@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
                     changeContent(BLEFragment.getInstance());
                     return true;
                 case R.id.navigation_notifications:
-                    
+
                     return true;
 
 

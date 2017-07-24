@@ -19,6 +19,12 @@ android {
         }
     }
 
+    packagingOptions {
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'com/fasterxml/jackson/core/json/VERSION.txt'
+    }
+
 }
 
 dependencies {

@@ -17,7 +17,8 @@ public class comm {
     }
 
     public void recieveOverWire()
-    {
+    { //update email
+        
 
         //recieve bytes .. parse to event .. send on eventbus
         EventBus.getDefault().post(new MessageEvent());

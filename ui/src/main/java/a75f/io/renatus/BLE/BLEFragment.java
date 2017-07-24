@@ -1,4 +1,4 @@
-package a75f.io.renatus;
+package a75f.io.renatus.BLE;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -8,10 +8,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
+import a75f.io.renatus.R;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -27,7 +26,7 @@ public class BLEFragment extends Fragment {
     public static BLEFragment getInstance() {
         return new BLEFragment();
     }
-    
+
     @BindView(R.id.fragment_ble_button)
     Button mainTextView;
 
@@ -53,6 +52,7 @@ public class BLEFragment extends Fragment {
     @OnClick(R.id.fragment_ble_button)
     void bleSubmit() {
         Log.i(TAG, "Done");
+        FragmentDeviceScan.getInstance().show(getChildFragmentManager(), "dialog");
         Toast.makeText(this.getActivity(), "BLE Fragment Done", Toast.LENGTH_LONG).show();
     }
 

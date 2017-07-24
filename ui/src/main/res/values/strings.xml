@@ -6,4 +6,8 @@
     <string name="title_ble">BLE</string>
     <string name="main_content">Main Content</string>
     <string name="ble_content">BLE</string>
+
+    <string name="ble_not_supported">BLE Not Supported</string>
+    <string name="error_bluetooth_not_supported">Bluetooth Not Supported</string>
+    <string name="unknown_device">unknown device</string>
 </resources>

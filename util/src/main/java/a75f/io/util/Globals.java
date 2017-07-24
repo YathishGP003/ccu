@@ -47,7 +47,7 @@ public class Globals {
         this.mApplicationContext = mApplicationContext;
     }
 
-    public void setKinveyClient() {
+    public void initKinveyClient() {
         this.kinveyClient = new Client.Builder(mApplicationContext).build();
     }
 

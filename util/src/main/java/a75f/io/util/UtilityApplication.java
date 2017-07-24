@@ -13,7 +13,7 @@ public abstract class UtilityApplication extends Application {
     {
         super.onCreate();
         Globals.getInstance().setApplicationContext(this);
-        Globals.getInstance().setKinveyClient(this);
+        Globals.getInstance().initKinveyClient();
 
 
 

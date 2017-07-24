@@ -8,6 +8,7 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/ble" />
             <option value="$PROJECT_DIR$/bo" />
             <option value="$PROJECT_DIR$/dal" />
             <option value="$PROJECT_DIR$/kinvey" />

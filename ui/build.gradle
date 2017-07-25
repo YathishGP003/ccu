@@ -7,7 +7,7 @@ android {
         applicationId "a75f.io.renatus"
         minSdkVersion 19
         targetSdkVersion 26
-        versionCode 1
+        versionCode 153
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -25,18 +25,29 @@ android {
         exclude 'com/fasterxml/jackson/core/json/VERSION.txt'
     }
 
+    signingConfigs {
+        debug {
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+            storeFile file("debug.keystore")
+            storePassword 'android'
+        }
+    }
+
 }
 
 dependencies {
-
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     compile 'com.android.support:appcompat-v7:26.+'
     compile 'com.android.support:design:26.+'
     compile 'com.android.support:support-vector-drawable:26.+'
+    compile 'org.greenrobot:eventbus:3.0.0'
     compile 'com.jakewharton:butterknife:8.7.0'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.7.0'
     testCompile 'junit:junit:4.12'
     compile project(':logic')
+    compile project(':bluetooth')
+    compile project(':bo')
 }

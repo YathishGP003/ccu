@@ -54,4 +54,5 @@ public class Globals {
     public Client getKinveyClient() {
         return kinveyClient;
     }
+
 }

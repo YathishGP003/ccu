@@ -1,4 +1,4 @@
-package ccu.x75fahrenheit.com.ble;
+package a75f.io.renatus.serial;
 
 import org.junit.Test;
 

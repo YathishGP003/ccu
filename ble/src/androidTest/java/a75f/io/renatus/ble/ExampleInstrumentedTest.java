@@ -1,4 +1,4 @@
-package ccu.x75fahrenheit.com.serial;
+package a75f.io.renatus.ble;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("ccu.x75fahrenheit.com.serial.test", appContext.getPackageName());
+        assertEquals("ccu.x75fahrenheit.com.ble.test", appContext.getPackageName());
     }
 }

@@ -6,6 +6,13 @@
 
         <service android:name=".SerialCommService" />
 
+        <receiver android:name=".UsbPluginReceiver">
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+            </intent-filter>
+
+        </receiver>
+
     </application>
 
 </manifest>

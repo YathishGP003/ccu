@@ -1,10 +1,13 @@
 package a75f.io.serial;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Message;
 
 import org.greenrobot.eventbus.EventBus;
 
 import a75f.io.bo.interfaces.ISerial;
+import a75f.io.util.Globals;
 
 /**
  * Created by samjithsadasivan on 7/24/17.
@@ -124,6 +127,10 @@ public class SerialCommManager {
     }
 
     private SerialCommManager() {
+        Context c = Globals.getInstance().getApplicationContext();
+        Intent serialIntent = new Intent(c, SerialCommService.class);
+        //serialIntent.putExtra("USB_DEVICE", Globals.getInstance.getCMDevice());
+        c.startService(serialIntent);
 
     }
 

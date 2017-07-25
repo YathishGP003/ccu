@@ -21,6 +21,8 @@ import android.widget.Toast;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Iterator;
 
 import a75f.io.bo.interfaces.ISerial;
 
@@ -30,8 +32,19 @@ import a75f.io.bo.interfaces.ISerial;
 
 public class SerialCommService extends Service {
 
+    public static final String TAG = "SerialCommService";
+
+    public static final int SERIAL_COMM_DATA_READ = 1;
+    public static final int SERIAL_COMM_DATA_WRITE = 2;
+    public static final int SERIAL_COMM_CLOCK_UPDATE = 3;
+    public static final int SERIAL_COMM_HEARTBEAT_UPDATE = 4;
+
+    public static final long SERIAL_READ_POLLING_INTERVAL = 200;
+    public static final long SERIAL_CLOCK_UPDATE_INTERVAL = 60 * 1000;
+    public static final long SERIAL_HEARTBEAT_UPDATE_INTERVAL = 60 * 1000;
+
+
     private static final String FTDI_VID_PID = "0403:6001";
-    private static final String TAG = "SerialCommService";
     static final String CM_VID_PID = "03EB:2404";
 
 
@@ -55,17 +68,6 @@ public class SerialCommService extends Service {
 
     class SerialCommHandlerThread extends HandlerThread {
 
-        public static final String TAG = "SerialCommHandlerThread";
-        public static final int SERIAL_COMM_DATA_READ = 1;
-        public static final int SERIAL_COMM_DATA_WRITE = 2;
-        public static final int SERIAL_COMM_CLOCK_UPDATE = 3;
-        public static final int SERIAL_COMM_HEARTBEAT_UPDATE = 4;
-
-        public static final long SERIAL_READ_POLLING_INTERVAL = 200;
-        public static final long SERIAL_CLOCK_UPDATE_INTERVAL = 60 * 1000;
-        public static final long SERIAL_HEARBEAT_UPDATE_INTERVAL = 60 * 1000;
-
-
         public SerialCommHandlerThread(String name, int priority) {
             super(name, priority);
         }
@@ -76,15 +78,15 @@ public class SerialCommService extends Service {
                 @Override
                 public void handleMessage(Message msg) {
 
-                    switch(msg.what) {
+                    switch (msg.what) {
                         case SERIAL_COMM_DATA_READ:
                             Log.v(TAG, "SERIAL_COMM_DATA_READ");
                             // read USB Data
-
-                            sendEmptyMessageDelayed(SERIAL_COMM_DATA_READ,SERIAL_READ_POLLING_INTERVAL);
+                            sendEmptyMessageDelayed(SERIAL_COMM_DATA_READ, SERIAL_READ_POLLING_INTERVAL);
                             break;
                         case SERIAL_COMM_DATA_WRITE:
-                            Log.v(TAG,("SERIAL_COMM_DATA_WRITE");
+                            Log.v(TAG, "SERIAL_COMM_DATA_WRITE");
+                            sendSerialData((byte[]) msg.obj);
                             break;
                         case SERIAL_COMM_CLOCK_UPDATE:
                             //send current time
@@ -92,7 +94,7 @@ public class SerialCommService extends Service {
                             break;
                         case SERIAL_COMM_HEARTBEAT_UPDATE:
                             //send heartbeat update
-                            sendEmptyMessageDelayed(SERIAL_COMM_HEARTBEAT_UPDATE, SERIAL_HEARBEAT_UPDATE_INTERVAL);
+                            sendEmptyMessageDelayed(SERIAL_COMM_HEARTBEAT_UPDATE, SERIAL_HEARTBEAT_UPDATE_INTERVAL);
                             break;
                         default:
                             //place holder
@@ -100,40 +102,35 @@ public class SerialCommService extends Service {
                 }
             };
         }
-
-        public Handler getHandler (){
-
-            if (serialCommHandler == null) {
-                throw new IllegalStateException("Handler not Ready");
-            }
-
-            return serialCommHandler;
-
-        }
-
     }
 
-    private void sendData(ISerial payLoad){
-    serialCommHandler.obtainMessage( SerialCommHandlerThread.SERIAL_COMM_DATA_WRITE ,
-                            payLoad.toBytes());
+    public Handler getSerialCommHandler (){
+        if (serialCommHandler == null) {
+            throw new IllegalStateException("Handler not Ready");
+        }
+        return serialCommHandler;
+    }
 
-
+    //TODO : Implement stop service and quit handler thread
+    public void sendData(ISerial payLoad){
+        serialCommHandler.obtainMessage (SERIAL_COMM_DATA_WRITE ,
+                            payLoad.toBytes()).sendToTarget();
     }
 
     private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (UsbManager.ACTION_USB_DEVICE_DETACHED.equals(action)) {
-                UsbDevice device = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
-                if (device != null) {
-                    //CCUApp.setScreenOn(true, true);
-                    Log.w("SERIAL_DEBUG", "Usb Device dettached" + device.getDeviceName() + device.getClass() + device.getVendorId() + device.getProductId());
-                    Toast.makeText(getApplicationContext(), R.string.cm_stopped, Toast.LENGTH_SHORT).show();
-                    //cleanUp();
-                    stopSelf();
+        String action = intent.getAction();
+        if (UsbManager.ACTION_USB_DEVICE_DETACHED.equals(action)) {
+            UsbDevice device = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+            if (device != null) {
+                //CCUApp.setScreenOn(true, true);
+                Log.w("SERIAL_DEBUG", "Usb Device dettached" + device.getDeviceName() + device.getClass() + device.getVendorId() + device.getProductId());
+                Toast.makeText(getApplicationContext(), R.string.cm_stopped, Toast.LENGTH_SHORT).show();
+                //cleanUp();
+                stopSelf();
 
-                }
             }
+        }
         }
     };
 
@@ -148,18 +145,36 @@ public class SerialCommService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
+        // TODO move CM detection to appropriate place.
+        UsbManager manager = (UsbManager) getSystemService(Context.USB_SERVICE);
+        HashMap<String, UsbDevice> deviceList = manager.getDeviceList();
+        Iterator<UsbDevice> deviceIterator = deviceList.values().iterator();
+
+        String d = "";
+        while (deviceIterator.hasNext()) {
+            device = deviceIterator.next();
+            d += "\n" +
+                    "DeviceID: " + device.getDeviceId() + "\n" +
+                    "DeviceName: " + device.getDeviceName() + "\n" +
+                    "DeviceClass: " + device.getDeviceClass() + " - "+
+                    "DeviceSubClass: " + device.getDeviceSubclass() + "\n" +
+                    "VendorID: " + device.getVendorId() + "\n" +
+                    "ProductID: " + device.getProductId() + "\n";
+        }
+
+        if (device == null) {
+            Log.d(TAG, "CM Device not connected. SerialService cant continue");
+            stopSelf();
+            return START_NOT_STICKY;
+        }
+
         mSerialService = this;
         if (conn == null) {
-            if (intent != null)
-                device = (UsbDevice) intent.getParcelableExtra("USB_DEVICE");
-            if (device != null) {
-                if (openDevice(device) == false)
-                    stopSelf();
-            }
-            else {
+            if (openDevice(device) == false)
+                stopSelf();
+        } else {
                 Toast.makeText(this, R.string.controller_notfound, Toast.LENGTH_SHORT).show();
                 stopSelf();
-            }
         }
 
         return START_NOT_STICKY;
@@ -235,7 +250,7 @@ public class SerialCommService extends Service {
     }
 
     //Could be moved to SerialCommTxrThread
-    public void sendData(byte[] byteArray) {
+    private void sendSerialData(byte[] byteArray) {
 
         byte buffer[] = new byte[1024];
         byte crc = 0;
@@ -271,12 +286,7 @@ public class SerialCommService extends Service {
 
         if (conn != null)
             conn.bulkTransfer(epOUT, buffer, nOffset + len, 0);
-        try {
-            Thread.sleep(50);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+
     }
 
 

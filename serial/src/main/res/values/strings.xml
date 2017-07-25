@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">serial</string>
+    <string name="cm_stopped">CM Connection Stopped</string>
+    <string name="controller_notfound">No Controller Device found. Please connect and restart</string>
+    <string name="no_endpoints_found">No Endpoints found on Controller Device</string>
+
 </resources>

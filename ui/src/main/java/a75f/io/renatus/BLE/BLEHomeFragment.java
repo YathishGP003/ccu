@@ -34,7 +34,6 @@ public class BLEHomeFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
         View retVal = inflater.inflate(R.layout.fragment_ble, container, false);
         ButterKnife.bind(this, retVal);
         return retVal;
@@ -45,9 +44,7 @@ public class BLEHomeFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mainTextView.setText("BLE");
-
     }
-
 
     @OnClick(R.id.fragment_ble_button)
     void bleSubmit() {

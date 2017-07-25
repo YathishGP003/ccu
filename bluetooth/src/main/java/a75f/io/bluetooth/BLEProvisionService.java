@@ -261,6 +261,36 @@ public class BLEProvisionService extends Service {
         mBluetoothGatt.readCharacteristic(characteristic);
     }
 
+    public void readCharacteristic(String characteristic)
+    {
+        readCharacteristic(getSupportedGattAttribute(characteristic));
+    }
+
+    /**
+     * Request a write on a given {@code BluetoothGattCharacteristic}. The write result is reported
+     * asynchronously through the {@code BluetoothGattCallback#onCharacteristicWrite(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattCharacteristic, int)}
+     * callback.
+     *
+     * @param characteristic The characteristic to write to from.
+     */
+    public boolean writeCharacteristic(BluetoothGattCharacteristic characteristic, byte[] dataToWrite) {
+        if (mBluetoothAdapter == null || mBluetoothGatt == null) {
+            Log.w(TAG, "BluetoothAdapter not initialized");
+            return false;
+        }
+        characteristic.setValue(dataToWrite);
+        boolean initiatedSuccessfully = mBluetoothGatt.writeCharacteristic(characteristic);
+        Log.i(TAG, "Write to: " + characteristic.getUuid().toString() +  " - initially successful? " + initiatedSuccessfully);
+        return initiatedSuccessfully;
+    }
+
+    public boolean writeCharacteristic(String characteristic, byte[] dataToWrite)
+    {
+        BluetoothGattCharacteristic supportedGattAttribute = getSupportedGattAttribute(characteristic);
+        return writeCharacteristic(supportedGattAttribute, dataToWrite);
+
+    }
+
     /**
      * Enables or disables notification on a give characteristic.
      *

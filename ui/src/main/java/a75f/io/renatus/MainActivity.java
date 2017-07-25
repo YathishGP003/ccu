@@ -7,11 +7,9 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
-import a75f.io.renatus.BLE.BLEFragment;
+import a75f.io.renatus.BLE.BLEHomeFragment;
 
 public class MainActivity extends AppCompatActivity {
-
-    private Fragment content;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -20,19 +18,14 @@ public class MainActivity extends AppCompatActivity {
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_home:
-
                     changeContent(DefaultFragment.getInstance());
-
                     return true;
                 case R.id.navigation_ble:
-
-                    changeContent(BLEFragment.getInstance());
+                    changeContent(BLEHomeFragment.getInstance());
                     return true;
                 case R.id.navigation_notifications:
 
                     return true;
-
-
 
 
             }
@@ -50,12 +43,10 @@ public class MainActivity extends AppCompatActivity {
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         changeContent(DefaultFragment.getInstance());
-
     }
 
 
-    private void changeContent(Fragment fragment)
-    {
+    private void changeContent(Fragment fragment) {
         getSupportFragmentManager().beginTransaction().replace(R.id.content, fragment).commit();
     }
 

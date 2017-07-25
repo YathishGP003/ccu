@@ -106,7 +106,7 @@ public class FragmentDeviceScan extends DialogFragment {
                     @Override
                     public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                         final BluetoothDevice device = mLeDeviceListAdapter.getDevice(position);
-
+                        FragmentBLEDevicePin.getInstance(device).show(getChildFragmentManager(), "dialog");
                         if (device == null) return;
                         if (mScanning) {
                             mBluetoothAdapter.stopLeScan(mLeScanCallback);

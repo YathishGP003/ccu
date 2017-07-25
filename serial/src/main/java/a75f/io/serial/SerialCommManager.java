@@ -19,7 +19,7 @@ public class SerialCommManager {
     public static final int SOF_BYTE = 0x00;
     public static final int EOF_BYTE = 0x03;
 
-    public static final SerialCommManager INSTANCE = new SerialCommManager();
+    public static SerialCommManager INSTANCE = null;
 
     public enum MESSAGETYPE {
         FSV_PAIRING_REQ,
@@ -135,6 +135,9 @@ public class SerialCommManager {
     }
 
     public static SerialCommManager getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new SerialCommManager();
+        }
         return INSTANCE;
     }
 

@@ -5,8 +5,8 @@ android {
     buildToolsVersion "26.0.0"
     defaultConfig {
         applicationId "a75f.io.renatus"
-        minSdkVersion 17
-        targetSdkVersion 17
+        minSdkVersion 19
+        targetSdkVersion 26
         versionCode 153
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -50,7 +50,5 @@ dependencies {
     compile project(':logic')
     compile project(':bluetooth')
     compile project(':bo')
-
-
     compile project(':serial')
 }

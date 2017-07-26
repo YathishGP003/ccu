@@ -29,6 +29,7 @@ import java.nio.ByteOrder;
 import a75f.io.bluetooth.BLEAction;
 import a75f.io.bluetooth.BLEProvisionService;
 import a75f.io.bo.SmartNode;
+import a75f.io.bo.ble.BLEShort;
 import a75f.io.bo.ble.GattAttributes;
 import a75f.io.bo.ble.GattPin;
 import a75f.io.logic.SmartNodeBLL;
@@ -220,10 +221,8 @@ public class FragmentBLEDevicePin extends DialogFragment {
             {
                 Log.i(TAG, "Successfully wrote room name!");
                 Log.i(TAG, "Writing pairing address");
-                ByteBuffer byteBuffer = ByteBuffer.allocate(2).putShort(mSmartNode.getMeshAddress());
-                byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
-                mByteBufferForSmartNodeAdderess = byteBuffer.array();
-                mBLEProvisionService.writeCharacteristic(GattAttributes.LW_MESH_PAIRING_ADDRESS, mByteBufferForSmartNodeAdderess);
+
+                mBLEProvisionService.writeCharacteristic(GattAttributes.LW_MESH_PAIRING_ADDRESS, BLEShort.getBytes(BLEShort.get(mSmartNode.getMeshAddress())));
             }
             else if(event.getBluetoothGattCharacteristic().getUuid().toString().equalsIgnoreCase(GattAttributes.LW_MESH_PAIRING_ADDRESS))
             {
@@ -288,6 +287,8 @@ public class FragmentBLEDevicePin extends DialogFragment {
         getActivity().unbindService(mServiceConnection);
         mBLEProvisionService = null;
     }
+
+
 
     private static final String TAG = FragmentBLEDevicePin.class.getSimpleName();
 

@@ -8,7 +8,7 @@ import a75f.io.util.prefs.EncryptionPrefs;
  */
 
 public class SmartNodeBLL {
-    private static short address = 200;
+    private static short address = 8000;
 
     public static SmartNode generateSmartNodeFromJSON()
     {

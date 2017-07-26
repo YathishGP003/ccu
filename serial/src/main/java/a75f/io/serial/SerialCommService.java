@@ -1,5 +1,6 @@
 package a75f.io.serial;
 
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -44,6 +45,9 @@ public class SerialCommService extends Service {
     public static final long SERIAL_CLOCK_UPDATE_INTERVAL = 60 * 1000;
     public static final long SERIAL_HEARTBEAT_UPDATE_INTERVAL = 60 * 1000;
 
+    public static final String ACTION_USB_PERMISSION =
+                            "a75f.io.renatus.action.USB_PERMISSION";
+
     public static final boolean DEBUG_SERIAL_XFER = true;
                                     //Log.isLoggable(TAG, Log.VERBOSE);
 
@@ -56,12 +60,12 @@ public class SerialCommService extends Service {
     UsbEndpoint mEpIN = null;
     UsbEndpoint mEpOUT = null;
     UsbDeviceConnection mUsbConnection = null;
+    UsbManager mUsbManager = null;
 
     private int mDataLength = 0;
     private int mCurIndex = 0;
     private int mCRC = 0;
     private int mDataBuffer[] = new int[1024];
-    private boolean usbDetachReceiverRegistered = false;
 
     static private SerialCommService mSerialService = null;
 
@@ -128,19 +132,34 @@ public class SerialCommService extends Service {
 
     private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
-        String action = intent.getAction();
-        if (UsbManager.ACTION_USB_DEVICE_DETACHED.equals(action)) {
-            UsbDevice device = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
-            if (device != null) {
-                //CCUApp.setScreenOn(true, true);
-                Log.e(TAG, "Usb Device dettached" + device.getDeviceName() + device.getClass() + device.getVendorId() + device.getProductId());
-                Toast.makeText(getApplicationContext(), R.string.cm_stopped, Toast.LENGTH_SHORT).show();
-                //cleanUp();
-                stopSelf();
-                mSerialService = null;
+            String action = intent.getAction();
+            if (UsbManager.ACTION_USB_DEVICE_DETACHED.equals(action)) {
+                UsbDevice device = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+                if (device != null) {
+                    //CCUApp.setScreenOn(true, true);
+                    Log.e(TAG, "Usb Device dettached" + device.getDeviceName() + device.getClass() + device.getVendorId() + device.getProductId());
+                    Toast.makeText(getApplicationContext(), R.string.cm_stopped, Toast.LENGTH_SHORT).show();
+                    //cleanUp();
+                    stopSelf();
+                    mSerialService = null;
 
+                }
+            } else if (ACTION_USB_PERMISSION.equals(action)) {
+                boolean permission = intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED,
+                        false);
+                Log.d(TAG, "ACTION_USB_PERMISSION: " + permission);
+                if (permission) {
+                    if (mUsbConnection == null) {
+                        if (openDevice(mDevice) == false)
+                            stopSelf();
+                    } else {
+                        Toast.makeText(getApplicationContext(), R.string.controller_notfound, Toast.LENGTH_SHORT).show();
+                        stopSelf();
+
+                    }
+                }
             }
-        }
+
         }
     };
 
@@ -148,8 +167,8 @@ public class SerialCommService extends Service {
     @Override
     public void onCreate() {
         IntentFilter filter1 = new IntentFilter(UsbManager.ACTION_USB_DEVICE_DETACHED);
+        filter1.addAction(ACTION_USB_PERMISSION);
         registerReceiver(mUsbReceiver, filter1);
-        usbDetachReceiverRegistered = true;
     }
 
     @Override
@@ -164,15 +183,26 @@ public class SerialCommService extends Service {
             return START_NOT_STICKY;
         }
 
-        mSerialService = this;
-        if (mUsbConnection == null) {
-            if (openDevice(mDevice) == false)
-                stopSelf();
+        mUsbManager = (UsbManager) getSystemService(USB_SERVICE);
+
+        //TODO : Need to find a way to grant usb access permission by defualt.
+        //This is temporary hack for testing purpose.
+        boolean hasPermission = mUsbManager.hasPermission(mDevice);
+        if (!hasPermission) {
+            Log.d(TAG, "Request USB access permission");
+            mUsbManager.requestPermission (mDevice, PendingIntent.getBroadcast
+                            (getApplicationContext(), 0, new Intent(ACTION_USB_PERMISSION), 0));
         } else {
+            if (mUsbConnection == null) {
+                if (openDevice(mDevice) == false)
+                    stopSelf();
+            } else {
                 Toast.makeText(this, R.string.controller_notfound, Toast.LENGTH_SHORT).show();
                 stopSelf();
+            }
         }
 
+        mSerialService = this;
         return START_NOT_STICKY;
     }
 
@@ -198,8 +228,8 @@ public class SerialCommService extends Service {
     }
 
     private boolean openDevice(UsbDevice d) {
-        UsbManager usbm = (UsbManager) getSystemService(USB_SERVICE);
-        mUsbConnection = usbm.openDevice(d);
+
+        mUsbConnection = mUsbManager.openDevice(d);
         if (mUsbConnection == null) {
             Log.e(TAG, "Failed to open device, Shutting down service");
             return false;

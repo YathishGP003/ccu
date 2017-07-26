@@ -1,10 +1,13 @@
 package a75f.io.serial;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Message;
 
 import org.greenrobot.eventbus.EventBus;
 
 import a75f.io.bo.interfaces.ISerial;
+import a75f.io.util.Globals;
 
 /**
  * Created by samjithsadasivan on 7/24/17.
@@ -16,7 +19,7 @@ public class SerialCommManager {
     public static final int SOF_BYTE = 0x00;
     public static final int EOF_BYTE = 0x03;
 
-    public static final SerialCommManager INSTANCE = new SerialCommManager();
+    public static SerialCommManager sInstance = null;
 
     public enum MESSAGETYPE {
         FSV_PAIRING_REQ,
@@ -73,7 +76,7 @@ public class SerialCommManager {
 
     };
 
-    private enum CM_ERROR_TYPE {
+    public enum CM_ERROR_TYPE {
         BAD_PACKET_FRAMING,
         DBASE_FULL,
         CCU_UPDATE_FSV_NOT_IN_DBASE,
@@ -97,7 +100,7 @@ public class SerialCommManager {
         SN_MAX_ALLOWED_LIGHTING_MODULES_EXCEEDED
     };
 
-    private enum STATES {
+    public enum STATES {
         PARSE_INIT,
         ESC_BYTE_RCVD,
         SOF_BYTE_RCVD,
@@ -124,11 +127,18 @@ public class SerialCommManager {
     }
 
     private SerialCommManager() {
+        /*Context c = Globals.getInstance().getApplicationContext();
+        Intent serialIntent = new Intent(c, SerialCommService.class);
+        //serialIntent.putExtra("USB_DEVICE", Globals.getInstance.getCMDevice());
+        c.startService(serialIntent);*/
 
     }
 
     public static SerialCommManager getInstance() {
-        return INSTANCE;
+        if (sInstance == null) {
+            sInstance = new SerialCommManager();
+        }
+        return sInstance;
     }
 
     public void registerSerialListener(Object l) {
@@ -140,6 +150,9 @@ public class SerialCommManager {
     }
 
     public void sendData(ISerial payload) {
+        if (SerialCommService.getSerialService() == null) {
+            throw new IllegalStateException("SerialCommService not running");
+        }
         SerialCommService.getSerialService().sendData(payload);
     }
 

@@ -1,4 +1,4 @@
-package a75f.io.bo.serial.CCUtoCM;
+package a75f.io.bo.serial;
 
 /**
  * Created by ryanmattison on 7/26/17.

@@ -1,4 +1,4 @@
-package a75f.io.bo.serial.CCUtoCM;
+package a75f.io.bo.serial;
 
 import javolution.io.Struct;
 import javolution.io.Union;

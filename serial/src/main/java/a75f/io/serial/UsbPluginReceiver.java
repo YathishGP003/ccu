@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
+import android.util.Log;
 
 /**
  * Created by samjithsadasivan on 7/25/17.
@@ -13,6 +14,11 @@ import android.hardware.usb.UsbManager;
 public class UsbPluginReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
+
+        Log.d("Serial","USB device plugged in");
+
+
+
 
         //TODO - Ignore USB types other than CM.
         UsbDevice device = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);

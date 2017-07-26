@@ -146,7 +146,7 @@ public class SerialCommManager {
     }
 
     public void unregisterSerialListener(Object l) {
-        EventBus.getDefault().register(l);
+        EventBus.getDefault().unregister(l);
     }
 
     public void sendData(ISerial payload) {

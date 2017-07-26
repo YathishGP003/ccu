@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <option name="distributionType" value="DEFAULT_WRAPPED" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/bluetooth" />
+            <option value="$PROJECT_DIR$/bo" />
+            <option value="$PROJECT_DIR$/dal" />
+            <option value="$PROJECT_DIR$/kinvey" />
+            <option value="$PROJECT_DIR$/logic" />
+            <option value="$PROJECT_DIR$/realm" />
+            <option value="$PROJECT_DIR$/relinker" />
+            <option value="$PROJECT_DIR$/serial" />
+            <option value="$PROJECT_DIR$/ui" />
+            <option value="$PROJECT_DIR$/util" />
+          </set>
+        </option>
+        <option name="resolveModulePerSourceSet" value="false" />
+      </GradleProjectSettings>
+    </option>
+  </component>
+</project>

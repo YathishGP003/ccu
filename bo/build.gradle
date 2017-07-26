@@ -19,6 +19,7 @@ android {
 }
 dependencies {
     compile fileTree(include: '*.jar', dir: '../libs')
+    compile 'org.javolution:javolution-core-java:6.0.0'
     compile project(':util')
 
 }

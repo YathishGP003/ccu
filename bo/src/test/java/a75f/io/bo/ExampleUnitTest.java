@@ -17,7 +17,7 @@ public class ExampleUnitTest {
         smartNodeControls_t.analogOut2.set((short)2);
         smartNodeControls_t.smartNodeControls_extras.smartNodeControlsBitExtras.digitalOut1.set(1);
         smartNodeControls_t.smartNodeControls_extras.smartNodeControlsBitExtras.digitalOut2.set(1);
-        //Smart Node Controls: 00 00 00 00 00 01 02 00 00 00 60 
+        //Smart Node Controls: 00 00 00 00 00 01 02 00 00 00 60
         System.out.println("Smart Node Controls: " + smartNodeControls_t.toString());
     }
 }

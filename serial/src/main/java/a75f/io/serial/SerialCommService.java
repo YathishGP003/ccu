@@ -44,8 +44,8 @@ public class SerialCommService extends Service {
     public static final long SERIAL_CLOCK_UPDATE_INTERVAL = 60 * 1000;
     public static final long SERIAL_HEARTBEAT_UPDATE_INTERVAL = 60 * 1000;
 
-    public static final boolean DEBUG_SERIAL_XFER =
-                                    Log.isLoggable(TAG, Log.VERBOSE);
+    public static final boolean DEBUG_SERIAL_XFER = true;
+                                    //Log.isLoggable(TAG, Log.VERBOSE);
 
 
     private static final String FTDI_VID_PID = "0403:6001";
@@ -133,7 +133,7 @@ public class SerialCommService extends Service {
             UsbDevice device = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
             if (device != null) {
                 //CCUApp.setScreenOn(true, true);
-                Log.e("SERIAL_DEBUG", "Usb Device dettached" + device.getDeviceName() + device.getClass() + device.getVendorId() + device.getProductId());
+                Log.e(TAG, "Usb Device dettached" + device.getDeviceName() + device.getClass() + device.getVendorId() + device.getProductId());
                 Toast.makeText(getApplicationContext(), R.string.cm_stopped, Toast.LENGTH_SHORT).show();
                 //cleanUp();
                 stopSelf();
@@ -178,6 +178,9 @@ public class SerialCommService extends Service {
 
     @Override
     public void onDestroy() {
+        if (serialCommThread != null)
+            serialCommThread.quit();
+        unregisterReceiver(mUsbReceiver);
         //cleanUp();
     }
 

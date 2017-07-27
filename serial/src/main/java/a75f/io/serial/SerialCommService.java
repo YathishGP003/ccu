@@ -96,6 +96,10 @@ public class SerialCommService extends Service {
 
     }
 
+    public void sendData(byte[] bytes) {
+        sendSerialData(bytes);
+    }
+
     class SerialCommHandlerThread extends HandlerThread {
 
         public SerialCommHandlerThread(String name, int priority) {
@@ -149,45 +153,10 @@ public class SerialCommService extends Service {
                             payLoad.toBytes()).sendToTarget();
     }
 
-    private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (UsbManager.ACTION_USB_DEVICE_DETACHED.equals(action)) {
-                UsbDevice device = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
-                if (device != null) {
-                    //CCUApp.setScreenOn(true, true);
-                    Log.e(TAG, "Usb Device dettached" + device.getDeviceName() + device.getClass() + device.getVendorId() + device.getProductId());
-                    Toast.makeText(getApplicationContext(), R.string.cm_stopped, Toast.LENGTH_SHORT).show();
-                    //cleanUp();
-                    stopSelf();
-                    mSerialService = null;
-
-                }
-            } else if (ACTION_USB_PERMISSION.equals(action)) {
-                boolean permission = intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED,
-                        false);
-                Log.d(TAG, "ACTION_USB_PERMISSION: " + permission);
-                if (permission) {
-                    if (mUsbConnection == null) {
-                        if (openDevice(mDevice) == false)
-                            stopSelf();
-                    } else {
-                        Toast.makeText(getApplicationContext(), R.string.controller_notfound, Toast.LENGTH_SHORT).show();
-                        stopSelf();
-
-                    }
-                }
-            }
-
-        }
-    };
 
 
     @Override
     public void onCreate() {
-        IntentFilter filter1 = new IntentFilter(UsbManager.ACTION_USB_DEVICE_DETACHED);
-        filter1.addAction(ACTION_USB_PERMISSION);
-        registerReceiver(mUsbReceiver, filter1);
     }
 
     @Override
@@ -232,7 +201,7 @@ public class SerialCommService extends Service {
         mSerialService = null;
         if (serialCommThread != null)
             serialCommThread.quit();
-        unregisterReceiver(mUsbReceiver);
+
         //cleanUp();
     }
 

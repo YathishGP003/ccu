@@ -22,6 +22,11 @@ public class SerialCommManager {
     public static final String CM_VID_PID = "03EB:2404";
     public static SerialCommManager sInstance = null;
 
+    public void sendData(byte[] bytes) {
+
+        SerialCommService.getSerialService().sendData(bytes);
+    }
+
     public enum MESSAGETYPE {
         FSV_PAIRING_REQ,
         CM_PAIRING_REPONSE,

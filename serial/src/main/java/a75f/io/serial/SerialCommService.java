@@ -26,7 +26,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import a75f.io.bo.interfaces.ISerial;
+import a75f.io.util.GlobalUtils;
+
 import static a75f.io.serial.SerialCommManager.*;
+import static a75f.io.serial.SerialCommManager.MESSAGETYPE.CCU_CLOCK_UPDATE;
 
 /**
  * Created by samjithsadasivan on 7/24/17.
@@ -102,7 +105,9 @@ public class SerialCommService extends Service {
                             sendSerialData((byte[]) msg.obj);
                             break;
                         case SERIAL_COMM_CLOCK_UPDATE:
-                            //send current time
+                            if (DEBUG_SERIAL_XFER)
+                                Log.v(TAG, "SERIAL_COMM_CLOCK_UPDATE");
+                            sendSerialData(new ClockUpdatePacket().build().toBytes());
                             sendEmptyMessageDelayed(SERIAL_COMM_CLOCK_UPDATE, SERIAL_CLOCK_UPDATE_INTERVAL);
                             break;
                         case SERIAL_COMM_HEARTBEAT_UPDATE:
@@ -284,6 +289,7 @@ public class SerialCommService extends Service {
 
         serialCommThread = new SerialCommHandlerThread("SerialCommThread", Thread.NORM_PRIORITY);
         serialCommThread.start();
+
         return true;
     }
 
@@ -418,4 +424,6 @@ public class SerialCommService extends Service {
         }
 
     }
+
+
 }

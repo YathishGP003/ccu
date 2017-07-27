@@ -16,11 +16,6 @@ public class UsbPluginReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
 
         Log.d("Serial","USB device plugged in");
-
-
-
-
-        //TODO - Ignore USB types other than CM.
         UsbDevice device = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
         if (device != null) {
             Intent serialIntent = new Intent(context, SerialCommService.class);

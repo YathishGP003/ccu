@@ -190,8 +190,10 @@ public class SerialCommService extends Service {
         boolean hasPermission = mUsbManager.hasPermission(mDevice);
         if (!hasPermission) {
             Log.d(TAG, "Request USB access permission");
+
             mUsbManager.requestPermission (mDevice, PendingIntent.getBroadcast
                             (getApplicationContext(), 0, new Intent(ACTION_USB_PERMISSION), 0));
+
         } else {
             if (mUsbConnection == null) {
                 if (openDevice(mDevice) == false)
@@ -208,6 +210,7 @@ public class SerialCommService extends Service {
 
     @Override
     public void onDestroy() {
+        mSerialService = null;
         if (serialCommThread != null)
             serialCommThread.quit();
         unregisterReceiver(mUsbReceiver);
@@ -291,14 +294,14 @@ public class SerialCommService extends Service {
         byte crc = 0;
         byte nOffset = 0;
         int len = byteArray.length;
-        buffer[nOffset++] = (byte) (SerialCommManager.ESC_BYTE & 0xff);
+        buffer[nOffset++] = (byte) (ESC_BYTE & 0xff);
         buffer[nOffset++] = (byte) (SOF_BYTE & 0xff);
         buffer[nOffset++] = (byte) (len & 0xff);
 
         for (int i = 0; i < len; i++) {
             buffer[i + nOffset] = byteArray[i]; // add payload to the tx buffer
             crc ^= byteArray[i];             // calculate the new crc
-            if (byteArray[i] == (byte) (SerialCommManager.ESC_BYTE & 0xff)) // if the data is equal to ESC byte then add another instance of that
+            if (byteArray[i] == (byte) (ESC_BYTE & 0xff)) // if the data is equal to ESC byte then add another instance of that
             {
                 nOffset++;
                 buffer[i + nOffset] = byteArray[i];
@@ -306,9 +309,9 @@ public class SerialCommService extends Service {
         }
         buffer[nOffset + len] = (byte) (crc & 0xff);
         nOffset++;
-        buffer[nOffset + len] = (byte) (SerialCommManager.ESC_BYTE & 0xff);
+        buffer[nOffset + len] = (byte) (ESC_BYTE & 0xff);
         nOffset++;
-        buffer[nOffset + len] = (byte) (SerialCommManager.EOF_BYTE & 0xff);
+        buffer[nOffset + len] = (byte) (EOF_BYTE & 0xff);
         nOffset++;
 
         if (DEBUG_SERIAL_XFER) {

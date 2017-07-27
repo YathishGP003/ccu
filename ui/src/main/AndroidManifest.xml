@@ -47,6 +47,14 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
+                android:resource="@xml/filter" />
+
         </activity>
 
         <service android:name="a75f.io.bluetooth.BLEProvisionService"></service>
@@ -54,10 +62,6 @@
         <service android:name="a75f.io.serial.SerialCommService" />
 
         <receiver android:name="a75f.io.serial.UsbPluginReceiver">
-            <intent-filter>
-                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
-            </intent-filter>
-
 
 
         </receiver>

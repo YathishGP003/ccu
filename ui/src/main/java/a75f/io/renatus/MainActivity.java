@@ -64,6 +64,14 @@ public class MainActivity extends AppCompatActivity {
             }
         }, 3000);
 
+        UsbDevice device = (UsbDevice) getIntent().getParcelableExtra(UsbManager.EXTRA_DEVICE);
+        if (device != null) {
+            Log.d("Serial :","USB Attach triggered activity launch");
+            Intent serialIntent = new Intent(getApplicationContext(), SerialCommService.class);
+            serialIntent.putExtra("USB_DEVICE", device);
+            startService(serialIntent);
+        }
+
     }
 
 

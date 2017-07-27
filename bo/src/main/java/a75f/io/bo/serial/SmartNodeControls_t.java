@@ -35,4 +35,6 @@ public class SmartNodeControls_t extends Struct {
         }
 
 
+
+
 }

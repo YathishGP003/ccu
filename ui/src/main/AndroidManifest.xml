@@ -4,7 +4,7 @@
 
     <uses-sdk
         android:minSdkVersion="19"
-        android:targetSdkVersion="26" />
+        android:targetSdkVersion="19" />
 
     <uses-feature android:name="android.hardware.usb.host" />
     <uses-feature
@@ -31,8 +31,6 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.SET_TIME_ZONE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-    <uses-permission android:name="android.permission.BLUETOOTH" />
 
     <application android:name=".RenatusApp"
         android:allowBackup="true"
@@ -60,9 +58,6 @@
                 <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
             </intent-filter>
 
-            <meta-data
-                android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
-                android:resource="@xml/filter" />
 
 
         </receiver>

@@ -18,7 +18,7 @@ public class SerialCommManager {
     public static final int ESC_BYTE = 0xD9;
     public static final int SOF_BYTE = 0x00;
     public static final int EOF_BYTE = 0x03;
-
+    public static final String CM_VID_PID = "03EB:2404";
     public static SerialCommManager sInstance = null;
 
     public enum MESSAGETYPE {

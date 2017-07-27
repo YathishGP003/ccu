@@ -227,20 +227,21 @@ public class SerialCommService extends Service {
         return mBinder;
     }
 
-    private boolean openDevice(UsbDevice d) {
+    private boolean openDevice(UsbDevice usbDevice) {
 
-        mUsbConnection = mUsbManager.openDevice(d);
+        mUsbConnection = mUsbManager.openDevice(usbDevice);
         if (mUsbConnection == null) {
             Log.e(TAG, "Failed to open device, Shutting down service");
             return false;
         }
-        for (int n = 0; n < d.getInterfaceCount(); n++) {
+        for (int ifIndex = 0; ifIndex < usbDevice.getInterfaceCount(); ifIndex++) {
 
-            if (!mUsbConnection.claimInterface(d.getInterface(n), true)) {
-                Log.d(TAG, "Claim interface failed for " + n);
+            if (!mUsbConnection.claimInterface(usbDevice.getInterface(ifIndex), true)) {
+                Log.e(TAG, "Claim interface failed for " + ifIndex);
                 continue;
             }
-            if (String.format("%04X:%04X", d.getVendorId(), d.getProductId()).equals(FTDI_VID_PID)) {
+            if (String.format("%04X:%04X", usbDevice.getVendorId(),
+                                        usbDevice.getProductId()).equals(FTDI_VID_PID)) {
                 if (mUsbConnection.controlTransfer(0x40, 0, 0, 0, null, 0, 0) < 0)//reset
                     Log.d(TAG, "control transfer 1 failed");
                 if (mUsbConnection.controlTransfer(0x40, 0, 1, 0, null, 0, 0) < 0)//clear Rx
@@ -250,21 +251,26 @@ public class SerialCommService extends Service {
                 if (mUsbConnection.controlTransfer(0x40, 0x03, 0xC04E, 0, null, 0, 0) < 0)//baudrate 38400
                     Log.d(TAG, "control transfer 4 failed");
             }
-            UsbInterface usbIf = d.getInterface(n);
-            for (int i = 0; i < usbIf.getEndpointCount(); i++) {
-                if (usbIf.getEndpoint(i).getType() == UsbConstants.USB_ENDPOINT_XFER_BULK) {
-                    Log.d(TAG, "Bulk Endpoint");
-                    if (usbIf.getEndpoint(i).getDirection() == UsbConstants.USB_DIR_IN)
-                        mEpIN = usbIf.getEndpoint(i);
-                    else
-                        mEpOUT = usbIf.getEndpoint(i);
-                } else if (usbIf.getEndpoint(i).getType() == UsbConstants.USB_ENDPOINT_XFER_CONTROL) {
-                    Log.d(TAG, "Control Endpoint");
-                } else if (usbIf.getEndpoint(i).getType() == UsbConstants.USB_ENDPOINT_XFER_INT) {
-                    Log.d(TAG, "Interrupt Endpoint");
-                } else {
-                    Log.d(TAG, "Not Bulk");
+            UsbInterface usbIf = usbDevice.getInterface(ifIndex);
+            for (int epIndex = 0; epIndex < usbIf.getEndpointCount(); epIndex++) {
+                switch(usbIf.getEndpoint(epIndex).getType()) {
+                    case UsbConstants.USB_ENDPOINT_XFER_BULK:
+                        Log.d(TAG, "Bulk Endpoint");
+                        if (usbIf.getEndpoint(epIndex).getDirection() == UsbConstants.USB_DIR_IN)
+                            mEpIN = usbIf.getEndpoint(epIndex);
+                        else
+                            mEpOUT = usbIf.getEndpoint(epIndex);
+                        break;
+                    case UsbConstants.USB_ENDPOINT_XFER_CONTROL:
+                        Log.d(TAG, "Control Endpoint");
+                        break;
+                    case UsbConstants.USB_ENDPOINT_XFER_INT:
+                        Log.d(TAG, "Interrupt Endpoint");
+                        break;
+                    default:
+                        Log.d(TAG, "Endpoint invalid");
                 }
+
             }
         }
         if ((mEpIN == null) || (mEpOUT == null)) {
@@ -348,7 +354,6 @@ public class SerialCommService extends Service {
                         curState = STATES.SOF_BYTE_RCVD;
                     else
                         curState = STATES.BAD_PACKET;
-
                     break;
                 case SOF_BYTE_RCVD:
                     mDataLength = inData;

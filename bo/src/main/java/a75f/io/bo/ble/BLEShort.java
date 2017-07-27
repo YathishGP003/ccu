@@ -9,24 +9,10 @@ import javolution.io.Struct;
  */
 
 public class BLEShort extends Struct {
+
     public final Unsigned16 smartNodeAddress = new Unsigned16();
 
-    public static byte[] getBytes(BLEShort bleShort)
-    {
-        byte[] retVal = new byte[bleShort.size()];
-        for(int i = 0; i < bleShort.size(); i++)
-        {
-            retVal[i] = bleShort.getByteBuffer().get(i);
-        }
-        return retVal;
-    }
 
-    public static BLEShort get(short bleShortPrim)
-    {
-        BLEShort bleShort = new BLEShort();
-        bleShort.smartNodeAddress.set(bleShortPrim);
-        return bleShort;
-    }
 
     @Override
     public ByteOrder byteOrder() {

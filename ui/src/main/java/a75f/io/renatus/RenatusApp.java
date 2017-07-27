@@ -1,5 +1,6 @@
 package a75f.io.renatus;
 
+import a75f.io.bo.SmartNode;
 import a75f.io.util.UtilityApplication;
 
 /**
@@ -7,4 +8,9 @@ import a75f.io.util.UtilityApplication;
  */
 
 public class RenatusApp extends UtilityApplication {
+
+    public boolean isProvisioned = false;
+    public SmartNode mSmartNode = null;
+
+
 }

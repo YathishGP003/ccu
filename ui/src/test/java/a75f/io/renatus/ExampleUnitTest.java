@@ -2,6 +2,8 @@ package a75f.io.renatus;
 
 import org.junit.Test;
 
+import a75f.io.bo.serial.SmartNodeControls_t;
+
 import static org.junit.Assert.*;
 
 /**
@@ -12,6 +14,12 @@ import static org.junit.Assert.*;
 public class ExampleUnitTest {
     @Test
     public void addition_isCorrect() throws Exception {
-        assertEquals(4, 2 + 2);
+        SmartNodeControls_t smartNodeControls_t = new SmartNodeControls_t();
+        smartNodeControls_t.analogOut1.set((short)1);
+        smartNodeControls_t.analogOut2.set((short)2);
+        smartNodeControls_t.smartNodeControls_extras.smartNodeControlsBitExtras.digitalOut1.set(1);
+        smartNodeControls_t.smartNodeControls_extras.smartNodeControlsBitExtras.digitalOut2.set(1);
+        //Smart Node Controls: 00 00 00 00 00 01 02 00 00 00 60
+        System.out.println("Smart Node Controls: " + smartNodeControls_t.toString());
     }
 }

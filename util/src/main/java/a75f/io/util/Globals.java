@@ -15,7 +15,7 @@ import com.kinvey.android.Client;
 public class Globals {
 
     private static Globals globals;
-
+    
     private Globals() {
     }
 

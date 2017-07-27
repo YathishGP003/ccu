@@ -25,7 +25,7 @@ import java.util.List;
 
 public class BLEProvisionService extends Service {
 
-    private final static String TAG = BLEProvisionService.class.getSimpleName();
+    private final static String TAG = "FragmentBLEDevicePin";
 
     private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
@@ -58,7 +58,7 @@ public class BLEProvisionService extends Service {
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                tSleep();
+
 
                 broadcastUpdate(BLEAction.ACTION_GATT_SERVICES_DISCOVERED, null);
             } else
@@ -96,18 +96,6 @@ public class BLEProvisionService extends Service {
         }
     };
 
-
-    /*
-    Sleep hack when connection has happened and it is still reading the gatt services, but it notifies early that it is finished with this process.
-    Wait a very long time, because the amount of services and chars the server has and the distance between this device & peripheral can impact the read time.
-     */
-    private void tSleep() {
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
 
     private void broadcastUpdate(final BLEAction action,
                                  final BluetoothGattCharacteristic characteristic) {
@@ -259,10 +247,10 @@ public class BLEProvisionService extends Service {
             return;
         }
         mBluetoothGatt.readCharacteristic(characteristic);
+        // tSleep();
     }
 
-    public void readCharacteristic(String characteristic)
-    {
+    public void readCharacteristic(String characteristic) {
         readCharacteristic(getSupportedGattAttribute(characteristic));
     }
 
@@ -280,12 +268,12 @@ public class BLEProvisionService extends Service {
         }
         characteristic.setValue(dataToWrite);
         boolean initiatedSuccessfully = mBluetoothGatt.writeCharacteristic(characteristic);
-        Log.i(TAG, "Write to: " + characteristic.getUuid().toString() +  " - initially successful? " + initiatedSuccessfully);
+        Log.i(TAG, "Write to: " + characteristic.getUuid().toString() + " - initially successful? " + initiatedSuccessfully);
+        //tSleep();
         return initiatedSuccessfully;
     }
 
-    public boolean writeCharacteristic(String characteristic, byte[] dataToWrite)
-    {
+    public boolean writeCharacteristic(String characteristic, byte[] dataToWrite) {
         BluetoothGattCharacteristic supportedGattAttribute = getSupportedGattAttribute(characteristic);
         return writeCharacteristic(supportedGattAttribute, dataToWrite);
 
@@ -350,7 +338,6 @@ public class BLEProvisionService extends Service {
             this.mBluetoothGattCharacteristic = bluetoothGattCharacteristic;
         }
     }
-
 
 
 }

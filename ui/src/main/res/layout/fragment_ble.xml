@@ -7,3 +7,4 @@
         android:text="@string/ble_content"></Button>
 
 </LinearLayout>
+

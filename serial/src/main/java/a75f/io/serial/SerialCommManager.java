@@ -8,6 +8,7 @@ import org.greenrobot.eventbus.EventBus;
 
 import a75f.io.bo.interfaces.ISerial;
 import a75f.io.util.Globals;
+import javolution.io.Struct;
 
 /**
  * Created by samjithsadasivan on 7/24/17.
@@ -150,6 +151,13 @@ public class SerialCommManager {
     }
 
     public void sendData(ISerial payload) {
+        if (SerialCommService.getSerialService() == null) {
+            throw new IllegalStateException("SerialCommService not running");
+        }
+        SerialCommService.getSerialService().sendData(payload);
+    }
+
+    public void sendData(Struct payload) {
         if (SerialCommService.getSerialService() == null) {
             throw new IllegalStateException("SerialCommService not running");
         }

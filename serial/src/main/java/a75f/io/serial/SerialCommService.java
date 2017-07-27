@@ -20,12 +20,15 @@ import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.nio.ByteBuffer;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 
 import a75f.io.bo.interfaces.ISerial;
+import javolution.io.Struct;
+
 import static a75f.io.serial.SerialCommManager.*;
 
 /**
@@ -75,6 +78,22 @@ public class SerialCommService extends Service {
 
     static public SerialCommService getSerialService() {
         return mSerialService;
+    }
+
+    public void sendData(Struct payload) {
+        Log.i("BYTE_BUFFER", payload.toString());
+
+        byte[] bytes = new byte[payload.size()];
+
+
+        for(int i = 0; i < payload.size(); i++)
+        {
+            bytes[i] = payload.getByteBuffer().get(i);
+        }
+        Log.i("BYTE_BUFFER", "Converted payload to bytes");
+
+        sendSerialData(bytes);
+
     }
 
     class SerialCommHandlerThread extends HandlerThread {

@@ -17,12 +17,17 @@ import android.widget.Toast;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import a75f.io.bo.SmartNode;
 import a75f.io.renatus.BLE.BLEHomeFragment;
+import a75f.io.renatus.BLE.USBHomeFragment;
 import a75f.io.serial.SerialCommManager;
 import a75f.io.serial.SerialCommService;
 import a75f.io.util.Globals;
 
 public class MainActivity extends AppCompatActivity {
+
+
+
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -36,8 +41,8 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.navigation_ble:
                     changeContent(BLEHomeFragment.getInstance());
                     return true;
-                case R.id.navigation_notifications:
-
+                case R.id.navigation_usb:
+                    changeContent(USBHomeFragment.getInstance());
                     return true;
 
 
@@ -46,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
     };
-    private Toast enumerateUSBDevices;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         changeContent(DefaultFragment.getInstance());
-        (new Handler()).postDelayed(new Runnable() {
+        /*(new Handler()).postDelayed(new Runnable() {
             @Override
             public void run() {
                 enumurateUSBDevices();
@@ -70,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
             Intent serialIntent = new Intent(getApplicationContext(), SerialCommService.class);
             serialIntent.putExtra("USB_DEVICE", device);
             startService(serialIntent);
-        }
+        }*/
 
     }
 
@@ -106,9 +111,9 @@ public class MainActivity extends AppCompatActivity {
 
         if (bDeviceFound) {
             Log.i("Serial", "Device Found");
-            Intent serialIntent = new Intent(Globals.getInstance().getApplicationContext(), SerialCommService.class);
+            Intent serialIntent = new Intent(MainActivity.this, SerialCommService.class);
             serialIntent.putExtra("USB_DEVICE", d);
-            Globals.getInstance().getApplicationContext().startService(serialIntent);
+            MainActivity.this.startService(serialIntent);
         }
 
     }

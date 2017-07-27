@@ -102,6 +102,15 @@ public class MainActivity extends AppCompatActivity {
             startService(serialIntent);
         }
 
+        //TODO- Temp test code to avoid usb time out, to be moved
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Log.d("Serial","kickOffClockUpdate");
+                SerialCommManager.getInstance().kickOffClockUpdate();
+            }
+        }, 30000);
+
     }
 
 
@@ -111,7 +120,9 @@ public class MainActivity extends AppCompatActivity {
 
     public synchronized void enumurateUSBDevices() {
 
+
         UsbDevice d = null;
+
 
         UsbManager usbman = (UsbManager) MainActivity.this.getSystemService(Context.USB_SERVICE);
 
@@ -138,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
-
+        
 
     }
 

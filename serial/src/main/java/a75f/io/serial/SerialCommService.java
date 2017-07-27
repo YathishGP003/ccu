@@ -167,7 +167,7 @@ public class SerialCommService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         // TODO move CM detection to appropriate place.
-        mDevice = (UsbDevice) intent.getParcelableExtra("USB_DEVICE");
+        mDevice = intent.getParcelableExtra("USB_DEVICE");
 
         if (mDevice == null) {
             Log.d(TAG, "CM Device not connected. SerialService cant continue");
@@ -175,28 +175,15 @@ public class SerialCommService extends Service {
             return START_NOT_STICKY;
         }
 
+
+
+
         mUsbManager = (UsbManager) getSystemService(USB_SERVICE);
 
-        //TODO : Need to find a way to grant usb access permission by defualt.
-        //This is temporary hack for testing purpose.
-        boolean hasPermission = mUsbManager.hasPermission(mDevice);
-        if (!hasPermission) {
-            Log.d(TAG, "Request USB access permission");
-
-            mUsbManager.requestPermission (mDevice, PendingIntent.getBroadcast
-                            (getApplicationContext(), 0, new Intent(ACTION_USB_PERMISSION), 0));
-
-        } else {
-            if (mUsbConnection == null) {
-                if (openDevice(mDevice) == false)
-                    stopSelf();
-            } else {
-                Toast.makeText(this, R.string.controller_notfound, Toast.LENGTH_SHORT).show();
-                stopSelf();
-            }
-        }
-
         mSerialService = this;
+
+
+        openDevice(mDevice);
         return START_NOT_STICKY;
     }
 

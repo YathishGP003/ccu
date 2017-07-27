@@ -94,22 +94,22 @@ public class MainActivity extends AppCompatActivity {
 
         changeContent(DefaultFragment.getInstance());
 
-        UsbDevice device = getIntent().getParcelableExtra(UsbManager.EXTRA_DEVICE);
-        if (device != null) {
-            Log.d("Serial :","USB Attach triggered activity launch");
-            Intent serialIntent = new Intent(getApplicationContext(), SerialCommService.class);
-            serialIntent.putExtra("USB_DEVICE", device);
-            startService(serialIntent);
-        }
+//        UsbDevice device = getIntent().getParcelableExtra(UsbManager.EXTRA_DEVICE);
+//        if (device != null) {
+//            Log.d("Serial :","USB Attach triggered activity launch");
+//            Intent serialIntent = new Intent(getApplicationContext(), SerialCommService.class);
+//            serialIntent.putExtra("USB_DEVICE", device);
+//            startService(serialIntent);
+//        }
 
-        //TODO- Temp test code to avoid usb time out, to be moved
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                Log.d("Serial","kickOffClockUpdate");
-                SerialCommManager.getInstance().kickOffClockUpdate();
-            }
-        }, 30000);
+//        //TODO- Temp test code to avoid usb time out, to be moved
+//        new Handler().postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                Log.d("Serial","kickOffClockUpdate");
+//                SerialCommManager.getInstance().kickOffClockUpdate();
+//            }
+//        }, 30000);
 
     }
 
@@ -149,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
-        
+
 
     }
 

@@ -62,8 +62,6 @@
         <service android:name="a75f.io.serial.SerialCommService" />
 
         <receiver android:name="a75f.io.serial.UsbPluginReceiver">
-
-
         </receiver>
 
 

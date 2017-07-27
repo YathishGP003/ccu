@@ -3,6 +3,7 @@ package a75f.io.serial;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Message;
+import android.util.Log;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -162,6 +163,15 @@ public class SerialCommManager {
             throw new IllegalStateException("SerialCommService not running");
         }
         SerialCommService.getSerialService().sendData(payload);
+    }
+    public void kickOffClockUpdate() {
+        if (SerialCommService.getSerialService() == null) {
+            //throw new IllegalStateException("SerialCommService not running");
+            Log.d("Serial", "SerialService is down ");
+            return;
+        }
+        SerialCommService.getSerialService().getSerialCommHandler().
+                    sendEmptyMessage(SerialCommService.SERIAL_COMM_CLOCK_UPDATE);
     }
 
 }

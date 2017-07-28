@@ -101,15 +101,14 @@ public class MainActivity extends AppCompatActivity {
             serialIntent.putExtra("USB_DEVICE", device);
             startService(serialIntent);
         }
-
-        //TODO- Temp test code to avoid usb time out, to be moved
+        /*//TODO- Temp test code to avoid usb time out, to be moved
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
                 Log.d("Serial","kickOffClockUpdate");
                 SerialCommManager.getInstance().kickOffClockUpdate();
             }
-        }, 30000);
+        }, 30000);*/
 
     }
 

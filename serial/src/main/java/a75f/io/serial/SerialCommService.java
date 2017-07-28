@@ -141,6 +141,9 @@ public class SerialCommService extends Service {
                     }
                 }
             };
+
+            serialCommHandler.sendEmptyMessageDelayed(SERIAL_COMM_DATA_READ, 30000);
+            serialCommHandler.sendEmptyMessageDelayed(SERIAL_COMM_CLOCK_UPDATE, 20000);
         }
     }
 
@@ -325,6 +328,7 @@ public class SerialCommService extends Service {
         byte[] rcvArray = new byte[1024];
 
         int rcvRet = mUsbConnection.bulkTransfer(mEpIN, rcvArray, rcvArray.length, 0);
+        Log.d(TAG, "readStatus : "+rcvRet);
         if (rcvRet <= 2)
             return;
 

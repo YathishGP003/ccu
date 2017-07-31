@@ -1,6 +1,5 @@
 package a75f.io.renatus;
 
-import android.app.PendingIntent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -9,7 +8,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
 import a75f.io.renatus.BLE.BLEHomeFragment;
-import a75f.io.renatus.BLE.USBHomeFragment;
+import a75f.io.renatus.USB.USBHomeFragment;
+import a75f.io.util.Globals;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -42,6 +42,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Globals.getInstance().getSmartNode().setMeshAddress((short) 6000);
+        Globals.getInstance().getSmartNode().setName("RyansNode");
 
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);

@@ -5,17 +5,10 @@ import a75f.io.bo.interfaces.ISerial;
 
 public class SmartNode implements ISerial {
 
-    private byte[] mEncryptionKey;
     private String name;
     private Short mMeshAddress;
 
-    public byte[] getEncryptionKey() {
-        return mEncryptionKey;
-    }
 
-    public void setEncryptionKey(byte[] encryptionKey) {
-        this.mEncryptionKey = encryptionKey;
-    }
 
     public String getName() {
         return name;

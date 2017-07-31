@@ -32,6 +32,8 @@ public class BLEProvisionService extends Service {
     private String mBluetoothDeviceAddress;
     private BluetoothGatt mBluetoothGatt;
 
+
+
     // Implements callback methods for GATT events that the app cares about.  For example,
     // connection change and services discovered.
     private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
@@ -44,6 +46,7 @@ public class BLEProvisionService extends Service {
                 broadcastUpdate(intentAction, null);
                 Log.i(TAG, "Connected to GATT server.");
                 // Attempts to discover services after successful connection.
+
                 Log.i(TAG, "Attempting to start service discovery:" +
                         mBluetoothGatt.discoverServices());
 
@@ -59,7 +62,7 @@ public class BLEProvisionService extends Service {
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
 
-
+                tSleep();
                 broadcastUpdate(BLEAction.ACTION_GATT_SERVICES_DISCOVERED, null);
             } else
                 Log.w(TAG, "onServicesDiscovered received: " + status);
@@ -137,6 +140,19 @@ public class BLEProvisionService extends Service {
         // invoked when the UI is disconnected from the Service.
         close();
         return super.onUnbind(intent);
+    }
+
+
+    /*
+    Sleep hack when connection has happened and it is still reading the gatt services, but it notifies early that it is finished with this process.
+    Wait a very long time, because the amount of services and chars the server has and the distance between this device & peripheral can impact the read time.
+     */
+    private void tSleep() {
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private final IBinder mBinder = new LocalBinder();

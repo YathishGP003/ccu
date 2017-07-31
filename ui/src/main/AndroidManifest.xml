@@ -52,11 +52,6 @@
                 <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
             </intent-filter>
 
-
-            <meta-data
-                android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
-                android:resource="@xml/filter" />
-
         </activity>
 
         <service android:name="a75f.io.bluetooth.BLEProvisionService"></service>

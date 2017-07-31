@@ -21,7 +21,6 @@ android {
 }
 dependencies {
     compile fileTree(include: '*.jar', dir: '../libs')
-    compile project(':util')
     compile 'junit:junit:4.12'
 }
 

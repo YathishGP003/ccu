@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,19 +22,17 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-
 import a75f.io.bluetooth.BLEAction;
 import a75f.io.bluetooth.BLEProvisionService;
 import a75f.io.bo.SmartNode;
-import a75f.io.bo.ble.BLEShort;
+import a75f.io.bo.ble.BLERoomName;
+import a75f.io.bo.ble.StructShort;
 import a75f.io.bo.ble.GattAttributes;
 import a75f.io.bo.ble.GattPin;
-import a75f.io.logic.SmartNodeBLL;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
 import a75f.io.util.ByteArrayUtils;
+import a75f.io.util.Globals;
 import a75f.io.util.prefs.EncryptionPrefs;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -59,11 +56,16 @@ public class FragmentBLEDevicePin extends DialogFragment {
     Button bleDialogDoneButton;
 
 
+    private SmartNode mSmartNode;
+
     private boolean mPinEntered = false;
     private BluetoothDevice mDevice;
     private BLEProvisionService mBLEProvisionService;
     private GattPin mGattPin;
-    private byte[] mByteBufferZoneConfigInProgress;
+    private byte[] mByteBufferZoneConfigInProgress = new byte[]{GattAttributes.ZONE_CONFIGURATION_IN_PROGRESS};
+
+    private byte[] mBLERoomNameBuffer;
+    private byte[] mBLEAddressBuffer;
 
     public static FragmentBLEDevicePin getInstance(BluetoothDevice device) {
         FragmentBLEDevicePin bleProvisionDialogFragment = new FragmentBLEDevicePin();
@@ -73,12 +75,7 @@ public class FragmentBLEDevicePin extends DialogFragment {
         return bleProvisionDialogFragment;
     }
 
-    private SmartNode getSmartNode() {
-        if (((RenatusApp) getActivity().getApplication()).mSmartNode == null)
-            ((RenatusApp) getActivity().getApplication()).mSmartNode = SmartNodeBLL.generateSmartNodeFromJSON();
 
-        return ((RenatusApp) getActivity().getApplication()).mSmartNode;
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -96,6 +93,8 @@ public class FragmentBLEDevicePin extends DialogFragment {
             error();
         }
 
+        mSmartNode = Globals.getInstance().getSmartNode();
+
         Log.i(TAG, "mAddress: " + (mDevice.getAddress() != null ? mDevice.getAddress() : "null"));
         View retVal = inflater.inflate(R.layout.fragment_ble_pin_dialog, container, false);
         ButterKnife.bind(this, retVal);
@@ -111,7 +110,12 @@ public class FragmentBLEDevicePin extends DialogFragment {
         Intent gattServiceIntent = new Intent(this.getContext(), BLEProvisionService.class);
         getActivity().bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
         Log.i(TAG, "Service binded");
-
+        BLERoomName mBLERoomName = new BLERoomName();
+        StructShort mBLEAddress = new StructShort();
+        mBLEAddress.smartNodeAddress.set(mSmartNode.getMeshAddress());
+        mBLEAddressBuffer = mBLEAddress.getOrderedBuffer();
+        mBLERoomName.roomName.set(mSmartNode.getName());
+        mBLERoomNameBuffer = mBLERoomName.getOrderedBuffer();
     }
 
 
@@ -146,10 +150,10 @@ public class FragmentBLEDevicePin extends DialogFragment {
     private void writeZoneUpdateInProgress() {
         //Zone Configuration Status
 
-        ByteBuffer byteBuffer = ByteBuffer.allocate(1).put(GattAttributes.ZONE_CONFIGURATION_IN_PROGRESS);
-        byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
-        mByteBufferZoneConfigInProgress = byteBuffer.array();
-        boolean initiallySuccessful = mBLEProvisionService.writeCharacteristic(mBLEProvisionService.getSupportedGattAttribute(GattAttributes.ZONE_CONFIGURATION_STATUS), mByteBufferZoneConfigInProgress);
+
+        boolean initiallySuccessful = mBLEProvisionService.writeCharacteristic(
+                mBLEProvisionService.getSupportedGattAttribute(GattAttributes.ZONE_CONFIGURATION_STATUS),
+                mByteBufferZoneConfigInProgress);
         Log.d(TAG, "Writing zone configuration status:  " + initiallySuccessful);
     }
 
@@ -196,15 +200,16 @@ public class FragmentBLEDevicePin extends DialogFragment {
                     }
                 });
             } else if (event.getBluetoothGattCharacteristic().getUuid().toString().equalsIgnoreCase(GattAttributes.ZONE_CONFIGURATION_STATUS)) {
-                if (mByteBufferZoneConfigInProgress != event.getBluetoothGattCharacteristic().getValue()) {
+                if (!mByteBufferZoneConfigInProgress.equals(event.getBluetoothGattCharacteristic().getValue())) {
                     Log.i(TAG, "Bluetooth configured success");
                     ((RenatusApp) getActivity().getApplication()).isProvisioned = true;
-                    Toast.makeText(this.getActivity(), "Pairing Success!", Toast.LENGTH_LONG).show();
+
                     Log.i(TAG, "Blue Status: " + event.getBluetoothGattCharacteristic().getValue().equals(new byte[]{GattAttributes.ZONE_CONFIGURATION_SUCCESS}));
 
                     FragmentBLEDevicePin.this.getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            Toast.makeText(FragmentBLEDevicePin.this.getActivity(), "Pairing Success!", Toast.LENGTH_LONG).show();
                             dismissAllowingStateLoss();
                         }
                     });
@@ -214,32 +219,31 @@ public class FragmentBLEDevicePin extends DialogFragment {
 
         } else if (event.getAction() == BLEAction.ACTION_DATA_WROTE && event.getBluetoothGattCharacteristic() != null) {
             if (event.getBluetoothGattCharacteristic().getUuid().toString().equalsIgnoreCase(GattAttributes.ZONE_CONFIGURATION_STATUS)) {
-                Log.i(TAG, "Successfully wrote to zone configuration status!");
-                Log.i(TAG, "Wiritng BLE Link Key");
+
+
                 mBLEProvisionService.writeCharacteristic(GattAttributes.BLE_LINK_KEY, EncryptionPrefs.getBLELinkKey());
-            } else if (event.getBluetoothGattCharacteristic().getUuid().toString().equalsIgnoreCase(GattAttributes.BLE_LINK_KEY)) {
-                Log.i(TAG, "Successfully wrote to BLE LINK KEY!");
-                Log.i(TAG, "Writing room name");
-                mBLEProvisionService.writeCharacteristic(GattAttributes.ROOM_NAME, ByteArrayUtils.nullTerminateAndFillArrayToLengthFromString(getSmartNode().getName(), 25));
+            }
+            else if (event.getBluetoothGattCharacteristic().getUuid().toString().equalsIgnoreCase(GattAttributes.BLE_LINK_KEY)) {
+
+                mBLEProvisionService.writeCharacteristic(GattAttributes.ROOM_NAME, mBLERoomNameBuffer);
+
             } else if (event.getBluetoothGattCharacteristic().getUuid().toString().equalsIgnoreCase(GattAttributes.ROOM_NAME)) {
-                Log.i(TAG, "Successfully wrote room name!");
-                Log.i(TAG, "Writing pairing address");
+                mBLEProvisionService.writeCharacteristic(GattAttributes.LW_MESH_PAIRING_ADDRESS, mBLEAddressBuffer);
 
-
-                mBLEProvisionService.writeCharacteristic(GattAttributes.LW_MESH_PAIRING_ADDRESS, new byte[]{0x70, 0x17});
             } else if (event.getBluetoothGattCharacteristic().getUuid().toString().equalsIgnoreCase(GattAttributes.LW_MESH_PAIRING_ADDRESS)) {
-                Log.i(TAG, "Successfully wrote mesh pairing address");
-                Log.i(TAG, "Now writing mesh security key");
-                mBLEProvisionService.writeCharacteristic(GattAttributes.LW_MESH_SECURITY_KEY, getSmartNode().getEncryptionKey());
+
+                mBLEProvisionService.writeCharacteristic(GattAttributes.LW_MESH_SECURITY_KEY, EncryptionPrefs.getEncryptionKey());
             } else if (event.getBluetoothGattCharacteristic().getUuid().toString().equalsIgnoreCase(GattAttributes.LW_MESH_SECURITY_KEY)) {
-                Log.i(TAG, "Sucessfully wrote mesh security key");
-                Log.i(TAG, "now writing firmware signature key");
+
                 mBLEProvisionService.writeCharacteristic(GattAttributes.FIRMWARE_SIGNATURE_KEY, EncryptionPrefs.getFirmwareSignatureKey());
             } else if (event.getBluetoothGattCharacteristic().getUuid().toString().equalsIgnoreCase(GattAttributes.FIRMWARE_SIGNATURE_KEY)) {
-                Log.i(TAG, "Successfully wrote firmware signature key.");
-                byte[] message = ByteArrayUtils.addBytes(EncryptionPrefs.getBLELinkKey(), ByteArrayUtils.nullTerminateAndFillArrayToLengthFromString(getSmartNode().getName(), 25), new byte[]{0x70, 0x17},
-                        getSmartNode().getEncryptionKey(), EncryptionPrefs.getFirmwareSignatureKey(), mByteBufferZoneConfigInProgress);
-                mBLEProvisionService.writeCharacteristic(GattAttributes.CRC, ByteArrayUtils.bigToLittleEndian(ByteArrayUtils.computeCrc(message)));
+
+
+                byte[] crc = ByteArrayUtils.addBytes(EncryptionPrefs.getBLELinkKey(),
+                        mBLERoomNameBuffer, mBLEAddressBuffer,
+                        EncryptionPrefs.getEncryptionKey(), EncryptionPrefs.getFirmwareSignatureKey(),
+                        mByteBufferZoneConfigInProgress);
+                mBLEProvisionService.writeCharacteristic(GattAttributes.CRC, ByteArrayUtils.bigToLittleEndian(ByteArrayUtils.computeCrc(crc)));
                 Log.i(TAG, "Wrote to CRC gatt characteristic");
             } else if (event.getBluetoothGattCharacteristic().getUuid().toString().equalsIgnoreCase(GattAttributes.CRC)) {
                 Log.i(TAG, "Successfully wrote to CRC...");

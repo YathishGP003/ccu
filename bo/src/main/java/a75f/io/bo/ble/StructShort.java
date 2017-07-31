@@ -9,7 +9,7 @@ import java.nio.ByteOrder;
  * Created by ryanmattison on 7/26/17.
  */
 
-public class BLEShort extends Struct {
+public class StructShort extends Struct {
 
     public final Unsigned16 smartNodeAddress = new Unsigned16();
 

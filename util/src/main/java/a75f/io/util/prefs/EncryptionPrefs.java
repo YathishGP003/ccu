@@ -51,7 +51,7 @@ public class EncryptionPrefs {
         SecureRandom secureRandom = new SecureRandom();
         byte[] bytes = secureRandom.generateSeed(KEY_SIZE);
         String encryptionKeyAsString = Base64.encodeToString(bytes, Base64.DEFAULT);
-        systemSettings.putString("encryption_key", encryptionKeyAsString);
+        systemSettings.putString(VAR_SYSTEM_SETTINGS_ENCRYPTION_KEY, encryptionKeyAsString);
         systemSettings.apply();
         return bytes;
     }

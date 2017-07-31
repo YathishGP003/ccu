@@ -1,4 +1,4 @@
-package a75f.io.renatus.BLE;
+package a75f.io.renatus.USB;
 
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -17,20 +17,20 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.Set;
 
+import a75f.io.bo.SmartNode;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.bo.serial.MessageType;
+import a75f.io.renatus.BLE.BLEHomeFragment;
 import a75f.io.renatus.MainActivity;
 import a75f.io.renatus.R;
 import a75f.io.usbserial.UsbService;
+
+import a75f.io.util.Globals;
 import a75f.io.util.prefs.EncryptionPrefs;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -182,12 +182,13 @@ public class USBHomeFragment extends Fragment {
     public void usbLight() {
         usbService.setDebug(true);
         mLightButton.setText("Send ordered buffer!");
+        SmartNode sn = Globals.getInstance().getSmartNode();
         CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = new CcuToCmOverUsbDatabaseSeedSnMessage_t();
 
         seedMessage.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN);
         seedMessage.encryptionKey.set(0);
-
-        seedMessage.smartNodeAddress.set(2000);
+        seedMessage.settings.roomName.set(sn.getName());
+        seedMessage.smartNodeAddress.set(sn.getMeshAddress());
         seedMessage.controls.time.day.set((short) 1);
         seedMessage.controls.time.hours.set((short) 1);
         seedMessage.controls.time.minutes.set((short) 1);

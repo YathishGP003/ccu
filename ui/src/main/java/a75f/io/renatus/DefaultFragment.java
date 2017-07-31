@@ -3,11 +3,22 @@ package a75f.io.renatus;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.util.Arrays;
+import java.util.List;
+
+import a75f.io.util.Globals;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -17,13 +28,23 @@ import butterknife.ButterKnife;
 
 public class DefaultFragment extends Fragment {
 
+
+    private static final String TAG = DefaultFragment.class.getSimpleName();
+    List<String> ports = Arrays.asList("1000", "2000", "3000", "4000", "5000", "6000", "7000", "8000", "9000");
+
     public static DefaultFragment getInstance() {
         return new DefaultFragment();
     }
 
 
+    @BindView(R.id.fragment_main_sn_name_edittext)
+    EditText mSNNameEditText;
+
     @BindView(R.id.fragment_main_textview)
-    TextView mainTextView;
+    TextView mMainTextView;
+
+    @BindView(R.id.fragment_main_port_spinner)
+    Spinner mPortSpinner;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -38,7 +59,41 @@ public class DefaultFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mainTextView.setText("Butterknife");
+        setupPortSpinner();
+        setupSNName();
+    }
 
+    private void setupPortSpinner() {
+
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this.getActivity(),
+                android.R.layout.simple_spinner_item, ports);
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mPortSpinner.setAdapter(dataAdapter);
+        mPortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                ports.get(position);
+                Globals.getInstance().getSmartNode().setMeshAddress(Short.parseShort(ports.get(position)));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+    }
+
+    private void setupSNName() {
+        mSNNameEditText.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                String name = mSNNameEditText.getText().toString();
+                Toast.makeText(DefaultFragment.this.getContext(), "Saved: " + name, Toast.LENGTH_LONG).show();
+                Globals.getInstance().getSmartNode().setName(mSNNameEditText.getText().toString());
+                return false;
+            }
+        });
     }
 }
+
+

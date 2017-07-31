@@ -37,7 +37,7 @@ public class FragmentDeviceScan extends DialogFragment {
 
     private static final int REQUEST_ENABLE_BT = 1;
     // Stops scanning after 10 seconds.
-    private static final long SCAN_PERIOD = 10000;
+    private static final long SCAN_PERIOD = 2500;
 
     public static FragmentDeviceScan getInstance() {
         return new FragmentDeviceScan();

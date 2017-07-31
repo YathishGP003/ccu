@@ -50,4 +50,6 @@ dependencies {
     compile project(':usbserial')
     compile 'com.android.support.test:runner:0.5'
     androidTestCompile 'junit:junit:4.12'
+    compile project(path: ':util')
+    compile project(path: ':util')
 }

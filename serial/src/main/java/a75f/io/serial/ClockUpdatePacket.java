@@ -6,7 +6,7 @@ import java.util.GregorianCalendar;
 import a75f.io.bo.interfaces.ISerial;
 import a75f.io.util.GlobalUtils;
 
-import static a75f.io.serial.SerialCommManager.MESSAGETYPE.CCU_CLOCK_UPDATE;
+import static a75f.io.serial.SerialCommManager.MESSAGETYPE.CCU_HEARTBEAT_UPDATE;
 
 /**
  * Created by samjithsadasivan on 7/27/17.
@@ -17,7 +17,7 @@ class ClockUpdatePacket implements ISerial {
 
     public ClockUpdatePacket build() {
         mByteArray = new byte[4];
-        mByteArray[0] = (byte) CCU_CLOCK_UPDATE.ordinal();
+        mByteArray[0] = (byte) CCU_HEARTBEAT_UPDATE.ordinal();
 
         Calendar curDate = GregorianCalendar.getInstance();
         mByteArray[1] = (byte) (GlobalUtils.getCurrentDayOfWeekWithMondayAsStart() & 0xff);

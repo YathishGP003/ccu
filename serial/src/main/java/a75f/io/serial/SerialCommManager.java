@@ -1,14 +1,11 @@
 package a75f.io.serial;
 
-import android.content.Context;
-import android.content.Intent;
 import android.os.Message;
 import android.util.Log;
 
 import org.greenrobot.eventbus.EventBus;
 
 import a75f.io.bo.interfaces.ISerial;
-import a75f.io.util.Globals;
 import javolution.io.Struct;
 
 /**
@@ -20,8 +17,12 @@ public class SerialCommManager {
     public static final int ESC_BYTE = 0xD9;
     public static final int SOF_BYTE = 0x00;
     public static final int EOF_BYTE = 0x03;
-    public static final String CM_VID_PID = "03EB:2404";
     public static SerialCommManager sInstance = null;
+
+    public static final String FTDI_VID_PID = "0403:6001";
+    public static final String CM_VID_PID = "03EB:2404";
+
+
 
     public void sendData(byte[] bytes) {
 
@@ -120,17 +121,30 @@ public class SerialCommManager {
     };
 
     //Message wrapper to be used on EventBus
-    public class SerialCommEvent {
+    public static class SerialCommEvent {
 
-        private Message mMessage;
+        public Message mMessage;
 
-        public SerialCommEvent(Message msg) {
-            this.mMessage = msg;
+        public void setMessage(Message msg) {
+            mMessage = msg;
         }
+    }
 
-        public Message getMessage() {
-            return mMessage;
-        }
+    public static class SNPairingConfirmEvent extends SerialCommEvent {
+    }
+    public static class SNRegularUpdateEvent extends SerialCommEvent {
+    }
+    public static class CMRegularUpdateEvent extends SerialCommEvent {
+    }
+    public static class SNRebootEvent extends SerialCommEvent {
+    }
+    public static class CMErrorEvent extends SerialCommEvent {
+    }
+    public static class USBRegularUpdateEvent extends SerialCommEvent {
+    }
+    public static class UsbSNRebootEvent extends SerialCommEvent {
+    }
+    public static class FirmwarePacketRequestEvent extends SerialCommEvent {
     }
 
     private SerialCommManager() {

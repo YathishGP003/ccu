@@ -181,9 +181,10 @@ public class USBHomeFragment extends Fragment {
     @OnClick(R.id.fragment_light_button)
     public void usbLight() {
         usbService.setDebug(true);
+        mLightButton.setText("Send ordered buffer!");
         CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = new CcuToCmOverUsbDatabaseSeedSnMessage_t();
 
-        seedMessage.messageType.set((short) MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN.ordinal());
+        seedMessage.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN);
         seedMessage.encryptionKey.set(0);
 
         seedMessage.smartNodeAddress.set(2000);
@@ -194,15 +195,12 @@ public class USBHomeFragment extends Fragment {
         seedMessage.settings.ledBitmap.digitalOut1.set(1);
         seedMessage.controls.smartNodeControls_extras.digitalOut1.set(1);
         seedMessage.settings.ledBitmap.digitalOut2.set(1);
-        byte[] bytes = new byte[] {((byte) MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN.ordinal()), (byte) 0xD0, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+
         if (usbService != null) { // if UsbService was correctly binded, Send data
-            usbService.write(bytes);
+            usbService.write(seedMessage.getOrderedBuffer());
             //usbService.write(seedMessage.getOrderedBuffer());
         }
+
 
     }
 
@@ -210,6 +208,27 @@ public class USBHomeFragment extends Fragment {
     @OnClick(R.id.fragment_usb_button)
     public void usbSubmit() {
         Log.i(TAG, "Done");
+        usbService.setDebug(true);
+        mUSBButton.setText("Send Array bytes");
+        CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = new CcuToCmOverUsbDatabaseSeedSnMessage_t();
+
+        seedMessage.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN);
+        seedMessage.encryptionKey.set(0);
+
+        seedMessage.smartNodeAddress.set(2000);
+        seedMessage.controls.time.day.set((short) 1);
+        seedMessage.controls.time.hours.set((short) 1);
+        seedMessage.controls.time.minutes.set((short) 1);
+
+        seedMessage.settings.ledBitmap.digitalOut1.set(1);
+        seedMessage.controls.smartNodeControls_extras.digitalOut1.set(1);
+        seedMessage.settings.ledBitmap.digitalOut2.set(1);
+
+        if (usbService != null) { // if UsbService was correctly binded, Send data
+            usbService.write(seedMessage.getByteBuffer().array());
+            //usbService.write(seedMessage.getOrderedBuffer());
+        }
+
 
     }
 

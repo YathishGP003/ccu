@@ -1,18 +1,13 @@
 package a75f.io.renatus;
 
-import android.content.Context;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import a75f.io.bo.LittleEndianTestStruct;
-import a75f.io.bo.TestStruct;
+import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.bo.serial.MessageType;
-
-import static org.junit.Assert.*;
 
 /**
  * Instrumentation test, which will execute on an Android device.
@@ -24,21 +19,12 @@ public class ExampleInstrumentedTest {
     @Test
     public void useAppContext() throws Exception {
         // Context of the app under test.
+        CcuToCmOverUsbDatabaseSeedSnMessage_t ccuToCmOverUsbDatabaseSeedSnMessage_t = new CcuToCmOverUsbDatabaseSeedSnMessage_t();
+        ccuToCmOverUsbDatabaseSeedSnMessage_t.smartNodeAddress.set(2000);
+        ccuToCmOverUsbDatabaseSeedSnMessage_t.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN);
 
-        TestStruct testStruct = new TestStruct();
 
 
-        testStruct.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN);
 
-        
-        Log.i("TEST", testStruct.toString());
-
-        LittleEndianTestStruct littleEndianTestStruct = new LittleEndianTestStruct();
-
-        littleEndianTestStruct.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN);
-
-        littleEndianTestStruct.smartNodeAddress.set(2000);
-
-        Log.i("TEST", littleEndianTestStruct.toString());
     }
 }

@@ -168,7 +168,7 @@ public class UsbService extends Service {
 
     public void setDebug(boolean debug)
     {
-        serialPort.debug(true);
+        serialPort.debug(debug);
     }
 
     /*

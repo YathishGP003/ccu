@@ -2,17 +2,6 @@ package a75f.io.renatus;
 
 import org.junit.Test;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-
-import a75f.io.bo.LittleEndianTestStruct;
-import a75f.io.bo.TestStruct;
-import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
-import a75f.io.bo.serial.MessageType;
-import a75f.io.bo.serial.SmartNodeControls_t;
-
-import static org.junit.Assert.*;
-
 /**
  * Example local unit test, which will execute on the development machine (host).
  *

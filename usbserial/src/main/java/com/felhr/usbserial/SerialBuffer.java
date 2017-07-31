@@ -11,7 +11,7 @@ public class SerialBuffer
     private ByteBuffer readBuffer;
     private SynchronizedBuffer writeBuffer;
     private byte[] readBuffer_compatible; // Read buffer for android < 4.2
-    private boolean debugging = false;
+    private boolean debugging = true;
 
     public SerialBuffer(boolean version)
     {

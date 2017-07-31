@@ -21,9 +21,6 @@ android {
 }
 dependencies {
     compile fileTree(include: '*.jar', dir: '../libs')
-    compile('org.javolution:javolution-core-java:6.0.0') {
-        exclude group: 'org.osgi'
-    }
     compile project(':util')
     compile 'junit:junit:4.12'
 }

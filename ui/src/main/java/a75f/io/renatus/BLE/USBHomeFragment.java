@@ -17,9 +17,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Set;
 
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
@@ -27,6 +31,7 @@ import a75f.io.bo.serial.MessageType;
 import a75f.io.renatus.MainActivity;
 import a75f.io.renatus.R;
 import a75f.io.usbserial.UsbService;
+import a75f.io.util.prefs.EncryptionPrefs;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -181,7 +186,7 @@ public class USBHomeFragment extends Fragment {
         seedMessage.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN);
         seedMessage.encryptionKey.set(0);
 
-        seedMessage.smartNodeAddress.set(8000);
+        seedMessage.smartNodeAddress.set(2000);
         seedMessage.controls.time.day.set((short) 1);
         seedMessage.controls.time.hours.set((short) 1);
         seedMessage.controls.time.minutes.set((short) 1);
@@ -191,7 +196,8 @@ public class USBHomeFragment extends Fragment {
         seedMessage.settings.ledBitmap.digitalOut2.set(1);
 
         if (usbService != null) { // if UsbService was correctly binded, Send data
-            usbService.write(seedMessage.getByteBuffer().array());
+
+            usbService.write(seedMessage.getOrderedBuffer());
         }
 
     }

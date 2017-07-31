@@ -58,7 +58,10 @@
         <service android:name="a75f.io.bluetooth.BLEProvisionService"></service>
 
 
-
+        <service
+            android:name="a75f.io.usbserial.UsbService"
+            android:enabled="true">
+        </service>
     </application>
 
 </manifest>

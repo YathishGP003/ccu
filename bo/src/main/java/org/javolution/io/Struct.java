@@ -158,6 +158,7 @@ public class Struct {
 
 
 
+
     /**
      * Holds the outer struct if any.
      */
@@ -258,6 +259,19 @@ public class Struct {
         bf.order(byteOrder());
         setByteBuffer(bf, 0);
         return _byteBuffer;
+    }
+
+
+    public final byte[] getOrderedBuffer()
+    {
+        byte[] bytes = new byte[size()];
+        ByteBuffer byteBuffer = getByteBuffer();
+        for(int i = 0; i< size(); i++)
+        {
+            bytes[i] = byteBuffer.get(i);
+        }
+
+        return bytes;
     }
 
     /**

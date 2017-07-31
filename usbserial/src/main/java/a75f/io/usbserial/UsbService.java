@@ -201,7 +201,7 @@ public class UsbService extends Service {
             buffer[nOffset + len] = (byte) (EOF_BYTE & 0xff);
             nOffset++;
 
-            serialPort.write(data);
+            serialPort.write(buffer);
         }
     }
 

@@ -52,4 +52,5 @@ dependencies {
 
 
 
+    androidTestCompile 'junit:junit:4.12'
 }

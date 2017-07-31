@@ -189,7 +189,7 @@ public class Struct {
      * Holds the word size during construction (for bit fields).
      * This is the size of the last word used.
      */
-    int _wordSize;
+    int _wordSize = 8;
     /**
      * Holds the bits used in the word during construction (for bit fields).
      * This is the number of bits used in the last word.
@@ -266,6 +266,8 @@ public class Struct {
     {
         byte[] bytes = new byte[size()];
         ByteBuffer byteBuffer = getByteBuffer();
+
+
         for(int i = 0; i< size(); i++)
         {
             bytes[i] = byteBuffer.get(i);
@@ -479,6 +481,7 @@ public class Struct {
         return false;
     }
 
+    /**
     /**
      * Returns the byte order for this struct (configurable).
      * The byte order is inherited by inner structs. Sub-classes may change

@@ -175,6 +175,9 @@ public class UsbService extends Service {
      * This function will be called from MainActivity to write data through Serial Port
      */
     public void write(byte[] data) {
+
+
+
         if (serialPort != null) {
 
             byte buffer[] = new byte[1024];

@@ -37,7 +37,6 @@ android {
 }
 
 dependencies {
-
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support:design:25.3.1'
     compile 'com.android.support:support-vector-drawable:25.3.1'
@@ -49,8 +48,6 @@ dependencies {
     compile project(':bluetooth')
     compile project(':bo')
     compile project(':usbserial')
-
-
-
+    compile 'com.android.support.test:runner:0.5'
     androidTestCompile 'junit:junit:4.12'
 }

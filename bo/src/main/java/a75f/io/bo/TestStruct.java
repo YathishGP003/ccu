@@ -9,10 +9,7 @@ import a75f.io.bo.serial.MessageType;
  */
 
 public class TestStruct extends Struct {
-    public final Struct.Enum8<MessageType> messageType = new Struct.Enum8<>(MessageType.values());
-    public final Struct.Unsigned16 smartNodeAddress = new Struct.Unsigned16();
+    public final Unsigned8 messageType = new Unsigned8();
+    //public final Unsigned16 smartNodeAddress = new Unsigned16();
 
-    public Enum8<MessageType> getMessageType() {
-        return messageType;
-    }
 }

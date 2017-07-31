@@ -13,6 +13,10 @@ import java.nio.ByteOrder;
 //77
 public class CcuToCmOverUsbDatabaseSeedSnMessage_t extends Struct {
 
+    public CcuToCmOverUsbDatabaseSeedSnMessage_t()
+    {
+    }
+
     public final Struct.Unsigned8 messageType = new Struct.Unsigned8();
     public final Struct.Unsigned16 smartNodeAddress = new Unsigned16();
     public final BitField encryptionKey = new BitField(128);
@@ -25,6 +29,8 @@ public class CcuToCmOverUsbDatabaseSeedSnMessage_t extends Struct {
     public ByteOrder byteOrder() {
         return ByteOrder.LITTLE_ENDIAN;
     }
+
+
 
 
 }

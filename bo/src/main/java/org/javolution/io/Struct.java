@@ -519,7 +519,7 @@ public class Struct {
      *         <code>false</code> otherwise (default).
      */
     public boolean isPacked() {
-        return false;
+        return true;
     }
 
     /**

@@ -68,13 +68,10 @@ public class UsbService extends Service {
     private UsbSerialInterface.UsbReadCallback mCallback = new UsbSerialInterface.UsbReadCallback() {
         @Override
         public void onReceivedData(byte[] data) {
-            try {
-                String data = new String(data, "UTF-8");
-                if (mHandler != null)
-                    mHandler.obtainMessage(MESSAGE_FROM_SERIAL_PORT, data).sendToTarget();
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
+
+            if (mHandler != null)
+                mHandler.obtainMessage(MESSAGE_FROM_SERIAL_PORT, data).sendToTarget();
+
         }
     };
 
@@ -168,11 +165,18 @@ public class UsbService extends Service {
         UsbService.SERVICE_CONNECTED = false;
     }
 
+
+    public void setDebug(boolean debug)
+    {
+        serialPort.debug(true);
+    }
+
     /*
      * This function will be called from MainActivity to write data through Serial Port
      */
     public void write(byte[] data) {
         if (serialPort != null) {
+
             byte buffer[] = new byte[1024];
             byte crc = 0;
             byte nOffset = 0;

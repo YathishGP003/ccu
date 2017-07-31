@@ -1,1 +1,1 @@
-include ':ui', ':logic', ':bo', ':util', ':kinvey', ':realm', ':relinker', ':dal', ':serial', ':bluetooth'
+include ':ui', ':logic', ':bo', ':util', ':kinvey', ':realm', ':relinker', ':dal', ':bluetooth', ':usbserial'

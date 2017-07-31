@@ -48,7 +48,7 @@ dependencies {
     compile project(':logic')
     compile project(':bluetooth')
     compile project(':bo')
-    compile project(':serial')
+    compile project(':usbserial')
 
 
 

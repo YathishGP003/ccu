@@ -61,14 +61,11 @@
 
         <service android:name="a75f.io.bluetooth.BLEProvisionService"></service>
 
-        <service android:name="a75f.io.serial.SerialCommService" />
 
-        <receiver android:name="a75f.io.serial.UsbPluginReceiver">
-
-
-        </receiver>
-
-
+        <service
+            android:name="a75f.io.usbserial.UsbService"
+            android:enabled="true">
+        </service>
     </application>
 
 </manifest>

@@ -1,0 +1,104 @@
+/*
+ * Javolution - Java(TM) Solution for Real-Time and Embedded Systems
+ * Copyright (C) 2012 - Javolution (http://javolution.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
+ */
+package org.javolution.util.internal.collection;
+
+import org.javolution.util.FastCollection;
+import org.javolution.util.function.Equality;
+import org.javolution.util.function.Function;
+import org.javolution.util.function.Predicate;
+
+import java.util.Iterator;
+
+/**
+ * A mapped view over a collection.
+ */
+public final class MappedCollectionImpl<E, R> extends FastCollection<R> {
+
+    private static final long serialVersionUID = 0x700L; // Version.
+    private final FastCollection<E> inner;
+    private final Function<? super E, ? extends R> function;
+
+    public MappedCollectionImpl(FastCollection<E> inner, Function<? super E, ? extends R> function) {
+        this.inner = inner;
+        this.function = function;
+    }
+
+    @Override
+    public boolean add(R element) {
+        throw new UnsupportedOperationException("New elements cannot be added to mapped views");
+    }
+
+    @Override
+    public void clear() {
+        inner.clear();
+
+    }
+
+    @Override
+    public MappedCollectionImpl<E, R> clone() {
+        return new MappedCollectionImpl<E, R>(inner.clone(), function);
+    }
+
+    @Override
+    public Equality<? super R> equality() {
+        return Equality.DEFAULT;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return inner.isEmpty();
+    }
+
+    @Override
+    public Iterator<R> iterator() {
+        return new Iterator<R>() {
+            Iterator<E> itr = inner.iterator();
+
+            @Override
+            public boolean hasNext() {
+                return itr.hasNext();
+            }
+
+            @Override
+            public R next() {
+                return function.apply(itr.next());
+            }
+
+            @Override
+            public void remove() {
+                itr.remove();
+            }
+        };
+    }
+
+    @Override
+    public boolean removeIf(final Predicate<? super R> toRemove) {
+        return inner.removeIf(new Predicate<E>() {
+            @Override
+            public boolean test(E param) {
+                return toRemove.test(function.apply(param));
+            }
+        });
+    }
+
+    @Override
+    public int size() {
+        return inner.size();
+    }
+
+    @Override
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public FastCollection<R>[] trySplit(int n) {
+        FastCollection[] subViews = inner.trySplit(n);
+        for (int i = 0; i < subViews.length; i++)
+            subViews[i] = new MappedCollectionImpl(subViews[i], function);
+        return subViews;
+    }
+
+}

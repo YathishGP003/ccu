@@ -1,6 +1,6 @@
 package a75f.io.bo.serial;
 
-import javolution.io.Struct;
+import org.javolution.io.Struct;
 
 /**
  * Created by ryanmattison on 7/25/17.

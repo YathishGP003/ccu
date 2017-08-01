@@ -19,7 +19,12 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
+import org.javolution.io.Struct;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.nio.ByteBuffer;
 import java.util.Set;
 
 import a75f.io.bo.SmartNode;
@@ -186,16 +191,27 @@ public class USBHomeFragment extends Fragment {
         CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = new CcuToCmOverUsbDatabaseSeedSnMessage_t();
 
         seedMessage.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN);
-        seedMessage.encryptionKey.set(0);
-        seedMessage.settings.roomName.set(sn.getName());
-        seedMessage.smartNodeAddress.set(sn.getMeshAddress());
-        seedMessage.controls.time.day.set((short) 1);
-        seedMessage.controls.time.hours.set((short) 1);
-        seedMessage.controls.time.minutes.set((short) 1);
 
-        seedMessage.settings.ledBitmap.digitalOut1.set(1);
-        seedMessage.controls.smartNodeControls_extras.digitalOut1.set(1);
-        seedMessage.settings.ledBitmap.digitalOut2.set(1);
+//        try {
+//            seedMessage.encryptionKey.read(new ByteArrayInputStream(EncryptionPrefs.getEncryptionKey()));
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+
+
+       /// seedMessage.settings.roomName.set(sn.getName());
+        seedMessage.smartNodeAddress.set(sn.getMeshAddress());
+        //seedMessage.controls.time.day.set((short) 1);
+        //seedMessage.controls.time.hours.set((short) 1);
+        //seedMessage.controls.time.minutes.set((short) 1);
+
+        //seedMessage.controls.digitalOut1.set(1);
+        //seedMessage.settings.lightingControl.set(1);
+        //seedMessage.settings.ledBitmap.digitalOut2.set(1);
+
+        seedMessage.controls.smartNodeControls_extras.smartNodeControlsBitExtras.digitalOut1.set(1);
+
+        seedMessage.controls.smartNodeControls_extras.smartNodeControlsBitExtras.padding.set(1);
 
         if (usbService != null) { // if UsbService was correctly binded, Send data
             usbService.write(seedMessage.getOrderedBuffer());
@@ -214,16 +230,15 @@ public class USBHomeFragment extends Fragment {
         CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = new CcuToCmOverUsbDatabaseSeedSnMessage_t();
 
         seedMessage.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN);
-        seedMessage.encryptionKey.set(0);
 
         seedMessage.smartNodeAddress.set(2000);
         seedMessage.controls.time.day.set((short) 1);
         seedMessage.controls.time.hours.set((short) 1);
         seedMessage.controls.time.minutes.set((short) 1);
 
-        seedMessage.settings.ledBitmap.digitalOut1.set(1);
-        seedMessage.controls.smartNodeControls_extras.digitalOut1.set(1);
-        seedMessage.settings.ledBitmap.digitalOut2.set(1);
+
+        seedMessage.controls.smartNodeControls_extras.smartNodeControlsBitExtras.digitalOut1.set(1);
+        seedMessage.settings.ledBitmap.smartNodeLedBitmap_t_extras.digitalOut1.set(1);
 
         if (usbService != null) { // if UsbService was correctly binded, Send data
             usbService.write(seedMessage.getByteBuffer().array());

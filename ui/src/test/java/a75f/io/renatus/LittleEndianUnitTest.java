@@ -2,6 +2,9 @@ package a75f.io.renatus;
 
 import org.junit.Test;
 
+import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
+import a75f.io.bo.serial.MessageType;
+
 /**
  * Example local unit test, which will execute on the development machine (host).
  *
@@ -22,12 +25,15 @@ Process finished with exit code 0
     @Test
     public void test_LittleEndian() throws Exception {
 
-//        CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = new CcuToCmOverUsbDatabaseSeedSnMessage_t();
-//
-//        seedMessage.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN);
-//        seedMessage.encryptionKey.set(0);
-//
-//        seedMessage.smartNodeAddress.set(2000);
+        CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = new CcuToCmOverUsbDatabaseSeedSnMessage_t();
+
+        seedMessage.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN);
+        seedMessage.encryptionKey.set(0);
+
+        seedMessage.smartNodeAddress.set(2000);
+        seedMessage.controls.smartNodeControls_extras.smartNodeControlsBitExtras.digitalOut1.set(1);
+        seedMessage.controls.smartNodeControls_extras.smartNodeControlsBitExtras.padding.set(1);
+        System.out.println(seedMessage.toString());
 //        seedMessage.controls.time.day.set((short) 1);
 //        seedMessage.controls.time.hours.set((short) 1);
 //        seedMessage.controls.time.minutes.set((short) 1);
@@ -37,22 +43,22 @@ Process finished with exit code 0
 //        seedMessage.settings.ledBitmap.digitalOut2.set(1);
 //        System.out.println("Seed message: " + seedMessage.toString());
 //        System.out.println("Seed message size: " + seedMessage.size());
-        TestStruct testStruct = new TestStruct();
-
-
-        //testStruct.messageType.set((short) MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN.ordinal());
-
-        testStruct.messageType.set((short) 1);
-        System.out.println(testStruct.toString());
-
-        LittleEndianTestStruct littleEndianTestStruct = new LittleEndianTestStruct();
-        System.out.println("Size: " + testStruct.size());
-       // littleEndianTestStruct.messageType.set((short) MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN.ordinal());
-        littleEndianTestStruct.messageType.set((short) 1);
-        littleEndianTestStruct.smartNodeAddress.set(2000);
-
-        System.out.println(littleEndianTestStruct.toString());
-        System.out.println("Size: " + littleEndianTestStruct.size());
+//        TestStruct testStruct = new TestStruct();
+//
+//
+//        //testStruct.messageType.set((short) MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN.ordinal());
+//
+//        testStruct.messageType.set((short) 1);
+//        System.out.println(testStruct.toString());
+//
+//        LittleEndianTestStruct littleEndianTestStruct = new LittleEndianTestStruct();
+//        System.out.println("Size: " + testStruct.size());
+//       // littleEndianTestStruct.messageType.set((short) MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN.ordinal());
+//        littleEndianTestStruct.messageType.set((short) 1);
+//        littleEndianTestStruct.smartNodeAddress.set(2000);
+//
+//        System.out.println(littleEndianTestStruct.toString());
+//        System.out.println("Size: " + littleEndianTestStruct.size());
 
 
 //        CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage =  new CcuToCmOverUsbDatabaseSeedSnMessage_t();

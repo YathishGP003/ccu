@@ -2,6 +2,9 @@ package a75f.io.bo.serial;
 
 
 import org.javolution.io.Struct;
+import org.javolution.io.Union;
+
+import java.nio.ByteOrder;
 
 /**
  * Created by ryanmattison on 7/25/17.
@@ -19,15 +22,37 @@ public class SmartNodeControls_t extends Struct {
     public final Unsigned8 infraredCommand = new Unsigned8(); /* Command for the infrared transmitter */
     public final SmartNodeControls_Extras smartNodeControls_extras = inner(new SmartNodeControls_Extras());
 
-    public class SmartNodeControls_Extras extends Struct {
-        public final BitField conditioningMode = new BitField(1); /* 1 is heating, 0 is cooling - sent from CCU to Smart Node for display indication */
-        public final BitField digitalOut1 = new BitField(1); /* digital out for activation */
-        public final BitField digitalOut2 = new BitField(1); /* digital out for activation */
-        public final BitField digitalOut3 = new BitField(1); /* digital out for activation */
-        public final BitField digitalOut4 = new BitField(1); /* digital out for activation */
-        public final BitField reset = new BitField(1); /* force a reset of the device remotely when set to 1 */
-        public final BitField reserved = new BitField(2);
+    public class SmartNodeControls_Extras extends Union {
+
+        public final SmartNodeControls_Extras_Struct smartNodeControlsBitExtras = inner(new SmartNodeControls_Extras_Struct());
+        public final Unsigned8 smartNodeControlsBitExtrasAsInt = new Unsigned8();
+
+        public class SmartNodeControls_Extras_Struct extends Struct {
+
+            public final BitField conditioningMode = new BitField(1); /* 1 is heating, 0 is cooling - sent from CCU to Smart Node for display indication */
+            public final BitField digitalOut1 = new BitField(1); /* digital out for activation */
+            public final BitField digitalOut2 = new BitField(1); /* digital out for activation */
+            public final BitField digitalOut3 = new BitField(1); /* digital out for activation */
+            public final BitField digitalOut4 = new BitField(1); /* digital out for activation */
+            public final BitField reset = new BitField(1); /* force a reset of the device remotely when set to 1 */
+            public final BitField padding = new BitField(1);
+            public final BitField paddingTwo = new BitField(1);
+
+
+        }
+
+
+
+
     }
+
+
+
+    @Override
+    public ByteOrder byteOrder() {
+        return ByteOrder.BIG_ENDIAN;
+    }
+
 
 
 }

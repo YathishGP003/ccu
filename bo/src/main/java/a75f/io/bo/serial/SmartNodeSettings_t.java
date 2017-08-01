@@ -2,6 +2,9 @@ package a75f.io.bo.serial;
 
 
 import org.javolution.io.Struct;
+import org.javolution.io.Union;
+
+import java.nio.ByteOrder;
 
 /**
  * Created by ryanmattison on 7/25/17.
@@ -45,39 +48,66 @@ CCU is lost */
 
     public final SmartNodeSettings_t_Extras smartNodeSettingsMerge = inner(new SmartNodeSettings_t_Extras());
 
-    public class SmartNodeSettings_t_Extras extends Struct
+    public class SmartNodeSettings_t_Extras extends Union
     {
-        public final BitField showCentigrade = new BitField(1);
-        public final BitField displayHold = new BitField(1);
-        public final BitField militaryTime = new BitField(1);
-        public final BitField enableOccupationDetection = new BitField(1);
-        public final BitField reserved = new BitField(4);
+
+        public final Unsigned8 mergeInnerUnsignedInt = new Unsigned8();
+        public final SmartNodeMergeInner mergeInner = inner(new SmartNodeMergeInner());
+
+        public class SmartNodeMergeInner extends Struct
+        {
+            public final BitField showCentigrade = new BitField(1);
+            public final BitField displayHold = new BitField(1);
+            public final BitField militaryTime = new BitField(1);
+            public final BitField enableOccupationDetection = new BitField(1);
+        }
+
     }
 
-    public class SmartNodeProfileBitmap_t extends Struct {
-        public final BitField dynamicAirflowBalancing = new BitField(1); /* 1 is heating, 0 is cooling - sent from CCU to Smart Node for display indication */
-        public final BitField lightingControl = new BitField(1); /* digital out for activation */
-        public final BitField outsideAirOptimization = new BitField(1); /* digital out for activation */
-        public final BitField singleStageEquipment = new BitField(1); /* digital out for activation */
-        public final BitField customControl = new BitField(1); /* digital out for activation */
-        public final BitField reserved = new BitField(3); /* force a reset of the device remotely when set to 1 */
+    class SmartNodeProfileBitmap_t extends Union {
+        public final Unsigned8 bitmap = new Unsigned8();
+        public final SmartNodeProfileBitmap_t_Extras smartNodeProfileBitmap_t_extras = inner(new SmartNodeProfileBitmap_t_Extras());
+
+        public class SmartNodeProfileBitmap_t_Extras extends Struct {
+            public final BitField dynamicAirflowBalancing = new BitField(1); /* 1 is heating, 0 is cooling - sent from CCU to Smart Node for display indication */
+            public final BitField lightingControl = new BitField(1); /* digital out for activation */
+            public final BitField outsideAirOptimization = new BitField(1); /* digital out for activation */
+            public final BitField singleStageEquipment = new BitField(1); /* digital out for activation */
+            public final BitField customControl = new BitField(1); /* digital out for activation */
+            public final BitField reserved = new BitField(3); /* force a reset of the device remotely when set to 1 */
+        }
     }
 
-    public class SmartNodeLedBitmap_t extends Struct
-    {
-        public final BitField powerIn = new BitField(1);
-        public final BitField powerOut = new BitField(1);
-        public final BitField analogIn1 = new BitField(1);
-        public final BitField analogIn2 = new BitField(1);
-        public final BitField thermistor1 = new BitField(1);
-        public final BitField thermistor2 = new BitField(1);
-        public final BitField analogOut1 = new BitField(1);
-        public final BitField analogOut2 = new BitField(1);
-        public final BitField digitalOut1 = new BitField(1);
-        public final BitField digitalOut2 = new BitField(1);
-        public final BitField analogIn24v = new BitField(1);
-        public final BitField analogOut24v = new BitField(1);
-        public final BitField logo = new BitField(1);
-        public final BitField reserved = new BitField(3);
+    public class SmartNodeLedBitmap_t extends Union {
+
+
+        public final Struct.Unsigned16 bitmap = new Unsigned16();
+        public final SmartNodeLedBitmap_t_extras smartNodeLedBitmap_t_extras = inner(new SmartNodeLedBitmap_t_extras());
+
+        public class SmartNodeLedBitmap_t_extras extends Struct
+        {
+            public final BitField powerIn = new BitField(1);
+            public final BitField powerOut = new BitField(1);
+            public final BitField analogIn1 = new BitField(1);
+            public final BitField analogIn2 = new BitField(1);
+            public final BitField thermistor1 = new BitField(1);
+            public final BitField thermistor2 = new BitField(1);
+            public final BitField analogOut1 = new BitField(1);
+            public final BitField analogOut2 = new BitField(1);
+            public final BitField digitalOut1 = new BitField(1);
+            public final BitField digitalOut2 = new BitField(1);
+            public final BitField analogIn24v = new BitField(1);
+            public final BitField analogOut24v = new BitField(1);
+            public final BitField logo = new BitField(1);
+            public final BitField reserved = new BitField(3);
+
+
+        }
     }
+
+    @Override
+    public ByteOrder byteOrder() {
+        return ByteOrder.BIG_ENDIAN;
+    }
+
 }

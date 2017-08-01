@@ -1395,7 +1395,7 @@ public final class MathLib {
         lx = (int) xBits;
 
         k = 0;
-        if (hx < 0x00100000) { // x < 2**-1022 
+        if (hx < 0x00100000) { // x < 2**-1022
             if (((hx & 0x7fffffff) | lx) == 0)
                 return -two54 / zero; // log(+-0)=-inf
             if (hx < 0)

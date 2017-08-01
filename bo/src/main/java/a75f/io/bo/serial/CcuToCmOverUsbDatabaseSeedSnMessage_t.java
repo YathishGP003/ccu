@@ -15,7 +15,7 @@ public class CcuToCmOverUsbDatabaseSeedSnMessage_t extends Struct {
 
     public final Enum8<MessageType> messageType = new Enum8<>(MessageType.values());
     public final Struct.Unsigned16 smartNodeAddress = new Unsigned16();
-    public final BitSet encryptionKey = new BitSet(128);
+    public final BitField encryptionKey = new BitField(128);
     public final SmartNodeSettings_t settings = inner(new SmartNodeSettings_t());
     public final SmartNodeControls_t controls = inner(new SmartNodeControls_t());
 

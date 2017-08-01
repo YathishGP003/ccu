@@ -10,7 +10,7 @@ import a75f.io.bo.serial.MessageType;
  *
  * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
  */
-public class LittleEndianUnitTest {
+public class SampleUnitTtest {
 
 
 /*

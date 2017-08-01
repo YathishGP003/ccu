@@ -1463,6 +1463,16 @@ public class Struct {
         public String toString() {
             return String.valueOf(longValue());
         }
+
+        public void set(ByteBuffer bytes)
+        {
+            setByteBuffer(bytes, 0);
+        }
+
+        public ByteBuffer bytesValue()
+        {
+            return getByteBuffer();
+        }
     }
 
     /**

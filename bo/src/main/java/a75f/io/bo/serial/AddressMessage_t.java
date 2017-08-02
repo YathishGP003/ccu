@@ -14,8 +14,7 @@ public class AddressMessage_t extends Struct {
     public final Struct.Unsigned16 address = new Unsigned16();
 
     @Override
-    public ByteOrder byteOrder() {
-        return ByteOrder.LITTLE_ENDIAN;
+    public ByteOrder byteOrder() {  return ByteOrder.LITTLE_ENDIAN;
     }
 
 }

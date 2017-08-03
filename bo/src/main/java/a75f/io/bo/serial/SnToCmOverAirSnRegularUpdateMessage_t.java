@@ -51,19 +51,19 @@ public class SnToCmOverAirSnRegularUpdateMessage_t extends Struct
 	
 	public final SmartNodeSensorReading_t[] sensorReadings = array(new SmartNodeSensorReading_t[MessageConstants.NUM_SN_TYPE_VALUE_SENSOR_READINGS]);
 	
-	public final BitField batteryStatus = new BitField(2); /* 00 = failsafe mode (outline), 01 = 33% full (1 bar) , 10 = 100% full (2 bars) */
+	public final Unsigned8 batteryStatus = new Unsigned8(2); /* 00 = failsafe mode (outline), 01 = 33% full (1 bar) , 10 = 100% full (2 bars) */
 	
-	public final BitField conditioningMode = new BitField(1); /* 1 is heating, 0 is cooling */
+	public final Unsigned8 conditioningMode = new Unsigned8(1); /* 1 is heating, 0 is cooling */
 	
-	public final BitField externalPower = new BitField(1); /* 0 is battery power, 1 is external DC power */
+	public final Unsigned8 externalPower = new Unsigned8(1); /* 0 is battery power, 1 is external DC power */
 	
-	public final BitField nodeType = new BitField(1); /* 0 is end node, 1 is router */
+	public final Unsigned8 nodeType = new Unsigned8(1); /* 0 is end node, 1 is router */
 	
-	public final BitField damper1CalibrationError = new BitField(1); /* 0 is no error, 1 is error */
+	public final Unsigned8 damper1CalibrationError = new Unsigned8(1); /* 0 is no error, 1 is error */
 	
-	public final BitField damper2CalibrationError = new BitField(1); /* 0 is no error, 1 is error */
+	public final Unsigned8 damper2CalibrationError = new Unsigned8(1); /* 0 is no error, 1 is error */
 	
-	public final BitField reserved = new BitField(1);
+	public final Unsigned8 reserved = new Unsigned8(1);
 	
 	@Override
 	public ByteOrder byteOrder()

@@ -36,13 +36,13 @@ public class WrmSettings_t extends Struct
 	public class Status extends Struct
 	{
 		
-		public final BitField conditioningMode         = new BitField(1); // 1 is heating, 0 is cooling - sent from CCU to WRM for display indication
-		public final BitField occupancyDetectorEnabled = new BitField(1); // 1 enabled. WRM should only turn on detector if enabled
-		public final BitField resetWrm                 = new BitField(1); // force a reset of the WRM remotely when set to 1
-		public final BitField digitalOut1              = new BitField(1); // digital out for activation
-		public final BitField digitalOut2              = new BitField(1); // digital out for activation
-		public final BitField showCentigrade           = new BitField(1); // show F or C
-		public final BitField displayHold              = new BitField(1); // if 'hold' is to be shown to signify temporary hold if temperature changed during occupied system schedule
-		public final BitField militaryTime             = new BitField(1); // determine if we are using 24 hour format or not
+		public final Unsigned8 conditioningMode         = new Unsigned8(1); // 1 is heating, 0 is cooling - sent from CCU to WRM for display indication
+		public final Unsigned8 occupancyDetectorEnabled = new Unsigned8(1); // 1 enabled. WRM should only turn on detector if enabled
+		public final Unsigned8 resetWrm                 = new Unsigned8(1); // force a reset of the WRM remotely when set to 1
+		public final Unsigned8 digitalOut1              = new Unsigned8(1); // digital out for activation
+		public final Unsigned8 digitalOut2              = new Unsigned8(1); // digital out for activation
+		public final Unsigned8 showCentigrade           = new Unsigned8(1); // show F or C
+		public final Unsigned8 displayHold              = new Unsigned8(1); // if 'hold' is to be shown to signify temporary hold if temperature changed during occupied system schedule
+		public final Unsigned8 militaryTime             = new Unsigned8(1); // determine if we are using 24 hour format or not
 	}
 }

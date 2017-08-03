@@ -38,25 +38,25 @@ public class WrmToCmOverAirWrmRegularUpdateMessage_t extends Struct
 	public class Status extends Struct
 	{
 		
-		public final BitField batteryStatus = new BitField(2);// 00 - failsafe mode( outline ), 01 33% full * 1 bar ) , 10 100% full ( 2 bars )
+		public final Unsigned16 batteryStatus = new Unsigned16(2);// 00 - failsafe mode( outline ), 01 33% full * 1 bar ) , 10 100% full ( 2 bars )
 		
-		public final BitField extDigital1 = new BitField(1); // occupancy mode from WRM is no longer supported
+		public final Unsigned16 extDigital1 = new Unsigned16(1); // occupancy mode from WRM is no longer supported
 		
-		public final BitField extDigital2 = new BitField(1); // instead those 2 bits are now used for digital input
+		public final Unsigned16 extDigital2 = new Unsigned16(1); // instead those 2 bits are now used for digital input
 		
-		public final BitField occupancyStatus = new BitField(1); // 1 is occupied, 0 is unoccupied
+		public final Unsigned16 occupancyStatus = new Unsigned16(1); // 1 is occupied, 0 is unoccupied
 		
-		public final BitField conditioningMode = new BitField(1); // 1 is heating, 0 is cooling
+		public final Unsigned16 conditioningMode = new Unsigned16(1); // 1 is heating, 0 is cooling
 		
-		public final BitField externalPower = new BitField(1); // 0 is battery power, 1 is external DC power
+		public final Unsigned16 externalPower = new Unsigned16(1); // 0 is battery power, 1 is external DC power
 		
-		public final BitField nodeType = new BitField(1); // 0 is end node, 1 is router
+		public final Unsigned16 nodeType = new Unsigned16(1); // 0 is end node, 1 is router
 		
-		public final BitField motorJammed = new BitField(1); // 0 is motor ok, 1 is motor error
+		public final Unsigned16 motorJammed = new Unsigned16(1); // 0 is motor ok, 1 is motor error
 		
-		public final BitField updatedOccupiedTemp = new BitField(1); // 1 is occupied set temp was changed from WRM. this is set in async update packet sent after user interaction
+		public final Unsigned16 updatedOccupiedTemp = new Unsigned16(1); // 1 is occupied set temp was changed from WRM. this is set in async update packet sent after user interaction
 		
-		public final BitField reserved = new BitField(6);
+		public final Unsigned16 reserved = new Unsigned16(6);
 	}
 }
 

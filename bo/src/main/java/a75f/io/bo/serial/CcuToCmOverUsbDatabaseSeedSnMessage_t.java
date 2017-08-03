@@ -29,5 +29,4 @@ public class CcuToCmOverUsbDatabaseSeedSnMessage_t extends Struct
 			encryptionKey[i].set(encryptionKeyBytes[i]);
 		}
 	}
-
 }

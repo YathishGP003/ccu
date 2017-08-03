@@ -1,19 +1,18 @@
 package a75f.io.bo.serial;
 
-import org.javolution.io.Struct;
-
 /**
  * Created by samjithsadasivan on 8/2/17.
  */
 
-public enum SmartNodeLightingCircuit_t {
-    LIGHTING_CIRCUIT_ANALOG_1,
-
-    LIGHTING_CIRCUIT_ANALOG_2,
-
-    LIGHTING_CIRCUIT_DIGITAL_1,
-
-    LIGHTING_CIRCUIT_DIGITAL_2,
-
-    NUM_LIGHTING_CONTROL_CIRCUITS
+public enum SmartNodeLightingCircuit_t
+{
+	LIGHTING_CIRCUIT_ANALOG_1,
+	
+	LIGHTING_CIRCUIT_ANALOG_2,
+	
+	LIGHTING_CIRCUIT_DIGITAL_1,
+	
+	LIGHTING_CIRCUIT_DIGITAL_2,
+	
+	NUM_LIGHTING_CONTROL_CIRCUITS
 }

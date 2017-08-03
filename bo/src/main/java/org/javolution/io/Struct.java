@@ -189,7 +189,7 @@ public class Struct {
      * Holds the word size during construction (for bit fields).
      * This is the size of the last word used.
      */
-    int _wordSize = 8;
+    int  _wordSize = 8;
     /**
      * Holds the bits used in the word during construction (for bit fields).
      * This is the number of bits used in the last word.
@@ -799,6 +799,7 @@ public class Struct {
                 "Attempt to read outside the Struct");
         int offset = bitOffset >> 3;
         int bitStart = bitOffset - (offset << 3);
+        
         bitStart = (byteOrder() == ByteOrder.BIG_ENDIAN) ? bitStart : 64
                 - bitSize - bitStart;
         int index = getByteBufferPosition() + offset;

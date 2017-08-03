@@ -29,9 +29,9 @@ public class Schedule extends GenericJson {
     @Key("action1")
     private int action1;
 
-
     @Key("_kmd")
     private KinveyMetaData meta;
+    
     @Key("_acl")
     private KinveyMetaData.AccessControlList acl;
 

@@ -7,6 +7,7 @@ import java.nio.ByteOrder;
 /**
  * Created by ryanmattison on 7/25/17.
  */
+
 public class CcuToCmOverUsbDatabaseSeedSnMessage_t extends Struct
 {
 	public final Enum8<MessageType>  messageType      = new Enum8<>(MessageType.values());
@@ -28,4 +29,5 @@ public class CcuToCmOverUsbDatabaseSeedSnMessage_t extends Struct
 			encryptionKey[i].set(encryptionKeyBytes[i]);
 		}
 	}
+
 }

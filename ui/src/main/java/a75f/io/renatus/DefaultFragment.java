@@ -2,6 +2,7 @@ package a75f.io.renatus;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -10,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -21,12 +23,13 @@ import java.util.List;
 import a75f.io.util.Globals;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * Created by ryanmattison on 7/24/17.
  */
 
-public class DefaultFragment extends Fragment {
+public class DefaultFragment extends DialogFragment {
 
 
     private static final String TAG = DefaultFragment.class.getSimpleName();
@@ -45,6 +48,9 @@ public class DefaultFragment extends Fragment {
 
     @BindView(R.id.fragment_main_port_spinner)
     Spinner mPortSpinner;
+    
+    @BindView(R.id.button)
+    Button doneBtn;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -93,6 +99,11 @@ public class DefaultFragment extends Fragment {
                 return false;
             }
         });
+    }
+    
+    @OnClick(R.id.button)
+    public void done() {
+        dismiss();
     }
 }
 

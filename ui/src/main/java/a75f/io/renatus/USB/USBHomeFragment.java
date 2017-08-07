@@ -237,7 +237,7 @@ public class USBHomeFragment extends Fragment {
 
 
         seedMessage.controls.digitalOut1.set((short)1);
-        seedMessage.settings.ledBitmap.digitalOut1.set(1);
+        seedMessage.settings.ledBitmap.digitalOut1.set((short)1);
 
         if (usbService != null) { // if UsbService was correctly binded, Send data
             usbService.write(seedMessage.getByteBuffer().array());

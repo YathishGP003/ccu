@@ -97,8 +97,6 @@ public class FragmentDeviceScan extends DialogFragment {
                 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                 startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
             } else {
-
-
                 // Initializes list view adapter.
                 mLeDeviceListAdapter = new LeDeviceListAdapter();
                 bleDeviceListListView.setAdapter(mLeDeviceListAdapter);
@@ -115,8 +113,6 @@ public class FragmentDeviceScan extends DialogFragment {
                         }
                     }
                 });
-
-
                 scanLeDevice(true);
             }
         }

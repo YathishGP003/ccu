@@ -180,12 +180,17 @@ public class FragmentBLEDevicePin extends DialogFragment {
             mBLEProvisionService = null;
         }
     };
-
+    
+    public boolean isPinRequired()
+    {
+        return mDevice.getName().equalsIgnoreCase("");
+    }
     // Called in a separate thread
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void onBLEEvent(BLEProvisionService.BLEEvent event) {
         Log.i(TAG, "Event Type: " + event.getAction().name());
         if (event.getAction() == BLEAction.ACTION_GATT_SERVICES_DISCOVERED) {
+            
             mBLEProvisionService.readCharacteristic(GattAttributes.BLE_PIN);
         } else if (event.getAction() == BLEAction.ACTION_DATA_AVAILABLE && event.getBluetoothGattCharacteristic() != null) {
             if (event.getBluetoothGattCharacteristic().getUuid().toString().equalsIgnoreCase(GattAttributes.BLE_PIN)) {

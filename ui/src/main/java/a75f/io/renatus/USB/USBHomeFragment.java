@@ -209,9 +209,9 @@ public class USBHomeFragment extends Fragment {
         //seedMessage.settings.lightingControl.set(1);
         //seedMessage.settings.ledBitmap.digitalOut2.set(1);
 
-        seedMessage.controls.smartNodeControls_extras.smartNodeControlsBitExtras.digitalOut1.set(1);
+        seedMessage.controls.digitalOut1.set((short)1);
 
-        seedMessage.controls.smartNodeControls_extras.smartNodeControlsBitExtras.padding.set(1);
+        
 
         if (usbService != null) { // if UsbService was correctly binded, Send data
             usbService.write(seedMessage.getOrderedBuffer());
@@ -237,8 +237,8 @@ public class USBHomeFragment extends Fragment {
         seedMessage.controls.time.minutes.set((short) 1);
 
 
-        seedMessage.controls.smartNodeControls_extras.smartNodeControlsBitExtras.digitalOut1.set(1);
-        seedMessage.settings.ledBitmap.smartNodeLedBitmap_t_extras.digitalOut1.set(1);
+        seedMessage.controls.digitalOut1.set((short)1);
+        seedMessage.settings.ledBitmap.digitalOut1.set((short)1);
 
         if (usbService != null) { // if UsbService was correctly binded, Send data
             usbService.write(seedMessage.getByteBuffer().array());

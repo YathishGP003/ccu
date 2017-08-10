@@ -5,6 +5,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
+import a75f.io.renatus.USB.USBHomeFragment;
+
 /**
  * Created by samjithsadasivan on 8/7/17.
  */
@@ -27,6 +29,7 @@ public class SettingsPagerAdapter extends FragmentStatePagerAdapter
 				fragment = FloorPlanFragment.newInstance();
 				break;
 			case 1:
+				//fragment = USBHomeFragment.getInstance();
 				fragment = SettingsFragment.newInstance();
 				break;
 		}

@@ -21,6 +21,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
+import a75f.io.bo.serial.SerialConsts;
 import a75f.io.renatus.R;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -37,7 +38,7 @@ public class FragmentDeviceScan extends DialogFragment {
 
     private static final int REQUEST_ENABLE_BT = 1;
     // Stops scanning after 10 seconds.
-    private static final long SCAN_PERIOD = 2500;
+    private static final long SCAN_PERIOD = 30000;
 
     public static FragmentDeviceScan getInstance() {
         return new FragmentDeviceScan();
@@ -113,7 +114,7 @@ public class FragmentDeviceScan extends DialogFragment {
                         }
                     }
                 });
-                scanLeDevice(true);
+                scanLeDevice(mScanning);
             }
         }
     }
@@ -225,8 +226,11 @@ public class FragmentDeviceScan extends DialogFragment {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            mLeDeviceListAdapter.addDevice(device);
-                            mLeDeviceListAdapter.notifyDataSetChanged();
+                            if(device != null && device.getName() != null && (device.getName().equalsIgnoreCase(SerialConsts.SMART_NODE_NAME) || device.getName().equalsIgnoreCase(SerialConsts.SMART_STAT_NAME)))
+                            {
+                                mLeDeviceListAdapter.addDevice(device);
+                                mLeDeviceListAdapter.notifyDataSetChanged();
+                            }
                         }
                     });
                 }

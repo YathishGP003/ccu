@@ -22,10 +22,10 @@ public class SmartNodeSettings_t extends Struct
 	public final Unsigned8 airflowHeatingTemperature    = new Unsigned8(); /* default 105 - airflow temperature in deg F above which we consider unit is in heating mode for failsafe mode */
 	public final Unsigned8 airflowCoolingTemperature    = new Unsigned8(); /* default 60 - airflow temperature in deg F below which we consider unit is in cooling mode for failsafe mode */
 	
-	public final SmartNodeLedBitmap_t     ledBitmap                               = inner(new SmartNodeLedBitmap_t()); /* Determines which LEDs are enabled */
-	public final SmartNodeProfileBitmap_t profileBitmap                           = inner(new SmartNodeProfileBitmap_t()); /* Determines which profiles are enabled */
-	public final Unsigned8                lightingIntensityForOccupantDetected    = new Unsigned8(); /* Lighting intensity (%) to use when occupants aredetected */
-	public final Unsigned8                minLightingControlOverrideTimeInMinutes = new Unsigned8(); /* Minimum time that a lighting control override willstay in effect */
+	public final SmartNodeLedBitmap_t     ledBitmap                                   = inner(new SmartNodeLedBitmap_t()); /* Determines which LEDs are enabled */
+	public final SmartNodeProfileBitmap_t profileBitmap                               = inner(new SmartNodeProfileBitmap_t()); /* Determines which profiles are enabled */
+	public final Unsigned8                lightingIntensityForOccupantDetected        = new Unsigned8(); /* Lighting intensity (%) to use when occupants aredetected */
+	public final Unsigned8                minLightingControlOverrideTimeInMinutes     = new Unsigned8(); /* Minimum time that a lighting control override willstay in effect */
 	//region BUG - damper positions
 	//TODO: Smart Node Software Specification 75F Smart  page 15 of 24 has SmartNodeControls_t containing
 	//uint8_t defaultOutsideAirOptimizationDamperPosition; /* Percentage to open OAO damper if connection to CCU is lost */
@@ -45,13 +45,12 @@ public class SmartNodeSettings_t extends Struct
 	//    SeedMessageOld.length: 77
 	//    seedMessageStr.length: 77
 	//TODO: Uncomment below to reaadd these
-	//    public final Unsigned8 defaultOutsideAirOptimizationDamperPosition = new Unsigned8(); /* Percentage to open OAO damper if connection to
-	//CCU is lost */
-	//    public final Enum8<DamperActuator_t> outsideAirOptimizationDamperActuatorType = new Enum8<>(DamperActuator_t.values()); /* Type of actuator used for the OAO damper
-	//*/
-	//    public final Enum8<DamperActuator_t> returnAirDamperActuatorType = new Enum8<>(DamperActuator_t.values());
+	public final Unsigned8                defaultOutsideAirOptimizationDamperPosition = new Unsigned8(); /* Percentage to open OAO damper if connection to
+	CCU is lost */
+	public final Enum8<DamperActuator_t>  outsideAirOptimizationDamperActuatorType    = new Enum8<>(DamperActuator_t.values()); /* Type of actuator used for the OAO damper
+	*/
+	public final Enum8<DamperActuator_t>  returnAirDamperActuatorType                 = new Enum8<>(DamperActuator_t.values());
 	//TODO: End uncomment
-	//endregion
 	
 	public final UTF8String roomName = new UTF8String(SerialConsts.ROOM_NAME_MAX_LENGTH);
 	
@@ -59,6 +58,7 @@ public class SmartNodeSettings_t extends Struct
 	public final Unsigned8 displayHold               = new Unsigned8(1);
 	public final Unsigned8 militaryTime              = new Unsigned8(1);
 	public final Unsigned8 enableOccupationDetection = new Unsigned8(1);
+	public final Unsigned8 reserved                  = new Unsigned8(4);
 	
 	class SmartNodeProfileBitmap_t extends Struct
 	{
@@ -67,6 +67,7 @@ public class SmartNodeSettings_t extends Struct
 		public final Unsigned8 outsideAirOptimization  = new Unsigned8(1); /* digital out for activation */
 		public final Unsigned8 singleStageEquipment    = new Unsigned8(1); /* digital out for activation */
 		public final Unsigned8 customControl           = new Unsigned8(1); /* digital out for activation */
+		public final Unsigned8 reserved                = new Unsigned8(3);
 	}
 	
 	public class SmartNodeLedBitmap_t extends Struct

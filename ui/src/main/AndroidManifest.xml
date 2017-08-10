@@ -50,6 +50,7 @@
             android:name="a75f.io.usbserial.UsbService"
             android:enabled="true" >
         </service>
+        <!-- TODO we don't want this and shouldn't need it, we should monitor the USB connection, not kick the application whenever it restarts -->
 
         <activity
             android:name=".RenatusLandingActivity"
@@ -63,6 +64,8 @@
             <intent-filter>
                 <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
             </intent-filter>
+            <meta-data android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
+                       android:resource="@xml/filter" />
         </activity>
     </application>
 

@@ -1,5 +1,6 @@
 package a75f.io.renatus;
 
+import android.content.Intent;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -71,7 +72,8 @@ public class RenatusLandingActivity extends AppCompatActivity {
         {
             @Override
             public void onClick(View view) {
-                DefaultFragment.getInstance().show(getSupportFragmentManager(), "setup");
+                Intent i = new Intent(RenatusLandingActivity.this, MainActivity.class);
+                startActivity(i);
             }
         });
         

@@ -17,6 +17,8 @@ import android.util.Log;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -25,13 +27,15 @@ import java.util.List;
 
 public class BLEProvisionService extends Service {
 
+    
+    //boolean mReliableWrite = false;
     private final static String TAG = "FragmentBLEDevicePin";
 
     private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
     private String mBluetoothDeviceAddress;
     private BluetoothGatt mBluetoothGatt;
-
+    //private HashMap<String, byte[]> mReliableWriteHashMap = new HashMap<>();
 
 
     // Implements callback methods for GATT events that the app cares about.  For example,
@@ -42,7 +46,7 @@ public class BLEProvisionService extends Service {
             BLEAction intentAction;
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 intentAction = BLEAction.ACTION_GATT_CONNECTED;
-
+                Log.i(TAG, "STATE_CONNECTED: " + " -- " + System.currentTimeMillis());
                 broadcastUpdate(intentAction, null);
                 Log.i(TAG, "Connected to GATT server.");
                 // Attempts to discover services after successful connection.
@@ -61,8 +65,9 @@ public class BLEProvisionService extends Service {
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-
-                tSleep();
+                
+                //tSleep();
+                Log.i(TAG, "onServicesDiscovered: " + " -- " + System.currentTimeMillis());
                 broadcastUpdate(BLEAction.ACTION_GATT_SERVICES_DISCOVERED, null);
             } else
                 Log.w(TAG, "onServicesDiscovered received: " + status);
@@ -74,7 +79,10 @@ public class BLEProvisionService extends Service {
                                          BluetoothGattCharacteristic characteristic,
                                          int status) {
             if (status == BluetoothGatt.GATT_SUCCESS)
+            {
+                Log.i(TAG, "onCharacteristicRead: " + characteristic.getUuid().toString() + " -- " + System.currentTimeMillis());
                 broadcastUpdate(BLEAction.ACTION_DATA_AVAILABLE, characteristic);
+            }
             else
                 Log.w(TAG, "onCharacteristicRead received: " + status);
 
@@ -83,19 +91,50 @@ public class BLEProvisionService extends Service {
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt,
                                             BluetoothGattCharacteristic characteristic) {
-
+            Log.i(TAG, "OnCharacteristicChanged: " + characteristic.getUuid().toString() + " -- " + System.currentTimeMillis());
             broadcastUpdate(BLEAction.ACTION_DATA_AVAILABLE, characteristic);
         }
 
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-
-            if (status == BluetoothGatt.GATT_SUCCESS)
-                broadcastUpdate(BLEAction.ACTION_DATA_WROTE, characteristic);
-            else
-                Log.w(TAG, "onCharacteristicWrite received: " + status);
-
-
+            
+//            if(!mReliableWrite)
+//            {
+                if (status == BluetoothGatt.GATT_SUCCESS)
+                {
+                    Log.i(TAG, "OnCharacteristicWrite: " + characteristic.getUuid().toString() + " -- " + System.currentTimeMillis());
+                    broadcastUpdate(BLEAction.ACTION_DATA_WROTE, characteristic);
+                }
+                else Log.w(TAG, "onCharacteristicWrite received: " + status);
+//            }
+//            else
+//            {
+//                if(Arrays.equals(mReliableWriteHashMap.get(characteristic.getUuid().toString()), characteristic.getValue()))
+//                {
+//                    gatt.executeReliableWrite();
+//                }
+//                else
+//                {
+//                    gatt.abortReliableWrite();
+//                }
+//            }
+        }
+    
+        @Override
+        public void onReliableWriteCompleted(BluetoothGatt gatt, int status)
+        {
+            super.onReliableWriteCompleted(gatt, status);
+//            if(mReliableWrite)
+//            {
+//                if (status == BluetoothGatt.GATT_SUCCESS)
+//                {
+//                    //TODO: finish reliable write
+//                    //Log.i(TAG, "OnCharacteristicWrite: " +  .getUuid().toString() + " -- " + System.currentTimeMillis());
+//                    //broadcastUpdate(BLEAction.ACTION_DATA_WROTE, characteristic);
+//                }
+//                else Log.w(TAG, "onCharacteristicWrite received: " + status);
+//            }
+//
         }
     };
 
@@ -147,13 +186,13 @@ public class BLEProvisionService extends Service {
     Sleep hack when connection has happened and it is still reading the gatt services, but it notifies early that it is finished with this process.
     Wait a very long time, because the amount of services and chars the server has and the distance between this device & peripheral can impact the read time.
      */
-    private void tSleep() {
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
+//    private void tSleep() {
+//        try {
+//            Thread.sleep(50);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     private final IBinder mBinder = new LocalBinder();
 
@@ -258,6 +297,7 @@ public class BLEProvisionService extends Service {
      * @param characteristic The characteristic to read from.
      */
     public void readCharacteristic(BluetoothGattCharacteristic characteristic) {
+        Log.i(TAG, "Read Characteristic: " + characteristic.getUuid().toString() + " -- " + System.currentTimeMillis());
         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
             Log.w(TAG, "BluetoothAdapter not initialized");
             return;
@@ -278,11 +318,16 @@ public class BLEProvisionService extends Service {
      * @param characteristic The characteristic to write to from.
      */
     public boolean writeCharacteristic(BluetoothGattCharacteristic characteristic, byte[] dataToWrite) {
+        Log.i(TAG, "Write Characteristic: " + characteristic.getUuid().toString() + " -- " + System.currentTimeMillis());
         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
             Log.w(TAG, "BluetoothAdapter not initialized");
             return false;
         }
+        
+        
+        
         characteristic.setValue(dataToWrite);
+        
         boolean initiatedSuccessfully = mBluetoothGatt.writeCharacteristic(characteristic);
         Log.i(TAG, "Write to: " + characteristic.getUuid().toString() + " - initially successful? " + initiatedSuccessfully);
         //tSleep();

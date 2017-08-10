@@ -199,38 +199,34 @@ public class USBHomeFragment extends DialogFragment {
 
     @OnClick(R.id.fragment_light_button)
     public void usbLight() {
-        usbService.setDebug(true);
-        mLightButton.setText("Send ordered buffMer!");
-        SmartNode sn = Globals.getInstance().getSmartNode();
-        CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = new CcuToCmOverUsbDatabaseSeedSnMessage_t();
-
-        seedMessage.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN);
-
-//        try {
-//            seedMessage.encryptionKey.read(new ByteArrayInputStream(EncryptionPrefs.getEncryptionKey()));
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-
-
-       /// seedMessage.settings.roomName.set(sn.getName());
-        seedMessage.smartNodeAddress.set(sn.getMeshAddress());
-        //seedMessage.controls.time.day.set((short) 1);
-        //seedMessage.controls.time.hours.set((short) 1);
-        //seedMessage.controls.time.minutes.set((short) 1);
-
-        //seedMessage.controls.digitalOut1.set(1);
-        //seedMessage.settings.lightingControl.set(1);
-        //seedMessage.settings.ledBitmap.digitalOut2.set(1);
-
-        seedMessage.controls.digitalOut1.set((short)1);
-	    
-
-        if (usbService != null) { // if UsbService was correctly binded, Send data
+        if(usbService != null)
+        {
+            usbService.setDebug(true);
+            mLightButton.setText("Send ordered buffer!");
+            SmartNode sn = Globals.getInstance().getSmartNode();
+            CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = new CcuToCmOverUsbDatabaseSeedSnMessage_t();
+            seedMessage.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN);
+            //        try {
+            //            seedMessage.encryptionKey.read(new ByteArrayInputStream(EncryptionPrefs.getEncryptionKey()));
+            //        } catch (IOException e) {
+            //            e.printStackTrace();
+            //        }
+            seedMessage.settings.roomName.set("RoomName");
+            seedMessage.smartNodeAddress.set(6000);
+            //seedMessage.controls.time.day.set((short) 1);
+            //seedMessage.controls.time.hours.set((short) 1);
+            //seedMessage.controls.time.minutes.set((short) 1);
+            //seedMessage.controls.digitalOut1.set(1);
+            //seedMessage.settings.lightingControl.set(1);
+            //seedMessage.settings.ledBitmap.digitalOut2.set(1);
+            seedMessage.controls.digitalOut1.set((short) 1);
             usbService.write(seedMessage.getOrderedBuffer());
             //usbService.write(seedMessage.getOrderedBuffer());
         }
-
+        else
+        {
+            Toast.makeText(USBHomeFragment.this.getContext(), "USB Service not connected", Toast.LENGTH_SHORT).show();
+        }
 
     }
 

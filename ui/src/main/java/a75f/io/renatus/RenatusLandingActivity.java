@@ -1,5 +1,6 @@
 package a75f.io.renatus;
 
+import android.content.Intent;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -70,24 +71,25 @@ public class RenatusLandingActivity extends AppCompatActivity {
         setupButton = (ImageButton) findViewById(R.id.logo);
         setupButton.setOnClickListener(new View.OnClickListener()
         {
-            @Override
-            public void onClick(View view) {
-                if (settingView == true && mTabLayout.getSelectedTabPosition() == 0)
-                {
-                    DefaultFragment.getInstance().show(getSupportFragmentManager(), "setup");
-                }
-                else if (settingView == true && mTabLayout.getSelectedTabPosition() == 1)
-                {
-                    TestFragment.newInstance().show(getSupportFragmentManager(), "test");
-                }
-            }
+           @Override
+           public void onClick(View view)
+           {
+               if (settingView == true && mTabLayout.getSelectedTabPosition() == 0)
+               {
+                   DefaultFragment.getInstance().show(getSupportFragmentManager(), "setup");
+               }
+               else if (settingView == true && mTabLayout.getSelectedTabPosition() == 1)
+               {
+                   TestFragment.newInstance().show(getSupportFragmentManager(), "test");
+               }
+               else if (settingView == false && mTabLayout.getSelectedTabPosition() == 1)
+               {
+                   Intent i = new Intent(RenatusLandingActivity.this, MainActivity.class);
+                   startActivity(i);
+               }
+           }
         });
-        
         setViewPager();
-        
-        //TODO- TEMP hack
-        //Globals.getInstance().getSmartNode().setMeshAddress(Short.parseShort("6000"));
-        //Globals.getInstance().getSmartNode().setName("SamNode");
     }
     
     @Override

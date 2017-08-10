@@ -23,4 +23,5 @@ public class SmartNodeControls_t extends Struct
 	public final Unsigned8 digitalOut3      = new Unsigned8(1); /* digital out for activation */
 	public final Unsigned8 digitalOut4      = new Unsigned8(1); /* digital out for activation */
 	public final Unsigned8 reset            = new Unsigned8(1); /* force a reset of the device remotely when set to 1 */
+	public final Unsigned8 reserved         = new Unsigned8(2);
 }

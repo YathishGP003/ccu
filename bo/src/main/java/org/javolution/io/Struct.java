@@ -1617,6 +1617,44 @@ public class Struct {
             }
         }
     }
+    
+    /**
+     * This class represents a 8 bits {@link Enum}.
+     */
+    public class Enum4<T extends Enum<T>> extends Member {
+        
+        private final T[] _values;
+        
+        public Enum4(T[] values) {
+            super(4, 1);
+            _values = values;
+        }
+        
+        public Enum4(T[] values, int nbrOfBits) {
+            super(nbrOfBits, 1);
+            _values = values;
+        }
+        
+        public T get() {
+            final int index = getByteBufferPosition() + offset();
+            int word = getByteBuffer().get(index);
+            return _values[0xFF & get(1, word)];
+        }
+        
+        public void set(T e) {
+            int value = e.ordinal();
+            if (_values[value] != e) throw new IllegalArgumentException("enum: "
+                                                                        + e
+                                                                        + ", ordinal value does not reflect enum values position");
+            final int index = getByteBufferPosition() + offset();
+            int word = getByteBuffer().get(index);
+            getByteBuffer().put(index, (byte) set(value, 1, word));
+        }
+        
+        public String toString() {
+            return String.valueOf(this.get());
+        }
+    }
 
     /**
      * This class represents a 8 bits {@link Enum}.

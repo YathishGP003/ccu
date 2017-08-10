@@ -1,5 +1,6 @@
 package a75f.io.renatus.USB;
 
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -11,6 +12,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -45,7 +47,7 @@ import butterknife.OnClick;
  * Created by ryanmattison on 7/27/17.
  */
 
-public class USBHomeFragment extends Fragment {
+public class USBHomeFragment extends DialogFragment {
 
 
     private static final String TAG = BLEHomeFragment.class.getSimpleName();
@@ -74,8 +76,20 @@ public class USBHomeFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
     }
-
-
+    
+    @Override
+    public void onStart()
+    {
+        super.onStart();
+        Dialog dialog = getDialog();
+        if (dialog != null)
+        {
+            int width = ViewGroup.LayoutParams.MATCH_PARENT;
+            int height = ViewGroup.LayoutParams.MATCH_PARENT;
+            dialog.getWindow().setLayout(width, height);
+        }
+    }
+    
     /*
    * Notifications from UsbService will be received here.
    */
@@ -186,7 +200,7 @@ public class USBHomeFragment extends Fragment {
     @OnClick(R.id.fragment_light_button)
     public void usbLight() {
         usbService.setDebug(true);
-        mLightButton.setText("Send ordered buffer!");
+        mLightButton.setText("Send ordered buffMer!");
         SmartNode sn = Globals.getInstance().getSmartNode();
         CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = new CcuToCmOverUsbDatabaseSeedSnMessage_t();
 

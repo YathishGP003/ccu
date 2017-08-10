@@ -45,11 +45,11 @@ public class SmartNodeSettings_t extends Struct
 	//    SeedMessageOld.length: 77
 	//    seedMessageStr.length: 77
 	//TODO: Uncomment below to reaadd these
-	//    public final Unsigned8 defaultOutsideAirOptimizationDamperPosition = new Unsigned8(); /* Percentage to open OAO damper if connection to
+	    public final Unsigned8 defaultOutsideAirOptimizationDamperPosition = new Unsigned8(); /* Percentage to open OAO damper if connection to
 	//CCU is lost */
-	//    public final Enum8<DamperActuator_t> outsideAirOptimizationDamperActuatorType = new Enum8<>(DamperActuator_t.values()); /* Type of actuator used for the OAO damper
+	    public final Enum8<DamperActuator_t> outsideAirOptimizationDamperActuatorType = new Enum8<>(DamperActuator_t.values()); /* Type of actuator used for the OAO damper
 	//*/
-	//    public final Enum8<DamperActuator_t> returnAirDamperActuatorType = new Enum8<>(DamperActuator_t.values());
+	    public final Enum8<DamperActuator_t> returnAirDamperActuatorType = new Enum8<>(DamperActuator_t.values());
 	//TODO: End uncomment
 	//endregion
 	

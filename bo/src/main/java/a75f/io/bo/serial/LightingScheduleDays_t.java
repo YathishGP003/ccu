@@ -15,18 +15,20 @@ public class LightingScheduleDays_t extends Union
 	public final class LightingDaysInner extends Struct
 	{
 		
-		public final BitField monday = new BitField(1);
+		public final Unsigned8 monday = new Unsigned8(1);
 		
-		public final BitField tuesday = new BitField(1);
+		public final Unsigned8 tuesday = new Unsigned8(1);
 		
-		public final BitField wednesday = new BitField(1);
+		public final Unsigned8 wednesday = new Unsigned8(1);
 		
-		public final BitField thursday = new BitField(1);
+		public final Unsigned8 thursday = new Unsigned8(1);
 		
-		public final BitField friday = new BitField(1);
+		public final Unsigned8 friday = new Unsigned8(1);
 		
-		public final BitField saturday = new BitField(1);
+		public final Unsigned8 saturday = new Unsigned8(1);
 		
-		public final BitField sunday = new BitField(1);
+		public final Unsigned8 sunday = new Unsigned8(1);
+		
+		public final Unsigned8 reserved = new Unsigned8(1);
 	}
 }

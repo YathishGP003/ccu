@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true">
+        <color android:color="@color/progress_gray" />
+    </item>
+    <item android:state_focused="true">
+        <color android:color="@color/progress_gray" />
+    </item>
+    <item android:state_selected="true">
+        <color android:color="@color/progress_gray" />
+    </item>
+    <item android:state_activated="true">
+        <color android:color="@color/progress_gray" />
+    </item>
+    <item android:state_checked="true">
+        <color android:color="@color/progress_gray" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+        
+    </item>
+
+    <item android:state_checked="false">
+        <color android:color="@color/progress_gray" />
+    </item>
+
+    <item>
+        <color android:color="@color/transparent" />
+    </item>
+</selector>

@@ -2,6 +2,9 @@ package a75f.io.util;
 
 import android.content.Context;
 
+import java.util.ArrayList;
+
+import a75f.io.bo.Floor;
 import a75f.io.bo.SmartNode;
 
 /**
@@ -16,7 +19,10 @@ public class Globals {
 
 
     private static Globals globals;
-
+    
+    private Context mApplicationContext;
+    private SmartNode mSmartNode;
+    
     private Globals() {
     }
 
@@ -26,7 +32,7 @@ public class Globals {
         }
         return globals;
     }
-
+    
     public SmartNode getSmartNode() {
         if (mSmartNode == null) {
             mSmartNode = new SmartNode();
@@ -41,10 +47,6 @@ public class Globals {
     public void setApplicationContext(Context mApplicationContext) {
         this.mApplicationContext = mApplicationContext;
     }
-
-
-    private Context mApplicationContext;
-    private SmartNode mSmartNode;
 
 
 }

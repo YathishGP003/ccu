@@ -49,4 +49,6 @@ public class MessageConstants
 	public static final int ROOM_NAME_MAX_LENGTH = 25;
 	
 	public static final int FIRMWARE_SIGNATURE_LENGTH = 32;
+	
+	public static final int MESH_ENCRYPTION_KEY_LENGTH = 16;
 }

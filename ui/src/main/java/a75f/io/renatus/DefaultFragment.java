@@ -31,8 +31,9 @@ import butterknife.OnClick;
 public class DefaultFragment extends DialogFragment
 {
 	
-	private static final String TAG = DefaultFragment.class.getSimpleName();
-	List<String> ports = Arrays.asList("1000", "2000", "3000", "4000", "5000", "6000", "7000", "8000", "9000");
+	private static final String TAG        = DefaultFragment.class.getSimpleName();
+	private static final String DIMISSABLE = "DIMISSABLE";
+	List<Integer> ports = Arrays.asList(1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000);
 	@BindView(R.id.fragment_main_sn_name_edittext)
 	EditText     mSNNameEditText;
 	@BindView(R.id.fragment_main_textview)
@@ -45,29 +46,51 @@ public class DefaultFragment extends DialogFragment
 	ToggleButton mBLEDeviceTypeButton;
 	
 	int mPortPosition = 0;
+	private boolean mDismissable;
+	
 	
 	public static DefaultFragment getInstance()
 	{
-		return new DefaultFragment();
+		return DefaultFragment.getInstance(true);
 	}
+	
+	
+	public static DefaultFragment getInstance(boolean dismissable)
+	{
+		DefaultFragment defaultFragment = new DefaultFragment();
+		Bundle b = new Bundle();
+		b.putBoolean(DIMISSABLE, dismissable);
+		defaultFragment.setArguments(b);
+		return defaultFragment;
+	}
+	
+	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
 		View retVal = inflater.inflate(R.layout.fragment_main, container, false);
 		ButterKnife.bind(this, retVal);
+		mDismissable = getArguments().getBoolean(DIMISSABLE);
 		return retVal;
 	}
+	
 	
 	@Override
 	public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
 	{
 		super.onViewCreated(view, savedInstanceState);
 		setupPortSpinner();
+		short meshAddress = Globals.getInstance().getSmartNode().getMeshAddress();
+		String roomName = Globals.getInstance().getSmartNode().getName();
+		int position = Arrays.binarySearch(ports.toArray(), (int) meshAddress);
+		mPortSpinner.setSelection(position);
+		mSNNameEditText.setText(roomName);
 	}
+	
 	
 	private void setupPortSpinner()
 	{
-		ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this.getActivity(), android.R.layout.simple_spinner_item, ports);
+		ArrayAdapter<Integer> dataAdapter = new ArrayAdapter<Integer>(this.getActivity(), android.R.layout.simple_spinner_item, ports);
 		dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		mPortSpinner.setAdapter(dataAdapter);
 		mPortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
@@ -78,6 +101,7 @@ public class DefaultFragment extends DialogFragment
 				mPortPosition = position;
 			}
 			
+			
 			@Override
 			public void onNothingSelected(AdapterView<?> parent)
 			{
@@ -85,30 +109,28 @@ public class DefaultFragment extends DialogFragment
 		});
 	}
 	
+	
 	@OnClick(R.id.button)
 	public void done()
 	{
 		if (mSNNameEditText.getText() != null && !mSNNameEditText.getText().toString().equals(""))
 		{
 			Globals.getInstance().getSmartNode().setName(mSNNameEditText.getText().toString());
-			
-			ports.get(mPortPosition);
-			Globals.getInstance().getSmartNode().setMeshAddress(Short.parseShort(ports.get(mPortPosition)));
+			Globals.getInstance().getSmartNode().setMeshAddress(ports.get(mPortPosition).shortValue());
 			Toast.makeText(DefaultFragment.this.getActivity(), "Saved", Toast.LENGTH_SHORT).show();
-			
-			if(mBLEDeviceTypeButton.isChecked())
+			if (mBLEDeviceTypeButton.isChecked())
 			{
 				Log.i(TAG, "Is Checked: " + mBLEDeviceTypeButton.isChecked());
 			}
-			
-			
-			dismiss();
+			if (mDismissable)
+			{
+				dismiss();
+			}
 		}
 		else
 		{
 			Toast.makeText(DefaultFragment.this.getActivity(), "Must enter a smart node name", Toast.LENGTH_SHORT).show();
 		}
-		
 	}
 }
 

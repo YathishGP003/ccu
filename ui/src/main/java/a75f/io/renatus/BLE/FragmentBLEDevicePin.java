@@ -5,10 +5,8 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
-import android.support.v4.app.DialogFragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,18 +20,19 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import a75f.io.bluetooth.BLEAction;
 import a75f.io.bluetooth.BLEProvisionService;
-import a75f.io.bo.SmartNode;
 import a75f.io.bo.ble.BLERoomName;
 import a75f.io.bo.ble.GattAttributes;
 import a75f.io.bo.ble.GattPin;
 import a75f.io.bo.ble.StructShort;
 import a75f.io.bo.serial.SerialConsts;
+import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.R;
-import a75f.io.renatus.RenatusApp;
 import a75f.io.util.ByteArrayUtils;
-import a75f.io.util.Globals;
 import a75f.io.util.prefs.EncryptionPrefs;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -45,23 +44,26 @@ import static android.content.Context.BIND_AUTO_CREATE;
  * Created by ryanmattison on 7/24/17.
  */
 
-public class FragmentBLEDevicePin extends DialogFragment
+public class FragmentBLEDevicePin extends BaseDialogFragment
 {
 	
-	private static final String BUNDLE_KEY_BLUETOOTH_DEVICE = "bluetooth_device";
-	private static final String TAG                         = FragmentBLEDevicePin.class.getSimpleName();
-	@BindView(R.id.ble_dialog_enter_pin_textview)
-	TextView bleDialogEnterPinTextview;
-	@BindView(R.id.ble_dialog_enter_pin_edittext)
-	EditText bleDialogEnterPinEdittext;
-	@BindView(R.id.ble_dialog_done_button)
-	Button   bleDialogDoneButton;
-	private SmartNode mSmartNode;
-	private boolean mPinEntered = false;
-	private BluetoothDevice     mDevice;
-	private BLEProvisionService mBLEProvisionService;
-	// Code to manage Service lifecycle.
-	private final ServiceConnection mServiceConnection = new ServiceConnection()
+	public static final  String ID                                   = "pin_dialog";
+	public static final  int    RETRY_TIME_GATT_SERVICES_UNAVAILABLE = 100;
+	public static final  String ARG_PAIRING_ADDRESS                  = "PAIRINGADDRESS";
+	public static final  String ARG_NAME                             = "NAME";
+	private static final String BUNDLE_KEY_BLUETOOTH_DEVICE          = "bluetooth_device";
+	private static final String TAG                                  = FragmentBLEDevicePin.class.getSimpleName();
+	
+	GattPin mGattPin;
+	byte[] mByteBufferZoneConfigInProgress = new byte[]{GattAttributes.ZONE_CONFIGURATION_IN_PROGRESS};
+	byte[] mBLERoomNameBuffer;
+	byte[] mBLEAddressBuffer;
+	String mName;
+	short  mPairingAddress;
+	boolean mPinEntered = false;
+	BluetoothDevice     mDevice;
+	BLEProvisionService mBLEProvisionService;
+	final ServiceConnection mServiceConnection = new ServiceConnection()
 	{
 		
 		@Override
@@ -70,163 +72,178 @@ public class FragmentBLEDevicePin extends DialogFragment
 			mBLEProvisionService = ((BLEProvisionService.LocalBinder) service).getService();
 			if (!mBLEProvisionService.initialize())
 			{
-				Log.e(TAG, "Unable to initialize Bluetooth");
+				Toast.makeText(FragmentBLEDevicePin.this.getActivity(), R.string.unable_to_bluetooth, Toast.LENGTH_LONG).show();
 				getActivity().finish();
 			}
-			// Automatically connects to the device upon successful start-up initialization.
-			Log.i(TAG, "Attempt to connect to mDevice.getAddress(): " + mDevice.getAddress());
-			final Handler handler = new Handler();
-			handler.postDelayed(new Runnable()
+			else
 			{
-				@Override
-				public void run()
-				{
-					mBLEProvisionService.connect(mDevice.getAddress());
-				}
-			}, 250);
+				mBLEProvisionService.connect(mDevice.getAddress());
+			}
 		}
+		
 		
 		@Override
 		public void onServiceDisconnected(ComponentName componentName)
 		{
 			mBLEProvisionService.disconnect();
+			mBLEProvisionService.close();
 			mBLEProvisionService = null;
 		}
 	};
-	private GattPin mGattPin;
-	private byte[] mByteBufferZoneConfigInProgress = new byte[]{GattAttributes.ZONE_CONFIGURATION_IN_PROGRESS};
-	private byte[] mBLERoomNameBuffer;
-	private byte[] mBLEAddressBuffer;
-	public static FragmentBLEDevicePin getInstance(BluetoothDevice device)
+	@BindView(R.id.ble_dialog_enter_pin_textview)
+	TextView bleDialogEnterPinTextview;
+	@BindView(R.id.ble_dialog_enter_pin_edittext)
+	EditText bleDialogEnterPinEdittext;
+	@BindView(R.id.ble_dialog_done_button)
+	Button   bleDialogDoneButton;
+	
+	
+	public static FragmentBLEDevicePin getInstance(short pairingAddress, String name, BluetoothDevice device)
 	{
 		FragmentBLEDevicePin bleProvisionDialogFragment = new FragmentBLEDevicePin();
 		Bundle b = new Bundle();
 		b.putParcelable(BUNDLE_KEY_BLUETOOTH_DEVICE, device);
+		b.putShort(ARG_PAIRING_ADDRESS, pairingAddress);
+		b.putString(ARG_NAME, name);
 		bleProvisionDialogFragment.setArguments(b);
 		return bleProvisionDialogFragment;
 	}
+	
+	
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+	public void onCreate(Bundle savedInstanceState)
 	{
-		Log.i(TAG, "onCreateView");
+		super.onCreate(savedInstanceState);
 		if (getArguments() != null && getArguments().containsKey(BUNDLE_KEY_BLUETOOTH_DEVICE))
 		{
 			mDevice = getArguments().getParcelable(BUNDLE_KEY_BLUETOOTH_DEVICE);
+			mName = getArguments().getString(ARG_NAME);
+			mPairingAddress = getArguments().getShort(ARG_PAIRING_ADDRESS);
 		}
-		else //No Bluetooth Device throw exception
-		{
-			error();
-		}
-		if (mDevice == null)
-		{
-			error();
-		}
-		mSmartNode = Globals.getInstance().getSmartNode();
-		Log.i(TAG, "mAddress: " + (mDevice.getAddress() != null ? mDevice.getAddress() : "null"));
+		Intent gattServiceIntent = new Intent(getActivity(), BLEProvisionService.class);
+		getActivity().bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
+	}
+	
+	
+	@Override
+	public void onStart()
+	{
+		super.onStart();
+		EventBus.getDefault().register(this);
+	}
+	
+	
+	@Override
+	public void onStop()
+	{
+		super.onStop();
+		EventBus.getDefault().unregister(this);
+		mBLEProvisionService.disconnect();
+		getActivity().unbindService(mServiceConnection);
+		mBLEProvisionService = null;
+	}
+	
+	
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+	{
 		View retVal = inflater.inflate(R.layout.fragment_ble_pin_dialog, container, false);
 		ButterKnife.bind(this, retVal);
-		Log.i(TAG, "Butterknife Bind");
+		showProgressDialog();
 		return retVal;
 	}
+	
+	
 	@Override
 	public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
 	{
-		Log.i(TAG, "On View Created");
 		super.onViewCreated(view, savedInstanceState);
-		Log.i(TAG, "Attempt to bind service");
-		Intent gattServiceIntent = new Intent(this.getContext(), BLEProvisionService.class);
-		getActivity().bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
-		Log.i(TAG, "Service binded");
 		BLERoomName mBLERoomName = new BLERoomName();
 		StructShort mBLEAddress = new StructShort();
-		mBLEAddress.smartNodeAddress.set(mSmartNode.getMeshAddress());
+		mBLEAddress.smartNodeAddress.set(mPairingAddress);
 		mBLEAddressBuffer = mBLEAddress.getOrderedBuffer();
-		mBLERoomName.roomName.set(mSmartNode.getName());
+		mBLERoomName.roomName.set(mName);
 		mBLERoomNameBuffer = mBLERoomName.getOrderedBuffer();
+		bleDialogEnterPinEdittext.setVisibility(View.VISIBLE);
+		setTitle("Pairing " + mBLERoomName.roomName.get());
 	}
-	private void error()
-	{
-		Log.e(TAG, "Please select a bluetooth device and package it before using this fragment.");
-		dismissAllowingStateLoss();
-	}
+	
+	
 	@OnClick(R.id.ble_dialog_done_button)
 	void done()
 	{
-		String editField = bleDialogEnterPinEdittext.getText().toString();
-		//If they have entered the pin, the done button becomes a cancel button
 		if (!mPinEntered)
 		{
-			if (editField.equalsIgnoreCase(String.valueOf(mGattPin.getPin())))
+			if (bleDialogEnterPinEdittext.getText() == null || bleDialogEnterPinEdittext.getText().toString().trim().equals(""))
 			{
-				mPinEntered = true;
-				//Pin has been entered, set button to cancel & and hide edittext.
-				bleDialogDoneButton.setText("Cancel");
-				bleDialogEnterPinTextview.setText("Processing");
-				bleDialogEnterPinEdittext.setVisibility(View.GONE);
-				writeZoneUpdateInProgress();
-				//After the pin was successfully entered, write channel.
-				Toast.makeText(this.getActivity(), "Pin Matches Proceed with BLE chararecteristic write", Toast.LENGTH_LONG).show();
+				bleDialogEnterPinEdittext.setError("Pin required.  Please enter pin displayed on the 75F device you'd like to pair.");
+			}
+			else
+			{
+				String pinFeildText = bleDialogEnterPinEdittext.getText() != null && !bleDialogEnterPinEdittext.getText().toString().trim().equals("") ? bleDialogEnterPinEdittext.getText().toString() : "0";
+				int pinNumericValue = Integer.valueOf(pinFeildText);
+				if (pinNumericValue == mGattPin.getPin())
+				{
+					mPinEntered = true;
+					showProgressDialog();
+					mBLEProvisionService.writeCharacteristic(mBLEProvisionService.getSupportedGattAttribute(GattAttributes.ZONE_CONFIGURATION_STATUS), mByteBufferZoneConfigInProgress);
+				}
+				else
+				{
+					bleDialogEnterPinEdittext.setError("Pins do not match.  Please enter pin displayed on the 75F device you'd like to pair.");
+				}
 			}
 		}
 		else
 		{
 			dismiss();
 		}
-		Log.i(TAG, "Done");
 	}
-	private void writeZoneUpdateInProgress()
-	{
-		//Zone Configuration Status
-		boolean initiallySuccessful = mBLEProvisionService.writeCharacteristic(mBLEProvisionService.getSupportedGattAttribute(GattAttributes.ZONE_CONFIGURATION_STATUS), mByteBufferZoneConfigInProgress);
-		Log.d(TAG, "Writing zone configuration status:  " + initiallySuccessful);
-	}
+	
+	
 	// Called in a separate thread
-	@Subscribe(threadMode = ThreadMode.ASYNC)
+	@Subscribe(threadMode = ThreadMode.MAIN)
 	public void onBLEEvent(BLEProvisionService.BLEEvent event)
 	{
 		Log.i(TAG, "Event Type: " + event.getAction().name());
 		if (event.getAction() == BLEAction.ACTION_GATT_SERVICES_DISCOVERED)
 		{
-			final Handler handler = new Handler();
-			handler.postDelayed(new Runnable()
+			if (!mBLEProvisionService.isCharacteristicReady(GattAttributes.BLE_PIN))
 			{
-				@Override
-				public void run()
+				new Timer().schedule(new TimerTask()
 				{
-					mBLEProvisionService.readCharacteristic(GattAttributes.BLE_PIN);
-				}
-			}, 250);
+					@Override
+					public void run()
+					{
+						mBLEProvisionService.connect(mDevice.getAddress());
+					}
+				}, RETRY_TIME_GATT_SERVICES_UNAVAILABLE);
+			}
+			else
+			{
+				mBLEProvisionService.readCharacteristic(GattAttributes.BLE_PIN);
+			}
 		}
 		else if (event.getAction() == BLEAction.ACTION_DATA_AVAILABLE && event.getBluetoothGattCharacteristic() != null)
 		{
 			if (event.getBluetoothGattCharacteristic().getUuid().toString().equalsIgnoreCase(GattAttributes.BLE_PIN))
 			{
-				Log.i(TAG, "BluetoothGatt Pin Service Read");
 				mGattPin = GattPin.initialize(event.getBluetoothGattCharacteristic().getValue());
-				Log.i(TAG, "mGattPin: " + mGattPin.getPin());
-				FragmentBLEDevicePin.this.getActivity().runOnUiThread(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						setupPinFields();
-					}
-				});
+				dismissProgressDialog();
 			}
 			else if (event.getBluetoothGattCharacteristic().getUuid().toString().equalsIgnoreCase(GattAttributes.ZONE_CONFIGURATION_STATUS))
 			{
 				if (!mByteBufferZoneConfigInProgress.equals(event.getBluetoothGattCharacteristic().getValue()))
 				{
-					Log.i(TAG, "Bluetooth configured success");
-					((RenatusApp) getActivity().getApplication()).isProvisioned = true;
-					Log.i(TAG, "Blue Status: " + event.getBluetoothGattCharacteristic().getValue().equals(new byte[]{GattAttributes.ZONE_CONFIGURATION_SUCCESS}));
 					FragmentBLEDevicePin.this.getActivity().runOnUiThread(new Runnable()
 					{
 						@Override
 						public void run()
 						{
+							dismissProgressDialog();
 							Toast.makeText(FragmentBLEDevicePin.this.getActivity(), "Pairing Success!", Toast.LENGTH_LONG).show();
-							dismissAllowingStateLoss();
+							removeDialogFragment(FragmentDeviceScan.ID);
+							removeDialogFragment(FragmentBLEDevicePin.ID);
 						}
 					});
 				}
@@ -273,46 +290,19 @@ public class FragmentBLEDevicePin extends DialogFragment
 					crc = ByteArrayUtils.addBytes(mBLERoomNameBuffer, mBLEAddressBuffer, EncryptionPrefs.getEncryptionKey(), EncryptionPrefs.getFirmwareSignatureKey(), mByteBufferZoneConfigInProgress);
 				}
 				mBLEProvisionService.writeCharacteristic(GattAttributes.CRC, ByteArrayUtils.bigToLittleEndian(ByteArrayUtils.computeCrc(crc)));
-				Log.i(TAG, "Wrote to CRC gatt characteristic");
 			}
 			else if (event.getBluetoothGattCharacteristic().getUuid().toString().equalsIgnoreCase(GattAttributes.CRC))
 			{
-				Log.i(TAG, "Successfully wrote to CRC...");
-				Log.i(TAG, "Read status");
 				mBLEProvisionService.readCharacteristic(GattAttributes.ZONE_CONFIGURATION_STATUS);
 			}
 		}
 	}
-	private void setupPinFields()
-	{
-		bleDialogEnterPinEdittext.setEnabled(true);
-		bleDialogDoneButton.setEnabled(true);
-		bleDialogEnterPinTextview.setText("Please enter pin: " + mGattPin.getPin());
-		Log.i(TAG, "Set pin textview to: " + "Please enter pin: " + mGattPin.getPin());
-	}
+	
+	
 	private boolean needsLinkKey()
 	{
 		return !mDevice.getName().equalsIgnoreCase(SerialConsts.SMART_STAT_NAME);
 	}
-	@Override
-	public void onStart()
-	{
-		Log.i(TAG, "OnStart");
-		super.onStart();
-		EventBus.getDefault().register(this);
-		if (mBLEProvisionService != null)
-		{
-			final boolean result = mBLEProvisionService.connect(mDevice.getAddress());
-			Log.d(TAG, "Connect request result=" + result);
-		}
-	}
-	@Override
-	public void onStop()
-	{
-		super.onStop();
-		Log.i(TAG, "OnStop");
-		EventBus.getDefault().unregister(this);
-		getActivity().unbindService(mServiceConnection);
-		mBLEProvisionService = null;
-	}
 }
+	
+

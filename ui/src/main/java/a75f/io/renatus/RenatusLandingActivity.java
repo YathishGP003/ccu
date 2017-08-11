@@ -69,6 +69,19 @@ public class RenatusLandingActivity extends AppCompatActivity {
         });
     
         setupButton = (ImageButton) findViewById(R.id.logo);
+    
+        setupButton.setOnLongClickListener(new View.OnLongClickListener()
+        {
+            @Override
+            public boolean onLongClick(View v)
+            {
+    
+    
+                Intent i = new Intent(RenatusLandingActivity.this, MainActivity.class);
+                startActivity(i);
+                return false;
+            }
+        });
         setupButton.setOnClickListener(new View.OnClickListener()
         {
            @Override

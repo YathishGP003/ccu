@@ -13,7 +13,6 @@ import android.os.IBinder;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,12 +20,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
-import org.javolution.io.Struct;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.nio.ByteBuffer;
 import java.util.Set;
 
 import a75f.io.bo.SmartNode;
@@ -36,9 +30,7 @@ import a75f.io.renatus.BLE.BLEHomeFragment;
 import a75f.io.renatus.MainActivity;
 import a75f.io.renatus.R;
 import a75f.io.usbserial.UsbService;
-
 import a75f.io.util.Globals;
-import a75f.io.util.prefs.EncryptionPrefs;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -211,8 +203,8 @@ public class USBHomeFragment extends DialogFragment {
             //        } catch (IOException e) {
             //            e.printStackTrace();
             //        }
-            seedMessage.settings.roomName.set("RoomName");
-            seedMessage.smartNodeAddress.set(6000);
+            seedMessage.settings.roomName.set(Globals.getInstance().getSmartNode().getName());
+            seedMessage.smartNodeAddress.set( Globals.getInstance().getSmartNode().getMeshAddress());
             //seedMessage.controls.time.day.set((short) 1);
             //seedMessage.controls.time.hours.set((short) 1);
             //seedMessage.controls.time.minutes.set((short) 1);

@@ -3,7 +3,9 @@ package a75f.io.renatus;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +20,7 @@ import android.widget.Toast;
 
 import a75f.io.renatus.BLE.FragmentDeviceScan;
 
+import a75f.io.util.Globals;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -169,7 +172,24 @@ public class FloorPlanFragment extends Fragment
 	
 	@OnClick (R.id.pairModuleBtn)
 	public void startPairing() {
-		FragmentDeviceScan.getInstance().show(getChildFragmentManager(), "dialog");
+		
+		short meshAddress = Globals.getInstance().getSmartNode().getMeshAddress();
+		String roomName = Globals.getInstance().getSmartNode().getName();
+		FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(meshAddress, roomName);
+		showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
+	}
+	
+	private void showDialogFragment(DialogFragment dialogFragment, String id)
+	{
+		FragmentTransaction ft = getFragmentManager().beginTransaction();
+		Fragment prev = getFragmentManager().findFragmentByTag(id);
+		if (prev != null)
+		{
+			ft.remove(prev);
+		}
+		ft.addToBackStack(null);
+		// Create and show the dialog.
+		dialogFragment.show(ft, id);
 	}
 	
 	private void selectFloor(int position) {

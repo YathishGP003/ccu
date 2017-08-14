@@ -30,7 +30,6 @@ import butterknife.ButterKnife;
 /**
  * Created by ryanmattison on 7/24/17.
  */
-
 public class FragmentDeviceScan extends BaseDialogFragment
 {
 	

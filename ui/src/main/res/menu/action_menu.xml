@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:myapp="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/renameSelection"
+        android:title="Rename"
+        android:visible="true"
+        myapp:showAsAction="always|withText" />
+    <item
+        android:id="@+id/deleteSelection"
+        android:title="Delete"
+        android:visible="true"
+        myapp:showAsAction="always|withText" />
+    <item
+        android:id="@+id/restartSelection"
+        android:title="Restart"
+        android:visible="false"
+        myapp:showAsAction="always|withText" />
+</menu>

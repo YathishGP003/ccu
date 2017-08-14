@@ -1,6 +1,5 @@
 package a75f.io.usbserial;
 
-
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -19,7 +18,8 @@ import com.felhr.usbserial.CDCSerialDevice;
 import com.felhr.usbserial.UsbSerialDevice;
 import com.felhr.usbserial.UsbSerialInterface;
 
-import java.io.UnsupportedEncodingException;
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,7 +44,6 @@ public class UsbService extends Service {
     public static final String ACTION_USB_DISCONNECTED = "com.felhr.usbservice.USB_DISCONNECTED";
     public static final String ACTION_CDC_DRIVER_NOT_WORKING = "com.felhr.connectivityservices.ACTION_CDC_DRIVER_NOT_WORKING";
     public static final String ACTION_USB_DEVICE_NOT_WORKING = "com.felhr.connectivityservices.ACTION_USB_DEVICE_NOT_WORKING";
-    public static final int MESSAGE_FROM_SERIAL_PORT = 0;
     public static final int CTS_CHANGE = 1;
     public static final int DSR_CHANGE = 2;
     private static final String ACTION_USB_PERMISSION = "com.android.example.USB_PERMISSION";
@@ -69,9 +68,17 @@ public class UsbService extends Service {
     private UsbSerialInterface.UsbReadCallback mCallback = new UsbSerialInterface.UsbReadCallback() {
         @Override
         public void onReceivedData(byte[] data) {
-
-            if (mHandler != null)
-                mHandler.obtainMessage(MESSAGE_FROM_SERIAL_PORT, data).sendToTarget();
+            if(data.length > 0)
+            {
+                SerialAction serialAction = SerialAction.MESSAGE_FROM_SERIAL_PORT;
+                SerialEvent serialEvent = new SerialEvent(serialAction, data);
+                EventBus.getDefault().post(serialEvent);
+            }
+//            if (mHandler != null)
+//            {
+//                mHandler.obtainMessage(MESSAGE_FROM_SERIAL_PORT, data).sendToTarget();
+//
+//            }
 
         }
     };

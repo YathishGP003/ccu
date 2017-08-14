@@ -49,6 +49,7 @@ public class BLEHomeFragment extends Fragment
 	public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
 	{
 		super.onViewCreated(view, savedInstanceState);
+		Log.i(TAG, "BLE VIEW INITIATED");
 		mainTextView.setText("BLE");
 	}
 	

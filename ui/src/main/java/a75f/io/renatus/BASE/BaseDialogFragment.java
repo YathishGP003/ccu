@@ -67,4 +67,7 @@ public class BaseDialogFragment extends DialogFragment
 		super.onPause();
 		dismissProgressDialog();
 	}
+	
+	
+	
 }

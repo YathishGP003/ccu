@@ -27,6 +27,10 @@ import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.Toast;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.List;
@@ -37,6 +41,9 @@ import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSmartStatMessage_t;
 import a75f.io.bo.serial.MessageType;
 import a75f.io.bo.serial.SmartStatConditioningMode_t;
 import a75f.io.bo.serial.SmartStatFanSpeed_t;
+import a75f.io.renatus.BASE.BaseDialogFragment;
+import a75f.io.usbserial.SerialAction;
+import a75f.io.usbserial.SerialEvent;
 import a75f.io.usbserial.UsbService;
 import a75f.io.util.Globals;
 import a75f.io.util.prefs.EncryptionPrefs;
@@ -51,7 +58,7 @@ import static java.lang.Short.parseShort;
  * Created by samjithsadasivan on 8/9/17.
  */
 
-public class TestFragment extends DialogFragment
+public class TestFragment extends BaseDialogFragment
 {
 	private static final String TAG = DialogFragment.class.getSimpleName();
 	
@@ -144,6 +151,8 @@ public class TestFragment extends DialogFragment
 	public void onStart()
 	{
 		super.onStart();
+		
+		EventBus.getDefault().register(this);
 		Dialog dialog = getDialog();
 		if (dialog != null)
 		{
@@ -154,6 +163,16 @@ public class TestFragment extends DialogFragment
 		
 		dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
 	}
+	
+	
+	@Override
+	public void onStop()
+	{
+		super.onStop();
+		EventBus.getDefault().unregister(this);
+	}
+	
+	
 	
 	/*
    * Notifications from UsbService will be received here.
@@ -249,10 +268,7 @@ public class TestFragment extends DialogFragment
 		@Override
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
-				case UsbService.MESSAGE_FROM_SERIAL_PORT:
-					byte[] data = (byte[]) msg.obj;
-					Log.i(TAG, "Data return size: " + data.length);
-					break;
+				
 				case UsbService.CTS_CHANGE:
 					Toast.makeText(mActivity.get(), "CTS_CHANGE", Toast.LENGTH_LONG).show();
 					break;
@@ -260,6 +276,18 @@ public class TestFragment extends DialogFragment
 					Toast.makeText(mActivity.get(), "DSR_CHANGE", Toast.LENGTH_LONG).show();
 					break;
 			}
+		}
+	}
+	
+	// Called in a separate thread
+	@Subscribe(threadMode = ThreadMode.MAIN)
+	public void onBLEEvent(SerialEvent event)
+	{
+		Log.i(TAG, "Event Type: " + event.getSerialAction().name());
+		if (event.getSerialAction() == SerialAction.MESSAGE_FROM_SERIAL_PORT)
+		{
+			byte[] data = (byte[]) event.getBytes();
+			Log.i(TAG, "Data return size: " + data.length);
 		}
 	}
 	

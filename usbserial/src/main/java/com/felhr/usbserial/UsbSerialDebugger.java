@@ -1,8 +1,8 @@
 package com.felhr.usbserial;
 
-import com.felhr.utils.HexData;
-
 import android.util.Log;
+
+import com.felhr.utils.HexData;
 
 public class UsbSerialDebugger
 {
@@ -42,14 +42,18 @@ public class UsbSerialDebugger
 
     public static void printReadLogGet(byte[] src, boolean verbose)
     {
-        if(!verbose)
+        if (src.length > 0)
         {
-            Log.i(CLASS_ID, "Data obtained from Read buffer: " + new String(src));
-        }else
-        {
-            Log.i(CLASS_ID, "Data obtained from Read buffer: " + new String(src));
-            Log.i(CLASS_ID, "Raw data from Read buffer: " + HexData.hexToString(src));
-            Log.i(CLASS_ID, "Number of bytes obtained from Read buffer: " + src.length);
+            if (!verbose)
+            {
+                Log.i(CLASS_ID, "Data obtained from Read buffer: " + new String(src));
+            }
+            else
+            {
+                Log.i(CLASS_ID, "Data obtained from Read buffer: " + new String(src));
+                Log.i(CLASS_ID, "Raw data from Read buffer: " + HexData.hexToString(src));
+                Log.i(CLASS_ID, "Number of bytes obtained from Read buffer: " + src.length);
+            }
         }
     }
 

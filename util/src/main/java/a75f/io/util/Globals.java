@@ -1,10 +1,6 @@
 package a75f.io.util;
 
 import android.content.Context;
-
-import java.util.ArrayList;
-
-import a75f.io.bo.Floor;
 import a75f.io.bo.SmartNode;
 
 /**

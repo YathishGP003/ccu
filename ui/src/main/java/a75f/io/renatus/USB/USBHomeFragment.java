@@ -34,6 +34,7 @@ import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.bo.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
 import a75f.io.bo.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 import a75f.io.bo.serial.MessageType;
+import a75f.io.bo.serial.SnToCmOverAirSnRegularUpdateMessage_t;
 import a75f.io.renatus.BLE.BLEHomeFragment;
 import a75f.io.renatus.MainActivity;
 import a75f.io.renatus.R;
@@ -214,6 +215,7 @@ public class USBHomeFragment extends DialogFragment
 			
 			MessageType messageType = MessageType.values()[(event.getBytes()[0] & 0xff)];
 			
+			Log.i(TAG, "Message Type: " + messageType.name());
 			if(messageType == MessageType.CM_REGULAR_UPDATE)
 			{
 				
@@ -224,12 +226,14 @@ public class USBHomeFragment extends DialogFragment
 			else if(messageType == MessageType.CM_TO_CCU_OVER_USB_SN_REGULAR_UPDATE)
 			{
 				CmToCcuOverUsbSnRegularUpdateMessage_t smartNodeRegularUpdateMessage_t = new CmToCcuOverUsbSnRegularUpdateMessage_t();
+				Log.i(TAG, "Smart Node Settings: " + smartNodeRegularUpdateMessage_t.size());
+				Log.i(TAG, "Buffer size with smart node regular update message: " + data.length);
+				Log.i(TAG, "Size of inner struct SnToCmOverAirSnRegularUpdateMessage_t: " +  new SnToCmOverAirSnRegularUpdateMessage_t().size());
 				smartNodeRegularUpdateMessage_t.setByteBuffer(ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN), 0);
 				Log.i(TAG, "Smart Node Regular Update Message: " + smartNodeRegularUpdateMessage_t.toString());
 				
 			}
 			
-			Log.i(TAG, "Message Type: " + messageType.name());
 		}
 	}
 	

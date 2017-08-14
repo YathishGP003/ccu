@@ -11,6 +11,7 @@ import java.nio.ByteOrder;
 public class SnToCmOverAirSnRegularUpdateMessage_t extends Struct
 {
 	
+	public final Enum8<MessageType> messageType = new Enum8<>(MessageType.values());
 	
 	public final Unsigned16 smartNodeAddress = new Unsigned16(); /* LW Mesh Address of the Smart Node sending the message */
 	

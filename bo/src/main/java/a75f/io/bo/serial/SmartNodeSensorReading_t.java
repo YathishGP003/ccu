@@ -9,7 +9,7 @@ import org.javolution.io.Struct;
 public class SmartNodeSensorReading_t extends Struct
 {
 	
-	public final Unsigned8 sensorType = new Unsigned8(4);
+	public final Unsigned16 sensorType = new Unsigned16(4);
 	
-	public final Unsigned8 sensorData = new Unsigned8(12);
+	public final Unsigned16 sensorData = new Unsigned16(12);
 }

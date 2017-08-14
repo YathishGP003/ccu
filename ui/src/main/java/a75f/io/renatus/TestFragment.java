@@ -34,9 +34,12 @@ import java.util.Set;
 
 import a75f.io.bo.SmartNode;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSmartStatMessage_t;
+import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
+import a75f.io.bo.serial.CcuToCmOverUsbSnSettingsMessage_t;
 import a75f.io.bo.serial.MessageType;
 import a75f.io.bo.serial.SmartStatConditioningMode_t;
 import a75f.io.bo.serial.SmartStatFanSpeed_t;
+import a75f.io.renatus.USB.USBHomeFragment;
 import a75f.io.usbserial.UsbService;
 import a75f.io.util.Globals;
 import a75f.io.util.prefs.EncryptionPrefs;
@@ -133,8 +136,8 @@ public class TestFragment extends DialogFragment
 	@Override
 	public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
-		//initChannelSpinner();
-		channelSpinner.setVisibility(View.GONE);
+		initChannelSpinner();
+		//channelSpinner.setVisibility(View.GONE);
 		initProfileSpinner();
 		initFanspeedSpinner();
 		initCondModeSpinner();
@@ -356,10 +359,23 @@ public class TestFragment extends DialogFragment
 		}
 		
 		msg.controls.digitalOut1.set((short)1);
-		msg.controls.digitalOut2.set((short)1);
+		msg.controls.digitalOut2.set((short)1);*/
 		
-		usbService.write(msg.getOrderedBuffer());
-		*/
+		
+		short maxT ,minT, setT;
+		try
+		{
+			maxT = parseShort(maxTemp.getText().toString());
+			minT = parseShort(minTemp.getText().toString());
+			setT = parseShort(setTemp.getText().toString());
+		} catch (Exception e) {
+			e.printStackTrace();
+			maxT = (short) 80;
+			minT = (short) 65;
+			setT = (short) 75;
+			Toast.makeText(TestFragment.this.getContext(), "Temperature not set , default values are used", Toast.LENGTH_SHORT).show();
+		}
+		
 		SmartNode sn = Globals.getInstance().getSmartNode();
 		CcuToCmOverUsbDatabaseSeedSmartStatMessage_t msg = new CcuToCmOverUsbDatabaseSeedSmartStatMessage_t();
 		msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SMART_STAT);
@@ -374,14 +390,14 @@ public class TestFragment extends DialogFragment
 		//settings
 		msg.settings.roomName.set(roomName.getText().toString());
 		msg.settings.profileBitmap.bitmap.set((short) (1 << profileSlection));
-		msg.settings.maxUserTemp.set(parseShort(maxTemp.getText().toString()));
-		msg.settings.minUserTemp.set(parseShort(minTemp.getText().toString()));
+		msg.settings.maxUserTemp.set(maxT);
+		msg.settings.minUserTemp.set(minT);
 		msg.settings.showCentigrade.set(showCentigrade.isChecked() == true ? (short)1 : (short) 0);
 		msg.settings.enableOccupancyDetection.set(occDetection.isChecked() == true ? (short)1 : (short)0);
 		msg.settings.enabledRelaysBitmap.bitmap.set((short)0xFF); //Enable all relays
 		
 		//controls
-		msg.controls.setTemperature.set(parseShort(setTemp.getText().toString()));
+		msg.controls.setTemperature.set(setT);
 		msg.controls.fanSpeed.set(SmartStatFanSpeed_t.values()[fanspeedSelection]);
 		msg.controls.conditioningMode.set(SmartStatConditioningMode_t.values()[condModeSelection]);
 		
@@ -400,6 +416,12 @@ public class TestFragment extends DialogFragment
 	
 	@OnClick(R.id.sendSettings)
 	public void sendSettings() {
+		/*CcuToCmOverUsbSnSettingsMessage_t msg = new CcuToCmOverUsbSnSettingsMessage_t();
+                msg.smartNodeAddress.set((short)4000);
+                msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_SETTINGS);
+                msg.settings.profileBitmap.bitmap.set((short) (1));*/
+
+
 		SmartNode sn = Globals.getInstance().getSmartNode();
 		CcuToCmOverUsbDatabaseSeedSmartStatMessage_t msg = new CcuToCmOverUsbDatabaseSeedSmartStatMessage_t();
 		msg.messageType.set(MessageType.CM_TO_SMART_STAT_OVER_AIR_SMART_STAT_SETTINGS);
@@ -421,12 +443,22 @@ public class TestFragment extends DialogFragment
 	@OnClick(R.id.sendControl)
 	public void sendControl() {
 		
+		
 		SmartNode sn = Globals.getInstance().getSmartNode();
 		CcuToCmOverUsbDatabaseSeedSmartStatMessage_t msg = new CcuToCmOverUsbDatabaseSeedSmartStatMessage_t();
 		msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SMART_STAT_CONTROLS);
 		msg.address.set(sn.getMeshAddress());
+		short setT;
+		try
+		{
+			setT = parseShort(setTemp.getText().toString());
+		} catch (Exception e) {
+			e.printStackTrace();
+			setT = (short)75;
+			Toast.makeText(TestFragment.this.getContext(), "Temperature not set , default values are used", Toast.LENGTH_SHORT).show();
+		}
 		
-		msg.controls.setTemperature.set(parseShort(setTemp.getText().toString()));
+		msg.controls.setTemperature.set(setT);
 		msg.controls.fanSpeed.set(SmartStatFanSpeed_t.values()[fanspeedSelection]);
 		msg.controls.conditioningMode.set(SmartStatConditioningMode_t.values()[condModeSelection]);
 		

@@ -114,7 +114,7 @@ public class FragmentDeviceScan extends DialogFragment {
                         }
                     }
                 });
-                scanLeDevice(mScanning);
+                scanLeDevice(true);
             }
         }
     }

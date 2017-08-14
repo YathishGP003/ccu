@@ -30,7 +30,8 @@ import butterknife.OnFocusChange;
 
 public class FloorPlanFragment extends Fragment
 {
-	private int nCurFloorIndex = 0;
+	public int mCurFloorIndex = -1;
+	public int mCurRoomIndex = -1;
 	
 	@BindView (R.id.addFloorBtn)
 	ImageButton addFloorBtn;
@@ -51,13 +52,13 @@ public class FloorPlanFragment extends Fragment
 	EditText addModuleEdit;
 	
 	@BindView(R.id.floorList)
-	ListView floorList;
+	ListView floorListView;
 	
 	@BindView(R.id.roomList)
-	ListView roomList;
+	ListView roomListView;
 	
 	@BindView(R.id.moduleList)
-	ListView moduleList;
+	ListView moduleListView;
 	
 	public static FloorPlanFragment newInstance(){
 		return new FloorPlanFragment();
@@ -80,6 +81,34 @@ public class FloorPlanFragment extends Fragment
 		super.onViewCreated(view, savedInstanceState);
 		enableFloorButton();
 		enableRoomBtn();
+	}
+	
+	@Override
+	public void onStart(){
+		super.onStart();
+		floorListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+		floorListView.setMultiChoiceModeListener(new FloorListActionMenuListener(this));
+		
+		roomListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+		roomListView.setMultiChoiceModeListener(new RoomListActionMenuListener(this));
+		
+	}
+	@Override
+	public void onResume() {
+		super.onResume();
+		floorListView.setAdapter(FloorContainer.getInstance().getFloorListAdapter());
+		if (FloorContainer.getInstance().getFloorList().size() >0) {
+			mCurFloorIndex = mCurFloorIndex >= 0 ? mCurFloorIndex : 0;
+			roomListView.setAdapter(FloorContainer.getInstance().getFloorList()
+				                                      .get(mCurFloorIndex).getmRoomListAdapter());
+		}
+		
+	}
+	
+	@Override
+	public void onPause() {
+		super.onPause();
+		FloorContainer.getInstance().saveData();
 	}
 	
 	private void enableFloorButton() {
@@ -120,6 +149,8 @@ public class FloorPlanFragment extends Fragment
 		{
 			final int nID = FloorContainer.getInstance().addFloor(addFloorEdit.getText().toString());
 			selectFloor(nID);
+			roomListView.setAdapter(FloorContainer.getInstance().getFloorList()
+			                                      .get(mCurFloorIndex).getmRoomListAdapter());
 			//CCUKinveyInterface.updateFloor(FloorData.getFloorData().get(nID), false);
 			InputMethodManager mgr = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 			mgr.hideSoftInputFromWindow(addFloorEdit.getWindowToken(), 0);
@@ -151,7 +182,10 @@ public class FloorPlanFragment extends Fragment
 	{
 		if (actionId == EditorInfo.IME_ACTION_DONE)
 		{
-			//Save room
+			Toast.makeText(getActivity().getApplicationContext(), "Room " + addRoomEdit.getText() + " added", Toast.LENGTH_SHORT).show();
+			Room room = FloorContainer.getInstance().getFloorList()
+			                                    .get(mCurFloorIndex).addRoom(addFloorEdit.getText().toString());
+			selectRoomItem(room.getmRoomId());
 			InputMethodManager mgr = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 			mgr.hideSoftInputFromWindow(addFloorEdit.getWindowToken(), 0);
 			enableRoomBtn();
@@ -173,11 +207,17 @@ public class FloorPlanFragment extends Fragment
 	}
 	
 	private void selectFloor(int position) {
-		nCurFloorIndex = position;
+		mCurFloorIndex = position;
 		FloorContainer.getInstance().getFloorListAdapter().setSelectedItem(position);
-		//tvAddRoom.setEnabled(true);
-		//lvRoomList.setAdapter(FloorData.getFloorData().get(nCurFloorIndex).getRoomDataAdapter());
-		//selectRoomItem(0);
+	}
+	
+	private void selectRoomItem(int position) {
+		mCurRoomIndex = position;
+		/*if (position == 0) {
+			roomListView.setAdapter(FloorContainer.getInstance().getFloorList()
+			                                      .get(mCurFloorIndex).getmRoomListAdapter());
+		}*/
+		FloorContainer.getInstance().getFloorList().get(mCurFloorIndex).getmRoomListAdapter().setSelectedItem(position);
 	}
 	
 }

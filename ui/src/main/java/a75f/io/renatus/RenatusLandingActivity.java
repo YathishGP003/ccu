@@ -90,6 +90,7 @@ public class RenatusLandingActivity extends AppCompatActivity {
            }
         });
         setViewPager();
+        FloorContainer.getInstance().loadData();
     }
     
     @Override

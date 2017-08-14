@@ -30,19 +30,14 @@ public class WrmSettings_t extends Struct
 	public final Unsigned8 integrationTime              = new Unsigned8(); // default 30 - time in minutes the integration takes to max out
 	public final Unsigned8 airflowHeatingTemperature    = new Unsigned8(); // default 105 - airflow temperature in deg F above which we consider unit is in heating mode for failsafe mode
 	public final Unsigned8 airflowCoolingTemperature    = new Unsigned8(); // default 60 - airflow temperature in deg F below which we consider unit is in cooling mode for failsafe mode
-	public final Unsigned8 analogOut1 = new Unsigned8(); // output for pwm channel 1 // additional bytes to make legacy structure as new_protocol structure
-	public final Unsigned8 analogOut2 = new Unsigned8(); // output for pwm channel 2 // additional bytes to make legacy structure as new_protocol structure
-
-	public class Status extends Struct
-	{
-		
-		public final Unsigned8 conditioningMode         = new Unsigned8(1); // 1 is heating, 0 is cooling - sent from CCU to WRM for display indication
-		public final Unsigned8 occupancyDetectorEnabled = new Unsigned8(1); // 1 enabled. WRM should only turn on detector if enabled
-		public final Unsigned8 resetWrm                 = new Unsigned8(1); // force a reset of the WRM remotely when set to 1
-		public final Unsigned8 digitalOut1              = new Unsigned8(1); // digital out for activation
-		public final Unsigned8 digitalOut2              = new Unsigned8(1); // digital out for activation
-		public final Unsigned8 showCentigrade           = new Unsigned8(1); // show F or C
-		public final Unsigned8 displayHold              = new Unsigned8(1); // if 'hold' is to be shown to signify temporary hold if temperature changed during occupied system schedule
-		public final Unsigned8 militaryTime             = new Unsigned8(1); // determine if we are using 24 hour format or not
-	}
+	public final Unsigned8 conditioningMode             = new Unsigned8(1); // 1 is heating, 0 is cooling - sent from CCU to WRM for display indication
+	public final Unsigned8 occupancyDetectorEnabled     = new Unsigned8(1); // 1 enabled. WRM should only turn on detector if enabled
+	public final Unsigned8 resetWrm                     = new Unsigned8(1); // force a reset of the WRM remotely when set to 1
+	public final Unsigned8 digitalOut1                  = new Unsigned8(1); // digital out for activation
+	public final Unsigned8 digitalOut2                  = new Unsigned8(1); // digital out for activation
+	public final Unsigned8 showCentigrade               = new Unsigned8(1); // show F or C
+	public final Unsigned8 displayHold                  = new Unsigned8(1); // if 'hold' is to be shown to signify temporary hold if temperature changed during occupied system schedule
+	public final Unsigned8 militaryTime                 = new Unsigned8(1); // determine if we are using 24 hour format or not
+	public final Unsigned8 analogOut1                   = new Unsigned8(); // output for pwm channel 1 // additional bytes to make legacy structure as new_protocol structure
+	public final Unsigned8 analogOut2                   = new Unsigned8(); // output for pwm channel 2 // additional bytes to make legacy structure as new_protocol structure
 }

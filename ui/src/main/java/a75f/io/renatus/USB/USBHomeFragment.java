@@ -226,7 +226,7 @@ public class USBHomeFragment extends DialogFragment
 			else if(messageType == MessageType.CM_TO_CCU_OVER_USB_SN_REGULAR_UPDATE)
 			{
 				CmToCcuOverUsbSnRegularUpdateMessage_t smartNodeRegularUpdateMessage_t = new CmToCcuOverUsbSnRegularUpdateMessage_t();
-				Log.i(TAG, "Smart Node Settings: " + smartNodeRegularUpdateMessage_t.size());
+				Log.i(TAG, "CmToCcuOverUsbSnRegularUpdateMessage_t size: " + smartNodeRegularUpdateMessage_t.size());
 				Log.i(TAG, "Buffer size with smart node regular update message: " + data.length);
 				Log.i(TAG, "Size of inner struct SnToCmOverAirSnRegularUpdateMessage_t: " +  new SnToCmOverAirSnRegularUpdateMessage_t().size());
 				smartNodeRegularUpdateMessage_t.setByteBuffer(ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN), 0);

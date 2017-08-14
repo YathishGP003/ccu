@@ -200,13 +200,17 @@ public class USBHomeFragment extends DialogFragment
 	
 	// Called in a separate thread
 	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onBLEEvent(SerialEvent event)
+	public void onSerialEvent(SerialEvent event)
 	{
 		Log.i(TAG, "Event Type: " + event.getSerialAction().name());
 		if (event.getSerialAction() == SerialAction.MESSAGE_FROM_SERIAL_PORT)
 		{
 			byte[] data = (byte[]) event.getBytes();
 			Log.i(TAG, "Data return size: " + data.length);
+			
+			MessageType messageType = MessageType.values()[(event.getBytes()[0] & 0xff)];
+			
+			Log.i(TAG, "Message Type: " + messageType.name());
 		}
 	}
 	

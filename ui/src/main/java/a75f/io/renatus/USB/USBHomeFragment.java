@@ -25,10 +25,14 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.ref.WeakReference;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Set;
 
 import a75f.io.bo.SmartNode;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
+import a75f.io.bo.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
+import a75f.io.bo.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 import a75f.io.bo.serial.MessageType;
 import a75f.io.renatus.BLE.BLEHomeFragment;
 import a75f.io.renatus.MainActivity;
@@ -209,6 +213,21 @@ public class USBHomeFragment extends DialogFragment
 			Log.i(TAG, "Data return size: " + data.length);
 			
 			MessageType messageType = MessageType.values()[(event.getBytes()[0] & 0xff)];
+			
+			if(messageType == MessageType.CM_REGULAR_UPDATE)
+			{
+				
+				CmToCcuOverUsbCmRegularUpdateMessage_t regularUpdateMessage_t = new CmToCcuOverUsbCmRegularUpdateMessage_t();
+				regularUpdateMessage_t.setByteBuffer(ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN), 0);
+				Log.i(TAG, "Regular Update Message: " + regularUpdateMessage_t.toString());
+			}
+			else if(messageType == MessageType.CM_TO_CCU_OVER_USB_SN_REGULAR_UPDATE)
+			{
+				CmToCcuOverUsbSnRegularUpdateMessage_t smartNodeRegularUpdateMessage_t = new CmToCcuOverUsbSnRegularUpdateMessage_t();
+				smartNodeRegularUpdateMessage_t.setByteBuffer(ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN), 0);
+				Log.i(TAG, "Smart Node Regular Update Message: " + smartNodeRegularUpdateMessage_t.toString());
+				
+			}
 			
 			Log.i(TAG, "Message Type: " + messageType.name());
 		}

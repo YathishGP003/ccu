@@ -11,7 +11,6 @@ import java.nio.ByteOrder;
 public class SnToCmOverAirSnRegularUpdateMessage_t extends Struct
 {
 	
-	public final Enum8<MessageType> messageType = new Enum8<>(MessageType.values());
 	
 	public final Unsigned16 smartNodeAddress = new Unsigned16(); /* LW Mesh Address of the Smart Node sending the message */
 	
@@ -21,7 +20,8 @@ public class SnToCmOverAirSnRegularUpdateMessage_t extends Struct
 	
 	public final Unsigned8 rssi = new Unsigned8(); /* Received Signal Strength Indicator of last received data packet */
 	
-	public final Unsigned8 roomTemperature = new Unsigned8(); /* room temp in 1/10 F. This is the adjusted temp and is offset + measured temp */
+	
+	public final Unsigned16 roomTemperature = new Unsigned16(); /* room temp in 1/10 F. This is the adjusted temp and is offset + measured temp */
 	
 	public final Unsigned16 airflow1Temperature = new Unsigned16(); /* airflow temp in 1/10 F */
 	

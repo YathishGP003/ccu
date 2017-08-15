@@ -10,6 +10,7 @@ package org.javolution.io;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.EnumSerializer;
 
 import org.javolution.annotations.Realtime;
 import org.javolution.lang.MathLib;
@@ -21,6 +22,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import a75f.io.bo.json.serializers.Enum4Serializer;
 import a75f.io.bo.json.serializers.Enum8Serializaer;
 import a75f.io.bo.json.serializers.Signed8Serializer;
 import a75f.io.bo.json.serializers.UTF8Serializer;
@@ -1637,12 +1639,14 @@ public class Struct {
             } else {
                 return getByteBuffer().getLong(index) == 0L;
             }
+            
         }
     }
     
     /**
      * This class represents a 8 bits {@link Enum}.
      */
+    @JsonSerialize(using = Enum4Serializer.class)
     public class Enum4<T extends Enum<T>> extends Member {
         
         private final T[] _values;

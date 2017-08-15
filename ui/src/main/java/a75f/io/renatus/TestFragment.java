@@ -31,21 +31,28 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import a75f.io.bo.SmartNode;
+import a75f.io.bo.json.serializers.JsonSerializer;
+import a75f.io.bo.serial.CcuToCmOverUsbSmartStatSettingsMessage_t;
+import a75f.io.bo.serial.MessageType;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.usbserial.SerialAction;
 import a75f.io.usbserial.SerialEvent;
 import a75f.io.usbserial.UsbService;
+import a75f.io.util.Globals;
 import butterknife.BindView;
 import butterknife.BindViews;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 import static java.lang.Short.parseShort;
+
 
 /**
  * Created by samjithsadasivan on 8/9/17.
@@ -427,6 +434,15 @@ public class TestFragment extends BaseDialogFragment
 		msg.controls.relay5.set(((Switch)relayList.get(4)).isChecked() == true ? (short) 1: (short)0);
 		msg.controls.relay6.set(((Switch)relayList.get(5)).isChecked() == true ? (short) 1: (short)0);
 		
+		try
+		{
+			Log.i(TAG, "CCuToCM: " + JsonSerializer.toJson(msg, true));
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		
 		if (usbService != null) {
 			usbService.write(msg.getOrderedBuffer());
 		}
@@ -435,29 +451,48 @@ public class TestFragment extends BaseDialogFragment
 	}
 	
 	@OnClick(R.id.sendSettings)
-	public void sendSettings() {
+	public void sendSettings()
+	{
 		/*CcuToCmOverUsbSnSettingsMessage_t msg = new CcuToCmOverUsbSnSettingsMessage_t();
                 msg.smartNodeAddress.set((short)4000);
                 msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_SETTINGS);
                 msg.settings.profileBitmap.bitmap.set((short) (1));*/
-			//TODO: fixme
-		/*
+
+		short maxT ,minT;
+		try
+		{
+			maxT = parseShort(maxTemp.getText().toString());
+			minT = parseShort(minTemp.getText().toString());
+		} catch (Exception e) {
+			e.printStackTrace();
+			maxT = (short) 80;
+			minT = (short) 65;
+			Toast.makeText(TestFragment.this.getContext(), "Temperature not set , default values are used", Toast.LENGTH_SHORT).show();
+		}
+
 		SmartNode sn = Globals.getInstance().getSmartNode();
-		CcuToCmOverUsbDatabaseSeedSmartStatMessage_t msg = new CcuToCmOverUsbDatabaseSeedSmartStatMessage_t();
-		msg.messageType.set(MessageType.CM_TO_SMART_STAT_OVER_AIR_SMART_STAT_SETTINGS);
+		CcuToCmOverUsbSmartStatSettingsMessage_t msg = new CcuToCmOverUsbSmartStatSettingsMessage_t();
+		msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SMART_STAT_SETTINGS);
 		msg.address.set(sn.getMeshAddress());
 		
 		msg.settings.roomName.set(roomName.getText().toString());
 		msg.settings.profileBitmap.bitmap.set((short) (1 << profileSlection));
-		msg.settings.maxUserTemp.set(parseShort(maxTemp.getText().toString()));
-		msg.settings.minUserTemp.set(parseShort(minTemp.getText().toString()));
+		msg.settings.maxUserTemp.set(maxT);
+		msg.settings.minUserTemp.set(minT);
 		msg.settings.showCentigrade.set(showCentigrade.isChecked() == true ? (short)1 : (short) 0);
 		msg.settings.enableOccupancyDetection.set(occDetection.isChecked() == true ? (short)1 : (short)0);
-		
+		msg.settings.enabledRelaysBitmap.bitmap.set((short)0xFF); //Enable all relays
+		try
+		{
+			Log.i(TAG, "CCuToCM: " + JsonSerializer.toJson(msg, true));
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
 		if (usbService != null) {
 			usbService.write(msg.getOrderedBuffer());
 		}
-		*/
 	}
 	
 	
@@ -466,7 +501,7 @@ public class TestFragment extends BaseDialogFragment
 		
 		/*
 		SmartNode sn = Globals.getInstance().getSmartNode();
-		CcuToCmOverUsbDatabaseSeedSmartStatMessage_t msg = new CcuToCmOverUsbDatabaseSeedSmartStatMessage_t();
+		CcuToCmOverUsbSmartStatControlsMessage_t msg = new CcuToCmOverUsbSmartStatControlsMessage_t();
 		msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SMART_STAT_CONTROLS);
 		msg.address.set(sn.getMeshAddress());
 		short setT;
@@ -489,6 +524,15 @@ public class TestFragment extends BaseDialogFragment
 		msg.controls.relay4.set(((Switch)relayList.get(3)).isChecked() == true ? (short) 1: (short)0);
 		msg.controls.relay5.set(((Switch)relayList.get(4)).isChecked() == true ? (short) 1: (short)0);
 		msg.controls.relay6.set(((Switch)relayList.get(5)).isChecked() == true ? (short) 1: (short)0);
+		
+		try
+		{
+			Log.i(TAG, "CCuToCM: " + JsonSerializer.toJson(msg, true));
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
 		
 		if (usbService != null) {
 			usbService.write(msg.getOrderedBuffer());

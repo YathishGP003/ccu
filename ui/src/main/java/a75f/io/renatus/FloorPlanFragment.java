@@ -63,6 +63,8 @@ public class FloorPlanFragment extends Fragment
 	@BindView(R.id.moduleList)
 	ListView moduleListView;
 	
+	private DataArrayAdapter<Floor> mModuleListAdapter = null;
+	
 	public static FloorPlanFragment newInstance(){
 		return new FloorPlanFragment();
 	}

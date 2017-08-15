@@ -61,13 +61,13 @@ public class SmartNodeSettings_t extends Struct
 	class SmartNodeProfileBitmap_t extends Struct
 	{
 		public final Unsigned8 dynamicAirflowBalancing = new Unsigned8(1); /* 1 is heating, 0 is cooling - sent from CCU to Smart Node for display indication */
-		public final Unsigned8 lightingControl         = new Unsigned8(1); /* digital out for activation */
+		public final Unsigned8 lightingControl         = new Unsigned8(1); /* digital out for activation */  //set light control to 1 ..
 		public final Unsigned8 outsideAirOptimization  = new Unsigned8(1); /* digital out for activation */
 		public final Unsigned8 singleStageEquipment    = new Unsigned8(1); /* digital out for activation */
 		public final Unsigned8 customControl           = new Unsigned8(1); /* digital out for activation */
 		public final Unsigned8 reserved                = new Unsigned8(3);
 	}
-	
+	/* These just light up the liight next to the digital out 1 etc */
 	public class SmartNodeLedBitmap_t extends Struct
 	{
 		public final Unsigned8 powerIn      = new Unsigned8(1);
@@ -78,7 +78,7 @@ public class SmartNodeSettings_t extends Struct
 		public final Unsigned8 thermistor2  = new Unsigned8(1);
 		public final Unsigned8 analogOut1   = new Unsigned8(1);
 		public final Unsigned8 analogOut2   = new Unsigned8(1);
-		public final Unsigned8 digitalOut1  = new Unsigned8(1);
+		public final Unsigned8 digitalOut1  = new Unsigned8(1);  //
 		public final Unsigned8 digitalOut2  = new Unsigned8(1);
 		public final Unsigned8 analogIn24v  = new Unsigned8(1);
 		public final Unsigned8 analogOut24v = new Unsigned8(1);

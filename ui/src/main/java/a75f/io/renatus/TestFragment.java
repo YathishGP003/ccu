@@ -36,20 +36,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import a75f.io.bo.SmartNode;
-import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSmartStatMessage_t;
-import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
-import a75f.io.bo.serial.CcuToCmOverUsbSnSettingsMessage_t;
-import a75f.io.bo.serial.MessageType;
-import a75f.io.bo.serial.SmartStatConditioningMode_t;
-import a75f.io.bo.serial.SmartStatFanSpeed_t;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.usbserial.SerialAction;
 import a75f.io.usbserial.SerialEvent;
-
 import a75f.io.usbserial.UsbService;
-import a75f.io.util.Globals;
-import a75f.io.util.prefs.EncryptionPrefs;
 import butterknife.BindView;
 import butterknife.BindViews;
 import butterknife.ButterKnife;
@@ -304,7 +294,8 @@ public class TestFragment extends BaseDialogFragment
 			@Override
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 				channelSelection = position > 0 ? position : 4;
-				Globals.getInstance().getSmartNode().setMeshAddress(Short.parseShort(channels.get(channelSelection)));
+				//TODO: fixme
+				//Globals.getInstance().getSmartNode().setMeshAddress(Short.parseShort(channels.get(channelSelection)));
 			}
 			
 			@Override
@@ -404,7 +395,7 @@ public class TestFragment extends BaseDialogFragment
 			Toast.makeText(TestFragment.this.getContext(), "Temperature not set , default values are used", Toast.LENGTH_SHORT).show();
 		}
 		
-		SmartNode sn = Globals.getInstance().getSmartNode();
+	/*-	SmartNode sn = Globals.getInstance().getSmartNode();
 		CcuToCmOverUsbDatabaseSeedSmartStatMessage_t msg = new CcuToCmOverUsbDatabaseSeedSmartStatMessage_t();
 		msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SMART_STAT);
 		msg.address.set(sn.getMeshAddress());
@@ -439,6 +430,7 @@ public class TestFragment extends BaseDialogFragment
 		if (usbService != null) {
 			usbService.write(msg.getOrderedBuffer());
 		}
+		*/
 		
 	}
 	
@@ -448,8 +440,8 @@ public class TestFragment extends BaseDialogFragment
                 msg.smartNodeAddress.set((short)4000);
                 msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_SETTINGS);
                 msg.settings.profileBitmap.bitmap.set((short) (1));*/
-
-
+			//TODO: fixme
+		/*
 		SmartNode sn = Globals.getInstance().getSmartNode();
 		CcuToCmOverUsbDatabaseSeedSmartStatMessage_t msg = new CcuToCmOverUsbDatabaseSeedSmartStatMessage_t();
 		msg.messageType.set(MessageType.CM_TO_SMART_STAT_OVER_AIR_SMART_STAT_SETTINGS);
@@ -465,13 +457,14 @@ public class TestFragment extends BaseDialogFragment
 		if (usbService != null) {
 			usbService.write(msg.getOrderedBuffer());
 		}
+		*/
 	}
 	
 	
 	@OnClick(R.id.sendControl)
 	public void sendControl() {
 		
-		
+		/*
 		SmartNode sn = Globals.getInstance().getSmartNode();
 		CcuToCmOverUsbDatabaseSeedSmartStatMessage_t msg = new CcuToCmOverUsbDatabaseSeedSmartStatMessage_t();
 		msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SMART_STAT_CONTROLS);
@@ -500,5 +493,6 @@ public class TestFragment extends BaseDialogFragment
 		if (usbService != null) {
 			usbService.write(msg.getOrderedBuffer());
 		}
+		*/
 	}
 }

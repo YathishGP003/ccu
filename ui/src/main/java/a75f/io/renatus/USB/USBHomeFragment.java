@@ -30,7 +30,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Set;
 
-import a75f.io.bo.SmartNode;
 import a75f.io.bo.json.serializers.JsonSerializer;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.bo.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
@@ -43,7 +42,6 @@ import a75f.io.renatus.R;
 import a75f.io.usbserial.SerialAction;
 import a75f.io.usbserial.SerialEvent;
 import a75f.io.usbserial.UsbService;
-import a75f.io.util.Globals;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -266,7 +264,7 @@ public class USBHomeFragment extends DialogFragment
 		{
 			usbService.setDebug(true);
 			mLightButton.setText("Send ordered buffer!");
-			SmartNode sn = Globals.getInstance().getSmartNode();
+			//SmartNode sn = Globals.getInstance().getSmartNode();
 			CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = new CcuToCmOverUsbDatabaseSeedSnMessage_t();
 			seedMessage.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN);
 			//        try {
@@ -274,8 +272,8 @@ public class USBHomeFragment extends DialogFragment
 			//        } catch (IOException e) {
 			//            e.printStackTrace();
 			//        }
-			seedMessage.settings.roomName.set(Globals.getInstance().getSmartNode().getName());
-			seedMessage.smartNodeAddress.set(Globals.getInstance().getSmartNode().getMeshAddress());
+			//edMessage.settings.roomName.set(Globals.getInstance().getSmartNode().getName());
+			//edMessage.smartNodeAddress.set(Globals.getInstance().getSmartNode().getMeshAddress());
 			//seedMessage.controls.time.day.set((short) 1);
 			//seedMessage.controls.time.hours.set((short) 1);
 			//seedMessage.controls.time.minutes.set((short) 1);

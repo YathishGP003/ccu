@@ -10,10 +10,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.Toast;
 
 import a75f.io.renatus.R;
-import a75f.io.util.Globals;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -57,13 +55,19 @@ public class BLEHomeFragment extends Fragment
 	@OnClick(R.id.fragment_ble_button)
 	void bleSubmit()
 	{
-		Log.i(TAG, "Done");
-		short meshAddress = Globals.getInstance().getSmartNode().getMeshAddress();
-		String roomName = Globals.getInstance().getSmartNode().getName();
-		FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(meshAddress, roomName);
-		showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
-		
-		Toast.makeText(this.getActivity(), "BLE Fragment Done", Toast.LENGTH_LONG).show();
+//		Log.i(TAG, "Done");
+//		Zone zone = new Zone();
+//		LightProfile zoneProfile = new LightProfile();
+//		zoneProfile.on = true;
+//		zoneProfile.dimmable = true;
+//		zoneProfile.dimmablePercent = 50;
+//		zoneProfile.
+//		short meshAddress = Globals.getInstance().getCCUApplication().zones.add(getSmartNode().getMeshAddress();
+//		String roomName = Globals.getInstance().getSmartNode().getName();
+//		FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(meshAddress, roomName);
+//		showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
+//
+//		Toast.makeText(this.getActivity(), "BLE Fragment Done", Toast.LENGTH_LONG).show();
 	}
 	
 	

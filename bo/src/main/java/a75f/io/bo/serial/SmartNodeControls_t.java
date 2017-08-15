@@ -18,10 +18,10 @@ public class SmartNodeControls_t extends Struct
 	public final Unsigned8    infraredCommand = new Unsigned8(); /* Command for the infrared transmitter */
 	
 	public final Unsigned8 conditioningMode = new Unsigned8(1); /* 1 is heating, 0 is cooling - sent from CCU to Smart Node for display indication */
-	public final Unsigned8 digitalOut1      = new Unsigned8(1); /* digital out for activation */
-	public final Unsigned8 digitalOut2      = new Unsigned8(1); /* digital out for activation */
-	public final Unsigned8 digitalOut3      = new Unsigned8(1); /* digital out for activation */
-	public final Unsigned8 digitalOut4      = new Unsigned8(1); /* digital out for activation */
+	public final Unsigned8 digitalOut1      = new Unsigned8(1); /* digital out for activation, relay on smartnode board on */
+	public final Unsigned8 digitalOut2      = new Unsigned8(1); /* digital out for activation, turn relay on */
+	public final Unsigned8 digitalOut3      = new Unsigned8(1); /* digital out for activation --- not active for smartnode */
+	public final Unsigned8 digitalOut4      = new Unsigned8(1); /* digital out for activation --- not active for smartnode */
 	public final Unsigned8 reset            = new Unsigned8(1); /* force a reset of the device remotely when set to 1 */
 	public final Unsigned8 reserved         = new Unsigned8(2);
 }

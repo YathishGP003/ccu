@@ -20,8 +20,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import a75f.io.renatus.BLE.FragmentDeviceScan;
-
-import a75f.io.util.Globals;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -209,8 +207,9 @@ public class FloorPlanFragment extends Fragment
 	@OnClick (R.id.pairModuleBtn)
 	public void startPairing() {
 		
-		short meshAddress = Globals.getInstance().getSmartNode().getMeshAddress();
-		String roomName = Globals.getInstance().getSmartNode().getName();
+		short meshAddress = 2000; // Globals.getInstance().getSmartNode().getMeshAddress();
+		String roomName = "RyansRoom"; //Globals.getInstance().getSmartNode().getName();
+		
 		FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(meshAddress, roomName);
 		showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
 	}

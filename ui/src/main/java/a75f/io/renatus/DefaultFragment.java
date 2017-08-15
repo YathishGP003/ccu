@@ -19,7 +19,6 @@ import android.widget.ToggleButton;
 import java.util.Arrays;
 import java.util.List;
 
-import a75f.io.util.Globals;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -79,12 +78,12 @@ public class DefaultFragment extends DialogFragment
 	public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
 	{
 		super.onViewCreated(view, savedInstanceState);
-		setupPortSpinner();
-		short meshAddress = Globals.getInstance().getSmartNode().getMeshAddress();
-		String roomName = Globals.getInstance().getSmartNode().getName();
-		int position = Arrays.binarySearch(ports.toArray(), (int) meshAddress);
-		mPortSpinner.setSelection(position);
-		mSNNameEditText.setText(roomName);
+//		setupPortSpinner();
+//		short meshAddress = Globals.getInstance().getSmartNode().getMeshAddress();
+//		String roomName = Globals.getInstance().getSmartNode().getName();
+//		int position = Arrays.binarySearch(ports.toArray(), (int) meshAddress);
+//		mPortSpinner.setSelection(position);
+//		mSNNameEditText.setText(roomName);
 	}
 	
 	
@@ -115,8 +114,8 @@ public class DefaultFragment extends DialogFragment
 	{
 		if (mSNNameEditText.getText() != null && !mSNNameEditText.getText().toString().equals(""))
 		{
-			Globals.getInstance().getSmartNode().setName(mSNNameEditText.getText().toString());
-			Globals.getInstance().getSmartNode().setMeshAddress(ports.get(mPortPosition).shortValue());
+//			Globals.getInstance().getSmartNode().setName(mSNNameEditText.getText().toString());
+//			Globals.getInstance().getSmartNode().setMeshAddress(ports.get(mPortPosition).shortValue());
 			Toast.makeText(DefaultFragment.this.getActivity(), "Saved", Toast.LENGTH_SHORT).show();
 			if (mBLEDeviceTypeButton.isChecked())
 			{

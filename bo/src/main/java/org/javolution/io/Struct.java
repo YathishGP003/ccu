@@ -22,6 +22,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import a75f.io.bo.json.serializers.Enum8Serializaer;
+import a75f.io.bo.json.serializers.Signed8Serializer;
 import a75f.io.bo.json.serializers.UTF8Serializer;
 import a75f.io.bo.json.serializers.Unsigned16Serializer;
 import a75f.io.bo.json.serializers.Unsigned8Serializer;
@@ -1210,6 +1211,7 @@ public class Struct {
     /**
      * This class represents a 8 bits signed integer.
      */
+    @JsonSerialize(using = Signed8Serializer.class)
     public class Signed8 extends Member {
 
         public Signed8() {
@@ -1279,6 +1281,7 @@ public class Struct {
     /**
      * This class represents a 16 bits signed integer.
      */
+    
     public class Signed16 extends Member {
 
         public Signed16() {

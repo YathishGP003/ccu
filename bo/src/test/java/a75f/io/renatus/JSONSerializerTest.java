@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import a75f.io.bo.JsonSerializer;
+import a75f.io.bo.json.serializers.JsonSerializer;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 
 /**

@@ -1,13 +1,8 @@
 package a75f.io.bo.serial;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
 import org.javolution.io.Struct;
 
 import java.nio.ByteOrder;
-
-import a75f.io.bo.Enum8Serializaer;
 
 /**
  * Created by ryanmattison on 7/25/17.
@@ -15,15 +10,18 @@ import a75f.io.bo.Enum8Serializaer;
 
 public class CcuToCmOverUsbDatabaseSeedSnMessage_t extends Struct
 {
-	@JsonSerialize(using = Enum8Serializaer.class)
+	
+	public String CCU = "DefaultCCU";
+	
 	public final Enum8<MessageType>  messageType      = new Enum8<>(MessageType.values());
-	@JsonIgnore
+	
 	public final Struct.Unsigned16   smartNodeAddress = new Unsigned16();
-	@JsonIgnore
+	
+	
 	public final Unsigned8[]         encryptionKey    = array(new Unsigned8[SerialConsts.APP_KEY_LENGTH]);
-	@JsonIgnore
+	
 	public final SmartNodeSettings_t settings         = inner(new SmartNodeSettings_t());
-	@JsonIgnore
+	
 	public final SmartNodeControls_t controls         = inner(new SmartNodeControls_t());
 	
 	@Override

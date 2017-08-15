@@ -24,12 +24,14 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Set;
 
 import a75f.io.bo.SmartNode;
+import a75f.io.bo.json.serializers.JsonSerializer;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.bo.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
 import a75f.io.bo.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
@@ -214,7 +216,7 @@ public class USBHomeFragment extends DialogFragment
 			Log.i(TAG, "Data return size: " + data.length);
 			
 			MessageType messageType = MessageType.values()[(event.getBytes()[0] & 0xff)];
-			
+			String pojoAsString = null;
 			Log.i(TAG, "Message Type: " + messageType.name());
 			if(messageType == MessageType.CM_REGULAR_UPDATE)
 			{
@@ -222,6 +224,16 @@ public class USBHomeFragment extends DialogFragment
 				CmToCcuOverUsbCmRegularUpdateMessage_t regularUpdateMessage_t = new CmToCcuOverUsbCmRegularUpdateMessage_t();
 				regularUpdateMessage_t.setByteBuffer(ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN), 0);
 				Log.i(TAG, "Regular Update Message: " + regularUpdateMessage_t.toString());
+			
+				try
+				{
+					pojoAsString = JsonSerializer.toJson(regularUpdateMessage_t, true);
+					System.out.println("POJO as string:\n" + pojoAsString + "\n");
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
 			}
 			else if(messageType == MessageType.CM_TO_CCU_OVER_USB_SN_REGULAR_UPDATE)
 			{
@@ -231,6 +243,15 @@ public class USBHomeFragment extends DialogFragment
 				Log.i(TAG, "Size of inner struct SnToCmOverAirSnRegularUpdateMessage_t: " +  new SnToCmOverAirSnRegularUpdateMessage_t().size());
 				smartNodeRegularUpdateMessage_t.setByteBuffer(ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN), 0);
 				Log.i(TAG, "Smart Node Regular Update Message: " + smartNodeRegularUpdateMessage_t.toString());
+				try
+				{
+					pojoAsString = JsonSerializer.toJson(smartNodeRegularUpdateMessage_t, true);
+					System.out.println("POJO as string:\n" + pojoAsString + "\n");
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
 				
 			}
 			
@@ -262,6 +283,17 @@ public class USBHomeFragment extends DialogFragment
 			//seedMessage.settings.lightingControl.set(1);
 			//seedMessage.settings.ledBitmap.digitalOut2.set(1);
 			seedMessage.controls.digitalOut1.set((short) 1);
+			String pojoAsString = null;
+			
+			try
+			{
+				pojoAsString = JsonSerializer.toJson(seedMessage, true);
+				System.out.println("POJO as string:\n" + pojoAsString + "\n");
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
 			usbService.write(seedMessage.getOrderedBuffer());
 			//usbService.write(seedMessage.getOrderedBuffer());
 		}

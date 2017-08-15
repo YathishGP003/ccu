@@ -2,13 +2,12 @@ package a75f.io.bo.ble;
 
 import android.util.Log;
 
-import a75f.io.bo.interfaces.ISerial;
 
 /**
  * Created by ryanmattison on 7/24/17.
  */
 
-public class GattPin implements ISerial {
+public class GattPin  {
     private static final String TAG = GattPin.class.getSimpleName();
 
     private int mPin;
@@ -27,7 +26,6 @@ public class GattPin implements ISerial {
         this.mPin = pin;
     }
 
-    @Override
     public void fromBytes(byte[] bytes) {
         mPin = 0;
         for (byte b : bytes) {
@@ -40,7 +38,6 @@ public class GattPin implements ISerial {
 
     }
 
-    @Override
     public byte[] toBytes() {
         return new byte[0];
     }

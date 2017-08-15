@@ -8,6 +8,9 @@
  */
 package org.javolution.io;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import org.javolution.annotations.Realtime;
 import org.javolution.lang.MathLib;
 import org.javolution.text.TextBuilder;
@@ -17,6 +20,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+
+import a75f.io.bo.json.serializers.Enum8Serializaer;
+import a75f.io.bo.json.serializers.UTF8Serializer;
+import a75f.io.bo.json.serializers.Unsigned16Serializer;
+import a75f.io.bo.json.serializers.Unsigned8Serializer;
 
 /**
  * <p> Equivalent to a  <code>C/C++ struct</code>; this class confers
@@ -166,11 +174,13 @@ public class Struct {
     /**
      * Holds the byte buffer backing the struct (top struct).
      */
+    @JsonIgnore
     ByteBuffer _byteBuffer;
     /**
      * Holds the offset of this struct relative to the outer struct or
      * to the byte buffer if there is no outer.
      */
+    
     int _outerOffset;
     /**
      * Holds this struct alignment in bytes (largest word size of its members).
@@ -248,6 +258,7 @@ public class Struct {
      * @return the current byte buffer or a new direct buffer if none set.
      * @see #setByteBuffer
      */
+    @JsonIgnore
     public final ByteBuffer getByteBuffer() {
         if (_outer != null) return _outer.getByteBuffer();
         return (_byteBuffer != null) ? _byteBuffer : newBuffer();
@@ -262,6 +273,7 @@ public class Struct {
     }
 
 
+    @JsonIgnore
     public final byte[] getOrderedBuffer()
     {
         byte[] bytes = new byte[size()];
@@ -321,6 +333,7 @@ public class Struct {
      * @return the absolute position of this struct (can be an inner struct)
      *         in the byte buffer.
      */
+    @JsonIgnore
     public final int getByteBufferPosition() {
         return (_outer != null) ? _outer.getByteBufferPosition() + _outerOffset
                 : _outerOffset;
@@ -477,6 +490,7 @@ public class Struct {
      *         otherwise.
      * @see Union
      */
+    @JsonIgnore
     public boolean isUnion() {
         return false;
     }
@@ -518,6 +532,7 @@ public class Struct {
      * @return <code>true</code> if word size requirements are ignored.
      *         <code>false</code> otherwise (default).
      */
+    @JsonIgnore
     public boolean isPacked() {
         return true;
     }
@@ -1089,6 +1104,7 @@ public class Struct {
      * This class represents a UTF-8 character string, null terminated
      * (for C/C++ compatibility)
      */
+    @JsonSerialize(using = UTF8Serializer.class)
     public class UTF8String extends Member {
 
         private final UTF8ByteBufferWriter _writer = new UTF8ByteBufferWriter();
@@ -1228,6 +1244,7 @@ public class Struct {
     /**
      * This class represents a 8 bits unsigned integer.
      */
+	@JsonSerialize(using = Unsigned8Serializer.class)
     public class Unsigned8 extends Member {
 
         public Unsigned8() {
@@ -1296,6 +1313,8 @@ public class Struct {
     /**
      * This class represents a 16 bits unsigned integer.
      */
+    
+    @JsonSerialize(using = Unsigned16Serializer.class)
     public class Unsigned16 extends Member {
 
         public Unsigned16() {
@@ -1659,6 +1678,7 @@ public class Struct {
     /**
      * This class represents a 8 bits {@link Enum}.
      */
+    @JsonSerialize(using = Enum8Serializaer.class)
     public class Enum8<T extends Enum<T>> extends Member {
 
         private final T[] _values;

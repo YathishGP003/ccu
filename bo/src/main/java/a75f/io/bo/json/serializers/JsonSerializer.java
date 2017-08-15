@@ -1,4 +1,4 @@
-package a75f.io.bo;
+package a75f.io.bo.json.serializers;
 /**
  * Created by Yinten on 8/14/2017.
  */

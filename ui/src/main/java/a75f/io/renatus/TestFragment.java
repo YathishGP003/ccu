@@ -31,12 +31,14 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
 import a75f.io.bo.SmartNode;
+import a75f.io.bo.json.serializers.JsonSerializer;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSmartStatMessage_t;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.bo.serial.CcuToCmOverUsbSnSettingsMessage_t;
@@ -443,7 +445,8 @@ public class TestFragment extends BaseDialogFragment
 	}
 	
 	@OnClick(R.id.sendSettings)
-	public void sendSettings() {
+	public void sendSettings()
+	{
 		/*CcuToCmOverUsbSnSettingsMessage_t msg = new CcuToCmOverUsbSnSettingsMessage_t();
                 msg.smartNodeAddress.set((short)4000);
                 msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_SETTINGS);
@@ -452,7 +455,7 @@ public class TestFragment extends BaseDialogFragment
 
 		SmartNode sn = Globals.getInstance().getSmartNode();
 		CcuToCmOverUsbDatabaseSeedSmartStatMessage_t msg = new CcuToCmOverUsbDatabaseSeedSmartStatMessage_t();
-		msg.messageType.set(MessageType.CM_TO_SMART_STAT_OVER_AIR_SMART_STAT_SETTINGS);
+		msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SMART_STAT_SETTINGS);
 		msg.address.set(sn.getMeshAddress());
 		
 		msg.settings.roomName.set(roomName.getText().toString());
@@ -461,7 +464,14 @@ public class TestFragment extends BaseDialogFragment
 		msg.settings.minUserTemp.set(parseShort(minTemp.getText().toString()));
 		msg.settings.showCentigrade.set(showCentigrade.isChecked() == true ? (short)1 : (short) 0);
 		msg.settings.enableOccupancyDetection.set(occDetection.isChecked() == true ? (short)1 : (short)0);
-		
+		try
+		{
+			Log.i(TAG, "CCuToCM: " + JsonSerializer.toJson(msg, true));
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
 		if (usbService != null) {
 			usbService.write(msg.getOrderedBuffer());
 		}

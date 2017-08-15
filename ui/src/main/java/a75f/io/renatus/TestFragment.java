@@ -41,6 +41,8 @@ import a75f.io.bo.SmartNode;
 import a75f.io.bo.json.serializers.JsonSerializer;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSmartStatMessage_t;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
+import a75f.io.bo.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
+import a75f.io.bo.serial.CcuToCmOverUsbSmartStatSettingsMessage_t;
 import a75f.io.bo.serial.CcuToCmOverUsbSnSettingsMessage_t;
 import a75f.io.bo.serial.MessageType;
 import a75f.io.bo.serial.SmartStatConditioningMode_t;
@@ -438,6 +440,15 @@ public class TestFragment extends BaseDialogFragment
 		msg.controls.relay5.set(((Switch)relayList.get(4)).isChecked() == true ? (short) 1: (short)0);
 		msg.controls.relay6.set(((Switch)relayList.get(5)).isChecked() == true ? (short) 1: (short)0);
 		
+		try
+		{
+			Log.i(TAG, "CCuToCM: " + JsonSerializer.toJson(msg, true));
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		
 		if (usbService != null) {
 			usbService.write(msg.getOrderedBuffer());
 		}
@@ -451,19 +462,31 @@ public class TestFragment extends BaseDialogFragment
                 msg.smartNodeAddress.set((short)4000);
                 msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_SETTINGS);
                 msg.settings.profileBitmap.bitmap.set((short) (1));*/
-
+		
+		short maxT ,minT;
+		try
+		{
+			maxT = parseShort(maxTemp.getText().toString());
+			minT = parseShort(minTemp.getText().toString());
+		} catch (Exception e) {
+			e.printStackTrace();
+			maxT = (short) 80;
+			minT = (short) 65;
+			Toast.makeText(TestFragment.this.getContext(), "Temperature not set , default values are used", Toast.LENGTH_SHORT).show();
+		}
 
 		SmartNode sn = Globals.getInstance().getSmartNode();
-		CcuToCmOverUsbDatabaseSeedSmartStatMessage_t msg = new CcuToCmOverUsbDatabaseSeedSmartStatMessage_t();
+		CcuToCmOverUsbSmartStatSettingsMessage_t msg = new CcuToCmOverUsbSmartStatSettingsMessage_t();
 		msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SMART_STAT_SETTINGS);
 		msg.address.set(sn.getMeshAddress());
 		
 		msg.settings.roomName.set(roomName.getText().toString());
 		msg.settings.profileBitmap.bitmap.set((short) (1 << profileSlection));
-		msg.settings.maxUserTemp.set(parseShort(maxTemp.getText().toString()));
-		msg.settings.minUserTemp.set(parseShort(minTemp.getText().toString()));
+		msg.settings.maxUserTemp.set(maxT);
+		msg.settings.minUserTemp.set(minT);
 		msg.settings.showCentigrade.set(showCentigrade.isChecked() == true ? (short)1 : (short) 0);
 		msg.settings.enableOccupancyDetection.set(occDetection.isChecked() == true ? (short)1 : (short)0);
+		msg.settings.enabledRelaysBitmap.bitmap.set((short)0xFF); //Enable all relays
 		try
 		{
 			Log.i(TAG, "CCuToCM: " + JsonSerializer.toJson(msg, true));
@@ -483,7 +506,7 @@ public class TestFragment extends BaseDialogFragment
 		
 		
 		SmartNode sn = Globals.getInstance().getSmartNode();
-		CcuToCmOverUsbDatabaseSeedSmartStatMessage_t msg = new CcuToCmOverUsbDatabaseSeedSmartStatMessage_t();
+		CcuToCmOverUsbSmartStatControlsMessage_t msg = new CcuToCmOverUsbSmartStatControlsMessage_t();
 		msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SMART_STAT_CONTROLS);
 		msg.address.set(sn.getMeshAddress());
 		short setT;
@@ -506,6 +529,15 @@ public class TestFragment extends BaseDialogFragment
 		msg.controls.relay4.set(((Switch)relayList.get(3)).isChecked() == true ? (short) 1: (short)0);
 		msg.controls.relay5.set(((Switch)relayList.get(4)).isChecked() == true ? (short) 1: (short)0);
 		msg.controls.relay6.set(((Switch)relayList.get(5)).isChecked() == true ? (short) 1: (short)0);
+		
+		try
+		{
+			Log.i(TAG, "CCuToCM: " + JsonSerializer.toJson(msg, true));
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
 		
 		if (usbService != null) {
 			usbService.write(msg.getOrderedBuffer());

@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -26,6 +27,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnEditorAction;
 import butterknife.OnFocusChange;
+import butterknife.OnItemClick;
 
 /**
  * Created by samjithsadasivan on 8/7/17.
@@ -188,7 +190,7 @@ public class FloorPlanFragment extends Fragment
 			Toast.makeText(getActivity().getApplicationContext(), "Room " + addRoomEdit.getText() + " added", Toast.LENGTH_SHORT).show();
 			Room room = FloorContainer.getInstance().getFloorList()
 			                                    .get(mCurFloorIndex).addRoom(addFloorEdit.getText().toString());
-			selectRoomItem(room.getmRoomId());
+			selectRoom(room.getmRoomId());
 			InputMethodManager mgr = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 			mgr.hideSoftInputFromWindow(addFloorEdit.getWindowToken(), 0);
 			enableRoomBtn();
@@ -213,6 +215,24 @@ public class FloorPlanFragment extends Fragment
 		showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
 	}
 	
+	@OnItemClick(R.id.floorList)
+	public void setFloorListView(AdapterView<?> parent, View view, int position,
+	                             long id) {
+		selectFloor(position);
+	}
+	
+	@OnItemClick(R.id.roomList)
+	public void setRoomListView(AdapterView<?> parent, View view, int position,
+	                             long id) {
+		selectRoom(position);
+	}
+	
+	@OnItemClick(R.id.moduleList)
+	public void setModuleListView(AdapterView<?> parent, View view, int position,
+	                             long id) {
+		//select module
+	}
+	
 	private void showDialogFragment(DialogFragment dialogFragment, String id)
 	{
 		FragmentTransaction ft = getFragmentManager().beginTransaction();
@@ -229,14 +249,12 @@ public class FloorPlanFragment extends Fragment
 	private void selectFloor(int position) {
 		mCurFloorIndex = position;
 		FloorContainer.getInstance().getFloorListAdapter().setSelectedItem(position);
+		roomListView.setAdapter(FloorContainer.getInstance().getFloorList().get(mCurFloorIndex).getmRoomListAdapter());
+		selectRoom(0);
 	}
 	
-	private void selectRoomItem(int position) {
+	private void selectRoom(int position) {
 		mCurRoomIndex = position;
-		/*if (position == 0) {
-			roomListView.setAdapter(FloorContainer.getInstance().getFloorList()
-			                                      .get(mCurFloorIndex).getmRoomListAdapter());
-		}*/
 		FloorContainer.getInstance().getFloorList().get(mCurFloorIndex).getmRoomListAdapter().setSelectedItem(position);
 	}
 	

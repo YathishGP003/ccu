@@ -13,7 +13,6 @@ public class CcuToCmOverUsbCmRelayActivationMessage_t extends Struct
 	
 	// note one more byte is added at end. By default if CCU sends old message with shorter structure, all the ext i/0 will be output.
 	public final Enum8<MessageType> messageType = new Enum8<>(MessageType.values());
-	public final Struct.Unsigned16  address     = new Unsigned16();
 	
 	public final Unsigned8 relayBitmap              = new Unsigned8(); // digital out for HVAC activation
 	public final Unsigned8 analog0                  = new Unsigned8(); // analog outputs for variable freq drive

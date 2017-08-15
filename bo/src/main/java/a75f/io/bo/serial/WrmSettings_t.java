@@ -17,7 +17,7 @@ public class WrmSettings_t extends Struct
 	public final Unsigned8 minUserTemp                  = new Unsigned8(); // default 60 - in deg F
 	public final Unsigned8 maxDamperOpen                = new Unsigned8(); // default 100 - in percent
 	public final Unsigned8 minDamperOpen                = new Unsigned8(); // default 40 - in percent
-	public final Unsigned8 temperatureOffset            = new Unsigned8(); // default 0 - in 1/10 deg F. This is added to the measured temp
+	public final Signed8 temperatureOffset            = new Signed8(); // default 0 - in 1/10 deg F. This is added to the measured temp
 	public final Unsigned8 motorOperationalCurrent      = new Unsigned8(); // default 20 - the current in ma motor draws when steady state @5v
 	public final Unsigned8 motorStallCurrent            = new Unsigned8(); // default 80 - the current in ma motor draws when stalled @5v
 	public final Unsigned8 indicatedForwardMotorRpm     = new Unsigned8(); // default 22 - the actual rpm used in all settings. Normally should be equal to measured rpm but may be overridden for testing

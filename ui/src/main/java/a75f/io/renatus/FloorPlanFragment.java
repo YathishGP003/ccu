@@ -20,12 +20,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import a75f.io.renatus.BLE.FragmentDeviceScan;
+import a75f.io.util.Globals;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnEditorAction;
 import butterknife.OnFocusChange;
 import butterknife.OnItemClick;
+
+import org.greenrobot.eventbus.EventBus;
+
 
 /**
  * Created by samjithsadasivan on 8/7/17.
@@ -96,6 +100,8 @@ public class FloorPlanFragment extends Fragment
 		
 		roomListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
 		roomListView.setMultiChoiceModeListener(new RoomListActionMenuListener(this));
+		
+		//EventBus.getDefault().register();
 		
 	}
 	@Override
@@ -226,16 +232,9 @@ public class FloorPlanFragment extends Fragment
 	
 	@OnClick (R.id.pairModuleBtn)
 	public void startPairing() {//TODO - Test code hardcoded to fix crash
-		short meshAddress;
-		String roomName;
-		try
-		{
-			meshAddress = Globals.getInstance().getSmartNode().getMeshAddress();
-			roomName = Globals.getInstance().getSmartNode().getName();
-		} catch (NullPointerException e) {
-			meshAddress = 6000;
-			roomName = "75F Room";
-		}
+		short meshAddress = 6000;;
+		String roomName = "75F Room";
+		
 		FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(meshAddress, roomName);
 		showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
 	}

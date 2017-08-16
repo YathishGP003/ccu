@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
+import a75f.io.bo.building.CCUApplication;
 import a75f.io.bo.json.serializers.JsonSerializer;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 
@@ -27,6 +28,30 @@ public class JSONSerializerTest
 		try
 		{
 			String pojoAsString = JsonSerializer.toJson(seedMessage, true);
+			System.out.println("POJO as string:\n" + pojoAsString + "\n");
+		}
+		catch (JsonGenerationException e)
+		{
+			e.printStackTrace();
+		}
+		catch (JsonMappingException e)
+		{
+			e.printStackTrace();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	@Test
+	public void buildingPOJOTest()
+	{
+		CCUApplication ccuApp = new CCUApplication();
+		
+		try
+		{
+			String pojoAsString = JsonSerializer.toJson(ccuApp, true);
 			System.out.println("POJO as string:\n" + pojoAsString + "\n");
 		}
 		catch (JsonGenerationException e)

@@ -25,4 +25,29 @@
     <string name="ble_no_devices_found_warning">No devices found.  (Please have smart node in advertisement mode and be within range)</string>
     <string name="scan_dialog_title">Scanning for 75F devices</string>
     <string name="unable_to_bluetooth">Unable to initialize bluetooth!</string>
+
+
+    <string-array name="lcm_relay">
+        <item>  Normally Open </item>
+        <item>  Normally Close </item>
+    </string-array>
+
+    <string-array name="lcm_analog_out">
+        <item>  0-10v </item>
+        <item>  2-10v </item>
+    </string-array>
+    <string-array name="lcm_analog_in">
+        <item>  0-10A Current Transformer </item>
+        <item>  0-20A Current Transformer </item>
+        <item>  0-50A Current Transformer</item>
+    </string-array>
+    <string-array name="hvac_equip_select">
+        <item>  DX-Unit</item>
+        <item>  Chiller/AHU </item>
+        <item>  Pneumatic VAV </item>
+        <item>  VAV with Reheat </item>
+    </string-array>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

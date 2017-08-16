@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import a75f.io.bo.building.CCUApplication;
 import a75f.io.bo.building.LightProfile;
@@ -56,7 +57,7 @@ public class JSONSerializerTest
 		CCUApplication ccuApplication = new CCUApplication();
 		SmartNode smartNode5K = new SmartNode();
 		smartNode5K.address = smartNodeAddress;
-		
+		smartNode5K.analog1OutId = UUID.randomUUID());
 		ccuApplication.CCUTitle = "Light Test";
 		
 		Zone zone5K = new Zone();

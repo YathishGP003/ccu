@@ -6,5 +6,5 @@ package a75f.io.bo.building;
 
 public class ControlMote
 {
-	String controlMoteOutputInput = "Control Mote settings go here";
+	public String controlMoteOutputInput = "Control Mote settings go here";
 }

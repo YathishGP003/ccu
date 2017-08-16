@@ -7,6 +7,11 @@ import org.junit.Test;
 
 import java.io.IOException;
 
+import a75f.io.bo.building.CCUApplication;
+import a75f.io.bo.building.LightProfile;
+import a75f.io.bo.building.SmartNode;
+import a75f.io.bo.building.SmartNodeOutput;
+import a75f.io.bo.building.Zone;
 import a75f.io.bo.json.serializers.JsonSerializer;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 
@@ -41,5 +46,32 @@ public class JSONSerializerTest
 		{
 			e.printStackTrace();
 		}
+	}
+	
+	
+	@Test
+	public void generateLightObjectsTest()
+	{
+		int smartNodeAddress = 5000;
+		CCUApplication ccuApplication = new CCUApplication();
+		SmartNode smartNode5K = new SmartNode();
+		smartNode5K.address = smartNodeAddress;
+		
+		ccuApplication.CCUTitle = "Light Test";
+		
+		Zone zone5K = new Zone();
+		LightProfile lightProfile5K = new LightProfile();
+		zone5K.zoneProfiles.add(lightProfile5K);
+		ccuApplication.zones.add(zone5K);
+		
+		zone5K.roomName = "5000 test zone";
+		SmartNodeOutput smartNodeOutput5K = new SmartNodeOutput();
+		
+		
+	//	lightProfile5K.smartNodeOutputs.add();
+		
+		
+		
+		
 	}
 }

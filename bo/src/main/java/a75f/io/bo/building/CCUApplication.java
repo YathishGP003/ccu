@@ -13,4 +13,5 @@ public class CCUApplication
 	public List<Zone>    zones         = new ArrayList<Zone>();
 	public SystemProfile systemProfile = new SystemProfile();
 	public ControlMote   controlMote   = new ControlMote();
+	public ArrayList<SmartNode> smartNodes = new ArrayList<SmartNode>();
 }

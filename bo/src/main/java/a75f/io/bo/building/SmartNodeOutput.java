@@ -8,10 +8,12 @@ public class SmartNodeOutput
 {
 	
 	///UUID.randomUUID().toString();
-	String uniqueID = "";
-	String                   name;
-	Output                   output;
-	OutputRelayActuatorType  outputRelayActuatorType;
-	OutputAnalogActuatorType outputAnalogActuatorType;
+	public String uniqueID = "";
+	public String                   name;
+	public Output                   output;
+	public OutputRelayActuatorType  outputRelayActuatorType;
+	public OutputAnalogActuatorType outputAnalogActuatorType;
+	
+	
 	
 }

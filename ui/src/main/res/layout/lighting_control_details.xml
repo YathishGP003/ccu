@@ -123,8 +123,8 @@
             android:minEms="10"
             android:id="@+id/lcmRelay2EditName"
             android:layout_marginLeft="20dp"
-            android:focusable="false"
-            android:clickable="false" />
+            android:focusable="true"
+            android:clickable="true" />
 
 
         <Switch
@@ -297,7 +297,7 @@
             android:id="@+id/lcmCancelCommand"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="CANCEL"
+            android:text="Cancel"
             android:textColor="@color/black"
             android:layout_alignLeft="@+id/lcmSetCommand"
             android:layout_marginRight="50dp" />
@@ -305,7 +305,7 @@
             android:id="@+id/lcmSetCommand"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="SET"
+            android:text="Send"
             android:textColor="@color/black"
             android:layout_marginRight="50dp" />
     </LinearLayout>

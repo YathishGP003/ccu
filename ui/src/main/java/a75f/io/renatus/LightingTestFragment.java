@@ -158,7 +158,7 @@ public class LightingTestFragment extends DialogFragment implements AdapterView.
         });
         
         return new AlertDialog.Builder(getActivity(), R.style.NewDialogStyle)
-                       .setTitle("Lighting Control").setView(view)
+                       .setTitle("Lighting Test").setView(view)
                        .setCancelable(false).create();
         
     }

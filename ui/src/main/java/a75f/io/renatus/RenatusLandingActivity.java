@@ -11,9 +11,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 
-import a75f.io.renatus.USB.USBHomeFragment;
-import a75f.io.util.Globals;
-
 public class RenatusLandingActivity extends AppCompatActivity {
 
     /**
@@ -93,7 +90,7 @@ public class RenatusLandingActivity extends AppCompatActivity {
                }
                else if (settingView == true && mTabLayout.getSelectedTabPosition() == 1)
                {
-                   TestFragment.newInstance().show(getSupportFragmentManager(), "test");
+                 
                }
                else if (settingView == false && mTabLayout.getSelectedTabPosition() == 1)
                {

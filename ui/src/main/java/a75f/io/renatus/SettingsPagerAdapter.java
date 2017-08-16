@@ -32,6 +32,10 @@ public class SettingsPagerAdapter extends FragmentStatePagerAdapter
 				//fragment = USBHomeFragment.getInstance();
 				fragment = SettingsFragment.newInstance();
 				break;
+			case 2:
+				//fragment = USBHomeFragment.getInstance();
+				fragment = TestFragment.newInstance();
+				break;
 		}
 		return fragment;
 	}
@@ -39,7 +43,7 @@ public class SettingsPagerAdapter extends FragmentStatePagerAdapter
 	@Override
 	public int getCount() {
 		// Show 2 total pages.
-		return 2;
+		return 3;
 	}
 	
 	@Override
@@ -49,6 +53,8 @@ public class SettingsPagerAdapter extends FragmentStatePagerAdapter
 				return "Floor Layout";
 			case 1:
 				return "Settings";
+			case 2:
+				return "Tests";
 			
 		}
 		return null;

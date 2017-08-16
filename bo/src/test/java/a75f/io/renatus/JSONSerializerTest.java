@@ -54,7 +54,6 @@ public class JSONSerializerTest
 		}
 	}
 	
-	
 	@Test
 	public void generateLightObjectsTest()
 	{
@@ -107,12 +106,11 @@ public class JSONSerializerTest
 		{
 			String ccuToCMSeedMessage  = JsonSerializer.toJson(ccuToCmOverUsbDatabaseSeedSnMessage_t, true);
 			System.out.println("CCU seedMessage:\n" + ccuToCMSeedMessage + "\n");
+
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
 		}
-		
-		
 	}
 }

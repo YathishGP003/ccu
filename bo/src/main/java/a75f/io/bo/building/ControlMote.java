@@ -9,6 +9,8 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @JsonSerialize
 public class ControlMote
 {
-	//SerializationFeature.FAIL_ON_EMPTY_BEANS
-	String controlMoteOutputInput = "Control Mote settings go here";
+	
+	
+	
+	public String controlMoteOutputInput = "Control Mote settings go here";
 }

@@ -19,6 +19,8 @@ import android.widget.ToggleButton;
 import java.util.Arrays;
 import java.util.List;
 
+import a75f.io.bo.building.SmartNode;
+import a75f.io.util.Globals;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -78,12 +80,13 @@ public class DefaultFragment extends DialogFragment
 	public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
 	{
 		super.onViewCreated(view, savedInstanceState);
-//		setupPortSpinner();
-//		short meshAddress = Globals.getInstance().getSmartNode().getMeshAddress();
-//		String roomName = Globals.getInstance().getSmartNode().getName();
-//		int position = Arrays.binarySearch(ports.toArray(), (int) meshAddress);
-//		mPortSpinner.setSelection(position);
-//		mSNNameEditText.setText(roomName);
+		setupPortSpinner();
+		SmartNode smartNode = Globals.getInstance().getCCUApplication().smartNodes.size() > 0 ? Globals.getInstance().getCCUApplication().smartNodes.get(0) : null;
+		short meshAddress = smartNode != null ? (short) smartNode.address : (short) 5000;
+		String roomName = smartNode != null ? smartNode.roomName : "Default Room Name";
+		int position = Arrays.binarySearch(ports.toArray(), (int) meshAddress);
+		mPortSpinner.setSelection(position);
+		mSNNameEditText.setText(roomName);
 	}
 	
 	
@@ -112,10 +115,25 @@ public class DefaultFragment extends DialogFragment
 	@OnClick(R.id.button)
 	public void done()
 	{
+		
+		
+		SmartNode smartNode = null;
+		if(Globals.getInstance().getCCUApplication().smartNodes.size() == 0)
+		{
+			smartNode = new SmartNode();
+			Globals.getInstance().getCCUApplication().smartNodes.add(smartNode);
+		}
+		else
+		{
+			smartNode = Globals.getInstance().getCCUApplication().smartNodes.get(0);
+		}
 		if (mSNNameEditText.getText() != null && !mSNNameEditText.getText().toString().equals(""))
 		{
-//			Globals.getInstance().getSmartNode().setName(mSNNameEditText.getText().toString());
-//			Globals.getInstance().getSmartNode().setMeshAddress(ports.get(mPortPosition).shortValue());
+			smartNode.roomName = mSNNameEditText.getText().toString();
+		}
+		smartNode.address = ports.get(mPortPosition).shortValue();
+			//			Globals.getInstance().getSmartNode().setName(mSNNameEditText.getText().toString());
+			//			Globals.getInstance().getSmartNode().setMeshAddress(ports.get(mPortPosition).shortValue());
 			Toast.makeText(DefaultFragment.this.getActivity(), "Saved", Toast.LENGTH_SHORT).show();
 			if (mBLEDeviceTypeButton.isChecked())
 			{
@@ -125,7 +143,7 @@ public class DefaultFragment extends DialogFragment
 			{
 				dismiss();
 			}
-		}
+		
 		else
 		{
 			Toast.makeText(DefaultFragment.this.getActivity(), "Must enter a smart node name", Toast.LENGTH_SHORT).show();

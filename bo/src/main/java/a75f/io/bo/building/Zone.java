@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 public class Zone
 {
-	String roomName;
+	public String roomName = "Default Zone";
 	public ArrayList<ZoneProfile> zoneProfiles = new ArrayList<ZoneProfile>();
+	
 }

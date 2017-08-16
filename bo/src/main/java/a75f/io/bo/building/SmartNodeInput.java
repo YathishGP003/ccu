@@ -1,5 +1,7 @@
 package a75f.io.bo.building;
 
+import java.util.UUID;
+
 /**
  * Created by Yinten on 8/15/2017.
  */
@@ -7,7 +9,7 @@ package a75f.io.bo.building;
 public class SmartNodeInput
 {
 	///UUID.randomUUID().toString();
-	String  uniqueID = "";
+	UUID uniqueID;
 	String            name;
 	Input             input;
 	InputActuatorType inputActuatorType;

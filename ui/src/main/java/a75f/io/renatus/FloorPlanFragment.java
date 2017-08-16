@@ -87,7 +87,7 @@ public class FloorPlanFragment extends Fragment
 	public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 		enableFloorButton();
-		enableRoomBtn();
+		disableRoomModule();
 	}
 	
 	@Override
@@ -103,11 +103,17 @@ public class FloorPlanFragment extends Fragment
 	@Override
 	public void onResume() {
 		super.onResume();
+		mCurFloorIndex = mCurFloorIndex >= 0 ? mCurFloorIndex : 0;
 		floorListView.setAdapter(FloorContainer.getInstance().getFloorListAdapter());
 		if (FloorContainer.getInstance().getFloorList().size() >0) {
-			mCurFloorIndex = mCurFloorIndex >= 0 ? mCurFloorIndex : 0;
+			selectFloor(mCurFloorIndex);
 			roomListView.setAdapter(FloorContainer.getInstance().getFloorList()
 				                                      .get(mCurFloorIndex).getmRoomListAdapter());
+			enableRoomBtn();
+			if (FloorContainer.getInstance().getFloorList().get(mCurFloorIndex)
+			                  .getRoomList().size() > 0) {
+				enableModueButton();
+			}
 		}
 		
 	}
@@ -138,6 +144,16 @@ public class FloorPlanFragment extends Fragment
 		addRoomEdit.setVisibility(View.VISIBLE);
 	}
 	
+	private void enableModueButton() {
+		pairModuleBtn.setVisibility(View.VISIBLE);
+	}
+	private void disableRoomModule() {
+		addRoomBtn.setVisibility(View.INVISIBLE);
+		addRoomEdit.setVisibility(View.INVISIBLE);
+		pairModuleBtn.setVisibility(View.INVISIBLE);
+		addModuleEdit.setVisibility(View.INVISIBLE);
+	}
+	
 	@OnClick(R.id.addFloorBtn)
 	public void handleFloorBtn()
 	{
@@ -163,6 +179,7 @@ public class FloorPlanFragment extends Fragment
 			mgr.hideSoftInputFromWindow(addFloorEdit.getWindowToken(), 0);
 			Toast.makeText(getActivity().getApplicationContext(), "Floor " + addFloorEdit.getText() + " added", Toast.LENGTH_SHORT).show();
 			enableFloorButton();
+			enableRoomBtn();
 			return true;
 		}
 		return false;
@@ -191,11 +208,12 @@ public class FloorPlanFragment extends Fragment
 		{
 			Toast.makeText(getActivity().getApplicationContext(), "Room " + addRoomEdit.getText() + " added", Toast.LENGTH_SHORT).show();
 			Room room = FloorContainer.getInstance().getFloorList()
-			                                    .get(mCurFloorIndex).addRoom(addFloorEdit.getText().toString());
+			                                    .get(mCurFloorIndex).addRoom(addRoomEdit.getText().toString());
 			selectRoom(room.getmRoomId());
 			InputMethodManager mgr = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-			mgr.hideSoftInputFromWindow(addFloorEdit.getWindowToken(), 0);
+			mgr.hideSoftInputFromWindow(addRoomEdit.getWindowToken(), 0);
 			enableRoomBtn();
+			enableModueButton();
 			return true;
 		}
 		return false;
@@ -210,9 +228,17 @@ public class FloorPlanFragment extends Fragment
 	
 	@OnClick (R.id.pairModuleBtn)
 	public void startPairing() {
-		
-		short meshAddress = Globals.getInstance().getSmartNode().getMeshAddress();
-		String roomName = Globals.getInstance().getSmartNode().getName();
+		//TODO - Test code hardcoded to fix crash
+		short meshAddress;
+		String roomName;
+		try
+		{
+			meshAddress = Globals.getInstance().getSmartNode().getMeshAddress();
+			roomName = Globals.getInstance().getSmartNode().getName();
+		} catch (NullPointerException e) {
+			meshAddress = 6000;
+			roomName = "75F Room";
+		}
 		FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(meshAddress, roomName);
 		showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
 	}

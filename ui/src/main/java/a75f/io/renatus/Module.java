@@ -43,9 +43,9 @@ public class Module
 		return mModuleName;
 	}
 	
-	public void saveData(SharedPreferences.Editor editor, int floorId) {
-		editor.putString(MODULE_NAME+mRoomId +mModuleId, mModuleName);
-		editor.putInt(ROOM_ID+ mRoomId+mModuleId, mRoomId);
-		editor.putInt(MODULE_ADDRESS+mRoomId+mModuleId, (int)mModuleAddress);
+	public void saveData(SharedPreferences.Editor editor, int roomId) {
+		editor.putString(MODULE_NAME+roomId +mModuleId, mModuleName);
+		editor.putInt(ROOM_ID+ roomId+mModuleId, mRoomId);
+		editor.putInt(MODULE_ADDRESS+roomId+mModuleId, (int)mModuleAddress);
 	}
 }

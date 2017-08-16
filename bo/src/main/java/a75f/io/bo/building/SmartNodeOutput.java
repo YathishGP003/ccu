@@ -10,7 +10,7 @@ public class SmartNodeOutput
 {
 	
 	///UUID.randomUUID().toString();
-	public UUID uniqueI;
+	public UUID uniqueID;
 	public String                   name;
 	public Output                   output;
 	public OutputRelayActuatorType  outputRelayActuatorType;

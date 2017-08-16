@@ -13,7 +13,8 @@ public class CcuToCmOverUsbDatabaseSeedSnMessage_t extends Struct
 	
 	public String CCU = "DefaultCCU";
 	
-	public final Enum8<MessageType>  messageType      = new Enum8<>(MessageType.values());
+	
+	public final Enum8<MessageType>  messageType      =  new Enum8<>(MessageType.values());
 	
 	public final Struct.Unsigned16   smartNodeAddress = new Unsigned16();
 	

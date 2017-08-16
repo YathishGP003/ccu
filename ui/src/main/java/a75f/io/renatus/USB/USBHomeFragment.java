@@ -29,9 +29,19 @@ import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Set;
+import java.util.UUID;
 
+import a75f.io.bo.building.CCUApplication;
+import a75f.io.bo.building.LightProfile;
+import a75f.io.bo.building.Output;
+import a75f.io.bo.building.OutputAnalogActuatorType;
+import a75f.io.bo.building.SmartNode;
+import a75f.io.bo.building.SmartNodeOutput;
+import a75f.io.bo.building.Zone;
+import a75f.io.bo.building.ZoneProfile;
 import a75f.io.bo.json.serializers.JsonSerializer;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
+import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.bo.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
 import a75f.io.bo.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 import a75f.io.bo.serial.MessageType;
@@ -42,6 +52,7 @@ import a75f.io.renatus.R;
 import a75f.io.usbserial.SerialAction;
 import a75f.io.usbserial.SerialEvent;
 import a75f.io.usbserial.UsbService;
+import a75f.io.util.Globals;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -126,6 +137,7 @@ public class USBHomeFragment extends DialogFragment
 	public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
 	{
 		super.onViewCreated(view, savedInstanceState);
+		mUSBButton.setText("Light Off");
 	}
 
 
@@ -262,37 +274,63 @@ public class USBHomeFragment extends DialogFragment
 	{
 		if (usbService != null)
 		{
+			CCUApplication ccuApplication = Globals.getInstance().getCCUApplication();
 			usbService.setDebug(true);
 			mLightButton.setText("Send ordered buffer!");
-			//SmartNode sn = Globals.getInstance().getSmartNode();
-			CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = new CcuToCmOverUsbDatabaseSeedSnMessage_t();
-			seedMessage.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN);
-			//        try {
-			//            seedMessage.encryptionKey.read(new ByteArrayInputStream(EncryptionPrefs.getEncryptionKey()));
-			//        } catch (IOException e) {
-			//            e.printStackTrace();
-			//        }
-			//edMessage.settings.roomName.set(Globals.getInstance().getSmartNode().getName());
-			//edMessage.smartNodeAddress.set(Globals.getInstance().getSmartNode().getMeshAddress());
-			//seedMessage.controls.time.day.set((short) 1);
-			//seedMessage.controls.time.hours.set((short) 1);
-			//seedMessage.controls.time.minutes.set((short) 1);
-			//seedMessage.controls.digitalOut1.set(1);
-			//seedMessage.settings.lightingControl.set(1);
-			//seedMessage.settings.ledBitmap.digitalOut2.set(1);
-			seedMessage.controls.digitalOut1.set((short) 1);
-			String pojoAsString = null;
+			if(ccuApplication.zones.size() == 0)
+			{
+				UUID analog15kUUID = UUID.randomUUID();
+				SmartNode smartNode = ccuApplication.smartNodes.get(0);
+				smartNode.analog1OutId = analog15kUUID;
+				Zone zone5K = new Zone();
+				zone5K.roomName = "5000 test zone";
+				LightProfile lightProfile5K = new LightProfile();
+				zone5K.zoneProfiles.add(lightProfile5K);
+				ccuApplication.zones.add(zone5K);
+				SmartNodeOutput smartNodeOutput5K = new SmartNodeOutput();
+				smartNodeOutput5K.uniqueID = analog15kUUID;
+				smartNodeOutput5K.outputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
+				smartNodeOutput5K.output = Output.Analog;
+				smartNodeOutput5K.name = "Dining Room";
+				lightProfile5K.smartNodeOutputs.add(smartNodeOutput5K);
+				
+				
+			}
 			
 			try
 			{
-				pojoAsString = JsonSerializer.toJson(seedMessage, true);
-				System.out.println("POJO as string:\n" + pojoAsString + "\n");
+				String ccuApplicationJSON = JsonSerializer.toJson(ccuApplication, true);
+				System.out.println("CCU Application As String:\n" + ccuApplicationJSON + "\n");
 			}
 			catch (IOException e)
 			{
 				e.printStackTrace();
 			}
-			usbService.write(seedMessage.getOrderedBuffer());
+			
+			SmartNode smartNode = ccuApplication.findSmartNodeByIOUUID(ccuApplication.zones.get(0).zoneProfiles.get(0).smartNodeOutputs.get(0).uniqueID);
+			CcuToCmOverUsbDatabaseSeedSnMessage_t ccuToCmOverUsbDatabaseSeedSnMessage_t = new CcuToCmOverUsbDatabaseSeedSnMessage_t();
+			ccuToCmOverUsbDatabaseSeedSnMessage_t.smartNodeAddress.set(smartNode.address);
+			ccuToCmOverUsbDatabaseSeedSnMessage_t.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN);
+			//ccuToCmOverUsbDatabaseSeedSnMessage_t.putEncrptionKey(Encryp);
+			ZoneProfile zoneProfile = ccuApplication.zones.get(0).zoneProfiles.get(0);
+			ccuToCmOverUsbDatabaseSeedSnMessage_t.controls.analogOut1.set((short) 100);
+			
+			ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.profileBitmap.lightingControl.set((short) 1);
+			ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.ledBitmap.analogIn1.set((short)1);
+			ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.lightingIntensityForOccupantDetected.set((short) 100);
+			ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.minLightingControlOverrideTimeInMinutes.set((short)1);
+			ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.roomName.set(smartNode.roomName);
+			try
+			{
+				String ccuToCmOverUsbDatabaseSeedSnMessageJSON = JsonSerializer.toJson(ccuToCmOverUsbDatabaseSeedSnMessage_t, true);
+				System.out.println("CCU Application As String:\n" + ccuToCmOverUsbDatabaseSeedSnMessageJSON + "\n");
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+			
+			usbService.write(ccuToCmOverUsbDatabaseSeedSnMessage_t.getOrderedBuffer());
 			//usbService.write(seedMessage.getOrderedBuffer());
 		}
 		else
@@ -300,26 +338,84 @@ public class USBHomeFragment extends DialogFragment
 			Toast.makeText(USBHomeFragment.this.getContext(), "USB Service not connected", Toast.LENGTH_SHORT).show();
 		}
 	}
-	
+
+	boolean lightOn = false;
 	
 	@OnClick(R.id.fragment_usb_button)
 	public void usbSubmit()
 	{
-		Log.i(TAG, "Done");
-		usbService.setDebug(true);
-		mUSBButton.setText("Send Array bytes");
-		CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = new CcuToCmOverUsbDatabaseSeedSnMessage_t();
-		seedMessage.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN);
-		seedMessage.smartNodeAddress.set(2000);
-		seedMessage.controls.time.day.set((short) 1);
-		seedMessage.controls.time.hours.set((short) 1);
-		seedMessage.controls.time.minutes.set((short) 1);
-		seedMessage.controls.digitalOut1.set((short) 1);
-		seedMessage.settings.ledBitmap.digitalOut1.set((short) 1);
 		if (usbService != null)
-		{ // if UsbService was correctly binded, Send data
-			usbService.write(seedMessage.getByteBuffer().array());
+		{
+			CCUApplication ccuApplication = Globals.getInstance().getCCUApplication();
+			usbService.setDebug(true);
+			mLightButton.setText("Send ordered buffer!");
+			if(ccuApplication.zones.size() == 0)
+			{
+				
+				
+				UUID analog15kUUID = UUID.randomUUID();
+				SmartNode smartNode = ccuApplication.smartNodes.get(0);
+				smartNode.analog1OutId = analog15kUUID;
+				Zone zone5K = new Zone();
+				zone5K.roomName = "5000 test zone";
+				LightProfile lightProfile5K = new LightProfile();
+				zone5K.zoneProfiles.add(lightProfile5K);
+				ccuApplication.zones.add(zone5K);
+				SmartNodeOutput smartNodeOutput5K = new SmartNodeOutput();
+				smartNodeOutput5K.uniqueID = analog15kUUID;
+				smartNodeOutput5K.outputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
+				smartNodeOutput5K.output = Output.Analog;
+				smartNodeOutput5K.name = "Dining Room";
+				lightProfile5K.smartNodeOutputs.add(smartNodeOutput5K);
+				
+				
+			}
+			
+			try
+			{
+				String ccuApplicationJSON = JsonSerializer.toJson(ccuApplication, true);
+				System.out.println("CCU Application As String:\n" + ccuApplicationJSON + "\n");
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+			SmartNode smartNode = ccuApplication.findSmartNodeByIOUUID(ccuApplication.zones.get(0).zoneProfiles.get(0).smartNodeOutputs.get(0).uniqueID);
+			CcuToCmOverUsbSnControlsMessage_t controlsMessage_t = new CcuToCmOverUsbSnControlsMessage_t();
+			controlsMessage_t.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_CONTROLS);
+			controlsMessage_t.smartNodeAddress.set(smartNode.address);
+			lightOn = !lightOn;
+			controlsMessage_t.controls.analogOut1.set(lightOn ? (short)100 : (short) 0);
+			try
+			{
+				String controlsMessage_tJSON = JsonSerializer.toJson(controlsMessage_t, true);
+				System.out.println("controlsMessage_tJSON As String:\n" + controlsMessage_tJSON + "\n");
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+			usbService.write(controlsMessage_t.getOrderedBuffer());
+			
+			
+//			CcuToCmOverUsbDatabaseSeedSnMessage_t ccuToCmOverUsbDatabaseSeedSnMessage_t = new CcuToCmOverUsbDatabaseSeedSnMessage_t();
+//			ccuToCmOverUsbDatabaseSeedSnMessage_t.smartNodeAddress.set(smartNode.address);
+//			ccuToCmOverUsbDatabaseSeedSnMessage_t.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN);
+//			//ccuToCmOverUsbDatabaseSeedSnMessage_t.putEncrptionKey(Encryp);
+//			ZoneProfile zoneProfile = ccuApplication.zones.get(0).zoneProfiles.get(0);
+//			ccuToCmOverUsbDatabaseSeedSnMessage_t.controls.analogOut1.set((short) 0);
+//
+//			ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.profileBitmap.lightingControl.set((short) 1);
+//			ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.ledBitmap.analogIn1.set((short)1);
+//			ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.lightingIntensityForOccupantDetected.set((short) 0);
+//			ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.minLightingControlOverrideTimeInMinutes.set((short) 1);
+//			ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.roomName.set(smartNode.roomName);
+			
 			//usbService.write(seedMessage.getOrderedBuffer());
+		}
+		else
+		{
+			Toast.makeText(USBHomeFragment.this.getContext(), "USB Service not connected", Toast.LENGTH_SHORT).show();
 		}
 	}
 	

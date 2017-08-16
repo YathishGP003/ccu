@@ -20,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import a75f.io.renatus.BLE.FragmentDeviceScan;
+import a75f.io.util.Globals;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;

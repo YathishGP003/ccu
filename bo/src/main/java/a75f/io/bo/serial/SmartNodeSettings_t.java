@@ -58,7 +58,7 @@ public class SmartNodeSettings_t extends Struct
 	public final Unsigned8 enableOccupationDetection = new Unsigned8(1);
 	public final Unsigned8 reserved                  = new Unsigned8(4);
 	
-	class SmartNodeProfileBitmap_t extends Struct
+	public class SmartNodeProfileBitmap_t extends Struct
 	{
 		public final Unsigned8 dynamicAirflowBalancing = new Unsigned8(1); /* 1 is heating, 0 is cooling - sent from CCU to Smart Node for display indication */
 		public final Unsigned8 lightingControl         = new Unsigned8(1); /* digital out for activation */  //set light control to 1 ..

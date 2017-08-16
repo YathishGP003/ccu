@@ -55,6 +55,29 @@ public class JSONSerializerTest
 	}
 	
 	@Test
+	public void buildingPOJOTest()
+	{
+		CCUApplication ccuApp = new CCUApplication();
+		try
+		{
+			String pojoAsString = JsonSerializer.toJson(ccuApp, true);
+			System.out.println("POJO as string:\n" + pojoAsString + "\n");
+		}
+		catch (JsonGenerationException e)
+		{
+			e.printStackTrace();
+		}
+		catch (JsonMappingException e)
+		{
+			e.printStackTrace();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	@Test
 	public void generateLightObjectsTest()
 	{
 		UUID analog15kUUID = UUID.randomUUID();
@@ -106,7 +129,6 @@ public class JSONSerializerTest
 		{
 			String ccuToCMSeedMessage  = JsonSerializer.toJson(ccuToCmOverUsbDatabaseSeedSnMessage_t, true);
 			System.out.println("CCU seedMessage:\n" + ccuToCMSeedMessage + "\n");
-
 		}
 		catch (IOException e)
 		{

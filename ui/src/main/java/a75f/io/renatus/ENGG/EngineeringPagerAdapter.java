@@ -1,18 +1,18 @@
-package a75f.io.renatus;
+package a75f.io.renatus.ENGG;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import a75f.io.renatus.ENGG.logger.LogFragment;
 
-import a75f.io.renatus.ENGG.FieldTestFragment;
 
 /**
- * Created by samjithsadasivan on 8/7/17.
+ * Created by samjithsadasivan on 8/17/17.
  */
 
-public class SettingsPagerAdapter extends FragmentStatePagerAdapter
+public class EngineeringPagerAdapter extends FragmentStatePagerAdapter
 {
-	public SettingsPagerAdapter(FragmentManager fm) {
+	public EngineeringPagerAdapter(FragmentManager fm) {
 		super(fm);
 	}
 	
@@ -25,11 +25,16 @@ public class SettingsPagerAdapter extends FragmentStatePagerAdapter
 		switch (position)
 		{
 			case 0:
-				fragment = FloorPlanFragment.newInstance();
+				fragment = SerialMessageFragment.newInstance();
 				break;
 			case 1:
-				//fragment = USBHomeFragment.getInstance();
-				fragment = SettingsFragment.newInstance();
+				fragment = LogFragment.newInstance();
+				break;
+			case 2:
+				fragment = FieldTestFragment.newInstance();
+				break;
+			case 3:
+				fragment = BLETestFragment.newInstance();
 				break;
 		}
 		return fragment;
@@ -38,17 +43,20 @@ public class SettingsPagerAdapter extends FragmentStatePagerAdapter
 	@Override
 	public int getCount() {
 		// Show 2 total pages.
-		return 2;
+		return 4;
 	}
 	
 	@Override
 	public CharSequence getPageTitle(int position) {
 		switch (position) {
 			case 0:
-				return "Floor Layout";
+				return "Serial Messages";
 			case 1:
-				return "Settings";
-			
+				return "Logging";
+			case 2:
+				return "Field Test";
+			case 3:
+				return "BLE Test";
 		}
 		return null;
 	}
@@ -57,5 +65,5 @@ public class SettingsPagerAdapter extends FragmentStatePagerAdapter
 	public int getItemPosition(Object object) {
 		return POSITION_NONE;
 	}
-
+	
 }

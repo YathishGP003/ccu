@@ -18,13 +18,21 @@ public class LightProfile extends ZoneProfile
 		{
 			for (int i = 0; i < this.smartNodeOutputs.size(); i++)
 			{
-				if (this.smartNodeOutputs.get(i).output == Output.Relay)
+				switch (this.smartNodeOutputs.get(i).mOutput)
 				{
-					switch (this.smartNodeOutputs.get(i).outputRelayActuatorType)
-					{
-						case NormallyClose:
-							//get this smart node
-					}
+					case Relay:
+						switch (this.smartNodeOutputs.get(i).mOutputRelayActuatorType)
+						{
+							case NormallyClose:
+								break;
+							
+							default:
+								break;
+						}
+						break;
+					
+					case Analog:
+						break;
 				}
 			}
 		}

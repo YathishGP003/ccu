@@ -20,7 +20,6 @@ public class Globals
 	private static Globals globals;
 	
 	private Context        mApplicationContext;
-	private SmartNode      mSmartNode;
 	private CCUApplication mCCUApplication;
 	
 	
@@ -36,16 +35,6 @@ public class Globals
 			globals = new Globals();
 		}
 		return globals;
-	}
-	
-	
-	public SmartNode getSmartNode()
-	{
-		if (mSmartNode == null)
-		{
-			mSmartNode = new SmartNode();
-		}
-		return mSmartNode;
 	}
 	
 	

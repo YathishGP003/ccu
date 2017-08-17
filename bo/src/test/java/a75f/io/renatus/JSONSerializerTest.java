@@ -54,6 +54,28 @@ public class JSONSerializerTest
 		}
 	}
 	
+	@Test
+	public void buildingPOJOTest()
+	{
+		CCUApplication ccuApp = new CCUApplication();
+		try
+		{
+			String pojoAsString = JsonSerializer.toJson(ccuApp, true);
+			System.out.println("POJO as string:\n" + pojoAsString + "\n");
+		}
+		catch (JsonGenerationException e)
+		{
+			e.printStackTrace();
+		}
+		catch (JsonMappingException e)
+		{
+			e.printStackTrace();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+	}
 	
 	@Test
 	public void generateLightObjectsTest()
@@ -112,7 +134,5 @@ public class JSONSerializerTest
 		{
 			e.printStackTrace();
 		}
-		
-		
 	}
 }

@@ -1,4 +1,4 @@
-package a75f.io.renatus;
+package a75f.io.renatus.ENGG;
 
 import android.app.Dialog;
 import android.support.v4.app.DialogFragment;
@@ -17,6 +17,8 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+
+import a75f.io.renatus.R;
 
 /**
  * Created by anilkumar on 27-10-2016.

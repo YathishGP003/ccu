@@ -11,6 +11,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 
+import a75f.io.renatus.ENGG.RenatusEngineeringActivity;
+
 public class RenatusLandingActivity extends AppCompatActivity {
 
     /**
@@ -48,7 +50,6 @@ public class RenatusLandingActivity extends AppCompatActivity {
         mStatusPagerAdapter = new StatusPagerAdapter(getSupportFragmentManager());
         
 
-        // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
         
         mTabLayout = (TabLayout) findViewById(R.id.tabs);
@@ -66,19 +67,7 @@ public class RenatusLandingActivity extends AppCompatActivity {
         });
     
         setupButton = (ImageButton) findViewById(R.id.logo);
-    
-        setupButton.setOnLongClickListener(new View.OnLongClickListener()
-        {
-            @Override
-            public boolean onLongClick(View v)
-            {
-    
-    
-                Intent i = new Intent(RenatusLandingActivity.this, MainActivity.class);
-                startActivity(i);
-                return false;
-            }
-        });
+        
         setupButton.setOnClickListener(new View.OnClickListener()
         {
            @Override
@@ -90,7 +79,8 @@ public class RenatusLandingActivity extends AppCompatActivity {
                }
                else if (settingView == true && mTabLayout.getSelectedTabPosition() == 1)
                {
-                 
+                   Intent i = new Intent(RenatusLandingActivity.this, MainActivity.class);
+                   startActivity(i);
                }
                else if (settingView == false && mTabLayout.getSelectedTabPosition() == 1)
                {
@@ -98,6 +88,16 @@ public class RenatusLandingActivity extends AppCompatActivity {
                    startActivity(i);
                }
            }
+        });
+        
+        setupButton.setOnLongClickListener(new View.OnLongClickListener()
+        {
+            @Override
+            public boolean onLongClick(View view)
+            {
+                startActivity(new Intent(view.getContext(), RenatusEngineeringActivity.class));
+                return true;
+            }
         });
         setViewPager();
         FloorContainer.getInstance().loadData();

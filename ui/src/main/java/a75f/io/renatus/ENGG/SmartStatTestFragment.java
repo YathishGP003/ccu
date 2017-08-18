@@ -1,4 +1,4 @@
-package a75f.io.renatus;
+package a75f.io.renatus.ENGG;
 
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
@@ -41,6 +41,8 @@ import a75f.io.bo.json.serializers.JsonSerializer;
 import a75f.io.bo.serial.CcuToCmOverUsbSmartStatSettingsMessage_t;
 import a75f.io.bo.serial.MessageType;
 import a75f.io.renatus.BASE.BaseDialogFragment;
+import a75f.io.renatus.MainActivity;
+import a75f.io.renatus.R;
 import a75f.io.usbserial.SerialAction;
 import a75f.io.usbserial.SerialEvent;
 import a75f.io.usbserial.UsbService;

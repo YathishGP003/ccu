@@ -1,8 +1,5 @@
-package a75f.io.renatus;
+package a75f.io.renatus.ENGG;
 
-import android.app.Dialog;
-import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -11,20 +8,17 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.TextView;
 
-import org.greenrobot.eventbus.EventBus;
-
+import a75f.io.renatus.R;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class TestFragment extends Fragment
+public class FieldTestFragment extends Fragment
 {
-	public static TestFragment newInstance(){
-		return new TestFragment();
+	public static FieldTestFragment newInstance(){
+		return new FieldTestFragment();
 	}
 	
 	@BindView(R.id.lightsTestBtn)

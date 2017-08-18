@@ -82,8 +82,8 @@ public class DefaultFragment extends DialogFragment
 		super.onViewCreated(view, savedInstanceState);
 		setupPortSpinner();
 		SmartNode smartNode = Globals.getInstance().getCCUApplication().smartNodes.size() > 0 ? Globals.getInstance().getCCUApplication().smartNodes.get(0) : null;
-		short meshAddress = smartNode != null ? (short) smartNode.address : (short) 5000;
-		String roomName = smartNode != null ? smartNode.roomName : "Default Room Name";
+		short meshAddress = smartNode != null ? (short) smartNode.mAddress : (short) 5000;
+		String roomName = smartNode != null ? smartNode.mRoomName : "Default Room Name";
 		int position = Arrays.binarySearch(ports.toArray(), (int) meshAddress);
 		mPortSpinner.setSelection(position);
 		mSNNameEditText.setText(roomName);
@@ -129,9 +129,9 @@ public class DefaultFragment extends DialogFragment
 		}
 		if (mSNNameEditText.getText() != null && !mSNNameEditText.getText().toString().equals(""))
 		{
-			smartNode.roomName = mSNNameEditText.getText().toString();
+			smartNode.mRoomName = mSNNameEditText.getText().toString();
 		}
-		smartNode.address = ports.get(mPortPosition).shortValue();
+		smartNode.mAddress = ports.get(mPortPosition).shortValue();
 			//			Globals.getInstance().getSmartNode().setName(mSNNameEditText.getText().toString());
 			//			Globals.getInstance().getSmartNode().setMeshAddress(ports.get(mPortPosition).shortValue());
 			Toast.makeText(DefaultFragment.this.getActivity(), "Saved", Toast.LENGTH_SHORT).show();

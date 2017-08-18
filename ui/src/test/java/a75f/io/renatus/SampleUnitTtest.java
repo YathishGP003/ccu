@@ -28,11 +28,11 @@ Process finished with exit code 0
         CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = new CcuToCmOverUsbDatabaseSeedSnMessage_t();
 
         seedMessage.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN);
-        seedMessage.encryptionKey.set(0);
+        seedMessage.putEncrptionKey(new byte[16]);
 
         seedMessage.smartNodeAddress.set(2000);
-        seedMessage.controls.smartNodeControls_extras.smartNodeControlsBitExtras.digitalOut1.set(1);
-        seedMessage.controls.smartNodeControls_extras.smartNodeControlsBitExtras.padding.set(1);
+        seedMessage.controls.digitalOut1.set((short) 1);
+        
         System.out.println(seedMessage.toString());
 //        seedMessage.controls.time.day.set((short) 1);
 //        seedMessage.controls.time.hours.set((short) 1);

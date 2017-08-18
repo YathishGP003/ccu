@@ -69,7 +69,7 @@ public class BLEHomeFragment extends Fragment
 		{
 			smartNode = Globals.getInstance().getCCUApplication().smartNodes.get(0);
 		}
-		FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance((short) smartNode.address, smartNode.roomName);
+		FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance((short) smartNode.mAddress, smartNode.mRoomName);
 		showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
 		Toast.makeText(this.getActivity(), "BLE Fragment Done", Toast.LENGTH_LONG).show();
 	}

@@ -299,9 +299,9 @@ public class USBHomeFragment extends DialogFragment
 			{
 				e.printStackTrace();
 			}
-			SmartNode smartNode = ccuApplication.findSmartNodeByIOUUID(ccuApplication.zones.get(0).zoneProfiles.get(0).smartNodeOutputs.get(0).uniqueID);
+			SmartNode smartNode = ccuApplication.findSmartNodeByAddress(ccuApplication.zones.get(0).zoneProfiles.get(0).smartNodeOutputs.get(0).mSmartNodeAddress);//findSmartNodeByIOUUID(ccuApplication.zones.get(0).zoneProfiles.get(0).smartNodeOutputs.get(0).uniqueID);
 			CcuToCmOverUsbDatabaseSeedSnMessage_t ccuToCmOverUsbDatabaseSeedSnMessage_t = new CcuToCmOverUsbDatabaseSeedSnMessage_t();
-			ccuToCmOverUsbDatabaseSeedSnMessage_t.smartNodeAddress.set(smartNode.address);
+			ccuToCmOverUsbDatabaseSeedSnMessage_t.smartNodeAddress.set(smartNode.mAddress);
 			ccuToCmOverUsbDatabaseSeedSnMessage_t.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN);
 			//ccuToCmOverUsbDatabaseSeedSnMessage_t.putEncrptionKey(Encryp);
 			ZoneProfile zoneProfile = ccuApplication.zones.get(0).zoneProfiles.get(0);
@@ -310,7 +310,7 @@ public class USBHomeFragment extends DialogFragment
 			ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.ledBitmap.analogIn1.set((short) 1);
 			ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.lightingIntensityForOccupantDetected.set((short) 100);
 			ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.minLightingControlOverrideTimeInMinutes.set((short) 1);
-			ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.roomName.set(smartNode.roomName);
+			ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.roomName.set(smartNode.mRoomName);
 			try
 			{
 				String ccuToCmOverUsbDatabaseSeedSnMessageJSON = JsonSerializer.toJson(ccuToCmOverUsbDatabaseSeedSnMessage_t, true);

@@ -61,16 +61,11 @@
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-            <intent-filter>
-                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"/>
-            </intent-filter>
 
-            <meta-data
-                android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
-                android:resource="@xml/filter"/>
         </activity>
-        <activity android:name=".ENGG.RenatusEngineeringActivity"
-                  android:theme="@style/RenatusAppTheme.NoActionBar">
+        <activity
+            android:name=".ENGG.RenatusEngineeringActivity"
+            android:theme="@style/RenatusAppTheme.NoActionBar">
         </activity>
     </application>
 

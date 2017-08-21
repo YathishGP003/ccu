@@ -1,4 +1,4 @@
-package a75f.io.usbserial;
+package a75f.io.bo.serial.comm;
 
 /**
  * Created by ryanmattison on 7/25/17.

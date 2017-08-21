@@ -9,12 +9,12 @@ import java.io.IOException;
 import java.util.UUID;
 
 import a75f.io.bo.building.CCUApplication;
+import a75f.io.bo.building.Floor;
 import a75f.io.bo.building.LightProfile;
-import a75f.io.bo.building.Output;
-import a75f.io.bo.building.OutputAnalogActuatorType;
+import a75f.io.bo.building.definitions.Output;
+import a75f.io.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.bo.building.SmartNode;
 import a75f.io.bo.building.SmartNodeOutput;
-import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.ZoneProfile;
 import a75f.io.bo.json.serializers.JsonSerializer;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
@@ -54,6 +54,7 @@ public class JSONSerializerTest
 		}
 	}
 	
+	
 	@Test
 	public void buildingPOJOTest()
 	{
@@ -77,30 +78,29 @@ public class JSONSerializerTest
 		}
 	}
 	
+	
 	@Test
 	public void generateLightObjectsTest()
 	{
 		UUID analog15kUUID = UUID.randomUUID();
-		int smartNodeAddress = 5000;
+		short smartNodeAddress = 5000;
 		CCUApplication ccuApplication = new CCUApplication();
 		SmartNode smartNode5K = new SmartNode();
-		smartNode5K.address = smartNodeAddress;
-		smartNode5K.analog1OutId = analog15kUUID;
-		smartNode5K.roomName = "SmartNode roomName";
+		smartNode5K.mAddress = smartNodeAddress;
+		smartNode5K.mRoomName = "SmartNode roomName";
 		ccuApplication.smartNodes.add(smartNode5K);
 		ccuApplication.CCUTitle = "Light Test";
-		Zone zone5K = new Zone();
-		zone5K.roomName = "5000 test zone";
-		LightProfile lightProfile5K = new LightProfile();
-		zone5K.zoneProfiles.add(lightProfile5K);
-		ccuApplication.zones.add(zone5K);
+		Floor floor = new Floor(1, "webid", "Floor1");
+		LightProfile lightProfile5K = new LightProfile("Light Profile");
+		ccuApplication.floors.get(0).addZone("5000 test zone");
+		ccuApplication.floors.get(0).getRoomList().get(0).zoneProfiles.add(lightProfile5K);
 		SmartNodeOutput smartNodeOutput5K = new SmartNodeOutput();
-		smartNodeOutput5K.uniqueID = analog15kUUID;
-		smartNodeOutput5K.outputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
-		smartNodeOutput5K.output = Output.Analog;
-		smartNodeOutput5K.name = "Dining Room";
+		smartNodeOutput5K.mSmartNodeAddress = smartNode5K.mAddress;
+		smartNodeOutput5K.mUniqueID = analog15kUUID;
+		smartNodeOutput5K.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
+		smartNodeOutput5K.mOutput = Output.Analog;
+		smartNodeOutput5K.mName = "Dining Room";
 		lightProfile5K.smartNodeOutputs.add(smartNodeOutput5K);
-		//	lightProfile5K.smartNodeOutputs.add();
 		try
 		{
 			String ccuApplicationJSON = JsonSerializer.toJson(ccuApplication, true);
@@ -110,24 +110,19 @@ public class JSONSerializerTest
 		{
 			e.printStackTrace();
 		}
-		
-		SmartNode smartNode = ccuApplication.findSmartNodeByIOUUID(ccuApplication.zones.get(0).zoneProfiles.get(0).smartNodeOutputs.get(0).uniqueID);
+		SmartNode smartNode = ccuApplication.findSmartNodeByAddress(ccuApplication.floors.get(0).getRoomList().get(0).zoneProfiles.get(0).smartNodeOutputs.get(0).mSmartNodeAddress);
 		CcuToCmOverUsbDatabaseSeedSnMessage_t ccuToCmOverUsbDatabaseSeedSnMessage_t = new CcuToCmOverUsbDatabaseSeedSnMessage_t();
-		ccuToCmOverUsbDatabaseSeedSnMessage_t.smartNodeAddress.set(smartNode.address);
-		//ccuToCmOverUsbDatabaseSeedSnMessage_t.putEncrptionKey(Encryp);
-		ZoneProfile zoneProfile = ccuApplication.zones.get(0).zoneProfiles.get(0);
+		ccuToCmOverUsbDatabaseSeedSnMessage_t.smartNodeAddress.set(smartNode.mAddress);
+		ZoneProfile zoneProfile = ccuApplication.floors.get(0).getRoomList().get(0).zoneProfiles.get(0);
 		ccuToCmOverUsbDatabaseSeedSnMessage_t.controls.analogOut1.set((short) 0);
-		
 		ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.profileBitmap.lightingControl.set((short) 1);
-		ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.ledBitmap.analogIn1.set((short)1);
+		ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.ledBitmap.analogIn1.set((short) 1);
 		ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.lightingIntensityForOccupantDetected.set((short) 100);
-		ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.minLightingControlOverrideTimeInMinutes.set((short)1);
-		ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.roomName.set(smartNode.roomName);
-		
-		
+		ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.minLightingControlOverrideTimeInMinutes.set((short) 1);
+		ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.roomName.set(smartNode.mRoomName);
 		try
 		{
-			String ccuToCMSeedMessage  = JsonSerializer.toJson(ccuToCmOverUsbDatabaseSeedSnMessage_t, true);
+			String ccuToCMSeedMessage = JsonSerializer.toJson(ccuToCmOverUsbDatabaseSeedSnMessage_t, true);
 			System.out.println("CCU seedMessage:\n" + ccuToCMSeedMessage + "\n");
 		}
 		catch (IOException e)

@@ -27,19 +27,22 @@ import a75f.io.renatus.R;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static a75f.io.renatus.FragmentCommonBundleArgs.ARG_NAME;
+import static a75f.io.renatus.FragmentCommonBundleArgs.ARG_PAIRING_ADDR;
+import static a75f.io.renatus.FragmentCommonBundleArgs.FLOOR_NAME;
+
 /**
  * Created by ryanmattison on 7/24/17.
  */
 public class FragmentDeviceScan extends BaseDialogFragment
 {
 	
-	public static final String ARG_NAME          = "NAME";
-	public static final String ARG_PAIRING_ADDR  = "PAIRINGADDRESS";
 	public static final String ID                = "scan_dialog";
 	static final        int    REQUEST_ENABLE_BT = 1;
 	@BindView(R.id.ble_device_list_list_view)
 	ListView mBLEDeviceListListView;
 	String              mName;
+	String              mFloorName;
 	Short               mPairingAddress;
 	LeDeviceListAdapter mLeDeviceListAdapter;
 	BluetoothAdapter    mBluetoothAdapter;
@@ -56,7 +59,9 @@ public class FragmentDeviceScan extends BaseDialogFragment
 				@Override
 				public void run()
 				{
-					if (device != null && device.getName() != null && (device.getName().equalsIgnoreCase(SerialConsts.SMART_NODE_NAME) || device.getName().equalsIgnoreCase(SerialConsts.SMART_STAT_NAME)))
+					if (device != null && device.getName() != null &&
+					    (device.getName().equalsIgnoreCase(SerialConsts.SMART_NODE_NAME) ||
+					     device.getName().equalsIgnoreCase(SerialConsts.SMART_STAT_NAME)))
 					{
 						mLeDeviceListAdapter.addDevice(device);
 						mLeDeviceListAdapter.notifyDataSetChanged();
@@ -67,12 +72,14 @@ public class FragmentDeviceScan extends BaseDialogFragment
 	};
 	
 	
-	public static FragmentDeviceScan getInstance(short pairingAddress, String name)
+	public static FragmentDeviceScan getInstance(short pairingAddress, String name,
+	                                             String floorName)
 	{
 		FragmentDeviceScan fds = new FragmentDeviceScan();
 		Bundle args = new Bundle();
 		args.putShort(ARG_PAIRING_ADDR, pairingAddress);
 		args.putString(ARG_NAME, name);
+		args.putString(FLOOR_NAME, floorName);
 		fds.setArguments(args);
 		return fds;
 	}
@@ -92,10 +99,12 @@ public class FragmentDeviceScan extends BaseDialogFragment
 	
 	
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+	                         Bundle savedInstanceState)
 	{
 		mName = getArguments().getString(ARG_NAME);
 		mPairingAddress = getArguments().getShort(ARG_PAIRING_ADDR);
+		mFloorName = getArguments().getString(FLOOR_NAME);
 		View retVal = inflater.inflate(R.layout.fragment_device_scan, container, false);
 		ButterKnife.bind(this, retVal);
 		setTitle(getString(R.string.scan_dialog_title));
@@ -125,10 +134,12 @@ public class FragmentDeviceScan extends BaseDialogFragment
 				mBLEDeviceListListView.setOnItemClickListener(new AdapterView.OnItemClickListener()
 				{
 					@Override
-					public void onItemClick(AdapterView<?> adapterView, View view, int position, long id)
+					public void onItemClick(AdapterView<?> adapterView, View view, int position,
+					                        long id)
 					{
 						final BluetoothDevice device = mLeDeviceListAdapter.getDevice(position);
-						DialogFragment newFragment = FragmentBLEDevicePin.getInstance(mPairingAddress, mName, device);
+						DialogFragment newFragment = FragmentBLEDevicePin
+								                             .getInstance(mPairingAddress, mName, mFloorName, device);
 						showDialogFragment(newFragment, FragmentBLEDevicePin.ID);
 						scanLeDevice(false);
 					}
@@ -142,7 +153,8 @@ public class FragmentDeviceScan extends BaseDialogFragment
 	private void setListViewEmptyView()
 	{
 		TextView emptyText = new TextView(getActivity());
-		emptyText.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+		emptyText
+				.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 		emptyText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 24);
 		emptyText.setPadding(20, 20, 20, 20);
 		((ViewGroup) mBLEDeviceListListView.getParent()).addView(emptyText);
@@ -180,14 +192,16 @@ public class FragmentDeviceScan extends BaseDialogFragment
 		super.onCreate(savedInstanceState);
 		// Use this check to determine whether BLE is supported on the device.  Then you can
 		// selectively disable BLE-related features.
-		if (!getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE))
+		if (!getActivity().getPackageManager()
+		                  .hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE))
 		{
 			Toast.makeText(this.getActivity(), "BLE not supported", Toast.LENGTH_SHORT).show();
 			return;
 		}
 		// Initializes a Bluetooth adapter.  For API level 18 and above, get a reference to
 		// BluetoothAdapter through BluetoothManager.
-		final BluetoothManager bluetoothManager = (BluetoothManager) getActivity().getSystemService(Context.BLUETOOTH_SERVICE);
+		final BluetoothManager bluetoothManager =
+				(BluetoothManager) getActivity().getSystemService(Context.BLUETOOTH_SERVICE);
 		mBluetoothAdapter = bluetoothManager.getAdapter();
 		// Checks if Bluetooth is supported on the device.
 		if (mBluetoothAdapter == null)

@@ -3,8 +3,6 @@ package a75f.io.bo.building;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 /**
  * Created by Yinten on 8/15/2017.
@@ -12,18 +10,20 @@ import java.util.UUID;
 @JsonSerialize
 public class CCUApplication
 {
-	public String               CCUTitle      = new String();
-	public List<Zone>           zones         = new ArrayList<Zone>();
+	public String      CCUTitle = new String();
+	public ArrayList<Floor> floors   = new ArrayList<Floor>();
+	
 	public SystemProfile        systemProfile = new SystemProfile();
 	public ControlMote          controlMote   = new ControlMote();
 	public ArrayList<SmartNode> smartNodes    = new ArrayList<SmartNode>();
+	public short mSmartNodeBand;
 	
 	
-	public SmartNode findSmartNodeByIOUUID(UUID uniqueID)
+	public SmartNode findSmartNodeByAddress(short smartNodeAddress)
 	{
 		for (SmartNode smartNode : smartNodes)
 		{
-			if (smartNode.hasIOAddress(uniqueID))
+			if (smartNode.mAddress == smartNodeAddress)
 			{
 				return smartNode;
 			}

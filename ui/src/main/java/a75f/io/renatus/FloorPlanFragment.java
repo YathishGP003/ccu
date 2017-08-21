@@ -19,6 +19,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import a75f.io.bo.building.Floor;
+import a75f.io.bo.building.Zone;
+import a75f.io.logic.SmartNodeBLL;
 import a75f.io.renatus.BLE.FragmentDeviceScan;
 import a75f.io.util.Globals;
 import butterknife.BindView;
@@ -28,135 +31,160 @@ import butterknife.OnEditorAction;
 import butterknife.OnFocusChange;
 import butterknife.OnItemClick;
 
-import org.greenrobot.eventbus.EventBus;
-
-
 /**
  * Created by samjithsadasivan on 8/7/17.
  */
 
 public class FloorPlanFragment extends Fragment
 {
-	public int mCurFloorIndex = -1;
-	public int mCurRoomIndex = -1;
-	
-	@BindView (R.id.addFloorBtn)
+	public int                    mCurFloorIndex   = -1;
+	public int                    mCurRoomIndex    = -1;
+	public DataArrayAdapter<Zone> mRoomListAdapter = null;
+	@BindView(R.id.addFloorBtn)
 	ImageButton addFloorBtn;
-	
-	@BindView (R.id.addRoomBtn)
+	@BindView(R.id.addRoomBtn)
 	ImageButton addRoomBtn;
-	
-	@BindView (R.id.pairModuleBtn)
+	@BindView(R.id.pairModuleBtn)
 	ImageButton pairModuleBtn;
-	
-	@BindView (R.id.addFloorEdit)
-	EditText addFloorEdit;
-	
-	@BindView (R.id.addRoomEdit)
-	EditText addRoomEdit;
-	
-	@BindView (R.id.addModuleEdit)
-	EditText addModuleEdit;
-	
+	@BindView(R.id.addFloorEdit)
+	EditText    addFloorEdit;
+	@BindView(R.id.addRoomEdit)
+	EditText    addRoomEdit;
+	@BindView(R.id.addModuleEdit)
+	EditText    addModuleEdit;
 	@BindView(R.id.floorList)
-	ListView floorListView;
-	
+	ListView    floorListView;
 	@BindView(R.id.roomList)
-	ListView roomListView;
-	
+	ListView    roomListView;
 	@BindView(R.id.moduleList)
-	ListView moduleListView;
-	
+	ListView    moduleListView;
 	private DataArrayAdapter<Floor> mModuleListAdapter = null;
 	
-	public static FloorPlanFragment newInstance(){
+	
+	public FloorPlanFragment()
+	{
+	}
+	
+	
+	public static FloorPlanFragment newInstance()
+	{
 		return new FloorPlanFragment();
 	}
 	
-	public FloorPlanFragment(){
-		
-	}
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-	                         Bundle savedInstanceState) {
+	                         Bundle savedInstanceState)
+	{
 		View rootView = inflater.inflate(R.layout.fragment_floorplan, container, false);
-		ButterKnife.bind (this, rootView);
+		ButterKnife.bind(this, rootView);
 		return rootView;
 	}
 	
+	
 	@Override
-	public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+	public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
+	{
 		super.onViewCreated(view, savedInstanceState);
 		enableFloorButton();
 		disableRoomModule();
 	}
 	
+	
 	@Override
-	public void onStart(){
+	public void onStart()
+	{
 		super.onStart();
 		floorListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
 		floorListView.setMultiChoiceModeListener(new FloorListActionMenuListener(this));
-		
 		roomListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
 		roomListView.setMultiChoiceModeListener(new RoomListActionMenuListener(this));
-		
 		//EventBus.getDefault().register();
-		
 	}
+	
+	
 	@Override
-	public void onResume() {
+	public void onResume()
+	{
 		super.onResume();
 		mCurFloorIndex = mCurFloorIndex >= 0 ? mCurFloorIndex : 0;
 		floorListView.setAdapter(FloorContainer.getInstance().getFloorListAdapter());
-		if (FloorContainer.getInstance().getFloorList().size() >0) {
+		if (FloorContainer.getInstance().getFloorList().size() > 0)
+		{
 			selectFloor(mCurFloorIndex);
-			roomListView.setAdapter(FloorContainer.getInstance().getFloorList()
-				                                      .get(mCurFloorIndex).getmRoomListAdapter());
+			mRoomListAdapter = new DataArrayAdapter<Zone>(Globals.getInstance()
+			                                                     .getApplicationContext(), R.layout.listviewitem, FloorContainer
+					                                                                                                      .getInstance()
+					                                                                                                      .getFloorList()
+					                                                                                                      .get(mCurFloorIndex).mRoomList);
+			roomListView.setAdapter(mRoomListAdapter);
 			enableRoomBtn();
-			if (FloorContainer.getInstance().getFloorList().get(mCurFloorIndex)
-			                  .getRoomList().size() > 0) {
+			if (FloorContainer.getInstance().getFloorList().get(mCurFloorIndex).mRoomList.size() >
+			    0)
+			{
 				enableModueButton();
 			}
 		}
-		
 	}
 	
+	
 	@Override
-	public void onPause() {
+	public void onPause()
+	{
 		super.onPause();
 		FloorContainer.getInstance().saveData();
 	}
 	
-	private void enableFloorButton() {
-		addFloorBtn.setVisibility(View.VISIBLE);
-		addFloorEdit.setVisibility(View.INVISIBLE);
+	
+	private void selectFloor(int position)
+	{
+		mCurFloorIndex = position;
+		FloorContainer.getInstance().getFloorListAdapter().setSelectedItem(position);
+		mRoomListAdapter = new DataArrayAdapter<Zone>(Globals.getInstance()
+		                                                     .getApplicationContext(), R.layout.listviewitem, FloorContainer
+				                                                                                                      .getInstance()
+				                                                                                                      .getFloorList()
+				                                                                                                      .get(mCurFloorIndex).mRoomList);
+		roomListView.setAdapter(mRoomListAdapter);
+		selectRoom(0);
 	}
 	
-	private void enableFloorEdit() {
-		addFloorBtn.setVisibility(View.INVISIBLE);
-		addFloorEdit.setVisibility(View.VISIBLE);
-	}
 	
-	private void enableRoomBtn() {
+	private void enableRoomBtn()
+	{
 		addRoomBtn.setVisibility(View.VISIBLE);
 		addRoomEdit.setVisibility(View.INVISIBLE);
 	}
 	
-	private void enableRoomEdit() {
-		addRoomBtn.setVisibility(View.INVISIBLE);
-		addRoomEdit.setVisibility(View.VISIBLE);
-	}
 	
-	private void enableModueButton() {
+	private void enableModueButton()
+	{
 		pairModuleBtn.setVisibility(View.VISIBLE);
 	}
-	private void disableRoomModule() {
+	
+	
+	private void selectRoom(int position)
+	{
+		mCurRoomIndex = position;
+		mRoomListAdapter.setSelectedItem(position);
+	}
+	
+	
+	private void enableFloorButton()
+	{
+		addFloorBtn.setVisibility(View.VISIBLE);
+		addFloorEdit.setVisibility(View.INVISIBLE);
+	}
+	
+	
+	private void disableRoomModule()
+	{
 		addRoomBtn.setVisibility(View.INVISIBLE);
 		addRoomEdit.setVisibility(View.INVISIBLE);
 		pairModuleBtn.setVisibility(View.INVISIBLE);
 		addModuleEdit.setVisibility(View.INVISIBLE);
 	}
+	
 	
 	@OnClick(R.id.addFloorBtn)
 	public void handleFloorBtn()
@@ -164,8 +192,16 @@ public class FloorPlanFragment extends Fragment
 		enableFloorEdit();
 		addFloorEdit.setText("");
 		addFloorEdit.requestFocus();
-		InputMethodManager mgr = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+		InputMethodManager mgr =
+				(InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 		mgr.showSoftInput(addFloorEdit, InputMethodManager.SHOW_IMPLICIT);
+	}
+	
+	
+	private void enableFloorEdit()
+	{
+		addFloorBtn.setVisibility(View.INVISIBLE);
+		addFloorEdit.setVisibility(View.VISIBLE);
 	}
 	
 	
@@ -174,14 +210,21 @@ public class FloorPlanFragment extends Fragment
 	{
 		if (actionId == EditorInfo.IME_ACTION_DONE)
 		{
-			final int nID = FloorContainer.getInstance().addFloor(addFloorEdit.getText().toString());
+			final int nID =
+					FloorContainer.getInstance().addFloor(addFloorEdit.getText().toString());
 			selectFloor(nID);
-			roomListView.setAdapter(FloorContainer.getInstance().getFloorList()
-			                                      .get(mCurFloorIndex).getmRoomListAdapter());
+			mRoomListAdapter = new DataArrayAdapter<Zone>(Globals.getInstance()
+			                                                     .getApplicationContext(), R.layout.listviewitem, FloorContainer
+					                                                                                                      .getInstance()
+					                                                                                                      .getFloorList()
+					                                                                                                      .get(mCurFloorIndex).mRoomList);
+			roomListView.setAdapter(mRoomListAdapter);
 			//CCUKinveyInterface.updateFloor(FloorData.getFloorData().get(nID), false);
-			InputMethodManager mgr = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+			InputMethodManager mgr = (InputMethodManager) getActivity()
+					                                              .getSystemService(Context.INPUT_METHOD_SERVICE);
 			mgr.hideSoftInputFromWindow(addFloorEdit.getWindowToken(), 0);
-			Toast.makeText(getActivity().getApplicationContext(), "Floor " + addFloorEdit.getText() + " added", Toast.LENGTH_SHORT).show();
+			Toast.makeText(getActivity().getApplicationContext(),
+					"Floor " + addFloorEdit.getText() + " added", Toast.LENGTH_SHORT).show();
 			enableFloorButton();
 			enableRoomBtn();
 			return true;
@@ -189,32 +232,49 @@ public class FloorPlanFragment extends Fragment
 		return false;
 	}
 	
+	
 	@OnFocusChange(R.id.addFloorEdit)
-	public void handleFloorFocus(View v, boolean hasFocus) {
-		if (!hasFocus) {
+	public void handleFloorFocus(View v, boolean hasFocus)
+	{
+		if (!hasFocus)
+		{
 			enableFloorButton();
 		}
 	}
 	
+	
 	@OnClick(R.id.addRoomBtn)
-	public void handleRoomBtn() {
+	public void handleRoomBtn()
+	{
 		enableRoomEdit();
 		addRoomEdit.setText("");
 		addRoomEdit.requestFocus();
-		InputMethodManager mgr = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+		InputMethodManager mgr =
+				(InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 		mgr.showSoftInput(addRoomEdit, InputMethodManager.SHOW_IMPLICIT);
 	}
 	
-	@OnEditorAction (R.id.addRoomEdit)
+	
+	private void enableRoomEdit()
+	{
+		addRoomBtn.setVisibility(View.INVISIBLE);
+		addRoomEdit.setVisibility(View.VISIBLE);
+	}
+	
+	
+	@OnEditorAction(R.id.addRoomEdit)
 	public boolean handleRoomChange(TextView v, int actionId, KeyEvent event)
 	{
 		if (actionId == EditorInfo.IME_ACTION_DONE)
 		{
-			Toast.makeText(getActivity().getApplicationContext(), "Room " + addRoomEdit.getText() + " added", Toast.LENGTH_SHORT).show();
-			Room room = FloorContainer.getInstance().getFloorList()
-			                                    .get(mCurFloorIndex).addRoom(addRoomEdit.getText().toString());
-			selectRoom(room.getmRoomId());
-			InputMethodManager mgr = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+			Toast.makeText(getActivity().getApplicationContext(),
+					"Room " + addRoomEdit.getText() + " added", Toast.LENGTH_SHORT).show();
+			Zone room = new Zone(addRoomEdit.getText().toString());
+			FloorContainer.getInstance().getFloorList().get(mCurFloorIndex).mRoomList
+					.add(new Zone(addRoomEdit.getText().toString()));
+			selectRoom(FloorContainer.getInstance().getFloorList().size() - 1);
+			InputMethodManager mgr = (InputMethodManager) getActivity()
+					                                              .getSystemService(Context.INPUT_METHOD_SERVICE);
 			mgr.hideSoftInputFromWindow(addRoomEdit.getWindowToken(), 0);
 			enableRoomBtn();
 			enableModueButton();
@@ -223,39 +283,28 @@ public class FloorPlanFragment extends Fragment
 		return false;
 	}
 	
+	
 	@OnFocusChange(R.id.addRoomEdit)
-	public void handleRoomFocus(View v, boolean hasFocus) {
-		if (!hasFocus) {
+	public void handleRoomFocus(View v, boolean hasFocus)
+	{
+		if (!hasFocus)
+		{
 			enableRoomBtn();
 		}
 	}
 	
-	@OnClick (R.id.pairModuleBtn)
-	public void startPairing() {//TODO - Test code hardcoded to fix crash
-		short meshAddress = 6000;;
-		String roomName = "75F Room";
-		
-		FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(meshAddress, roomName);
+	
+	@OnClick(R.id.pairModuleBtn)
+	public void startPairing()
+	{//TODO - Test code hardcoded to fix crash
+		short meshAddress = SmartNodeBLL.nextSmartNodeAddress();
+		Floor floor = Globals.getInstance().getCCUApplication().floors.get(mCurFloorIndex);
+		Zone room = floor.mRoomList.get(mCurRoomIndex);
+		FragmentDeviceScan fragmentDeviceScan =
+				FragmentDeviceScan.getInstance(meshAddress, room.roomName, floor.mFloorName);
 		showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
 	}
 	
-	@OnItemClick(R.id.floorList)
-	public void setFloorListView(AdapterView<?> parent, View view, int position,
-	                             long id) {
-		selectFloor(position);
-	}
-	
-	@OnItemClick(R.id.roomList)
-	public void setRoomListView(AdapterView<?> parent, View view, int position,
-	                             long id) {
-		selectRoom(position);
-	}
-	
-	@OnItemClick(R.id.moduleList)
-	public void setModuleListView(AdapterView<?> parent, View view, int position,
-	                             long id) {
-		//select module
-	}
 	
 	private void showDialogFragment(DialogFragment dialogFragment, String id)
 	{
@@ -270,16 +319,24 @@ public class FloorPlanFragment extends Fragment
 		dialogFragment.show(ft, id);
 	}
 	
-	private void selectFloor(int position) {
-		mCurFloorIndex = position;
-		FloorContainer.getInstance().getFloorListAdapter().setSelectedItem(position);
-		roomListView.setAdapter(FloorContainer.getInstance().getFloorList().get(mCurFloorIndex).getmRoomListAdapter());
-		selectRoom(0);
+	
+	@OnItemClick(R.id.floorList)
+	public void setFloorListView(AdapterView<?> parent, View view, int position, long id)
+	{
+		selectFloor(position);
 	}
 	
-	private void selectRoom(int position) {
-		mCurRoomIndex = position;
-		FloorContainer.getInstance().getFloorList().get(mCurFloorIndex).getmRoomListAdapter().setSelectedItem(position);
+	
+	@OnItemClick(R.id.roomList)
+	public void setRoomListView(AdapterView<?> parent, View view, int position, long id)
+	{
+		selectRoom(position);
 	}
 	
+	
+	@OnItemClick(R.id.moduleList)
+	public void setModuleListView(AdapterView<?> parent, View view, int position, long id)
+	{
+		//select module
+	}
 }

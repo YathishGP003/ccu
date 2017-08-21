@@ -2,8 +2,8 @@ package a75f.io.util;
 
 import android.content.Context;
 
-import a75f.io.bo.SmartNode;
 import a75f.io.bo.building.CCUApplication;
+import a75f.io.util.prefs.ApplicationPreference;
 import a75f.io.util.prefs.LocalStorage;
 
 /**
@@ -19,9 +19,9 @@ public class Globals
 	
 	private static Globals globals;
 	
-	private Context        mApplicationContext;
-	private CCUApplication mCCUApplication;
-	
+	private Context               mApplicationContext;
+	private CCUApplication        mCCUApplication;
+	private ApplicationPreference mApplicationPreferences;
 	
 	private Globals()
 	{
@@ -57,5 +57,11 @@ public class Globals
 	public void setApplicationContext(Context mApplicationContext)
 	{
 		this.mApplicationContext = mApplicationContext;
+	}
+	
+	
+	public ApplicationPreference getApplicationPreferences()
+	{
+		return ApplicationPreference.getApplicationSettings();
 	}
 }

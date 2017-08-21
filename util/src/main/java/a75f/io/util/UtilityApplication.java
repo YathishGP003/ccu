@@ -2,8 +2,6 @@ package a75f.io.util;
 
 import android.app.Application;
 
-import a75f.io.util.prefs.LocalStorage;
-
 /**
  * Created by rmatt on 7/19/2017.
  */
@@ -22,7 +20,7 @@ public abstract class UtilityApplication extends Application
 	@Override
 	public void onTerminate()
 	{
-		LocalStorage.setApplicationSettings(Globals.getInstance().getCCUApplication());
+		
 		super.onTerminate();
 	}
 }

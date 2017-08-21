@@ -29,10 +29,12 @@ import a75f.io.bo.ble.BLERoomName;
 import a75f.io.bo.ble.GattAttributes;
 import a75f.io.bo.ble.GattPin;
 import a75f.io.bo.ble.StructShort;
+import a75f.io.bo.building.SmartNode;
 import a75f.io.bo.serial.SerialConsts;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.R;
 import a75f.io.util.ByteArrayUtils;
+import a75f.io.util.Globals;
 import a75f.io.util.prefs.EncryptionPrefs;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -52,10 +54,12 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
 	public static final  String ARG_PAIRING_ADDRESS                  = "PAIRINGADDRESS";
 	public static final  String ARG_NAME                             = "NAME";
 	private static final String BUNDLE_KEY_BLUETOOTH_DEVICE          = "bluetooth_device";
-	private static final String TAG                                  = FragmentBLEDevicePin.class.getSimpleName();
+	private static final String TAG                                  =
+			FragmentBLEDevicePin.class.getSimpleName();
 	
 	GattPin mGattPin;
-	byte[] mByteBufferZoneConfigInProgress = new byte[]{GattAttributes.ZONE_CONFIGURATION_IN_PROGRESS};
+	byte[] mByteBufferZoneConfigInProgress =
+			new byte[]{GattAttributes.ZONE_CONFIGURATION_IN_PROGRESS};
 	byte[] mBLERoomNameBuffer;
 	byte[] mBLEAddressBuffer;
 	String mName;
@@ -72,7 +76,9 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
 			mBLEProvisionService = ((BLEProvisionService.LocalBinder) service).getService();
 			if (!mBLEProvisionService.initialize())
 			{
-				Toast.makeText(FragmentBLEDevicePin.this.getActivity(), R.string.unable_to_bluetooth, Toast.LENGTH_LONG).show();
+				Toast.makeText(FragmentBLEDevicePin.this
+						               .getActivity(), R.string.unable_to_bluetooth, Toast.LENGTH_LONG)
+				     .show();
 				getActivity().finish();
 			}
 			else
@@ -98,7 +104,8 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
 	Button   bleDialogDoneButton;
 	
 	
-	public static FragmentBLEDevicePin getInstance(short pairingAddress, String name, BluetoothDevice device)
+	public static FragmentBLEDevicePin getInstance(short pairingAddress, String name,
+	                                               BluetoothDevice device)
 	{
 		FragmentBLEDevicePin bleProvisionDialogFragment = new FragmentBLEDevicePin();
 		Bundle b = new Bundle();
@@ -145,7 +152,8 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
 	
 	
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+	                         Bundle savedInstanceState)
 	{
 		View retVal = inflater.inflate(R.layout.fragment_ble_pin_dialog, container, false);
 		ButterKnife.bind(this, retVal);
@@ -174,23 +182,31 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
 	{
 		if (!mPinEntered)
 		{
-			if (bleDialogEnterPinEdittext.getText() == null || bleDialogEnterPinEdittext.getText().toString().trim().equals(""))
+			if (bleDialogEnterPinEdittext.getText() == null ||
+			    bleDialogEnterPinEdittext.getText().toString().trim().equals(""))
 			{
-				bleDialogEnterPinEdittext.setError("Pin required.  Please enter pin displayed on the 75F device you'd like to pair.");
+				bleDialogEnterPinEdittext
+						.setError("Pin required.  Please enter pin displayed on the 75F device you'd like to pair.");
 			}
 			else
 			{
-				String pinFeildText = bleDialogEnterPinEdittext.getText() != null && !bleDialogEnterPinEdittext.getText().toString().trim().equals("") ? bleDialogEnterPinEdittext.getText().toString() : "0";
+				String pinFeildText = bleDialogEnterPinEdittext.getText() != null &&
+				                      !bleDialogEnterPinEdittext.getText().toString().trim()
+				                                                .equals("")
+						                      ? bleDialogEnterPinEdittext.getText().toString()
+						                      : "0";
 				int pinNumericValue = Integer.valueOf(pinFeildText);
 				if (pinNumericValue == mGattPin.getPin())
 				{
 					mPinEntered = true;
 					showProgressDialog();
-					mBLEProvisionService.writeCharacteristic(mBLEProvisionService.getSupportedGattAttribute(GattAttributes.ZONE_CONFIGURATION_STATUS), mByteBufferZoneConfigInProgress);
+					mBLEProvisionService.writeCharacteristic(mBLEProvisionService
+							                                         .getSupportedGattAttribute(GattAttributes.ZONE_CONFIGURATION_STATUS), mByteBufferZoneConfigInProgress);
 				}
 				else
 				{
-					bleDialogEnterPinEdittext.setError("Pins do not match.  Please enter pin displayed on the 75F device you'd like to pair.");
+					bleDialogEnterPinEdittext
+							.setError("Pins do not match.  Please enter pin displayed on the 75F device you'd like to pair.");
 				}
 			}
 		}
@@ -224,80 +240,119 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
 				mBLEProvisionService.readCharacteristic(GattAttributes.BLE_PIN);
 			}
 		}
-		else if (event.getAction() == BLEAction.ACTION_DATA_AVAILABLE && event.getBluetoothGattCharacteristic() != null)
+		else if (event.getAction() == BLEAction.ACTION_DATA_AVAILABLE &&
+		         event.getBluetoothGattCharacteristic() != null)
 		{
-			if (event.getBluetoothGattCharacteristic().getUuid().toString().equalsIgnoreCase(GattAttributes.BLE_PIN))
+			if (event.getBluetoothGattCharacteristic().getUuid().toString()
+			         .equalsIgnoreCase(GattAttributes.BLE_PIN))
 			{
 				mGattPin = GattPin.initialize(event.getBluetoothGattCharacteristic().getValue());
 				dismissProgressDialog();
 			}
-			else if (event.getBluetoothGattCharacteristic().getUuid().toString().equalsIgnoreCase(GattAttributes.ZONE_CONFIGURATION_STATUS))
+			else if (event.getBluetoothGattCharacteristic().getUuid().toString()
+			              .equalsIgnoreCase(GattAttributes.ZONE_CONFIGURATION_STATUS))
 			{
-				if (!mByteBufferZoneConfigInProgress.equals(event.getBluetoothGattCharacteristic().getValue()))
+				if (!mByteBufferZoneConfigInProgress
+						     .equals(event.getBluetoothGattCharacteristic().getValue()))
 				{
-					
-					
-					FragmentBLEDevicePin.this.getActivity().runOnUiThread(new Runnable()
-					{
-						@Override
-						public void run()
-						{
-							dismissProgressDialog();
-							Toast.makeText(FragmentBLEDevicePin.this.getActivity(), "Pairing Success!", Toast.LENGTH_LONG).show();
-							removeDialogFragment(FragmentDeviceScan.ID);
-							removeDialogFragment(FragmentBLEDevicePin.ID);
-						}
-					});
+					pairingSuccess();
 				}
 			}
 		}
-		else if (event.getAction() == BLEAction.ACTION_DATA_WROTE && event.getBluetoothGattCharacteristic() != null)
+		else if (event.getAction() == BLEAction.ACTION_DATA_WROTE &&
+		         event.getBluetoothGattCharacteristic() != null)
 		{
-			if (event.getBluetoothGattCharacteristic().getUuid().toString().equalsIgnoreCase(GattAttributes.ZONE_CONFIGURATION_STATUS))
+			if (event.getBluetoothGattCharacteristic().getUuid().toString()
+			         .equalsIgnoreCase(GattAttributes.ZONE_CONFIGURATION_STATUS))
 			{
 				if (needsLinkKey())
 				{
-					mBLEProvisionService.writeCharacteristic(GattAttributes.BLE_LINK_KEY, EncryptionPrefs.getBLELinkKey());
+					mBLEProvisionService
+							.writeCharacteristic(GattAttributes.BLE_LINK_KEY, EncryptionPrefs
+									                                                  .getBLELinkKey());
 				}
 				else
 				{
-					mBLEProvisionService.writeCharacteristic(GattAttributes.ROOM_NAME, mBLERoomNameBuffer);
+					mBLEProvisionService
+							.writeCharacteristic(GattAttributes.ROOM_NAME, mBLERoomNameBuffer);
 				}
 			}
-			else if (event.getBluetoothGattCharacteristic().getUuid().toString().equalsIgnoreCase(GattAttributes.BLE_LINK_KEY))
+			else if (event.getBluetoothGattCharacteristic().getUuid().toString()
+			              .equalsIgnoreCase(GattAttributes.BLE_LINK_KEY))
 			{
-				mBLEProvisionService.writeCharacteristic(GattAttributes.ROOM_NAME, mBLERoomNameBuffer);
+				mBLEProvisionService
+						.writeCharacteristic(GattAttributes.ROOM_NAME, mBLERoomNameBuffer);
 			}
-			else if (event.getBluetoothGattCharacteristic().getUuid().toString().equalsIgnoreCase(GattAttributes.ROOM_NAME))
+			else if (event.getBluetoothGattCharacteristic().getUuid().toString()
+			              .equalsIgnoreCase(GattAttributes.ROOM_NAME))
 			{
-				mBLEProvisionService.writeCharacteristic(GattAttributes.LW_MESH_PAIRING_ADDRESS, mBLEAddressBuffer);
+				mBLEProvisionService
+						.writeCharacteristic(GattAttributes.LW_MESH_PAIRING_ADDRESS, mBLEAddressBuffer);
 			}
-			else if (event.getBluetoothGattCharacteristic().getUuid().toString().equalsIgnoreCase(GattAttributes.LW_MESH_PAIRING_ADDRESS))
+			else if (event.getBluetoothGattCharacteristic().getUuid().toString()
+			              .equalsIgnoreCase(GattAttributes.LW_MESH_PAIRING_ADDRESS))
 			{
-				mBLEProvisionService.writeCharacteristic(GattAttributes.LW_MESH_SECURITY_KEY, EncryptionPrefs.getEncryptionKey());
+				mBLEProvisionService
+						.writeCharacteristic(GattAttributes.LW_MESH_SECURITY_KEY, EncryptionPrefs
+								                                                          .getEncryptionKey());
 			}
-			else if (event.getBluetoothGattCharacteristic().getUuid().toString().equalsIgnoreCase(GattAttributes.LW_MESH_SECURITY_KEY))
+			else if (event.getBluetoothGattCharacteristic().getUuid().toString()
+			              .equalsIgnoreCase(GattAttributes.LW_MESH_SECURITY_KEY))
 			{
-				mBLEProvisionService.writeCharacteristic(GattAttributes.FIRMWARE_SIGNATURE_KEY, EncryptionPrefs.getFirmwareSignatureKey());
+				mBLEProvisionService
+						.writeCharacteristic(GattAttributes.FIRMWARE_SIGNATURE_KEY, EncryptionPrefs
+								                                                            .getFirmwareSignatureKey());
 			}
-			else if (event.getBluetoothGattCharacteristic().getUuid().toString().equalsIgnoreCase(GattAttributes.FIRMWARE_SIGNATURE_KEY))
+			else if (event.getBluetoothGattCharacteristic().getUuid().toString()
+			              .equalsIgnoreCase(GattAttributes.FIRMWARE_SIGNATURE_KEY))
 			{
 				byte[] crc = null;
 				if (needsLinkKey())
 				{
-					crc = ByteArrayUtils.addBytes(EncryptionPrefs.getBLELinkKey(), mBLERoomNameBuffer, mBLEAddressBuffer, EncryptionPrefs.getEncryptionKey(), EncryptionPrefs.getFirmwareSignatureKey(), mByteBufferZoneConfigInProgress);
+					crc = ByteArrayUtils.addBytes(EncryptionPrefs
+							                              .getBLELinkKey(), mBLERoomNameBuffer, mBLEAddressBuffer, EncryptionPrefs
+									                                                                                       .getEncryptionKey(), EncryptionPrefs
+											                                                                                                            .getFirmwareSignatureKey(), mByteBufferZoneConfigInProgress);
 				}
 				else
 				{
-					crc = ByteArrayUtils.addBytes(mBLERoomNameBuffer, mBLEAddressBuffer, EncryptionPrefs.getEncryptionKey(), EncryptionPrefs.getFirmwareSignatureKey(), mByteBufferZoneConfigInProgress);
+					crc = ByteArrayUtils
+							      .addBytes(mBLERoomNameBuffer, mBLEAddressBuffer, EncryptionPrefs
+									                                                       .getEncryptionKey(), EncryptionPrefs
+											                                                                            .getFirmwareSignatureKey(), mByteBufferZoneConfigInProgress);
 				}
-				mBLEProvisionService.writeCharacteristic(GattAttributes.CRC, ByteArrayUtils.bigToLittleEndian(ByteArrayUtils.computeCrc(crc)));
+				mBLEProvisionService.writeCharacteristic(GattAttributes.CRC, ByteArrayUtils
+						                                                             .bigToLittleEndian(ByteArrayUtils
+								                                                                                .computeCrc(crc)));
 			}
-			else if (event.getBluetoothGattCharacteristic().getUuid().toString().equalsIgnoreCase(GattAttributes.CRC))
+			else if (event.getBluetoothGattCharacteristic().getUuid().toString()
+			              .equalsIgnoreCase(GattAttributes.CRC))
 			{
 				mBLEProvisionService.readCharacteristic(GattAttributes.ZONE_CONFIGURATION_STATUS);
 			}
 		}
+	}
+	
+	
+	private void pairingSuccess()
+	{
+		FragmentBLEDevicePin.this.getActivity().runOnUiThread(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				SmartNode smartNode = new SmartNode();
+				smartNode.mAddress = mPairingAddress;
+				smartNode.mRoomName = mName;
+				Globals.getInstance().getCCUApplication().smartNodes.add(smartNode);
+				dismissProgressDialog();
+				Toast.makeText(FragmentBLEDevicePin.this
+						               .getActivity(), "Pairing Success!", Toast.LENGTH_LONG)
+				     .show();
+				removeDialogFragment(FragmentDeviceScan.ID);
+				removeDialogFragment(FragmentBLEDevicePin.ID);
+			}
+		});
 	}
 	
 	

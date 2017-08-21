@@ -40,22 +40,22 @@ public class LocalStorage
 	}
 	
 	
-	public static void setApplicationSettings(CCUApplication ccuApplication)
+	private static SharedPreferences getCCUSettings()
+	{
+		return Globals.getInstance().getApplicationContext().getSharedPreferences(PREFS_CCU_SETTINGS_CONST, Context.MODE_PRIVATE);
+	}
+	
+	
+	public static void setApplicationSettings()
 	{
 		try
 		{
-			String jsonString = JsonSerializer.toJson(ccuApplication, false);
-			getCCUSettings().edit().putString(VAR_CCU_SETTINGS, jsonString).apply();
+			String jsonString = JsonSerializer.toJson(Globals.getInstance().getCCUApplication(), false);
+			getCCUSettings().edit().putString(VAR_CCU_SETTINGS, jsonString).commit();
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
 		}
-	}
-	
-	
-	private static SharedPreferences getCCUSettings()
-	{
-		return Globals.getInstance().getApplicationContext().getSharedPreferences(PREFS_CCU_SETTINGS_CONST, Context.MODE_PRIVATE);
 	}
 }

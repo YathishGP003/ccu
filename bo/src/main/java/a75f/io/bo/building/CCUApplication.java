@@ -3,7 +3,6 @@ package a75f.io.bo.building;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Yinten on 8/15/2017.
@@ -12,7 +11,7 @@ import java.util.List;
 public class CCUApplication
 {
 	public String      CCUTitle = new String();
-	public List<Floor> floors   = new ArrayList<Floor>();
+	public ArrayList<Floor> floors   = new ArrayList<Floor>();
 	
 	public SystemProfile        systemProfile = new SystemProfile();
 	public ControlMote          controlMote   = new ControlMote();

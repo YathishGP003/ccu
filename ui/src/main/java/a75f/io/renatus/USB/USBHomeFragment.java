@@ -34,8 +34,8 @@ import java.util.UUID;
 import a75f.io.bo.building.CCUApplication;
 import a75f.io.bo.building.Floor;
 import a75f.io.bo.building.LightProfile;
-import a75f.io.bo.building.Output;
-import a75f.io.bo.building.OutputAnalogActuatorType;
+import a75f.io.bo.building.definitions.Output;
+import a75f.io.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.bo.building.SmartNode;
 import a75f.io.bo.building.SmartNodeOutput;
 import a75f.io.bo.building.Zone;
@@ -280,9 +280,10 @@ public class USBHomeFragment extends DialogFragment
 				SmartNode smartNode = ccuApplication.smartNodes.get(0);
 				ccuApplication.floors.add(new Floor(0, "FloorID", "TestFloorUSBLight"));
 				//				smartNode.analog1OutId = analog15kUUID;
-				ccuApplication.floors.get(0).addZone("5000 test zone");
+				ccuApplication.floors.get(0).mRoomList.add(new Zone("5000 test zone"));
 				LightProfile lightProfile5K = new LightProfile("light profile");
-				ccuApplication.floors.get(0).getRoomList().get(0).zoneProfiles.add(lightProfile5K);
+				ccuApplication.floors.get(0).mRoomList.get(0).zoneProfiles.add
+						                                                                         (lightProfile5K);
 				SmartNodeOutput smartNodeOutput5K = new SmartNodeOutput();
 				//				smartNodeOutput5K.uniqueID = analog15kUUID;
 				smartNodeOutput5K.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
@@ -299,12 +300,13 @@ public class USBHomeFragment extends DialogFragment
 			{
 				e.printStackTrace();
 			}
-			SmartNode smartNode = ccuApplication.findSmartNodeByAddress(ccuApplication.floors.get(0).getRoomList().get(0).zoneProfiles.get(0).smartNodeOutputs.get(0).mSmartNodeAddress);//findSmartNodeByIOUUID(ccuApplication.zones.get(0).zoneProfiles.get(0).smartNodeOutputs.get(0).uniqueID);
+			SmartNode smartNode = ccuApplication.findSmartNodeByAddress(ccuApplication.floors.get
+					                                                                                  (0).mRoomList.get(0).zoneProfiles.get(0).smartNodeOutputs.get(0).mSmartNodeAddress);//findSmartNodeByIOUUID(ccuApplication.zones.get(0).zoneProfiles.get(0).smartNodeOutputs.get(0).uniqueID);
 			CcuToCmOverUsbDatabaseSeedSnMessage_t ccuToCmOverUsbDatabaseSeedSnMessage_t = new CcuToCmOverUsbDatabaseSeedSnMessage_t();
 			ccuToCmOverUsbDatabaseSeedSnMessage_t.smartNodeAddress.set(smartNode.mAddress);
 			ccuToCmOverUsbDatabaseSeedSnMessage_t.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN);
 			//ccuToCmOverUsbDatabaseSeedSnMessage_t.putEncrptionKey(Encryp);
-			ZoneProfile zoneProfile = ccuApplication.floors.get(0).getRoomList().get(0).zoneProfiles.get(0);
+			ZoneProfile zoneProfile = ccuApplication.floors.get(0).mRoomList.get(0).zoneProfiles.get(0);
 			ccuToCmOverUsbDatabaseSeedSnMessage_t.controls.analogOut1.set((short) 100);
 			ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.profileBitmap.lightingControl.set((short) 1);
 			ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.ledBitmap.analogIn1.set((short) 1);
@@ -345,7 +347,7 @@ public class USBHomeFragment extends DialogFragment
 				Zone zone5K = new Zone("5000 test zone");
 				LightProfile lightProfile5K = new LightProfile("light profile");
 				zone5K.zoneProfiles.add(lightProfile5K);
-				ccuApplication.floors.get(0).getRoomList().add(zone5K);
+				ccuApplication.floors.get(0).mRoomList.add(zone5K);
 				SmartNodeOutput smartNodeOutput5K = new SmartNodeOutput();
 				smartNodeOutput5K.mUniqueID = analog15kUUID;
 				smartNodeOutput5K.mSmartNodeAddress = smartNode.mAddress;
@@ -363,7 +365,8 @@ public class USBHomeFragment extends DialogFragment
 			{
 				e.printStackTrace();
 			}
-			SmartNode smartNode = ccuApplication.findSmartNodeByAddress(ccuApplication.floors.get(0).getRoomList().get(0).zoneProfiles.get(0).smartNodeOutputs.get(0).mSmartNodeAddress);
+			SmartNode smartNode = ccuApplication.findSmartNodeByAddress(ccuApplication.floors.get
+					                                                                                  (0).mRoomList.get(0).zoneProfiles.get(0).smartNodeOutputs.get(0).mSmartNodeAddress);
 			CcuToCmOverUsbSnControlsMessage_t controlsMessage_t = new CcuToCmOverUsbSnControlsMessage_t();
 			controlsMessage_t.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_CONTROLS);
 			controlsMessage_t.smartNodeAddress.set(smartNode.mAddress);

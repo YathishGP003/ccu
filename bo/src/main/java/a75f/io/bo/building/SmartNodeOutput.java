@@ -2,6 +2,9 @@ package a75f.io.bo.building;
 
 import java.util.UUID;
 
+import a75f.io.bo.building.definitions.Output;
+import a75f.io.bo.building.definitions.OutputAnalogActuatorType;
+import a75f.io.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.bo.building.definitions.Port;
 
 /**

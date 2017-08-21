@@ -91,7 +91,8 @@ class RoomListActionMenuListener implements MultiChoiceModeListener
 		for (int nCount = 0; nCount < selectedRoom.size(); nCount++)
 		{
 			//TODO: test
-			FloorContainer.getInstance().getFloorList().get(floorPlanActivity.mCurFloorIndex).getRoomList().remove(nCount);
+			FloorContainer.getInstance().getFloorList().get(floorPlanActivity.mCurFloorIndex)
+					.mRoomList.remove(nCount);
 		}
 	}
 	

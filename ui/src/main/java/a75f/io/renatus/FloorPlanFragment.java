@@ -37,38 +37,28 @@ import butterknife.OnItemClick;
 
 public class FloorPlanFragment extends Fragment
 {
-	public int mCurFloorIndex = -1;
-	public int mCurRoomIndex  = -1;
-	
+	public int                    mCurFloorIndex   = -1;
+	public int                    mCurRoomIndex    = -1;
+	public DataArrayAdapter<Zone> mRoomListAdapter = null;
 	@BindView(R.id.addFloorBtn)
 	ImageButton addFloorBtn;
-	
 	@BindView(R.id.addRoomBtn)
 	ImageButton addRoomBtn;
-	
 	@BindView(R.id.pairModuleBtn)
 	ImageButton pairModuleBtn;
-	
 	@BindView(R.id.addFloorEdit)
-	EditText addFloorEdit;
-	
+	EditText    addFloorEdit;
 	@BindView(R.id.addRoomEdit)
-	EditText addRoomEdit;
-	
+	EditText    addRoomEdit;
 	@BindView(R.id.addModuleEdit)
-	EditText addModuleEdit;
-	
+	EditText    addModuleEdit;
 	@BindView(R.id.floorList)
-	ListView floorListView;
-	
+	ListView    floorListView;
 	@BindView(R.id.roomList)
-	ListView roomListView;
-	
+	ListView    roomListView;
 	@BindView(R.id.moduleList)
-	ListView moduleListView;
-	
+	ListView    moduleListView;
 	private DataArrayAdapter<Floor> mModuleListAdapter = null;
-	public  DataArrayAdapter<Zone>  mRoomListAdapter   = null;
 	
 	
 	public FloorPlanFragment()
@@ -83,7 +73,8 @@ public class FloorPlanFragment extends Fragment
 	
 	
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+	                         Bundle savedInstanceState)
 	{
 		View rootView = inflater.inflate(R.layout.fragment_floorplan, container, false);
 		ButterKnife.bind(this, rootView);
@@ -121,10 +112,15 @@ public class FloorPlanFragment extends Fragment
 		if (FloorContainer.getInstance().getFloorList().size() > 0)
 		{
 			selectFloor(mCurFloorIndex);
-			mRoomListAdapter = new DataArrayAdapter<Zone>(Globals.getInstance().getApplicationContext(), R.layout.listviewitem, FloorContainer.getInstance().getFloorList().get(mCurFloorIndex).getRoomList());
+			mRoomListAdapter = new DataArrayAdapter<Zone>(Globals.getInstance()
+			                                                     .getApplicationContext(), R.layout.listviewitem, FloorContainer
+					                                                                                                      .getInstance()
+					                                                                                                      .getFloorList()
+					                                                                                                      .get(mCurFloorIndex).mRoomList);
 			roomListView.setAdapter(mRoomListAdapter);
 			enableRoomBtn();
-			if (FloorContainer.getInstance().getFloorList().get(mCurFloorIndex).getRoomList().size() > 0)
+			if (FloorContainer.getInstance().getFloorList().get(mCurFloorIndex).mRoomList.size() >
+			    0)
 			{
 				enableModueButton();
 			}
@@ -144,7 +140,11 @@ public class FloorPlanFragment extends Fragment
 	{
 		mCurFloorIndex = position;
 		FloorContainer.getInstance().getFloorListAdapter().setSelectedItem(position);
-		mRoomListAdapter = new DataArrayAdapter<Zone>(Globals.getInstance().getApplicationContext(), R.layout.listviewitem, FloorContainer.getInstance().getFloorList().get(mCurFloorIndex).getRoomList());
+		mRoomListAdapter = new DataArrayAdapter<Zone>(Globals.getInstance()
+		                                                     .getApplicationContext(), R.layout.listviewitem, FloorContainer
+				                                                                                                      .getInstance()
+				                                                                                                      .getFloorList()
+				                                                                                                      .get(mCurFloorIndex).mRoomList);
 		roomListView.setAdapter(mRoomListAdapter);
 		selectRoom(0);
 	}
@@ -192,7 +192,8 @@ public class FloorPlanFragment extends Fragment
 		enableFloorEdit();
 		addFloorEdit.setText("");
 		addFloorEdit.requestFocus();
-		InputMethodManager mgr = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+		InputMethodManager mgr =
+				(InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 		mgr.showSoftInput(addFloorEdit, InputMethodManager.SHOW_IMPLICIT);
 	}
 	
@@ -209,14 +210,21 @@ public class FloorPlanFragment extends Fragment
 	{
 		if (actionId == EditorInfo.IME_ACTION_DONE)
 		{
-			final int nID = FloorContainer.getInstance().addFloor(addFloorEdit.getText().toString());
+			final int nID =
+					FloorContainer.getInstance().addFloor(addFloorEdit.getText().toString());
 			selectFloor(nID);
-			mRoomListAdapter = new DataArrayAdapter<Zone>(Globals.getInstance().getApplicationContext(), R.layout.listviewitem, FloorContainer.getInstance().getFloorList().get(mCurFloorIndex).getRoomList());
+			mRoomListAdapter = new DataArrayAdapter<Zone>(Globals.getInstance()
+			                                                     .getApplicationContext(), R.layout.listviewitem, FloorContainer
+					                                                                                                      .getInstance()
+					                                                                                                      .getFloorList()
+					                                                                                                      .get(mCurFloorIndex).mRoomList);
 			roomListView.setAdapter(mRoomListAdapter);
 			//CCUKinveyInterface.updateFloor(FloorData.getFloorData().get(nID), false);
-			InputMethodManager mgr = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+			InputMethodManager mgr = (InputMethodManager) getActivity()
+					                                              .getSystemService(Context.INPUT_METHOD_SERVICE);
 			mgr.hideSoftInputFromWindow(addFloorEdit.getWindowToken(), 0);
-			Toast.makeText(getActivity().getApplicationContext(), "Floor " + addFloorEdit.getText() + " added", Toast.LENGTH_SHORT).show();
+			Toast.makeText(getActivity().getApplicationContext(),
+					"Floor " + addFloorEdit.getText() + " added", Toast.LENGTH_SHORT).show();
 			enableFloorButton();
 			enableRoomBtn();
 			return true;
@@ -241,7 +249,8 @@ public class FloorPlanFragment extends Fragment
 		enableRoomEdit();
 		addRoomEdit.setText("");
 		addRoomEdit.requestFocus();
-		InputMethodManager mgr = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+		InputMethodManager mgr =
+				(InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 		mgr.showSoftInput(addRoomEdit, InputMethodManager.SHOW_IMPLICIT);
 	}
 	
@@ -258,10 +267,14 @@ public class FloorPlanFragment extends Fragment
 	{
 		if (actionId == EditorInfo.IME_ACTION_DONE)
 		{
-			Toast.makeText(getActivity().getApplicationContext(), "Room " + addRoomEdit.getText() + " added", Toast.LENGTH_SHORT).show();
-			Zone room = FloorContainer.getInstance().getFloorList().get(mCurFloorIndex).addZone(addRoomEdit.getText().toString());
+			Toast.makeText(getActivity().getApplicationContext(),
+					"Room " + addRoomEdit.getText() + " added", Toast.LENGTH_SHORT).show();
+			Zone room = new Zone(addRoomEdit.getText().toString());
+			FloorContainer.getInstance().getFloorList().get(mCurFloorIndex).mRoomList
+					.add(new Zone(addRoomEdit.getText().toString()));
 			selectRoom(FloorContainer.getInstance().getFloorList().size() - 1);
-			InputMethodManager mgr = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+			InputMethodManager mgr = (InputMethodManager) getActivity()
+					                                              .getSystemService(Context.INPUT_METHOD_SERVICE);
 			mgr.hideSoftInputFromWindow(addRoomEdit.getWindowToken(), 0);
 			enableRoomBtn();
 			enableModueButton();
@@ -285,8 +298,11 @@ public class FloorPlanFragment extends Fragment
 	public void startPairing()
 	{//TODO - Test code hardcoded to fix crash
 		short meshAddress = SmartNodeBLL.nextSmartNodeAddress();
-		String roomName = "75F Room";
-		FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(meshAddress, roomName);
+		String roomName =
+				Globals.getInstance().getCCUApplication().floors.get(mCurFloorIndex).mRoomList
+						.get(mCurRoomIndex).roomName;
+		FragmentDeviceScan fragmentDeviceScan =
+				FragmentDeviceScan.getInstance(meshAddress, roomName);
 		showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
 	}
 	

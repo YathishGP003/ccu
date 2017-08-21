@@ -8,14 +8,17 @@ import java.util.ArrayList;
 
 public class Floor
 {
-	
 	public static final String FLOOR_NAME  = "FloorName";
 	public static final String FLOOR_WEBID = "FloorWebId";
+	public int             mFloorId;
+	public String          mFloorName;
+	public String          mKinveyWebId;
+	public ArrayList<Zone> mRoomList;
 	
-	private int             mFloorId;
-	private String          mFloorName;
-	private String          mKinveyWebId;
-	private ArrayList<Zone> mRoomList;
+	
+	public Floor()
+	{
+	}
 	
 	
 	public Floor(int floorId, String webId, String floor)
@@ -27,59 +30,9 @@ public class Floor
 	}
 	
 	
-	public String getName()
-	{
-		return mFloorName;
-	}
-	
-	
-	public void setName(String nName)
-	{
-		this.mFloorName = nName;
-	}
-	
-	
-	public Integer getID()
-	{
-		return mFloorId;
-	}
-	
-	
-	public String getWebID()
-	{
-		return mKinveyWebId;
-	}
-	
-	
 	public String toString()
 	{
 		return mFloorName;
 	}
-	
-	
-	public ArrayList<Zone> getRoomList()
-	{
-		return mRoomList;
-	}
-	
-	
-	public Zone addZone(String room)
-	{
-		Zone r = new Zone(room);
-		mRoomList.add(r);
-		return r;
-	}
-	
-	
-//	public void deleteRoom(int roomId)
-//	{
-//		mRoomList.remove(roomId);
-//	}
-//
-//
-//	public void saveData(SharedPreferences.Editor editor)
-//	{
-//		editor.putString(FLOOR_NAME + mFloorId, mFloorName);
-//		editor.putString(FLOOR_WEBID + mFloorId, mKinveyWebId);
-//	}
+
 }

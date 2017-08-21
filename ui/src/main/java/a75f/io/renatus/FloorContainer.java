@@ -15,14 +15,14 @@ public class FloorContainer
 	
 	private static FloorContainer sInstance = null;
 	
-	private ArrayList<Floor>        mFloorList        = null;
 	private DataArrayAdapter<Floor> mFloorListAdapter = null;
 	
 	
 	private FloorContainer()
 	{
-		mFloorList = new ArrayList<>();
-		mFloorListAdapter = new DataArrayAdapter<Floor>(Globals.getInstance().getApplicationContext(), R.layout.listviewitem, mFloorList);
+		mFloorListAdapter = new DataArrayAdapter<Floor>(Globals.getInstance()
+		                                                       .getApplicationContext(), R.layout.listviewitem, Globals.getInstance()
+		                                                                                                               .getCCUApplication().floors);
 	}
 	
 	
@@ -38,10 +38,11 @@ public class FloorContainer
 	
 	public int addFloor(String floorName)
 	{
-		int fID = mFloorList.size();
-		String sWebId = null; //CCUKinveyInterface.getKinveyId() + "_" + UUID.randomUUID().toString();
-		Floor floor = new Floor(fID, sWebId, floorName);
-		mFloorList.add(fID, floor);
+		int fID = Globals.getInstance().getCCUApplication().floors.size();
+		String sWebId =
+				null; //CCUKinveyInterface.getKinveyId() + "_" + UUID.randomUUID().toString();
+		Floor floor = new Floor(fID, "webid", floorName);
+		Globals.getInstance().getCCUApplication().floors.add(fID, floor);
 		mFloorListAdapter.notifyDataSetChanged();
 		return fID;
 	}
@@ -49,7 +50,7 @@ public class FloorContainer
 	
 	public void deleteFloor(Floor f)
 	{
-		mFloorList.remove(f);
+		Globals.getInstance().getCCUApplication().floors.remove(f);
 		mFloorListAdapter.notifyDataSetChanged();
 		//CCUKinveyInterface.updateFloor(floorData, true);
 	}
@@ -57,20 +58,26 @@ public class FloorContainer
 	
 	public ArrayList<Floor> getFloorList()
 	{
-		return mFloorList;
+		return Globals.getInstance().getCCUApplication().floors;
 	}
 	
 	
 	public DataArrayAdapter<Floor> getFloorListAdapter()
 	{
+		mFloorListAdapter = new DataArrayAdapter<Floor>(Globals.getInstance()
+		                                                       .getApplicationContext(), R.layout.listviewitem, Globals.getInstance()
+		                                                                                                               .getCCUApplication().floors);
 		return mFloorListAdapter;
 	}
 	
 	
 	public void loadData()
 	{
-		mFloorList.clear();
-		mFloorListAdapter = new DataArrayAdapter<Floor>(Globals.getInstance().getApplicationContext(), R.layout.listviewitem, Globals.getInstance().getCCUApplication().floors);
+		mFloorListAdapter = new DataArrayAdapter<Floor>(Globals.getInstance()
+		                                                       .getApplicationContext(), R.layout.listviewitem, Globals.getInstance()
+		                                                                                                               .getCCUApplication().floors);
+		
+		
 		/*DCVSensorData.getHandle().loadData();
 		PressureSensorData.getHandle().loadData();
 		NO2SensorData.getHandle().loadData();
@@ -81,9 +88,7 @@ public class FloorContainer
 	
 	public void saveData()
 	{
-		//Apply changes
-		Globals.getInstance().getCCUApplication().floors = mFloorList;
 		//Save
-		LocalStorage.setApplicationSettings(Globals.getInstance().getCCUApplication());
+		LocalStorage.setApplicationSettings();
 	}
 }

@@ -33,22 +33,19 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.List;
-import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.bo.json.serializers.JsonSerializer;
 import a75f.io.bo.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
 import a75f.io.bo.serial.CmToCcuOverUsbErrorReportMessage_t;
 import a75f.io.bo.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 import a75f.io.bo.serial.MessageType;
-import a75f.io.bo.serial.SnToCmOverAirSnRegularUpdateMessage_t;
+import a75f.io.bo.serial.comm.SerialAction;
+import a75f.io.bo.serial.comm.SerialEvent;
 import a75f.io.renatus.ENGG.logger.Log;
 import a75f.io.renatus.MainActivity;
 import a75f.io.renatus.R;
 
-import a75f.io.usbserial.SerialAction;
-import a75f.io.usbserial.SerialEvent;
 import a75f.io.usbserial.UsbService;
 import butterknife.BindView;
-import butterknife.BindViews;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 

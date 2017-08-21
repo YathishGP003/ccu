@@ -91,7 +91,7 @@ public class BLETestFragment extends Fragment
 	@OnClick(R.id.pairButton)
 	public void pairModule() {
 		FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(
-					Short.parseShort(channels.get(channelSelection)), roomName.getText().toString());
+					Short.parseShort(channels.get(channelSelection)), roomName.getText().toString(), "75F");
 		showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
 	}
 	

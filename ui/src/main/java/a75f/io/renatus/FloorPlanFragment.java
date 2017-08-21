@@ -298,11 +298,10 @@ public class FloorPlanFragment extends Fragment
 	public void startPairing()
 	{//TODO - Test code hardcoded to fix crash
 		short meshAddress = SmartNodeBLL.nextSmartNodeAddress();
-		String roomName =
-				Globals.getInstance().getCCUApplication().floors.get(mCurFloorIndex).mRoomList
-						.get(mCurRoomIndex).roomName;
+		Floor floor = Globals.getInstance().getCCUApplication().floors.get(mCurFloorIndex);
+		Zone room = floor.mRoomList.get(mCurRoomIndex);
 		FragmentDeviceScan fragmentDeviceScan =
-				FragmentDeviceScan.getInstance(meshAddress, roomName);
+				FragmentDeviceScan.getInstance(meshAddress, room.roomName, floor.mFloorName);
 		showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
 	}
 	

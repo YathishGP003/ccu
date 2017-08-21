@@ -32,7 +32,9 @@ import a75f.io.bo.ble.StructShort;
 import a75f.io.bo.building.SmartNode;
 import a75f.io.bo.serial.SerialConsts;
 import a75f.io.renatus.BASE.BaseDialogFragment;
+import a75f.io.renatus.FragmentCommonBundleArgs;
 import a75f.io.renatus.R;
+import a75f.io.renatus.ZONEPROFILE.LightingZoneProfileFragment;
 import a75f.io.util.ByteArrayUtils;
 import a75f.io.util.Globals;
 import a75f.io.util.prefs.EncryptionPrefs;
@@ -40,6 +42,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static a75f.io.renatus.FragmentCommonBundleArgs.ARG_NAME;
+import static a75f.io.renatus.FragmentCommonBundleArgs.ARG_PAIRING_ADDR;
+import static a75f.io.renatus.FragmentCommonBundleArgs.FLOOR_NAME;
 import static android.content.Context.BIND_AUTO_CREATE;
 
 /**
@@ -49,12 +54,11 @@ import static android.content.Context.BIND_AUTO_CREATE;
 public class FragmentBLEDevicePin extends BaseDialogFragment
 {
 	
-	public static final  String ID                                   = "pin_dialog";
-	public static final  int    RETRY_TIME_GATT_SERVICES_UNAVAILABLE = 100;
-	public static final  String ARG_PAIRING_ADDRESS                  = "PAIRINGADDRESS";
-	public static final  String ARG_NAME                             = "NAME";
-	private static final String BUNDLE_KEY_BLUETOOTH_DEVICE          = "bluetooth_device";
-	private static final String TAG                                  =
+	public static final String ID                                   = "pin_dialog";
+	public static final int    RETRY_TIME_GATT_SERVICES_UNAVAILABLE = 500;
+	
+	private static final String BUNDLE_KEY_BLUETOOTH_DEVICE = "bluetooth_device";
+	private static final String TAG                         =
 			FragmentBLEDevicePin.class.getSimpleName();
 	
 	GattPin mGattPin;
@@ -63,6 +67,7 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
 	byte[] mBLERoomNameBuffer;
 	byte[] mBLEAddressBuffer;
 	String mName;
+	String mFloorName;
 	short  mPairingAddress;
 	boolean mPinEntered = false;
 	BluetoothDevice     mDevice;
@@ -105,13 +110,14 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
 	
 	
 	public static FragmentBLEDevicePin getInstance(short pairingAddress, String name,
-	                                               BluetoothDevice device)
+	                                               String mFloorName, BluetoothDevice device)
 	{
 		FragmentBLEDevicePin bleProvisionDialogFragment = new FragmentBLEDevicePin();
 		Bundle b = new Bundle();
 		b.putParcelable(BUNDLE_KEY_BLUETOOTH_DEVICE, device);
-		b.putShort(ARG_PAIRING_ADDRESS, pairingAddress);
+		b.putShort(ARG_PAIRING_ADDR, pairingAddress);
 		b.putString(ARG_NAME, name);
+		b.putString(FragmentCommonBundleArgs.FLOOR_NAME, mFloorName);
 		bleProvisionDialogFragment.setArguments(b);
 		return bleProvisionDialogFragment;
 	}
@@ -125,7 +131,8 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
 		{
 			mDevice = getArguments().getParcelable(BUNDLE_KEY_BLUETOOTH_DEVICE);
 			mName = getArguments().getString(ARG_NAME);
-			mPairingAddress = getArguments().getShort(ARG_PAIRING_ADDRESS);
+			mPairingAddress = getArguments().getShort(ARG_PAIRING_ADDR);
+			mFloorName = getArguments().getString(FLOOR_NAME);
 		}
 		Intent gattServiceIntent = new Intent(getActivity(), BLEProvisionService.class);
 		getActivity().bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
@@ -226,6 +233,7 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
 		{
 			if (!mBLEProvisionService.isCharacteristicReady(GattAttributes.BLE_PIN))
 			{
+				mBLEProvisionService.disconnect();
 				new Timer().schedule(new TimerTask()
 				{
 					@Override
@@ -351,6 +359,8 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
 				     .show();
 				removeDialogFragment(FragmentDeviceScan.ID);
 				removeDialogFragment(FragmentBLEDevicePin.ID);
+				showDialogFragment(LightingZoneProfileFragment
+						                   .newInstance(mPairingAddress, mName, mFloorName), LightingZoneProfileFragment.ID);
 			}
 		});
 	}

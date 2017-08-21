@@ -11,6 +11,14 @@ public class LightProfile extends ZoneProfile
 	public short   dimmablePercent = 50;
 	
 	
+	
+	
+	public LightProfile(String name)
+	{
+		super(name);
+	}
+	
+	
 	public void on(boolean on)
 	{
 		this.on = on;

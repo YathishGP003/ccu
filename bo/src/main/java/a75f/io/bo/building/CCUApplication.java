@@ -11,11 +11,13 @@ import java.util.List;
 @JsonSerialize
 public class CCUApplication
 {
-	public String               CCUTitle      = new String();
-	public List<Zone>           zones         = new ArrayList<Zone>();
+	public String      CCUTitle = new String();
+	public List<Floor> floors   = new ArrayList<Floor>();
+	
 	public SystemProfile        systemProfile = new SystemProfile();
 	public ControlMote          controlMote   = new ControlMote();
 	public ArrayList<SmartNode> smartNodes    = new ArrayList<SmartNode>();
+	public short mSmartNodeBand;
 	
 	
 	public SmartNode findSmartNodeByAddress(short smartNodeAddress)

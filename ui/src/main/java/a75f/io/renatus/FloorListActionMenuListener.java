@@ -8,6 +8,8 @@ import android.widget.AbsListView.MultiChoiceModeListener;
 
 import java.util.ArrayList;
 
+import a75f.io.bo.building.Floor;
+
 public class FloorListActionMenuListener implements MultiChoiceModeListener {
 
 	final private FloorPlanFragment floorPlanActivity;

@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +18,7 @@ import android.widget.Toast;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+import org.javolution.annotations.Nullable;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -235,6 +235,8 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
 			{
 				if (!mByteBufferZoneConfigInProgress.equals(event.getBluetoothGattCharacteristic().getValue()))
 				{
+					
+					
 					FragmentBLEDevicePin.this.getActivity().runOnUiThread(new Runnable()
 					{
 						@Override

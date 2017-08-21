@@ -24,7 +24,7 @@ public class LocalStorage
 	
 	public static CCUApplication getApplicationSettings()
 	{
-		String ccuSettings = getCCUSettings().getString(PREFS_CCU_SETTINGS_CONST, null);
+		String ccuSettings = getCCUSettings().getString(VAR_CCU_SETTINGS, null);
 		if (ccuSettings != null && !ccuSettings.equals(""))
 		{
 			try
@@ -45,7 +45,7 @@ public class LocalStorage
 		try
 		{
 			String jsonString = JsonSerializer.toJson(ccuApplication, false);
-			getCCUSettings().edit().putString(jsonString, null).apply();
+			getCCUSettings().edit().putString(VAR_CCU_SETTINGS, jsonString).apply();
 		}
 		catch (IOException e)
 		{

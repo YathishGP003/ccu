@@ -27,4 +27,5 @@ dependencies {
     compile 'com.evernote:android-job:1.1.11'
     testCompile 'junit:junit:4.12'
     compile project(':bo')
+    compile project(path: ':util')
 }

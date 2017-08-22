@@ -1,5 +1,6 @@
 package a75f.io.logic;
 
+import a75f.io.bo.building.SmartNode;
 import a75f.io.util.Globals;
 
 /**
@@ -14,6 +15,15 @@ public class SmartNodeBLL
 		short currentBand = Globals.getInstance().getApplicationPreferences().getSmartNodeAddressBand();
 		//currentBand + current number of paired smart nodes.
 		return (short) (currentBand + Globals.getInstance().getCCUApplication().smartNodes.size());
+	}
+	
+	
+	public static void addSmartNodeAndSeed(short mPairingAddress, String mName)
+	{
+		SmartNode smartNode = new SmartNode();
+		smartNode.mAddress = mPairingAddress;
+		smartNode.mRoomName = mName;
+		Globals.getInstance().getCCUApplication().smartNodes.add(smartNode);
 	}
 	//	public static Output
 	//public Room addModule(String roomName, short address)

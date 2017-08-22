@@ -1,0 +1,11 @@
+Go to Run -> Edit Configurations
+Do the following changes on General tab (of your module)
+Installation Options->Deplay: Nothing
+Launch Options->Launch: Nothing
+Before launch: press +, then Run External Tool, to select your script.
+In the new dialog:
+set any name.
+On 'Tool Settings'->Program: navigate to the project's dir, and select your script
+
+
+Must ADB reboot one time after install and it should work from there on out.

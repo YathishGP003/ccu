@@ -11,11 +11,10 @@ import java.util.UUID;
 import a75f.io.bo.building.CCUApplication;
 import a75f.io.bo.building.Floor;
 import a75f.io.bo.building.LightProfile;
-import a75f.io.bo.building.definitions.Output;
-import a75f.io.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.bo.building.SmartNode;
 import a75f.io.bo.building.SmartNodeOutput;
-import a75f.io.bo.building.ZoneProfile;
+import a75f.io.bo.building.definitions.Output;
+import a75f.io.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.bo.json.serializers.JsonSerializer;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 
@@ -92,8 +91,8 @@ public class JSONSerializerTest
 		ccuApplication.CCUTitle = "Light Test";
 		Floor floor = new Floor(1, "webid", "Floor1");
 		LightProfile lightProfile5K = new LightProfile("Light Profile");
-		ccuApplication.floors.get(0).addZone("5000 test zone");
-		ccuApplication.floors.get(0).getRoomList().get(0).zoneProfiles.add(lightProfile5K);
+//		ccuApplication.floors.get(0).addZone("5000 test zone");
+//		ccuApplication.floors.get(0).getRoomList().get(0).zoneProfiles.add(lightProfile5K);
 		SmartNodeOutput smartNodeOutput5K = new SmartNodeOutput();
 		smartNodeOutput5K.mSmartNodeAddress = smartNode5K.mAddress;
 		smartNodeOutput5K.mUniqueID = analog15kUUID;
@@ -110,24 +109,25 @@ public class JSONSerializerTest
 		{
 			e.printStackTrace();
 		}
-		SmartNode smartNode = ccuApplication.findSmartNodeByAddress(ccuApplication.floors.get(0).getRoomList().get(0).zoneProfiles.get(0).smartNodeOutputs.get(0).mSmartNodeAddress);
-		CcuToCmOverUsbDatabaseSeedSnMessage_t ccuToCmOverUsbDatabaseSeedSnMessage_t = new CcuToCmOverUsbDatabaseSeedSnMessage_t();
-		ccuToCmOverUsbDatabaseSeedSnMessage_t.smartNodeAddress.set(smartNode.mAddress);
-		ZoneProfile zoneProfile = ccuApplication.floors.get(0).getRoomList().get(0).zoneProfiles.get(0);
-		ccuToCmOverUsbDatabaseSeedSnMessage_t.controls.analogOut1.set((short) 0);
-		ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.profileBitmap.lightingControl.set((short) 1);
-		ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.ledBitmap.analogIn1.set((short) 1);
-		ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.lightingIntensityForOccupantDetected.set((short) 100);
-		ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.minLightingControlOverrideTimeInMinutes.set((short) 1);
-		ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.roomName.set(smartNode.mRoomName);
-		try
-		{
-			String ccuToCMSeedMessage = JsonSerializer.toJson(ccuToCmOverUsbDatabaseSeedSnMessage_t, true);
-			System.out.println("CCU seedMessage:\n" + ccuToCMSeedMessage + "\n");
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
+		//SmartNode smartNode = ccuApplication.findSmartNodeByAddress(ccuApplication.floors.get(0)
+//		                                                                                  .getRoomList().get(0).zoneProfiles.get(0).smartNodeOutputs.get(0).mSmartNodeAddress);
+//		CcuToCmOverUsbDatabaseSeedSnMessage_t ccuToCmOverUsbDatabaseSeedSnMessage_t = new CcuToCmOverUsbDatabaseSeedSnMessage_t();
+//		ccuToCmOverUsbDatabaseSeedSnMessage_t.smartNodeAddress.set(smartNode.mAddress);
+//		ZoneProfile zoneProfile = ccuApplication.floors.get(0).getRoomList().get(0).zoneProfiles.get(0);
+//		ccuToCmOverUsbDatabaseSeedSnMessage_t.controls.analogOut1.set((short) 0);
+//		ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.profileBitmap.lightingControl.set((short) 1);
+//		ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.ledBitmap.analogIn1.set((short) 1);
+//		ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.lightingIntensityForOccupantDetected.set((short) 100);
+//		ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.minLightingControlOverrideTimeInMinutes.set((short) 1);
+//		ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.roomName.set(smartNode.mRoomName);
+//		try
+//		{
+//			String ccuToCMSeedMessage = JsonSerializer.toJson(ccuToCmOverUsbDatabaseSeedSnMessage_t, true);
+//			System.out.println("CCU seedMessage:\n" + ccuToCMSeedMessage + "\n");
+//		}
+//		catch (IOException e)
+//		{
+//			e.printStackTrace();
+//		}
 	}
 }

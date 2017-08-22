@@ -29,22 +29,21 @@ import a75f.io.bo.ble.BLERoomName;
 import a75f.io.bo.ble.GattAttributes;
 import a75f.io.bo.ble.GattPin;
 import a75f.io.bo.ble.StructShort;
-import a75f.io.bo.building.SmartNode;
 import a75f.io.bo.serial.SerialConsts;
+import a75f.io.logic.SmartNodeBLL;
 import a75f.io.renatus.BASE.BaseDialogFragment;
-import a75f.io.renatus.FragmentCommonBundleArgs;
+import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.R;
 import a75f.io.renatus.ZONEPROFILE.LightingZoneProfileFragment;
 import a75f.io.util.ByteArrayUtils;
-import a75f.io.util.Globals;
 import a75f.io.util.prefs.EncryptionPrefs;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import static a75f.io.renatus.FragmentCommonBundleArgs.ARG_NAME;
-import static a75f.io.renatus.FragmentCommonBundleArgs.ARG_PAIRING_ADDR;
-import static a75f.io.renatus.FragmentCommonBundleArgs.FLOOR_NAME;
+import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.ARG_NAME;
+import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.ARG_PAIRING_ADDR;
+import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.FLOOR_NAME;
 import static android.content.Context.BIND_AUTO_CREATE;
 
 /**
@@ -349,10 +348,8 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
 			@Override
 			public void run()
 			{
-				SmartNode smartNode = new SmartNode();
-				smartNode.mAddress = mPairingAddress;
-				smartNode.mRoomName = mName;
-				Globals.getInstance().getCCUApplication().smartNodes.add(smartNode);
+				
+				SmartNodeBLL.addSmartNodeAndSeed(mPairingAddress, mName);
 				dismissProgressDialog();
 				Toast.makeText(FragmentBLEDevicePin.this
 						               .getActivity(), "Pairing Success!", Toast.LENGTH_LONG)

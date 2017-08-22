@@ -19,7 +19,7 @@ import java.util.ArrayList;
 
 import a75f.io.logic.RoomBLL;
 import a75f.io.renatus.BASE.BaseDialogFragment;
-import a75f.io.renatus.FragmentCommonBundleArgs;
+import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.R;
 
 /**
@@ -99,7 +99,7 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 	public Dialog onCreateDialog(Bundle savedInstanceState)
 	{
 		LayoutInflater inflater = (LayoutInflater) LayoutInflater.from(getActivity());
-		view = inflater.inflate(R.layout.lighting_control_details, null);
+		view = inflater.inflate(R.layout.fragment_lighting_control_details, null);
 		mSmartNodeAddress = getArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR);
 		mRoomName = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
 		mFloorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);

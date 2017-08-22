@@ -80,7 +80,7 @@ public class LightingTestFragment extends DialogFragment implements AdapterView.
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         LayoutInflater inflater = (LayoutInflater) LayoutInflater.from(getActivity());
-        view = inflater.inflate(R.layout.lighting_control_details, null);
+        view = inflater.inflate(R.layout.fragment_lighting_control_details, null);
         lcmSetCommand = (TextView)view.findViewById(R.id.lcmSetCommand);
         lcmCancelCommand = (TextView)view.findViewById(R.id.lcmCancelCommand);
         if(!mbIsInEditMode)lcmCancelCommand.setVisibility(View.INVISIBLE);

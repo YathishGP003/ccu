@@ -30,7 +30,6 @@ import a75f.io.bo.ble.GattAttributes;
 import a75f.io.bo.ble.GattPin;
 import a75f.io.bo.ble.StructShort;
 import a75f.io.bo.serial.SerialConsts;
-import a75f.io.logic.SmartNodeBLL;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.R;
@@ -349,7 +348,6 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
 			public void run()
 			{
 				
-				SmartNodeBLL.addSmartNodeAndSeed(mPairingAddress, mName);
 				dismissProgressDialog();
 				Toast.makeText(FragmentBLEDevicePin.this
 						               .getActivity(), "Pairing Success!", Toast.LENGTH_LONG)

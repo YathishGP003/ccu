@@ -3,6 +3,7 @@ package a75f.io.renatus.ZONEPROFILE;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -14,10 +15,20 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
+import a75f.io.bo.building.LightProfile;
+import a75f.io.bo.building.SmartNode;
+import a75f.io.bo.building.SmartNodeOutput;
+import a75f.io.bo.building.Zone;
+import a75f.io.bo.building.definitions.Output;
+import a75f.io.bo.building.definitions.OutputAnalogActuatorType;
+import a75f.io.bo.building.definitions.Port;
 import a75f.io.logic.RoomBLL;
+import a75f.io.logic.SmartNodeBLL;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.R;
@@ -31,7 +42,8 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 				           View.OnClickListener
 {
 	
-	public static final String ID = LightingZoneProfileFragment.class.getSimpleName();
+	public static final  String ID  = LightingZoneProfileFragment.class.getSimpleName();
+	private static final String TAG = LightingZoneProfileFragment.class.getSimpleName();
 	
 	View        view;
 	AlertDialog mAlertDialog;
@@ -65,23 +77,33 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 	EditText  analog2InEditText;
 	ImageView editAnalog1In;
 	ImageView editAnalog2In;
+	
+	ToggleButton lcmRelay1Override;
+	ToggleButton lcmRelay2Override;
+	ToggleButton lcmAnalog1OutOverride;
+	ToggleButton lcmAnalog2OutOverride;
+	
 	ArrayList<EditText> circuitsList   = new ArrayList<EditText>();
 	ArrayList<Switch>   circuitEnabled = new ArrayList<Switch>();
 	ArrayList<String> zoneCircuitNames;
+	Zone         mZone;
+	LightProfile mLightProfile;
+	SmartNode    mSmartNode;
+	SmartNodeOutput smartNodeAnalogOutputOne;
 	private ArrayAdapter<CharSequence> relay1Adapter;
 	private ArrayAdapter<CharSequence> relay2Adapter;
 	private ArrayAdapter<CharSequence> analog1OutAdapter;
 	private ArrayAdapter<CharSequence> analog2OutAdapter;
 	private ArrayAdapter<CharSequence> analog1InAdapter;
 	private ArrayAdapter<CharSequence> analog2InAdapter;
-	private short  mSmartNodeAddress;
-	private String mRoomName;
-	private String mFloorName;
+	private short                      mSmartNodeAddress;
+	private String                     mRoomName;
+	private String                     mFloorName;
 	public LightingZoneProfileFragment()
 	{
 	}
-
-
+	
+	
 	public static LightingZoneProfileFragment newInstance(short smartNodeAddress, String roomName,
 	                                                      String floorName)
 	{
@@ -103,16 +125,32 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 		mSmartNodeAddress = getArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR);
 		mRoomName = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
 		mFloorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
-		
-		RoomBLL.findZoneByName(mFloorName, mRoomName);
-		
-		
+		mZone = RoomBLL.findZoneByName(mFloorName, mRoomName);
+		mLightProfile = new LightProfile(mZone.roomName);
+		mSmartNode = SmartNodeBLL.getSmartNodeAndSeed(mSmartNodeAddress, mRoomName);
+		getSmartNodeAnalogOutputOne();
 		lcmSetCommand = (TextView) view.findViewById(R.id.lcmSetCommand);
 		lcmCancelCommand = (TextView) view.findViewById(R.id.lcmCancelCommand);
 		if (!mbIsInEditMode)
 		{
 			lcmCancelCommand.setVisibility(View.INVISIBLE);
 		}
+		//TODO: if they close dialog how do we remove seed from CM?
+		lcmRelay1Override = (ToggleButton) view.findViewById(R.id.lcmRelay1Override);
+		lcmRelay2Override = (ToggleButton) view.findViewById(R.id.lcmRelay2Override);
+		lcmAnalog1OutOverride = (ToggleButton) view.findViewById(R.id.lcmAnalog1OutOverride);
+		lcmAnalog2OutOverride = (ToggleButton) view.findViewById(R.id.lcmAnalog2OutOverride);
+		lcmAnalog1OutOverride
+				.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+				{
+					@Override
+					public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+					{
+						Log.i(TAG, "lcmAnalog1OutOverride isChecked: " + isChecked);
+						mLightProfile.on = isChecked;
+						SmartNodeBLL.sendControlsMessage(mLightProfile);
+					}
+				});
 		spRelay1 = (Spinner) view.findViewById(R.id.lcmRelay1Actuator);
 		spRelay2 = (Spinner) view.findViewById(R.id.lcmRelay2Actuator);
 		relay1Switch = (Switch) view.findViewById(R.id.lcmRelay1Switch);
@@ -184,6 +222,24 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 	}
 	
 	
+	public SmartNodeOutput getSmartNodeAnalogOutputOne()
+	{
+		if (smartNodeAnalogOutputOne == null)
+		{
+			smartNodeAnalogOutputOne = new SmartNodeOutput();
+			smartNodeAnalogOutputOne.mOutput = Output.Analog;
+			smartNodeAnalogOutputOne.mOutputAnalogActuatorType =
+					OutputAnalogActuatorType.ZeroToTenV;
+			smartNodeAnalogOutputOne.mSmartNodePort = Port.ANALOG_OUT_ONE;
+			smartNodeAnalogOutputOne.mUniqueID = UUID.randomUUID();
+			smartNodeAnalogOutputOne.mName = "Analog 1";
+			smartNodeAnalogOutputOne.mSmartNodeAddress = mSmartNodeAddress;
+			mLightProfile.smartNodeOutputs.add(smartNodeAnalogOutputOne);
+		}
+		return smartNodeAnalogOutputOne;
+	}
+	
+	
 	@Override
 	public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
 	{
@@ -226,7 +282,7 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 		switch (v.getId())
 		{
 		   /* case R.id.lcmRelay1EditImg:
-                showEditLogicalNameDialog(relay1EditText,mLCMControls.getRelay1CircuitName(), v.getId());
+		        showEditLogicalNameDialog(relay1EditText,mLCMControls.getRelay1CircuitName(), v.getId());
                 break;*/
 		}
 	}

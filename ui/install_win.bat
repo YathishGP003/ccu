@@ -1,6 +1,4 @@
-::WIN BATCH SCRIPT
 
-:: CHANGE THESE
 set app_package=a75f.io.renatus
 set dir_app_name=ui-debug
 set MAIN_ACTIVITY=RenatusLandingActivity

@@ -14,7 +14,7 @@ set apk_target_dir=%path_sysapp%/
 set apk_target_sys=%apk_target_dir%/
 
 :: Delete previous APK
-del %apk_host%
+del /F /Q %apk_host%
 
 :: Compile the APK: you can adapt this for production build, flavors, etc.
 call ..\gradlew assembleDebug

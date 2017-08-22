@@ -60,9 +60,7 @@ public class SmartNodeBLL
 	
 	public static void sendControlsMessage(LightProfile lightProfile)
 	{
-		CcuToCmOverUsbSnControlsMessage_t controlsMessage_t =
-				new CcuToCmOverUsbSnControlsMessage_t();
-		for(CcuToCmOverUsbSnControlsMessage_t controlsMessageT : lightProfile.getControlsMessage())
+		for(CcuToCmOverUsbSnControlsMessage_t controlsMessage_t : lightProfile.getControlsMessage())
 		{
 			SerialBLL.getInstance().sendSerialStruct(controlsMessage_t);
 		}

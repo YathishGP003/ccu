@@ -52,8 +52,9 @@ public class LightProfile extends ZoneProfile
 			}
 			else
 			{
+				controlsMessage_t = new CcuToCmOverUsbSnControlsMessage_t();
 				controlsMessage_t = controlsMessages
-						                    .put(smartNodeOutput.mSmartNodeAddress, new CcuToCmOverUsbSnControlsMessage_t());
+						                    .put(smartNodeOutput.mSmartNodeAddress, controlsMessage_t);
 				controlsMessage_t.smartNodeAddress.set(smartNodeOutput.mSmartNodeAddress);
 				controlsMessage_t.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_CONTROLS);
 			}

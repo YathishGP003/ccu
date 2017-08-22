@@ -4,8 +4,10 @@ package a75f.io.renatus.ENGG.logger;
  * Created by samjithsadasivan on 8/17/17.
  */
 
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -15,7 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ScrollView;
 
-import a75f.io.renatus.ENGG.BLETestFragment;
+import a75f.io.renatus.R;
 
 /**
  * Simple fraggment which contains a LogView and uses is to output log data it receives
@@ -53,8 +55,10 @@ public class LogFragment extends Fragment {
 		int paddingPixels = (int) ((paddingDips * (scale)) + .5);
 		mLogView.setPadding(paddingPixels, paddingPixels, paddingPixels, paddingPixels);
 		mLogView.setCompoundDrawablePadding(paddingPixels);
-		
+		//mLogView.set
 		mLogView.setGravity(Gravity.BOTTOM);
+		mLogView.setBackgroundColor(Color.YELLOW);
+		mLogView.setBackgroundResource(R.drawable.border);
 		mLogView.setTextAppearance(getActivity(), android.R.style.TextAppearance_Holo_Medium);
 		
 		mScrollView.addView(mLogView);
@@ -80,6 +84,29 @@ public class LogFragment extends Fragment {
 			}
 		});
 		return result;
+	}
+	
+	@Override
+	public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+		super.onViewCreated(view, savedInstanceState);
+		initializeLogging();
+	}
+	
+	public void initializeLogging() {
+		// Using Log, front-end to the logging chain, emulates android.util.log method signatures.
+		// Wraps Android's native log framework
+		LogWrapper logWrapper = new LogWrapper();
+		Log.setLogNode(logWrapper);
+		
+		MessageOnlyLogFilter msgFilter = new MessageOnlyLogFilter();
+		logWrapper.setNext(msgFilter);
+		
+		// On screen logging via a fragment with a TextView.
+		//LogFragment logFragment = (LogFragment) getSupportFragmentManager()
+		//		                                        .findFragmentById(R.id.log_fragment);
+		msgFilter.setNext(mLogView);
+		
+		Log.i("Engg UI", "Ready");
 	}
 	
 	public LogView getLogView() {

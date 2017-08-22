@@ -22,20 +22,18 @@ public class LogBLL
 	
 	public static void logStructAsJSON(Struct struct)
 	{
+		if (BuildConfig.DEBUG)
 		{
-			if (BuildConfig.DEBUG)
+			String structString = null;
+			try
 			{
-				String structString = null;
-				try
-				{
-					structString = JsonSerializer.toJson(struct, true);
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
-				}
-				System.out.println("Struct As String:\n" + structString + "\n");
+				structString = JsonSerializer.toJson(struct, true);
 			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+			System.out.println("Struct As String:\n" + structString + "\n");
 		}
 	}
 	

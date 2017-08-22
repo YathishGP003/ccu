@@ -234,6 +234,7 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 			smartNodeAnalogOutputOne.mUniqueID = UUID.randomUUID();
 			smartNodeAnalogOutputOne.mName = "Analog 1";
 			smartNodeAnalogOutputOne.mSmartNodeAddress = mSmartNodeAddress;
+			
 			mLightProfile.smartNodeOutputs.add(smartNodeAnalogOutputOne);
 		}
 		return smartNodeAnalogOutputOne;

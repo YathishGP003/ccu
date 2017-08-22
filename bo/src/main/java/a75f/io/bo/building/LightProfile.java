@@ -53,7 +53,7 @@ public class LightProfile extends ZoneProfile
 			else
 			{
 				controlsMessage_t = new CcuToCmOverUsbSnControlsMessage_t();
-				controlsMessage_t = controlsMessages
+				controlsMessages
 						                    .put(smartNodeOutput.mSmartNodeAddress, controlsMessage_t);
 				controlsMessage_t.smartNodeAddress.set(smartNodeOutput.mSmartNodeAddress);
 				controlsMessage_t.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_CONTROLS);
@@ -168,6 +168,7 @@ public class LightProfile extends ZoneProfile
 	
 	private short getDimmable(int analogVoltage)
 	{
-		return (short) (dimmablePercent * analogVoltage);
+		return (short) ((dimmablePercent / 100) *
+		                 analogVoltage);
 	}
 }

@@ -25,5 +25,10 @@ dependencies {
     compile 'com.fasterxml.jackson.core:jackson-core:2.7.3'
     compile 'com.fasterxml.jackson.core:jackson-annotations:2.7.3'
     compile 'com.fasterxml.jackson.core:jackson-databind:2.7.3'
+
+    compile 'com.google.http-client:google-http-client:1.19.0'
+    compile 'com.google.http-client:google-http-client-android:1.19.0'
+    compile 'com.google.http-client:google-http-client-gson:1.19.0'
+    compile 'com.google.http-client:google-http-client-jackson2:1.19.0'
 }
 

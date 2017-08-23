@@ -1,6 +1,8 @@
-package a75f.io.renatus;
+package a75f.io.renatus.receivers;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.hardware.usb.IUsbManager;
@@ -9,43 +11,41 @@ import android.hardware.usb.UsbManager;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.support.multidex.MultiDex;
 import android.util.Log;
-
-import com.crashlytics.android.Crashlytics;
 
 import java.util.HashMap;
 import java.util.Iterator;
 
-import a75f.io.bo.SmartNode;
-import a75f.io.util.UtilityApplication;
-import io.fabric.sdk.android.Fabric;
-
 /**
- * Created by ryanmattison on 7/24/17.
+ * Created by Yinten on 8/22/2017.
  */
 
-public class RenatusApp extends UtilityApplication
+public class BootCompletedReceivers extends BroadcastReceiver
 {
-	
-	private static final String    TAG           = RenatusApp.class.getSimpleName();
-	public               boolean   isProvisioned = false;
-	public               SmartNode mSmartNode    = null;
+	private static final String TAG = BootCompletedReceivers.class.getSimpleName();
 	
 	
-	@Override
-	public void onCreate()
+	public void onReceive(Context context, Intent intent)
 	{
-		super.onCreate();
-		Fabric.with(this, new Crashlytics());
-		Log.i(TAG, "RENATUS APP INITIATED");
-		removeUSBPermissionDialogs();
+		Log.i(TAG, "Boot Completed Intent Reciever");
+		String action = intent.getAction();
+		if (action != null && action.equals(Intent.ACTION_BOOT_COMPLETED))
+		{
+			try
+			{
+				removeUSBPermissionDialogs(context);
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	
-	private void removeUSBPermissionDialogs()
+	private void removeUSBPermissionDialogs(Context context)
 	{
-		PackageManager pm = getPackageManager();
+		PackageManager pm = context.getPackageManager();
 		ApplicationInfo ai = null;
 		try
 		{
@@ -58,7 +58,7 @@ public class RenatusApp extends UtilityApplication
 		if (ai != null)
 		{
 			Log.i(TAG, "Trying to grant permissions");
-			UsbManager manager = (UsbManager) getSystemService(Context.USB_SERVICE);
+			UsbManager manager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
 			IBinder b = ServiceManager.getService(Context.USB_SERVICE);
 			IUsbManager service = IUsbManager.Stub.asInterface(b);
 			HashMap<String, UsbDevice> deviceList = manager.getDeviceList();
@@ -85,12 +85,5 @@ public class RenatusApp extends UtilityApplication
 				}
 			}
 		}
-	}
-	
-	
-	@Override
-	protected void attachBaseContext(Context base) {
-		super.attachBaseContext(base);
-		MultiDex.install(this);
 	}
 }

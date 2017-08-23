@@ -27,9 +27,9 @@ import a75f.io.renatus.R;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static a75f.io.renatus.FragmentCommonBundleArgs.ARG_NAME;
-import static a75f.io.renatus.FragmentCommonBundleArgs.ARG_PAIRING_ADDR;
-import static a75f.io.renatus.FragmentCommonBundleArgs.FLOOR_NAME;
+import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.ARG_NAME;
+import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.ARG_PAIRING_ADDR;
+import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.FLOOR_NAME;
 
 /**
  * Created by ryanmattison on 7/24/17.

@@ -2,8 +2,6 @@ package a75f.io.dal;
 
 import java.io.IOException;
 
-import a75f.io.bo.Schedule;
-
 /**
  * Created by rmatt on 7/19/2017.
  */

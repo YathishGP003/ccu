@@ -16,6 +16,7 @@ public abstract class UtilityApplication extends Application
 		Globals.getInstance().setApplicationContext(this);
 	}
 	
+
 	
 	@Override
 	public void onTerminate()

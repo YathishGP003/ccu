@@ -37,28 +37,40 @@ public class UsbService extends Service
 	public static final byte SOF_BYTE = 0x00;
 	public static final byte EOF_BYTE = 0x03;
 	
-	public static final  String  ACTION_USB_READY                  = "com.felhr.connectivityservices.USB_READY";
-	public static final  String  ACTION_USB_ATTACHED               = "android.hardware.usb.action.USB_DEVICE_ATTACHED";
-	public static final  String  ACTION_USB_DETACHED               = "android.hardware.usb.action.USB_DEVICE_DETACHED";
-	public static final  String  ACTION_USB_NOT_SUPPORTED          = "com.felhr.usbservice.USB_NOT_SUPPORTED";
+	public static final  String  ACTION_USB_READY                  =
+			"com.felhr.connectivityservices.USB_READY";
+	public static final  String  ACTION_USB_ATTACHED               =
+			"android.hardware.usb.action.USB_DEVICE_ATTACHED";
+	public static final  String  ACTION_USB_DETACHED               =
+			"android.hardware.usb.action.USB_DEVICE_DETACHED";
+	public static final  String  ACTION_USB_NOT_SUPPORTED          =
+			"com.felhr.usbservice.USB_NOT_SUPPORTED";
 	public static final  String  ACTION_NO_USB                     = "com.felhr.usbservice.NO_USB";
-	public static final  String  ACTION_USB_PERMISSION_GRANTED     = "com.felhr.usbservice.USB_PERMISSION_GRANTED";
-	public static final  String  ACTION_USB_PERMISSION_NOT_GRANTED = "com.felhr.usbservice.USB_PERMISSION_NOT_GRANTED";
-	public static final  String  ACTION_USB_DISCONNECTED           = "com.felhr.usbservice.USB_DISCONNECTED";
-	public static final  String  ACTION_CDC_DRIVER_NOT_WORKING     = "com.felhr.connectivityservices.ACTION_CDC_DRIVER_NOT_WORKING";
-	public static final  String  ACTION_USB_DEVICE_NOT_WORKING     = "com.felhr.connectivityservices.ACTION_USB_DEVICE_NOT_WORKING";
+	public static final  String  ACTION_USB_PERMISSION_GRANTED     =
+			"com.felhr.usbservice.USB_PERMISSION_GRANTED";
+	public static final  String  ACTION_USB_PERMISSION_NOT_GRANTED =
+			"com.felhr.usbservice.USB_PERMISSION_NOT_GRANTED";
+	public static final  String  ACTION_USB_DISCONNECTED           =
+			"com.felhr.usbservice.USB_DISCONNECTED";
+	public static final  String  ACTION_CDC_DRIVER_NOT_WORKING     =
+			"com.felhr.connectivityservices.ACTION_CDC_DRIVER_NOT_WORKING";
+	public static final  String  ACTION_USB_DEVICE_NOT_WORKING     =
+			"com.felhr.connectivityservices.ACTION_USB_DEVICE_NOT_WORKING";
 	public static final  int     CTS_CHANGE                        = 1;
 	public static final  int     DSR_CHANGE                        = 2;
-	private static final String  ACTION_USB_PERMISSION             = "com.android.example.USB_PERMISSION";
-	private static final int     BAUD_RATE                         = 38400; // BaudRate. Change this value if you need
-	private static final String  TAG                               = UsbService.class.getSimpleName();
+	private static final String  ACTION_USB_PERMISSION             =
+			"com.android.example.USB_PERMISSION";
+	private static final int     BAUD_RATE                         = 38400;
+			// BaudRate. Change this value if you need
+	private static final String  TAG                               =
+			UsbService.class.getSimpleName();
 	private static final boolean PARSE_DEBUG                       = false;
 	public static        boolean SERVICE_CONNECTED                 = false;
 	SerialState curState = SerialState.PARSE_INIT;
 	int         nCRC     = 0;
 	int nCurIndex;
 	byte[] inDataBuffer = new byte[1024];
-	int nDataLength = 0;
+	int    nDataLength  = 0;
 	private IBinder binder = new UsbBinder();
 	private Context             context;
 	private Handler             mHandler;
@@ -66,7 +78,7 @@ public class UsbService extends Service
 	private UsbDevice           device;
 	private UsbDeviceConnection connection;
 	private UsbSerialDevice     serialPort;
-	private boolean serialPortConnected;
+	private boolean             serialPortConnected;
 	
 	;
 	/*
@@ -85,8 +97,8 @@ public class UsbService extends Service
 				{
 					Intent intent = new Intent(ACTION_USB_PERMISSION_GRANTED);
 					arg0.sendBroadcast(intent);
-					connection = usbManager.openDevice(device);
-					new ConnectionThread().start();
+					//connection = usbManager.openDevice(device);
+					//new ConnectionThread().start();
 				}
 				else // User not accepted our USB connection. Send an Intent to the Main Activity
 				{
@@ -119,46 +131,49 @@ public class UsbService extends Service
 	 *  In this particular example. byte stream is converted to String and send to UI thread to
 	 *  be treated there.
 	 */
-	private       UsbSerialInterface.UsbReadCallback mCallback   = new UsbSerialInterface.UsbReadCallback()
-	{
-		@Override
-		public void onReceivedData(byte[] data)
-		{
-			if (data.length > 0)
+	private       UsbSerialInterface.UsbReadCallback mCallback   =
+			new UsbSerialInterface.UsbReadCallback()
 			{
-				Log.i(TAG, "Parse Bytes: " + data.length);
-				parseBytes(data);
-			}
-		}
-	};
+				@Override
+				public void onReceivedData(byte[] data)
+				{
+					if (data.length > 0)
+					{
+						Log.i(TAG, "Parse Bytes: " + data.length);
+						parseBytes(data);
+					}
+				}
+			};
 	/*
 	 * State changes in the CTS line will be received here
 	 */
-	private UsbSerialInterface.UsbCTSCallback ctsCallback = new UsbSerialInterface.UsbCTSCallback()
-	{
-		@Override
-		public void onCTSChanged(boolean state)
-		{
-			if (mHandler != null)
+	private       UsbSerialInterface.UsbCTSCallback  ctsCallback =
+			new UsbSerialInterface.UsbCTSCallback()
 			{
-				mHandler.obtainMessage(CTS_CHANGE).sendToTarget();
-			}
-		}
-	};
+				@Override
+				public void onCTSChanged(boolean state)
+				{
+					if (mHandler != null)
+					{
+						mHandler.obtainMessage(CTS_CHANGE).sendToTarget();
+					}
+				}
+			};
 	/*
 	 * State changes in the DSR line will be received here
 	 */
-	private UsbSerialInterface.UsbDSRCallback dsrCallback = new UsbSerialInterface.UsbDSRCallback()
-	{
-		@Override
-		public void onDSRChanged(boolean state)
-		{
-			if (mHandler != null)
+	private       UsbSerialInterface.UsbDSRCallback  dsrCallback =
+			new UsbSerialInterface.UsbDSRCallback()
 			{
-				mHandler.obtainMessage(DSR_CHANGE).sendToTarget();
-			}
-		}
-	};
+				@Override
+				public void onDSRChanged(boolean state)
+				{
+					if (mHandler != null)
+					{
+						mHandler.obtainMessage(DSR_CHANGE).sendToTarget();
+					}
+				}
+			};
 	
 	
 	private void parseBytes(byte[] inReg)
@@ -293,7 +308,7 @@ public class UsbService extends Service
 		}
 	}
 	
-
+	
 	private void messageToClients(byte[] data)
 	{
 		SerialAction serialAction = SerialAction.MESSAGE_FROM_SERIAL_PORT;
@@ -372,8 +387,11 @@ public class UsbService extends Service
 				{
 					Log.i("USB", "Try connecting!");
 					// There is a device connected to our Android device. Try to open it as a Serial Port.
-					requestUserPermission();
-					keep = false;
+					connection = usbManager.openDevice(device);
+					new ConnectionThread().start();
+					Intent intent = new Intent(ACTION_USB_PERMISSION_GRANTED);
+					UsbService.this.getApplicationContext().sendBroadcast(intent);
+					keep = true;
 				}
 				else
 				{
@@ -406,7 +424,8 @@ public class UsbService extends Service
 	 */
 	private void requestUserPermission()
 	{
-		PendingIntent mPendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
+		PendingIntent mPendingIntent =
+				PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
 		usbManager.requestPermission(device, mPendingIntent);
 	}
 	
@@ -435,7 +454,8 @@ public class UsbService extends Service
 			{
 				buffer[i + nOffset] = data[i]; // add payload to the tx buffer
 				crc ^= data[i];             // calculate the new crc
-				if (data[i] == (byte) (ESC_BYTE & 0xff)) // if the data is equal to ESC byte then add another instance of that
+				if (data[i] == (byte) (ESC_BYTE &
+				                       0xff)) // if the data is equal to ESC byte then add another instance of that
 				{
 					nOffset++;
 					buffer[i + nOffset] = data[i];
@@ -460,7 +480,8 @@ public class UsbService extends Service
 	
 	private enum SerialState
 	{
-		PARSE_INIT, ESC_BYTE_RCVD, SOF_BYTE_RCVD, LEN_BYTE_RCVD, ESC_BYTE_IN_DATA_RCVD, CRC_RCVD, ESC_BYTE_AS_END_OF_PACKET_RCVD, BAD_PACKET, DATA_AVAILABLE
+		PARSE_INIT, ESC_BYTE_RCVD, SOF_BYTE_RCVD, LEN_BYTE_RCVD, ESC_BYTE_IN_DATA_RCVD, CRC_RCVD,
+		ESC_BYTE_AS_END_OF_PACKET_RCVD, BAD_PACKET, DATA_AVAILABLE
 	}
 	
 	public class UsbBinder extends Binder

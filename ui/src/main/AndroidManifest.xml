@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools"
           package="a75f.io.renatus">
 
     <uses-sdk
@@ -32,6 +33,9 @@
     <uses-permission android:name="android.permission.SET_TIME_ZONE"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
+    <uses-permission
+        android:name="android.permission.MANAGE_USB"></uses-permission>
+
     <application
         android:name=".RenatusApp"
         android:allowBackup="true"
@@ -63,10 +67,19 @@
             </intent-filter>
 
         </activity>
+
+        <receiver android:name=".receivers.BootCompletedReceivers">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"></action>
+            </intent-filter>
+        </receiver>
         <activity
             android:name=".ENGG.RenatusEngineeringActivity"
             android:theme="@style/RenatusAppTheme.NoActionBar">
         </activity>
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="a3eaad5c6571007c20544f5e3ead9179ddcdb218" />
     </application>
 
 </manifest>

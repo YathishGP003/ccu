@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -33,7 +35,18 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+
 import a75f.io.bo.json.serializers.JsonSerializer;
+import a75f.io.bo.serial.CcuToCmOverUsbCcuHeartbeatMessage_t;
+import a75f.io.bo.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
+import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSmartStatMessage_t;
+import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
+import a75f.io.bo.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
+import a75f.io.bo.serial.CcuToCmOverUsbSmartStatSettingsMessage_t;
+import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
+import a75f.io.bo.serial.CcuToCmOverUsbSnLightingScheduleMessage_t;
+import a75f.io.bo.serial.CcuToCmOverUsbSnSettingsMessage_t;
 import a75f.io.bo.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
 import a75f.io.bo.serial.CmToCcuOverUsbErrorReportMessage_t;
 import a75f.io.bo.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
@@ -45,6 +58,7 @@ import a75f.io.renatus.MainActivity;
 import a75f.io.renatus.R;
 
 import a75f.io.usbserial.UsbService;
+import a75f.io.util.Globals;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -79,6 +93,9 @@ public class SerialMessageFragment extends Fragment
 	
 	@BindView(R.id.msgRcvd)
 	TextView msgRcvd;
+	
+	@BindView(R.id.sendButton)
+	Button sendButton;
 	
 	private int msgSelection;
 	private int channelSelection = 0;
@@ -117,11 +134,46 @@ public class SerialMessageFragment extends Fragment
 	}
 	
 	@Override
+	public void onResume() {
+		super.onResume();
+		setFilters();  // Start listening notifications from UsbService
+		startService(UsbService.class, usbConnection, null); // Start UsbService(if it was not started before) and Bind it
+	}
+	
+	@Override
 	public void onStop()
 	{
 		super.onStop();
 		EventBus.getDefault().unregister(this);
 	}
+	
+	private void setFilters() {
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(UsbService.ACTION_USB_PERMISSION_GRANTED);
+		filter.addAction(UsbService.ACTION_NO_USB);
+		filter.addAction(UsbService.ACTION_USB_DISCONNECTED);
+		filter.addAction(UsbService.ACTION_USB_NOT_SUPPORTED);
+		filter.addAction(UsbService.ACTION_USB_PERMISSION_NOT_GRANTED);
+		getActivity().registerReceiver(mUsbReceiver, filter);
+	}
+	
+	
+	private void startService(Class<?> service, ServiceConnection serviceConnection, Bundle extras) {
+		if (!UsbService.SERVICE_CONNECTED) {
+			Intent startService = new Intent(getActivity(), service);
+			if (extras != null && !extras.isEmpty()) {
+				Set<String> keys = extras.keySet();
+				for (String key : keys) {
+					String extra = extras.getString(key);
+					startService.putExtra(key, extra);
+				}
+			}
+			getActivity().startService(startService);
+		}
+		Intent bindingIntent = new Intent(this.getActivity(), service);
+		getActivity().bindService(bindingIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+	}
+	
 	
 	private void initMessageSpinner() {
 		ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this.getActivity(),
@@ -137,6 +189,7 @@ public class SerialMessageFragment extends Fragment
 					msgSend.setText(null);
 				else
 					fillMessageView(position);
+				msgSelection = position > 0 ? position : 1;
 			}
 			@Override
 			public void onNothingSelected(AdapterView<?> adapterView)
@@ -170,8 +223,55 @@ public class SerialMessageFragment extends Fragment
 		try
 		{
 			msgClass =  Class.forName("a75f.io.bo.serial."+messages.get(position));
-			Struct msg = (Struct) msgClass.newInstance();
-			msgSend.setText(JsonSerializer.toJson(msg, true));
+			//Struct msg = (Struct) msgClass.newInstance();
+			switch(position) {
+				case 1:
+					CcuToCmOverUsbDatabaseSeedSnMessage_t snSeedMsg = new CcuToCmOverUsbDatabaseSeedSnMessage_t();
+					snSeedMsg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN);
+					msgSend.setText(JsonSerializer.toJson(snSeedMsg, true));
+					break;
+				case 2:
+					CcuToCmOverUsbSnSettingsMessage_t snSettingMsg = new CcuToCmOverUsbSnSettingsMessage_t();
+					snSettingMsg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_SETTINGS);
+					msgSend.setText(JsonSerializer.toJson(snSettingMsg, true));
+					break;
+				case 3:
+					CcuToCmOverUsbSnControlsMessage_t snControlMsg = new CcuToCmOverUsbSnControlsMessage_t();
+					snControlMsg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_CONTROLS);
+					msgSend.setText(JsonSerializer.toJson(snControlMsg, true));
+					break;
+				case 4:
+					CcuToCmOverUsbSnLightingScheduleMessage_t snLightingMsg = new CcuToCmOverUsbSnLightingScheduleMessage_t();
+					snLightingMsg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_LIGHTING_SCHEDULE);
+					msgSend.setText(JsonSerializer.toJson(snLightingMsg, true));
+					break;
+				case 5:
+					CcuToCmOverUsbDatabaseSeedSmartStatMessage_t ssSeedMsg = new CcuToCmOverUsbDatabaseSeedSmartStatMessage_t();
+					ssSeedMsg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SMART_STAT);
+					msgSend.setText(JsonSerializer.toJson(ssSeedMsg, true));
+					break;
+				case 6:
+					CcuToCmOverUsbSmartStatSettingsMessage_t ssSettingsMsg = new CcuToCmOverUsbSmartStatSettingsMessage_t();
+					ssSettingsMsg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SMART_STAT_SETTINGS);
+					msgSend.setText(JsonSerializer.toJson(ssSettingsMsg, true));
+					break;
+				case 7:
+					CcuToCmOverUsbSmartStatControlsMessage_t ssControlMsg = new CcuToCmOverUsbSmartStatControlsMessage_t();
+					ssControlMsg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SMART_STAT_CONTROLS);
+					msgSend.setText(JsonSerializer.toJson(ssControlMsg, true));
+					break;
+				case 8:
+					CcuToCmOverUsbCcuHeartbeatMessage_t ccuHbMsg = new CcuToCmOverUsbCcuHeartbeatMessage_t();
+					ccuHbMsg.messageType.set(MessageType.CCU_HEARTBEAT_UPDATE);
+					msgSend.setText(JsonSerializer.toJson(ccuHbMsg, true));
+					break;
+				case 9:
+					CcuToCmOverUsbCmRelayActivationMessage_t cmRelayMsg = new CcuToCmOverUsbCmRelayActivationMessage_t();
+					cmRelayMsg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
+					msgSend.setText(JsonSerializer.toJson(cmRelayMsg, true));
+					break;
+					
+			}
 			
 		} catch (Exception e) {
 			Log.d("CCU" ,e.getMessage());
@@ -180,16 +280,19 @@ public class SerialMessageFragment extends Fragment
 		
 	}
 	
-	@OnClick(R.id.msgSend)
+	@OnClick(R.id.sendButton)
 	public void sendMessage() {
-		
 		try
 		{
-			Struct msg = (Struct) JsonSerializer.fromJson(msgSend.getText().toString(), msgClass);
+			CcuToCmOverUsbDatabaseSeedSnMessage_t msg = (CcuToCmOverUsbDatabaseSeedSnMessage_t) JsonSerializer.fromJson(msgSend.getText().toString(), msgClass);
+			msg.smartNodeAddress.set(Integer.parseInt(channels.get(channelSelection)));
 			usbService.write(msg.getOrderedBuffer());
+			Log.i("EnggUI", "SerialMessage: " + JsonSerializer.toJson(msg, true));
+			
+			Toast.makeText(Globals.getInstance().getApplicationContext(), "Message Sent" ,Toast.LENGTH_SHORT).show();
 			
 		} catch (Exception e) {
-			Log.d("CCU" ,e.getMessage());
+			Log.e("CCU" ,"Exception ",e);
 			
 		}
 		

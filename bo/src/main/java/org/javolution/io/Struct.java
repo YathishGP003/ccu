@@ -9,6 +9,7 @@
 package org.javolution.io;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.EnumSerializer;
 
@@ -22,8 +23,16 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import a75f.io.bo.json.deserializers.Enum4Deserializer;
+import a75f.io.bo.json.deserializers.Enum8Deserializer;
+import a75f.io.bo.json.deserializers.Signed16Deserializer;
+import a75f.io.bo.json.deserializers.Signed8Deserializer;
+import a75f.io.bo.json.deserializers.UTF8Deserializer;
+import a75f.io.bo.json.deserializers.Unsigned16Deserializer;
+import a75f.io.bo.json.deserializers.Unsigned8Deserializer;
 import a75f.io.bo.json.serializers.Enum4Serializer;
 import a75f.io.bo.json.serializers.Enum8Serializaer;
+import a75f.io.bo.json.serializers.Signed16Serializer;
 import a75f.io.bo.json.serializers.Signed8Serializer;
 import a75f.io.bo.json.serializers.UTF8Serializer;
 import a75f.io.bo.json.serializers.Unsigned16Serializer;
@@ -1108,6 +1117,7 @@ public class Struct {
      * (for C/C++ compatibility)
      */
     @JsonSerialize(using = UTF8Serializer.class)
+    @JsonDeserialize(using = UTF8Deserializer.class)
     public class UTF8String extends Member {
 
         private final UTF8ByteBufferWriter _writer = new UTF8ByteBufferWriter();
@@ -1214,6 +1224,7 @@ public class Struct {
      * This class represents a 8 bits signed integer.
      */
     @JsonSerialize(using = Signed8Serializer.class)
+    @JsonDeserialize(using = Signed8Deserializer.class)
     public class Signed8 extends Member {
 
         public Signed8() {
@@ -1249,6 +1260,7 @@ public class Struct {
      * This class represents a 8 bits unsigned integer.
      */
 	@JsonSerialize(using = Unsigned8Serializer.class)
+    @JsonDeserialize(using = Unsigned8Deserializer.class)
     public class Unsigned8 extends Member {
 
         public Unsigned8() {
@@ -1283,8 +1295,9 @@ public class Struct {
     /**
      * This class represents a 16 bits signed integer.
      */
-    
-    public class Signed16 extends Member {
+    @JsonSerialize (using = Signed16Serializer.class)
+    @JsonDeserialize (using = Signed16Deserializer.class)
+    public  class Signed16 extends Member {
 
         public Signed16() {
             super(16, 2);
@@ -1320,6 +1333,7 @@ public class Struct {
      */
     
     @JsonSerialize(using = Unsigned16Serializer.class)
+    @JsonDeserialize(using = Unsigned16Deserializer.class)
     public class Unsigned16 extends Member {
 
         public Unsigned16() {
@@ -1647,9 +1661,15 @@ public class Struct {
      * This class represents a 8 bits {@link Enum}.
      */
     @JsonSerialize(using = Enum4Serializer.class)
+    @JsonDeserialize(using = Enum4Deserializer.class)
     public class Enum4<T extends Enum<T>> extends Member {
         
         private final T[] _values;
+        
+        public T[] getValues()
+        {
+            return _values;
+        }
         
         public Enum4(T[] values) {
             super(4, 1);
@@ -1686,9 +1706,15 @@ public class Struct {
      * This class represents a 8 bits {@link Enum}.
      */
     @JsonSerialize(using = Enum8Serializaer.class)
+    @JsonDeserialize(using = Enum8Deserializer.class)
     public class Enum8<T extends Enum<T>> extends Member {
 
         private final T[] _values;
+    
+        public T[] getValues()
+        {
+            return _values;
+        }
 
         public Enum8(T[] values) {
             super(8, 1);

@@ -7,8 +7,10 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -26,12 +28,16 @@ public class JsonSerializer
 	
 	public static <T> Object fromJson(String jsonAsString, Class<T> pojoClass) throws JsonMappingException, JsonParseException, IOException
 	{
+		m.enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING);
+		m.enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING);
 		return m.readValue(jsonAsString, pojoClass);
 	}
 	
 	
 	public static <T> Object fromJson(FileReader fr, Class<T> pojoClass) throws JsonParseException, IOException
 	{
+		m.enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING);
+		m.enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING);
 		return m.readValue(fr, pojoClass);
 	}
 	
@@ -40,6 +46,8 @@ public class JsonSerializer
 	{
 		StringWriter sw = new StringWriter();
 		JsonGenerator jg = jf.createJsonGenerator(sw);
+		m.enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING);
+		m.enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING);
 		
 		if (prettyPrint)
 		{
@@ -57,6 +65,8 @@ public class JsonSerializer
 		{
 			jg.useDefaultPrettyPrinter();
 		}
+		m.enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING);
+		m.enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING);
 		m.writeValue(jg, pojo);
 	}
 }

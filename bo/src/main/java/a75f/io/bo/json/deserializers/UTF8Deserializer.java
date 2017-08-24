@@ -1,12 +1,14 @@
 package a75f.io.bo.json.deserializers;
 
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.json.ReaderBasedJsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
 import org.javolution.io.Struct;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 
 /**
  * Created by samjithsadasivan on 8/22/17.
@@ -27,13 +29,29 @@ public class UTF8Deserializer extends StdDeserializer<Struct.UTF8String>
 	@Override
 	public Struct.UTF8String deserialize(JsonParser p, DeserializationContext cxt)
 	{
+		
+		Object currentValue =
+				((ReaderBasedJsonParser) cxt.getParser()).getParsingContext().getCurrentValue();
 		try
 		{
-			Struct.UTF8String utfString = new Struct().new UTF8String(p.getValueAsString().length());
-			utfString.set(p.getValueAsString());
-			return utfString;
+			String currentName = ((ReaderBasedJsonParser) cxt.getParser()).getCurrentName();
+			Field field = currentValue.getClass().getField(currentName);
+			
+			((Field) field).setAccessible(true);
+			Struct.UTF8String utf8String = (Struct.UTF8String)((Field) field).get(currentValue);
+			utf8String.set(p.getValueAsString());
+			return utf8String;
+			
 		}
 		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		catch (NoSuchFieldException e)
+		{
+			e.printStackTrace();
+		}
+		catch (IllegalAccessException e)
 		{
 			e.printStackTrace();
 		}

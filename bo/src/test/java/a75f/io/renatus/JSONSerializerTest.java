@@ -17,6 +17,7 @@ import a75f.io.bo.building.definitions.Output;
 import a75f.io.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.bo.json.serializers.JsonSerializer;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
+import a75f.io.bo.serial.MessageType;
 
 import static a75f.io.bo.json.serializers.JsonSerializer.toJson;
 
@@ -32,12 +33,18 @@ public class JSONSerializerTest
 	{
 		String roomName = "Ryans Room";
 		CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = new CcuToCmOverUsbDatabaseSeedSnMessage_t();
+		seedMessage.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_SETTINGS);
 		seedMessage.settings.roomName.set(roomName);
 		seedMessage.settings.ledBitmap.analogIn1.set((short) 1);
 		try
 		{
 			String pojoAsString = toJson(seedMessage, true);
 			System.out.println("POJO as string:\n" + pojoAsString + "\n");
+			CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessagePostSerilizer =
+					(CcuToCmOverUsbDatabaseSeedSnMessage_t) JsonSerializer.fromJson
+							                                                                 (pojoAsString,CcuToCmOverUsbDatabaseSeedSnMessage_t.class);
+			System.out.println("Before: " + seedMessage.toString());
+			System.out.println("After: " + seedMessagePostSerilizer.toString());
 		}
 		catch (JsonGenerationException e)
 		{

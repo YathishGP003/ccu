@@ -26,10 +26,9 @@ public class JsonSerializer
 	
 	
 	
-	public static <T> Object fromJson(String jsonAsString, Class<T> pojoClass) throws JsonMappingException, JsonParseException, IOException
+	public static <T> Object fromJson(String jsonAsString, Class<T> pojoClass) throws IOException
 	{
-		m.enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING);
-		m.enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING);
+		
 		return m.readValue(jsonAsString, pojoClass);
 	}
 	

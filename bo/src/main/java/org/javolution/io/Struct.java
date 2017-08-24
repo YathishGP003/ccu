@@ -11,7 +11,6 @@ package org.javolution.io;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.EnumSerializer;
 
 import org.javolution.annotations.Realtime;
 import org.javolution.lang.MathLib;
@@ -1686,6 +1685,7 @@ public class Struct {
             int word = getByteBuffer().get(index);
             return _values[0xFF & get(1, word)];
         }
+       
         
         public void set(T e) {
             int value = e.ordinal();

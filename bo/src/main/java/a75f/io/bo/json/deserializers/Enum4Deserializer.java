@@ -12,34 +12,35 @@ import java.io.IOException;
  * Created by samjithsadasivan on 8/22/17.
  */
 
-public class Enum4Deserializer<HT extends Struct.Enum4> extends StdDeserializer<HT>
+public class Enum4Deserializer<HT extends Enum<HT>> extends StdDeserializer<Struct.Enum4<HT>>
 {
 	public Enum4Deserializer()
 	{
 		this(null);
 	}
 	
+	
 	public Enum4Deserializer(Class<HT> t)
 	{
 		super(t);
 	}
 	
+	
 	@Override
-	public HT deserialize(JsonParser p, DeserializationContext cxt)
+	public Struct.Enum4<HT> deserialize(JsonParser p, DeserializationContext cxt)
 	{
 		try
 		{
-			Struct.Enum4 enumStruct = new Struct().new Enum4(((Struct.Enum4) _valueClass.newInstance()).getValues());
-			enumStruct.set(((Struct.Enum4) _valueClass.newInstance()).getValues()[p.getValueAsInt()]);
-			return (HT) enumStruct;
-		}
-		catch (InstantiationException e)
-		{
-			e.printStackTrace();
-		}
-		catch (IllegalAccessException e)
-		{
-			e.printStackTrace();
+			for (HT values : getEmptyValue(cxt).getValues())
+			{
+				if (values.name().equalsIgnoreCase(p.getValueAsString()))
+				{
+					Struct.Enum4<HT> emptyValues = getEmptyValue(cxt);
+					emptyValues.set(values);
+					return emptyValues;
+				}
+			}
+			return null;
 		}
 		catch (IOException e)
 		{

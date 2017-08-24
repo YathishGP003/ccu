@@ -1,5 +1,7 @@
 package a75f.io.bo.serial;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import org.javolution.io.Struct;
 
 import java.nio.ByteOrder;
@@ -31,6 +33,7 @@ public class CcuToCmOverUsbDatabaseSeedSnMessage_t extends Struct
 		return ByteOrder.LITTLE_ENDIAN;
 	}
 	
+	@JsonIgnore
 	public void putEncrptionKey(byte[] encryptionKeyBytes) throws Exception
 	{
 		for (int i = 0; i < encryptionKeyBytes.length; i++)
@@ -38,4 +41,7 @@ public class CcuToCmOverUsbDatabaseSeedSnMessage_t extends Struct
 			encryptionKey[i].set(encryptionKeyBytes[i]);
 		}
 	}
+	
+	
+	
 }

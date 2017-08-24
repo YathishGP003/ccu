@@ -47,7 +47,7 @@ android {
         debug {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
-            storeFile file('C:/Users/Yinten/repos/75F/svn/duh/smart_node/app/debug.keystore')
+            storeFile file('/Users/samjithsadasivan/src/renatus/ui/debug.keystore')
             storePassword 'android'
         }
     }

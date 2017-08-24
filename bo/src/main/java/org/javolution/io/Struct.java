@@ -8,7 +8,9 @@
  */
 package org.javolution.io;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
@@ -1258,8 +1260,8 @@ public class Struct {
     /**
      * This class represents a 8 bits unsigned integer.
      */
-	@JsonSerialize(using = Unsigned8Serializer.class)
-    @JsonDeserialize(using = Unsigned8Deserializer.class)
+	//@JsonSerialize(using = Unsigned8Serializer.class)
+        //@Json
     public class Unsigned8 extends Member {
 
         public Unsigned8() {
@@ -1270,12 +1272,14 @@ public class Struct {
             super(nbrOfBits, 1);
         }
 
+        @JsonGetter
         public short get() {
             final int index = getByteBufferPosition() + offset();
             int word = getByteBuffer().get(index);
             return (short) (0xFF & ((bitLength() == 8) ? word : get(1, word)));
         }
-
+        
+        @JsonSetter
         public void set(short value) {
             final int index = getByteBufferPosition() + offset();
             if (bitLength() == 8) {
@@ -1285,6 +1289,8 @@ public class Struct {
                         (byte) set(value, 1, getByteBuffer().get(index)));
             }
         }
+        
+        
 
         public String toString() {
             return String.valueOf(this.get());

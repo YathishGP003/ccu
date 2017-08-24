@@ -37,6 +37,7 @@ public class JSONSerializerTest
 		seedMessage.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_SETTINGS);
 		seedMessage.settings.roomName.set(roomName);
 		seedMessage.settings.ledBitmap.analogIn1.set((short) 1);
+		seedMessage.smartNodeAddress.set(5); 
 		try
 		{
 			String pojoAsString = toJson(seedMessage, true);
@@ -55,6 +56,7 @@ public class JSONSerializerTest
 			System.out.println("Before: " + seedMessage.toString());
 			System.out.println("After: " +  seedMessagePostSerilizer.toString
 					                                                                             ());
+			Assert.assertArrayEquals(seedMessage.getOrderedBuffer(), seedMessagePostSerilizer.getOrderedBuffer());
 		}
 		catch (JsonGenerationException e)
 		{

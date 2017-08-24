@@ -4,37 +4,44 @@ app_package="a75f.io.renatus"
 dir_app_name="ui-debug"
 MAIN_ACTIVITY="RenatusLandingActivity"
 
-ADB="adb"
-$ADB_SH="$ADB shell"
+ADB=adb
+ADB_SH="$ADB shell su -c"
 
-path_sysapp="/system/priv-app" # assuming the app is priviledged
-apk_host="./ui/build/outputs/apk/"
-apk_name=$dir_app_name".apk"
-apk_target_dir="$path_sysapp/"
-apk_target_sys="$apk_target_dir/$apk_name"
+#$ADB "shell su -c"
+#//$ADB root 2> /dev/null
 
-$ADB "shell am force-stop $app_package"
+path_sysapp=/system/priv-app # assuming the app is priviledged
+apk_host=./build/outputs/apk
+apk_name=$dir_app_name.apk
+apk_target_dir=$path_sysapp
+apk_target_sys=$apk_target_dir/$apk_name
+
+echo "force stop app package"
+$ADB shell am force-stop $app_package
+
 
 # Delete previous APK
 rm -f $apk_host
 
 # Compile the APK: you can adapt this for production build, flavors, etc.
-./gradlew assembleDebug || exit -1 # exit on failure
+../gradlew assembleDebug #|| exit -1 # exit on failure
 
 
 $ADB remount # mount system
-$ADB "push $apk_host/$apk_name $apk_target_dir"
+
+$ADB push $apk_host/$apk_name $apk_target_dir
+#adb push ./build/outputs/apk/ui-debug.apk /system/priv-app/
 
 # Give permissions
-$ADB_SH "chmod 755 $apk_target_dir"
-$ADB_SH "chmod 644 $apk_target_sys"
+$ADB_SH chmod 755 $apk_target_dir
+$ADB_SH chmod 644 $apk_target_sys
 
 # Reinstall app
-$ADB_SH "pm install -r $apk_target_sys"
+$ADB_SH pm install -r $apk_target_sys
 
 #Unmount system
-$ADB_SH "mount -o remount,ro /"
+$ADB_SH mount -o remount,ro /
 
 # Re execute the app
-$ADB shell "am start -n \"$app_package/$app_package.$MAIN_ACTIVITY\" -a android.intent.action.MAIN -c android.intent.category.LAUNCHER"
+$ADB shell am start -n \"$app_package/$app_package.$MAIN_ACTIVITY\" -a android.intent.action.MAIN -c android.intent.category.LAUNCHER
 

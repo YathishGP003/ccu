@@ -3,6 +3,7 @@ package a75f.io.renatus;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -43,8 +44,17 @@ public class JSONSerializerTest
 			CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessagePostSerilizer =
 					(CcuToCmOverUsbDatabaseSeedSnMessage_t) JsonSerializer.fromJson
 							                                                                 (pojoAsString,CcuToCmOverUsbDatabaseSeedSnMessage_t.class);
+			
+			
+			System.out.println("roomname: " + seedMessage.settings.roomName.get());
+			System.out.println("roomname: " + seedMessagePostSerilizer.settings.roomName.get());
+			Assert.assertTrue(seedMessage.settings.roomName.get().equals(seedMessagePostSerilizer
+					                                                       .settings.roomName.get()));
+			
+			
 			System.out.println("Before: " + seedMessage.toString());
-			System.out.println("After: " + seedMessagePostSerilizer.toString());
+			System.out.println("After: " +  seedMessagePostSerilizer.toString
+					                                                                             ());
 		}
 		catch (JsonGenerationException e)
 		{

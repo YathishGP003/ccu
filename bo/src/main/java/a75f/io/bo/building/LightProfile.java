@@ -99,6 +99,7 @@ public class LightProfile extends ZoneProfile
 							{
 								port.set(getDimmable(0));
 							}
+							break;
 						case TenToZeroV:
 							if (on)
 							{
@@ -108,6 +109,7 @@ public class LightProfile extends ZoneProfile
 							{
 								port.set(getDimmable(100));
 							}
+							break;
 						case TwoToTenV:
 							if (on)
 							{
@@ -117,6 +119,7 @@ public class LightProfile extends ZoneProfile
 							{
 								port.set(getDimmable(20));
 							}
+							break;
 						case TenToTwov:
 							if (on)
 							{
@@ -126,6 +129,7 @@ public class LightProfile extends ZoneProfile
 							{
 								port.set(getDimmable(100));
 							}
+							break;
 					}
 					break;
 			}

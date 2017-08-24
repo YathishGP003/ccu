@@ -34,7 +34,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-
     packagingOptions {
         exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/LICENSE'
@@ -44,7 +43,6 @@ android {
         exclude 'com/google/api/client/http/AbstractHttpContent.class'
 
     }
-
     signingConfigs {
         debug {
             keyAlias 'androiddebugkey'
@@ -53,13 +51,14 @@ android {
             storePassword 'android'
         }
     }
-
     dexOptions {
+    }
+    productFlavors {
+
     }
 }
 
 dependencies {
-
     compile 'com.android.support:multidex:1.0.1'
     compile project(':logic')
     compile project(':bluetooth')

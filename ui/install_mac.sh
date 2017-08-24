@@ -1,18 +1,19 @@
 #!/bin/bash
 
-# CHANGE THESE
 app_package="a75f.io.renatus"
-dir_app_name="Renatus"
+dir_app_name="ui-debug"
 MAIN_ACTIVITY="RenatusLandingActivity"
 
-ADB="adb" # how you execute adb
-$ADB_SH="$ADB shell" # this script assumes using `adb root`. for `adb su` see `Caveats`
+ADB="adb"
+$ADB_SH="$ADB shell"
 
 path_sysapp="/system/priv-app" # assuming the app is priviledged
-apk_host="./app/build/outputs/apk/app-debug.apk"
+apk_host="./ui/build/outputs/apk/"
 apk_name=$dir_app_name".apk"
-apk_target_dir="$path_sysapp/$dir_app_name"
+apk_target_dir="$path_sysapp/"
 apk_target_sys="$apk_target_dir/$apk_name"
+
+$ADB "shell am force-stop $app_package"
 
 # Delete previous APK
 rm -f $apk_host
@@ -20,20 +21,20 @@ rm -f $apk_host
 # Compile the APK: you can adapt this for production build, flavors, etc.
 ./gradlew assembleDebug || exit -1 # exit on failure
 
-# Install APK: using adb root
-$ADB root 2> /dev/null
+
 $ADB remount # mount system
-$ADB push $apk_host $apk_target_sys
+$ADB "push $apk_host/$apk_name $apk_target_dir"
 
 # Give permissions
 $ADB_SH "chmod 755 $apk_target_dir"
 $ADB_SH "chmod 644 $apk_target_sys"
 
+# Reinstall app
+$ADB_SH "pm install -r $apk_target_sys"
+
 #Unmount system
 $ADB_SH "mount -o remount,ro /"
 
-# Stop the app
-$ADB shell "am force-stop $app_package"
-
 # Re execute the app
 $ADB shell "am start -n \"$app_package/$app_package.$MAIN_ACTIVITY\" -a android.intent.action.MAIN -c android.intent.category.LAUNCHER"
+

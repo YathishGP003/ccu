@@ -7,9 +7,9 @@ package android.hardware.usb;
 public interface IUsbManager extends android.os.IInterface
 {
 	/** Local-side IPC implementation stub class. */
-	public static abstract class Stub extends android.os.Binder implements android.hardware.usb.IUsbManager
+	public static abstract class Stub extends android.os.Binder implements IUsbManager
 	{
-		private static final java.lang.String DESCRIPTOR = "android.hardware.usb.IUsbManager";
+		private static final String DESCRIPTOR = "android.hardware.usb.IUsbManager";
 		/** Construct the stub at attach it to the interface. */
 		public Stub()
 		{
@@ -19,16 +19,16 @@ public interface IUsbManager extends android.os.IInterface
 		 * Cast an IBinder object into an android.hardware.usb.IUsbManager interface,
 		 * generating a proxy if needed.
 		 */
-		public static android.hardware.usb.IUsbManager asInterface(android.os.IBinder obj)
+		public static IUsbManager asInterface(android.os.IBinder obj)
 		{
 			if ((obj==null)) {
 				return null;
 			}
 			android.os.IInterface iin = obj.queryLocalInterface(DESCRIPTOR);
-			if (((iin!=null)&&(iin instanceof android.hardware.usb.IUsbManager))) {
-				return ((android.hardware.usb.IUsbManager)iin);
+			if (((iin!=null)&&(iin instanceof IUsbManager))) {
+				return ((IUsbManager)iin);
 			}
-			return new android.hardware.usb.IUsbManager.Stub.Proxy(obj);
+			return new Proxy(obj);
 		}
 		@Override public android.os.IBinder asBinder()
 		{
@@ -62,7 +62,7 @@ public interface IUsbManager extends android.os.IInterface
 				case TRANSACTION_openDevice:
 				{
 					data.enforceInterface(DESCRIPTOR);
-					java.lang.String _arg0;
+					String _arg0;
 					_arg0 = data.readString();
 					android.os.ParcelFileDescriptor _result = this.openDevice(_arg0);
 					reply.writeNoException();
@@ -78,7 +78,7 @@ public interface IUsbManager extends android.os.IInterface
 				case TRANSACTION_getCurrentAccessory:
 				{
 					data.enforceInterface(DESCRIPTOR);
-					android.hardware.usb.UsbAccessory _result = this.getCurrentAccessory();
+					UsbAccessory _result = this.getCurrentAccessory();
 					reply.writeNoException();
 					if ((_result!=null)) {
 						reply.writeInt(1);
@@ -92,9 +92,9 @@ public interface IUsbManager extends android.os.IInterface
 				case TRANSACTION_openAccessory:
 				{
 					data.enforceInterface(DESCRIPTOR);
-					android.hardware.usb.UsbAccessory _arg0;
+					UsbAccessory _arg0;
 					if ((0!=data.readInt())) {
-						_arg0 = android.hardware.usb.UsbAccessory.CREATOR.createFromParcel(data);
+						_arg0 = UsbAccessory.CREATOR.createFromParcel(data);
 					}
 					else {
 						_arg0 = null;
@@ -113,14 +113,14 @@ public interface IUsbManager extends android.os.IInterface
 				case TRANSACTION_setDevicePackage:
 				{
 					data.enforceInterface(DESCRIPTOR);
-					android.hardware.usb.UsbDevice _arg0;
+					UsbDevice _arg0;
 					if ((0!=data.readInt())) {
-						_arg0 = android.hardware.usb.UsbDevice.CREATOR.createFromParcel(data);
+						_arg0 = UsbDevice.CREATOR.createFromParcel(data);
 					}
 					else {
 						_arg0 = null;
 					}
-					java.lang.String _arg1;
+					String _arg1;
 					_arg1 = data.readString();
 					int _arg2;
 					_arg2 = data.readInt();
@@ -131,14 +131,14 @@ public interface IUsbManager extends android.os.IInterface
 				case TRANSACTION_setAccessoryPackage:
 				{
 					data.enforceInterface(DESCRIPTOR);
-					android.hardware.usb.UsbAccessory _arg0;
+					UsbAccessory _arg0;
 					if ((0!=data.readInt())) {
-						_arg0 = android.hardware.usb.UsbAccessory.CREATOR.createFromParcel(data);
+						_arg0 = UsbAccessory.CREATOR.createFromParcel(data);
 					}
 					else {
 						_arg0 = null;
 					}
-					java.lang.String _arg1;
+					String _arg1;
 					_arg1 = data.readString();
 					int _arg2;
 					_arg2 = data.readInt();
@@ -149,9 +149,9 @@ public interface IUsbManager extends android.os.IInterface
 				case TRANSACTION_hasDevicePermission:
 				{
 					data.enforceInterface(DESCRIPTOR);
-					android.hardware.usb.UsbDevice _arg0;
+					UsbDevice _arg0;
 					if ((0!=data.readInt())) {
-						_arg0 = android.hardware.usb.UsbDevice.CREATOR.createFromParcel(data);
+						_arg0 = UsbDevice.CREATOR.createFromParcel(data);
 					}
 					else {
 						_arg0 = null;
@@ -164,9 +164,9 @@ public interface IUsbManager extends android.os.IInterface
 				case TRANSACTION_hasAccessoryPermission:
 				{
 					data.enforceInterface(DESCRIPTOR);
-					android.hardware.usb.UsbAccessory _arg0;
+					UsbAccessory _arg0;
 					if ((0!=data.readInt())) {
-						_arg0 = android.hardware.usb.UsbAccessory.CREATOR.createFromParcel(data);
+						_arg0 = UsbAccessory.CREATOR.createFromParcel(data);
 					}
 					else {
 						_arg0 = null;
@@ -179,14 +179,14 @@ public interface IUsbManager extends android.os.IInterface
 				case TRANSACTION_requestDevicePermission:
 				{
 					data.enforceInterface(DESCRIPTOR);
-					android.hardware.usb.UsbDevice _arg0;
+					UsbDevice _arg0;
 					if ((0!=data.readInt())) {
-						_arg0 = android.hardware.usb.UsbDevice.CREATOR.createFromParcel(data);
+						_arg0 = UsbDevice.CREATOR.createFromParcel(data);
 					}
 					else {
 						_arg0 = null;
 					}
-					java.lang.String _arg1;
+					String _arg1;
 					_arg1 = data.readString();
 					android.app.PendingIntent _arg2;
 					if ((0!=data.readInt())) {
@@ -202,14 +202,14 @@ public interface IUsbManager extends android.os.IInterface
 				case TRANSACTION_requestAccessoryPermission:
 				{
 					data.enforceInterface(DESCRIPTOR);
-					android.hardware.usb.UsbAccessory _arg0;
+					UsbAccessory _arg0;
 					if ((0!=data.readInt())) {
-						_arg0 = android.hardware.usb.UsbAccessory.CREATOR.createFromParcel(data);
+						_arg0 = UsbAccessory.CREATOR.createFromParcel(data);
 					}
 					else {
 						_arg0 = null;
 					}
-					java.lang.String _arg1;
+					String _arg1;
 					_arg1 = data.readString();
 					android.app.PendingIntent _arg2;
 					if ((0!=data.readInt())) {
@@ -225,9 +225,9 @@ public interface IUsbManager extends android.os.IInterface
 				case TRANSACTION_grantDevicePermission:
 				{
 					data.enforceInterface(DESCRIPTOR);
-					android.hardware.usb.UsbDevice _arg0;
+					UsbDevice _arg0;
 					if ((0!=data.readInt())) {
-						_arg0 = android.hardware.usb.UsbDevice.CREATOR.createFromParcel(data);
+						_arg0 = UsbDevice.CREATOR.createFromParcel(data);
 					}
 					else {
 						_arg0 = null;
@@ -241,9 +241,9 @@ public interface IUsbManager extends android.os.IInterface
 				case TRANSACTION_grantAccessoryPermission:
 				{
 					data.enforceInterface(DESCRIPTOR);
-					android.hardware.usb.UsbAccessory _arg0;
+					UsbAccessory _arg0;
 					if ((0!=data.readInt())) {
-						_arg0 = android.hardware.usb.UsbAccessory.CREATOR.createFromParcel(data);
+						_arg0 = UsbAccessory.CREATOR.createFromParcel(data);
 					}
 					else {
 						_arg0 = null;
@@ -257,7 +257,7 @@ public interface IUsbManager extends android.os.IInterface
 				case TRANSACTION_hasDefaults:
 				{
 					data.enforceInterface(DESCRIPTOR);
-					java.lang.String _arg0;
+					String _arg0;
 					_arg0 = data.readString();
 					int _arg1;
 					_arg1 = data.readInt();
@@ -269,7 +269,7 @@ public interface IUsbManager extends android.os.IInterface
 				case TRANSACTION_clearDefaults:
 				{
 					data.enforceInterface(DESCRIPTOR);
-					java.lang.String _arg0;
+					String _arg0;
 					_arg0 = data.readString();
 					int _arg1;
 					_arg1 = data.readInt();
@@ -280,7 +280,7 @@ public interface IUsbManager extends android.os.IInterface
 				case TRANSACTION_setCurrentFunction:
 				{
 					data.enforceInterface(DESCRIPTOR);
-					java.lang.String _arg0;
+					String _arg0;
 					_arg0 = data.readString();
 					boolean _arg1;
 					_arg1 = (0!=data.readInt());
@@ -291,7 +291,7 @@ public interface IUsbManager extends android.os.IInterface
 				case TRANSACTION_setMassStorageBackingFile:
 				{
 					data.enforceInterface(DESCRIPTOR);
-					java.lang.String _arg0;
+					String _arg0;
 					_arg0 = data.readString();
 					this.setMassStorageBackingFile(_arg0);
 					reply.writeNoException();
@@ -302,7 +302,7 @@ public interface IUsbManager extends android.os.IInterface
 					data.enforceInterface(DESCRIPTOR);
 					boolean _arg0;
 					_arg0 = (0!=data.readInt());
-					java.lang.String _arg1;
+					String _arg1;
 					_arg1 = data.readString();
 					this.allowUsbDebugging(_arg0, _arg1);
 					reply.writeNoException();
@@ -325,7 +325,7 @@ public interface IUsbManager extends android.os.IInterface
 			}
 			return super.onTransact(code, data, reply, flags);
 		}
-		private static class Proxy implements android.hardware.usb.IUsbManager
+		private static class Proxy implements IUsbManager
 		{
 			private android.os.IBinder mRemote;
 			Proxy(android.os.IBinder remote)
@@ -336,7 +336,7 @@ public interface IUsbManager extends android.os.IInterface
 			{
 				return mRemote;
 			}
-			public java.lang.String getInterfaceDescriptor()
+			public String getInterfaceDescriptor()
 			{
 				return DESCRIPTOR;
 			}
@@ -361,7 +361,7 @@ public interface IUsbManager extends android.os.IInterface
 			/* Returns a file descriptor for communicating with the USB device.
 				 * The native fd can be passed to usb_device_new() in libusbhost.
 				 */
-			@Override public android.os.ParcelFileDescriptor openDevice(java.lang.String deviceName) throws android.os.RemoteException
+			@Override public android.os.ParcelFileDescriptor openDevice(String deviceName) throws android.os.RemoteException
 			{
 				android.os.Parcel _data = android.os.Parcel.obtain();
 				android.os.Parcel _reply = android.os.Parcel.obtain();
@@ -385,17 +385,17 @@ public interface IUsbManager extends android.os.IInterface
 				return _result;
 			}
 			/* Returns the currently attached USB accessory */
-			@Override public android.hardware.usb.UsbAccessory getCurrentAccessory() throws android.os.RemoteException
+			@Override public UsbAccessory getCurrentAccessory() throws android.os.RemoteException
 			{
 				android.os.Parcel _data = android.os.Parcel.obtain();
 				android.os.Parcel _reply = android.os.Parcel.obtain();
-				android.hardware.usb.UsbAccessory _result;
+				UsbAccessory _result;
 				try {
 					_data.writeInterfaceToken(DESCRIPTOR);
 					mRemote.transact(Stub.TRANSACTION_getCurrentAccessory, _data, _reply, 0);
 					_reply.readException();
 					if ((0!=_reply.readInt())) {
-						_result = android.hardware.usb.UsbAccessory.CREATOR.createFromParcel(_reply);
+						_result = UsbAccessory.CREATOR.createFromParcel(_reply);
 					}
 					else {
 						_result = null;
@@ -410,7 +410,7 @@ public interface IUsbManager extends android.os.IInterface
 			/* Returns a file descriptor for communicating with the USB accessory.
 				 * This file descriptor can be used with standard Java file operations.
 				 */
-			@Override public android.os.ParcelFileDescriptor openAccessory(android.hardware.usb.UsbAccessory accessory) throws android.os.RemoteException
+			@Override public android.os.ParcelFileDescriptor openAccessory(UsbAccessory accessory) throws android.os.RemoteException
 			{
 				android.os.Parcel _data = android.os.Parcel.obtain();
 				android.os.Parcel _reply = android.os.Parcel.obtain();
@@ -442,7 +442,7 @@ public interface IUsbManager extends android.os.IInterface
 			/* Sets the default package for a USB device
 				 * (or clears it if the package name is null)
 				 */
-			@Override public void setDevicePackage(android.hardware.usb.UsbDevice device, java.lang.String packageName, int userId) throws android.os.RemoteException
+			@Override public void setDevicePackage(UsbDevice device, String packageName, int userId) throws android.os.RemoteException
 			{
 				android.os.Parcel _data = android.os.Parcel.obtain();
 				android.os.Parcel _reply = android.os.Parcel.obtain();
@@ -468,7 +468,7 @@ public interface IUsbManager extends android.os.IInterface
 			/* Sets the default package for a USB accessory
 				 * (or clears it if the package name is null)
 				 */
-			@Override public void setAccessoryPackage(android.hardware.usb.UsbAccessory accessory, java.lang.String packageName, int userId) throws android.os.RemoteException
+			@Override public void setAccessoryPackage(UsbAccessory accessory, String packageName, int userId) throws android.os.RemoteException
 			{
 				android.os.Parcel _data = android.os.Parcel.obtain();
 				android.os.Parcel _reply = android.os.Parcel.obtain();
@@ -492,7 +492,7 @@ public interface IUsbManager extends android.os.IInterface
 				}
 			}
 			/* Returns true if the caller has permission to access the device. */
-			@Override public boolean hasDevicePermission(android.hardware.usb.UsbDevice device) throws android.os.RemoteException
+			@Override public boolean hasDevicePermission(UsbDevice device) throws android.os.RemoteException
 			{
 				android.os.Parcel _data = android.os.Parcel.obtain();
 				android.os.Parcel _reply = android.os.Parcel.obtain();
@@ -517,7 +517,7 @@ public interface IUsbManager extends android.os.IInterface
 				return _result;
 			}
 			/* Returns true if the caller has permission to access the accessory. */
-			@Override public boolean hasAccessoryPermission(android.hardware.usb.UsbAccessory accessory) throws android.os.RemoteException
+			@Override public boolean hasAccessoryPermission(UsbAccessory accessory) throws android.os.RemoteException
 			{
 				android.os.Parcel _data = android.os.Parcel.obtain();
 				android.os.Parcel _reply = android.os.Parcel.obtain();
@@ -545,7 +545,7 @@ public interface IUsbManager extends android.os.IInterface
 				 * Will display a system dialog to query the user if permission
 				 * had not already been given.
 				 */
-			@Override public void requestDevicePermission(android.hardware.usb.UsbDevice device, java.lang.String packageName, android.app.PendingIntent pi) throws android.os.RemoteException
+			@Override public void requestDevicePermission(UsbDevice device, String packageName, android.app.PendingIntent pi) throws android.os.RemoteException
 			{
 				android.os.Parcel _data = android.os.Parcel.obtain();
 				android.os.Parcel _reply = android.os.Parcel.obtain();
@@ -578,7 +578,7 @@ public interface IUsbManager extends android.os.IInterface
 				 * Will display a system dialog to query the user if permission
 				 * had not already been given. Result is returned via pi.
 				 */
-			@Override public void requestAccessoryPermission(android.hardware.usb.UsbAccessory accessory, java.lang.String packageName, android.app.PendingIntent pi) throws android.os.RemoteException
+			@Override public void requestAccessoryPermission(UsbAccessory accessory, String packageName, android.app.PendingIntent pi) throws android.os.RemoteException
 			{
 				android.os.Parcel _data = android.os.Parcel.obtain();
 				android.os.Parcel _reply = android.os.Parcel.obtain();
@@ -608,7 +608,7 @@ public interface IUsbManager extends android.os.IInterface
 				}
 			}
 			/* Grants permission for the given UID to access the device */
-			@Override public void grantDevicePermission(android.hardware.usb.UsbDevice device, int uid) throws android.os.RemoteException
+			@Override public void grantDevicePermission(UsbDevice device, int uid) throws android.os.RemoteException
 			{
 				android.os.Parcel _data = android.os.Parcel.obtain();
 				android.os.Parcel _reply = android.os.Parcel.obtain();
@@ -631,7 +631,7 @@ public interface IUsbManager extends android.os.IInterface
 				}
 			}
 			/* Grants permission for the given UID to access the accessory */
-			@Override public void grantAccessoryPermission(android.hardware.usb.UsbAccessory accessory, int uid) throws android.os.RemoteException
+			@Override public void grantAccessoryPermission(UsbAccessory accessory, int uid) throws android.os.RemoteException
 			{
 				android.os.Parcel _data = android.os.Parcel.obtain();
 				android.os.Parcel _reply = android.os.Parcel.obtain();
@@ -654,7 +654,7 @@ public interface IUsbManager extends android.os.IInterface
 				}
 			}
 			/* Returns true if the USB manager has default preferences or permissions for the package */
-			@Override public boolean hasDefaults(java.lang.String packageName, int userId) throws android.os.RemoteException
+			@Override public boolean hasDefaults(String packageName, int userId) throws android.os.RemoteException
 			{
 				android.os.Parcel _data = android.os.Parcel.obtain();
 				android.os.Parcel _reply = android.os.Parcel.obtain();
@@ -674,7 +674,7 @@ public interface IUsbManager extends android.os.IInterface
 				return _result;
 			}
 			/* Clears default preferences and permissions for the package */
-			@Override public void clearDefaults(java.lang.String packageName, int userId) throws android.os.RemoteException
+			@Override public void clearDefaults(String packageName, int userId) throws android.os.RemoteException
 			{
 				android.os.Parcel _data = android.os.Parcel.obtain();
 				android.os.Parcel _reply = android.os.Parcel.obtain();
@@ -691,7 +691,7 @@ public interface IUsbManager extends android.os.IInterface
 				}
 			}
 			/* Sets the current USB function. */
-			@Override public void setCurrentFunction(java.lang.String function, boolean makeDefault) throws android.os.RemoteException
+			@Override public void setCurrentFunction(String function, boolean makeDefault) throws android.os.RemoteException
 			{
 				android.os.Parcel _data = android.os.Parcel.obtain();
 				android.os.Parcel _reply = android.os.Parcel.obtain();
@@ -708,7 +708,7 @@ public interface IUsbManager extends android.os.IInterface
 				}
 			}
 			/* Sets the file path for USB mass storage backing file. */
-			@Override public void setMassStorageBackingFile(java.lang.String path) throws android.os.RemoteException
+			@Override public void setMassStorageBackingFile(String path) throws android.os.RemoteException
 			{
 				android.os.Parcel _data = android.os.Parcel.obtain();
 				android.os.Parcel _reply = android.os.Parcel.obtain();
@@ -726,7 +726,7 @@ public interface IUsbManager extends android.os.IInterface
 			/* Allow USB debugging from the attached host. If alwaysAllow is true, add the
 				 * the public key to list of host keys that the user has approved.
 				 */
-			@Override public void allowUsbDebugging(boolean alwaysAllow, java.lang.String publicKey) throws android.os.RemoteException
+			@Override public void allowUsbDebugging(boolean alwaysAllow, String publicKey) throws android.os.RemoteException
 			{
 				android.os.Parcel _data = android.os.Parcel.obtain();
 				android.os.Parcel _reply = android.os.Parcel.obtain();
@@ -798,51 +798,53 @@ public interface IUsbManager extends android.os.IInterface
 	/* Returns a file descriptor for communicating with the USB device.
 		 * The native fd can be passed to usb_device_new() in libusbhost.
 		 */
-	public android.os.ParcelFileDescriptor openDevice(java.lang.String deviceName) throws android.os.RemoteException;
+	public android.os.ParcelFileDescriptor openDevice(String deviceName) throws android.os.RemoteException;
 	/* Returns the currently attached USB accessory */
-	public android.hardware.usb.UsbAccessory getCurrentAccessory() throws android.os.RemoteException;
+	public UsbAccessory getCurrentAccessory() throws android.os.RemoteException;
 	/* Returns a file descriptor for communicating with the USB accessory.
 		 * This file descriptor can be used with standard Java file operations.
 		 */
-	public android.os.ParcelFileDescriptor openAccessory(android.hardware.usb.UsbAccessory accessory) throws android.os.RemoteException;
+	public android.os.ParcelFileDescriptor openAccessory(UsbAccessory accessory) throws android.os.RemoteException;
 	/* Sets the default package for a USB device
 		 * (or clears it if the package name is null)
 		 */
-	public void setDevicePackage(android.hardware.usb.UsbDevice device, java.lang.String packageName, int userId) throws android.os.RemoteException;
+	public void setDevicePackage(UsbDevice device, String packageName, int userId) throws android.os.RemoteException;
 	/* Sets the default package for a USB accessory
 		 * (or clears it if the package name is null)
 		 */
-	public void setAccessoryPackage(android.hardware.usb.UsbAccessory accessory, java.lang.String packageName, int userId) throws android.os.RemoteException;
+	public void setAccessoryPackage(UsbAccessory accessory, String packageName, int userId) throws android.os.RemoteException;
 	/* Returns true if the caller has permission to access the device. */
-	public boolean hasDevicePermission(android.hardware.usb.UsbDevice device) throws android.os.RemoteException;
+	public boolean hasDevicePermission(UsbDevice device) throws android.os.RemoteException;
 	/* Returns true if the caller has permission to access the accessory. */
-	public boolean hasAccessoryPermission(android.hardware.usb.UsbAccessory accessory) throws android.os.RemoteException;
+	public boolean hasAccessoryPermission(UsbAccessory accessory) throws android.os.RemoteException;
 	/* Requests permission for the given package to access the device.
 		 * Will display a system dialog to query the user if permission
 		 * had not already been given.
 		 */
-	public void requestDevicePermission(android.hardware.usb.UsbDevice device, java.lang.String packageName, android.app.PendingIntent pi) throws android.os.RemoteException;
+	public void requestDevicePermission(UsbDevice device, String packageName,
+	                                    android.app.PendingIntent pi) throws android.os.RemoteException;
 	/* Requests permission for the given package to access the accessory.
 		 * Will display a system dialog to query the user if permission
 		 * had not already been given. Result is returned via pi.
 		 */
-	public void requestAccessoryPermission(android.hardware.usb.UsbAccessory accessory, java.lang.String packageName, android.app.PendingIntent pi) throws android.os.RemoteException;
+	public void requestAccessoryPermission(UsbAccessory accessory, String packageName,
+	                                       android.app.PendingIntent pi) throws android.os.RemoteException;
 	/* Grants permission for the given UID to access the device */
-	public void grantDevicePermission(android.hardware.usb.UsbDevice device, int uid) throws android.os.RemoteException;
+	public void grantDevicePermission(UsbDevice device, int uid) throws android.os.RemoteException;
 	/* Grants permission for the given UID to access the accessory */
-	public void grantAccessoryPermission(android.hardware.usb.UsbAccessory accessory, int uid) throws android.os.RemoteException;
+	public void grantAccessoryPermission(UsbAccessory accessory, int uid) throws android.os.RemoteException;
 	/* Returns true if the USB manager has default preferences or permissions for the package */
-	public boolean hasDefaults(java.lang.String packageName, int userId) throws android.os.RemoteException;
+	public boolean hasDefaults(String packageName, int userId) throws android.os.RemoteException;
 	/* Clears default preferences and permissions for the package */
-	public void clearDefaults(java.lang.String packageName, int userId) throws android.os.RemoteException;
+	public void clearDefaults(String packageName, int userId) throws android.os.RemoteException;
 	/* Sets the current USB function. */
-	public void setCurrentFunction(java.lang.String function, boolean makeDefault) throws android.os.RemoteException;
+	public void setCurrentFunction(String function, boolean makeDefault) throws android.os.RemoteException;
 	/* Sets the file path for USB mass storage backing file. */
-	public void setMassStorageBackingFile(java.lang.String path) throws android.os.RemoteException;
+	public void setMassStorageBackingFile(String path) throws android.os.RemoteException;
 	/* Allow USB debugging from the attached host. If alwaysAllow is true, add the
 		 * the public key to list of host keys that the user has approved.
 		 */
-	public void allowUsbDebugging(boolean alwaysAllow, java.lang.String publicKey) throws android.os.RemoteException;
+	public void allowUsbDebugging(boolean alwaysAllow, String publicKey) throws android.os.RemoteException;
 	/* Deny USB debugging from the attached host */
 	public void denyUsbDebugging() throws android.os.RemoteException;
 	/* Clear public keys installed for secure USB debugging */

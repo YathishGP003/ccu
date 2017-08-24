@@ -6,12 +6,17 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.hardware.usb.IUsbManager;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.util.Log;
 
 import com.felhr.usbserial.CDCSerialDevice;
@@ -61,7 +66,7 @@ public class UsbService extends Service
 	private static final String  ACTION_USB_PERMISSION             =
 			"com.android.example.USB_PERMISSION";
 	private static final int     BAUD_RATE                         = 38400;
-			// BaudRate. Change this value if you need
+	// BaudRate. Change this value if you need
 	private static final String  TAG                               =
 			UsbService.class.getSimpleName();
 	private static final boolean PARSE_DEBUG                       = false;
@@ -385,13 +390,21 @@ public class UsbService extends Service
 				Log.i("USB", "Device PID: " + devicePID);
 				if (deviceVID == 0x0403 || deviceVID == 0x1027 || deviceVID == 1003)
 				{
-					Log.i("USB", "Try connecting!");
-					// There is a device connected to our Android device. Try to open it as a Serial Port.
+					boolean success = grantRootPermissionToUSBDevice(device);
 					connection = usbManager.openDevice(device);
-					new ConnectionThread().start();
-					Intent intent = new Intent(ACTION_USB_PERMISSION_GRANTED);
-					UsbService.this.getApplicationContext().sendBroadcast(intent);
-					keep = true;
+					if (success)
+					{
+						new ConnectionThread().start();
+						Intent intent = new Intent(ACTION_USB_PERMISSION_GRANTED);
+						UsbService.this.getApplicationContext().sendBroadcast(intent);
+						keep = true;
+					}
+					else
+					{
+						Intent intent = new Intent(ACTION_USB_PERMISSION_NOT_GRANTED);
+						UsbService.this.getApplicationContext().sendBroadcast(intent);
+						keep = false;
+					}
 				}
 				else
 				{
@@ -416,6 +429,41 @@ public class UsbService extends Service
 			Intent intent = new Intent(ACTION_NO_USB);
 			sendBroadcast(intent);
 		}
+	}
+	
+	
+	private boolean grantRootPermissionToUSBDevice(UsbDevice device)
+	{
+		IBinder b = ServiceManager.getService(Context.USB_SERVICE);
+		IUsbManager service = IUsbManager.Stub.asInterface(b);
+		Log.i("USB", "Try connecting!");
+		// There is a device connected to our Android device. Try to open it as a Serial Port.
+		try
+		{
+			service.grantDevicePermission(device, getApplicationInfo().uid);
+			return true;
+		}
+		catch (RemoteException e)
+		{
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	
+	public ApplicationInfo getApplicationInfo()
+	{
+		PackageManager pm = getApplicationContext().getPackageManager();
+		ApplicationInfo ai = null;
+		try
+		{
+			ai = pm.getApplicationInfo("a75f.io.renatus", 0);
+		}
+		catch (PackageManager.NameNotFoundException e)
+		{
+			e.printStackTrace();
+		}
+		return ai;
 	}
 	
 	

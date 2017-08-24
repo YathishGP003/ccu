@@ -22,8 +22,9 @@ public class LogBLL
 	
 	public static void logStructAsJSON(Struct struct)
 	{
-		if (BuildConfig.DEBUG)
-		{
+		Log.i(TAG, "YOLO");
+		//if (BuildConfig.DEBUG)
+		//{
 			String structString = null;
 			try
 			{
@@ -34,7 +35,7 @@ public class LogBLL
 				e.printStackTrace();
 			}
 			System.out.println("Struct As String:\n" + structString + "\n");
-		}
+		//}
 	}
 	
 	

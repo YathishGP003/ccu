@@ -68,11 +68,6 @@
 
         </activity>
 
-        <receiver android:name=".receivers.BootCompletedReceivers">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"></action>
-            </intent-filter>
-        </receiver>
         <activity
             android:name=".ENGG.RenatusEngineeringActivity"
             android:theme="@style/RenatusAppTheme.NoActionBar">

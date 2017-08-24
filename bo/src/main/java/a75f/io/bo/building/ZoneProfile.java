@@ -24,4 +24,7 @@ public abstract class ZoneProfile
 	public List<SmartNodeOutput> smartNodeOutputs = new ArrayList<SmartNodeOutput>();
 	
 	public abstract List<CcuToCmOverUsbSnControlsMessage_t> getControlsMessage();
+	
+	
+	
 }

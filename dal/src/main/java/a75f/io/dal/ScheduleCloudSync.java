@@ -1,14 +1,12 @@
 package a75f.io.dal;
 
-import java.io.IOException;
-
 /**
  * Created by rmatt on 7/19/2017.
  */
 
 public class ScheduleCloudSync {
 
-    public static boolean saveSchedule(Schedule schedule) throws IOException {
+    //public static boolean saveSchedule(Schedule schedule) throws IOException {
       //  DataStore<Schedule> scheduleDataStore = DataStore.collection(Schedule.class.getSimpleName(), Schedule.class, StoreType.NETWORK, Globals.getInstance().getKinveyClient());
 
         /*scheduleDataStore.sync(new KinveySyncCallback<Schedule>() {
@@ -42,7 +40,7 @@ public class ScheduleCloudSync {
 
             }
         });*/
-        return true;
-    }
+        //return true;
+   // }
 
 }

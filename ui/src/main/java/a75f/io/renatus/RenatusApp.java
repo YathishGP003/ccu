@@ -1,21 +1,10 @@
 package a75f.io.renatus;
 
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.hardware.usb.IUsbManager;
-import android.hardware.usb.UsbDevice;
-import android.hardware.usb.UsbManager;
-import android.os.IBinder;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.support.multidex.MultiDex;
 import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
-
-import java.util.HashMap;
-import java.util.Iterator;
 
 import a75f.io.bo.SmartNode;
 import a75f.io.util.UtilityApplication;
@@ -39,53 +28,10 @@ public class RenatusApp extends UtilityApplication
 		super.onCreate();
 		Fabric.with(this, new Crashlytics());
 		Log.i(TAG, "RENATUS APP INITIATED");
-		removeUSBPermissionDialogs();
 	}
 	
 	
-	private void removeUSBPermissionDialogs()
-	{
-		PackageManager pm = getPackageManager();
-		ApplicationInfo ai = null;
-		try
-		{
-			ai = pm.getApplicationInfo("a75f.io.renatus", 0);
-		}
-		catch (PackageManager.NameNotFoundException e)
-		{
-			e.printStackTrace();
-		}
-		if (ai != null)
-		{
-			Log.i(TAG, "Trying to grant permissions");
-			UsbManager manager = (UsbManager) getSystemService(Context.USB_SERVICE);
-			IBinder b = ServiceManager.getService(Context.USB_SERVICE);
-			IUsbManager service = IUsbManager.Stub.asInterface(b);
-			HashMap<String, UsbDevice> deviceList = manager.getDeviceList();
-			Iterator<UsbDevice> deviceIterator = deviceList.values().iterator();
-			while (deviceIterator.hasNext())
-			{
-				Log.i(TAG, "Granting permissions");
-				UsbDevice device = deviceIterator.next();
-				try
-				{
-					service.grantDevicePermission(device, ai.uid);
-				}
-				catch (RemoteException e)
-				{
-					e.printStackTrace();
-				}
-				try
-				{
-					service.setDevicePackage(device, "a75f.io.renatus", ai.uid);
-				}
-				catch (RemoteException e)
-				{
-					e.printStackTrace();
-				}
-			}
-		}
-	}
+
 	
 	
 	@Override

@@ -16,12 +16,14 @@ import a75f.io.util.Globals;
 
 public class ApplicationPreference
 {
+	
+	public static final  short  RYAN_PORT                   = 9400;
 	public static final  String TAG                         = LocalStorage.class.getSimpleName();
 	private static final String PREFS_CCU_PREFERENCES_CONST = "ccu_preferences";
 	private static final String PREFS_APPLICATION           = "application_preferences";
 	
-	
 	short mSmartNodeAddressRange;
+	
 	
 	@JsonIgnore
 	public static ApplicationPreference getApplicationSettings()
@@ -31,7 +33,8 @@ public class ApplicationPreference
 		{
 			try
 			{
-				return (ApplicationPreference) JsonSerializer.fromJson(ccuSettings, ApplicationPreference.class);
+				return (ApplicationPreference) JsonSerializer
+						                               .fromJson(ccuSettings, ApplicationPreference.class);
 			}
 			catch (IOException e)
 			{
@@ -42,22 +45,24 @@ public class ApplicationPreference
 	}
 	
 	
+	@JsonIgnore
+	private static SharedPreferences getCCUSettings()
+	{
+		return Globals.getInstance().getApplicationContext()
+		              .getSharedPreferences(PREFS_APPLICATION, Context.MODE_PRIVATE);
+	}
+	
+	
 	public short getSmartNodeAddressBand()
 	{
 		if (mSmartNodeAddressRange == 0)
 		{
-			mSmartNodeAddressRange = 6000;
+			mSmartNodeAddressRange = RYAN_PORT;
 			save();
 		}
 		return mSmartNodeAddressRange;
 	}
 	
-	
-	public void setSmartNodeAddressRange(short smartNodeAddressRange)
-	{
-		this.mSmartNodeAddressRange = mSmartNodeAddressRange;
-		save();
-	}
 	
 	@JsonIgnore
 	private void save()
@@ -73,9 +78,10 @@ public class ApplicationPreference
 		}
 	}
 	
-	@JsonIgnore
-	private static SharedPreferences getCCUSettings()
+	
+	public void setSmartNodeAddressRange(short smartNodeAddressRange)
 	{
-		return Globals.getInstance().getApplicationContext().getSharedPreferences(PREFS_APPLICATION, Context.MODE_PRIVATE);
+		this.mSmartNodeAddressRange = mSmartNodeAddressRange;
+		save();
 	}
 }

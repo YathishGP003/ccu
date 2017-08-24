@@ -65,4 +65,5 @@ public class SmartNodeBLL
 			SerialBLL.getInstance().sendSerialStruct(controlsMessage_t);
 		}
 	}
+	
 }

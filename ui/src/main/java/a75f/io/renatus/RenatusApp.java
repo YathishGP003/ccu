@@ -9,6 +9,7 @@ import com.evernote.android.job.JobManager;
 
 import a75f.io.bo.SmartNode;
 import a75f.io.logic.jobs.CCUJobCreator;
+import a75f.io.logic.jobs.HeartBeatJob;
 import a75f.io.util.UtilityApplication;
 import io.fabric.sdk.android.Fabric;
 
@@ -30,7 +31,7 @@ public class RenatusApp extends UtilityApplication
 		super.onCreate();
 		Fabric.with(this, new Crashlytics());
 		JobManager.create(this).addJobCreator(new CCUJobCreator());
-
+		HeartBeatJob.scheduleJob();
 
 		Log.i(TAG, "RENATUS APP INITIATED");
 	}

@@ -31,14 +31,14 @@ public class HeartBeatJob extends Job {
         Log.i(TAG, "On Run Job");
         Log.i(TAG, "Sending Heartbeat");
         SerialBLL.getInstance().sendSerialStruct(getHeartBeat((short) 0));
-        HeartBeatJob.scheduleJob();
+       //HeartBeatJob.scheduleJob();
 
-        return Result.SUCCESS;
+        return Result.RESCHEDULE;
     }
 
     public static void scheduleJob() {
         Log.i(TAG, "Job Scheduled: " + HeartBeatJob.TAG);
-        new JobRequest.Builder(HeartBeatJob.TAG).setPersisted(true).setExecutionWindow(50000, 70000)
+        new JobRequest.Builder(HeartBeatJob.TAG).setExecutionWindow(50000, 70000)
                 .build()
                 .schedule();
     }

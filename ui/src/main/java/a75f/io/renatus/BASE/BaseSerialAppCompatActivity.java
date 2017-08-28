@@ -55,8 +55,7 @@ public class BaseSerialAppCompatActivity extends AppCompatActivity {
             switch (intent.getAction()) {
                 case UsbService.ACTION_USB_PERMISSION_GRANTED: // USB PERMISSION GRANTED
                     Toast.makeText(context, "USB Ready", Toast.LENGTH_SHORT).show();
-					/* Start the heart beat thread.*/
-                    HeartBeatJob.scheduleJob();
+
 
 
                     break;

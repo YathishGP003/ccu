@@ -8,6 +8,7 @@
  */
 package org.javolution.io;
 
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSetter;
@@ -1260,8 +1261,8 @@ public class Struct {
     /**
      * This class represents a 8 bits unsigned integer.
      */
-	//@JsonSerialize(using = Unsigned8Serializer.class)
-        //@Json
+	@JsonSerialize(using = Unsigned8Serializer.class)
+    @JsonDeserialize(using = Unsigned8Deserializer.class)
     public class Unsigned8 extends Member {
 
         public Unsigned8() {
@@ -1272,14 +1273,14 @@ public class Struct {
             super(nbrOfBits, 1);
         }
 
-        @JsonGetter
+
         public short get() {
             final int index = getByteBufferPosition() + offset();
             int word = getByteBuffer().get(index);
             return (short) (0xFF & ((bitLength() == 8) ? word : get(1, word)));
         }
         
-        @JsonSetter
+
         public void set(short value) {
             final int index = getByteBufferPosition() + offset();
             if (bitLength() == 8) {
@@ -1288,6 +1289,11 @@ public class Struct {
                 getByteBuffer().put(index,
                         (byte) set(value, 1, getByteBuffer().get(index)));
             }
+        }
+
+        @JsonSetter
+        public void set(int value) {
+            set((short)value);
         }
         
         
@@ -1338,7 +1344,6 @@ public class Struct {
      */
     
     @JsonSerialize(using = Unsigned16Serializer.class)
-    @JsonDeserialize(using = Unsigned16Deserializer.class)
     public class Unsigned16 extends Member {
 
         public Unsigned16() {
@@ -1355,6 +1360,7 @@ public class Struct {
             return 0xFFFF & ((bitLength() == 16) ? word : get(2, word));
         }
 
+
         public void set(int value) {
             final int index = getByteBufferPosition() + offset();
             if (bitLength() == 16) {
@@ -1364,6 +1370,8 @@ public class Struct {
                         (short) set(value, 2, getByteBuffer().getShort(index)));
             }
         }
+
+
 
         public String toString() {
             return String.valueOf(this.get());

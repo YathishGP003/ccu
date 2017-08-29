@@ -1,6 +1,5 @@
 package a75f.io.renatus.ENGG;
 
-import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -53,7 +52,7 @@ import a75f.io.bo.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 import a75f.io.bo.serial.MessageType;
 import a75f.io.bo.serial.comm.SerialAction;
 import a75f.io.bo.serial.comm.SerialEvent;
-import a75f.io.renatus.ENGG.logger.Log;
+import a75f.io.renatus.ENGG.logger.CcuLog;
 import a75f.io.renatus.MainActivity;
 import a75f.io.renatus.R;
 
@@ -145,6 +144,7 @@ public class SerialMessageFragment extends Fragment
 	{
 		super.onStop();
 		EventBus.getDefault().unregister(this);
+		getActivity().unbindService(usbConnection);
 	}
 	
 	private void setFilters() {
@@ -274,7 +274,7 @@ public class SerialMessageFragment extends Fragment
 			}
 			
 		} catch (Exception e) {
-			Log.d("CCU" ,e.getMessage());
+			CcuLog.d("CCU" ,e.getMessage());
 			
 		}
 		
@@ -284,15 +284,16 @@ public class SerialMessageFragment extends Fragment
 	public void sendMessage() {
 		try
 		{
+			//TODO - Complete after verifying deserialization issues.
 			CcuToCmOverUsbDatabaseSeedSnMessage_t msg = (CcuToCmOverUsbDatabaseSeedSnMessage_t) JsonSerializer.fromJson(msgSend.getText().toString(), msgClass);
 			msg.smartNodeAddress.set(Integer.parseInt(channels.get(channelSelection)));
 			usbService.write(msg.getOrderedBuffer());
-			Log.i("EnggUI", "SerialMessage: " + JsonSerializer.toJson(msg, true));
+			CcuLog.i("EnggUI", "SerialMessage: " + JsonSerializer.toJson(msg, true));
 			
 			Toast.makeText(Globals.getInstance().getApplicationContext(), "Message Sent" ,Toast.LENGTH_SHORT).show();
 			
 		} catch (Exception e) {
-			Log.e("CCU" ,"Exception ",e);
+			CcuLog.e("CCU" ,"Exception ",e);
 			
 		}
 		

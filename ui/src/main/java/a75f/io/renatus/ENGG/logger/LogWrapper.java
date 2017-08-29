@@ -7,12 +7,12 @@ package a75f.io.renatus.ENGG.logger;
 import android.util.Log;
 
 /**
- * Helper class which wraps Android's native Log utility in the Logger interface.  This way
+ * Helper class which wraps Android's native CcuLog utility in the Logger interface.  This way
  * normal DDMS output can be one of the many targets receiving and outputting logs simultaneously.
  */
 public class LogWrapper implements LogNode {
 	
-	// For piping:  The next node to receive Log data after this one has done its work.
+	// For piping:  The next node to receive CcuLog data after this one has done its work.
 	private LogNode mNext;
 	
 	/**
@@ -31,7 +31,7 @@ public class LogWrapper implements LogNode {
 	
 	/**
 	 * Prints data out to the console using Android's native log mechanism.
-	 * @param priority Log level of the data being logged.  Verbose, Error, etc.
+	 * @param priority CcuLog level of the data being logged.  Verbose, Error, etc.
 	 * @param tag Tag for for the log data.  Can be used to organize log statements.
 	 * @param msg The actual message to be logged. The actual message to be logged.
 	 * @param tr If an exception was thrown, this can be sent along for the logging facilities
@@ -52,8 +52,8 @@ public class LogWrapper implements LogNode {
 			msg += "\n" + Log.getStackTraceString(tr);
 		}
 		
-		// This is functionally identical to Log.x(tag, useMsg);
-		// For instance, if priority were Log.VERBOSE, this would be the same as Log.v(tag, useMsg)
+		// This is functionally identical to CcuLog.x(tag, useMsg);
+		// For instance, if priority were CcuLog.VERBOSE, this would be the same as CcuLog.v(tag, useMsg)
 		Log.println(priority, tag, useMsg);
 		
 		// If this isn't the last node in the chain, move things along.

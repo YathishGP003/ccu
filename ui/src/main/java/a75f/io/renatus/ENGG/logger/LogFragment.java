@@ -93,10 +93,10 @@ public class LogFragment extends Fragment {
 	}
 	
 	public void initializeLogging() {
-		// Using Log, front-end to the logging chain, emulates android.util.log method signatures.
+		// Using CcuLog, front-end to the logging chain, emulates android.util.log method signatures.
 		// Wraps Android's native log framework
 		LogWrapper logWrapper = new LogWrapper();
-		Log.setLogNode(logWrapper);
+		CcuLog.setLogNode(logWrapper);
 		
 		MessageOnlyLogFilter msgFilter = new MessageOnlyLogFilter();
 		logWrapper.setNext(msgFilter);
@@ -106,7 +106,7 @@ public class LogFragment extends Fragment {
 		//		                                        .findFragmentById(R.id.log_fragment);
 		msgFilter.setNext(mLogView);
 		
-		Log.i("Engg UI", "Ready");
+		CcuLog.i("Engg UI", "Ready");
 	}
 	
 	public LogView getLogView() {

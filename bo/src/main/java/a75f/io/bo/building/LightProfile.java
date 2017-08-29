@@ -196,7 +196,6 @@ public class LightProfile extends ZoneProfile
 	
 	private static short getDimmable(short localDimmablePercent, int analogVoltage)
 	{
-		return (short) ((localDimmablePercent / 100) *
-		                 analogVoltage);
+		return (short) ((localDimmablePercent * analogVoltage) / 100);
 	}
 }

@@ -1153,7 +1153,7 @@ public class SeekArcWidget extends View {
 
     private void updateProgress(int progress, boolean fromUser) {
 
-        // Log.d(TAG,"Update Prigress----============>>> "+progress);
+        // CcuLog.d(TAG,"Update Prigress----============>>> "+progress);
         if (progress == INVALID_PROGRESS_VALUE) {
             return;
         }

@@ -245,7 +245,7 @@ public class ZonesFragment extends Fragment
 			int nDetailsLoc = ((index - 1) / mod) + 1;
 			if (mLightsDetailsView.getHeaderViewsCount() > 0)
 				mLightsDetailsView.removeHeaderView(mLcmHeaderView);
-			//Log.d("WRM_PRO_TEST", "ImageDevices onClick-" + index + "," + bDetailsShowing + "," + imageViewDevices.getRoomData().getRoomName());
+		
 			if (!mDetailsView) {
 				w.setSelected(true);
 				if (w.getProfile() instanceof LightProfile) {
@@ -350,17 +350,10 @@ public class ZonesFragment extends Fragment
 			mLcmHeaderView = header;
 			}
 		
-		if (roomData == null) {
-			LightingDetailAdapter adapter = new LightingDetailAdapter(getActivity(), mLightsDetailsView, roomData, false);
-			mLightsDetailsView.setAdapter(adapter);
-			LayoutHelper layoutHelper = new LayoutHelper(getActivity());
-			layoutHelper.getListViewSize(mLightsDetailsView, null, 0, 0, false);
-		} else {
-			LightingDetailAdapter adapter = new LightingDetailAdapter(getActivity(), mLightsDetailsView, roomData, true);
-			mLightsDetailsView.setAdapter(adapter);
-			LayoutHelper layoutHelper = new LayoutHelper(getActivity());
-			layoutHelper.getListViewSize(mLightsDetailsView, null, 0, 0, true);
-		}
+		boolean expand = roomData == null ? false : true;
+		LightingDetailAdapter adapter = new LightingDetailAdapter(getActivity(), mLightsDetailsView, roomData, expand);
+		mLightsDetailsView.setAdapter(adapter);
+		new LayoutHelper(getActivity()).setListViewParams(mLightsDetailsView, null, 0, 0, expand);
 		
 	}
 	

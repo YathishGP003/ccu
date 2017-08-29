@@ -436,7 +436,7 @@ public class SmartStatTestFragment extends BaseDialogFragment
 		
 		try
 		{
-			Log.i(TAG, "CCuToCM: " + JsonSerializer.toJson(msg, true));
+			CcuLog.i(TAG, "CCuToCM: " + JsonSerializer.toJson(msg, true));
 		}
 		catch (IOException e)
 		{
@@ -527,7 +527,7 @@ public class SmartStatTestFragment extends BaseDialogFragment
 		
 		try
 		{
-			Log.i(TAG, "CCuToCM: " + JsonSerializer.toJson(msg, true));
+			CcuLog.i(TAG, "CCuToCM: " + JsonSerializer.toJson(msg, true));
 		}
 		catch (IOException e)
 		{

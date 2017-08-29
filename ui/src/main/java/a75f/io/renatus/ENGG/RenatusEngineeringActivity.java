@@ -5,13 +5,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-import a75f.io.renatus.ENGG.logger.Log;
-import a75f.io.renatus.ENGG.logger.LogFragment;
-import a75f.io.renatus.ENGG.logger.LogWrapper;
-import a75f.io.renatus.ENGG.logger.MessageOnlyLogFilter;
 import a75f.io.renatus.R;
-import a75f.io.renatus.SettingsPagerAdapter;
-import a75f.io.renatus.StatusPagerAdapter;
 
 public class RenatusEngineeringActivity extends AppCompatActivity
 {
@@ -55,8 +49,8 @@ public class RenatusEngineeringActivity extends AppCompatActivity
 	public void initializeLogging() {
 		// Wraps Android's native log framework.
 		/*LogWrapper logWrapper = new LogWrapper();
-		// Using Log, front-end to the logging chain, emulates android.util.log method signatures.
-		Log.setLogNode(logWrapper);
+		// Using CcuLog, front-end to the logging chain, emulates android.util.log method signatures.
+		CcuLog.setLogNode(logWrapper);
 		
 		// Filter strips out everything except the message text.
 		MessageOnlyLogFilter msgFilter = new MessageOnlyLogFilter();
@@ -67,6 +61,6 @@ public class RenatusEngineeringActivity extends AppCompatActivity
 				                                        .findFragmentById(R.id.log_fragment);
 		msgFilter.setNext(logFragment.getLogView());
 		
-		//Log.i(TAG, "Ready");*/
+		//CcuLog.i(TAG, "Ready");*/
 	}
 }

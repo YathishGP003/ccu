@@ -59,7 +59,7 @@ public class FloorPlanFragment extends Fragment
 	ListView    roomListView;
 	@BindView(R.id.moduleList)
 	ListView    moduleListView;
-	private DataArrayAdapter<ZoneProfile> mModuleListAdapter = null;
+	public DataArrayAdapter<ZoneProfile> mModuleListAdapter = null;
 	
 	
 	public FloorPlanFragment()
@@ -100,6 +100,8 @@ public class FloorPlanFragment extends Fragment
 		floorListView.setMultiChoiceModeListener(new FloorListActionMenuListener(this));
 		roomListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
 		roomListView.setMultiChoiceModeListener(new RoomListActionMenuListener(this));
+		moduleListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+		moduleListView.setMultiChoiceModeListener(new ModuleListActionMenuListener(this));
 		//EventBus.getDefault().register();
 	}
 	

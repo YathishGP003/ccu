@@ -52,7 +52,7 @@ public class EngineeringPagerAdapter extends FragmentStatePagerAdapter
 			case 0:
 				return "Serial Messages";
 			case 1:
-				return "Log View";
+				return "CcuLog View";
 			case 2:
 				return "Field Test";
 			case 3:

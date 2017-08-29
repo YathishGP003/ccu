@@ -6,6 +6,7 @@ import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.SwitchCompat;
 import android.view.LayoutInflater;
@@ -22,11 +23,13 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -40,19 +43,23 @@ import a75f.io.bo.building.ZoneProfile;
 import a75f.io.bo.building.definitions.Output;
 import a75f.io.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.bo.building.definitions.Port;
+import a75f.io.bo.json.serializers.JsonSerializer;
+import a75f.io.logic.SmartNodeBLL;
+import a75f.io.renatus.ENGG.logger.CcuLog;
 
 /**
  * Created by JASPINDER on 11/9/2016.
  */
 
 public class LightingDetailAdapter extends BaseAdapter{
+    
+    public static final String TAG = "Lighting";
 
     View                            row;
     LayoutInflater                  inflater;
     Activity                        c;
     ViewHolder                      viewHolder;
     ArrayList<LightSmartNodeOutput> snOutPortList;
-    ///StatusScreenHelper statusScreenHelper;
     ListView                        thiSList;
     private ArrayAdapter<CharSequence> aaOccupancyMode;
     private Boolean lcmdab;
@@ -67,13 +74,11 @@ public class LightingDetailAdapter extends BaseAdapter{
         this.thiSList = thiSList;
         this.lcmdab = lcmdab;
         this.profile =p;
-        ///statusScreenHelper = new StatusScreenHelper(act);
         aaOccupancyMode = ArrayAdapter.createFromResource(c.getApplicationContext(), R.array.schedulePORT, R.layout.spinner_item);
         aaOccupancyMode.setDropDownViewResource(R.layout.spinner_dropdown_item);
         Collections.sort(snOutPortList, new Comparator<SmartNodeOutput>() {
             @Override
             public int compare(SmartNodeOutput lhs, SmartNodeOutput rhs) {
-                ///TODO - change to circuit name
                 return lhs.mName.compareToIgnoreCase(rhs.mName);
             }
         });
@@ -203,13 +208,16 @@ public class LightingDetailAdapter extends BaseAdapter{
 
 
             }
-            //on switching on off light for relay
-
-            SwitchCompat onOff = (SwitchCompat) row.findViewById(R.id.OnOffLight);
+           
+            final Switch onOff = (Switch) row.findViewById(R.id.OnOffLight);
             onOff.setTag(position);
             onOff.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    onOff.getThumbDrawable().setColorFilter(c.getResources().getColor(
+                                        isChecked ? R.color.progress_color_orange: R.color.grey_select),PorterDuff.Mode.MULTIPLY);
+                    onOff.getTrackDrawable().setColorFilter(c.getResources().getColor(
+                            isChecked ? R.color.white: R.color.grey_select),PorterDuff.Mode.MULTIPLY);
                     
                     switch (lightPort.mSmartNodePort){
                         case RELAY_ONE:
@@ -217,21 +225,23 @@ public class LightingDetailAdapter extends BaseAdapter{
                             lightPort.on = isChecked;
                             lightPort.override = true;
                     }
+                    try
+                    {
+                        CcuLog.d(TAG, JsonSerializer.toJson(profile.getControlsMessage(), true));
+                        SmartNodeBLL.sendControlsMessage(profile);
+                    } catch (IOException e){
+                        CcuLog.wtf(TAG, "Failed to generate Control Message" ,e);
+                    }
 
-                  /*  fsvInfo.updateLCMDataFromAssignedSchedule();
-
-                        fsvInfo.getAssignedRoom().sendSettingsToWeb("lcm user change");
-                        notifyDataSetChanged();*/
                 }
             });
-            //changing brightnesss
+          
             SeekBar brightnessControl = (SeekBar) row.findViewById(R.id.brightness);
             final TextView val = (TextView) row.findViewById(R.id.brightnessVal);
             brightnessControl.setTag(position);
             val.setTag(position);
             brightnessControl.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
-                //FSVData fsvInfo = port_map.getFsvData();
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                     val.setText(progress+"");
@@ -258,6 +268,13 @@ public class LightingDetailAdapter extends BaseAdapter{
                             lightPort.dimmable = (short)value;
                             lightPort.override = true;
                     }
+                    try
+                    {
+                        CcuLog.d(TAG, JsonSerializer.toJson(profile.getControlsMessage(), true));
+                        SmartNodeBLL.sendControlsMessage(profile);
+                    } catch (IOException e){
+                        CcuLog.wtf(TAG, "Failed to generate Control Message" ,e);
+                    }
                     
                 }
             });
@@ -282,12 +299,9 @@ public class LightingDetailAdapter extends BaseAdapter{
                         }
 
                     }
-
-                   /* if(schedule == null) {
-                        statusScreenHelper.getListViewSize(thiSList, LightingDetailAdapter.this, 0, fsvPortList.size(), lcmdab);
-                    }else{
-                        statusScreenHelper.getListViewSize(thiSList, LightingDetailAdapter.this, 1, fsvPortList.size(), lcmdab);
-                    }*/
+    
+                    new LayoutHelper(c).setListViewParams(thiSList, LightingDetailAdapter.this, schedule == null ? 0 : 1, snOutPortList.size(), lcmdab);
+                   
                 }
 
             });
@@ -314,7 +328,7 @@ public class LightingDetailAdapter extends BaseAdapter{
             imgNameSchedule.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    /*//Log.d("WRM_PRO","imageView LCM detail named sch edit -"+v.isEnabled()+","+v.isPressed());
+                    /*//CcuLog.d("WRM_PRO","imageView LCM detail named sch edit -"+v.isEnabled()+","+v.isPressed());
                     if(v.isPressed()) {
                         FSVData fsvData = fsvPortList.get(position).getFsvData();
                         FSVData.SMARTNODE_PORT port = fsvPortList.get(position).getPort();
@@ -392,7 +406,7 @@ public class LightingDetailAdapter extends BaseAdapter{
                             viewHolder.imgNameSchedule.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-                                    //Log.d("WRM_PRO","imageView LCM detail named sch  select-"+v.isEnabled()+","+v.isPressed());
+                                    //CcuLog.d("WRM_PRO","imageView LCM detail named sch  select-"+v.isEnabled()+","+v.isPressed());
                                     if(v.isPressed()) {
                                         showNameScheduleSelector(port_map.getFsvData(), port);
                                     }
@@ -527,7 +541,7 @@ public class LightingDetailAdapter extends BaseAdapter{
     public class ViewHolder {
         public TextView       LogicalName;
         public SeekBar        brightness;
-        public SwitchCompat   OnOffLight;
+        public Switch  OnOffLight;
         public TextView       statusDetail;
         public TextView       brightnessVal;
         public Spinner        spinnerSchedule;
@@ -541,7 +555,7 @@ public class LightingDetailAdapter extends BaseAdapter{
         public ViewHolder(View v) {
             LogicalName = (TextView) v.findViewById(R.id.LogicalName);
             brightness = (SeekBar) v.findViewById(R.id.brightness);
-            OnOffLight = (SwitchCompat) v.findViewById(R.id.OnOffLight);
+            OnOffLight = (Switch) v.findViewById(R.id.OnOffLight);
             statusDetail = (TextView) v.findViewById(R.id.statusDetail);
             brightnessVal = (TextView) v.findViewById(R.id.brightnessVal);
             spinnerSchedule = (Spinner) v.findViewById(R.id.spinnerSchedule);

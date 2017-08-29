@@ -29,7 +29,7 @@ public class LayoutHelper
         rowHeight.clear();
     }
 
-    public static void getListViewSize(ListView myListView, ListAdapter adapter, int open, int total, Boolean lcm) {
+    public static void setListViewParams(ListView myListView, ListAdapter adapter, int open, int total, Boolean lcm) {
         openItems = open;
         totalItems = total;
         getScreenDimen();

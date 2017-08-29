@@ -27,7 +27,7 @@ public class LogView extends TextView implements LogNode {
 	
 	/**
 	 * Formats the log data and prints it out to the LogView.
-	 * @param priority Log level of the data being logged.  Verbose, Error, etc.
+	 * @param priority CcuLog level of the data being logged.  Verbose, Error, etc.
 	 * @param tag Tag for for the log data.  Can be used to organize log statements.
 	 * @param msg The actual message to be logged. The actual message to be logged.
 	 * @param tr If an exception was thrown, this can be sent along for the logging facilities
@@ -63,7 +63,7 @@ public class LogView extends TextView implements LogNode {
 				break;
 		}
 		
-		// Handily, the Log class has a facility for converting a stack trace into a usable string.
+		// Handily, the CcuLog class has a facility for converting a stack trace into a usable string.
 		String exceptionStr = null;
 		if (tr != null) {
 			exceptionStr = android.util.Log.getStackTraceString(tr);

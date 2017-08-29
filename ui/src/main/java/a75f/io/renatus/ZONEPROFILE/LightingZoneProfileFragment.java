@@ -17,6 +17,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -31,10 +32,12 @@ import a75f.io.bo.building.definitions.Output;
 import a75f.io.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.bo.building.definitions.Port;
+import a75f.io.bo.json.serializers.JsonSerializer;
 import a75f.io.logic.RoomBLL;
 import a75f.io.logic.SmartNodeBLL;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import a75f.io.renatus.ENGG.logger.CcuLog;
 import a75f.io.renatus.R;
 import a75f.io.util.Globals;
 import a75f.io.util.prefs.LocalStorage;
@@ -49,7 +52,7 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 {
 	
 	public static final  String ID  = LightingZoneProfileFragment.class.getSimpleName();
-	private static final String TAG = LightingZoneProfileFragment.class.getSimpleName();
+	private static final String TAG = "Lighting";
 	
 	View        view;
 	AlertDialog mAlertDialog;
@@ -425,6 +428,14 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 			analogTwoOp.mSmartNodeAddress = mSmartNodeAddress;
 			mLightProfile.smartNodeOutputs.add(analogTwoOp);
 		}
+		try {
+				CcuLog.d(TAG, JsonSerializer.toJson(mLightProfile.getControlsMessage(), true));
+		} catch (IOException e){
+				CcuLog.wtf(TAG, "Failed to generate Control Message" ,e);
+		}
+		
 		LocalStorage.setApplicationSettings();
+		
+		
 	}
 }

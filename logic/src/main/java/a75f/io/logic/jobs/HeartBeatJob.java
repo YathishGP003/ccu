@@ -6,9 +6,6 @@ import android.util.Log;
 import com.evernote.android.job.Job;
 import com.evernote.android.job.JobRequest;
 
-import org.javolution.io.Struct;
-
-import java.nio.ByteOrder;
 import java.util.concurrent.TimeUnit;
 
 import a75f.io.bo.serial.CcuToCmOverUsbCcuHeartbeatMessage_t;
@@ -24,21 +21,29 @@ public class HeartBeatJob extends Job {
     public static final String TAG = "HeartBeatJob";
     public static final short HEARTBEAT_INTERVAL = 1;  // minutes
     private static final short HEARTBEAT_MULTIPLIER = 5;
+    private static final short HEART_BEAT_TOLERANCE = 10;
 
     @Override
     @NonNull
     protected Result onRunJob(Params params) {
         Log.i(TAG, "On Run Job");
         Log.i(TAG, "Sending Heartbeat");
-        SerialBLL.getInstance().sendSerialStruct(getHeartBeat((short) 0));
-       //HeartBeatJob.scheduleJob();
+        if (SerialBLL.getInstance().isConnected()) {
+            Log.i(TAG, "Serial is connected, sending heartbeat");
+            SerialBLL.getInstance().sendSerialStruct(getHeartBeat((short) 0));
 
-        return Result.RESCHEDULE;
+        } else {
+            Log.i(TAG, "Serial is not connected, rescheduling heartbeat");
+            HeartBeatJob.scheduleJob();
+        }
+
+
+        return Result.SUCCESS;
     }
 
     public static void scheduleJob() {
         Log.i(TAG, "Job Scheduled: " + HeartBeatJob.TAG);
-        new JobRequest.Builder(HeartBeatJob.TAG).setExecutionWindow(50000, 70000)
+        new JobRequest.Builder(HeartBeatJob.TAG).setExact(TimeUnit.MINUTES.toMillis(HEARTBEAT_INTERVAL))
                 .build()
                 .schedule();
     }

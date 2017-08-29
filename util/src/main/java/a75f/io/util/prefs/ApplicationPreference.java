@@ -17,7 +17,7 @@ import a75f.io.util.Globals;
 public class ApplicationPreference
 {
 	
-	public static final  short  RYAN_PORT                   = 9400;
+	public static final  short  RYAN_PORT                   = 9600;
 	public static final  String TAG                         = LocalStorage.class.getSimpleName();
 	private static final String PREFS_CCU_PREFERENCES_CONST = "ccu_preferences";
 	private static final String PREFS_APPLICATION           = "application_preferences";

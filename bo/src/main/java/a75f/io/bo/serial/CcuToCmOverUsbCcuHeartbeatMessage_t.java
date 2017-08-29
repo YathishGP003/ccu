@@ -23,4 +23,5 @@ public class CcuToCmOverUsbCcuHeartbeatMessage_t extends Struct
 	{
 		return ByteOrder.LITTLE_ENDIAN;
 	}
+
 }

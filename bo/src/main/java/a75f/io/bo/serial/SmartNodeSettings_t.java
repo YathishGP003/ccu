@@ -6,7 +6,7 @@ import org.javolution.io.Struct;
  * Created by ryanmattison on 7/25/17.
  */
 
-public class SmartNodeSettings_t extends Struct
+public class  SmartNodeSettings_t extends Struct
 {
 	public final Unsigned8 maxUserTem                   = new Unsigned8(); /* default 80 - in deg F */
 	public final Unsigned8 minUserTemp                  = new Unsigned8(); /* default 60 - in deg F */

@@ -29,9 +29,9 @@ public class Unsigned8Deserializer extends StdDeserializer<Struct.Unsigned8>
 	{
 		try
 		{
-			Struct.Unsigned8 unsignedStruct = new Struct().new Unsigned8();
-			unsignedStruct.set(p.getShortValue());
-			return unsignedStruct;
+			Struct.Unsigned8 unsigned8 = (Struct.Unsigned8)cxt.getParser().getEmbeddedObject();
+			unsigned8.set(p.getShortValue());
+			return unsigned8;
 		}
 		catch (IOException e)
 		{

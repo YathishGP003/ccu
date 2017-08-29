@@ -29,6 +29,7 @@ public class Unsigned16Deserializer extends StdDeserializer<Struct.Unsigned16>
 	{
 		try
 		{
+			((Struct.Unsigned16)cxt.getParser().getEmbeddedObject()).set(p.getIntValue());
 			Struct.Unsigned16 unsignedStruct = new Struct().new Unsigned16();
 			unsignedStruct.set(p.getIntValue());
 			return unsignedStruct;

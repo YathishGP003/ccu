@@ -55,7 +55,4 @@ public class CcuToCmOverUsbDatabaseSeedSnMessage_t extends Struct
 	
 	
 	
-	
-	
-	
 }

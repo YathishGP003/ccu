@@ -34,9 +34,8 @@ public class HeartBeatJob extends Job {
 
         } else {
             Log.i(TAG, "Serial is not connected, rescheduling heartbeat");
-            HeartBeatJob.scheduleJob();
         }
-
+        HeartBeatJob.scheduleJob();
 
         return Result.SUCCESS;
     }

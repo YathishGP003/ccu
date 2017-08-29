@@ -89,7 +89,7 @@ public class RenatusLandingActivity extends BaseSerialAppCompatActivity
 			}
 		});
 		setViewPager();
-		FloorContainer.getInstance().loadData();
+		//FloorContainer.getInstance().loadData();
 	}
 	
 	
@@ -148,5 +148,11 @@ public class RenatusLandingActivity extends BaseSerialAppCompatActivity
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
+	}
+	
+	@Override
+	public void onPause(){
+		super.onPause();
+		
 	}
 }

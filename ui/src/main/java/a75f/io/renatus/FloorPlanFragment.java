@@ -21,6 +21,7 @@ import android.widget.Toast;
 
 import a75f.io.bo.building.Floor;
 import a75f.io.bo.building.Zone;
+import a75f.io.bo.building.ZoneProfile;
 import a75f.io.logic.SmartNodeBLL;
 import a75f.io.renatus.BLE.FragmentDeviceScan;
 import a75f.io.util.Globals;
@@ -58,7 +59,7 @@ public class FloorPlanFragment extends Fragment
 	ListView    roomListView;
 	@BindView(R.id.moduleList)
 	ListView    moduleListView;
-	private DataArrayAdapter<Floor> mModuleListAdapter = null;
+	private DataArrayAdapter<ZoneProfile> mModuleListAdapter = null;
 	
 	
 	public FloorPlanFragment()
@@ -108,6 +109,7 @@ public class FloorPlanFragment extends Fragment
 	{
 		super.onResume();
 		mCurFloorIndex = mCurFloorIndex >= 0 ? mCurFloorIndex : 0;
+		mCurRoomIndex = mCurRoomIndex >=0 ? mCurRoomIndex: 0;
 		floorListView.setAdapter(FloorContainer.getInstance().getFloorListAdapter());
 		if (FloorContainer.getInstance().getFloorList().size() > 0)
 		{
@@ -119,10 +121,16 @@ public class FloorPlanFragment extends Fragment
 					                                                                                                      .get(mCurFloorIndex).mRoomList);
 			roomListView.setAdapter(mRoomListAdapter);
 			enableRoomBtn();
-			if (FloorContainer.getInstance().getFloorList().get(mCurFloorIndex).mRoomList.size() >
-			    0)
+			if (FloorContainer.getInstance().getFloorList().get(mCurFloorIndex).mRoomList.size() > 0)
 			{
 				enableModueButton();
+				
+				mModuleListAdapter = new DataArrayAdapter<ZoneProfile>(Globals.getInstance()
+				                                                              .getApplicationContext(), R.layout.listviewitem, FloorContainer
+						                                                                                                               .getInstance()
+						                                                                                                               .getFloorList()
+						                                                                                                               .get(mCurFloorIndex).mRoomList.get(mCurRoomIndex).zoneProfiles);
+				moduleListView.setAdapter(mModuleListAdapter);
 			}
 		}
 	}
@@ -269,7 +277,6 @@ public class FloorPlanFragment extends Fragment
 		{
 			Toast.makeText(getActivity().getApplicationContext(),
 					"Room " + addRoomEdit.getText() + " added", Toast.LENGTH_SHORT).show();
-			Zone room = new Zone(addRoomEdit.getText().toString());
 			FloorContainer.getInstance().getFloorList().get(mCurFloorIndex).mRoomList
 					.add(new Zone(addRoomEdit.getText().toString()));
 			selectRoom(FloorContainer.getInstance().getFloorList().size() - 1);

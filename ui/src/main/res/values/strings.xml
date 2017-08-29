@@ -48,6 +48,26 @@
         <item>  VAV with Reheat </item>
     </string-array>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string-array name="mode">
+        <item >Smart</item>
+        <item >Manual</item>
+    </string-array>
+    <string-array name="schedule">
+        <item>  System Schedule</item>
+        <item>  Zone Schedule</item>
+        <item>  External Calendar</item>
+        <item>  Named Schedule</item>
+    </string-array>
+
+    <string-array name="schedulePORT">
+        <item>   LCM Zone Schedule</item>
+        <item>   Circuit Schedule</item>
+        <item>   Named Schedule</item>
+    </string-array>
+
+    <string-array name="scheduleLCM">
+        <item>   LCM Zone Schedule</item>
+        <item>   Named Schedule</item>
+    </string-array>
+
 </resources>

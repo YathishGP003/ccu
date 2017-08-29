@@ -1,5 +1,7 @@
 package a75f.io.bo.building;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import org.javolution.io.Struct;
 
 import java.util.ArrayList;
@@ -20,6 +22,9 @@ public class LightProfile extends ZoneProfile
 	public boolean dimmable        = true;
 	public short   dimmablePercent = 100;
 	
+	public LightProfile(){
+		
+	}
 	
 	public LightProfile(String name)
 	{
@@ -38,6 +43,7 @@ public class LightProfile extends ZoneProfile
 	 * messages in case there are multiple SmartNodes controlling a single light profile.
 	 * @return List<CcuToCmOverUsbSnControlsMessages_t> </CcuToCmOverUsbSnControlsMessages_t>
 	 */
+	@JsonIgnore
 	public List<CcuToCmOverUsbSnControlsMessage_t> getControlsMessage()
 	{
 		ensureDimmable();

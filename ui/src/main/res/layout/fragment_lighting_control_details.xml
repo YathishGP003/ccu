@@ -338,7 +338,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="50dp"
-            android:text="Send"
+            android:text="Set"
             android:textColor="@color/black"/>
     </LinearLayout>
 </LinearLayout>

@@ -38,6 +38,7 @@ import a75f.io.bo.json.serializers.Signed8Serializer;
 import a75f.io.bo.json.serializers.UTF8Serializer;
 import a75f.io.bo.json.serializers.Unsigned16Serializer;
 import a75f.io.bo.json.serializers.Unsigned8Serializer;
+import a75f.io.bo.serial.MessageType;
 
 /**
  * <p> Equivalent to a  <code>C/C++ struct</code>; this class confers
@@ -1118,7 +1119,7 @@ public class Struct {
      * (for C/C++ compatibility)
      */
     @JsonSerialize(using = UTF8Serializer.class)
-    @JsonDeserialize(using = UTF8Deserializer.class)
+    //@JsonDeserialize(using = UTF8Deserializer.class)
     public class UTF8String extends Member {
 
         private final UTF8ByteBufferWriter _writer = new UTF8ByteBufferWriter();
@@ -1176,6 +1177,12 @@ public class Struct {
                     _reader.reset();
                 }
             }
+        }
+        
+        @JsonSetter
+        public void setUTF8(String value)
+        {
+            this.set(value);
         }
 
         public String toString() {
@@ -1260,7 +1267,7 @@ public class Struct {
     /**
      * This class represents a 8 bits unsigned integer.
      */
-	//@JsonSerialize(using = Unsigned8Serializer.class)
+	@JsonSerialize(using = Unsigned8Serializer.class)
         //@Json
     public class Unsigned8 extends Member {
 
@@ -1288,6 +1295,12 @@ public class Struct {
                 getByteBuffer().put(index,
                         (byte) set(value, 1, getByteBuffer().get(index)));
             }
+        }
+    
+        @JsonSetter
+        public void setThis(int setter)
+        {
+            this.set((short)setter);
         }
         
         
@@ -1752,6 +1765,8 @@ public class Struct {
         public String toString() {
             return String.valueOf(this.get());
         }
+        
+   
     }
 
     /**

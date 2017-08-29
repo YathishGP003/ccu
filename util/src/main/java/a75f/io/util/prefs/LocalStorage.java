@@ -40,7 +40,7 @@ public class LocalStorage
 	}
 	
 	
-	private static SharedPreferences getCCUSettings()
+	public static SharedPreferences getCCUSettings()
 	{
 		return Globals.getInstance().getApplicationContext().getSharedPreferences(PREFS_CCU_SETTINGS_CONST, Context.MODE_PRIVATE);
 	}

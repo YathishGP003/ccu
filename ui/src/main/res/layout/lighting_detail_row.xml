@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/orange_multi"
+    android:orientation="horizontal">
+
+    <Space
+        android:layout_width="40dp"
+        android:layout_height="match_parent" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="0.4"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="horizontal"
+            android:padding="5dp">
+
+
+            <TextView
+                android:id="@+id/LogicalName"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center|left"
+                android:gravity="center_vertical"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:text="Parking Light"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="#202020" />
+
+            <TextView
+                android:id="@+id/brightnessVal"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center|left"
+                android:layout_marginLeft="10dp"
+                android:layout_toRightOf="@+id/LogicalName"
+                android:gravity="center_vertical"
+                android:text="100"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="#202020"
+                 />
+
+            <SeekBar
+                android:id="@+id/brightness"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center|left"
+                android:layout_toRightOf="@+id/brightnessVal"
+                android:ems="10"
+                android:gravity="center_vertical"
+                >
+
+            </SeekBar>
+
+            <android.support.v7.widget.SwitchCompat
+                android:id="@+id/OnOffLight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:visibility="gone"
+                android:layout_toRightOf="@+id/LogicalName"
+                android:gravity="center_vertical" />
+
+            <TextView
+                android:id="@+id/statusDetail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:layout_gravity="center|left"
+                android:layout_alignParentEnd="true"
+                android:layout_marginRight="80dp"
+                android:layout_marginLeft="10dp"
+                android:text="On now, Turns Off at 11:00 PM"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="#202020"
+                android:textSize="15sp" />
+
+
+            <ImageView
+                android:id="@+id/imageOccupied"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_gravity="right"
+                android:src="@drawable/occupied" />
+
+        </RelativeLayout>
+
+
+        <RelativeLayout
+            android:id="@+id/schedulerow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            android:paddingTop="10dp"
+
+            android:weightSum="1">
+
+            <LinearLayout
+                android:id="@+id/lay1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="5dp">
+
+                <TextView
+                    android:id="@+id/textView3"
+                    android:layout_width="150dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0"
+                    android:gravity="center_vertical"
+                    android:text="Schedule"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="#202020" />
+
+                <Spinner
+                    android:id="@+id/spinnerSchedule"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    style="@style/Base.Widget.AppCompat.Spinner.Underlined"
+                    android:layout_gravity="center"/>
+                <ImageView
+                    android:id="@+id/lcmNamedScheduleEdit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="10dp"
+                    android:layout_weight="0.1"
+                    android:visibility="invisible"
+                    android:padding="10dp"
+                    android:src="@drawable/content_edit" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/vacationData"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_marginLeft="10dp">
+
+                <TextView
+                    android:id="@+id/textView5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="fill_parent"
+                    android:layout_gravity="center"
+                    android:gravity="center_vertical"
+                    android:text="Vacation"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="#202020" />
+
+                <EditText
+                    android:id="@+id/vacationFromTo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:clickable="true"
+                    android:ems="15"
+                    android:focusable="false"
+                    android:focusableInTouchMode="true"
+                    android:gravity="center_vertical"
+                    android:text=""
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="#202020" />
+
+                <ImageView
+                    android:id="@+id/vacationEdit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:padding="10dp"
+                    android:src="@drawable/content_edit" />
+            </LinearLayout>
+        </RelativeLayout>
+
+    </LinearLayout>
+
+
+    <Space
+        android:layout_width="30dp"
+        android:layout_height="match_parent" />
+</LinearLayout>

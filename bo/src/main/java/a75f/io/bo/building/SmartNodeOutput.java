@@ -21,4 +21,5 @@ public class SmartNodeOutput
 	public Output                   mOutput;
 	public OutputRelayActuatorType  mOutputRelayActuatorType;
 	public OutputAnalogActuatorType mOutputAnalogActuatorType;
+	public short           mLightOutput; // Intended rage is 0/1 when Output is Relay and 0-100 when Output is Analog
 }

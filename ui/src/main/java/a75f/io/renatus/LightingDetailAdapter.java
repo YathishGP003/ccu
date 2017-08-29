@@ -1,0 +1,625 @@
+package a75f.io.renatus;
+
+import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.graphics.Color;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.SwitchCompat;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
+import android.widget.CompoundButton;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.SeekBar;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.SortedMap;
+
+import a75f.io.bo.building.LightProfile;
+import a75f.io.bo.building.SmartNodeOutput;
+import a75f.io.bo.building.ZoneProfile;
+import a75f.io.bo.building.definitions.Output;
+import a75f.io.bo.building.definitions.OutputRelayActuatorType;
+import a75f.io.bo.building.definitions.Port;
+
+/**
+ * Created by JASPINDER on 11/9/2016.
+ */
+
+public class LightingDetailAdapter extends BaseAdapter{
+
+    View row;
+    LayoutInflater inflater;
+    Activity c;
+    ViewHolder viewHolder;
+    ArrayList<SmartNodeOutput> snOutPortList;
+    ///StatusScreenHelper statusScreenHelper;
+    ListView thiSList;
+    private ArrayAdapter<CharSequence> aaOccupancyMode;
+    private Boolean lcmdab;
+    private RelativeLayout schedule;
+    private LightProfile profile;
+
+    public LightingDetailAdapter(Context c, ListView thiSList, LightProfile p, Boolean lcmdab) {
+        this.c = (Activity) c;
+        notifyDataSetChanged();
+        this.snOutPortList = new ArrayList<>();
+        snOutPortList.addAll(p.smartNodeOutputs);
+        this.thiSList = thiSList;
+        this.lcmdab = lcmdab;
+        this.profile =p;
+        ///statusScreenHelper = new StatusScreenHelper(act);
+        aaOccupancyMode = ArrayAdapter.createFromResource(c.getApplicationContext(), R.array.schedulePORT, R.layout.spinner_item);
+        aaOccupancyMode.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        Collections.sort(snOutPortList, new Comparator<SmartNodeOutput>() {
+            @Override
+            public int compare(SmartNodeOutput lhs, SmartNodeOutput rhs) {
+                ///TODO - change to circuit name
+                return lhs.mName.compareToIgnoreCase(rhs.mName);
+            }
+        });
+    }
+
+    @Override
+    public int getCount() {
+        return snOutPortList.size();
+    }
+
+    @Override
+    public Object getItem(int position) {
+        return position;
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
+    @Override
+    public View getView(final int position, View convertView, ViewGroup parent) {
+
+        row = convertView;
+        viewHolder = null;
+        if (row == null) {
+            inflater = (LayoutInflater) c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            row = inflater.inflate(R.layout.lighting_detail_row, parent, false);
+            viewHolder = new ViewHolder(row);
+            row.setTag(viewHolder);
+
+        } else {
+            viewHolder = (ViewHolder) row.getTag();
+
+        }
+
+        row.setBackgroundColor((position % 2 == 0) ?  Color.parseColor("#ececec"): Color.TRANSPARENT);
+       
+        if (snOutPortList.size() > 0) {
+            final SmartNodeOutput opPort = snOutPortList.get(position);
+            viewHolder.LogicalName.setText(opPort.mName/*port_map.getCircuitName()*/);
+            viewHolder.spinnerSchedule.setTag(position);
+            viewHolder.spinnerSchedule.setAdapter(aaOccupancyMode);
+            if(schedule != null){
+                schedule.setVisibility(View.VISIBLE);
+            }
+            
+            switch (opPort.mSmartNodePort) {
+                case RELAY_ONE:
+                   
+                    if (profile.on) {
+                        if(opPort.mOutputRelayActuatorType == OutputRelayActuatorType.NormallyClose)
+                            viewHolder.OnOffLight.setChecked(true);
+                        else
+                            viewHolder.OnOffLight.setChecked(false);
+                    } else {
+                        if(opPort.mOutputRelayActuatorType == OutputRelayActuatorType.NormallyClose)
+                            viewHolder.OnOffLight.setChecked(false);
+                        else
+                        viewHolder.OnOffLight.setChecked(true);
+                    }
+                    /*viewHolder.spinnerSchedule.setSelection(port_info.relay1.schedule_mode);
+                    viewHolder.statusDetail.setText(port_info.relay1.status);
+                    viewHolder.vacationFromTo.setText(port_info.relay1.vacation_text);
+                    if (!port_info.relay1.isOccupied) {
+                        viewHolder.imageOccupied.setVisibility(View.GONE);
+                    }
+                    if(port_info.relay1.schedule_mode == 2){
+                        viewHolder.imgNameSchedule.setVisibility(View.VISIBLE);
+                    }*/
+                    
+                    break;
+                case RELAY_TWO:
+    
+                    if (profile.on) {
+                        if(opPort.mOutputRelayActuatorType == OutputRelayActuatorType.NormallyClose)
+                            viewHolder.OnOffLight.setChecked(true);
+                        else
+                            viewHolder.OnOffLight.setChecked(false);
+                    } else {
+                        if(opPort.mOutputRelayActuatorType == OutputRelayActuatorType.NormallyClose)
+                            viewHolder.OnOffLight.setChecked(false);
+                        else
+                            viewHolder.OnOffLight.setChecked(true);
+                    }
+                    
+                   /* viewHolder.spinnerSchedule.setSelection(port_info.relay2.schedule_mode);
+                    viewHolder.statusDetail.setText(port_info.relay2.status);
+                    viewHolder.vacationFromTo.setText(port_info.relay2.vacation_text);
+                    if (!port_info.relay2.isOccupied) {
+                        viewHolder.imageOccupied.setVisibility(View.GONE);
+                    }
+                    if(port_info.relay2.schedule_mode == 2){
+                        viewHolder.imgNameSchedule.setVisibility(View.VISIBLE);
+                    }*/
+
+                    break;
+                case ANALOG_OUT_ONE:
+                    viewHolder.brightness.setMax(100);
+                    viewHolder.brightness.setProgress(profile.dimmablePercent);
+                    viewHolder.brightnessVal.setText(profile.dimmablePercent + "");
+                    /*viewHolder.statusDetail.setText(port_info.analog1_out.status);
+                    viewHolder.vacationFromTo.setText(port_info.analog1_out.vacation_text);
+                    viewHolder.spinnerSchedule.setSelection(port_info.analog1_out.schedule_mode);
+                    if (!port_info.analog1_out.isOccupied) {
+                        viewHolder.imageOccupied.setVisibility(View.GONE);
+                    }
+                    if(port_info.analog1_out.schedule_mode == 2){
+                        viewHolder.imgNameSchedule.setVisibility(View.VISIBLE);
+                    }*/
+                    break;
+                case ANALOG_OUT_TWO:
+                    viewHolder.brightness.setMax(100);
+                    viewHolder.brightness.setProgress(profile.dimmablePercent);
+                    viewHolder.brightnessVal.setText(profile.dimmablePercent + "");
+                    /*viewHolder.vacationFromTo.setText(port_info.analog2_out.vacation_text);
+                    viewHolder.statusDetail.setText(port_info.analog2_out.status);
+                    viewHolder.spinnerSchedule.setSelection(port_info.analog2_out.schedule_mode);
+                    if (!port_info.analog2_out.isOccupied) {
+                        viewHolder.imageOccupied.setVisibility(View.GONE);
+                    }
+                    if(port_info.analog2_out.schedule_mode == 2){
+                        viewHolder.imgNameSchedule.setVisibility(View.VISIBLE);
+                    }*/
+                    break;
+            }
+            if (opPort.mSmartNodePort == Port.ANALOG_OUT_ONE || opPort.mSmartNodePort == Port.ANALOG_OUT_TWO) {
+                viewHolder.OnOffLight.setVisibility(View.GONE);
+                viewHolder.brightness.setVisibility(View.VISIBLE);
+                viewHolder.brightnessVal.setVisibility(View.VISIBLE);
+
+            }
+            if (opPort.mSmartNodePort == Port.RELAY_ONE || opPort.mSmartNodePort == Port.RELAY_TWO) {
+                viewHolder.OnOffLight.setVisibility(View.VISIBLE);
+                viewHolder.brightness.setVisibility(View.GONE);
+                viewHolder.brightnessVal.setVisibility(View.GONE);
+
+
+            }
+            //on switching on off light for relay
+
+            SwitchCompat onOff = (SwitchCompat) row.findViewById(R.id.OnOffLight);
+            onOff.setTag(position);
+            onOff.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    //TODO need to change the switch on or off
+                   /* int value = 0;
+                    FSVData fsvInfo = port_map.getFsvData();
+                    switch (port){
+                        case RELAY_1:
+                            if(isChecked) value = 1;
+                            else value = 0;
+                            if(port_map.getActuator() == 1) {
+                                if (port_info.relay1.isOccupied && value == 0) {
+                                    fsvInfo.getSmartNodePort().relay1.inUserState = true;
+                                    fsvInfo.getSmartNodePort().relay1.lcm_value = 1;
+                                } else if (!port_info.relay1.isOccupied && value > 0) {
+                                    fsvInfo.getSmartNodePort().relay1.inUserState = true;
+                                    fsvInfo.getSmartNodePort().relay1.lcm_value = 0;
+                                }else{
+                                    fsvInfo.getSmartNodePort().relay1.inUserState = false;
+                                    fsvInfo.getSmartNodePort().relay1.lcm_value = value;
+                                }
+                            }else{
+                                if (port_info.relay1.isOccupied && value == 0) {
+                                    fsvInfo.getSmartNodePort().relay1.inUserState = true;
+                                    fsvInfo.getSmartNodePort().relay1.lcm_value = value;
+                                } else if (!port_info.relay1.isOccupied && value > 0) {
+                                    fsvInfo.getSmartNodePort().relay1.inUserState = true;
+                                    fsvInfo.getSmartNodePort().relay1.lcm_value = value;
+                                }else{
+                                    fsvInfo.getSmartNodePort().relay1.inUserState = false;
+                                    fsvInfo.getSmartNodePort().relay1.lcm_value = value;
+                                }
+
+                            }
+                            break;
+                        case RELAY_2:
+                            if(isChecked) value = 1;
+                            else value = 0;
+                            if(port_map.getActuator() == 1) {
+                                if (port_info.relay2.isOccupied && value == 0) {
+                                    fsvInfo.getSmartNodePort().relay2.inUserState = true;
+                                    fsvInfo.getSmartNodePort().relay2.lcm_value = 1;
+                                } else if (!port_info.relay2.isOccupied && value > 0) {
+                                    fsvInfo.getSmartNodePort().relay2.inUserState = true;
+                                    fsvInfo.getSmartNodePort().relay2.lcm_value = 0;
+                                }else{
+                                    fsvInfo.getSmartNodePort().relay2.inUserState = false;
+                                    fsvInfo.getSmartNodePort().relay2.lcm_value = value;
+                                }
+                            }else{
+                                if (port_info.relay2.isOccupied && value == 0) {
+                                    fsvInfo.getSmartNodePort().relay2.inUserState = true;
+                                    fsvInfo.getSmartNodePort().relay2.lcm_value = value;
+                                } else if (!port_info.relay2.isOccupied && value > 0) {
+                                    fsvInfo.getSmartNodePort().relay2.inUserState = true;
+                                    fsvInfo.getSmartNodePort().relay2.lcm_value = value;
+                                }else{
+                                    fsvInfo.getSmartNodePort().relay2.inUserState = false;
+                                    fsvInfo.getSmartNodePort().relay2.lcm_value = value;
+                                }
+                            }
+                            break;
+                    }
+
+                    fsvInfo.updateLCMDataFromAssignedSchedule();
+
+                        fsvInfo.getAssignedRoom().sendSettingsToWeb("lcm user change");
+                        notifyDataSetChanged();*/
+                }
+            });
+            //changing brightnesss
+            SeekBar brightnessControl = (SeekBar) row.findViewById(R.id.brightness);
+            final TextView val = (TextView) row.findViewById(R.id.brightnessVal);
+            brightnessControl.setTag(position);
+            val.setTag(position);
+            brightnessControl.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+                //FSVData fsvInfo = port_map.getFsvData();
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    val.setText(progress+"");
+                    switch (opPort.mSmartNodePort){
+                        case ANALOG_OUT_ONE:
+                            opPort.mLightOutput = (short)progress;
+                            break;
+                        case ANALOG_OUT_TWO:
+                            opPort.mLightOutput = (short)progress;
+                            break;
+                    }
+
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                    int value = seekBar.getProgress();
+                    switch (opPort.mSmartNodePort){
+                        case ANALOG_OUT_ONE:
+                            opPort.mLightOutput = (short)value;
+                            break;
+                        case ANALOG_OUT_TWO:
+                            opPort.mLightOutput = (short)value;
+                            break;
+                    }
+                    
+                }
+            });
+
+            row.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    View vw = v;
+                    RelativeLayout row2 = null;
+                    row2 = (RelativeLayout) vw.findViewById(R.id.schedulerow);
+                    if(schedule == null){
+                        row2.setVisibility(View.VISIBLE);
+                        schedule = row2;
+                    }else{
+                        if(row2 != schedule) {
+                            schedule.setVisibility(View.GONE);
+                            row2.setVisibility(View.VISIBLE);
+                            schedule = row2;
+                        }else{
+                            row2.setVisibility(View.GONE);
+                            schedule = null;
+                        }
+
+                    }
+
+                   /* if(schedule == null) {
+                        statusScreenHelper.getListViewSize(thiSList, LightingDetailAdapter.this, 0, fsvPortList.size(), lcmdab);
+                    }else{
+                        statusScreenHelper.getListViewSize(thiSList, LightingDetailAdapter.this, 1, fsvPortList.size(), lcmdab);
+                    }*/
+                }
+
+            });
+            //changing vacation
+            final ImageView vacationEdit = (ImageView) row.findViewById(R.id.vacationEdit);
+            vacationEdit.setTag(position);
+            vacationEdit.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    /*FragmentTransaction ftt = c.getFragmentManager().beginTransaction();
+                    Fragment prev1 = c.getFragmentManager().findFragmentByTag("vacation");
+                    if (prev1 != null) {
+                        ftt.remove(prev1);
+                    }
+                    LCMVacationScheduleEditor vacationFragment = null;
+                    vacationFragment = new LCMVacationScheduleEditor(LightingDetailAdapter.this, port_map.getFsvData(), port);
+                    vacationFragment.show(ftt, "vacation");*/
+                }
+            });
+
+            //named schedule edit
+            final ImageView imgNameSchedule = (ImageView) row.findViewById(R.id.lcmNamedScheduleEdit);
+            imgNameSchedule.setTag(position);
+            imgNameSchedule.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    /*//Log.d("WRM_PRO","imageView LCM detail named sch edit -"+v.isEnabled()+","+v.isPressed());
+                    if(v.isPressed()) {
+                        FSVData fsvData = fsvPortList.get(position).getFsvData();
+                        FSVData.SMARTNODE_PORT port = fsvPortList.get(position).getPort();
+                        showNameScheduleSelector(fsvData, port);
+                    }*/
+
+                }
+            });
+
+
+
+
+            //changing schedule
+            //FSVData.SMARTNODE_PORT port = port_map.getPort();
+            viewHolder.spinnerSchedule.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+                    /*SmartNodesPortData.LCM_CIRCUIT_SCHEDULE_MODE eSelectedSchedule = SmartNodesPortData.LCM_CIRCUIT_SCHEDULE_MODE.values()[pos];
+                    //FSVData.SMARTNODE_PORT port = port_map.getPort();
+                    final FSVData fsvData = port_map.getFsvData();
+                    boolean isSchedulechanged = false;
+                    switch (port) {
+                        case RELAY_1:
+
+                            if(fsvData.getSmartNodePort().relay1.schedule_mode != eSelectedSchedule.ordinal()) {
+                                if(eSelectedSchedule == SmartNodesPortData.LCM_CIRCUIT_SCHEDULE_MODE.NAMED)
+                                    showNameScheduleSelector(fsvData,port);
+                                else{
+                                    isSchedulechanged = true;
+                                    port_info.updatePortScheduleMode(fsvData.getSmartNodePort().relay1,eSelectedSchedule.ordinal(),"");
+                                    fsvData.getSmartNodePort().updateVacationStartAndEndDate(port_info.relay1, false);
+
+                                }
+                            }
+                            break;
+                        case RELAY_2:
+                            if (fsvData.getSmartNodePort().relay2.schedule_mode != eSelectedSchedule.ordinal()) {
+                                if(eSelectedSchedule == SmartNodesPortData.LCM_CIRCUIT_SCHEDULE_MODE.NAMED)
+                                    showNameScheduleSelector(fsvData,port);
+                                else {
+                                    isSchedulechanged = true;
+                                    port_info.updatePortScheduleMode(fsvData.getSmartNodePort().relay2,eSelectedSchedule.ordinal(),"");
+
+                                    fsvData.getSmartNodePort().updateVacationStartAndEndDate(port_info.relay2, false);
+                                }
+                            }
+                            break;
+                        case ANALOG_1_OUT:
+                            if (fsvData.getSmartNodePort().analog1_out.schedule_mode != eSelectedSchedule.ordinal()) {
+                                if(eSelectedSchedule == SmartNodesPortData.LCM_CIRCUIT_SCHEDULE_MODE.NAMED)
+                                    showNameScheduleSelector(fsvData,port);
+                                else{
+                                    isSchedulechanged = true;
+                                    port_info.updatePortScheduleMode(fsvData.getSmartNodePort().analog1_out,eSelectedSchedule.ordinal(),"");
+                                    fsvData.getSmartNodePort().updateVacationStartAndEndDate(port_info.analog1_out, false);
+                                }
+                            }
+                            break;
+                        case ANALOG_2_OUT:
+                            if (fsvData.getSmartNodePort().analog2_out.schedule_mode != eSelectedSchedule.ordinal()) {
+                                if(eSelectedSchedule == SmartNodesPortData.LCM_CIRCUIT_SCHEDULE_MODE.NAMED)
+                                    showNameScheduleSelector(fsvData,port);
+                                else{
+                                    isSchedulechanged = true;
+                                    port_info.updatePortScheduleMode(fsvData.getSmartNodePort().analog2_out,eSelectedSchedule.ordinal(),"");
+                                    fsvData.getSmartNodePort().updateVacationStartAndEndDate(port_info.analog2_out, false);
+
+                                }
+                            }
+                            break;
+                    }
+                    if(eSelectedSchedule == SmartNodesPortData.LCM_CIRCUIT_SCHEDULE_MODE.NAMED){
+                        if(schedule != null) {
+                            viewHolder.imgNameSchedule.setVisibility(View.VISIBLE);
+                            viewHolder.imgNameSchedule.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    //Log.d("WRM_PRO","imageView LCM detail named sch  select-"+v.isEnabled()+","+v.isPressed());
+                                    if(v.isPressed()) {
+                                        showNameScheduleSelector(port_map.getFsvData(), port);
+                                    }
+                                }
+                            });
+                        }
+                    }
+                    if(isSchedulechanged) {
+                        fsvData.updateLCMDataFromAssignedSchedule();
+                        	fsvData.getAssignedRoom().sendSettingsToWeb("lcm schedule change");
+                    }*/
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+
+                }
+            });
+
+
+        }
+
+        return row;
+    }
+
+   /* @Override
+    public void OnSetLCMVacationSchedule(SortedMap<Long, JSONObject> vacationData, FSVData.SMARTNODE_PORT port, FSVData fsvData) {
+        SmartNodesPortData portData = fsvData.getSmartNodePort();
+        switch (port) {
+            case RELAY_1:
+                portData.relay1.vacation_data = vacationData;
+                portData.updateVacationStartAndEndDate(portData.relay1, true);
+                break;
+            case RELAY_2:
+                portData.relay2.vacation_data = vacationData;
+                portData.updateVacationStartAndEndDate(portData.relay2, true);
+                break;
+            case ANALOG_1_OUT:
+                portData.analog1_out.vacation_data = vacationData;
+                portData.updateVacationStartAndEndDate(portData.analog1_out, true);
+                break;
+            case ANALOG_2_OUT:
+                portData.analog2_out.vacation_data = vacationData;
+                portData.updateVacationStartAndEndDate(portData.analog2_out, true);
+                break;
+        }
+        if(fsvData.updateLCMDataFromAssignedSchedule())
+            fsvData.getAssignedRoom().sendSettingsToWeb("lcm schedule change");
+        notifyDataSetChanged();
+    }
+
+
+    private void showNameScheduleSelector(final FSVData fsvData, final FSVData.SMARTNODE_PORT port) {
+        final ArrayList<String> nameSchList = NamedSchedule.getHandle().getNamedScheduleList();
+        if (!nameSchList.isEmpty()) {
+            try {
+                AlertDialog dlg;
+                final ArrayAdapter<String> nameSchAdapter = new ArrayAdapter<String>(c, android.R.layout.simple_list_item_1, nameSchList);
+                AlertDialog.Builder builder = new AlertDialog.Builder(c, R.style.NewDialogStyle);
+                builder.setTitle("Select Named Schedule");
+                builder.setCancelable(false);
+                builder.setAdapter(nameSchAdapter, new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String nameSchId = NamedSchedule.getHandle().getNameScheduleId(nameSchList.get(which));
+                        switch (port) {
+                            case RELAY_1:
+                                fsvData.getSmartNodePort().updatePortScheduleMode(fsvData.getSmartNodePort().relay1, SmartNodesPortData.LCM_CIRCUIT_SCHEDULE_MODE.NAMED.ordinal(),nameSchId);
+                                fsvData.getSmartNodePort().relay1.named_schedule_id = nameSchId;
+                                break;
+                            case RELAY_2:
+                                fsvData.getSmartNodePort().updatePortScheduleMode(fsvData.getSmartNodePort().relay2, SmartNodesPortData.LCM_CIRCUIT_SCHEDULE_MODE.NAMED.ordinal(),nameSchId);
+                                fsvData.getSmartNodePort().relay2.named_schedule_id = nameSchId;
+                                break;
+                            case ANALOG_1_OUT:
+                                fsvData.getSmartNodePort().updatePortScheduleMode(fsvData.getSmartNodePort().analog1_out, SmartNodesPortData.LCM_CIRCUIT_SCHEDULE_MODE.NAMED.ordinal(),nameSchId);
+                                fsvData.getSmartNodePort().analog1_out.named_schedule_id = nameSchId;
+                                break;
+                            case ANALOG_2_OUT:
+                                fsvData.getSmartNodePort().updatePortScheduleMode(fsvData.getSmartNodePort().analog2_out, SmartNodesPortData.LCM_CIRCUIT_SCHEDULE_MODE.NAMED.ordinal(),nameSchId);
+                                fsvData.getSmartNodePort().analog2_out.named_schedule_id = nameSchId;
+                                break;
+                        }
+
+                        fsvData.updateLCMDataFromAssignedSchedule();
+                            fsvData.getAssignedRoom().sendSettingsToWeb("lcm schedule change");
+                        FloorData.saveFloorData();
+                        notifyDataSetChanged();
+
+
+                    }
+                });
+
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (port) {
+                            case RELAY_1:
+                                if (fsvData.getSmartNodePort().relay1.named_schedule_id.isEmpty() && (nameSchList.size() == 0))
+                                    fsvData.getSmartNodePort().relay1.status = "No Named schedule associated, Click edit to assign";
+                                break;
+                            case RELAY_2:
+                                if (fsvData.getSmartNodePort().relay2.named_schedule_id.isEmpty() && (nameSchList.size() == 0))
+                                    fsvData.getSmartNodePort().relay2.status = "No Named schedule associated, Click edit to assign";
+                                break;
+                            case ANALOG_1_OUT:
+                                if (fsvData.getSmartNodePort().analog1_out.named_schedule_id.isEmpty() && (nameSchList.size() == 0))
+                                    fsvData.getSmartNodePort().analog1_out.status = "No Named schedule associated, Click edit to assign";
+                                break;
+                            case ANALOG_2_OUT:
+                                if (fsvData.getSmartNodePort().analog2_out.named_schedule_id.isEmpty() && (nameSchList.size() == 0))
+                                    fsvData.getSmartNodePort().analog2_out.status = "No Named schedule associated, Click edit to assign";
+                                break;
+                        }
+                        //notifyDataSetChanged();
+                        dialog.dismiss();
+
+                    }
+                });
+                dlg = builder.create();
+                dlg.show();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else
+            Toast.makeText(c, "No Named Schedule list to select ", Toast.LENGTH_SHORT).show();
+
+    }*/
+
+    public class ViewHolder {
+        public TextView       LogicalName;
+        public SeekBar        brightness;
+        public SwitchCompat   OnOffLight;
+        public TextView       statusDetail;
+        public TextView       brightnessVal;
+        public Spinner        spinnerSchedule;
+        public EditText       vacationFromTo;
+        public ImageView      vacationEdit;
+        public ImageView      imageOccupied;
+        public RelativeLayout schedulerow;
+        public LinearLayout   llmain;
+        public ImageView      imgNameSchedule;
+
+        public ViewHolder(View v) {
+            LogicalName = (TextView) v.findViewById(R.id.LogicalName);
+            brightness = (SeekBar) v.findViewById(R.id.brightness);
+            OnOffLight = (SwitchCompat) v.findViewById(R.id.OnOffLight);
+            statusDetail = (TextView) v.findViewById(R.id.statusDetail);
+            brightnessVal = (TextView) v.findViewById(R.id.brightnessVal);
+            spinnerSchedule = (Spinner) v.findViewById(R.id.spinnerSchedule);
+            vacationEdit = (ImageView) v.findViewById(R.id.vacationEdit);
+            imageOccupied = (ImageView) v.findViewById(R.id.imageOccupied);
+            vacationFromTo = (EditText) v.findViewById(R.id.vacationFromTo);
+            schedulerow = (RelativeLayout) v.findViewById(R.id.schedulerow);
+            llmain = (LinearLayout) v.findViewById(R.id.llmain);
+
+            imgNameSchedule = (ImageView)v.findViewById(R.id.lcmNamedScheduleEdit);
+        }
+
+
+    }
+}

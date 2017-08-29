@@ -17,8 +17,17 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
+import a75f.io.bo.building.CCUApplication;
+import a75f.io.bo.building.Floor;
+import a75f.io.bo.building.LightProfile;
+import a75f.io.bo.building.SmartNode;
+import a75f.io.bo.building.SmartNodeOutput;
+import a75f.io.bo.building.definitions.Output;
+import a75f.io.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.renatus.R;
+import a75f.io.util.prefs.LocalStorage;
 
 /**
  * Created by anilkumar on 27-10-2016.
@@ -147,7 +156,7 @@ public class LightingTestFragment extends DialogFragment implements AdapterView.
         setBtn.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
-                //create CcuApp structure and send data
+                saveLightData();
             }
         });
         
@@ -210,6 +219,10 @@ public class LightingTestFragment extends DialogFragment implements AdapterView.
                 break;*/
             
         }
+    }
+    
+    public void saveLightData() {
+        
     }
     
 

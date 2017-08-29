@@ -35,8 +35,10 @@ public class JSONSerializerTest
 		String roomName = "Ryans Room";
 		CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = new CcuToCmOverUsbDatabaseSeedSnMessage_t();
 		seedMessage.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_SETTINGS);
+		
 		seedMessage.settings.roomName.set(roomName);
 		seedMessage.settings.ledBitmap.analogIn1.set((short) 1);
+		
 		seedMessage.smartNodeAddress.set(5); 
 		try
 		{
@@ -46,9 +48,11 @@ public class JSONSerializerTest
 					(CcuToCmOverUsbDatabaseSeedSnMessage_t) JsonSerializer.fromJson
 							                                                                 (pojoAsString,CcuToCmOverUsbDatabaseSeedSnMessage_t.class);
 			
+			System.out.println("seedMessage: " + seedMessagePostSerilizer.messageType);
 			
 			System.out.println("roomname: " + seedMessage.settings.roomName.get());
 			System.out.println("roomname: " + seedMessagePostSerilizer.settings.roomName.get());
+			System.out.println("adddress: " + seedMessagePostSerilizer.smartNodeAddress);
 			Assert.assertTrue(seedMessage.settings.roomName.get().equals(seedMessagePostSerilizer
 					                                                       .settings.roomName.get()));
 			
@@ -140,7 +144,7 @@ public class JSONSerializerTest
 //		ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.minLightingControlOverrideTimeInMinutes.set((short) 1);
 //		ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.roomName.set(smartNode.mRoomName);
 //		try
-//		{
+//		{ioi
 //			String ccuToCMSeedMessage = JsonSerializer.toJson(ccuToCmOverUsbDatabaseSeedSnMessage_t, true);
 //			System.out.println("CCU seedMessage:\n" + ccuToCMSeedMessage + "\n");
 //		}
@@ -149,4 +153,5 @@ public class JSONSerializerTest
 //			e.printStackTrace();
 //		}
 	}
+	
 }

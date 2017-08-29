@@ -20,6 +20,8 @@ import android.widget.ToggleButton;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import a75f.io.bo.building.CCUApplication;
+import a75f.io.bo.building.Floor;
 import a75f.io.bo.building.LightProfile;
 import a75f.io.bo.building.SmartNode;
 import a75f.io.bo.building.SmartNodeOutput;
@@ -33,6 +35,8 @@ import a75f.io.logic.SmartNodeBLL;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.R;
+import a75f.io.util.Globals;
+import a75f.io.util.prefs.LocalStorage;
 
 /**
  * Created by anilkumar on 27-10-2016.
@@ -217,7 +221,8 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 			@Override
 			public void onClick(View v)
 			{
-				//create CcuApp structure and send data
+				saveLightData();
+				dismiss();
 			}
 		});
 		Button cancelBtn = (Button) view.findViewById(R.id.lcmCancelCommand);
@@ -337,5 +342,88 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 		        showEditLogicalNameDialog(relay1EditText,mLCMControls.getRelay1CircuitName(), v.getId());
                 break;*/
 		}
+	}
+	
+	public void saveLightData() {
+		
+	
+		CCUApplication ccuApplication = Globals.getInstance().getCCUApplication();
+		SmartNode smartnode = new SmartNode();
+		smartnode.mAddress = mSmartNodeAddress;
+		smartnode.mRoomName = mRoomName;
+		ccuApplication.smartNodes.add(smartnode);
+		ccuApplication.CCUTitle = "Light Profile";
+		//TODO - TEMP
+		ccuApplication.floors.get(0).mRoomList.get(0).zoneProfiles.clear();
+		ccuApplication.floors.get(0).mRoomList.get(0).zoneProfiles.add(mLightProfile);
+		mLightProfile.smartNodeOutputs.clear();
+		
+		
+		
+		if (relay1Switch.isChecked()) {
+			SmartNodeOutput relayOneOp = new SmartNodeOutput();
+			relayOneOp.mSmartNodeAddress = smartnode.mAddress;
+			relayOneOp.mUniqueID = UUID.randomUUID();
+			if(spRelay1.getSelectedItemPosition() == 0 )
+			{
+				relayOneOp.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyOpen;
+			} else {
+				relayOneOp.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyClose;
+			}
+			relayOneOp.mOutput = Output.Relay;
+			relayOneOp.mName = relay1EditText.getText().toString();
+			relayOneOp.mSmartNodePort = Port.RELAY_ONE;
+			mLightProfile.smartNodeOutputs.add(relayOneOp);
+		}
+		if (relay2Switch.isChecked()) {
+			SmartNodeOutput relayTwoOp = new SmartNodeOutput();
+			relayTwoOp.mSmartNodeAddress = smartnode.mAddress;
+			relayTwoOp.mUniqueID = UUID.randomUUID();
+			if(spRelay2.getSelectedItemPosition() == 0 )
+			{
+				relayTwoOp.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyOpen;
+			} else {
+				relayTwoOp.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyClose;
+			}
+			relayTwoOp.mOutput = Output.Relay;
+			relayTwoOp.mName = relay2EditText.getText().toString();
+			relayTwoOp.mSmartNodePort = Port.RELAY_TWO;
+			mLightProfile.smartNodeOutputs.add(relayTwoOp);
+		}
+		if (analog1OutSwitch.isChecked()){
+			SmartNodeOutput analogOneOp = new SmartNodeOutput();
+			analogOneOp.mOutput = Output.Analog;
+			if (spAnalog1Out.getSelectedItemPosition() == 0)
+			{
+				analogOneOp.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
+			} else {
+				analogOneOp.mOutputAnalogActuatorType = OutputAnalogActuatorType.TwoToTenV;
+			}
+			analogOneOp.mSmartNodePort = Port.ANALOG_OUT_ONE;
+			analogOneOp.mSmartNodeAddress = smartnode.mAddress;
+			analogOneOp.mOutput=Output.Analog;
+			analogOneOp.mUniqueID = UUID.randomUUID();
+			analogOneOp.mName = analog1OutEditText.getText().toString();
+			analogOneOp.mSmartNodeAddress = mSmartNodeAddress;
+			mLightProfile.smartNodeOutputs.add(analogOneOp);
+		}
+		if (analog2OutSwitch.isChecked()){
+			SmartNodeOutput analogTwoOp = new SmartNodeOutput();
+			analogTwoOp.mOutput = Output.Analog;
+			if (spAnalog2Out.getSelectedItemPosition() == 0)
+			{
+				analogTwoOp.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
+			} else {
+				analogTwoOp.mOutputAnalogActuatorType = OutputAnalogActuatorType.TwoToTenV;
+			}
+			analogTwoOp.mSmartNodePort = Port.ANALOG_OUT_TWO;
+			analogTwoOp.mSmartNodeAddress = smartnode.mAddress;
+			analogTwoOp.mOutput = Output.Analog;
+			analogTwoOp.mUniqueID = UUID.randomUUID();
+			analogTwoOp.mName = analog2OutEditText.getText().toString();
+			analogTwoOp.mSmartNodeAddress = mSmartNodeAddress;
+			mLightProfile.smartNodeOutputs.add(analogTwoOp);
+		}
+		LocalStorage.setApplicationSettings();
 	}
 }

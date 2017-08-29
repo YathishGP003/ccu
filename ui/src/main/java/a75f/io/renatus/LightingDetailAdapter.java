@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.SortedMap;
 
 import a75f.io.bo.building.LightProfile;
+import a75f.io.bo.building.LightSmartNodeOutput;
 import a75f.io.bo.building.SmartNodeOutput;
 import a75f.io.bo.building.ZoneProfile;
 import a75f.io.bo.building.definitions.Output;
@@ -46,13 +47,13 @@ import a75f.io.bo.building.definitions.Port;
 
 public class LightingDetailAdapter extends BaseAdapter{
 
-    View row;
-    LayoutInflater inflater;
-    Activity c;
-    ViewHolder viewHolder;
-    ArrayList<SmartNodeOutput> snOutPortList;
+    View                            row;
+    LayoutInflater                  inflater;
+    Activity                        c;
+    ViewHolder                      viewHolder;
+    ArrayList<LightSmartNodeOutput> snOutPortList;
     ///StatusScreenHelper statusScreenHelper;
-    ListView thiSList;
+    ListView                        thiSList;
     private ArrayAdapter<CharSequence> aaOccupancyMode;
     private Boolean lcmdab;
     private RelativeLayout schedule;
@@ -112,27 +113,22 @@ public class LightingDetailAdapter extends BaseAdapter{
         row.setBackgroundColor((position % 2 == 0) ?  Color.parseColor("#ececec"): Color.TRANSPARENT);
        
         if (snOutPortList.size() > 0) {
-            final SmartNodeOutput opPort = snOutPortList.get(position);
-            viewHolder.LogicalName.setText(opPort.mName/*port_map.getCircuitName()*/);
+            final LightSmartNodeOutput lightPort = snOutPortList.get(position);
+            viewHolder.LogicalName.setText(lightPort.mName/*port_map.getCircuitName()*/);
             viewHolder.spinnerSchedule.setTag(position);
             viewHolder.spinnerSchedule.setAdapter(aaOccupancyMode);
             if(schedule != null){
                 schedule.setVisibility(View.VISIBLE);
             }
             
-            switch (opPort.mSmartNodePort) {
+            switch (lightPort.mSmartNodePort) {
                 case RELAY_ONE:
                    
-                    if (profile.on) {
-                        if(opPort.mOutputRelayActuatorType == OutputRelayActuatorType.NormallyClose)
-                            viewHolder.OnOffLight.setChecked(true);
-                        else
-                            viewHolder.OnOffLight.setChecked(false);
-                    } else {
-                        if(opPort.mOutputRelayActuatorType == OutputRelayActuatorType.NormallyClose)
-                            viewHolder.OnOffLight.setChecked(false);
-                        else
+                    if (lightPort.on) {
                         viewHolder.OnOffLight.setChecked(true);
+                    } else
+                    {
+                        viewHolder.OnOffLight.setChecked(false);
                     }
                     /*viewHolder.spinnerSchedule.setSelection(port_info.relay1.schedule_mode);
                     viewHolder.statusDetail.setText(port_info.relay1.status);
@@ -147,16 +143,11 @@ public class LightingDetailAdapter extends BaseAdapter{
                     break;
                 case RELAY_TWO:
     
-                    if (profile.on) {
-                        if(opPort.mOutputRelayActuatorType == OutputRelayActuatorType.NormallyClose)
-                            viewHolder.OnOffLight.setChecked(true);
-                        else
-                            viewHolder.OnOffLight.setChecked(false);
+                    if (lightPort.on)
+                    {
+                        viewHolder.OnOffLight.setChecked(true);
                     } else {
-                        if(opPort.mOutputRelayActuatorType == OutputRelayActuatorType.NormallyClose)
-                            viewHolder.OnOffLight.setChecked(false);
-                        else
-                            viewHolder.OnOffLight.setChecked(true);
+                        viewHolder.OnOffLight.setChecked(false);
                     }
                     
                    /* viewHolder.spinnerSchedule.setSelection(port_info.relay2.schedule_mode);
@@ -172,8 +163,8 @@ public class LightingDetailAdapter extends BaseAdapter{
                     break;
                 case ANALOG_OUT_ONE:
                     viewHolder.brightness.setMax(100);
-                    viewHolder.brightness.setProgress(profile.dimmablePercent);
-                    viewHolder.brightnessVal.setText(profile.dimmablePercent + "");
+                    viewHolder.brightness.setProgress(lightPort.dimmable);
+                    viewHolder.brightnessVal.setText(lightPort.dimmable + "");
                     /*viewHolder.statusDetail.setText(port_info.analog1_out.status);
                     viewHolder.vacationFromTo.setText(port_info.analog1_out.vacation_text);
                     viewHolder.spinnerSchedule.setSelection(port_info.analog1_out.schedule_mode);
@@ -186,8 +177,8 @@ public class LightingDetailAdapter extends BaseAdapter{
                     break;
                 case ANALOG_OUT_TWO:
                     viewHolder.brightness.setMax(100);
-                    viewHolder.brightness.setProgress(profile.dimmablePercent);
-                    viewHolder.brightnessVal.setText(profile.dimmablePercent + "");
+                    viewHolder.brightness.setProgress(lightPort.dimmable);
+                    viewHolder.brightnessVal.setText(lightPort.dimmable + "");
                     /*viewHolder.vacationFromTo.setText(port_info.analog2_out.vacation_text);
                     viewHolder.statusDetail.setText(port_info.analog2_out.status);
                     viewHolder.spinnerSchedule.setSelection(port_info.analog2_out.schedule_mode);
@@ -199,13 +190,13 @@ public class LightingDetailAdapter extends BaseAdapter{
                     }*/
                     break;
             }
-            if (opPort.mSmartNodePort == Port.ANALOG_OUT_ONE || opPort.mSmartNodePort == Port.ANALOG_OUT_TWO) {
+            if (lightPort.mSmartNodePort == Port.ANALOG_OUT_ONE || lightPort.mSmartNodePort == Port.ANALOG_OUT_TWO) {
                 viewHolder.OnOffLight.setVisibility(View.GONE);
                 viewHolder.brightness.setVisibility(View.VISIBLE);
                 viewHolder.brightnessVal.setVisibility(View.VISIBLE);
 
             }
-            if (opPort.mSmartNodePort == Port.RELAY_ONE || opPort.mSmartNodePort == Port.RELAY_TWO) {
+            if (lightPort.mSmartNodePort == Port.RELAY_ONE || lightPort.mSmartNodePort == Port.RELAY_TWO) {
                 viewHolder.OnOffLight.setVisibility(View.VISIBLE);
                 viewHolder.brightness.setVisibility(View.GONE);
                 viewHolder.brightnessVal.setVisibility(View.GONE);
@@ -219,68 +210,15 @@ public class LightingDetailAdapter extends BaseAdapter{
             onOff.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    //TODO need to change the switch on or off
-                   /* int value = 0;
-                    FSVData fsvInfo = port_map.getFsvData();
-                    switch (port){
-                        case RELAY_1:
-                            if(isChecked) value = 1;
-                            else value = 0;
-                            if(port_map.getActuator() == 1) {
-                                if (port_info.relay1.isOccupied && value == 0) {
-                                    fsvInfo.getSmartNodePort().relay1.inUserState = true;
-                                    fsvInfo.getSmartNodePort().relay1.lcm_value = 1;
-                                } else if (!port_info.relay1.isOccupied && value > 0) {
-                                    fsvInfo.getSmartNodePort().relay1.inUserState = true;
-                                    fsvInfo.getSmartNodePort().relay1.lcm_value = 0;
-                                }else{
-                                    fsvInfo.getSmartNodePort().relay1.inUserState = false;
-                                    fsvInfo.getSmartNodePort().relay1.lcm_value = value;
-                                }
-                            }else{
-                                if (port_info.relay1.isOccupied && value == 0) {
-                                    fsvInfo.getSmartNodePort().relay1.inUserState = true;
-                                    fsvInfo.getSmartNodePort().relay1.lcm_value = value;
-                                } else if (!port_info.relay1.isOccupied && value > 0) {
-                                    fsvInfo.getSmartNodePort().relay1.inUserState = true;
-                                    fsvInfo.getSmartNodePort().relay1.lcm_value = value;
-                                }else{
-                                    fsvInfo.getSmartNodePort().relay1.inUserState = false;
-                                    fsvInfo.getSmartNodePort().relay1.lcm_value = value;
-                                }
-
-                            }
-                            break;
-                        case RELAY_2:
-                            if(isChecked) value = 1;
-                            else value = 0;
-                            if(port_map.getActuator() == 1) {
-                                if (port_info.relay2.isOccupied && value == 0) {
-                                    fsvInfo.getSmartNodePort().relay2.inUserState = true;
-                                    fsvInfo.getSmartNodePort().relay2.lcm_value = 1;
-                                } else if (!port_info.relay2.isOccupied && value > 0) {
-                                    fsvInfo.getSmartNodePort().relay2.inUserState = true;
-                                    fsvInfo.getSmartNodePort().relay2.lcm_value = 0;
-                                }else{
-                                    fsvInfo.getSmartNodePort().relay2.inUserState = false;
-                                    fsvInfo.getSmartNodePort().relay2.lcm_value = value;
-                                }
-                            }else{
-                                if (port_info.relay2.isOccupied && value == 0) {
-                                    fsvInfo.getSmartNodePort().relay2.inUserState = true;
-                                    fsvInfo.getSmartNodePort().relay2.lcm_value = value;
-                                } else if (!port_info.relay2.isOccupied && value > 0) {
-                                    fsvInfo.getSmartNodePort().relay2.inUserState = true;
-                                    fsvInfo.getSmartNodePort().relay2.lcm_value = value;
-                                }else{
-                                    fsvInfo.getSmartNodePort().relay2.inUserState = false;
-                                    fsvInfo.getSmartNodePort().relay2.lcm_value = value;
-                                }
-                            }
-                            break;
+                    
+                    switch (lightPort.mSmartNodePort){
+                        case RELAY_ONE:
+                        case RELAY_TWO:
+                            lightPort.on = isChecked;
+                            lightPort.override = true;
                     }
 
-                    fsvInfo.updateLCMDataFromAssignedSchedule();
+                  /*  fsvInfo.updateLCMDataFromAssignedSchedule();
 
                         fsvInfo.getAssignedRoom().sendSettingsToWeb("lcm user change");
                         notifyDataSetChanged();*/
@@ -297,13 +235,11 @@ public class LightingDetailAdapter extends BaseAdapter{
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                     val.setText(progress+"");
-                    switch (opPort.mSmartNodePort){
+                    switch (lightPort.mSmartNodePort){
                         case ANALOG_OUT_ONE:
-                            opPort.mLightOutput = (short)progress;
-                            break;
                         case ANALOG_OUT_TWO:
-                            opPort.mLightOutput = (short)progress;
-                            break;
+                            lightPort.dimmable = (short) progress;
+                            lightPort.override = true;
                     }
 
                 }
@@ -316,13 +252,11 @@ public class LightingDetailAdapter extends BaseAdapter{
                 @Override
                 public void onStopTrackingTouch(SeekBar seekBar) {
                     int value = seekBar.getProgress();
-                    switch (opPort.mSmartNodePort){
+                    switch (lightPort.mSmartNodePort){
                         case ANALOG_OUT_ONE:
-                            opPort.mLightOutput = (short)value;
-                            break;
                         case ANALOG_OUT_TWO:
-                            opPort.mLightOutput = (short)value;
-                            break;
+                            lightPort.dimmable = (short)value;
+                            lightPort.override = true;
                     }
                     
                 }

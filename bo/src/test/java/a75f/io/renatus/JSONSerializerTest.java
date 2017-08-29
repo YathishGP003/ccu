@@ -12,6 +12,7 @@ import java.util.UUID;
 import a75f.io.bo.building.CCUApplication;
 import a75f.io.bo.building.Floor;
 import a75f.io.bo.building.LightProfile;
+import a75f.io.bo.building.LightSmartNodeOutput;
 import a75f.io.bo.building.SmartNode;
 import a75f.io.bo.building.SmartNodeOutput;
 import a75f.io.bo.building.definitions.Output;
@@ -116,7 +117,7 @@ public class JSONSerializerTest
 		LightProfile lightProfile5K = new LightProfile("Light Profile");
 //		ccuApplication.floors.get(0).addZone("5000 test zone");
 //		ccuApplication.floors.get(0).getRoomList().get(0).zoneProfiles.add(lightProfile5K);
-		SmartNodeOutput smartNodeOutput5K = new SmartNodeOutput();
+		LightSmartNodeOutput smartNodeOutput5K = new LightSmartNodeOutput();
 		smartNodeOutput5K.mSmartNodeAddress = smartNode5K.mAddress;
 		smartNodeOutput5K.mUniqueID = analog15kUUID;
 		smartNodeOutput5K.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;

@@ -21,7 +21,7 @@ public class LightProfile extends ZoneProfile
 	public boolean on              = true;
 	public boolean dimmable        = true;
 	public short   dimmablePercent = 100;
-	
+	public ArrayList<LightSmartNodeOutput> smartNodeOutputs = new ArrayList<>();
 	public LightProfile(){
 		
 	}
@@ -49,8 +49,9 @@ public class LightProfile extends ZoneProfile
 		ensureDimmable();
 		HashMap<Short, CcuToCmOverUsbSnControlsMessage_t> controlsMessages =
 				new HashMap<Short, CcuToCmOverUsbSnControlsMessage_t>();
-		for (SmartNodeOutput smartNodeOutput : this.smartNodeOutputs)
+		for (LightSmartNodeOutput smartNodeOutput : this.smartNodeOutputs)
 		{
+			
 			CcuToCmOverUsbSnControlsMessage_t controlsMessage_t = null;
 			if (controlsMessages.containsKey(smartNodeOutput.mSmartNodeAddress))
 			{
@@ -64,14 +65,31 @@ public class LightProfile extends ZoneProfile
 				controlsMessage_t.smartNodeAddress.set(smartNodeOutput.mSmartNodeAddress);
 				controlsMessage_t.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_CONTROLS);
 			}
+			
+			
 			Struct.Unsigned8 port = getPort(controlsMessage_t, smartNodeOutput.mSmartNodePort);
+			
+			short localDimmablePercent = 100;
+			boolean localOn = true;
+			if(smartNodeOutput.override)
+			{
+				localDimmablePercent = smartNodeOutput.dimmable;
+				localOn = smartNodeOutput.on;
+				//USE values for smartnodeoutput rather than smartNodeProfile
+			}
+			else
+			{
+				localDimmablePercent = this.dimmablePercent;
+				localOn = this.on;
+			}
+			
 			switch (smartNodeOutput.mOutput)
 			{
 				case Relay:
 					switch (smartNodeOutput.mOutputRelayActuatorType)
 					{
 						case NormallyClose:
-							if (on)
+							if (localOn)
 							{
 								port.set((short) 0);
 							}
@@ -82,7 +100,7 @@ public class LightProfile extends ZoneProfile
 							break;
 						///Defaults to normally open
 						default:
-							if (on)
+							if (localOn)
 							{
 								port.set((short) 1);
 							}
@@ -97,50 +115,50 @@ public class LightProfile extends ZoneProfile
 					switch (smartNodeOutput.mOutputAnalogActuatorType)
 					{
 						case ZeroToTenV:
-							if (on)
+							if (localOn)
 							{
-								port.set(getDimmable(100));
+								port.set(getDimmable(localDimmablePercent, 100));
 							}
 							else
 							{
-								port.set(getDimmable(0));
+								port.set(getDimmable(localDimmablePercent, 0));
 							}
 							break;
 						case TenToZeroV:
-							if (on)
+							if (localOn)
 							{
-								port.set(getDimmable(0));
+								port.set(getDimmable(localDimmablePercent, 0));
 							}
 							else
 							{
-								port.set(getDimmable(100));
+								port.set(getDimmable(localDimmablePercent, 100));
 							}
 							break;
 						case TwoToTenV:
-							if (on)
+							if (localOn)
 							{
-								port.set(getDimmable(100));
+								port.set(getDimmable(localDimmablePercent, 100));
 							}
 							else
 							{
-								port.set(getDimmable(20));
+								port.set(getDimmable(localDimmablePercent, 20));
 							}
 							break;
 						case TenToTwov:
-							if (on)
+							if (localOn)
 							{
-								port.set(getDimmable(20));
+								port.set(getDimmable(localDimmablePercent,20));
 							}
 							else
 							{
-								port.set(getDimmable(100));
+								port.set(getDimmable(localDimmablePercent, 100));
 							}
 							break;
 					}
 					break;
 			}
 		}
-		return new ArrayList<CcuToCmOverUsbSnControlsMessage_t>(controlsMessages.values());
+		return new ArrayList<>(controlsMessages.values());
 	}
 	
 	
@@ -176,9 +194,9 @@ public class LightProfile extends ZoneProfile
 	}
 	
 	
-	private short getDimmable(int analogVoltage)
+	private static short getDimmable(short localDimmablePercent, int analogVoltage)
 	{
-		return (short) ((dimmablePercent / 100) *
+		return (short) ((localDimmablePercent / 100) *
 		                 analogVoltage);
 	}
 }

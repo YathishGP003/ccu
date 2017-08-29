@@ -34,6 +34,7 @@ import java.util.UUID;
 import a75f.io.bo.building.CCUApplication;
 import a75f.io.bo.building.Floor;
 import a75f.io.bo.building.LightProfile;
+import a75f.io.bo.building.LightSmartNodeOutput;
 import a75f.io.bo.building.definitions.Output;
 import a75f.io.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.bo.building.SmartNode;
@@ -284,7 +285,7 @@ public class USBHomeFragment extends DialogFragment
 				LightProfile lightProfile5K = new LightProfile("light profile");
 				ccuApplication.floors.get(0).mRoomList.get(0).zoneProfiles.add
 						                                                                         (lightProfile5K);
-				SmartNodeOutput smartNodeOutput5K = new SmartNodeOutput();
+				LightSmartNodeOutput smartNodeOutput5K = new LightSmartNodeOutput();
 				//				smartNodeOutput5K.uniqueID = analog15kUUID;
 				smartNodeOutput5K.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
 				smartNodeOutput5K.mOutput = Output.Analog;
@@ -348,7 +349,7 @@ public class USBHomeFragment extends DialogFragment
 				LightProfile lightProfile5K = new LightProfile("light profile");
 				zone5K.zoneProfiles.add(lightProfile5K);
 				ccuApplication.floors.get(0).mRoomList.add(zone5K);
-				SmartNodeOutput smartNodeOutput5K = new SmartNodeOutput();
+				LightSmartNodeOutput smartNodeOutput5K = new LightSmartNodeOutput();
 				smartNodeOutput5K.mUniqueID = analog15kUUID;
 				smartNodeOutput5K.mSmartNodeAddress = smartNode.mAddress;
 				smartNodeOutput5K.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;

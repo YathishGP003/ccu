@@ -110,6 +110,15 @@ public class SerialBLL
 			}
 		}
 	}
+
+	public boolean isConnected()
+	{
+		if(mUsbService == null)
+		{
+			return false;
+		}
+		return mUsbService.isConnected();
+	}
 	
 	
 	/***

@@ -120,6 +120,7 @@ public class UsbService extends Service
 			}
 			else if (arg1.getAction().equals(ACTION_USB_DETACHED))
 			{
+
 				// Usb device was disconnected. send an intent to the Main Activity
 				Intent intent = new Intent(ACTION_USB_DISCONNECTED);
 				arg0.sendBroadcast(intent);
@@ -524,9 +525,13 @@ public class UsbService extends Service
 	{
 		this.mHandler = mHandler;
 	}
-	
-	
-	private enum SerialState
+
+    public boolean isConnected() {
+        return serialPortConnected;
+    }
+
+
+    private enum SerialState
 	{
 		PARSE_INIT, ESC_BYTE_RCVD, SOF_BYTE_RCVD, LEN_BYTE_RCVD, ESC_BYTE_IN_DATA_RCVD, CRC_RCVD,
 		ESC_BYTE_AS_END_OF_PACKET_RCVD, BAD_PACKET, DATA_AVAILABLE

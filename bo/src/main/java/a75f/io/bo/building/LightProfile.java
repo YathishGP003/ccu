@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import a75f.io.bo.building.definitions.Port;
+import a75f.io.bo.json.serializers.JsonSerializer;
 import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.bo.serial.MessageType;
 

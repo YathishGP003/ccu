@@ -1,6 +1,7 @@
 package a75f.io.renatus.ZONEPROFILE;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -38,6 +39,7 @@ import a75f.io.logic.SmartNodeBLL;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.ENGG.logger.CcuLog;
+import a75f.io.renatus.FloorPlanFragment;
 import a75f.io.renatus.R;
 import a75f.io.util.Globals;
 import a75f.io.util.prefs.LocalStorage;
@@ -226,6 +228,7 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 			public void onClick(View v)
 			{
 				saveLightData();
+				getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
 				dismiss();
 			}
 		});

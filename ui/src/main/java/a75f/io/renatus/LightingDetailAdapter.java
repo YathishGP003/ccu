@@ -7,6 +7,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.StateListDrawable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.SwitchCompat;
 import android.view.LayoutInflater;
@@ -211,13 +213,14 @@ public class LightingDetailAdapter extends BaseAdapter{
            
             final Switch onOff = (Switch) row.findViewById(R.id.OnOffLight);
             onOff.setTag(position);
+            StateListDrawable switchStates = new StateListDrawable();
+            switchStates.addState(new int[]{android.R.attr.state_checked}, new ColorDrawable(c.getResources().getColor(R.color.progress_color_orange)));
+            switchStates.addState(new int[]{-android.R.attr.state_enabled}, new ColorDrawable(c.getResources().getColor(R.color.grey_select)));
+            switchStates.addState(new int[]{}, new ColorDrawable(c.getResources().getColor(R.color.grey_select))); // this one has to come last
+            onOff.setThumbDrawable(switchStates);
             onOff.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    onOff.getThumbDrawable().setColorFilter(c.getResources().getColor(
-                                        isChecked ? R.color.progress_color_orange: R.color.grey_select),PorterDuff.Mode.MULTIPLY);
-                    onOff.getTrackDrawable().setColorFilter(c.getResources().getColor(
-                            isChecked ? R.color.white: R.color.grey_select),PorterDuff.Mode.MULTIPLY);
                     
                     switch (snOutput.mSmartNodePort){
                         case RELAY_ONE:
@@ -228,6 +231,7 @@ public class LightingDetailAdapter extends BaseAdapter{
                     try
                     {
                         CcuLog.d(TAG, JsonSerializer.toJson(profile.getControlsMessage(), true));
+
                         SmartNodeBLL.sendControlsMessage(profile);
                     } catch (IOException e){
                         CcuLog.wtf(TAG, "Failed to generate Control Message" ,e);

@@ -1,6 +1,9 @@
 package a75f.io.renatus;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -24,6 +27,7 @@ import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.ZoneProfile;
 import a75f.io.logic.SmartNodeBLL;
 import a75f.io.renatus.BLE.FragmentDeviceScan;
+import a75f.io.usbserial.UsbService;
 import a75f.io.util.Globals;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -38,6 +42,7 @@ import butterknife.OnItemClick;
 
 public class FloorPlanFragment extends Fragment
 {
+	public static final String ACTION_BLE_PAIRING_COMPLETED = "a75f.io.renatus.BLE_PAIRING_COMPLETED";
 	public int                    mCurFloorIndex   = -1;
 	public int                    mCurRoomIndex    = -1;
 	public DataArrayAdapter<Zone> mRoomListAdapter = null;
@@ -110,31 +115,7 @@ public class FloorPlanFragment extends Fragment
 	public void onResume()
 	{
 		super.onResume();
-		mCurFloorIndex = mCurFloorIndex >= 0 ? mCurFloorIndex : 0;
-		mCurRoomIndex = mCurRoomIndex >=0 ? mCurRoomIndex: 0;
-		floorListView.setAdapter(FloorContainer.getInstance().getFloorListAdapter());
-		if (FloorContainer.getInstance().getFloorList().size() > 0)
-		{
-			selectFloor(mCurFloorIndex);
-			mRoomListAdapter = new DataArrayAdapter<Zone>(Globals.getInstance()
-			                                                     .getApplicationContext(), R.layout.listviewitem, FloorContainer
-					                                                                                                      .getInstance()
-					                                                                                                      .getFloorList()
-					                                                                                                      .get(mCurFloorIndex).mRoomList);
-			roomListView.setAdapter(mRoomListAdapter);
-			enableRoomBtn();
-			if (FloorContainer.getInstance().getFloorList().get(mCurFloorIndex).mRoomList.size() > 0)
-			{
-				enableModueButton();
-				
-				mModuleListAdapter = new DataArrayAdapter<ZoneProfile>(Globals.getInstance()
-				                                                              .getApplicationContext(), R.layout.listviewitem, FloorContainer
-						                                                                                                               .getInstance()
-						                                                                                                               .getFloorList()
-						                                                                                                               .get(mCurFloorIndex).mRoomList.get(mCurRoomIndex).zoneProfiles);
-				moduleListView.setAdapter(mModuleListAdapter);
-			}
-		}
+		refreshScreen();
 	}
 	
 	
@@ -324,6 +305,8 @@ public class FloorPlanFragment extends Fragment
 			ft.remove(prev);
 		}
 		ft.addToBackStack(null);
+		
+		getActivity().registerReceiver(mPairingReceiver, new IntentFilter(ACTION_BLE_PAIRING_COMPLETED));
 		// Create and show the dialog.
 		dialogFragment.show(ft, id);
 	}
@@ -348,4 +331,45 @@ public class FloorPlanFragment extends Fragment
 	{
 		//select module
 	}
+	
+	public void refreshScreen() {
+		mCurFloorIndex = mCurFloorIndex >= 0 ? mCurFloorIndex : 0;
+		mCurRoomIndex = mCurRoomIndex >=0 ? mCurRoomIndex: 0;
+		floorListView.setAdapter(FloorContainer.getInstance().getFloorListAdapter());
+		if (FloorContainer.getInstance().getFloorList().size() > 0)
+		{
+			selectFloor(mCurFloorIndex);
+			mRoomListAdapter = new DataArrayAdapter<Zone>(Globals.getInstance()
+			                                                     .getApplicationContext(), R.layout.listviewitem, FloorContainer
+					                                                                                                      .getInstance()
+					                                                                                                      .getFloorList()
+					                                                                                                      .get(mCurFloorIndex).mRoomList);
+			roomListView.setAdapter(mRoomListAdapter);
+			enableRoomBtn();
+			if (FloorContainer.getInstance().getFloorList().get(mCurFloorIndex).mRoomList.size() > 0)
+			{
+				enableModueButton();
+				
+				mModuleListAdapter = new DataArrayAdapter<ZoneProfile>(Globals.getInstance()
+				                                                              .getApplicationContext(), R.layout.listviewitem, FloorContainer
+						                                                                                                               .getInstance()
+						                                                                                                               .getFloorList()
+						                                                                                                               .get(mCurFloorIndex).mRoomList.get(mCurRoomIndex).zoneProfiles);
+				moduleListView.setAdapter(mModuleListAdapter);
+			}
+		}
+	}
+	
+	private final BroadcastReceiver mPairingReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			switch (intent.getAction()) {
+				case ACTION_BLE_PAIRING_COMPLETED:
+					refreshScreen();
+					getActivity().unregisterReceiver(mPairingReceiver);
+					break;
+				
+			}
+		}
+	};
 }

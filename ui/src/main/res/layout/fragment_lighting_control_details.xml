@@ -60,7 +60,7 @@
                     android:textAppearance="?android:attr/textAppearanceLarge"/>
 
 
-                <Switch
+                <android.support.v7.widget.SwitchCompat
                     android:id="@+id/lcmRelay1Switch"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
@@ -99,10 +99,11 @@
 
                 <ToggleButton
                     android:id="@+id/lcmRelay1Override"
-                    style="@style/toggle_on_off"/>
+                    style="@style/toggle_on_off"
+                    android:visibility="gone"/>
 
 
-                <Switch
+                <android.support.v7.widget.SwitchCompat
                     android:id="@+id/lcmRelay2Switch"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
@@ -142,9 +143,10 @@
                 <ToggleButton
                     android:id="@+id/lcmRelay2Override"
                     style="@style/toggle_on_off"
+                    android:visibility="gone"
                     />
 
-                <Switch
+                <android.support.v7.widget.SwitchCompat
 
                     android:id="@+id/lcmAnalog1OutSwitch"
                     android:layout_width="wrap_content"
@@ -185,9 +187,10 @@
                 <ToggleButton
                     android:id="@+id/lcmAnalog1OutOverride"
                     style="@style/toggle_on_off"
+                    android:visibility="gone"
                     />
 
-                <Switch
+                <android.support.v7.widget.SwitchCompat
                     android:id="@+id/lcmAnalog2OutSwitch"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
@@ -226,9 +229,10 @@
 
                 <ToggleButton
                     android:id="@+id/lcmAnalog2OutOverride"
-                    style="@style/toggle_on_off"/>
+                    style="@style/toggle_on_off"
+                    android:visibility="gone"/>
 
-                <Switch
+                <android.support.v7.widget.SwitchCompat
                     android:id="@+id/lcmAnalog1InSwitch"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
@@ -266,7 +270,7 @@
                     android:focusable="true"
                     android:minEms="10"/>
 
-                <Switch
+                <android.support.v7.widget.SwitchCompat
                     android:id="@+id/lcmAnalog2InSwitch"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"

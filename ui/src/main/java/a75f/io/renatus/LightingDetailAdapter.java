@@ -211,13 +211,14 @@ public class LightingDetailAdapter extends BaseAdapter{
 
             }
            
-            final Switch onOff = (Switch) row.findViewById(R.id.OnOffLight);
+            final SwitchCompat onOff = (SwitchCompat) row.findViewById(R.id.OnOffLight);
             onOff.setTag(position);
-            StateListDrawable switchStates = new StateListDrawable();
+            onOff.setSwitchMinWidth(40);
+            /*StateListDrawable switchStates = new StateListDrawable();
             switchStates.addState(new int[]{android.R.attr.state_checked}, new ColorDrawable(c.getResources().getColor(R.color.progress_color_orange)));
             switchStates.addState(new int[]{-android.R.attr.state_enabled}, new ColorDrawable(c.getResources().getColor(R.color.grey_select)));
             switchStates.addState(new int[]{}, new ColorDrawable(c.getResources().getColor(R.color.grey_select))); // this one has to come last
-            onOff.setThumbDrawable(switchStates);
+            onOff.setThumbDrawable(switchStates);*/
             onOff.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -545,7 +546,7 @@ public class LightingDetailAdapter extends BaseAdapter{
     public class ViewHolder {
         public TextView       LogicalName;
         public SeekBar        brightness;
-        public Switch  OnOffLight;
+        public SwitchCompat  OnOffLight;
         public TextView       statusDetail;
         public TextView       brightnessVal;
         public Spinner        spinnerSchedule;
@@ -559,7 +560,7 @@ public class LightingDetailAdapter extends BaseAdapter{
         public ViewHolder(View v) {
             LogicalName = (TextView) v.findViewById(R.id.LogicalName);
             brightness = (SeekBar) v.findViewById(R.id.brightness);
-            OnOffLight = (Switch) v.findViewById(R.id.OnOffLight);
+            OnOffLight = (SwitchCompat) v.findViewById(R.id.OnOffLight);
             statusDetail = (TextView) v.findViewById(R.id.statusDetail);
             brightnessVal = (TextView) v.findViewById(R.id.brightnessVal);
             spinnerSchedule = (Spinner) v.findViewById(R.id.spinnerSchedule);

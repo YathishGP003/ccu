@@ -50,6 +50,10 @@ public class LightProfile extends ZoneProfile
 		ensureDimmable();
 		HashMap<Short, CcuToCmOverUsbSnControlsMessage_t> controlsMessages =
 				new HashMap<Short, CcuToCmOverUsbSnControlsMessage_t>();
+		
+		boolean override = overrideEnabled(); //Used to ignore profile settings while sending override control message.
+		
+		
 		for (LightSmartNodeOutput smartNodeOutput : this.smartNodeOutputs)
 		{
 			
@@ -71,8 +75,8 @@ public class LightProfile extends ZoneProfile
 			Struct.Unsigned8 port = getPort(controlsMessage_t, smartNodeOutput.mSmartNodePort);
 			
 			short localDimmablePercent = 100;
-			boolean localOn = true;
-			if(smartNodeOutput.override)
+			boolean localOn = false;
+			if(override)
 			{
 				localDimmablePercent = smartNodeOutput.dimmable;
 				localOn = smartNodeOutput.on;
@@ -163,6 +167,16 @@ public class LightProfile extends ZoneProfile
 	}
 	
 	
+	private boolean overrideEnabled() {
+		for (LightSmartNodeOutput op : this.smartNodeOutputs) {
+			if (op.override) {
+				return true;
+			}
+			
+		}
+		return false;
+	}
+	
 	private void ensureDimmable()
 	{
 		if (dimmable == false)
@@ -170,7 +184,6 @@ public class LightProfile extends ZoneProfile
 			dimmablePercent = 100;
 		}
 	}
-	
 	
 	private Struct.Unsigned8 getPort(CcuToCmOverUsbSnControlsMessage_t controlsMessage_t,
 	                                 Port smartNodePort)

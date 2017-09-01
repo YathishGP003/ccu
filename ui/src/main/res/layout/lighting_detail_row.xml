@@ -68,8 +68,7 @@
                 android:layout_marginLeft="10dp"
                 android:layout_toRightOf="@+id/LogicalName"
                 android:gravity="center_vertical"
-                android:theme="@style/SwitchTheme"
-                />
+                android:theme="@style/SwitchTheme"/>
 
             <TextView
                 android:id="@+id/statusDetail"

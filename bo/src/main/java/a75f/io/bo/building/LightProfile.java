@@ -75,7 +75,7 @@ public class LightProfile extends ZoneProfile
 			Struct.Unsigned8 port = getPort(controlsMessage_t, smartNodeOutput.mSmartNodePort);
 			
 			short localDimmablePercent = 100;
-			boolean localOn = false;
+			boolean localOn = true;
 			if(override)
 			{
 				localDimmablePercent = smartNodeOutput.dimmable;

@@ -1,10 +1,13 @@
 package a75f.io.renatus.ZONEPROFILE;
 
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.SwitchCompat;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +20,7 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import java.io.IOException;
@@ -59,9 +63,7 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 	
 	View        view;
 	AlertDialog mAlertDialog;
-	//FSVData mFSVData = null;
 	boolean mbIsInEditMode = false;
-	//LightingControlsData mLCMControls = null;
 	Spinner      spRelay1;
 	Spinner      spRelay2;
 	SwitchCompat relay1Switch;
@@ -95,8 +97,6 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 	ToggleButton lcmAnalog1OutOverride;
 	ToggleButton lcmAnalog2OutOverride;
 	
-	ArrayList<EditText> circuitsList   = new ArrayList<EditText>();
-	ArrayList<Switch>   circuitEnabled = new ArrayList<Switch>();
 	ArrayList<String> zoneCircuitNames;
 	Zone              mZone;
 	LightProfile      mLightProfile;
@@ -216,12 +216,30 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 				                   .createFromResource(getActivity(), R.array.lcm_analog_in, R.layout.spinner_dropdown_item);
 		analog2InAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		spAnalog2In.setAdapter(analog2InAdapter);
+		
+		editRelay1 = (ImageView)view.findViewById(R.id.lcmRelay1EditImg);
+		editRelay2 = (ImageView)view.findViewById(R.id.lcmRelay2EditImg);
+		editAnalog1Out = (ImageView)view.findViewById(R.id.lcmAnalog1OutEditImg);
+		editAnalog2Out = (ImageView)view.findViewById(R.id.lcmAnalog2OutEditImg);
+		editAnalog1In = (ImageView)view.findViewById(R.id.lcmAnalog1InEditImg);
+		editAnalog2In = (ImageView)view.findViewById(R.id.lcmAnalog2InEditImg);
+		
 		relay1Switch.setOnCheckedChangeListener(this);
 		relay2Switch.setOnCheckedChangeListener(this);
 		analog1OutSwitch.setOnCheckedChangeListener(this);
 		analog2OutSwitch.setOnCheckedChangeListener(this);
 		analog1InSwitch.setOnCheckedChangeListener(this);
 		analog2InSwitch.setOnCheckedChangeListener(this);
+		
+		editRelay1.setOnClickListener(this);
+		editRelay2.setOnClickListener(this);
+		editAnalog1Out.setOnClickListener(this);
+		editAnalog2Out.setOnClickListener(this);
+		editAnalog1In.setOnClickListener(this);
+		editAnalog2In.setOnClickListener(this);
+		
+		zoneCircuitNames = new ArrayList<>();
+		
 		Button setBtn = (Button) view.findViewById(R.id.lcmSetCommand);
 		setBtn.setOnClickListener(new View.OnClickListener()
 		{
@@ -243,7 +261,7 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 			}
 		});
 		return new AlertDialog.Builder(getActivity(), R.style.NewDialogStyle)
-				       .setTitle("Lighting Test").setView(view).setCancelable(false).create();
+				       .setTitle("Lighting Profile").setView(view).setCancelable(false).create();
 	}
 	
 	
@@ -346,9 +364,30 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 	{
 		switch (v.getId())
 		{
-		   /* case R.id.lcmRelay1EditImg:
-		        showEditLogicalNameDialog(relay1EditText,mLCMControls.getRelay1CircuitName(), v.getId());
-                break;*/
+			case R.id.lcmRelay1EditImg:
+				if (relay1Switch.isChecked())
+					showEditLogicalNameDialog(relay1EditText, v.getId());
+				break;
+			case R.id.lcmRelay2EditImg:
+				if (relay1Switch.isChecked())
+					showEditLogicalNameDialog(relay2EditText, v.getId());
+				break;
+			case R.id.lcmAnalog1OutEditImg:
+				if (analog1OutSwitch.isChecked())
+					showEditLogicalNameDialog(analog1OutEditText, v.getId());
+				break;
+			case R.id.lcmAnalog2OutEditImg:
+				if (analog2OutSwitch.isChecked())
+					showEditLogicalNameDialog(analog2OutEditText, v.getId());
+				break;
+			case R.id.lcmAnalog1InEditImg:
+				if (analog1InSwitch.isChecked())
+					showEditLogicalNameDialog(analog1InEditText, v.getId());
+				break;
+			case R.id.lcmAnalog2InEditImg:
+				if (analog2InSwitch.isChecked())
+					showEditLogicalNameDialog(analog2InEditText, v.getId());
+				break;
 		}
 	}
 	
@@ -413,6 +452,7 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 			analogOneOp.mUniqueID = UUID.randomUUID();
 			analogOneOp.mName = analog1OutEditText.getText().toString();
 			analogOneOp.mSmartNodeAddress = mSmartNodeAddress;
+			analogOneOp.on = true;
 			mLightProfile.smartNodeOutputs.add(analogOneOp);
 		}
 		if (analog2OutSwitch.isChecked()){
@@ -430,6 +470,7 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 			analogTwoOp.mUniqueID = UUID.randomUUID();
 			analogTwoOp.mName = analog2OutEditText.getText().toString();
 			analogTwoOp.mSmartNodeAddress = mSmartNodeAddress;
+			analogTwoOp.on = true;
 			mLightProfile.smartNodeOutputs.add(analogTwoOp);
 		}
 		try {
@@ -441,5 +482,65 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 		LocalStorage.setApplicationSettings();
 		
 		
+	}
+	
+	public void showEditLogicalNameDialog(final EditText etext, final int id){
+		AlertDialog.Builder alertBuilder = new AlertDialog.Builder(getActivity(), R.style.NewDialogStyle);
+		alertBuilder.setTitle("Assign Name for this Lighting Circuit");
+		alertBuilder.setCancelable(false);
+		
+		LayoutInflater inflater = LayoutInflater.from(getActivity());
+		final View view = inflater.inflate(R.layout.edit_circuit_name_dialog, null);
+		final EditText input = (EditText)view.findViewById(R.id.editTextCircuitName);
+		final TextView remainingChar = (TextView)view.findViewById(R.id.remainingChar);
+		input.addTextChangedListener(new TextWatcher() {
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+				
+			}
+			
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
+				
+			}
+			
+			@Override
+			public void afterTextChanged(Editable s) {
+				if(input.getText().toString().length() >20){
+					int i = 30 - input.getText().toString().length();
+					remainingChar.setVisibility(View.VISIBLE);
+					remainingChar.setText(i+" ");
+				}else{
+					remainingChar.setVisibility(View.GONE);
+				}
+			}
+		});
+		input.setText(etext.getText().toString());
+		alertBuilder.setView(view);
+		alertBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				String displayName = input.getText().toString();
+				if(displayName.isEmpty()) {
+					Toast.makeText(getActivity(), "Circuit Name cannot be Empty", Toast.LENGTH_SHORT).show();
+				}else {
+					if(!zoneCircuitNames.contains(displayName)) {
+						zoneCircuitNames.add(displayName);
+					}else {
+						Toast.makeText(getActivity(), "Circuit Name ["+displayName+"] exists, enter a valid circuit name", Toast.LENGTH_LONG).show();
+						displayName = "";
+					}
+				}
+				etext.setText(displayName.length() > 15 ? displayName.substring(0, 12).concat("...") : displayName.toString());
+				dialog.dismiss();
+			}
+		});
+		alertBuilder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.dismiss();
+			}
+		});
+		alertBuilder.show();
 	}
 }

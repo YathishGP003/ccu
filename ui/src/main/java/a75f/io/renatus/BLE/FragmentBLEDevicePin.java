@@ -357,7 +357,6 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
 				removeDialogFragment(FragmentBLEDevicePin.ID);
 				showDialogFragment(LightingZoneProfileFragment
 						                   .newInstance(mPairingAddress, mName, mFloorName), LightingZoneProfileFragment.ID);
-				
 			}
 		});
 	}

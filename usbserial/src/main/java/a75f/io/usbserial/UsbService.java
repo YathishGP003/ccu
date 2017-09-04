@@ -145,9 +145,9 @@ public class UsbService extends Service
 				{
 					if (data.length > 0)
 					{
-						Log.i(TAG, "Parse Bytes: " + data.length);
 						
-						parseBytes(Arrays.copyOfRange(data, 2, data.length));
+						
+						parseBytes(data);
 					}
 				}
 			};

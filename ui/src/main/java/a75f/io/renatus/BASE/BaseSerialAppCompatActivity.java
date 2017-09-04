@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.Toast;
 
 import org.greenrobot.eventbus.EventBus;
@@ -22,7 +23,6 @@ import java.util.Set;
 
 import a75f.io.bo.serial.comm.SerialEvent;
 import a75f.io.logic.SerialBLL;
-import a75f.io.logic.jobs.HeartBeatJob;
 import a75f.io.renatus.BLE.BLEHomeFragment;
 import a75f.io.renatus.MainActivity;
 import a75f.io.usbserial.UsbService;
@@ -178,9 +178,11 @@ public class BaseSerialAppCompatActivity extends AppCompatActivity {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case UsbService.CTS_CHANGE:
+                    Log.i("SERIAL_DEBUG", "CTS_CHANGE");
                     Toast.makeText(mActivity.get(), "CTS_CHANGE", Toast.LENGTH_LONG).show();
                     break;
                 case UsbService.DSR_CHANGE:
+                    Log.i("SERIAL_DEBUG", "DSR_CHANGE");
                     Toast.makeText(mActivity.get(), "DSR_CHANGE", Toast.LENGTH_LONG).show();
                     break;
             }

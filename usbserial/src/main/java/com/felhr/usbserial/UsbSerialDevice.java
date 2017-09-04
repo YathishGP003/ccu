@@ -1,12 +1,5 @@
 package com.felhr.usbserial;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import com.felhr.deviceids.CH34xIds;
-import com.felhr.deviceids.CP210xIds;
-import com.felhr.deviceids.FTDISioIds;
-import com.felhr.deviceids.PL2303Ids;
-
 import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
@@ -14,8 +7,23 @@ import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbRequest;
 
+import com.felhr.deviceids.CH34xIds;
+import com.felhr.deviceids.CP210xIds;
+import com.felhr.deviceids.FTDISioIds;
+import com.felhr.deviceids.PL2303Ids;
+
+import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public abstract class UsbSerialDevice implements UsbSerialInterface
 {
+    
+    
+    protected boolean isFiDI()
+    {
+        return false;
+    }
+    
     private static final String CLASS_ID = UsbSerialDevice.class.getSimpleName();
 
     private static boolean mr1Version;
@@ -23,6 +31,8 @@ public abstract class UsbSerialDevice implements UsbSerialInterface
     protected final UsbDeviceConnection connection;
 
     protected static final int USB_TIMEOUT = 5000;
+    
+
 
     protected SerialBuffer serialBuffer;
 
@@ -69,7 +79,9 @@ public abstract class UsbSerialDevice implements UsbSerialInterface
         int pid = device.getProductId();
 
         if(FTDISioIds.isDeviceSupported(vid, pid))
+        {
             return new FTDISerialDevice(device, connection, iface);
+        }
         else if(CP210xIds.isDeviceSupported(vid, pid))
             return new CP2102SerialDevice(device, connection, iface);
         else if(PL2303Ids.isDeviceSupported(vid, pid))
@@ -241,16 +253,22 @@ public abstract class UsbSerialDevice implements UsbSerialInterface
                     {
                         ((FTDISerialDevice) usbSerialDevice).ftdiUtilities.checkModemStatus(data); //Check the Modem status
                         serialBuffer.clearReadBuffer();
-
+						
                         if(data.length > 2)
                         {
-                            data = ((FTDISerialDevice) usbSerialDevice).ftdiUtilities.adaptArray(data);
+	                        data = Arrays.copyOfRange(data, 2, data.length);
+	
+	                        if(serialBuffer.getDebug())
+		                        UsbSerialDebugger.printReadLogGet(data, true);
+                         
                             onReceivedData(data);
                         }
                     }else
                     {
                         // Clear buffer, execute the callback
                         serialBuffer.clearReadBuffer();
+	                    if(serialBuffer.getDebug())
+		                    UsbSerialDebugger.printReadLogGet(data, true);
                         onReceivedData(data);
                     }
                     // Queue a new request

@@ -1,20 +1,35 @@
 apply plugin: 'com.android.library'
 
+
 android {
-    compileSdkVersion 25
-    buildToolsVersion '25.0.3'
+    compileSdkVersion Integer.parseInt(project.ANDROID_BUILD_SDK_VERSION)
+    buildToolsVersion project.ANDROID_BUILD_TOOLS_VERSION
+
+    dexOptions {
+        javaMaxHeapSize "4g"
+    }
 
     defaultConfig {
-        minSdkVersion 19
-        targetSdkVersion 19
+        minSdkVersion Integer.parseInt(project.ANDROID_BUILD_MIN_SDK_VERSION)
+        targetSdkVersion Integer.parseInt(project.ANDROID_BUILD_TARGET_SDK_VERSION)
         versionCode 1
         versionName "1.0"
+        multiDexEnabled true
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
+
     }
 
+    packagingOptions {
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'com/fasterxml/jackson/core/json/VERSION.txt'
+        exclude 'com/fasterxml/jackson/core/Base64Variant'
+        exclude 'com/google/api/client/http/AbstractHttpContent.class'
 
+    }
     buildTypes {
         release {
             minifyEnabled false
@@ -24,16 +39,34 @@ android {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile fileTree(include: '*.jar', dir: '../libs')
     testCompile 'junit:junit:4.12'
-
+    androidTestCompile 'com.android.support:support-annotations:25.3.1'
+    androidTestCompile 'com.android.support.test:runner:0.5'
+    androidTestCompile 'com.android.support.test:rules:0.5'
+    // Optional -- Hamcrest library
+    androidTestCompile 'org.hamcrest:hamcrest-library:1.3'
+    // Optional -- UI testing with Espresso
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    // Optional -- UI testing with UI Automator
+    androidTestCompile 'com.android.support.test.uiautomator:uiautomator-v18:2.1.2'
+    compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.android.support:design:25.3.1'
+    compile 'com.android.support:multidex:1.0.1'
+    compile 'com.facebook.android:facebook-android-sdk:[4,5)'
+    compile 'com.fasterxml.jackson.core:jackson-core:2.7.3'
+    compile 'com.fasterxml.jackson.core:jackson-annotations:2.7.3'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.7.3'
+    compile(name: 'kinvey-android-3.0.3', ext: 'aar')
+    compile(name: 'realm-android-library-3.2.1', ext: 'aar')
+    compile(name: 'relinker-1.2.2', ext: 'aar')
+    compile 'com.google.http-client:google-http-client:1.19.0'
+    compile 'commons-io:commons-io:2.4'
     compile 'com.google.http-client:google-http-client:1.19.0'
     compile 'com.google.http-client:google-http-client-android:1.19.0'
     compile 'com.google.http-client:google-http-client-gson:1.19.0'
     compile 'com.google.http-client:google-http-client-jackson2:1.19.0'
-    compile project(path: ':bo')
-    compile project(':kinvey')
-    compile project(':realm')
-    compile project(':relinker')
-    compile project(path: ':util')
+    compile 'com.google.guava:guava:16.0.1'
 }

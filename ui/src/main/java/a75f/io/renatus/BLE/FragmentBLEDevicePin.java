@@ -347,7 +347,6 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
 			@Override
 			public void run()
 			{
-				
 				dismissProgressDialog();
 				Toast.makeText(FragmentBLEDevicePin.this
 						               .getActivity(), "Pairing Success!", Toast.LENGTH_LONG)

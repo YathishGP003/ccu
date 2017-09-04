@@ -7,6 +7,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.StateListDrawable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.SwitchCompat;
 import android.view.LayoutInflater;
@@ -118,18 +120,18 @@ public class LightingDetailAdapter extends BaseAdapter{
         row.setBackgroundColor((position % 2 == 0) ?  Color.parseColor("#ececec"): Color.TRANSPARENT);
        
         if (snOutPortList.size() > 0) {
-            final LightSmartNodeOutput lightPort = snOutPortList.get(position);
-            viewHolder.LogicalName.setText(lightPort.mName/*port_map.getCircuitName()*/);
+            final LightSmartNodeOutput snOutput = snOutPortList.get(position);
+            viewHolder.LogicalName.setText(snOutput.mName/*port_map.getCircuitName()*/);
             viewHolder.spinnerSchedule.setTag(position);
             viewHolder.spinnerSchedule.setAdapter(aaOccupancyMode);
             if(schedule != null){
                 schedule.setVisibility(View.VISIBLE);
             }
             
-            switch (lightPort.mSmartNodePort) {
+            switch (snOutput.mSmartNodePort) {
                 case RELAY_ONE:
                    
-                    if (lightPort.on) {
+                    if (snOutput.on) {
                         viewHolder.OnOffLight.setChecked(true);
                     } else
                     {
@@ -148,7 +150,7 @@ public class LightingDetailAdapter extends BaseAdapter{
                     break;
                 case RELAY_TWO:
     
-                    if (lightPort.on)
+                    if (snOutput.on)
                     {
                         viewHolder.OnOffLight.setChecked(true);
                     } else {
@@ -168,8 +170,8 @@ public class LightingDetailAdapter extends BaseAdapter{
                     break;
                 case ANALOG_OUT_ONE:
                     viewHolder.brightness.setMax(100);
-                    viewHolder.brightness.setProgress(lightPort.dimmable);
-                    viewHolder.brightnessVal.setText(lightPort.dimmable + "");
+                    viewHolder.brightness.setProgress(snOutput.dimmable);
+                    viewHolder.brightnessVal.setText(snOutput.dimmable + "");
                     /*viewHolder.statusDetail.setText(port_info.analog1_out.status);
                     viewHolder.vacationFromTo.setText(port_info.analog1_out.vacation_text);
                     viewHolder.spinnerSchedule.setSelection(port_info.analog1_out.schedule_mode);
@@ -182,8 +184,8 @@ public class LightingDetailAdapter extends BaseAdapter{
                     break;
                 case ANALOG_OUT_TWO:
                     viewHolder.brightness.setMax(100);
-                    viewHolder.brightness.setProgress(lightPort.dimmable);
-                    viewHolder.brightnessVal.setText(lightPort.dimmable + "");
+                    viewHolder.brightness.setProgress(snOutput.dimmable);
+                    viewHolder.brightnessVal.setText(snOutput.dimmable + "");
                     /*viewHolder.vacationFromTo.setText(port_info.analog2_out.vacation_text);
                     viewHolder.statusDetail.setText(port_info.analog2_out.status);
                     viewHolder.spinnerSchedule.setSelection(port_info.analog2_out.schedule_mode);
@@ -195,13 +197,13 @@ public class LightingDetailAdapter extends BaseAdapter{
                     }*/
                     break;
             }
-            if (lightPort.mSmartNodePort == Port.ANALOG_OUT_ONE || lightPort.mSmartNodePort == Port.ANALOG_OUT_TWO) {
+            if (snOutput.mSmartNodePort == Port.ANALOG_OUT_ONE || snOutput.mSmartNodePort == Port.ANALOG_OUT_TWO) {
                 viewHolder.OnOffLight.setVisibility(View.GONE);
                 viewHolder.brightness.setVisibility(View.VISIBLE);
                 viewHolder.brightnessVal.setVisibility(View.VISIBLE);
 
             }
-            if (lightPort.mSmartNodePort == Port.RELAY_ONE || lightPort.mSmartNodePort == Port.RELAY_TWO) {
+            if (snOutput.mSmartNodePort == Port.RELAY_ONE || snOutput.mSmartNodePort == Port.RELAY_TWO) {
                 viewHolder.OnOffLight.setVisibility(View.VISIBLE);
                 viewHolder.brightness.setVisibility(View.GONE);
                 viewHolder.brightnessVal.setVisibility(View.GONE);
@@ -209,25 +211,28 @@ public class LightingDetailAdapter extends BaseAdapter{
 
             }
            
-            final Switch onOff = (Switch) row.findViewById(R.id.OnOffLight);
+            final SwitchCompat onOff = (SwitchCompat) row.findViewById(R.id.OnOffLight);
             onOff.setTag(position);
+            onOff.setSwitchMinWidth(40);
+            /*StateListDrawable switchStates = new StateListDrawable();
+            switchStates.addState(new int[]{android.R.attr.state_checked}, new ColorDrawable(c.getResources().getColor(R.color.progress_color_orange)));
+            switchStates.addState(new int[]{-android.R.attr.state_enabled}, new ColorDrawable(c.getResources().getColor(R.color.grey_select)));
+            switchStates.addState(new int[]{}, new ColorDrawable(c.getResources().getColor(R.color.grey_select))); // this one has to come last
+            onOff.setThumbDrawable(switchStates);*/
             onOff.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    onOff.getThumbDrawable().setColorFilter(c.getResources().getColor(
-                                        isChecked ? R.color.progress_color_orange: R.color.grey_select),PorterDuff.Mode.MULTIPLY);
-                    onOff.getTrackDrawable().setColorFilter(c.getResources().getColor(
-                            isChecked ? R.color.white: R.color.grey_select),PorterDuff.Mode.MULTIPLY);
                     
-                    switch (lightPort.mSmartNodePort){
+                    switch (snOutput.mSmartNodePort){
                         case RELAY_ONE:
                         case RELAY_TWO:
-                            lightPort.on = isChecked;
-                            lightPort.override = true;
+                            snOutput.on = isChecked;
+                            snOutput.override = true;
                     }
                     try
                     {
                         CcuLog.d(TAG, JsonSerializer.toJson(profile.getControlsMessage(), true));
+
                         SmartNodeBLL.sendControlsMessage(profile);
                     } catch (IOException e){
                         CcuLog.wtf(TAG, "Failed to generate Control Message" ,e);
@@ -245,11 +250,11 @@ public class LightingDetailAdapter extends BaseAdapter{
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                     val.setText(progress+"");
-                    switch (lightPort.mSmartNodePort){
+                    switch (snOutput.mSmartNodePort){
                         case ANALOG_OUT_ONE:
                         case ANALOG_OUT_TWO:
-                            lightPort.dimmable = (short) progress;
-                            lightPort.override = true;
+                            snOutput.dimmable = (short) progress;
+                            snOutput.override = true;
                     }
 
                 }
@@ -262,11 +267,11 @@ public class LightingDetailAdapter extends BaseAdapter{
                 @Override
                 public void onStopTrackingTouch(SeekBar seekBar) {
                     int value = seekBar.getProgress();
-                    switch (lightPort.mSmartNodePort){
+                    switch (snOutput.mSmartNodePort){
                         case ANALOG_OUT_ONE:
                         case ANALOG_OUT_TWO:
-                            lightPort.dimmable = (short)value;
-                            lightPort.override = true;
+                            snOutput.dimmable = (short)value;
+                            snOutput.override = true;
                     }
                     try
                     {
@@ -541,7 +546,7 @@ public class LightingDetailAdapter extends BaseAdapter{
     public class ViewHolder {
         public TextView       LogicalName;
         public SeekBar        brightness;
-        public Switch  OnOffLight;
+        public SwitchCompat  OnOffLight;
         public TextView       statusDetail;
         public TextView       brightnessVal;
         public Spinner        spinnerSchedule;
@@ -555,7 +560,7 @@ public class LightingDetailAdapter extends BaseAdapter{
         public ViewHolder(View v) {
             LogicalName = (TextView) v.findViewById(R.id.LogicalName);
             brightness = (SeekBar) v.findViewById(R.id.brightness);
-            OnOffLight = (Switch) v.findViewById(R.id.OnOffLight);
+            OnOffLight = (SwitchCompat) v.findViewById(R.id.OnOffLight);
             statusDetail = (TextView) v.findViewById(R.id.statusDetail);
             brightnessVal = (TextView) v.findViewById(R.id.brightnessVal);
             spinnerSchedule = (Spinner) v.findViewById(R.id.spinnerSchedule);

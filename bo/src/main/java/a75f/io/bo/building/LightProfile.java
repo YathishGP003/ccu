@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import a75f.io.bo.building.definitions.Port;
+import a75f.io.bo.json.serializers.JsonSerializer;
 import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.bo.serial.MessageType;
 
@@ -49,6 +50,10 @@ public class LightProfile extends ZoneProfile
 		ensureDimmable();
 		HashMap<Short, CcuToCmOverUsbSnControlsMessage_t> controlsMessages =
 				new HashMap<Short, CcuToCmOverUsbSnControlsMessage_t>();
+		
+		boolean override = overrideEnabled(); //Used to ignore profile settings while sending override control message.
+		
+		
 		for (LightSmartNodeOutput smartNodeOutput : this.smartNodeOutputs)
 		{
 			
@@ -71,7 +76,7 @@ public class LightProfile extends ZoneProfile
 			
 			short localDimmablePercent = 100;
 			boolean localOn = true;
-			if(smartNodeOutput.override)
+			if(override)
 			{
 				localDimmablePercent = smartNodeOutput.dimmable;
 				localOn = smartNodeOutput.on;
@@ -162,6 +167,16 @@ public class LightProfile extends ZoneProfile
 	}
 	
 	
+	private boolean overrideEnabled() {
+		for (LightSmartNodeOutput op : this.smartNodeOutputs) {
+			if (op.override) {
+				return true;
+			}
+			
+		}
+		return false;
+	}
+	
 	private void ensureDimmable()
 	{
 		if (dimmable == false)
@@ -169,7 +184,6 @@ public class LightProfile extends ZoneProfile
 			dimmablePercent = 100;
 		}
 	}
-	
 	
 	private Struct.Unsigned8 getPort(CcuToCmOverUsbSnControlsMessage_t controlsMessage_t,
 	                                 Port smartNodePort)

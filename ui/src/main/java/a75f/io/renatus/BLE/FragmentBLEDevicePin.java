@@ -32,6 +32,7 @@ import a75f.io.bo.ble.StructShort;
 import a75f.io.bo.serial.SerialConsts;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import a75f.io.renatus.FloorPlanFragment;
 import a75f.io.renatus.R;
 import a75f.io.renatus.ZONEPROFILE.LightingZoneProfileFragment;
 import a75f.io.util.ByteArrayUtils;
@@ -347,7 +348,6 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
 			@Override
 			public void run()
 			{
-				
 				dismissProgressDialog();
 				Toast.makeText(FragmentBLEDevicePin.this
 						               .getActivity(), "Pairing Success!", Toast.LENGTH_LONG)

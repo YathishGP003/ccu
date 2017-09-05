@@ -72,6 +72,8 @@ public class SerialBLL
 			{
 				CmToCcuOverUsbCmRegularUpdateMessage_t regularUpdateMessage_t =
 						new CmToCcuOverUsbCmRegularUpdateMessage_t();
+				Log.i(TAG, "CmToCcuOverUsbCmRegularUpdateMessage_t Message Expected Size: " +
+				           regularUpdateMessage_t.size());
 				regularUpdateMessage_t
 						.setByteBuffer(ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN), 0);
 				Log.i(TAG, "Regular Update Message: " + regularUpdateMessage_t.toString());
@@ -89,6 +91,8 @@ public class SerialBLL
 			{
 				CmToCcuOverUsbSnRegularUpdateMessage_t smartNodeRegularUpdateMessage_t =
 						new CmToCcuOverUsbSnRegularUpdateMessage_t();
+				Log.i(TAG, "CmToCcuOverUsbSnRegularUpdateMessage_t Message Expected Size: " +
+				           smartNodeRegularUpdateMessage_t.size());
 				Log.i(TAG, "CmToCcuOverUsbSnRegularUpdateMessage_t size: " +
 				           smartNodeRegularUpdateMessage_t.size());
 				Log.i(TAG, "Buffer size with smart node regular update message: " + data.length);

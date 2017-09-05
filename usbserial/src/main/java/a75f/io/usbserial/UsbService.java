@@ -146,7 +146,8 @@ public class UsbService extends Service
 				{
 					if (data.length > 0)
 					{
-						Log.i(TAG, "Parse Bytes: " + data.length);
+						
+						
 						parseBytes(data);
 					}
 				}

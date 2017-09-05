@@ -8,6 +8,7 @@ import com.crashlytics.android.Crashlytics;
 import com.evernote.android.job.JobManager;
 
 import a75f.io.bo.SmartNode;
+import a75f.io.logic.LogicBLL;
 import a75f.io.logic.jobs.CCUJobCreator;
 import a75f.io.logic.jobs.HeartBeatJob;
 import a75f.io.util.UtilityApplication;
@@ -30,6 +31,7 @@ public class RenatusApp extends UtilityApplication
 	{
 		super.onCreate();
 		Fabric.with(this, new Crashlytics());
+		LogicBLL.initializeKinvey(this);
 		JobManager.create(this).addJobCreator(new CCUJobCreator());
 		HeartBeatJob.scheduleJob();
 

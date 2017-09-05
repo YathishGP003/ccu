@@ -1,7 +1,5 @@
 package com.felhr.usbserial;
 
-import java.util.Arrays;
-
 import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
@@ -9,6 +7,8 @@ import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbRequest;
 import android.util.Log;
+
+import java.util.Arrays;
 
 public class FTDISerialDevice extends UsbSerialDevice
 {
@@ -88,8 +88,14 @@ public class FTDISerialDevice extends UsbSerialDevice
     private UsbSerialInterface.UsbFrameCallback frameCallback;
     private UsbSerialInterface.UsbOverrunCallback overrunCallback;
     private UsbSerialInterface.UsbBreakCallback breakCallback;
-
-
+	
+	
+	@Override
+	protected boolean isFiDI()
+	{
+		return true;
+	}
+	
     public FTDISerialDevice(UsbDevice device, UsbDeviceConnection connection)
     {
         this(device, connection, -1);
@@ -576,8 +582,8 @@ public class FTDISerialDevice extends UsbSerialDevice
                 }
             }
         }
-
-        // Copy data without FTDI headers
+        
+	    //Copy data without FTDI headers
         private void copyData(byte[] src, byte[] dst)
         {
             int i = 0; // src index

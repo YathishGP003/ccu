@@ -6,12 +6,13 @@ import java.util.Arrays;
 
 public class SerialBuffer
 {
-    public static final int DEFAULT_READ_BUFFER_SIZE = 16 * 1024;
-    public static final int DEFAULT_WRITE_BUFFER_SIZE = 16 * 1024;
+    public static final int DEFAULT_READ_BUFFER_SIZE = 1024;
+    public static final int DEFAULT_WRITE_BUFFER_SIZE = 1024;
     private ByteBuffer readBuffer;
     private SynchronizedBuffer writeBuffer;
     private byte[] readBuffer_compatible; // Read buffer for android < 4.2
     private boolean debugging = true;
+    private boolean isFIDI = false;
 
     public SerialBuffer(boolean version)
     {
@@ -64,8 +65,7 @@ public class SerialBuffer
             byte[] dst = new byte[readBuffer.position()];
             readBuffer.position(0);
             readBuffer.get(dst, 0, dst.length);
-            if(debugging)
-                UsbSerialDebugger.printReadLogGet(dst, true);
+
             return dst;
         }
     }
@@ -104,7 +104,14 @@ public class SerialBuffer
         byte[] tempBuff = Arrays.copyOfRange(readBuffer_compatible, 0, numberBytes);
         return tempBuff;
     }
-
+    
+    
+    public boolean getDebug()
+    {
+        return debugging;
+    }
+    
+    
     private class SynchronizedBuffer
     {
         private byte[] buffer;

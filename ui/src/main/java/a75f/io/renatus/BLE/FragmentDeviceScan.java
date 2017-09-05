@@ -118,6 +118,8 @@ public class FragmentDeviceScan extends BaseDialogFragment
 		super.onResume();
 		// Ensures Bluetooth is enabled on the device.  If Bluetooth is not currently enabled,
 		// fire an intent to display a dialog asking the user to grant permission to enable it.
+		//Skip BLE because we can't emulate it.
+		
 		if (mBluetoothAdapter != null)
 		{
 			if (!mBluetoothAdapter.isEnabled())
@@ -138,9 +140,7 @@ public class FragmentDeviceScan extends BaseDialogFragment
 					                        long id)
 					{
 						final BluetoothDevice device = mLeDeviceListAdapter.getDevice(position);
-						DialogFragment newFragment = FragmentBLEDevicePin
-								                             .getInstance(mPairingAddress, mName, mFloorName, device);
-						showDialogFragment(newFragment, FragmentBLEDevicePin.ID);
+						finish(device);
 						scanLeDevice(false);
 					}
 				});
@@ -160,6 +160,14 @@ public class FragmentDeviceScan extends BaseDialogFragment
 		((ViewGroup) mBLEDeviceListListView.getParent()).addView(emptyText);
 		emptyText.setText(R.string.ble_no_devices_found_warning);
 		mBLEDeviceListListView.setEmptyView(emptyText);
+	}
+	
+	
+	private void finish(BluetoothDevice device)
+	{
+		DialogFragment newFragment =
+				FragmentBLEDevicePin.getInstance(mPairingAddress, mName, mFloorName, device);
+		showDialogFragment(newFragment, FragmentBLEDevicePin.ID);
 	}
 	
 	

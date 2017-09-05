@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.evernote.android.job.Job;
 import com.evernote.android.job.JobRequest;
+import com.evernote.android.job.JobRescheduleService;
 
 import java.util.concurrent.TimeUnit;
 
@@ -15,7 +16,7 @@ import a75f.io.logic.SerialBLL;
 /**
  * Created by Yinten on 8/24/2017.
  */
-
+//0x11 0x00
 public class HeartBeatJob extends Job {
 
     public static final String TAG = "HeartBeatJob";
@@ -26,7 +27,7 @@ public class HeartBeatJob extends Job {
     @Override
     @NonNull
     protected Result onRunJob(Params params) {
-        Log.i(TAG, "On Run Job");
+        Log.i(TAG, "On Run Job" + toString());
         Log.i(TAG, "Sending Heartbeat");
         if (SerialBLL.getInstance().isConnected()) {
             Log.i(TAG, "Serial is connected, sending heartbeat");
@@ -35,16 +36,22 @@ public class HeartBeatJob extends Job {
         } else {
             Log.i(TAG, "Serial is not connected, rescheduling heartbeat");
         }
-        HeartBeatJob.scheduleJob();
 
+        scheduleJob();
         return Result.SUCCESS;
+    }
+
+    @Override
+    protected void onReschedule(int newJobId) {
+        super.onReschedule(newJobId);
+
     }
 
     public static void scheduleJob() {
         Log.i(TAG, "Job Scheduled: " + HeartBeatJob.TAG);
-        new JobRequest.Builder(HeartBeatJob.TAG).setExact(TimeUnit.MINUTES.toMillis(HEARTBEAT_INTERVAL))
-                .build()
-                .schedule();
+        new JobRequest.Builder(HeartBeatJob.TAG).setExact(TimeUnit.MINUTES.toMillis(HEARTBEAT_INTERVAL)).setPersisted(true).setUpdateCurrent(true).build().schedule();
+
+
     }
 
 

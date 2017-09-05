@@ -3,8 +3,10 @@ package a75f.io.dal;
  * Created by Yinten on 9/4/2017.
  */
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
+import com.kinvey.java.model.KinveyMetaData;
 
 import java.util.ArrayList;
 
@@ -12,68 +14,72 @@ public class CCUSchedules extends GenericJson
 { // For Serialization
 	
 	@Key("_id")
-	private String  id;
+	public String  id;
 	@Key
-	private String  monday_OccuTime;
+	public String  monday_OccuTime;
 	@Key
-	private Integer monday_OccupTemp;
+	public Integer monday_OccupTemp;
 	@Key
-	private String  monday_UnoccuTime;
+	public String  monday_UnoccuTime;
 	@Key
-	private String  tuesday_OccuTime;
+	public String  tuesday_OccuTime;
 	@Key
-	private Integer tuesday_OccupTemp;
+	public Integer tuesday_OccupTemp;
 	@Key
-	private String  tuesday_UnoccuTime;
+	public String  tuesday_UnoccuTime;
 	@Key
-	private String  wednesday_OccuTime;
+	public String  wednesday_OccuTime;
 	@Key
-	private Integer wednesday_OccupTemp;
+	public Integer wednesday_OccupTemp;
 	@Key
-	private String  wednesday_UnoccuTime;
+	public String  wednesday_UnoccuTime;
 	@Key
-	private String  thursday_OccuTime;
+	public String  thursday_OccuTime;
 	@Key
-	private Integer thursday_OccupTemp;
+	public Integer thursday_OccupTemp;
 	@Key
-	private String  thursday_UnoccuTime;
+	public String  thursday_UnoccuTime;
 	@Key
-	private String  friday_OccuTime;
+	public String  friday_OccuTime;
 	@Key
-	private Integer friday_OccupTemp;
+	public Integer friday_OccupTemp;
 	@Key
-	private String  friday_UnoccuTime;
+	public String  friday_UnoccuTime;
 	@Key
-	private String  saturday_OccuTime;
+	public String  saturday_OccuTime;
 	@Key
-	private Integer saturday_OccupTemp;
+	public Integer saturday_OccupTemp;
 	@Key
-	private String  saturday_UnoccuTime;
+	public String  saturday_UnoccuTime;
 	@Key
-	private String  sunday_OccuTime;
+	public String  sunday_OccuTime;
 	@Key
-	private Integer sunday_OccupTemp;
+	public Integer sunday_OccupTemp;
 	@Key
-	private String  sunday_UnoccuTime;
+	public String  sunday_UnoccuTime;
 	
 	@Key
-	private ArrayList<LCMSchedule>           lcm_zone_schedule;
+	public ArrayList<LCMSchedule>           lcm_zone_schedule;
 	@Key
-	private Object                           wrm_details;
+	public Object                           wrm_details;
 	@Key
-	private String                           ccu_id;
+	public String                           ccu_id;
 	@Key
-	private Integer                          room_id;
+	public Integer                          room_id;
 	@Key
-	private Integer                          floor_id;
+	public Integer                          floor_id;
 	@Key
-	private String                           name;
+	public String                           name;
 	@Key
-	private String                           src;
-	
-	
+	public String                           src;
 
-	
+
+
+    @Key("_kmd")
+    private KinveyMetaData meta;
+    @Key("_acl")
+    private KinveyMetaData.AccessControlList acl;
+
 	public CCUSchedules()
 	{
 	}  //GenericJson classes must have a public empty constructor

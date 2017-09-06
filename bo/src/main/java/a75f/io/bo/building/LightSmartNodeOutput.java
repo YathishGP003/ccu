@@ -1,5 +1,7 @@
 package a75f.io.bo.building;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 /**
  * Created by samjithsadasivan on 8/29/17.
  */

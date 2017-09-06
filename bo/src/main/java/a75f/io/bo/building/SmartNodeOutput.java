@@ -1,5 +1,8 @@
 package a75f.io.bo.building;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import java.util.UUID;
 
 import a75f.io.bo.building.definitions.Output;
@@ -10,7 +13,6 @@ import a75f.io.bo.building.definitions.Port;
 /**
  * Created by Yinten on 8/15/2017.
  */
-
 public class SmartNodeOutput
 {
 	

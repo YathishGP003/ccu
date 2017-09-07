@@ -12,4 +12,6 @@ public class Schedule
 	
 	//7 days per week.
 	public List<ScheduleDay> scheduleDays = new ArrayList<ScheduleDay>();
+	
+	
 }

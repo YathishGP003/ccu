@@ -9,7 +9,7 @@ import org.javolution.io.Struct;
 public class SmartNodeLightingSchedule_t extends Struct
 {
 	
-	public final Unsigned8[] logicalName = array(new Unsigned8[MessageConstants.MAX_LIGHTING_CONTROL_CIRCUIT_LOGICAL_NAME_BYTES]);
+	public final UTF8String logicalName = new UTF8String(MessageConstants.MAX_LIGHTING_CONTROL_CIRCUIT_LOGICAL_NAME_BYTES);
 	
 	public final Unsigned8 normallyOpen = new Unsigned8(); /* 0 = No (Normally Closed) and 1 = Yes (Normally Open) */
 	

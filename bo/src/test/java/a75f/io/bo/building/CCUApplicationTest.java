@@ -43,18 +43,20 @@ public class CCUApplicationTest
 		ccuApplication.floors.get(0).mRoomList.get(0).zoneProfiles.add(p1);
 		LightSmartNodeOutput op1 = new LightSmartNodeOutput();
 		op1.mSmartNodeAddress = testSN.mAddress;
-		op1.mUniqueID = UUID.randomUUID();
+		UUID op1UD = UUID.randomUUID();
+		op1.mUniqueID = op1UD;
 		op1.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
 		op1.mOutput = Output.Analog;
 		op1.mName = "Dining Room";
 		p1.smartNodeOutputs.add(op1);
 		
 		LightSmartNodeOutput op2 = new LightSmartNodeOutput();
-		op1.mSmartNodeAddress = testSN.mAddress;
-		op1.mUniqueID = UUID.randomUUID();
-		op1.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
-		op1.mOutput = Output.Relay;
-		op1.mName = "Kitchen";
+		op2.mSmartNodeAddress = testSN.mAddress;
+		UUID op2UD = UUID.randomUUID();
+		op2.mUniqueID = op2UD;
+		op2.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
+		op2.mOutput = Output.Relay;
+		op2.mName = "Kitchen";
 		p1.smartNodeOutputs.add(op2);
 		
 		try
@@ -67,6 +69,7 @@ public class CCUApplicationTest
 			Assert.assertEquals("75FRoom1", deCcuApp.floors.get(0).mRoomList.get(0).roomName .toString() );
 			Assert.assertEquals(2, deCcuApp.floors.get(0).mRoomList.get(0).zoneProfiles.get(0).smartNodeOutputs.size());
 			Assert.assertEquals("Kitchen", deCcuApp.floors.get(0).mRoomList.get(0).zoneProfiles.get(0).smartNodeOutputs.get(1).mName);
+			Assert.assertEquals(op1UD, deCcuApp.floors.get(0).mRoomList.get(0).zoneProfiles.get(0).smartNodeOutputs.get(0).mUniqueID);
 			
 		}
 		catch (IOException e)

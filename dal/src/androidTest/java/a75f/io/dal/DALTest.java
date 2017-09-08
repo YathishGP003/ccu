@@ -109,6 +109,7 @@ public class DALTest
 								@Override
 								public void onFailure(Throwable throwable)
 								{
+                                    Assert.fail(throwable.getMessage());
 								}
 							});
 						}
@@ -120,21 +121,24 @@ public class DALTest
 					catch (IOException e)
 					{
 						e.printStackTrace();
-					}
+                        Assert.fail(e.getMessage());
+                    }
 				}
 			});
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
+            Assert.fail(e.getMessage());
 		}
 		try
 		{
-			Thread.sleep(5000);
+			Thread.sleep(20000);
 		}
 		catch (InterruptedException e)
 		{
-			e.printStackTrace();
+            Assert.fail(e.getMessage());
+            e.printStackTrace();
 		}
 	}
 	
@@ -148,15 +152,32 @@ public class DALTest
 			
 			CCUSchedules schedule = JsonSerializer.fromJson(inputStream, CCUSchedules.class);
 			final DataStore<CCUSchedules> schedulesDataStore = DataStore
-					                                                   .collection(Constants.SCHEDULE_COLLECTION_NAME, CCUSchedules.class, StoreType.CACHE, DalContext
+					                                                   .collection(Constants.SCHEDULE_COLLECTION_NAME, CCUSchedules.class, StoreType.NETWORK, DalContext
 							                                                                                                                                        .getSharedClient());
-			schedulesDataStore.save(schedule);
-			Assert.assertNotNull(schedule);
+
+
+            schedulesDataStore.save(schedule, new KinveyClientCallback<CCUSchedules>() {
+                @Override
+                public void onSuccess(CCUSchedules ccuSchedules) {
+                    Log.i(TAG, "Schedule SaVED");
+                    Assert.assertNotNull(ccuSchedules);
+                }
+
+                @Override
+                public void onFailure(Throwable throwable) {
+                    Log.i(TAG, "Schedule fAILED");
+
+                    Assert.fail(throwable.getMessage());
+                }
+            });
+
+            Assert.assertNotNull(schedule);
 			Assert.assertNotNull(schedule.getLcm_zone_schedule());
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
+            Assert.fail(e.getMessage());
 		}
 	}
 	
@@ -210,9 +231,10 @@ public class DALTest
 										
 										
 										@Override
-										public void onFailure(Throwable throwable)
+										public void onFailure(Throwable error)
 										{
-										}
+                                            Assert.fail(error.getMessage());
+                                        }
 									});
 								}
 								
@@ -220,7 +242,9 @@ public class DALTest
 								@Override
 								public void onFailure(Throwable error)
 								{
-									error.printStackTrace();
+
+                                    Assert.fail(error.getMessage());
+                                    error.printStackTrace();
 								}
 							});
 						}

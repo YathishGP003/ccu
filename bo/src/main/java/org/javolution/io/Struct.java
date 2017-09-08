@@ -1269,6 +1269,7 @@ public class Struct {
      * This class represents a 8 bits unsigned integer.
      */
 	@JsonSerialize(using = Unsigned8Serializer.class)
+    @JsonDeserialize(using = Unsigned8Deserializer.class)
     public class Unsigned8 extends Member {
 
         public Unsigned8() {
@@ -1352,6 +1353,7 @@ public class Struct {
      */
     
     @JsonSerialize(using = Unsigned16Serializer.class)
+    @JsonDeserialize(using = Unsigned16Deserializer.class)
     public class Unsigned16 extends Member {
 
         public Unsigned16() {

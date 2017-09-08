@@ -203,4 +203,5 @@ public class Schedule
 	{
 		this.days = days;
 	}
+
 }

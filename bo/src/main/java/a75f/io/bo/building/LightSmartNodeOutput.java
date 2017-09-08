@@ -11,4 +11,6 @@ public class LightSmartNodeOutput extends SmartNodeOutput
 	public boolean on = false;
 	public short dimmable = 100;
 	
+	public LightingSchedule schedule = null;
+	
 }

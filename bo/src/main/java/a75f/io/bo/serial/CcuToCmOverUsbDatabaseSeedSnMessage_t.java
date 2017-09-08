@@ -13,7 +13,7 @@ import java.nio.ByteOrder;
 
 public class CcuToCmOverUsbDatabaseSeedSnMessage_t extends Struct
 {
-	
+	@JsonIgnore
 	public String CCU = "DefaultCCU";
 	
 	

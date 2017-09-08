@@ -137,11 +137,11 @@
                     android:layout_gravity="center"
                     android:layout_marginLeft="10dp"
                     android:layout_weight="0.1"
-                    android:visibility="invisible"
                     android:padding="10dp"
                     android:src="@drawable/content_edit" />
 
             </LinearLayout>
+
 
             <LinearLayout
                 android:id="@+id/vacationData"

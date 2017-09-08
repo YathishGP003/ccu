@@ -1,15 +1,11 @@
 package a75f.io.renatus;
 
 import android.app.Activity;
+import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.StateListDrawable;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.SwitchCompat;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,25 +21,16 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Spinner;
-import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
-import java.util.SortedMap;
 
 import a75f.io.bo.building.LightProfile;
 import a75f.io.bo.building.LightSmartNodeOutput;
 import a75f.io.bo.building.SmartNodeOutput;
-import a75f.io.bo.building.ZoneProfile;
-import a75f.io.bo.building.definitions.Output;
-import a75f.io.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.bo.building.definitions.Port;
 import a75f.io.bo.json.serializers.JsonSerializer;
 import a75f.io.logic.SmartNodeBLL;
@@ -310,13 +297,13 @@ public class LightingDetailAdapter extends BaseAdapter{
                 }
 
             });
-            //changing vacation
+            //changing schedule
             final ImageView vacationEdit = (ImageView) row.findViewById(R.id.vacationEdit);
             vacationEdit.setTag(position);
             vacationEdit.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    /*FragmentTransaction ftt = c.getFragmentManager().beginTransaction();
+                   /* FragmentTransaction ftt = c.getFragmentManager().beginTransaction();
                     Fragment prev1 = c.getFragmentManager().findFragmentByTag("vacation");
                     if (prev1 != null) {
                         ftt.remove(prev1);
@@ -333,12 +320,10 @@ public class LightingDetailAdapter extends BaseAdapter{
             imgNameSchedule.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    /*//CcuLog.d("WRM_PRO","imageView LCM detail named sch edit -"+v.isEnabled()+","+v.isPressed());
-                    if(v.isPressed()) {
-                        FSVData fsvData = fsvPortList.get(position).getFsvData();
-                        FSVData.SMARTNODE_PORT port = fsvPortList.get(position).getPort();
-                        showNameScheduleSelector(fsvData, port);
-                    }*/
+                    
+                    if(v.isPressed() && position == 1) {
+                        showDialogFragment(LightScheduleFragment.newInstance(snOutput),"schedule_fragment");
+                    }
 
                 }
             });
@@ -436,7 +421,19 @@ public class LightingDetailAdapter extends BaseAdapter{
 
         return row;
     }
-
+    
+    private void showDialogFragment(DialogFragment dialogFragment, String id)
+    {
+        FragmentTransaction ft = c.getFragmentManager().beginTransaction();
+        Fragment prev = c.getFragmentManager().findFragmentByTag(id);
+        if (prev != null)
+        {
+            ft.remove(prev);
+        }
+        ft.addToBackStack(null);
+        // Create and show the dialog.
+        dialogFragment.show(ft, id);
+    }
    /* @Override
     public void OnSetLCMVacationSchedule(SortedMap<Long, JSONObject> vacationData, FSVData.SMARTNODE_PORT port, FSVData fsvData) {
         SmartNodesPortData portData = fsvData.getSmartNodePort();

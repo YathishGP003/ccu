@@ -10,5 +10,5 @@ public class BaseEvent
 	start with light turning on and off and certain time of day
 	and move on the more advanced scheduled events
 	*/
-	boolean on = true;
+	public boolean on = true;
 }

@@ -33,7 +33,7 @@ import a75f.io.bo.serial.comm.SerialAction;
 import a75f.io.bo.serial.comm.SerialEvent;
 
 /**
- * Created by rmatt on 7/30/2017.
+ * Created by rmatt isOn 7/30/2017.
  */
 public class UsbService extends Service
 {

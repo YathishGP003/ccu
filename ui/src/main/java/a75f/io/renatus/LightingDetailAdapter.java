@@ -1,15 +1,8 @@
 package a75f.io.renatus;
 
 import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentTransaction;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.StateListDrawable;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.SwitchCompat;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,32 +18,22 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Spinner;
-import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
-import java.util.SortedMap;
 
 import a75f.io.bo.building.LightProfile;
-import a75f.io.bo.building.LightSmartNodeOutput;
 import a75f.io.bo.building.SmartNodeOutput;
-import a75f.io.bo.building.ZoneProfile;
-import a75f.io.bo.building.definitions.Output;
-import a75f.io.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.bo.building.definitions.Port;
 import a75f.io.bo.json.serializers.JsonSerializer;
 import a75f.io.logic.SmartNodeBLL;
 import a75f.io.renatus.ENGG.logger.CcuLog;
 
 /**
- * Created by JASPINDER on 11/9/2016.
+ * Created by JASPINDER isOn 11/9/2016.
  */
 
 public class LightingDetailAdapter extends BaseAdapter{
@@ -61,7 +44,7 @@ public class LightingDetailAdapter extends BaseAdapter{
     LayoutInflater                  inflater;
     Activity                        c;
     ViewHolder                      viewHolder;
-    ArrayList<LightSmartNodeOutput> snOutPortList;
+    ArrayList<SmartNodeOutput> snOutPortList;
     ListView                        thiSList;
     private ArrayAdapter<CharSequence> aaOccupancyMode;
     private Boolean lcmdab;
@@ -120,7 +103,7 @@ public class LightingDetailAdapter extends BaseAdapter{
         row.setBackgroundColor((position % 2 == 0) ?  Color.parseColor("#ececec"): Color.TRANSPARENT);
        
         if (snOutPortList.size() > 0) {
-            final LightSmartNodeOutput snOutput = snOutPortList.get(position);
+            final SmartNodeOutput snOutput = snOutPortList.get(position);
             viewHolder.LogicalName.setText(snOutput.mName/*port_map.getCircuitName()*/);
             viewHolder.spinnerSchedule.setTag(position);
             viewHolder.spinnerSchedule.setAdapter(aaOccupancyMode);
@@ -131,7 +114,7 @@ public class LightingDetailAdapter extends BaseAdapter{
             switch (snOutput.mSmartNodePort) {
                 case RELAY_ONE:
                    
-                    if (snOutput.on) {
+                    if (snOutput.isOn()) {
                         viewHolder.OnOffLight.setChecked(true);
                     } else
                     {
@@ -150,7 +133,7 @@ public class LightingDetailAdapter extends BaseAdapter{
                     break;
                 case RELAY_TWO:
     
-                    if (snOutput.on)
+                    if (snOutput.isOn())
                     {
                         viewHolder.OnOffLight.setChecked(true);
                     } else {
@@ -170,8 +153,8 @@ public class LightingDetailAdapter extends BaseAdapter{
                     break;
                 case ANALOG_OUT_ONE:
                     viewHolder.brightness.setMax(100);
-                    viewHolder.brightness.setProgress(snOutput.dimmable);
-                    viewHolder.brightnessVal.setText(snOutput.dimmable + "");
+                    viewHolder.brightness.setProgress(snOutput.mVal);
+                    viewHolder.brightnessVal.setText(snOutput.mVal + "");
                     /*viewHolder.statusDetail.setText(port_info.analog1_out.status);
                     viewHolder.vacationFromTo.setText(port_info.analog1_out.vacation_text);
                     viewHolder.spinnerSchedule.setSelection(port_info.analog1_out.schedule_mode);
@@ -184,8 +167,8 @@ public class LightingDetailAdapter extends BaseAdapter{
                     break;
                 case ANALOG_OUT_TWO:
                     viewHolder.brightness.setMax(100);
-                    viewHolder.brightness.setProgress(snOutput.dimmable);
-                    viewHolder.brightnessVal.setText(snOutput.dimmable + "");
+                    viewHolder.brightness.setProgress(snOutput.mVal);
+                    viewHolder.brightnessVal.setText(snOutput.mVal + "");
                     /*viewHolder.vacationFromTo.setText(port_info.analog2_out.vacation_text);
                     viewHolder.statusDetail.setText(port_info.analog2_out.status);
                     viewHolder.spinnerSchedule.setSelection(port_info.analog2_out.schedule_mode);
@@ -226,8 +209,8 @@ public class LightingDetailAdapter extends BaseAdapter{
                     switch (snOutput.mSmartNodePort){
                         case RELAY_ONE:
                         case RELAY_TWO:
-                            snOutput.on = isChecked;
-                            snOutput.override = true;
+                            snOutput.isOn(isChecked);
+                            snOutput.mOverride = true;
                     }
                     try
                     {
@@ -253,8 +236,8 @@ public class LightingDetailAdapter extends BaseAdapter{
                     switch (snOutput.mSmartNodePort){
                         case ANALOG_OUT_ONE:
                         case ANALOG_OUT_TWO:
-                            snOutput.dimmable = (short) progress;
-                            snOutput.override = true;
+                            snOutput.mVal =  (short) progress;
+                            snOutput.mOverride = true;
                     }
 
                 }
@@ -270,8 +253,8 @@ public class LightingDetailAdapter extends BaseAdapter{
                     switch (snOutput.mSmartNodePort){
                         case ANALOG_OUT_ONE:
                         case ANALOG_OUT_TWO:
-                            snOutput.dimmable = (short)value;
-                            snOutput.override = true;
+                            snOutput.mVal = (short)value;
+                            snOutput.mOverride = true;
                     }
                     try
                     {

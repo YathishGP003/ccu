@@ -28,7 +28,7 @@ import java.util.Vector;
  *     can be used to that effect..</p> 
  * 
  * <p> Class loading can be performed in a lazy manner and therefore some parts 
- *     of the class loading process may be done on first use rather than at 
+ *     of the class loading process may be done isOn first use rather than at
  *     load time. Javolution bundle activator ensure that <b>all</b> its classes
  *     are initialized at start up.
  *     The following code illustrates how this can be done for any bundle.
@@ -45,7 +45,7 @@ import java.util.Vector;
  * }}</pre></p>
  * 
  * <p> This utility use reflection to find the classes loaded and may not be
- *     supported on all platforms.</p>
+ *     supported isOn all platforms.</p>
  * 
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 5.1, July 26, 2007

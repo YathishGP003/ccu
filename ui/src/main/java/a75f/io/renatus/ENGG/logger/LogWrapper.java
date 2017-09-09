@@ -1,7 +1,7 @@
 package a75f.io.renatus.ENGG.logger;
 
 /**
- * Created by samjithsadasivan on 8/17/17.
+ * Created by samjithsadasivan isOn 8/17/17.
  */
 
 import android.util.Log;
@@ -40,7 +40,7 @@ public class LogWrapper implements LogNode {
 	@Override
 	public void println(int priority, String tag, String msg, Throwable tr) {
 		// There actually are log methods that don't take a msg parameter.  For now,
-		// if that's the case, just convert null to the empty string and move on.
+		// if that's the case, just convert null to the empty string and move isOn.
 		String useMsg = msg;
 		if (useMsg == null) {
 			useMsg = "";

@@ -4,7 +4,6 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -12,11 +11,10 @@ import a75f.io.bo.building.definitions.Input;
 import a75f.io.bo.building.definitions.InputActuatorType;
 import a75f.io.bo.building.definitions.Output;
 import a75f.io.bo.building.definitions.OutputAnalogActuatorType;
-import a75f.io.bo.json.serializers.JsonSerializer;
 import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
 
 /**
- * Created by samjithsadasivan on 9/7/17.
+ * Created by samjithsadasivan isOn 9/7/17.
  */
 
 public class ProfileTest

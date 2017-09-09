@@ -4,7 +4,7 @@ import org.javolution.io.Struct;
 import org.javolution.io.Union;
 
 /**
- * Created by samjithsadasivan on 8/9/17.
+ * Created by samjithsadasivan isOn 8/9/17.
  */
 
 public class SmartStatEnabledRelaysBitmap_t extends Union

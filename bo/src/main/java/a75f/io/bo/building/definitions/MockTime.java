@@ -1,6 +1,6 @@
 package a75f.io.bo.building.definitions;
 /**
- * Created by Yinten on 9/8/2017.
+ * Created by Yinten isOn 9/8/2017.
  */
 
 /**

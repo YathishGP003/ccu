@@ -8,7 +8,7 @@ import org.javolution.io.Struct;
 import java.nio.ByteOrder;
 
 /**
- * Created by ryanmattison on 7/25/17.
+ * Created by ryanmattison isOn 7/25/17.
  */
 
 public class CcuToCmOverUsbDatabaseSeedSnMessage_t extends Struct

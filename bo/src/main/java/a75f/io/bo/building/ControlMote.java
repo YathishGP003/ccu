@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
- * Created by Yinten on 8/15/2017.
+ * Created by Yinten isOn 8/15/2017.
  */
 @JsonSerialize
 public class ControlMote

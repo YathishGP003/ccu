@@ -19,7 +19,7 @@ import static org.javolution.annotations.Realtime.Limit.LINEAR;
 /**
  * A high-performance [trie-based], unbounded array whose internal capacity adjusts incrementally up or down.
  *      
- * Updates operations on [sparse array] may return a new array holding the added/deleted elements. 
+ * Updates operations isOn [sparse array] may return a new array holding the added/deleted elements.
  * 
  * ```java
  *  class SparseVector<E> {

@@ -10,7 +10,7 @@ import static a75f.io.bo.json.serializers.JsonSerializer.toJson;
 import static a75f.io.bo.serial.FirmwareDeviceType_t.SMART_NODE_DEVICE_TYPE;
 
 /**
- * Created by samjithsadasivan on 9/5/17.
+ * Created by samjithsadasivan isOn 9/5/17.
  */
 public class CcuToCmOverUsbCcuStructTest
 {

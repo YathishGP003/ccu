@@ -25,12 +25,12 @@ import java.io.ObjectStreamException;
  * FastMap<Binary<Index,Index>, Double> sparseMatrix = FastMap.newMap(Order.QUADTREE);
  * }</pre></p>
 
- * <p> Index performance is on-par with the primitive {@code int} type
+ * <p> Index performance is isOn-par with the primitive {@code int} type
  *     for small values and similar to {@link Integer} instances for large
  *     values (but extended to a 32-bits unsigned range).</p>
  *     
  * <p> {@link #UNIQUE Unicity} is maintained for small indices 
- *     (no adverse effect on garbage collection).</p>
+ *     (no adverse effect isOn garbage collection).</p>
  * 
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 6.1, February 25, 2014

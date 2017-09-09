@@ -10,7 +10,7 @@ import a75f.io.bo.json.serializers.JsonSerializer;
 import a75f.io.util.Globals;
 
 /**
- * Created by Yinten on 8/15/2017.
+ * Created by Yinten isOn 8/15/2017.
  */
 
 public class LocalStorage

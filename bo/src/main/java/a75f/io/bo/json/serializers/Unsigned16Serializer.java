@@ -9,7 +9,7 @@ import org.javolution.io.Struct;
 import java.io.IOException;
 
 /**
- * Created by Yinten on 8/15/2017.
+ * Created by Yinten isOn 8/15/2017.
  */
 
 public class Unsigned16Serializer extends StdSerializer<Struct.Unsigned16>

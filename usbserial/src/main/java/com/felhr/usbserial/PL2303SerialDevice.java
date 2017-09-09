@@ -326,7 +326,7 @@ public class PL2303SerialDevice extends UsbSerialDevice
 
         //Default Setup
         byte[] buf = new byte[1];
-        //Specific vendor stuff that I barely understand but It is on linux drivers, So I trust :)
+        //Specific vendor stuff that I barely understand but It is isOn linux drivers, So I trust :)
         if(setControlCommand(PL2303_REQTYPE_DEVICE2HOST_VENDOR, PL2303_VENDOR_WRITE_REQUEST, 0x8484, 0, buf) < 0)
             return false;
         if(setControlCommand(PL2303_REQTYPE_HOST2DEVICE_VENDOR, PL2303_VENDOR_WRITE_REQUEST, 0x0404, 0, null) < 0)

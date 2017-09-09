@@ -10,7 +10,7 @@ package org.javolution.lang;
 
 /**
  * <p> An object which does not expose any way to change its state.can be manipulated by value rather than by reference; 
- *     a JVM implementation may allocate instances of this class on the stack. The entire graph of objects
+ *     a JVM implementation may allocate instances of this class isOn the stack. The entire graph of objects
  *     reachable from an immutable object must be immutable as well.  
  * <pre>{@code
  * public class Complex implements ValueType { // Complex numbers can be manipulated by value.
@@ -23,7 +23,7 @@ package org.javolution.lang;
  *     public int hashCode() { ... } // Must return value hash code.    
  * }}</pre></p>
  *      
- * <p> <b>Note:</b> "Stack" allocation is not the only optimization that a VM can do on {@link ReadOnly}. 
+ * <p> <b>Note:</b> "Stack" allocation is not the only optimization that a VM can do isOn {@link ReadOnly}.
  *     The VM might decide not to perform any allocation at all and store values directly in registers.</p> 
  *              
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
@@ -35,7 +35,7 @@ public interface ReadOnly  {
      * Returns {@code true} if this object has the same value content as the 
      * the one specified; {@code false} otherwise. The default object 
      * equals must be overridden to ensure the same behavior whether or 
-     * not the instance is allocated on the stack.
+     * not the instance is allocated isOn the stack.
      */
     @Override
     boolean equals(Object obj);

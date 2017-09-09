@@ -18,7 +18,7 @@ import a75f.io.bo.building.definitions.Port;
 import a75f.io.bo.json.serializers.JsonSerializer;
 
 /**
- * Created by samjithsadasivan on 8/28/17.
+ * Created by samjithsadasivan isOn 8/28/17.
  */
 
 public class LocalStorageUtilTest
@@ -40,7 +40,7 @@ public class LocalStorageUtilTest
 		LightProfile lightProfile5K = new LightProfile("Light Profile");
 		//		ccuApplication.floors.get(0).addZone("5000 test zone");
 		orgCcu.floors.get(0).mRoomList.get(0).zoneProfiles.add(lightProfile5K);
-		LightSmartNodeOutput smartNodeOutput5K = new LightSmartNodeOutput();
+		SmartNodeOutput smartNodeOutput5K = new SmartNodeOutput();
 		smartNodeOutput5K.mSmartNodeAddress = smartNode5K.mAddress;
 		smartNodeOutput5K.mUniqueID = analog15kUUID;
 		smartNodeOutput5K.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;

@@ -1,24 +1,31 @@
 package a75f.io.bo.building;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
+import a75f.io.bo.building.definitions.DAYS;
 import a75f.io.bo.building.definitions.MockTime;
+import a75f.io.bo.building.definitions.ScheduleMode;
 
-/**
- * Created by Yinten on 9/8/2017.
- */
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Schedule
 {
 	public static final String TAG = "Schedule";
-	private int    defaultVal;
-	private int    val;
-	private String st;
-	private String et;
-	private int[]  days;
+	public    ScheduleMode mode;
+	/*The value when scheduled parameters are active. */
+	protected short        val;
+	protected String       st;
+	protected String       et;
+	protected String[]     days;
+	
+	private int curVal;
 	
 	
 	public Schedule()
@@ -26,9 +33,8 @@ public class Schedule
 	}
 	
 	
-	public Schedule(int defaultVal, int val, String st, String et, int[] days)
+	public Schedule(short val, String st, String et, String[] days)
 	{
-		this.defaultVal = defaultVal;
 		this.val = val;
 		this.st = st;
 		this.et = et;
@@ -36,12 +42,21 @@ public class Schedule
 	}
 	
 	
+	@JsonIgnore
+	private int getScheduleValue()
+	{
+		return val;
+	}
+	
+	
+	@JsonIgnore
 	public boolean isInSchedule()
 	{
 		return isInDays() && isInHours();
 	}
 	
 	
+	@JsonIgnore
 	public boolean isInDays()
 	{
 		DateTime dateTime = new DateTime(MockTime.getInstance().getMockTime());
@@ -56,7 +71,8 @@ public class Schedule
 		}
 		//TODO: logged not mocked
 		System.out.println(TAG + " isInSchedule week days: " + Arrays.toString(days));
-		int foundIndex = Arrays.binarySearch(days, currentDayOfWeekWithMondayAsStart);
+		int foundIndex = Arrays.binarySearch(days, String.valueOf
+				                                                  (currentDayOfWeekWithMondayAsStart));
 		//TODO: logged not mocked
 		System.out.println(TAG + " Arrays.binarySearch(days, currentDayOfWeekWithMondayAsStart): " +
 		                   foundIndex);
@@ -80,6 +96,7 @@ public class Schedule
 	 * st and et.
 	 *
 	 */
+	@JsonIgnore
 	public boolean isInHours()
 	{
 		try
@@ -125,6 +142,7 @@ public class Schedule
 	 * @return the time in hours for example 01:12, will return an integer value of 1
 	 * @throws Exception
 	 */
+	@JsonIgnore
 	public int getStringTimeHours(String time) throws Exception
 	{
 		String[] split = time.split("[:]");
@@ -138,6 +156,7 @@ public class Schedule
 	 * @return the time in minutes for example 01:12, will return an integer value of 12
 	 * @throws Exception
 	 */
+	@JsonIgnore
 	public int getStringTimeMinutes(String time) throws Exception
 	{
 		String[] split = time.split("[:]");
@@ -145,25 +164,13 @@ public class Schedule
 	}
 	
 	
-	public int getDefaultVal()
+	public short getVal()
 	{
-		return defaultVal;
+		return this.val;
 	}
 	
 	
-	public void setDefaultVal(int defaultVal)
-	{
-		this.defaultVal = defaultVal;
-	}
-	
-	
-	public int getVal()
-	{
-		return val;
-	}
-	
-	
-	public void setVal(int val)
+	public void setVal(short val)
 	{
 		this.val = val;
 	}
@@ -181,6 +188,28 @@ public class Schedule
 	}
 	
 	
+	@JsonIgnore
+	public int getStAsShort() throws Exception
+	{
+		return getStringMMSSAsShort(st);
+	}
+	
+	
+	@JsonIgnore
+	public int getStringMMSSAsShort(String string)
+	{
+		String[] split = et.split("[:]");
+		return Integer.parseInt(split[0] + split[1]);
+	}
+	
+	
+	@JsonIgnore
+	public int getEtAsShort() throws Exception
+	{
+		return getStringMMSSAsShort(et);
+	}
+	
+	
 	public String getEt()
 	{
 		return et;
@@ -193,15 +222,37 @@ public class Schedule
 	}
 	
 	
-	public int[] getDays()
+	public String[] getDays()
 	{
 		return days;
 	}
 	
 	
-	public void setDays(int[] days)
+	public void setDays(String[] days)
 	{
 		this.days = days;
 	}
-
+	
+	
+	/*****************
+	 *ONLY USED FOR CIRCUITS BELOW
+	 ******************/
+	
+	public byte getScheduleDaysBitmap()
+	{
+		ArrayList<Integer> daysAsArrayList = new ArrayList<Integer>();
+		for (int j = 0; j < days.length; j++)
+		{
+			daysAsArrayList.add(Integer.parseInt(days[j]));
+		}
+		byte dayBytes = (byte) ((daysAsArrayList.contains(DAYS.MONDAY.ordinal()) ? 0x01 : 0x00) |
+		                        (daysAsArrayList.contains(DAYS.TUESDAY.ordinal()) ? 0x02 : 0x00) |
+		                        (daysAsArrayList.contains(DAYS.WEDNESDAY.ordinal()) ? 0x04 : 0x00) |
+		                        (daysAsArrayList.contains(DAYS.THURSDAY.ordinal()) ? 0x08 : 0x00) |
+		                        (daysAsArrayList.contains(DAYS.FRIDAY.ordinal()) ? 0x10 : 0x00) |
+		                        (daysAsArrayList.contains(DAYS.SATURDAY.ordinal()) ? 0x20 : 0x00) |
+		                        (daysAsArrayList.contains(DAYS.SUNDAY.ordinal()) ? 0x40 : 0x00) |
+		                        0x00);
+		return dayBytes;
+	}
 }

@@ -21,7 +21,7 @@ import static a75f.io.logic.LogBLL.logStructAsJSON;
 import static android.content.ContentValues.TAG;
 
 /**
- * Created by Yinten on 8/21/2017.
+ * Created by Yinten isOn 8/21/2017.
  */
 
 public class SerialBLL
@@ -148,7 +148,7 @@ public class SerialBLL
 	 *
 	 * @param struct This is a representation of a C Struct, loggable to hexadecimal and JSON.
 	 *                  It is a convience to deal with ByteOrder and following interface
-	 *                  documentation on Sharepoint.
+	 *                  documentation isOn Sharepoint.
 	 * @return success If serial was open and the usbService was successfully able to try to send
 	 * to CM without Android stopping it.  It doesn't nessacarily mean any messages went to
 	 * either the CM or the SmartNode.

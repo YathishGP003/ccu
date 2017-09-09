@@ -28,7 +28,7 @@ import a75f.io.renatus.MainActivity;
 import a75f.io.usbserial.UsbService;
 
 /**
- * Created by Yinten on 8/21/2017.
+ * Created by Yinten isOn 8/21/2017.
  * <p>
  * This class will be the base serial activity that will connect to the serial BLL that will
  * control eventing around the application.

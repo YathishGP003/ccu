@@ -22,7 +22,7 @@ package org.javolution.util.function;
 public interface BinaryOperator<T> {
 
     /**
-     * Returns the result of applying this operator on the specified parameters. 
+     * Returns the result of applying this operator isOn the specified parameters.
      * 
      * @param first the first parameter. 
      * @param second the second parameter. 

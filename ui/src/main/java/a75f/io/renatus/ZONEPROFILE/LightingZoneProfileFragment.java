@@ -18,7 +18,6 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -28,7 +27,6 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import a75f.io.bo.building.CCUApplication;
-import a75f.io.bo.building.Floor;
 import a75f.io.bo.building.LightProfile;
 import a75f.io.bo.building.LightSmartNodeOutput;
 import a75f.io.bo.building.SmartNode;
@@ -50,7 +48,7 @@ import a75f.io.util.Globals;
 import a75f.io.util.prefs.LocalStorage;
 
 /**
- * Created by anilkumar on 27-10-2016.
+ * Created by anilkumar isOn 27-10-2016.
  */
 
 public class LightingZoneProfileFragment extends BaseDialogFragment
@@ -101,8 +99,8 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 	Zone              mZone;
 	LightProfile      mLightProfile;
 	SmartNode         mSmartNode;
-	LightSmartNodeOutput   smartNodeAnalogOutputOne;
-	LightSmartNodeOutput   mSmartNodeRelayOne;
+	SmartNodeOutput   smartNodeAnalogOutputOne;
+	SmartNodeOutput   mSmartNodeRelayOne;
 	private ArrayAdapter<CharSequence> relay1Adapter;
 	private ArrayAdapter<CharSequence> relay2Adapter;
 	private ArrayAdapter<CharSequence> analog1OutAdapter;
@@ -408,7 +406,7 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 		
 		
 		if (relay1Switch.isChecked()) {
-			LightSmartNodeOutput relayOneOp = new LightSmartNodeOutput();
+			SmartNodeOutput relayOneOp = new SmartNodeOutput();
 			relayOneOp.mSmartNodeAddress = smartnode.mAddress;
 			relayOneOp.mUniqueID = UUID.randomUUID();
 			if(spRelay1.getSelectedItemPosition() == 0 )
@@ -423,7 +421,7 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 			mLightProfile.smartNodeOutputs.add(relayOneOp);
 		}
 		if (relay2Switch.isChecked()) {
-			LightSmartNodeOutput relayTwoOp = new LightSmartNodeOutput();
+			SmartNodeOutput relayTwoOp = new SmartNodeOutput();
 			relayTwoOp.mSmartNodeAddress = smartnode.mAddress;
 			relayTwoOp.mUniqueID = UUID.randomUUID();
 			if(spRelay2.getSelectedItemPosition() == 0 )
@@ -438,7 +436,7 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 			mLightProfile.smartNodeOutputs.add(relayTwoOp);
 		}
 		if (analog1OutSwitch.isChecked()){
-			LightSmartNodeOutput analogOneOp = new LightSmartNodeOutput();
+			SmartNodeOutput analogOneOp = new SmartNodeOutput();
 			analogOneOp.mOutput = Output.Analog;
 			if (spAnalog1Out.getSelectedItemPosition() == 0)
 			{
@@ -452,11 +450,11 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 			analogOneOp.mUniqueID = UUID.randomUUID();
 			analogOneOp.mName = analog1OutEditText.getText().toString();
 			analogOneOp.mSmartNodeAddress = mSmartNodeAddress;
-			analogOneOp.on = true;
+			analogOneOp.isOn(true);
 			mLightProfile.smartNodeOutputs.add(analogOneOp);
 		}
 		if (analog2OutSwitch.isChecked()){
-			LightSmartNodeOutput analogTwoOp = new LightSmartNodeOutput();
+			SmartNodeOutput analogTwoOp = new SmartNodeOutput();
 			analogTwoOp.mOutput = Output.Analog;
 			if (spAnalog2Out.getSelectedItemPosition() == 0)
 			{
@@ -470,7 +468,7 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 			analogTwoOp.mUniqueID = UUID.randomUUID();
 			analogTwoOp.mName = analog2OutEditText.getText().toString();
 			analogTwoOp.mSmartNodeAddress = mSmartNodeAddress;
-			analogTwoOp.on = true;
+			analogTwoOp.isOn(true);
 			mLightProfile.smartNodeOutputs.add(analogTwoOp);
 		}
 		try {

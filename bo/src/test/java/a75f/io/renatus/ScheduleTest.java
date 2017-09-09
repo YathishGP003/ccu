@@ -8,7 +8,7 @@ import a75f.io.bo.building.Schedule;
 import a75f.io.bo.building.definitions.MockTime;
 
 /**
- * Created by Yinten on 9/8/2017.
+ * Created by Yinten isOn 9/8/2017.
  */
 
 public class ScheduleTest
@@ -57,13 +57,12 @@ public class ScheduleTest
 	@Before
 	public void setUpMockSchedule()
 	{
-		//Mock schedule M-F, 8AM - 5:30PM turn on lights to value 100.
+		//Mock schedule M-F, 8AM - 5:30PM turn isOn lights to value 100.
 		schedule = new Schedule();
-		schedule.setDays(new int[]{1, 2, 3, 4, 5});
-		schedule.setDefaultVal(0);
+		schedule.setDays(new String[]{"1", "2", "3", "4", "5"});
 		schedule.setSt("8:00");
 		schedule.setEt("17:30");
-		schedule.setVal(100);
+		schedule.setVal((short) 100);
 	}
 	
 	

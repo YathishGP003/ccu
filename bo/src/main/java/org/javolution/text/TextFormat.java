@@ -36,7 +36,7 @@ import java.io.IOException;
  * {@code
  * TextContext ctx = TextContext.enter();
  * try {
- *      ctx.setFormat(Complex.class, Complex.Polar.class); // No impact on others threads.
+ *      ctx.setFormat(Complex.class, Complex.Polar.class); // No impact isOn others threads.
  *      System.out.println(complexMatrix); // Displays complex numbers in polar coordinates.
  * } finally {
  *      ctx.exit(); // Reverts to previous cartesian format for complex numbers.

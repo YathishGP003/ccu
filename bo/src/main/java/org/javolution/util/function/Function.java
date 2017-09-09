@@ -25,7 +25,7 @@ public interface Function<T, R> {
     /**
      * Returns the result of applying this function to the specified parameter. 
      * 
-     * @param param the parameter object on which the function is performed. 
+     * @param param the parameter object isOn which the function is performed.
      * @return the result of the function.
      */
     R apply(T param);

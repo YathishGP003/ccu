@@ -6,7 +6,7 @@ import java.nio.ByteOrder;
 
 
 /**
- * Created by ryanmattison on 7/26/17.
+ * Created by ryanmattison isOn 7/26/17.
  */
 
 public class StructShort extends Struct {

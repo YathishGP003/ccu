@@ -5,7 +5,7 @@ import android.app.Application;
 import com.evernote.android.job.JobManager;
 
 /**
- * Created by rmatt on 7/19/2017.
+ * Created by rmatt isOn 7/19/2017.
  */
 
 public abstract class UtilityApplication extends Application

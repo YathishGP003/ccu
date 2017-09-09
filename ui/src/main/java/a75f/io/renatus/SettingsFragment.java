@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 /**
- * Created by samjithsadasivan on 8/7/17.
+ * Created by samjithsadasivan isOn 8/7/17.
  */
 
 public class SettingsFragment extends Fragment

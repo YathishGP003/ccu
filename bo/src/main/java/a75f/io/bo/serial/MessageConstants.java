@@ -1,7 +1,7 @@
 package a75f.io.bo.serial;
 
 /**
- * Created by samjithsadasivan on 8/1/17.
+ * Created by samjithsadasivan isOn 8/1/17.
  */
 
 public class MessageConstants

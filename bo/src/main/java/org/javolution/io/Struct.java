@@ -440,7 +440,7 @@ public class Struct {
         } catch (Throwable error) {
             error.printStackTrace();
             throw new UnsupportedOperationException(
-                    "Method Struct.address() not supported on this platform.");
+                    "Method Struct.address() not supported isOn this platform.");
         }
     }
 
@@ -532,7 +532,7 @@ public class Struct {
 
     /**
      * Indicates if this struct is packed (configurable).
-     * By default, {@link Member members} of a struct are aligned on the
+     * By default, {@link Member members} of a struct are aligned isOn the
      * boundary corresponding to the member base type; padding is performed
      * if necessary. This directive is <b>not</b> inherited by inner structs.
      * Sub-classes may change the packing directive by overriding this method.
@@ -972,7 +972,7 @@ public class Struct {
          * incremented.
          *
          * @param  bitLength the number of bits or <code>0</code>
-         *         to force next member on next word boundary.
+         *         to force next member isOn next word boundary.
          * @param  wordSize the word size in bytes used when accessing
          *         this member data or <code>0</code> if the data is accessed
          *         at the bit level.
@@ -1005,7 +1005,7 @@ public class Struct {
             // Check alignment.
             if (!isPacked()) {
 
-                // Updates struct's alignment constraint, based on largest word size.
+                // Updates struct's alignment constraint, based isOn largest word size.
                 if ((_alignment < wordSize)) {
                     _alignment = wordSize;
                 }

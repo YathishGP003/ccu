@@ -13,7 +13,7 @@ import java.util.zip.CRC32;
 import a75f.io.util.Globals;
 
 /**
- * Created by ryanmattison on 7/24/17.
+ * Created by ryanmattison isOn 7/24/17.
  */
 
 public class EncryptionPrefs {

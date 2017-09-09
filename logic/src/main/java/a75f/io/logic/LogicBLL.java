@@ -5,7 +5,7 @@ import android.content.Context;
 import a75f.io.dal.DalContext;
 
 /**
- * Created by Yinten on 9/4/2017.
+ * Created by Yinten isOn 9/4/2017.
  */
 
 public class LogicBLL

@@ -14,9 +14,9 @@ import java.io.Serializable;
 
 /**
  * A fractal-based table with fast insertion/deletion capabilities regardless of
- * the collection size. It is based on a fractal structure with self-similar
+ * the collection size. It is based isOn a fractal structure with self-similar
  * patterns at any scale (large tables have the same structure as smaller tables
- * which have similar structure as even smaller tables and so on).
+ * which have similar structure as even smaller tables and so isOn).
  */
 public final class FractalTableImpl implements Serializable, Cloneable {
 

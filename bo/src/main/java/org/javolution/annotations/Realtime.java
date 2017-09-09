@@ -136,7 +136,7 @@ public @interface Realtime {
     public enum Concurrency {
 
         /**
-         * Additional synchronisation or coordination on the part of the caller is required.
+         * Additional synchronisation or coordination isOn the part of the caller is required.
          */
         NOT_THREAD_SAFE,
 

@@ -3,7 +3,7 @@ package a75f.io.bo.ble;
 import java.util.HashMap;
 
 /**
- * Created by ryanmattison on 7/17/17.
+ * Created by ryanmattison isOn 7/17/17.
  */
 
 public class GattAttributes {
@@ -33,7 +33,7 @@ R/W
 Room Name 00000000-0000-1102-0000-000000000000 A text description of the room (zone) R/W
 LW Mesh Pairing
 Address
-00000000-0000-1103-0000-000000000000 The address of the Smart Node on the LW Mesh
+00000000-0000-1103-0000-000000000000 The address of the Smart Node isOn the LW Mesh
 network
 R/W
 LW Mesh Security

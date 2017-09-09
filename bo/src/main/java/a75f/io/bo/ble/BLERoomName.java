@@ -5,7 +5,7 @@ import org.javolution.io.Struct;
 import a75f.io.bo.serial.SerialConsts;
 
 /**
- * Created by ryanmattison on 7/31/17.
+ * Created by ryanmattison isOn 7/31/17.
  */
 
 public class BLERoomName extends Struct {

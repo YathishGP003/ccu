@@ -10,7 +10,7 @@ import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.bo.serial.MessageType;
 
 /**
- * Instrumentation test, which will execute on an Android device.
+ * Instrumentation test, which will execute isOn an Android device.
  *
  * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
  */

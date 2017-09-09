@@ -5,7 +5,6 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,7 +14,7 @@ import a75f.io.bo.json.serializers.JsonSerializer;
 import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
 
 /**
- * Created by samjithsadasivan on 9/7/17.
+ * Created by samjithsadasivan isOn 9/7/17.
  */
 
 public class SmartNodeTest
@@ -55,7 +54,7 @@ public class SmartNodeTest
 		
 		ccuApplication.floors.add(floor);
 		ccuApplication.floors.get(0).mRoomList.get(0).zoneProfiles.add(p1);
-		LightSmartNodeOutput op1 = new LightSmartNodeOutput();
+		SmartNodeOutput op1 = new SmartNodeOutput();
 		op1.mSmartNodeAddress = testSN1.mAddress;
 		UUID op1UD = UUID.randomUUID();
 		op1.mUniqueID = op1UD;
@@ -64,7 +63,7 @@ public class SmartNodeTest
 		op1.mName = "Dining Room";
 		p1.smartNodeOutputs.add(op1);
 		
-		LightSmartNodeOutput op2 = new LightSmartNodeOutput();
+		SmartNodeOutput op2 = new SmartNodeOutput();
 		op2.mSmartNodeAddress = testSN2.mAddress;
 		UUID op2UD = UUID.randomUUID();
 		op2.mUniqueID = op2UD;
@@ -73,7 +72,7 @@ public class SmartNodeTest
 		op2.mName = "Kitchen";
 		p1.smartNodeOutputs.add(op2);
 		
-		LightSmartNodeOutput op3 = new LightSmartNodeOutput();
+		SmartNodeOutput op3 = new SmartNodeOutput();
 		op3.mSmartNodeAddress = testSN2.mAddress;
 		UUID op3UD = UUID.randomUUID();
 		op3.mUniqueID = op3UD;
@@ -106,7 +105,7 @@ public class SmartNodeTest
 	
 	public int getSmartNodeAddressFromOpUUID(CCUApplication global, UUID opUUID) {
 		LightProfile profile = (LightProfile) global.floors.get(0).mRoomList.get(0).zoneProfiles.get(0);
-		for (LightSmartNodeOutput op : profile.smartNodeOutputs) {
+		for (SmartNodeOutput op : profile.smartNodeOutputs) {
 			if (opUUID.equals(op.mUniqueID)) {
 				return  op.mSmartNodeAddress;
 			}
@@ -117,7 +116,7 @@ public class SmartNodeTest
 	public int getConfiguredOpsforSmartnode(CCUApplication global, SmartNode node) {
 		LightProfile profile = (LightProfile) global.floors.get(0).mRoomList.get(0).zoneProfiles.get(0);
 		int count = 0;
-		for (LightSmartNodeOutput op : profile.smartNodeOutputs) {
+		for (SmartNodeOutput op : profile.smartNodeOutputs) {
 			if (op.mSmartNodeAddress == node.mAddress)
 				count++;
 		}

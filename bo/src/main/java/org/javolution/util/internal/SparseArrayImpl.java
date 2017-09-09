@@ -276,7 +276,7 @@ public class SparseArrayImpl  {
     }
  
     /**
-     * Returns the minimal shift for two indices (based on common high-bits which can be masked).
+     * Returns the minimal shift for two indices (based isOn common high-bits which can be masked).
      */
     private static int commonShift(int i, int j) {
         int xor = i ^ j;

@@ -106,7 +106,7 @@ public final class ConstSet<E> extends FastSet<E> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the set unmodified.
-     * @deprecated Should never be used on immutable set.
+     * @deprecated Should never be used isOn immutable set.
      */
     @Override
     public boolean add(E element) {
@@ -115,7 +115,7 @@ public final class ConstSet<E> extends FastSet<E> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the set unmodified.
-     * @deprecated Should never be used on immutable set.
+     * @deprecated Should never be used isOn immutable set.
      */
     @Override
     public boolean addAll(Collection<? extends E> that) {
@@ -124,7 +124,7 @@ public final class ConstSet<E> extends FastSet<E> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the set unmodified.
-     * @deprecated Should never be used on immutable set.
+     * @deprecated Should never be used isOn immutable set.
      */
     @Override
     public boolean addAll(E... elements) {
@@ -133,7 +133,7 @@ public final class ConstSet<E> extends FastSet<E> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the set unmodified.
-     * @deprecated Should never be used on immutable set.
+     * @deprecated Should never be used isOn immutable set.
      */
     @Override
     public void clear() {
@@ -210,7 +210,7 @@ public final class ConstSet<E> extends FastSet<E> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the set unmodified.
-     * @deprecated Should never be used on immutable set.
+     * @deprecated Should never be used isOn immutable set.
      */
     @Override
     public E pollFirst() {
@@ -219,7 +219,7 @@ public final class ConstSet<E> extends FastSet<E> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the set unmodified.
-     * @deprecated Should never be used on immutable set.
+     * @deprecated Should never be used isOn immutable set.
      */
     @Override
     public E pollLast() {
@@ -228,7 +228,7 @@ public final class ConstSet<E> extends FastSet<E> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the set unmodified.
-     * @deprecated Should never be used on immutable set.
+     * @deprecated Should never be used isOn immutable set.
      */
     @Override
     public boolean remove(Object obj) {
@@ -237,7 +237,7 @@ public final class ConstSet<E> extends FastSet<E> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the set unmodified.
-     * @deprecated Should never be used on immutable set.
+     * @deprecated Should never be used isOn immutable set.
      */
     @Override
     public boolean removeAll(Collection<?> that) {
@@ -246,7 +246,7 @@ public final class ConstSet<E> extends FastSet<E> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the set unmodified.
-     * @deprecated Should never be used on immutable set.
+     * @deprecated Should never be used isOn immutable set.
      */
     @Override
     public boolean removeIf(Predicate<? super E> filter) {
@@ -255,7 +255,7 @@ public final class ConstSet<E> extends FastSet<E> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the set unmodified.
-     * @deprecated Should never be used on immutable set.
+     * @deprecated Should never be used isOn immutable set.
      */
     @Override
     public boolean retainAll(Collection<?> that) {

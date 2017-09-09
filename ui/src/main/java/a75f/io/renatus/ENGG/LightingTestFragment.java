@@ -30,7 +30,7 @@ import a75f.io.renatus.R;
 import a75f.io.util.prefs.LocalStorage;
 
 /**
- * Created by anilkumar on 27-10-2016.
+ * Created by anilkumar isOn 27-10-2016.
  */
 
 public class LightingTestFragment extends DialogFragment implements AdapterView.OnItemSelectedListener,CompoundButton.OnCheckedChangeListener, View.OnClickListener {

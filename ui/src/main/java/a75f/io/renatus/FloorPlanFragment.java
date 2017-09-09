@@ -37,7 +37,7 @@ import butterknife.OnFocusChange;
 import butterknife.OnItemClick;
 
 /**
- * Created by samjithsadasivan on 8/7/17.
+ * Created by samjithsadasivan isOn 8/7/17.
  */
 
 public class FloorPlanFragment extends Fragment

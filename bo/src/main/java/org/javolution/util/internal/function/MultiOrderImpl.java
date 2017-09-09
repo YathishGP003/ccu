@@ -23,7 +23,7 @@ public enum MultiOrderImpl implements Order<Object> {
         return false; // Considers all objects are different.
     }
 
-    /** Order based on hash value (never returns 0).*/
+    /** Order based isOn hash value (never returns 0).*/
     @Override
     public int compare(Object left, Object right) {
         int hashLeft = left.hashCode();

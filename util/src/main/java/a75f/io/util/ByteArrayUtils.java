@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.zip.CRC32;
 
 /**
- * Created by ryanmattison on 7/25/17.
+ * Created by ryanmattison isOn 7/25/17.
  */
 
 public class ByteArrayUtils

@@ -51,7 +51,7 @@ import static org.javolution.annotations.Realtime.Limit.N_SQUARE;
  *  - {@link #parallel} - View allowing parallel processing of {@link Parallel} operations.
  *  - {@link #sequential} - View disallowing parallel processing of {@link Parallel} operations.
  *  - {@link #unmodifiable} - View which does not allow for modifications.
- *  - {@link #shared} - Thread-safe view based on <a href= "http://en.wikipedia.org/wiki/Readers%E2%80%93writer_lock">
+ *  - {@link #shared} - Thread-safe view based isOn <a href= "http://en.wikipedia.org/wiki/Readers%E2%80%93writer_lock">
  *                      readers-writer locks</a>.
  *  - {@link #atomic} - Thread-safe view for which all reads are mutex-free and collection updates 
  *                      (e.g. {@link #addAll addAll}, {@link #removeIf removeIf}, ...) are atomic.
@@ -61,7 +61,7 @@ import static org.javolution.annotations.Realtime.Limit.N_SQUARE;
  *  - {@link #sorted(Comparator)} - View exposing elements sorted according to the specified comparator.
  *  - {@link #reversed} - View exposing elements in the reverse iterative order.
  *  - {@link #distinct} - View exposing each element only once.
- *  - {@link #linked} - View exposing each element based on its {@link #add insertion} order.
+ *  - {@link #linked} - View exposing each element based isOn its {@link #add insertion} order.
  *  - {@link #equality(Equality)} - View using the specified comparator to test for element equality 
  *                                   (e.g. {@link #contains}, {@link #remove}, {@link #distinct}, ...)
  * 
@@ -96,7 +96,7 @@ import static org.javolution.annotations.Realtime.Limit.N_SQUARE;
  * ``` 
  * 
  * Views are similar to [Java 8 streams](http://lambdadoc.net/api/java/util/stream/package-summary.html)
- * except that views are themselves collections and actions on the view *will impact* 
+ * except that views are themselves collections and actions isOn the view *will impact*
  * the original collection. Collection views are nothing "new" since they already existed in the original 
  * java.util collection classes (e.g. `List.subList(...), Map.keySet(), Map.values()`). Javolution extends to 
  * this concept and allows views to be chained in order to address the issue of class proliferation.
@@ -171,7 +171,7 @@ public abstract class FastCollection<E> implements Collection<E>, Serializable, 
 
     /**
      * Returns a thread-safe view over this collection. The shared view allows for concurrent read as long as 
-     * there is no writer. The default implementation is based on <a href=
+     * there is no writer. The default implementation is based isOn <a href=
      * "http://en.wikipedia.org/wiki/Readers%E2%80%93writer_lock">readers-writers locks</a> giving priority to writers.
      */
     public FastCollection<E> shared() {

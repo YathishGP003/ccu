@@ -14,7 +14,7 @@ import java.io.Reader;
 /**
  * <p>A character stream whose source is a Text.</p>
  * <p> This class is similar to {@link java.io.StringReader} but 
- *     operates on {@link Text} instances and is not synchronized.</p>
+ *     operates isOn {@link Text} instances and is not synchronized.</p>
  * 
  * @author javalama
  * @version 6.1, January 17, 2014
@@ -127,7 +127,7 @@ public class TextReader extends Reader {
 	 * Marks the present position in the stream.  Subsequent calls to reset()
 	 * will reposition the stream to this point.
 	 *
-	 * @param  readAheadLimit  Limit on the number of characters that may be
+	 * @param  readAheadLimit  Limit isOn the number of characters that may be
 	 *                         read while still preserving the mark.  Because
 	 *                         the stream's input comes from a string, there
 	 *                         is no actual limit, so this argument must not

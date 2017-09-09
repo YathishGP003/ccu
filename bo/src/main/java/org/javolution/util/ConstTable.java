@@ -95,7 +95,7 @@ public final class ConstTable<E> extends FastTable<E> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the table unmodified.
-     * @deprecated Should never be used on immutable table.
+     * @deprecated Should never be used isOn immutable table.
      */
     @Override
     public boolean add(E element) {
@@ -104,7 +104,7 @@ public final class ConstTable<E> extends FastTable<E> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the table unmodified.
-     * @deprecated Should never be used on immutable table.
+     * @deprecated Should never be used isOn immutable table.
      */
     @Override
     public void add(int index, E element) {
@@ -113,7 +113,7 @@ public final class ConstTable<E> extends FastTable<E> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the table unmodified.
-     * @deprecated Should never be used on immutable table.
+     * @deprecated Should never be used isOn immutable table.
      */
     @Override
     public boolean addAll(Collection<? extends E> that) {
@@ -122,7 +122,7 @@ public final class ConstTable<E> extends FastTable<E> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the table unmodified.
-     * @deprecated Should never be used on immutable table.
+     * @deprecated Should never be used isOn immutable table.
      */
     @Override
     public boolean addAll(E...elements) {
@@ -131,7 +131,7 @@ public final class ConstTable<E> extends FastTable<E> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the table unmodified.
-     * @deprecated Should never be used on immutable table.
+     * @deprecated Should never be used isOn immutable table.
      */
     @Override
     public boolean addAll(int index, Collection<? extends E> that) {
@@ -140,7 +140,7 @@ public final class ConstTable<E> extends FastTable<E> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the table unmodified.
-     * @deprecated Should never be used on immutable table.
+     * @deprecated Should never be used isOn immutable table.
      */
     @Override
     public boolean addAllSorted(Collection<? extends E> that, Comparator<? super E> cmp) {
@@ -149,7 +149,7 @@ public final class ConstTable<E> extends FastTable<E> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the table unmodified.
-     * @deprecated Should never be used on immutable table.
+     * @deprecated Should never be used isOn immutable table.
      */
     @Override
     public void addFirst(E element) {
@@ -158,7 +158,7 @@ public final class ConstTable<E> extends FastTable<E> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the table unmodified.
-     * @deprecated Should never be used on immutable table.
+     * @deprecated Should never be used isOn immutable table.
      */
     @Override
     public void addLast(E element) {
@@ -167,7 +167,7 @@ public final class ConstTable<E> extends FastTable<E> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the table unmodified.
-     * @deprecated Should never be used on immutable table.
+     * @deprecated Should never be used isOn immutable table.
      */
     @Override
     public void clear() {
@@ -197,7 +197,7 @@ public final class ConstTable<E> extends FastTable<E> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the table unmodified.
-     * @deprecated Should never be used on immutable table.
+     * @deprecated Should never be used isOn immutable table.
      */
     @Override
     public E pollFirst() {
@@ -206,7 +206,7 @@ public final class ConstTable<E> extends FastTable<E> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the table unmodified.
-     * @deprecated Should never be used on immutable table.
+     * @deprecated Should never be used isOn immutable table.
      */
     @Override
     public E pollLast() {
@@ -215,7 +215,7 @@ public final class ConstTable<E> extends FastTable<E> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the table unmodified.
-     * @deprecated Should never be used on immutable table.
+     * @deprecated Should never be used isOn immutable table.
      */
     @Override
     public E remove(int index) {
@@ -224,7 +224,7 @@ public final class ConstTable<E> extends FastTable<E> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the table unmodified.
-     * @deprecated Should never be used on immutable table.
+     * @deprecated Should never be used isOn immutable table.
      */
     @Override
     public boolean remove(Object searched) {
@@ -233,7 +233,7 @@ public final class ConstTable<E> extends FastTable<E> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the table unmodified.
-     * @deprecated Should never be used on immutable table.
+     * @deprecated Should never be used isOn immutable table.
      */
     @Override
     public boolean removeAll(Collection<?> that) {
@@ -242,7 +242,7 @@ public final class ConstTable<E> extends FastTable<E> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the table unmodified.
-     * @deprecated Should never be used on immutable table.
+     * @deprecated Should never be used isOn immutable table.
      */
     @Override
     public E removeFirst() {
@@ -251,7 +251,7 @@ public final class ConstTable<E> extends FastTable<E> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the table unmodified.
-     * @deprecated Should never be used on immutable table.
+     * @deprecated Should never be used isOn immutable table.
      */
     @Override
     public boolean removeFirstOccurrence(Object o) {
@@ -260,7 +260,7 @@ public final class ConstTable<E> extends FastTable<E> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the table unmodified.
-     * @deprecated Should never be used on immutable table.
+     * @deprecated Should never be used isOn immutable table.
      */
     @Override
     public boolean removeIf(Predicate<? super E> filter) {
@@ -269,7 +269,7 @@ public final class ConstTable<E> extends FastTable<E> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the table unmodified.
-     * @deprecated Should never be used on immutable table.
+     * @deprecated Should never be used isOn immutable table.
      */
     public E removeLast() {
         throw new UnsupportedOperationException(ERROR_MSG);
@@ -277,7 +277,7 @@ public final class ConstTable<E> extends FastTable<E> implements Immutable {
     
     /** 
      * Guaranteed to throw an exception and leave the table unmodified.
-     * @deprecated Should never be used on immutable table.
+     * @deprecated Should never be used isOn immutable table.
      */
     @Override
     public boolean removeLastOccurrence(Object o) {
@@ -286,7 +286,7 @@ public final class ConstTable<E> extends FastTable<E> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the table unmodified.
-     * @deprecated Should never be used on immutable table.
+     * @deprecated Should never be used isOn immutable table.
      */
     @Override
     public boolean retainAll(Collection<?> that) {
@@ -295,7 +295,7 @@ public final class ConstTable<E> extends FastTable<E> implements Immutable {
     
     /** 
      * Guaranteed to throw an exception and leave the table unmodified.
-     * @deprecated Should never be used on immutable table.
+     * @deprecated Should never be used isOn immutable table.
      */
     @Override
     public E set(int index, E element) {
@@ -309,7 +309,7 @@ public final class ConstTable<E> extends FastTable<E> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the table unmodified.
-     * @deprecated Should never be used on immutable table.
+     * @deprecated Should never be used isOn immutable table.
      */
     @Override
     public void sort(Comparator<? super E> cmp) {
@@ -324,7 +324,7 @@ public final class ConstTable<E> extends FastTable<E> implements Immutable {
     
     /** 
      * Guaranteed to throw an exception and leave the table unmodified.
-     * @deprecated Should never be used on immutable table.
+     * @deprecated Should never be used isOn immutable table.
      */
     @Override
     public boolean addSorted(E element,  Comparator<? super E> cmp) {
@@ -333,7 +333,7 @@ public final class ConstTable<E> extends FastTable<E> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the table unmodified.
-     * @deprecated Should never be used on immutable table.
+     * @deprecated Should never be used isOn immutable table.
      */
     @Override
     public boolean removeSorted(E element,  Comparator<? super E> cmp) {

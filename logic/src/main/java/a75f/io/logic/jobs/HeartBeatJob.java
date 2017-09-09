@@ -14,7 +14,7 @@ import a75f.io.bo.serial.MessageType;
 import a75f.io.logic.SerialBLL;
 
 /**
- * Created by Yinten on 8/24/2017.
+ * Created by Yinten isOn 8/24/2017.
  */
 //0x11 0x00
 public class HeartBeatJob extends Job {

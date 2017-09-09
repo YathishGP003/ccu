@@ -22,7 +22,7 @@ import java.util.ListIterator;
 
 /**
  * An atomic view over a table. All updates are synchronized, reads are
- * performed on immutable copy.
+ * performed isOn immutable copy.
  */
 public final class AtomicTableImpl<E> extends FastTable<E> {
 

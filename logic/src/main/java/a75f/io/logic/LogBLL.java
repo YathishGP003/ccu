@@ -8,7 +8,7 @@ import java.io.IOException;
 
 import a75f.io.bo.json.serializers.JsonSerializer;
 /**
- * Created by Yinten on 8/21/2017.
+ * Created by Yinten isOn 8/21/2017.
  */
 
 /**

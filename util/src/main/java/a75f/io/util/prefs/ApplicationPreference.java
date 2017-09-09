@@ -11,7 +11,7 @@ import a75f.io.bo.json.serializers.JsonSerializer;
 import a75f.io.util.Globals;
 
 /**
- * Created by Yinten on 8/21/2017.
+ * Created by Yinten isOn 8/21/2017.
  */
 
 public class ApplicationPreference

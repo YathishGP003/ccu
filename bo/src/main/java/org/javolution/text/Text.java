@@ -126,7 +126,7 @@ public final class Text implements CharSequence, Comparable<CharSequence>,
 		_count = str.length();
 		if (_data != null) { // Primitive.
 			str.getChars(0, _count, _data, 0);
-		} else { // Composite, splits on a block boundary. 
+		} else { // Composite, splits isOn a block boundary.
 			int half = ((_count + BLOCK_SIZE) >> 1) & BLOCK_MASK;
 			_head = new Text(str.substring(0, half));
 			_tail = new Text(str.substring(half, _count));
@@ -165,7 +165,7 @@ public final class Text implements CharSequence, Comparable<CharSequence>,
 			Text text = newPrimitive(length);
 			str.getChars(start, end, text._data, 0);
 			return text;
-		} else { // Splits on a block boundary.
+		} else { // Splits isOn a block boundary.
 			int half = ((length + BLOCK_SIZE) >> 1) & BLOCK_MASK;
 			return newComposite(Text.valueOf(str, start, start + half),
 					Text.valueOf(str, start + half, end));
@@ -202,7 +202,7 @@ public final class Text implements CharSequence, Comparable<CharSequence>,
 			Text text = Text.newPrimitive(length);
 			System.arraycopy(chars, offset, text._data, 0, length);
 			return text;
-		} else { // Splits on a block boundary.
+		} else { // Splits isOn a block boundary.
 			int half = ((length + BLOCK_SIZE) >> 1) & BLOCK_MASK;
 			return Text.newComposite(Text.valueOf(chars, offset, half),
 					Text.valueOf(chars, offset + half, length - half));
@@ -223,7 +223,7 @@ public final class Text implements CharSequence, Comparable<CharSequence>,
 			Text text = Text.newPrimitive(length);
 			tb.getChars(start, end, text._data, 0);
 			return text;
-		} else { // Splits on a block boundary.
+		} else { // Splits isOn a block boundary.
 			int half = ((length + BLOCK_SIZE) >> 1) & BLOCK_MASK;
 			return Text.newComposite(Text.valueOf(tb, start, start + half),
 					Text.valueOf(tb, start + half, end));
@@ -867,7 +867,7 @@ public final class Text implements CharSequence, Comparable<CharSequence>,
 	}
 
 	/**
-	 * Prints the current statistics on this text tree structure.
+	 * Prints the current statistics isOn this text tree structure.
 	 *  
 	 * @param out the stream to use for output (e.g. <code>System.out</code>)
 	 */
@@ -1209,7 +1209,7 @@ public final class Text implements CharSequence, Comparable<CharSequence>,
 	}
 
 	/**
-	 * Pads this text on the left with spaces to make the minimum total length
+	 * Pads this text isOn the left with spaces to make the minimum total length
 	 * as specified.
 	 * The new length of the new text is equal to the original length plus
 	 * <code>(length()-len)</code> spaces.
@@ -1222,7 +1222,7 @@ public final class Text implements CharSequence, Comparable<CharSequence>,
 	}
 
 	/**
-	 * Pads this text on the left to make the minimum total length as specified.
+	 * Pads this text isOn the left to make the minimum total length as specified.
 	 * Spaces or the given Unicode character are used to pad with.
 	 * <br>
 	 * The new length of the new text is equal to the original length plus
@@ -1238,7 +1238,7 @@ public final class Text implements CharSequence, Comparable<CharSequence>,
 	}
 
 	/**
-	 * Pads this text on the right with spaces to make the minimum total length
+	 * Pads this text isOn the right with spaces to make the minimum total length
 	 * as specified.
 	 * The new length of the new text is equal to the original length plus
 	 * <code>(length()-len)</code> spaces.
@@ -1251,7 +1251,7 @@ public final class Text implements CharSequence, Comparable<CharSequence>,
 	}
 
 	/**
-	 * Pads this text on the right to make the minimum total length as specified.
+	 * Pads this text isOn the right to make the minimum total length as specified.
 	 * Spaces or the given Unicode character are used to pad with.
 	 * <br>
 	 * The new length of the new text is equal to the original length plus

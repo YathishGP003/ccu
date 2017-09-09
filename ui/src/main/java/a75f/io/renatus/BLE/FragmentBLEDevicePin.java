@@ -47,7 +47,7 @@ import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.FLOOR_NAME;
 import static android.content.Context.BIND_AUTO_CREATE;
 
 /**
- * Created by ryanmattison on 7/24/17.
+ * Created by ryanmattison isOn 7/24/17.
  */
 
 public class FragmentBLEDevicePin extends BaseDialogFragment
@@ -192,7 +192,7 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
 			    bleDialogEnterPinEdittext.getText().toString().trim().equals(""))
 			{
 				bleDialogEnterPinEdittext
-						.setError("Pin required.  Please enter pin displayed on the 75F device you'd like to pair.");
+						.setError("Pin required.  Please enter pin displayed isOn the 75F device you'd like to pair.");
 			}
 			else
 			{
@@ -212,7 +212,7 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
 				else
 				{
 					bleDialogEnterPinEdittext
-							.setError("Pins do not match.  Please enter pin displayed on the 75F device you'd like to pair.");
+							.setError("Pins do not match.  Please enter pin displayed isOn the 75F device you'd like to pair.");
 				}
 			}
 		}

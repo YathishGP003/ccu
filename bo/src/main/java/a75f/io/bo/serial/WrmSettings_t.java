@@ -3,7 +3,7 @@ package a75f.io.bo.serial;
 import org.javolution.io.Struct;
 
 /**
- * Created by samjithsadasivan on 8/1/17.
+ * Created by samjithsadasivan isOn 8/1/17.
  */
 
 public class WrmSettings_t extends Struct
@@ -31,7 +31,7 @@ public class WrmSettings_t extends Struct
 	public final Unsigned8 airflowHeatingTemperature    = new Unsigned8(); // default 105 - airflow temperature in deg F above which we consider unit is in heating mode for failsafe mode
 	public final Unsigned8 airflowCoolingTemperature    = new Unsigned8(); // default 60 - airflow temperature in deg F below which we consider unit is in cooling mode for failsafe mode
 	public final Unsigned8 conditioningMode             = new Unsigned8(1); // 1 is heating, 0 is cooling - sent from CCU to WRM for display indication
-	public final Unsigned8 occupancyDetectorEnabled     = new Unsigned8(1); // 1 enabled. WRM should only turn on detector if enabled
+	public final Unsigned8 occupancyDetectorEnabled     = new Unsigned8(1); // 1 enabled. WRM should only turn isOn detector if enabled
 	public final Unsigned8 resetWrm                     = new Unsigned8(1); // force a reset of the WRM remotely when set to 1
 	public final Unsigned8 digitalOut1                  = new Unsigned8(1); // digital out for activation
 	public final Unsigned8 digitalOut2                  = new Unsigned8(1); // digital out for activation

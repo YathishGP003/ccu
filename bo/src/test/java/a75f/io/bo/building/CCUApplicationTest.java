@@ -13,10 +13,8 @@ import a75f.io.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.bo.json.serializers.JsonSerializer;
 import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
 
-import static org.junit.Assert.*;
-
 /**
- * Created by samjithsadasivan on 9/6/17.
+ * Created by samjithsadasivan isOn 9/6/17.
  */
 public class CCUApplicationTest
 {
@@ -41,7 +39,7 @@ public class CCUApplicationTest
 		};
 		ccuApplication.floors.add(floor);
 		ccuApplication.floors.get(0).mRoomList.get(0).zoneProfiles.add(p1);
-		LightSmartNodeOutput op1 = new LightSmartNodeOutput();
+		SmartNodeOutput op1 = new SmartNodeOutput();
 		op1.mSmartNodeAddress = testSN.mAddress;
 		UUID op1UD = UUID.randomUUID();
 		op1.mUniqueID = op1UD;
@@ -50,7 +48,7 @@ public class CCUApplicationTest
 		op1.mName = "Dining Room";
 		p1.smartNodeOutputs.add(op1);
 		
-		LightSmartNodeOutput op2 = new LightSmartNodeOutput();
+		SmartNodeOutput op2 = new LightSmartNodeOutput();
 		op2.mSmartNodeAddress = testSN.mAddress;
 		UUID op2UD = UUID.randomUUID();
 		op2.mUniqueID = op2UD;

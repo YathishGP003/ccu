@@ -47,7 +47,7 @@ public final class UTF8ByteBufferWriter extends Writer {
     public UTF8ByteBufferWriter() {}
 
     /**
-	 * Constructor to Provide a Byte Buffer on Initialization
+	 * Constructor to Provide a Byte Buffer isOn Initialization
 	 *
 	 * @param byteBuffer Byte Buffer to use for Writing
 	 */

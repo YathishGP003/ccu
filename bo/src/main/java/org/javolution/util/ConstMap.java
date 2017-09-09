@@ -114,7 +114,7 @@ public final class ConstMap<K, V> extends FastMap<K, V> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the map unmodified.
-     * @deprecated Should never be used on immutable map.
+     * @deprecated Should never be used isOn immutable map.
      */
     @Override
     public void clear() {
@@ -188,7 +188,7 @@ public final class ConstMap<K, V> extends FastMap<K, V> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the map unmodified.
-     * @deprecated Should never be used on immutable map.
+     * @deprecated Should never be used isOn immutable map.
      */
     @Override
     public Entry<K, V> pollFirstEntry() {
@@ -197,7 +197,7 @@ public final class ConstMap<K, V> extends FastMap<K, V> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the map unmodified.
-     * @deprecated Should never be used on immutable map.
+     * @deprecated Should never be used isOn immutable map.
      */
     @Override
     public Entry<K, V> pollLastEntry() {
@@ -206,7 +206,7 @@ public final class ConstMap<K, V> extends FastMap<K, V> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the map unmodified.
-     * @deprecated Should never be used on immutable map.
+     * @deprecated Should never be used isOn immutable map.
      */
     @Override
     public V put(K key, @Nullable V value) {
@@ -215,7 +215,7 @@ public final class ConstMap<K, V> extends FastMap<K, V> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the map unmodified.
-     * @deprecated Should never be used on immutable map.
+     * @deprecated Should never be used isOn immutable map.
      */
     @Override
     public void putAll(Object... keyValuePairs) {
@@ -224,7 +224,7 @@ public final class ConstMap<K, V> extends FastMap<K, V> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the map unmodified.
-     * @deprecated Should never be used on immutable map.
+     * @deprecated Should never be used isOn immutable map.
      */
     @Override
     public void putAll(Map<? extends K, ? extends V> that) {
@@ -238,7 +238,7 @@ public final class ConstMap<K, V> extends FastMap<K, V> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the map unmodified.
-     * @deprecated Should never be used on immutable map.
+     * @deprecated Should never be used isOn immutable map.
      */
     @Override
     public V putIfAbsent(K key, @Nullable V value) {
@@ -247,7 +247,7 @@ public final class ConstMap<K, V> extends FastMap<K, V> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the map unmodified.
-     * @deprecated Should never be used on immutable map.
+     * @deprecated Should never be used isOn immutable map.
      */
     @Override
     public V remove(Object key) {
@@ -256,7 +256,7 @@ public final class ConstMap<K, V> extends FastMap<K, V> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the map unmodified.
-     * @deprecated Should never be used on immutable map.
+     * @deprecated Should never be used isOn immutable map.
      */
     @Override
     public boolean remove(Object key, @Nullable Object value) {
@@ -265,7 +265,7 @@ public final class ConstMap<K, V> extends FastMap<K, V> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the map unmodified.
-     * @deprecated Should never be used on immutable map.
+     * @deprecated Should never be used isOn immutable map.
      */
     @Override
     public Entry<K, V> removeEntry(K key) {
@@ -274,7 +274,7 @@ public final class ConstMap<K, V> extends FastMap<K, V> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the map unmodified.
-     * @deprecated Should never be used on immutable map.
+     * @deprecated Should never be used isOn immutable map.
      */
     @Override
     public V replace(K key, @Nullable V value) {
@@ -283,7 +283,7 @@ public final class ConstMap<K, V> extends FastMap<K, V> implements Immutable {
 
     /** 
      * Guaranteed to throw an exception and leave the map unmodified.
-     * @deprecated Should never be used on immutable map.
+     * @deprecated Should never be used isOn immutable map.
      */
     @Override
     public boolean replace(K key, @Nullable V oldValue, @Nullable V newValue) {

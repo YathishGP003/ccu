@@ -8,7 +8,7 @@ import a75f.io.bo.serial.MessageType;
 import a75f.io.util.Globals;
 
 /**
- * Created by Yinten on 8/17/2017.
+ * Created by Yinten isOn 8/17/2017.
  */
 
 public class SmartNodeBLL

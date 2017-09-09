@@ -7,7 +7,6 @@ import java.util.UUID;
 import a75f.io.bo.building.CCUApplication;
 import a75f.io.bo.building.Floor;
 import a75f.io.bo.building.LightProfile;
-import a75f.io.bo.building.LightSmartNodeOutput;
 import a75f.io.bo.building.SmartNode;
 import a75f.io.bo.building.SmartNodeOutput;
 import a75f.io.bo.building.Zone;
@@ -53,7 +52,7 @@ public class LocalStorageUtilTest
 		relayOneOp.mSmartNodePort = Port.RELAY_ONE;
 		relayOneOp.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyClose;
 		relayOneOp.mOutputAnalogActuatorType = OutputAnalogActuatorType.TwoToTenV;
-		lightProfile5K.smartNodeOutputs.add((LightSmartNodeOutput) relayOneOp);
+		lightProfile5K.smartNodeOutputs.add(relayOneOp);
 		try
 		{
 			String jsonString = JsonSerializer.toJson(orgCcu, false);

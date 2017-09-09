@@ -1,6 +1,10 @@
 package a75f.io.renatus;
 
 import android.app.Activity;
+
+import android.app.DialogFragment;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.graphics.Color;
 import android.support.v7.widget.SwitchCompat;
@@ -293,13 +297,13 @@ public class LightingDetailAdapter extends BaseAdapter{
                 }
 
             });
-            //changing vacation
+            //changing schedule
             final ImageView vacationEdit = (ImageView) row.findViewById(R.id.vacationEdit);
             vacationEdit.setTag(position);
             vacationEdit.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    /*FragmentTransaction ftt = c.getFragmentManager().beginTransaction();
+                   /* FragmentTransaction ftt = c.getFragmentManager().beginTransaction();
                     Fragment prev1 = c.getFragmentManager().findFragmentByTag("vacation");
                     if (prev1 != null) {
                         ftt.remove(prev1);
@@ -316,12 +320,10 @@ public class LightingDetailAdapter extends BaseAdapter{
             imgNameSchedule.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    /*//CcuLog.d("WRM_PRO","imageView LCM detail named sch edit -"+v.isEnabled()+","+v.isPressed());
-                    if(v.isPressed()) {
-                        FSVData fsvData = fsvPortList.get(position).getFsvData();
-                        FSVData.SMARTNODE_PORT port = fsvPortList.get(position).getPort();
-                        showNameScheduleSelector(fsvData, port);
-                    }*/
+                    
+                    if(v.isPressed() && position == 1) {
+                        showDialogFragment(LightScheduleFragment.newInstance(snOutput),"schedule_fragment");
+                    }
 
                 }
             });
@@ -419,7 +421,19 @@ public class LightingDetailAdapter extends BaseAdapter{
 
         return row;
     }
-
+    
+    private void showDialogFragment(DialogFragment dialogFragment, String id)
+    {
+        FragmentTransaction ft = c.getFragmentManager().beginTransaction();
+        Fragment prev = c.getFragmentManager().findFragmentByTag(id);
+        if (prev != null)
+        {
+            ft.remove(prev);
+        }
+        ft.addToBackStack(null);
+        // Create and show the dialog.
+        dialogFragment.show(ft, id);
+    }
    /* @Override
     public void OnSetLCMVacationSchedule(SortedMap<Long, JSONObject> vacationData, FSVData.SMARTNODE_PORT port, FSVData fsvData) {
         SmartNodesPortData portData = fsvData.getSmartNodePort();

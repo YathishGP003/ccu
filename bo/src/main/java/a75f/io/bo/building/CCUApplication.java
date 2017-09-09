@@ -3,6 +3,7 @@ package a75f.io.bo.building;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 /**
  * Created by Yinten isOn 8/15/2017.
@@ -29,4 +30,29 @@ public class CCUApplication
 		}
 		return null;
 	}
+	
+	public SmartNodeOutput findSmartNodePortByUUID(UUID id) {
+		for (Floor f : floors) {
+			for (Zone z : f.mRoomList) {
+				for (ZoneProfile p : z.zoneProfiles) {
+					
+					if (p instanceof LightProfile) {
+						for (SmartNodeOutput op : ((LightProfile) p).smartNodeOutputs) {
+							if (id.equals(op.mUniqueID)) {
+								return op;
+							}
+						}
+					} else {
+						for (SmartNodeOutput op : p.smartNodeOutputs) {
+							if (id.equals(op.mUniqueID)) {
+								return op;
+							}
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
+	
 }

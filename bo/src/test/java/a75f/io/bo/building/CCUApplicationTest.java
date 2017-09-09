@@ -48,7 +48,7 @@ public class CCUApplicationTest
 		op1.mName = "Dining Room";
 		p1.smartNodeOutputs.add(op1);
 		
-		SmartNodeOutput op2 = new LightSmartNodeOutput();
+		SmartNodeOutput op2 = new SmartNodeOutput();
 		op2.mSmartNodeAddress = testSN.mAddress;
 		UUID op2UD = UUID.randomUUID();
 		op2.mUniqueID = op2UD;

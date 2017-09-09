@@ -28,7 +28,6 @@ import java.util.UUID;
 
 import a75f.io.bo.building.CCUApplication;
 import a75f.io.bo.building.LightProfile;
-import a75f.io.bo.building.LightSmartNodeOutput;
 import a75f.io.bo.building.SmartNode;
 import a75f.io.bo.building.SmartNodeOutput;
 import a75f.io.bo.building.Zone;
@@ -267,7 +266,7 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 	{
 		if (mSmartNodeRelayOne == null)
 		{
-			mSmartNodeRelayOne = new LightSmartNodeOutput();
+			mSmartNodeRelayOne = new SmartNodeOutput();
 			mSmartNodeRelayOne.mOutput = Output.Relay;
 			mSmartNodeRelayOne.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyClose;
 			mSmartNodeRelayOne.mSmartNodePort = Port.RELAY_ONE;
@@ -295,7 +294,7 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 	{
 		if (smartNodeAnalogOutputOne == null)
 		{
-			smartNodeAnalogOutputOne = new LightSmartNodeOutput();
+			smartNodeAnalogOutputOne = new SmartNodeOutput();
 			smartNodeAnalogOutputOne.mOutput = Output.Analog;
 			smartNodeAnalogOutputOne.mOutputAnalogActuatorType =
 					OutputAnalogActuatorType.ZeroToTenV;

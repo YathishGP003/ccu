@@ -15,6 +15,6 @@ public class ScheduledItemComparator implements Comparator<Map.Entry<UUID, Sched
 	@Override
 	public int compare(Map.Entry<UUID, ScheduledItem> siA, Map.Entry<UUID, ScheduledItem> siB)
 	{
-		return siA.getValue().mTimeStamp.compareTo(siB.getValue().mTimeStamp); 
+		return siA.getValue().mTimeStamp.compareTo(siB.getValue().mTimeStamp);
 	}
 }

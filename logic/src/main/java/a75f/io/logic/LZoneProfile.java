@@ -54,8 +54,14 @@ public class LZoneProfile
 
 	
 	
-	public static void scheduleProfile(ZoneProfile zoneProfile) throws Exception
+	public static void scheduleProfiles() throws Exception
 	{
-		Globals.getInstance().getLScheduler().add(zoneProfile.getNextActiveScheduledTime());
+		ArrayList<ZoneProfile> allZoneProfiles = Globals.getInstance().getCCUApplication().findAllZoneProfiles();
+
+		for(ZoneProfile zp : allZoneProfiles)
+		{
+			Globals.getInstance().getLScheduler().add(zp.getNextActiveScheduledTime());
+		}
+		
 	}
 }

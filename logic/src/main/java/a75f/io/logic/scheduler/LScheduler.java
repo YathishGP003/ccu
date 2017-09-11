@@ -8,6 +8,7 @@ import android.content.Intent;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -101,7 +102,12 @@ public class LScheduler
 	
 	static SortedSet<Map.Entry<UUID, ScheduledItem>> mapOfEntriesSortedByTimeStamp(Map<UUID, ScheduledItem> map)
 	{
-		SortedSet<Map.Entry<UUID, ScheduledItem>> sortedEntries = new TreeSet<>();
+		SortedSet<Map.Entry<UUID, ScheduledItem>> sortedEntries = new TreeSet<>(new Comparator<Map.Entry<UUID, ScheduledItem>>() {
+            @Override
+            public int compare(Map.Entry<UUID, ScheduledItem> o1, Map.Entry<UUID, ScheduledItem> o2) {
+                return o1.getValue().mTimeStamp.compareTo(o2.getValue().mTimeStamp);
+            }
+        });
 		sortedEntries.addAll(map.entrySet());
 		return sortedEntries;
 	}

@@ -16,6 +16,7 @@ import java.util.UUID;
 
 import a75f.io.bo.building.Schedule;
 import a75f.io.bo.building.SmartNodeOutput;
+import a75f.io.logic.LZoneProfile;
 import a75f.io.logic.cache.Globals;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
@@ -138,10 +139,14 @@ public class LightScheduleFragment extends BaseDialogFragment
 		mSchedule.setEt(et);
 		mSchedule.setVal((short) 100);
 
-		mCurrentPort.mSchedules.add(mSchedule); 
+		mCurrentPort.mSchedules.add(mSchedule);
+        try {
+            LZoneProfile.scheduleProfiles();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-		
-	}
+    }
 	
 	
 	

@@ -138,6 +138,13 @@ public class SerialBLL
 	public void setUSBService(UsbService usbService)
 	{
 		mUsbService = usbService;
+		try {
+
+			//TODO: move this forward.
+			LZoneProfile.scheduleProfiles();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	

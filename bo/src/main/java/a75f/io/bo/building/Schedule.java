@@ -91,8 +91,8 @@ public class Schedule {
                 //Add the scheduled intervals.
                 for (int day : days) {
                     Interval scheduledInterval =
-                            new Interval(startDateTime.withDayOfWeek(day), endDateTime
-                                    .withDayOfWeek(day));
+                            new Interval(startDateTime.withDayOfWeek(day + 1), endDateTime
+                                    .withDayOfWeek(day + 1));
                     scheduledIntervals.add(scheduledInterval);
                 }
             } catch (Exception e) {

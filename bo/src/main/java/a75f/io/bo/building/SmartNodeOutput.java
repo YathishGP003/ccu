@@ -29,7 +29,7 @@ public class SmartNodeOutput
 	public Output                   mOutput;
 	public OutputRelayActuatorType  mOutputRelayActuatorType;
 	public OutputAnalogActuatorType mOutputAnalogActuatorType;
-	public ArrayList<Schedule>      mSchedules;
+	public ArrayList<Schedule>      mSchedules = new ArrayList<Schedule>();
 	
 	private boolean mOverride = false; //This circuit controls it's own value
 	

@@ -117,7 +117,7 @@ public class LScheduler
 		//set time to mock time or system time if there is no mock time.
 		mAlarmMgr.setTime(MockTime.getInstance().getMockTime());
 		//schedule item
-		mAlarmMgr.set(AlarmManager.RTC, itemToSchedule.mTimeStamp, mAlarmIntent);
+		mAlarmMgr.set(AlarmManager.RTC, itemToSchedule.mTimeStamp.getMillis(), mAlarmIntent);
 	}
 	
 	
@@ -141,6 +141,15 @@ public class LScheduler
 			mCurrentScheduledItem = null;
 			checkFront();
 		}
+	}
+	
+	//For test
+	public Map<UUID, ScheduledItem> getScheduledItems() {
+		return mScheduledItems;
+	}
+	
+	public ScheduledItem getCurrentScheduledItem() {
+		return mCurrentScheduledItem;
 	}
 }
 	

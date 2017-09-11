@@ -247,7 +247,7 @@ public class Schedule
 	
 	
 	@JsonIgnore
-	public long getNextScheduleTransistionTime() throws Exception
+	public DateTime getNextScheduleTransistionTime() throws Exception
 	{
 		if (!isValidSchedule())
 		{
@@ -266,13 +266,13 @@ public class Schedule
 			//Before start of first
 			if (now.isBefore(interval.getStart()))
 			{
-				return interval.getStartMillis();
+				return interval.getStart();
 			}
 			else if (interval.contains(now))
 			{
-				return interval.getEndMillis();
+				return interval.getEnd();
 			}
 		}
-		return -1;
+		return null;
 	}
 }

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import org.joda.time.DateTime;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -77,10 +79,11 @@ public abstract class ZoneProfile
 	private Schedule getSchedule(Schedule nextActiveScheduleTime, Schedule schedule)
 			throws Exception
 	{
-		if (nextActiveScheduleTime == null || schedule.getNextScheduleTransistionTime() <
-		                                      nextActiveScheduleTime
-				                                      .getNextScheduleTransistionTime())
+		if (nextActiveScheduleTime == null || schedule.getNextScheduleTransistionTime().isBefore(nextActiveScheduleTime
+				                                                                                         .getNextScheduleTransistionTime())
+		                                      )
 		{
+			
 			nextActiveScheduleTime = schedule;
 		}
 		return nextActiveScheduleTime;

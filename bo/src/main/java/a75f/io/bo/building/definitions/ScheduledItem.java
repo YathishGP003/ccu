@@ -14,7 +14,6 @@ public class ScheduledItem
 	public LScheduleAction lScheduleAction;
 	public DateTime        mTimeStamp;
 	
-	
 	@Override
 	public String toString()
 	{

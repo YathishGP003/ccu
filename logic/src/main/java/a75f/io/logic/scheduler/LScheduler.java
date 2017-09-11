@@ -5,9 +5,11 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -46,6 +48,7 @@ public class LScheduler
 	public void add(ScheduledItem scheduledItem)
 	{
 		/*The list contains the key */
+
 		if (mScheduledItems.containsKey(scheduledItem.mUuid))
 		{
 			ScheduledItem alreadyAddedScheduledItem = mScheduledItems.get(scheduledItem.mUuid);
@@ -101,7 +104,12 @@ public class LScheduler
 	
 	static SortedSet<Map.Entry<UUID, ScheduledItem>> mapOfEntriesSortedByTimeStamp(Map<UUID, ScheduledItem> map)
 	{
-		SortedSet<Map.Entry<UUID, ScheduledItem>> sortedEntries = new TreeSet<>();
+		SortedSet<Map.Entry<UUID, ScheduledItem>> sortedEntries = new TreeSet<>(new Comparator<Map.Entry<UUID, ScheduledItem>>() {
+            @Override
+            public int compare(Map.Entry<UUID, ScheduledItem> o1, Map.Entry<UUID, ScheduledItem> o2) {
+                return o1.getValue().mTimeStamp.compareTo(o2.getValue().mTimeStamp);
+            }
+        });
 		sortedEntries.addAll(map.entrySet());
 		return sortedEntries;
 	}
@@ -115,7 +123,9 @@ public class LScheduler
 		//set new scheduled item to front
 		mCurrentScheduledItem = itemToSchedule;
 		//set time to mock time or system time if there is no mock time.
-		mAlarmMgr.setTime(MockTime.getInstance().getMockTime());
+
+        //TODO revisit
+        //mAlarmMgr.setTime(MockTime.getInstance().getMockTime());
 		//schedule item
 		mAlarmMgr.set(AlarmManager.RTC, itemToSchedule.mTimeStamp.getMillis(), mAlarmIntent);
 	}
@@ -128,6 +138,7 @@ public class LScheduler
 		public void onReceive(Context context, Intent intent)
 		{
 			//Remove mCurrentScheduledItem, Notify LZoneProfile.
+            Log.i("LScheduler", "ON recieve scheduled event");
 			SortedSet<Map.Entry<UUID, ScheduledItem>> entries =
 					mapOfEntriesSortedByTimeStamp(mScheduledItems);
 			ArrayList<ScheduledItem> removedScheduledItems = new ArrayList<>();

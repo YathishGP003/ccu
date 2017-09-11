@@ -70,7 +70,7 @@ public abstract class ZoneProfile
 			ScheduledItem scheduledItem = new ScheduledItem();
 			scheduledItem.mUuid = this.uuid;
 			scheduledItem.lScheduleAction = LScheduleAction.CONTROLS_UPDATE;
-			scheduledItem.mTimeStamp = nextActiveScheduleTime.getNextScheduleTransistionTime();
+			scheduledItem.mTimeStamp = new DateTime(nextActiveScheduleTime.getNextScheduleTransistionTime());
 			return scheduledItem;
 		}
 	}
@@ -79,9 +79,8 @@ public abstract class ZoneProfile
 	private Schedule getSchedule(Schedule nextActiveScheduleTime, Schedule schedule)
 			throws Exception
 	{
-		if (nextActiveScheduleTime == null || schedule.getNextScheduleTransistionTime().isBefore(nextActiveScheduleTime
-				                                                                                         .getNextScheduleTransistionTime())
-		                                      )
+		if (nextActiveScheduleTime == null || schedule.getNextScheduleTransistionTime() <
+		                                      nextActiveScheduleTime.getNextScheduleTransistionTime())
 		{
 			
 			nextActiveScheduleTime = schedule;

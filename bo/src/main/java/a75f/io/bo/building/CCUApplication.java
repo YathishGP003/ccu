@@ -78,4 +78,21 @@ public class CCUApplication
 		
 		return null;
 	}
+
+	public ArrayList<ZoneProfile> findAllZoneProfiles()
+	{
+		ArrayList<ZoneProfile> zoneProfiles = new ArrayList<ZoneProfile>();
+
+		for (Floor f : floors)
+		{
+			for (Zone z : f.mRoomList)
+			{
+				for (ZoneProfile p : z.zoneProfiles)
+				{
+					zoneProfiles.add(p);
+				}
+			}
+		}
+		return zoneProfiles;
+	}
 }

@@ -17,16 +17,22 @@ del /F /Q %apk_host%
 ECHO Stop the app
 %ADB% shell am force-stop %app_package%
 
-ECHO Compile the APK
-call ..\gradlew assembleDebug -q
+::%ADB% root
 
+
+ECHO Compile the APK
+call ..\gradlew assembleDebug
+
+ECHO  mount system
 %ADB% push %apk_host%/%apk_name% %apk_target_dir%
 
-ECHO Reinstall app
-%ADB_SH% 'pm install -r %apk_target_sys%'
+ECHO Give permissions
+::%ADB_SH% "chmod 755 %apk_target_dir%"
+::%ADB_SH% "chmod 644 %apk_target_sys%"
 
+ECHO Reinstall app %ADB_SH% 'pm install -r %apk_target_sys%'
+%ADB_SH% 'pm install -r %apk_target_sys%'
 
 ECHO Start the app
 %ADB% shell "am start -n %app_package%/%app_package%.%MAIN_ACTIVITY% -a android.intent.action.MAIN -c android.intent.category.LAUNCHER"
 
-PAUSE

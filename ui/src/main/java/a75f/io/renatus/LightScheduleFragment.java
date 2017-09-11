@@ -10,11 +10,13 @@ import android.widget.TimePicker;
 
 import org.javolution.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import a75f.io.bo.building.Schedule;
 import a75f.io.bo.building.SmartNodeOutput;
+import a75f.io.logic.LZoneProfile;
 import a75f.io.logic.cache.Globals;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
@@ -47,7 +49,7 @@ public class LightScheduleFragment extends BaseDialogFragment
 	@BindView(R.id.scheduleSave)
 	Button saveBtn;
 	
-	@BindViews({R.id.checkBoxSun, R.id.checkBoxMon, R.id.checkBoxTue, R.id.checkBoxWed, R.id.checkBoxThu, R.id.checkBoxFri, R.id.checkBoxSat})
+	@BindViews({R.id.checkBoxMon, R.id.checkBoxTue, R.id.checkBoxWed, R.id.checkBoxThu, R.id.checkBoxFri, R.id.checkBoxSat, R.id.checkBoxSun})
 	List<CheckBox> daysList;
 	
 	public static LightScheduleFragment newInstance(SmartNodeOutput port){
@@ -80,7 +82,7 @@ public class LightScheduleFragment extends BaseDialogFragment
 	public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
 	{
 		super.onViewCreated(view, savedInstanceState);
-		mCurrentPort = (SmartNodeOutput) Globals.getInstance().getCCUApplication().findSmartNodePortByUUID(mCurrentPortId);
+		mCurrentPort =  Globals.getInstance().getCCUApplication().findSmartNodePortByUUID(mCurrentPortId);
 		
 		if (mCurrentPort == null) {
 			dismiss();
@@ -100,7 +102,7 @@ public class LightScheduleFragment extends BaseDialogFragment
 	   
 		
 		for (int i = 0 ;i < 7; i++) {
-			 
+
 			//if ((CheckBox)daysList.get(i).)
 		}
     }
@@ -115,15 +117,36 @@ public class LightScheduleFragment extends BaseDialogFragment
 		if (mSchedule == null) {
 			mSchedule = new Schedule();
 		}
-		
+		ArrayList<Integer> days = new ArrayList<Integer>();
+
+
 		for (int i = 0 ;i < 7; i++) {
 			
 			if (((CheckBox)daysList.get(i)).isChecked()) {
-				//Add schedules
+				days.add(i);
 			}
 		}
-		
-	}
+
+		String st = startTimePicker.getCurrentHour() < 10 ? "0" + startTimePicker.getCurrentHour() :
+				startTimePicker.getCurrentHour() + "" + ":" + (startTimePicker.getCurrentMinute() < 10 ? "0" + startTimePicker.getCurrentMinute() : startTimePicker.getCurrentMinute());
+
+
+		String et = endTimePicker.getCurrentHour() < 10 ? "0" + endTimePicker.getCurrentHour() :
+				endTimePicker.getCurrentHour() + "" + ":" + (endTimePicker.getCurrentMinute() < 10 ? "0" + startTimePicker.getCurrentMinute() : startTimePicker.getCurrentMinute());
+
+		mSchedule.setDays(days);
+		mSchedule.setSt(st);
+		mSchedule.setEt(et);
+		mSchedule.setVal((short) 100);
+
+		mCurrentPort.mSchedules.add(mSchedule);
+        try {
+            LZoneProfile.scheduleProfiles();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
 	
 	
 	

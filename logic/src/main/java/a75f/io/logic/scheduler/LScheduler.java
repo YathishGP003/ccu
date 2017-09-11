@@ -47,6 +47,7 @@ public class LScheduler
 	public void add(ScheduledItem scheduledItem)
 	{
 		/*The list contains the key */
+
 		if (mScheduledItems.containsKey(scheduledItem.mUuid))
 		{
 			ScheduledItem alreadyAddedScheduledItem = mScheduledItems.get(scheduledItem.mUuid);
@@ -121,7 +122,9 @@ public class LScheduler
 		//set new scheduled item to front
 		mCurrentScheduledItem = itemToSchedule;
 		//set time to mock time or system time if there is no mock time.
-		mAlarmMgr.setTime(MockTime.getInstance().getMockTime());
+
+        //TODO revisit
+        //mAlarmMgr.setTime(MockTime.getInstance().getMockTime());
 		//schedule item
 		mAlarmMgr.set(AlarmManager.RTC, itemToSchedule.mTimeStamp.getMillis(), mAlarmIntent);
 

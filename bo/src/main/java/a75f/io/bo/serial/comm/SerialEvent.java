@@ -1,6 +1,8 @@
 package a75f.io.bo.serial.comm;
 
-public class SerialEvent
+import a75f.io.bo.building.BaseEvent;
+
+public class SerialEvent extends BaseEvent
 {
 	private SerialAction mSerialAction;
 	private byte[]       mBytes;

@@ -17,7 +17,7 @@ import a75f.io.bo.serial.comm.SerialAction;
 import a75f.io.bo.serial.comm.SerialEvent;
 import a75f.io.usbserial.UsbService;
 
-import static a75f.io.logic.LogBLL.logStructAsJSON;
+import static a75f.io.logic.LLog.logStructAsJSON;
 import static android.content.ContentValues.TAG;
 
 /**
@@ -159,7 +159,7 @@ public class SerialBLL
 		logStructAsJSON(struct);
 		if (mUsbService == null)
 		{
-			LogBLL.logUSBServiceNotInitialized();
+			LLog.logUSBServiceNotInitialized();
 			return false;
 		}
 		mUsbService.write(struct.getOrderedBuffer());

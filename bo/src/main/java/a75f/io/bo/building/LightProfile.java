@@ -13,17 +13,11 @@ import a75f.io.bo.building.definitions.Port;
 import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.bo.serial.MessageType;
 
-
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class LightProfile extends ZoneProfile
 {
-	public boolean on       = true;
-	public boolean dimmable = true;
-	public short dimmablePercent;
-	
-	public Schedule schedule = null;
-	
-	public ArrayList<SmartNodeOutput> smartNodeOutputs = new ArrayList<>();
+	public boolean on = true;
+	public short mDimmablePercent;
 	
 	
 	public LightProfile()
@@ -36,14 +30,11 @@ public class LightProfile extends ZoneProfile
 		super(name);
 	}
 	
-	
+	@JsonIgnore
 	public void on(boolean on)
 	{
 		this.on = on;
 	}
-	
-	
-	
 	/*****************
 	 *ONLY USED FOR CIRCUITS BELOW
 	 ******************/
@@ -56,7 +47,6 @@ public class LightProfile extends ZoneProfile
 	@JsonIgnore
 	public List<CcuToCmOverUsbSnControlsMessage_t> getControlsMessage()
 	{
-		ensureDimmable();
 		HashMap<Short, CcuToCmOverUsbSnControlsMessage_t> controlsMessages =
 				new HashMap<Short, CcuToCmOverUsbSnControlsMessage_t>();
 		for (SmartNodeOutput smartNodeOutput : this.smartNodeOutputs)
@@ -76,7 +66,7 @@ public class LightProfile extends ZoneProfile
 			Struct.Unsigned8 port = getPort(controlsMessage_t, smartNodeOutput.mSmartNodePort);
 			int localDimmablePercent = 100;
 			boolean localOn = true;
-			if (smartNodeOutput.mOverride)
+			if (smartNodeOutput.isOverride())
 			{
 				localDimmablePercent = smartNodeOutput.mVal;
 				localOn = smartNodeOutput.mVal != 0;
@@ -84,8 +74,21 @@ public class LightProfile extends ZoneProfile
 			}
 			else
 			{
-				localDimmablePercent = this.dimmablePercent;
-				localOn = this.dimmablePercent != 0;
+				if (smartNodeOutput.hasSchedules())
+				{
+					localDimmablePercent = smartNodeOutput.getScheduledVal();
+					localOn = localDimmablePercent != 0;
+				}
+				else if (this.hasSchedules())
+				{
+					localDimmablePercent = this.getScheduledVal();
+					localOn = localDimmablePercent != 0;
+				}
+				else
+				{
+					localOn = on;
+					localDimmablePercent = mDimmablePercent;
+				}
 			}
 			switch (smartNodeOutput.mOutput)
 			{
@@ -165,16 +168,7 @@ public class LightProfile extends ZoneProfile
 		return new ArrayList<>(controlsMessages.values());
 	}
 	
-	
-	private void ensureDimmable()
-	{
-		if (dimmable == false)
-		{
-			dimmablePercent = 100;
-		}
-	}
-	
-	
+	@JsonIgnore
 	private Struct.Unsigned8 getPort(CcuToCmOverUsbSnControlsMessage_t controlsMessage_t,
 	                                 Port smartNodePort)
 	{
@@ -197,7 +191,20 @@ public class LightProfile extends ZoneProfile
 		return retVal;
 	}
 	
+	@JsonIgnore
+	public int getScheduledVal()
+	{
+		for (Schedule schedule : mSchedules)
+		{
+			if (schedule.isInSchedule())
+			{
+				return schedule.getVal();
+			}
+		}
+		return 0;
+	}
 	
+	@JsonIgnore
 	private static short getDimmable(int localDimmablePercent, int analogVoltage)
 	{
 		return (short) (((float) localDimmablePercent * (float) analogVoltage) / 100.0f);

@@ -31,7 +31,11 @@ public class CCUApplication
 		return null;
 	}
 	
-	public SmartNodeOutput findSmartNodePortByUUID(UUID id) {
+	public SmartNodeOutput findSmartNodePortByUUID(UUID id)
+	
+	{
+		
+		//TODO: revisit
 		for (Floor f : floors) {
 			for (Zone z : f.mRoomList) {
 				for (ZoneProfile p : z.zoneProfiles) {
@@ -55,4 +59,23 @@ public class CCUApplication
 		return null;
 	}
 	
+	
+	public ZoneProfile findZoneProfileByUUID(UUID uuid)
+	{
+		for (Floor f : floors)
+		{
+			for (Zone z : f.mRoomList)
+			{
+				for (ZoneProfile p : z.zoneProfiles)
+				{
+					if(p.uuid.equals(uuid))
+					{
+						return p;
+					}
+				}
+			}
+		}
+		
+		return null;
+	}
 }

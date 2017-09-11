@@ -1,14 +1,11 @@
 package a75f.io.renatus;
 
-import android.app.DialogFragment;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.TextView;
 import android.widget.TimePicker;
 
 import org.javolution.annotations.Nullable;
@@ -18,8 +15,9 @@ import java.util.UUID;
 
 import a75f.io.bo.building.Schedule;
 import a75f.io.bo.building.SmartNodeOutput;
+import a75f.io.logic.cache.Globals;
+import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
-import a75f.io.util.Globals;
 import butterknife.BindView;
 import butterknife.BindViews;
 import butterknife.ButterKnife;
@@ -29,7 +27,7 @@ import butterknife.OnClick;
  * Created by samjithsadasivan on 9/8/17.
  */
 
-public class LightScheduleFragment extends DialogFragment
+public class LightScheduleFragment extends BaseDialogFragment
 {
 	
 	UUID mCurrentPortId = null;
@@ -69,11 +67,12 @@ public class LightScheduleFragment extends DialogFragment
 	                         Bundle savedInstanceState) {
 		View rootView = inflater.inflate(R.layout.fragment_light_schedule, container, false);
 		mCurrentPortId = (UUID)getArguments().getSerializable(FragmentCommonBundleArgs.SNOUTPUT_UUID);
-		int titleTextId = getResources().getIdentifier("title", "id", "android");
-		TextView titleText = (TextView)getDialog().findViewById(titleTextId);
-		titleText.setText("Lighting Schedule");
-		titleText.setTextColor(ContextCompat.getColor(getActivity(), R.color.progress_color_orange));
 		ButterKnife.bind(this, rootView);
+		//int titleTextId = getResources().getIdentifier("title", "id", "android");
+		
+		setTitle("Lighting Schedule");
+		
+		
 		return rootView;
 	}
 	
@@ -85,10 +84,11 @@ public class LightScheduleFragment extends DialogFragment
 		
 		if (mCurrentPort == null) {
 			dismiss();
-		} else {
-			mSchedule = mCurrentPort.mSchedules.get(0);
-			fillScheduleData();
 		}
+			// else {
+//			mSchedule = mCurrentPort.mSchedules.get(0);
+//			fillScheduleData();
+//		}
 		
 	}
 	

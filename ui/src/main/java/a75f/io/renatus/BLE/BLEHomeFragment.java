@@ -13,8 +13,8 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import a75f.io.bo.building.SmartNode;
+import a75f.io.logic.cache.Globals;
 import a75f.io.renatus.R;
-import a75f.io.util.Globals;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;

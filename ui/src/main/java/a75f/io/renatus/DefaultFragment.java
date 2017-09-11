@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import a75f.io.bo.building.SmartNode;
-import a75f.io.util.Globals;
+import a75f.io.logic.cache.Globals;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;

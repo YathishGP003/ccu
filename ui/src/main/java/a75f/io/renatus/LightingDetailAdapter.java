@@ -1,12 +1,11 @@
 package a75f.io.renatus;
 
-import android.app.Activity;
-
-import android.app.DialogFragment;
-import android.app.Fragment;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.graphics.Color;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,6 +30,7 @@ import java.util.Comparator;
 
 import a75f.io.bo.building.LightProfile;
 import a75f.io.bo.building.SmartNodeOutput;
+import a75f.io.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.bo.building.definitions.Port;
 import a75f.io.bo.json.serializers.JsonSerializer;
 import a75f.io.logic.SmartNodeBLL;
@@ -44,19 +44,19 @@ public class LightingDetailAdapter extends BaseAdapter{
     
     public static final String TAG = "Lighting";
 
-    View                            row;
-    LayoutInflater                  inflater;
-    Activity                        c;
-    ViewHolder                      viewHolder;
+    View                       row;
+    LayoutInflater             inflater;
+    AppCompatActivity          c;
+    ViewHolder                 viewHolder;
     ArrayList<SmartNodeOutput> snOutPortList;
-    ListView                        thiSList;
+    ListView                   thiSList;
     private ArrayAdapter<CharSequence> aaOccupancyMode;
     private Boolean lcmdab;
     private RelativeLayout schedule;
     private LightProfile profile;
 
     public LightingDetailAdapter(Context c, ListView thiSList, LightProfile p, Boolean lcmdab) {
-        this.c = (Activity) c;
+        this.c = (AppCompatActivity) c;
         notifyDataSetChanged();
         this.snOutPortList = new ArrayList<>();
         snOutPortList.addAll(p.smartNodeOutputs);
@@ -213,8 +213,18 @@ public class LightingDetailAdapter extends BaseAdapter{
                     switch (snOutput.mSmartNodePort){
                         case RELAY_ONE:
                         case RELAY_TWO:
-                            snOutput.isOn(isChecked);
-                            snOutput.mOverride = true;
+                            
+                            if(snOutput.mOutputRelayActuatorType ==
+                               OutputRelayActuatorType.NormallyClose )
+                            {
+                                snOutput.mVal = isChecked ? 100 : 0;
+                            }
+                            else
+                            {
+                                snOutput.mVal = isChecked ? 0 : 100;
+                            }
+                            
+                            snOutput.setOverride(true);
                     }
                     try
                     {
@@ -241,7 +251,7 @@ public class LightingDetailAdapter extends BaseAdapter{
                         case ANALOG_OUT_ONE:
                         case ANALOG_OUT_TWO:
                             snOutput.mVal =  (short) progress;
-                            snOutput.mOverride = true;
+                            snOutput.setOverride(true);
                     }
 
                 }
@@ -258,7 +268,7 @@ public class LightingDetailAdapter extends BaseAdapter{
                         case ANALOG_OUT_ONE:
                         case ANALOG_OUT_TWO:
                             snOutput.mVal = (short)value;
-                            snOutput.mOverride = true;
+                            snOutput.setOverride(true);
                     }
                     try
                     {
@@ -424,14 +434,17 @@ public class LightingDetailAdapter extends BaseAdapter{
     
     private void showDialogFragment(DialogFragment dialogFragment, String id)
     {
-        FragmentTransaction ft = c.getFragmentManager().beginTransaction();
-        Fragment prev = c.getFragmentManager().findFragmentByTag(id);
+        FragmentTransaction
+                ft = c.getSupportFragmentManager().beginTransaction();
+        Fragment prev = c.getSupportFragmentManager().findFragmentByTag(id);
         if (prev != null)
         {
+            
             ft.remove(prev);
         }
         ft.addToBackStack(null);
         // Create and show the dialog.
+        
         dialogFragment.show(ft, id);
     }
    /* @Override

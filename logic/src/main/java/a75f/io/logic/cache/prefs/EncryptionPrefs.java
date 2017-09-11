@@ -1,16 +1,13 @@
-package a75f.io.util.prefs;
+package a75f.io.logic.cache.prefs;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Base64;
 import android.util.Log;
 
-import com.google.common.primitives.Ints;
-
 import java.security.SecureRandom;
-import java.util.zip.CRC32;
 
-import a75f.io.util.Globals;
+import a75f.io.logic.cache.Globals;
 
 /**
  * Created by ryanmattison isOn 7/24/17.

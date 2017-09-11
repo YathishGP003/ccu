@@ -1,7 +1,6 @@
 package a75f.io.renatus;
 
 import android.support.test.runner.AndroidJUnit4;
-import android.util.Log;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,6 +15,8 @@ import a75f.io.bo.serial.MessageType;
  */
 @RunWith(AndroidJUnit4.class)
 public class ExampleInstrumentedTest {
+    
+    
     @Test
     public void useAppContext() throws Exception {
         // Context of the app under test.

@@ -1,4 +1,4 @@
-package a75f.io.util;
+package a75f.io.bo;
 
 import org.junit.Test;
 

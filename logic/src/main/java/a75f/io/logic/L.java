@@ -8,7 +8,7 @@ import a75f.io.dal.DalContext;
  * Created by Yinten isOn 9/4/2017.
  */
 
-public class LogicBLL
+public class L
 {
 	
 	public static void initializeKinvey(Context context)

@@ -1,5 +1,6 @@
 package a75f.io.bo.building;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.ArrayList;
@@ -20,7 +21,6 @@ import a75f.io.bo.serial.SmartNodeLightingCircuit_t;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SmartNodeOutput
 {
-	public boolean mOverride = false;
 	public int                      mVal;
 	public Port                     mSmartNodePort;
 	public short                    mSmartNodeAddress;
@@ -31,22 +31,58 @@ public class SmartNodeOutput
 	public OutputAnalogActuatorType mOutputAnalogActuatorType;
 	public ArrayList<Schedule>      mSchedules;
 	
+	private boolean mOverride = false; //This circuit controls it's own value
 	
-	public boolean isOn()
+	
+	/***
+	 * This circuit is in manual control mode, zone profile and schedules will be ignored.
+	 * @return isInOverRide
+	 */
+	public boolean isOverride()
+	{
+		return mOverride;
+	}
+	
+	
+	public void setOverride(boolean override)
+	{
+		this.mOverride = override;
+	}
+	
+	
+	public boolean hasSchedules()
+	{
+		if (mSchedules != null && mSchedules.size() > 0)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	
+	
+	@JsonIgnore
+	public boolean isRelayOn()
 	{
 		return mVal == 100;
 	}
 	
 	
-	public void isOn(boolean on)
+	@JsonIgnore
+	public void turnOn(boolean on)
 	{
-		if (on)
+		if (mOutput == Output.Relay)
 		{
-			mVal = 100;
-		}
-		else
-		{
-			mVal = 0;
+			if (on)
+			{
+				mVal = 100;
+			}
+			else
+			{
+				mVal = 0;
+			}
 		}
 	}
 	
@@ -54,10 +90,12 @@ public class SmartNodeOutput
 	/*****************
 	 *ONLY USED FOR CIRCUITS.
 	 ******************/
-	//TODO: make sure to get sunrise data.
+	//TODO: make sure to get sunrise data.  If the schedule is set to sunrise periodically update
+	// the sunrise to the weather channel's sunrise on the smart node.
 	//String starttime = start.compareTo("sr") == 0 ? WeatherDataDownloadService.getSunriseTime() : start.compareTo("ss") == 0 ? WeatherDataDownloadService.getSunsetTime() : start;
 	//String endtime = end.compareTo("sr") == 0 ? WeatherDataDownloadService.getSunriseTime() :
 	// end.compareTo("ss")==0?WeatherDataDownloadService.getSunsetTime():end;
+	@JsonIgnore
 	public CcuToCmOverUsbSnLightingScheduleMessage_t getScheduleMessage()
 	{
 		CcuToCmOverUsbSnLightingScheduleMessage_t scheduleMsg =
@@ -109,6 +147,7 @@ public class SmartNodeOutput
 	 *  controls message.
 	 * @return name when communicating via serial to Smart Node
 	 */
+	@JsonIgnore
 	public String getCircuitName()
 	{
 		if (mName.length() > MessageConstants.MAX_LIGHTING_CONTROL_CIRCUIT_LOGICAL_NAME_BYTES)
@@ -119,6 +158,37 @@ public class SmartNodeOutput
 		{
 			return mName;
 		}
+	}
+	
+	@JsonIgnore
+	public int getScheduledVal()
+	{
+		for(Schedule schedule : mSchedules)
+		{
+			if(schedule.isInSchedule())
+			{
+				return schedule.getVal();
+			}
+		}
+		return 0;
+	}
+	
+	 @JsonIgnore
+	public boolean isOn()
+	{
+		boolean retVal = false;
+		
+		if (mVal == 100)
+			retVal = true;
+		
+		else
+			retVal = false;
+			
+		if(mOutputRelayActuatorType == OutputRelayActuatorType.NormallyClose)
+			return retVal;
+		else
+			return !retVal;
+				
 	}
 	
 	

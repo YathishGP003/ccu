@@ -105,6 +105,7 @@ public class CcuToCmOverUsbCcuStructTest
 		
 	}
 	
+	
 	@Test
 	public void testCcuToCmOverUsbSnControlsMessage_t() {
 		CcuToCmOverUsbSnControlsMessage_t controlMsg = new CcuToCmOverUsbSnControlsMessage_t();

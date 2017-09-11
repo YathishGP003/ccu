@@ -1,8 +1,8 @@
 package a75f.io.renatus.ENGG;
 
 import android.app.Dialog;
-import android.support.v4.app.DialogFragment;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,17 +17,8 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.UUID;
 
-import a75f.io.bo.building.CCUApplication;
-import a75f.io.bo.building.Floor;
-import a75f.io.bo.building.LightProfile;
-import a75f.io.bo.building.SmartNode;
-import a75f.io.bo.building.SmartNodeOutput;
-import a75f.io.bo.building.definitions.Output;
-import a75f.io.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.renatus.R;
-import a75f.io.util.prefs.LocalStorage;
 
 /**
  * Created by anilkumar isOn 27-10-2016.

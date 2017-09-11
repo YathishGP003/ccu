@@ -14,10 +14,10 @@ import a75f.io.bo.json.serializers.JsonSerializer;
 /**
  * This class will log to crashlytics important information for development.
  */
-public class LogBLL
+public class LLog
 {
 	
-	private static final String TAG = LogBLL.class.getSimpleName();
+	private static final String TAG = LLog.class.getSimpleName();
 	
 	
 	public static void logStructAsJSON(Struct struct)
@@ -42,5 +42,14 @@ public class LogBLL
 	public static void logUSBServiceNotInitialized()
 	{
 		Log.i(TAG, "USB SERVICE NOT INITIALIZED! ");
+	}
+	
+	
+	public  static void Logd(String message)
+	{
+		if (BuildConfig.DEBUG)
+		{
+			Log.d(TAG, message);
+		}
 	}
 }

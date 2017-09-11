@@ -59,7 +59,7 @@ public class ScheduleTest
 	{
 		//Mock schedule M-F, 8AM - 5:30PM turn isOn lights to value 100.
 		schedule = new Schedule();
-		schedule.setDays(new String[]{"1", "2", "3", "4", "5"});
+		schedule.setDays(new int[]{1, 2, 3, 4, 5});
 		schedule.setSt("8:00");
 		schedule.setEt("17:30");
 		schedule.setVal((short) 100);

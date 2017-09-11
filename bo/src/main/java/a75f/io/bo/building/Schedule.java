@@ -13,7 +13,6 @@ import a75f.io.bo.building.definitions.DAYS;
 import a75f.io.bo.building.definitions.MockTime;
 import a75f.io.bo.building.definitions.ScheduleMode;
 
-
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Schedule
 {
@@ -23,9 +22,10 @@ public class Schedule
 	protected short        val;
 	protected String       st;
 	protected String       et;
-	protected String[]     days;
+	protected int[]        days;
+	protected boolean mValidSchedule = false;
 	
-	private int curVal;
+	ArrayList<Interval> scheduledIntervals = new ArrayList<Interval>();
 	
 	
 	public Schedule()
@@ -33,7 +33,7 @@ public class Schedule
 	}
 	
 	
-	public Schedule(short val, String st, String et, String[] days)
+	public Schedule(short val, String st, String et, int[] days)
 	{
 		this.val = val;
 		this.st = st;
@@ -43,96 +43,76 @@ public class Schedule
 	
 	
 	@JsonIgnore
-	private int getScheduleValue()
-	{
-		return val;
-	}
-	
-	
-	@JsonIgnore
 	public boolean isInSchedule()
 	{
-		return isInDays() && isInHours();
-	}
-	
-	
-	@JsonIgnore
-	public boolean isInDays()
-	{
-		DateTime dateTime = new DateTime(MockTime.getInstance().getMockTime());
-		int currentDayOfWeekWithMondayAsStart = dateTime.dayOfWeek().get();
-		//TODO: logged not mocked
-		System.out.println(TAG + " isInScheduled currentDayOfWeekWithMondayAsStar: " +
-		                   currentDayOfWeekWithMondayAsStart);
-		//If there are no days return false, nothing will be findable.
-		if (days == null)
+		if (isValidSchedule())
 		{
-			return false;
-		}
-		//TODO: logged not mocked
-		System.out.println(TAG + " isInSchedule week days: " + Arrays.toString(days));
-		int foundIndex = Arrays.binarySearch(days, String.valueOf
-				                                                  (currentDayOfWeekWithMondayAsStart));
-		//TODO: logged not mocked
-		System.out.println(TAG + " Arrays.binarySearch(days, currentDayOfWeekWithMondayAsStart): " +
-		                   foundIndex);
-		if (foundIndex > -1)
-		{
-			System.out.println(TAG + " returning true  ");
-			return true;
+			long time = MockTime.getInstance().getMockTime();
+			if (scheduledIntervals.isEmpty() && days != null && days.length > 0)
+			{
+				buildIntervals();
+			}
+			for (Interval interval : scheduledIntervals)
+			{
+				if (interval.contains(time))
+				{
+					return true;
+				}
+			}
 		}
 		return false;
 	}
 	
-	
-	/***
-	 * Populates two datetimes from system's current time or mockable time.   It then adjusts the
-	 * start time date time by the hour and minute in the vairable st.  Following it adjusts the
-	 * start time date time by the hour and minute in the variable et time.   It then checks to
-	 * see if the current mocked or real system time is between the adjusted start and end date
-	 * time.  If an exception in parsing occurs TODO: a log should be generated and sent to
-	 * crashlytics.
-	 * @return if the current system time (or mocked time) is between the hours and minutes from
-	 * st and et.
-	 *
-	 */
 	@JsonIgnore
-	public boolean isInHours()
+	public boolean isValidSchedule()
 	{
-		try
+		if (mValidSchedule)
 		{
-			System.out.println(TAG + " isInHours()  ");
-			if (st != null && !st.equalsIgnoreCase("") && et != null && !et.equalsIgnoreCase(""))
+			return true;
+		}
+		if (days != null && days.length > 0 && st != null && et != null)
+		{
+			mValidSchedule = true;
+			return mValidSchedule;
+		}
+		return mValidSchedule = false;
+	}
+	
+	@JsonIgnore
+	public void buildIntervals()
+	{
+		if (isValidSchedule())
+		{
+			try
 			{
+			/*
+			  * Sorts the specified array into ascending numerical order.
+			 */
+				Arrays.sort(days);
 				int startTimeHours = getStringTimeHours(st);
-				System.out.println(TAG + " startTimeHours:  " + startTimeHours);
 				int startTimeMinutes = getStringTimeMinutes(st);
-				System.out.println(TAG + " startTimeMinutes:  " + startTimeMinutes);
 				int endTimeHours = getStringTimeHours(et);
-				System.out.println(TAG + " endTimeHours:  " + endTimeHours);
 				int endTimeMinutes = getStringTimeMinutes(et);
-				System.out.println(TAG + " endTimeMinutes:  " + endTimeMinutes);
 				DateTime startDateTime = new DateTime(MockTime.getInstance().getMockTime())
 						                         .withHourOfDay(startTimeHours)
 						                         .withMinuteOfHour(startTimeMinutes);
-				System.out.println("Start Date Time: " + startDateTime.toString());
 				DateTime endDateTime = new DateTime(MockTime.getInstance().getMockTime())
 						                       .withHourOfDay(endTimeHours)
 						                       .withMinuteOfHour(endTimeMinutes);
-				System.out.println("EndD Date Time: " + endDateTime.toString());
-				Interval interval =
-						new Interval(startDateTime.toInstant(), endDateTime.toInstant());
-				System.out.println("Interval: " + interval.toString());
-				System.out.println("Interval contains: " +
-				                   interval.contains(MockTime.getInstance().getMockTime()));
-				return interval.contains(MockTime.getInstance().getMockTime());
+				//Add the scheduled intervals.
+				for (int day : days)
+				{
+					Interval scheduledInterval =
+							new Interval(startDateTime.withDayOfWeek(day), endDateTime
+									                                               .withDayOfWeek(day));
+					scheduledIntervals.add(scheduledInterval);
+				}
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
 			}
 		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		return false;
 	}
 	
 	
@@ -222,13 +202,13 @@ public class Schedule
 	}
 	
 	
-	public String[] getDays()
+	public int[] getDays()
 	{
 		return days;
 	}
 	
 	
-	public void setDays(String[] days)
+	public void setDays(int[] days)
 	{
 		this.days = days;
 	}
@@ -237,14 +217,10 @@ public class Schedule
 	/*****************
 	 *ONLY USED FOR CIRCUITS BELOW
 	 ******************/
-	
+	@JsonIgnore
 	public byte getScheduleDaysBitmap()
 	{
-		ArrayList<Integer> daysAsArrayList = new ArrayList<Integer>();
-		for (int j = 0; j < days.length; j++)
-		{
-			daysAsArrayList.add(Integer.parseInt(days[j]));
-		}
+		ArrayList<Integer> daysAsArrayList = getDaysAsArrayList();
 		byte dayBytes = (byte) ((daysAsArrayList.contains(DAYS.MONDAY.ordinal()) ? 0x01 : 0x00) |
 		                        (daysAsArrayList.contains(DAYS.TUESDAY.ordinal()) ? 0x02 : 0x00) |
 		                        (daysAsArrayList.contains(DAYS.WEDNESDAY.ordinal()) ? 0x04 : 0x00) |
@@ -254,5 +230,49 @@ public class Schedule
 		                        (daysAsArrayList.contains(DAYS.SUNDAY.ordinal()) ? 0x40 : 0x00) |
 		                        0x00);
 		return dayBytes;
+	}
+	
+	
+	@JsonIgnore
+	public ArrayList<Integer> getDaysAsArrayList()
+	{
+		ArrayList<Integer> retVal = new ArrayList<Integer>();
+		for (int j = 0; j < days.length; j++)
+		{
+			retVal.add(days[j]);
+		}
+		return retVal;
+	}
+	
+	
+	
+	@JsonIgnore
+	public long getNextScheduleTransistionTime() throws Exception
+	{
+		if (!isValidSchedule())
+		{
+			throw new Exception("Schedule is invalid");
+		}
+		
+		/* If intervals are not built */
+		if (scheduledIntervals.isEmpty() && days != null && days.length > 0)
+		{
+			buildIntervals();
+		}
+		DateTime now = new DateTime(MockTime.getInstance().getMockTime());
+		for (int i = 0; i < scheduledIntervals.size(); i++)
+		{
+			Interval interval = scheduledIntervals.get(i);
+			//Before start of first
+			if (now.isBefore(interval.getStart()))
+			{
+				return interval.getStartMillis();
+			}
+			else if (interval.contains(now))
+			{
+				return interval.getEndMillis();
+			}
+		}
+		return -1;
 	}
 }

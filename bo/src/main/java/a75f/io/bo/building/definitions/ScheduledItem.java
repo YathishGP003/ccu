@@ -1,5 +1,7 @@
 package a75f.io.bo.building.definitions;
 
+import org.joda.time.DateTime;
+
 import java.util.UUID;
 
 /**
@@ -10,7 +12,7 @@ public class ScheduledItem
 {
 	public UUID            mUuid;
 	public LScheduleAction lScheduleAction;
-	public long            mTimeStamp;
+	public DateTime mTimeStamp;
 	
 	
 	@Override

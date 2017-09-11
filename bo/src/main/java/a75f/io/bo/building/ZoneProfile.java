@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import org.joda.time.DateTime;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -68,7 +70,7 @@ public abstract class ZoneProfile
 			ScheduledItem scheduledItem = new ScheduledItem();
 			scheduledItem.mUuid = this.uuid;
 			scheduledItem.lScheduleAction = LScheduleAction.CONTROLS_UPDATE;
-			scheduledItem.mTimeStamp = nextActiveScheduleTime.getNextScheduleTransistionTime();
+			scheduledItem.mTimeStamp = new DateTime(nextActiveScheduleTime.getNextScheduleTransistionTime());
 			return scheduledItem;
 		}
 	}

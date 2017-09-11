@@ -32,7 +32,7 @@ import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.ARG_PAIRING_ADDR;
 import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.FLOOR_NAME;
 
 /**
- * Created by ryanmattison on 7/24/17.
+ * Created by ryanmattison isOn 7/24/17.
  */
 public class FragmentDeviceScan extends BaseDialogFragment
 {
@@ -116,7 +116,7 @@ public class FragmentDeviceScan extends BaseDialogFragment
 	public void onResume()
 	{
 		super.onResume();
-		// Ensures Bluetooth is enabled on the device.  If Bluetooth is not currently enabled,
+		// Ensures Bluetooth is enabled isOn the device.  If Bluetooth is not currently enabled,
 		// fire an intent to display a dialog asking the user to grant permission to enable it.
 		//Skip BLE because we can't emulate it.
 		
@@ -198,7 +198,7 @@ public class FragmentDeviceScan extends BaseDialogFragment
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		// Use this check to determine whether BLE is supported on the device.  Then you can
+		// Use this check to determine whether BLE is supported isOn the device.  Then you can
 		// selectively disable BLE-related features.
 		if (!getActivity().getPackageManager()
 		                  .hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE))
@@ -211,7 +211,7 @@ public class FragmentDeviceScan extends BaseDialogFragment
 		final BluetoothManager bluetoothManager =
 				(BluetoothManager) getActivity().getSystemService(Context.BLUETOOTH_SERVICE);
 		mBluetoothAdapter = bluetoothManager.getAdapter();
-		// Checks if Bluetooth is supported on the device.
+		// Checks if Bluetooth is supported isOn the device.
 		if (mBluetoothAdapter == null)
 		{
 			Toast.makeText(this.getActivity(), "BLE not supported", Toast.LENGTH_SHORT).show();

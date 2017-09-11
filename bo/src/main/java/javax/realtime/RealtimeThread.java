@@ -4,7 +4,7 @@ package javax.realtime;
 
 //77
 /**
- * Stub version (replaced by the actual class on RTSJ VM).
+ * Stub version (replaced by the actual class isOn RTSJ VM).
  */
 public class RealtimeThread extends Thread {
 

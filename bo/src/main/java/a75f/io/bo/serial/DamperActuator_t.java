@@ -1,7 +1,7 @@
 package a75f.io.bo.serial;
 
 /**
- * Created by ryanmattison on 7/26/17.
+ * Created by ryanmattison isOn 7/26/17.
  */
 
 public enum DamperActuator_t

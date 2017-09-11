@@ -38,7 +38,7 @@ import a75f.io.renatus.VIEWS.ZoneImageWidget;
 import a75f.io.renatus.VIEWS.SeekArcWidget;
 
 /**
- * Created by samjithsadasivan on 8/7/17.
+ * Created by samjithsadasivan isOn 8/7/17.
  */
 
 public class ZonesFragment extends Fragment

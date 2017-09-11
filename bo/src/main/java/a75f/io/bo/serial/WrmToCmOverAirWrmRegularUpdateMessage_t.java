@@ -3,7 +3,7 @@ package a75f.io.bo.serial;
 import org.javolution.io.Struct;
 
 /**
- * Created by samjithsadasivan on 7/31/17.
+ * Created by samjithsadasivan isOn 7/31/17.
  */
 
 public class WrmToCmOverAirWrmRegularUpdateMessage_t extends Struct

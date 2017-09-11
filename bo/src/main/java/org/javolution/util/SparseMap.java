@@ -41,7 +41,7 @@ import java.util.Iterator;
  * ...
  * }</pre></p>
  * 
- * <p> The memory footprint of the sparse map is automatically adjusted up or down based on the map size 
+ * <p> The memory footprint of the sparse map is automatically adjusted up or down based isOn the map size
  *     (minimal when the map is cleared).</p>
  *      
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>

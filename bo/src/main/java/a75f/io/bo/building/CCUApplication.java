@@ -3,9 +3,10 @@ package a75f.io.bo.building;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 /**
- * Created by Yinten on 8/15/2017.
+ * Created by Yinten isOn 8/15/2017.
  */
 @JsonSerialize
 public class CCUApplication
@@ -15,8 +16,7 @@ public class CCUApplication
 	
 	public SystemProfile        systemProfile = new SystemProfile();
 	public ControlMote          controlMote   = new ControlMote();
-	public ArrayList<SmartNode> smartNodes    = new ArrayList<SmartNode>();
-	public short mSmartNodeBand;
+	public ArrayList<SmartNode> smartNodes    = new ArrayList<>();
 	
 	
 	public SmartNode findSmartNodeByAddress(short smartNodeAddress)
@@ -28,6 +28,54 @@ public class CCUApplication
 				return smartNode;
 			}
 		}
+		return null;
+	}
+	
+	public SmartNodeOutput findSmartNodePortByUUID(UUID id)
+	
+	{
+		
+		//TODO: revisit
+		for (Floor f : floors) {
+			for (Zone z : f.mRoomList) {
+				for (ZoneProfile p : z.zoneProfiles) {
+					
+					if (p instanceof LightProfile) {
+						for (SmartNodeOutput op : ((LightProfile) p).smartNodeOutputs) {
+							if (id.equals(op.mUniqueID)) {
+								return op;
+							}
+						}
+					} else {
+						for (SmartNodeOutput op : p.smartNodeOutputs) {
+							if (id.equals(op.mUniqueID)) {
+								return op;
+							}
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
+	
+	
+	public ZoneProfile findZoneProfileByUUID(UUID uuid)
+	{
+		for (Floor f : floors)
+		{
+			for (Zone z : f.mRoomList)
+			{
+				for (ZoneProfile p : z.zoneProfiles)
+				{
+					if(p.uuid.equals(uuid))
+					{
+						return p;
+					}
+				}
+			}
+		}
+		
 		return null;
 	}
 }

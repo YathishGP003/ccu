@@ -221,7 +221,7 @@ public abstract class FastSet<E> extends FastCollection<E> implements NavigableS
     @Override
     @SuppressWarnings("unchecked")
     public FastSet<E>[] trySplit(final int n) {
-        // Split into filtered sets with filter based on the element index (hashed to ensure balanced distribution). 
+        // Split into filtered sets with filter based isOn the element index (hashed to ensure balanced distribution).
         final Order<? super E> order = order();
         FastSet<E>[] split = new FastSet[n];
         for (int i=0; i < n; i++) {

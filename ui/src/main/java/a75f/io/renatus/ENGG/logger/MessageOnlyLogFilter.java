@@ -1,12 +1,12 @@
 package a75f.io.renatus.ENGG.logger;
 
 /**
- * Created by samjithsadasivan on 8/17/17.
+ * Created by samjithsadasivan isOn 8/17/17.
  */
 
 /**
  * Simple {@link LogNode} filter, removes everything except the message.
- * Useful for situations like on-screen log output where you don't want a lot of metadata displayed,
+ * Useful for situations like isOn-screen log output where you don't want a lot of metadata displayed,
  * just easy-to-read message updates as they're happening.
  */
 public class MessageOnlyLogFilter implements LogNode {

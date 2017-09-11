@@ -14,7 +14,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
- * Created by samjithsadasivan on 8/24/17.
+ * Created by samjithsadasivan isOn 8/24/17.
  */
 
 public class ZoneImageWidget extends RelativeLayout

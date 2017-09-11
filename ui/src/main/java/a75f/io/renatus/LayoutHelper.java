@@ -75,7 +75,7 @@ public class LayoutHelper
             params.width = width;
         }
         myListView.setLayoutParams(params);
-        // print height of adapter on log
+        // print height of adapter isOn log
 
     }
 

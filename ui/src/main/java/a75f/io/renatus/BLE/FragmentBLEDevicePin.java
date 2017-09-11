@@ -30,13 +30,12 @@ import a75f.io.bo.ble.GattAttributes;
 import a75f.io.bo.ble.GattPin;
 import a75f.io.bo.ble.StructShort;
 import a75f.io.bo.serial.SerialConsts;
+import a75f.io.logic.cache.prefs.EncryptionPrefs;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
-import a75f.io.renatus.FloorPlanFragment;
 import a75f.io.renatus.R;
 import a75f.io.renatus.ZONEPROFILE.LightingZoneProfileFragment;
 import a75f.io.util.ByteArrayUtils;
-import a75f.io.util.prefs.EncryptionPrefs;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -47,7 +46,7 @@ import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.FLOOR_NAME;
 import static android.content.Context.BIND_AUTO_CREATE;
 
 /**
- * Created by ryanmattison on 7/24/17.
+ * Created by ryanmattison isOn 7/24/17.
  */
 
 public class FragmentBLEDevicePin extends BaseDialogFragment
@@ -192,7 +191,7 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
 			    bleDialogEnterPinEdittext.getText().toString().trim().equals(""))
 			{
 				bleDialogEnterPinEdittext
-						.setError("Pin required.  Please enter pin displayed on the 75F device you'd like to pair.");
+						.setError("Pin required.  Please enter pin displayed isOn the 75F device you'd like to pair.");
 			}
 			else
 			{
@@ -212,7 +211,7 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
 				else
 				{
 					bleDialogEnterPinEdittext
-							.setError("Pins do not match.  Please enter pin displayed on the 75F device you'd like to pair.");
+							.setError("Pins do not match.  Please enter pin displayed isOn the 75F device you'd like to pair.");
 				}
 			}
 		}

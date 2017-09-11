@@ -19,12 +19,5 @@ android {
 dependencies {
     compile fileTree(include: '*.jar', dir: 'libs')
     testCompile 'junit:junit:4.12'
-    compile project(path: ':bo')
-    compile 'com.evernote:android-job:1.1.11'
-    compile 'commons-io:commons-io:2.4'
-    compile 'com.google.http-client:google-http-client:1.19.0'
-    compile 'com.google.http-client:google-http-client-android:1.19.0'
-    compile 'com.google.http-client:google-http-client-gson:1.19.0'
-    compile 'com.google.http-client:google-http-client-jackson2:1.19.0'
     compile 'com.google.guava:guava:16.0.1'
 }

@@ -2,8 +2,6 @@ package a75f.io.util;
 
 import android.util.Log;
 
-import com.google.common.primitives.Ints;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -11,7 +9,7 @@ import java.util.Arrays;
 import java.util.zip.CRC32;
 
 /**
- * Created by ryanmattison on 7/25/17.
+ * Created by ryanmattison isOn 7/25/17.
  */
 
 public class ByteArrayUtils
@@ -85,8 +83,16 @@ public class ByteArrayUtils
         CRC32 crcGen = new CRC32();
         crcGen.update(message);
         long val = crcGen.getValue();
-        byte[] crc = Ints.toByteArray((int) val);
+        byte[] crc = ByteArrayUtils.toByteArray((int) val);
         return crc;
+    }
+    
+    public static byte[] toByteArray(int value) {
+        return new byte[] {
+                (byte) (value >> 24),
+                (byte) (value >> 16),
+                (byte) (value >> 8),
+                (byte) value};
     }
 
     /**

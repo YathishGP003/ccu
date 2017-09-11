@@ -6,7 +6,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 
 /**
- * Created by Yinten on 8/11/2017.
+ * Created by Yinten isOn 8/11/2017.
  */
 
 public class BaseDialogFragment extends DialogFragment

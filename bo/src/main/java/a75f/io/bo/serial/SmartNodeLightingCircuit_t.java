@@ -1,7 +1,7 @@
 package a75f.io.bo.serial;
 
 /**
- * Created by samjithsadasivan on 8/2/17.
+ * Created by samjithsadasivan isOn 8/2/17.
  */
 
 public enum SmartNodeLightingCircuit_t

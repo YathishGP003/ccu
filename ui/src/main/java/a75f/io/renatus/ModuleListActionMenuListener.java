@@ -9,10 +9,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
-import a75f.io.bo.SmartNode;
-import a75f.io.bo.building.CCUApplication;
 import a75f.io.bo.building.ZoneProfile;
-import a75f.io.util.Globals;
 
 class ModuleListActionMenuListener implements MultiChoiceModeListener {
 

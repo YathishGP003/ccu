@@ -23,7 +23,7 @@ public enum HashOrderImpl implements Order<Object> {
         return (left == right) || (left != null && left.equals(right));
     }
 
-    /** Order based on hash value.*/
+    /** Order based isOn hash value.*/
     @Override
     public int compare(Object left, Object right) {
         int hashLeft = left.hashCode();

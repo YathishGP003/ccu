@@ -287,7 +287,7 @@ public final class CharArray implements CharSequence, Comparable<CharSequence> {
     
     /**
      * Returns the <code>String</code> corresponding to this character
-     * sequence. The <code>String</code> returned is always allocated on the
+     * sequence. The <code>String</code> returned is always allocated isOn the
      * heap and can safely be referenced elsewhere.
      *
      * @return the <code>java.lang.String</code> for this character sequence.

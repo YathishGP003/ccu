@@ -1,6 +1,6 @@
 package a75f.io.bo.json.serializers;
 /**
- * Created by Yinten on 8/14/2017.
+ * Created by Yinten isOn 8/14/2017.
  */
 
 import com.fasterxml.jackson.core.JsonFactory;

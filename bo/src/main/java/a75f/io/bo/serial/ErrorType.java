@@ -1,7 +1,7 @@
 package a75f.io.bo.serial;
 
 /**
- * Created by rmatt on 7/30/2017.
+ * Created by rmatt isOn 7/30/2017.
  */
 
 public enum ErrorType

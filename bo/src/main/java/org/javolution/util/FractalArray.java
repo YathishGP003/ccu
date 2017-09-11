@@ -64,7 +64,7 @@ public abstract class FractalArray<E> implements Cloneable, Serializable {
         private static final long serialVersionUID = 0x700L; // Version.
 
         /** 
-         * Returns a new copy-on-write fractal array holding the specified elements.
+         * Returns a new copy-isOn-write fractal array holding the specified elements.
          */
         public static <E> FractalArray<E> newArray(E...elements) {
             throw new UnsupportedOperationException("Not implemented yet"); // TODO

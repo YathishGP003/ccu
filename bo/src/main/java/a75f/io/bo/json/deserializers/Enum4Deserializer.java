@@ -9,7 +9,7 @@ import org.javolution.io.Struct;
 import java.io.IOException;
 
 /**
- * Created by samjithsadasivan on 8/22/17.
+ * Created by samjithsadasivan isOn 8/22/17.
  */
 
 public class Enum4Deserializer<HT extends Enum<HT>> extends StdDeserializer<Struct.Enum4<HT>>

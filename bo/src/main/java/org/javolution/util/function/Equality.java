@@ -36,7 +36,7 @@ import static org.javolution.annotations.Realtime.Limit.UNKNOWN;
 public interface Equality<T> extends  Immutable, Serializable {
 	
     /**
-     * A default object equality (based on {@link Object#equals}).
+     * A default object equality (based isOn {@link Object#equals}).
      */
     @Realtime(limit = UNKNOWN)
     public static final Equality<Object> DEFAULT = HashOrderImpl.INSTANCE;

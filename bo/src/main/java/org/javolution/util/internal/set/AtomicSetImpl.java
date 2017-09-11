@@ -18,7 +18,7 @@ import java.util.Collection;
 import java.util.Iterator;
 
 /**
- * An atomic view over a set (copy-on-write).
+ * An atomic view over a set (copy-isOn-write).
  */
 public final class AtomicSetImpl<E> extends FastSet<E> {
 

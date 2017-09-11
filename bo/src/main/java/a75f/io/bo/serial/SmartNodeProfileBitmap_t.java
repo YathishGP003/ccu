@@ -4,7 +4,7 @@ import org.javolution.io.Struct;
 import org.javolution.io.Union;
 
 /**
- * Created by samjithsadasivan on 8/10/17.
+ * Created by samjithsadasivan isOn 8/10/17.
  */
 
 public class SmartNodeProfileBitmap_t extends Union

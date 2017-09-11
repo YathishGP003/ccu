@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 
 /**
- * Created by samjithsadasivan on 8/22/17.
+ * Created by samjithsadasivan isOn 8/22/17.
  */
 
 public class UTF8Deserializer extends StdDeserializer<Struct.UTF8String>

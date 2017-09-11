@@ -6,7 +6,7 @@ import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.bo.serial.MessageType;
 
 /**
- * Example local unit test, which will execute on the development machine (host).
+ * Example local unit test, which will execute isOn the development machine (host).
  *
  * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
  */

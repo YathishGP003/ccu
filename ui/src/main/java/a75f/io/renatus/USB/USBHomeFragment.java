@@ -34,13 +34,12 @@ import java.util.UUID;
 import a75f.io.bo.building.CCUApplication;
 import a75f.io.bo.building.Floor;
 import a75f.io.bo.building.LightProfile;
-import a75f.io.bo.building.LightSmartNodeOutput;
-import a75f.io.bo.building.definitions.Output;
-import a75f.io.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.bo.building.SmartNode;
 import a75f.io.bo.building.SmartNodeOutput;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.ZoneProfile;
+import a75f.io.bo.building.definitions.Output;
+import a75f.io.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.bo.json.serializers.JsonSerializer;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
@@ -48,19 +47,19 @@ import a75f.io.bo.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
 import a75f.io.bo.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 import a75f.io.bo.serial.MessageType;
 import a75f.io.bo.serial.SnToCmOverAirSnRegularUpdateMessage_t;
+import a75f.io.bo.serial.comm.SerialAction;
+import a75f.io.bo.serial.comm.SerialEvent;
+import a75f.io.logic.cache.Globals;
 import a75f.io.renatus.BLE.BLEHomeFragment;
 import a75f.io.renatus.MainActivity;
 import a75f.io.renatus.R;
-import a75f.io.bo.serial.comm.SerialAction;
-import a75f.io.bo.serial.comm.SerialEvent;
 import a75f.io.usbserial.UsbService;
-import a75f.io.util.Globals;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 /**
- * Created by ryanmattison on 7/27/17.
+ * Created by ryanmattison isOn 7/27/17.
  */
 
 public class USBHomeFragment extends DialogFragment
@@ -285,7 +284,7 @@ public class USBHomeFragment extends DialogFragment
 				LightProfile lightProfile5K = new LightProfile("light profile");
 				ccuApplication.floors.get(0).mRoomList.get(0).zoneProfiles.add
 						                                                                         (lightProfile5K);
-				LightSmartNodeOutput smartNodeOutput5K = new LightSmartNodeOutput();
+				SmartNodeOutput smartNodeOutput5K = new SmartNodeOutput();
 				//				smartNodeOutput5K.uniqueID = analog15kUUID;
 				smartNodeOutput5K.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
 				smartNodeOutput5K.mOutput = Output.Analog;
@@ -349,7 +348,7 @@ public class USBHomeFragment extends DialogFragment
 				LightProfile lightProfile5K = new LightProfile("light profile");
 				zone5K.zoneProfiles.add(lightProfile5K);
 				ccuApplication.floors.get(0).mRoomList.add(zone5K);
-				LightSmartNodeOutput smartNodeOutput5K = new LightSmartNodeOutput();
+				SmartNodeOutput smartNodeOutput5K = new SmartNodeOutput();
 				smartNodeOutput5K.mUniqueID = analog15kUUID;
 				smartNodeOutput5K.mSmartNodeAddress = smartNode.mAddress;
 				smartNodeOutput5K.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;

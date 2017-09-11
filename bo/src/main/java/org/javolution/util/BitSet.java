@@ -159,7 +159,7 @@ public class BitSet extends FastSet<Index> {
      //
 
     /**
-     * Performs the logical AND operation on this bit set and the
+     * Performs the logical AND operation isOn this bit set and the
      * given bit set. This means it builds the intersection
      * of the two sets. The result is stored into this bit set.
      *
@@ -178,7 +178,7 @@ public class BitSet extends FastSet<Index> {
     }
 
     /**
-     * Performs the logical AND operation on this bit set and the
+     * Performs the logical AND operation isOn this bit set and the
      * complement of the given bit set.  This means it
      * selects every element in the first set, that isn't in the
      * second set. The result is stored into this bit set.
@@ -426,7 +426,7 @@ public class BitSet extends FastSet<Index> {
     }
 
     /**
-     * Performs the logical OR operation on this bit set and the one specified.
+     * Performs the logical OR operation isOn this bit set and the one specified.
      * In other words, builds the union of the two sets.  
      * The result is stored into this bit set.
      *
@@ -579,7 +579,7 @@ public class BitSet extends FastSet<Index> {
     }
 
 	/**
-     * Performs the logical XOR operation on this bit set and the one specified.
+     * Performs the logical XOR operation isOn this bit set and the one specified.
      * In other words, builds the symmetric remainder of the two sets 
      * (the elements that are in one set, but not in the other).  
      * The result is stored into this bit set.

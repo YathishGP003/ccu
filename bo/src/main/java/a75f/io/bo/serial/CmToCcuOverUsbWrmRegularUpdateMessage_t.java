@@ -5,7 +5,7 @@ import org.javolution.io.Struct;
 import java.nio.ByteOrder;
 
 /**
- * Created by samjithsadasivan on 7/31/17.
+ * Created by samjithsadasivan isOn 7/31/17.
  */
 
 public class CmToCcuOverUsbWrmRegularUpdateMessage_t extends Struct

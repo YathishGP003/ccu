@@ -4,7 +4,7 @@ import com.evernote.android.job.Job;
 import com.evernote.android.job.JobCreator;
 
 /**
- * Created by Yinten on 8/24/2017.
+ * Created by Yinten isOn 8/24/2017.
  */
 
 public class CCUJobCreator implements JobCreator {

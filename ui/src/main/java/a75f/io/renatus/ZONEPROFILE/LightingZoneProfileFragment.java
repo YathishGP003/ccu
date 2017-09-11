@@ -18,7 +18,6 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -28,9 +27,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import a75f.io.bo.building.CCUApplication;
-import a75f.io.bo.building.Floor;
 import a75f.io.bo.building.LightProfile;
-import a75f.io.bo.building.LightSmartNodeOutput;
 import a75f.io.bo.building.SmartNode;
 import a75f.io.bo.building.SmartNodeOutput;
 import a75f.io.bo.building.Zone;
@@ -41,16 +38,16 @@ import a75f.io.bo.building.definitions.Port;
 import a75f.io.bo.json.serializers.JsonSerializer;
 import a75f.io.logic.RoomBLL;
 import a75f.io.logic.SmartNodeBLL;
+import a75f.io.logic.cache.Globals;
+import a75f.io.logic.cache.prefs.LocalStorage;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.ENGG.logger.CcuLog;
 import a75f.io.renatus.FloorPlanFragment;
 import a75f.io.renatus.R;
-import a75f.io.util.Globals;
-import a75f.io.util.prefs.LocalStorage;
 
 /**
- * Created by anilkumar on 27-10-2016.
+ * Created by anilkumar isOn 27-10-2016.
  */
 
 public class LightingZoneProfileFragment extends BaseDialogFragment
@@ -67,15 +64,15 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 	Spinner      spRelay1;
 	Spinner      spRelay2;
 	SwitchCompat relay1Switch;
-	SwitchCompat       relay2Switch;
+	SwitchCompat relay2Switch;
 	EditText     relay1EditText;
 	EditText     relay2EditText;
 	ImageView    editRelay1;
 	ImageView    editRelay2;
 	Spinner      spAnalog1Out;
 	Spinner      spAnalog2Out;
-	SwitchCompat       analog1OutSwitch;
-	SwitchCompat       analog2OutSwitch;
+	SwitchCompat analog1OutSwitch;
+	SwitchCompat analog2OutSwitch;
 	EditText     analog1OutEditText;
 	EditText     analog2OutEditText;
 	ImageView    editAnalog1Out;
@@ -85,12 +82,12 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 	TextView     lcmCancelCommand;
 	Spinner      spAnalog1In;
 	Spinner      spAnalog2In;
-	SwitchCompat       analog1InSwitch;
-	SwitchCompat    analog2InSwitch;
-	EditText  analog1InEditText;
-	EditText  analog2InEditText;
-	ImageView editAnalog1In;
-	ImageView editAnalog2In;
+	SwitchCompat analog1InSwitch;
+	SwitchCompat analog2InSwitch;
+	EditText     analog1InEditText;
+	EditText     analog2InEditText;
+	ImageView    editAnalog1In;
+	ImageView    editAnalog2In;
 	
 	ToggleButton lcmRelay1Override;
 	ToggleButton lcmRelay2Override;
@@ -101,8 +98,8 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 	Zone              mZone;
 	LightProfile      mLightProfile;
 	SmartNode         mSmartNode;
-	LightSmartNodeOutput   smartNodeAnalogOutputOne;
-	LightSmartNodeOutput   mSmartNodeRelayOne;
+	SmartNodeOutput   smartNodeAnalogOutputOne;
+	SmartNodeOutput   mSmartNodeRelayOne;
 	private ArrayAdapter<CharSequence> relay1Adapter;
 	private ArrayAdapter<CharSequence> relay2Adapter;
 	private ArrayAdapter<CharSequence> analog1OutAdapter;
@@ -216,30 +213,25 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 				                   .createFromResource(getActivity(), R.array.lcm_analog_in, R.layout.spinner_dropdown_item);
 		analog2InAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		spAnalog2In.setAdapter(analog2InAdapter);
-		
-		editRelay1 = (ImageView)view.findViewById(R.id.lcmRelay1EditImg);
-		editRelay2 = (ImageView)view.findViewById(R.id.lcmRelay2EditImg);
-		editAnalog1Out = (ImageView)view.findViewById(R.id.lcmAnalog1OutEditImg);
-		editAnalog2Out = (ImageView)view.findViewById(R.id.lcmAnalog2OutEditImg);
-		editAnalog1In = (ImageView)view.findViewById(R.id.lcmAnalog1InEditImg);
-		editAnalog2In = (ImageView)view.findViewById(R.id.lcmAnalog2InEditImg);
-		
+		editRelay1 = (ImageView) view.findViewById(R.id.lcmRelay1EditImg);
+		editRelay2 = (ImageView) view.findViewById(R.id.lcmRelay2EditImg);
+		editAnalog1Out = (ImageView) view.findViewById(R.id.lcmAnalog1OutEditImg);
+		editAnalog2Out = (ImageView) view.findViewById(R.id.lcmAnalog2OutEditImg);
+		editAnalog1In = (ImageView) view.findViewById(R.id.lcmAnalog1InEditImg);
+		editAnalog2In = (ImageView) view.findViewById(R.id.lcmAnalog2InEditImg);
 		relay1Switch.setOnCheckedChangeListener(this);
 		relay2Switch.setOnCheckedChangeListener(this);
 		analog1OutSwitch.setOnCheckedChangeListener(this);
 		analog2OutSwitch.setOnCheckedChangeListener(this);
 		analog1InSwitch.setOnCheckedChangeListener(this);
 		analog2InSwitch.setOnCheckedChangeListener(this);
-		
 		editRelay1.setOnClickListener(this);
 		editRelay2.setOnClickListener(this);
 		editAnalog1Out.setOnClickListener(this);
 		editAnalog2Out.setOnClickListener(this);
 		editAnalog1In.setOnClickListener(this);
 		editAnalog2In.setOnClickListener(this);
-		
 		zoneCircuitNames = new ArrayList<>();
-		
 		Button setBtn = (Button) view.findViewById(R.id.lcmSetCommand);
 		setBtn.setOnClickListener(new View.OnClickListener()
 		{
@@ -247,7 +239,8 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 			public void onClick(View v)
 			{
 				saveLightData();
-				getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
+				getActivity()
+						.sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
 				dismiss();
 			}
 		});
@@ -269,7 +262,7 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 	{
 		if (mSmartNodeRelayOne == null)
 		{
-			mSmartNodeRelayOne = new LightSmartNodeOutput();
+			mSmartNodeRelayOne = new SmartNodeOutput();
 			mSmartNodeRelayOne.mOutput = Output.Relay;
 			mSmartNodeRelayOne.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyClose;
 			mSmartNodeRelayOne.mSmartNodePort = Port.RELAY_ONE;
@@ -297,7 +290,7 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 	{
 		if (smartNodeAnalogOutputOne == null)
 		{
-			smartNodeAnalogOutputOne = new LightSmartNodeOutput();
+			smartNodeAnalogOutputOne = new SmartNodeOutput();
 			smartNodeAnalogOutputOne.mOutput = Output.Analog;
 			smartNodeAnalogOutputOne.mOutputAnalogActuatorType =
 					OutputAnalogActuatorType.ZeroToTenV;
@@ -323,6 +316,108 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 	}
 	
 	
+	public void saveLightData()
+	{
+		CCUApplication ccuApplication = Globals.getInstance().getCCUApplication();
+		SmartNode smartnode = new SmartNode();
+		smartnode.mAddress = mSmartNodeAddress;
+		smartnode.mRoomName = mRoomName;
+		ccuApplication.smartNodes.add(smartnode);
+		ccuApplication.CCUTitle = "Light Profile";
+		//TODO - TEMP
+		ccuApplication.floors.get(0).mRoomList.get(0).zoneProfiles.clear();
+		ccuApplication.floors.get(0).mRoomList.get(0).zoneProfiles.add(mLightProfile);
+		mLightProfile.smartNodeOutputs.clear();
+		if (relay1Switch.isChecked())
+		{
+			SmartNodeOutput relayOneOp = new SmartNodeOutput();
+			relayOneOp.mSmartNodeAddress = smartnode.mAddress;
+			relayOneOp.mUniqueID = UUID.randomUUID();
+			if (spRelay1.getSelectedItemPosition() == 0)
+			{
+				relayOneOp.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyOpen;
+			}
+			else
+			{
+				relayOneOp.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyClose;
+			}
+			relayOneOp.mOutput = Output.Relay;
+			relayOneOp.mName = relay1EditText.getText().toString();
+			relayOneOp.mSmartNodePort = Port.RELAY_ONE;
+			mLightProfile.smartNodeOutputs.add(relayOneOp);
+		}
+		if (relay2Switch.isChecked())
+		{
+			SmartNodeOutput relayTwoOp = new SmartNodeOutput();
+			relayTwoOp.mSmartNodeAddress = smartnode.mAddress;
+			relayTwoOp.mUniqueID = UUID.randomUUID();
+			if (spRelay2.getSelectedItemPosition() == 0)
+			{
+				relayTwoOp.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyOpen;
+			}
+			else
+			{
+				relayTwoOp.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyClose;
+			}
+			relayTwoOp.mOutput = Output.Relay;
+			relayTwoOp.mName = relay2EditText.getText().toString();
+			relayTwoOp.mSmartNodePort = Port.RELAY_TWO;
+			mLightProfile.smartNodeOutputs.add(relayTwoOp);
+		}
+		if (analog1OutSwitch.isChecked())
+		{
+			SmartNodeOutput analogOneOp = new SmartNodeOutput();
+			analogOneOp.mOutput = Output.Analog;
+			if (spAnalog1Out.getSelectedItemPosition() == 0)
+			{
+				analogOneOp.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
+			}
+			else
+			{
+				analogOneOp.mOutputAnalogActuatorType = OutputAnalogActuatorType.TwoToTenV;
+			}
+			analogOneOp.mSmartNodePort = Port.ANALOG_OUT_ONE;
+			analogOneOp.mSmartNodeAddress = smartnode.mAddress;
+			analogOneOp.mOutput = Output.Analog;
+			analogOneOp.mUniqueID = UUID.randomUUID();
+			analogOneOp.mName = analog1OutEditText.getText().toString();
+			analogOneOp.mSmartNodeAddress = mSmartNodeAddress;
+			analogOneOp.mVal = 100;
+			mLightProfile.smartNodeOutputs.add(analogOneOp);
+		}
+		if (analog2OutSwitch.isChecked())
+		{
+			SmartNodeOutput analogTwoOp = new SmartNodeOutput();
+			analogTwoOp.mOutput = Output.Analog;
+			if (spAnalog2Out.getSelectedItemPosition() == 0)
+			{
+				analogTwoOp.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
+			}
+			else
+			{
+				analogTwoOp.mOutputAnalogActuatorType = OutputAnalogActuatorType.TwoToTenV;
+			}
+			analogTwoOp.mSmartNodePort = Port.ANALOG_OUT_TWO;
+			analogTwoOp.mSmartNodeAddress = smartnode.mAddress;
+			analogTwoOp.mOutput = Output.Analog;
+			analogTwoOp.mUniqueID = UUID.randomUUID();
+			analogTwoOp.mName = analog2OutEditText.getText().toString();
+			analogTwoOp.mSmartNodeAddress = mSmartNodeAddress;
+			analogTwoOp.mVal = 100;
+			mLightProfile.smartNodeOutputs.add(analogTwoOp);
+		}
+		try
+		{
+			CcuLog.d(TAG, JsonSerializer.toJson(mLightProfile.getControlsMessage(), true));
+		}
+		catch (IOException e)
+		{
+			CcuLog.wtf(TAG, "Failed to generate Control Message", e);
+		}
+		LocalStorage.setApplicationSettings();
+	}
+	
+	
 	@Override
 	public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
 	{
@@ -335,10 +430,7 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 	@Override
 	public void onNothingSelected(AdapterView<?> parent)
 	{
-	}
-	
-	
-	@Override
+	}	@Override
 	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
 	{
 		switch (buttonView.getId())
@@ -366,178 +458,123 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 		{
 			case R.id.lcmRelay1EditImg:
 				if (relay1Switch.isChecked())
+				{
 					showEditLogicalNameDialog(relay1EditText, v.getId());
+				}
 				break;
 			case R.id.lcmRelay2EditImg:
 				if (relay1Switch.isChecked())
+				{
 					showEditLogicalNameDialog(relay2EditText, v.getId());
+				}
 				break;
 			case R.id.lcmAnalog1OutEditImg:
 				if (analog1OutSwitch.isChecked())
+				{
 					showEditLogicalNameDialog(analog1OutEditText, v.getId());
+				}
 				break;
 			case R.id.lcmAnalog2OutEditImg:
 				if (analog2OutSwitch.isChecked())
+				{
 					showEditLogicalNameDialog(analog2OutEditText, v.getId());
+				}
 				break;
 			case R.id.lcmAnalog1InEditImg:
 				if (analog1InSwitch.isChecked())
+				{
 					showEditLogicalNameDialog(analog1InEditText, v.getId());
+				}
 				break;
 			case R.id.lcmAnalog2InEditImg:
 				if (analog2InSwitch.isChecked())
+				{
 					showEditLogicalNameDialog(analog2InEditText, v.getId());
+				}
 				break;
 		}
 	}
 	
-	public void saveLightData() {
-		
 	
-		CCUApplication ccuApplication = Globals.getInstance().getCCUApplication();
-		SmartNode smartnode = new SmartNode();
-		smartnode.mAddress = mSmartNodeAddress;
-		smartnode.mRoomName = mRoomName;
-		ccuApplication.smartNodes.add(smartnode);
-		ccuApplication.CCUTitle = "Light Profile";
-		//TODO - TEMP
-		ccuApplication.floors.get(0).mRoomList.get(0).zoneProfiles.clear();
-		ccuApplication.floors.get(0).mRoomList.get(0).zoneProfiles.add(mLightProfile);
-		mLightProfile.smartNodeOutputs.clear();
-		
-		
-		
-		if (relay1Switch.isChecked()) {
-			LightSmartNodeOutput relayOneOp = new LightSmartNodeOutput();
-			relayOneOp.mSmartNodeAddress = smartnode.mAddress;
-			relayOneOp.mUniqueID = UUID.randomUUID();
-			if(spRelay1.getSelectedItemPosition() == 0 )
-			{
-				relayOneOp.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyOpen;
-			} else {
-				relayOneOp.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyClose;
-			}
-			relayOneOp.mOutput = Output.Relay;
-			relayOneOp.mName = relay1EditText.getText().toString();
-			relayOneOp.mSmartNodePort = Port.RELAY_ONE;
-			mLightProfile.smartNodeOutputs.add(relayOneOp);
-		}
-		if (relay2Switch.isChecked()) {
-			LightSmartNodeOutput relayTwoOp = new LightSmartNodeOutput();
-			relayTwoOp.mSmartNodeAddress = smartnode.mAddress;
-			relayTwoOp.mUniqueID = UUID.randomUUID();
-			if(spRelay2.getSelectedItemPosition() == 0 )
-			{
-				relayTwoOp.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyOpen;
-			} else {
-				relayTwoOp.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyClose;
-			}
-			relayTwoOp.mOutput = Output.Relay;
-			relayTwoOp.mName = relay2EditText.getText().toString();
-			relayTwoOp.mSmartNodePort = Port.RELAY_TWO;
-			mLightProfile.smartNodeOutputs.add(relayTwoOp);
-		}
-		if (analog1OutSwitch.isChecked()){
-			LightSmartNodeOutput analogOneOp = new LightSmartNodeOutput();
-			analogOneOp.mOutput = Output.Analog;
-			if (spAnalog1Out.getSelectedItemPosition() == 0)
-			{
-				analogOneOp.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
-			} else {
-				analogOneOp.mOutputAnalogActuatorType = OutputAnalogActuatorType.TwoToTenV;
-			}
-			analogOneOp.mSmartNodePort = Port.ANALOG_OUT_ONE;
-			analogOneOp.mSmartNodeAddress = smartnode.mAddress;
-			analogOneOp.mOutput=Output.Analog;
-			analogOneOp.mUniqueID = UUID.randomUUID();
-			analogOneOp.mName = analog1OutEditText.getText().toString();
-			analogOneOp.mSmartNodeAddress = mSmartNodeAddress;
-			analogOneOp.on = true;
-			mLightProfile.smartNodeOutputs.add(analogOneOp);
-		}
-		if (analog2OutSwitch.isChecked()){
-			LightSmartNodeOutput analogTwoOp = new LightSmartNodeOutput();
-			analogTwoOp.mOutput = Output.Analog;
-			if (spAnalog2Out.getSelectedItemPosition() == 0)
-			{
-				analogTwoOp.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
-			} else {
-				analogTwoOp.mOutputAnalogActuatorType = OutputAnalogActuatorType.TwoToTenV;
-			}
-			analogTwoOp.mSmartNodePort = Port.ANALOG_OUT_TWO;
-			analogTwoOp.mSmartNodeAddress = smartnode.mAddress;
-			analogTwoOp.mOutput = Output.Analog;
-			analogTwoOp.mUniqueID = UUID.randomUUID();
-			analogTwoOp.mName = analog2OutEditText.getText().toString();
-			analogTwoOp.mSmartNodeAddress = mSmartNodeAddress;
-			analogTwoOp.on = true;
-			mLightProfile.smartNodeOutputs.add(analogTwoOp);
-		}
-		try {
-				CcuLog.d(TAG, JsonSerializer.toJson(mLightProfile.getControlsMessage(), true));
-		} catch (IOException e){
-				CcuLog.wtf(TAG, "Failed to generate Control Message" ,e);
-		}
-		
-		LocalStorage.setApplicationSettings();
-		
-		
-	}
+
 	
-	public void showEditLogicalNameDialog(final EditText etext, final int id){
-		AlertDialog.Builder alertBuilder = new AlertDialog.Builder(getActivity(), R.style.NewDialogStyle);
+	
+	public void showEditLogicalNameDialog(final EditText etext, final int id)
+	{
+		AlertDialog.Builder alertBuilder =
+				new AlertDialog.Builder(getActivity(), R.style.NewDialogStyle);
 		alertBuilder.setTitle("Assign Name for this Lighting Circuit");
 		alertBuilder.setCancelable(false);
-		
 		LayoutInflater inflater = LayoutInflater.from(getActivity());
 		final View view = inflater.inflate(R.layout.edit_circuit_name_dialog, null);
-		final EditText input = (EditText)view.findViewById(R.id.editTextCircuitName);
-		final TextView remainingChar = (TextView)view.findViewById(R.id.remainingChar);
-		input.addTextChangedListener(new TextWatcher() {
+		final EditText input = (EditText) view.findViewById(R.id.editTextCircuitName);
+		final TextView remainingChar = (TextView) view.findViewById(R.id.remainingChar);
+		input.addTextChangedListener(new TextWatcher()
+		{
 			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-				
+			public void beforeTextChanged(CharSequence s, int start, int count, int after)
+			{
 			}
 			
-			@Override
-			public void onTextChanged(CharSequence s, int start, int before, int count) {
-				
-			}
 			
 			@Override
-			public void afterTextChanged(Editable s) {
-				if(input.getText().toString().length() >20){
+			public void onTextChanged(CharSequence s, int start, int before, int count)
+			{
+			}
+			
+			
+			@Override
+			public void afterTextChanged(Editable s)
+			{
+				if (input.getText().toString().length() > 20)
+				{
 					int i = 30 - input.getText().toString().length();
 					remainingChar.setVisibility(View.VISIBLE);
-					remainingChar.setText(i+" ");
-				}else{
+					remainingChar.setText(i + " ");
+				}
+				else
+				{
 					remainingChar.setVisibility(View.GONE);
 				}
 			}
 		});
 		input.setText(etext.getText().toString());
 		alertBuilder.setView(view);
-		alertBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+		alertBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener()
+		{
 			@Override
-			public void onClick(DialogInterface dialog, int which) {
+			public void onClick(DialogInterface dialog, int which)
+			{
 				String displayName = input.getText().toString();
-				if(displayName.isEmpty()) {
-					Toast.makeText(getActivity(), "Circuit Name cannot be Empty", Toast.LENGTH_SHORT).show();
-				}else {
-					if(!zoneCircuitNames.contains(displayName)) {
+				if (displayName.isEmpty())
+				{
+					Toast.makeText(getActivity(), "Circuit Name cannot be Empty", Toast.LENGTH_SHORT)
+					     .show();
+				}
+				else
+				{
+					if (!zoneCircuitNames.contains(displayName))
+					{
 						zoneCircuitNames.add(displayName);
-					}else {
-						Toast.makeText(getActivity(), "Circuit Name ["+displayName+"] exists, enter a valid circuit name", Toast.LENGTH_LONG).show();
+					}
+					else
+					{
+						Toast.makeText(getActivity(), "Circuit Name [" + displayName +
+						                              "] exists, enter a valid circuit name", Toast.LENGTH_LONG)
+						     .show();
 						displayName = "";
 					}
 				}
-				etext.setText(displayName.length() > 15 ? displayName.substring(0, 12).concat("...") : displayName.toString());
+				etext.setText(displayName.length() > 15 ? displayName.substring(0, 12).concat("...")
+						              : displayName.toString());
 				dialog.dismiss();
 			}
 		});
-		alertBuilder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+		alertBuilder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener()
+		{
 			@Override
-			public void onClick(DialogInterface dialog, int which) {
+			public void onClick(DialogInterface dialog, int which)
+			{
 				dialog.dismiss();
 			}
 		});

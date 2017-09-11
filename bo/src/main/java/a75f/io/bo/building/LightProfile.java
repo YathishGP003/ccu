@@ -1,6 +1,7 @@
 package a75f.io.bo.building;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import org.javolution.io.Struct;
 
@@ -9,35 +10,34 @@ import java.util.HashMap;
 import java.util.List;
 
 import a75f.io.bo.building.definitions.Port;
-import a75f.io.bo.json.serializers.JsonSerializer;
 import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.bo.serial.MessageType;
 
-/**
- * Created by Yinten on 8/15/2017.
- */
-
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class LightProfile extends ZoneProfile
 {
-	public boolean on              = true;
-	public boolean dimmable        = true;
-	public short   dimmablePercent = 100;
-	public ArrayList<LightSmartNodeOutput> smartNodeOutputs = new ArrayList<>();
-	public LightProfile(){
-		
+	public boolean on = true;
+	public short mDimmablePercent;
+	
+	
+	public LightProfile()
+	{
 	}
+	
 	
 	public LightProfile(String name)
 	{
 		super(name);
 	}
 	
-	
+	@JsonIgnore
 	public void on(boolean on)
 	{
 		this.on = on;
 	}
-	
+	/*****************
+	 *ONLY USED FOR CIRCUITS BELOW
+	 ******************/
 	
 	/***
 	 * A profile can have many smart nodes attached to it.   It has to formulate many controls
@@ -47,16 +47,10 @@ public class LightProfile extends ZoneProfile
 	@JsonIgnore
 	public List<CcuToCmOverUsbSnControlsMessage_t> getControlsMessage()
 	{
-		ensureDimmable();
 		HashMap<Short, CcuToCmOverUsbSnControlsMessage_t> controlsMessages =
 				new HashMap<Short, CcuToCmOverUsbSnControlsMessage_t>();
-		
-		boolean override = overrideEnabled(); //Used to ignore profile settings while sending override control message.
-		
-		
-		for (LightSmartNodeOutput smartNodeOutput : this.smartNodeOutputs)
+		for (SmartNodeOutput smartNodeOutput : this.smartNodeOutputs)
 		{
-			
 			CcuToCmOverUsbSnControlsMessage_t controlsMessage_t = null;
 			if (controlsMessages.containsKey(smartNodeOutput.mSmartNodeAddress))
 			{
@@ -65,29 +59,37 @@ public class LightProfile extends ZoneProfile
 			else
 			{
 				controlsMessage_t = new CcuToCmOverUsbSnControlsMessage_t();
-				controlsMessages
-						                    .put(smartNodeOutput.mSmartNodeAddress, controlsMessage_t);
+				controlsMessages.put(smartNodeOutput.mSmartNodeAddress, controlsMessage_t);
 				controlsMessage_t.smartNodeAddress.set(smartNodeOutput.mSmartNodeAddress);
 				controlsMessage_t.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_CONTROLS);
 			}
-			
-			
 			Struct.Unsigned8 port = getPort(controlsMessage_t, smartNodeOutput.mSmartNodePort);
-			
-			short localDimmablePercent = 100;
+			int localDimmablePercent = 100;
 			boolean localOn = true;
-			if(override)
+			if (smartNodeOutput.isOverride())
 			{
-				localDimmablePercent = smartNodeOutput.dimmable;
-				localOn = smartNodeOutput.on;
+				localDimmablePercent = smartNodeOutput.mVal;
+				localOn = smartNodeOutput.mVal != 0;
 				//USE values for smartnodeoutput rather than smartNodeProfile
 			}
 			else
 			{
-				localDimmablePercent = this.dimmablePercent;
-				localOn = this.on;
+				if (smartNodeOutput.hasSchedules())
+				{
+					localDimmablePercent = smartNodeOutput.getScheduledVal();
+					localOn = localDimmablePercent != 0;
+				}
+				else if (this.hasSchedules())
+				{
+					localDimmablePercent = this.getScheduledVal();
+					localOn = localDimmablePercent != 0;
+				}
+				else
+				{
+					localOn = on;
+					localDimmablePercent = mDimmablePercent;
+				}
 			}
-			
 			switch (smartNodeOutput.mOutput)
 			{
 				case Relay:
@@ -152,7 +154,7 @@ public class LightProfile extends ZoneProfile
 						case TenToTwov:
 							if (localOn)
 							{
-								port.set(getDimmable(localDimmablePercent,20));
+								port.set(getDimmable(localDimmablePercent, 20));
 							}
 							else
 							{
@@ -166,25 +168,7 @@ public class LightProfile extends ZoneProfile
 		return new ArrayList<>(controlsMessages.values());
 	}
 	
-	
-	private boolean overrideEnabled() {
-		for (LightSmartNodeOutput op : this.smartNodeOutputs) {
-			if (op.override) {
-				return true;
-			}
-			
-		}
-		return false;
-	}
-	
-	private void ensureDimmable()
-	{
-		if (dimmable == false)
-		{
-			dimmablePercent = 100;
-		}
-	}
-	
+	@JsonIgnore
 	private Struct.Unsigned8 getPort(CcuToCmOverUsbSnControlsMessage_t controlsMessage_t,
 	                                 Port smartNodePort)
 	{
@@ -207,9 +191,22 @@ public class LightProfile extends ZoneProfile
 		return retVal;
 	}
 	
-	
-	private static short getDimmable(short localDimmablePercent, int analogVoltage)
+	@JsonIgnore
+	public int getScheduledVal()
 	{
-		return (short) ((localDimmablePercent * analogVoltage) / 100);
+		for (Schedule schedule : mSchedules)
+		{
+			if (schedule.isInSchedule())
+			{
+				return schedule.getVal();
+			}
+		}
+		return 0;
+	}
+	
+	@JsonIgnore
+	private static short getDimmable(int localDimmablePercent, int analogVoltage)
+	{
+		return (short) (((float) localDimmablePercent * (float) analogVoltage) / 100.0f);
 	}
 }

@@ -7,7 +7,7 @@ import a75f.io.renatus.ENGG.logger.LogFragment;
 
 
 /**
- * Created by samjithsadasivan on 8/17/17.
+ * Created by samjithsadasivan isOn 8/17/17.
  */
 
 public class EngineeringPagerAdapter extends FragmentStatePagerAdapter

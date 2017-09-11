@@ -72,7 +72,7 @@ public class TextBuilder implements Appendable, CharSequence, Serializable {
     /**
      * Creates a text builder of specified initial capacity.
      * Unless the text length exceeds the specified capacity, operations 
-     * on this text builder will not allocate memory.
+     * isOn this text builder will not allocate memory.
      * 
      * @param capacity the initial capacity.
      */

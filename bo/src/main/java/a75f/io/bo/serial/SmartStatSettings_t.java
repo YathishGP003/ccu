@@ -3,7 +3,7 @@ package a75f.io.bo.serial;
 import org.javolution.io.Struct;
 
 /**
- * Created by samjithsadasivan on 8/9/17.
+ * Created by samjithsadasivan isOn 8/9/17.
  */
 
 public class SmartStatSettings_t extends Struct

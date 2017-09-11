@@ -76,18 +76,18 @@ import static org.javolution.annotations.Realtime.Limit.LINEAR;
  * }</pre> </p> 
  * <p> FastMap supports a great diversity of views.
  * <ul>
- *    <li>{@link #subMap} - View over a range of entries (based on map's order).</li>
+ *    <li>{@link #subMap} - View over a range of entries (based isOn map's order).</li>
  *    <li>{@link #headMap} - View over the head portion of the map.</li>
  *    <li>{@link #tailMap} - View over the tail portion of the map.</li>
  *    <li>{@link #entrySet} - View over the map entries.</li>
  *    <li>{@link #keySet} - View over the map keys allowing keys to be removed or added (entries with {@code null} values).</li>
  *    <li>{@link #values} - View over the map values (removal is supported but not adding new values).</li>
- *    <li>{@link #shared} - Thread-safe view based on <a href=
+ *    <li>{@link #shared} - Thread-safe view based isOn <a href=
  *                          "http://en.wikipedia.org/wiki/Readers%E2%80%93writer_lock">readers-writer locks</a>.</li>
  *    <li>{@link #atomic} - Thread-safe view for which all reads are mutex-free and map updates 
  *                           (e.g. {@link #putAll putAll}) are atomic.</li>
  *    <li>{@link #reversed} - Reversed order view.</li>
- *    <li>{@link #linked} - View exposing each entry based on the {@link #put insertion} order in the view.</li>
+ *    <li>{@link #linked} - View exposing each entry based isOn the {@link #put insertion} order in the view.</li>
  *    <li>{@link #unmodifiable} - View which does not allow for modification.</li>
  *    <li>{@link #valuesEquality} - View using the specified equality comparator for the map's values.</li>
  * </ul></p>      
@@ -198,7 +198,7 @@ public abstract class FastMap<K, V>
 
     /**
      * Returns a thread-safe view over this map. The shared view allows for concurrent read as long as 
-     * there is no writer. The default implementation is based on <a href=
+     * there is no writer. The default implementation is based isOn <a href=
      * "http://en.wikipedia.org/wiki/Readers%E2%80%93writer_lock"> readers-writers locks</a> giving priority to writers. 
      */
     public FastMap<K, V> shared() {
@@ -677,7 +677,7 @@ public abstract class FastMap<K, V>
      */
     @SuppressWarnings("unchecked")
     public FastMap<K, V>[] trySplit(final int n) {
-        // Split into filtered maps with filter based on the element index (hashed to ensure balanced distribution). 
+        // Split into filtered maps with filter based isOn the element index (hashed to ensure balanced distribution).
         final Order<? super K> order = keyOrder();
         FastMap<K, V>[] split = new FastMap[n];
         for (int i = 0; i < n; i++) {

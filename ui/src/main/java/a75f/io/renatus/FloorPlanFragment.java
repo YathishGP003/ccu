@@ -26,9 +26,9 @@ import a75f.io.bo.building.Floor;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.ZoneProfile;
 import a75f.io.logic.SmartNodeBLL;
+import a75f.io.logic.cache.Globals;
 import a75f.io.renatus.BLE.FragmentDeviceScan;
 import a75f.io.renatus.ZONEPROFILE.LightingZoneProfileFragment;
-import a75f.io.util.Globals;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -37,7 +37,7 @@ import butterknife.OnFocusChange;
 import butterknife.OnItemClick;
 
 /**
- * Created by samjithsadasivan on 8/7/17.
+ * Created by samjithsadasivan isOn 8/7/17.
  */
 
 public class FloorPlanFragment extends Fragment

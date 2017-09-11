@@ -58,7 +58,7 @@ public final class MathLib {
     }    
 
     /**
-     * 32 bits hashing function based on FNV-1 algorithm.
+     * 32 bits hashing function based isOn FNV-1 algorithm.
      *  
      * @param intValue the 32 bits number input.
      * @return the corresponding hash value.
@@ -1331,10 +1331,10 @@ public final class MathLib {
      *	   where  sqrt(2)/2 < 1+f < sqrt(2) .
      *
      *   2. Approximation of log(1+f).
-     *	Let s = f/(2+f) ; based on log(1+f) = log(1+s) - log(1-s)
+     *	Let s = f/(2+f) ; based isOn log(1+f) = log(1+s) - log(1-s)
      *		 = 2s + 2/3 s**3 + 2/5 s**5 + .....,
      *	     	 = 2s + s*R
-     *      We use a special Reme algorithm on [0,0.1716] to generate 
+     *      We use a special Reme algorithm isOn [0,0.1716] to generate
      * 	a polynomial of degree 14 to approximate R The maximum error 
      *	of this polynomial approximation is bounded by 2**-58.45. In
      *	other words,
@@ -1481,11 +1481,11 @@ public final class MathLib {
      *      Here r will be represented as r = hi-lo for better 
      *	accuracy.
      *
-     *   2. Approximation of exp(r) by a special rational function on
+     *   2. Approximation of exp(r) by a special rational function isOn
      *	the interval [0,0.34658]:
      *	Write
      *	    R(r**2) = r*(exp(r)+1)/(exp(r)-1) = 2 + r*r/6 - r**4/360 + ...
-     *      We use a special Remes algorithm on [0,0.34658] to generate 
+     *      We use a special Remes algorithm isOn [0,0.34658] to generate
      * 	a polynomial of degree 5 to approximate R. The maximum error 
      *	of this polynomial approximation is bounded by 2**-59. In
      *	other words,

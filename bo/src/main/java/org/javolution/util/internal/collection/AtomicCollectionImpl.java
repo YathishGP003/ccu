@@ -18,7 +18,7 @@ import java.util.Collection;
 import java.util.Iterator;
 
 /**
- * An atomic view over a collection (copy-on-write).
+ * An atomic view over a collection (copy-isOn-write).
  */
 public final class AtomicCollectionImpl<E> extends FastCollection<E> {
 

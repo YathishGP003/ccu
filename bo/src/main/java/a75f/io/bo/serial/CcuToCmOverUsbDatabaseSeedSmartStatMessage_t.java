@@ -5,7 +5,7 @@ import org.javolution.io.Struct;
 import java.nio.ByteOrder;
 
 /**
- * Created by samjithsadasivan on 8/9/17.
+ * Created by samjithsadasivan isOn 8/9/17.
  */
 
 public class CcuToCmOverUsbDatabaseSeedSmartStatMessage_t extends Struct

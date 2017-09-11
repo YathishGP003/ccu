@@ -2,10 +2,10 @@ package a75f.io.logic;
 
 import a75f.io.bo.building.Floor;
 import a75f.io.bo.building.Zone;
-import a75f.io.util.Globals;
+import a75f.io.logic.cache.Globals;
 
 /**
- * Created by Yinten on 8/21/2017.
+ * Created by Yinten isOn 8/21/2017.
  */
 
 public class RoomBLL

@@ -18,6 +18,10 @@ android {
         exclude 'META-INF/rxjava.properties'
 
     }
+
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
 }
 dependencies {
     compile fileTree(include: '*.jar', dir: 'libs')
@@ -30,5 +34,7 @@ dependencies {
     compile 'com.google.http-client:google-http-client-android:1.19.0'
     compile 'com.google.http-client:google-http-client-gson:1.19.0'
     compile 'com.google.http-client:google-http-client-jackson2:1.19.0'
+    compile 'joda-time:joda-time:2.9.9'
+
 }
 

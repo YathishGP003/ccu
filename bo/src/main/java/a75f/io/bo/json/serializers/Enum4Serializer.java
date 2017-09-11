@@ -9,7 +9,7 @@ import org.javolution.io.Struct;
 import java.io.IOException;
 
 /**
- * Created by samjithsadasivan on 8/15/17.
+ * Created by samjithsadasivan isOn 8/15/17.
  */
 
 public class Enum4Serializer<HT extends Struct.Enum4> extends StdSerializer<HT>

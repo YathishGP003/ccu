@@ -5,10 +5,10 @@ import a75f.io.bo.building.SmartNode;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.bo.serial.MessageType;
-import a75f.io.util.Globals;
+import a75f.io.logic.cache.Globals;
 
 /**
- * Created by Yinten on 8/17/2017.
+ * Created by Yinten isOn 8/17/2017.
  */
 
 public class SmartNodeBLL

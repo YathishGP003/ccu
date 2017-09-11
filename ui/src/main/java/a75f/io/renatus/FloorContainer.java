@@ -3,11 +3,11 @@ package a75f.io.renatus;
 import java.util.ArrayList;
 
 import a75f.io.bo.building.Floor;
-import a75f.io.util.Globals;
-import a75f.io.util.prefs.LocalStorage;
+import a75f.io.logic.cache.Globals;
+import a75f.io.logic.cache.prefs.LocalStorage;
 
 /**
- * Created by samjithsadasivan on 8/8/17.
+ * Created by samjithsadasivan isOn 8/8/17.
  */
 
 public class FloorContainer

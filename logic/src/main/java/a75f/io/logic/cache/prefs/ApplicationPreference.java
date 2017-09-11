@@ -1,4 +1,4 @@
-package a75f.io.util.prefs;
+package a75f.io.logic.cache.prefs;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -8,10 +8,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.IOException;
 
 import a75f.io.bo.json.serializers.JsonSerializer;
-import a75f.io.util.Globals;
+import a75f.io.logic.cache.Globals;
 
 /**
- * Created by Yinten on 8/21/2017.
+ * Created by Yinten isOn 8/21/2017.
  */
 
 public class ApplicationPreference

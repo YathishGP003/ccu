@@ -1,15 +1,11 @@
 package a75f.io.renatus;
 
-import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentTransaction;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.StateListDrawable;
-import android.support.v7.app.AlertDialog;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,24 +21,15 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Spinner;
-import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
-import java.util.SortedMap;
 
 import a75f.io.bo.building.LightProfile;
-import a75f.io.bo.building.LightSmartNodeOutput;
 import a75f.io.bo.building.SmartNodeOutput;
-import a75f.io.bo.building.ZoneProfile;
-import a75f.io.bo.building.definitions.Output;
 import a75f.io.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.bo.building.definitions.Port;
 import a75f.io.bo.json.serializers.JsonSerializer;
@@ -50,26 +37,26 @@ import a75f.io.logic.SmartNodeBLL;
 import a75f.io.renatus.ENGG.logger.CcuLog;
 
 /**
- * Created by JASPINDER on 11/9/2016.
+ * Created by JASPINDER isOn 11/9/2016.
  */
 
 public class LightingDetailAdapter extends BaseAdapter{
     
     public static final String TAG = "Lighting";
 
-    View                            row;
-    LayoutInflater                  inflater;
-    Activity                        c;
-    ViewHolder                      viewHolder;
-    ArrayList<LightSmartNodeOutput> snOutPortList;
-    ListView                        thiSList;
+    View                       row;
+    LayoutInflater             inflater;
+    AppCompatActivity          c;
+    ViewHolder                 viewHolder;
+    ArrayList<SmartNodeOutput> snOutPortList;
+    ListView                   thiSList;
     private ArrayAdapter<CharSequence> aaOccupancyMode;
     private Boolean lcmdab;
     private RelativeLayout schedule;
     private LightProfile profile;
 
     public LightingDetailAdapter(Context c, ListView thiSList, LightProfile p, Boolean lcmdab) {
-        this.c = (Activity) c;
+        this.c = (AppCompatActivity) c;
         notifyDataSetChanged();
         this.snOutPortList = new ArrayList<>();
         snOutPortList.addAll(p.smartNodeOutputs);
@@ -120,7 +107,7 @@ public class LightingDetailAdapter extends BaseAdapter{
         row.setBackgroundColor((position % 2 == 0) ?  Color.parseColor("#ececec"): Color.TRANSPARENT);
        
         if (snOutPortList.size() > 0) {
-            final LightSmartNodeOutput snOutput = snOutPortList.get(position);
+            final SmartNodeOutput snOutput = snOutPortList.get(position);
             viewHolder.LogicalName.setText(snOutput.mName/*port_map.getCircuitName()*/);
             viewHolder.spinnerSchedule.setTag(position);
             viewHolder.spinnerSchedule.setAdapter(aaOccupancyMode);
@@ -131,7 +118,7 @@ public class LightingDetailAdapter extends BaseAdapter{
             switch (snOutput.mSmartNodePort) {
                 case RELAY_ONE:
                    
-                    if (snOutput.on) {
+                    if (snOutput.isOn()) {
                         viewHolder.OnOffLight.setChecked(true);
                     } else
                     {
@@ -150,7 +137,7 @@ public class LightingDetailAdapter extends BaseAdapter{
                     break;
                 case RELAY_TWO:
     
-                    if (snOutput.on)
+                    if (snOutput.isOn())
                     {
                         viewHolder.OnOffLight.setChecked(true);
                     } else {
@@ -170,8 +157,8 @@ public class LightingDetailAdapter extends BaseAdapter{
                     break;
                 case ANALOG_OUT_ONE:
                     viewHolder.brightness.setMax(100);
-                    viewHolder.brightness.setProgress(snOutput.dimmable);
-                    viewHolder.brightnessVal.setText(snOutput.dimmable + "");
+                    viewHolder.brightness.setProgress(snOutput.mVal);
+                    viewHolder.brightnessVal.setText(snOutput.mVal + "");
                     /*viewHolder.statusDetail.setText(port_info.analog1_out.status);
                     viewHolder.vacationFromTo.setText(port_info.analog1_out.vacation_text);
                     viewHolder.spinnerSchedule.setSelection(port_info.analog1_out.schedule_mode);
@@ -184,8 +171,8 @@ public class LightingDetailAdapter extends BaseAdapter{
                     break;
                 case ANALOG_OUT_TWO:
                     viewHolder.brightness.setMax(100);
-                    viewHolder.brightness.setProgress(snOutput.dimmable);
-                    viewHolder.brightnessVal.setText(snOutput.dimmable + "");
+                    viewHolder.brightness.setProgress(snOutput.mVal);
+                    viewHolder.brightnessVal.setText(snOutput.mVal + "");
                     /*viewHolder.vacationFromTo.setText(port_info.analog2_out.vacation_text);
                     viewHolder.statusDetail.setText(port_info.analog2_out.status);
                     viewHolder.spinnerSchedule.setSelection(port_info.analog2_out.schedule_mode);
@@ -226,8 +213,18 @@ public class LightingDetailAdapter extends BaseAdapter{
                     switch (snOutput.mSmartNodePort){
                         case RELAY_ONE:
                         case RELAY_TWO:
-                            snOutput.on = isChecked;
-                            snOutput.override = true;
+                            
+                            if(snOutput.mOutputRelayActuatorType ==
+                               OutputRelayActuatorType.NormallyClose )
+                            {
+                                snOutput.mVal = isChecked ? 100 : 0;
+                            }
+                            else
+                            {
+                                snOutput.mVal = isChecked ? 0 : 100;
+                            }
+                            
+                            snOutput.setOverride(true);
                     }
                     try
                     {
@@ -253,8 +250,8 @@ public class LightingDetailAdapter extends BaseAdapter{
                     switch (snOutput.mSmartNodePort){
                         case ANALOG_OUT_ONE:
                         case ANALOG_OUT_TWO:
-                            snOutput.dimmable = (short) progress;
-                            snOutput.override = true;
+                            snOutput.mVal =  (short) progress;
+                            snOutput.setOverride(true);
                     }
 
                 }
@@ -270,8 +267,8 @@ public class LightingDetailAdapter extends BaseAdapter{
                     switch (snOutput.mSmartNodePort){
                         case ANALOG_OUT_ONE:
                         case ANALOG_OUT_TWO:
-                            snOutput.dimmable = (short)value;
-                            snOutput.override = true;
+                            snOutput.mVal = (short)value;
+                            snOutput.setOverride(true);
                     }
                     try
                     {
@@ -310,13 +307,13 @@ public class LightingDetailAdapter extends BaseAdapter{
                 }
 
             });
-            //changing vacation
+            //changing schedule
             final ImageView vacationEdit = (ImageView) row.findViewById(R.id.vacationEdit);
             vacationEdit.setTag(position);
             vacationEdit.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    /*FragmentTransaction ftt = c.getFragmentManager().beginTransaction();
+                   /* FragmentTransaction ftt = c.getFragmentManager().beginTransaction();
                     Fragment prev1 = c.getFragmentManager().findFragmentByTag("vacation");
                     if (prev1 != null) {
                         ftt.remove(prev1);
@@ -333,12 +330,10 @@ public class LightingDetailAdapter extends BaseAdapter{
             imgNameSchedule.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    /*//CcuLog.d("WRM_PRO","imageView LCM detail named sch edit -"+v.isEnabled()+","+v.isPressed());
-                    if(v.isPressed()) {
-                        FSVData fsvData = fsvPortList.get(position).getFsvData();
-                        FSVData.SMARTNODE_PORT port = fsvPortList.get(position).getPort();
-                        showNameScheduleSelector(fsvData, port);
-                    }*/
+                    
+                    if(v.isPressed() && position == 1) {
+                        showDialogFragment(LightScheduleFragment.newInstance(snOutput),"schedule_fragment");
+                    }
 
                 }
             });
@@ -436,7 +431,22 @@ public class LightingDetailAdapter extends BaseAdapter{
 
         return row;
     }
-
+    
+    private void showDialogFragment(DialogFragment dialogFragment, String id)
+    {
+        FragmentTransaction
+                ft = c.getSupportFragmentManager().beginTransaction();
+        Fragment prev = c.getSupportFragmentManager().findFragmentByTag(id);
+        if (prev != null)
+        {
+            
+            ft.remove(prev);
+        }
+        ft.addToBackStack(null);
+        // Create and show the dialog.
+        
+        dialogFragment.show(ft, id);
+    }
    /* @Override
     public void OnSetLCMVacationSchedule(SortedMap<Long, JSONObject> vacationData, FSVData.SMARTNODE_PORT port, FSVData fsvData) {
         SmartNodesPortData portData = fsvData.getSmartNodePort();

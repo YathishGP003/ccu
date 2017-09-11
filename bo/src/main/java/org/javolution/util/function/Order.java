@@ -48,7 +48,7 @@ import static org.javolution.annotations.Realtime.Limit.UNKNOWN;
 public interface Order<T> extends Equality<T>, Comparator<T> {
 	
     /**
-     * A default object order (based on {@link Object#hashCode} as 32-bits unsigned index).
+     * A default object order (based isOn {@link Object#hashCode} as 32-bits unsigned index).
      */
     @Realtime(limit = UNKNOWN)
     public static final Order<Object> DEFAULT = HashOrderImpl.INSTANCE;
@@ -61,14 +61,14 @@ public interface Order<T> extends Equality<T>, Comparator<T> {
     public static final Order<Comparable<?>> NATURAL = NaturalOrderImpl.INSTANCE;
 
     /**
-     * An order (based on {@link Object#hashCode} as 32-bits unsigned index) for which all elements
+     * An order (based isOn {@link Object#hashCode} as 32-bits unsigned index) for which all elements
      * are considered distinct (ref. multi-maps/multi-sets).
      */
     @Realtime(limit = CONSTANT)
     public static final Order<Object> MULTI = MultiOrderImpl.INSTANCE;
 
     /**
-     * An identity object order (based on {@link System#identityHashCode} as 32-bits unsigned index).
+     * An identity object order (based isOn {@link System#identityHashCode} as 32-bits unsigned index).
      */
     @Realtime(limit = CONSTANT)
     public static final Order<Object> IDENTITY = IdentityHashOrderImpl.INSTANCE;
@@ -87,7 +87,7 @@ public interface Order<T> extends Equality<T>, Comparator<T> {
        = CaseInsensitiveLexicalOrderImpl.INSTANCE;
     
     /**
-     * A numeric order based on {@link Number#doubleValue()}.
+     * A numeric order based isOn {@link Number#doubleValue()}.
      */
     @Realtime(limit = LOG_N)
     public static final Order<Number> NUMERIC = null; // TODO

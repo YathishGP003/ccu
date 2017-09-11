@@ -1,4 +1,4 @@
-package a75f.io.util;
+package a75f.io.bo;
 
 import org.junit.Test;
 
@@ -7,7 +7,6 @@ import java.util.UUID;
 import a75f.io.bo.building.CCUApplication;
 import a75f.io.bo.building.Floor;
 import a75f.io.bo.building.LightProfile;
-import a75f.io.bo.building.LightSmartNodeOutput;
 import a75f.io.bo.building.SmartNode;
 import a75f.io.bo.building.SmartNodeOutput;
 import a75f.io.bo.building.Zone;
@@ -18,7 +17,7 @@ import a75f.io.bo.building.definitions.Port;
 import a75f.io.bo.json.serializers.JsonSerializer;
 
 /**
- * Created by samjithsadasivan on 8/28/17.
+ * Created by samjithsadasivan isOn 8/28/17.
  */
 
 public class LocalStorageUtilTest
@@ -40,7 +39,7 @@ public class LocalStorageUtilTest
 		LightProfile lightProfile5K = new LightProfile("Light Profile");
 		//		ccuApplication.floors.get(0).addZone("5000 test zone");
 		orgCcu.floors.get(0).mRoomList.get(0).zoneProfiles.add(lightProfile5K);
-		LightSmartNodeOutput smartNodeOutput5K = new LightSmartNodeOutput();
+		SmartNodeOutput smartNodeOutput5K = new SmartNodeOutput();
 		smartNodeOutput5K.mSmartNodeAddress = smartNode5K.mAddress;
 		smartNodeOutput5K.mUniqueID = analog15kUUID;
 		smartNodeOutput5K.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
@@ -53,7 +52,7 @@ public class LocalStorageUtilTest
 		relayOneOp.mSmartNodePort = Port.RELAY_ONE;
 		relayOneOp.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyClose;
 		relayOneOp.mOutputAnalogActuatorType = OutputAnalogActuatorType.TwoToTenV;
-		lightProfile5K.smartNodeOutputs.add((LightSmartNodeOutput) relayOneOp);
+		lightProfile5K.smartNodeOutputs.add(relayOneOp);
 		try
 		{
 			String jsonString = JsonSerializer.toJson(orgCcu, false);

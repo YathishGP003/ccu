@@ -52,18 +52,17 @@ import a75f.io.bo.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 import a75f.io.bo.serial.MessageType;
 import a75f.io.bo.serial.comm.SerialAction;
 import a75f.io.bo.serial.comm.SerialEvent;
+import a75f.io.logic.cache.Globals;
 import a75f.io.renatus.ENGG.logger.CcuLog;
 import a75f.io.renatus.MainActivity;
 import a75f.io.renatus.R;
-
 import a75f.io.usbserial.UsbService;
-import a75f.io.util.Globals;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 /**
- * Created by samjithsadasivan on 8/17/17.
+ * Created by samjithsadasivan isOn 8/17/17.
  */
 
 public class SerialMessageFragment extends Fragment

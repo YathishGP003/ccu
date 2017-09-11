@@ -21,14 +21,15 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.lang.ref.WeakReference;
 import java.util.Set;
 
-import a75f.io.bo.serial.comm.SerialEvent;
+import a75f.io.bo.building.BaseEvent;
+import a75f.io.logic.LEventManager;
 import a75f.io.logic.SerialBLL;
 import a75f.io.renatus.BLE.BLEHomeFragment;
 import a75f.io.renatus.MainActivity;
 import a75f.io.usbserial.UsbService;
 
 /**
- * Created by Yinten on 8/21/2017.
+ * Created by Yinten isOn 8/21/2017.
  * <p>
  * This class will be the base serial activity that will connect to the serial BLL that will
  * control eventing around the application.
@@ -107,13 +108,18 @@ public class BaseSerialAppCompatActivity extends AppCompatActivity {
         EventBus.getDefault().unregister(this);
     }
 
+//
+//    // Called in a separate thread
+//    @Subscribe(threadMode = ThreadMode.BACKGROUND)
+//    public void onSerialEvent(SerialEvent event) {
+//        SerialBLL.handleSerialEvent(event);
+//    }
 
-    // Called in a separate thread
-    @Subscribe(threadMode = ThreadMode.ASYNC)
-    public void onSerialEvent(SerialEvent event) {
-        SerialBLL.handleSerialEvent(event);
+    @Subscribe(threadMode = ThreadMode.BACKGROUND)
+    public void onBaseEvent(BaseEvent event)
+    {
+        LEventManager.handleEvent(event);
     }
-
 
     @Override
     public void onPause() {

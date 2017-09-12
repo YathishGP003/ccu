@@ -38,6 +38,10 @@ public class LZoneProfile
 		ZoneProfile zoneProfileByUUID = ccuApplication.findZoneProfileByUUID(scheduledItem.mUuid);
 		if (zoneProfileByUUID != null)
 		{
+			for(SmartNodeOutput smartNodeOutput : zoneProfileByUUID.smartNodeOutputs)
+			{
+				smartNodeOutput.setOverride(false);
+			}
 			Logd(zoneProfileByUUID.toString());
 			List<CcuToCmOverUsbSnControlsMessage_t> controlsMessage =
 					zoneProfileByUUID.getControlsMessage();

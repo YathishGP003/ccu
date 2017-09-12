@@ -16,7 +16,7 @@ class ModuleListActionMenuListener implements MultiChoiceModeListener
 	 *
 	 */
 	private final FloorPlanFragment floorPlanActivity;
-	private ArrayList<Short> seletedModules = new ArrayList<Short>();
+	private ArrayList<Short> seletedModules = new ArrayList<>();
 	
 	
 	/**

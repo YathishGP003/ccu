@@ -16,6 +16,7 @@ import a75f.io.bo.serial.SmartNodeLightingCircuit_t;
  * Created by Yinten isOn 8/15/2017.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
+
 public class SmartNodeOutput extends Circuit
 {
 	
@@ -44,7 +45,7 @@ public class SmartNodeOutput extends Circuit
 		this.mOverride = override;
 	}
 	
-	
+	@JsonIgnore
 	public boolean hasSchedules()
 	{
 		if (mSchedules != null && mSchedules.size() > 0)
@@ -105,10 +106,13 @@ public class SmartNodeOutput extends Circuit
 		{
 			try
 			{
-				scheduleMsg.lightingSchedule.entries[index].startTime
-						.set((short) mSchedules.get(index).getStAsShort());
-				scheduleMsg.lightingSchedule.entries[index].stopTime
-						.set((short) mSchedules.get(index).getEtAsShort());
+				//TODO: review
+				//scheduleMsg.lightingSchedule.entries[index].startTime
+				//		.set((short) mSchedules.get(index).getStAsShort());
+				
+				//TODO: review
+				//scheduleMsg.lightingSchedule.entries[index].stopTime
+				//		.set((short) mSchedules.get(index).getEtAsShort());
 				scheduleMsg.lightingSchedule.entries[index].intensityPercent
 						.set((short) mSchedules.get(index).getVal());
 				scheduleMsg.lightingSchedule.entries[index].applicableDaysOfTheWeek.bitmap

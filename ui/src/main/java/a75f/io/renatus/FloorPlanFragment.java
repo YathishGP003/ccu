@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -140,7 +141,7 @@ public class FloorPlanFragment extends Fragment
 		FloorContainer.getInstance().saveData();
 	}
 	
-	
+	Short[] smartNodeAddresses;
 	public void refreshScreen()
 	{
 		mCurFloorIndex = mCurFloorIndex >= 0 ? mCurFloorIndex : 0;
@@ -159,13 +160,15 @@ public class FloorPlanFragment extends Fragment
 			if (FloorContainer.getInstance().getFloorList().get(mCurFloorIndex).mRoomList.size() >
 			    0)
 			{
+				smartNodeAddresses = FloorContainer
+						.getInstance()
+						.getFloorList()
+						.get(mCurFloorIndex).mRoomList
+						.get(mCurRoomIndex)
+						.findSmartNodeAddresses();
 				enableModueButton();
 				mModuleListAdapter = new DataArrayAdapter<Short>(Globals.getInstance()
-				                                                              .getApplicationContext(), R.layout.listviewitem, FloorContainer
-						                                                                                                               .getInstance()
-						                                                                                                               .getFloorList()
-						                                                                                                               .get(mCurFloorIndex).mRoomList
-						                                                                                                               .get(mCurRoomIndex).findSmartNodeAddresses());
+				                                                        .getApplicationContext(), R.layout.listviewitem,smartNodeAddresses );
 				moduleListView.setAdapter(mModuleListAdapter);
 			}
 		}
@@ -384,6 +387,22 @@ public class FloorPlanFragment extends Fragment
 	@OnItemClick(R.id.moduleList)
 	public void setModuleListView(AdapterView<?> parent, View view, int position, long id)
 	{
-		//select module
+		
+		Log.i("ModuleSelected", "Selected ID: " + parent.getSelectedItem());
+		showDialogFragment(LightingZoneProfileFragment
+				                   .newInstance(smartNodeAddresses[position], FloorContainer
+						                                                                  .getInstance()
+						                                                                  .getFloorList()
+						                                                                  .get(mCurFloorIndex).mRoomList
+						                                                                  .get(mCurRoomIndex).roomName, FloorContainer
+								                                                                                                .getInstance()
+								                                                                                                .getFloorList()
+								                                                                                                .get(mCurFloorIndex).mFloorName), LightingZoneProfileFragment.ID);
+		selectModule(position);
+	}
+	
+	
+	private void selectModule(int position)
+	{
 	}
 }

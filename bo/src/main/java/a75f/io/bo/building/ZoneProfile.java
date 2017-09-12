@@ -25,6 +25,9 @@ import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
 @JsonSerialize(as = LightProfile.class)
 public abstract class ZoneProfile
 {
+	
+	
+	
 	public static final String                TAG              = ZoneProfile.class.getSimpleName();
 	@JsonIgnore
 	public              UUID                  uuid             = UUID.randomUUID();
@@ -162,4 +165,14 @@ public abstract class ZoneProfile
 			smartNodeOutputs.add(smartNodeOuput);
 		}
 	}
+	
+	
+	@Override
+	public String toString()
+	{
+		return "ZoneProfile{" + "uuid=" + uuid + ", mSchedules=" + mSchedules +
+		       ", smartNodeInputs=" + smartNodeInputs + ", smartNodeOutputs=" + smartNodeOutputs +
+		       '}';
+	}
+	
 }

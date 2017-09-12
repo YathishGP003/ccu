@@ -24,9 +24,10 @@ public abstract class Circuit
 	public  String mName = "";
 	@JsonIgnore
 	public boolean mConfigured;
+	@JsonIgnore
 	private UUID   uuid  = UUID.randomUUID();
 	
-	
+	@JsonIgnore
 	public Output getOutput()
 	{
 		switch (mSmartNodePort)
@@ -64,7 +65,7 @@ public abstract class Circuit
 		}
 	}
 	
-	
+	@JsonIgnore
 	public UUID getUuid()
 	{
 		return uuid;

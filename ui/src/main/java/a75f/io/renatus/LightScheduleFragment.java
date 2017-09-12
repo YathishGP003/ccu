@@ -1,6 +1,7 @@
 package a75f.io.renatus;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -136,20 +137,14 @@ public class LightScheduleFragment extends BaseDialogFragment
 				days.add(i);
 			}
 		}
-		String st = startTimePicker.getCurrentHour() < 10 ? "0" + startTimePicker.getCurrentHour()
-				            : startTimePicker.getCurrentHour() + "" + ":" +
-				              (startTimePicker.getCurrentMinute() < 10 ? "0" + startTimePicker
-						                                                               .getCurrentMinute()
-						               : startTimePicker.getCurrentMinute());
-		String et = endTimePicker.getCurrentHour() < 10 ? "0" + endTimePicker.getCurrentHour()
-				            : endTimePicker.getCurrentHour() + "" + ":" +
-				              (endTimePicker.getCurrentMinute() < 10 ? "0" + startTimePicker
-						                                                             .getCurrentMinute()
-						               : startTimePicker.getCurrentMinute());
+		
+		
 		mSchedule.setDays(days);
-		mSchedule.setSt(st);
-		mSchedule.setEt(et);
-		mSchedule.setVal((short) 100);
+		mSchedule.setSt(startTimePicker.getCurrentHour(), startTimePicker.getCurrentMinute());
+		mSchedule.setEt(endTimePicker.getCurrentHour(), endTimePicker.getCurrentMinute());
+		mSchedule.setVal((short) 69);
+		
+		Log.i("Schedule", "mSchedule to add: " + mSchedule.toString());
 		mCurrentPort.mSchedules.add(mSchedule);
 		try
 		{

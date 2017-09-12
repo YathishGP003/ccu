@@ -2,6 +2,9 @@ package a75f.io.logic.cache;
 
 import android.content.Context;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+
 import a75f.io.bo.building.CCUApplication;
 import a75f.io.logic.cache.prefs.LocalStorage;
 import a75f.io.logic.scheduler.LScheduler;
@@ -17,11 +20,13 @@ import a75f.io.logic.scheduler.LScheduler;
 public class Globals
 {
 	
-	private static Globals globals;
+	private static final int NUMBER_OF_TASKS_RENATUS_REQUIRES = 10;
+	private static Globals                  globals;
+	private        ScheduledExecutorService scheduleTaskExecutor;
+	private        Context                  mApplicationContext;
+	private        CCUApplication           mCCUApplication;
+	private        LScheduler               mLScheduler;
 	
-	private Context               mApplicationContext;
-	private CCUApplication        mCCUApplication;
-	private LScheduler mLScheduler;
 	
 	private Globals()
 	{
@@ -48,31 +53,37 @@ public class Globals
 	}
 	
 	
-	public Context getApplicationContext()
+	public LScheduler getLScheduler()
+	{
+		return mLScheduler;
+	}	public Context getApplicationContext()
 	{
 		return mApplicationContext;
 	}
 	
 	
-	public void setApplicationContext(Context mApplicationContext)
+	public ScheduledExecutorService getScheduledThreadPool()
 	{
-		if(this.mApplicationContext == null)
+		return scheduleTaskExecutor;
+	}	public void setApplicationContext(Context mApplicationContext)
+	{
+		if (this.mApplicationContext == null)
 		{
 			this.mApplicationContext = mApplicationContext;
 			initilize();
 		}
-		
 	}
 	
 	
 	private void initilize()
 	{
-		mLScheduler = new LScheduler(getApplicationContext());
+		scheduleTaskExecutor = Executors.newScheduledThreadPool(5);
+		mLScheduler = new LScheduler();
 	}
 	
 	
-	public LScheduler getLScheduler()
-	{
-		return mLScheduler;
-	}
+
+	
+	
+
 }

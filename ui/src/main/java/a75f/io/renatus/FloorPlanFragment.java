@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,7 +25,6 @@ import android.widget.Toast;
 
 import a75f.io.bo.building.Floor;
 import a75f.io.bo.building.Zone;
-import a75f.io.bo.building.ZoneProfile;
 import a75f.io.logic.SmartNodeBLL;
 import a75f.io.logic.cache.Globals;
 import a75f.io.renatus.BLE.FragmentDeviceScan;
@@ -42,12 +42,12 @@ import butterknife.OnItemClick;
 
 public class FloorPlanFragment extends Fragment
 {
-	public static final String                        ACTION_BLE_PAIRING_COMPLETED =
+	public static final String                  ACTION_BLE_PAIRING_COMPLETED =
 			"a75f.io.renatus.BLE_PAIRING_COMPLETED";
-	public              int                           mCurFloorIndex               = -1;
-	public              int                           mCurRoomIndex                = -1;
-	public              DataArrayAdapter<Zone>        mRoomListAdapter             = null;
-	public              DataArrayAdapter<ZoneProfile> mModuleListAdapter           = null;
+	public              int                     mCurFloorIndex               = -1;
+	public              int                     mCurRoomIndex                = -1;
+	public              DataArrayAdapter<Zone>  mRoomListAdapter             = null;
+	public              DataArrayAdapter<Short> mModuleListAdapter           = null;
 	@BindView(R.id.addFloorBtn)
 	ImageButton addFloorBtn;
 	@BindView(R.id.addRoomBtn)
@@ -141,7 +141,7 @@ public class FloorPlanFragment extends Fragment
 		FloorContainer.getInstance().saveData();
 	}
 	
-	
+	Short[] smartNodeAddresses;
 	public void refreshScreen()
 	{
 		mCurFloorIndex = mCurFloorIndex >= 0 ? mCurFloorIndex : 0;
@@ -160,13 +160,15 @@ public class FloorPlanFragment extends Fragment
 			if (FloorContainer.getInstance().getFloorList().get(mCurFloorIndex).mRoomList.size() >
 			    0)
 			{
+				smartNodeAddresses = FloorContainer
+						.getInstance()
+						.getFloorList()
+						.get(mCurFloorIndex).mRoomList
+						.get(mCurRoomIndex)
+						.findSmartNodeAddresses();
 				enableModueButton();
-				mModuleListAdapter = new DataArrayAdapter<ZoneProfile>(Globals.getInstance()
-				                                                              .getApplicationContext(), R.layout.listviewitem, FloorContainer
-						                                                                                                               .getInstance()
-						                                                                                                               .getFloorList()
-						                                                                                                               .get(mCurFloorIndex).mRoomList
-						                                                                                                               .get(mCurRoomIndex).zoneProfiles);
+				mModuleListAdapter = new DataArrayAdapter<Short>(Globals.getInstance()
+				                                                        .getApplicationContext(), R.layout.listviewitem,smartNodeAddresses );
 				moduleListView.setAdapter(mModuleListAdapter);
 			}
 		}
@@ -332,7 +334,7 @@ public class FloorPlanFragment extends Fragment
 	
 	@OnClick(R.id.pairModuleBtn)
 	public void startPairing()
-	{//TODO - Test code hardcoded to fix crash
+	{
 		short meshAddress = SmartNodeBLL.nextSmartNodeAddress();
 		Floor floor = Globals.getInstance().getCCUApplication().floors.get(mCurFloorIndex);
 		Zone room = floor.mRoomList.get(mCurRoomIndex);
@@ -385,6 +387,22 @@ public class FloorPlanFragment extends Fragment
 	@OnItemClick(R.id.moduleList)
 	public void setModuleListView(AdapterView<?> parent, View view, int position, long id)
 	{
-		//select module
+		
+		Log.i("ModuleSelected", "Selected ID: " + parent.getSelectedItem());
+		showDialogFragment(LightingZoneProfileFragment
+				                   .newInstance(smartNodeAddresses[position], FloorContainer
+						                                                                  .getInstance()
+						                                                                  .getFloorList()
+						                                                                  .get(mCurFloorIndex).mRoomList
+						                                                                  .get(mCurRoomIndex).roomName, FloorContainer
+								                                                                                                .getInstance()
+								                                                                                                .getFloorList()
+								                                                                                                .get(mCurFloorIndex).mFloorName), LightingZoneProfileFragment.ID);
+		selectModule(position);
+	}
+	
+	
+	private void selectModule(int position)
+	{
 	}
 }

@@ -1,5 +1,7 @@
 package a75f.io.bo.building;
 
+import android.util.Log;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -7,9 +9,11 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.joda.time.DateTime;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import a75f.io.bo.BuildConfig;
 import a75f.io.bo.building.definitions.LScheduleAction;
 import a75f.io.bo.building.definitions.ScheduledItem;
 import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
@@ -21,13 +25,15 @@ import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
 @JsonSerialize(as = LightProfile.class)
 public abstract class ZoneProfile
 {
+	
+	
+	
+	public static final String                TAG              = ZoneProfile.class.getSimpleName();
 	@JsonIgnore
-	public UUID uuid = UUID.randomUUID();
-	public String mModuleName;
-	public ArrayList<Schedule>   mSchedules        = new ArrayList<>();
-	public List<Sensor>          sensors          = new ArrayList<Sensor>();
-	public List<SmartNodeInput>  smartNodeInputs  = new ArrayList<SmartNodeInput>();
-	public List<SmartNodeOutput> smartNodeOutputs = new ArrayList<SmartNodeOutput>();
+	public              UUID                  uuid             = UUID.randomUUID();
+	public              ArrayList<Schedule>   mSchedules       = new ArrayList<>();
+	public              List<SmartNodeInput>  smartNodeInputs  = new ArrayList<>();
+	public              List<SmartNodeOutput> smartNodeOutputs = new ArrayList<>();
 	
 	
 	public ZoneProfile()
@@ -35,14 +41,9 @@ public abstract class ZoneProfile
 	}
 	
 	
-	public ZoneProfile(String name)
-	{
-		this.mModuleName = name;
-	}
-	
-	
 	@JsonIgnore
 	public abstract List<CcuToCmOverUsbSnControlsMessage_t> getControlsMessage();
+	
 	
 	@JsonIgnore
 	public ScheduledItem getNextActiveScheduledTime() throws Exception
@@ -70,23 +71,26 @@ public abstract class ZoneProfile
 			ScheduledItem scheduledItem = new ScheduledItem();
 			scheduledItem.mUuid = this.uuid;
 			scheduledItem.lScheduleAction = LScheduleAction.CONTROLS_UPDATE;
-			scheduledItem.mTimeStamp = new DateTime(nextActiveScheduleTime.getNextScheduleTransistionTime());
+			scheduledItem.mTimeStamp =
+					new DateTime(nextActiveScheduleTime.getNextScheduleTransistionTime());
 			return scheduledItem;
 		}
 	}
+	
 	
 	@JsonIgnore
 	private Schedule getSchedule(Schedule nextActiveScheduleTime, Schedule schedule)
 			throws Exception
 	{
 		if (nextActiveScheduleTime == null || schedule.getNextScheduleTransistionTime() <
-		                                      nextActiveScheduleTime.getNextScheduleTransistionTime())
+		                                      nextActiveScheduleTime
+				                                      .getNextScheduleTransistionTime())
 		{
-			
 			nextActiveScheduleTime = schedule;
 		}
 		return nextActiveScheduleTime;
 	}
+	
 	
 	@JsonIgnore
 	public boolean hasSchedules()
@@ -95,9 +99,80 @@ public abstract class ZoneProfile
 	}
 	
 	
-	@JsonIgnore
+	public ArrayList<SmartNodeOutput> findSmartNodeOutputs(short mSmartNodeAddress)
+	{
+		ArrayList<SmartNodeOutput> retValArrayList = new ArrayList<>();
+		for (SmartNodeOutput smartNodeOutput : smartNodeOutputs)
+		{
+			if (smartNodeOutput.mSmartNodeAddress == mSmartNodeAddress)
+			{
+				retValArrayList.add(smartNodeOutput);
+			}
+		}
+		return retValArrayList;
+	}
+	
+	
+	public ArrayList<SmartNodeInput> findSmartNodeInputs(short mSmartNodeAddress)
+	{
+		ArrayList<SmartNodeInput> retValArrayList = new ArrayList<>();
+		for (SmartNodeInput smartNodeInput : smartNodeInputs)
+		{
+			if (smartNodeInput.mSmartNodeAddress == mSmartNodeAddress)
+			{
+				retValArrayList.add(smartNodeInput);
+			}
+		}
+		return retValArrayList;
+	}
+	
+	
+	public void removeCircuit(SmartNodeOutput smartNodeOutput)
+	{
+		if (BuildConfig.DEBUG)
+		{
+			Log.w(TAG, "Adding SmartNodeOutput: " + smartNodeOutput);
+			Log.d(TAG, "------------TO------------");
+			Log.d(TAG, Arrays.toString(smartNodeOutputs.toArray()));
+		}
+		if (smartNodeOutputs.contains(smartNodeOutput))
+		{
+			if (BuildConfig.DEBUG)
+			{
+				Log.w(TAG, "removing smartNodeOutputs.contains(smartNodeOuput): " +
+				           smartNodeOutputs.contains(smartNodeOutput));
+			}
+			smartNodeOutputs.remove(smartNodeOutput);
+		}
+	}
+	
+	
+	public void addCircuit(SmartNodeOutput smartNodeOuput)
+	{
+		if (BuildConfig.DEBUG)
+		{
+			Log.w(TAG, "Adding SmartNodeOutput: " + smartNodeOuput);
+			Log.d(TAG, "------------TO------------");
+			Log.d(TAG, Arrays.toString(smartNodeOutputs.toArray()));
+		}
+		if (!smartNodeOutputs.contains(smartNodeOuput))
+		{
+			if (BuildConfig.DEBUG)
+			{
+				Log.w(TAG, "!smartNodeOutputs.contains(smartNodeOuput): " +
+				           !smartNodeOutputs.contains(smartNodeOuput));
+			}
+			smartNodeOutputs.add(smartNodeOuput);
+		}
+	}
+	
+	
+	@Override
 	public String toString()
 	{
-		return mModuleName;
+		return "ZoneProfile{" + "uuid=" + uuid + ", mSchedules=" + mSchedules +
+		       ", smartNodeInputs=" + smartNodeInputs + ", smartNodeOutputs=" + smartNodeOutputs +
+		       '}';
 	}
+	
 }

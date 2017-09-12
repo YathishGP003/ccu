@@ -38,7 +38,6 @@ import a75f.io.bo.building.SmartNode;
 import a75f.io.bo.building.SmartNodeOutput;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.ZoneProfile;
-import a75f.io.bo.building.definitions.Output;
 import a75f.io.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.bo.json.serializers.JsonSerializer;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
@@ -80,7 +79,8 @@ public class USBHomeFragment extends DialogFragment
 					Toast.makeText(context, "USB Ready", Toast.LENGTH_SHORT).show();
 					break;
 				case UsbService.ACTION_USB_PERMISSION_NOT_GRANTED: // USB PERMISSION NOT GRANTED
-					Toast.makeText(context, "USB Permission not granted", Toast.LENGTH_SHORT).show();
+					Toast.makeText(context, "USB Permission not granted", Toast.LENGTH_SHORT)
+					     .show();
 					break;
 				case UsbService.ACTION_NO_USB: // NO USB CONNECTED
 					Toast.makeText(context, "No USB connected", Toast.LENGTH_SHORT).show();
@@ -127,7 +127,8 @@ public class USBHomeFragment extends DialogFragment
 	
 	
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+	                         Bundle savedInstanceState)
 	{
 		View retVal = inflater.inflate(R.layout.fragment_usb, container, false);
 		ButterKnife.bind(this, retVal);
@@ -231,8 +232,10 @@ public class USBHomeFragment extends DialogFragment
 			Log.i(TAG, "Message Type: " + messageType.name());
 			if (messageType == MessageType.CM_REGULAR_UPDATE)
 			{
-				CmToCcuOverUsbCmRegularUpdateMessage_t regularUpdateMessage_t = new CmToCcuOverUsbCmRegularUpdateMessage_t();
-				regularUpdateMessage_t.setByteBuffer(ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN), 0);
+				CmToCcuOverUsbCmRegularUpdateMessage_t regularUpdateMessage_t =
+						new CmToCcuOverUsbCmRegularUpdateMessage_t();
+				regularUpdateMessage_t
+						.setByteBuffer(ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN), 0);
 				Log.i(TAG, "Regular Update Message: " + regularUpdateMessage_t.toString());
 				try
 				{
@@ -246,12 +249,17 @@ public class USBHomeFragment extends DialogFragment
 			}
 			else if (messageType == MessageType.CM_TO_CCU_OVER_USB_SN_REGULAR_UPDATE)
 			{
-				CmToCcuOverUsbSnRegularUpdateMessage_t smartNodeRegularUpdateMessage_t = new CmToCcuOverUsbSnRegularUpdateMessage_t();
-				Log.i(TAG, "CmToCcuOverUsbSnRegularUpdateMessage_t size: " + smartNodeRegularUpdateMessage_t.size());
+				CmToCcuOverUsbSnRegularUpdateMessage_t smartNodeRegularUpdateMessage_t =
+						new CmToCcuOverUsbSnRegularUpdateMessage_t();
+				Log.i(TAG, "CmToCcuOverUsbSnRegularUpdateMessage_t size: " +
+				           smartNodeRegularUpdateMessage_t.size());
 				Log.i(TAG, "Buffer size with smart node regular update message: " + data.length);
-				Log.i(TAG, "Size of inner struct SnToCmOverAirSnRegularUpdateMessage_t: " + new SnToCmOverAirSnRegularUpdateMessage_t().size());
-				smartNodeRegularUpdateMessage_t.setByteBuffer(ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN), 0);
-				Log.i(TAG, "Smart Node Regular Update Message: " + smartNodeRegularUpdateMessage_t.toString());
+				Log.i(TAG, "Size of inner struct SnToCmOverAirSnRegularUpdateMessage_t: " +
+				           new SnToCmOverAirSnRegularUpdateMessage_t().size());
+				smartNodeRegularUpdateMessage_t
+						.setByteBuffer(ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN), 0);
+				Log.i(TAG, "Smart Node Regular Update Message: " +
+				           smartNodeRegularUpdateMessage_t.toString());
 				try
 				{
 					pojoAsString = JsonSerializer.toJson(smartNodeRegularUpdateMessage_t, true);
@@ -281,13 +289,11 @@ public class USBHomeFragment extends DialogFragment
 				ccuApplication.floors.add(new Floor(0, "FloorID", "TestFloorUSBLight"));
 				//				smartNode.analog1OutId = analog15kUUID;
 				ccuApplication.floors.get(0).mRoomList.add(new Zone("5000 test zone"));
-				LightProfile lightProfile5K = new LightProfile("light profile");
-				ccuApplication.floors.get(0).mRoomList.get(0).zoneProfiles.add
-						                                                                         (lightProfile5K);
+				LightProfile lightProfile5K = new LightProfile();
+				ccuApplication.floors.get(0).mRoomList.get(0).mLightProfile = lightProfile5K;
 				SmartNodeOutput smartNodeOutput5K = new SmartNodeOutput();
 				//				smartNodeOutput5K.uniqueID = analog15kUUID;
 				smartNodeOutput5K.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
-				smartNodeOutput5K.mOutput = Output.Analog;
 				smartNodeOutput5K.mName = "Dining Room";
 				lightProfile5K.smartNodeOutputs.add(smartNodeOutput5K);
 			}
@@ -300,23 +306,34 @@ public class USBHomeFragment extends DialogFragment
 			{
 				e.printStackTrace();
 			}
-			SmartNode smartNode = ccuApplication.findSmartNodeByAddress(ccuApplication.floors.get
-					                                                                                  (0).mRoomList.get(0).zoneProfiles.get(0).smartNodeOutputs.get(0).mSmartNodeAddress);//findSmartNodeByIOUUID(ccuApplication.zones.get(0).zoneProfiles.get(0).smartNodeOutputs.get(0).uniqueID);
-			CcuToCmOverUsbDatabaseSeedSnMessage_t ccuToCmOverUsbDatabaseSeedSnMessage_t = new CcuToCmOverUsbDatabaseSeedSnMessage_t();
+			SmartNode smartNode = ccuApplication.findSmartNodeByAddress(ccuApplication.floors
+					                                                            .get(0).mRoomList
+					                                                            .get(0).mLightProfile.smartNodeOutputs
+					                                                            .get(0).mSmartNodeAddress);//findSmartNodeByIOUUID(ccuApplication.zones.get(0).zoneProfiles.get(0).smartNodeOutputs.get(0).uniqueID);
+			CcuToCmOverUsbDatabaseSeedSnMessage_t ccuToCmOverUsbDatabaseSeedSnMessage_t =
+					new CcuToCmOverUsbDatabaseSeedSnMessage_t();
 			ccuToCmOverUsbDatabaseSeedSnMessage_t.smartNodeAddress.set(smartNode.mAddress);
-			ccuToCmOverUsbDatabaseSeedSnMessage_t.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN);
+			ccuToCmOverUsbDatabaseSeedSnMessage_t.messageType
+					.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN);
 			//ccuToCmOverUsbDatabaseSeedSnMessage_t.putEncrptionKey(Encryp);
-			ZoneProfile zoneProfile = ccuApplication.floors.get(0).mRoomList.get(0).zoneProfiles.get(0);
+			ZoneProfile zoneProfile = ccuApplication.floors.get(0).mRoomList.get(0).mLightProfile;
 			ccuToCmOverUsbDatabaseSeedSnMessage_t.controls.analogOut1.set((short) 100);
-			ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.profileBitmap.lightingControl.set((short) 1);
+			ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.profileBitmap.lightingControl
+					.set((short) 1);
 			ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.ledBitmap.analogIn1.set((short) 1);
-			ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.lightingIntensityForOccupantDetected.set((short) 100);
-			ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.minLightingControlOverrideTimeInMinutes.set((short) 1);
-			ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.roomName.set(smartNode.mRoomName);
+			ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.lightingIntensityForOccupantDetected
+					.set((short) 100);
+			ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.minLightingControlOverrideTimeInMinutes
+					.set((short) 1);
+			ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.roomName
+					.set(ccuApplication.floors.get(0).mRoomList.get(0).roomName);
 			try
 			{
-				String ccuToCmOverUsbDatabaseSeedSnMessageJSON = JsonSerializer.toJson(ccuToCmOverUsbDatabaseSeedSnMessage_t, true);
-				System.out.println("CCU Application As String:\n" + ccuToCmOverUsbDatabaseSeedSnMessageJSON + "\n");
+				String ccuToCmOverUsbDatabaseSeedSnMessageJSON =
+						JsonSerializer.toJson(ccuToCmOverUsbDatabaseSeedSnMessage_t, true);
+				System.out.println(
+						"CCU Application As String:\n" + ccuToCmOverUsbDatabaseSeedSnMessageJSON +
+						"\n");
 			}
 			catch (IOException e)
 			{
@@ -327,7 +344,8 @@ public class USBHomeFragment extends DialogFragment
 		}
 		else
 		{
-			Toast.makeText(USBHomeFragment.this.getContext(), "USB Service not connected", Toast.LENGTH_SHORT).show();
+			Toast.makeText(USBHomeFragment.this
+					               .getContext(), "USB Service not connected", Toast.LENGTH_SHORT).show();
 		}
 	}
 	
@@ -345,14 +363,12 @@ public class USBHomeFragment extends DialogFragment
 				UUID analog15kUUID = UUID.randomUUID();
 				SmartNode smartNode = ccuApplication.smartNodes.get(0);
 				Zone zone5K = new Zone("5000 test zone");
-				LightProfile lightProfile5K = new LightProfile("light profile");
-				zone5K.zoneProfiles.add(lightProfile5K);
+				LightProfile lightProfile5K = new LightProfile();
+				zone5K.mLightProfile = lightProfile5K;
 				ccuApplication.floors.get(0).mRoomList.add(zone5K);
 				SmartNodeOutput smartNodeOutput5K = new SmartNodeOutput();
-				smartNodeOutput5K.mUniqueID = analog15kUUID;
 				smartNodeOutput5K.mSmartNodeAddress = smartNode.mAddress;
 				smartNodeOutput5K.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
-				smartNodeOutput5K.mOutput = Output.Analog;
 				smartNodeOutput5K.mName = "Dining Room";
 				lightProfile5K.smartNodeOutputs.add(smartNodeOutput5K);
 			}
@@ -365,9 +381,12 @@ public class USBHomeFragment extends DialogFragment
 			{
 				e.printStackTrace();
 			}
-			SmartNode smartNode = ccuApplication.findSmartNodeByAddress(ccuApplication.floors.get
-					                                                                                  (0).mRoomList.get(0).zoneProfiles.get(0).smartNodeOutputs.get(0).mSmartNodeAddress);
-			CcuToCmOverUsbSnControlsMessage_t controlsMessage_t = new CcuToCmOverUsbSnControlsMessage_t();
+			SmartNode smartNode = ccuApplication.findSmartNodeByAddress(ccuApplication.floors
+					                                                            .get(0).mRoomList
+					                                                            .get(0).mLightProfile.smartNodeOutputs
+					                                                            .get(0).mSmartNodeAddress);
+			CcuToCmOverUsbSnControlsMessage_t controlsMessage_t =
+					new CcuToCmOverUsbSnControlsMessage_t();
 			controlsMessage_t.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_CONTROLS);
 			controlsMessage_t.smartNodeAddress.set(smartNode.mAddress);
 			lightOn = !lightOn;
@@ -375,30 +394,20 @@ public class USBHomeFragment extends DialogFragment
 			try
 			{
 				String controlsMessage_tJSON = JsonSerializer.toJson(controlsMessage_t, true);
-				System.out.println("controlsMessage_tJSON As String:\n" + controlsMessage_tJSON + "\n");
+				System.out.println(
+						"controlsMessage_tJSON As String:\n" + controlsMessage_tJSON + "\n");
 			}
 			catch (IOException e)
 			{
 				e.printStackTrace();
 			}
 			usbService.write(controlsMessage_t.getOrderedBuffer());
-			//			CcuToCmOverUsbDatabaseSeedSnMessage_t ccuToCmOverUsbDatabaseSeedSnMessage_t = new CcuToCmOverUsbDatabaseSeedSnMessage_t();
-			//			ccuToCmOverUsbDatabaseSeedSnMessage_t.smartNodeAddress.set(smartNode.address);
-			//			ccuToCmOverUsbDatabaseSeedSnMessage_t.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN);
-			//			//ccuToCmOverUsbDatabaseSeedSnMessage_t.putEncrptionKey(Encryp);
-			//			ZoneProfile zoneProfile = ccuApplication.zones.get(0).zoneProfiles.get(0);
-			//			ccuToCmOverUsbDatabaseSeedSnMessage_t.controls.analogOut1.set((short) 0);
-			//
-			//			ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.profileBitmap.lightingControl.set((short) 1);
-			//			ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.ledBitmap.analogIn1.set((short)1);
-			//			ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.lightingIntensityForOccupantDetected.set((short) 0);
-			//			ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.minLightingControlOverrideTimeInMinutes.set((short) 1);
-			//			ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.roomName.set(smartNode.roomName);
-			//usbService.write(seedMessage.getOrderedBuffer());
 		}
 		else
 		{
-			Toast.makeText(USBHomeFragment.this.getContext(), "USB Service not connected", Toast.LENGTH_SHORT).show();
+			Toast.makeText(USBHomeFragment.this
+					               .getContext(), "USB Service not connected", Toast.LENGTH_SHORT)
+			     .show();
 		}
 	}
 	

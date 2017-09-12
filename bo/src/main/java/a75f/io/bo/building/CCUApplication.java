@@ -11,12 +11,25 @@ import java.util.UUID;
 @JsonSerialize
 public class CCUApplication
 {
-	public String      CCUTitle = new String();
+	public String           CCUTitle = new String();
 	public ArrayList<Floor> floors   = new ArrayList<Floor>();
 	
 	public SystemProfile        systemProfile = new SystemProfile();
 	public ControlMote          controlMote   = new ControlMote();
 	public ArrayList<SmartNode> smartNodes    = new ArrayList<>();
+	private short mSmartNodeAddressBand;
+	
+	
+	public short getSmartNodeAddressBand()
+	{
+		return mSmartNodeAddressBand;
+	}
+	
+	
+	public void setSmartNodeAddressBand(short smartNodeAddressBand)
+	{
+		this.mSmartNodeAddressBand = smartNodeAddressBand;
+	}
 	
 	
 	public SmartNode findSmartNodeByAddress(short smartNodeAddress)
@@ -31,26 +44,20 @@ public class CCUApplication
 		return null;
 	}
 	
-	public SmartNodeOutput findSmartNodePortByUUID(UUID id)
 	
+	public SmartNodeOutput findSmartNodePortByUUID(UUID id)
 	{
-		
-		//TODO: revisit
-		for (Floor f : floors) {
-			for (Zone z : f.mRoomList) {
-				for (ZoneProfile p : z.zoneProfiles) {
-					
-					if (p instanceof LightProfile) {
-						for (SmartNodeOutput op : ((LightProfile) p).smartNodeOutputs) {
-							if (id.equals(op.mUniqueID)) {
-								return op;
-							}
-						}
-					} else {
-						for (SmartNodeOutput op : p.smartNodeOutputs) {
-							if (id.equals(op.mUniqueID)) {
-								return op;
-							}
+		for (Floor f : floors)
+		{
+			for (Zone z : f.mRoomList)
+			{
+				if (z.mLightProfile != null)
+				{
+					for (SmartNodeOutput op : z.mLightProfile.smartNodeOutputs)
+					{
+						if (id.equals(op.getUuid()))
+						{
+							return op;
 						}
 					}
 				}
@@ -66,30 +73,26 @@ public class CCUApplication
 		{
 			for (Zone z : f.mRoomList)
 			{
-				for (ZoneProfile p : z.zoneProfiles)
+				if (z.mLightProfile.uuid.equals(uuid))
 				{
-					if(p.uuid.equals(uuid))
-					{
-						return p;
-					}
+					return z.mLightProfile;
 				}
 			}
 		}
-		
 		return null;
 	}
-
+	
+	
 	public ArrayList<ZoneProfile> findAllZoneProfiles()
 	{
-		ArrayList<ZoneProfile> zoneProfiles = new ArrayList<ZoneProfile>();
-
+		ArrayList<ZoneProfile> zoneProfiles = new ArrayList<>();
 		for (Floor f : floors)
 		{
 			for (Zone z : f.mRoomList)
 			{
-				for (ZoneProfile p : z.zoneProfiles)
+				if (z.mLightProfile != null)
 				{
-					zoneProfiles.add(p);
+					zoneProfiles.add(z.mLightProfile);
 				}
 			}
 		}

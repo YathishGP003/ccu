@@ -33,7 +33,10 @@ public class LocalStorage
 			}
 			catch (IOException e)
 			{
+				
 				e.printStackTrace();
+				int z = 5 / 0;
+				
 			}
 		}
 		return new CCUApplication();
@@ -51,7 +54,7 @@ public class LocalStorage
 		try
 		{
 			String jsonString = JsonSerializer.toJson(Globals.getInstance().getCCUApplication(), false);
-			getCCUSettings().edit().putString(VAR_CCU_SETTINGS, jsonString).commit();
+			getCCUSettings().edit().putString(VAR_CCU_SETTINGS, jsonString).apply();
 		}
 		catch (IOException e)
 		{

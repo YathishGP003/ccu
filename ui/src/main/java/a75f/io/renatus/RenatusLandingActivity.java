@@ -16,9 +16,9 @@ import a75f.io.renatus.ENGG.RenatusEngineeringActivity;
 public class RenatusLandingActivity extends BaseSerialAppCompatActivity
 {
 	
-	private static final String TAG = RenatusLandingActivity.class.getSimpleName();
+	private static final String  TAG         = RenatusLandingActivity.class.getSimpleName();
 	//TODO - refactor
-	public boolean settingView = false;
+	public               boolean settingView = false;
 	ImageButton pageSwitchButton;
 	ImageButton setupButton;
 	/**
@@ -34,8 +34,8 @@ public class RenatusLandingActivity extends BaseSerialAppCompatActivity
 	/**
 	 * The {@link ViewPager} that will host the section contents.
 	 */
-	private ViewPager mViewPager;
-	private TabLayout mTabLayout;
+	private ViewPager            mViewPager;
+	private TabLayout            mTabLayout;
 	
 	
 	@Override
@@ -89,7 +89,7 @@ public class RenatusLandingActivity extends BaseSerialAppCompatActivity
 			}
 		});
 		setViewPager();
-		//FloorContainer.getInstance().loadData();
+		FloorContainer.getInstance().loadData();
 	}
 	
 	
@@ -150,9 +150,10 @@ public class RenatusLandingActivity extends BaseSerialAppCompatActivity
 		return super.onOptionsItemSelected(item);
 	}
 	
+	
 	@Override
-	public void onPause(){
+	public void onPause()
+	{
 		super.onPause();
-		
 	}
 }

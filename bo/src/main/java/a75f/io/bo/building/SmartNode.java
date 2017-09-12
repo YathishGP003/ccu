@@ -6,7 +6,6 @@ package a75f.io.bo.building;
 
 public class SmartNode
 {
-	public String mRoomName = new String();
 	public short mAddress;
 	
 	

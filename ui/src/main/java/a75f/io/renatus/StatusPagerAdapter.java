@@ -2,7 +2,6 @@ package a75f.io.renatus;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
 /**
@@ -11,9 +10,11 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 
 public class StatusPagerAdapter extends FragmentStatePagerAdapter
 {
-	public StatusPagerAdapter(FragmentManager fm) {
+	public StatusPagerAdapter(FragmentManager fm)
+	{
 		super(fm);
 	}
+	
 	
 	@Override
 	public Fragment getItem(int position)
@@ -39,15 +40,27 @@ public class StatusPagerAdapter extends FragmentStatePagerAdapter
 		return fragment;
 	}
 	
+	
 	@Override
-	public int getCount() {
+	public int getCount()
+	{
 		// Show 2 total pages.
 		return 4;
 	}
 	
+	
 	@Override
-	public CharSequence getPageTitle(int position) {
-		switch (position) {
+	public int getItemPosition(Object object)
+	{
+		return POSITION_NONE;
+	}
+	
+	
+	@Override
+	public CharSequence getPageTitle(int position)
+	{
+		switch (position)
+		{
 			case 0:
 				return "Dashboard";
 			case 1:
@@ -59,10 +72,4 @@ public class StatusPagerAdapter extends FragmentStatePagerAdapter
 		}
 		return null;
 	}
-	
-	@Override
-	public int getItemPosition(Object object) {
-		return POSITION_NONE;
-	}
-	
 }

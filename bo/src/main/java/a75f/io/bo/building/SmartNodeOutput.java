@@ -4,14 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.ArrayList;
-import java.util.UUID;
 
 import a75f.io.bo.building.definitions.Output;
 import a75f.io.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.bo.building.definitions.OutputRelayActuatorType;
-import a75f.io.bo.building.definitions.Port;
 import a75f.io.bo.serial.CcuToCmOverUsbSnLightingScheduleMessage_t;
-import a75f.io.bo.serial.MessageConstants;
 import a75f.io.bo.serial.MessageType;
 import a75f.io.bo.serial.SmartNodeLightingCircuit_t;
 
@@ -19,14 +16,13 @@ import a75f.io.bo.serial.SmartNodeLightingCircuit_t;
  * Created by Yinten isOn 8/15/2017.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class SmartNodeOutput
+
+public class SmartNodeOutput extends Circuit
 {
-	public int                      mVal;
-	public Port                     mSmartNodePort;
-	public short                    mSmartNodeAddress;
-	public UUID                     mUniqueID;
-	public String                   mName;
-	public Output                   mOutput;
+	
+	
+	
+	/* These are particular to 'outputs' when dealing with 'circuits'  */;
 	public OutputRelayActuatorType  mOutputRelayActuatorType;
 	public OutputAnalogActuatorType mOutputAnalogActuatorType;
 	public ArrayList<Schedule>      mSchedules = new ArrayList<Schedule>();
@@ -49,7 +45,7 @@ public class SmartNodeOutput
 		this.mOverride = override;
 	}
 	
-	
+	@JsonIgnore
 	public boolean hasSchedules()
 	{
 		if (mSchedules != null && mSchedules.size() > 0)
@@ -70,10 +66,12 @@ public class SmartNodeOutput
 	}
 	
 	
+
+	
 	@JsonIgnore
 	public void turnOn(boolean on)
 	{
-		if (mOutput == Output.Relay)
+		if (getOutput() == Output.Relay)
 		{
 			if (on)
 			{
@@ -108,10 +106,13 @@ public class SmartNodeOutput
 		{
 			try
 			{
-				scheduleMsg.lightingSchedule.entries[index].startTime
-						.set((short) mSchedules.get(index).getStAsShort());
-				scheduleMsg.lightingSchedule.entries[index].stopTime
-						.set((short) mSchedules.get(index).getEtAsShort());
+				//TODO: review
+				//scheduleMsg.lightingSchedule.entries[index].startTime
+				//		.set((short) mSchedules.get(index).getStAsShort());
+				
+				//TODO: review
+				//scheduleMsg.lightingSchedule.entries[index].stopTime
+				//		.set((short) mSchedules.get(index).getEtAsShort());
 				scheduleMsg.lightingSchedule.entries[index].intensityPercent
 						.set((short) mSchedules.get(index).getVal());
 				scheduleMsg.lightingSchedule.entries[index].applicableDaysOfTheWeek.bitmap
@@ -142,24 +143,7 @@ public class SmartNodeOutput
 	}
 	
 	
-	/***
-	 *  This is used when settings a smart node circuit name, when setting a smart node light
-	 *  controls message.
-	 * @return name when communicating via serial to Smart Node
-	 */
-	@JsonIgnore
-	public String getCircuitName()
-	{
-		if (mName.length() > MessageConstants.MAX_LIGHTING_CONTROL_CIRCUIT_LOGICAL_NAME_BYTES)
-		{
-			return mName.substring(0, 17) + "...";
-		}
-		else
-		{
-			return mName;
-		}
-	}
-	
+
 	@JsonIgnore
 	public int getScheduledVal()
 	{
@@ -189,6 +173,19 @@ public class SmartNodeOutput
 		else
 			return !retVal;
 				
+	}
+	
+	
+	@JsonIgnore
+	@Override
+	public String toString()
+	{
+		return "SmartNodeOutput{" + "mVal=" + mVal + ", mSmartNodePort=" + mSmartNodePort +
+		       ", mSmartNodeAddress=" + mSmartNodeAddress + ", mUniqueID=" + getUuid() +
+		       ", mName='" + mName + '\'' + ", mConfigured=" + mConfigured +
+		       ", mOutputRelayActuatorType=" + mOutputRelayActuatorType +
+		       ", mOutputAnalogActuatorType=" + mOutputAnalogActuatorType + ", mSchedules=" +
+		       mSchedules + ", mOverride=" + mOverride + '}';
 	}
 	
 	

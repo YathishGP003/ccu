@@ -1,13 +1,7 @@
 package a75f.io.logic.scheduler;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
 import android.util.Log;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map;
@@ -15,10 +9,13 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
-import a75f.io.bo.building.definitions.MockTime;
 import a75f.io.bo.building.definitions.ScheduledItem;
 import a75f.io.logic.LZoneProfile;
+import a75f.io.logic.cache.Globals;
+
+import static a75f.io.logic.LLog.Logd;
 
 /**
  * Created by Yinten on 9/10/2017.
@@ -26,31 +23,37 @@ import a75f.io.logic.LZoneProfile;
 
 public class LScheduler
 {
-	
-	private static final int LSCHEDULER_REQUEST_CODE = LScheduler.class.hashCode();
-	private static final int NO_FLAGS                = 0;
+	private static final String TAG                     = "Schedule";
 	Map<UUID, ScheduledItem> mScheduledItems =
 			Collections.synchronizedSortedMap(new TreeMap<UUID, ScheduledItem>());
-	private AlarmManager  mAlarmMgr;
-	private PendingIntent mAlarmIntent;
 	private ScheduledItem mCurrentScheduledItem;
 	
-	public Intent receiverIntent;
-	
-	
-	public LScheduler(Context context)
+	public LScheduler()
 	{
-		mAlarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-		receiverIntent = new Intent(context, ScheduleAlarmReciever.class);
-		mAlarmIntent =
-				PendingIntent.getBroadcast(context, LSCHEDULER_REQUEST_CODE, receiverIntent, NO_FLAGS);
+	}
+	
+	
+	static SortedSet<Map.Entry<UUID, ScheduledItem>> mapOfEntriesSortedByTimeStamp(Map<UUID, ScheduledItem> map)
+	{
+		SortedSet<Map.Entry<UUID, ScheduledItem>> sortedEntries =
+				new TreeSet<>(new Comparator<Map.Entry<UUID, ScheduledItem>>()
+				{
+					@Override
+					public int compare(Map.Entry<UUID, ScheduledItem> o1,
+					                   Map.Entry<UUID, ScheduledItem> o2)
+					{
+						return o1.getValue().mTimeStamp.compareTo(o2.getValue().mTimeStamp);
+					}
+				});
+		sortedEntries.addAll(map.entrySet());
+		return sortedEntries;
 	}
 	
 	
 	public void add(ScheduledItem scheduledItem)
 	{
 		/*The list contains the key */
-
+		Log.i("Schedule", "add - " + scheduledItem.toString());
 		if (mScheduledItems.containsKey(scheduledItem.mUuid))
 		{
 			ScheduledItem alreadyAddedScheduledItem = mScheduledItems.get(scheduledItem.mUuid);
@@ -93,6 +96,7 @@ public class LScheduler
 		/* The item first in the list, the lowest timestamp */
 		Map.Entry<UUID, ScheduledItem> first = entries.first();
 		ScheduledItem frontValue = first.getValue();
+		Log.d(TAG, "Front Value: " + frontValue.toString());
 		if (mCurrentScheduledItem == null)
 		{
 			schedule(frontValue);
@@ -104,70 +108,45 @@ public class LScheduler
 	}
 	
 	
-	static SortedSet<Map.Entry<UUID, ScheduledItem>> mapOfEntriesSortedByTimeStamp(Map<UUID, ScheduledItem> map)
-	{
-		SortedSet<Map.Entry<UUID, ScheduledItem>> sortedEntries = new TreeSet<>(new Comparator<Map.Entry<UUID, ScheduledItem>>() {
-            @Override
-            public int compare(Map.Entry<UUID, ScheduledItem> o1, Map.Entry<UUID, ScheduledItem> o2) {
-                return o1.getValue().mTimeStamp.compareTo(o2.getValue().mTimeStamp);
-            }
-        });
-		sortedEntries.addAll(map.entrySet());
-		return sortedEntries;
-	}
-	
-	
 	/* This method unschedules the current alarm and schedules the first selected item */
 	private void schedule(ScheduledItem itemToSchedule)
 	{
-		//cancel the previous alarm
-		mAlarmMgr.cancel(mAlarmIntent);
+		Logd("schedule for alarm: " + itemToSchedule.toString());
+		long lengthUntilNextAlarm =
+				itemToSchedule.mTimeStamp.getMillis() - System.currentTimeMillis();
+		Globals.getInstance().getScheduledThreadPool().schedule(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				takeAction();
+			}
+		}, lengthUntilNextAlarm, TimeUnit.MILLISECONDS);
 		//set new scheduled item to front
 		mCurrentScheduledItem = itemToSchedule;
-		//set time to mock time or system time if there is no mock time.
-
-        //TODO revisit
-        //mAlarmMgr.setTime(MockTime.getInstance().getMockTime());
-		//schedule item
-		mAlarmMgr.set(AlarmManager.RTC, itemToSchedule.mTimeStamp.getMillis(), mAlarmIntent);
+		Logd("Next Alarm: " + lengthUntilNextAlarm);
 	}
 	
-	
-	public class ScheduleAlarmReciever extends BroadcastReceiver
-	{
-		
-		@Override
-		public void onReceive(Context context, Intent intent)
-		{
-			//Remove mCurrentScheduledItem, Notify LZoneProfile.
-            Log.i("LScheduler", "ON recieve scheduled event");
-			SortedSet<Map.Entry<UUID, ScheduledItem>> entries =
-					mapOfEntriesSortedByTimeStamp(mScheduledItems);
-			ArrayList<ScheduledItem> removedScheduledItems = new ArrayList<>();
-			while (!entries.isEmpty() &&
-			       entries.first().getValue().mTimeStamp == mCurrentScheduledItem.mTimeStamp)
-			{
-				removedScheduledItems.add(mScheduledItems.remove(entries.first().getValue()
-						                                                 .mUuid));
-				LZoneProfile.handleZoneProfileScheduledEvent(removedScheduledItems);
-			}
-			mCurrentScheduledItem = null;
-			checkFront();
-		}
-	}
 	
 	//For test
-	public Map<UUID, ScheduledItem> getScheduledItems() {
+	public Map<UUID, ScheduledItem> getScheduledItems()
+	{
 		return mScheduledItems;
 	}
 	
-	public ScheduledItem getCurrentScheduledItem() {
-		return mCurrentScheduledItem;
+	
+	public void takeAction()
+	{
+		Log.i("LScheduler", "ON recieve scheduled event");
+		Log.e(TAG, "FIRED FIRED FIRED FIRED FIRED");
+		Log.i(TAG, "mScheduledItems.size()" + mScheduledItems.size());
+		LZoneProfile.handleZoneProfileScheduledEvent(mScheduledItems.remove(mCurrentScheduledItem
+				                                                                .mUuid));
+		Log.i(TAG, "after mScheduledItems.size()" + mScheduledItems.size());
+		mCurrentScheduledItem = null;
+		checkFront();
 	}
 	
-	public PendingIntent getAlarmIntent() {
-		return mAlarmIntent;
-	}
 }
 	
 

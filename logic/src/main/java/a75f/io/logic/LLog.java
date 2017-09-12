@@ -22,7 +22,6 @@ public class LLog
 	
 	public static void logStructAsJSON(Struct struct)
 	{
-		Log.i(TAG, "YOLO");
 		//if (BuildConfig.DEBUG)
 		//{
 			String structString = null;

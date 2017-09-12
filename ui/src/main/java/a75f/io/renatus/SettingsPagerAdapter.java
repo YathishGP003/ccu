@@ -4,17 +4,17 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
-import a75f.io.renatus.ENGG.FieldTestFragment;
-
 /**
  * Created by samjithsadasivan isOn 8/7/17.
  */
 
 public class SettingsPagerAdapter extends FragmentStatePagerAdapter
 {
-	public SettingsPagerAdapter(FragmentManager fm) {
+	public SettingsPagerAdapter(FragmentManager fm)
+	{
 		super(fm);
 	}
+	
 	
 	@Override
 	public Fragment getItem(int position)
@@ -35,27 +35,32 @@ public class SettingsPagerAdapter extends FragmentStatePagerAdapter
 		return fragment;
 	}
 	
+	
 	@Override
-	public int getCount() {
+	public int getCount()
+	{
 		// Show 2 total pages.
 		return 2;
 	}
 	
+	
 	@Override
-	public CharSequence getPageTitle(int position) {
-		switch (position) {
+	public int getItemPosition(Object object)
+	{
+		return POSITION_NONE;
+	}
+	
+	
+	@Override
+	public CharSequence getPageTitle(int position)
+	{
+		switch (position)
+		{
 			case 0:
 				return "Floor Layout";
 			case 1:
 				return "Settings";
-			
 		}
 		return null;
 	}
-	
-	@Override
-	public int getItemPosition(Object object) {
-		return POSITION_NONE;
-	}
-
 }

@@ -35,13 +35,15 @@ public class LScheduler
 	private PendingIntent mAlarmIntent;
 	private ScheduledItem mCurrentScheduledItem;
 	
+	public Intent receiverIntent;
+	
 	
 	public LScheduler(Context context)
 	{
 		mAlarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-		Intent intent = new Intent(context, ScheduleAlarmReciever.class);
+		receiverIntent = new Intent(context, ScheduleAlarmReciever.class);
 		mAlarmIntent =
-				PendingIntent.getBroadcast(context, LSCHEDULER_REQUEST_CODE, intent, NO_FLAGS);
+				PendingIntent.getBroadcast(context, LSCHEDULER_REQUEST_CODE, receiverIntent, NO_FLAGS);
 	}
 	
 	
@@ -161,6 +163,10 @@ public class LScheduler
 	
 	public ScheduledItem getCurrentScheduledItem() {
 		return mCurrentScheduledItem;
+	}
+	
+	public PendingIntent getAlarmIntent() {
+		return mAlarmIntent;
 	}
 }
 	

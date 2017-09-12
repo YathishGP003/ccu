@@ -53,6 +53,14 @@ public class LZoneProfile
 					SerialBLL.getInstance().sendSerialStruct(controlMessage_t);
 				}
 			}
+			try
+			{
+				LZoneProfile.scheduleProfiles();
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
 		}
 	}
 	

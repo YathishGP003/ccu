@@ -65,7 +65,9 @@ public class Globals
 	public ScheduledExecutorService getScheduledThreadPool()
 	{
 		return scheduleTaskExecutor;
-	}	public void setApplicationContext(Context mApplicationContext)
+	}
+	
+	public void setApplicationContext(Context mApplicationContext)
 	{
 		if (this.mApplicationContext == null)
 		{

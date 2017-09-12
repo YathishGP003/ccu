@@ -23,6 +23,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import a75f.io.bo.building.Floor;
 import a75f.io.bo.building.Zone;
 import a75f.io.logic.SmartNodeBLL;
@@ -66,6 +69,8 @@ public class FloorPlanFragment extends Fragment
 	ListView    roomListView;
 	@BindView(R.id.moduleList)
 	ListView    moduleListView;
+	Short[] smartNodeAddresses;
+	
 	private final BroadcastReceiver mPairingReceiver = new BroadcastReceiver()
 	{
 		@Override
@@ -80,8 +85,8 @@ public class FloorPlanFragment extends Fragment
 			}
 		}
 	};
-	
-	
+	{
+	}
 	public FloorPlanFragment()
 	{
 	}
@@ -141,73 +146,6 @@ public class FloorPlanFragment extends Fragment
 		FloorContainer.getInstance().saveData();
 	}
 	
-	Short[] smartNodeAddresses;
-	public void refreshScreen()
-	{
-		mCurFloorIndex = mCurFloorIndex >= 0 ? mCurFloorIndex : 0;
-		mCurRoomIndex = mCurRoomIndex >= 0 ? mCurRoomIndex : 0;
-		floorListView.setAdapter(FloorContainer.getInstance().getFloorListAdapter());
-		if (FloorContainer.getInstance().getFloorList().size() > 0)
-		{
-			selectFloor(mCurFloorIndex);
-			mRoomListAdapter = new DataArrayAdapter<Zone>(Globals.getInstance()
-			                                                     .getApplicationContext(), R.layout.listviewitem, FloorContainer
-					                                                                                                      .getInstance()
-					                                                                                                      .getFloorList()
-					                                                                                                      .get(mCurFloorIndex).mRoomList);
-			roomListView.setAdapter(mRoomListAdapter);
-			enableRoomBtn();
-			if (FloorContainer.getInstance().getFloorList().get(mCurFloorIndex).mRoomList.size() >
-			    0)
-			{
-				smartNodeAddresses = FloorContainer
-						.getInstance()
-						.getFloorList()
-						.get(mCurFloorIndex).mRoomList
-						.get(mCurRoomIndex)
-						.findSmartNodeAddresses();
-				enableModueButton();
-				mModuleListAdapter = new DataArrayAdapter<Short>(Globals.getInstance()
-				                                                        .getApplicationContext(), R.layout.listviewitem,smartNodeAddresses );
-				moduleListView.setAdapter(mModuleListAdapter);
-			}
-		}
-	}
-	
-	
-	private void selectFloor(int position)
-	{
-		mCurFloorIndex = position;
-		FloorContainer.getInstance().getFloorListAdapter().setSelectedItem(position);
-		mRoomListAdapter = new DataArrayAdapter<Zone>(Globals.getInstance()
-		                                                     .getApplicationContext(), R.layout.listviewitem, FloorContainer
-				                                                                                                      .getInstance()
-				                                                                                                      .getFloorList()
-				                                                                                                      .get(mCurFloorIndex).mRoomList);
-		roomListView.setAdapter(mRoomListAdapter);
-		selectRoom(0);
-	}
-	
-	
-	private void enableRoomBtn()
-	{
-		addRoomBtn.setVisibility(View.VISIBLE);
-		addRoomEdit.setVisibility(View.INVISIBLE);
-	}
-	
-	
-	private void enableModueButton()
-	{
-		pairModuleBtn.setVisibility(View.VISIBLE);
-	}
-	
-	
-	private void selectRoom(int position)
-	{
-		mCurRoomIndex = position;
-		mRoomListAdapter.setSelectedItem(position);
-	}
-	
 	
 	private void enableFloorButton()
 	{
@@ -223,6 +161,26 @@ public class FloorPlanFragment extends Fragment
 		pairModuleBtn.setVisibility(View.INVISIBLE);
 		addModuleEdit.setVisibility(View.INVISIBLE);
 	}
+	
+	
+	public void refreshScreen()
+	{
+		mCurFloorIndex = mCurFloorIndex >= 0 ? mCurFloorIndex : 0;
+		mCurRoomIndex = mCurRoomIndex >= 0 ? mCurRoomIndex : 0;
+		floorListView.setAdapter(FloorContainer.getInstance().getFloorListAdapter());
+		if (FloorContainer.getInstance().getFloorList().size() > 0)
+		{
+			selectFloor(mCurFloorIndex);
+			updateRooms();
+			selectRoom(mCurRoomIndex);
+			enableRoomBtn();
+			updateModules();
+			enableModueButton();
+		}
+	}
+	
+	
+
 	
 	
 	@OnClick(R.id.addFloorBtn)
@@ -252,12 +210,7 @@ public class FloorPlanFragment extends Fragment
 			final int nID =
 					FloorContainer.getInstance().addFloor(addFloorEdit.getText().toString());
 			selectFloor(nID);
-			mRoomListAdapter = new DataArrayAdapter<Zone>(Globals.getInstance()
-			                                                     .getApplicationContext(), R.layout.listviewitem, FloorContainer
-					                                                                                                      .getInstance()
-					                                                                                                      .getFloorList()
-					                                                                                                      .get(mCurFloorIndex).mRoomList);
-			roomListView.setAdapter(mRoomListAdapter);
+			updateRooms();
 			//CCUKinveyInterface.updateFloor(FloorData.getFloorData().get(nID), false);
 			InputMethodManager mgr = (InputMethodManager) getActivity()
 					                                              .getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -269,6 +222,11 @@ public class FloorPlanFragment extends Fragment
 			return true;
 		}
 		return false;
+	}
+	
+	
+	private void updateFloors()
+	{
 	}
 	
 	
@@ -319,6 +277,48 @@ public class FloorPlanFragment extends Fragment
 			return true;
 		}
 		return false;
+	}
+	
+	
+	private void selectRoom(int position)
+	{
+		mCurRoomIndex = position;
+		mRoomListAdapter.setSelectedItem(position);
+		updateModules();
+	}
+	
+	
+	private void enableRoomBtn()
+	{
+		addRoomBtn.setVisibility(View.VISIBLE);
+		addRoomEdit.setVisibility(View.INVISIBLE);
+	}
+	
+	
+	private void enableModueButton()
+	{
+		pairModuleBtn.setVisibility(View.VISIBLE);
+	}
+	
+	
+	private void updateModules()
+	{
+		if (FloorContainer.getInstance().getFloorList().size() > 0 &&
+		    FloorContainer.getInstance().getFloorList().get(mCurFloorIndex).mRoomList.size() > 0)
+		{
+			smartNodeAddresses = FloorContainer.getInstance().getFloorList().get(mCurFloorIndex)
+					                                  .mRoomList
+					.get(mCurRoomIndex).findSmartNodeAddresses();
+			Log.i("Modules", "Smart Node Addresses: " + Arrays.deepToString(smartNodeAddresses));
+		}
+		else
+		{
+			smartNodeAddresses = new Short[]{};
+		}
+		
+		mModuleListAdapter = new DataArrayAdapter<Short>(Globals.getInstance()
+		                                                        .getApplicationContext(), R.layout.listviewitem, smartNodeAddresses);
+		moduleListView.setAdapter(mModuleListAdapter);
 	}
 	
 	
@@ -377,6 +377,38 @@ public class FloorPlanFragment extends Fragment
 	}
 	
 	
+	private void selectFloor(int position)
+	{
+		mCurFloorIndex = position;
+		FloorContainer.getInstance().getFloorListAdapter().setSelectedItem(position);
+		updateRooms();
+	}
+	
+	
+	private void updateRooms()
+	{
+		ArrayList<Zone> mRoomList;
+		if (FloorContainer.getInstance().getFloorList().size() > 0)
+		{
+			 mRoomList =
+					FloorContainer.getInstance().getFloorList().get(mCurFloorIndex).mRoomList;
+
+			
+		}
+		else
+		{
+			mRoomList = new ArrayList<Zone>();
+		}
+		
+		
+		mRoomListAdapter = new DataArrayAdapter<>(Globals.getInstance()
+		                                                 .getApplicationContext(), R.layout.listviewitem, mRoomList);
+		roomListView.setAdapter(mRoomListAdapter);
+		mCurRoomIndex = 0;
+		updateModules();
+	}
+	
+	
 	@OnItemClick(R.id.roomList)
 	public void setRoomListView(AdapterView<?> parent, View view, int position, long id)
 	{
@@ -387,22 +419,20 @@ public class FloorPlanFragment extends Fragment
 	@OnItemClick(R.id.moduleList)
 	public void setModuleListView(AdapterView<?> parent, View view, int position, long id)
 	{
-		
-		Log.i("ModuleSelected", "Selected ID: " + parent.getSelectedItem());
-		showDialogFragment(LightingZoneProfileFragment
-				                   .newInstance(smartNodeAddresses[position], FloorContainer
-						                                                                  .getInstance()
-						                                                                  .getFloorList()
-						                                                                  .get(mCurFloorIndex).mRoomList
-						                                                                  .get(mCurRoomIndex).roomName, FloorContainer
-								                                                                                                .getInstance()
-								                                                                                                .getFloorList()
-								                                                                                                .get(mCurFloorIndex).mFloorName), LightingZoneProfileFragment.ID);
 		selectModule(position);
 	}
 	
 	
 	private void selectModule(int position)
 	{
+		showDialogFragment(LightingZoneProfileFragment
+				                   .newInstance(smartNodeAddresses[position], FloorContainer
+						                                                              .getInstance()
+						                                                              .getFloorList()
+						                                                              .get(mCurFloorIndex).mRoomList
+						                                                              .get(mCurRoomIndex).roomName, FloorContainer
+								                                                                                            .getInstance()
+								                                                                                            .getFloorList()
+								                                                                                            .get(mCurFloorIndex).mFloorName), LightingZoneProfileFragment.ID);
 	}
 }

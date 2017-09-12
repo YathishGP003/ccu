@@ -78,11 +78,7 @@ public class FloorContainer
 		                                                                                                               .getCCUApplication().floors);
 		
 		
-		/*DCVSensorData.getHandle().loadData();
-		PressureSensorData.getHandle().loadData();
-		NO2SensorData.getHandle().loadData();
-		COSensorData.getHandle().loadData();
-		startCloudSync();*/
+		
 	}
 	
 	

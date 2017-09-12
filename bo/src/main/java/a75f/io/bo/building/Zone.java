@@ -41,14 +41,21 @@ public class Zone
 	public Short[] findSmartNodeAddresses()
 	{
 		Set<Short> shortHashSet = new HashSet<Short>();
-		for (SmartNodeInput smartNodeInput : mLightProfile.smartNodeInputs)
+		if(mLightProfile != null && mLightProfile.smartNodeInputs != null)
 		{
-			shortHashSet.add(smartNodeInput.mSmartNodeAddress);
+			for (SmartNodeInput smartNodeInput : mLightProfile.smartNodeInputs)
+			{
+				shortHashSet.add(smartNodeInput.mSmartNodeAddress);
+			}
 		}
-		for (SmartNodeOutput smartNodeOutput : mLightProfile.smartNodeOutputs)
+		if(mLightProfile != null && mLightProfile.smartNodeOutputs != null)
 		{
-			shortHashSet.add(smartNodeOutput.mSmartNodeAddress);
+			for (SmartNodeOutput smartNodeOutput : mLightProfile.smartNodeOutputs)
+			{
+				shortHashSet.add(smartNodeOutput.mSmartNodeAddress);
+			}
 		}
+		
 		return shortHashSet.toArray(new Short[shortHashSet.size()]);
 	}
 }

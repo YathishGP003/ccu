@@ -33,98 +33,114 @@ import a75f.io.bo.building.SmartNodeOutput;
 import a75f.io.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.bo.building.definitions.Port;
 import a75f.io.bo.json.serializers.JsonSerializer;
-import a75f.io.logic.SmartNodeBLL;
+import a75f.io.logic.ZoneBLL;
 import a75f.io.renatus.ENGG.logger.CcuLog;
 
 /**
  * Created by JASPINDER isOn 11/9/2016.
  */
 
-public class LightingDetailAdapter extends BaseAdapter{
-    
-    public static final String TAG = "Lighting";
-
-    View                       row;
-    LayoutInflater             inflater;
-    AppCompatActivity          c;
-    ViewHolder                 viewHolder;
-    ArrayList<SmartNodeOutput> snOutPortList;
-    ListView                   thiSList;
-    private ArrayAdapter<CharSequence> aaOccupancyMode;
-    private Boolean lcmdab;
-    private RelativeLayout schedule;
-    private LightProfile profile;
-
-    public LightingDetailAdapter(Context c, ListView thiSList, LightProfile p, Boolean lcmdab) {
-        this.c = (AppCompatActivity) c;
-        notifyDataSetChanged();
-        this.snOutPortList = new ArrayList<>();
-        snOutPortList.addAll(p.smartNodeOutputs);
-        this.thiSList = thiSList;
-        this.lcmdab = lcmdab;
-        this.profile =p;
-        aaOccupancyMode = ArrayAdapter.createFromResource(c.getApplicationContext(), R.array.schedulePORT, R.layout.spinner_item);
-        aaOccupancyMode.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        Collections.sort(snOutPortList, new Comparator<SmartNodeOutput>() {
-            @Override
-            public int compare(SmartNodeOutput lhs, SmartNodeOutput rhs) {
-                return lhs.mName.compareToIgnoreCase(rhs.mName);
-            }
-        });
-    }
-
-    @Override
-    public int getCount() {
-        return snOutPortList.size();
-    }
-
-    @Override
-    public Object getItem(int position) {
-        return position;
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return position;
-    }
-
-    @Override
-    public View getView(final int position, View convertView, ViewGroup parent) {
-
-        row = convertView;
-        viewHolder = null;
-        if (row == null) {
-            inflater = (LayoutInflater) c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            row = inflater.inflate(R.layout.lighting_detail_row, parent, false);
-            viewHolder = new ViewHolder(row);
-            row.setTag(viewHolder);
-
-        } else {
-            viewHolder = (ViewHolder) row.getTag();
-
-        }
-
-        row.setBackgroundColor((position % 2 == 0) ?  Color.parseColor("#ececec"): Color.TRANSPARENT);
-       
-        if (snOutPortList.size() > 0) {
-            final SmartNodeOutput snOutput = snOutPortList.get(position);
-            viewHolder.LogicalName.setText(snOutput.mName/*port_map.getCircuitName()*/);
-            viewHolder.spinnerSchedule.setTag(position);
-            viewHolder.spinnerSchedule.setAdapter(aaOccupancyMode);
-            if(schedule != null){
-                schedule.setVisibility(View.VISIBLE);
-            }
-            
-            switch (snOutput.mSmartNodePort) {
-                case RELAY_ONE:
-                   
-                    if (snOutput.isOn()) {
-                        viewHolder.OnOffLight.setChecked(true);
-                    } else
-                    {
-                        viewHolder.OnOffLight.setChecked(false);
-                    }
-                    /*viewHolder.spinnerSchedule.setSelection(port_info.relay1.schedule_mode);
+public class LightingDetailAdapter extends BaseAdapter
+{
+	
+	public static final String TAG = "Lighting";
+	
+	View                       row;
+	LayoutInflater             inflater;
+	AppCompatActivity          c;
+	ViewHolder                 viewHolder;
+	ArrayList<SmartNodeOutput> snOutPortList;
+	ListView                   thiSList;
+	private ArrayAdapter<CharSequence> aaOccupancyMode;
+	private Boolean                    lcmdab;
+	private RelativeLayout             schedule;
+	private LightProfile               profile;
+	
+	
+	public LightingDetailAdapter(Context c, ListView thiSList, LightProfile p, Boolean lcmdab)
+	{
+		this.c = (AppCompatActivity) c;
+		notifyDataSetChanged();
+		this.snOutPortList = new ArrayList<>();
+		snOutPortList.addAll(p.smartNodeOutputs);
+		this.thiSList = thiSList;
+		this.lcmdab = lcmdab;
+		this.profile = p;
+		aaOccupancyMode = ArrayAdapter
+				                  .createFromResource(c.getApplicationContext(), R.array.schedulePORT, R.layout.spinner_item);
+		aaOccupancyMode.setDropDownViewResource(R.layout.spinner_dropdown_item);
+		Collections.sort(snOutPortList, new Comparator<SmartNodeOutput>()
+		{
+			@Override
+			public int compare(SmartNodeOutput lhs, SmartNodeOutput rhs)
+			{
+				return lhs.mName.compareToIgnoreCase(rhs.mName);
+			}
+		});
+	}
+	
+	
+	@Override
+	public int getCount()
+	{
+		return snOutPortList.size();
+	}
+	
+	
+	@Override
+	public Object getItem(int position)
+	{
+		return position;
+	}
+	
+	
+	@Override
+	public long getItemId(int position)
+	{
+		return position;
+	}
+	
+	
+	@Override
+	public View getView(final int position, View convertView, ViewGroup parent)
+	{
+		row = convertView;
+		viewHolder = null;
+		if (row == null)
+		{
+			inflater = (LayoutInflater) c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			row = inflater.inflate(R.layout.lighting_detail_row, parent, false);
+			viewHolder = new ViewHolder(row);
+			row.setTag(viewHolder);
+		}
+		else
+		{
+			viewHolder = (ViewHolder) row.getTag();
+		}
+		row.setBackgroundColor(
+				(position % 2 == 0) ? Color.parseColor("#ececec") : Color.TRANSPARENT);
+		if (snOutPortList.size() > 0)
+		{
+			final SmartNodeOutput snOutput = snOutPortList.get(position);
+			viewHolder.LogicalName.setText(snOutput.mName/*port_map.getCircuitName()*/);
+			viewHolder.spinnerSchedule.setTag(position);
+			viewHolder.spinnerSchedule.setAdapter(aaOccupancyMode);
+			if (schedule != null)
+			{
+				schedule.setVisibility(View.VISIBLE);
+			}
+			switch (snOutput.mSmartNodePort)
+			{
+				case RELAY_ONE:
+					if (snOutput.isOn())
+					{
+						viewHolder.OnOffLight.setChecked(true);
+					}
+					else
+					{
+						viewHolder.OnOffLight.setChecked(false);
+					}
+		            /*viewHolder.spinnerSchedule.setSelection(port_info.relay1.schedule_mode);
                     viewHolder.statusDetail.setText(port_info.relay1.status);
                     viewHolder.vacationFromTo.setText(port_info.relay1.vacation_text);
                     if (!port_info.relay1.isOccupied) {
@@ -133,16 +149,16 @@ public class LightingDetailAdapter extends BaseAdapter{
                     if(port_info.relay1.schedule_mode == 2){
                         viewHolder.imgNameSchedule.setVisibility(View.VISIBLE);
                     }*/
-                    
-                    break;
-                case RELAY_TWO:
-    
-                    if (snOutput.isOn())
-                    {
-                        viewHolder.OnOffLight.setChecked(true);
-                    } else {
-                        viewHolder.OnOffLight.setChecked(false);
-                    }
+					break;
+				case RELAY_TWO:
+					if (snOutput.isOn())
+					{
+						viewHolder.OnOffLight.setChecked(true);
+					}
+					else
+					{
+						viewHolder.OnOffLight.setChecked(false);
+					}
                     
                    /* viewHolder.spinnerSchedule.setSelection(port_info.relay2.schedule_mode);
                     viewHolder.statusDetail.setText(port_info.relay2.status);
@@ -153,12 +169,11 @@ public class LightingDetailAdapter extends BaseAdapter{
                     if(port_info.relay2.schedule_mode == 2){
                         viewHolder.imgNameSchedule.setVisibility(View.VISIBLE);
                     }*/
-
-                    break;
-                case ANALOG_OUT_ONE:
-                    viewHolder.brightness.setMax(100);
-                    viewHolder.brightness.setProgress(snOutput.mVal);
-                    viewHolder.brightnessVal.setText(snOutput.mVal + "");
+					break;
+				case ANALOG_OUT_ONE:
+					viewHolder.brightness.setMax(100);
+					viewHolder.brightness.setProgress(snOutput.mVal);
+					viewHolder.brightnessVal.setText(snOutput.mVal + "");
                     /*viewHolder.statusDetail.setText(port_info.analog1_out.status);
                     viewHolder.vacationFromTo.setText(port_info.analog1_out.vacation_text);
                     viewHolder.spinnerSchedule.setSelection(port_info.analog1_out.schedule_mode);
@@ -168,11 +183,11 @@ public class LightingDetailAdapter extends BaseAdapter{
                     if(port_info.analog1_out.schedule_mode == 2){
                         viewHolder.imgNameSchedule.setVisibility(View.VISIBLE);
                     }*/
-                    break;
-                case ANALOG_OUT_TWO:
-                    viewHolder.brightness.setMax(100);
-                    viewHolder.brightness.setProgress(snOutput.mVal);
-                    viewHolder.brightnessVal.setText(snOutput.mVal + "");
+					break;
+				case ANALOG_OUT_TWO:
+					viewHolder.brightness.setMax(100);
+					viewHolder.brightness.setProgress(snOutput.mVal);
+					viewHolder.brightnessVal.setText(snOutput.mVal + "");
                     /*viewHolder.vacationFromTo.setText(port_info.analog2_out.vacation_text);
                     viewHolder.statusDetail.setText(port_info.analog2_out.status);
                     viewHolder.spinnerSchedule.setSelection(port_info.analog2_out.schedule_mode);
@@ -182,137 +197,149 @@ public class LightingDetailAdapter extends BaseAdapter{
                     if(port_info.analog2_out.schedule_mode == 2){
                         viewHolder.imgNameSchedule.setVisibility(View.VISIBLE);
                     }*/
-                    break;
-            }
-            if (snOutput.mSmartNodePort == Port.ANALOG_OUT_ONE || snOutput.mSmartNodePort == Port.ANALOG_OUT_TWO) {
-                viewHolder.OnOffLight.setVisibility(View.GONE);
-                viewHolder.brightness.setVisibility(View.VISIBLE);
-                viewHolder.brightnessVal.setVisibility(View.VISIBLE);
-
-            }
-            if (snOutput.mSmartNodePort == Port.RELAY_ONE || snOutput.mSmartNodePort == Port.RELAY_TWO) {
-                viewHolder.OnOffLight.setVisibility(View.VISIBLE);
-                viewHolder.brightness.setVisibility(View.GONE);
-                viewHolder.brightnessVal.setVisibility(View.GONE);
-
-
-            }
-           
-            final SwitchCompat onOff = (SwitchCompat) row.findViewById(R.id.OnOffLight);
-            onOff.setTag(position);
-            onOff.setSwitchMinWidth(40);
+					break;
+			}
+			if (snOutput.mSmartNodePort == Port.ANALOG_OUT_ONE ||
+			    snOutput.mSmartNodePort == Port.ANALOG_OUT_TWO)
+			{
+				viewHolder.OnOffLight.setVisibility(View.GONE);
+				viewHolder.brightness.setVisibility(View.VISIBLE);
+				viewHolder.brightnessVal.setVisibility(View.VISIBLE);
+			}
+			if (snOutput.mSmartNodePort == Port.RELAY_ONE ||
+			    snOutput.mSmartNodePort == Port.RELAY_TWO)
+			{
+				viewHolder.OnOffLight.setVisibility(View.VISIBLE);
+				viewHolder.brightness.setVisibility(View.GONE);
+				viewHolder.brightnessVal.setVisibility(View.GONE);
+			}
+			final SwitchCompat onOff = (SwitchCompat) row.findViewById(R.id.OnOffLight);
+			onOff.setTag(position);
+			onOff.setSwitchMinWidth(40);
             /*StateListDrawable switchStates = new StateListDrawable();
             switchStates.addState(new int[]{android.R.attr.state_checked}, new ColorDrawable(c.getResources().getColor(R.color.progress_color_orange)));
             switchStates.addState(new int[]{-android.R.attr.state_enabled}, new ColorDrawable(c.getResources().getColor(R.color.grey_select)));
             switchStates.addState(new int[]{}, new ColorDrawable(c.getResources().getColor(R.color.grey_select))); // this one has to come last
             onOff.setThumbDrawable(switchStates);*/
-            onOff.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    
-                    switch (snOutput.mSmartNodePort){
-                        case RELAY_ONE:
-                        case RELAY_TWO:
-                            
-                            if(snOutput.mOutputRelayActuatorType ==
-                               OutputRelayActuatorType.NormallyClose )
-                            {
-                                snOutput.mVal = isChecked ? 100 : 0;
-                            }
-                            else
-                            {
-                                snOutput.mVal = isChecked ? 0 : 100;
-                            }
-                            
-                            snOutput.setOverride(true);
-                    }
-                    try
-                    {
-                        CcuLog.d(TAG, JsonSerializer.toJson(profile.getControlsMessage(), true));
-
-                        SmartNodeBLL.sendControlsMessage(profile);
-                    } catch (IOException e){
-                        CcuLog.wtf(TAG, "Failed to generate Control Message" ,e);
-                    }
-
-                }
-            });
-          
-            SeekBar brightnessControl = (SeekBar) row.findViewById(R.id.brightness);
-            final TextView val = (TextView) row.findViewById(R.id.brightnessVal);
-            brightnessControl.setTag(position);
-            val.setTag(position);
-            brightnessControl.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-
-                @Override
-                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    val.setText(progress+"");
-                    switch (snOutput.mSmartNodePort){
-                        case ANALOG_OUT_ONE:
-                        case ANALOG_OUT_TWO:
-                            snOutput.mVal =  (short) progress;
-                            snOutput.setOverride(true);
-                    }
-
-                }
-
-                @Override
-                public void onStartTrackingTouch(SeekBar seekBar) {
-
-                }
-
-                @Override
-                public void onStopTrackingTouch(SeekBar seekBar) {
-                    int value = seekBar.getProgress();
-                    switch (snOutput.mSmartNodePort){
-                        case ANALOG_OUT_ONE:
-                        case ANALOG_OUT_TWO:
-                            snOutput.mVal = (short)value;
-                            snOutput.setOverride(true);
-                    }
-                    try
-                    {
-                        CcuLog.d(TAG, JsonSerializer.toJson(profile.getControlsMessage(), true));
-                        SmartNodeBLL.sendControlsMessage(profile);
-                    } catch (IOException e){
-                        CcuLog.wtf(TAG, "Failed to generate Control Message" ,e);
-                    }
-                    
-                }
-            });
-
-            row.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    View vw = v;
-                    RelativeLayout row2 = null;
-                    row2 = (RelativeLayout) vw.findViewById(R.id.schedulerow);
-                    if(schedule == null){
-                        row2.setVisibility(View.VISIBLE);
-                        schedule = row2;
-                    }else{
-                        if(row2 != schedule) {
-                            schedule.setVisibility(View.GONE);
-                            row2.setVisibility(View.VISIBLE);
-                            schedule = row2;
-                        }else{
-                            row2.setVisibility(View.GONE);
-                            schedule = null;
-                        }
-
-                    }
-    
-                    new LayoutHelper(c).setListViewParams(thiSList, LightingDetailAdapter.this, schedule == null ? 0 : 1, snOutPortList.size(), lcmdab);
-                   
-                }
-
-            });
-            //changing schedule
-            final ImageView vacationEdit = (ImageView) row.findViewById(R.id.vacationEdit);
-            vacationEdit.setTag(position);
-            vacationEdit.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
+			onOff.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+			{
+				@Override
+				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+				{
+					switch (snOutput.mSmartNodePort)
+					{
+						case RELAY_ONE:
+						case RELAY_TWO:
+							if (snOutput.mOutputRelayActuatorType ==
+							    OutputRelayActuatorType.NormallyClose)
+							{
+								snOutput.mVal = isChecked ? 100 : 0;
+							}
+							else
+							{
+								snOutput.mVal = isChecked ? 0 : 100;
+							}
+							snOutput.setOverride(true);
+					}
+					try
+					{
+						CcuLog.d(TAG, JsonSerializer.toJson(profile.getControlsMessage(), true));
+						ZoneBLL.sendControlsMessage(profile);
+					}
+					catch (IOException e)
+					{
+						CcuLog.wtf(TAG, "Failed to generate Control Message", e);
+					}
+				}
+			});
+			SeekBar brightnessControl = (SeekBar) row.findViewById(R.id.brightness);
+			final TextView val = (TextView) row.findViewById(R.id.brightnessVal);
+			brightnessControl.setTag(position);
+			val.setTag(position);
+			brightnessControl.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
+			{
+				
+				@Override
+				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
+				{
+					val.setText(progress + "");
+					switch (snOutput.mSmartNodePort)
+					{
+						case ANALOG_OUT_ONE:
+						case ANALOG_OUT_TWO:
+							snOutput.mVal = (short) progress;
+							snOutput.setOverride(true);
+					}
+				}
+				
+				
+				@Override
+				public void onStartTrackingTouch(SeekBar seekBar)
+				{
+				}
+				
+				
+				@Override
+				public void onStopTrackingTouch(SeekBar seekBar)
+				{
+					int value = seekBar.getProgress();
+					switch (snOutput.mSmartNodePort)
+					{
+						case ANALOG_OUT_ONE:
+						case ANALOG_OUT_TWO:
+							snOutput.mVal = (short) value;
+							snOutput.setOverride(true);
+					}
+					try
+					{
+						CcuLog.d(TAG, JsonSerializer.toJson(profile.getControlsMessage(), true));
+						ZoneBLL.sendControlsMessage(profile);
+					}
+					catch (IOException e)
+					{
+						CcuLog.wtf(TAG, "Failed to generate Control Message", e);
+					}
+				}
+			});
+			row.setOnClickListener(new View.OnClickListener()
+			{
+				@Override
+				public void onClick(View v)
+				{
+					View vw = v;
+					RelativeLayout row2 = null;
+					row2 = (RelativeLayout) vw.findViewById(R.id.schedulerow);
+					if (schedule == null)
+					{
+						row2.setVisibility(View.VISIBLE);
+						schedule = row2;
+					}
+					else
+					{
+						if (row2 != schedule)
+						{
+							schedule.setVisibility(View.GONE);
+							row2.setVisibility(View.VISIBLE);
+							schedule = row2;
+						}
+						else
+						{
+							row2.setVisibility(View.GONE);
+							schedule = null;
+						}
+					}
+					new LayoutHelper(c).setListViewParams(thiSList, LightingDetailAdapter.this,
+							schedule == null ? 0 : 1, snOutPortList.size(), lcmdab);
+				}
+			});
+			//changing schedule
+			final ImageView vacationEdit = (ImageView) row.findViewById(R.id.vacationEdit);
+			vacationEdit.setTag(position);
+			vacationEdit.setOnClickListener(new View.OnClickListener()
+			{
+				@Override
+				public void onClick(View v)
+				{
                    /* FragmentTransaction ftt = c.getFragmentManager().beginTransaction();
                     Fragment prev1 = c.getFragmentManager().findFragmentByTag("vacation");
                     if (prev1 != null) {
@@ -321,31 +348,33 @@ public class LightingDetailAdapter extends BaseAdapter{
                     LCMVacationScheduleEditor vacationFragment = null;
                     vacationFragment = new LCMVacationScheduleEditor(LightingDetailAdapter.this, port_map.getFsvData(), port);
                     vacationFragment.show(ftt, "vacation");*/
-                }
-            });
-
-            //named schedule edit
-            final ImageView imgNameSchedule = (ImageView) row.findViewById(R.id.lcmNamedScheduleEdit);
-            imgNameSchedule.setTag(position);
-            imgNameSchedule.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    
-                    if(v.isPressed() && position == 1) {
-                        showDialogFragment(LightScheduleFragment.newInstance(snOutput),"schedule_fragment");
-                    }
-
-                }
-            });
-
-
-
-
-            //changing schedule
-            //FSVData.SMARTNODE_PORT port = port_map.getPort();
-            viewHolder.spinnerSchedule.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+				}
+			});
+			//named schedule edit
+			final ImageView imgNameSchedule =
+					(ImageView) row.findViewById(R.id.lcmNamedScheduleEdit);
+			imgNameSchedule.setTag(position);
+			imgNameSchedule.setOnClickListener(new View.OnClickListener()
+			{
+				@Override
+				public void onClick(View v)
+				{
+					if (v.isPressed() && position == 1)
+					{
+						showDialogFragment(LightScheduleFragment
+								                   .newInstance(snOutput), "schedule_fragment");
+					}
+				}
+			});
+			//changing schedule
+			//FSVData.SMARTNODE_PORT port = port_map.getPort();
+			viewHolder.spinnerSchedule
+					.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+					{
+						@Override
+						public void onItemSelected(AdapterView<?> parent, View view, int pos,
+						                           long id)
+						{
                     /*SmartNodesPortData.LCM_CIRCUIT_SCHEDULE_MODE eSelectedSchedule = SmartNodesPortData.LCM_CIRCUIT_SCHEDULE_MODE.values()[pos];
                     //FSVData.SMARTNODE_PORT port = port_map.getPort();
                     final FSVData fsvData = port_map.getFsvData();
@@ -418,35 +447,31 @@ public class LightingDetailAdapter extends BaseAdapter{
                         fsvData.updateLCMDataFromAssignedSchedule();
                         	fsvData.getAssignedRoom().sendSettingsToWeb("lcm schedule change");
                     }*/
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-
-                }
-            });
-
-
-        }
-
-        return row;
-    }
-    
-    private void showDialogFragment(DialogFragment dialogFragment, String id)
-    {
-        FragmentTransaction
-                ft = c.getSupportFragmentManager().beginTransaction();
-        Fragment prev = c.getSupportFragmentManager().findFragmentByTag(id);
-        if (prev != null)
-        {
-            
-            ft.remove(prev);
-        }
-        ft.addToBackStack(null);
-        // Create and show the dialog.
-        
-        dialogFragment.show(ft, id);
-    }
+						}
+						
+						
+						@Override
+						public void onNothingSelected(AdapterView<?> parent)
+						{
+						}
+					});
+		}
+		return row;
+	}
+	
+	
+	private void showDialogFragment(DialogFragment dialogFragment, String id)
+	{
+		FragmentTransaction ft = c.getSupportFragmentManager().beginTransaction();
+		Fragment prev = c.getSupportFragmentManager().findFragmentByTag(id);
+		if (prev != null)
+		{
+			ft.remove(prev);
+		}
+		ft.addToBackStack(null);
+		// Create and show the dialog.
+		dialogFragment.show(ft, id);
+	}
    /* @Override
     public void OnSetLCMVacationSchedule(SortedMap<Long, JSONObject> vacationData, FSVData.SMARTNODE_PORT port, FSVData fsvData) {
         SmartNodesPortData portData = fsvData.getSmartNodePort();
@@ -552,37 +577,37 @@ public class LightingDetailAdapter extends BaseAdapter{
             Toast.makeText(c, "No Named Schedule list to select ", Toast.LENGTH_SHORT).show();
 
     }*/
-
-    public class ViewHolder {
-        public TextView       LogicalName;
-        public SeekBar        brightness;
-        public SwitchCompat  OnOffLight;
-        public TextView       statusDetail;
-        public TextView       brightnessVal;
-        public Spinner        spinnerSchedule;
-        public EditText       vacationFromTo;
-        public ImageView      vacationEdit;
-        public ImageView      imageOccupied;
-        public RelativeLayout schedulerow;
-        public LinearLayout   llmain;
-        public ImageView      imgNameSchedule;
-
-        public ViewHolder(View v) {
-            LogicalName = (TextView) v.findViewById(R.id.LogicalName);
-            brightness = (SeekBar) v.findViewById(R.id.brightness);
-            OnOffLight = (SwitchCompat) v.findViewById(R.id.OnOffLight);
-            statusDetail = (TextView) v.findViewById(R.id.statusDetail);
-            brightnessVal = (TextView) v.findViewById(R.id.brightnessVal);
-            spinnerSchedule = (Spinner) v.findViewById(R.id.spinnerSchedule);
-            vacationEdit = (ImageView) v.findViewById(R.id.vacationEdit);
-            imageOccupied = (ImageView) v.findViewById(R.id.imageOccupied);
-            vacationFromTo = (EditText) v.findViewById(R.id.vacationFromTo);
-            schedulerow = (RelativeLayout) v.findViewById(R.id.schedulerow);
-            llmain = (LinearLayout) v.findViewById(R.id.llmain);
-
-            imgNameSchedule = (ImageView)v.findViewById(R.id.lcmNamedScheduleEdit);
-        }
-
-
-    }
+	
+	public class ViewHolder
+	{
+		public TextView       LogicalName;
+		public SeekBar        brightness;
+		public SwitchCompat   OnOffLight;
+		public TextView       statusDetail;
+		public TextView       brightnessVal;
+		public Spinner        spinnerSchedule;
+		public EditText       vacationFromTo;
+		public ImageView      vacationEdit;
+		public ImageView      imageOccupied;
+		public RelativeLayout schedulerow;
+		public LinearLayout   llmain;
+		public ImageView      imgNameSchedule;
+		
+		
+		public ViewHolder(View v)
+		{
+			LogicalName = (TextView) v.findViewById(R.id.LogicalName);
+			brightness = (SeekBar) v.findViewById(R.id.brightness);
+			OnOffLight = (SwitchCompat) v.findViewById(R.id.OnOffLight);
+			statusDetail = (TextView) v.findViewById(R.id.statusDetail);
+			brightnessVal = (TextView) v.findViewById(R.id.brightnessVal);
+			spinnerSchedule = (Spinner) v.findViewById(R.id.spinnerSchedule);
+			vacationEdit = (ImageView) v.findViewById(R.id.vacationEdit);
+			imageOccupied = (ImageView) v.findViewById(R.id.imageOccupied);
+			vacationFromTo = (EditText) v.findViewById(R.id.vacationFromTo);
+			schedulerow = (RelativeLayout) v.findViewById(R.id.schedulerow);
+			llmain = (LinearLayout) v.findViewById(R.id.llmain);
+			imgNameSchedule = (ImageView) v.findViewById(R.id.lcmNamedScheduleEdit);
+		}
+	}
 }

@@ -13,17 +13,21 @@ import android.widget.TextView;
 
 public class AlertsFragment extends Fragment
 {
-	public static AlertsFragment newInstance(){
+	public AlertsFragment()
+	{
+	}
+	
+	
+	public static AlertsFragment newInstance()
+	{
 		return new AlertsFragment();
 	}
 	
-	public AlertsFragment(){
-		
-	}
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-	                         Bundle savedInstanceState) {
+	                         Bundle savedInstanceState)
+	{
 		View rootView = inflater.inflate(R.layout.fragment_renatus_landing, container, false);
 		TextView textView = (TextView) rootView.findViewById(R.id.section_label);
 		textView.setText("Alerts screen comes here");

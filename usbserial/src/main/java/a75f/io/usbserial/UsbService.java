@@ -9,7 +9,6 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.hardware.usb.IUsbManager;
-import android.hardware.usb.UsbConfiguration;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
@@ -66,7 +65,7 @@ public class UsbService extends Service
 	public static final  int     DSR_CHANGE                        = 2;
 	private static final String  ACTION_USB_PERMISSION             =
 			"com.android.example.USB_PERMISSION";
-	private static final int     BAUD_RATE                         = 9600;
+	private static final int     BAUD_RATE                         = 38400;
 	// BaudRate. Change this value if you need
 	private static final String  TAG                               =
 			UsbService.class.getSimpleName();

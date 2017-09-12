@@ -13,17 +13,21 @@ import android.widget.TextView;
 
 public class SystemFragment extends Fragment
 {
-	public static SystemFragment newInstance(){
+	public SystemFragment()
+	{
+	}
+	
+	
+	public static SystemFragment newInstance()
+	{
 		return new SystemFragment();
 	}
 	
-	public SystemFragment(){
-		
-	}
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-	                         Bundle savedInstanceState) {
+	                         Bundle savedInstanceState)
+	{
 		View rootView = inflater.inflate(R.layout.fragment_renatus_landing, container, false);
 		TextView textView = (TextView) rootView.findViewById(R.id.section_label);
 		textView.setText("System screen comes here");

@@ -24,7 +24,6 @@ import android.widget.Toast;
 
 import a75f.io.bo.building.Floor;
 import a75f.io.bo.building.Zone;
-import a75f.io.bo.building.ZoneProfile;
 import a75f.io.logic.SmartNodeBLL;
 import a75f.io.logic.cache.Globals;
 import a75f.io.renatus.BLE.FragmentDeviceScan;
@@ -42,12 +41,12 @@ import butterknife.OnItemClick;
 
 public class FloorPlanFragment extends Fragment
 {
-	public static final String                        ACTION_BLE_PAIRING_COMPLETED =
+	public static final String                  ACTION_BLE_PAIRING_COMPLETED =
 			"a75f.io.renatus.BLE_PAIRING_COMPLETED";
-	public              int                           mCurFloorIndex               = -1;
-	public              int                           mCurRoomIndex                = -1;
-	public              DataArrayAdapter<Zone>        mRoomListAdapter             = null;
-	public              DataArrayAdapter<ZoneProfile> mModuleListAdapter           = null;
+	public              int                     mCurFloorIndex               = -1;
+	public              int                     mCurRoomIndex                = -1;
+	public              DataArrayAdapter<Zone>  mRoomListAdapter             = null;
+	public              DataArrayAdapter<Short> mModuleListAdapter           = null;
 	@BindView(R.id.addFloorBtn)
 	ImageButton addFloorBtn;
 	@BindView(R.id.addRoomBtn)
@@ -161,12 +160,12 @@ public class FloorPlanFragment extends Fragment
 			    0)
 			{
 				enableModueButton();
-				mModuleListAdapter = new DataArrayAdapter<ZoneProfile>(Globals.getInstance()
+				mModuleListAdapter = new DataArrayAdapter<Short>(Globals.getInstance()
 				                                                              .getApplicationContext(), R.layout.listviewitem, FloorContainer
 						                                                                                                               .getInstance()
 						                                                                                                               .getFloorList()
 						                                                                                                               .get(mCurFloorIndex).mRoomList
-						                                                                                                               .get(mCurRoomIndex).zoneProfiles);
+						                                                                                                               .get(mCurRoomIndex).findSmartNodeAddresses());
 				moduleListView.setAdapter(mModuleListAdapter);
 			}
 		}
@@ -332,7 +331,7 @@ public class FloorPlanFragment extends Fragment
 	
 	@OnClick(R.id.pairModuleBtn)
 	public void startPairing()
-	{//TODO - Test code hardcoded to fix crash
+	{
 		short meshAddress = SmartNodeBLL.nextSmartNodeAddress();
 		Floor floor = Globals.getInstance().getCCUApplication().floors.get(mCurFloorIndex);
 		Zone room = floor.mRoomList.get(mCurRoomIndex);

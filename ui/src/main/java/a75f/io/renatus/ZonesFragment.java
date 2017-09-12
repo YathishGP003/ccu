@@ -27,15 +27,13 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 import a75f.io.bo.building.Floor;
 import a75f.io.bo.building.LightProfile;
 import a75f.io.bo.building.Zone;
-import a75f.io.bo.building.ZoneProfile;
-import a75f.io.renatus.VIEWS.ZoneImageWidget;
 import a75f.io.renatus.VIEWS.SeekArcWidget;
+import a75f.io.renatus.VIEWS.ZoneImageWidget;
 
 /**
  * Created by samjithsadasivan isOn 8/7/17.
@@ -43,6 +41,17 @@ import a75f.io.renatus.VIEWS.SeekArcWidget;
 
 public class ZonesFragment extends Fragment
 {
+	public ListView mLightsDetailsView = null;
+	LinearLayout drawer_screen;
+	int                        mCurFloorIndex            = 0;
+	boolean                    mDesiredTempScrolling     = false;
+	boolean                    mDetailsView              = false;
+	ZoneImageWidget            selectedDevice            = null;
+	int                        nRoomDetailsLocationIndex = -1;
+	SeekArcWidget              rbSelectedRoom            = null;
+	int                        nSelectedRoomIndex        = -1;
+	ArrayList<SeekArcWidget>   seekArcWidgetList         = null;
+	ArrayList<ZoneImageWidget> zoneWidgetList            = null;
 	private ListView       lvFloorList;
 	private DrawerLayout   mDrawerLayout;
 	private ScrollView     scrollView;
@@ -55,53 +64,165 @@ public class ZonesFragment extends Fragment
 	private TextView       note;
 	private LayoutInflater inflater;
 	private LinearLayout   roomButtonGrid;
-	LinearLayout drawer_screen;
 	private SwitchCompat   show_weather = null;
 	private RelativeLayout weather_data = null;
 	private AttributeSet attributeSet;
-	private int room_width;
-	private int room_height;
-	int mCurFloorIndex = 0;
+	private int          room_width;
+	private int          room_height;
 	private LinearLayout roomRow;
-	boolean mDesiredTempScrolling = false;
-	boolean mDetailsView = false;
+	private LinearLayout                          mLightingRow          = null;
+	private View                                  mLcmHeaderView        = null;
+	private DataArrayAdapter<Floor>               floorDataAdapter      =
+			FloorContainer.getInstance().getFloorListAdapter();
+	private SeekArcWidget.OnSeekArcChangeListener seekArcChangeListener =
+			new SeekArcWidget.OnSeekArcChangeListener()
+			{
+				@Override
+				public void onProgressChanged(SeekArcWidget seekArc, int progress, boolean fromUser)
+				{
+				}
+				
+				
+				@Override
+				public void onStartTrackingTouch(SeekArcWidget seekArc)
+				{
+					mDesiredTempScrolling = true;
+				}
+				
+				
+				@Override
+				public void onStopTrackingTouch(final SeekArcWidget seekArc)
+				{
+					Handler handler = new Handler();
+					handler.postDelayed(new Runnable()
+					{
+						public void run()
+						{
+							if (!seekArc.getIsSensorPaired())
+							{
+								//seekArc.getRoomData().updateRawDesiredTemp((int) CCUUtils.roundTo2Decimal(seekArc.getDesireTemp() * 2), UPDATESRC.CCU);
+								//updateRoomDetailsWidget(seekArc.getRoomData());
+							}
+							mDesiredTempScrolling = false;
+						}
+					}, 200);
+				}
+			};
+	private ZoneImageWidget.OnClickListener       zoneWidgetListener    =
+			new ZoneImageWidget.OnClickListener()
+			{
+				
+				@Override
+				public void onClick(ZoneImageWidget w)
+				{
+					int index = w.getIndex();
+					int mod = 4;
+					int nDetailsLoc = ((index - 1) / mod) + 1;
+					if (mLightsDetailsView.getHeaderViewsCount() > 0)
+					{
+						mLightsDetailsView.removeHeaderView(mLcmHeaderView);
+					}
+					if (!mDetailsView)
+					{
+						w.setSelected(true);
+						if (w.getProfile() instanceof LightProfile)
+						{
+							roomButtonGrid.addView(mLightingRow, nDetailsLoc);
+							UpdateRoomLightingWidget((LightProfile) w.getProfile(), false);
+							//mLightingRow.startAnimation(in);
+						}
+						mDetailsView = true;
+						nSelectedRoomIndex = index;
+						nRoomDetailsLocationIndex = nDetailsLoc;
+						selectedDevice = w;
+						rbSelectedRoom = null;
+						//hmpSelected = null;
+						if (nDetailsLoc < 2)
+						{
+							scrollView.fullScroll(ScrollView.FOCUS_UP);
+						}
+						else
+						{
+							scrollView.scrollTo(0, mLightingRow.getHeight());
+						}
+					}
+					else
+					{
+						if (selectedDevice != null)
+						{
+							selectedDevice.setSelected(false);
+						}
+						if (rbSelectedRoom != null)
+						{
+							rbSelectedRoom.setSelected(false);
+						}
+						roomButtonGrid.removeViewAt(nRoomDetailsLocationIndex);
+						if (nSelectedRoomIndex == index)
+						{
+							mDetailsView = false;
+							nSelectedRoomIndex = index;
+							nRoomDetailsLocationIndex = -1;
+							selectedDevice = null;
+							rbSelectedRoom = null;
+							//hmpSelected = null;
+						}
+						else
+						{
+							w.setSelected(true);
+							if (w.getProfile() instanceof LightProfile)
+							{
+								roomButtonGrid.addView(mLightingRow, nDetailsLoc);
+								UpdateRoomLightingWidget((LightProfile) w.getProfile(), false);
+								//mLightingRow.startAnimation(in);
+							}
+							mDetailsView = true;
+							nSelectedRoomIndex = index;
+							nRoomDetailsLocationIndex = nDetailsLoc;
+							selectedDevice = w;
+							rbSelectedRoom = null;
+							//hmpSelected = null;
+							if (nDetailsLoc < 2)
+							{
+								scrollView.fullScroll(ScrollView.FOCUS_UP);
+							}
+							else
+							{
+								scrollView.scrollTo(0, mLightingRow.getHeight());
+							}
+						}
+					}
+				}
+			};
 	
-	private LinearLayout mLightingRow = null;
-	ZoneImageWidget selectedDevice = null;
-	public ListView mLightsDetailsView = null;
-	private View mLcmHeaderView = null;
 	
-	int nRoomDetailsLocationIndex = -1;
-	SeekArcWidget rbSelectedRoom = null;
-	int nSelectedRoomIndex = -1;
-	
-	ArrayList<SeekArcWidget> seekArcWidgetList = null;
-	ArrayList<ZoneImageWidget> zoneWidgetList = null;
-	
-	private DataArrayAdapter<Floor> floorDataAdapter = FloorContainer.getInstance().getFloorListAdapter();
-	
-	public static ZonesFragment newInstance(){
-		return new ZonesFragment();
-	}
-	
-	public ZonesFragment(){
+	public ZonesFragment()
+	{
 		seekArcWidgetList = new ArrayList<>();
 		zoneWidgetList = new ArrayList<>();
 	}
 	
+	
+	public static ZonesFragment newInstance()
+	{
+		return new ZonesFragment();
+	}
+	
+	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-	                         Bundle savedInstanceState) {
+	                         Bundle savedInstanceState)
+	{
 		this.inflater = inflater;
 		createDetailsWidget(inflater);
 		return inflater.inflate(R.layout.fragment_zones, container, false);
 	}
 	
+	
 	@Override
-	public void onStart() {
+	public void onStart()
+	{
 		super.onStart();
 		Display display = getActivity().getWindowManager().getDefaultDisplay();
-		
 		// display size in pixels
 		Point size = new Point();
 		display.getSize(size);
@@ -110,12 +231,9 @@ public class ZonesFragment extends Fragment
 		mOpenDrawer = (ImageView) getView().findViewById(R.id.openDrawerBtn);
 		mOpenDrawer.setClickable(true);
 		//mOpenDrawer.setOnClickListener(this);
-		
 		mDrawerLayout = (DrawerLayout) getView().findViewById(R.id.drawer_layout);
 		mDrawerLayout.setClickable(true);
 		//mDrawerLayout.setOnClickListener(this);
-		
-		
 		scrollView = (ScrollView) getView().findViewById(R.id.floorscroll);
 		weather_data = (RelativeLayout) getView().findViewById(R.id.weather_data);
 		place = (TextView) getView().findViewById(R.id.place);
@@ -133,16 +251,84 @@ public class ZonesFragment extends Fragment
 		show_weather.setClickable(false);
 		show_weather.setOnCheckedChangeListener(this);*/
 		attributeSet = getSeekbarXmlAttributes();
-		
 	}
 	
+	
 	@Override
-	public void onResume() {
+	public void onResume()
+	{
 		// TODO Auto-generated method stub
 		super.onResume();
 		fillZoneData();
 		floorDataAdapter.setSelectedItem(mCurFloorIndex);
 	}
+	
+	
+	public void fillZoneData()
+	{
+		ArrayList<Floor> floorList = FloorContainer.getInstance().getFloorList();
+		roomButtonGrid.removeAllViews();
+		roomButtonGrid.setOrientation(LinearLayout.VERTICAL);
+		//arrayRooms.clear();
+		if (floorList.size() > 0)
+		{
+			roomRow = new LinearLayout(getActivity());
+			LinearLayout.LayoutParams lp =
+					new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+			roomRow.setOrientation(LinearLayout.HORIZONTAL);
+			roomRow.setLayoutParams(lp);
+			roomButtonGrid.addView(roomRow);
+			ArrayList<Zone> zoneList =
+					FloorContainer.getInstance().getFloorList().get(mCurFloorIndex).mRoomList;
+			//TODO - refactor
+			for (Zone z : zoneList)
+			{
+				if (z.mLightProfile != null)
+				{
+					ZoneImageWidget zWidget = new ZoneImageWidget(getActivity()
+							                                              .getApplicationContext(), z.mLightProfile);
+					zWidget.setLayoutParams(new LinearLayout.LayoutParams(room_width, room_height));
+					zWidget.setOnClickChangeListener(zoneWidgetListener);
+					roomRow.addView(zWidget);
+	
+				}
+			}
+		}
+	}
+	
+	
+	private AttributeSet getSeekbarXmlAttributes()
+	{
+		AttributeSet as = null;
+		XmlResourceParser parser = getResources().getLayout(R.layout.widget_seekarc);
+		int state = 0;
+		do
+		{
+			try
+			{
+				state = parser.next();
+			}
+			catch (XmlPullParserException e1)
+			{
+				e1.printStackTrace();
+			}
+			catch (IOException e1)
+			{
+				e1.printStackTrace();
+			}
+			if (state == XmlPullParser.START_TAG)
+			{
+				if (parser.getName().equals("a75f.io.renatus.VIEWS.SeekArcWidget"))
+				{
+					as = Xml.asAttributeSet(parser);
+					break;
+				}
+			}
+		}
+		while (state != XmlPullParser.END_DOCUMENT);
+		return as;
+	}
+	
 	
 	private void createDetailsWidget(LayoutInflater inflater)
 	{
@@ -150,171 +336,24 @@ public class ZonesFragment extends Fragment
 		mLightsDetailsView = (ListView) mLightingRow.findViewById(R.id.lighting_detail_list);
 	}
 	
-	public void fillZoneData() {
-		ArrayList<Floor> floorList = FloorContainer.getInstance().getFloorList();
-		roomButtonGrid.removeAllViews();
-		roomButtonGrid.setOrientation(LinearLayout.VERTICAL);
-		//arrayRooms.clear();
-		
-		if (floorList.size() > 0) {
-			roomRow = new LinearLayout(getActivity());
-			LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
-			roomRow.setOrientation(LinearLayout.HORIZONTAL);
-			roomRow.setLayoutParams(lp);
-			roomButtonGrid.addView(roomRow);
-			ArrayList<Zone> zoneList = FloorContainer.getInstance().getFloorList().get(mCurFloorIndex).mRoomList;
-			
-			//TODO - refactor
-			for (Zone z : zoneList) {
-				for (ZoneProfile zp : z.zoneProfiles) {
-					ZoneImageWidget zWidget = new ZoneImageWidget(getActivity().getApplicationContext(), zp);
-					zWidget.setLayoutParams(new LinearLayout.LayoutParams(room_width, room_height));
-					//zWidget.setModuleData(index+imageDevices, LCM, room.getRoomName(), FSVData.MODULE_TYPE.LIGHTING_CONTROL.ordinal());
-					zWidget.setOnClickChangeListener(zoneWidgetListener);
-					roomRow.addView(zWidget);
-					/*if ((index + imageDevices) % mod == 0) {
-						roomRow = new LinearLayout(getActivity());
-						roomRow.setLayoutParams(lp);
-						roomRow.setOrientation(LinearLayout.HORIZONTAL);
-						roomButtonGrid.addView(roomRow);
-					}*/
-				}
-			}
-			
-			
-			
-		}
-	}
 	
-	private AttributeSet getSeekbarXmlAttributes() {
-		AttributeSet as = null;
-		XmlResourceParser parser = getResources().getLayout(R.layout.widget_seekarc);
-		int state = 0;
-		do {
-			try {
-				state = parser.next();
-			} catch (XmlPullParserException e1) {
-				e1.printStackTrace();
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
-			if (state == XmlPullParser.START_TAG) {
-				if (parser.getName().equals("a75f.io.renatus.VIEWS.SeekArcWidget")) {
-					as = Xml.asAttributeSet(parser);
-					break;
-				}
-			}
-		} while (state != XmlPullParser.END_DOCUMENT);
-		
-		
-		return as;
-	}
-	
-	private SeekArcWidget.OnSeekArcChangeListener seekArcChangeListener = new SeekArcWidget.OnSeekArcChangeListener() {
-		@Override
-		public void onProgressChanged(SeekArcWidget seekArc, int progress, boolean fromUser) {
-			
-		}
-		
-		@Override
-		public void onStartTrackingTouch(SeekArcWidget seekArc) {
-			mDesiredTempScrolling = true;
-		}
-		
-		@Override
-		public void onStopTrackingTouch(final SeekArcWidget seekArc) {
-			Handler handler = new Handler();
-			handler.postDelayed(new Runnable() {
-				public void run() {
-					if (!seekArc.getIsSensorPaired()) {
-						//seekArc.getRoomData().updateRawDesiredTemp((int) CCUUtils.roundTo2Decimal(seekArc.getDesireTemp() * 2), UPDATESRC.CCU);
-						//updateRoomDetailsWidget(seekArc.getRoomData());
-					}
-					mDesiredTempScrolling = false;
-				}
-			}, 200);
-		}
-	};
-	
-	private ZoneImageWidget.OnClickListener zoneWidgetListener =     new ZoneImageWidget.OnClickListener() {
-		
-		@Override
-		public void onClick(ZoneImageWidget w) {
-			int index = w.getIndex();
-			int mod = 4;
-			int nDetailsLoc = ((index - 1) / mod) + 1;
-			if (mLightsDetailsView.getHeaderViewsCount() > 0)
-				mLightsDetailsView.removeHeaderView(mLcmHeaderView);
-		
-			if (!mDetailsView) {
-				w.setSelected(true);
-				if (w.getProfile() instanceof LightProfile) {
-					roomButtonGrid.addView(mLightingRow, nDetailsLoc);
-					UpdateRoomLightingWidget((LightProfile)w.getProfile(), false);
-					//mLightingRow.startAnimation(in);
-				}
-				
-				mDetailsView = true;
-				nSelectedRoomIndex = index;
-				nRoomDetailsLocationIndex = nDetailsLoc;
-				selectedDevice = w;
-				rbSelectedRoom = null;
-				//hmpSelected = null;
-				if (nDetailsLoc < 2)
-					scrollView.fullScroll(ScrollView.FOCUS_UP);
-				else
-					scrollView.scrollTo(0, mLightingRow.getHeight());
-			} else {
-				if (selectedDevice != null) {
-					selectedDevice.setSelected(false);
-				}
-				if (rbSelectedRoom != null) {
-					rbSelectedRoom.setSelected(false);
-				}
-				roomButtonGrid.removeViewAt(nRoomDetailsLocationIndex);
-				if (nSelectedRoomIndex == index) {
-					mDetailsView = false;
-					nSelectedRoomIndex = index;
-					nRoomDetailsLocationIndex = -1;
-					selectedDevice = null;
-					rbSelectedRoom = null;
-					//hmpSelected = null;
-				} else {
-					w.setSelected(true);
-					if (w.getProfile() instanceof LightProfile) {
-						roomButtonGrid.addView(mLightingRow, nDetailsLoc);
-						UpdateRoomLightingWidget((LightProfile)w.getProfile(), false);
-						//mLightingRow.startAnimation(in);
-					}
-					mDetailsView = true;
-					nSelectedRoomIndex = index;
-					nRoomDetailsLocationIndex = nDetailsLoc;
-					selectedDevice = w;
-					rbSelectedRoom = null;
-					//hmpSelected = null;
-					if (nDetailsLoc < 2)
-						scrollView.fullScroll(ScrollView.FOCUS_UP);
-					else
-						scrollView.scrollTo(0, mLightingRow.getHeight());
-				}
-			}
-		}
-	};
-	
-	public void UpdateRoomLightingWidget(LightProfile roomData, Boolean lcmdabfsv) {
+	public void UpdateRoomLightingWidget(LightProfile roomData, Boolean lcmdabfsv)
+	{
 		mLightsDetailsView.setAdapter(null);
-		if (mLcmHeaderView != null) {
+		if (mLcmHeaderView != null)
+		{
 			mLightsDetailsView.removeHeaderView(mLcmHeaderView);
 		}
-		
-		if (mLightsDetailsView.getHeaderViewsCount() == 0) {
-			View header = (View) getActivity().getLayoutInflater().inflate(R.layout.lcm_header_row, null);
+		if (mLightsDetailsView.getHeaderViewsCount() == 0)
+		{
+			View header =
+					(View) getActivity().getLayoutInflater().inflate(R.layout.lcm_header_row, null);
 			ImageView signal = (ImageView) header.findViewById(R.id.imageSignal);
 			ImageView occupied = (ImageView) header.findViewById(R.id.imageOccupied);
-			ImageView lcmHeaderNamedSchEdit = (ImageView) header.findViewById(R.id.lcmHeaderNamedSchEdit);
-			
+			ImageView lcmHeaderNamedSchEdit =
+					(ImageView) header.findViewById(R.id.lcmHeaderNamedSchEdit);
 			//if(roomData.getLCMSchedulingMode().ordinal() == RoomData.LCM_ZONE_SCHEDULE_MODE.NAMED.ordinal()){
-				lcmHeaderNamedSchEdit.setVisibility(View.VISIBLE);
+			lcmHeaderNamedSchEdit.setVisibility(View.VISIBLE);
 				/*lcmHeaderNamedSchEdit.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View v) {
@@ -323,13 +362,17 @@ public class ZonesFragment extends Fragment
 				});*/
 			//}
 			Spinner spinnerSchedule = (Spinner) header.findViewById(R.id.spinnerSchedule);
-			ArrayAdapter<CharSequence> aaOccupancyMode = ArrayAdapter.createFromResource(getActivity().getApplicationContext(), R.array.scheduleLCM, R.layout.spinner_item);
+			ArrayAdapter<CharSequence> aaOccupancyMode = ArrayAdapter
+					                                             .createFromResource(getActivity()
+							                                                                 .getApplicationContext(), R.array.scheduleLCM, R.layout.spinner_item);
 			aaOccupancyMode.setDropDownViewResource(R.layout.spinner_dropdown_item);
 			spinnerSchedule.setAdapter(aaOccupancyMode);
 			//spinnerSchedule.setSelection(roomData.getLCMSchedulingMode().ordinal());
-			spinnerSchedule.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+			spinnerSchedule.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+			{
 				@Override
-				public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+				public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+				{
 					/*RoomData.LCM_ZONE_SCHEDULE_MODE eSelectedMode = RoomData.LCM_ZONE_SCHEDULE_MODE.values()[position];
 					if( (roomData.getLCMSchedulingMode() != eSelectedMode)) {
 						if (eSelectedMode == RoomData.LCM_ZONE_SCHEDULE_MODE.NAMED) {
@@ -338,25 +381,21 @@ public class ZonesFragment extends Fragment
 							roomData.setLCMScheduleMode(eSelectedMode, true);
 						}
 					}*/
-					
 				}
 				
+				
 				@Override
-				public void onNothingSelected(AdapterView<?> parent) {
-					
+				public void onNothingSelected(AdapterView<?> parent)
+				{
 				}
 			});
 			mLightsDetailsView.addHeaderView(header);
 			mLcmHeaderView = header;
-			}
-		
+		}
 		boolean expand = roomData == null ? false : true;
-		LightingDetailAdapter adapter = new LightingDetailAdapter(getActivity(), mLightsDetailsView, roomData, expand);
+		LightingDetailAdapter adapter =
+				new LightingDetailAdapter(getActivity(), mLightsDetailsView, roomData, expand);
 		mLightsDetailsView.setAdapter(adapter);
 		new LayoutHelper(getActivity()).setListViewParams(mLightsDetailsView, null, 0, 0, expand);
-		
 	}
-	
-	
-	
 }

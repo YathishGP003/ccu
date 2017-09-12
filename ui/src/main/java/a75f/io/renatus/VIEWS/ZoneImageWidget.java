@@ -8,7 +8,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import a75f.io.bo.building.LightProfile;
+import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.ZoneProfile;
+import a75f.io.logic.LZoneProfile;
 import a75f.io.renatus.R;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -29,42 +31,46 @@ public class ZoneImageWidget extends RelativeLayout
 	@BindView(R.id.zoneRefTemp)
 	TextView zoneRefTemp;
 	
-	private Context            mContext;
-	private OnClickListener    mOnClickListener;
-	private ZoneProfile           mProfile;
-	private int mIndex;
+	private Context         mContext;
+	private OnClickListener mOnClickListener;
+	private ZoneProfile     mProfile;
+	private int             mIndex;
 	
-	public ZoneImageWidget(Context context, ZoneProfile profile) {
+	
+	public ZoneImageWidget(Context context, ZoneProfile profile)
+	{
 		super(context);
 		mContext = context;
 		this.mProfile = profile;
 		init();
-		
 	}
 	
-	public void init() {
+	
+	public void init()
+	{
 		View v = inflate(getContext(), R.layout.widget_imageview, this);
 		ButterKnife.bind(v, this);
-		zoneName.setText(mProfile.mModuleName);
-		
-		if (mProfile instanceof LightProfile) {
-			zoneImage.setImageDrawable(mContext.getResources().getDrawable(R.drawable.light_orange));
+		Zone zone = LZoneProfile.findZone(mProfile);
+		zoneName.setText(zone.roomName);
+		if (mProfile instanceof LightProfile)
+		{
+			zoneImage
+					.setImageDrawable(mContext.getResources().getDrawable(R.drawable.light_orange));
 		}
 	}
 	
-	public interface OnClickListener {
-		void onClick(ZoneImageWidget v);
-	}
 	
-	
-	public void setOnClickChangeListener(ZoneImageWidget.OnClickListener l) {
+	public void setOnClickChangeListener(ZoneImageWidget.OnClickListener l)
+	{
 		mOnClickListener = l;
 	}
 	
 	
 	@Override
-	public boolean onTouchEvent(MotionEvent event) {
-		switch (event.getAction()) {
+	public boolean onTouchEvent(MotionEvent event)
+	{
+		switch (event.getAction())
+		{
 			case MotionEvent.ACTION_DOWN:
 				break;
 			case MotionEvent.ACTION_MOVE:
@@ -76,20 +82,35 @@ public class ZoneImageWidget extends RelativeLayout
 		return true;
 	}
 	
-	public ZoneProfile getProfile() {
+	
+	public void setSelected(boolean bSelected)
+	{
+		if (bSelected)
+		{
+			this.setBackgroundColor(getContext().getResources().getColor(R.color.orange_multi));
+		}
+		else
+		{
+			this.setBackgroundColor(getContext().getResources().getColor(R.color.transparent));
+		}
+		invalidate();
+	}
+	
+	
+	public ZoneProfile getProfile()
+	{
 		return mProfile;
 	}
 	
-	public int getIndex() {
+	
+	public int getIndex()
+	{
 		return mIndex;
 	}
 	
 	
-	public void setSelected(boolean bSelected) {
-		if (bSelected)
-			this.setBackgroundColor(getContext().getResources().getColor(R.color.orange_multi));
-		else
-			this.setBackgroundColor(getContext().getResources().getColor(R.color.transparent));
-		invalidate();
+	public interface OnClickListener
+	{
+		void onClick(ZoneImageWidget v);
 	}
 }

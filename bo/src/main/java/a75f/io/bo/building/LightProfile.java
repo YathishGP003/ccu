@@ -13,21 +13,17 @@ import a75f.io.bo.building.definitions.Port;
 import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.bo.serial.MessageType;
 
+import static a75f.io.bo.building.definitions.Output.Analog;
+import static a75f.io.bo.building.definitions.Output.Relay;
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class LightProfile extends ZoneProfile
 {
 	public boolean on = true;
 	public short mDimmablePercent;
 	
-	
 	public LightProfile()
 	{
-	}
-	
-	
-	public LightProfile(String name)
-	{
-		super(name);
 	}
 	
 	@JsonIgnore
@@ -90,7 +86,7 @@ public class LightProfile extends ZoneProfile
 					localDimmablePercent = mDimmablePercent;
 				}
 			}
-			switch (smartNodeOutput.mOutput)
+			switch (smartNodeOutput.getOutput())
 			{
 				case Relay:
 					switch (smartNodeOutput.mOutputRelayActuatorType)
@@ -209,4 +205,6 @@ public class LightProfile extends ZoneProfile
 	{
 		return (short) (((float) localDimmablePercent * (float) analogVoltage) / 100.0f);
 	}
+	
+	
 }

@@ -67,7 +67,8 @@ public class DefaultFragment extends DialogFragment
 	
 	
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+	                         Bundle savedInstanceState)
 	{
 		View retVal = inflater.inflate(R.layout.fragment_main, container, false);
 		ButterKnife.bind(this, retVal);
@@ -81,9 +82,11 @@ public class DefaultFragment extends DialogFragment
 	{
 		super.onViewCreated(view, savedInstanceState);
 		setupPortSpinner();
-		SmartNode smartNode = Globals.getInstance().getCCUApplication().smartNodes.size() > 0 ? Globals.getInstance().getCCUApplication().smartNodes.get(0) : null;
-		short meshAddress = smartNode != null ? (short) smartNode.mAddress : (short) 5000;
-		String roomName = smartNode != null ? smartNode.mRoomName : "Default Room Name";
+		SmartNode smartNode = Globals.getInstance().getCCUApplication().smartNodes.size() > 0
+				                      ? Globals.getInstance().getCCUApplication().smartNodes.get(0)
+				                      : null;
+		short meshAddress = smartNode != null ? smartNode.mAddress : (short) 5000;
+		String roomName = "Default Room Name";
 		int position = Arrays.binarySearch(ports.toArray(), (int) meshAddress);
 		mPortSpinner.setSelection(position);
 		mSNNameEditText.setText(roomName);
@@ -92,7 +95,8 @@ public class DefaultFragment extends DialogFragment
 	
 	private void setupPortSpinner()
 	{
-		ArrayAdapter<Integer> dataAdapter = new ArrayAdapter<Integer>(this.getActivity(), android.R.layout.simple_spinner_item, ports);
+		ArrayAdapter<Integer> dataAdapter =
+				new ArrayAdapter<>(this.getActivity(), android.R.layout.simple_spinner_item, ports);
 		dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		mPortSpinner.setAdapter(dataAdapter);
 		mPortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
@@ -115,10 +119,8 @@ public class DefaultFragment extends DialogFragment
 	@OnClick(R.id.button)
 	public void done()
 	{
-		
-		
 		SmartNode smartNode = null;
-		if(Globals.getInstance().getCCUApplication().smartNodes.size() == 0)
+		if (Globals.getInstance().getCCUApplication().smartNodes.size() == 0)
 		{
 			smartNode = new SmartNode();
 			Globals.getInstance().getCCUApplication().smartNodes.add(smartNode);
@@ -127,26 +129,21 @@ public class DefaultFragment extends DialogFragment
 		{
 			smartNode = Globals.getInstance().getCCUApplication().smartNodes.get(0);
 		}
-		if (mSNNameEditText.getText() != null && !mSNNameEditText.getText().toString().equals(""))
-		{
-			smartNode.mRoomName = mSNNameEditText.getText().toString();
-		}
 		smartNode.mAddress = ports.get(mPortPosition).shortValue();
-			//			Globals.getInstance().getSmartNode().setName(mSNNameEditText.getText().toString());
-			//			Globals.getInstance().getSmartNode().setMeshAddress(ports.get(mPortPosition).shortValue());
-			Toast.makeText(DefaultFragment.this.getActivity(), "Saved", Toast.LENGTH_SHORT).show();
-			if (mBLEDeviceTypeButton.isChecked())
-			{
-				Log.i(TAG, "Is Checked: " + mBLEDeviceTypeButton.isChecked());
-			}
-			if (mDismissable)
-			{
-				dismiss();
-			}
-		
+		Toast.makeText(DefaultFragment.this.getActivity(), "Saved", Toast.LENGTH_SHORT).show();
+		if (mBLEDeviceTypeButton.isChecked())
+		{
+			Log.i(TAG, "Is Checked: " + mBLEDeviceTypeButton.isChecked());
+		}
+		if (mDismissable)
+		{
+			dismiss();
+		}
 		else
 		{
-			Toast.makeText(DefaultFragment.this.getActivity(), "Must enter a smart node name", Toast.LENGTH_SHORT).show();
+			Toast.makeText(DefaultFragment.this
+					               .getActivity(), "Must enter a smart node name", Toast.LENGTH_SHORT)
+			     .show();
 		}
 	}
 }

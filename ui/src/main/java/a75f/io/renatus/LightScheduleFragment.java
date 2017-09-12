@@ -32,8 +32,8 @@ import butterknife.OnClick;
 public class LightScheduleFragment extends BaseDialogFragment
 {
 	
-	UUID mCurrentPortId = null;
-	SmartNodeOutput mCurrentPort = null;
+	UUID            mCurrentPortId = null;
+	SmartNodeOutput mCurrentPort   = null;
 	
 	Schedule mSchedule = null;
 	
@@ -49,105 +49,115 @@ public class LightScheduleFragment extends BaseDialogFragment
 	@BindView(R.id.scheduleSave)
 	Button saveBtn;
 	
-	@BindViews({R.id.checkBoxMon, R.id.checkBoxTue, R.id.checkBoxWed, R.id.checkBoxThu, R.id.checkBoxFri, R.id.checkBoxSat, R.id.checkBoxSun})
+	@BindViews({R.id.checkBoxMon, R.id.checkBoxTue, R.id.checkBoxWed, R.id.checkBoxThu,
+			           R.id.checkBoxFri, R.id.checkBoxSat, R.id.checkBoxSun})
 	List<CheckBox> daysList;
 	
-	public static LightScheduleFragment newInstance(SmartNodeOutput port){
+	
+	public LightScheduleFragment()
+	{
+	}
+	
+	
+	public static LightScheduleFragment newInstance(SmartNodeOutput port)
+	{
 		LightScheduleFragment fragment = new LightScheduleFragment();
 		Bundle bundle = new Bundle();
-		bundle.putSerializable(FragmentCommonBundleArgs.SNOUTPUT_UUID, port.mUniqueID);
+		bundle.putSerializable(FragmentCommonBundleArgs.SNOUTPUT_UUID, port.getUuid());
 		fragment.setArguments(bundle);
 		return fragment;
 	}
 	
-	public LightScheduleFragment(){
-		
-	}
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-	                         Bundle savedInstanceState) {
+	                         Bundle savedInstanceState)
+	{
 		View rootView = inflater.inflate(R.layout.fragment_light_schedule, container, false);
-		mCurrentPortId = (UUID)getArguments().getSerializable(FragmentCommonBundleArgs.SNOUTPUT_UUID);
+		mCurrentPortId =
+				(UUID) getArguments().getSerializable(FragmentCommonBundleArgs.SNOUTPUT_UUID);
 		ButterKnife.bind(this, rootView);
 		//int titleTextId = getResources().getIdentifier("title", "id", "android");
-		
 		setTitle("Lighting Schedule");
-		
-		
 		return rootView;
 	}
+	
 	
 	@Override
 	public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
 	{
 		super.onViewCreated(view, savedInstanceState);
-		mCurrentPort =  Globals.getInstance().getCCUApplication().findSmartNodePortByUUID(mCurrentPortId);
-		
-		if (mCurrentPort == null) {
+		mCurrentPort =
+				Globals.getInstance().getCCUApplication().findSmartNodePortByUUID(mCurrentPortId);
+		if (mCurrentPort == null)
+		{
 			dismiss();
 		}
-			// else {
-//			mSchedule = mCurrentPort.mSchedules.get(0);
-//			fillScheduleData();
-//		}
-		
+		// else {
+		//			mSchedule = mCurrentPort.mSchedules.get(0);
+		//			fillScheduleData();
+		//		}
 	}
 	
-	public void fillScheduleData() {
-		if (mSchedule == null) {
+	
+	public void fillScheduleData()
+	{
+		if (mSchedule == null)
+		{
 			//No schedule yet
 			return;
 		}
-	   
-		
-		for (int i = 0 ;i < 7; i++) {
-
+		for (int i = 0; i < 7; i++)
+		{
 			//if ((CheckBox)daysList.get(i).)
 		}
-    }
-    
+	}
+	
+	
 	@OnClick(R.id.scheduleCancel)
-	public void dismissDialog() {
+	public void dismissDialog()
+	{
 		dismiss();
 	}
 	
+	
 	@OnClick(R.id.scheduleSave)
-	public void saveSchedule() {
-		if (mSchedule == null) {
+	public void saveSchedule()
+	{
+		if (mSchedule == null)
+		{
 			mSchedule = new Schedule();
 		}
 		ArrayList<Integer> days = new ArrayList<Integer>();
-
-
-		for (int i = 0 ;i < 7; i++) {
-			
-			if (((CheckBox)daysList.get(i)).isChecked()) {
+		for (int i = 0; i < 7; i++)
+		{
+			if (((CheckBox) daysList.get(i)).isChecked())
+			{
 				days.add(i);
 			}
 		}
-
-		String st = startTimePicker.getCurrentHour() < 10 ? "0" + startTimePicker.getCurrentHour() :
-				startTimePicker.getCurrentHour() + "" + ":" + (startTimePicker.getCurrentMinute() < 10 ? "0" + startTimePicker.getCurrentMinute() : startTimePicker.getCurrentMinute());
-
-
-		String et = endTimePicker.getCurrentHour() < 10 ? "0" + endTimePicker.getCurrentHour() :
-				endTimePicker.getCurrentHour() + "" + ":" + (endTimePicker.getCurrentMinute() < 10 ? "0" + startTimePicker.getCurrentMinute() : startTimePicker.getCurrentMinute());
-
+		String st = startTimePicker.getCurrentHour() < 10 ? "0" + startTimePicker.getCurrentHour()
+				            : startTimePicker.getCurrentHour() + "" + ":" +
+				              (startTimePicker.getCurrentMinute() < 10 ? "0" + startTimePicker
+						                                                               .getCurrentMinute()
+						               : startTimePicker.getCurrentMinute());
+		String et = endTimePicker.getCurrentHour() < 10 ? "0" + endTimePicker.getCurrentHour()
+				            : endTimePicker.getCurrentHour() + "" + ":" +
+				              (endTimePicker.getCurrentMinute() < 10 ? "0" + startTimePicker
+						                                                             .getCurrentMinute()
+						               : startTimePicker.getCurrentMinute());
 		mSchedule.setDays(days);
 		mSchedule.setSt(st);
 		mSchedule.setEt(et);
 		mSchedule.setVal((short) 100);
-
 		mCurrentPort.mSchedules.add(mSchedule);
-        try {
-            LZoneProfile.scheduleProfiles();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-	
-	
-	
+		try
+		{
+			LZoneProfile.scheduleProfiles();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
 }

@@ -1,5 +1,7 @@
 package a75f.io.logic;
 
+import java.util.ArrayList;
+
 import a75f.io.bo.building.LightProfile;
 import a75f.io.bo.building.SmartNode;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
@@ -16,8 +18,7 @@ public class SmartNodeBLL
 	
 	public static short nextSmartNodeAddress()
 	{
-		short currentBand =
-				Globals.getInstance().getApplicationPreferences().getSmartNodeAddressBand();
+		short currentBand = Globals.getInstance().getCCUApplication().getSmartNodeAddressBand();
 		//currentBand + current number of paired smart nodes.
 		return (short) (currentBand + Globals.getInstance().getCCUApplication().smartNodes.size());
 	}
@@ -29,19 +30,18 @@ public class SmartNodeBLL
 		{
 			if (smartNode.mAddress == mPairingAddress)
 			{
+				seedSmartNode(smartNode, mName);
 				return smartNode;
 			}
 		}
 		SmartNode smartNode = new SmartNode();
 		smartNode.mAddress = mPairingAddress;
-		smartNode.mRoomName = mName;
-		//Globals.getInstance().getCCUApplication().smartNodes.add(smartNode);
-		seedSmartNode(smartNode);
+		seedSmartNode(smartNode, mName);
 		return smartNode;
 	}
 	
 	
-	private static void seedSmartNode(SmartNode smartNode)
+	private static void seedSmartNode(SmartNode smartNode, String mRoomName)
 	{
 		CcuToCmOverUsbDatabaseSeedSnMessage_t ccuToCmOverUsbDatabaseSeedSnMessage_t =
 				new CcuToCmOverUsbDatabaseSeedSnMessage_t();
@@ -52,18 +52,21 @@ public class SmartNodeBLL
 				.set((short) 100);
 		ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.minLightingControlOverrideTimeInMinutes
 				.set((short) 1);
-		ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.roomName.set(smartNode.mRoomName);
+		ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.roomName.set(mRoomName);
 		ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.profileBitmap.lightingControl.set((short) 1);
 		SerialBLL.getInstance().sendSerialStruct(ccuToCmOverUsbDatabaseSeedSnMessage_t);
 	}
 	
 	
-	public static void sendControlsMessage(LightProfile lightProfile)
+	public static void addSmartNode(SmartNode smartNode)
 	{
-		for(CcuToCmOverUsbSnControlsMessage_t controlsMessage_t : lightProfile.getControlsMessage())
+		ArrayList<SmartNode> smartNodes = Globals.getInstance().getCCUApplication().smartNodes;
+		if (!smartNodes.contains(smartNode))
 		{
-			SerialBLL.getInstance().sendSerialStruct(controlsMessage_t);
+			smartNodes.add(smartNode);
 		}
 	}
+	
+	
 	
 }

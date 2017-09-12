@@ -4,6 +4,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
+
 import a75f.io.bo.building.Schedule;
 import a75f.io.bo.building.definitions.MockTime;
 
@@ -59,7 +61,13 @@ public class ScheduleTest
 	{
 		//Mock schedule M-F, 8AM - 5:30PM turn isOn lights to value 100.
 		schedule = new Schedule();
-		schedule.setDays(new int[]{1, 2, 3, 4, 5});
+		int[] ints = {1, 2, 3, 4, 5};
+		ArrayList<Integer> intsaslist = new ArrayList<Integer>();
+		for(int i : ints)
+		{
+			intsaslist.add(i);
+		}
+		schedule.setDays(intsaslist);
 		schedule.setSt("8:00");
 		schedule.setEt("17:30");
 		schedule.setVal((short) 100);

@@ -34,16 +34,13 @@ public class RenatusApp extends UtilityApplication
 		L.initializeKinvey(this);
 		JobManager.create(this).addJobCreator(new CCUJobCreator());
 		HeartBeatJob.scheduleJob();
-
 		Log.i(TAG, "RENATUS APP INITIATED");
 	}
 	
 	
-
-	
-	
 	@Override
-	protected void attachBaseContext(Context base) {
+	protected void attachBaseContext(Context base)
+	{
 		super.attachBaseContext(base);
 		MultiDex.install(this);
 	}

@@ -3,7 +3,6 @@ package a75f.io.logic.cache;
 import android.content.Context;
 
 import a75f.io.bo.building.CCUApplication;
-import a75f.io.logic.cache.prefs.ApplicationPreference;
 import a75f.io.logic.cache.prefs.LocalStorage;
 import a75f.io.logic.scheduler.LScheduler;
 
@@ -22,7 +21,6 @@ public class Globals
 	
 	private Context               mApplicationContext;
 	private CCUApplication        mCCUApplication;
-	private ApplicationPreference mApplicationPreferences;
 	private LScheduler mLScheduler;
 	
 	private Globals()
@@ -70,12 +68,6 @@ public class Globals
 	private void initilize()
 	{
 		mLScheduler = new LScheduler(getApplicationContext());
-	}
-	
-	
-	public ApplicationPreference getApplicationPreferences()
-	{
-		return ApplicationPreference.getApplicationSettings();
 	}
 	
 	

@@ -109,18 +109,18 @@ public class JSONSerializerTest
 		CCUApplication ccuApplication = new CCUApplication();
 		SmartNode smartNode5K = new SmartNode();
 		smartNode5K.mAddress = smartNodeAddress;
-		smartNode5K.mRoomName = "SmartNode roomName";
+		//smartNode5K.mRoomName = "SmartNode roomName";
 		ccuApplication.smartNodes.add(smartNode5K);
 		ccuApplication.CCUTitle = "Light Test";
 		Floor floor = new Floor(1, "webid", "Floor1");
-		LightProfile lightProfile5K = new LightProfile("Light Profile");
+		LightProfile lightProfile5K = new LightProfile();
 //		ccuApplication.floors.get(0).addZone("5000 test zone");
 //		ccuApplication.floors.get(0).getRoomList().get(0).zoneProfiles.add(lightProfile5K);
 		SmartNodeOutput smartNodeOutput5K = new SmartNodeOutput();
 		smartNodeOutput5K.mSmartNodeAddress = smartNode5K.mAddress;
-		smartNodeOutput5K.mUniqueID = analog15kUUID;
+		//smartNodeOutput5K.mUniqueID = analog15kUUID;
 		smartNodeOutput5K.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
-		smartNodeOutput5K.mOutput = Output.Analog;
+		//smartNodeOutput5K.mOutput = Output.Analog;
 		smartNodeOutput5K.mName = "Dining Room";
 		lightProfile5K.smartNodeOutputs.add(smartNodeOutput5K);
 		try

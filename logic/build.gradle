@@ -12,6 +12,7 @@ android {
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
+
     }
     buildTypes {
         release {
@@ -36,7 +37,7 @@ android {
     }
 
     testOptions {
-        unitTests.returnDefaultValues = true
+        //unitTests.returnDefaultValues = true
     }
 
 }

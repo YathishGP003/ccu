@@ -36,7 +36,7 @@ public class LScheduler
 	static SortedSet<Map.Entry<UUID, ScheduledItem>> mapOfEntriesSortedByTimeStamp(Map<UUID, ScheduledItem> map)
 	{
 		SortedSet<Map.Entry<UUID, ScheduledItem>> sortedEntries =
-				new TreeSet<>(new Comparator<Map.Entry<UUID, ScheduledItem>>()
+				Collections.synchronizedSortedSet(new TreeSet<>(new Comparator<Map.Entry<UUID, ScheduledItem>>()
 				{
 					@Override
 					public int compare(Map.Entry<UUID, ScheduledItem> o1,
@@ -44,14 +44,24 @@ public class LScheduler
 					{
 						return o1.getValue().mTimeStamp.compareTo(o2.getValue().mTimeStamp);
 					}
-				});
-		sortedEntries.addAll(map.entrySet());
+				}));
+		//sortedEntries.addAll(map.entrySet());// throws ConcurrentModificationException
+		
+		for (Map.Entry<UUID, ScheduledItem> m :map.entrySet()) {
+			sortedEntries.add(m);
+		}
 		return sortedEntries;
 	}
 	
 	
 	public void add(ScheduledItem scheduledItem)
 	{
+		if (scheduledItem.mTimeStamp == null || scheduledItem.mUuid == null
+										|| scheduledItem.lScheduleAction == null)
+		{
+			Log.e(TAG, "Invalid Schedule , not added "+ scheduledItem.toString());
+			return;
+		}
 		/*The list contains the key */
 		Log.i("Schedule", "add - " + scheduledItem.toString());
 		if (mScheduledItems.containsKey(scheduledItem.mUuid))
@@ -76,6 +86,16 @@ public class LScheduler
 		}
 	}
 	
+	public void removeSchedule(ScheduledItem scheduledItem) {
+		if (scheduledItem.mTimeStamp == null || scheduledItem.mUuid == null
+		    || scheduledItem.lScheduleAction == null)
+		{
+			Log.e(TAG, "Invalid Schedule , not added "+ scheduledItem.toString());
+			return;
+		}
+		
+		mScheduledItems.remove(scheduledItem.mUuid);
+	}
 	
 	/* This method will check the front of the queue to see if it is the currently selected item.
 	   If it isn't the currently selected, it will cancel the current alarm and add the currently
@@ -114,6 +134,7 @@ public class LScheduler
 		Logd("schedule for alarm: " + itemToSchedule.toString());
 		long lengthUntilNextAlarm =
 				itemToSchedule.mTimeStamp.getMillis() - System.currentTimeMillis();
+		
 		Globals.getInstance().getScheduledThreadPool().schedule(new Runnable()
 		{
 			@Override
@@ -122,31 +143,31 @@ public class LScheduler
 				takeAction();
 			}
 		}, lengthUntilNextAlarm, TimeUnit.MILLISECONDS);
+		
 		//set new scheduled item to front
 		mCurrentScheduledItem = itemToSchedule;
+		
 		Logd("Next Alarm: " + lengthUntilNextAlarm);
 	}
-	
-	
-	//For test
-	public Map<UUID, ScheduledItem> getScheduledItems()
-	{
-		return mScheduledItems;
-	}
-	
 	
 	public void takeAction()
 	{
 		Log.i("LScheduler", "ON recieve scheduled event");
 		Log.e(TAG, "FIRED FIRED FIRED FIRED FIRED");
 		Log.i(TAG, "mScheduledItems.size()" + mScheduledItems.size());
-		LZoneProfile.handleZoneProfileScheduledEvent(mScheduledItems.remove(mCurrentScheduledItem
-				                                                                .mUuid));
+		ScheduledItem currItem = mScheduledItems.remove(mCurrentScheduledItem
+				                       .mUuid);
+		LZoneProfile.handleZoneProfileScheduledEvent(currItem);
 		Log.i(TAG, "after mScheduledItems.size()" + mScheduledItems.size());
 		mCurrentScheduledItem = null;
 		checkFront();
 	}
 	
+	//For test
+	public Map<UUID, ScheduledItem> getScheduledItems()
+	{
+		return mScheduledItems;
+	}
 }
 	
 

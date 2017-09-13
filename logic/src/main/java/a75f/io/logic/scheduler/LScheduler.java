@@ -28,7 +28,6 @@ public class LScheduler
 			Collections.synchronizedSortedMap(new TreeMap<UUID, ScheduledItem>());
 	private ScheduledItem mCurrentScheduledItem;
 	
-	
 	public LScheduler()
 	{
 	}
@@ -147,6 +146,7 @@ public class LScheduler
 		mCurrentScheduledItem = null;
 		checkFront();
 	}
+	
 }
 	
 

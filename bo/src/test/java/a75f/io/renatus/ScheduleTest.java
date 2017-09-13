@@ -68,8 +68,8 @@ public class ScheduleTest
 			intsaslist.add(i);
 		}
 		schedule.setDays(intsaslist);
-		schedule.setSt("8:00");
-		schedule.setEt("17:30");
+		//schedule.setSt("8:00");
+		//schedule.setEt("17:30");
 		schedule.setVal((short) 100);
 	}
 	

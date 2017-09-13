@@ -13,8 +13,6 @@ import a75f.io.bo.building.definitions.Port;
 import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.bo.serial.MessageType;
 
-import static a75f.io.bo.building.definitions.Output.Analog;
-import static a75f.io.bo.building.definitions.Output.Relay;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class LightProfile extends ZoneProfile

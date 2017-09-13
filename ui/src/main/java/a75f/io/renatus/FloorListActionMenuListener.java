@@ -30,7 +30,8 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 	@Override
 	public boolean onCreateActionMode(ActionMode mode, Menu menu)
 	{
-		FloorContainer.getInstance().getFloorListAdapter().setMultiSelectMode(true);
+		floorPlanActivity.mRoomListAdapter.setMultiSelectMode(true);
+		
 		MenuInflater inflater = mode.getMenuInflater();
 		inflater.inflate(R.menu.action_menu, menu);
 		mMenu = menu;
@@ -72,7 +73,8 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 	@Override
 	public void onDestroyActionMode(ActionMode mode)
 	{
-		FloorContainer.getInstance().getFloorListAdapter().setMultiSelectMode(false);
+		
+		floorPlanActivity.mRoomListAdapter.setMultiSelectMode(false);
 		selectedFloor.clear();
 		mMenu = null;
 	}
@@ -83,13 +85,14 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 		for (int nCount = 0; nCount < selectedFloor.size(); nCount++)
 		{
 			Floor floorData = selectedFloor.get(nCount);
-			FloorContainer.getInstance().deleteFloor(floorData);
+			floorPlanActivity.ccuApplication.floors.remove(floorData);
 		}
 	}
 	
 	
 	private void renameSelectedFloor()
 	{
+		//selectedFloor.get(0).mFloorName = selectedFloor.get(0).mFloorName;
 		//floorPlanActivity.renameFloor(selectedFloor.get(0));
 	}
 	
@@ -97,19 +100,19 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 	@Override
 	public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked)
 	{
-		Floor floorData = (Floor) FloorContainer.getInstance().getFloorList().get(position);
+		Floor floorData = (Floor) floorPlanActivity.ccuApplication.floors.get(position);
 		if (floorData == null)
 		{
 			return;
 		}
 		if (checked)
 		{
-			FloorContainer.getInstance().getFloorListAdapter().addSelected(position);
+			floorPlanActivity.mFloorListAdapter.addSelected(position);
 			selectedFloor.add(floorData);
 		}
 		else
 		{
-			FloorContainer.getInstance().getFloorListAdapter().removeSelected(position);
+			floorPlanActivity.mFloorListAdapter.removeSelected(position);
 			selectedFloor.remove(floorData);
 		}
 		final int checkedCount = selectedFloor.size();

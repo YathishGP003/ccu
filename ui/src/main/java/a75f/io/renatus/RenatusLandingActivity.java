@@ -89,7 +89,7 @@ public class RenatusLandingActivity extends BaseSerialAppCompatActivity
 			}
 		});
 		setViewPager();
-		FloorContainer.getInstance().loadData();
+//		FloorContainer.getInstance().loadData();
 	}
 	
 	

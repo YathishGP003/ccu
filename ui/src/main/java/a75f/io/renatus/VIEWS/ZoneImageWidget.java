@@ -8,9 +8,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import a75f.io.bo.building.LightProfile;
-import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.ZoneProfile;
-import a75f.io.logic.LZoneProfile;
 import a75f.io.renatus.R;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -35,13 +33,15 @@ public class ZoneImageWidget extends RelativeLayout
 	private OnClickListener mOnClickListener;
 	private ZoneProfile     mProfile;
 	private int             mIndex;
+	private String          mZoneName;
 	
 	
-	public ZoneImageWidget(Context context, ZoneProfile profile)
+	public ZoneImageWidget(Context context, String name, ZoneProfile profile)
 	{
 		super(context);
 		mContext = context;
 		this.mProfile = profile;
+		this.mZoneName = name;
 		init();
 	}
 	
@@ -50,8 +50,7 @@ public class ZoneImageWidget extends RelativeLayout
 	{
 		View v = inflate(getContext(), R.layout.widget_imageview, this);
 		ButterKnife.bind(v, this);
-		Zone zone = LZoneProfile.findZone(mProfile);
-		zoneName.setText(zone.roomName);
+		zoneName.setText(mZoneName);
 		if (mProfile instanceof LightProfile)
 		{
 			zoneImage

@@ -74,6 +74,12 @@ public class DataArrayAdapter<T> extends ArrayAdapter<T>
 	}
 	
 	
+	public int getSelectedPostion()
+	{
+		return nSelectedPostion;
+	}
+	
+	
 	public void setMultiSelectMode(boolean bMultiSelect)
 	{
 		this.bMultiSelect = bMultiSelect;
@@ -106,4 +112,6 @@ public class DataArrayAdapter<T> extends ArrayAdapter<T>
 			notifyDataSetChanged();
 		}
 	}
+	
+	
 }

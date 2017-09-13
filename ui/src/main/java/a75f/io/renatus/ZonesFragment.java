@@ -29,9 +29,11 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import a75f.io.bo.building.CCUApplication;
 import a75f.io.bo.building.Floor;
 import a75f.io.bo.building.LightProfile;
 import a75f.io.bo.building.Zone;
+import a75f.io.logic.cache.Globals;
 import a75f.io.renatus.VIEWS.SeekArcWidget;
 import a75f.io.renatus.VIEWS.ZoneImageWidget;
 
@@ -70,10 +72,9 @@ public class ZonesFragment extends Fragment
 	private int          room_width;
 	private int          room_height;
 	private LinearLayout roomRow;
-	private LinearLayout                          mLightingRow          = null;
-	private View                                  mLcmHeaderView        = null;
-	private DataArrayAdapter<Floor>               floorDataAdapter      =
-			FloorContainer.getInstance().getFloorListAdapter();
+	private LinearLayout mLightingRow   = null;
+	private View         mLcmHeaderView = null;
+	private DataArrayAdapter<Floor> floorDataAdapter;
 	private SeekArcWidget.OnSeekArcChangeListener seekArcChangeListener =
 			new SeekArcWidget.OnSeekArcChangeListener()
 			{
@@ -206,7 +207,7 @@ public class ZonesFragment extends Fragment
 	{
 		return new ZonesFragment();
 	}
-	
+	CCUApplication ccuApplication = Globals.getInstance().getCCUApplication();
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -222,6 +223,9 @@ public class ZonesFragment extends Fragment
 	public void onStart()
 	{
 		super.onStart();
+		
+		floorDataAdapter =
+				new DataArrayAdapter<>(getActivity(), R.layout.listviewitem, ccuApplication.floors);
 		Display display = getActivity().getWindowManager().getDefaultDisplay();
 		// display size in pixels
 		Point size = new Point();
@@ -266,11 +270,11 @@ public class ZonesFragment extends Fragment
 	
 	public void fillZoneData()
 	{
-		ArrayList<Floor> floorList = FloorContainer.getInstance().getFloorList();
+		ArrayList<Floor> floorList = ccuApplication.floors;
 		roomButtonGrid.removeAllViews();
 		roomButtonGrid.setOrientation(LinearLayout.VERTICAL);
 		//arrayRooms.clear();
-		if (floorList.size() > 0)
+		for (Floor floor : floorList)
 		{
 			roomRow = new LinearLayout(getActivity());
 			LinearLayout.LayoutParams lp =
@@ -278,23 +282,25 @@ public class ZonesFragment extends Fragment
 			roomRow.setOrientation(LinearLayout.HORIZONTAL);
 			roomRow.setLayoutParams(lp);
 			roomButtonGrid.addView(roomRow);
-			ArrayList<Zone> zoneList =
-					FloorContainer.getInstance().getFloorList().get(mCurFloorIndex).mRoomList;
+			ArrayList<Zone> zoneList = floor.mRoomList;
 			//TODO - refactor
 			for (Zone z : zoneList)
 			{
 				if (z.mLightProfile != null)
 				{
 					ZoneImageWidget zWidget = new ZoneImageWidget(getActivity()
-							                                              .getApplicationContext(), z.mLightProfile);
+							                                              .getApplicationContext
+									                                               (), z
+							                                                                                                                                     .roomName,  z
+							                                                                                                                                       .mLightProfile);
 					zWidget.setLayoutParams(new LinearLayout.LayoutParams(room_width, room_height));
 					zWidget.setOnClickChangeListener(zoneWidgetListener);
 					roomRow.addView(zWidget);
-	
 				}
 			}
 		}
 	}
+	
 	
 	
 	private AttributeSet getSeekbarXmlAttributes()

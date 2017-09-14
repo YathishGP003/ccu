@@ -6,10 +6,7 @@ import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 
-import a75f.io.bo.SmartNode;
-import a75f.io.logic.L;
-import a75f.io.logic.cache.UtilityApplication;
-import a75f.io.logic.jobs.HeartBeatJob;
+import a75f.io.logic.UtilityApplication;
 import io.fabric.sdk.android.Fabric;
 
 /**
@@ -20,8 +17,6 @@ public class RenatusApp extends UtilityApplication
 {
 	
 	private static final String    TAG           = RenatusApp.class.getSimpleName();
-	public               boolean   isProvisioned = false;
-	public               SmartNode mSmartNode    = null;
 	
 	
 	@Override
@@ -29,8 +24,7 @@ public class RenatusApp extends UtilityApplication
 	{
 		super.onCreate();
 		Fabric.with(this, new Crashlytics());
-		L.initializeKinvey(this);
-		HeartBeatJob.scheduleJob();
+		
 		Log.i(TAG, "RENATUS APP INITIATED");
 	}
 	

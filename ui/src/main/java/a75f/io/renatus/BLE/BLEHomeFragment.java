@@ -13,11 +13,12 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import a75f.io.bo.building.SmartNode;
-import a75f.io.logic.cache.Globals;
 import a75f.io.renatus.R;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+
+import static a75f.io.logic.L.ccu;
 
 /**
  * Created by ryanmattison isOn 7/24/17.
@@ -60,14 +61,14 @@ public class BLEHomeFragment extends Fragment
 	{
 		Log.i(TAG, "Done");
 		SmartNode smartNode = null;
-		if (Globals.getInstance().getCCUApplication().smartNodes.size() == 0)
+		if (ccu().smartNodes.size() == 0)
 		{
 			smartNode = new SmartNode();
-			Globals.getInstance().getCCUApplication().smartNodes.add(smartNode);
+			ccu().smartNodes.add(smartNode);
 		}
 		else
 		{
-			smartNode = Globals.getInstance().getCCUApplication().smartNodes.get(0);
+			smartNode = ccu().smartNodes.get(0);
 		}
 		FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance((short) smartNode
 				                                                                               .mAddress, "SmartNodeName ", "Floor");

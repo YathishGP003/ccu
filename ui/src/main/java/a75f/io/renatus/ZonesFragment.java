@@ -29,13 +29,13 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import a75f.io.bo.building.CCUApplication;
 import a75f.io.bo.building.Floor;
 import a75f.io.bo.building.LightProfile;
 import a75f.io.bo.building.Zone;
-import a75f.io.logic.cache.Globals;
 import a75f.io.renatus.VIEWS.SeekArcWidget;
 import a75f.io.renatus.VIEWS.ZoneImageWidget;
+
+import static a75f.io.logic.L.ccu;
 
 /**
  * Created by samjithsadasivan isOn 8/7/17.
@@ -207,7 +207,6 @@ public class ZonesFragment extends Fragment
 	{
 		return new ZonesFragment();
 	}
-	CCUApplication ccuApplication = Globals.getInstance().getCCUApplication();
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -225,7 +224,7 @@ public class ZonesFragment extends Fragment
 		super.onStart();
 		
 		floorDataAdapter =
-				new DataArrayAdapter<>(getActivity(), R.layout.listviewitem, ccuApplication.floors);
+				new DataArrayAdapter<>(getActivity(), R.layout.listviewitem, ccu().getFloors());
 		Display display = getActivity().getWindowManager().getDefaultDisplay();
 		// display size in pixels
 		Point size = new Point();
@@ -270,7 +269,7 @@ public class ZonesFragment extends Fragment
 	
 	public void fillZoneData()
 	{
-		ArrayList<Floor> floorList = ccuApplication.floors;
+		ArrayList<Floor> floorList = ccu().getFloors();
 		roomButtonGrid.removeAllViews();
 		roomButtonGrid.setOrientation(LinearLayout.VERTICAL);
 		//arrayRooms.clear();

@@ -33,7 +33,7 @@ import a75f.io.bo.building.SmartNodeOutput;
 import a75f.io.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.bo.building.definitions.Port;
 import a75f.io.bo.json.serializers.JsonSerializer;
-import a75f.io.logic.ZoneBLL;
+import a75f.io.logic.L;
 import a75f.io.renatus.ENGG.logger.CcuLog;
 
 /**
@@ -244,7 +244,7 @@ public class LightingDetailAdapter extends BaseAdapter
 					try
 					{
 						CcuLog.d(TAG, JsonSerializer.toJson(profile.getControlsMessage(), true));
-						ZoneBLL.sendControlsMessage(profile);
+						L.sendLightControlsMessage(profile);
 					}
 					catch (IOException e)
 					{
@@ -293,7 +293,7 @@ public class LightingDetailAdapter extends BaseAdapter
 					try
 					{
 						CcuLog.d(TAG, JsonSerializer.toJson(profile.getControlsMessage(), true));
-						ZoneBLL.sendControlsMessage(profile);
+						L.sendLightControlsMessage(profile);
 					}
 					catch (IOException e)
 					{

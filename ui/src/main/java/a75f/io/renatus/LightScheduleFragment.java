@@ -17,8 +17,7 @@ import java.util.UUID;
 
 import a75f.io.bo.building.Schedule;
 import a75f.io.bo.building.SmartNodeOutput;
-import a75f.io.logic.LZoneProfile;
-import a75f.io.logic.cache.Globals;
+import a75f.io.logic.L;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import butterknife.BindView;
@@ -89,7 +88,7 @@ public class LightScheduleFragment extends BaseDialogFragment
 	{
 		super.onViewCreated(view, savedInstanceState);
 		mCurrentPort =
-				Globals.getInstance().getCCUApplication().findSmartNodePortByUUID(mCurrentPortId);
+				L.findSmartNodePortByUUID(mCurrentPortId);
 		if (mCurrentPort == null)
 		{
 			dismiss();
@@ -146,13 +145,6 @@ public class LightScheduleFragment extends BaseDialogFragment
 		
 		Log.i("Schedule", "mSchedule to add: " + mSchedule.toString());
 		mCurrentPort.mSchedules.add(mSchedule);
-		try
-		{
-			LZoneProfile.scheduleProfiles();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+
 	}
 }

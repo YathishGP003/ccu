@@ -14,7 +14,7 @@ import a75f.io.bo.json.serializers.JsonSerializer;
 /**
  * This class will log to crashlytics important information for development.
  */
-public class LLog
+class LLog
 {
 	
 	private static final String TAG = LLog.class.getSimpleName();
@@ -22,8 +22,8 @@ public class LLog
 	
 	public static void logStructAsJSON(Struct struct)
 	{
-		//if (BuildConfig.DEBUG)
-		//{
+		if (BuildConfig.DEBUG)
+		{
 			String structString = null;
 			try
 			{
@@ -34,7 +34,7 @@ public class LLog
 				e.printStackTrace();
 			}
 			System.out.println("Struct As String:\n" + structString + "\n");
-		//}
+		}
 	}
 	
 	

@@ -4,18 +4,19 @@ import a75f.io.bo.building.Floor;
 import a75f.io.bo.building.LightProfile;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
-import a75f.io.logic.cache.Globals;
+
+import static a75f.io.logic.L.ccu;
 
 /**
  * Created by Yinten isOn 8/21/2017.
  */
 
-public class ZoneBLL
+class ZoneBLL
 {
 	
 	public static Zone findZoneByName(String mFloorName, String mRoomName)
 	{
-		for (Floor floor : Globals.getInstance().getCCUApplication().floors)
+		for (Floor floor : ccu().getFloors())
 		{
 			if (mFloorName.equalsIgnoreCase(floor.mFloorName))
 			{
@@ -47,7 +48,7 @@ public class ZoneBLL
 		for (CcuToCmOverUsbSnControlsMessage_t controlsMessage_t : lightProfile
 				                                                           .getControlsMessage())
 		{
-			SerialBLL.getInstance().sendSerialStruct(controlsMessage_t);
+			LSerial.getInstance().sendSerialStruct(controlsMessage_t);
 		}
 	}
 }

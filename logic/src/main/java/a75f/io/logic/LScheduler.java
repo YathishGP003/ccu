@@ -1,5 +1,6 @@
-package a75f.io.logic.scheduler;
+package a75f.io.logic;
 
+import android.support.annotation.WorkerThread;
 import android.util.Log;
 
 import java.util.Collections;
@@ -9,13 +10,9 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import a75f.io.bo.building.definitions.ScheduledItem;
-import a75f.io.logic.LZoneProfile;
-import a75f.io.logic.cache.Globals;
-
-import static a75f.io.logic.LLog.Logd;
 
 /**
  * Created by Yinten on 9/10/2017.
@@ -23,35 +20,30 @@ import static a75f.io.logic.LLog.Logd;
 
 public class LScheduler
 {
-	private static final String TAG                     = "Schedule";
-	Map<UUID, ScheduledItem> mScheduledItems =
-			Collections.synchronizedSortedMap(new TreeMap<UUID, ScheduledItem>());
-	private ScheduledItem mCurrentScheduledItem;
+	private static final String TAG = "Schedule";
 	
-	public LScheduler()
+	Map<UUID, ScheduledItem>                  mScheduledItems = Collections.synchronizedSortedMap(new TreeMap<UUID, ScheduledItem>());
+	SortedSet<Map.Entry<UUID, ScheduledItem>> sortedEntries   = new TreeSet<>(new Comparator<Map.Entry<UUID, ScheduledItem>>()
 	{
+		@Override
+		public int compare(Map.Entry<UUID, ScheduledItem> o1, Map.Entry<UUID, ScheduledItem> o2)
+		{
+			return o1.getValue().mTimeStamp.compareTo(o2.getValue().mTimeStamp);
+		}
+	});
+	private ScheduledItem   mCurrentScheduledItem;
+	private IScheduleAction scheduleAction;
+	private ScheduledExecutorService mScheduleExecutorService = Executors.newSingleThreadScheduledExecutor();
+	
+	public LScheduler(IScheduleAction scheduleAction)
+	{
+		this.scheduleAction = scheduleAction;
 	}
 	
-	
-	static SortedSet<Map.Entry<UUID, ScheduledItem>> mapOfEntriesSortedByTimeStamp(Map<UUID, ScheduledItem> map)
-	{
-		SortedSet<Map.Entry<UUID, ScheduledItem>> sortedEntries =
-				new TreeSet<>(new Comparator<Map.Entry<UUID, ScheduledItem>>()
-				{
-					@Override
-					public int compare(Map.Entry<UUID, ScheduledItem> o1,
-					                   Map.Entry<UUID, ScheduledItem> o2)
-					{
-						return o1.getValue().mTimeStamp.compareTo(o2.getValue().mTimeStamp);
-					}
-				});
-		sortedEntries.addAll(map.entrySet());
-		return sortedEntries;
-	}
-	
-	
+	@WorkerThread
 	public void add(ScheduledItem scheduledItem)
 	{
+		
 		/*The list contains the key */
 		Log.i("Schedule", "add - " + scheduledItem.toString());
 		if (mScheduledItems.containsKey(scheduledItem.mUuid))
@@ -76,10 +68,10 @@ public class LScheduler
 		}
 	}
 	
-	
 	/* This method will check the front of the queue to see if it is the currently selected item.
 	   If it isn't the currently selected, it will cancel the current alarm and add the currently
 	    selected item as the alarm. */
+	@WorkerThread
 	private void checkFront()
 	{
 		/* No items scheduled, abandon ship. */
@@ -88,15 +80,11 @@ public class LScheduler
 			return;
 		}
 		
-		/* Returns a map of entries sorted by timestamp. */
-		SortedSet<Map.Entry<UUID, ScheduledItem>> entries =
-				mapOfEntriesSortedByTimeStamp(mScheduledItems);
-		
+		/* Synchronize map of entries sorted by timestamp. */
+		sortedEntries.addAll(mScheduledItems.entrySet());
 		
 		/* The item first in the list, the lowest timestamp */
-		Map.Entry<UUID, ScheduledItem> first = entries.first();
-		ScheduledItem frontValue = first.getValue();
-		Log.d(TAG, "Front Value: " + frontValue.toString());
+		ScheduledItem frontValue = sortedEntries.first().getValue();
 		if (mCurrentScheduledItem == null)
 		{
 			schedule(frontValue);
@@ -107,14 +95,12 @@ public class LScheduler
 		}
 	}
 	
-	
 	/* This method unschedules the current alarm and schedules the first selected item */
-	private void schedule(ScheduledItem itemToSchedule)
+	private synchronized void schedule(ScheduledItem itemToSchedule)
 	{
-		Logd("schedule for alarm: " + itemToSchedule.toString());
-		long lengthUntilNextAlarm =
-				itemToSchedule.mTimeStamp.getMillis() - System.currentTimeMillis();
-		Globals.getInstance().getScheduledThreadPool().schedule(new Runnable()
+		//Logd("schedule for alarm: " + itemToSchedule.toString());
+		long lengthUntilNextAlarm = itemToSchedule.mTimeStamp.getMillis() - System.currentTimeMillis();
+		mScheduleExecutorService.schedule(new Runnable()
 		{
 			@Override
 			public void run()
@@ -124,9 +110,8 @@ public class LScheduler
 		}, lengthUntilNextAlarm, TimeUnit.MILLISECONDS);
 		//set new scheduled item to front
 		mCurrentScheduledItem = itemToSchedule;
-		Logd("Next Alarm: " + lengthUntilNextAlarm);
+		//Logd("Next Alarm: " + lengthUntilNextAlarm);
 	}
-	
 	
 	//For test
 	public Map<UUID, ScheduledItem> getScheduledItems()
@@ -134,19 +119,23 @@ public class LScheduler
 		return mScheduledItems;
 	}
 	
-	
-	public void takeAction()
+	public synchronized void takeAction()
 	{
-		Log.i("LScheduler", "ON recieve scheduled event");
-		Log.e(TAG, "FIRED FIRED FIRED FIRED FIRED");
-		Log.i(TAG, "mScheduledItems.size()" + mScheduledItems.size());
-		LZoneProfile.handleZoneProfileScheduledEvent(mScheduledItems.remove(mCurrentScheduledItem
-				                                                                .mUuid));
-		Log.i(TAG, "after mScheduledItems.size()" + mScheduledItems.size());
+		executeCurrentTimeStamps();
 		mCurrentScheduledItem = null;
 		checkFront();
 	}
-	
+	private void executeCurrentTimeStamps()
+	{
+		while (sortedEntries.first() != null && sortedEntries.first().getValue().mTimeStamp.getMillis() <= mCurrentScheduledItem.mTimeStamp.getMillis())
+		{
+			if (scheduleAction != null)
+			{
+				scheduleAction.takeAction(mCurrentScheduledItem);
+			}
+			sortedEntries.remove(sortedEntries.first());
+		}
+	}
 }
 	
 

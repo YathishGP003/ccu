@@ -6,16 +6,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import org.joda.time.DateTime;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
 import a75f.io.bo.BuildConfig;
-import a75f.io.bo.building.definitions.LScheduleAction;
-import a75f.io.bo.building.definitions.ScheduledItem;
 import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
 
 /**
@@ -46,57 +42,13 @@ public abstract class ZoneProfile
 	
 	
 	@JsonIgnore
-	public ScheduledItem getNextActiveScheduledTime() throws Exception
-	{
-		Schedule nextActiveScheduleTime = null;
-		// Go through the zone profiles schedules.
-		for (Schedule schedule : mSchedules)
-		{
-			nextActiveScheduleTime = getSchedule(nextActiveScheduleTime, schedule);
-		}
-		for (SmartNodeOutput smartNodeOutput : smartNodeOutputs)
-		{
-			for (Schedule schedule : smartNodeOutput.mSchedules)
-			{
-				nextActiveScheduleTime = getSchedule(nextActiveScheduleTime, schedule);
-			}
-		}
-		//No schedules
-		if (nextActiveScheduleTime == null)
-		{
-			return null;
-		}
-		else
-		{
-			ScheduledItem scheduledItem = new ScheduledItem();
-			scheduledItem.mUuid = this.uuid;
-			scheduledItem.lScheduleAction = LScheduleAction.CONTROLS_UPDATE;
-			scheduledItem.mTimeStamp =
-					new DateTime(nextActiveScheduleTime.getNextScheduleTransistionTime());
-			return scheduledItem;
-		}
-	}
-	
-	
-	@JsonIgnore
-	private Schedule getSchedule(Schedule nextActiveScheduleTime, Schedule schedule)
-			throws Exception
-	{
-		if (nextActiveScheduleTime == null || schedule.getNextScheduleTransistionTime() <
-		                                      nextActiveScheduleTime
-				                                      .getNextScheduleTransistionTime())
-		{
-			nextActiveScheduleTime = schedule;
-		}
-		return nextActiveScheduleTime;
-	}
-	
-	
-	@JsonIgnore
 	public boolean hasSchedules()
 	{
 		return !mSchedules.isEmpty();
 	}
+	
+	
+	
 	
 	
 	public ArrayList<SmartNodeOutput> findSmartNodeOutputs(short mSmartNodeAddress)

@@ -1,10 +1,8 @@
-package a75f.io.logic.scheduler;
+package a75f.io.logic;
 
 import java.util.Comparator;
 import java.util.Map;
 import java.util.UUID;
-
-import a75f.io.bo.building.definitions.ScheduledItem;
 
 /**
  * Created by Yinten on 9/10/2017.

@@ -44,10 +44,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/RenatusAppTheme">
-        <activity
-            android:name=".MainActivity"
-            android:label="@string/app_name">
-        </activity>
 
         <service android:name="a75f.io.bluetooth.BLEProvisionService"/>
         <service

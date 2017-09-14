@@ -24,28 +24,28 @@ import static android.content.ContentValues.TAG;
  * Created by Yinten isOn 8/21/2017.
  */
 
-public class SerialBLL
+class LSerial
 {
-	private static SerialBLL  mSerialBLL;
+	private static LSerial    mLSerial;
 	private        UsbService mUsbService;
 	
 	
 	/***
 	 * Default empty constructor for a singleton.
 	 */
-	private SerialBLL()
+	private LSerial()
 	{
 	}
 	
 	
-	public static SerialBLL getInstance()
+	public static LSerial getInstance()
 	{
-		if (mSerialBLL == null)
+		if (mLSerial == null)
 		{
-			mSerialBLL = new SerialBLL();
+			mLSerial = new LSerial();
 		}
 		
-		return mSerialBLL;
+		return mLSerial;
 	}
 	
 	
@@ -129,7 +129,7 @@ public class SerialBLL
 	 * This is the setter method for the USB Service.
 	 *
 	 * All the members of BaseSerialAppCompatActivity are private and shouldn't be used.   The
-	 * only place the usbService should be interacted with is through the SerialBLL.
+	 * only place the usbService should be interacted with is through the LSerial.
 	 *
 	 * This will be help when we move onto the state machines.
 	 *
@@ -138,13 +138,6 @@ public class SerialBLL
 	public void setUSBService(UsbService usbService)
 	{
 		mUsbService = usbService;
-		try {
-
-			//TODO: move this forward.
-			LZoneProfile.scheduleProfiles();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 	
 	

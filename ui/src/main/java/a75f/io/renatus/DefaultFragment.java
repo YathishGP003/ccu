@@ -20,10 +20,11 @@ import java.util.Arrays;
 import java.util.List;
 
 import a75f.io.bo.building.SmartNode;
-import a75f.io.logic.cache.Globals;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+
+import static a75f.io.logic.L.ccu;
 
 /**
  * Created by ryanmattison isOn 7/24/17.
@@ -82,8 +83,8 @@ public class DefaultFragment extends DialogFragment
 	{
 		super.onViewCreated(view, savedInstanceState);
 		setupPortSpinner();
-		SmartNode smartNode = Globals.getInstance().getCCUApplication().smartNodes.size() > 0
-				                      ? Globals.getInstance().getCCUApplication().smartNodes.get(0)
+		SmartNode smartNode = ccu().smartNodes.size() > 0
+				                      ? ccu().smartNodes.get(0)
 				                      : null;
 		short meshAddress = smartNode != null ? smartNode.mAddress : (short) 5000;
 		String roomName = "Default Room Name";
@@ -120,14 +121,14 @@ public class DefaultFragment extends DialogFragment
 	public void done()
 	{
 		SmartNode smartNode = null;
-		if (Globals.getInstance().getCCUApplication().smartNodes.size() == 0)
+		if ( ccu().smartNodes.size() == 0)
 		{
 			smartNode = new SmartNode();
-			Globals.getInstance().getCCUApplication().smartNodes.add(smartNode);
+			ccu().smartNodes.add(smartNode);
 		}
 		else
 		{
-			smartNode = Globals.getInstance().getCCUApplication().smartNodes.get(0);
+			smartNode = ccu().smartNodes.get(0);
 		}
 		smartNode.mAddress = ports.get(mPortPosition).shortValue();
 		Toast.makeText(DefaultFragment.this.getActivity(), "Saved", Toast.LENGTH_SHORT).show();

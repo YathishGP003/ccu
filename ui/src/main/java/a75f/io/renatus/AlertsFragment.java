@@ -20,6 +20,7 @@ public class AlertsFragment extends Fragment
 	
 	public static AlertsFragment newInstance()
 	{
+		
 		return new AlertsFragment();
 	}
 	

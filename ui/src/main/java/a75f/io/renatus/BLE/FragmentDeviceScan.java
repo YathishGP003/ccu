@@ -103,6 +103,7 @@ public class FragmentDeviceScan extends BaseDialogFragment
 	                         Bundle savedInstanceState)
 	{
 		mName = getArguments().getString(ARG_NAME);
+		
 		mPairingAddress = getArguments().getShort(ARG_PAIRING_ADDR);
 		mFloorName = getArguments().getString(FLOOR_NAME);
 		View retVal = inflater.inflate(R.layout.fragment_device_scan, container, false);

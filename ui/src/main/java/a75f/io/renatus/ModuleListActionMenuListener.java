@@ -9,7 +9,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
-import a75f.io.bo.building.CCUApplication;
+import static a75f.io.logic.L.ccu;
 
 class ModuleListActionMenuListener implements MultiChoiceModeListener
 {
@@ -84,10 +84,10 @@ class ModuleListActionMenuListener implements MultiChoiceModeListener
 		seletedModules.clear();
 	}
 	
-	private CCUApplication ccu;
+	
 	private void deleteSelectedFSV()
 	{
-		ccu.floors.get(floorPlanActivity.mFloorListAdapter.getSelectedPostion()).mRoomList
+		ccu().getFloors().get(floorPlanActivity.mFloorListAdapter.getSelectedPostion()).mRoomList
 				.get(floorPlanActivity.mRoomListAdapter.getSelectedPostion()).mLightProfile = null;
 	}
 	

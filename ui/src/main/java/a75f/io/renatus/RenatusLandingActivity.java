@@ -5,15 +5,15 @@ import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 
-import a75f.io.renatus.BASE.BaseSerialAppCompatActivity;
 import a75f.io.renatus.ENGG.RenatusEngineeringActivity;
 
-public class RenatusLandingActivity extends BaseSerialAppCompatActivity
+public class RenatusLandingActivity extends AppCompatActivity
 {
 	
 	private static final String  TAG         = RenatusLandingActivity.class.getSimpleName();
@@ -67,16 +67,16 @@ public class RenatusLandingActivity extends BaseSerialAppCompatActivity
 				{
 					DefaultFragment.getInstance().show(getSupportFragmentManager(), "setup");
 				}
-				else if (settingView == true && mTabLayout.getSelectedTabPosition() == 1)
-				{
-					Intent i = new Intent(RenatusLandingActivity.this, MainActivity.class);
-					startActivity(i);
-				}
-				else if (settingView == false && mTabLayout.getSelectedTabPosition() == 1)
-				{
-					Intent i = new Intent(RenatusLandingActivity.this, MainActivity.class);
-					startActivity(i);
-				}
+//				else if (settingView == true && mTabLayout.getSelectedTabPosition() == 1)
+//				{
+//					Intent i = new Intent(RenatusLandingActivity.this, MainActivity.class);
+//					startActivity(i);
+//				}
+//				else if (settingView == false && mTabLayout.getSelectedTabPosition() == 1)
+//				{
+//					Intent i = new Intent(RenatusLandingActivity.this, MainActivity.class);
+//					startActivity(i);
+//				}
 			}
 		});
 		setupButton.setOnLongClickListener(new View.OnLongClickListener()

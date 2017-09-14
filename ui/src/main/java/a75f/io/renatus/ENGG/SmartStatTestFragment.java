@@ -8,9 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.util.Log;
@@ -32,7 +30,6 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -40,11 +37,10 @@ import java.util.Set;
 import a75f.io.bo.json.serializers.JsonSerializer;
 import a75f.io.bo.serial.CcuToCmOverUsbSmartStatSettingsMessage_t;
 import a75f.io.bo.serial.MessageType;
-import a75f.io.renatus.BASE.BaseDialogFragment;
-import a75f.io.renatus.MainActivity;
-import a75f.io.renatus.R;
 import a75f.io.bo.serial.comm.SerialAction;
 import a75f.io.bo.serial.comm.SerialEvent;
+import a75f.io.renatus.BASE.BaseDialogFragment;
+import a75f.io.renatus.R;
 import a75f.io.usbserial.UsbService;
 import butterknife.BindView;
 import butterknife.BindViews;
@@ -200,12 +196,12 @@ public class SmartStatTestFragment extends BaseDialogFragment
 		}
 	};
 	private UsbService                usbService;
-	private MyHandler mHandler;
+
 	private final ServiceConnection usbConnection = new ServiceConnection() {
 		@Override
 		public void onServiceConnected(ComponentName arg0, IBinder arg1) {
 			usbService = ((UsbService.UsbBinder) arg1).getService();
-			usbService.setHandler(mHandler);
+			usbService.setHandler(null);
 		}
 		
 		@Override
@@ -254,30 +250,7 @@ public class SmartStatTestFragment extends BaseDialogFragment
 		getActivity().registerReceiver(mUsbReceiver, filter);
 	}
 	
-	/*
-	 * This handler will be passed to UsbService. Data received from serial port is displayed through this handler
-	 */
-	private static class MyHandler extends Handler
-	{
-		private final WeakReference<MainActivity> mActivity;
-		
-		public MyHandler(MainActivity activity) {
-			mActivity = new WeakReference<>(activity);
-		}
-		
-		@Override
-		public void handleMessage(Message msg) {
-			switch (msg.what) {
-				
-				case UsbService.CTS_CHANGE:
-					Toast.makeText(mActivity.get(), "CTS_CHANGE", Toast.LENGTH_LONG).show();
-					break;
-				case UsbService.DSR_CHANGE:
-					Toast.makeText(mActivity.get(), "DSR_CHANGE", Toast.LENGTH_LONG).show();
-					break;
-			}
-		}
-	}
+	
 	
 	// Called in a separate thread
 	@Subscribe(threadMode = ThreadMode.MAIN)

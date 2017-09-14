@@ -12,7 +12,7 @@ import java.util.UUID;
 public class CCUApplication
 {
 	public String           CCUTitle = new String();
-	public ArrayList<Floor> floors   = new ArrayList<Floor>();
+	private ArrayList<Floor> floors   = new ArrayList<Floor>();
 	
 	public SystemProfile        systemProfile = new SystemProfile();
 	public ControlMote          controlMote   = new ControlMote();
@@ -45,26 +45,7 @@ public class CCUApplication
 	}
 	
 	
-	public SmartNodeOutput findSmartNodePortByUUID(UUID id)
-	{
-		for (Floor f : floors)
-		{
-			for (Zone z : f.mRoomList)
-			{
-				if (z.mLightProfile != null)
-				{
-					for (SmartNodeOutput op : z.mLightProfile.smartNodeOutputs)
-					{
-						if (id.equals(op.getUuid()))
-						{
-							return op;
-						}
-					}
-				}
-			}
-		}
-		return null;
-	}
+
 	
 	
 	public ZoneProfile findZoneProfileByUUID(UUID uuid)
@@ -98,4 +79,9 @@ public class CCUApplication
 		}
 		return zoneProfiles;
 	}
+	public ArrayList<Floor> getFloors()
+	{
+		return floors;
+	}
+	
 }

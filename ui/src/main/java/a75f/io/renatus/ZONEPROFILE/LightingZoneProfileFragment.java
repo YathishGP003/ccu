@@ -30,27 +30,25 @@ import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.bo.building.definitions.Port;
-import a75f.io.logic.LZoneProfile;
-import a75f.io.logic.SmartNodeBLL;
-import a75f.io.logic.ZoneBLL;
-import a75f.io.logic.cache.prefs.LocalStorage;
+import a75f.io.logic.L;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.FloorPlanFragment;
 import a75f.io.renatus.R;
 
+import static a75f.io.logic.L.addZoneProfileToZone;
+
 /**
  * Created by anilkumar isOn 27-10-2016.
  */
 
-public class LightingZoneProfileFragment extends BaseDialogFragment
-		implements CompoundButton.OnCheckedChangeListener, View.OnClickListener
+public class LightingZoneProfileFragment extends BaseDialogFragment implements CompoundButton.OnCheckedChangeListener, View.OnClickListener
 {
 	
 	public static final  String ID  = LightingZoneProfileFragment.class.getSimpleName();
 	private static final String TAG = "Lighting";
 	
-	View        view;
+	View view;
 	boolean mbIsInEditMode = false;
 	Spinner      spRelay1;
 	Spinner      spRelay2;
@@ -103,14 +101,11 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 	private ArrayAdapter<CharSequence> analog2InAdapter;
 	private short                      mSmartNodeAddress;
 	
-	
 	public LightingZoneProfileFragment()
 	{
 	}
 	
-	
-	public static LightingZoneProfileFragment newInstance(short smartNodeAddress, String roomName,
-	                                                      String floorName)
+	public static LightingZoneProfileFragment newInstance(short smartNodeAddress, String roomName, String floorName)
 	{
 		LightingZoneProfileFragment f = new LightingZoneProfileFragment();
 		Bundle bundle = new Bundle();
@@ -121,7 +116,6 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 		return f;
 	}
 	
-	
 	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState)
 	{
@@ -130,9 +124,9 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 		mSmartNodeAddress = getArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR);
 		String mRoomName = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
 		String mFloorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
-		mZone = ZoneBLL.findZoneByName(mFloorName, mRoomName);
+		mZone = L.findZoneByName(mFloorName, mRoomName);
 		mLightProfile = (LightProfile) mZone.findLightProfile();
-		mSmartNode = SmartNodeBLL.getSmartNodeAndSeed(mSmartNodeAddress, mRoomName);
+		mSmartNode = L.getSmartNodeAndSeed(mSmartNodeAddress, mRoomName);
 		lcmSetCommand = (TextView) view.findViewById(R.id.lcmSetCommand);
 		lcmCancelCommand = (TextView) view.findViewById(R.id.lcmCancelCommand);
 		if (!mbIsInEditMode)
@@ -147,35 +141,32 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
 			{
 				getSmartNodeRelayOne(isChecked);
-				ZoneBLL.sendControlsMessage(mLightProfile);
+				L.sendLightControlsMessage(mLightProfile);
 			}
 		});
 		lcmRelay2Override = (ToggleButton) view.findViewById(R.id.lcmRelay2Override);
 		lcmAnalog1OutOverride = (ToggleButton) view.findViewById(R.id.lcmAnalog1OutOverride);
 		lcmAnalog2OutOverride = (ToggleButton) view.findViewById(R.id.lcmAnalog2OutOverride);
-		lcmAnalog1OutOverride
-				.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
-				{
-					@Override
-					public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
-					{
-						getSmartNodeAnalogOutputOne(isChecked);
-						Log.i(TAG, "lcmAnalog1OutOverride isChecked: " + isChecked);
-						ZoneBLL.sendControlsMessage(mLightProfile);
-					}
-				});
+		lcmAnalog1OutOverride.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+		{
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+			{
+				getSmartNodeAnalogOutputOne(isChecked);
+				Log.i(TAG, "lcmAnalog1OutOverride isChecked: " + isChecked);
+				L.sendLightControlsMessage(mLightProfile);
+			}
+		});
 		spRelay1 = (Spinner) view.findViewById(R.id.lcmRelay1Actuator);
 		spRelay2 = (Spinner) view.findViewById(R.id.lcmRelay2Actuator);
 		relay1Switch = (SwitchCompat) view.findViewById(R.id.lcmRelay1Switch);
 		relay2Switch = (SwitchCompat) view.findViewById(R.id.lcmRelay2Switch);
 		relay1EditText = (EditText) view.findViewById(R.id.lcmRelay1EditName);
 		relay2EditText = (EditText) view.findViewById(R.id.lcmRelay2EditName);
-		relay1Adapter = ArrayAdapter
-				                .createFromResource(getActivity(), R.array.lcm_relay, R.layout.spinner_dropdown_item);
+		relay1Adapter = ArrayAdapter.createFromResource(getActivity(), R.array.lcm_relay, R.layout.spinner_dropdown_item);
 		relay1Adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		spRelay1.setAdapter(relay1Adapter);
-		relay2Adapter = ArrayAdapter
-				                .createFromResource(getActivity(), R.array.lcm_relay, R.layout.spinner_dropdown_item);
+		relay2Adapter = ArrayAdapter.createFromResource(getActivity(), R.array.lcm_relay, R.layout.spinner_dropdown_item);
 		relay2Adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		spRelay2.setAdapter(relay2Adapter);
 		spAnalog1Out = (Spinner) view.findViewById(R.id.lcmAnalog1OutActuator);
@@ -184,26 +175,22 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 		analog2OutSwitch = (SwitchCompat) view.findViewById(R.id.lcmAnalog2OutSwitch);
 		analog1OutEditText = (EditText) view.findViewById(R.id.lcmAnalog1OutEditName);
 		analog2OutEditText = (EditText) view.findViewById(R.id.lcmAnalog2OutEditName);
-		analog1OutAdapter = ArrayAdapter
-				                    .createFromResource(getActivity(), R.array.lcm_analog_out, R.layout.spinner_dropdown_item);
+		analog1OutAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.lcm_analog_out, R.layout.spinner_dropdown_item);
 		analog1OutAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		spAnalog1Out.setAdapter(analog1OutAdapter);
-		analog2OutAdapter = ArrayAdapter
-				                    .createFromResource(getActivity(), R.array.lcm_analog_out, R.layout.spinner_dropdown_item);
+		analog2OutAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.lcm_analog_out, R.layout.spinner_dropdown_item);
 		analog2OutAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		spAnalog2Out.setAdapter(analog2OutAdapter);
 		spAnalog1In = (Spinner) view.findViewById(R.id.lcmAnalog1InActuator);
 		analog1InSwitch = (SwitchCompat) view.findViewById(R.id.lcmAnalog1InSwitch);
 		analog1InEditText = (EditText) view.findViewById(R.id.lcmAnalog1InEditName);
-		analog1InAdapter = ArrayAdapter
-				                   .createFromResource(getActivity(), R.array.lcm_analog_in, R.layout.spinner_dropdown_item);
+		analog1InAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.lcm_analog_in, R.layout.spinner_dropdown_item);
 		analog1InAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		spAnalog1In.setAdapter(analog1InAdapter);
 		analog2InEditText = (EditText) view.findViewById(R.id.lcmAnalog2InEditName);
 		analog2InSwitch = (SwitchCompat) view.findViewById(R.id.lcmAnalog2InSwitch);
 		spAnalog2In = (Spinner) view.findViewById(R.id.lcmAnalog2InActuator);
-		analog2InAdapter = ArrayAdapter
-				                   .createFromResource(getActivity(), R.array.lcm_analog_in, R.layout.spinner_dropdown_item);
+		analog2InAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.lcm_analog_in, R.layout.spinner_dropdown_item);
 		analog2InAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		spAnalog2In.setAdapter(analog2InAdapter);
 		editRelay1 = (ImageView) view.findViewById(R.id.lcmRelay1EditImg);
@@ -232,8 +219,7 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 			public void onClick(View v)
 			{
 				saveLightData();
-				getActivity()
-						.sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
+				getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
 				dismiss();
 			}
 		});
@@ -247,10 +233,8 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 			}
 		});
 		bindData();
-		return new AlertDialog.Builder(getActivity(), R.style.NewDialogStyle)
-				       .setTitle("Lighting Profile").setView(view).setCancelable(false).create();
+		return new AlertDialog.Builder(getActivity(), R.style.NewDialogStyle).setTitle("Lighting Profile").setView(view).setCancelable(false).create();
 	}
-	
 	
 	public SmartNodeOutput getSmartNodeRelayOne(boolean isChecked)
 	{
@@ -271,20 +255,16 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 		{
 			mSmartNodeRelayOne.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyClose;
 		}
-		mSmartNodeRelayOne.mName =
-				relay1EditText.getText() != null && relay1EditText.getText().length() > 0
-						? relay1EditText.getText().toString() : "empty";
+		mSmartNodeRelayOne.mName = relay1EditText.getText() != null && relay1EditText.getText().length() > 0 ? relay1EditText.getText().toString() : "empty";
 		return mSmartNodeRelayOne;
 	}
-	
 	
 	public SmartNodeOutput getSmartNodeAnalogOutputOne(boolean isChecked)
 	{
 		if (smartNodeAnalogOutputOne == null)
 		{
 			smartNodeAnalogOutputOne = new SmartNodeOutput();
-			smartNodeAnalogOutputOne.mOutputAnalogActuatorType =
-					OutputAnalogActuatorType.ZeroToTenV;
+			smartNodeAnalogOutputOne.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
 			smartNodeAnalogOutputOne.mSmartNodePort = Port.ANALOG_OUT_ONE;
 			smartNodeAnalogOutputOne.mName = "Analog 1";
 			smartNodeAnalogOutputOne.mSmartNodeAddress = mSmartNodeAddress;
@@ -292,19 +272,15 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 		}
 		if (spAnalog1Out.getSelectedItemPosition() == 0)
 		{
-			smartNodeAnalogOutputOne.mOutputAnalogActuatorType =
-					OutputAnalogActuatorType.ZeroToTenV;
+			smartNodeAnalogOutputOne.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
 		}
 		else
 		{
 			smartNodeAnalogOutputOne.mOutputAnalogActuatorType = OutputAnalogActuatorType.TwoToTenV;
 		}
-		smartNodeAnalogOutputOne.mName =
-				analog1OutEditText.getText() != null && analog1OutEditText.getText().length() > 0
-						? analog1OutEditText.getText().toString() : "empty";
+		smartNodeAnalogOutputOne.mName = analog1OutEditText.getText() != null && analog1OutEditText.getText().length() > 0 ? analog1OutEditText.getText().toString() : "empty";
 		return smartNodeAnalogOutputOne;
 	}
-	
 	
 	public void saveLightData()
 	{
@@ -379,45 +355,36 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 		{
 			mLightProfile.removeCircuit(analogTwo);
 		}
-		SmartNodeBLL.addSmartNode(mSmartNode);
-		ZoneBLL.addZoneProfileToZone(mZone, mLightProfile);
-		LocalStorage.setApplicationSettings();
+		addZoneProfileToZone(mSmartNode, mZone, mLightProfile);
 	}
-	
 	
 	private void bindData()
 	{
-		ArrayList<SmartNodeOutput> smartNodeOutputs =
-				mLightProfile.findSmartNodeOutputs(mSmartNodeAddress);
-		relayOne = LZoneProfile.findPort(smartNodeOutputs, Port.RELAY_ONE, mSmartNodeAddress);
-		relayTwo = LZoneProfile.findPort(smartNodeOutputs, Port.RELAY_TWO, mSmartNodeAddress);
-		analogOne = LZoneProfile.findPort(smartNodeOutputs, Port.ANALOG_OUT_ONE, mSmartNodeAddress);
-		analogTwo = LZoneProfile.findPort(smartNodeOutputs, Port.ANALOG_OUT_TWO, mSmartNodeAddress);
+		ArrayList<SmartNodeOutput> smartNodeOutputs = mLightProfile.findSmartNodeOutputs(mSmartNodeAddress);
+		relayOne = L.findPort(smartNodeOutputs, Port.RELAY_ONE, mSmartNodeAddress);
+		relayTwo = L.findPort(smartNodeOutputs, Port.RELAY_TWO, mSmartNodeAddress);
+		analogOne = L.findPort(smartNodeOutputs, Port.ANALOG_OUT_ONE, mSmartNodeAddress);
+		analogTwo = L.findPort(smartNodeOutputs, Port.ANALOG_OUT_TWO, mSmartNodeAddress);
 		//RelayOne
-		spRelay1.setSelection(
-				relayOne.mOutputRelayActuatorType == OutputRelayActuatorType.NormallyOpen ? 0 : 1);
+		spRelay1.setSelection(relayOne.mOutputRelayActuatorType == OutputRelayActuatorType.NormallyOpen ? 0 : 1);
 		relay1EditText.setText(relayOne.getCircuitName());
 		relay1Switch.setChecked(relayOne.mConfigured);
 		//RelayTwo
-		spRelay2.setSelection(
-				relayOne.mOutputRelayActuatorType == OutputRelayActuatorType.NormallyOpen ? 0 : 1);
+		spRelay2.setSelection(relayOne.mOutputRelayActuatorType == OutputRelayActuatorType.NormallyOpen ? 0 : 1);
 		relay2EditText.setText(relayTwo.getCircuitName());
 		relay2Switch.setChecked(relayTwo.mConfigured);
 		//AnalogOne
-		spAnalog1Out.setSelection(
-				analogOne.mOutputAnalogActuatorType == OutputAnalogActuatorType.ZeroToTenV ? 0 : 1);
+		spAnalog1Out.setSelection(analogOne.mOutputAnalogActuatorType == OutputAnalogActuatorType.ZeroToTenV ? 0 : 1);
 		analog1OutEditText.setText(analogOne.getCircuitName());
 		analog1OutSwitch.setChecked(analogOne.mConfigured);
 		//AnalogTwo
-		spAnalog2Out.setSelection(
-				analogOne.mOutputAnalogActuatorType == OutputAnalogActuatorType.ZeroToTenV ? 0 : 1);
+		spAnalog2Out.setSelection(analogOne.mOutputAnalogActuatorType == OutputAnalogActuatorType.ZeroToTenV ? 0 : 1);
 		analog2OutEditText.setText(analogTwo.getCircuitName());
 		analog2OutSwitch.setChecked(analogTwo.mConfigured);
 		//TODO: inputs
 		//		ArrayList<SmartNodeInput> smartNodeInputs =
 		//				mLightProfile.findSmartNodeInputs(mSmartNodeAddress);
 	}
-	
 	
 	@Override
 	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
@@ -442,7 +409,6 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 				break;
 		}
 	}
-	
 	
 	@Override
 	public void onClick(View v)
@@ -488,11 +454,9 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 		}
 	}
 	
-	
 	public void showEditLogicalNameDialog(final EditText etext, final int id)
 	{
-		AlertDialog.Builder alertBuilder =
-				new AlertDialog.Builder(getActivity(), R.style.NewDialogStyle);
+		AlertDialog.Builder alertBuilder = new AlertDialog.Builder(getActivity(), R.style.NewDialogStyle);
 		alertBuilder.setTitle("Assign Name for this Lighting Circuit");
 		alertBuilder.setCancelable(false);
 		LayoutInflater inflater = LayoutInflater.from(getActivity());
@@ -506,12 +470,10 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 			{
 			}
 			
-			
 			@Override
 			public void onTextChanged(CharSequence s, int start, int before, int count)
 			{
 			}
-			
 			
 			@Override
 			public void afterTextChanged(Editable s)
@@ -538,8 +500,7 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 				String displayName = input.getText().toString();
 				if (displayName.isEmpty())
 				{
-					Toast.makeText(getActivity(), "Circuit Name cannot be Empty", Toast.LENGTH_SHORT)
-					     .show();
+					Toast.makeText(getActivity(), "Circuit Name cannot be Empty", Toast.LENGTH_SHORT).show();
 				}
 				else
 				{
@@ -549,14 +510,11 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
 					}
 					else
 					{
-						Toast.makeText(getActivity(), "Circuit Name [" + displayName +
-						                              "] exists, enter a valid circuit name", Toast.LENGTH_LONG)
-						     .show();
+						Toast.makeText(getActivity(), "Circuit Name [" + displayName + "] exists, enter a valid circuit name", Toast.LENGTH_LONG).show();
 						displayName = "";
 					}
 				}
-				etext.setText(displayName.length() > 15 ? displayName.substring(0, 12).concat("...")
-						              : displayName.toString());
+				etext.setText(displayName.length() > 15 ? displayName.substring(0, 12).concat("...") : displayName.toString());
 				dialog.dismiss();
 			}
 		});

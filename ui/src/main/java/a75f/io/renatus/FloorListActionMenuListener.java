@@ -9,6 +9,9 @@ import android.widget.AbsListView.MultiChoiceModeListener;
 import java.util.ArrayList;
 
 import a75f.io.bo.building.Floor;
+import a75f.io.logic.L;
+
+import static a75f.io.logic.L.ccu;
 
 public class FloorListActionMenuListener implements MultiChoiceModeListener
 {
@@ -85,7 +88,8 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 		for (int nCount = 0; nCount < selectedFloor.size(); nCount++)
 		{
 			Floor floorData = selectedFloor.get(nCount);
-			floorPlanActivity.ccuApplication.floors.remove(floorData);
+			ccu().getFloors().remove(floorData);
+			L.saveCCUState();
 		}
 	}
 	
@@ -100,7 +104,7 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 	@Override
 	public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked)
 	{
-		Floor floorData = (Floor) floorPlanActivity.ccuApplication.floors.get(position);
+		Floor floorData = (Floor) ccu().getFloors().get(position);
 		if (floorData == null)
 		{
 			return;

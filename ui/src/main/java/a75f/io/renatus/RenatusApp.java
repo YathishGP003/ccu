@@ -38,7 +38,7 @@ public class RenatusApp extends UtilityApplication
 	@Override
 	protected void attachBaseContext(Context base)
 	{
-		super.attachBaseContext(base);
+		super.attachBaseContext(base);   
 		MultiDex.install(this);
 	}
 }

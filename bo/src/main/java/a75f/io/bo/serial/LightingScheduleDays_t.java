@@ -23,9 +23,10 @@ public class LightingScheduleDays_t extends Struct
 		public final Unsigned8 saturday = new Unsigned8(1);
 		
 		public final Unsigned8 sunday = new Unsigned8(1);
-		
+
 		public final Unsigned8 reserved = new Unsigned8(1);
-	}
+	}//n;rjnjgf
+
 	
 	public final Unsigned8 bitmap = new Unsigned8();
 }

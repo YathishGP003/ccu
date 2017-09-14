@@ -14,7 +14,7 @@ import io.fabric.sdk.android.Fabric;
 
 /**
  * Created by ryanmattison isOn 7/24/17.
- */
+ */ 
 
 public class RenatusApp extends UtilityApplication
 {

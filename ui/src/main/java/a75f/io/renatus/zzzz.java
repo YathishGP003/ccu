@@ -5,9 +5,5 @@ package a75f.io.renatus;
  */
 
 public class zzzz {
-     
-    
-     
-
     public int i = 0;
 }

@@ -18,12 +18,12 @@ import io.fabric.sdk.android.Fabric;
 
 public class RenatusApp extends UtilityApplication
 {
-	
+
 	private static final String    TAG           = RenatusApp.class.getSimpleName();
 	public               boolean   isProvisioned = false;
 	public               SmartNode mSmartNode    = null;
-	
-	
+
+
 	@Override
 	public void onCreate()
 	{
@@ -33,12 +33,13 @@ public class RenatusApp extends UtilityApplication
 		HeartBeatJob.scheduleJob();
 		Log.i(TAG, "RENATUS APP INITIATED");
 	}
-	
-	
+
+
 	@Override
 	protected void attachBaseContext(Context base)
 	{
-		super.attachBaseContext(base);   
+		
+		super.attachBaseContext(base);
 		MultiDex.install(this);
 	}
 }

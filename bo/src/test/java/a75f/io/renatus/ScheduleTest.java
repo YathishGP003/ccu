@@ -15,7 +15,7 @@ import a75f.io.bo.building.definitions.MockTime;
 
 public class ScheduleTest
 {
-	
+	//dkdkdk
 	
 	/*
 	local date
@@ -64,7 +64,8 @@ public class ScheduleTest
 		int[] ints = {1, 2, 3, 4, 5};
 		ArrayList<Integer> intsaslist = new ArrayList<Integer>();
 		for(int i : ints)
-		{
+		{ //as
+			int z = 0;
 			intsaslist.add(i);
 		}
 		schedule.setDays(intsaslist);

@@ -6,4 +6,5 @@ package a75f.io.bo.building;
 
 public class ScheduleTest
 {
+	int xtest;
 }

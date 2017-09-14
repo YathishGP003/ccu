@@ -100,6 +100,7 @@ public class ScheduleTest
 	@Test
 	public void getUnMockedTimeTest()
 	{
+		int i = 0;
 		//2017 Sep 08 18:22:00 UTC-5:00
 		MockTime.getInstance().setMockTime(true, OUT_OF_SCHEDULE_MOCK_TIME);
 		//Assert that the mocktime changed.
@@ -107,6 +108,8 @@ public class ScheduleTest
 		boolean scheduled = schedule.isInSchedule();
 		//This should be false and out of the mock time.
 		Assert.assertFalse(scheduled);
+		
+		
 	}
 }
 

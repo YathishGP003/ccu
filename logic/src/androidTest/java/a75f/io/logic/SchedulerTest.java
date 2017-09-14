@@ -1,6 +1,5 @@
 package a75f.io.logic;
 
-import android.app.AlarmManager;
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
@@ -8,7 +7,6 @@ import android.support.test.runner.AndroidJUnit4;
 import junit.framework.Assert;
 
 import org.joda.time.DateTime;
-import org.joda.time.LocalDateTime;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -204,33 +202,50 @@ public class SchedulerTest
 	
 	@Test
 	public void test100SchedulesExpiringEvery2Second() {
-		ScheduledItem item = new ScheduledItem();
-		long time = System.currentTimeMillis();
 		
-		for (int cnt = 1; cnt <= 3; cnt++)
+		int numSchudules = 0;
+		
+		for (int cnt = 1; cnt <= 100; cnt++)
 		{
-			item.mTimeStamp = new DateTime(System.currentTimeMillis()+ 10000 *  cnt);
-			//item.mTimeStamp.plusSeconds(10);
+			ScheduledItem item = new ScheduledItem();
+			item.mTimeStamp = new DateTime(System.currentTimeMillis()+ 2000 *  cnt);
 			item.mUuid = UUID.randomUUID();
 			item.lScheduleAction = LScheduleAction.CONTROLS_UPDATE;
 			mLScheduler.add(item);
 		}
-		Assert.assertEquals(3, mLScheduler.getScheduledItems().size());
-		threadSleep(30);
-		Assert.assertEquals(1, mLScheduler.getScheduledItems().size());
-		threadSleep(15);
-		Assert.assertEquals(0, mLScheduler.getScheduledItems().size());
 		
-		
-		/*Assert.assertEquals(100, mLScheduler.getScheduledItems().size());
-		threadSleep(50);
-		Assert.assertEquals(75, mLScheduler.getScheduledItems().size());
-		threadSleep(50);
-		Assert.assertEquals(50, mLScheduler.getScheduledItems().size());
-		threadSleep(50);
-		Assert.assertEquals(25, mLScheduler.getScheduledItems().size());
-		threadSleep(50);
-		Assert.assertEquals(0, mLScheduler.getScheduledItems().size());*/
+		numSchudules = mLScheduler.getScheduledItems().size();
+		System.out.print(numSchudules);
+		threadSleep(20);
+		System.out.println(mLScheduler.getScheduledItems().size());
+		Assert.assertTrue(mLScheduler.getScheduledItems().size() <= (numSchudules -10));
+		threadSleep(20);
+		System.out.println(mLScheduler.getScheduledItems().size());
+		Assert.assertTrue(mLScheduler.getScheduledItems().size() <= (numSchudules -20));
+		threadSleep(20);
+		System.out.println(mLScheduler.getScheduledItems().size());
+		Assert.assertTrue(mLScheduler.getScheduledItems().size() <= (numSchudules -30));
+		threadSleep(20);
+		System.out.println(mLScheduler.getScheduledItems().size());
+		Assert.assertTrue(mLScheduler.getScheduledItems().size() <= (numSchudules -40));
+		threadSleep(20);
+		System.out.println(mLScheduler.getScheduledItems().size());
+		Assert.assertTrue(mLScheduler.getScheduledItems().size() <= (numSchudules -50));
+		threadSleep(20);
+		System.out.println(mLScheduler.getScheduledItems().size());
+		Assert.assertTrue(mLScheduler.getScheduledItems().size() <= (numSchudules -60));
+		threadSleep(20);
+		System.out.println(mLScheduler.getScheduledItems().size());
+		Assert.assertTrue(mLScheduler.getScheduledItems().size() <= (numSchudules -70));
+		threadSleep(20);
+		System.out.println(mLScheduler.getScheduledItems().size());
+		Assert.assertTrue(mLScheduler.getScheduledItems().size() <= (numSchudules -80));
+		threadSleep(20);
+		System.out.println(mLScheduler.getScheduledItems().size());
+		Assert.assertTrue(mLScheduler.getScheduledItems().size() <= (numSchudules -80));
+		threadSleep(20);
+		System.out.println(mLScheduler.getScheduledItems().size());
+		Assert.assertTrue(mLScheduler.getScheduledItems().size() == 0);
 		
 	}
 	

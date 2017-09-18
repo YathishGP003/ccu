@@ -23,8 +23,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import a75f.io.bo.building.Floor;
+import a75f.io.bo.building.Node;
 import a75f.io.bo.building.Zone;
 import a75f.io.logic.L;
 import a75f.io.renatus.BLE.FragmentDeviceScan;
@@ -258,12 +260,23 @@ public class FloorPlanFragment extends Fragment
 	
 	private void updateModules(Zone zone)
 	{
-		smartNodeAddresses = zone.findSmartNodeAddresses();
 		mModuleListAdapter =
-				new DataArrayAdapter<>(getActivity(), R.layout.listviewitem, smartNodeAddresses);
+				new DataArrayAdapter<>(getActivity(), R.layout.listviewitem, createIntegerList(
+						zone.getNodes()));
 		moduleListView.setAdapter(mModuleListAdapter);
 	}
 	
+	private ArrayList<Short> createIntegerList(HashMap<Short, Node> nodes)
+	{
+		ArrayList<Short> arrayList = new ArrayList<Short>();
+		
+		for(Short address : nodes.keySet())
+		{
+			arrayList.add(address);
+			
+		}
+		return arrayList;
+	}
 	
 	private void enableFloorButton()
 	{

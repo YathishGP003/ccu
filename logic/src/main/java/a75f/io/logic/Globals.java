@@ -25,7 +25,6 @@ class Globals
 	private static final TimeUnit TASK_SERERATION_TIMEUNIT                  = TimeUnit.SECONDS;
 	private static Globals                  globals;
 	HeartBeatJob        mHeartBeatJob        = new HeartBeatJob();
-	ScheduleProfilesJob mScheduleProfilesJob = new ScheduleProfilesJob();
 	private        ScheduledExecutorService taskExecutor;
 	private        Context                  mApplicationContext;
 	private        CCUApplication           mCCUApplication;
@@ -71,7 +70,6 @@ class Globals
 		int HEARTBEAT_INTERVAL = 60;
 		mHeartBeatJob.scheduleJob(HEARTBEAT_INTERVAL, TASK_SEPERATION, TASK_SERERATION_TIMEUNIT);
 		//5 seconds after heart beat initializes start profile scheduler.
-		mScheduleProfilesJob.scheduleJob(HEARTBEAT_INTERVAL, TASK_SEPERATION, TASK_SERERATION_TIMEUNIT);
 	}
 	
 	public ScheduledExecutorService getScheduledThreadPool()

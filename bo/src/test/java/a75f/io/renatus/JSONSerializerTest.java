@@ -12,9 +12,9 @@ import java.util.UUID;
 import a75f.io.bo.building.CCUApplication;
 import a75f.io.bo.building.Floor;
 import a75f.io.bo.building.LightProfile;
-import a75f.io.bo.building.SmartNode;
-import a75f.io.bo.building.SmartNodeOutput;
-import a75f.io.bo.building.definitions.Output;
+import a75f.io.bo.building.Node;
+import a75f.io.bo.building.Output;
+import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.bo.json.serializers.JsonSerializer;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
@@ -107,22 +107,23 @@ public class JSONSerializerTest
 		UUID analog15kUUID = UUID.randomUUID();
 		short smartNodeAddress = 5000;
 		CCUApplication ccuApplication = new CCUApplication();
-		SmartNode smartNode5K = new SmartNode();
-		smartNode5K.mAddress = smartNodeAddress;
-		smartNode5K.mRoomName = "SmartNode roomName";
-		ccuApplication.smartNodes.add(smartNode5K);
-		ccuApplication.CCUTitle = "Light Test";
+		Node node5K = new Node();
+		node5K.setAddress(smartNodeAddress);
+		
+		ccuApplication.setTitle("Light Test");
 		Floor floor = new Floor(1, "webid", "Floor1");
-		LightProfile lightProfile5K = new LightProfile("Light Profile");
+		Zone zone = new Zone("Zone1");
+		LightProfile lightProfile5K = new LightProfile();
+		
+		zone.getNodes().put(node5K.getAddress(), node5K);
 //		ccuApplication.floors.get(0).addZone("5000 test zone");
 //		ccuApplication.floors.get(0).getRoomList().get(0).zoneProfiles.add(lightProfile5K);
-		SmartNodeOutput smartNodeOutput5K = new SmartNodeOutput();
-		smartNodeOutput5K.mSmartNodeAddress = smartNode5K.mAddress;
-		smartNodeOutput5K.mUniqueID = analog15kUUID;
-		smartNodeOutput5K.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
-		smartNodeOutput5K.mOutput = Output.Analog;
-		smartNodeOutput5K.mName = "Dining Room";
-		lightProfile5K.smartNodeOutputs.add(smartNodeOutput5K);
+		Output output5K = new Output();
+		output5K.setAddress(node5K.getAddress());
+		output5K.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
+		output5K.setName("Dining Room");
+		zone.addOutputCircuit(node5K, lightProfile5K, output5K);
+		
 		try
 		{
 			String ccuApplicationJSON = JsonSerializer.toJson(ccuApplication, true);
@@ -132,7 +133,7 @@ public class JSONSerializerTest
 		{
 			e.printStackTrace();
 		}
-		//SmartNode smartNode = ccuApplication.findSmartNodeByAddress(ccuApplication.floors.get(0)
+		//Node smartNode = ccuApplication.findSmartNodeByAddress(ccuApplication.floors.get(0)
 //		                                                                                  .getRoomList().get(0).zoneProfiles.get(0).smartNodeOutputs.get(0).mSmartNodeAddress);
 //		CcuToCmOverUsbDatabaseSeedSnMessage_t ccuToCmOverUsbDatabaseSeedSnMessage_t = new CcuToCmOverUsbDatabaseSeedSnMessage_t();
 //		ccuToCmOverUsbDatabaseSeedSnMessage_t.smartNodeAddress.set(smartNode.mAddress);

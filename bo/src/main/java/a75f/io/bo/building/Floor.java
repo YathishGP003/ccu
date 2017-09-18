@@ -8,31 +8,30 @@ import java.util.ArrayList;
 
 public class Floor
 {
-	public static final String FLOOR_NAME  = "FloorName";
-	public static final String FLOOR_WEBID = "FloorWebId";
-	public int             mFloorId;
-	public String          mFloorName;
-	public String          mKinveyWebId;
-	public ArrayList<Zone> mRoomList;
-	
-	
-	public Floor()
-	{
-	}
-	
-	
-	public Floor(int floorId, String webId, String floor)
-	{
-		mFloorId = floorId;
-		mKinveyWebId = webId;
-		mFloorName = floor;
-		mRoomList = new ArrayList<Zone>();
-	}
-	
-	
-	public String toString()
-	{
-		return mFloorName;
-	}
-
+    public static final String FLOOR_NAME  = "FloorName";
+    public static final String FLOOR_WEBID = "FloorWebId";
+    public int             mFloorId;
+    public String          mFloorName;
+    public String          mKinveyWebId;
+    public ArrayList<Zone> mRoomList;
+    
+    
+    public Floor()
+    {
+    }
+    
+    
+    public Floor(int floorId, String webId, String floor)
+    {
+        mFloorId = floorId;
+        mKinveyWebId = webId;
+        mFloorName = floor;
+        mRoomList = new ArrayList<Zone>();
+    }
+    
+    
+    public String toString()
+    {
+        return mFloorName;
+    }
 }

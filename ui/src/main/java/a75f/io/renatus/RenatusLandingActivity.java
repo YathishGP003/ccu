@@ -63,10 +63,10 @@ public class RenatusLandingActivity extends AppCompatActivity
 			@Override
 			public void onClick(View view)
 			{
-				if (settingView == true && mTabLayout.getSelectedTabPosition() == 0)
+/*				if (settingView == true && mTabLayout.getSelectedTabPosition() == 0)
 				{
 					DefaultFragment.getInstance().show(getSupportFragmentManager(), "setup");
-				}
+				}*/
 //				else if (settingView == true && mTabLayout.getSelectedTabPosition() == 1)
 //				{
 //					Intent i = new Intent(RenatusLandingActivity.this, MainActivity.class);
@@ -109,7 +109,6 @@ public class RenatusLandingActivity extends AppCompatActivity
 			settingView = false;
 			pageSwitchButton.setImageResource(R.drawable.setting);
 		}
-		else
 		{
 			mViewPager.setAdapter(mSettingPagerAdapter);
 			mTabLayout.post(new Runnable()

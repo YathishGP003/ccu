@@ -375,7 +375,7 @@ public class SmartStatTestFragment extends BaseDialogFragment
 			Toast.makeText(SmartStatTestFragment.this.getContext(), "Temperature not set , default values are used", Toast.LENGTH_SHORT).show();
 		}
 		
-	/*-	SmartNode sn = Globals.getInstance().getSmartNode();
+	/*-	Node sn = Globals.getInstance().getSmartNode();
 		CcuToCmOverUsbDatabaseSeedSmartStatMessage_t msg = new CcuToCmOverUsbDatabaseSeedSmartStatMessage_t();
 		msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SMART_STAT);
 		msg.address.set(sn.getMeshAddress());
@@ -443,7 +443,7 @@ public class SmartStatTestFragment extends BaseDialogFragment
 			Toast.makeText(SmartStatTestFragment.this.getContext(), "Temperature not set , default values are used", Toast.LENGTH_SHORT).show();
 		}
 
-		//SmartNode sn = Globals.getInstance().getSmartNode();
+		//Node sn = Globals.getInstance().getSmartNode();
 		CcuToCmOverUsbSmartStatSettingsMessage_t msg = new CcuToCmOverUsbSmartStatSettingsMessage_t();
 		msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SMART_STAT_SETTINGS);
 		msg.address.set(6000/*sn.getMeshAddress()*/);
@@ -473,7 +473,7 @@ public class SmartStatTestFragment extends BaseDialogFragment
 	public void sendControl() {
 		
 		/*
-		SmartNode sn = Globals.getInstance().getSmartNode();
+		Node sn = Globals.getInstance().getSmartNode();
 		CcuToCmOverUsbSmartStatControlsMessage_t msg = new CcuToCmOverUsbSmartStatControlsMessage_t();
 		msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SMART_STAT_CONTROLS);
 		msg.address.set(sn.getMeshAddress());

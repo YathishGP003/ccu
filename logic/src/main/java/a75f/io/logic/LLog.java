@@ -17,14 +17,17 @@ import a75f.io.bo.json.serializers.JsonSerializer;
 class LLog
 {
 	
-	private static final String TAG = LLog.class.getSimpleName();
+	private static final String TAG     = LLog.class.getSimpleName();
+	private static final String SERIAL_TAG = "Serial";
 	
 	
-	public static void logStructAsJSON(Struct struct)
+	public static void LogdStructAsJson(Struct struct)
 	{
 		if (BuildConfig.DEBUG)
 		{
 			String structString = null;
+		
+			//We can bury this exception because when we log a struct to json, it is purely for loggin purposes
 			try
 			{
 				structString = JsonSerializer.toJson(struct, true);
@@ -50,5 +53,19 @@ class LLog
 		{
 			Log.d(TAG, message);
 		}
+	}
+	
+	public static void LogdSerial(String message)
+	{
+		
+		if (BuildConfig.DEBUG)
+		{
+			Log.d(SERIAL_TAG, message);
+		}
+	}
+	
+	public static String objectNullString(Object object)
+	{
+		return object == null ? " is null. " : " is not null. ";
 	}
 }

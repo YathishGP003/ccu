@@ -398,9 +398,9 @@ public class ZonesFragment extends Fragment
 			mLcmHeaderView = header;
 		}
 		boolean expand = roomData == null ? false : true;
-		LightingDetailAdapter adapter =
+		/*LightingDetailAdapter adapter =
 				new LightingDetailAdapter(getActivity(), mLightsDetailsView, roomData, expand);
-		mLightsDetailsView.setAdapter(adapter);
+		mLightsDetailsView.setAdapter(adapter);*/
 		new LayoutHelper(getActivity()).setListViewParams(mLightsDetailsView, null, 0, 0, expand);
 	}
 }

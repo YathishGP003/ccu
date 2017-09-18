@@ -7,10 +7,9 @@ import java.util.UUID;
 import a75f.io.bo.building.CCUApplication;
 import a75f.io.bo.building.Floor;
 import a75f.io.bo.building.LightProfile;
-import a75f.io.bo.building.SmartNode;
-import a75f.io.bo.building.SmartNodeOutput;
+import a75f.io.bo.building.Node;
+import a75f.io.bo.building.Output;
 import a75f.io.bo.building.Zone;
-import a75f.io.bo.building.definitions.Output;
 import a75f.io.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.bo.building.definitions.Port;
@@ -27,37 +26,40 @@ public class LocalStorageUtilTest
 	public void persistCcuAppSettingsTest()
 	{
 		CCUApplication orgCcu = new CCUApplication();
-		orgCcu.floors.add(new Floor(0, null, "FirstFloor"));
-		orgCcu.floors.get(0).mRoomList.add(new Zone("FirstRoom"));
+		orgCcu.getFloors().add(new Floor(0, null, "FirstFloor"));
+		orgCcu.getFloors().get(0).mRoomList.add(new Zone("FirstRoom"));
 		UUID analog15kUUID = UUID.randomUUID();
 		short smartNodeAddress = 5000;
-		SmartNode smartNode5K = new SmartNode();
-		smartNode5K.mAddress = smartNodeAddress;
-		//smartNode5K.mRoomName = "SmartNode roomName";
-		orgCcu.smartNodes.add(smartNode5K);
-		orgCcu.CCUTitle = "Light Test";
+		Node node5K = new Node();
+		node5K.setAddress(smartNodeAddress);
+		
+		
+		orgCcu.setTitle("Light Test");
 		LightProfile lightProfile5K = new LightProfile();
-		SmartNodeOutput smartNodeOutput5K = new SmartNodeOutput();
-		smartNodeOutput5K.mSmartNodeAddress = smartNode5K.mAddress;
-		//smartNodeOutput5K.mUniqueID = analog15kUUID;
-		smartNodeOutput5K.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
-		//smartNodeOutput5K.mOutput = Output.Analog;
-		SmartNodeOutput relayOneOp = new SmartNodeOutput();
-		relayOneOp.mSmartNodeAddress = smartNode5K.mAddress;
+		Output output5K = new Output();
+		output5K.setAddress(node5K.getAddress());
+		//output5K.mUniqueID = analog15kUUID;
+		output5K.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
+		//output5K.mOutput = Output.Analog;
+		orgCcu.getFloors().get(0).mRoomList.get(0).addOutputCircuit(node5K, lightProfile5K,
+                output5K);
+		Output relayOneOp = new Output();
+		relayOneOp.setAddress(node5K.getAddress());
 		//relayOneOp.mUniqueID = UUID.randomUUID();
 		//relayOneOp.mOutput = Output.Relay;
-		relayOneOp.mName = "Relay1";
-		relayOneOp.mSmartNodePort = Port.RELAY_ONE;
+		relayOneOp.setName( "Relay1");
+		relayOneOp.setPort(Port.RELAY_ONE);
 		relayOneOp.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyClose;
 		relayOneOp.mOutputAnalogActuatorType = OutputAnalogActuatorType.TwoToTenV;
-		lightProfile5K.smartNodeOutputs.add(relayOneOp);
+		orgCcu.getFloors().get(0).mRoomList.get(0).addOutputCircuit(node5K, lightProfile5K,
+                relayOneOp);
 		try
 		{
 			String jsonString = JsonSerializer.toJson(orgCcu, false);
 			System.out.println(jsonString);
 			//LocalStorage.getCCUSettings().edit().putString("storagetest", jsonString).commit();
 			CCUApplication ccuFrmJson = (CCUApplication) JsonSerializer.fromJson(jsonString, CCUApplication.class);
-			System.out.println(ccuFrmJson.smartNodes.size());
+			System.out.println(ccuFrmJson.getFloors().get(0).mRoomList.size());
 		}
 		catch (Exception c)
 		{

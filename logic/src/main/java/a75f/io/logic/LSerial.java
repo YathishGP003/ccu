@@ -1,24 +1,20 @@
 package a75f.io.logic;
 
-import android.util.Log;
-
 import org.javolution.io.Struct;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import a75f.io.bo.json.serializers.JsonSerializer;
 import a75f.io.bo.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
 import a75f.io.bo.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 import a75f.io.bo.serial.MessageType;
-import a75f.io.bo.serial.SnToCmOverAirSnRegularUpdateMessage_t;
 import a75f.io.bo.serial.comm.SerialAction;
 import a75f.io.bo.serial.comm.SerialEvent;
 import a75f.io.usbserial.UsbService;
 
-import static a75f.io.logic.LLog.logStructAsJSON;
-import static android.content.ContentValues.TAG;
+import static a75f.io.logic.LLog.Logd;
+import static a75f.io.logic.LLog.LogdSerial;
+import static a75f.io.logic.LLog.LogdStructAsJson;
 
 /**
  * Created by Yinten isOn 8/21/2017.
@@ -48,6 +44,26 @@ class LSerial
 		return mLSerial;
 	}
 	
+	/***
+	 * This method will construct the Struct based on a class type.   It will log message type, data return size, incoming hexadecimal, and json.
+	 * This is a lot of parsing, so it should only be used for
+	 * @param data
+	 * @param pojoClass
+	 * @param <T>
+	 * @return
+	 */
+	public static <T extends Struct> T fromBytes(byte[] data, Class<T> pojoClass)
+	{
+		T struct = pojoClass.cast(new Struct());
+		struct.setByteBuffer(ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN), 0);
+		Logd("Message Type: " + pojoClass.getSimpleName());
+		Logd("Data return size: " + data.length);
+		//Log hexadecimal
+		Logd("Incoming Hexadecimal: " + struct.toString());
+		LogdStructAsJson(struct);
+		return struct;
+	}
+
 	
 	/***
 	 * This method will handle all incoming messages from the CM.   It will parse them and
@@ -60,61 +76,26 @@ class LSerial
 	
 	public static void handleSerialEvent(SerialEvent event)
 	{
-		Log.i(TAG, "Event Type: " + event.getSerialAction().name());
+		
+		LogdSerial("Event Type: " + event.getSerialAction().name());
+		
 		if (event.getSerialAction() == SerialAction.MESSAGE_FROM_SERIAL_PORT)
 		{
-			byte[] data = (byte[]) event.getBytes();
-			Log.i(TAG, "Data return size: " + data.length);
+			byte[] data = event.getBytes();
 			MessageType messageType = MessageType.values()[(event.getBytes()[0] & 0xff)];
-			String pojoAsString = null;
-			Log.i(TAG, "Message Type: " + messageType.name());
+		
 			if (messageType == MessageType.CM_REGULAR_UPDATE)
 			{
-				CmToCcuOverUsbCmRegularUpdateMessage_t regularUpdateMessage_t =
-						new CmToCcuOverUsbCmRegularUpdateMessage_t();
-				Log.i(TAG, "CmToCcuOverUsbCmRegularUpdateMessage_t Message Expected Size: " +
-				           regularUpdateMessage_t.size());
-				regularUpdateMessage_t
-						.setByteBuffer(ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN), 0);
-				Log.i(TAG, "Regular Update Message: " + regularUpdateMessage_t.toString());
-				try
-				{
-					pojoAsString = JsonSerializer.toJson(regularUpdateMessage_t, true);
-					System.out.println("POJO as string:\n" + pojoAsString + "\n");
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
-				}
+					Pulse.regularCMUpdate(fromBytes(data, CmToCcuOverUsbCmRegularUpdateMessage_t.class));
 			}
 			else if (messageType == MessageType.CM_TO_CCU_OVER_USB_SN_REGULAR_UPDATE)
 			{
-				CmToCcuOverUsbSnRegularUpdateMessage_t smartNodeRegularUpdateMessage_t =
-						new CmToCcuOverUsbSnRegularUpdateMessage_t();
-				Log.i(TAG, "CmToCcuOverUsbSnRegularUpdateMessage_t Message Expected Size: " +
-				           smartNodeRegularUpdateMessage_t.size());
-				Log.i(TAG, "CmToCcuOverUsbSnRegularUpdateMessage_t size: " +
-				           smartNodeRegularUpdateMessage_t.size());
-				Log.i(TAG, "Buffer size with smart node regular update message: " + data.length);
-				Log.i(TAG, "Size of inner struct SnToCmOverAirSnRegularUpdateMessage_t: " +
-				           new SnToCmOverAirSnRegularUpdateMessage_t().size());
-				smartNodeRegularUpdateMessage_t
-						.setByteBuffer(ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN), 0);
-				Log.i(TAG, "Smart Node Regular Update Message: " +
-				           smartNodeRegularUpdateMessage_t.toString());
-				try
-				{
-					pojoAsString = JsonSerializer.toJson(smartNodeRegularUpdateMessage_t, true);
-					System.out.println("POJO as string:\n" + pojoAsString + "\n");
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
-				}
+					Pulse.regularSNUpdate(fromBytes(data, CmToCcuOverUsbSnRegularUpdateMessage_t.class));
 			}
 		}
 	}
-
+	
+	
 	public boolean isConnected()
 	{
 		if(mUsbService == null)
@@ -151,12 +132,12 @@ class LSerial
 	 *                  documentation isOn Sharepoint.
 	 * @return success If serial was open and the usbService was successfully able to try to send
 	 * to CM without Android stopping it.  It doesn't nessacarily mean any messages went to
-	 * either the CM or the SmartNode.
+	 * either the CM or the Node.
 	 *
 	 */
 	public boolean sendSerialStruct(Struct struct)
 	{
-		logStructAsJSON(struct);
+		LogdStructAsJson(struct);
 		if (mUsbService == null)
 		{
 			LLog.logUSBServiceNotInitialized();

@@ -2,15 +2,10 @@ package a75f.io.logic;
 
 import android.content.Context;
 
-import java.util.ArrayList;
-import java.util.UUID;
-
 import a75f.io.bo.building.CCUApplication;
 import a75f.io.bo.building.LightProfile;
-import a75f.io.bo.building.SmartNode;
-import a75f.io.bo.building.SmartNodeOutput;
+import a75f.io.bo.building.Node;
 import a75f.io.bo.building.Zone;
-import a75f.io.bo.building.definitions.Port;
 
 /**
  * Created by Yinten isOn 9/4/2017.
@@ -68,41 +63,36 @@ public class L
 	
 	private static void sync()
 	{
-		///
-	}
-	
-	public static SmartNodeOutput findPort(ArrayList<SmartNodeOutput> smartNodeOutputs, Port port, short smartNodeAddress)
-	{
-		return Globals.getInstance().getLZoneProfile().findPort(smartNodeOutputs, port, smartNodeAddress);
+		//seed all ccus
+		//send settings messages
+		//send controls messages
 	}
 	
 	public static short generateSmartNodeAddress()
 	{
 		return LSmartNode.nextSmartNodeAddress();
 	}
-	
-	public static SmartNodeOutput findSmartNodePortByUUID(UUID mCurrentPortId)
-	{
-		return LSmartNode.findSmartNodePortByUUID(mCurrentPortId);
-	}
+
 	public static Zone findZoneByName(String mFloorName, String mRoomName)
 	{
 		return ZoneBLL.findZoneByName(mFloorName, mRoomName);
 	}
-	public static SmartNode getSmartNodeAndSeed(short mSmartNodeAddress, String mRoomName)
+	public static Node getSmartNodeAndSeed(Zone zone, short address, String mRoomName)
 	{
-		return LSmartNode.getSmartNodeAndSeed(mSmartNodeAddress, mRoomName);
+		return LSmartNode.getSmartNodeAndSeed(zone, address, mRoomName);
 	}
-	public static void sendLightControlsMessage(LightProfile mLightProfile)
+	public static void sendLightControlsMessage(Zone zone)
 	{
-		ZoneBLL.sendControlsMessage(mLightProfile);
+        //TODO: revist
+		//ZoneBLL.sendControlsMessage(zone);
 	}
 	
 	
-	public static void addZoneProfileToZone(SmartNode smartNode, Zone zone, LightProfile mLightProfile)
+	public static void addZoneProfileToZone(Node node, Zone zone, LightProfile mLightProfile)
 	{
-		LSmartNode.addSmartNode(smartNode);
-		ZoneBLL.addZoneProfileToZone(zone, mLightProfile);
+
 		saveCCUState();
 	}
+    
+
 }

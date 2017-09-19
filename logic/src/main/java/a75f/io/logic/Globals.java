@@ -9,6 +9,8 @@ import java.util.concurrent.TimeUnit;
 import a75f.io.bo.building.CCUApplication;
 import a75f.io.dal.DalContext;
 
+import static a75f.io.logic.LLog.Logd;
+
 /**
  * Created by rmatt isOn 7/19/2017.
  */
@@ -25,6 +27,7 @@ class Globals
 	private static final TimeUnit TASK_SERERATION_TIMEUNIT                  = TimeUnit.SECONDS;
 	private static Globals                  globals;
 	HeartBeatJob        mHeartBeatJob        = new HeartBeatJob();
+	MeshUpdateJob		mMeshUpdateJob		= new MeshUpdateJob();
 	private        ScheduledExecutorService taskExecutor;
 	private        Context                  mApplicationContext;
 	private        CCUApplication           mCCUApplication;
@@ -68,7 +71,12 @@ class Globals
 		DalContext.instantiate(this.mApplicationContext);
 		//5 seconds after application initializes start heart beat
 		int HEARTBEAT_INTERVAL = 60;
-		mHeartBeatJob.scheduleJob(HEARTBEAT_INTERVAL, TASK_SEPERATION, TASK_SERERATION_TIMEUNIT);
+        Logd("Scheduling ---- HeartBeat Job");
+		mHeartBeatJob.scheduleJob("Heartbeat Job", HEARTBEAT_INTERVAL, TASK_SEPERATION, TASK_SERERATION_TIMEUNIT);
+        
+        Logd("Scheduling ---- MeshUpdate Job");
+        mMeshUpdateJob.scheduleJob("Mesh Update Job", HEARTBEAT_INTERVAL, TASK_SEPERATION * 2,
+				TASK_SERERATION_TIMEUNIT);
 		//5 seconds after heart beat initializes start profile scheduler.
 	}
 	

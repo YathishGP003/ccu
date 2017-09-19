@@ -61,4 +61,5 @@ public class LightProfile extends ZoneProfile
                 .set((short) 1);
         seedMessage.settings.profileBitmap.lightingControl.set((short) 1);
     }
+    
 }

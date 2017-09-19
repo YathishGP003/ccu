@@ -1,36 +1,35 @@
 package a75f.io.bo.building;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.UUID;
 
 public class Node
 {
     private short    mAddress;
     private NodeType mNodeType;
-    private List<UUID> mInputs  = new ArrayList<>();
-    private List<UUID> mOutputs = new ArrayList<>();
+    private HashSet<UUID> mInputs  = new HashSet<>();
+    private HashSet<UUID> mOutputs = new HashSet<>();
     
     
-    public List<UUID> getInputs()
+    public HashSet<UUID> getInputs()
     {
         return mInputs;
     }
     
     
-    public void setInputs(List<UUID> inputs)
+    public void setInputs(HashSet<UUID> inputs)
     {
         this.mInputs = inputs;
     }
     
     
-    public List<UUID> getOutputs()
+    public HashSet<UUID> getOutputs()
     {
         return mOutputs;
     }
     
     
-    public void setOutputs(List<UUID> outputs)
+    public void setOutputs(HashSet<UUID> outputs)
     {
         this.mOutputs = outputs;
     }

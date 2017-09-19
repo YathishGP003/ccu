@@ -35,10 +35,13 @@ class LSmartNode
         {
             node = zone.getNodes().get(mPairingAddress);
         }
-        else
+        
+        
+        if(node == null)
         {
             node = new Node();
             node.setAddress(mPairingAddress);
+            zone.getNodes().put(mPairingAddress, node);
         }
         
         //seedSmartNode(node, mName);

@@ -14,6 +14,7 @@ import a75f.io.bo.building.Floor;
 import a75f.io.bo.building.LightProfile;
 import a75f.io.bo.building.Node;
 import a75f.io.bo.building.Output;
+import a75f.io.bo.building.SingleStageProfile;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.bo.json.serializers.JsonSerializer;
@@ -105,30 +106,35 @@ public class JSONSerializerTest
 	public void generateLightObjectsTest()
 	{
 		UUID analog15kUUID = UUID.randomUUID();
-		short smartNodeAddress = 5000;
+		short smartNodeAddress = 0;
 		CCUApplication ccuApplication = new CCUApplication();
 		Node node5K = new Node();
 		node5K.setAddress(smartNodeAddress);
-		
+        
 		ccuApplication.setTitle("Light Test");
 		Floor floor = new Floor(1, "webid", "Floor1");
 		Zone zone = new Zone("Zone1");
 		LightProfile lightProfile5K = new LightProfile();
 		
 		zone.getNodes().put(node5K.getAddress(), node5K);
-//		ccuApplication.floors.get(0).addZone("5000 test zone");
-//		ccuApplication.floors.get(0).getRoomList().get(0).zoneProfiles.add(lightProfile5K);
-		Output output5K = new Output();
-		output5K.setAddress(node5K.getAddress());
+        zone.mLightProfile = lightProfile5K;
+        Output output5K = new Output();
 		output5K.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
 		output5K.setName("Dining Room");
+        ccuApplication.getFloors().add(floor);
+        ccuApplication.getFloors().get(0).mRoomList.add(zone);
 		zone.addOutputCircuit(node5K, lightProfile5K, output5K);
-		
+
 		try
 		{
 			String ccuApplicationJSON = JsonSerializer.toJson(ccuApplication, true);
 			System.out.println("CCU Application As String:\n" + ccuApplicationJSON + "\n");
-		}
+            CCUApplication ccu =
+                    (CCUApplication) JsonSerializer.fromJson(ccuApplicationJSON, CCUApplication.class);
+            Assert.assertTrue((ccu.getFloors().get(0).mRoomList.get(0).mLightProfile instanceof
+                                      LightProfile));
+            Assert.assertFalse((ccu.getFloors().get(0).mRoomList.get(0).mLightProfile instanceof SingleStageProfile));
+        }
 		catch (IOException e)
 		{
 			e.printStackTrace();

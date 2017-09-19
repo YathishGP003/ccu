@@ -299,7 +299,7 @@ public class FloorPlanFragment extends Fragment
 	{
 		enableFloorEdit();
 		addFloorEdit.setText("");
-		addFloorEdit.requestFocus();
+		//addFloorEdit.requestFocus();
 		InputMethodManager mgr =
 				(InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 		mgr.showSoftInput(addFloorEdit, InputMethodManager.SHOW_IMPLICIT);
@@ -457,7 +457,9 @@ public class FloorPlanFragment extends Fragment
 	{
 		Floor floor = ccu().getFloors().get(mFloorListAdapter.getSelectedPostion());
 		Zone zone = floor.mRoomList.get(mRoomListAdapter.getSelectedPostion());
+		
 		showDialogFragment(LightingZoneProfileFragment
-				                   .newInstance(smartNodeAddresses[position], zone.roomName, floor.mFloorName), LightingZoneProfileFragment.ID);
+				                   .newInstance((Short)zone.getNodes().keySet().toArray()
+															   [position], zone.roomName, floor.mFloorName), LightingZoneProfileFragment.ID);
 	}
 }

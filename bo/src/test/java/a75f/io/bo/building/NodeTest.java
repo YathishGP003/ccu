@@ -8,7 +8,9 @@ import java.io.IOException;
 import java.util.UUID;
 
 import a75f.io.bo.building.definitions.OutputAnalogActuatorType;
+import a75f.io.bo.building.definitions.Port;
 import a75f.io.bo.json.serializers.JsonSerializer;
+import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 
 /**
  * Created by samjithsadasivan isOn 9/7/17.
@@ -32,6 +34,20 @@ public class NodeTest
         Zone z = new Zone("75FRoom1");
         floor.mRoomList.add(z);
         LightProfile p1 = new LightProfile();
+        ZoneProfile p2 = new ZoneProfile()
+        {
+            @Override
+            public short mapCircuit(Output output)
+            {
+                return 100;
+            }
+            
+            
+            @Override
+            public void mapSeed(CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage)
+            {
+            }
+        };
         z.mLightProfile = p1;
         z.getNodes().put(testSN1.getAddress(), testSN1);
         z.getNodes().put(testSN2.getAddress(), testSN2);
@@ -41,25 +57,28 @@ public class NodeTest
         op1.setAddress(testSN1.getAddress());
         op1.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
         op1.mName = "Dining Room";
-        p1.getOutputs().add(op1.getUuid());
+        z.addOutputCircuit(testSN1, p1, op1);
         Output op2 = new Output();
         op2.setAddress(testSN2.getAddress());
         op2.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
         op2.mName = "Kitchen";
-        p1.getOutputs().add(op2.getUuid());
-        z.getOutputs().put(op2.getUuid(), op2);
-        testSN1.getOutputs().add(op2.getUuid());
+        z.addOutputCircuit(testSN2, p1, op2);
         Output op3 = new Output();
         op3.setAddress(testSN2.getAddress());
-        UUID op3UD = UUID.randomUUID();
-        op3.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
+        op3.mOutputAnalogActuatorType = OutputAnalogActuatorType.TwoToTenV;
         op3.mName = "Bedroom";
-        p1.getOutputs().add(op3.getUuid());
-        z.getOutputs().put(op3.getUuid(), op3);
-        testSN2.getOutputs().add(op3.getUuid());
+        op3.setPort(Port.ANALOG_OUT_ONE);
+        z.addOutputCircuit(testSN2, p1, op3);
+        short lightProfile = z.mLightProfile.mapCircuit(op3);
+        Assert.assertEquals(lightProfile, 20);
+        System.out.println("Mapping zone profile: " + z.mLightProfile.mapCircuit(op3));
+        z.mLightProfile = p2;
+        short zoneProfile = z.mLightProfile.mapCircuit(op3);
+        System.out.println("Mapping zone profile: " + z.mLightProfile.mapCircuit(op3));
+        Assert.assertEquals(zoneProfile, 100);
         try
         {
-            Assert.assertEquals(testSN2.getAddress(), getSmartNodeAddressFromOpUUID(ccuApplication, op3UD));
+            Assert.assertEquals(testSN2.getAddress(), getSmartNodeAddressFromOpUUID(ccuApplication, op3.getUuid()));
             Assert.assertEquals(2, getConfiguredOpsforSmartnode(ccuApplication, testSN2));
             String ccuApplicationJSON = JsonSerializer.toJson(ccuApplication, true);
             System.out.println("CCU Application As String:\n" + ccuApplicationJSON + "\n");
@@ -76,7 +95,7 @@ public class NodeTest
     
     public int getSmartNodeAddressFromOpUUID(CCUApplication global, UUID opUUID)
     {
-        Zone profile = (Zone) global.getFloors().get(0).mRoomList.get(0);
+        Zone profile = global.getFloors().get(0).mRoomList.get(0);
         return profile.getOutputs().get(opUUID).getAddress();
     }
     

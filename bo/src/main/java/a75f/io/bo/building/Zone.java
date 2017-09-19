@@ -1,6 +1,9 @@
 package a75f.io.bo.building;
 
+import android.util.Log;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.javolution.io.Struct;
 
@@ -20,14 +23,15 @@ import a75f.io.bo.serial.MessageType;
 public class Zone
 {
     public String roomName = "Default Zone";
-    public LightProfile mLightProfile;
+    public ZoneProfile mLightProfile;
     
     private HashMap<Short, Node>  mNodes   = new HashMap<>();
     private HashMap<UUID, Input>  mInputs  = new HashMap<>();
     private HashMap<UUID, Output> mOutputs = new HashMap<>();
-    private CcuToCmOverUsbSnControlsMessage_t[] controlsMessage;
-    private CcuToCmOverUsbSnControlsMessage_t[] seedMessages;
-    private CcuToCmOverUsbSnControlsMessage_t[] controlsMessages;
+    //    private CcuToCmOverUsbSnControlsMessage_t[] controlsMessage;
+    //    private CcuToCmOverUsbSnControlsMessage_t[] seedMessages;
+    //    private CcuToCmOverUsbSnControlsMessage_t[] controlsMessages;
+    //
     
     
     public Zone()
@@ -42,7 +46,8 @@ public class Zone
     }
     
     
-    public  Output findPort(Port port, short smartNodeAddress)
+    @JsonIgnore
+    public Output findPort(Port port, short smartNodeAddress)
     {
         for (Output output : getOutputs(smartNodeAddress))
         {
@@ -60,42 +65,16 @@ public class Zone
     }
     
     
-    public HashMap<UUID, Input> getInputs()
-    {
-        return mInputs;
-    }
-    
-    
-    public void setInputs(HashMap<UUID, Input> inputs)
-    {
-        mInputs = inputs;
-    }
-    
-    
-    @Override
-    public String toString()
-    {
-        return roomName;
-    }
-    
-    
-    public ZoneProfile findLightProfile()
-    {
-        if (mLightProfile == null)
-        {
-            mLightProfile = new LightProfile();
-        }
-        return mLightProfile;
-    }
-    
-    
     public ArrayList<Output> getOutputs(short address)
     {
-        ArrayList<Output> retVal = new ArrayList<Output>();
-        Node node = mNodes.get(address);
-        for (UUID outputUUID : node.getOutputs())
+        ArrayList<Output> retVal = new ArrayList<>();
+        if (mNodes.containsKey(address))
         {
-            retVal.add(getOutputs().get(outputUUID));
+            Node node = mNodes.get(address);
+            for (UUID outputUUID : node.getOutputs())
+            {
+                retVal.add(getOutputs().get(outputUUID));
+            }
         }
         return retVal;
     }
@@ -113,24 +92,26 @@ public class Zone
     }
     
     
-
-    
-    
-    public HashMap<Short, Node> getNodes()
+    @Override
+    @JsonIgnore
+    public String toString()
     {
-        return mNodes;
+        return roomName;
     }
     
     
-    public void setNodes(HashMap<Short, Node> nodes)
+    @JsonIgnore
+    public ZoneProfile findLightProfile()
     {
-        mNodes = nodes;
+        if (mLightProfile == null)
+        {
+            mLightProfile = new LightProfile();
+        }
+        return mLightProfile;
     }
     
     
-
-    
-    
+    @JsonIgnore
     public CcuToCmOverUsbSnControlsMessage_t[] getControlsMessages()
     {
         HashMap<Short, CcuToCmOverUsbSnControlsMessage_t> controlMessagesHash = new HashMap<>();
@@ -174,6 +155,7 @@ public class Zone
     }
     
     
+    @JsonIgnore
     public CcuToCmOverUsbDatabaseSeedSnMessage_t[] getSeedMessages()
     {
         CcuToCmOverUsbDatabaseSeedSnMessage_t[] seedMessages =
@@ -188,6 +170,7 @@ public class Zone
     }
     
     
+    @JsonIgnore
     public CcuToCmOverUsbDatabaseSeedSnMessage_t getSeedMessage(short address)
     {
         CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage =
@@ -203,31 +186,113 @@ public class Zone
     }
     
     
+    @JsonIgnore
     public void addInputCircuit(Node node, ZoneProfile zoneProfile, Input circuit)
     {
+        circuit.setAddress(node.getAddress());
         getInputs().put(circuit.getUuid(), circuit);
         zoneProfile.getOutputs().add(circuit.uuid);
         this.getNodes().put(node.getAddress(), node);
     }
     
+    
+    public HashMap<UUID, Input> getInputs()
+    {
+        return mInputs;
+    }
+    //
+    //    public ArrayList<Struct> getStructs()
+    //    {
+    //
+    //    }
+    
+    
+    public void setInputs(HashMap<UUID, Input> inputs)
+    {
+        mInputs = inputs;
+    }
+    
+    
+    @JsonProperty("nodes")
+    public HashMap<Short, Node> getNodes()
+    {
+        return mNodes;
+    }
+    
+    
+    @JsonProperty("nodes")
+    public void setNodes(HashMap<Short, Node> nodes)
+    {
+        Log.i("Nodes", "Set nodes! " + nodes.size());
+        this.mNodes = nodes;
+    }
+    
+    
+    @JsonIgnore
     public void removeOutputCircuit(Output output, ZoneProfile zoneProfile)
     {
         getOutputs().remove(output.getUuid());
         zoneProfile.getOutputs().remove(output.uuid);
-        getNodes().remove(output.getAddress());
+        getNodes().get(output.getAddress()).getOutputs().remove(output.getUuid());
     }
     
+    
+    @JsonIgnore
     public void addOutputCircuit(Node node, ZoneProfile zoneProfile, Output output)
     {
+        output.setAddress(node.getAddress());
         getOutputs().put(output.getUuid(), output);
         zoneProfile.getOutputs().add(output.uuid);
-        this.getNodes().put(node.getAddress(), node);
+        node.getOutputs().add(output.uuid);
     }
     
-    public void removeInputCircuit(Input output, ZoneProfile zoneProfile)
+    
+    @JsonIgnore
+    public void removeInputCircuit(Input input, ZoneProfile zoneProfile)
     {
-        getOutputs().remove(output.getUuid());
-        zoneProfile.getOutputs().remove(output.uuid);
-        getNodes().remove(output.getAddress());
+        getOutputs().remove(input.getUuid());
+        zoneProfile.getOutputs().remove(input.uuid);
+        getNodes().remove(input.getAddress());
+        getNodes().get(input.getAddress()).getInputs().remove(input.getUuid());
+    }
+    
+    
+    @JsonIgnore
+    public Node getSmartNode(Short mSmartNodeAddress)
+    {
+        if (mNodes.containsKey(mSmartNodeAddress))
+        {
+            Log.i("NODE", "Contains Key");
+            return mNodes.get(mSmartNodeAddress);
+        }
+        else
+        {
+            Log.i("NODE", "New node");
+            Node node = new Node();
+            node.setAddress(mSmartNodeAddress);
+            mNodes.put(mSmartNodeAddress, node);
+            return node;
+        }
+    }
+    
+    
+    public void removeNodeAndClearAssociations(Short selectedModule)
+    {
+        Node nodeToDelete = getNodes().get(selectedModule);
+        for (UUID uuid : nodeToDelete.getOutputs())
+        {
+            removeCircuit(uuid);
+        }
+        getNodes().remove(selectedModule);
+    }
+    
+    
+    @JsonIgnore
+    public void removeCircuit(UUID uuid)
+    {
+        getOutputs().remove(uuid);
+        getInputs().remove(uuid);
+        mLightProfile.getOutputs().remove(uuid);
+        mLightProfile.getInputs().remove(uuid);
     }
 }

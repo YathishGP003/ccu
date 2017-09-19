@@ -9,6 +9,8 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
+import a75f.io.logic.L;
+
 import static a75f.io.logic.L.ccu;
 
 class ModuleListActionMenuListener implements MultiChoiceModeListener
@@ -59,9 +61,12 @@ class ModuleListActionMenuListener implements MultiChoiceModeListener
 			case R.id.deleteSelection:
 				if (true)
 				{ //TODO check prefconfigured profiels
+					
 					deleteSelectedFSV();
 					seletedModules.clear();
+                    floorPlanActivity.refreshScreen();
 					mode.finish(); // Action picked, so close the CAB
+                    
 				}
 				else
 				{
@@ -87,9 +92,14 @@ class ModuleListActionMenuListener implements MultiChoiceModeListener
 	
 	private void deleteSelectedFSV()
 	{
-		ccu().getFloors().get(floorPlanActivity.mFloorListAdapter.getSelectedPostion()).mRoomList
-				.get(floorPlanActivity.mRoomListAdapter.getSelectedPostion()).mLightProfile = null;
-	}
+		for(Short selectedModule : seletedModules)
+		{
+			ccu().getFloors().get(floorPlanActivity.mFloorListAdapter.getSelectedPostion()).mRoomList
+					.get(floorPlanActivity.mRoomListAdapter.getSelectedPostion())
+					.removeNodeAndClearAssociations(selectedModule);
+		}
+        L.saveCCUState();
+    }
 	
 	
 	@Override

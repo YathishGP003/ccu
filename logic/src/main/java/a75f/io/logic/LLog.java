@@ -23,8 +23,8 @@ class LLog
 	
 	public static void LogdStructAsJson(Struct struct)
 	{
-		if (BuildConfig.DEBUG)
-		{
+		//if (BuildConfig.DEBUG)
+		//{
 			String structString = null;
 		
 			//We can bury this exception because when we log a struct to json, it is purely for loggin purposes
@@ -36,8 +36,8 @@ class LLog
 			{
 				e.printStackTrace();
 			}
-			System.out.println("Struct As String:\n" + structString + "\n");
-		}
+			Logd("Struct As String:\n" + structString + "\n");
+		//}
 	}
 	
 	
@@ -49,19 +49,19 @@ class LLog
 	
 	public  static void Logd(String message)
 	{
-		if (BuildConfig.DEBUG)
-		{
+	//	if (BuildConfig.DEBUG)
+		//{
 			Log.d(TAG, message);
-		}
+		//}
 	}
 	
 	public static void LogdSerial(String message)
 	{
 		
-		if (BuildConfig.DEBUG)
-		{
+	//	if (BuildConfig.DEBUG)
+	//	{
 			Log.d(SERIAL_TAG, message);
-		}
+		//}
 	}
 	
 	public static String objectNullString(Object object)

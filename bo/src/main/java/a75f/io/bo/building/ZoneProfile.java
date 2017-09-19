@@ -1,9 +1,10 @@
 package a75f.io.bo.building;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.UUID;
 
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
@@ -11,6 +12,7 @@ import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 /**
  * Created by Yinten isOn 8/15/2017.
  */
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "clazz")
 public abstract class ZoneProfile
 {
     
@@ -18,10 +20,11 @@ public abstract class ZoneProfile
     @JsonIgnore
     protected           UUID                uuid       = UUID.randomUUID();
     protected           ArrayList<Schedule> mSchedules = new ArrayList<>();
-    protected           List<UUID>          mInputs    = new ArrayList<>();
-    protected           List<UUID>          mOutputs   = new ArrayList<>();
+    protected           HashSet<UUID>       mInputs    = new HashSet<>();
+    protected           HashSet<UUID>       mOutputs   = new HashSet<>();
     protected short mLogicalValue;
     
+
     
     public ZoneProfile()
     {
@@ -38,25 +41,25 @@ public abstract class ZoneProfile
     }
     
     
-    public List<UUID> getOutputs()
+    public HashSet<UUID> getOutputs()
     {
         return mOutputs;
     }
     
     
-    public void setOutputs(List<UUID> outputs)
+    public void setOutputs(HashSet<UUID> outputs)
     {
         mOutputs = outputs;
     }
     
     
-    public List<UUID> getInputs()
+    public HashSet<UUID> getInputs()
     {
         return mInputs;
     }
     
     
-    public void setInputs(List<UUID> inputs)
+    public void setInputs(HashSet<UUID> inputs)
     {
         mInputs = inputs;
     }
@@ -155,4 +158,7 @@ public abstract class ZoneProfile
     
     
     public abstract void mapSeed(CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage);
+    
+    
+    
 }

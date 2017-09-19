@@ -39,15 +39,14 @@ public class CCUApplicationTest
 		UUID op1UD = UUID.randomUUID();
 		op1.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
 		op1.mName = "Dining Room";
-		p1.getOutputs().add(op1.getUuid());
+		zone.addOutputCircuit(testSN, p1, op1);
         
-		zone.getOutputs().put(op1.getUuid(), op1);
+		
 		Output op2 = new Output();
 		op2.setAddress(testSN.getAddress());
 		op2.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
 		op2.mName = "Kitchen";
-		p1.getOutputs().add(op2.getUuid());
-        zone.getOutputs().put(op2.getUuid(), op2);
+		zone.addOutputCircuit(testSN, p1, op2);
         
 		
 		try
@@ -58,7 +57,12 @@ public class CCUApplicationTest
 			CCUApplication deCcuApp = (CCUApplication) JsonSerializer.fromJson(ccuApplicationJSON ,CCUApplication.class);
 			Assert.assertEquals(1, deCcuApp.getFloors().size());
 			Assert.assertEquals("75FRoom1", deCcuApp.getFloors().get(0).mRoomList.get(0).roomName .toString() );
-			//Assert.assertEquals(2, deCcuApp.floors.get(0).mRoomList.get(0).zoneProfiles.get(0).smartNodeOutputs.size());
+			Assert.assertEquals(2, deCcuApp.getFloors().get(0).mRoomList.get(0)
+                                           .mLightProfile.getOutputs().size());
+            Assert.assertEquals(2, deCcuApp.getFloors().get(0).mRoomList.get(0).getNodes().get(
+                    (short)7000).getOutputs().size());
+            
+            
 			//Assert.assertEquals("Kitchen", deCcuApp.floors.get(0).mRoomList.get(0).zoneProfiles.get(0).smartNodeOutputs.get(1).mName);
 			//Assert.assertEquals(op1UD, deCcuApp.floors.get(0).mRoomList.get(0).zoneProfiles.get(0).smartNodeOutputs.get(0).mUniqueID);
 			

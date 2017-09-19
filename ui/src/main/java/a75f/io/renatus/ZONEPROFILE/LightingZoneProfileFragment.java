@@ -131,7 +131,7 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
         String mFloorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
         mZone = L.findZoneByName(mFloorName, mRoomName);
         mLightProfile = (LightProfile) mZone.findLightProfile();
-        mNode = L.getSmartNodeAndSeed(mZone, mSmartNodeAddress, mRoomName);
+        mNode = mZone.getSmartNode(mSmartNodeAddress);
         lcmSetCommand = (TextView) view.findViewById(R.id.lcmSetCommand);
         lcmCancelCommand = (TextView) view.findViewById(R.id.lcmCancelCommand);
         if (!mbIsInEditMode)
@@ -311,7 +311,7 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
     
     public void saveLightData()
     {
-        mZone.getNodes().put(mSmartNodeAddress, mNode);
+        Log.e("ERROR", "mZone: " + mZone.getNodes().size());
         if (relay1Switch.isChecked())
         {
             if (spRelay1.getSelectedItemPosition() == 0)
@@ -384,10 +384,9 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
         addZoneProfileToZone(mNode, mZone, mLightProfile);
     }
     
-
+    
     private void bindData()
     {
-        
         relayOne = mZone.findPort(Port.RELAY_ONE, mSmartNodeAddress);
         relayTwo = mZone.findPort(Port.RELAY_TWO, mSmartNodeAddress);
         analogOne = mZone.findPort(Port.ANALOG_OUT_ONE, mSmartNodeAddress);
@@ -412,7 +411,6 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
                 analogOne.mOutputAnalogActuatorType == OutputAnalogActuatorType.ZeroToTenV ? 0 : 1);
         analog2OutEditText.setText(analogTwo.getCircuitName());
         analog2OutSwitch.setChecked(analogTwo.mConfigured);
-   
     }
     
     

@@ -156,14 +156,14 @@ public class Zone
     
     
     @JsonIgnore
-    public CcuToCmOverUsbDatabaseSeedSnMessage_t[] getSeedMessages()
+    public CcuToCmOverUsbDatabaseSeedSnMessage_t[] getSeedMessages(byte[] encryptionKey)
     {
         CcuToCmOverUsbDatabaseSeedSnMessage_t[] seedMessages =
                 new CcuToCmOverUsbDatabaseSeedSnMessage_t[mNodes.size()];
         int i = 0;
         for (Short address : mNodes.keySet())
         {
-            seedMessages[i] = getSeedMessage(address);
+            seedMessages[i] = getSeedMessage(encryptionKey, address);
             i++;
         }
         return seedMessages;
@@ -171,13 +171,15 @@ public class Zone
     
     
     @JsonIgnore
-    public CcuToCmOverUsbDatabaseSeedSnMessage_t getSeedMessage(short address)
+    public CcuToCmOverUsbDatabaseSeedSnMessage_t getSeedMessage(byte[] encryptionKey, short address)
     {
         CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage =
                 new CcuToCmOverUsbDatabaseSeedSnMessage_t();
         seedMessage.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN);
         seedMessage.settings.roomName.set(roomName);
         seedMessage.smartNodeAddress.set(address);
+        seedMessage.putEncrptionKey(encryptionKey);
+        Log.i("ZONE", "Zone Name: " + roomName);
         if (mLightProfile != null)
         {
             mLightProfile.mapSeed(seedMessage);

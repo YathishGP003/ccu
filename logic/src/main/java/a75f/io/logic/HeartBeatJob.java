@@ -15,14 +15,15 @@ class HeartBeatJob extends BaseJob
 	public static final  String TAG                  = "HeartBeatJob";
 	public static final  short  HEARTBEAT_INTERVAL   = 1;  // minutes
 	private static final short  HEARTBEAT_MULTIPLIER = 5;
-
+	
 	
 	//This task should run every minute.
 	public void doJob()
 	{
 		if (LSerial.getInstance().isConnected())
 		{
-			LSerial.getInstance().sendSerialStruct(getHeartBeat((short) 0));
+			//TODO: why does the heart beat send the temperature offset.
+			LSerial.getInstance().sendSerialToCM(getHeartBeat((short) 0));
 		}
 		else
 		{

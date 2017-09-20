@@ -21,7 +21,7 @@ class LLog
 	private static final String SERIAL_TAG = "Serial";
 	
 	
-	public static void LogdStructAsJson(Struct struct)
+	public static <T extends Struct>  void LogdStructAsJson(T struct)
 	{
 		//if (BuildConfig.DEBUG)
 		//{

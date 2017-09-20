@@ -2,8 +2,6 @@ package a75f.io.logic;
 
 import a75f.io.bo.building.Floor;
 import a75f.io.bo.building.Zone;
-import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
-import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
 
 import static a75f.io.logic.L.ccu;
 
@@ -32,27 +30,27 @@ class ZoneBLL
 		return null;
 	}
 	
-	
-	public static void sendControls(Zone zone)
-	{
-		for (CcuToCmOverUsbSnControlsMessage_t controlsMessage_t : zone
-				                                                           .getControlsMessages())
-		{
-			
-			LSerial.getInstance().sendSerialStruct(controlsMessage_t);
-		}
-	}
-    
-    public static void sendSeeds(Zone zone)
-    {
-        for (CcuToCmOverUsbDatabaseSeedSnMessage_t controlsMessage_t : zone
-                                                                           .getSeedMessages())
-        {
-            
-            LSerial.getInstance().sendSerialStruct(controlsMessage_t);
-        }
-    }
-    
+//
+//	public static void sendControls(Zone zone)
+//	{
+//		for (CcuToCmOverUsbSnControlsMessage_t controlsMessage_t : zone
+//				                                                           .getControlsMessages())
+//		{
+//
+//			LSerial.getInstance().sendSerialStruct(controlsMessage_t);
+//		}
+//	}
+//
+//    public static void sendSeeds(Zone zone)
+//    {
+//        for (CcuToCmOverUsbDatabaseSeedSnMessage_t controlsMessage_t : zone
+//                                                                           .getSeedMessages())
+//        {
+//
+//            LSerial.getInstance().sendSerialStruct(controlsMessage_t);
+//        }
+//    }
+//
     public static void sendMiscProfileStructs(Zone zone)
     {
         

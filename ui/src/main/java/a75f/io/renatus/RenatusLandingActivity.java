@@ -109,6 +109,7 @@ public class RenatusLandingActivity extends AppCompatActivity
 			settingView = false;
 			pageSwitchButton.setImageResource(R.drawable.setting);
 		}
+		else
 		{
 			mViewPager.setAdapter(mSettingPagerAdapter);
 			mTabLayout.post(new Runnable()

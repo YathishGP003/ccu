@@ -26,6 +26,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.UUID;
 
 import a75f.io.bo.building.Floor;
 import a75f.io.bo.building.LightProfile;
@@ -70,9 +71,10 @@ public class LightingDetailAdapter extends BaseAdapter
 		notifyDataSetChanged();
 		this.snOutPortList = new ArrayList<>();
         //TODO:
-        //ArrayList<Output> outputs = L.getOutputs(p.getOutputs());
-        
-		//snOutPortList.addAll(p.getOutputs());
+		for(UUID uuid : p.getOutputs())
+		{
+			this.snOutPortList.add(zone.getOutputs().get(uuid));
+		}
 		this.thiSList = thiSList;
 		this.lcmdab = lcmdab;
 		this.profile = p;

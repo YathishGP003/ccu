@@ -2,7 +2,9 @@ package a75f.io.bo.building;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import a75f.io.bo.building.definitions.AlgoTuningParameters;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
+import a75f.io.bo.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class LightProfile extends ZoneProfile
@@ -11,8 +13,6 @@ public class LightProfile extends ZoneProfile
     {
     }
     
-    
-
     
     @Override
     public short mapCircuit(Output output)
@@ -49,17 +49,19 @@ public class LightProfile extends ZoneProfile
         return (short) 0;
     }
     
-    /*
-    //TODO: get these values
-     */
     @Override
     public void mapSeed(CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage)
     {
         seedMessage.settings.lightingIntensityForOccupantDetected
-                .set((short) 100);
+                .set((short) AlgoTuningParameters.LIGHTING_INTENSITY_OCCUPANT_DETECTED);
         seedMessage.settings.minLightingControlOverrideTimeInMinutes
-                .set((short) 1);
+                .set((short) AlgoTuningParameters.MIN_LIGHTING_CONTROL_OVERRIDE_IN_MINUTES);
         seedMessage.settings.profileBitmap.lightingControl.set((short) 1);
     }
     
+    
+    @Override
+    public void mapRegularUpdate(CmToCcuOverUsbSnRegularUpdateMessage_t regularUpdateMessage)
+    {
+    }
 }

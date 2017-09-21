@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.UUID;
 
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
+import a75f.io.bo.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 
 /**
  * Created by Yinten isOn 8/15/2017.
@@ -158,7 +159,7 @@ public abstract class ZoneProfile
     
     
     public abstract void mapSeed(CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage);
-    
+    public abstract void mapRegularUpdate(CmToCcuOverUsbSnRegularUpdateMessage_t regularUpdateMessage);
     
     
 }

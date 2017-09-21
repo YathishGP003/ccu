@@ -138,10 +138,13 @@ class LSerial
      *
      * This will be help when we move onto the state machines.
      *
+     * The structs need to be cleared because when the USB reconnects this method is called.
+     *
      * @param usbService
      */
     public void setUSBService(UsbService usbService)
     {
+        structs.clear();
         mUsbService = usbService;
     }
     

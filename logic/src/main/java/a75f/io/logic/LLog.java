@@ -17,11 +17,13 @@ import a75f.io.bo.json.serializers.JsonSerializer;
 class LLog
 {
 	
-	private static final String TAG     = LLog.class.getSimpleName();
-	private static final String SERIAL_TAG = "Serial";
-	
-	
-	public static <T extends Struct>  void LogdStructAsJson(T struct)
+	private static final String TAG             = LLog.class.getSimpleName();
+	private static final String SERIAL_TAG      = "Serial";
+    public static final String UPDATED_ZONE_TAG = "UPDATE_ZONE";
+    public static final String UPDATED_STRUCT     = "UPDATED_STRUCT";
+    
+    
+    public static <T extends Struct>  void LogdStructAsJson(T struct)
 	{
 		//if (BuildConfig.DEBUG)
 		//{
@@ -36,7 +38,7 @@ class LLog
 			{
 				e.printStackTrace();
 			}
-			Logd("Struct As String:\n" + structString + "\n");
+			Log.d(UPDATED_STRUCT, structString);
 		//}
 	}
 	
@@ -67,5 +69,11 @@ class LLog
 	public static String objectNullString(Object object)
 	{
 		return object == null ? " is null. " : " is not null. ";
+	}
+	
+	
+	public static void Logw(String message)
+	{
+		Log.w(TAG, message);
 	}
 }

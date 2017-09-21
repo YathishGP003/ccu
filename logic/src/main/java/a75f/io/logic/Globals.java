@@ -32,6 +32,7 @@ class Globals
 	private        Context                  mApplicationContext;
 	private        CCUApplication           mCCUApplication;
 	private        LZoneProfile             mLZoneProfile;
+	private 	boolean isSimulation = false;
 	private Globals()
 	{
 	}
@@ -78,6 +79,13 @@ class Globals
         mMeshUpdateJob.scheduleJob("Mesh Update Job", HEARTBEAT_INTERVAL, TASK_SEPERATION * 2,
 				TASK_SERERATION_TIMEUNIT);
 		//5 seconds after heart beat initializes start profile scheduler.
+		
+        
+        //Application in simulation mode notes
+        //--Skips BLE
+        //--Adds sleeps between any Serial Activity to work with biskit.
+        isSimulation = getApplicationContext().getResources().getBoolean(R.bool.simulation);
+        Logd("Simulation ----- " + isSimulation);
 	}
 	
 	public ScheduledExecutorService getScheduledThreadPool()
@@ -92,5 +100,11 @@ class Globals
 			getInstance().mLZoneProfile = new LZoneProfile();
 		}
 		return getInstance().mLZoneProfile;
+	}
+	
+	
+	public boolean isSimulation()
+	{
+		return isSimulation;
 	}
 }

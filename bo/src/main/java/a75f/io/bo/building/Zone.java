@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.javolution.io.Struct;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -112,7 +113,7 @@ public class Zone
     
     
     @JsonIgnore
-    public CcuToCmOverUsbSnControlsMessage_t[] getControlsMessages()
+    public Collection<CcuToCmOverUsbSnControlsMessage_t> getControlsMessages()
     {
         HashMap<Short, CcuToCmOverUsbSnControlsMessage_t> controlMessagesHash = new HashMap<>();
         for (Output output : this.getOutputs().values())
@@ -131,7 +132,7 @@ public class Zone
             }
             getPort(controlsMessage_t, output.getPort()).set(mLightProfile.mapCircuit(output));
         }
-        return (CcuToCmOverUsbSnControlsMessage_t[]) controlMessagesHash.values().toArray();
+        return controlMessagesHash.values();
     }
     
     

@@ -150,6 +150,7 @@ public class LightScheduleFragment extends BaseDialogFragment
 		
 		Log.i("Schedule", "mSchedule to add: " + mSchedule.toString());
 		mCurrentPort.mSchedules.add(mSchedule);
+		L.saveCCUState();
 
 	}
 }

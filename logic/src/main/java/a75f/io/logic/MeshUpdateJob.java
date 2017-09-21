@@ -2,12 +2,17 @@ package a75f.io.logic;
 
 import android.util.Log;
 
+import org.javolution.io.Struct;
+
 import a75f.io.bo.building.Floor;
 import a75f.io.bo.building.Zone;
+import a75f.io.bo.json.serializers.JsonSerializer;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
+import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
 
 import static a75f.io.logic.L.ccu;
 import static a75f.io.logic.LLog.Logd;
+import static a75f.io.logic.LLog.Logw;
 
 /**
  * Created by Yinten isOn 8/24/2017.
@@ -16,34 +21,83 @@ import static a75f.io.logic.LLog.Logd;
 class MeshUpdateJob extends BaseJob
 {
     
-    public static final String TAG = "HeartBeatJob";
+    public static final String TAG                 = "HeartBeatJob";
+    private static final int SIMULATION_SLEEP_TIME = 100;
     
     
     //This task should run every minute.
     public void doJob()
     {
-        Logd("MeshUpdateJob running");
-        if (LSerial.getInstance().isConnected())
+        try
         {
-            for (Floor floor : ccu().getFloors())
+            Logw("MeshUpdateJob running");
+            if (LSerial.getInstance().isConnected())
             {
-                for (Zone zone : floor.mRoomList)
+                for (Floor floor : ccu().getFloors())
                 {
-                    for (CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage : zone.getSeedMessages(EncryptionPrefs
-                                                                                                          .getEncryptionKey()))
+                    for (Zone zone : floor.mRoomList)
                     {
-                        LSerial.getInstance()
-                               .sendSerialStructToNode((short) seedMessage.smartNodeAddress
-                                                                       .get(), seedMessage);
+                        Logw("=============Zone: " + zone.roomName + " ==================");
+                        Logw("=================NOW SENDING SEEDS=====================");
+                        for (CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage : zone.getSeedMessages(EncryptionPrefs
+                                                                                                              .getEncryptionKey()))
+                        {
+                            if(sendStruct((short) seedMessage.smartNodeAddress.get(), seedMessage))
+                            {
+                                Log.w(LLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
+                            }
+                        }
+                        Logw("=================NOW SENDING CONTROLS=====================");
+                        for (CcuToCmOverUsbSnControlsMessage_t controlsMessage : zone.getControlsMessages())
+                        {
+                            if(sendStruct((short) controlsMessage.smartNodeAddress.get(),
+                                    controlsMessage))
+                            {
+                                Log.w(LLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
+                            }
+                        }
                     }
                 }
+                //Foreach smart node, send seed messages & controls messages.   TODO worry about
+                // duplciates.
             }
-            //Foreach smart node, send seed messages & controls messages.   TODO worry about
-            // duplciates.
+            else
+            {
+                Log.d(TAG, "Serial is not connected, rescheduling heartbeat");
+            }
         }
-        else
+        catch(Exception e)
         {
-            Log.d(TAG, "Serial is not connected, rescheduling heartbeat");
+            e.printStackTrace();
+        }
+    }
+    
+    
+    private boolean sendStruct(short smartNodeAddress, Struct struct)
+    {
+        boolean retVal = LSerial.getInstance()
+               .sendSerialStructToNode(smartNodeAddress, struct);
+    
+        //If the application is in simualtion mode to work over FTDI with biskit,
+        // sleep between messages, so biskit doesn't fall behind.
+        if(Globals.getInstance().isSimulation())
+        {
+            tSleep(SIMULATION_SLEEP_TIME);
+        }
+        return retVal;
+    }
+    
+    
+    private void tSleep(int sleepTime)
+    {
+        Logd("sleeping: " + sleepTime);
+        try
+        {
+           Thread.sleep(sleepTime);
+        }
+        catch (InterruptedException e)
+        {
+            e.printStackTrace();
         }
     }
 }

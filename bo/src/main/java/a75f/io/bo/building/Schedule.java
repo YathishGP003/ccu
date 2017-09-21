@@ -23,6 +23,7 @@ public class Schedule
     protected short              val;
     protected ArrayList<Integer> days;
     protected boolean mValidSchedule = false;
+    @JsonIgnore
     ArrayList<Interval> mScheduledIntervals = new ArrayList<Interval>();
     
     
@@ -82,7 +83,7 @@ public class Schedule
         return mValidSchedule = false;
     }
     
-    
+    @JsonIgnore
     public ArrayList<Interval> getScheduledIntervals()
     {
         if (!mScheduledIntervals.isEmpty())
@@ -258,6 +259,7 @@ public class Schedule
      * * @param over
      * @return
      */
+    @JsonIgnore
     public boolean crossedBound(long ot)
     {
         boolean isOverrideTimeInSchedule = isInSchedule(ot);

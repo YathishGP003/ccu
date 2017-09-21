@@ -74,7 +74,8 @@ public class UsbService extends Service
 	SerialState curState = SerialState.PARSE_INIT;
 	int         nCRC     = 0;
 	int nCurIndex;
-	byte[] inDataBuffer = new byte[1024];
+    //NOTE: reduced buffer size to 256
+	byte[] inDataBuffer = new byte[256];
 	int    nDataLength  = 0;
 	private IBinder binder = new UsbBinder();
 	private Context             context;
@@ -493,7 +494,7 @@ public class UsbService extends Service
 	{
 		if (serialPort != null)
 		{
-			byte buffer[] = new byte[1024];
+			byte buffer[] = new byte[256];
 			byte crc = 0;
 			byte nOffset = 0;
 			int len = data.length;
@@ -517,6 +518,7 @@ public class UsbService extends Service
 			nOffset++;
 			buffer[nOffset + len] = (byte) (EOF_BYTE & 0xff);
 			nOffset++;
+			//TODO: Review.
 			serialPort.write(buffer);
 		}
 	}

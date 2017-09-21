@@ -35,7 +35,6 @@ public class LocalStorage
 			{
 				
 				e.printStackTrace();
-				int z = 5 / 0;
 				
 			}
 		}

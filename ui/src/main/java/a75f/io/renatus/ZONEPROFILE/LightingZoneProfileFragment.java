@@ -30,6 +30,7 @@ import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.bo.building.definitions.Port;
+import a75f.io.bo.building.definitions.ProfileType;
 import a75f.io.logic.L;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
@@ -45,10 +46,10 @@ import static a75f.io.logic.L.addZoneProfileToZone;
 public class LightingZoneProfileFragment extends BaseDialogFragment
         implements CompoundButton.OnCheckedChangeListener, View.OnClickListener
 {
-    
+
     public static final  String ID  = LightingZoneProfileFragment.class.getSimpleName();
     private static final String TAG = "Lighting";
-    
+
     View view;
     boolean mbIsInEditMode = false;
     Spinner      spRelay1;
@@ -78,12 +79,12 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
     EditText     analog2InEditText;
     ImageView    editAnalog1In;
     ImageView    editAnalog2In;
-    
+
     ToggleButton lcmRelay1Override;
     ToggleButton lcmRelay2Override;
     ToggleButton lcmAnalog1OutOverride;
     ToggleButton lcmAnalog2OutOverride;
-    
+
     ArrayList<String> zoneCircuitNames;
     Zone              mZone;
     LightProfile      mLightProfile;
@@ -101,13 +102,13 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
     private ArrayAdapter<CharSequence> analog1InAdapter;
     private ArrayAdapter<CharSequence> analog2InAdapter;
     private short                      mSmartNodeAddress;
-    
-    
+
+
     public LightingZoneProfileFragment()
     {
     }
-    
-    
+
+
     public static LightingZoneProfileFragment newInstance(short smartNodeAddress, String roomName,
                                                           String floorName)
     {
@@ -119,8 +120,8 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
         f.setArguments(bundle);
         return f;
     }
-    
-    
+
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState)
     {
@@ -130,7 +131,7 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
         String mRoomName = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
         String mFloorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
         mZone = L.findZoneByName(mFloorName, mRoomName);
-        mLightProfile = (LightProfile) mZone.findLightProfile();
+        mLightProfile = (LightProfile) mZone.findProfile(ProfileType.LIGHT);
         mNode = mZone.getSmartNode(mSmartNodeAddress);
         lcmSetCommand = (TextView) view.findViewById(R.id.lcmSetCommand);
         lcmCancelCommand = (TextView) view.findViewById(R.id.lcmCancelCommand);
@@ -249,8 +250,8 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
         return new AlertDialog.Builder(getActivity(), R.style.NewDialogStyle)
                        .setTitle("Lighting Profile").setView(view).setCancelable(false).create();
     }
-    
-    
+
+
     public Output getSmartNodeRelayOne(boolean isChecked)
     {
         if (mSmartNodeRelayOne == null)
@@ -277,8 +278,8 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
                         ? relay1EditText.getText().toString() : "empty");
         return mSmartNodeRelayOne;
     }
-    
-    
+
+
     public Output getSmartNodeAnalogOutputOne(boolean isChecked)
     {
         if (smartNodeAnalogOutputOne == null)
@@ -307,8 +308,8 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
                         ? analog1OutEditText.getText().toString() : "empty");
         return smartNodeAnalogOutputOne;
     }
-    
-    
+
+
     public void saveLightData()
     {
         Log.e("ERROR", "mZone: " + mZone.getNodes().size());
@@ -383,8 +384,8 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
         }
         addZoneProfileToZone(mNode, mZone, mLightProfile);
     }
-    
-    
+
+
     private void bindData()
     {
         relayOne = mZone.findPort(Port.RELAY_ONE, mSmartNodeAddress);
@@ -412,8 +413,8 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
         analog2OutEditText.setText(analogTwo.getCircuitName());
         analog2OutSwitch.setChecked(analogTwo.mConfigured);
     }
-    
-    
+
+
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
     {
@@ -437,8 +438,8 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
                 break;
         }
     }
-    
-    
+
+
     @Override
     public void onClick(View v)
     {
@@ -482,8 +483,8 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
                 break;
         }
     }
-    
-    
+
+
     public void showEditLogicalNameDialog(final EditText etext, final int id)
     {
         AlertDialog.Builder alertBuilder =
@@ -500,14 +501,14 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
             public void beforeTextChanged(CharSequence s, int start, int count, int after)
             {
             }
-            
-            
+
+
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count)
             {
             }
-            
-            
+
+
             @Override
             public void afterTextChanged(Editable s)
             {

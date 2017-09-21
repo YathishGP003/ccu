@@ -17,6 +17,7 @@ import a75f.io.bo.building.Output;
 import a75f.io.bo.building.SingleStageProfile;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.definitions.OutputAnalogActuatorType;
+import a75f.io.bo.building.definitions.ProfileType;
 import a75f.io.bo.json.serializers.JsonSerializer;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.bo.serial.MessageType;
@@ -29,18 +30,18 @@ import static a75f.io.bo.json.serializers.JsonSerializer.toJson;
 
 public class JSONSerializerTest
 {
-	
+
 	@Test
 	public void simplePOJOTest()
 	{
 		String roomName = "Ryans Room";
 		CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = new CcuToCmOverUsbDatabaseSeedSnMessage_t();
 		seedMessage.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_SETTINGS);
-		
+
 		seedMessage.settings.roomName.set(roomName);
 		seedMessage.settings.ledBitmap.analogIn1.set((short) 1);
-		
-		seedMessage.smartNodeAddress.set(5); 
+
+		seedMessage.smartNodeAddress.set(5);
 		try
 		{
 			String pojoAsString = toJson(seedMessage, true);
@@ -48,16 +49,16 @@ public class JSONSerializerTest
 			CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessagePostSerilizer =
 					(CcuToCmOverUsbDatabaseSeedSnMessage_t) JsonSerializer.fromJson
 							                                                                 (pojoAsString,CcuToCmOverUsbDatabaseSeedSnMessage_t.class);
-			
+
 			System.out.println("seedMessage: " + seedMessagePostSerilizer.messageType);
-			
+
 			System.out.println("roomname: " + seedMessage.settings.roomName.get());
 			System.out.println("roomname: " + seedMessagePostSerilizer.settings.roomName.get());
 			System.out.println("adddress: " + seedMessagePostSerilizer.smartNodeAddress);
 			Assert.assertTrue(seedMessage.settings.roomName.get().equals(seedMessagePostSerilizer
 					                                                       .settings.roomName.get()));
-			
-			
+
+
 			System.out.println("Before: " + seedMessage.toString());
 			System.out.println("After: " +  seedMessagePostSerilizer.toString
 					                                                                             ());
@@ -76,8 +77,8 @@ public class JSONSerializerTest
 			e.printStackTrace();
 		}
 	}
-	
-	
+
+
 	@Test
 	public void buildingPOJOTest()
 	{
@@ -100,42 +101,24 @@ public class JSONSerializerTest
 			e.printStackTrace();
 		}
 	}
-	
-	
+
+
 	@Test
 	public void generateLightObjectsTest()
 	{
 		UUID analog15kUUID = UUID.randomUUID();
 		short smartNodeAddress = 0;
 		CCUApplication ccuApplication = new CCUApplication();
-<<<<<<< HEAD
-		SmartNode smartNode5K = new SmartNode();
-		smartNode5K.mAddress = smartNodeAddress;
-		//smartNode5K.mRoomName = "SmartNode roomName";
-		ccuApplication.smartNodes.add(smartNode5K);
-		ccuApplication.CCUTitle = "Light Test";
-		Floor floor = new Floor(1, "webid", "Floor1");
-		LightProfile lightProfile5K = new LightProfile();
-//		ccuApplication.floors.get(0).addZone("5000 test zone");
-//		ccuApplication.floors.get(0).getRoomList().get(0).zoneProfiles.add(lightProfile5K);
-		SmartNodeOutput smartNodeOutput5K = new SmartNodeOutput();
-		smartNodeOutput5K.mSmartNodeAddress = smartNode5K.mAddress;
-		//smartNodeOutput5K.mUniqueID = analog15kUUID;
-		smartNodeOutput5K.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
-		//smartNodeOutput5K.mOutput = Output.Analog;
-		smartNodeOutput5K.mName = "Dining Room";
-		lightProfile5K.smartNodeOutputs.add(smartNodeOutput5K);
-=======
+
 		Node node5K = new Node();
 		node5K.setAddress(smartNodeAddress);
-        
+
 		ccuApplication.setTitle("Light Test");
 		Floor floor = new Floor(1, "webid", "Floor1");
 		Zone zone = new Zone("Zone1");
-		LightProfile lightProfile5K = new LightProfile();
-		
+		LightProfile lightProfile5K = (LightProfile) zone.findProfile(ProfileType.LIGHT);
+
 		zone.getNodes().put(node5K.getAddress(), node5K);
-        zone.mLightProfile = lightProfile5K;
         Output output5K = new Output();
 		output5K.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
 		output5K.setName("Dining Room");
@@ -143,16 +126,15 @@ public class JSONSerializerTest
         ccuApplication.getFloors().get(0).mRoomList.add(zone);
 		zone.addOutputCircuit(node5K, lightProfile5K, output5K);
 
->>>>>>> ryan
 		try
 		{
 			String ccuApplicationJSON = JsonSerializer.toJson(ccuApplication, true);
 			System.out.println("CCU Application As String:\n" + ccuApplicationJSON + "\n");
             CCUApplication ccu =
                     (CCUApplication) JsonSerializer.fromJson(ccuApplicationJSON, CCUApplication.class);
-            Assert.assertTrue((ccu.getFloors().get(0).mRoomList.get(0).mLightProfile instanceof
+            Assert.assertTrue((ccu.getFloors().get(0).mRoomList.get(0).findProfile(ProfileType.LIGHT)instanceof
                                       LightProfile));
-            Assert.assertFalse((ccu.getFloors().get(0).mRoomList.get(0).mLightProfile instanceof SingleStageProfile));
+            Assert.assertFalse((ccu.getFloors().get(0).mRoomList.get(0).findProfile(ProfileType.SSE) instanceof SingleStageProfile));
         }
 		catch (IOException e)
 		{
@@ -179,5 +161,5 @@ public class JSONSerializerTest
 //			e.printStackTrace();
 //		}
 	}
-	
+
 }

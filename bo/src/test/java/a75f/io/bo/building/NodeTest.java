@@ -1,5 +1,7 @@
 package a75f.io.bo.building;
 
+import android.provider.ContactsContract;
+
 import junit.framework.Assert;
 
 import org.junit.Test;
@@ -9,6 +11,7 @@ import java.util.UUID;
 
 import a75f.io.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.bo.building.definitions.Port;
+import a75f.io.bo.building.definitions.ProfileType;
 import a75f.io.bo.json.serializers.JsonSerializer;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 
@@ -18,7 +21,7 @@ import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 
 public class NodeTest
 {
-    
+
     @Test
     public void testSmartNode()
     {
@@ -33,22 +36,8 @@ public class NodeTest
         Floor floor = new Floor(1, "webid", "Floor1");
         Zone z = new Zone("75FRoom1");
         floor.mRoomList.add(z);
-        LightProfile p1 = new LightProfile();
-        ZoneProfile p2 = new ZoneProfile()
-        {
-            @Override
-            public short mapCircuit(Output output)
-            {
-                return 100;
-            }
-            
-            
-            @Override
-            public void mapSeed(CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage)
-            {
-            }
-        };
-        z.mLightProfile = p1;
+        LightProfile p1 = (LightProfile) z.findProfile(ProfileType.LIGHT);
+
         z.getNodes().put(testSN1.getAddress(), testSN1);
         z.getNodes().put(testSN2.getAddress(), testSN2);
         z.getNodes().put(testSN3.getAddress(), testSN3);
@@ -69,12 +58,12 @@ public class NodeTest
         op3.mName = "Bedroom";
         op3.setPort(Port.ANALOG_OUT_ONE);
         z.addOutputCircuit(testSN2, p1, op3);
-        short lightProfile = z.mLightProfile.mapCircuit(op3);
+        short lightProfile = z.findProfile(ProfileType.LIGHT).mapCircuit(op3);
         Assert.assertEquals(lightProfile, 20);
-        System.out.println("Mapping zone profile: " + z.mLightProfile.mapCircuit(op3));
-        z.mLightProfile = p2;
-        short zoneProfile = z.mLightProfile.mapCircuit(op3);
-        System.out.println("Mapping zone profile: " + z.mLightProfile.mapCircuit(op3));
+        System.out.println("Mapping zone profile: " + z.findProfile(ProfileType.LIGHT).mapCircuit(op3));
+
+        short zoneProfile = z.findProfile(ProfileType.LIGHT).mapCircuit(op3);
+        System.out.println("Mapping zone profile: " + z.findProfile(ProfileType.LIGHT).mapCircuit(op3));
         Assert.assertEquals(zoneProfile, 100);
         try
         {
@@ -91,15 +80,15 @@ public class NodeTest
             Assert.assertTrue(false);
         }
     }
-    
-    
+
+
     public int getSmartNodeAddressFromOpUUID(CCUApplication global, UUID opUUID)
     {
         Zone profile = global.getFloors().get(0).mRoomList.get(0);
         return profile.getOutputs().get(opUUID).getAddress();
     }
-    
-    
+
+
     public int getConfiguredOpsforSmartnode(CCUApplication global, Node node)
     {
         Zone profile = global.getFloors().get(0).mRoomList.get(0);

@@ -6,5 +6,5 @@ package a75f.io.bo.building.definitions;
 
 public enum ProfileType
 {
-    LIGHT,SSE
+    LIGHT, GENERIC, SSE
 }

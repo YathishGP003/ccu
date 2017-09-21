@@ -34,6 +34,7 @@ import a75f.io.bo.building.Floor;
 import a75f.io.bo.building.LightProfile;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.ZoneProfile;
+import a75f.io.bo.building.definitions.ProfileType;
 import a75f.io.renatus.VIEWS.SeekArcWidget;
 import a75f.io.renatus.VIEWS.ZoneImageWidget;
 
@@ -84,15 +85,15 @@ public class ZonesFragment extends Fragment
                 public void onProgressChanged(SeekArcWidget seekArc, int progress, boolean fromUser)
                 {
                 }
-                
-                
+
+
                 @Override
                 public void onStartTrackingTouch(SeekArcWidget seekArc)
                 {
                     mDesiredTempScrolling = true;
                 }
-                
-                
+
+
                 @Override
                 public void onStopTrackingTouch(final SeekArcWidget seekArc)
                 {
@@ -114,7 +115,7 @@ public class ZonesFragment extends Fragment
     private ZoneImageWidget.OnClickListener       zoneWidgetListener    =
             new ZoneImageWidget.OnClickListener()
             {
-                
+
                 @Override
                 public void onClick(ZoneImageWidget w)
                 {
@@ -175,7 +176,7 @@ public class ZonesFragment extends Fragment
                             w.setSelected(true);
                             if (w.getProfile() instanceof LightProfile)
                             {
-                                
+
                                 roomButtonGrid.addView(mLightingRow, nDetailsLoc);
                                 UpdateRoomLightingWidget((LightProfile) w.getProfile(), false);
                                 //mLightingRow.startAnimation(in);
@@ -199,21 +200,21 @@ public class ZonesFragment extends Fragment
                     }
                 }
             };
-    
-    
+
+
     public ZonesFragment()
     {
         seekArcWidgetList = new ArrayList<>();
         zoneWidgetList = new ArrayList<>();
     }
-    
-    
+
+
     public static ZonesFragment newInstance()
     {
         return new ZonesFragment();
     }
-    
-    
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState)
@@ -225,8 +226,8 @@ public class ZonesFragment extends Fragment
         Log.e("ZONE", "FINISHED ONCREATEVIEW");
         return inflate;
     }
-    
-    
+
+
     @Override
     public void onStart()
     {
@@ -265,8 +266,8 @@ public class ZonesFragment extends Fragment
         attributeSet = getSeekbarXmlAttributes();
         Log.e("ZONE", "END ONSTART");
     }
-    
-    
+
+
     @Override
     public void onResume()
     {
@@ -277,8 +278,8 @@ public class ZonesFragment extends Fragment
         floorDataAdapter.setSelectedItem(mCurFloorIndex);
         Log.e("ZONE", "END onResume");
     }
-    
-    
+
+
     public void fillZoneData()
     {
         ArrayList<Floor> floorList = ccu().getFloors();
@@ -297,10 +298,10 @@ public class ZonesFragment extends Fragment
             //TODO - refactor
             for (Zone z : zoneList)
             {
-                if (z.mLightProfile != null)
+                if (z.findProfile(ProfileType.LIGHT) != null)
                 {
                     ZoneImageWidget zWidget = new ZoneImageWidget(getActivity()
-                                                                          .getApplicationContext(), z.roomName, z.mLightProfile);
+                                                                          .getApplicationContext(), z.roomName, z.findProfile(ProfileType.LIGHT));
                     zWidget.setLayoutParams(new LinearLayout.LayoutParams(room_width, room_height));
                     zWidget.setOnClickChangeListener(zoneWidgetListener);
                     roomRow.addView(zWidget);
@@ -308,8 +309,8 @@ public class ZonesFragment extends Fragment
             }
         }
     }
-    
-    
+
+
     private AttributeSet getSeekbarXmlAttributes()
     {
         AttributeSet as = null;
@@ -341,15 +342,15 @@ public class ZonesFragment extends Fragment
         while (state != XmlPullParser.END_DOCUMENT);
         return as;
     }
-    
-    
+
+
     private void createDetailsWidget(LayoutInflater inflater)
     {
         mLightingRow = (LinearLayout) inflater.inflate(R.layout.zone_detail_list, null);
         mLightsDetailsView = (ListView) mLightingRow.findViewById(R.id.lighting_detail_list);
     }
-    
-    
+
+
     public void UpdateRoomLightingWidget(LightProfile roomData, Boolean lcmdabfsv)
     {
         mLightsDetailsView.setAdapter(null);
@@ -395,8 +396,8 @@ public class ZonesFragment extends Fragment
 						}
 					}*/
                 }
-                
-                
+
+
                 @Override
                 public void onNothingSelected(AdapterView<?> parent)
                 {
@@ -414,38 +415,38 @@ public class ZonesFragment extends Fragment
 		mLightsDetailsView.setAdapter(adapter);
         new LayoutHelper(getActivity()).setListViewParams(mLightsDetailsView, null, 0, 0, expand);
     }
-    
+
     private Floor getFloorForLightProfile(ZoneProfile zoneProfile)
     {
         for(Floor f : ccu().getFloors())
         {
             for(Zone z : f.mRoomList)
             {
-                
-                if(z.mLightProfile.equals(zoneProfile))
+
+                if(z.findProfile(ProfileType.LIGHT).equals(zoneProfile))
                 {
                     return f;
                 }
             }
-            
+
         }
         return null;
     }
-    
-    
+
+
     private Zone getZoneForLightProfile(ZoneProfile zoneProfile)
     {
         for(Floor f : ccu().getFloors())
         {
             for(Zone z : f.mRoomList)
             {
-                
-                if(z.mLightProfile.equals(zoneProfile))
+
+                if(z.findProfile(ProfileType.LIGHT).equals(zoneProfile))
                 {
                     return z;
                 }
             }
-            
+
         }
         return null;
     }

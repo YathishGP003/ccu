@@ -17,21 +17,14 @@ public class RenatusApp extends UtilityApplication
 {
 
 	private static final String    TAG           = RenatusApp.class.getSimpleName();
-<<<<<<< HEAD
-	public               boolean   isProvisioned = false;
-	public               SmartNode mSmartNode    = null;
 
 
-=======
-	
-	
->>>>>>> ryan
 	@Override
 	public void onCreate()
 	{
 		super.onCreate();
 		Fabric.with(this, new Crashlytics());
-		
+
 		Log.i(TAG, "RENATUS APP INITIATED");
 	}
 
@@ -39,7 +32,7 @@ public class RenatusApp extends UtilityApplication
 	@Override
 	protected void attachBaseContext(Context base)
 	{
-		 
+
 		super.attachBaseContext(base);
 		MultiDex.install(this);
 	}

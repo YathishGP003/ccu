@@ -6,5 +6,5 @@ package a75f.io.bo.building;
 
 public class SystemProfile
 {
-	public Schedule schedule = new Schedule();
+    public Schedule schedule = new Schedule();
 }

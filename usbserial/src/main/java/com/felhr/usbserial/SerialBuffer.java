@@ -6,8 +6,9 @@ import java.util.Arrays;
 
 public class SerialBuffer
 {
-    public static final int DEFAULT_READ_BUFFER_SIZE = 1024;
-    public static final int DEFAULT_WRITE_BUFFER_SIZE = 1024;
+    //NOTE: reduced buffer size to 256 from 1024
+    public static final int DEFAULT_READ_BUFFER_SIZE = 256;
+    public static final int DEFAULT_WRITE_BUFFER_SIZE = 256;
     private ByteBuffer readBuffer;
     private SynchronizedBuffer writeBuffer;
     private byte[] readBuffer_compatible; // Read buffer for android < 4.2
@@ -44,7 +45,7 @@ public class SerialBuffer
                 readBuffer.put(data);
             }catch(BufferOverflowException e)
             {
-                // TO-DO
+                e.printStackTrace();
             }
         }
     }

@@ -6,6 +6,5 @@ package a75f.io.bo.building;
 
 public class Sensor
 {
-	
-	
+    
 }

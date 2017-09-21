@@ -23,8 +23,6 @@ import java.util.Set;
 
 import a75f.io.bo.serial.comm.SerialEvent;
 import a75f.io.logic.SerialBLL;
-import a75f.io.renatus.BLE.BLEHomeFragment;
-import a75f.io.renatus.MainActivity;
 import a75f.io.usbserial.UsbService;
 
 /**

@@ -1,4 +1,4 @@
-package a75f.io.logic.cache.prefs;
+package a75f.io.logic;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -7,13 +7,14 @@ import java.io.IOException;
 
 import a75f.io.bo.building.CCUApplication;
 import a75f.io.bo.json.serializers.JsonSerializer;
-import a75f.io.logic.cache.Globals;
+
+import static a75f.io.logic.LLog.Logd;
 
 /**
  * Created by Yinten isOn 8/15/2017.
  */
 
-public class LocalStorage
+class LocalStorage
 {
 	
 	public static final String TAG = LocalStorage.class.getSimpleName();
@@ -21,10 +22,11 @@ public class LocalStorage
 	private static final String PREFS_CCU_SETTINGS_CONST = "ccu_settings";
 	private static final String VAR_CCU_SETTINGS         = "ccu_key";
 	
-	
 	public static CCUApplication getApplicationSettings()
 	{
-		String ccuSettings = getCCUSettings().getString(VAR_CCU_SETTINGS, null);
+		String ccuSettings = getCCUSettings(L.app()).getString(VAR_CCU_SETTINGS, null);
+		Logd("==========GET APPLICATION SETTINGS================");
+		Logd(ccuSettings != null ? ccuSettings : "Settings are empty");
 		if (ccuSettings != null && !ccuSettings.equals(""))
 		{
 			try
@@ -33,28 +35,26 @@ public class LocalStorage
 			}
 			catch (IOException e)
 			{
-				
 				e.printStackTrace();
 				int z = 5 / 0;
-				
 			}
 		}
 		return new CCUApplication();
 	}
 	
-	
-	public static SharedPreferences getCCUSettings()
+	public static SharedPreferences getCCUSettings(Context context)
 	{
-		return Globals.getInstance().getApplicationContext().getSharedPreferences(PREFS_CCU_SETTINGS_CONST, Context.MODE_PRIVATE);
+		return context.getSharedPreferences(PREFS_CCU_SETTINGS_CONST, Context.MODE_PRIVATE);
 	}
-	
 	
 	public static void setApplicationSettings()
 	{
 		try
 		{
-			String jsonString = JsonSerializer.toJson(Globals.getInstance().getCCUApplication(), false);
-			getCCUSettings().edit().putString(VAR_CCU_SETTINGS, jsonString).apply();
+			String jsonString = JsonSerializer.toJson(L.ccu(), true);
+			Logd("==========SET APPLICATION SETTINGS================");
+			Logd(jsonString);
+			getCCUSettings(L.app()).edit().putString(VAR_CCU_SETTINGS, jsonString).apply();
 		}
 		catch (IOException e)
 		{

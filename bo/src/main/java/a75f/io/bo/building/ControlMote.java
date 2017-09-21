@@ -1,6 +1,5 @@
 package a75f.io.bo.building;
 
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
@@ -9,5 +8,5 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @JsonSerialize
 public class ControlMote
 {
-	public String controlMoteOutputInput = "Control Mote settings go here";
+    public String controlMoteOutputInput = "Control Mote settings go here";
 }

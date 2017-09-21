@@ -1,4 +1,4 @@
-package a75f.io.logic.cache.prefs;
+package a75f.io.logic;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -7,13 +7,11 @@ import android.util.Log;
 
 import java.security.SecureRandom;
 
-import a75f.io.logic.cache.Globals;
-
 /**
  * Created by ryanmattison isOn 7/24/17.
  */
 
-public class EncryptionPrefs {
+class EncryptionPrefs {
 
     private static final String PREFS_SYSTEM_SETTINGS_CONST = "system_settings";
     private static final String VAR_SYSTEM_SETTINGS_ENCRYPTION_KEY = "system_settings_encryption_key";
@@ -32,7 +30,7 @@ public class EncryptionPrefs {
 
     private static SharedPreferences getSystemSettings()
     {
-        return Globals.getInstance().getApplicationContext().getSharedPreferences(PREFS_SYSTEM_SETTINGS_CONST, Context.MODE_PRIVATE);
+        return L.app().getSharedPreferences(PREFS_SYSTEM_SETTINGS_CONST, Context.MODE_PRIVATE);
     }
 
     public static byte[] getEncryptionKey() {

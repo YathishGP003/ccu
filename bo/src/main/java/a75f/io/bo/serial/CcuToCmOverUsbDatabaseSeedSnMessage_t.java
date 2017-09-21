@@ -1,7 +1,6 @@
 package a75f.io.bo.serial;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonSetter;
 
 import org.javolution.io.Struct;
 
@@ -13,7 +12,7 @@ import java.nio.ByteOrder;
 
 public class CcuToCmOverUsbDatabaseSeedSnMessage_t extends Struct
 {
-	@JsonIgnore
+
 	public String CCU = "DefaultCCU";
 	
 	
@@ -22,13 +21,13 @@ public class CcuToCmOverUsbDatabaseSeedSnMessage_t extends Struct
 	
 	public final Struct.Unsigned16   smartNodeAddress = new Unsigned16();
 	
-	@JsonIgnore
+
 	public final Unsigned8[]         encryptionKey    = array(new Unsigned8[SerialConsts.APP_KEY_LENGTH]);
 	
-	@JsonIgnore
+
 	public final SmartNodeSettings_t settings         = inner(new SmartNodeSettings_t());
 	
-	@JsonIgnore
+
 	public final SmartNodeControls_t controls         = inner(new SmartNodeControls_t());
 	
 	@Override
@@ -38,7 +37,7 @@ public class CcuToCmOverUsbDatabaseSeedSnMessage_t extends Struct
 	}
 	
 	@JsonIgnore
-	public void putEncrptionKey(byte[] encryptionKeyBytes) throws Exception
+	public void putEncrptionKey(byte[] encryptionKeyBytes)
 	{
 		for (int i = 0; i < encryptionKeyBytes.length; i++)
 		{

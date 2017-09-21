@@ -6,5 +6,5 @@ package a75f.io.bo.building;
 
 public abstract class BaseEvent
 {
-
+    
 }

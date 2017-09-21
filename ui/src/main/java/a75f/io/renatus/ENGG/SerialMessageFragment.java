@@ -7,9 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -29,7 +27,6 @@ import org.greenrobot.eventbus.ThreadMode;
 import org.javolution.io.Struct;
 
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
@@ -52,9 +49,7 @@ import a75f.io.bo.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 import a75f.io.bo.serial.MessageType;
 import a75f.io.bo.serial.comm.SerialAction;
 import a75f.io.bo.serial.comm.SerialEvent;
-import a75f.io.logic.cache.Globals;
 import a75f.io.renatus.ENGG.logger.CcuLog;
-import a75f.io.renatus.MainActivity;
 import a75f.io.renatus.R;
 import a75f.io.usbserial.UsbService;
 import butterknife.BindView;
@@ -289,7 +284,7 @@ public class SerialMessageFragment extends Fragment
 			usbService.write(msg.getOrderedBuffer());
 			CcuLog.i("EnggUI", "SerialMessage: " + JsonSerializer.toJson(msg, true));
 			
-			Toast.makeText(Globals.getInstance().getApplicationContext(), "Message Sent" ,Toast.LENGTH_SHORT).show();
+			Toast.makeText(this.getActivity(), "Message Sent" ,Toast.LENGTH_SHORT).show();
 			
 		} catch (Exception e) {
 			CcuLog.e("CCU" ,"Exception ",e);
@@ -324,12 +319,12 @@ public class SerialMessageFragment extends Fragment
 		}
 	};
 	private UsbService                      usbService;
-	private MyHandler mHandler;
+
 	private final ServiceConnection usbConnection = new ServiceConnection() {
 		@Override
 		public void onServiceConnected(ComponentName arg0, IBinder arg1) {
 			usbService = ((UsbService.UsbBinder) arg1).getService();
-			usbService.setHandler(mHandler);
+			usbService.setHandler(null);
 		}
 		
 		@Override
@@ -338,30 +333,7 @@ public class SerialMessageFragment extends Fragment
 		}
 	};
 	
-	/*
-	 * This handler will be passed to UsbService. Data received from serial port is displayed through this handler
-	 */
-	private static class MyHandler extends Handler
-	{
-		private final WeakReference<MainActivity> mActivity;
-		
-		public MyHandler(MainActivity activity) {
-			mActivity = new WeakReference<>(activity);
-		}
-		
-		@Override
-		public void handleMessage(Message msg) {
-			switch (msg.what) {
-				
-				case UsbService.CTS_CHANGE:
-					Toast.makeText(mActivity.get(), "CTS_CHANGE", Toast.LENGTH_LONG).show();
-					break;
-				case UsbService.DSR_CHANGE:
-					Toast.makeText(mActivity.get(), "DSR_CHANGE", Toast.LENGTH_LONG).show();
-					break;
-			}
-		}
-	}
+	
 	
 	// Called in a separate thread
 	@Subscribe(threadMode = ThreadMode.MAIN)

@@ -15,10 +15,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import a75f.io.bo.building.Floor;
+import a75f.io.bo.building.Output;
 import a75f.io.bo.building.Schedule;
-import a75f.io.bo.building.SmartNodeOutput;
-import a75f.io.logic.LZoneProfile;
-import a75f.io.logic.cache.Globals;
+import a75f.io.bo.building.Zone;
+import a75f.io.logic.L;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import butterknife.BindView;
@@ -33,10 +34,15 @@ import butterknife.OnClick;
 public class LightScheduleFragment extends BaseDialogFragment
 {
 	
-	UUID            mCurrentPortId = null;
-	SmartNodeOutput mCurrentPort   = null;
+    //TODO: most of the UI for this...
+	UUID   mCurrentPortId = null;
+	Output mCurrentPort   = null;
+	
 	
 	Schedule mSchedule = null;
+	
+	Floor floor;
+	Zone zone;
 	
 	@BindView(R.id.timePickerSt)
 	TimePicker startTimePicker;
@@ -60,11 +66,13 @@ public class LightScheduleFragment extends BaseDialogFragment
 	}
 	
 	
-	public static LightScheduleFragment newInstance(SmartNodeOutput port)
+	public static LightScheduleFragment newInstance(Floor floor, Zone zone, Output port)
 	{
 		LightScheduleFragment fragment = new LightScheduleFragment();
 		Bundle bundle = new Bundle();
 		bundle.putSerializable(FragmentCommonBundleArgs.SNOUTPUT_UUID, port.getUuid());
+		bundle.putString(FragmentCommonBundleArgs.FLOOR_NAME, floor.mFloorName);
+		bundle.putString(FragmentCommonBundleArgs.ZONE_NAME, zone.roomName);
 		fragment.setArguments(bundle);
 		return fragment;
 	}
@@ -77,6 +85,10 @@ public class LightScheduleFragment extends BaseDialogFragment
 		View rootView = inflater.inflate(R.layout.fragment_light_schedule, container, false);
 		mCurrentPortId =
 				(UUID) getArguments().getSerializable(FragmentCommonBundleArgs.SNOUTPUT_UUID);
+		String zoneName = getArguments().getString(FragmentCommonBundleArgs.ZONE_NAME);
+		String floorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
+		zone = L.findZoneByName(floorName, zoneName);
+		
 		ButterKnife.bind(this, rootView);
 		//int titleTextId = getResources().getIdentifier("title", "id", "android");
 		setTitle("Lighting Schedule");
@@ -88,12 +100,8 @@ public class LightScheduleFragment extends BaseDialogFragment
 	public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
 	{
 		super.onViewCreated(view, savedInstanceState);
-		mCurrentPort =
-				Globals.getInstance().getCCUApplication().findSmartNodePortByUUID(mCurrentPortId);
-		if (mCurrentPort == null)
-		{
-			dismiss();
-		}
+		mCurrentPort = zone.getOutputs().get(mCurrentPortId);
+
 		// else {
 		//			mSchedule = mCurrentPort.mSchedules.get(0);
 		//			fillScheduleData();
@@ -103,11 +111,7 @@ public class LightScheduleFragment extends BaseDialogFragment
 	
 	public void fillScheduleData()
 	{
-		if (mSchedule == null)
-		{
-			//No schedule yet
-			return;
-		}
+
 		for (int i = 0; i < 7; i++)
 		{
 			//if ((CheckBox)daysList.get(i).)
@@ -146,13 +150,7 @@ public class LightScheduleFragment extends BaseDialogFragment
 		
 		Log.i("Schedule", "mSchedule to add: " + mSchedule.toString());
 		mCurrentPort.mSchedules.add(mSchedule);
-		try
-		{
-			LZoneProfile.scheduleProfiles();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+		L.saveCCUState();
+
 	}
 }

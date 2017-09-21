@@ -16,12 +16,12 @@ import static a75f.io.logic.LLog.Logd;
 
 class LocalStorage
 {
-	
+
 	public static final String TAG = LocalStorage.class.getSimpleName();
-	
+
 	private static final String PREFS_CCU_SETTINGS_CONST = "ccu_settings";
 	private static final String VAR_CCU_SETTINGS         = "ccu_key";
-	
+
 	public static CCUApplication getApplicationSettings()
 	{
 		String ccuSettings = getCCUSettings(L.app()).getString(VAR_CCU_SETTINGS, null);
@@ -36,17 +36,16 @@ class LocalStorage
 			catch (IOException e)
 			{
 				e.printStackTrace();
-				int z = 5 / 0;
 			}
 		}
 		return new CCUApplication();
 	}
-	
+
 	public static SharedPreferences getCCUSettings(Context context)
 	{
 		return context.getSharedPreferences(PREFS_CCU_SETTINGS_CONST, Context.MODE_PRIVATE);
 	}
-	
+
 	public static void setApplicationSettings()
 	{
 		try

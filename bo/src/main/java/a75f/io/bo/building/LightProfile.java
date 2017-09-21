@@ -3,7 +3,9 @@ package a75f.io.bo.building;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import a75f.io.bo.building.definitions.AlgoTuningParameters;
+import a75f.io.bo.building.definitions.ProfileType;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
+import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.bo.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -49,6 +51,13 @@ public class LightProfile extends ZoneProfile
         return (short) 0;
     }
     
+    
+    @Override
+    public void mapControls(CcuToCmOverUsbSnControlsMessage_t controlsMessage_t)
+    {
+    }
+    
+    
     @Override
     public void mapSeed(CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage)
     {
@@ -63,5 +72,12 @@ public class LightProfile extends ZoneProfile
     @Override
     public void mapRegularUpdate(CmToCcuOverUsbSnRegularUpdateMessage_t regularUpdateMessage)
     {
+    }
+    
+    
+    @Override
+    public ProfileType getProfileType()
+    {
+        return ProfileType.LIGHT;
     }
 }

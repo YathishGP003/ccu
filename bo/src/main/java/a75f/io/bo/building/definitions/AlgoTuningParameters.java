@@ -142,4 +142,6 @@ public class AlgoTuningParameters
     static final        int    ALARM_VOLUME_DEFAULT                     = 0; //Max volume limit is 7;
     public static final int    LIGHTING_INTENSITY_OCCUPANT_DETECTED     = 75;
     public static final int    MIN_LIGHTING_CONTROL_OVERRIDE_IN_MINUTES = 20;
+    public static final int SSE_Cooling_Deadband = 1;  //(°F)
+    public static final int SSE_Heating_Deadband = 1;  //(°F)
 }

@@ -13,8 +13,10 @@ import java.util.HashMap;
 import java.util.UUID;
 
 import a75f.io.bo.building.definitions.Port;
+import a75f.io.bo.building.definitions.ProfileType;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
+import a75f.io.bo.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 import a75f.io.bo.serial.MessageType;
 
 /**
@@ -23,8 +25,8 @@ import a75f.io.bo.serial.MessageType;
 //Also known as room.
 public class Zone
 {
-    public String roomName = "Default Zone";
-    public ZoneProfile mLightProfile;
+    public String                 roomName      = "Default Zone";
+    public ArrayList<ZoneProfile> mZoneProfiles = new ArrayList<ZoneProfile>();
     
     private HashMap<Short, Node>  mNodes   = new HashMap<>();
     private HashMap<UUID, Input>  mInputs  = new HashMap<>();
@@ -102,13 +104,27 @@ public class Zone
     
     
     @JsonIgnore
-    public ZoneProfile findLightProfile()
+    public ZoneProfile findProfile(ProfileType profileType)
     {
-        if (mLightProfile == null)
+        ZoneProfile retVal = null;
+        for (ZoneProfile zoneProfile : mZoneProfiles)
         {
-            mLightProfile = new LightProfile();
+            if (zoneProfile.getProfileType() == ProfileType.LIGHT)
+            {
+                return zoneProfile;
+            }
         }
-        return mLightProfile;
+        switch (profileType)
+        {
+            case LIGHT:
+                retVal = new LightProfile();
+                break;
+            case SSE:
+                retVal = new SingleStageProfile();
+                break;
+        }
+        mZoneProfiles.add(retVal);
+        return retVal;
     }
     
     
@@ -130,7 +146,13 @@ public class Zone
                 controlsMessage_t.smartNodeAddress.set(output.getAddress());
                 controlsMessage_t.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_CONTROLS);
             }
-            getPort(controlsMessage_t, output.getPort()).set(mLightProfile.mapCircuit(output));
+            for (ZoneProfile zp : mZoneProfiles)
+            {
+                if (zp.getOutputs().contains(output.getUuid()))
+                {
+                    getPort(controlsMessage_t, output.getPort()).set(zp.mapCircuit(output));
+                }
+            }
         }
         return controlMessagesHash.values();
     }
@@ -181,11 +203,53 @@ public class Zone
         seedMessage.smartNodeAddress.set(address);
         seedMessage.putEncrptionKey(encryptionKey);
         Log.i("ZONE", "Zone Name: " + roomName);
-        if (mLightProfile != null)
+        for (ZoneProfile zp : mZoneProfiles)
         {
-            mLightProfile.mapSeed(seedMessage);
+            if (usesSmartNode(address, zp))
+            {
+                zp.mapSeed(seedMessage);
+            }
         }
         return seedMessage;
+    }
+    
+    
+    private boolean usesSmartNode(short address, ZoneProfile zp)
+    {
+        for (UUID uuid : zp.getOutputs())
+        {
+            if (mOutputs.containsKey(uuid))
+            {
+                if (address == mOutputs.get(uuid).getAddress())
+                {
+                    return true;
+                }
+            }
+        }
+        for (UUID uuid : zp.getInputs())
+        {
+            if (mInputs.containsKey(uuid))
+            {
+                if (address == mInputs.get(uuid).getAddress())
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
+    
+    public void mapRegularUpdate(CmToCcuOverUsbSnRegularUpdateMessage_t smartNodeRegularUpdate)
+    {
+        short address = (short) smartNodeRegularUpdate.update.smartNodeAddress.get();
+        for (ZoneProfile zp : mZoneProfiles)
+        {
+            if (usesSmartNode(address, zp))
+            {
+                zp.mapRegularUpdate(smartNodeRegularUpdate);
+            }
+        }
     }
     
     
@@ -203,11 +267,7 @@ public class Zone
     {
         return mInputs;
     }
-    //
-    //    public ArrayList<Struct> getStructs()
-    //    {
-    //
-    //    }
+    
     
     
     public void setInputs(HashMap<UUID, Input> inputs)
@@ -295,7 +355,10 @@ public class Zone
     {
         getOutputs().remove(uuid);
         getInputs().remove(uuid);
-        mLightProfile.getOutputs().remove(uuid);
-        mLightProfile.getInputs().remove(uuid);
+        for(ZoneProfile zp : mZoneProfiles)
+        {
+            zp.getOutputs().remove(uuid);
+            zp.getInputs().remove(uuid);
+        }
     }
 }

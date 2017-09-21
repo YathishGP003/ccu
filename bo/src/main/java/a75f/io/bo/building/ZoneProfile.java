@@ -7,7 +7,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.UUID;
 
+import a75f.io.bo.building.definitions.ProfileType;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
+import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.bo.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 
 /**
@@ -25,21 +27,14 @@ public abstract class ZoneProfile
     protected           HashSet<UUID>       mOutputs   = new HashSet<>();
     protected short mLogicalValue;
     
-
     
     public ZoneProfile()
     {
     }
     
+    
     @JsonIgnore
     public abstract short mapCircuit(Output output);
-    
-    
-    @JsonIgnore
-    public boolean hasSchedules()
-    {
-        return !mSchedules.isEmpty();
-    }
     
     
     public HashSet<UUID> getOutputs()
@@ -77,6 +72,7 @@ public abstract class ZoneProfile
         this.mLogicalValue = mLogicalValue;
     }
     
+    
     protected short resolveLogicalValue(Output output)
     {
         if (output.isOverride())
@@ -105,13 +101,8 @@ public abstract class ZoneProfile
     }
     
     
-    protected short scaleDimmablePercent(short localDimmablePercent, int scale)
-    {
-        return (short) ((float) scale * ((float) localDimmablePercent / 100.0f));
-    }
-    
     @JsonIgnore
-    protected  boolean crossedBound(Output output)
+    protected boolean crossedBound(Output output)
     {
         //if the smartnode output has schedules, wait for it to cross a bound to remove the
         // override.
@@ -125,7 +116,40 @@ public abstract class ZoneProfile
         }
     }
     
-
+    
+    @JsonIgnore
+    public boolean hasSchedules()
+    {
+        return !mSchedules.isEmpty();
+    }
+    
+    
+    @JsonIgnore
+    public short getScheduledVal()
+    {
+        for (Schedule schedule : mSchedules)
+        {
+            if (schedule.isInSchedule())
+            {
+                return schedule.getVal();
+            }
+        }
+        return 0;
+    }
+    
+    @JsonIgnore
+    protected boolean isInSchedule()
+    {
+        for (Schedule schedule : mSchedules)
+        {
+            if (schedule.isInSchedule())
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+    
     
     @JsonIgnore
     protected boolean checkBoundCrossed(ArrayList<Schedule> mSchedules, long mOverrideMillis)
@@ -144,22 +168,26 @@ public abstract class ZoneProfile
     }
     
     
-    @JsonIgnore
-    public short getScheduledVal()
+    protected short resolveZoneLogicalValue()
     {
-        for (Schedule schedule : mSchedules)
+        if (this.hasSchedules())
         {
-            if (schedule.isInSchedule())
-            {
-                return schedule.getVal();
-            }
+            return this.getScheduledVal();
         }
-        return 0;
+        else
+        {
+            return mLogicalValue;
+        }
     }
     
     
+    protected short scaleDimmablePercent(short localDimmablePercent, int scale)
+    {
+        return (short) ((float) scale * ((float) localDimmablePercent / 100.0f));
+    }
+    
+    public abstract void mapControls(CcuToCmOverUsbSnControlsMessage_t controlsMessage_t);
     public abstract void mapSeed(CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage);
     public abstract void mapRegularUpdate(CmToCcuOverUsbSnRegularUpdateMessage_t regularUpdateMessage);
-    
-    
+    public abstract ProfileType getProfileType();
 }

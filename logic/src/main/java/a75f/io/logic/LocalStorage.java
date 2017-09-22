@@ -10,9 +10,6 @@ import a75f.io.bo.json.serializers.JsonSerializer;
 
 import static a75f.io.logic.LLog.Logd;
 
-/**
- * Created by Yinten isOn 8/15/2017.
- */
 
 class LocalStorage
 {

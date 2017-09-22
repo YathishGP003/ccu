@@ -2,6 +2,8 @@ package a75f.io.renatus;
 
 import android.support.test.runner.AndroidJUnit4;
 
+import junit.framework.TestResult;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -14,8 +16,23 @@ import a75f.io.bo.serial.MessageType;
  * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
  */
 @RunWith(AndroidJUnit4.class)
-public class ExampleInstrumentedTest
-{
+public abstract class SimulationBaseTest {
+	public abstract String getTestDescription();
+
+	public abstract String getCCUStateFileName();
+
+	public abstract String getSimulationFileName();
+
+	public abstract TestResult analyzeTestResults(SimulationTestLog testLog);
+
+	public abstract long testDuration();
+
+	public abstract void reportTestResults(SimulationTestLog testLog, TestResult result);
+
+	public abstract String[] graphColumns();
+
+}
+
 
 	@Test
 	public void useAppContext() throws Exception

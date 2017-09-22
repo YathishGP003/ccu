@@ -2,6 +2,7 @@ package a75f.io.bo.building;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 import a75f.io.bo.building.definitions.OutputType;
@@ -16,22 +17,18 @@ import a75f.io.bo.serial.MessageConstants;
  * Input and Output.   Input and Output should be renamed to
  * CircuitInput and CircuitOutput.  This maintains the logical to physical mapping of a circuit IO.
  */
-public abstract class Circuit
+public abstract class Circuit extends Schedulable
 {
-    
+
     @JsonIgnore
     public    boolean mConfigured;
     protected Port  mPort;
     protected short mAddress;
     protected UUID   uuid  = UUID.randomUUID();
     protected String mName = "";
-    protected short   mVal;
-    @JsonIgnore
-    protected long    mOverrideMillis;
-    @JsonIgnore
-    protected boolean mOverride = false; //This circuit controls it's own value
-    
-    
+
+
+
     @JsonIgnore
     public OutputType getOutputType()
     {
@@ -49,8 +46,8 @@ public abstract class Circuit
                 return OutputType.Analog;
         }
     }
-    
-    
+
+
     /***
      *  This is used when settings a smart node circuit name, when setting a smart node light
      *  controls message.
@@ -68,80 +65,46 @@ public abstract class Circuit
             return mName;
         }
     }
-    
-    
+
+
     public UUID getUuid()
     {
         return uuid;
     }
-    
-    
+
     public void setUuid(UUID uuid)
     {
         this.uuid = uuid;
     }
-    
-    
-    /***
-     * This circuit is in manual control mode, zone profile and schedules will be ignored.
-     * @return isInOverRide
-     */
-    @JsonIgnore
-    public boolean isOverride()
-    {
-        return mOverride;
-    }
-    
-    
-    @JsonIgnore
-    public void setOverride(long overrideTimeMillis, boolean override, short val)
-    {
-        this.mOverride = override;
-        this.mOverrideMillis = overrideTimeMillis;
-        this.mVal = val;
-    }
-    
-    
-    public void removeOverride()
-    {
-        this.mOverride = false;
-        this.mOverrideMillis = 0;
-        this.mVal = 0;
-    }
-    
-    
+
     public String getName()
     {
         return mName;
     }
-    
-    
+
     public void setName(String mName)
     {
         this.mName = mName;
     }
-    
-    
+
     public Port getPort()
     {
         return mPort;
     }
-    
-    
+
     public void setPort(Port port)
     {
         this.mPort = port;
     }
-    
-    
+
     public short getAddress()
     {
         return mAddress;
     }
-    
-    
+
     public void setAddress(short address)
     {
         this.mAddress = address;
     }
+
 }

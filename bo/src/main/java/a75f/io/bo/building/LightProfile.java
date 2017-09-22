@@ -14,8 +14,8 @@ public class LightProfile extends ZoneProfile
     public LightProfile()
     {
     }
-    
-    
+
+
     @Override
     public short mapCircuit(Output output)
     {
@@ -50,14 +50,14 @@ public class LightProfile extends ZoneProfile
         }
         return (short) 0;
     }
-    
-    
+
+
     @Override
     public void mapControls(CcuToCmOverUsbSnControlsMessage_t controlsMessage_t)
     {
     }
-    
-    
+
+
     @Override
     public void mapSeed(CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage)
     {
@@ -67,14 +67,14 @@ public class LightProfile extends ZoneProfile
                 .set((short) AlgoTuningParameters.MIN_LIGHTING_CONTROL_OVERRIDE_IN_MINUTES);
         seedMessage.settings.profileBitmap.lightingControl.set((short) 1);
     }
-    
-    
+
+
     @Override
     public void mapRegularUpdate(CmToCcuOverUsbSnRegularUpdateMessage_t regularUpdateMessage)
     {
     }
-    
-    
+
+
     @Override
     public ProfileType getProfileType()
     {

@@ -259,6 +259,7 @@ public class Zone
         circuit.setAddress(node.getAddress());
         getInputs().put(circuit.getUuid(), circuit);
         zoneProfile.getOutputs().add(circuit.uuid);
+        
         this.getNodes().put(node.getAddress(), node);
     }
     
@@ -306,7 +307,18 @@ public class Zone
         output.setAddress(node.getAddress());
         getOutputs().put(output.getUuid(), output);
         zoneProfile.getOutputs().add(output.uuid);
-        node.getOutputs().add(output.uuid);
+        if(this.getNodes().containsKey(node.getAddress()))
+        {
+            this.getNodes().get(node.getAddress()).getOutputs().add(output.getUuid());
+        }
+        else
+        {
+            this.getNodes().put(node.getAddress(), node);
+            node.getOutputs().add(output.getUuid());
+        }
+        
+        
+        
     }
     
     

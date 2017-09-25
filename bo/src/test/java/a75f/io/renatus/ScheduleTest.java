@@ -19,7 +19,7 @@ public class ScheduleTest
 
 
 	//why
-	
+
 	/*
 	local date
 	08 Sep 2017
@@ -34,18 +34,18 @@ public class ScheduleTest
 
 	1504901339999
 
- 
+
 
 	local timezone (UTC-5h)
 	Central Daylight
 	 */
-	
+
 	private static final long MOCK_TIME = 1504901339999L;
-	
-	
-	
+
+
+
 	/*
-	
+
 	+++x +++++++++
 	FRI
 	2017 Sep 08 23:22:00 UTC
@@ -53,12 +53,12 @@ public class ScheduleTest
 	2017 Sep 08 18:22:00 UTC-5:00
 	----  -  -- -- -- --
 	*/
-	
+
 	private static final long OUT_OF_SCHEDULE_MOCK_TIME = 1504912920000L;
-	
+
 	private Schedule schedule;
-	
-	
+
+
 	@Before
 	public void setUpMockSchedule()
 	{
@@ -72,12 +72,12 @@ public class ScheduleTest
 			intsaslist.add(i);
 		}
 		schedule.setDays(intsaslist);
-		//schedule.setSt("8:00");
-		//schedule.setEt("17:30");
+		schedule.setSt(8, 0);
+		schedule.setEt(17, 30);
 		schedule.setVal((short) 100);
 	}
-	
-	
+
+
 	@Test
 	public void getMockScheduleValidTest()
 	{
@@ -88,8 +88,8 @@ public class ScheduleTest
 		Assert.assertEquals(MockTime.getInstance().getMockTime(), MOCK_TIME);
 		Assert.assertTrue(schedule.isInSchedule());
 	}
-	
-	
+
+
 	@Test
 	public void getMockScheduleInvalidTest()
 	{
@@ -98,8 +98,8 @@ public class ScheduleTest
 		MockTime.getInstance().setMockTime(true, MOCK_TIME);
 		Assert.assertTrue(schedule.isInSchedule());
 	}
-	
-	
+
+
 	@Test
 	public void getUnMockedTimeTest()
 	{
@@ -111,8 +111,8 @@ public class ScheduleTest
 		boolean scheduled = schedule.isInSchedule();
 		//This should be false and out of the mock time.
 		Assert.assertFalse(scheduled);
-		
-		
+
+
 	}
 }
 

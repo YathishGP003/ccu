@@ -90,7 +90,7 @@ public class NodeTest
 
         z.findProfile(ProfileType.LIGHT).addSchedule(schedule);
         op3.setOverride(System.currentTimeMillis(), OverrideType.OVERRIDE_TIME_RELEASE_NEXT_SCHEDULE_BOUND, (short) 100);
-
+        op3.addSchedule(schedule);
         short zoneProfile = z.findProfile(ProfileType.LIGHT).mapCircuit(op3);
         System.out.println("Mapping zone profile: " + z.findProfile(ProfileType.LIGHT).mapCircuit(op3));
         Assert.assertEquals(zoneProfile, 100);

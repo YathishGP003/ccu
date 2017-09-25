@@ -88,18 +88,8 @@ public class Output extends Circuit
         {
             retVal = true;
         }
-        else
-        {
-            retVal = false;
-        }
-        if (mOutputRelayActuatorType == OutputRelayActuatorType.NormallyClose)
-        {
-            return retVal;
-        }
-        else
-        {
-            return !retVal;
-        }
+
+        return retVal;
     }
 
 	/* HELP: understand this~

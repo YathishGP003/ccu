@@ -1,5 +1,6 @@
 package a75f.io.bo.building;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import a75f.io.bo.building.definitions.AlgoTuningParameters;
@@ -76,6 +77,7 @@ public class LightProfile extends ZoneProfile
 
 
     @Override
+    @JsonIgnore
     public ProfileType getProfileType()
     {
         return ProfileType.LIGHT;

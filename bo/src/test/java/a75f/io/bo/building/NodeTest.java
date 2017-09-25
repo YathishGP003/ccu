@@ -4,12 +4,15 @@ import android.provider.ContactsContract;
 
 import junit.framework.Assert;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.UUID;
 
 import a75f.io.bo.building.definitions.OutputAnalogActuatorType;
+import a75f.io.bo.building.definitions.OverrideType;
 import a75f.io.bo.building.definitions.Port;
 import a75f.io.bo.building.definitions.ProfileType;
 import a75f.io.bo.json.serializers.JsonSerializer;
@@ -21,6 +24,29 @@ import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 
 public class NodeTest
 {
+
+
+    private Schedule schedule;
+
+
+    @Before
+    public void setUpMockSchedule()
+    {
+        //Mock schedule M-F, 8AM - 5:30PM turn isOn lights to value 100.
+        schedule = new Schedule();
+        int[] ints = {1, 2, 3, 4, 5};
+        ArrayList<Integer> intsaslist = new ArrayList<Integer>();
+        for(int i : ints)
+        { //as
+            int z = 0;
+            intsaslist.add(i);
+        }
+        schedule.setDays(intsaslist);
+        schedule.setSt(8, 00);
+        schedule.setEt(17,30);
+        schedule.setVal((short) 100);
+    }
+
 
     @Test
     public void testSmartNode()
@@ -61,6 +87,9 @@ public class NodeTest
         short lightProfile = z.findProfile(ProfileType.LIGHT).mapCircuit(op3);
         Assert.assertEquals(lightProfile, 20);
         System.out.println("Mapping zone profile: " + z.findProfile(ProfileType.LIGHT).mapCircuit(op3));
+
+        z.findProfile(ProfileType.LIGHT).addSchedule(schedule);
+        op3.setOverride(System.currentTimeMillis(), OverrideType.OVERRIDE_TIME_RELEASE_NEXT_SCHEDULE_BOUND, (short) 100);
 
         short zoneProfile = z.findProfile(ProfileType.LIGHT).mapCircuit(op3);
         System.out.println("Mapping zone profile: " + z.findProfile(ProfileType.LIGHT).mapCircuit(op3));

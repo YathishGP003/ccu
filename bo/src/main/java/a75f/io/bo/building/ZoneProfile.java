@@ -32,7 +32,7 @@ public abstract class ZoneProfile extends Schedulable {
     protected short resolveLogicalValue(Output output) {
         //If an output is overiden, but doesn't have schedules, it should fall back onto the zone profile schedules to see if it can release it's override.
         //  or if it has schedules, it should use the circuit's logical values.  This behavior can be overrode at a specific profile level.
-        if ((output.isOverride() && !output.hasSchedules() && output.checkOverrides(mSchedules))
+        if ((output.isOverride() && !output.hasSchedules() && !output.checkOverrides(mSchedules))
                 || output.hasSchedules()) {
             return output.resolveLogicalValue();
         }

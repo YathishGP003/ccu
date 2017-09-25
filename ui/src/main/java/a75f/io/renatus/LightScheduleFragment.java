@@ -33,39 +33,39 @@ import butterknife.OnClick;
 
 public class LightScheduleFragment extends BaseDialogFragment
 {
-	
+
     //TODO: most of the UI for this...
 	UUID   mCurrentPortId = null;
 	Output mCurrentPort   = null;
-	
-	
+
+
 	Schedule mSchedule = null;
-	
+
 	Floor floor;
 	Zone zone;
-	
+
 	@BindView(R.id.timePickerSt)
 	TimePicker startTimePicker;
-	
+
 	@BindView(R.id.timePickerEt)
 	TimePicker endTimePicker;
-	
+
 	@BindView(R.id.scheduleCancel)
 	Button cancelBtn;
-	
+
 	@BindView(R.id.scheduleSave)
 	Button saveBtn;
-	
+
 	@BindViews({R.id.checkBoxMon, R.id.checkBoxTue, R.id.checkBoxWed, R.id.checkBoxThu,
 			           R.id.checkBoxFri, R.id.checkBoxSat, R.id.checkBoxSun})
 	List<CheckBox> daysList;
-	
-	
+
+
 	public LightScheduleFragment()
 	{
 	}
-	
-	
+
+
 	public static LightScheduleFragment newInstance(Floor floor, Zone zone, Output port)
 	{
 		LightScheduleFragment fragment = new LightScheduleFragment();
@@ -76,8 +76,8 @@ public class LightScheduleFragment extends BaseDialogFragment
 		fragment.setArguments(bundle);
 		return fragment;
 	}
-	
-	
+
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 	                         Bundle savedInstanceState)
@@ -88,14 +88,14 @@ public class LightScheduleFragment extends BaseDialogFragment
 		String zoneName = getArguments().getString(FragmentCommonBundleArgs.ZONE_NAME);
 		String floorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
 		zone = L.findZoneByName(floorName, zoneName);
-		
+
 		ButterKnife.bind(this, rootView);
 		//int titleTextId = getResources().getIdentifier("title", "id", "android");
 		setTitle("Lighting Schedule");
 		return rootView;
 	}
-	
-	
+
+
 	@Override
 	public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
 	{
@@ -107,8 +107,8 @@ public class LightScheduleFragment extends BaseDialogFragment
 		//			fillScheduleData();
 		//		}
 	}
-	
-	
+
+
 	public void fillScheduleData()
 	{
 
@@ -117,15 +117,15 @@ public class LightScheduleFragment extends BaseDialogFragment
 			//if ((CheckBox)daysList.get(i).)
 		}
 	}
-	
-	
+
+
 	@OnClick(R.id.scheduleCancel)
 	public void dismissDialog()
 	{
 		dismiss();
 	}
-	
-	
+
+
 	@OnClick(R.id.scheduleSave)
 	public void saveSchedule()
 	{
@@ -141,15 +141,15 @@ public class LightScheduleFragment extends BaseDialogFragment
 				days.add(i);
 			}
 		}
-		
-		
+
+
 		mSchedule.setDays(days);
 		mSchedule.setSt(startTimePicker.getCurrentHour(), startTimePicker.getCurrentMinute());
 		mSchedule.setEt(endTimePicker.getCurrentHour(), endTimePicker.getCurrentMinute());
 		mSchedule.setVal((short) 69);
-		
+
 		Log.i("Schedule", "mSchedule to add: " + mSchedule.toString());
-		mCurrentPort.mSchedules.add(mSchedule);
+		mCurrentPort.addSchedule(mSchedule);
 		L.saveCCUState();
 
 	}

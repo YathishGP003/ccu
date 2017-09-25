@@ -33,6 +33,7 @@ import a75f.io.bo.building.LightProfile;
 import a75f.io.bo.building.Output;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.definitions.MockTime;
+import a75f.io.bo.building.definitions.OverrideType;
 
 import static a75f.io.bo.building.definitions.Port.ANALOG_OUT_ONE;
 import static a75f.io.bo.building.definitions.Port.ANALOG_OUT_TWO;
@@ -45,9 +46,9 @@ import static a75f.io.bo.building.definitions.Port.RELAY_TWO;
 
 public class LightingDetailAdapter extends BaseAdapter
 {
-	
+
 	public static final String TAG = "Lighting";
-	
+
 	View              row;
 	LayoutInflater    inflater;
 	AppCompatActivity c;
@@ -60,7 +61,7 @@ public class LightingDetailAdapter extends BaseAdapter
 	private LightProfile               profile;
 	private Floor                       floor;
     private Zone                        zone;
-	
+
 	public LightingDetailAdapter(Context c, ListView thiSList, LightProfile p, Floor floor,
                                  Zone zone, Boolean
                                                                                               lcmdab)
@@ -90,29 +91,29 @@ public class LightingDetailAdapter extends BaseAdapter
 			}
 		});
 	}
-	
-	
+
+
 	@Override
 	public int getCount()
 	{
 		return snOutPortList.size();
 	}
-	
-	
+
+
 	@Override
 	public Object getItem(int position)
 	{
 		return position;
 	}
-	
-	
+
+
 	@Override
 	public long getItemId(int position)
 	{
 		return position;
 	}
-	
-	
+
+
 	@Override
 	public View getView(final int position, View convertView, ViewGroup parent)
 	{
@@ -171,7 +172,7 @@ public class LightingDetailAdapter extends BaseAdapter
 					{
 						viewHolder.OnOffLight.setChecked(false);
 					}
-                    
+
                    /* viewHolder.spinnerSchedule.setSelection(port_info.relay2.schedule_mode);
                     viewHolder.statusDetail.setText(port_info.relay2.status);
                     viewHolder.vacationFromTo.setText(port_info.relay2.vacation_text);
@@ -242,9 +243,9 @@ public class LightingDetailAdapter extends BaseAdapter
 					{
 						case RELAY_ONE:
 						case RELAY_TWO:
-								snOutput.setOverride(System.currentTimeMillis(),true, (short)
+								snOutput.setOverride(System.currentTimeMillis(), OverrideType.OVERRIDE_TIME_RELEASE_NEXT_SCHEDULE_BOUND, (short)
                                                                                               (isChecked ? 100 : 0));
-							
+
 					}
 					//TODO: is delay ok here?
 //					try
@@ -265,7 +266,7 @@ public class LightingDetailAdapter extends BaseAdapter
 			val.setTag(position);
 			brightnessControl.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
 			{
-				
+
 				@Override
 				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
 				{
@@ -277,14 +278,14 @@ public class LightingDetailAdapter extends BaseAdapter
 	                        //Do nothing
 					}
 				}
-				
-				
+
+
 				@Override
 				public void onStartTrackingTouch(SeekBar seekBar)
 				{
 				}
-				
-				
+
+
 				@Override
 				public void onStopTrackingTouch(SeekBar seekBar)
 				{
@@ -293,7 +294,7 @@ public class LightingDetailAdapter extends BaseAdapter
 					{
 						case ANALOG_OUT_ONE:
 						case ANALOG_OUT_TWO:
-                            snOutput.setOverride(MockTime.getInstance().getMockTime(), true,
+                            snOutput.setOverride(MockTime.getInstance().getMockTime(), OverrideType.OVERRIDE_TIME_RELEASE_NEXT_SCHEDULE_BOUND,
                                     (short)value);
 					}
 					//TODO review
@@ -456,8 +457,8 @@ public class LightingDetailAdapter extends BaseAdapter
                         	fsvData.getAssignedRoom().sendSettingsToWeb("lcm schedule change");
                     }*/
 						}
-						
-						
+
+
 						@Override
 						public void onNothingSelected(AdapterView<?> parent)
 						{
@@ -466,8 +467,8 @@ public class LightingDetailAdapter extends BaseAdapter
 		}
 		return row;
 	}
-	
-	
+
+
 	private void showDialogFragment(DialogFragment dialogFragment, String id)
 	{
 		FragmentTransaction ft = c.getSupportFragmentManager().beginTransaction();
@@ -585,7 +586,7 @@ public class LightingDetailAdapter extends BaseAdapter
             Toast.makeText(c, "No Named Schedule list to select ", Toast.LENGTH_SHORT).show();
 
     }*/
-	
+
 	public class ViewHolder
 	{
 		public TextView       LogicalName;
@@ -600,8 +601,8 @@ public class LightingDetailAdapter extends BaseAdapter
 		public RelativeLayout schedulerow;
 		public LinearLayout   llmain;
 		public ImageView      imgNameSchedule;
-		
-		
+
+
 		public ViewHolder(View v)
 		{
 			LogicalName = (TextView) v.findViewById(R.id.LogicalName);

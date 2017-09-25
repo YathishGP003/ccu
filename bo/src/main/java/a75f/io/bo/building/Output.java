@@ -14,27 +14,14 @@ import a75f.io.bo.building.definitions.OutputRelayActuatorType;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Output extends Circuit
 {
-    
+
 	/* These are particular to 'outputs' when dealing with 'circuits'  */;
     public OutputRelayActuatorType  mOutputRelayActuatorType;
     public OutputAnalogActuatorType mOutputAnalogActuatorType;
-    public ArrayList<Schedule> mSchedules = new ArrayList<>();
-    
-    
-    @JsonIgnore
-    public boolean hasSchedules()
-    {
-        if (mSchedules != null && mSchedules.size() > 0)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    
-    
+
+
+
+
     /*****************
      *ONLY USED FOR CIRCUITS.
      ******************/
@@ -91,25 +78,13 @@ public class Output extends Circuit
     //		}
     //		return scheduleMsg;
     //	}
-    @JsonIgnore
-    public short getScheduledVal()
-    {
-        for (Schedule schedule : mSchedules)
-        {
-            if (schedule.isInSchedule())
-            {
-                return schedule.getVal();
-            }
-        }
-        return 0;
-    }
-    
-    
+
+
     @JsonIgnore
     public boolean isOn()
     {
         boolean retVal = false;
-        if (mVal == 100)
+        if (getScheduledVal() == 100)
         {
             retVal = true;
         }

@@ -37,7 +37,7 @@ public class AlgoTuningParameters
     static final int     ENTHALPY_COMPENSATION             = 0;
     static final int     OUTSIDE_AIR_MIN_TEMP              = 0;
     static final int     OUTSIDE_AIR_MAX_TEMP              = 70;
-    static final int     OUTSIDE_AIR_MIN_HUMIDITY          = 10;
+    public static final int     OUTSIDE_AIR_MIN_HUMIDITY          = 10;
     static final int     OUTSIDE_AIR_MAX_HUMIDITY          = 95;
     static final int     ECONOMIZER_LOAD_THRESHOLD         = 30;
     static final int     ECONOMIZER_HOLDTIME               = 15;

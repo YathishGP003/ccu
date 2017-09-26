@@ -13,6 +13,15 @@ import a75f.io.bo.building.definitions.OverrideType;
  */
 
 public class Schedulable {
+    
+    public ArrayList<Schedule> getSchedules()
+    {
+        return mSchedules;
+    }
+    public void setSchedules(ArrayList<Schedule> mSchedules)
+    {
+        this.mSchedules = mSchedules;
+    }
     protected ArrayList<Schedule> mSchedules = new ArrayList<>();
     protected short mLogicalValue;
     protected OverrideType mOverrideType = OverrideType.NONE;

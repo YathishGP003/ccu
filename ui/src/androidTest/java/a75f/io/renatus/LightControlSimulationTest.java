@@ -9,11 +9,11 @@ import org.junit.Before;
 
 public class LightControlSimulationTest extends CcuSimulationTest
 {
-    CcuTestRunner mRunner = null;
+    SimulationRunner mRunner = null;
     
     @Before
     public void setUp() {
-        mRunner =  new CcuTestRunner();
+        mRunner =  new SimulationRunner();
     }
     
     @After

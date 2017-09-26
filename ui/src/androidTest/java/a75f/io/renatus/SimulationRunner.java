@@ -4,8 +4,13 @@ package a75f.io.renatus;
  * Created by samjithsadasivan on 9/21/17.
  */
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -20,7 +25,7 @@ import static a75f.io.logic.L.ccu;
 import static java.lang.Thread.sleep;
 
 
-public class CcuTestRunner
+public class SimulationRunner
 {
     
     public List<String[]> csvDataArray = null;
@@ -44,7 +49,7 @@ public class CcuTestRunner
         
     }
     
-    public void injectState( CCUApplication state) {
+    public void injectState(CCUApplication state) {
         CCUApplication currentState = ccu();
         currentState.setTitle(state.getTitle());
         currentState.setFloors(state.getFloors());
@@ -99,6 +104,36 @@ public class CcuTestRunner
         {
             e.printStackTrace();
         }
+    }
+    
+    public String getResult(String url){
+        
+        StringBuilder result = new StringBuilder();
+            
+        HttpURLConnection urlConnection = null;
+        
+        try {
+            URL restUrl = new URL(url);
+            urlConnection = (HttpURLConnection) restUrl.openConnection();
+            InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+            
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+            
+            String line;
+            while ((line = reader.readLine()) != null) {
+                result.append(line);
+            }
+            
+        }catch( Exception e) {
+            e.printStackTrace();
+        }
+        finally {
+            urlConnection.disconnect();
+        }
+        
+        
+        return result.toString();
+        
     }
     
     

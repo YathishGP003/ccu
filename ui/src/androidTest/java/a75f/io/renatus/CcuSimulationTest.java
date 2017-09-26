@@ -4,15 +4,13 @@ package a75f.io.renatus;
  * Created by samjithsadasivan on 9/21/17.
  */
 
-import android.support.test.runner.AndroidJUnit4;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
- * Base class for functional test cases , runs with CcuTestRunner and enforces each test to have config and test input files
+ * Base class for functional test cases , runs with SimulationRunner and enforces each test to have config and test input files
  */
-@RunWith(AndroidJUnit4.class)
+@RunWith(CcuSimulationTestRunner.class)
 public abstract class CcuSimulationTest
 {
     //Description of test

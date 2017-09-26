@@ -10,7 +10,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
- * Base class for functional test cases , enforces each test to have config and test input files
+ * Base class for functional test cases , runs with CcuTestRunner and enforces each test to have config and test input files
  */
 @RunWith(AndroidJUnit4.class)
 public abstract class CcuSimulationTest

@@ -6,7 +6,6 @@
       <module fileurl="file://$PROJECT_DIR$/bo/bo.iml" filepath="$PROJECT_DIR$/bo/bo.iml" />
       <module fileurl="file://$PROJECT_DIR$/dal/dal.iml" filepath="$PROJECT_DIR$/dal/dal.iml" />
       <module fileurl="file://$PROJECT_DIR$/logic/logic.iml" filepath="$PROJECT_DIR$/logic/logic.iml" />
-      <module fileurl="file://$PROJECT_DIR$/opencsv-2.1-1.0.0/opencsv-2.1-1.0.0.iml" filepath="$PROJECT_DIR$/opencsv-2.1-1.0.0/opencsv-2.1-1.0.0.iml" />
       <module fileurl="file://$PROJECT_DIR$/renatus.iml" filepath="$PROJECT_DIR$/renatus.iml" />
       <module fileurl="file://$PROJECT_DIR$/ui/ui.iml" filepath="$PROJECT_DIR$/ui/ui.iml" />
       <module fileurl="file://$PROJECT_DIR$/usbserial/usbserial.iml" filepath="$PROJECT_DIR$/usbserial/usbserial.iml" />

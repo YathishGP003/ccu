@@ -12,20 +12,20 @@ import java.io.IOException;
 
 public class SimulationParams
 {
-    public Float room_temperature;
-    public Float airflow_1_temperature;
-    public Float airflow_2_temperature;
+    public float room_temperature;
+    public float airflow_1_temperature;
+    public float airflow_2_temperature;
     public int   external_analog_voltage_input_1;
     public int   external_analog_voltage_input_2;
     public int   external_thermistor_input_1;
     public int   external_thermistor_input_2;
     public int   actual_damper_position;
-    public Float set_temperature;
+    public float set_temperature;
     public int   hvac_supply_voltage;
-    public Float measured_motor_1_forward_rpm;
-    public Float measured_motor_1_reverse_rpm;
-    public Float measured_motor_2_forward_rpm;
-    public Float measured_motor_2_reverse_rpm;
+    public float measured_motor_1_forward_rpm;
+    public float measured_motor_1_reverse_rpm;
+    public float measured_motor_2_forward_rpm;
+    public float measured_motor_2_reverse_rpm;
     public int   battery_status;
     public int   actual_conditioning_mode;
     public int   external_power;

@@ -13,7 +13,7 @@ public class LightControlSimulationTest extends CcuSimulationTest
     
     @Before
     public void setUp() {
-        mRunner =  CcuTestRunner.getInstance();
+        mRunner =  new CcuTestRunner();
     }
     
     @After
@@ -60,16 +60,13 @@ public class LightControlSimulationTest extends CcuSimulationTest
         
         System.out.println("runTest.........");
         
-        /*Log.e("test", L.ccu().toString());
-        try
-        {
-            String stateJSON = JsonSerializer.toJson(L.ccu(), true);
-            Log.e("test", stateJSON);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
+        //Log.e("test", L.ccu().toString());
     
-       mRunner.run(this);
+        /*String params = CcuTestInputParser.readFileFromAssets(CcuTestEnv.getInstance().getContext(), "ccustates/testresult.json");
+        SmartNodeParams snParams = null;
+        snParams = SmartNodeParams.getParamsFromJson(params);*/
+        
+        mRunner.runSimulation(this);
     }
     
     

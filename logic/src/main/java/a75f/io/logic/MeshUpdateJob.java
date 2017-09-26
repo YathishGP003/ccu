@@ -7,6 +7,7 @@ import org.javolution.io.Struct;
 import a75f.io.bo.building.Floor;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.json.serializers.JsonSerializer;
+import a75f.io.bo.serial.AddressedStruct;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
 
@@ -21,9 +22,8 @@ import static a75f.io.logic.LLog.Logw;
 class MeshUpdateJob extends BaseJob
 {
     
-    public static final String TAG                 = "HeartBeatJob";
-    private static final int SIMULATION_SLEEP_TIME = 100;
-    
+    public static final  String TAG                   = "HeartBeatJob";
+    private static final int    SIMULATION_SLEEP_TIME = 100;
     
     //This task should run every minute.
     public void doJob()
@@ -39,61 +39,61 @@ class MeshUpdateJob extends BaseJob
                     {
                         Logw("=============Zone: " + zone.roomName + " ==================");
                         Logw("=================NOW SENDING SEEDS=====================");
-                        for (CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage : zone.getSeedMessages(EncryptionPrefs
-                                                                                                              .getEncryptionKey()))
+                        for (CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage : LSmartNode.getSeedMessages(floor, zone))
                         {
-                            if(sendStruct((short) seedMessage.smartNodeAddress.get(), seedMessage))
+                            if (sendStruct((short) seedMessage.smartNodeAddress.get(), seedMessage))
                             {
                                 Log.w(LLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
                             }
                         }
                         Logw("=================NOW SENDING CONTROLS=====================");
-                        for (CcuToCmOverUsbSnControlsMessage_t controlsMessage : zone.getControlsMessages())
+                        for (CcuToCmOverUsbSnControlsMessage_t controlsMessage : LSmartNode.getControlMessages(floor, zone))
                         {
-                            if(sendStruct((short) controlsMessage.smartNodeAddress.get(),
-                                    controlsMessage))
+                            if (sendStruct((short) controlsMessage.smartNodeAddress.get(), controlsMessage))
+                            {
+                                Log.w(LLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
+                            }
+                        }
+                        Logw("=================NOW SENDING EXTRA MESSAGES LIKE SCHEDULES====================");
+                        for (AddressedStruct extraMessage : LSmartNode.getExtraMessages(floor, zone))
+                        {
+                            if (sendStruct(extraMessage.getAddress(), extraMessage.getStruct()))
                             {
                                 Log.w(LLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
                             }
                         }
                     }
                 }
-                //Foreach smart node, send seed messages & controls messages.   TODO worry about
-                // duplciates.
             }
             else
             {
                 Log.d(TAG, "Serial is not connected, rescheduling heartbeat");
             }
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             e.printStackTrace();
         }
     }
     
-    
     private boolean sendStruct(short smartNodeAddress, Struct struct)
     {
-        boolean retVal = LSerial.getInstance()
-               .sendSerialStructToNode(smartNodeAddress, struct);
-    
+        boolean retVal = LSerial.getInstance().sendSerialStructToNode(smartNodeAddress, struct);
         //If the application is in simualtion mode to work over FTDI with biskit,
         // sleep between messages, so biskit doesn't fall behind.
-        if(Globals.getInstance().isSimulation())
+        if (Globals.getInstance().isSimulation())
         {
             tSleep(SIMULATION_SLEEP_TIME);
         }
         return retVal;
     }
     
-    
     private void tSleep(int sleepTime)
     {
         Logd("sleeping: " + sleepTime);
         try
         {
-           Thread.sleep(sleepTime);
+            Thread.sleep(sleepTime);
         }
         catch (InterruptedException e)
         {

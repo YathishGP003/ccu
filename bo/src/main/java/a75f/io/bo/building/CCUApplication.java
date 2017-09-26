@@ -4,18 +4,20 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.util.ArrayList;
 
+import a75f.io.bo.building.definitions.AlgoTuningParameters;
+
 /**
  * Created by Yinten isOn 8/15/2017.
  */
 @JsonSerialize
 public class CCUApplication
 {
-    public SystemProfile systemProfile = new SystemProfile();
-    public ControlMote   controlMote   = new ControlMote();
-    private String           mTitle  = "";
-    private ArrayList<Floor> mfloors = new ArrayList<Floor>();
-    private short mSmartNodeAddressBand;
-    
+    public  SystemProfile    systemProfile = new SystemProfile();
+    public  ControlMote      controlMote   = new ControlMote();
+    private String           mTitle        = "";
+    private ArrayList<Floor> mfloors       = new ArrayList<Floor>();
+    private short                mSmartNodeAddressBand;
+    private AlgoTuningParameters mAlgoTuningParameters;
     
     public short getSmartNodeAddressBand()
     {
@@ -26,9 +28,7 @@ public class CCUApplication
     {
         this.mSmartNodeAddressBand = smartNodeAddressBand;
     }
-    
     //
-
     //
     //
     //	public Node findSmartNodeByAddress(short smartNodeAddress)
@@ -79,27 +79,32 @@ public class CCUApplication
     //		return zoneProfiles;
     //	}
     
-    
     public ArrayList<Floor> getFloors()
     {
         return mfloors;
     }
-    
     
     public void setFloors(ArrayList<Floor> floors)
     {
         this.mfloors = floors;
     }
     
-    
     public String getTitle()
     {
         return mTitle;
     }
     
-    
     public void setTitle(String title)
     {
         this.mTitle = title;
+    }
+    
+    public AlgoTuningParameters getAlgoTuningParameters()
+    {
+        return mAlgoTuningParameters;
+    }
+    public void setAlgoTuningParameters(AlgoTuningParameters algoTuningParameters)
+    {
+        this.mAlgoTuningParameters = algoTuningParameters;
     }
 }

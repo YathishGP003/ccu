@@ -26,7 +26,7 @@ class Globals
 	private static final int      TASK_SEPERATION                           = 3;
 	private static final TimeUnit TASK_SERERATION_TIMEUNIT                  = TimeUnit.SECONDS;
 	private static Globals                  globals;
-	HeartBeatJob        mHeartBeatJob        = new HeartBeatJob();
+	HeartBeatJob        mHeartBeatJob;
 	MeshUpdateJob		mMeshUpdateJob		= new MeshUpdateJob();
 	private        ScheduledExecutorService taskExecutor;
 	private        Context                  mApplicationContext;
@@ -70,6 +70,7 @@ class Globals
 	{
 		taskExecutor = Executors.newScheduledThreadPool(NUMBER_OF_CYCLICAL_TASKS_RENATUS_REQUIRES);
 		DalContext.instantiate(this.mApplicationContext);
+		mHeartBeatJob        = new HeartBeatJob();
 		//5 seconds after application initializes start heart beat
 		int HEARTBEAT_INTERVAL = 60;
         Logd("Scheduling ---- HeartBeat Job");

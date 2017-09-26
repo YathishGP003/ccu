@@ -62,6 +62,7 @@ public class LightProfile extends ZoneProfile
     @Override
     public void mapSeed(CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage)
     {
+        //TODO: for now these are public
         seedMessage.settings.lightingIntensityForOccupantDetected
                 .set((short) AlgoTuningParameters.LIGHTING_INTENSITY_OCCUPANT_DETECTED);
         seedMessage.settings.minLightingControlOverrideTimeInMinutes

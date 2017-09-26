@@ -123,13 +123,15 @@ public class SingleStageProfile extends ZoneProfile
 
     public int getHeatingDeadband()
     {
-        return AlgoTuningParameters.SSE_Heating_Deadband;
+        //TODO: tuning
+        return 1; //AlgoTuningParameters.SSE_Heating_Deadband;
     }
 
 
     public int getCoolingDeadband()
     {
-        return AlgoTuningParameters.SSE_Cooling_Deadband;
+        //TODO: tuning
+        return 1; ///return AlgoTuningParameters.SSE_Cooling_Deadband;
     }
 
 

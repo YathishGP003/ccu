@@ -31,10 +31,6 @@ public class Zone
     private HashMap<Short, Node>  mNodes   = new HashMap<>();
     private HashMap<UUID, Input>  mInputs  = new HashMap<>();
     private HashMap<UUID, Output> mOutputs = new HashMap<>();
-    //    private CcuToCmOverUsbSnControlsMessage_t[] controlsMessage;
-    //    private CcuToCmOverUsbSnControlsMessage_t[] seedMessages;
-    //    private CcuToCmOverUsbSnControlsMessage_t[] controlsMessages;
-    //
     
     
     public Zone()

@@ -6,4 +6,7 @@ package a75f.io.renatus;
 
 public class TestLog
 {
+    public String name;
+    public String message;
+    
 }

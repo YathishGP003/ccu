@@ -13,7 +13,7 @@ import org.junit.runner.RunWith;
  * Base class for functional test cases , enforces each test to have config and test input files
  */
 @RunWith(AndroidJUnit4.class)
-public abstract class CcuSimulationTestSuite
+public abstract class CcuSimulationTest
 {
     //Description of test
     public abstract String getTestDescription();
@@ -35,4 +35,7 @@ public abstract class CcuSimulationTestSuite
     
     //Columns to graph
     public abstract String[] graphColumns();
+    
+    @Test
+    public abstract void runTest();
 }

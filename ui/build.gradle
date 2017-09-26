@@ -56,6 +56,7 @@ android {
     productFlavors {
 
     }
+    sourceSets { main { assets.srcDirs = ['src/main/assets', 'src/androidTest/assets'] } }
 }
 
 dependencies {
@@ -66,7 +67,6 @@ dependencies {
     compile project(':usbserial')
     compile project(':util')
     compile 'org.greenrobot:eventbus:3.0.0'
-
     compile 'com.android.support:design:25.3.1'
     compile 'com.android.support:support-vector-drawable:25.3.1'
     compile 'com.jakewharton:butterknife:8.7.0'
@@ -83,4 +83,5 @@ dependencies {
     compile(name: 'kinvey-android-3.0.3', ext: 'aar')
     compile(name: 'realm-android-library-3.2.1', ext: 'aar')
     compile(name: 'relinker-1.2.2', ext: 'aar')
+    compile 'com.opencsv:opencsv:4.0'
 }

@@ -4,6 +4,7 @@ package a75f.io.renatus;
  * Created by samjithsadasivan on 9/21/17.
  */
 
-public class TestResult
+public enum TestResult
 {
+    FAIL, NOT_RUN, PASS
 }

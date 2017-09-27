@@ -93,6 +93,9 @@ public class L
 		
 		saveCCUState();
 	}
-    
 
+
+    public static boolean isSimulation() {
+        return Globals.getInstance().isSimulation();
+    }
 }

@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical">
+    <!--<TextView-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="Select Module Type"-->
+        <!--android:textSize="@dimen/text_large_xlarge"-->
+        <!--android:layout_gravity="left"-->
+        <!--android:layout_marginLeft="60dp"-->
+        <!--android:layout_marginTop="40dp" />-->
+    <!--<ScrollView-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:overScrollMode="never"-->
+        <!--android:layout_height="wrap_content">-->
+        <!--<RadioGroup-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:orientation="vertical"-->
+            <!--android:layout_marginLeft="60dp"-->
+            <!--android:id="@+id/wrmProfilingRadioGrp">-->
+
+            <!--<RadioButton-->
+                <!--android:text=" Dynamic Airflow Balancing"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:id="@+id/dabModuleTypeRB"-->
+                <!--android:layout_weight="0.1"-->
+                <!--android:layout_marginTop="12dp"-->
+                <!--android:textSize="@dimen/text_medium_xlarge" />-->
+
+            <!--<TextView-->
+                <!--android:text="Controls dampers in ductwork to provide zone by zone airflow control"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_weight="0.1"-->
+                <!--android:textSize="@dimen/text_small_xlarge"-->
+                <!--android:layout_marginLeft="60dp"-->
+                <!--android:layout_marginRight="30dp" />-->
+
+            <!--<RadioButton-->
+                <!--android:text=" Lighting Control"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:id="@+id/lcmModuleTypeRB"-->
+                <!--android:layout_weight="0.1"-->
+                <!--android:layout_marginTop="25dp"-->
+                <!--android:textSize="@dimen/text_medium_xlarge" />-->
+            <!--<TextView-->
+                <!--android:text="Controls 2 independent zones via relays and 2 variable light units via 0-10v output."-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_weight="0.1"-->
+                <!--android:textSize="@dimen/text_small_xlarge"-->
+                <!--android:layout_marginLeft="60dp"-->
+                <!--android:layout_marginRight="30dp" />-->
+            <!--<RadioButton-->
+                <!--android:text=" Single Stage Equipment"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:id="@+id/sseModuleTypeRB"-->
+                <!--android:layout_marginTop="25dp"-->
+                <!--android:layout_weight="0.1"-->
+                <!--android:textSize="@dimen/text_medium_xlarge" />-->
+            <!--<TextView-->
+                <!--android:text="Controls simple HVAC equipment like split ACs, Heat pumps, fan coil unit etc.,"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_weight="0.1"-->
+                <!--android:textSize="@dimen/text_small_xlarge"-->
+                <!--android:layout_marginLeft="60dp"-->
+                <!--android:layout_marginRight="30dp" />-->
+
+            <!--<RadioButton-->
+                <!--android:text=" Refrigeration"-->
+                <!--android:textColor="@color/selection_gray"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:id="@+id/rmModuleTypeRB"-->
+                <!--android:layout_marginTop="25dp"-->
+                <!--android:layout_weight="0.1"-->
+                <!--android:textSize="@dimen/text_medium_xlarge"-->
+                <!--android:checked="false"-->
+                <!--android:focusable="false"-->
+                <!--android:clickable="false"-->
+                <!--/>-->
+            <!--<TextView-->
+                <!--android:text="Allows monitoring of refrigeration units via temperature probes"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_weight="0.1"-->
+                <!--android:textSize="@dimen/text_small_xlarge"-->
+                <!--android:layout_marginLeft="60dp"-->
+                <!--android:layout_marginRight="30dp" />-->
+            <!--<RadioButton-->
+                <!--android:text=" Energy Meter"-->
+                <!--android:textColor="@color/selection_gray"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:id="@+id/emrModuleTypeRB"-->
+                <!--android:layout_marginTop="25dp"-->
+                <!--android:layout_weight="0.1"-->
+                <!--android:textSize="@dimen/text_medium_xlarge"-->
+                <!--android:checked="false"-->
+                <!--android:focusable="false"-->
+                <!--android:clickable="false" />-->
+            <!--<TextView-->
+                <!--android:text="Connects to pulse type energy meters or current transformers to monitor energy usage "-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_weight="0.1"-->
+                <!--android:textSize="@dimen/text_small_xlarge"-->
+                <!--android:layout_marginLeft="60dp" />-->
+            <!--<RadioButton-->
+                <!--android:text=" Custom Control"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:id="@+id/ccmModuleTypeRB"-->
+                <!--android:layout_marginTop="25dp"-->
+                <!--android:layout_weight="0.1"-->
+                <!--android:textSize="@dimen/text_medium_xlarge" />-->
+            <!--<TextView-->
+                <!--android:text="Allows building automation control using combination of modes (DAB, Lighting, Single Stage Equipment, Refrigeration, Energy Meter) and IFTT Rules"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_weight="0.1"-->
+                <!--android:textSize="@dimen/text_small_xlarge"-->
+                <!--android:layout_marginLeft="60dp"-->
+
+                <!--android:layout_marginRight="30dp" />-->
+
+            <!--<RadioButton-->
+                <!--android:text=" Hot Water Mixture"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:id="@+id/hwpModuleTypeRB"-->
+                <!--android:layout_marginTop="25dp"-->
+                <!--android:layout_weight="0.1"-->
+                <!--android:textSize="@dimen/text_medium_xlarge" />-->
+            <!--<TextView-->
+                <!--android:text="Allows monitoring of hotwater units via analog out 1 for control, AnalogIn 1 for current transducer, Airflow-1 for Hot water temperature "-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_weight="0.1"-->
+                <!--android:textSize="@dimen/text_small_xlarge"-->
+                <!--android:layout_marginLeft="60dp"-->
+                <!--android:layout_marginBottom="30dp"-->
+                <!--android:layout_marginRight="30dp" />-->
+        <!--</RadioGroup>-->
+    <!--</ScrollView>-->
+</LinearLayout>

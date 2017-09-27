@@ -401,17 +401,11 @@ public class FloorPlanFragment extends Fragment
 		Zone room = floor.mRoomList.get(mRoomListAdapter.getSelectedPostion());
 		
 		/* Checks to see if emulated and doesn't popup BLE dialogs */
-		if (getActivity().getResources().getBoolean(R.bool.skip_ble))
-		{
-			showDialogFragment(LightingZoneProfileFragment
-					                   .newInstance(meshAddress, room.roomName, floor.mFloorName), LightingZoneProfileFragment.ID);
-		}
-		else
-		{
-			FragmentDeviceScan fragmentDeviceScan =
-					FragmentDeviceScan.getInstance(meshAddress, room.roomName, floor.mFloorName);
-			showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
-		}
+
+		//This should be moved to pair button for select device type screen.
+		showDialogFragment(FragmentSelectDeviceType.newInstance(meshAddress, room.roomName, floor.mFloorName), FragmentSelectDeviceType.ID);
+		/*
+		*/
 	}
 	
 	

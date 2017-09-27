@@ -38,7 +38,7 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     LightProfile mLightProfile;
     Node         mNode;
     short        mNodeAddress;
-    View         mView;
+    
     String       mRoomName;
     String       mFloorName;
     
@@ -56,7 +56,7 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     public Dialog onCreateDialog(Bundle savedInstanceState)
     {
         LayoutInflater inflater = LayoutInflater.from(getActivity());
-        mView =  inflater.inflate(R.layout.wrm_module_selection, null);
+        View mView =  inflater.inflate(R.layout.wrm_module_selection, null);
         //ButterKnife.bind(this, mView);
        // Log.e(TAG, "INFLATED");
         mNodeAddress = getArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR);
@@ -67,7 +67,9 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
         mNode = mZone.getSmartNode(mNodeAddress);
         AlertDialog.Builder alertBuilder= new AlertDialog.Builder(getActivity(), R.style.NewDialogStyle);
         alertBuilder.setTitle(mRoomName);
+  
         alertBuilder.setView(mView);
+        
         alertBuilder.setCancelable(false);
         alertBuilder.setPositiveButton("Pair", new DialogInterface.OnClickListener() {
             @Override
@@ -111,6 +113,8 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
         return alertBuilder.create();
 
     }
+    
+    
 
     
     

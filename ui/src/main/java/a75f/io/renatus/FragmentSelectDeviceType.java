@@ -1,14 +1,15 @@
 package a75f.io.renatus;
 
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
-import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 
 import a75f.io.bo.building.LightProfile;
 import a75f.io.bo.building.Node;
@@ -17,11 +18,9 @@ import a75f.io.bo.building.definitions.ProfileType;
 import a75f.io.logic.L;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
-import a75f.io.renatus.ZONEPROFILE.LightingZoneProfileFragment;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-
-import static a75f.io.renatus.R.id.roomName;
+import butterknife.OnClick;
 
 /**
  * Created by ryant on 9/27/2017.
@@ -38,17 +37,6 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
     String       mRoomName;
     String       mFloorName;
     
-    @BindView(R.id.deviceTypeSelection)
-    RadioGroup  deviceTypeSelection;
-    @BindView(R.id.smartNode)
-    RadioButton smartNode;
-    @BindView(R.id.smartstat)
-    RadioButton smartstat;
-    @BindView(R.id.hia)
-    RadioButton hia;
-    @BindView(R.id.lpi)
-    RadioButton lpi;
-    
     public static FragmentSelectDeviceType newInstance(short meshAddress, String roomName, String mFloorName)
     {
         FragmentSelectDeviceType f = new FragmentSelectDeviceType();
@@ -60,43 +48,55 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
         return f;
     }
     
+    @BindView(R.id.default_text_view)
+                                       TextView    defaultTextView;
+    @BindView(R.id.deviceTypeSelection)RadioGroup  deviceTypeSelection;
+    @BindView(R.id.smartNode)          RadioButton smartNode;
+    @BindView(R.id.smartstat)          RadioButton smartstat;
+    @BindView(R.id.hia)                RadioButton hia;
+    @BindView(R.id.lpi)                RadioButton lpi;
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState)
+    public void onCreate(Bundle savedInstanceState) {
+        // TODO Auto-generated method stub
+        super.onCreate(savedInstanceState);
+        
+        //setStyle(DialogFragment.STY, R.style.NewDialogStyle);
+        
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        ButterKnife.bind(this, view);
+        defaultTextView.setText(mRoomName + " - " + "Select device type to pair");
+    }
+    
+    
+    @OnClick(R.id.first_button) void onFirstButtonClick() {
+        removeDialogFragment(ID);
+    }
+    
+    
+    @OnClick(R.id.second_button) void onSecondButtonClick() {
+        OpenModuleSelectionDialog();
+    }
+    
+   
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
-        LayoutInflater inflater = LayoutInflater.from(getActivity());
-        View view = inflater.inflate(R.layout.devicetypeselectiondialog, null);
+        View view = inflater.inflate(R.layout.devicetypeselectiondialog, container, false);
         mNodeAddress = getArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR);
         mRoomName = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
         mFloorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
         mZone = L.findZoneByName(mFloorName, mRoomName);
         mLightProfile = (LightProfile) mZone.findProfile(ProfileType.LIGHT);
         mNode = mZone.getSmartNode(mNodeAddress);
-        ButterKnife.bind(this, view);
-        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(getActivity(), R.style.NewDialogStyle);
-        alertBuilder.setTitle(mRoomName + " - " + "Select device type to pair");
-        alertBuilder.setView(view);
-        alertBuilder.setCancelable(false);
         
-        alertBuilder.setPositiveButton("Pair", new DialogInterface.OnClickListener()
-        {
-            @Override
-            public void onClick(DialogInterface dialog, int which)
-            {
-                
-                OpenModuleSelectionDialog();
-                        
-            }
-        });
-        alertBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener()
-        {
-            @Override
-            public void onClick(DialogInterface dialog, int which)
-            {
-                dialog.dismiss();
-            }
-        });
-        return alertBuilder.create();
+        return view;
     }
+
     
     private void OpenModuleSelectionDialog()
     {
@@ -111,6 +111,20 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
         {
             DialogSmartStatProfiling hiaselection = DialogSmartStatProfiling.newInstance(mNodeAddress, mRoomName, mFloorName);
             showDialogFragment(hiaselection, DialogSmartStatProfiling.ID);
+        }
+    }
+    
+    @Override
+    public void onStart()
+    {
+        super.onStart();
+        Dialog dialog = getDialog();
+        
+        if (dialog != null)
+        {
+            int width = ViewGroup.LayoutParams.MATCH_PARENT;
+            int height = ViewGroup.LayoutParams.MATCH_PARENT;
+            dialog.getWindow().setLayout(width, height);
         }
     }
 }

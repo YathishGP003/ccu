@@ -1,7 +1,5 @@
 package a75f.io.renatus;
 
-import android.support.test.internal.util.AndroidRunnerParams;
-
 import org.junit.Test;
 import org.junit.internal.runners.statements.FailOnTimeout;
 import org.junit.runners.BlockJUnit4ClassRunner;
@@ -17,13 +15,10 @@ import org.junit.runners.model.Statement;
     
 public class CcuSimulationTestRunner extends BlockJUnit4ClassRunner
 {
-    private final AndroidRunnerParams mAndroidRunnerParams;
-    
-    public CcuSimulationTestRunner(Class<?> klass, AndroidRunnerParams runnerParams)
+    public CcuSimulationTestRunner(Class<?> klass)
             throws InitializationError
     {
         super(klass);
-        mAndroidRunnerParams = runnerParams;
     }
     
     @Override
@@ -31,8 +26,6 @@ public class CcuSimulationTestRunner extends BlockJUnit4ClassRunner
         long timeout = getTimeout(method.getAnnotation(Test.class));
         if (timeout > 0) {
             return new FailOnTimeout(next, timeout);
-        } else if (mAndroidRunnerParams.getPerTestTimeout() > 0) {
-            return new FailOnTimeout(next, mAndroidRunnerParams.getPerTestTimeout());
         }
         return next;
     }

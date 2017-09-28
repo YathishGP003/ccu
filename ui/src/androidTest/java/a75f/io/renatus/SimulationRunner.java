@@ -4,13 +4,19 @@ package a75f.io.renatus;
  * Created by samjithsadasivan on 9/21/17.
  */
 
+import android.os.Environment;
+
+import org.joda.time.DateTime;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -18,12 +24,13 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import a75f.io.bo.building.CCUApplication;
 
 import static a75f.io.logic.L.ccu;
 import static java.lang.Thread.sleep;
-
 
 public class SimulationRunner
 {
@@ -31,14 +38,18 @@ public class SimulationRunner
     public List<String[]> csvDataArray = null;
     CcuTestEnv mEnv = null;
     
+    CcuSimulationTest mCurrentTest;
+    
     String[] testVectorParams = null;
+    CCUApplication appState;
     
     public void runSimulation(CcuSimulationTest ccuTest) {
-        
+    
+        mCurrentTest = ccuTest;
         mEnv = CcuTestEnv.getInstance();
-        
-        CCUApplication state = CcuTestInputParser.parseStateConfig(mEnv, ccuTest.getCCUStateFileName());
-        injectState(state);
+    
+        appState = CcuTestInputParser.parseStateConfig(mEnv, ccuTest.getCCUStateFileName());
+        injectState(appState);
     
         csvDataArray = CcuTestInputParser.parseSimulationFile(mEnv, ccuTest.getSimulationFileName());
         testVectorParams = csvDataArray.get(0);
@@ -46,6 +57,8 @@ public class SimulationRunner
         for (int simIndex = 1; simIndex < csvDataArray.size(); simIndex ++) {
             injectSimulation(csvDataArray.get(simIndex));
         }
+        
+        addTestInfo();
         
     }
     
@@ -56,30 +69,33 @@ public class SimulationRunner
         currentState.setSmartNodeAddressBand(state.getSmartNodeAddressBand());
         currentState.systemProfile = state.systemProfile;
         currentState.controlMote = state.controlMote;
+        
     }
     
     public void injectSimulation(String[] testVals)
     {
         final String TIME_FORMAT = "hh:mm:ss";
-        SimpleDateFormat sdf = new SimpleDateFormat(TIME_FORMAT);
+        SimpleDateFormat sdf = new SimpleDateFormat(TIME_FORMAT, Locale.getDefault());
         try
         {
             Date d = sdf.parse(testVals[0]);
-            sleep(d.getTime() - System.currentTimeMillis());
+            //int waitTime = d.getHours()*3600+d.getMinutes()*60+d.getSeconds();
+            //sleep(d.getTime());
+            //threadSleep();
             SimulationParams params  = new SimulationParams().build(testVals);
             
             String paramsJson = params.convertToJsonString();
     
-            postJson("http://localhost:5000/state/smartnode?address="+testVals[1].trim(), paramsJson);
+            //postJson("http://localhost:5000/state/smartnode?address="+testVals[1].trim(), paramsJson);
         }
         catch (ParseException e)
         {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        catch (InterruptedException e) {
+       /* catch (InterruptedException e) {
             e.printStackTrace();
-        }
+        }*/
        
     }
     
@@ -130,12 +146,59 @@ public class SimulationRunner
         finally {
             urlConnection.disconnect();
         }
-        
-        
         return result.toString();
-        
     }
     
+    public void addTestInfo() {
+        CcuSimulationTestInfo info = new CcuSimulationTestInfo();
+        info.name = mCurrentTest.getTestDescription();
+        info.simulationResult = new SimulationResult();
+        info.simulationResult.result = TestResult.PASS;
+        
+        info.simulationInput = csvDataArray;
+        info.inputCcuState = appState;
+        String params = CcuTestInputParser.readFileFromAssets(CcuTestEnv.getInstance().getContext(), "ccustates/testresult.json");
+        SmartNodeParams snParams = null;
+        snParams = SmartNodeParams.getParamsFromJson(params);
+        info.nodeParams.add(snParams);
+        mEnv.testSuite.put(mCurrentTest.getTestDescription(),info);
+    }
+    
+    public void saveReport() {
+        
+        String path = Environment.getExternalStorageDirectory().getPath();//style="width:100%"
+        String testReport = "<br /><br /><h3>Simulation Test Summary</h3>"
+                                    .concat("<table width:200; border=1; cellspacing=0; cellpadding=0; table-layout:fixed; word-wrap:break-word;>")
+                                    .concat("<tr>")
+                                    .concat("<th> Test Case </th>")
+                                    .concat("<th> Status </th>")
+                                    .concat("<th> Simulation Input </th>")
+                                    .concat("<th> Ccu State </th>")
+                                    .concat("<th> SmartNode State</th>")
+                                    .concat("</tr>");
+        
+        for (Map.Entry<String, CcuSimulationTestInfo> test : mEnv.testSuite.entrySet()) {
+            testReport = testReport.concat(test.getValue().getHtml());
+        }
+        
+        testReport = testReport.concat("</table>");
+    
+        //String fileName = DateFormat.format("dd_MM_yyyy_hh_mm_ss", System.currentTimeMillis()).toString();
+        String name = "sim.html";
+        File file = new File(path, name);
+        String html = "<html><head><title>Simulation Test Report</title></head><body>"+testReport+"</body></html>";
+
+        try {
+            FileOutputStream out = new FileOutputStream(file);
+            byte[] data = html.getBytes();
+            out.write(data);
+            out.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     
     public void threadSleep(int seconds) {
         try {

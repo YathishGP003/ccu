@@ -67,6 +67,8 @@ public class LightControlSimulationTest extends CcuSimulationTest
         snParams = SmartNodeParams.getParamsFromJson(params);*/
         
         mRunner.runSimulation(this);
+        
+        mRunner.saveReport();
     }
     
     

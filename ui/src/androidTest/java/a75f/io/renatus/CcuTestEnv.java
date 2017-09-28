@@ -11,12 +11,10 @@ import java.util.HashMap;
 
 public class CcuTestEnv
 {
-    private static CcuTestEnv                            INSTANCE  = null;
+    private static CcuTestEnv INSTANCE  = null;
     
-    //Key for testSuite could simple class name of test
-    public         HashMap<String,CcuSimulationTestInfo> testSuite = new HashMap<>();
+    public HashMap<String,CcuSimulationTestInfo> testSuite = new HashMap<>();
     
-    //public ArrayList<CcuSimulationTest> testSuite = new ArrayList<>();
     private Context mContext;
     
     public CcuSimulationTest mCurrentTest;

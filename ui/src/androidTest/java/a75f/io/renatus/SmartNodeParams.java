@@ -1,5 +1,7 @@
 package a75f.io.renatus;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
@@ -101,6 +103,30 @@ public class SmartNodeParams
             e.printStackTrace();
         }
         return params;
+    }
+    
+    public String convertToJsonString()
+    {
+        String jsonString = null;
+        try
+        {
+            ObjectMapper mapper = new ObjectMapper();
+            jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(this);
+        }
+        catch (JsonGenerationException e)
+        {
+            e.printStackTrace();
+        }
+        catch (JsonMappingException e)
+        {
+            e.printStackTrace();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        
+        return jsonString;
     }
     
 }

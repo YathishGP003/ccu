@@ -13,14 +13,13 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.TextView;
 
 import java.util.Arrays;
 import java.util.List;
 
+import a75f.io.bo.building.definitions.ProfileType;
 import a75f.io.renatus.BLE.FragmentDeviceScan;
 import a75f.io.renatus.R;
-import a75f.io.renatus.ZonesFragment;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -91,7 +90,7 @@ public class BLETestFragment extends Fragment
 	@OnClick(R.id.pairButton)
 	public void pairModule() {
 		FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(
-					Short.parseShort(channels.get(channelSelection)), roomName.getText().toString(), "75F");
+					Short.parseShort(channels.get(channelSelection)), roomName.getText().toString(), "75F", ProfileType.LIGHT);
 		showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
 	}
 	

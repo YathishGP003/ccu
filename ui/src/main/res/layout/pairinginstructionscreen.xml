@@ -22,6 +22,34 @@
         android:textColor="@color/dark_gray"
         android:textSize="@dimen/text_medium_xlarge" />
 
+    <LinearLayout
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:orientation="horizontal"
+        android:paddingBottom="8dp"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:paddingTop="8dp">
+
+        <Button
+            style="@style/buttonstyle"
+            android:id="@+id/first_button"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="Cancel"></Button>
+
+        <Button
+            style="@style/buttonstyle"
+            android:id="@+id/second_button"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="Pair"></Button>
+
+    </LinearLayout>
+
+
 
 
 </RelativeLayout>

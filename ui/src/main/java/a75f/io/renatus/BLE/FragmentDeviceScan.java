@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.v4.app.DialogFragment;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -21,6 +22,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
+import a75f.io.bo.building.definitions.ProfileType;
 import a75f.io.bo.serial.SerialConsts;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.R;
@@ -39,11 +41,13 @@ public class FragmentDeviceScan extends BaseDialogFragment
 	
 	public static final String ID                = "scan_dialog";
 	static final        int    REQUEST_ENABLE_BT = 1;
+	private static final String PROFILE_TYPE     = "profile_type";
 	@BindView(R.id.ble_device_list_list_view)
 	ListView mBLEDeviceListListView;
 	String              mName;
 	String              mFloorName;
 	Short               mPairingAddress;
+    ProfileType         mProfileType;
 	LeDeviceListAdapter mLeDeviceListAdapter;
 	BluetoothAdapter    mBluetoothAdapter;
 	boolean             mScanning;
@@ -72,14 +76,14 @@ public class FragmentDeviceScan extends BaseDialogFragment
 	};
 	
 	
-	public static FragmentDeviceScan getInstance(short pairingAddress, String name,
-	                                             String floorName)
+	public static FragmentDeviceScan getInstance(short pairingAddress, String name, String floorName, ProfileType profileType)
 	{
 		FragmentDeviceScan fds = new FragmentDeviceScan();
 		Bundle args = new Bundle();
 		args.putShort(ARG_PAIRING_ADDR, pairingAddress);
 		args.putString(ARG_NAME, name);
 		args.putString(FLOOR_NAME, floorName);
+		args.putString(PROFILE_TYPE, profileType.name());
 		fds.setArguments(args);
 		return fds;
 	}
@@ -106,6 +110,7 @@ public class FragmentDeviceScan extends BaseDialogFragment
 		
 		mPairingAddress = getArguments().getShort(ARG_PAIRING_ADDR);
 		mFloorName = getArguments().getString(FLOOR_NAME);
+        mProfileType = ProfileType.valueOf(getArguments().getString(PROFILE_TYPE));
 		View retVal = inflater.inflate(R.layout.fragment_device_scan, container, false);
 		ButterKnife.bind(this, retVal);
 		setTitle(getString(R.string.scan_dialog_title));

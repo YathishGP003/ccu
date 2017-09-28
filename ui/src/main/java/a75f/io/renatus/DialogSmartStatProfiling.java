@@ -15,4 +15,9 @@ public class DialogSmartStatProfiling extends BaseDialogFragment
     {
         return null;
     }
+    @Override
+    public String getIdString()
+    {
+        return ID;
+    }
 }

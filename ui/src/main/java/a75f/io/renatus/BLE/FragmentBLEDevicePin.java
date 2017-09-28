@@ -307,5 +307,10 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
 	{
 		return !mDevice.getName().equalsIgnoreCase(SerialConsts.SMART_STAT_NAME);
 	}
+	@Override
+	public String getIdString()
+	{
+		return ID;
+	}
 }
 	

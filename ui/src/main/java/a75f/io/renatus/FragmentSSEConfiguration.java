@@ -15,4 +15,9 @@ public class FragmentSSEConfiguration extends BaseDialogFragment
     {
         return null;
     }
+    @Override
+    public String getIdString()
+    {
+        return ID;
+    }
 }

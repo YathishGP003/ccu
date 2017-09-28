@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import a75f.io.bo.building.LightProfile;
 import a75f.io.bo.building.Node;
+import a75f.io.bo.building.NodeType;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.definitions.ProfileType;
 import a75f.io.logic.L;
@@ -94,11 +95,12 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     {
         if (lcmModuleTypeRB.isChecked())
         {
-            showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.LIGHT), FragmentBLEInstructionScreen.ID);
+            showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.LIGHT, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
+            
         }
         else if (sseModuleTypeRB.isChecked())
         {
-            showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.SSE), FragmentBLEInstructionScreen.ID);
+            showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.SSE, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
         }
     }
     
@@ -124,5 +126,10 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
         bundle.putString(FragmentCommonBundleArgs.FLOOR_NAME, floorName);
         f.setArguments(bundle);
         return f;
+    }
+    @Override
+    public String getIdString()
+    {
+        return ID;
     }
 }

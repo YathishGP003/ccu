@@ -34,6 +34,8 @@ import butterknife.OnClick;
 public class LightScheduleFragment extends BaseDialogFragment
 {
 
+	public static final String ID = LightScheduleFragment.class.getSimpleName();
+
     //TODO: most of the UI for this...
 	UUID   mCurrentPortId = null;
 	Output mCurrentPort   = null;
@@ -152,5 +154,10 @@ public class LightScheduleFragment extends BaseDialogFragment
 		mCurrentPort.addSchedule(mSchedule);
 		L.saveCCUState();
 
+	}
+	@Override
+	public String getIdString()
+	{
+		return ID;
 	}
 }

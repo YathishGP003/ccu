@@ -234,6 +234,7 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
                 saveLightData();
                 getActivity()
                         .sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
+                LightingZoneProfileFragment.this.closeAllBaseDialogFragments();
                 dismiss();
             }
         });
@@ -565,5 +566,10 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
             }
         });
         alertBuilder.show();
+    }
+    @Override
+    public String getIdString()
+    {
+        return ID;
     }
 }

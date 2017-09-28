@@ -127,4 +127,9 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
             dialog.getWindow().setLayout(width, height);
         }
     }
+    @Override
+    public String getIdString()
+    {
+        return ID;
+    }
 }

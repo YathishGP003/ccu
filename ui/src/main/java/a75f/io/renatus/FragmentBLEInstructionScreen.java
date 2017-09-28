@@ -3,12 +3,12 @@ package a75f.io.renatus;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
-import a75f.io.bo.building.LightProfile;
 import a75f.io.bo.building.Node;
 import a75f.io.bo.building.NodeType;
 import a75f.io.bo.building.Zone;
@@ -18,13 +18,15 @@ import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.BLE.FragmentDeviceScan;
 import a75f.io.renatus.ZONEPROFILE.LightingZoneProfileFragment;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.ARG_NAME;
 import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.ARG_PAIRING_ADDR;
 import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.FLOOR_NAME;
+import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.NODE_TYPE;
 import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.PROFILE_TYPE;
-import static a75f.io.renatus.R.id.sseModuleTypeRB;
 
 /**
  * Created by ryant on 9/28/2017.
@@ -33,8 +35,14 @@ import static a75f.io.renatus.R.id.sseModuleTypeRB;
 public class FragmentBLEInstructionScreen extends BaseDialogFragment
 {
     
-    public static final String ID = DialogSmartNodeProfiling.class.getSimpleName();
+    @BindView(R.id.pairinginstruct)
+    ImageView pairinginstruct;
+    @BindView(R.id.title)
+    TextView  title;
     
+    public static final String ID = FragmentBLEInstructionScreen.class.getSimpleName();
+    
+    NodeType    mNodeType;
     Zone        mZone;
     ProfileType mProfileType;
     Node        mNode;
@@ -56,6 +64,20 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         return fds;
     }
     
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
+    {
+        super.onViewCreated(view, savedInstanceState);
+        ButterKnife.bind(this, view);
+        if (mNodeType == NodeType.SMART_NODE)
+        {
+            pairinginstruct.setImageResource(R.drawable.pairinginstructionsn);
+        }
+        else if (mNodeType == NodeType.SMART_STAT)
+        {
+            pairinginstruct.setImageResource(R.drawable.pairinginstruct);
+        }
+    }
     @OnClick(R.id.first_button)
     void onFirstButtonClick()
     {
@@ -104,6 +126,7 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         mFloorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
         mZone = L.findZoneByName(mFloorName, mRoomName);
         mProfileType = ProfileType.valueOf(getArguments().getString(PROFILE_TYPE));
+        mNodeType = NodeType.valueOf(getArguments().getString(NODE_TYPE));
         mNode = mZone.getSmartNode(mNodeAddress);
         return view;
     }
@@ -119,5 +142,10 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
             int height = ViewGroup.LayoutParams.MATCH_PARENT;
             dialog.getWindow().setLayout(width, height);
         }
+    }
+    @Override
+    public String getIdString()
+    {
+        return ID;
     }
 }

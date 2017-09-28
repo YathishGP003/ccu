@@ -218,6 +218,11 @@ public class SmartStatTestFragment extends BaseDialogFragment
 	}
 	
 	@Override
+	public String getIdString()
+	{
+		return "SmartStatTestFragment";
+	}
+	@Override
 	public void onPause() {
 		super.onPause();
 		getActivity().unregisterReceiver(mUsbReceiver);

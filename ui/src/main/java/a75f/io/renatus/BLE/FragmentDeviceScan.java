@@ -190,9 +190,13 @@ public class FragmentDeviceScan extends BaseDialogFragment
 			mBluetoothAdapter.stopLeScan(mLeScanCallback);
 		}
 	}
-	
-	
-	@Override
+    
+    @Override
+    public String getIdString()
+    {
+        return ID;
+    }
+    @Override
 	public void onPause()
 	{
 		super.onPause();

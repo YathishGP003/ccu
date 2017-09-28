@@ -1,11 +1,8 @@
 package a75f.io.renatus;
 
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,8 +17,6 @@ import a75f.io.bo.building.definitions.ProfileType;
 import a75f.io.logic.L;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
-import a75f.io.renatus.BLE.FragmentDeviceScan;
-import a75f.io.renatus.ZONEPROFILE.LightingZoneProfileFragment;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -99,27 +94,11 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     {
         if (lcmModuleTypeRB.isChecked())
         {
-            if (L.isSimulation())
-            {
-                showDialogFragment(LightingZoneProfileFragment.newInstance(mNodeAddress, mRoomName, mFloorName), LightingZoneProfileFragment.ID);
-            }
-            else
-            {
-                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.LIGHT);
-                showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
-            }
+            showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.LIGHT), FragmentBLEInstructionScreen.ID);
         }
         else if (sseModuleTypeRB.isChecked())
         {
-            if (L.isSimulation())
-            {
-                showDialogFragment(FragmentSSEConfiguration.newInstance(mNodeAddress, mRoomName, mFloorName), FragmentSSEConfiguration.ID);
-            }
-            else
-            {
-                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.SSE);
-                showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
-            }
+            showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.SSE), FragmentBLEInstructionScreen.ID);
         }
     }
     
@@ -135,67 +114,6 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
             dialog.getWindow().setLayout(width, height);
         }
     }
-    
-//    @Override
-//    public Dialog onCreateDialog(Bundle savedInstanceState)
-//    {
-//        LayoutInflater inflater = LayoutInflater.from(getActivity());
-//        View mView = inflater.inflate(R.layout.wrm_module_selection, null);
-//        ButterKnife.bind(this, mView);
-//        // Log.e(TAG, "INFLATED");
-//        mNodeAddress = getArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR);
-//        mRoomName = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
-//        mFloorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
-//        mZone = L.findZoneByName(mFloorName, mRoomName);
-//        mLightProfile = (LightProfile) mZone.findProfile(ProfileType.LIGHT);
-//        mNode = mZone.getSmartNode(mNodeAddress);
-//        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(getActivity(), R.style.NewDialogStyle);
-//        alertBuilder.setTitle(mRoomName);
-//        alertBuilder.setView(mView);
-//        alertBuilder.setCancelable(false);
-//        alertBuilder.setPositiveButton("Pair", new DialogInterface.OnClickListener()
-//        {
-//            @Override
-//            public void onClick(DialogInterface dialog, int which)
-//            {
-//                if (lcmModuleTypeRB.isChecked())
-//                {
-//                    if (L.isSimulation())
-//                    {
-//                        showDialogFragment(LightingZoneProfileFragment.newInstance(mNodeAddress, mRoomName, mFloorName), LightingZoneProfileFragment.ID);
-//                    }
-//                    else
-//                    {
-//                        FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.LIGHT);
-//                        showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
-//                    }
-//                    dialog.dismiss();
-//                }
-//                else if (sseModuleTypeRB.isChecked())
-//                {
-//                    if (L.isSimulation())
-//                    {
-//                        showDialogFragment(FragmentSSEConfiguration.newInstance(mNodeAddress, mRoomName, mFloorName), FragmentSSEConfiguration.ID);
-//                    }
-//                    else
-//                    {
-//                        FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.SSE);
-//                        showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
-//                    }
-//                    dialog.dismiss();
-//                }
-//            }
-//        });
-//        alertBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener()
-//        {
-//            @Override
-//            public void onClick(DialogInterface dialog, int which)
-//            {
-//                dialog.dismiss();
-//            }
-//        });
-//        return alertBuilder.create();
-//    }
     
     public static DialogSmartNodeProfiling newInstance(short meshAddress, String roomName, String floorName)
     {

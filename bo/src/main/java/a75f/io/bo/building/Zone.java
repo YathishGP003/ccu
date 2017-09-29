@@ -3,14 +3,13 @@ package a75f.io.bo.building;
 import android.util.Log;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.javolution.io.Struct;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.UUID;
+import java.util.HashSet;
 
 import a75f.io.bo.building.definitions.Port;
 import a75f.io.bo.building.definitions.ProfileType;
@@ -26,28 +25,18 @@ import a75f.io.bo.serial.MessageType;
 public class Zone
 {
     public String                 roomName      = "Default Zone";
-    public ArrayList<ZoneProfile> mZoneProfiles = new ArrayList<ZoneProfile>();
-    
-    private HashMap<Short, Node>  mNodes   = new HashMap<>();
-    private HashMap<UUID, Input>  mInputs  = new HashMap<>();
-    private HashMap<UUID, Output> mOutputs = new HashMap<>();
-    //    private CcuToCmOverUsbSnControlsMessage_t[] controlsMessage;
-    //    private CcuToCmOverUsbSnControlsMessage_t[] seedMessages;
-    //    private CcuToCmOverUsbSnControlsMessage_t[] controlsMessages;
-    //
+    public ArrayList<ZoneProfile> mZoneProfiles = new ArrayList<>();
     
     
     public Zone()
     {
     }
     
-    
     //Also known as zone name.
     public Zone(String roomName)
     {
         this.roomName = roomName;
     }
-    
     
     @JsonIgnore
     public Output findPort(Port port, short smartNodeAddress)
@@ -68,32 +57,20 @@ public class Zone
     }
     
     
+    @JsonIgnore
     public ArrayList<Output> getOutputs(short address)
     {
         ArrayList<Output> retVal = new ArrayList<>();
-        if (mNodes.containsKey(address))
+        for (ZoneProfile zp : mZoneProfiles)
         {
-            Node node = mNodes.get(address);
-            for (UUID outputUUID : node.getOutputs())
+            BaseProfileConfiguration profileConfiguration = zp.getProfileConfiguration(address);
+            if (profileConfiguration != null)
             {
-                retVal.add(getOutputs().get(outputUUID));
+                retVal.addAll(profileConfiguration.getOutputs());
             }
         }
         return retVal;
     }
-    
-    
-    public HashMap<UUID, Output> getOutputs()
-    {
-        return mOutputs;
-    }
-    
-    
-    public void setOutputs(HashMap<UUID, Output> outputs)
-    {
-        this.mOutputs = outputs;
-    }
-    
     
     @Override
     @JsonIgnore
@@ -101,7 +78,6 @@ public class Zone
     {
         return roomName;
     }
-    
     
     @JsonIgnore
     public ZoneProfile findProfile(ProfileType profileType)
@@ -132,23 +108,23 @@ public class Zone
     public Collection<CcuToCmOverUsbSnControlsMessage_t> getControlsMessages()
     {
         HashMap<Short, CcuToCmOverUsbSnControlsMessage_t> controlMessagesHash = new HashMap<>();
-        for (Output output : this.getOutputs().values())
+        for (ZoneProfile zp : mZoneProfiles)
         {
-            CcuToCmOverUsbSnControlsMessage_t controlsMessage_t;
-            if (controlMessagesHash.containsKey(output.getAddress()))
+            for (short node : zp.getNodeAddresses())
             {
-                controlsMessage_t = controlMessagesHash.get(output.getAddress());
-            }
-            else
-            {
-                controlsMessage_t = new CcuToCmOverUsbSnControlsMessage_t();
-                controlMessagesHash.put(output.getAddress(), controlsMessage_t);
-                controlsMessage_t.smartNodeAddress.set(output.getAddress());
-                controlsMessage_t.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_CONTROLS);
-            }
-            for (ZoneProfile zp : mZoneProfiles)
-            {
-                if (zp.getOutputs().contains(output.getUuid()))
+                CcuToCmOverUsbSnControlsMessage_t controlsMessage_t;
+                if (controlMessagesHash.containsKey(node))
+                {
+                    controlsMessage_t = controlMessagesHash.get(node);
+                }
+                else
+                {
+                    controlsMessage_t = new CcuToCmOverUsbSnControlsMessage_t();
+                    controlMessagesHash.put(node, controlsMessage_t);
+                    controlsMessage_t.smartNodeAddress.set(node);
+                    controlsMessage_t.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_CONTROLS);
+                }
+                for (Output output : zp.getProfileConfiguration(node).getOutputs())
                 {
                     getPort(controlsMessage_t, output.getPort()).set(zp.mapCircuit(output));
                 }
@@ -181,10 +157,12 @@ public class Zone
     @JsonIgnore
     public CcuToCmOverUsbDatabaseSeedSnMessage_t[] getSeedMessages(byte[] encryptionKey)
     {
+        //This needs to pair using module tuners as well..
+        HashSet<Short> addresses = getNodes(); 
         CcuToCmOverUsbDatabaseSeedSnMessage_t[] seedMessages =
-                new CcuToCmOverUsbDatabaseSeedSnMessage_t[mNodes.size()];
+                new CcuToCmOverUsbDatabaseSeedSnMessage_t[addresses.size()];
         int i = 0;
-        for (Short address : mNodes.keySet())
+        for (Short address : addresses)
         {
             seedMessages[i] = getSeedMessage(encryptionKey, address);
             i++;
@@ -205,160 +183,45 @@ public class Zone
         Log.i("ZONE", "Zone Name: " + roomName);
         for (ZoneProfile zp : mZoneProfiles)
         {
-            if (usesSmartNode(address, zp))
-            {
-                zp.mapSeed(seedMessage);
-            }
+            zp.mapSeed(seedMessage);
         }
         return seedMessage;
     }
     
-    
-    private boolean usesSmartNode(short address, ZoneProfile zp)
-    {
-        for (UUID uuid : zp.getOutputs())
-        {
-            if (mOutputs.containsKey(uuid))
-            {
-                if (address == mOutputs.get(uuid).getAddress())
-                {
-                    return true;
-                }
-            }
-        }
-        for (UUID uuid : zp.getInputs())
-        {
-            if (mInputs.containsKey(uuid))
-            {
-                if (address == mInputs.get(uuid).getAddress())
-                {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-    
-    
+    @JsonIgnore
     public void mapRegularUpdate(CmToCcuOverUsbSnRegularUpdateMessage_t smartNodeRegularUpdate)
     {
-        short address = (short) smartNodeRegularUpdate.update.smartNodeAddress.get();
+        Short address = Short.valueOf((short) smartNodeRegularUpdate.update.smartNodeAddress.get());
         for (ZoneProfile zp : mZoneProfiles)
         {
-            if (usesSmartNode(address, zp))
+            if (zp.getNodeAddresses().contains(address))
             {
                 zp.mapRegularUpdate(smartNodeRegularUpdate);
             }
         }
     }
     
-    
     @JsonIgnore
-    public void addInputCircuit(Node node, ZoneProfile zoneProfile, Input circuit)
-    {
-        circuit.setAddress(node.getAddress());
-        getInputs().put(circuit.getUuid(), circuit);
-        zoneProfile.getOutputs().add(circuit.uuid);
-        this.getNodes().put(node.getAddress(), node);
-    }
-    
-    
-    public HashMap<UUID, Input> getInputs()
-    {
-        return mInputs;
-    }
-    
-    
-    
-    public void setInputs(HashMap<UUID, Input> inputs)
-    {
-        mInputs = inputs;
-    }
-    
-    
-    @JsonProperty("nodes")
-    public HashMap<Short, Node> getNodes()
-    {
-        return mNodes;
-    }
-    
-    
-    @JsonProperty("nodes")
-    public void setNodes(HashMap<Short, Node> nodes)
-    {
-        Log.i("Nodes", "Set nodes! " + nodes.size());
-        this.mNodes = nodes;
-    }
-    
-    
-    @JsonIgnore
-    public void removeOutputCircuit(Output output, ZoneProfile zoneProfile)
-    {
-        getOutputs().remove(output.getUuid());
-        zoneProfile.getOutputs().remove(output.uuid);
-        getNodes().get(output.getAddress()).getOutputs().remove(output.getUuid());
-    }
-    
-    
-    @JsonIgnore
-    public void addOutputCircuit(Node node, ZoneProfile zoneProfile, Output output)
-    {
-        output.setAddress(node.getAddress());
-        getOutputs().put(output.getUuid(), output);
-        zoneProfile.getOutputs().add(output.uuid);
-        node.getOutputs().add(output.uuid);
-    }
-    
-    
-    @JsonIgnore
-    public void removeInputCircuit(Input input, ZoneProfile zoneProfile)
-    {
-        getOutputs().remove(input.getUuid());
-        zoneProfile.getOutputs().remove(input.uuid);
-        getNodes().remove(input.getAddress());
-        getNodes().get(input.getAddress()).getInputs().remove(input.getUuid());
-    }
-    
-    
-    @JsonIgnore
-    public Node getSmartNode(Short mSmartNodeAddress)
-    {
-        if (mNodes.containsKey(mSmartNodeAddress))
-        {
-            Log.i("NODE", "Contains Key");
-            return mNodes.get(mSmartNodeAddress);
-        }
-        else
-        {
-            Log.i("NODE", "New node");
-            Node node = new Node();
-            node.setAddress(mSmartNodeAddress);
-            mNodes.put(mSmartNodeAddress, node);
-            return node;
-        }
-    }
-    
-    
     public void removeNodeAndClearAssociations(Short selectedModule)
     {
-        Node nodeToDelete = getNodes().get(selectedModule);
-        for (UUID uuid : nodeToDelete.getOutputs())
+        for (ZoneProfile zp : mZoneProfiles)
         {
-            removeCircuit(uuid);
+            if (zp.getProfileConfiguration(selectedModule) != null)
+            {
+                zp.removeProfileConfiguration(selectedModule);
+            }
         }
-        getNodes().remove(selectedModule);
     }
     
     
-    @JsonIgnore
-    public void removeCircuit(UUID uuid)
+    public HashSet<Short> getNodes()
     {
-        getOutputs().remove(uuid);
-        getInputs().remove(uuid);
-        for(ZoneProfile zp : mZoneProfiles)
+        HashSet<Short> addresses = new HashSet<Short>();
+        for (ZoneProfile zp : mZoneProfiles)
         {
-            zp.getOutputs().remove(uuid);
-            zp.getInputs().remove(uuid);
+            addresses.addAll(zp.getNodeAddresses());
         }
+        
+        return addresses;
     }
 }

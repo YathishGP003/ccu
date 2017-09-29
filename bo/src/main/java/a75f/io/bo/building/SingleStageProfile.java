@@ -3,8 +3,8 @@ package a75f.io.bo.building;
 import android.util.Log;
 
 import java.util.HashMap;
+import java.util.Set;
 
-import a75f.io.bo.building.definitions.AlgoTuningParameters;
 import a75f.io.bo.building.definitions.ProfileType;
 import a75f.io.bo.building.definitions.SingleStageMode;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
@@ -36,7 +36,7 @@ public class SingleStageProfile extends ZoneProfile
     @Override
     public short mapCircuit(Output output)
     {
-        short localDimmablePercent = resolveLogicalValue(output);
+        short temperature = resolveLogicalValue(output);
         //The smartnode circuit is in override mode, check to see if a schedule hasn't crossed a
         // bound.  If a schedule did cross a bound remove the override and continue.
         switch (output.getOutputType())
@@ -152,5 +152,24 @@ public class SingleStageProfile extends ZoneProfile
     {
         return ProfileType.SSE;
     }
-
+    
+    
+    @Override
+    public BaseProfileConfiguration getProfileConfiguration(short address)
+    {
+        return null;
+    }
+    
+    
+    @Override
+    public Set<Short> getNodeAddresses()
+    {
+        return null;
+    }
+    
+    
+    @Override
+    public void removeProfileConfiguration(Short selectedModule)
+    {
+    }
 }

@@ -77,10 +77,7 @@ public class L
 	{
 		return ZoneBLL.findZoneByName(mFloorName, mRoomName);
 	}
-	public static Node getSmartNodeAndSeed(Zone zone, short address, String mRoomName)
-	{
-		return LSmartNode.getSmartNodeAndSeed(zone, address, mRoomName);
-	}
+	
 	public static void sendLightControlsMessage(Zone zone)
 	{
         //TODO: revist

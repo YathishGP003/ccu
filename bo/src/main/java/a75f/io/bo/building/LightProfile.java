@@ -3,6 +3,9 @@ package a75f.io.bo.building;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import java.util.HashMap;
+import java.util.Set;
+
 import a75f.io.bo.building.definitions.AlgoTuningParameters;
 import a75f.io.bo.building.definitions.ProfileType;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
@@ -12,11 +15,15 @@ import a75f.io.bo.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class LightProfile extends ZoneProfile
 {
+    private HashMap<Short, LightProfileConfiguration> mLightProfileConfiguration =
+            new HashMap<Short, LightProfileConfiguration>();
+    
+    
     public LightProfile()
     {
     }
-
-
+    
+    
     @Override
     public short mapCircuit(Output output)
     {
@@ -29,10 +36,10 @@ public class LightProfile extends ZoneProfile
                 switch (output.mOutputRelayActuatorType)
                 {
                     case NormallyClose:
-                        return (short) (localDimmablePercent != 100 ? 1 : 0);
+                        return (short) (localDimmablePercent != 0 ? 1 : 0);
                     ///Defaults to normally open
                     case NormallyOpen:
-                        return (short) (localDimmablePercent != 100 ? 0 : 1);
+                        return (short) (localDimmablePercent != 0 ? 0 : 1);
                 }
                 break;
             case Analog:
@@ -51,14 +58,14 @@ public class LightProfile extends ZoneProfile
         }
         return (short) 0;
     }
-
-
+    
+    
     @Override
     public void mapControls(CcuToCmOverUsbSnControlsMessage_t controlsMessage_t)
     {
     }
-
-
+    
+    
     @Override
     public void mapSeed(CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage)
     {
@@ -69,18 +76,51 @@ public class LightProfile extends ZoneProfile
                 .set((short) AlgoTuningParameters.MIN_LIGHTING_CONTROL_OVERRIDE_IN_MINUTES);
         seedMessage.settings.profileBitmap.lightingControl.set((short) 1);
     }
-
-
+    
+    
     @Override
     public void mapRegularUpdate(CmToCcuOverUsbSnRegularUpdateMessage_t regularUpdateMessage)
     {
     }
-
-
+    
+    
     @Override
     @JsonIgnore
     public ProfileType getProfileType()
     {
         return ProfileType.LIGHT;
+    }
+    
+    
+    @Override
+    public BaseProfileConfiguration getProfileConfiguration(short address)
+    {
+        return mLightProfileConfiguration.get(address);
+    }
+    
+    
+    @Override
+    public Set<Short> getNodeAddresses()
+    {
+        return mLightProfileConfiguration.keySet();
+    }
+    
+    
+    @Override
+    public void removeProfileConfiguration(Short selectedModule)
+    {
+        mLightProfileConfiguration.remove(selectedModule);
+    }
+    
+    
+    public HashMap<Short, LightProfileConfiguration> getLightProfileConfiguration()
+    {
+        return mLightProfileConfiguration;
+    }
+    
+    
+    public void setLightProfileConfiguration(HashMap<Short, LightProfileConfiguration> lightProfileConfiguration)
+    {
+        this.mLightProfileConfiguration = lightProfileConfiguration;
     }
 }

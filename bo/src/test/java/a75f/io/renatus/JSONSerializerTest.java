@@ -12,7 +12,7 @@ import java.util.UUID;
 import a75f.io.bo.building.CCUApplication;
 import a75f.io.bo.building.Floor;
 import a75f.io.bo.building.LightProfile;
-import a75f.io.bo.building.Node;
+import a75f.io.bo.building.LightProfileConfiguration;
 import a75f.io.bo.building.Output;
 import a75f.io.bo.building.SingleStageProfile;
 import a75f.io.bo.building.Zone;
@@ -110,22 +110,21 @@ public class JSONSerializerTest
 		short smartNodeAddress = 0;
 		CCUApplication ccuApplication = new CCUApplication();
 
-		Node node5K = new Node();
-		node5K.setAddress(smartNodeAddress);
 
 		ccuApplication.setTitle("Light Test");
 		Floor floor = new Floor(1, "webid", "Floor1");
 		Zone zone = new Zone("Zone1");
 		LightProfile lightProfile5K = (LightProfile) zone.findProfile(ProfileType.LIGHT);
-
-		zone.getNodes().put(node5K.getAddress(), node5K);
-        Output output5K = new Output();
+		LightProfileConfiguration lightProfileConfiguration = new LightProfileConfiguration();
+        
+		Output output5K = new Output();
 		output5K.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
 		output5K.setName("Dining Room");
         ccuApplication.getFloors().add(floor);
         ccuApplication.getFloors().get(0).mRoomList.add(zone);
-		zone.addOutputCircuit(node5K, lightProfile5K, output5K);
-
+		lightProfileConfiguration.getOutputs().add(output5K);
+        lightProfile5K.getLightProfileConfiguration().put(smartNodeAddress,
+                lightProfileConfiguration);
 		try
 		{
 			String ccuApplicationJSON = JsonSerializer.toJson(ccuApplication, true);
@@ -140,26 +139,6 @@ public class JSONSerializerTest
 		{
 			e.printStackTrace();
 		}
-		//Node smartNode = ccuApplication.findSmartNodeByAddress(ccuApplication.floors.get(0)
-//		                                                                                  .getRoomList().get(0).zoneProfiles.get(0).smartNodeOutputs.get(0).mSmartNodeAddress);
-//		CcuToCmOverUsbDatabaseSeedSnMessage_t ccuToCmOverUsbDatabaseSeedSnMessage_t = new CcuToCmOverUsbDatabaseSeedSnMessage_t();
-//		ccuToCmOverUsbDatabaseSeedSnMessage_t.smartNodeAddress.set(smartNode.mAddress);
-//		ZoneProfile zoneProfile = ccuApplication.floors.get(0).getRoomList().get(0).zoneProfiles.get(0);
-//		ccuToCmOverUsbDatabaseSeedSnMessage_t.controls.analogOut1.set((short) 0);
-//		ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.profileBitmap.lightingControl.set((short) 1);
-//		ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.ledBitmap.analogIn1.set((short) 1);
-//		ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.lightingIntensityForOccupantDetected.set((short) 100);
-//		ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.minLightingControlOverrideTimeInMinutes.set((short) 1);
-//		ccuToCmOverUsbDatabaseSeedSnMessage_t.settings.roomName.set(smartNode.mRoomName);
-//		try
-//		{ioi
-//			String ccuToCMSeedMessage = JsonSerializer.toJson(ccuToCmOverUsbDatabaseSeedSnMessage_t, true);
-//			System.out.println("CCU seedMessage:\n" + ccuToCMSeedMessage + "\n");
-//		}
-//		catch (IOException e)
-//		{
-//			e.printStackTrace();
-//		}
 	}
 
 }

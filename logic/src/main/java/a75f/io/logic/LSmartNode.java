@@ -1,8 +1,8 @@
 package a75f.io.logic;
 
 import a75f.io.bo.building.Floor;
-import a75f.io.bo.building.Node;
 import a75f.io.bo.building.Zone;
+import a75f.io.bo.building.ZoneProfile;
 import a75f.io.bo.serial.AddressedStruct;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
@@ -24,32 +24,16 @@ class LSmartNode
         {
             for (Zone zone : floors.mRoomList)
             {
-                amountOfNodes += zone.getNodes().size();
+                for(ZoneProfile zp : zone.mZoneProfiles)
+                {
+                    amountOfNodes += zp.getNodeAddresses().size();
+                }
+                
             }
         }
         return (short) (currentBand + amountOfNodes);
     }
     
-    
-    public static Node getSmartNodeAndSeed(Zone zone, short mPairingAddress, String mName)
-    {
-        Node node = null;
-        if (zone.getNodes().containsKey(mPairingAddress))
-        {
-            node = zone.getNodes().get(mPairingAddress);
-        }
-        
-        
-        if(node == null)
-        {
-            node = new Node();
-            node.setAddress(mPairingAddress);
-            zone.getNodes().put(mPairingAddress, node);
-        }
-        
-        //seedSmartNode(node, mName);
-        return node;
-    }
     
     public static CcuToCmOverUsbDatabaseSeedSnMessage_t[] getSeedMessages(Floor floor, Zone zone)
     {

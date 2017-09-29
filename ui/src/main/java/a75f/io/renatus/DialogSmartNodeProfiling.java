@@ -11,7 +11,6 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import a75f.io.bo.building.LightProfile;
-import a75f.io.bo.building.Node;
 import a75f.io.bo.building.NodeType;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.definitions.ProfileType;
@@ -33,7 +32,7 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     
     Zone         mZone;
     LightProfile mLightProfile;
-    Node         mNode;
+    
     short        mNodeAddress;
     
     String mRoomName;
@@ -87,7 +86,7 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
         mFloorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
         mZone = L.findZoneByName(mFloorName, mRoomName);
         mLightProfile = (LightProfile) mZone.findProfile(ProfileType.LIGHT);
-        mNode = mZone.getSmartNode(mNodeAddress);
+        
         return view;
     }
     

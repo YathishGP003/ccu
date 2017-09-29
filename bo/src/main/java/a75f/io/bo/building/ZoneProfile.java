@@ -3,11 +3,9 @@ package a75f.io.bo.building;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
-import a75f.io.bo.building.definitions.OverrideType;
 import a75f.io.bo.building.definitions.ProfileType;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
@@ -22,9 +20,7 @@ public abstract class ZoneProfile extends Schedulable {
     public static final String TAG = ZoneProfile.class.getSimpleName();
     @JsonIgnore
     protected UUID uuid = UUID.randomUUID();
-
-    protected HashSet<UUID> mInputs = new HashSet<>();
-    protected HashSet<UUID> mOutputs = new HashSet<>();
+    
 
     public ZoneProfile() {
     }
@@ -45,22 +41,6 @@ public abstract class ZoneProfile extends Schedulable {
     @JsonIgnore
     public abstract short mapCircuit(Output output);
 
-    public HashSet<UUID> getOutputs() {
-        return mOutputs;
-    }
-
-    public void setOutputs(HashSet<UUID> outputs) {
-        mOutputs = outputs;
-    }
-
-    public HashSet<UUID> getInputs() {
-        return mInputs;
-    }
-
-    public void setInputs(HashSet<UUID> inputs) {
-        mInputs = inputs;
-    }
-
     protected short scaleDimmablePercent(short localDimmablePercent, int scale) {
         return (short) ((float) scale * ((float) localDimmablePercent / 100.0f));
     }
@@ -72,4 +52,12 @@ public abstract class ZoneProfile extends Schedulable {
     public abstract void mapRegularUpdate(CmToCcuOverUsbSnRegularUpdateMessage_t regularUpdateMessage);
 
     public abstract ProfileType getProfileType();
+    
+    
+    public abstract BaseProfileConfiguration getProfileConfiguration(short address);
+    
+    public abstract Set<Short> getNodeAddresses();
+    
+    public abstract void removeProfileConfiguration(Short selectedModule);
+    
 }

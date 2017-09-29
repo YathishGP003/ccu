@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import a75f.io.bo.building.Node;
 import a75f.io.bo.building.NodeType;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.definitions.ProfileType;
@@ -35,23 +34,24 @@ import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.PROFILE_TYPE;
 public class FragmentBLEInstructionScreen extends BaseDialogFragment
 {
     
+    public static final String ID = FragmentBLEInstructionScreen.class.getSimpleName();
     @BindView(R.id.pairinginstruct)
     ImageView pairinginstruct;
     @BindView(R.id.title)
     TextView  title;
-    
-    public static final String ID = FragmentBLEInstructionScreen.class.getSimpleName();
-    
     NodeType    mNodeType;
     Zone        mZone;
     ProfileType mProfileType;
-    Node        mNode;
     short       mNodeAddress;
     
     String mRoomName;
     String mFloorName;
     
-    public static FragmentBLEInstructionScreen getInstance(short nodeAddress, String roomName, String floorName, ProfileType profileType, NodeType nodeType)
+    
+    public static FragmentBLEInstructionScreen getInstance(short nodeAddress, String roomName,
+                                                           String floorName,
+                                                           ProfileType profileType,
+                                                           NodeType nodeType)
     {
         FragmentBLEInstructionScreen fds = new FragmentBLEInstructionScreen();
         Bundle args = new Bundle();
@@ -63,6 +63,69 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         fds.setArguments(args);
         return fds;
     }
+    
+    
+    @OnClick(R.id.first_button)
+    void onFirstButtonClick()
+    {
+        removeDialogFragment(ID);
+    }
+    
+    
+    @OnClick(R.id.second_button)
+    void onSecondButtonClick()
+    {
+        openBLEPairing();
+    }
+    
+    
+    private void openBLEPairing()
+    {
+        if (mProfileType == ProfileType.LIGHT)
+        {
+            if (L.isSimulation())
+            {
+                showDialogFragment(LightingZoneProfileFragment
+                                           .newInstance(mNodeAddress, mRoomName, mNodeType, mFloorName), LightingZoneProfileFragment.ID);
+            }
+            else
+            {
+                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan
+                                                                .getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.LIGHT);
+                showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
+            }
+        }
+        else if (mProfileType == ProfileType.SSE)
+        {
+            if (L.isSimulation())
+            {
+                showDialogFragment(FragmentSSEConfiguration
+                                           .newInstance(mNodeAddress, mRoomName, mFloorName), FragmentSSEConfiguration.ID);
+            }
+            else
+            {
+                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan
+                                                                .getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.SSE);
+                showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
+            }
+        }
+    }
+    
+    
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState)
+    {
+        View view = inflater.inflate(R.layout.pairinginstructionscreen, container, false);
+        mNodeAddress = getArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR);
+        mRoomName = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
+        mFloorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
+        mZone = L.findZoneByName(mFloorName, mRoomName);
+        mProfileType = ProfileType.valueOf(getArguments().getString(PROFILE_TYPE));
+        mNodeType = NodeType.valueOf(getArguments().getString(NODE_TYPE));
+        return view;
+    }
+    
     
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
@@ -78,58 +141,7 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
             pairinginstruct.setImageResource(R.drawable.pairinginstruct);
         }
     }
-    @OnClick(R.id.first_button)
-    void onFirstButtonClick()
-    {
-        removeDialogFragment(ID);
-    }
     
-    @OnClick(R.id.second_button)
-    void onSecondButtonClick()
-    {
-        openBLEPairing();
-    }
-    private void openBLEPairing()
-    {
-        if (mProfileType == ProfileType.LIGHT)
-        {
-            if (L.isSimulation())
-            {
-                showDialogFragment(LightingZoneProfileFragment.newInstance(mNodeAddress, mRoomName, mFloorName), LightingZoneProfileFragment.ID);
-            }
-            else
-            {
-                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.LIGHT);
-                showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
-            }
-        }
-        else if (mProfileType == ProfileType.SSE)
-        {
-            if (L.isSimulation())
-            {
-                showDialogFragment(FragmentSSEConfiguration.newInstance(mNodeAddress, mRoomName, mFloorName), FragmentSSEConfiguration.ID);
-            }
-            else
-            {
-                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.SSE);
-                showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
-            }
-        }
-    }
-    
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
-    {
-        View view = inflater.inflate(R.layout.pairinginstructionscreen, container, false);
-        mNodeAddress = getArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR);
-        mRoomName = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
-        mFloorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
-        mZone = L.findZoneByName(mFloorName, mRoomName);
-        mProfileType = ProfileType.valueOf(getArguments().getString(PROFILE_TYPE));
-        mNodeType = NodeType.valueOf(getArguments().getString(NODE_TYPE));
-        mNode = mZone.getSmartNode(mNodeAddress);
-        return view;
-    }
     
     @Override
     public void onStart()
@@ -143,6 +155,8 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
             dialog.getWindow().setLayout(width, height);
         }
     }
+    
+    
     @Override
     public String getIdString()
     {

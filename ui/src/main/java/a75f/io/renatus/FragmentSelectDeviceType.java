@@ -3,7 +3,6 @@ package a75f.io.renatus;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +11,6 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import a75f.io.bo.building.LightProfile;
-import a75f.io.bo.building.Node;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.definitions.ProfileType;
 import a75f.io.logic.L;
@@ -31,7 +29,6 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
     public static final String ID = FragmentSelectDeviceType.class.getSimpleName();
     Zone         mZone;
     LightProfile mLightProfile;
-    Node         mNode;
     short        mNodeAddress;
     
     String       mRoomName;
@@ -92,7 +89,6 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
         mFloorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
         mZone = L.findZoneByName(mFloorName, mRoomName);
         mLightProfile = (LightProfile) mZone.findProfile(ProfileType.LIGHT);
-        mNode = mZone.getSmartNode(mNodeAddress);
         
         return view;
     }

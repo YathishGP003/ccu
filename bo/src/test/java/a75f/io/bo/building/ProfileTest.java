@@ -7,7 +7,6 @@ import org.junit.Test;
 import a75f.io.bo.building.definitions.InputActuatorType;
 import a75f.io.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.bo.building.definitions.ProfileType;
-import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 
 /**
  * Created by samjithsadasivan isOn 9/7/17.
@@ -18,36 +17,36 @@ public class ProfileTest
 	@Test
 	public void testProfiles() {
 		CCUApplication ccuApplication = new CCUApplication();
-		Node testSN = new Node();
-		testSN.setAddress((short) 7000);
+		
+		short testSN = (short) 7000;
 		//testSN.mRoomName = "75F";
 
 		ccuApplication.setTitle("Test");
 		Floor floor = new Floor(1, "webid", "Floor1");
 		Zone zone = new Zone("DefaultZone");
-        zone.getNodes().put(testSN.getAddress(), testSN);
+		LightProfileConfiguration lightProfileConfiguration = new LightProfileConfiguration();
 		floor.mRoomList.add(zone);
 		zone.findProfile(ProfileType.SSE);
 		ccuApplication.getFloors().add(floor);
 		//ccuApplication.floors.get(0).mRoomList.get(0).zoneProfiles.add(p1);
 
 		Input ip1 = new Input();
-		ip1.setAddress(testSN.getAddress());
+		ip1.setAddress(testSN);
 		ip1.mName = "Room1";
 		ip1.mInput = a75f.io.bo.building.definitions.Input.Analog1In;
 		ip1.mInputActuatorType = InputActuatorType.ZeroTo10ACurrentTransformer;
-
-		zone.addInputCircuit(testSN, zone.findProfile(ProfileType.SSE), ip1);
+		lightProfileConfiguration.getInputs().add(ip1);
 
 
 
 
 
 		Output op1 = new Output();
-		op1.setAddress(testSN.getAddress());
+		op1.setAddress(testSN);
 		op1.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
 		op1.mName = "Kitchen";
-		zone.addOutputCircuit(testSN, zone.findProfile(ProfileType.SSE), op1);
+		lightProfileConfiguration.getOutputs().add(op1);
+//		zone.addOutputCircuit(testSN, zone.findProfile(ProfileType.SSE), op1);
 
 
 //		ZoneProfile p2 = new ZoneProfile()

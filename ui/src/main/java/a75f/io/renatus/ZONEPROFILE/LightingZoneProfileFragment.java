@@ -248,7 +248,7 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
                 dismiss();
             }
         });
-        bindData();
+        //bindData();
         return new AlertDialog.Builder(getActivity(), R.style.NewDialogStyle)
                        .setTitle("Lighting Profile").setView(view).setCancelable(false).create();
     }
@@ -376,33 +376,33 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
     }
     
     
-    private void bindData()
-    {
-        relayOne = mZone.findPort(Port.RELAY_ONE, mSmartNodeAddress);
-        relayTwo = mZone.findPort(Port.RELAY_TWO, mSmartNodeAddress);
-        analogOne = mZone.findPort(Port.ANALOG_OUT_ONE, mSmartNodeAddress);
-        analogTwo = mZone.findPort(Port.ANALOG_OUT_TWO, mSmartNodeAddress);
-        //RelayOne
-        spRelay1.setSelection(
-                relayOne.mOutputRelayActuatorType == OutputRelayActuatorType.NormallyOpen ? 0 : 1);
-        relay1EditText.setText(relayOne.getCircuitName());
-        relay1Switch.setChecked(relayOne.mConfigured);
-        //RelayTwo
-        spRelay2.setSelection(
-                relayOne.mOutputRelayActuatorType == OutputRelayActuatorType.NormallyOpen ? 0 : 1);
-        relay2EditText.setText(relayTwo.getCircuitName());
-        relay2Switch.setChecked(relayTwo.mConfigured);
-        //AnalogOne
-        spAnalog1Out.setSelection(
-                analogOne.mOutputAnalogActuatorType == OutputAnalogActuatorType.ZeroToTenV ? 0 : 1);
-        analog1OutEditText.setText(analogOne.getCircuitName());
-        analog1OutSwitch.setChecked(analogOne.mConfigured);
-        //AnalogTwo
-        spAnalog2Out.setSelection(
-                analogOne.mOutputAnalogActuatorType == OutputAnalogActuatorType.ZeroToTenV ? 0 : 1);
-        analog2OutEditText.setText(analogTwo.getCircuitName());
-        analog2OutSwitch.setChecked(analogTwo.mConfigured);
-    }
+//    private void bindData()
+//    {
+//        relayOne = mZone.findPort(Port.RELAY_ONE, mSmartNodeAddress);
+//        relayTwo = mZone.findPort(Port.RELAY_TWO, mSmartNodeAddress);
+//        analogOne = mZone.findPort(Port.ANALOG_OUT_ONE, mSmartNodeAddress);
+//        analogTwo = mZone.findPort(Port.ANALOG_OUT_TWO, mSmartNodeAddress);
+//        //RelayOne
+//        spRelay1.setSelection(
+//                relayOne.mOutputRelayActuatorType == OutputRelayActuatorType.NormallyOpen ? 0 : 1);
+//        relay1EditText.setText(relayOne.getCircuitName());
+//        relay1Switch.setChecked(relayOne.mConfigured);
+//        //RelayTwo
+//        spRelay2.setSelection(
+//                relayOne.mOutputRelayActuatorType == OutputRelayActuatorType.NormallyOpen ? 0 : 1);
+//        relay2EditText.setText(relayTwo.getCircuitName());
+//        relay2Switch.setChecked(relayTwo.mConfigured);
+//        //AnalogOne
+//        spAnalog1Out.setSelection(
+//                analogOne.mOutputAnalogActuatorType == OutputAnalogActuatorType.ZeroToTenV ? 0 : 1);
+//        analog1OutEditText.setText(analogOne.getCircuitName());
+//        analog1OutSwitch.setChecked(analogOne.mConfigured);
+//        //AnalogTwo
+//        spAnalog2Out.setSelection(
+//                analogOne.mOutputAnalogActuatorType == OutputAnalogActuatorType.ZeroToTenV ? 0 : 1);
+//        analog2OutEditText.setText(analogTwo.getCircuitName());
+//        analog2OutSwitch.setChecked(analogTwo.mConfigured);
+//    }
     
     
     @Override

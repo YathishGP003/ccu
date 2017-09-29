@@ -7,8 +7,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import a75f.io.bo.building.definitions.ProfileType;
-import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
-import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.bo.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 
 /**
@@ -25,7 +23,7 @@ public abstract class ZoneProfile extends Schedulable {
     public ZoneProfile() {
     }
 
-    protected short resolveLogicalValue(Output output) {
+    public short resolveLogicalValue(Output output) {
         //If an output is overiden, but doesn't have schedules, it should fall back onto the zone profile schedules to see if it can release it's override.
         //  or if it has schedules, it should use the circuit's logical values.  This behavior can be overrode at a specific profile level.
         if ((output.isOverride() && !output.hasSchedules() && !output.checkOverrides(mSchedules))
@@ -38,16 +36,9 @@ public abstract class ZoneProfile extends Schedulable {
         }
     }
 
-    @JsonIgnore
-    public abstract short mapCircuit(Output output);
+    
 
-    protected short scaleDimmablePercent(short localDimmablePercent, int scale) {
-        return (short) ((float) scale * ((float) localDimmablePercent / 100.0f));
-    }
-
-    public abstract void mapControls(CcuToCmOverUsbSnControlsMessage_t controlsMessage_t);
-
-    public abstract void mapSeed(CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage);
+    
 
     public abstract void mapRegularUpdate(CmToCcuOverUsbSnRegularUpdateMessage_t regularUpdateMessage);
 

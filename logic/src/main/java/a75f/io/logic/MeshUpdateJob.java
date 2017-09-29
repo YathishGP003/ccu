@@ -39,7 +39,7 @@ class MeshUpdateJob extends BaseJob
                     {
                         Logw("=============Zone: " + zone.roomName + " ==================");
                         Logw("=================NOW SENDING SEEDS=====================");
-                        for (CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage : LSmartNode.getSeedMessages(floor, zone))
+                        for (CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage : LSmartNode.getSeedMessages(zone))
                         {
                             if (sendStruct((short) seedMessage.smartNodeAddress.get(), seedMessage))
                             {
@@ -47,7 +47,7 @@ class MeshUpdateJob extends BaseJob
                             }
                         }
                         Logw("=================NOW SENDING CONTROLS=====================");
-                        for (CcuToCmOverUsbSnControlsMessage_t controlsMessage : LSmartNode.getControlMessages(floor, zone))
+                        for (CcuToCmOverUsbSnControlsMessage_t controlsMessage : LSmartNode.getControlMessages(zone))
                         {
                             if (sendStruct((short) controlsMessage.smartNodeAddress.get(), controlsMessage))
                             {

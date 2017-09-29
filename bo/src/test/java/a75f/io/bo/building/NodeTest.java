@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import a75f.io.bo.building.definitions.OutputAnalogActuatorType;
-import a75f.io.bo.building.definitions.OverrideType;
 import a75f.io.bo.building.definitions.Port;
 import a75f.io.bo.building.definitions.ProfileType;
 import a75f.io.bo.json.serializers.JsonSerializer;
@@ -83,7 +82,10 @@ public class NodeTest
         
         p1.getLightProfileConfiguration().put(testSN2, testSN2Config);
         
-        short lightProfile = z.findProfile(ProfileType.LIGHT).mapCircuit(op3);
+       
+        ///BO library no longer takes care of logic behind mapping circuits.  That was silly and
+        /// confusing -- Ryan
+       /* short lightProfile = z.findProfile(ProfileType.LIGHT).mapCircuit(op3);
         Assert.assertEquals(lightProfile, 20);
         System.out.println("Mapping zone profile: " + z.findProfile(ProfileType.LIGHT).mapCircuit(op3));
 
@@ -92,7 +94,7 @@ public class NodeTest
 
         short zoneProfile = z.findProfile(ProfileType.LIGHT).mapCircuit(op3);
         System.out.println("Mapping zone profile: " + z.findProfile(ProfileType.LIGHT).mapCircuit(op3));
-        Assert.assertEquals(zoneProfile, 100);
+        Assert.assertEquals(zoneProfile, 100);*/
         try
         {
             Assert.assertEquals(testSN2, op3.getAddress());

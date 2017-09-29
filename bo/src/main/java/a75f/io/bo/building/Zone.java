@@ -1,22 +1,13 @@
 package a75f.io.bo.building;
 
-import android.util.Log;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import org.javolution.io.Struct;
-
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import a75f.io.bo.building.definitions.Port;
 import a75f.io.bo.building.definitions.ProfileType;
-import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
-import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.bo.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
-import a75f.io.bo.serial.MessageType;
 
 /**
  * Created by Yinten isOn 8/15/2017.
@@ -24,36 +15,20 @@ import a75f.io.bo.serial.MessageType;
 //Also known as room.
 public class Zone
 {
-    public String                 roomName      = "Default Zone";
-    public ArrayList<ZoneProfile> mZoneProfiles = new ArrayList<>();
+    public  String                  roomName          = "Default Zone";
+    public  ArrayList<ZoneProfile>  mZoneProfiles     = new ArrayList<>();
+    private HashMap<String, Object> mTuningParameters = new HashMap<>();
     
     
     public Zone()
     {
     }
     
+    
     //Also known as zone name.
     public Zone(String roomName)
     {
         this.roomName = roomName;
-    }
-    
-    @JsonIgnore
-    public Output findPort(Port port, short smartNodeAddress)
-    {
-        for (Output output : getOutputs(smartNodeAddress))
-        {
-            if (output.getPort() == port)
-            {
-                output.mConfigured = true;
-                return output;
-            }
-        }
-        Output output = new Output();
-        output.setPort(port);
-        output.setAddress(smartNodeAddress);
-        output.mConfigured = false;
-        return output;
     }
     
     
@@ -72,12 +47,14 @@ public class Zone
         return retVal;
     }
     
+    
     @Override
     @JsonIgnore
     public String toString()
     {
         return roomName;
     }
+    
     
     @JsonIgnore
     public ZoneProfile findProfile(ProfileType profileType)
@@ -103,90 +80,10 @@ public class Zone
         return retVal;
     }
     
+
     
-    @JsonIgnore
-    public Collection<CcuToCmOverUsbSnControlsMessage_t> getControlsMessages()
-    {
-        HashMap<Short, CcuToCmOverUsbSnControlsMessage_t> controlMessagesHash = new HashMap<>();
-        for (ZoneProfile zp : mZoneProfiles)
-        {
-            for (short node : zp.getNodeAddresses())
-            {
-                CcuToCmOverUsbSnControlsMessage_t controlsMessage_t;
-                if (controlMessagesHash.containsKey(node))
-                {
-                    controlsMessage_t = controlMessagesHash.get(node);
-                }
-                else
-                {
-                    controlsMessage_t = new CcuToCmOverUsbSnControlsMessage_t();
-                    controlMessagesHash.put(node, controlsMessage_t);
-                    controlsMessage_t.smartNodeAddress.set(node);
-                    controlsMessage_t.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_CONTROLS);
-                }
-                for (Output output : zp.getProfileConfiguration(node).getOutputs())
-                {
-                    getPort(controlsMessage_t, output.getPort()).set(zp.mapCircuit(output));
-                }
-            }
-        }
-        return controlMessagesHash.values();
-    }
+
     
-    
-    @JsonIgnore
-    private Struct.Unsigned8 getPort(CcuToCmOverUsbSnControlsMessage_t controlsMessage_t,
-                                     Port smartNodePort)
-    {
-        switch (smartNodePort)
-        {
-            case ANALOG_OUT_ONE:
-                return controlsMessage_t.controls.analogOut1;
-            case ANALOG_OUT_TWO:
-                return controlsMessage_t.controls.analogOut2;
-            case RELAY_ONE:
-                return controlsMessage_t.controls.digitalOut1;
-            case RELAY_TWO:
-                return controlsMessage_t.controls.digitalOut2;
-            default:
-                return null;
-        }
-    }
-    
-    
-    @JsonIgnore
-    public CcuToCmOverUsbDatabaseSeedSnMessage_t[] getSeedMessages(byte[] encryptionKey)
-    {
-        //This needs to pair using module tuners as well..
-        HashSet<Short> addresses = getNodes(); 
-        CcuToCmOverUsbDatabaseSeedSnMessage_t[] seedMessages =
-                new CcuToCmOverUsbDatabaseSeedSnMessage_t[addresses.size()];
-        int i = 0;
-        for (Short address : addresses)
-        {
-            seedMessages[i] = getSeedMessage(encryptionKey, address);
-            i++;
-        }
-        return seedMessages;
-    }
-    
-    
-    @JsonIgnore
-    public CcuToCmOverUsbDatabaseSeedSnMessage_t getSeedMessage(byte[] encryptionKey, short address)
-    {
-        CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage =
-                new CcuToCmOverUsbDatabaseSeedSnMessage_t();
-        seedMessage.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN);
-        seedMessage.settings.roomName.set(roomName);
-        seedMessage.smartNodeAddress.set(address);
-        seedMessage.putEncrptionKey(encryptionKey);
-        Log.i("ZONE", "Zone Name: " + roomName);
-        for (ZoneProfile zp : mZoneProfiles)
-        {
-            zp.mapSeed(seedMessage);
-        }
-        return seedMessage;
-    }
     
     @JsonIgnore
     public void mapRegularUpdate(CmToCcuOverUsbSnRegularUpdateMessage_t smartNodeRegularUpdate)
@@ -200,6 +97,7 @@ public class Zone
             }
         }
     }
+    
     
     @JsonIgnore
     public void removeNodeAndClearAssociations(Short selectedModule)
@@ -221,7 +119,36 @@ public class Zone
         {
             addresses.addAll(zp.getNodeAddresses());
         }
-        
         return addresses;
     }
+    
+    
+    public HashMap<String, Object> getTuningParameters()
+    {
+        return mTuningParameters;
+    }
+    
+    
+    public void setTuningParameters(HashMap<String, Object> tuningParameters)
+    {
+        this.mTuningParameters = tuningParameters;
+    }
+    //Scratch
+    //    @JsonIgnore
+    //    public Output findPort(Port port, short smartNodeAddress)
+    //    {
+    //        for (Output output : getOutputs(smartNodeAddress))
+    //        {
+    //            if (output.getPort() == port)
+    //            {
+    //                output.mConfigured = true;
+    //                return output;
+    //            }
+    //        }
+    //        Output output = new Output();
+    //        output.setPort(port);
+    //        output.setAddress(smartNodeAddress);
+    //        output.mConfigured = false;
+    //        return output;
+    //    }
 }

@@ -46,6 +46,7 @@ public class LightProfile extends ZoneProfile
     
     
     @Override
+    @JsonIgnore
     public Set<Short> getNodeAddresses()
     {
         return mLightProfileConfiguration.keySet();

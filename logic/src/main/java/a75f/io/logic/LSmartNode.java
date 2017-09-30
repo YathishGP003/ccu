@@ -29,7 +29,7 @@ class LSmartNode
 {
     
     private static final short                   TODO             = 0;
-    static               HashMap<String, Object> tuningParameters = new HashMap<>();
+
     
     
     public static short nextSmartNodeAddress()
@@ -119,7 +119,7 @@ class LSmartNode
         }
         else
         {
-            return tuningParameters.get(key);
+            return ccu().getDefaultCCUTuners().get(key);
         }
     }
     

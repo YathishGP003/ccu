@@ -3,8 +3,7 @@ package a75f.io.bo.building;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.util.ArrayList;
-
-import a75f.io.bo.building.definitions.AlgoTuningParameters;
+import java.util.HashMap;
 
 /**
  * Created by Yinten isOn 8/15/2017.
@@ -12,12 +11,13 @@ import a75f.io.bo.building.definitions.AlgoTuningParameters;
 @JsonSerialize
 public class CCUApplication
 {
-    public  SystemProfile    systemProfile = new SystemProfile();
-    public  ControlMote      controlMote   = new ControlMote();
-    private String           mTitle        = "";
-    private ArrayList<Floor> mfloors       = new ArrayList<Floor>();
+    
+    private  HashMap<String, Object> mDefaultCCUTuners = new HashMap<>();
+    public  SystemProfile           systemProfile    = new SystemProfile();
+    public  ControlMote             controlMote      = new ControlMote();
+    private String                  mTitle           = "";
+    private ArrayList<Floor>        mfloors          = new ArrayList<Floor>();
     private short                mSmartNodeAddressBand;
-    private AlgoTuningParameters mAlgoTuningParameters;
     
     public short getSmartNodeAddressBand()
     {
@@ -99,12 +99,14 @@ public class CCUApplication
         this.mTitle = title;
     }
     
-    public AlgoTuningParameters getAlgoTuningParameters()
+    public HashMap<String, Object> getDefaultCCUTuners()
     {
-        return mAlgoTuningParameters;
+        return mDefaultCCUTuners;
     }
-    public void setAlgoTuningParameters(AlgoTuningParameters algoTuningParameters)
+    
+    
+    public void setDefaultCCUTuners(HashMap<String, Object> defaultCCUTuners)
     {
-        this.mAlgoTuningParameters = algoTuningParameters;
+        this.mDefaultCCUTuners = defaultCCUTuners;
     }
 }

@@ -236,7 +236,6 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
                 getActivity()
                         .sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
                 LightingZoneProfileFragment.this.closeAllBaseDialogFragments();
-                dismiss();
             }
         });
         Button cancelBtn = (Button) view.findViewById(R.id.lcmCancelCommand);
@@ -318,6 +317,11 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
         lightProfileConfiguration.setNodeType(mNodeType);
         if (relay1Switch.isChecked())
         {
+    
+    
+            relayOne = new Output();
+            relayOne.setAddress(mSmartNodeAddress);
+            relayOne.setPort(Port.RELAY_ONE);
             if (spRelay1.getSelectedItemPosition() == 0)
             {
                 relayOne.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyOpen;
@@ -332,6 +336,9 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
         
         if (relay2Switch.isChecked())
         {
+            relayTwo = new Output();
+            relayTwo.setAddress(mSmartNodeAddress);
+            relayTwo.setPort(Port.RELAY_TWO);
             if (spRelay2.getSelectedItemPosition() == 0)
             {
                 relayTwo.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyOpen;
@@ -346,6 +353,10 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
         }
         if (analog1OutSwitch.isChecked())
         {
+    
+            analogOne = new Output();
+            analogOne.setAddress(mSmartNodeAddress);
+            analogOne.setPort(Port.ANALOG_OUT_ONE);
             if (spAnalog1Out.getSelectedItemPosition() == 0)
             {
                 analogOne.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
@@ -359,6 +370,10 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
         }
         if (analog2OutSwitch.isChecked())
         {
+    
+            analogTwo = new Output();
+            analogTwo.setAddress(mSmartNodeAddress);
+            analogTwo.setPort(Port.ANALOG_OUT_TWO);
             if (spAnalog2Out.getSelectedItemPosition() == 0)
             {
                 analogTwo.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
@@ -369,7 +384,6 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
             }
             analogTwo.setName(analog2OutEditText.getText().toString());
             lightProfileConfiguration.getOutputs().add(analogTwo);
-            ;
         }
         mLightProfile.getLightProfileConfiguration()
                      .put(mSmartNodeAddress, lightProfileConfiguration);
@@ -409,22 +423,20 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
     public String getIdString()
     {
         return ID;
-    }    @Override
+    }
+    
+    @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
     {
         switch (buttonView.getId())
         {
             case R.id.lcmRelay1Switch:
-                relayOne.mConfigured = isChecked;
                 break;
             case R.id.lcmRelay2Switch:
-                relayTwo.mConfigured = isChecked;
                 break;
             case R.id.lcmAnalog1OutSwitch:
-                analogOne.mConfigured = isChecked;
                 break;
             case R.id.lcmAnalog2OutSwitch:
-                analogTwo.mConfigured = isChecked;
                 break;
             case R.id.lcmAnalog1InSwitch:
                 break;

@@ -23,14 +23,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
 
 import a75f.io.bo.building.Floor;
-import a75f.io.bo.building.Node;
 import a75f.io.bo.building.Zone;
 import a75f.io.logic.L;
-import a75f.io.renatus.BLE.FragmentDeviceScan;
-import a75f.io.renatus.ZONEPROFILE.LightingZoneProfileFragment;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -266,11 +263,11 @@ public class FloorPlanFragment extends Fragment
 		moduleListView.setAdapter(mModuleListAdapter);
 	}
 	
-	private ArrayList<Short> createIntegerList(HashMap<Short, Node> nodes)
+	private ArrayList<Short> createIntegerList(HashSet<Short> nodes)
 	{
-		ArrayList<Short> arrayList = new ArrayList<Short>();
-		
-		for(Short address : nodes.keySet())
+		ArrayList<Short> arrayList = new ArrayList<>();
+		 
+		for(Short address : nodes)
 		{
 			arrayList.add(address);
 			
@@ -401,17 +398,11 @@ public class FloorPlanFragment extends Fragment
 		Zone room = floor.mRoomList.get(mRoomListAdapter.getSelectedPostion());
 		
 		/* Checks to see if emulated and doesn't popup BLE dialogs */
-		if (getActivity().getResources().getBoolean(R.bool.skip_ble))
-		{
-			showDialogFragment(LightingZoneProfileFragment
-					                   .newInstance(meshAddress, room.roomName, floor.mFloorName), LightingZoneProfileFragment.ID);
-		}
-		else
-		{
-			FragmentDeviceScan fragmentDeviceScan =
-					FragmentDeviceScan.getInstance(meshAddress, room.roomName, floor.mFloorName);
-			showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
-		}
+
+		//This should be moved to pair button for select device type screen.
+		showDialogFragment(FragmentSelectDeviceType.newInstance(meshAddress, room.roomName, floor.mFloorName), FragmentSelectDeviceType.ID);
+		/*
+		*/
 	}
 	
 	
@@ -457,9 +448,10 @@ public class FloorPlanFragment extends Fragment
 	{
 		Floor floor = ccu().getFloors().get(mFloorListAdapter.getSelectedPostion());
 		Zone zone = floor.mRoomList.get(mRoomListAdapter.getSelectedPostion());
-		
-		showDialogFragment(LightingZoneProfileFragment
-				                   .newInstance((Short)zone.getNodes().keySet().toArray()
-															   [position], zone.roomName, floor.mFloorName), LightingZoneProfileFragment.ID);
+//		DO NOTHING
+//		showDialogFragment(LightingZoneProfileFragment
+//				                   .newInstance((Short)createIntegerList(zone.getNodes()).get(position),
+//										   zone.roomName, mfloor.mFloorName),
+//				LightingZoneProfileFragment.ID);
 	}
 }

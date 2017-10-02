@@ -8,21 +8,18 @@ import org.joda.time.Interval;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 
 import a75f.io.bo.building.definitions.DAYS;
 import a75f.io.bo.building.definitions.MockTime;
-import a75f.io.bo.building.definitions.ScheduleMode;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Schedule
 {
-    public static final String TAG = "Schedule";
-    public ScheduleMode mode;
-    public int          stHour, stMinute, etHour, etMinute;
+    public static final String         TAG            = "Schedule";
     /*The value when scheduled parameters are active. */
-    protected short              val;
-    protected ArrayList<Integer> days;
-    protected boolean mValidSchedule = false;
+    protected           ArrayList<Day> days           = new ArrayList<Day>();
+    protected           boolean        mValidSchedule = false;
     @JsonIgnore
     ArrayList<Interval> mScheduledIntervals = new ArrayList<Interval>();
     
@@ -32,15 +29,23 @@ public class Schedule
     }
     
     
-    public Schedule(short val, int stHour, int stMinute, int etHour, int etMinute,
-                    ArrayList<Integer> days)
+    public Schedule(ArrayList<Day> days)
     {
-        this.val = val;
         this.days = days;
-        this.stHour = stHour;
-        this.stMinute = stMinute;
-        this.etHour = etHour;
-        this.etMinute = etMinute;
+        sort();
+    }
+    
+    
+    private void sort()
+    {
+        Collections.sort(days, new Comparator<Day>()
+        {
+            @Override
+            public int compare(Day o1, Day o2)
+            {
+                return Integer.valueOf(o1.getDay()).compareTo(Integer.valueOf(o2.getDay()));
+            }
+        });
     }
     
     
@@ -83,6 +88,7 @@ public class Schedule
         return mValidSchedule = false;
     }
     
+    
     @JsonIgnore
     public ArrayList<Interval> getScheduledIntervals()
     {
@@ -108,21 +114,20 @@ public class Schedule
             /*
               * Sorts the specified array into ascending numerical order.
 			 */
-                Collections.sort(days);
-                DateTime startDateTime =
-                        new DateTime(MockTime.getInstance().getMockTime()).withHourOfDay(stHour)
-                                                                          .withMinuteOfHour(stMinute);
-                DateTime endDateTime =
-                        new DateTime(MockTime.getInstance().getMockTime()).withHourOfDay(etHour)
-                                                                          .withMinuteOfHour(etMinute);
                 //Add the scheduled intervals.
-                for (int day : days)
+                for (Day day : days)
                 {
+                    DateTime startDateTime = new DateTime(MockTime.getInstance().getMockTime())
+                                                     .withHourOfDay(day.getSthh())
+                                                     .withMinuteOfHour(day.getStmm());
+                    DateTime endDateTime = new DateTime(MockTime.getInstance().getMockTime())
+                                                   .withHourOfDay(day.getEthh())
+                                                   .withMinuteOfHour(day.getEtmm());
                     Interval scheduledInterval =
-                            new Interval(startDateTime.withDayOfWeek(day + 1), endDateTime
-                                                                                       .withDayOfWeek(
-                                                                                               day +
-                                                                                               1));
+                            new Interval(startDateTime.withDayOfWeek(day.getDay() + 1), endDateTime
+                                                                                                .withDayOfWeek(
+                                                                                                        day.getDay() +
+                                                                                                        1));
                     mScheduledIntervals.add(scheduledInterval);
                 }
             }
@@ -132,39 +137,17 @@ public class Schedule
             }
         }
     }
-    
-    
-    public short getVal()
-    {
-        return this.val;
-    }
-    
-    
-    public void setVal(short val)
-    {
-        this.val = val;
-    }
-    
-    
-    public ArrayList<Integer> getDays()
-    {
-        return days;
-    }
-    
-    
-    public void setDays(ArrayList<Integer> days)
-    {
-        this.days = days;
-    }
+    //
     
     
     /*****************
      *ONLY USED FOR CIRCUITS BELOW
      ******************/
+    //TODO: need to implement next.
     @JsonIgnore
     public byte getScheduleDaysBitmap()
     {
-        ArrayList<Integer> daysAsArrayList = getDaysAsArrayList();
+        ArrayList<Day> daysAsArrayList = getDays();
         byte dayBytes = (byte) ((daysAsArrayList.contains(DAYS.MONDAY.ordinal()) ? 0x01 : 0x00) |
                                 (daysAsArrayList.contains(DAYS.TUESDAY.ordinal()) ? 0x02 : 0x00) |
                                 (daysAsArrayList.contains(DAYS.WEDNESDAY.ordinal()) ? 0x04 : 0x00) |
@@ -177,15 +160,16 @@ public class Schedule
     }
     
     
-    @JsonIgnore
-    public ArrayList<Integer> getDaysAsArrayList()
+    public ArrayList<Day> getDays()
     {
-        ArrayList<Integer> retVal = new ArrayList<Integer>();
-        for (int j = 0; j < days.size(); j++)
-        {
-            retVal.add(days.get(j));
-        }
-        return retVal;
+        return days;
+    }
+    
+    
+    public void setDays(ArrayList<Day> days)
+    {
+        this.days = days;
+        sort();
     }
     
     
@@ -196,7 +180,7 @@ public class Schedule
         {
             throw new Exception("Schedule is invalid");
         }
-		
+        
 		/* If intervals are not built */
         if (mScheduledIntervals.isEmpty() && days != null && days.size() > 0)
         {
@@ -217,22 +201,6 @@ public class Schedule
             }
         }
         return -1;
-    }
-    
-    
-    @JsonIgnore
-    public void setSt(Integer currentHour, Integer currentMinute)
-    {
-        stHour = currentHour;
-        stMinute = currentMinute;
-    }
-    
-    
-    @JsonIgnore
-    public void setEt(Integer currentHour, Integer currentMinute)
-    {
-        etHour = currentHour;
-        etMinute = currentMinute;
     }
     
     
@@ -265,5 +233,19 @@ public class Schedule
         boolean isOverrideTimeInSchedule = isInSchedule(ot);
         boolean isCurrentTimeInSchedule = isInSchedule(MockTime.getInstance().getMockTime());
         return isOverrideTimeInSchedule != isCurrentTimeInSchedule;
+    }
+    
+    
+    public Day getCurrentSchedule()
+    {
+        long mockTime = MockTime.getInstance().getMockTime();
+        for (int i = 0; i < getScheduledIntervals().size(); i++)
+        {
+            if (getScheduledIntervals().get(i).contains(mockTime))
+            {
+                return days.get(i);
+            }
+        }
+        return null;
     }
 }

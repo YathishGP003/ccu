@@ -2,7 +2,6 @@ package a75f.io.bo.building;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import java.util.ArrayList;
 import java.util.UUID;
 
 import a75f.io.bo.building.definitions.OutputType;
@@ -26,7 +25,12 @@ public abstract class Circuit extends Schedulable
     protected short mAddress;
     protected UUID   uuid  = UUID.randomUUID();
     protected String mName = "";
-
+    
+    
+    protected short mTestVal;
+    
+    
+    
 
 
     @JsonIgnore
@@ -106,5 +110,18 @@ public abstract class Circuit extends Schedulable
     {
         this.mAddress = address;
     }
-
+    
+    @JsonIgnore
+    public short getTestVal()
+    {
+        return mTestVal;
+    }
+    
+    
+    @JsonIgnore
+    public void setTestVal(short testVal)
+    {
+        this.mTestVal = testVal;
+    }
+    
 }

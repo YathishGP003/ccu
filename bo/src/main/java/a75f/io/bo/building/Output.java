@@ -1,9 +1,6 @@
 package a75f.io.bo.building;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-
-import java.util.ArrayList;
 
 import a75f.io.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.bo.building.definitions.OutputRelayActuatorType;
@@ -18,10 +15,53 @@ public class Output extends Circuit
 	/* These are particular to 'outputs' when dealing with 'circuits'  */;
     public OutputRelayActuatorType  mOutputRelayActuatorType;
     public OutputAnalogActuatorType mOutputAnalogActuatorType;
-
-
-
-
+    
+    public short mapDigital(boolean digital)
+    {
+        switch (getOutputType())
+        {
+            case Relay:
+                switch (mOutputRelayActuatorType)
+                {
+                    case NormallyClose:
+                        return (short) (digital ? 0 : 1);
+                    ///Defaults to normally open
+                    case NormallyOpen:
+                        return (short) (digital ? 1 : 0);
+                }
+                break;
+        }
+        return 0;
+    }
+    
+    
+    public short mapAnalog(short raw)
+    {
+        switch (getOutputType())
+        {
+            case Analog:
+                switch (mOutputAnalogActuatorType)
+                {
+                    case ZeroToTenV:
+                        return raw;
+                    case TenToZeroV:
+                        return (short) (100 - raw);
+                    case TwoToTenV:
+                        return (short) (20 + scaleAnalog(raw, 80));
+                    case TenToTwov:
+                        return (short) (100 - scaleAnalog(raw, 80));
+                }
+                break;
+        }
+        return (short) 0;
+    }
+    
+    
+    protected static short scaleAnalog(short analog, int scale)
+    {
+        return (short) ((float) scale * ((float) analog / 100.0f));
+    }
+    
     /*****************
      *ONLY USED FOR CIRCUITS.
      ******************/
@@ -79,21 +119,9 @@ public class Output extends Circuit
     //		return scheduleMsg;
     //	}
 
-
-    @JsonIgnore
-    public boolean isOn()
-    {
-        boolean retVal = false;
-        if (getScheduledVal() == 100)
-        {
-            retVal = true;
-        }
-
-        return retVal;
-    }
-
+    
 	/* HELP: understand this~
-	public static int timeToVal(String str) {
+    public static int timeToVal(String str) {
     	int hr = Integer.parseInt(str.substring(0, 2));
     	int min = Integer.parseInt(str.substring(3,5));
     	if (str.contains("PM") && hr < 12)

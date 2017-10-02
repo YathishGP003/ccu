@@ -3,6 +3,7 @@ package a75f.io.bo.building;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by Yinten isOn 8/15/2017.
@@ -10,12 +11,14 @@ import java.util.ArrayList;
 @JsonSerialize
 public class CCUApplication
 {
-    public SystemProfile systemProfile = new SystemProfile();
-    public ControlMote   controlMote   = new ControlMote();
-    private String           mTitle  = "";
-    private ArrayList<Floor> mfloors = new ArrayList<Floor>();
-    private short mSmartNodeAddressBand;
-    
+    private ArrayList<Schedule> mDefaultLightSchedule = new ArrayList<Schedule>();
+    private ArrayList<Schedule> mDefaultTemperatureSchedule = new ArrayList<Schedule>();
+    private  HashMap<String, Object> mDefaultCCUTuners = new HashMap<>();
+    public  SystemProfile           systemProfile    = new SystemProfile();
+    public  ControlMote             controlMote      = new ControlMote();
+    private String                  mTitle           = "";
+    private ArrayList<Floor>        mfloors          = new ArrayList<Floor>();
+    private short                mSmartNodeAddressBand;
     
     public short getSmartNodeAddressBand()
     {
@@ -26,9 +29,7 @@ public class CCUApplication
     {
         this.mSmartNodeAddressBand = smartNodeAddressBand;
     }
-    
     //
-
     //
     //
     //	public Node findSmartNodeByAddress(short smartNodeAddress)
@@ -79,27 +80,59 @@ public class CCUApplication
     //		return zoneProfiles;
     //	}
     
-    
     public ArrayList<Floor> getFloors()
     {
         return mfloors;
     }
-    
     
     public void setFloors(ArrayList<Floor> floors)
     {
         this.mfloors = floors;
     }
     
-    
     public String getTitle()
     {
         return mTitle;
     }
     
-    
     public void setTitle(String title)
     {
         this.mTitle = title;
+    }
+    
+    public HashMap<String, Object> getDefaultCCUTuners()
+    {
+        return mDefaultCCUTuners;
+    }
+    
+    
+    public void setDefaultCCUTuners(HashMap<String, Object> defaultCCUTuners)
+    {
+        this.mDefaultCCUTuners = defaultCCUTuners;
+    }
+    
+    //These will be provided as tuners when I get around ot it.
+    public ArrayList<Schedule> getDefaultLightSchedule()
+    {
+        return mDefaultLightSchedule;
+    }
+    
+    
+    public void setDefaultLightSchedule(ArrayList<Schedule> defaultLightSchedule)
+    {
+        this.mDefaultLightSchedule = defaultLightSchedule;
+    }
+    
+    
+    //These will be provided as tuners when I get around to it.
+    public ArrayList<Schedule> getDefaultTemperatureSchedule()
+    {
+        return mDefaultTemperatureSchedule;
+    }
+    
+    
+    public void setDefaultTemperatureSchedule(ArrayList<Schedule> defaultTemperatureSchedule)
+    {
+        this.mDefaultTemperatureSchedule = defaultTemperatureSchedule;
     }
 }

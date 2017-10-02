@@ -252,4 +252,11 @@ class LSerial
         structs.get(Short.valueOf(smartNodeAddress)).put(simpleName, structHash);
         return false;
     }
+    
+    
+    public boolean sendSerialStructToNodeWithoutHashCheck(short smartNodeAddress, Struct struct)
+    {
+        mUsbService.write(struct.getOrderedBuffer());
+        return true;
+    }
 }

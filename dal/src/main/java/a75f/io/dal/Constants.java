@@ -22,6 +22,7 @@ public final class Constants {
     public static final String IMAGE_ID = "image_id";
     public static final String COLLECTION_NAME = "Book";
     
-    public static final String ZONE_COLLECTION_NAME  = "00CCUZones";
+    public static final String ZONE_COLLECTION_NAME     = "00CCUZones";
     public static final String SCHEDULE_COLLECTION_NAME = "00CCUSchedules";
+    public static final String PRECONFIGURATION_NAME    = "00CCUPreConfiguration";
 }

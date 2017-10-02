@@ -31,6 +31,8 @@ public class DalContext
 		if (mDalContext == null)
 		{
 			mDalContext = new DalContext(new Client.Builder(context).build());
+			mDalContext.mSharedClient.setUseDeltaCache(true);
+			
 		}
 	}
 }

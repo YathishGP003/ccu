@@ -7,7 +7,7 @@ import java.util.UUID;
 import a75f.io.bo.building.CCUApplication;
 import a75f.io.bo.building.Floor;
 import a75f.io.bo.building.LightProfile;
-import a75f.io.bo.building.Node;
+import a75f.io.bo.building.LightProfileConfiguration;
 import a75f.io.bo.building.Output;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.definitions.OutputAnalogActuatorType;
@@ -30,29 +30,28 @@ public class LocalStorageUtilTest
 		orgCcu.getFloors().get(0).mRoomList.add(new Zone("FirstRoom"));
 		UUID analog15kUUID = UUID.randomUUID();
 		short smartNodeAddress = 5000;
-		Node node5K = new Node();
-		node5K.setAddress(smartNodeAddress);
-		
+		LightProfileConfiguration lightProfileConfiguration = new LightProfileConfiguration();
 		
 		orgCcu.setTitle("Light Test");
 		LightProfile lightProfile5K = new LightProfile();
 		Output output5K = new Output();
-		output5K.setAddress(node5K.getAddress());
+		output5K.setAddress(smartNodeAddress);
 		//output5K.mUniqueID = analog15kUUID;
 		output5K.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
 		//output5K.mOutput = Output.Analog;
-		orgCcu.getFloors().get(0).mRoomList.get(0).addOutputCircuit(node5K, lightProfile5K,
-                output5K);
+		lightProfileConfiguration.getOutputs().add(output5K);
+		
+		
 		Output relayOneOp = new Output();
-		relayOneOp.setAddress(node5K.getAddress());
+		relayOneOp.setAddress(smartNodeAddress);
 		//relayOneOp.mUniqueID = UUID.randomUUID();
 		//relayOneOp.mOutput = Output.Relay;
 		relayOneOp.setName( "Relay1");
 		relayOneOp.setPort(Port.RELAY_ONE);
 		relayOneOp.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyClose;
 		relayOneOp.mOutputAnalogActuatorType = OutputAnalogActuatorType.TwoToTenV;
-		orgCcu.getFloors().get(0).mRoomList.get(0).addOutputCircuit(node5K, lightProfile5K,
-                relayOneOp);
+		lightProfileConfiguration.getOutputs().add(relayOneOp);
+		
 		try
 		{
 			String jsonString = JsonSerializer.toJson(orgCcu, false);

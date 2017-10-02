@@ -26,9 +26,6 @@ call ..\gradlew assembleDebug
 ECHO  mount system
 %ADB% push %apk_host%/%apk_name% %apk_target_dir%
 
-ECHO Give permissions
-::%ADB_SH% "chmod 755 %apk_target_dir%"
-::%ADB_SH% "chmod 644 %apk_target_sys%"
 
 ECHO Reinstall app %ADB_SH% 'pm install -r %apk_target_sys%'
 %ADB_SH% 'pm install -r %apk_target_sys%'

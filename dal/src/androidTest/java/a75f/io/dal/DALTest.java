@@ -181,6 +181,87 @@ public class DALTest
 		}
 	}
 	
+	@Test
+	public void testCCUPreconfiguration()
+	{
+		//59c8ec3c8f57b7f96ed57ca5
+		DalContext.instantiate(context);
+		final DataStore<CCUPreconfiguration> preconfigurationDataStore = DataStore
+				                                      .collection(Constants.PRECONFIGURATION_NAME, CCUPreconfiguration.class, StoreType.CACHE, DalContext
+						                                                                                                                   .getSharedClient());
+        
+        final long currTime = System.nanoTime();
+		zone = "zone";
+		floor = "floor";
+		entityId = "";
+		ccuZones.setFloor_name(floor);
+		ccuZones.set_zone(floor + "_" + zone);
+		Handler h = new Handler(Looper.getMainLooper());
+		h.post(new Runnable()
+		{
+			
+			public void run()
+			{
+				try
+				{
+					UserStore.login(userId, password, DalContext
+							                                  .getSharedClient(), new KinveyClientCallback()
+					{
+						
+						@Override
+						public void onSuccess(Object o)
+						{
+							Log.i(TAG, "USER LOGIN SUCCESS");
+							preconfigurationDataStore.find("59c8ec3c8f57b7f96ed57ca5", new KinveyClientCallback<CCUPreconfiguration>()
+							{
+								@Override
+								public void onSuccess(CCUPreconfiguration ccuPreconfiguration)
+								{
+                                    long lengthToPullAndParse = System.nanoTime() - currTime;
+                                    Log.i(TAG, "Length to pull and parse in nanoseconds: " + lengthToPullAndParse);
+                                    
+									try
+									{
+										Log.i(TAG, "CCUPreconfiguration: "  + ccuPreconfiguration.toPrettyString());
+									}
+									catch (IOException e)
+									{
+										e.printStackTrace();
+									}
+								}
+								@Override
+								public void onFailure(Throwable throwable)
+								{
+									throwable.printStackTrace();
+								}
+							});
+						}
+						
+						
+						@Override
+						public void onFailure(Throwable throwable)
+						{
+							throwable.printStackTrace();
+						}
+					});
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
+			}
+		});
+		try
+		{
+			Thread.sleep(30000);
+		}
+		catch (InterruptedException e)
+		{
+			e.printStackTrace();
+		}
+		
+	}
+	
 	
 	@Test
 	public void testCCUZones()

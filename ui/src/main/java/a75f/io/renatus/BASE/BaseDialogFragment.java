@@ -9,7 +9,7 @@ import android.support.v4.app.FragmentTransaction;
  * Created by Yinten isOn 8/11/2017.
  */
 
-public class BaseDialogFragment extends DialogFragment
+public abstract class BaseDialogFragment extends DialogFragment
 {
 	protected void setTitle(String title)
 	{
@@ -61,6 +61,8 @@ public class BaseDialogFragment extends DialogFragment
 		}
 	}
 	
+	public abstract String getIdString();
+	
 	@Override
 	public void onPause()
 	{
@@ -68,6 +70,16 @@ public class BaseDialogFragment extends DialogFragment
 		dismissProgressDialog();
 	}
 	
-	
-	
+	public void closeAllBaseDialogFragments()
+	{
+        for(Fragment fragment : getFragmentManager().getFragments())
+        {
+            if(fragment instanceof BaseDialogFragment)
+            {
+                removeDialogFragment(((BaseDialogFragment)fragment).getIdString());
+            }
+        }
+		
+		
+	}
 }

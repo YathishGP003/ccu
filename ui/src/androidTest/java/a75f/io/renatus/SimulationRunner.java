@@ -5,8 +5,7 @@ package a75f.io.renatus;
  */
 
 import android.os.Environment;
-
-import org.joda.time.DateTime;
+import android.text.format.DateFormat;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -22,6 +21,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -36,12 +36,18 @@ public class SimulationRunner
 {
     
     public List<String[]> csvDataArray = null;
-    CcuTestEnv mEnv = null;
+    private CcuTestEnv mEnv = null;
     
-    CcuSimulationTest mCurrentTest;
+    private CcuSimulationTest mCurrentTest;
     
     String[] testVectorParams = null;
     CCUApplication appState;
+    
+    int secondsElapsed = 0;
+    
+    private List<Integer> mNodes = new ArrayList<>();
+    
+    String startTime = null;
     
     public void runSimulation(CcuSimulationTest ccuTest) {
     
@@ -54,11 +60,17 @@ public class SimulationRunner
         csvDataArray = CcuTestInputParser.parseSimulationFile(mEnv, ccuTest.getSimulationFileName());
         testVectorParams = csvDataArray.get(0);
         
+        startTime = new Date(System.currentTimeMillis()).toString();
+        
         for (int simIndex = 1; simIndex < csvDataArray.size(); simIndex ++) {
-            injectSimulation(csvDataArray.get(simIndex));
+            String[] simData = csvDataArray.get(simIndex);
+            if (!mNodes.contains(Integer.parseInt(simData[1].trim()))) {
+                mNodes.add(Integer.parseInt(simData[1].trim()));
+            }
+            injectSimulation(simData);
         }
         
-        addTestInfo();
+        populateTestInfo();
         
     }
     
@@ -79,24 +91,20 @@ public class SimulationRunner
         try
         {
             Date d = sdf.parse(testVals[0]);
-            //int waitTime = d.getHours()*3600+d.getMinutes()*60+d.getSeconds();
-            //sleep(d.getTime());
-            //threadSleep();
-            SimulationParams params  = new SimulationParams().build(testVals);
+            int waitTime = d.getHours()*3600+d.getMinutes()*60+d.getSeconds() - secondsElapsed;
+            threadSleep(waitTime);
+            secondsElapsed += waitTime;
             
+            SimulationParams params  = new SimulationParams().build(testVals);
             String paramsJson = params.convertToJsonString();
     
-            //postJson("http://localhost:5000/state/smartnode?address="+testVals[1].trim(), paramsJson);
+            postJson("http://localhost:5000/state/smartnode?address="+testVals[1].trim(), paramsJson);
         }
         catch (ParseException e)
         {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-       /* catch (InterruptedException e) {
-            e.printStackTrace();
-        }*/
-       
     }
     
     public void postJson(String url, String data){
@@ -149,7 +157,7 @@ public class SimulationRunner
         return result.toString();
     }
     
-    public void addTestInfo() {
+    public void populateTestInfo() {
         CcuSimulationTestInfo info = new CcuSimulationTestInfo();
         info.name = mCurrentTest.getTestDescription();
         info.simulationResult = new SimulationResult();
@@ -157,16 +165,25 @@ public class SimulationRunner
         
         info.simulationInput = csvDataArray;
         info.inputCcuState = appState;
-        String params = CcuTestInputParser.readFileFromAssets(CcuTestEnv.getInstance().getContext(), "ccustates/testresult.json");
-        SmartNodeParams snParams = null;
-        snParams = SmartNodeParams.getParamsFromJson(params);
-        info.nodeParams.add(snParams);
+        //String params = CcuTestInputParser.readFileFromAssets(CcuTestEnv.getInstance().getContext(), "ccustates/testresult.json");
+        
+        //http://localhost:5000/log/smartnode?address=2000&since=05-April-2017_17:00:40&limit_results=1
+        for (int node = 0; node < mNodes.size();node++)
+        {
+            String params = getResult("http://localhost:5000/log/smartnode?address=" + mNodes.get(node) + "&since=" + startTime + "&limit_results=1");
+            info.nodeParams.add(SmartNodeParams.getParamsFromJson(params));
+        }
+        
+    
+        //String params2 = CcuTestInputParser.readFileFromAssets(CcuTestEnv.getInstance().getContext(), "ccustates/testresult1.json");
+        //info.nodeParams.add(SmartNodeParams.getParamsFromJson(params2));
+        
         mEnv.testSuite.put(mCurrentTest.getTestDescription(),info);
     }
     
     public void saveReport() {
         
-        String path = Environment.getExternalStorageDirectory().getPath();//style="width:100%"
+        String path = Environment.getExternalStorageDirectory().getPath();
         String testReport = "<br /><br /><h3>Simulation Test Summary</h3>"
                                     .concat("<table width:200; border=1; cellspacing=0; cellpadding=0; table-layout:fixed; word-wrap:break-word;>")
                                     .concat("<tr>")
@@ -183,9 +200,8 @@ public class SimulationRunner
         
         testReport = testReport.concat("</table>");
     
-        //String fileName = DateFormat.format("dd_MM_yyyy_hh_mm_ss", System.currentTimeMillis()).toString();
-        String name = "sim.html";
-        File file = new File(path, name);
+        String fileName = DateFormat.format("dd_MM_yyyy_hh_mm_ss", System.currentTimeMillis()).toString();
+        File file = new File(path, fileName+"_Simulation.html");
         String html = "<html><head><title>Simulation Test Report</title></head><body>"+testReport+"</body></html>";
 
         try {

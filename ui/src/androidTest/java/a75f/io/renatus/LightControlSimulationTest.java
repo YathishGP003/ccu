@@ -60,12 +60,6 @@ public class LightControlSimulationTest extends CcuSimulationTest
         
         System.out.println("runTest.........");
         
-        //Log.e("test", L.ccu().toString());
-    
-        /*String params = CcuTestInputParser.readFileFromAssets(CcuTestEnv.getInstance().getContext(), "ccustates/testresult.json");
-        SmartNodeParams snParams = null;
-        snParams = SmartNodeParams.getParamsFromJson(params);*/
-        
         mRunner.runSimulation(this);
         
         mRunner.saveReport();

@@ -62,9 +62,16 @@ public class Zone
         ZoneProfile retVal = null;
         for (ZoneProfile zoneProfile : mZoneProfiles)
         {
-            if (zoneProfile.getProfileType() == ProfileType.LIGHT)
+            switch (profileType)
             {
-                return zoneProfile;
+                case LIGHT:
+                    return zoneProfile;
+                case GENERIC:
+                    break;
+                case TEST:
+                    return zoneProfile;
+                case SSE:
+                    return zoneProfile;
             }
         }
         switch (profileType)
@@ -74,6 +81,9 @@ public class Zone
                 break;
             case SSE:
                 retVal = new SingleStageProfile();
+                break;
+            case TEST:
+                retVal = new TestProfile();
                 break;
         }
         mZoneProfiles.add(retVal);

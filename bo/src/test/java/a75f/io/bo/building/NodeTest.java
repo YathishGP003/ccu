@@ -30,16 +30,19 @@ public class NodeTest
         //Mock schedule M-F, 8AM - 5:30PM turn isOn lights to value 100.
         schedule = new Schedule();
         int[] ints = {1, 2, 3, 4, 5};
-        ArrayList<Integer> intsaslist = new ArrayList<Integer>();
+        ArrayList<Day> intsaslist = new ArrayList<Day>();
         for(int i : ints)
         { //as
-            int z = 0;
-            intsaslist.add(i);
+            Day day = new Day();
+            day.setDay(i);
+            day.setSthh(8);
+            day.setStmm(00);
+            day.setEthh(17);
+            day.setEtmm(30);
+            day.setVal((short) 100);
+            intsaslist.add(day);
         }
         schedule.setDays(intsaslist);
-        schedule.setSt(8, 00);
-        schedule.setEt(17,30);
-        schedule.setVal((short) 100);
     }
 
 
@@ -64,7 +67,7 @@ public class NodeTest
         op1.setAddress(testSN1);
         op1.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
         op1.mName = "Dining Room";
-        p1.getLightProfileConfiguration().put(testSN1, testSn1Config);
+        p1.getProfileConfiguration().put(testSN1, testSn1Config);
         
         Output op2 = new Output();
         op2.setAddress(testSN2);
@@ -80,7 +83,7 @@ public class NodeTest
         
         testSN2Config.getOutputs().add(op3);
         
-        p1.getLightProfileConfiguration().put(testSN2, testSN2Config);
+        p1.getProfileConfiguration().put(testSN2, testSN2Config);
         
        
         ///BO library no longer takes care of logic behind mapping circuits.  That was silly and

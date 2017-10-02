@@ -8,18 +8,21 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import a75f.io.bo.building.Floor;
+import a75f.io.bo.building.LightProfile;
 import a75f.io.bo.building.Output;
-import a75f.io.bo.building.SingleStageProfile;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.ZoneProfile;
 import a75f.io.bo.building.definitions.Port;
 import a75f.io.bo.building.definitions.ProfileType;
+import a75f.io.bo.building.definitions.ScheduleMode;
 import a75f.io.bo.serial.AddressedStruct;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.bo.serial.MessageType;
 
 import static a75f.io.logic.L.ccu;
+import static a75f.io.logic.LZoneProfile.getScheduledVal;
+import static a75f.io.logic.LZoneProfile.resolveZoneProfileLogicalValue;
 
 /**
  * Created by Yinten isOn 8/17/2017.
@@ -28,8 +31,7 @@ import static a75f.io.logic.L.ccu;
 class LSmartNode
 {
     
-    private static final short                   TODO             = 0;
-
+    private static final short TODO = 0;
     
     
     public static short nextSmartNodeAddress()
@@ -56,6 +58,16 @@ class LSmartNode
     }
     
     
+    /**************************** TEST MESSAGES ****************************/
+    public static ArrayList<Struct> getTestMessages(Zone zone)
+    {
+        ArrayList<Struct> retVal = new ArrayList<>();
+        retVal.addAll(getSeedMessages(zone));
+        retVal.addAll(getControlMessages(zone));
+        return retVal;
+    }
+    
+    
     /***************************** SEED MESSAGES ****************************/
     
     public static ArrayList<CcuToCmOverUsbDatabaseSeedSnMessage_t> getSeedMessages(Zone zone)
@@ -70,57 +82,6 @@ class LSmartNode
             i++;
         }
         return seedMessages;
-    }
-    
-    
-    public static CcuToCmOverUsbDatabaseSeedSnMessage_t getSeedMessage(Zone zone, short address)
-    {
-        CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage =
-                new CcuToCmOverUsbDatabaseSeedSnMessage_t();
-        seedMessage.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN);
-        seedMessage.settings.roomName.set(zone.roomName);
-        seedMessage.smartNodeAddress.set(address);
-        seedMessage.putEncrptionKey(L.getEncryptionKey());
-        for (ZoneProfile zp : zone.mZoneProfiles)
-        {
-            switch (zp.getProfileType())
-            {
-                case LIGHT:
-                    mapLightProfileSeed(zone, seedMessage);
-                    break;
-                case SSE:
-                    break;
-                case GENERIC:
-                    break;
-            }
-        }
-        return seedMessage;
-    }
-    
-    
-    public static void mapLightProfileSeed(Zone zone,
-                                           CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage)
-    {
-        seedMessage.settings.lightingIntensityForOccupantDetected
-                .set((short) resolveTuningParameter(zone, "lightingIntensityOccupantDetected"));
-        seedMessage.settings.minLightingControlOverrideTimeInMinutes
-                .set((short) resolveTuningParameter(zone, "minLightControlOverInMinutes"));
-        seedMessage.settings.profileBitmap.lightingControl.set((short) 1);
-    }
-    
-    
-    /********************************END SEED MESSAGES**************************************/
-    
-    private static Object resolveTuningParameter(Zone zone, String key)
-    {
-        if (zone.getTuningParameters().containsKey(key))
-        {
-            return zone.getTuningParameters().get(key);
-        }
-        else
-        {
-            return ccu().getDefaultCCUTuners().get(key);
-        }
     }
     
     
@@ -151,9 +112,12 @@ class LSmartNode
                     switch (zp.getProfileType())
                     {
                         case LIGHT:
-                            outputMapped = mapLightCircuit(zone, zp, output);
+                            outputMapped = zp.isCircuitTest() ? output.getTestVal()
+                                                   : mapLightCircuit(zone, zp, output);
                             break;
                         case SSE:
+                            outputMapped = zp.isCircuitTest() ? output.getTestVal()
+                                                   : mapLightCircuit(zone, zp, output);
                             break;
                         case GENERIC:
                             break;
@@ -166,44 +130,52 @@ class LSmartNode
     }
     
     
+    public static CcuToCmOverUsbDatabaseSeedSnMessage_t getSeedMessage(Zone zone, short address)
+    {
+        CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage =
+                new CcuToCmOverUsbDatabaseSeedSnMessage_t();
+        seedMessage.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN);
+        seedMessage.settings.roomName.set(zone.roomName);
+        seedMessage.smartNodeAddress.set(address);
+        seedMessage.putEncrptionKey(L.getEncryptionKey());
+        for (ZoneProfile zp : zone.mZoneProfiles)
+        {
+            switch (zp.getProfileType())
+            {
+                case LIGHT:
+                    mapLightProfileSeed(zone, seedMessage);
+                    break;
+                case SSE:
+                    break;
+                case GENERIC:
+                    break;
+                case TEST:
+                    mapLightProfileSeed(zone, seedMessage);
+                    break;
+            }
+        }
+        return seedMessage;
+    }
+    
+    
     public static short mapLightCircuit(Zone zone, ZoneProfile zoneProfile, Output output)
     {
-        short dimmablePercent = zoneProfile.resolveLogicalValue(output);
+        short dimmablePercent = resolveZoneProfileLogicalValue(zoneProfile, output);
         //The smartnode circuit is in override mode, check to see if a schedule hasn't crossed a
         // bound.  If a schedule did cross a bound remove the override and continue.
         switch (output.getOutputType())
         {
             case Relay:
-                switch (output.mOutputRelayActuatorType)
-                {
-                    case NormallyClose:
-                        return (short) (dimmablePercent != 0 ? 1 : 0);
-                    ///Defaults to normally open
-                    case NormallyOpen:
-                        return (short) (dimmablePercent != 0 ? 0 : 1);
-                }
-                break;
+                return output.mapDigital(dimmablePercent != 0);
             case Analog:
-                switch (output.mOutputAnalogActuatorType)
-                {
-                    case ZeroToTenV:
-                        return dimmablePercent;
-                    case TenToZeroV:
-                        return (short) (100 - dimmablePercent);
-                    case TwoToTenV:
-                        return (short) (20 + scaleDimmablePercent(dimmablePercent, 80));
-                    case TenToTwov:
-                        return (short) (100 - scaleDimmablePercent(dimmablePercent, 80));
-                }
-                break;
+                return output.mapAnalog(dimmablePercent);
         }
         return (short) 0;
     }
     
     
-    private static Struct.Unsigned8 getSmartNodePort(CcuToCmOverUsbSnControlsMessage_t
-                                                         controlsMessage_t,
-                                              Port smartNodePort)
+    private static Struct.Unsigned8 getSmartNodePort(CcuToCmOverUsbSnControlsMessage_t controlsMessage_t,
+                                                     Port smartNodePort)
     {
         switch (smartNodePort)
         {
@@ -221,15 +193,45 @@ class LSmartNode
     }
     
     
-    protected static short scaleDimmablePercent(short localDimmablePercent, int scale)
+    public static void mapLightProfileSeed(Zone zone,
+                                           CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage)
     {
-        return (short) ((float) scale * ((float) localDimmablePercent / 100.0f));
+        //If a light profile doesn't have a schedule applied to it.   Inject the system schedule.
+        //Following, resolve the logical value for the output using the zone profile.
+        //This will check if the circuit should release an override or not, or if the circuit has
+        //a schedule.
+        LightProfile lightProfile = (LightProfile) zone.findProfile(ProfileType.LIGHT);
+        if (!lightProfile.hasSchedules())
+        {
+            lightProfile.addSchedules(ccu().getDefaultLightSchedule(), ScheduleMode.SystemSchedule);
+        }
+        seedMessage.settings.lightingIntensityForOccupantDetected
+                .set((short) resolveTuningParameter(zone, "lightingIntensityOccupantDetected"));
+        seedMessage.settings.minLightingControlOverrideTimeInMinutes
+                .set((short) resolveTuningParameter(zone, "minLightControlOverInMinutes"));
+        seedMessage.settings.profileBitmap.lightingControl.set((short) 1);
+    }
+    
+    
+    /********************************END SEED MESSAGES**************************************/
+    
+    private static Object resolveTuningParameter(Zone zone, String key)
+    {
+        if (zone.getTuningParameters().containsKey(key))
+        {
+            return zone.getTuningParameters().get(key);
+        }
+        else
+        {
+            return ccu().getDefaultCCUTuners().get(key);
+        }
     }
     
     
     public static short mapSSECircuit(Zone zone, Output output)
     {
-        short temperature = zone.findProfile(ProfileType.SSE).resolveLogicalValue(output);
+        short temperature =
+                resolveZoneProfileLogicalValue(zone.findProfile(ProfileType.SSE), output);
         //The smartnode circuit is in override mode, check to see if a schedule hasn't crossed a
         // bound.  If a schedule did cross a bound remove the override and continue.
         switch (output.getOutputType())
@@ -271,8 +273,7 @@ class LSmartNode
                                       CcuToCmOverUsbSnControlsMessage_t controlsMessage_t)
     {
         controlsMessage_t.controls.setTemperature
-                .set((short) (((SingleStageProfile) zone.findProfile(ProfileType.SSE))
-                                      .getDesiredTemperature() * 2));
+                .set((short) (getScheduledVal(zone.findProfile(ProfileType.SSE)) * 2));
     }
     
     

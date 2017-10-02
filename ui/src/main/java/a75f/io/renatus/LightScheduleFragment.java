@@ -15,11 +15,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import a75f.io.bo.building.Day;
 import a75f.io.bo.building.Floor;
 import a75f.io.bo.building.Output;
 import a75f.io.bo.building.Schedule;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.definitions.ProfileType;
+import a75f.io.bo.building.definitions.ScheduleMode;
 import a75f.io.logic.L;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
@@ -150,12 +152,26 @@ public class LightScheduleFragment extends BaseDialogFragment
                 days.add(i);
             }
         }
-        mSchedule.setDays(days);
-        mSchedule.setSt(startTimePicker.getCurrentHour(), startTimePicker.getCurrentMinute());
-        mSchedule.setEt(endTimePicker.getCurrentHour(), endTimePicker.getCurrentMinute());
-        mSchedule.setVal((short) 69);
+        
+        ArrayList<Day> daysList = new ArrayList<Day>();
+        Day day = new Day();
+        for(int dayOfWeek : days)
+        {
+            day.setDay(dayOfWeek);
+            day.setSthh(startTimePicker.getCurrentHour());
+            day.setStmm(startTimePicker.getCurrentMinute());
+            day.setEthh(endTimePicker.getCurrentHour());
+            day.setEtmm(endTimePicker.getCurrentMinute());
+            //TODO: hook up day.
+            day.setVal((short) 69);
+            daysList.add(day);
+            
+        }
+        Schedule schedule = new Schedule(daysList);
+        ArrayList<Schedule> schedules = new ArrayList<Schedule>();
+        schedules.add(schedule);
+        mCurrentPort.addSchedules(schedules, ScheduleMode.CircuitSchedule);
         Log.i("Schedule", "mSchedule to add: " + mSchedule.toString());
-        mCurrentPort.addSchedule(mSchedule);
         L.saveCCUState();
     }
     

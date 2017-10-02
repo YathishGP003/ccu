@@ -123,7 +123,7 @@ public class JSONSerializerTest
         ccuApplication.getFloors().add(floor);
         ccuApplication.getFloors().get(0).mRoomList.add(zone);
 		lightProfileConfiguration.getOutputs().add(output5K);
-        lightProfile5K.getLightProfileConfiguration().put(smartNodeAddress,
+        lightProfile5K.getProfileConfiguration().put(smartNodeAddress,
                 lightProfileConfiguration);
 		try
 		{

@@ -1,17 +1,17 @@
 package a75f.io.bo.building;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 
 import a75f.io.bo.building.definitions.ProfileType;
 import a75f.io.bo.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class LightProfile extends ZoneProfile
+/**
+ * Created by Yinten on 10/1/2017.
+ */
+
+public class TestProfile extends ZoneProfile
 {
-    
-    
-    public LightProfile()
+    public TestProfile()
     {
     }
     
@@ -24,15 +24,14 @@ public class LightProfile extends ZoneProfile
     @JsonIgnore
     public ProfileType getProfileType()
     {
-        return ProfileType.LIGHT;
+        return ProfileType.TEST;
     }
-    
     
     @Override
-    public LightProfileConfiguration getProfileConfiguration(short address)
+    public BaseProfileConfiguration getProfileConfiguration(short address)
     {
-        return (LightProfileConfiguration) mProfileConfiguration.get(address);
+        return mProfileConfiguration.get(address);
     }
-    
+
     
 }

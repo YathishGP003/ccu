@@ -11,7 +11,8 @@ import java.util.HashMap;
 @JsonSerialize
 public class CCUApplication
 {
-    
+    private ArrayList<Schedule> mDefaultLightSchedule = new ArrayList<Schedule>();
+    private ArrayList<Schedule> mDefaultTemperatureSchedule = new ArrayList<Schedule>();
     private  HashMap<String, Object> mDefaultCCUTuners = new HashMap<>();
     public  SystemProfile           systemProfile    = new SystemProfile();
     public  ControlMote             controlMote      = new ControlMote();
@@ -108,5 +109,30 @@ public class CCUApplication
     public void setDefaultCCUTuners(HashMap<String, Object> defaultCCUTuners)
     {
         this.mDefaultCCUTuners = defaultCCUTuners;
+    }
+    
+    //These will be provided as tuners when I get around ot it.
+    public ArrayList<Schedule> getDefaultLightSchedule()
+    {
+        return mDefaultLightSchedule;
+    }
+    
+    
+    public void setDefaultLightSchedule(ArrayList<Schedule> defaultLightSchedule)
+    {
+        this.mDefaultLightSchedule = defaultLightSchedule;
+    }
+    
+    
+    //These will be provided as tuners when I get around to it.
+    public ArrayList<Schedule> getDefaultTemperatureSchedule()
+    {
+        return mDefaultTemperatureSchedule;
+    }
+    
+    
+    public void setDefaultTemperatureSchedule(ArrayList<Schedule> defaultTemperatureSchedule)
+    {
+        this.mDefaultTemperatureSchedule = defaultTemperatureSchedule;
     }
 }

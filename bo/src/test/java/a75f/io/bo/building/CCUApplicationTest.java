@@ -27,7 +27,7 @@ public class CCUApplicationTest
         floor.mRoomList.add(zone);
         LightProfile p1 = (LightProfile) zone.findProfile(ProfileType.LIGHT);
         LightProfileConfiguration lightProfileConfiguration = new LightProfileConfiguration();
-        p1.getLightProfileConfiguration().put(nodeAddress, lightProfileConfiguration);
+        p1.getProfileConfiguration().put(nodeAddress, lightProfileConfiguration);
         ccuApplication.getFloors().add(floor);
         //ccuApplication.floors.get(0).mRoomList.get(0).add(p1);
         Output op1 = new Output();
@@ -51,7 +51,7 @@ public class CCUApplicationTest
                                                     .toString());
             Assert.assertEquals(2, ((LightProfile) deCcuApp.getFloors().get(0).mRoomList.get(0)
                                                                                         .findProfile(ProfileType.LIGHT))
-                                           .getLightProfileConfiguration().get(nodeAddress)
+                                           .getProfileConfiguration().get(nodeAddress)
                                            .getOutputs().size());
             //Assert.assertEquals("Kitchen", deCcuApp.floors.get(0).mRoomList.get(0).zoneProfiles.get(0).smartNodeOutputs.get(1).mName);
             //Assert.assertEquals(op1UD, deCcuApp.floors.get(0).mRoomList.get(0).zoneProfiles.get(0).smartNodeOutputs.get(0).mUniqueID);

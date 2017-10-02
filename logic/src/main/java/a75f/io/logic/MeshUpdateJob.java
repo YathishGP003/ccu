@@ -23,7 +23,7 @@ class MeshUpdateJob extends BaseJob
 {
     
     public static final  String TAG                   = "HeartBeatJob";
-    private static final int    SIMULATION_SLEEP_TIME = 100;
+    public static final int    SIMULATION_SLEEP_TIME = 100;
     
     //This task should run every minute.
     public void doJob()
@@ -76,7 +76,7 @@ class MeshUpdateJob extends BaseJob
         }
     }
     
-    private boolean sendStruct(short smartNodeAddress, Struct struct)
+    public static boolean sendStruct(short smartNodeAddress, Struct struct)
     {
         boolean retVal = LSerial.getInstance().sendSerialStructToNode(smartNodeAddress, struct);
         //If the application is in simualtion mode to work over FTDI with biskit,
@@ -88,7 +88,22 @@ class MeshUpdateJob extends BaseJob
         return retVal;
     }
     
-    private void tSleep(int sleepTime)
+    public static boolean sendStructTest(short smartNodeAddress, Struct struct)
+    {
+        boolean retVal = LSerial.getInstance().sendSerialStructToNodeWithoutHashCheck
+                                                       (smartNodeAddress, struct);
+        
+        //If the application is in simualtion mode to work over FTDI with biskit,
+        // sleep between messages, so biskit doesn't fall behind.
+        
+        if (Globals.getInstance().isSimulation())
+        {
+            tSleep(SIMULATION_SLEEP_TIME);
+        }
+        return retVal;
+    }
+    
+    private static void tSleep(int sleepTime)
     {
         Logd("sleeping: " + sleepTime);
         try

@@ -43,15 +43,11 @@ public class SingleStageProfile extends ZoneProfile
     }
 
 
-    public boolean isOccupancyMode()
-    {
-        return isInSchedule();
-    }
-
-    public float getRoomTemperature()
-    {
-        return mRoomTemperature;
-    }
+//
+//    public float getRoomTemperature()
+//    {
+//        return mRoomTemperature;
+//    }
 
 
     public void setRoomTemperature(float roomTemperature)
@@ -60,10 +56,6 @@ public class SingleStageProfile extends ZoneProfile
     }
 
 
-    public float getDesiredTemperature()
-    {
-        return resolveLogicalValue();
-    }
 
 
     public int getHeatingDeadband()

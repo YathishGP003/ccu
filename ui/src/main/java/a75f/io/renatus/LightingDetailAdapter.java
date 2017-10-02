@@ -34,6 +34,8 @@ import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.definitions.MockTime;
 import a75f.io.bo.building.definitions.OverrideType;
 import a75f.io.bo.building.definitions.ProfileType;
+import a75f.io.logic.L;
+import a75f.io.logic.LOutput;
 
 import static a75f.io.bo.building.definitions.Port.ANALOG_OUT_ONE;
 import static a75f.io.bo.building.definitions.Port.ANALOG_OUT_TWO;
@@ -146,7 +148,7 @@ public class LightingDetailAdapter extends BaseAdapter
             switch (snOutput.getPort())
             {
                 case RELAY_ONE:
-                    if (snOutput.isOn())
+                    if (LOutput.isOn(snOutput))
                     {
                         viewHolder.OnOffLight.setChecked(true);
                     }
@@ -165,7 +167,7 @@ public class LightingDetailAdapter extends BaseAdapter
                     }*/
                     break;
                 case RELAY_TWO:
-                    if (snOutput.isOn())
+                    if (LOutput.isOn(snOutput))
                     {
                         viewHolder.OnOffLight.setChecked(true);
                     }
@@ -186,8 +188,10 @@ public class LightingDetailAdapter extends BaseAdapter
                     break;
                 case ANALOG_OUT_ONE:
                     viewHolder.brightness.setMax(100);
-                    viewHolder.brightness.setProgress(snOutput.getScheduledVal());
-                    viewHolder.brightnessVal.setText(snOutput.getScheduledVal() + "");
+                    viewHolder.brightness.setProgress(L.resolveZoneProfileLogicalValue
+                                                              (profile,
+                            snOutput));
+                    viewHolder.brightnessVal.setText(L.resolveZoneProfileLogicalValue(profile, snOutput) + "");
                     /*viewHolder.statusDetail.setText(port_info.analog1_out.status);
                     viewHolder.vacationFromTo.setText(port_info.analog1_out.vacation_text);
                     viewHolder.spinnerSchedule.setSelection(port_info.analog1_out.schedule_mode);
@@ -200,8 +204,11 @@ public class LightingDetailAdapter extends BaseAdapter
                     break;
                 case ANALOG_OUT_TWO:
                     viewHolder.brightness.setMax(100);
-                    viewHolder.brightness.setProgress(snOutput.getScheduledVal());
-                    viewHolder.brightnessVal.setText(snOutput.getScheduledVal() + "");
+                    viewHolder.brightness.setProgress(L.resolveZoneProfileLogicalValue
+                                                                           (profile, snOutput));
+                    viewHolder.brightnessVal.setText(L
+                                                             .resolveZoneProfileLogicalValue
+                                                                      (profile, snOutput) + "");
                     /*viewHolder.vacationFromTo.setText(port_info.analog2_out.vacation_text);
                     viewHolder.statusDetail.setText(port_info.analog2_out.status);
                     viewHolder.spinnerSchedule.setSelection(port_info.analog2_out.schedule_mode);

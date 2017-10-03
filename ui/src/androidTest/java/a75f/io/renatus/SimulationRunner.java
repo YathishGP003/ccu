@@ -7,6 +7,9 @@ package a75f.io.renatus;
 import android.os.Environment;
 import android.text.format.DateFormat;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -35,7 +38,7 @@ import static java.lang.Thread.sleep;
 public class SimulationRunner
 {
     
-    public List<String[]> csvDataArray = null;
+    public List<String[]> csvDataList = null;
     private CcuTestEnv mEnv = null;
     
     private CcuSimulationTest mCurrentTest;
@@ -47,30 +50,32 @@ public class SimulationRunner
     
     private List<Integer> mNodes = new ArrayList<>();
     
-    String startTime = null;
+    String curTime = null;
+    int resultCounter = 0;
     
-    public void runSimulation(CcuSimulationTest ccuTest) {
-    
+    SimulationRunner(CcuSimulationTest ccuTest) {
         mCurrentTest = ccuTest;
         mEnv = CcuTestEnv.getInstance();
     
         appState = CcuTestInputParser.parseStateConfig(mEnv, ccuTest.getCCUStateFileName());
-        injectState(appState);
     
-        csvDataArray = CcuTestInputParser.parseSimulationFile(mEnv, ccuTest.getSimulationFileName());
-        testVectorParams = csvDataArray.get(0);
+        csvDataList = CcuTestInputParser.parseSimulationFile(mEnv, ccuTest.getSimulationFileName());
+        testVectorParams = csvDataList.get(0);
+    }
+    
+    public void runSimulation() {
         
-        startTime = new Date(System.currentTimeMillis()).toString();
+        injectState(appState);
         
-        for (int simIndex = 1; simIndex < csvDataArray.size(); simIndex ++) {
-            String[] simData = csvDataArray.get(simIndex);
+        for (int simIndex = 1; simIndex < csvDataList.size(); simIndex ++) {
+            String[] simData = csvDataList.get(simIndex);
             if (!mNodes.contains(Integer.parseInt(simData[1].trim()))) {
                 mNodes.add(Integer.parseInt(simData[1].trim()));
             }
             injectSimulation(simData);
+    
+            addTestLog();//TODO - should wait ?
         }
-        
-        populateTestInfo();
         
     }
     
@@ -88,6 +93,7 @@ public class SimulationRunner
     {
         final String TIME_FORMAT = "hh:mm:ss";
         SimpleDateFormat sdf = new SimpleDateFormat(TIME_FORMAT, Locale.getDefault());
+        curTime = new Date(System.currentTimeMillis()).toString();
         try
         {
             Date d = sdf.parse(testVals[0]);
@@ -98,6 +104,15 @@ public class SimulationRunner
             SimulationParams params  = new SimulationParams().build(testVals);
             String paramsJson = params.convertToJsonString();
     
+            JSONObject snType = new JSONObject();
+            try
+            {
+                snType.put("node_type", "smartnode");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+    
+            postJson("http://localhost:5000/nodetype/", snType.toString());
             postJson("http://localhost:5000/state/smartnode?address="+testVals[1].trim(), paramsJson);
         }
         catch (ParseException e)
@@ -157,28 +172,32 @@ public class SimulationRunner
         return result.toString();
     }
     
-    public void populateTestInfo() {
-        CcuSimulationTestInfo info = new CcuSimulationTestInfo();
-        info.name = mCurrentTest.getTestDescription();
-        info.simulationResult = new SimulationResult();
-        info.simulationResult.result = TestResult.PASS;
-        
-        info.simulationInput = csvDataArray;
-        info.inputCcuState = appState;
+    
+    public void addTestLog() {
+        CcuSimulationTestInfo info = mEnv.testSuite.get(mCurrentTest.getTestDescription());
+        if (info == null) {
+            info = new CcuSimulationTestInfo();
+            info.name = mCurrentTest.getTestDescription();
+            info.simulationResult = new SimulationResult();
+            info.simulationResult.result = TestResult.NA;
+            
+            info.simulationInput = csvDataList;
+            info.inputCcuState = appState;
+            mEnv.testSuite.put(mCurrentTest.getTestDescription(),info);
+        }
         //String params = CcuTestInputParser.readFileFromAssets(CcuTestEnv.getInstance().getContext(), "ccustates/testresult.json");
         
         //http://localhost:5000/log/smartnode?address=2000&since=05-April-2017_17:00:40&limit_results=1
-        for (int node = 0; node < mNodes.size();node++)
+        for(int node = 0; node < mNodes.size();node++)
         {
-            String params = getResult("http://localhost:5000/log/smartnode?address=" + mNodes.get(node) + "&since=" + startTime + "&limit_results=1");
+            String params = getResult("http://localhost:5000/log/smartnode?address=" + mNodes.get(node) + "&since=" + curTime + "&limit_results=1");
             info.nodeParams.add(SmartNodeParams.getParamsFromJson(params));
         }
         
-    
         //String params2 = CcuTestInputParser.readFileFromAssets(CcuTestEnv.getInstance().getContext(), "ccustates/testresult1.json");
         //info.nodeParams.add(SmartNodeParams.getParamsFromJson(params2));
         
-        mEnv.testSuite.put(mCurrentTest.getTestDescription(),info);
+        
     }
     
     public void saveReport() {
@@ -214,6 +233,25 @@ public class SimulationRunner
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    
+    public List<String[]> getSimulationInput() {
+        return csvDataList;
+    }
+    
+    public long duration() {
+        int lastTestIndex = csvDataList.size();
+        long duration = 0;
+        final String TIME_FORMAT = "hh:mm:ss";
+        SimpleDateFormat sdf = new SimpleDateFormat(TIME_FORMAT, Locale.getDefault());
+        try
+        {
+            Date d = sdf.parse(csvDataList.get(lastTestIndex)[0]);
+            duration = d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds() ;
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return duration * 1000;
     }
     
     public void threadSleep(int seconds) {

@@ -13,7 +13,7 @@ public class LightControlSimulationTest extends CcuSimulationTest
     
     @Before
     public void setUp() {
-        mRunner =  new SimulationRunner();
+        mRunner =  new SimulationRunner(this);
     }
     
     @After
@@ -42,7 +42,7 @@ public class LightControlSimulationTest extends CcuSimulationTest
     
     @Override
     public long testDuration() {
-        return 60000;
+        return mRunner.duration();
     }
     
     @Override
@@ -60,7 +60,7 @@ public class LightControlSimulationTest extends CcuSimulationTest
         
         System.out.println("runTest.........");
         
-        mRunner.runSimulation(this);
+        mRunner.runSimulation();
         
         mRunner.saveReport();
     }

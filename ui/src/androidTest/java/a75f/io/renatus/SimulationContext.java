@@ -9,23 +9,26 @@ import java.util.HashMap;
  * Created by samjithsadasivan on 9/21/17.
  */
 
-public class CcuTestEnv
+public class SimulationContext
 {
-    private static CcuTestEnv INSTANCE  = null;
+    private static SimulationContext INSTANCE = null;
     
-    public HashMap<String,CcuSimulationTestInfo> testSuite = new HashMap<>();
+    public SimulationTestSuite testSuite = new SimulationTestSuite();
     
     private Context mContext;
     
-    public CcuSimulationTest mCurrentTest;
+    public BaseSimulationTest mCurrentTest;
     
-    private CcuTestEnv() {
+    public int testCount;
+    public int runCount;
+    
+    private SimulationContext() {
         mContext = InstrumentationRegistry.getTargetContext().getApplicationContext();
     }
     
-    public static CcuTestEnv getInstance() {
+    public static SimulationContext getInstance() {
         if (INSTANCE == null) {
-            INSTANCE = new CcuTestEnv();
+            INSTANCE = new SimulationContext();
         }
         return INSTANCE;
     }
@@ -33,4 +36,6 @@ public class CcuTestEnv
     public Context getContext() {
         return mContext;
     }
+    
+    
 }

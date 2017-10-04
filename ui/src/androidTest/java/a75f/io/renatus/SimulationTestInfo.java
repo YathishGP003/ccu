@@ -16,7 +16,7 @@ import a75f.io.bo.json.serializers.JsonSerializer;
  * Created by samjithsadasivan on 9/26/17.
  */
 
-public class CcuSimulationTestInfo
+public class SimulationTestInfo
 {
     public String name;
     

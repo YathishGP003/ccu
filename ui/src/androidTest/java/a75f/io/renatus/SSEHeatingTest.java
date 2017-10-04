@@ -4,10 +4,13 @@ import org.junit.After;
 import org.junit.Before;
 
 /**
- * Created by samjithsadasivan on 9/22/17.
+ * Created by samjithsadasivan on 10/4/17.
  */
 
-public class LightControlSimulationTest extends BaseSimulationTest
+/**
+ * Test the heating is turned on when current temp drops below set temp
+ */
+public class SSEHeatingTest extends BaseSimulationTest
 {
     SimulationRunner mRunner = null;
     
@@ -22,17 +25,17 @@ public class LightControlSimulationTest extends BaseSimulationTest
     
     @Override
     public String getTestDescription() {
-        return LightControlSimulationTest.class.getSimpleName();
+        return SSEHeatingTest.class.getSimpleName();
     }
     
     @Override
     public String getCCUStateFileName() {
-         return "demoappstate.json";
+        return "demoappstate.json";
     }
     
     @Override
     public String getSimulationFileName() {
-        return "lighttest.csv";
+        return "sseheatingtest.csv";
     }
     
     @Override
@@ -61,8 +64,5 @@ public class LightControlSimulationTest extends BaseSimulationTest
         System.out.println("runTest.........");
         
         mRunner.runSimulation();
-        
     }
-    
-    
 }

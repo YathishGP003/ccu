@@ -13,7 +13,7 @@ public class LightControlSimulationTest extends CcuSimulationTest
     
     @Before
     public void setUp() {
-        mRunner =  new SimulationRunner();
+        mRunner =  new SimulationRunner(this);
     }
     
     @After
@@ -42,7 +42,7 @@ public class LightControlSimulationTest extends CcuSimulationTest
     
     @Override
     public long testDuration() {
-        return 60000;
+        return mRunner.duration();
     }
     
     @Override
@@ -60,13 +60,7 @@ public class LightControlSimulationTest extends CcuSimulationTest
         
         System.out.println("runTest.........");
         
-        //Log.e("test", L.ccu().toString());
-    
-        /*String params = CcuTestInputParser.readFileFromAssets(CcuTestEnv.getInstance().getContext(), "ccustates/testresult.json");
-        SmartNodeParams snParams = null;
-        snParams = SmartNodeParams.getParamsFromJson(params);*/
-        
-        mRunner.runSimulation(this);
+        mRunner.runSimulation();
         
         mRunner.saveReport();
     }

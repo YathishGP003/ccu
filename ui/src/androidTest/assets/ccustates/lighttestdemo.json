@@ -6,11 +6,6 @@
 
   "systemProfile" : {
       "schedule" : {
-        "etMinute" : 0,
-       "etHour" : 0,
-       "stHour" : 0,
-       "stMinute" : 0,
-        "val" : 0
       }
      },
 

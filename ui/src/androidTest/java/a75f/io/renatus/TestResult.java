@@ -6,5 +6,5 @@ package a75f.io.renatus;
 
 public enum TestResult
 {
-    FAIL, NOT_RUN, PASS
+    FAIL, NA, PASS
 }

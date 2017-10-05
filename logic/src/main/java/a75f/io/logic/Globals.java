@@ -2,11 +2,15 @@ package a75f.io.logic;
 
 import android.content.Context;
 
+import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import a75f.io.bo.building.CCUApplication;
+import a75f.io.bo.building.Day;
+import a75f.io.bo.building.NamedSchedule;
+import a75f.io.bo.building.Schedule;
 import a75f.io.dal.AlgoTuningParameters;
 import a75f.io.dal.DalContext;
 
@@ -119,6 +123,8 @@ class Globals
         //--Adds sleeps between any Serial Activity to work with biskit.
         isSimulation = getApplicationContext().getResources().getBoolean(R.bool.simulation);
         Logd("Simulation ----- " + isSimulation);
+        
+        
     }
     
     
@@ -129,5 +135,31 @@ class Globals
         // framework.
         AlgoTuningParameters algoTuningParameters = new AlgoTuningParameters();
         ccu().setDefaultCCUTuners(algoTuningParameters.getHashMap());
+        
+        //TODO test method
+        if(ccu().getLCMNamedSchedules().size() == 0)
+        {
+            //Mock schedule M-F, 8AM - 5:30PM turn isOn lights to value 100.
+            //Mock schedule M-F, 8AM - 5:30PM turn isOn lights to value 100.
+            Schedule schedule = new Schedule();
+            int[] ints = {1, 2, 3, 4, 5};
+            ArrayList<Day> intsaslist = new ArrayList<Day>();
+            for(int i : ints)
+            { //as
+                Day day = new Day();
+                day.setDay(i);
+                day.setSthh(8);
+                day.setStmm(00);
+                day.setEthh(17);
+                day.setEtmm(30);
+                day.setVal((short) 100);
+                intsaslist.add(day);
+            }
+            schedule.setDays(intsaslist);
+            NamedSchedule namedSchedule = new NamedSchedule();
+            namedSchedule.setName("LCM Named Schedule");
+            namedSchedule.setSchedule(schedule);
+            ccu().getLCMNamedSchedules().add(namedSchedule);
+        }
     }
 }

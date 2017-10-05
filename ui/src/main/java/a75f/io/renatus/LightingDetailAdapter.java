@@ -141,6 +141,8 @@ public class LightingDetailAdapter extends BaseAdapter
             viewHolder.LogicalName.setText(snOutput.getCircuitName());
             viewHolder.spinnerSchedule.setTag(position);
             viewHolder.spinnerSchedule.setAdapter(aaOccupancyMode);
+            viewHolder.spinnerSchedule.setSelection(snOutput.getScheduleMode().ordinal());
+            viewHolder.statusDetail.setText("status detail");
             if (schedule != null)
             {
                 schedule.setVisibility(View.VISIBLE);
@@ -156,7 +158,11 @@ public class LightingDetailAdapter extends BaseAdapter
                     {
                         viewHolder.OnOffLight.setChecked(false);
                     }
-                    /*viewHolder.spinnerSchedule.setSelection(port_info.relay1.schedule_mode);
+    
+                    
+                    
+                    /*
+                    //viewHolder.spinnerSchedule.setSelection(port_info.relay1.schedule_mode);
                     viewHolder.statusDetail.setText(port_info.relay1.status);
                     viewHolder.vacationFromTo.setText(port_info.relay1.vacation_text);
                     if (!port_info.relay1.isOccupied) {
@@ -176,7 +182,8 @@ public class LightingDetailAdapter extends BaseAdapter
                         viewHolder.OnOffLight.setChecked(false);
                     }
 
-                   /* viewHolder.spinnerSchedule.setSelection(port_info.relay2.schedule_mode);
+                   /*
+                    //viewHolder.spinnerSchedule.setSelection(port_info.relay2.schedule_mode);
                     viewHolder.statusDetail.setText(port_info.relay2.status);
                     viewHolder.vacationFromTo.setText(port_info.relay2.vacation_text);
                     if (!port_info.relay2.isOccupied) {

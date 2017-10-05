@@ -79,6 +79,8 @@ public abstract class UtilityApplication extends Application
 		setFilters();  // Start listening notifications from UsbService
 		startService(UsbService.class, usbConnection, null); // Start UsbService(if it was not started before) and Bind it
 		EventBus.getDefault().register(this);
+		
+		
 	}
 	private void setFilters()
 	{

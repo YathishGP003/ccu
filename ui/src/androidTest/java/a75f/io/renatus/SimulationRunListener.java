@@ -13,6 +13,7 @@ public class SimulationRunListener extends RunListener
 {
     SimulationContext tContext = SimulationContext.getInstance();
     public void testRunStarted(Description description) throws Exception {
+        //tContext.testCount++;
     }
     
     public void testRunFinished(Result result) throws Exception {

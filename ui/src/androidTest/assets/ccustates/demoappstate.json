@@ -1,79 +1,64 @@
-
- {
- "controlMote" : {
-   "controlMoteOutputInput" : "Control Mote settings go here"
- },
-
+{
   "systemProfile" : {
-      "schedule" : {
-      }
-     },
-
-  "floors" : [ {
-        "mRoomList" : [ {
-            "mZoneProfiles" : [ {
-                "clazz" : "a75f.io.bo.building.LightProfile",
-               "profileType" : "LIGHT",
-                 "inputs" : [ ],
+    "schedule" : {
+      "days" : [ ]
+    }
+  },
+  "controlMote" : {
+    "controlMoteOutputInput" : "Control Mote settings go here"
+  },
+  "title" : "Light Test",
+  "smartNodeAddressBand" : 0,
+  "floors" : [{
+    "mFloorId" : 1,
+    "mFloorName" : "Floor1",
+    "mKinveyWebId" : "webid",
+    "mRoomList" : [{
+      "roomName" : "75FRoom1",
+      "mZoneProfiles" : [{
+        "clazz" : "a75f.io.bo.building.LightProfile",
+          "profileConfiguration" : {
+            "7000" : {
+              "clazz" : "a75f.io.bo.building.LightProfileConfiguration",
+              "inputs" : [ ],
+              "outputs" :
+                [{
+                "uuid" : "84a1bf0c-238d-4890-b2be-d263e93ca976",
+                "mOutputAnalogActuatorType" : "ZeroToTenV",
+                "address" : 7000,
+                "name" : "Dining Room",
                 "logicalValue" : 0,
-              "outputs" : [ "0a5d941d-6841-4a84-86dc-bcda27d09898", "1ca985c5-20ac-47bb-9409-6f9f6a50a87f", "8f879dfd-c522-4f05-a6b2-c25dc7d13201", "bc1114c6-ea20-48cf-86ef-4034df794b19" ]
-               } ],
-           "roomName" : "room1",
-             "inputs" : { },
-            "outputs" : {
-                "0a5d941d-6841-4a84-86dc-bcda27d09898" : {
-                    "uuid" : "0a5d941d-6841-4a84-86dc-bcda27d09898",
-                    "mOutputRelayActuatorType" : "NormallyClose",
-                    "schedules" : [ ],
-                    "address" : 0,
-                     "name" : "r2",
-                    "port" : "RELAY_TWO"
-                 },
-                 "1ca985c5-20ac-47bb-9409-6f9f6a50a87f" : {
-                   "uuid" : "1ca985c5-20ac-47bb-9409-6f9f6a50a87f",
-                    "mOutputRelayActuatorType" : "NormallyClose",
-                    "schedules" : [ ],
-                   "address" : 0,
-                    "name" : "r1",
-                     "port" : "RELAY_ONE"
-                   },
-                 "8f879dfd-c522-4f05-a6b2-c25dc7d13201" : {
-                     "uuid" : "8f879dfd-c522-4f05-a6b2-c25dc7d13201",
-                     "mOutputAnalogActuatorType" : "TwoToTenV",
-                    "schedules" : [ ],
-                     "address" : 0,
-                    "name" : "a1",
-                     "port" : "ANALOG_OUT_ONE"
-                   },
-               "bc1114c6-ea20-48cf-86ef-4034df794b19" : {
-                     "uuid" : "bc1114c6-ea20-48cf-86ef-4034df794b19",
-                    "mOutputAnalogActuatorType" : "TwoToTenV",
-                     "schedules" : [ ],
-                    "address" : 0,
-                     "name" : "a2",
-                    "port" : "ANALOG_OUT_TWO"
-                   }
-               },
-             "nodes" : {
-               "7000" : {
-                     "address" : 7000,
-                     "inputs" : [ ],
-                     "nodeType" : null,
-                     "outputs" : [ "0a5d941d-6841-4a84-86dc-bcda27d09898", "1ca985c5-20ac-47bb-9409-6f9f6a50a87f", "8f879dfd-c522-4f05-a6b2-c25dc7d13201", "bc1114c6-ea20-48cf-86ef-4034df794b19" ]
-                   }
-              }
-           }, {
-             "mZoneProfiles" : [ ],
-             "roomName" : "room2",
-             "inputs" : { },
-             "outputs" : { },
-             "nodes" : { }
-          } ],
-         "mFloorName" : "floor1",
-        "mKinveyWebId" : "",
-         "mFloorId" : 0
-       } ],
-     "smartNodeAddressBand" : 7000,
-     "title" : ""
- }
-
+                "schedules" : [ ],
+                "overrideMillis" : 0,
+                "scheduleMode" : "SystemSchedule",
+                "overrideType" : "NONE"
+                },
+                {
+                "uuid" : "df947c17-a64a-4335-9167-745e9499fc24",
+                "mOutputAnalogActuatorType" : "ZeroToTenV",
+                "address" : 7000,
+                "name" : "Kitchen",
+                "logicalValue" : 0,
+                "schedules" : [ ],
+                "overrideMillis" : 0,
+                "scheduleMode" : "SystemSchedule",
+                "overrideType" : "NONE"
+                }],
+              "nodeType" : null,
+              "nodeAddress" : 0
+          }
+        },
+      "logicalValue" : 0,
+      "schedules" : [ ],
+      "overrideMillis" : 0,
+      "scheduleMode" : "SystemSchedule",
+      "overrideType" : "NONE"
+      }],
+    "nodes" : [ 7000 ],
+    "tuningParameters" : { }
+    }]
+  }],
+  "defaultCCUTuners" : { },
+  "defaultLightSchedule" : [ ],
+  "defaultTemperatureSchedule" : [ ]
+}

@@ -1,79 +1,101 @@
-
- {
- "controlMote" : {
-   "controlMoteOutputInput" : "Control Mote settings go here"
- },
-
+{
   "systemProfile" : {
-      "schedule" : {
-      }
-     },
-
+    "schedule" : {
+      "days" : [ ]
+    }
+  },
+  "controlMote" : {
+    "controlMoteOutputInput" : "Control Mote settings go here"
+  },
+  "title" : "Light Test",
   "floors" : [ {
-        "mRoomList" : [ {
-            "mZoneProfiles" : [ {
-                "clazz" : "a75f.io.bo.building.LightProfile",
-               "profileType" : "LIGHT",
-                 "inputs" : [ ],
-                "logicalValue" : 0,
-              "outputs" : [ "0a5d941d-6841-4a84-86dc-bcda27d09898", "1ca985c5-20ac-47bb-9409-6f9f6a50a87f", "8f879dfd-c522-4f05-a6b2-c25dc7d13201", "bc1114c6-ea20-48cf-86ef-4034df794b19" ]
-               } ],
-           "roomName" : "room1",
-             "inputs" : { },
-            "outputs" : {
-                "0a5d941d-6841-4a84-86dc-bcda27d09898" : {
-                    "uuid" : "0a5d941d-6841-4a84-86dc-bcda27d09898",
-                    "mOutputRelayActuatorType" : "NormallyClose",
-                    "schedules" : [ ],
-                    "address" : 0,
-                     "name" : "r2",
-                    "port" : "RELAY_TWO"
-                 },
-                 "1ca985c5-20ac-47bb-9409-6f9f6a50a87f" : {
-                   "uuid" : "1ca985c5-20ac-47bb-9409-6f9f6a50a87f",
-                    "mOutputRelayActuatorType" : "NormallyClose",
-                    "schedules" : [ ],
-                   "address" : 0,
-                    "name" : "r1",
-                     "port" : "RELAY_ONE"
-                   },
-                 "8f879dfd-c522-4f05-a6b2-c25dc7d13201" : {
-                     "uuid" : "8f879dfd-c522-4f05-a6b2-c25dc7d13201",
-                     "mOutputAnalogActuatorType" : "TwoToTenV",
-                    "schedules" : [ ],
-                     "address" : 0,
-                    "name" : "a1",
-                     "port" : "ANALOG_OUT_ONE"
-                   },
-               "bc1114c6-ea20-48cf-86ef-4034df794b19" : {
-                     "uuid" : "bc1114c6-ea20-48cf-86ef-4034df794b19",
-                    "mOutputAnalogActuatorType" : "TwoToTenV",
-                     "schedules" : [ ],
-                    "address" : 0,
-                     "name" : "a2",
-                    "port" : "ANALOG_OUT_TWO"
-                   }
-               },
-             "nodes" : {
-               "7000" : {
-                     "address" : 7000,
-                     "inputs" : [ ],
-                     "nodeType" : null,
-                     "outputs" : [ "0a5d941d-6841-4a84-86dc-bcda27d09898", "1ca985c5-20ac-47bb-9409-6f9f6a50a87f", "8f879dfd-c522-4f05-a6b2-c25dc7d13201", "bc1114c6-ea20-48cf-86ef-4034df794b19" ]
-                   }
-              }
-           }, {
-             "mZoneProfiles" : [ ],
-             "roomName" : "room2",
-             "inputs" : { },
-             "outputs" : { },
-             "nodes" : { }
-          } ],
-         "mFloorName" : "floor1",
-        "mKinveyWebId" : "",
-         "mFloorId" : 0
-       } ],
-     "smartNodeAddressBand" : 7000,
-     "title" : ""
- }
-
+    "mFloorId" : 1,
+    "mFloorName" : "Floor1",
+    "mKinveyWebId" : "webid",
+    "mRoomList" : [ {
+      "roomName" : "75FRoom1",
+      "mZoneProfiles" : [ {
+        "clazz" : "a75f.io.bo.building.LightProfile",
+        "profileConfiguration" : {
+          "7000" : {
+            "clazz" : "a75f.io.bo.building.LightProfileConfiguration",
+            "outputs" : [ {
+              "uuid" : "73a4415a-95b0-4cd6-857a-e073e824579b",
+              "mOutputAnalogActuatorType" : "ZeroToTenV",
+              "address" : 7000,
+              "name" : "Dining Room",
+              "port" : "ANALOG_OUT_ONE",
+              "schedules" : [ ],
+              "scheduleMode" : "SystemSchedule",
+              "overrideMillis" : 0,
+              "logicalValue" : 0,
+              "overrideType" : "NONE"
+            }, {
+              "uuid" : "83d051b3-db20-4534-8d2f-dedf55182a36",
+              "mOutputAnalogActuatorType" : "ZeroToTenV",
+              "address" : 7000,
+              "name" : "Kitchen",
+              "port" : "ANALOG_OUT_TWO",
+              "schedules" : [ ],
+              "scheduleMode" : "SystemSchedule",
+              "overrideMillis" : 0,
+              "logicalValue" : 0,
+              "overrideType" : "NONE"
+            } ],
+            "inputs" : [ ],
+            "nodeAddress" : 0,
+            "nodeType" : null
+          }
+        },
+        "schedules" : [ {
+          "days" : [ {
+            "day" : 1,
+            "sthh" : 17,
+            "stmm" : 0,
+            "ethh" : 17,
+            "etmm" : 30,
+            "val" : 80
+          }, {
+            "day" : 2,
+            "sthh" : 17,
+            "stmm" : 0,
+            "ethh" : 17,
+            "etmm" : 30,
+            "val" : 81
+          }, {
+            "day" : 3,
+            "sthh" : 17,
+            "stmm" : 0,
+            "ethh" : 17,
+            "etmm" : 30,
+            "val" : 82
+          }, {
+            "day" : 4,
+            "sthh" : 17,
+            "stmm" : 0,
+            "ethh" : 17,
+            "etmm" : 30,
+            "val" : 83
+          }, {
+            "day" : 5,
+            "sthh" : 17,
+            "stmm" : 0,
+            "ethh" : 17,
+            "etmm" : 30,
+            "val" : 84
+          } ]
+        } ],
+        "scheduleMode" : "ZoneSchedule",
+        "overrideMillis" : 0,
+        "logicalValue" : 0,
+        "overrideType" : "NONE"
+      } ],
+      "tuningParameters" : { },
+      "nodes" : [ 7000 ]
+    } ]
+  } ],
+  "defaultCCUTuners" : { },
+  "smartNodeAddressBand" : 0,
+  "defaultLightSchedule" : [ ],
+  "defaultTemperatureSchedule" : [ ]
+}

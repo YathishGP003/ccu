@@ -235,7 +235,7 @@ public class Schedule
         return isOverrideTimeInSchedule != isCurrentTimeInSchedule;
     }
     
-    
+    @JsonIgnore
     public Day getCurrentSchedule()
     {
         long mockTime = MockTime.getInstance().getMockTime();

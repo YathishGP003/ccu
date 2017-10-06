@@ -61,8 +61,6 @@ public class LightControlSimulationTest extends CcuSimulationTest
         System.out.println("runTest.........");
         
         mRunner.runSimulation();
-        
-        mRunner.saveReport();
     }
     
     

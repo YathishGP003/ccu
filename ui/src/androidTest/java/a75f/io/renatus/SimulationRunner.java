@@ -7,6 +7,7 @@ package a75f.io.renatus;
 import android.os.Environment;
 import android.text.format.DateFormat;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -177,6 +178,7 @@ public class SimulationRunner
         return snType.toString();
     }
     
+    //TODO - Handle {"reason": "NodeNotFound", "message": "Node (7000) not found", "result": "error"}
     public void addTestLog() {
         CcuSimulationTestInfo info = mEnv.testSuite.get(mCurrentTest.getTestDescription());
         if (info == null) {
@@ -196,7 +198,21 @@ public class SimulationRunner
         {
             postJson("http://10.0.2.2:5000/nodetype/", getSmartnodeType());
             String params = getResult("http://10.0.2.2:5000/log/smartnode?address=" + mNodes.get(node) + "&since=" + curTime + "&limit_results=1");
-            info.nodeParams.add(SmartNodeParams.getParamsFromJson(params));
+    
+            try
+            {
+                JSONArray jsonArray = new JSONArray(params);
+                ArrayList<String> list = new ArrayList<String>();
+    
+                for (int i = 0; i < jsonArray.length(); i++)
+                {
+                    list.add(jsonArray.get(i).toString());
+                    info.nodeParams.add(SmartNodeParams.getParamsFromJson(jsonArray.get(i).toString()));
+                }
+                
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
         
         //String params2 = CcuTestInputParser.readFileFromAssets(CcuTestEnv.getInstance().getContext(), "ccustates/testresult1.json");

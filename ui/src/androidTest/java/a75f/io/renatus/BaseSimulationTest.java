@@ -10,8 +10,8 @@ import org.junit.runner.RunWith;
 /**
  * Base class for functional test cases , runs with SimulationRunner and enforces each test to have config and test input files
  */
-@RunWith(CcuSimulationTestRunner.class)
-public abstract class CcuSimulationTest
+@RunWith(SimulationTestRunner.class)
+public abstract class BaseSimulationTest
 {
     //Description of test
     public abstract String getTestDescription();
@@ -23,13 +23,13 @@ public abstract class CcuSimulationTest
     public abstract String getSimulationFileName();
     
     //JSON from http:localhost:5000/log/smartnode?address=2000 returns test result, open ended. Pass / Fail, reason for failing.
-    public abstract TestResult analyzeTestResults(TestLog testLog);
+    public abstract TestResult analyzeTestResults(SimulationTestInfo testLog);
     
     //How long this test should run
     public abstract long testDuration();
     
     //report test results
-    public abstract void reportTestResults(TestLog testLog, TestResult result);
+    public abstract void reportTestResults(SimulationTestInfo testLog, TestResult result);
     
     //Columns to graph
     public abstract String[] graphColumns();

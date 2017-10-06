@@ -4,7 +4,6 @@ package a75f.io.renatus;
  * Created by samjithsadasivan on 9/21/17.
  */
 
-import android.os.Environment;
 import android.text.format.DateFormat;
 
 import org.json.JSONArray;
@@ -14,9 +13,6 @@ import org.json.JSONObject;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -29,20 +25,23 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import a75f.io.bo.building.CCUApplication;
 
 import static a75f.io.logic.L.ccu;
 import static java.lang.Thread.sleep;
 
+/**
+ * SimulationRunner runs within android instrumentation shell to inject and verify simulation parameters.
+ * It uses global static hashmap of SimulationContext class to track the tests beings run and corresponding param values.
+ */
 public class SimulationRunner
 {
     
-    public List<String[]> csvDataList = null;
-    private CcuTestEnv mEnv = null;
+    public  List<String[]>    csvDataList = null;
+    private SimulationContext mEnv        = null;
     
-    private CcuSimulationTest mCurrentTest;
+    private BaseSimulationTest mCurrentTest;
     
     String[] testVectorParams = null;
     CCUApplication appState;
@@ -52,18 +51,20 @@ public class SimulationRunner
     private List<Integer> mNodes = new ArrayList<>();
     
     String curTime = null;
-    int resultCounter = 0;
     
-    SimulationRunner(CcuSimulationTest ccuTest) {
+    SimulationRunner(BaseSimulationTest ccuTest) {
         mCurrentTest = ccuTest;
-        mEnv = CcuTestEnv.getInstance();
+        mEnv = SimulationContext.getInstance();
     
-        appState = CcuTestInputParser.parseStateConfig(mEnv, ccuTest.getCCUStateFileName());
+        appState = SimulationInputParser.parseStateConfig(mEnv, ccuTest.getCCUStateFileName());
     
-        csvDataList = CcuTestInputParser.parseSimulationFile(mEnv, ccuTest.getSimulationFileName());
+        csvDataList = SimulationInputParser.parseSimulationFile(mEnv, ccuTest.getSimulationFileName());
         testVectorParams = csvDataList.get(0);
     }
     
+    /**
+     * Must be called from @Test method of SimulationTest
+     */
     public void runSimulation() {
         
         injectState(appState);
@@ -80,7 +81,7 @@ public class SimulationRunner
         
     }
     
-    public void injectState(CCUApplication state) {
+    private void injectState(CCUApplication state) {
         CCUApplication currentState = ccu();
         currentState.setTitle(state.getTitle());
         currentState.setFloors(state.getFloors());
@@ -90,7 +91,7 @@ public class SimulationRunner
         
     }
     
-    public void injectSimulation(String[] testVals)
+    private void injectSimulation(String[] testVals)
     {
         final String TIME_FORMAT = "hh:mm:ss";
         SimpleDateFormat sdf = new SimpleDateFormat(TIME_FORMAT, Locale.getDefault());
@@ -115,7 +116,7 @@ public class SimulationRunner
         }
     }
     
-    public void postJson(String url, String data){
+    private void postJson(String url, String data){
         HttpURLConnection httpURLConnection = null;
         try {
             URL restUrl = new URL(url);
@@ -141,7 +142,7 @@ public class SimulationRunner
         }
     }
     
-    public String getResult(String url){
+    private String getResult(String url){
         
         StringBuilder result = new StringBuilder();
             
@@ -178,20 +179,19 @@ public class SimulationRunner
         return snType.toString();
     }
     
-    //TODO - Handle {"reason": "NodeNotFound", "message": "Node (7000) not found", "result": "error"}
-    public void addTestLog() {
-        CcuSimulationTestInfo info = mEnv.testSuite.get(mCurrentTest.getTestDescription());
+    private void addTestLog() {
+        SimulationTestInfo info = mEnv.testSuite.getSimulationTest(mCurrentTest.getTestDescription());
         if (info == null) {
-            info = new CcuSimulationTestInfo();
+            info = new SimulationTestInfo();
             info.name = mCurrentTest.getTestDescription();
             info.simulationResult = new SimulationResult();
             info.simulationResult.result = TestResult.NA;
             
             info.simulationInput = csvDataList;
             info.inputCcuState = appState;
-            mEnv.testSuite.put(mCurrentTest.getTestDescription(),info);
+            mEnv.testSuite.addSimulationTest(mCurrentTest.getTestDescription(),info);
         }
-        //String params = CcuTestInputParser.readFileFromAssets(CcuTestEnv.getInstance().getContext(), "ccustates/testresult.json");
+        //String params = SimulationInputParser.readFileFromAssets(SimulationContext.getInstance().getContext(), "ccustates/testresult.json");
         
         //http://localhost:5000/log/smartnode?address=2000&since=05-April-2017_17:00:40&limit_results=1
         for(int node = 0; node < mNodes.size();node++)
@@ -215,45 +215,10 @@ public class SimulationRunner
             }
         }
         
-        //String params2 = CcuTestInputParser.readFileFromAssets(CcuTestEnv.getInstance().getContext(), "ccustates/testresult1.json");
+        //String params2 = SimulationInputParser.readFileFromAssets(SimulationContext.getInstance().getContext(), "ccustates/testresult1.json");
         //info.nodeParams.add(SmartNodeParams.getParamsFromJson(params2));
         
         
-    }
-    
-    public void saveReport() {
-        
-        String path = Environment.getExternalStorageDirectory().getPath();
-        String testReport = "<br /><br /><h3>Simulation Test Summary</h3>"
-                                    .concat("<table width:200; border=1; cellspacing=0; cellpadding=0; table-layout:fixed; word-wrap:break-word;>")
-                                    .concat("<tr>")
-                                    .concat("<th> Test Case </th>")
-                                    .concat("<th> Status </th>")
-                                    .concat("<th> Simulation Input </th>")
-                                    .concat("<th> Ccu State </th>")
-                                    .concat("<th> SmartNode State</th>")
-                                    .concat("</tr>");
-        
-        for (Map.Entry<String, CcuSimulationTestInfo> test : mEnv.testSuite.entrySet()) {
-            testReport = testReport.concat(test.getValue().getHtml());
-        }
-        
-        testReport = testReport.concat("</table>");
-    
-        String fileName = DateFormat.format("dd_MM_yyyy_hh_mm_ss", System.currentTimeMillis()).toString();
-        File file = new File(path, fileName+"_Simulation.html");
-        String html = "<html><head><title>Simulation Test Report</title></head><body>"+testReport+"</body></html>";
-
-        try {
-            FileOutputStream out = new FileOutputStream(file);
-            byte[] data = html.getBytes();
-            out.write(data);
-            out.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
     
     public List<String[]> getSimulationInput() {
@@ -275,7 +240,7 @@ public class SimulationRunner
         return duration * 1000;
     }
     
-    public void threadSleep(int seconds) {
+    private void threadSleep(int seconds) {
         try {
             sleep(seconds * 1000);
         } catch (InterruptedException e) {

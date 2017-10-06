@@ -19,11 +19,11 @@ import a75f.io.bo.json.serializers.JsonSerializer;
  * Created by samjithsadasivan on 9/21/17.
  */
 
-public class CcuTestInputParser
+public class SimulationInputParser
 {
     private static final String ASSETS_STATE_PATH = "ccustates/";
     private static final String ASSETS_TESTS_PATH = "simulationtests/";
-    public static CCUApplication parseStateConfig(CcuTestEnv cxt, String fileName){
+    public static CCUApplication parseStateConfig(SimulationContext cxt, String fileName){
         
         String ccuConfig = readFileFromAssets(cxt.getContext(), ASSETS_STATE_PATH+fileName);
         CCUApplication appStruct = null;
@@ -41,7 +41,7 @@ public class CcuTestInputParser
         
     }
     
-    public static List<String[]> parseSimulationFile(CcuTestEnv cxt, String fileName) {
+    public static List<String[]> parseSimulationFile(SimulationContext cxt, String fileName) {
         List<String[]> simFile = readSimulationCSV(cxt.getContext(), ASSETS_TESTS_PATH+fileName);
         return simFile;
     }

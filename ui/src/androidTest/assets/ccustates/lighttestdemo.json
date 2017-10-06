@@ -1,0 +1,101 @@
+{
+  "systemProfile" : {
+    "schedule" : {
+      "days" : [ ]
+    }
+  },
+  "controlMote" : {
+    "controlMoteOutputInput" : "Control Mote settings go here"
+  },
+  "title" : "Light Test",
+  "floors" : [ {
+    "mFloorId" : 1,
+    "mFloorName" : "Floor1",
+    "mKinveyWebId" : "webid",
+    "mRoomList" : [ {
+      "roomName" : "75FRoom1",
+      "mZoneProfiles" : [ {
+        "clazz" : "a75f.io.bo.building.LightProfile",
+        "profileConfiguration" : {
+          "7000" : {
+            "clazz" : "a75f.io.bo.building.LightProfileConfiguration",
+            "outputs" : [ {
+              "uuid" : "73a4415a-95b0-4cd6-857a-e073e824579b",
+              "mOutputAnalogActuatorType" : "ZeroToTenV",
+              "address" : 7000,
+              "name" : "Dining Room",
+              "port" : "ANALOG_OUT_ONE",
+              "schedules" : [ ],
+              "scheduleMode" : "SystemSchedule",
+              "overrideMillis" : 0,
+              "logicalValue" : 0,
+              "overrideType" : "NONE"
+            }, {
+              "uuid" : "83d051b3-db20-4534-8d2f-dedf55182a36",
+              "mOutputAnalogActuatorType" : "ZeroToTenV",
+              "address" : 7000,
+              "name" : "Kitchen",
+              "port" : "ANALOG_OUT_TWO",
+              "schedules" : [ ],
+              "scheduleMode" : "SystemSchedule",
+              "overrideMillis" : 0,
+              "logicalValue" : 0,
+              "overrideType" : "NONE"
+            } ],
+            "inputs" : [ ],
+            "nodeAddress" : 0,
+            "nodeType" : null
+          }
+        },
+        "schedules" : [ {
+          "days" : [ {
+            "day" : 1,
+            "sthh" : 17,
+            "stmm" : 0,
+            "ethh" : 17,
+            "etmm" : 30,
+            "val" : 80
+          }, {
+            "day" : 2,
+            "sthh" : 17,
+            "stmm" : 0,
+            "ethh" : 17,
+            "etmm" : 30,
+            "val" : 81
+          }, {
+            "day" : 3,
+            "sthh" : 17,
+            "stmm" : 0,
+            "ethh" : 17,
+            "etmm" : 30,
+            "val" : 82
+          }, {
+            "day" : 4,
+            "sthh" : 17,
+            "stmm" : 0,
+            "ethh" : 17,
+            "etmm" : 30,
+            "val" : 83
+          }, {
+            "day" : 5,
+            "sthh" : 17,
+            "stmm" : 0,
+            "ethh" : 17,
+            "etmm" : 30,
+            "val" : 84
+          } ]
+        } ],
+        "scheduleMode" : "ZoneSchedule",
+        "overrideMillis" : 0,
+        "logicalValue" : 0,
+        "overrideType" : "NONE"
+      } ],
+      "tuningParameters" : { },
+      "nodes" : [ 7000 ]
+    } ]
+  } ],
+  "defaultCCUTuners" : { },
+  "smartNodeAddressBand" : 0,
+  "defaultLightSchedule" : [ ],
+  "defaultTemperatureSchedule" : [ ]
+}

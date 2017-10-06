@@ -2,6 +2,7 @@ package a75f.io.renatus;
 
 import org.junit.Test;
 import org.junit.internal.runners.statements.FailOnTimeout;
+import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
@@ -13,9 +14,9 @@ import org.junit.runners.model.Statement;
 
 //TODO - May override timeout, and implement junit testwatcher/testlistener
     
-public class CcuSimulationTestRunner extends BlockJUnit4ClassRunner
+public class SimulationTestRunner extends BlockJUnit4ClassRunner
 {
-    public CcuSimulationTestRunner(Class<?> klass)
+    public SimulationTestRunner(Class<?> klass)
             throws InitializationError
     {
         super(klass);
@@ -35,5 +36,13 @@ public class CcuSimulationTestRunner extends BlockJUnit4ClassRunner
             return 0;
         }
         return annotation.timeout();
+    }
+    
+    @Override
+    public void run(RunNotifier notifier){
+        notifier.addListener(new SimulationRunListener());
+        //notifier.fireTestRunStarted(getDescription());
+        SimulationContext.getInstance().testCount++;
+        super.run(notifier);
     }
 }

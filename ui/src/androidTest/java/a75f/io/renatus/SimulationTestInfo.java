@@ -16,7 +16,7 @@ import a75f.io.bo.json.serializers.JsonSerializer;
  * Created by samjithsadasivan on 9/26/17.
  */
 
-public class CcuSimulationTestInfo
+public class SimulationTestInfo
 {
     public String name;
     
@@ -39,7 +39,7 @@ public class CcuSimulationTestInfo
         
         for(String[] row : simulationInput) {
             for (String s : row) {
-                inputString += " "+s;
+                inputString += s+", ";
             }
             inputString += "<br>";
         }
@@ -53,13 +53,16 @@ public class CcuSimulationTestInfo
        
         for (SmartNodeParams param : nodeParams) {
             String paramString = param.convertToJsonString();
-            paramsString += decorateChangedParams(prevParam, paramString).concat("<br>");
+            paramsString += decorateChangedParams(prevParam, paramString).concat("<br><br>");
             prevParam = paramString;
         }
         
+        String resultHtml = simulationResult.result==TestResult.PASS ? "<span style=color:green>PASS</span>"
+                                                                    : "<span style=color:red>FAIL</span>";
+                                                
         String testInfoRow = "<tr style=color:blue>"
-                             .concat("<td>").concat(name).concat("</td>")
-                             .concat("<td>").concat(simulationResult.result.toString()).concat("</td>")
+                             .concat("<td>").concat(" "+name+" ").concat("</td>")
+                             .concat("<td>").concat(resultHtml).concat("</td>")
                              .concat("<td>").concat(inputString).concat("</td>")
                              .concat("<td>").concat(stateString).concat("</td>")
                              .concat("<td>").concat(paramsString).concat("</td>")

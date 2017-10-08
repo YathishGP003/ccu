@@ -158,8 +158,10 @@ class Globals
             schedule.setDays(intsaslist);
             NamedSchedule namedSchedule = new NamedSchedule();
             namedSchedule.setName("LCM Named Schedule");
-            namedSchedule.setSchedule(schedule);
-            ccu().getLCMNamedSchedules().add(namedSchedule);
+            ArrayList<Schedule> schedules = new ArrayList<Schedule>();
+            schedules.add(schedule);
+            namedSchedule.setSchedule(schedules);
+            ccu().getLCMNamedSchedules().put(namedSchedule.getName(), namedSchedule);
         }
     }
 }

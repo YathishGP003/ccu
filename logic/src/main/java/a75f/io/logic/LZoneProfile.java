@@ -5,12 +5,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 
 import a75f.io.bo.building.Circuit;
+import a75f.io.bo.building.Day;
 import a75f.io.bo.building.Output;
 import a75f.io.bo.building.Schedulable;
 import a75f.io.bo.building.Schedule;
 import a75f.io.bo.building.ZoneProfile;
 import a75f.io.bo.building.definitions.MockTime;
 import a75f.io.bo.building.definitions.OverrideType;
+
+import static a75f.io.logic.L.ccu;
 
 /**
  * Created by Yinten on 9/10/2017.
@@ -146,7 +149,7 @@ class LZoneProfile
         {
             if (schedule.isInSchedule())
             {
-                return schedule.getCurrentSchedule().getVal();
+                return getCurrentSchedule(schedule).getVal();
             }
         }
         return 0;
@@ -159,7 +162,8 @@ class LZoneProfile
         // override.
         if (schedulable.hasSchedules())
         {
-            return checkBoundCrossed(schedulable.getSchedules(), schedulable.getOverrideMillis());
+            return checkBoundCrossed(resolveSchedules(schedulable), schedulable
+                                                                                .getOverrideMillis());
         }
         return false;
     }
@@ -170,17 +174,39 @@ class LZoneProfile
     {
         return schedulable.getOverrideMillis() > MockTime.getInstance().getMockTime();
     }
+
     
-    
-    public boolean isInSchedule(Schedulable schedulable)
+    public static ArrayList<Schedule> resolveSchedules(Schedulable schedulable)
     {
-        for (Schedule schedule : schedulable.getSchedules())
+        if(isNamedSchedule(schedulable))
         {
-            if (schedule.isInSchedule())
+            return ccu().getLCMNamedSchedules().get(schedulable.getNamedSchedule()).getSchedule();
+        }
+        else if(schedulable.hasSchedules())
+        {
+            return schedulable.getSchedules();
+        }
+        
+        return null;
+    }
+    
+    public static Day getCurrentSchedule(Schedule schedule)
+    {
+        long mockTime = MockTime.getInstance().getMockTime();
+        for (int i = 0; i < schedule.getScheduledIntervals().size(); i++)
+        {
+            if (schedule.getScheduledIntervals().get(i).contains(mockTime))
             {
-                return true;
+                return schedule.getDays().get(i);
             }
         }
-        return false;
+        return null;
+    }
+    
+    
+    
+    public static boolean isNamedSchedule(Schedulable schedulable)
+    {
+        return schedulable.getNamedSchedule() != null && !schedulable.getNamedSchedule().equals("");
     }
 }

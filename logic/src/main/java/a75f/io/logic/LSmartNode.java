@@ -203,7 +203,7 @@ class LSmartNode
         LightProfile lightProfile = (LightProfile) zone.findProfile(ProfileType.LIGHT);
         if (!lightProfile.hasSchedules())
         {
-            lightProfile.addSchedules(ccu().getDefaultLightSchedule(), ScheduleMode.SystemSchedule);
+            lightProfile.addSchedules(ccu().getDefaultLightSchedule(), ScheduleMode.ZoneSchedule);
         }
         seedMessage.settings.lightingIntensityForOccupantDetected
                 .set((short) resolveTuningParameter(zone, "lightingIntensityOccupantDetected"));

@@ -80,6 +80,7 @@ public class NodeTest
         op3.mOutputAnalogActuatorType = OutputAnalogActuatorType.TwoToTenV;
         op3.mName = "Bedroom";
         op3.setPort(Port.ANALOG_OUT_ONE);
+        p1.setNamedSchedule("namedScheduleWhy?");
         
         testSN2Config.getOutputs().add(op3);
         
@@ -103,6 +104,14 @@ public class NodeTest
             Assert.assertEquals(testSN2, op3.getAddress());
             String ccuApplicationJSON = JsonSerializer.toJson(ccuApplication, true);
             System.out.println("CCU Application As String:\n" + ccuApplicationJSON + "\n");
+            
+            CCUApplication ccu =
+                    (CCUApplication) JsonSerializer.fromJson(ccuApplicationJSON, CCUApplication.class);
+            ZoneProfile profile =
+                    ccu.getFloors().get(0).mRoomList.get(0).findProfile(ProfileType.LIGHT);
+            
+            Assert.assertTrue(profile.getNamedSchedule() != null && !profile.getNamedSchedule().equals(""));
+            Assert.assertTrue(profile.getNamedSchedule().equals("namedScheduleWhy?"));
             //CCUApplication deCcuApp = (CCUApplication) JsonSerializer.fromJson(ccuApplicationJSON ,CCUApplication.class);
             //Assert.assertEquals(1, deCcuApp.floors.size());
         }

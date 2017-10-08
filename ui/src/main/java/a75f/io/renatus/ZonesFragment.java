@@ -1,11 +1,13 @@
 package a75f.io.renatus;
 
+import android.content.DialogInterface;
 import android.content.res.XmlResourceParser;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.SwitchCompat;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -37,6 +39,7 @@ import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.ZoneProfile;
 import a75f.io.bo.building.definitions.ProfileType;
 import a75f.io.bo.building.definitions.ScheduleMode;
+import a75f.io.logic.L;
 import a75f.io.renatus.VIEWS.SeekArcWidget;
 import a75f.io.renatus.VIEWS.ZoneImageWidget;
 
@@ -394,12 +397,11 @@ public class ZonesFragment extends Fragment
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
                 {
-                    roomData.setScheduleMode(roomData.getScheduleMode().values()[position]);
-                    if (roomData.getScheduleMode() == ScheduleMode.NamedSchedule)
+                    if (position == 1)
                     {
                         showLCMNamedScheduleSelector(roomData);
                     }
-                    else
+                    else if (position == 0)
                     {
                         roomData.setScheduleMode(ScheduleMode.ZoneSchedule);
                     }
@@ -422,9 +424,26 @@ public class ZonesFragment extends Fragment
     }
     
     
-    private void showLCMNamedScheduleSelector(ZoneProfile zoneProfile)
+    private void showLCMNamedScheduleSelector(final ZoneProfile zoneProfile)
     {
-        Toast.makeText(this.getContext(), "Zones Fragment", Toast.LENGTH_LONG).show();
+        final ArrayList<String> strings =
+                new ArrayList<String>(ccu().getLCMNamedSchedules().keySet());
+        CharSequence[] charSequences = new CharSequence[strings.size()];
+        for (int i = 0; i < strings.size(); i++)
+        {
+            charSequences[i] = strings.get(i);
+        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("Named Schedule")
+               .setItems(charSequences, new DialogInterface.OnClickListener()
+               {
+                   public void onClick(DialogInterface dialog, int which)
+                   {
+                       zoneProfile.setNamedSchedule(strings.get(which));
+                       L.saveCCUState();
+                   }
+               });
+        builder.create().show();
     }
     
     

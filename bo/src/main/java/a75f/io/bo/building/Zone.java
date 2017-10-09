@@ -1,5 +1,7 @@
 package a75f.io.bo.building;
 
+import android.provider.ContactsContract;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.ArrayList;
@@ -16,24 +18,20 @@ import a75f.io.bo.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 //Also known as room.
 public class Zone
 {
-
+    
     public  String                  roomName          = "Default Zone";
     public  ArrayList<ZoneProfile>  mZoneProfiles     = new ArrayList<>();
     private HashMap<String, Object> mTuningParameters = new HashMap<>();
-
-    
     
     public Zone()
     {
     }
-    
     
     //Also known as zone name.
     public Zone(String roomName)
     {
         this.roomName = roomName;
     }
-    
     
     @JsonIgnore
     public ArrayList<Output> getOutputs(short address)
@@ -50,7 +48,6 @@ public class Zone
         return retVal;
     }
     
-    
     @Override
     @JsonIgnore
     public String toString()
@@ -58,45 +55,34 @@ public class Zone
         return roomName;
     }
     
-    
     @JsonIgnore
     public ZoneProfile findProfile(ProfileType profileType)
     {
         ZoneProfile retVal = null;
         for (ZoneProfile zoneProfile : mZoneProfiles)
         {
-            switch (profileType)
+            if(zoneProfile.getProfileType() == profileType)
             {
-                case LIGHT:
-                    return zoneProfile;
-                case GENERIC:
-                    break;
-                case TEST:
-                    return zoneProfile;
-                case SSE:
-                    return zoneProfile;
+                return zoneProfile;
             }
         }
-        switch (profileType)
+        
+        
+        if (profileType == ProfileType.LIGHT)
         {
-            case LIGHT:
-                retVal = new LightProfile();
-                break;
-            case SSE:
-                retVal = new SingleStageProfile();
-                break;
-            case TEST:
-                retVal = new TestProfile();
-                break;
+            retVal = new LightProfile();
+        }
+        else if (profileType == ProfileType.SSE)
+        {
+            retVal = new SingleStageProfile();
+        }
+        else if (profileType == ProfileType.TEST)
+        {
+            retVal = new TestProfile();
         }
         mZoneProfiles.add(retVal);
         return retVal;
     }
-    
-
-    
-
-    
     
     @JsonIgnore
     public void mapRegularUpdate(CmToCcuOverUsbSnRegularUpdateMessage_t smartNodeRegularUpdate)
@@ -111,7 +97,6 @@ public class Zone
         }
     }
     
-    
     @JsonIgnore
     public void removeNodeAndClearAssociations(Short selectedModule)
     {
@@ -124,9 +109,7 @@ public class Zone
         }
     }
     
-
     public HashSet<Short> getNodes()
-
     {
         HashSet<Short> addresses = new HashSet<Short>();
         for (ZoneProfile zp : mZoneProfiles)
@@ -136,12 +119,10 @@ public class Zone
         return addresses;
     }
     
-    
     public HashMap<String, Object> getTuningParameters()
     {
         return mTuningParameters;
     }
-    
     
     public void setTuningParameters(HashMap<String, Object> tuningParameters)
     {

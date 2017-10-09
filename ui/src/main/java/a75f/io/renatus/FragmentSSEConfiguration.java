@@ -40,6 +40,7 @@ import a75f.io.bo.building.sse.SingleStageLogicalMap;
 import a75f.io.logic.L;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import rx.Single;
 
 import static a75f.io.logic.L.ccu;
 
@@ -202,8 +203,8 @@ public class FragmentSSEConfiguration extends BaseDialogFragment implements Comp
     private void setUpTestTriggers()
     {
         final Zone testZone = new Zone();
-        final LightProfile testLightProfile = (LightProfile) testZone.findProfile(ProfileType.LIGHT);
-        testLightProfile.setCircuitTest(true);
+        final SingleStageProfile testSingleStage = (SingleStageProfile) testZone.findProfile(ProfileType.SSE);
+        testSingleStage.setCircuitTest(true);
         lcmRelay1Override = (ToggleButton) view.findViewById(R.id.testr1);
         lcmRelay2Override = (ToggleButton) view.findViewById(R.id.testr2);
         //TODO why is analog min a tuner???
@@ -213,7 +214,7 @@ public class FragmentSSEConfiguration extends BaseDialogFragment implements Comp
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
             {
                 BaseProfileConfiguration baseProfileConfiguration = new BaseProfileConfiguration();
-                bindData(baseProfileConfiguration , testLightProfile, true);
+                bindData(baseProfileConfiguration , testSingleStage, true);
                 L.sendTestMessage(mSmartNodeAddress, testZone);
             }
         };
@@ -332,7 +333,7 @@ public class FragmentSSEConfiguration extends BaseDialogFragment implements Comp
     public void showEditLogicalNameDialog(final EditText etext, final int id)
     {
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(getActivity(), R.style.NewDialogStyle);
-        alertBuilder.setTitle("Assign Name for this Lighting Circuit");
+        alertBuilder.setTitle("SSE Parameters");
         alertBuilder.setCancelable(false);
         LayoutInflater inflater = LayoutInflater.from(getActivity());
         final View view = inflater.inflate(R.layout.edit_circuit_name_dialog, null);

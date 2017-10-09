@@ -36,11 +36,14 @@ import a75f.io.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.bo.building.definitions.Port;
 import a75f.io.bo.building.definitions.ProfileType;
+import a75f.io.bo.building.definitions.ScheduleMode;
 import a75f.io.logic.L;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.FloorPlanFragment;
 import a75f.io.renatus.R;
+
+import static a75f.io.logic.L.ccu;
 
 /**
  * Created by anilkumar isOn 27-10-2016.
@@ -214,6 +217,11 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
                         new LightProfileConfiguration();
                 LightProfile mLightProfile = (LightProfile) mZone.findProfile(ProfileType.LIGHT);
                 bindData(lightProfileConfiguration, mLightProfile, false);
+                if (!mLightProfile.hasSchedules())
+                {
+                    mLightProfile
+                            .addSchedules(ccu().getDefaultLightSchedule(), ScheduleMode.ZoneSchedule);
+                }
                 L.saveCCUState();
                 getActivity()
                         .sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
@@ -239,8 +247,7 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
         final LightProfile testLightProfile =
                 (LightProfile) testZone.findProfile(ProfileType.LIGHT);
         testLightProfile.setCircuitTest(true);
-        final LightProfileConfiguration testLightProfileConfiguration =
-                new LightProfileConfiguration();
+
         //TODO: if they close dialog how do we remove seed from CM?
         lcmRelay1Override = (ToggleButton) view.findViewById(R.id.testr1);
         lcmRelay2Override = (ToggleButton) view.findViewById(R.id.testr2);
@@ -265,6 +272,8 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
                     public void onItemSelected(AdapterView<?> parent, View view, int position,
                                                long id)
                     {
+                        final LightProfileConfiguration testLightProfileConfiguration =
+                                new LightProfileConfiguration();
                         bindData(testLightProfileConfiguration, testLightProfile, true);
                         L.sendTestMessage(mSmartNodeAddress, testZone);
                     }
@@ -281,6 +290,8 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
                     @Override
                     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
                     {
+                        final LightProfileConfiguration testLightProfileConfiguration =
+                                new LightProfileConfiguration();
                         bindData(testLightProfileConfiguration, testLightProfile, true);
                         L.sendTestMessage(mSmartNodeAddress, testZone);
                     }

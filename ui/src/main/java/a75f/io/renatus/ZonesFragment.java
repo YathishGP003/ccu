@@ -1,11 +1,15 @@
 package a75f.io.renatus;
 
+import android.content.DialogInterface;
 import android.content.res.XmlResourceParser;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.SwitchCompat;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -23,6 +27,7 @@ import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -35,6 +40,8 @@ import a75f.io.bo.building.LightProfile;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.ZoneProfile;
 import a75f.io.bo.building.definitions.ProfileType;
+import a75f.io.bo.building.definitions.ScheduleMode;
+import a75f.io.logic.L;
 import a75f.io.renatus.VIEWS.SeekArcWidget;
 import a75f.io.renatus.VIEWS.ZoneImageWidget;
 
@@ -74,6 +81,7 @@ public class ZonesFragment extends Fragment
     private AttributeSet attributeSet;
     private int          room_width;
     private int          room_height;
+    private int          eSelectedMode;
     private LinearLayout roomRow;
     private LinearLayout mLightingRow   = null;
     private View         mLcmHeaderView = null;
@@ -85,15 +93,15 @@ public class ZonesFragment extends Fragment
                 public void onProgressChanged(SeekArcWidget seekArc, int progress, boolean fromUser)
                 {
                 }
-
-
+                
+                
                 @Override
                 public void onStartTrackingTouch(SeekArcWidget seekArc)
                 {
                     mDesiredTempScrolling = true;
                 }
-
-
+                
+                
                 @Override
                 public void onStopTrackingTouch(final SeekArcWidget seekArc)
                 {
@@ -115,7 +123,7 @@ public class ZonesFragment extends Fragment
     private ZoneImageWidget.OnClickListener       zoneWidgetListener    =
             new ZoneImageWidget.OnClickListener()
             {
-
+                
                 @Override
                 public void onClick(ZoneImageWidget w)
                 {
@@ -176,7 +184,6 @@ public class ZonesFragment extends Fragment
                             w.setSelected(true);
                             if (w.getProfile() instanceof LightProfile)
                             {
-
                                 roomButtonGrid.addView(mLightingRow, nDetailsLoc);
                                 UpdateRoomLightingWidget((LightProfile) w.getProfile(), false);
                                 //mLightingRow.startAnimation(in);
@@ -200,21 +207,21 @@ public class ZonesFragment extends Fragment
                     }
                 }
             };
-
-
+    
+    
     public ZonesFragment()
     {
         seekArcWidgetList = new ArrayList<>();
         zoneWidgetList = new ArrayList<>();
     }
-
-
+    
+    
     public static ZonesFragment newInstance()
     {
         return new ZonesFragment();
     }
-
-
+    
+    
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState)
@@ -226,8 +233,8 @@ public class ZonesFragment extends Fragment
         Log.e("ZONE", "FINISHED ONCREATEVIEW");
         return inflate;
     }
-
-
+    
+    
     @Override
     public void onStart()
     {
@@ -261,13 +268,13 @@ public class ZonesFragment extends Fragment
         roomButtonGrid = (LinearLayout) getView().findViewById(R.id.roomButtonGrid);
         drawer_screen = (LinearLayout) getView().findViewById(R.id.drawer_screen);
         /*show_weather = (SwitchCompat) getView().findViewById(R.id.show_weather);
-		show_weather.setClickable(false);
+        show_weather.setClickable(false);
 		show_weather.setOnCheckedChangeListener(this);*/
         attributeSet = getSeekbarXmlAttributes();
         Log.e("ZONE", "END ONSTART");
     }
-
-
+    
+    
     @Override
     public void onResume()
     {
@@ -278,8 +285,8 @@ public class ZonesFragment extends Fragment
         floorDataAdapter.setSelectedItem(mCurFloorIndex);
         Log.e("ZONE", "END onResume");
     }
-
-
+    
+    
     public void fillZoneData()
     {
         ArrayList<Floor> floorList = ccu().getFloors();
@@ -309,8 +316,8 @@ public class ZonesFragment extends Fragment
             }
         }
     }
-
-
+    
+    
     private AttributeSet getSeekbarXmlAttributes()
     {
         AttributeSet as = null;
@@ -342,16 +349,16 @@ public class ZonesFragment extends Fragment
         while (state != XmlPullParser.END_DOCUMENT);
         return as;
     }
-
-
+    
+    
     private void createDetailsWidget(LayoutInflater inflater)
     {
         mLightingRow = (LinearLayout) inflater.inflate(R.layout.zone_detail_list, null);
         mLightsDetailsView = (ListView) mLightingRow.findViewById(R.id.lighting_detail_list);
     }
-
-
-    public void UpdateRoomLightingWidget(LightProfile roomData, Boolean lcmdabfsv)
+    
+    
+    public void UpdateRoomLightingWidget(final LightProfile roomData, Boolean lcmdabfsv)
     {
         mLightsDetailsView.setAdapter(null);
         if (mLcmHeaderView != null)
@@ -366,38 +373,45 @@ public class ZonesFragment extends Fragment
             ImageView occupied = (ImageView) header.findViewById(R.id.imageOccupied);
             ImageView lcmHeaderNamedSchEdit =
                     (ImageView) header.findViewById(R.id.lcmHeaderNamedSchEdit);
-            //if(roomData.getLCMSchedulingMode().ordinal() == RoomData.LCM_ZONE_SCHEDULE_MODE.NAMED.ordinal()){
-            lcmHeaderNamedSchEdit.setVisibility(View.VISIBLE);
-				/*lcmHeaderNamedSchEdit.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						showLCMNamedScheduleSelector(roomData);
-					}
-				});*/
-            //}
+
+                lcmHeaderNamedSchEdit.setVisibility(View.VISIBLE);
+                lcmHeaderNamedSchEdit.setOnClickListener(new View.OnClickListener()
+                {
+                    @Override
+                    public void onClick(View v)
+                    {
+                        Toast.makeText(ZonesFragment.this.getContext(),
+                                "onclick " + "lcmheadernamedSchEdit", Toast.LENGTH_LONG).show();
+                        showLCMLightScheduleFragment(getFloorForLightProfile(roomData),
+                                getZoneForLightProfile(roomData), roomData);
+                    }
+                });
+            
             Spinner spinnerSchedule = (Spinner) header.findViewById(R.id.spinnerSchedule);
             ArrayAdapter<CharSequence> aaOccupancyMode = ArrayAdapter
                                                                  .createFromResource(getActivity()
                                                                                              .getApplicationContext(), R.array.scheduleLCM, R.layout.spinner_item);
             aaOccupancyMode.setDropDownViewResource(R.layout.spinner_dropdown_item);
             spinnerSchedule.setAdapter(aaOccupancyMode);
-            //spinnerSchedule.setSelection(roomData.getLCMSchedulingMode().ordinal());
+            spinnerSchedule.setOnItemSelectedListener(null);
+            spinnerSchedule.setSelection(roomData.getScheduleMode() == ScheduleMode.ZoneSchedule
+                                                 ? 0 : 1);
             spinnerSchedule.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
             {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
                 {
-					/*RoomData.LCM_ZONE_SCHEDULE_MODE eSelectedMode = RoomData.LCM_ZONE_SCHEDULE_MODE.values()[position];
-					if( (roomData.getLCMSchedulingMode() != eSelectedMode)) {
-						if (eSelectedMode == RoomData.LCM_ZONE_SCHEDULE_MODE.NAMED) {
-							showLCMNamedScheduleSelector(roomData);
-						} else {
-							roomData.setLCMScheduleMode(eSelectedMode, true);
-						}
-					}*/
+                    if (position == 1)
+                    {
+                        showLCMNamedScheduleSelector(roomData);
+                    }
+                    else if (position == 0)
+                    {
+                        roomData.setScheduleMode(ScheduleMode.ZoneSchedule);
+                    }
                 }
-
-
+                
+                
                 @Override
                 public void onNothingSelected(AdapterView<?> parent)
                 {
@@ -407,47 +421,86 @@ public class ZonesFragment extends Fragment
             mLcmHeaderView = header;
         }
         boolean expand = roomData == null ? false : true;
-		LightingDetailAdapter adapter =
-				new LightingDetailAdapter(getActivity(), mLightsDetailsView, roomData,
-                                                 getFloorForLightProfile(roomData),
-                                                 getZoneForLightProfile(roomData),
-                                                 expand);
-		mLightsDetailsView.setAdapter(adapter);
+        LightingDetailAdapter adapter =
+                new LightingDetailAdapter(getActivity(), mLightsDetailsView, roomData, getFloorForLightProfile(roomData), getZoneForLightProfile(roomData), expand);
+        mLightsDetailsView.setAdapter(adapter);
         new LayoutHelper(getActivity()).setListViewParams(mLightsDetailsView, null, 0, 0, expand);
     }
-
+    
+    
+    private void showLCMNamedScheduleSelector(final ZoneProfile zoneProfile)
+    {
+        final ArrayList<String> strings =
+                new ArrayList<String>(ccu().getLCMNamedSchedules().keySet());
+        CharSequence[] charSequences = new CharSequence[strings.size()];
+        for (int i = 0; i < strings.size(); i++)
+        {
+            charSequences[i] = strings.get(i);
+        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("Named Schedule")
+               .setItems(charSequences, new DialogInterface.OnClickListener()
+               {
+                   public void onClick(DialogInterface dialog, int which)
+                   {
+                       zoneProfile.setNamedSchedule(strings.get(which));
+                       L.saveCCUState();
+                   }
+               });
+        builder.create().show();
+    }
+    
+    
+    private void showLCMLightScheduleFragment(Floor floor, Zone zone, ZoneProfile zoneProfile)
+    {
+        showDialogFragment(LightScheduleFragment
+                                   .newZoneProfileInstance(floor, zone, zoneProfile),
+                LightScheduleFragment.ID);
+    }
+    
+    
     private Floor getFloorForLightProfile(ZoneProfile zoneProfile)
     {
-        for(Floor f : ccu().getFloors())
+        for (Floor f : ccu().getFloors())
         {
-            for(Zone z : f.mRoomList)
+            for (Zone z : f.mRoomList)
             {
-
-                if(z.findProfile(ProfileType.LIGHT).equals(zoneProfile))
+                if (z.findProfile(ProfileType.LIGHT).equals(zoneProfile))
                 {
                     return f;
                 }
             }
-
         }
         return null;
     }
-
-
+    
+    
     private Zone getZoneForLightProfile(ZoneProfile zoneProfile)
     {
-        for(Floor f : ccu().getFloors())
+        for (Floor f : ccu().getFloors())
         {
-            for(Zone z : f.mRoomList)
+            for (Zone z : f.mRoomList)
             {
-
-                if(z.findProfile(ProfileType.LIGHT).equals(zoneProfile))
+                if (z.findProfile(ProfileType.LIGHT).equals(zoneProfile))
                 {
                     return z;
                 }
             }
-
         }
         return null;
+    }
+    
+    
+    protected void showDialogFragment(DialogFragment dialogFragment, String id)
+    {
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        Fragment prev = getFragmentManager().findFragmentByTag(id);
+        if (prev != null)
+        {
+            ft.remove(prev);
+        }
+        ft.addToBackStack(null);
+        // Create and show the dialog.
+        dialogFragment.show(ft, id);
     }
 }

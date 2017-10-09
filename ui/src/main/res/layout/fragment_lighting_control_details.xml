@@ -79,6 +79,59 @@
                     android:textStyle="bold" />
             </TableRow>
 
+            <TableRow
+                android:layout_width="match_parent"
+                android:height="35dp"
+                android:gravity="top|center">
+
+                <android.support.v7.widget.SwitchCompat
+                    android:id="@+id/lcmAnalog1OutSwitch"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top"
+                    android:layout_weight="0.1" />
+
+                <Spinner
+                    android:id="@+id/lcmAnalog1OutActuator"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.3"
+                    android:gravity="center"
+                    android:text="Actuator Type"
+                    android:textSize="@dimen/text_small_xlarge" />
+
+                <EditText
+                    android:id="@+id/lcmAnalog1OutEditName"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.3"
+                    android:gravity="center"
+                    android:focusable="false"
+                    android:clickable="false"
+                    android:textSize="@dimen/text_small_xlarge" />
+
+                <ImageView
+                    android:id="@+id/lcmAnalog1OutEditImg"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.1"
+                    android:layout_gravity="center"
+                    android:src="@drawable/content_edit" />
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="45dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_weight="0.2"
+                    android:gravity="center">
+                    <Spinner
+                        android:id="@+id/testAna1out"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:textSize="@dimen/text_small_xlarge" />
+                </LinearLayout>
+            </TableRow>
 
             <TableRow
                 android:layout_width="match_parent"
@@ -135,59 +188,6 @@
                 </LinearLayout>
             </TableRow>
 
-            <TableRow
-                android:layout_width="match_parent"
-                android:height="35dp"
-                android:gravity="top|center">
-
-                <android.support.v7.widget.SwitchCompat
-                    android:id="@+id/lcmAnalog1OutSwitch"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="top"
-                    android:layout_weight="0.1" />
-
-                <Spinner
-                    android:id="@+id/lcmAnalog1OutActuator"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.3"
-                    android:gravity="center"
-                    android:text="Actuator Type"
-                    android:textSize="@dimen/text_small_xlarge" />
-
-                <EditText
-                    android:id="@+id/lcmAnalog1OutEditName"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.3"
-                    android:gravity="center"
-                    android:focusable="false"
-                    android:clickable="false"
-                    android:textSize="@dimen/text_small_xlarge" />
-
-                <ImageView
-                    android:id="@+id/lcmAnalog1OutEditImg"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.1"
-                    android:layout_gravity="center"
-                    android:src="@drawable/content_edit" />
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="45dp"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="10dp"
-                    android:layout_weight="0.2"
-                    android:gravity="center">
-                    <Spinner
-                        android:id="@+id/testAna1out"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:textSize="@dimen/text_small_xlarge" />
-                </LinearLayout>
-            </TableRow>
 
             <TableRow
                 android:layout_width="match_parent"

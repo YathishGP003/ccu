@@ -234,18 +234,4 @@ public class Schedule
         boolean isCurrentTimeInSchedule = isInSchedule(MockTime.getInstance().getMockTime());
         return isOverrideTimeInSchedule != isCurrentTimeInSchedule;
     }
-    
-    @JsonIgnore
-    public Day getCurrentSchedule()
-    {
-        long mockTime = MockTime.getInstance().getMockTime();
-        for (int i = 0; i < getScheduledIntervals().size(); i++)
-        {
-            if (getScheduledIntervals().get(i).contains(mockTime))
-            {
-                return days.get(i);
-            }
-        }
-        return null;
-    }
 }

@@ -10,7 +10,11 @@ import a75f.io.bo.building.CCUApplication;
 import a75f.io.bo.building.LightProfile;
 import a75f.io.bo.building.Node;
 import a75f.io.bo.building.Output;
+import a75f.io.bo.building.Schedulable;
+import a75f.io.bo.building.Schedule;
 import a75f.io.bo.building.Zone;
+
+import static a75f.io.logic.LZoneProfile.isNamedSchedule;
 
 /**
  * Created by Yinten isOn 9/4/2017.
@@ -96,6 +100,12 @@ public class L
     }
     
     
+    ////Schedules////
+    
+    
+    
+    
+    
     private static void sync()
     {
         //seed all ccus
@@ -123,5 +133,20 @@ public class L
     public static int resolveZoneProfileLogicalValue(LightProfile profile, Output snOutput)
     {
         return LZoneProfile.resolveZoneProfileLogicalValue(profile, snOutput);
+    }
+    
+    
+    public static ArrayList<Schedule> resolveSchedules(Schedulable schedulable)
+    {
+        if(isNamedSchedule(schedulable))
+        {
+            return ccu().getLCMNamedSchedules().get(schedulable.getNamedSchedule()).getSchedule();
+        }
+        else if(schedulable.hasSchedules())
+        {
+            return schedulable.getSchedules();
+        }
+        
+        return null;
     }
 }

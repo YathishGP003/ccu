@@ -27,6 +27,13 @@
     <string name="unable_to_bluetooth">Unable to initialize bluetooth!</string>
 
 
+    <string-array name="sse_action_type">
+        <item> Cooling </item>
+        <item> Heating </item>
+        <item> Fan </item>
+        <item> Not Installed </item>
+    </string-array>
+
     <string-array name="lcm_relay">
         <item>  Normally Open </item>
         <item>  Normally Close </item>
@@ -49,8 +56,8 @@
     </string-array>
 
     <string-array name="mode">
-        <item >Smart</item>
-        <item >Manual</item>
+        <item>Smart</item>
+        <item>Manual</item>
     </string-array>
     <string-array name="schedule">
         <item>  System Schedule</item>

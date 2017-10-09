@@ -49,12 +49,22 @@
                     android:textSize="@dimen/text_small_xlarge"
                     android:textStyle="bold"/>
 
+
                 <TextView
                     android:gravity="center"
                     android:layout_height="wrap_content"
                     android:layout_weight="0.3"
                     android:layout_width="0dp"
                     android:text="Actuator Type"
+                    android:textSize="@dimen/text_small_xlarge"
+                    android:textStyle="bold"/>
+
+                <TextView
+                    android:id="@+id/textView28"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.1"
+                    android:layout_width="0dp"
+                    android:text="Action"
                     android:textSize="@dimen/text_small_xlarge"
                     android:textStyle="bold"/>
 
@@ -98,6 +108,15 @@
                     android:layout_weight="0.3"
                     android:layout_width="0dp"
                     android:text="Actuator Type"
+                    android:textSize="@dimen/text_small_xlarge"/>
+
+                <Spinner
+                    android:gravity="top|center"
+                    android:id="@+id/lcmRelay1HeatCoolFanSpinner"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.3"
+                    android:layout_width="0dp"
+                    android:text="Action"
                     android:textSize="@dimen/text_small_xlarge"/>
 
 
@@ -154,6 +173,15 @@
                     android:layout_weight="0.3"
                     android:layout_width="0dp"
                     android:text="Actuator Type"
+                    android:textSize="@dimen/text_small_xlarge"/>
+
+                <Spinner
+                    android:gravity="top|center"
+                    android:id="@+id/lcmRelay2HeatCoolFanSpinner"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.3"
+                    android:layout_width="0dp"
+                    android:text="Action"
                     android:textSize="@dimen/text_small_xlarge"/>
 
                 <EditText

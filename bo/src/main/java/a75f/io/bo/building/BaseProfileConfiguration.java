@@ -11,7 +11,7 @@ import a75f.io.bo.building.definitions.Port;
  * Created by Yinten on 9/29/2017.
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "clazz")
-public abstract class BaseProfileConfiguration
+public class BaseProfileConfiguration
 {
     
     protected short    mNodeAddress;

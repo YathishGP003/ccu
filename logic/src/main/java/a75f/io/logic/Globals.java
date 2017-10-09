@@ -163,6 +163,7 @@ class Globals
             namedSchedule.setSchedule(schedules);
             ccu().getLCMNamedSchedules().put(namedSchedule.getName(), namedSchedule);
             ccu().setDefaultLightSchedule(schedules);
+            ccu().setDefaultTemperatureSchedule(schedules);
         }
     }
 }

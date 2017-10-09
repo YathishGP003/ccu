@@ -28,14 +28,20 @@ import a75f.io.bo.building.LightProfile;
 import a75f.io.bo.building.LightProfileConfiguration;
 import a75f.io.bo.building.NodeType;
 import a75f.io.bo.building.Output;
+import a75f.io.bo.building.SingleStageProfile;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.ZoneProfile;
 import a75f.io.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.bo.building.definitions.Port;
 import a75f.io.bo.building.definitions.ProfileType;
+import a75f.io.bo.building.definitions.ScheduleMode;
+import a75f.io.bo.building.definitions.SingleStageMode;
+import a75f.io.bo.building.sse.SingleStageLogicalMap;
 import a75f.io.logic.L;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+
+import static a75f.io.logic.L.ccu;
 
 /**
  * Created by ryant on 9/27/2017.
@@ -44,7 +50,7 @@ import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 public class FragmentSSEConfiguration extends BaseDialogFragment implements CompoundButton.OnCheckedChangeListener, View.OnClickListener
 {
     
-    public static final  String ID  = FragmentSSEConfiguration.class.getSimpleName();
+    public static final String ID = FragmentSSEConfiguration.class.getSimpleName();
     
     View view;
     boolean mbIsInEditMode = false;
@@ -54,6 +60,8 @@ public class FragmentSSEConfiguration extends BaseDialogFragment implements Comp
     SwitchCompat relay2Switch;
     EditText     relay1EditText;
     EditText     relay2EditText;
+    Spinner      spRelay1Action;
+    Spinner      spRelay2Action;
     ImageView    editRelay1;
     ImageView    editRelay2;
     
@@ -109,6 +117,12 @@ public class FragmentSSEConfiguration extends BaseDialogFragment implements Comp
         relay2Switch = (SwitchCompat) view.findViewById(R.id.lcmRelay2Switch);
         relay1EditText = (EditText) view.findViewById(R.id.lcmRelay1EditName);
         relay2EditText = (EditText) view.findViewById(R.id.lcmRelay2EditName);
+        spRelay1Action = (Spinner) view.findViewById(R.id.lcmRelay1HeatCoolFanSpinner);
+        spRelay2Action = (Spinner) view.findViewById(R.id.lcmRelay2HeatCoolFanSpinner);
+        ArrayAdapter sseActionType = ArrayAdapter.createFromResource(getActivity(), R.array.sse_action_type, R.layout.spinner_dropdown_item);
+        sseActionType.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        spRelay1Action.setAdapter(sseActionType);
+        spRelay2Action.setAdapter(sseActionType);
         relay1Adapter = ArrayAdapter.createFromResource(getActivity(), R.array.lcm_relay, R.layout.spinner_dropdown_item);
         relay1Adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         spRelay1.setAdapter(relay1Adapter);
@@ -128,9 +142,26 @@ public class FragmentSSEConfiguration extends BaseDialogFragment implements Comp
             @Override
             public void onClick(View v)
             {
-                SSEProfileConfiguration sseProfileConfiguration = new SSEProfileConfiguration();
-                SSEProfilex`1 mLightProfile = (LightProfile) mZone.findProfile(ProfileType.LIGHT);
-                bindData(lightProfileConfiguration, mLightProfile, false);
+                BaseProfileConfiguration baseProfileConfiguration = new BaseProfileConfiguration();
+                SingleStageProfile mSingleStageProfile = (SingleStageProfile) mZone.findProfile(ProfileType.SSE);
+                bindData(baseProfileConfiguration, mSingleStageProfile, false);
+                SingleStageLogicalMap singleStageLogicalMap = null;
+                if(mSingleStageProfile.getLogicalMap().containsKey(mSmartNodeAddress))
+                {
+                    singleStageLogicalMap = mSingleStageProfile.getLogicalMap().get(mSmartNodeAddress);
+                }
+                else
+                {
+                    singleStageLogicalMap = new SingleStageLogicalMap();
+                    mSingleStageProfile.getLogicalMap().put(mSmartNodeAddress, singleStageLogicalMap);
+                }
+                
+                singleStageLogicalMap.getLogicalMap().put(Port.RELAY_ONE, getSingleStageMode(spRelay1Action));
+                singleStageLogicalMap.getLogicalMap().put(Port.RELAY_TWO, getSingleStageMode(spRelay2Action));
+                
+                mSingleStageProfile.setScheduleMode(ScheduleMode.SystemSchedule);
+                mSingleStageProfile.setSchedules(ccu().getDefaultTemperatureSchedule());
+                
                 L.saveCCUState();
                 getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
                 FragmentSSEConfiguration.this.closeAllBaseDialogFragments();
@@ -148,23 +179,41 @@ public class FragmentSSEConfiguration extends BaseDialogFragment implements Comp
         return view;
     }
     
+    private SingleStageMode getSingleStageMode(Spinner modeSpinner)
+    {
+        if (modeSpinner.getSelectedItemPosition() == 0)
+        {
+            return SingleStageMode.COOLING;
+        }
+        else if (modeSpinner.getSelectedItemPosition() == 1)
+        {
+            return SingleStageMode.HEATING;
+        }
+        else if (modeSpinner.getSelectedItemPosition() == 2)
+        {
+            return SingleStageMode.FAN;
+        }
+        else
+        {
+            return SingleStageMode.NOT_INSTALLED;
+        }
+    }
+    
     private void setUpTestTriggers()
     {
         final Zone testZone = new Zone();
         final LightProfile testLightProfile = (LightProfile) testZone.findProfile(ProfileType.LIGHT);
         testLightProfile.setCircuitTest(true);
-        final LightProfileConfiguration testLightProfileConfiguration = new LightProfileConfiguration();
-        //TODO: if they close dialog how do we remove seed from CM?
         lcmRelay1Override = (ToggleButton) view.findViewById(R.id.testr1);
         lcmRelay2Override = (ToggleButton) view.findViewById(R.id.testr2);
         //TODO why is analog min a tuner???
-        //lcmAnalog1OutOverride.setSelection();
         CompoundButton.OnCheckedChangeListener onCheckChangedListener = new CompoundButton.OnCheckedChangeListener()
         {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
             {
-                bindData(testLightProfileConfiguration, testLightProfile, true);
+                BaseProfileConfiguration baseProfileConfiguration = new BaseProfileConfiguration();
+                bindData(baseProfileConfiguration , testLightProfile, true);
                 L.sendTestMessage(mSmartNodeAddress, testZone);
             }
         };
@@ -220,7 +269,7 @@ public class FragmentSSEConfiguration extends BaseDialogFragment implements Comp
         }
         zoneProfile.getProfileConfiguration().put(mSmartNodeAddress, zoneProfileConfiguration);
     }
-  
+    
     @Override
     public String getIdString()
     {

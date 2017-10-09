@@ -7,6 +7,7 @@ import java.util.Set;
 
 import a75f.io.bo.building.definitions.ProfileType;
 import a75f.io.bo.building.definitions.SingleStageMode;
+import a75f.io.bo.building.sse.SingleStageLogicalMap;
 import a75f.io.bo.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 
 /**
@@ -15,13 +16,10 @@ import a75f.io.bo.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 
 public class SingleStageProfile extends ZoneProfile
 {
-
-
+    
     //There can be multiple single stage profiles in a zone.
     //We need to keep track of if they are heating, cooling, or non-functional.
-    HashMap<Short, SingleStageMode> mSingleStageModeHashMap = new HashMap<>();
-
-    private float mRoomTemperature;
+    HashMap<Short, SingleStageLogicalMap> mLogicalMap = new HashMap<>();
     //SSE works independtly just an aggregator for the smart node.
     //Relay 1 is heating or cooling
     //Relay 2 is fan
@@ -29,84 +27,34 @@ public class SingleStageProfile extends ZoneProfile
     //If the heating or cooling is on, fan must be on.
     //Multiple smart nodes can be in the zone.  The smart node should be assigned to heating or
     // cooling.
-
-
     
-
-
     @Override
     public void mapRegularUpdate(CmToCcuOverUsbSnRegularUpdateMessage_t regularUpdateMessage)
     {
-        mRoomTemperature = (float) regularUpdateMessage.update.roomTemperature.get() / 2.0f;
-        Log.i("SingleStageProfile",
-                "SingleStageProfile RoomTemperature Update: " + mRoomTemperature + "");
+        float roomTemperature = (float) regularUpdateMessage.update.roomTemperature.get() / 2.0f;
+        mLogicalMap.get(Short.valueOf((short) regularUpdateMessage.update.smartNodeAddress.get())).setRoomTemperature(roomTemperature);
+        Log.i("SingleStageProfile", "SingleStageProfile RoomTemperature Update: " + roomTemperature + "");
     }
-
-
-//
-//    public float getRoomTemperature()
-//    {
-//        return mRoomTemperature;
-//    }
-
-
-    public void setRoomTemperature(float roomTemperature)
-    {
-        this.mRoomTemperature = roomTemperature;
-    }
-
-
-
-
-    public int getHeatingDeadband()
-    {
-        //TODO: tuning
-        return 1; //AlgoTuningParameters.SSE_Heating_Deadband;
-    }
-
-
-    public int getCoolingDeadband()
-    {
-        //TODO: tuning
-        return 1; ///return AlgoTuningParameters.SSE_Cooling_Deadband;
-    }
-
-
-    public HashMap<Short, SingleStageMode> getSingleStageModeHashMap()
-    {
-        return mSingleStageModeHashMap;
-    }
-
-
-    public void setSingleStageModeHashMap(HashMap<Short, SingleStageMode> singleStageModeHashMap)
-    {
-        mSingleStageModeHashMap = singleStageModeHashMap;
-    }
-
-
+ 
+    
     @Override
     public ProfileType getProfileType()
     {
         return ProfileType.SSE;
     }
     
-    
     @Override
     public BaseProfileConfiguration getProfileConfiguration(short address)
     {
-        return null;
+        return mProfileConfiguration.get(address);
     }
     
-    
-    @Override
-    public Set<Short> getNodeAddresses()
+    public HashMap<Short, SingleStageLogicalMap> getLogicalMap()
     {
-        return null;
+        return mLogicalMap;
     }
-    
-    
-    @Override
-    public void removeProfileConfiguration(Short selectedModule)
+    public void setLogicalMap(HashMap<Short, SingleStageLogicalMap> logicalMap)
     {
+        this.mLogicalMap = logicalMap;
     }
 }

@@ -35,8 +35,10 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import a75f.io.bo.building.Circuit;
 import a75f.io.bo.building.Floor;
 import a75f.io.bo.building.LightProfile;
+import a75f.io.bo.building.Schedule;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.ZoneProfile;
 import a75f.io.bo.building.definitions.ProfileType;
@@ -45,6 +47,9 @@ import a75f.io.logic.L;
 import a75f.io.renatus.VIEWS.SeekArcWidget;
 import a75f.io.renatus.VIEWS.ZoneImageWidget;
 
+import static a75f.io.bo.building.definitions.ScheduleMode.CircuitSchedule;
+import static a75f.io.bo.building.definitions.ScheduleMode.NamedSchedule;
+import static a75f.io.bo.building.definitions.ScheduleMode.ZoneSchedule;
 import static a75f.io.logic.L.ccu;
 
 /**
@@ -401,11 +406,11 @@ public class ZonesFragment extends Fragment
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
                 {
-                    if (position == 1)
+                    if (position == 1 && roomData.getScheduleMode() != NamedSchedule)
                     {
                         showLCMNamedScheduleSelector(roomData);
                     }
-                    else if (position == 0)
+                    else if (position == 0 && roomData.getScheduleMode() != ZoneSchedule)
                     {
                         roomData.setScheduleMode(ScheduleMode.ZoneSchedule);
                     }

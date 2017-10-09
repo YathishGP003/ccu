@@ -9,6 +9,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -147,10 +148,13 @@ public class LightingDetailAdapter extends BaseAdapter
             viewHolder.spinnerSchedule.setOnItemSelectedListener(null);
             viewHolder.spinnerSchedule.setTag(position);
             viewHolder.spinnerSchedule.setAdapter(aaOccupancyMode);
-        
+            int logicalVal = L.resolveZoneProfileLogicalValue(profile, snOutput);
+            Log.i(TAG, "Position: " + position + " LogicalValue: " + logicalVal);
+                    
+            String brightnessVal = L.resolveZoneProfileLogicalValue(profile, snOutput) + "";
 
             viewHolder.spinnerSchedule.setSelection(snOutput.getScheduleMode().ordinal());
-            viewHolder.statusDetail.setText("status detail");
+            viewHolder.statusDetail.setText("Brightness Val: " + brightnessVal);
             if (schedule != null)
             {
                 schedule.setVisibility(View.VISIBLE);
@@ -158,21 +162,14 @@ public class LightingDetailAdapter extends BaseAdapter
             switch (snOutput.getOutputType())
             {
                 case Relay:
-                    if (LOutput.isOn(snOutput))
-                    {
-                        viewHolder.OnOffLight.setChecked(true);
-                    }
-                    else
-                    {
-                        viewHolder.OnOffLight.setChecked(false);
-                    }
+                        viewHolder.OnOffLight.setChecked(logicalVal != 0);
                     break;
                 case Analog:
                     viewHolder.brightness.setMax(100);
                     viewHolder.brightness
-                            .setProgress(L.resolveZoneProfileLogicalValue(profile, snOutput));
+                            .setProgress(logicalVal);
                     viewHolder.brightnessVal
-                            .setText(L.resolveZoneProfileLogicalValue(profile, snOutput) + "");
+                            .setText(logicalVal + "");
                     break;
             }
 //            switch (snOutput.getPort())
@@ -264,6 +261,7 @@ public class LightingDetailAdapter extends BaseAdapter
             onOff.setThumbDrawable(switchStates);*/
             onOff.setOnCheckedChangeListener(onCheckedChangeListener);
             SeekBar brightnessControl = (SeekBar) row.findViewById(R.id.brightness);
+        
             final TextView val = (TextView) row.findViewById(R.id.brightnessVal);
             brightnessControl.setTag(position);
             val.setTag(position);

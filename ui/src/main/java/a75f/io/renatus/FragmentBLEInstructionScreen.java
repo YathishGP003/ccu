@@ -27,9 +27,6 @@ import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.FLOOR_NAME;
 import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.NODE_TYPE;
 import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.PROFILE_TYPE;
 
-/**
- * Created by ryant on 9/28/2017.
- */
 
 public class FragmentBLEInstructionScreen extends BaseDialogFragment
 {
@@ -100,7 +97,7 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
             if (L.isSimulation())
             {
                 showDialogFragment(FragmentSSEConfiguration
-                                           .newInstance(mNodeAddress, mRoomName, mFloorName), FragmentSSEConfiguration.ID);
+                                           .newInstance(mNodeAddress, mRoomName, mNodeType, mFloorName), FragmentSSEConfiguration.ID);
             }
             else
             {

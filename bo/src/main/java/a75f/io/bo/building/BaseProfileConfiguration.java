@@ -1,14 +1,17 @@
 package a75f.io.bo.building;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import java.util.ArrayList;
+
+import a75f.io.bo.building.definitions.Port;
 
 /**
  * Created by Yinten on 9/29/2017.
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "clazz")
-public abstract class BaseProfileConfiguration
+public class BaseProfileConfiguration
 {
     
     protected short    mNodeAddress;
@@ -55,5 +58,19 @@ public abstract class BaseProfileConfiguration
     public void setNodeAddress(short nodeAddress)
     {
         this.mNodeAddress = nodeAddress;
+    }
+    
+    @JsonIgnore
+    public Output findPort(Port port)
+    {
+        for(Output output :  mOutputs)
+        {
+            if(output.getPort().equals(port))
+            {
+                return output;
+            }
+        }
+        
+        return null;
     }
 }

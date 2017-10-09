@@ -11,16 +11,14 @@ import a75f.io.bo.building.definitions.ScheduleMode;
  * Created by Yinten on 9/21/2017.
  */
 
-public class Schedulable {
-
+public class Schedulable
+{
     
-
-    protected ArrayList<Schedule> mSchedules = new ArrayList<>();
+    protected String              mNamedSchedule = "";
+    protected ArrayList<Schedule> mSchedules     = new ArrayList<>();
     protected short mLogicalValue;
     protected OverrideType mOverrideType = OverrideType.NONE;
-    protected ScheduleMode mScheduleMode = ScheduleMode.SystemSchedule;
-    
-
+    protected ScheduleMode mScheduleMode = ScheduleMode.ZoneSchedule;
     
     /***
      * This value is used differently depending on the OverrideType
@@ -31,28 +29,41 @@ public class Schedulable {
      */
     @JsonIgnore
     protected long mOverrideMillis;
-
-
-
+    
+    
     @JsonIgnore
-    public boolean hasSchedules() {
-        return !mSchedules.isEmpty();
+    public boolean hasSchedules()
+    {
+        return !mSchedules.isEmpty() || (mNamedSchedule != null && !mNamedSchedule.equals(""));
     }
+    
+    
 
-
-    public short getLogicalValue() {
+    
+    
+    public void setNamedSchedule(String namedSchedule)
+    {
+        this.setScheduleMode(ScheduleMode.NamedSchedule);
+        this.mNamedSchedule = namedSchedule;
+    }
+    
+    
+    public short getLogicalValue()
+    {
         return mLogicalValue;
     }
-
-    public void setLogicalValue(short logicalValue) {
+    
+    
+    public void setLogicalValue(short logicalValue)
+    {
         this.mLogicalValue = mLogicalValue;
     }
     
     
-    public void addSchedules(ArrayList<Schedule> schedules, ScheduleMode circuitSchedule)
+    public void addSchedules(ArrayList<Schedule> schedules, ScheduleMode scheduleMode)
     {
         this.mSchedules = schedules;
-        this.mScheduleMode = circuitSchedule;
+        this.mScheduleMode = scheduleMode;
     }
     
     
@@ -105,18 +116,24 @@ public class Schedulable {
     
     
     @JsonIgnore
-    public void setOverride(long overrideTimeMillis, OverrideType overrideType, short val) {
+    public void setOverride(long overrideTimeMillis, OverrideType overrideType, short val)
+    {
         this.mOverrideType = overrideType;
         this.mOverrideMillis = overrideTimeMillis;
         this.mLogicalValue = val;
     }
     
     
-    public void removeOverride() {
+    public void removeOverride()
+    {
         this.mOverrideType = OverrideType.NONE;
         this.mOverrideMillis = 0;
         this.mLogicalValue = 0;
     }
     
     
+    public String getNamedSchedule()
+    {
+        return mNamedSchedule;
+    }
 }

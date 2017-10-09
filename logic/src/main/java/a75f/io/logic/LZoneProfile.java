@@ -13,8 +13,6 @@ import a75f.io.bo.building.ZoneProfile;
 import a75f.io.bo.building.definitions.MockTime;
 import a75f.io.bo.building.definitions.OverrideType;
 
-import static a75f.io.logic.L.ccu;
-
 /**
  * Created by Yinten on 9/10/2017.
  */
@@ -162,7 +160,7 @@ class LZoneProfile
         // override.
         if (schedulable.hasSchedules())
         {
-            return checkBoundCrossed(resolveSchedules(schedulable), schedulable
+            return checkBoundCrossed(L.resolveSchedules(schedulable), schedulable
                                                                                 .getOverrideMillis());
         }
         return false;
@@ -175,20 +173,7 @@ class LZoneProfile
         return schedulable.getOverrideMillis() > MockTime.getInstance().getMockTime();
     }
 
-    
-    public static ArrayList<Schedule> resolveSchedules(Schedulable schedulable)
-    {
-        if(isNamedSchedule(schedulable))
-        {
-            return ccu().getLCMNamedSchedules().get(schedulable.getNamedSchedule()).getSchedule();
-        }
-        else if(schedulable.hasSchedules())
-        {
-            return schedulable.getSchedules();
-        }
-        
-        return null;
-    }
+  
     
     public static Day getCurrentSchedule(Schedule schedule)
     {

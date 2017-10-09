@@ -5,7 +5,9 @@ import android.content.res.XmlResourceParser;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.SwitchCompat;
@@ -371,8 +373,7 @@ public class ZonesFragment extends Fragment
             ImageView occupied = (ImageView) header.findViewById(R.id.imageOccupied);
             ImageView lcmHeaderNamedSchEdit =
                     (ImageView) header.findViewById(R.id.lcmHeaderNamedSchEdit);
-            if (roomData.getScheduleMode() == ScheduleMode.NamedSchedule)
-            {
+
                 lcmHeaderNamedSchEdit.setVisibility(View.VISIBLE);
                 lcmHeaderNamedSchEdit.setOnClickListener(new View.OnClickListener()
                 {
@@ -381,17 +382,20 @@ public class ZonesFragment extends Fragment
                     {
                         Toast.makeText(ZonesFragment.this.getContext(),
                                 "onclick " + "lcmheadernamedSchEdit", Toast.LENGTH_LONG).show();
-                        showLCMNamedScheduleSelector(roomData);
+                        showLCMLightScheduleFragment(getFloorForLightProfile(roomData),
+                                getZoneForLightProfile(roomData), roomData);
                     }
                 });
-            }
+            
             Spinner spinnerSchedule = (Spinner) header.findViewById(R.id.spinnerSchedule);
             ArrayAdapter<CharSequence> aaOccupancyMode = ArrayAdapter
                                                                  .createFromResource(getActivity()
                                                                                              .getApplicationContext(), R.array.scheduleLCM, R.layout.spinner_item);
             aaOccupancyMode.setDropDownViewResource(R.layout.spinner_dropdown_item);
             spinnerSchedule.setAdapter(aaOccupancyMode);
-            spinnerSchedule.setSelection(roomData.getScheduleMode().ordinal());
+            spinnerSchedule.setOnItemSelectedListener(null);
+            spinnerSchedule.setSelection(roomData.getScheduleMode() == ScheduleMode.ZoneSchedule
+                                                 ? 0 : 1);
             spinnerSchedule.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
             {
                 @Override
@@ -447,6 +451,14 @@ public class ZonesFragment extends Fragment
     }
     
     
+    private void showLCMLightScheduleFragment(Floor floor, Zone zone, ZoneProfile zoneProfile)
+    {
+        showDialogFragment(LightScheduleFragment
+                                   .newZoneProfileInstance(floor, zone, zoneProfile),
+                LightScheduleFragment.ID);
+    }
+    
+    
     private Floor getFloorForLightProfile(ZoneProfile zoneProfile)
     {
         for (Floor f : ccu().getFloors())
@@ -476,5 +488,19 @@ public class ZonesFragment extends Fragment
             }
         }
         return null;
+    }
+    
+    
+    protected void showDialogFragment(DialogFragment dialogFragment, String id)
+    {
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        Fragment prev = getFragmentManager().findFragmentByTag(id);
+        if (prev != null)
+        {
+            ft.remove(prev);
+        }
+        ft.addToBackStack(null);
+        // Create and show the dialog.
+        dialogFragment.show(ft, id);
     }
 }

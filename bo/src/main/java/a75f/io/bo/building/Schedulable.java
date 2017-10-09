@@ -60,10 +60,10 @@ public class Schedulable
     }
     
     
-    public void addSchedules(ArrayList<Schedule> schedules, ScheduleMode circuitSchedule)
+    public void addSchedules(ArrayList<Schedule> schedules, ScheduleMode scheduleMode)
     {
         this.mSchedules = schedules;
-        this.mScheduleMode = circuitSchedule;
+        this.mScheduleMode = scheduleMode;
     }
     
     

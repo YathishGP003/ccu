@@ -70,7 +70,8 @@ public class SimulationRunner
      * Must be called from @Test method of SimulationTest
      */
     public void runSimulation() {
-        
+    
+        curTime = DateFormat.format("dd-MMMM-yyyy_hh:mm:ss", (System.currentTimeMillis()-15000)).toString();
         injectState(appState);
         
         for (int simIndex = 1; simIndex < csvDataList.size(); simIndex ++) {
@@ -80,9 +81,10 @@ public class SimulationRunner
             }
             injectSimulation(simData);
     
-            addTestLog();//TODO - should wait ?
+            
         }
-        
+        threadSleep(60);
+        addTestLog();//TODO - should wait ?
     }
     
     private void injectState(CCUApplication state) {
@@ -99,17 +101,15 @@ public class SimulationRunner
     {
         final String TIME_FORMAT = "hh:mm:ss";
         SimpleDateFormat sdf = new SimpleDateFormat(TIME_FORMAT, Locale.getDefault());
-        curTime = DateFormat.format("dd-MMMM-yyyy_hh:mm:ss", System.currentTimeMillis()).toString();
         try
         {
             Date d = sdf.parse(testVals[0]);
             int waitTime = d.getHours()*3600+d.getMinutes()*60+d.getSeconds() - secondsElapsed;
             threadSleep(waitTime);
             secondsElapsed += waitTime;
-            
             SimulationParams params  = new SimulationParams().build(testVals);
             String paramsJson = params.convertToJsonString();
-            excutePost("http://10.0.2.2:5000/state/smartnode?address="+testVals[1].trim(), getHttpPostParams(paramsJson) );
+            executePost("http://10.0.2.2:5000/state/smartnode?address="+testVals[1].trim(), getHttpPostParams(paramsJson) );
         }
         catch (ParseException e)
         {
@@ -142,7 +142,7 @@ public class SimulationRunner
         return urlParameters.toString();
     }
     
-    private String excutePost(String targetURL, String urlParameters)
+    private String executePost(String targetURL, String urlParameters)
     {
         URL url;
         HttpURLConnection connection = null;
@@ -274,9 +274,9 @@ public class SimulationRunner
         //http://localhost:5000/log/smartnode?address=2000&since=05-April-2017_17:00:40&limit_results=1
         for(int node = 0; node < mNodes.size();node++)
         {
-            excutePost("http://10.0.2.2:5000/nodetype/", getSmartnodeType());
-            String params = getResult("http://10.0.2.2:5000/log/smartnode?address=" + mNodes.get(node) + "&since=" + curTime + "&limit_results=1");
-    
+            //executePost("http://10.0.2.2:5000/nodetype/", getSmartnodeType());
+            //String params = getResult("http://10.0.2.2:5000/log/smartnode?address=" + mNodes.get(node) + "&since=" + curTime + "&limit_results=1");
+            String params = getResult("http://10.0.2.2:5000/log/smartnode?address=" + mNodes.get(node) + "&since=" + curTime);
             try
             {
                 JSONArray jsonArray = new JSONArray(params);

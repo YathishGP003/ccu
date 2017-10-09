@@ -37,6 +37,12 @@ public class LightControlSimulationTest extends BaseSimulationTest
     
     @Override
     public TestResult analyzeTestResults(SimulationTestInfo testLog) {
+    
+        for (SmartNodeParams param : testLog.nodeParams) {
+            if (param.lighting_control_enabled == 0) {
+                return TestResult.FAIL;
+            }
+        }
         return TestResult.PASS;
     }
     

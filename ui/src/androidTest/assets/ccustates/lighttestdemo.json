@@ -50,7 +50,7 @@
         "schedules" : [ {
           "days" : [ {
             "day" : 1,
-            "sthh" : 17,
+            "sthh" : 9,
             "stmm" : 0,
             "ethh" : 17,
             "etmm" : 30,

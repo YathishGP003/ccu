@@ -21,8 +21,7 @@ public class CCUApplication
     /*
         Named Schedules
      */
-    private ArrayList<NamedSchedule> mLCMNamedSchedules = new ArrayList<NamedSchedule>();
-    private ArrayList<NamedSchedule> mTempNamedSchedules = new ArrayList<NamedSchedule>();
+    private HashMap<String, NamedSchedule> mLCMNamedSchedules = new HashMap<>();
     
     private  HashMap<String, Object> mDefaultCCUTuners = new HashMap<>();
     public  SystemProfile           systemProfile    = new SystemProfile();
@@ -148,26 +147,15 @@ public class CCUApplication
     }
     
     
-    public ArrayList<NamedSchedule> getLCMNamedSchedules()
+    public HashMap<String, NamedSchedule> getLCMNamedSchedules()
     {
         return mLCMNamedSchedules;
     }
     
     
-    public void setLCMNamedSchedules(ArrayList<NamedSchedule> namedSchedules)
+    public void setLCMNamedSchedules(HashMap<String, NamedSchedule> namedSchedules)
     {
         this.mLCMNamedSchedules = namedSchedules;
     }
     
-    
-    public ArrayList<NamedSchedule> getTempNamedSchedules()
-    {
-        return mTempNamedSchedules;
-    }
-    
-    
-    public void setTempNamedSchedules(ArrayList<NamedSchedule> mTempNamedSchedules)
-    {
-        this.mTempNamedSchedules = mTempNamedSchedules;
-    }
 }

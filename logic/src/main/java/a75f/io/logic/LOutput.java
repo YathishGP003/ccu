@@ -13,15 +13,6 @@ public class LOutput
     
     public static boolean isOn(Output output)
     {
-        boolean retVal = false;
-        if (getScheduledVal(output) == 100)
-        {
-            retVal = true;
-        }
-        else
-        {
-            retVal = false;
-        }
-        return retVal;
+        return getScheduledVal(output) != 0;
     }
 }

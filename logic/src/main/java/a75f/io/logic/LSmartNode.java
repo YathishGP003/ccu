@@ -112,11 +112,13 @@ class LSmartNode
                     switch (zp.getProfileType())
                     {
                         case LIGHT:
-                            outputMapped = zp.isCircuitTest() ? output.getTestVal()
+                            outputMapped = zp.isCircuitTest() ? mapRawValue(output, output
+                                                                                            .getTestVal())
                                                    : mapLightCircuit(zone, zp, output);
                             break;
                         case SSE:
-                            outputMapped = zp.isCircuitTest() ? output.getTestVal()
+                            outputMapped = zp.isCircuitTest() ? mapRawValue(output, output
+                                                                                            .getTestVal())
                                                    : mapLightCircuit(zone, zp, output);
                             break;
                         case GENERIC:
@@ -163,14 +165,20 @@ class LSmartNode
         short dimmablePercent = resolveZoneProfileLogicalValue(zoneProfile, output);
         //The smartnode circuit is in override mode, check to see if a schedule hasn't crossed a
         // bound.  If a schedule did cross a bound remove the override and continue.
+        return mapRawValue(output, dimmablePercent);
+    }
+    
+    public static short mapRawValue(Output output, short rawValue)
+    {
         switch (output.getOutputType())
         {
             case Relay:
-                return output.mapDigital(dimmablePercent != 0);
+                return output.mapDigital(rawValue != 0);
             case Analog:
-                return output.mapAnalog(dimmablePercent);
+                return output.mapAnalog(rawValue);
         }
-        return (short) 0;
+        
+        return 0;
     }
     
     
@@ -203,7 +211,7 @@ class LSmartNode
         LightProfile lightProfile = (LightProfile) zone.findProfile(ProfileType.LIGHT);
         if (!lightProfile.hasSchedules())
         {
-            lightProfile.addSchedules(ccu().getDefaultLightSchedule(), ScheduleMode.SystemSchedule);
+            lightProfile.addSchedules(ccu().getDefaultLightSchedule(), ScheduleMode.ZoneSchedule);
         }
         seedMessage.settings.lightingIntensityForOccupantDetected
                 .set((short) resolveTuningParameter(zone, "lightingIntensityOccupantDetected"));

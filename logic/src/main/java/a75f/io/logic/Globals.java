@@ -142,7 +142,7 @@ class Globals
             //Mock schedule M-F, 8AM - 5:30PM turn isOn lights to value 100.
             //Mock schedule M-F, 8AM - 5:30PM turn isOn lights to value 100.
             Schedule schedule = new Schedule();
-            int[] ints = {1, 2, 3, 4, 5};
+            int[] ints = {0, 1, 2, 3, 4};
             ArrayList<Day> intsaslist = new ArrayList<Day>();
             for(int i : ints)
             { //as
@@ -158,8 +158,11 @@ class Globals
             schedule.setDays(intsaslist);
             NamedSchedule namedSchedule = new NamedSchedule();
             namedSchedule.setName("LCM Named Schedule");
-            namedSchedule.setSchedule(schedule);
-            ccu().getLCMNamedSchedules().add(namedSchedule);
+            ArrayList<Schedule> schedules = new ArrayList<Schedule>();
+            schedules.add(schedule);
+            namedSchedule.setSchedule(schedules);
+            ccu().getLCMNamedSchedules().put(namedSchedule.getName(), namedSchedule);
+            ccu().setDefaultLightSchedule(schedules);
         }
     }
 }

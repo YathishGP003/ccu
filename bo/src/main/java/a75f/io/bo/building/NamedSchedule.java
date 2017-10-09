@@ -1,37 +1,26 @@
 package a75f.io.bo.building;
 
+import java.util.ArrayList;
+
 /**
  * Created by Yinten on 10/4/2017.
  */
 
 public class NamedSchedule
 {
-    private String mName;
-    private Schedule mSchedule;
-    private boolean mIsLCMSchedule;
+    private String              mName;
+    private ArrayList<Schedule> mSchedule;
     
     
-    public Schedule getSchedule()
+    public ArrayList<Schedule> getSchedule()
     {
         return mSchedule;
     }
     
     
-    public void setSchedule(Schedule schedule)
+    public void setSchedule(ArrayList<Schedule> schedule)
     {
         this.mSchedule = schedule;
-    }
-    
-    
-    public boolean isLCMSchedule()
-    {
-        return mIsLCMSchedule;
-    }
-    
-    
-    public void setLCMSchedule(boolean LCMSchedule)
-    {
-        mIsLCMSchedule = LCMSchedule;
     }
     
     

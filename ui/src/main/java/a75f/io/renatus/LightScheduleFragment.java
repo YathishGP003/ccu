@@ -1,12 +1,12 @@
 package a75f.io.renatus;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.TimePicker;
 
 import org.javolution.annotations.Nullable;
@@ -15,11 +15,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import a75f.io.bo.building.Circuit;
 import a75f.io.bo.building.Day;
 import a75f.io.bo.building.Floor;
-import a75f.io.bo.building.Output;
 import a75f.io.bo.building.Schedule;
 import a75f.io.bo.building.Zone;
+import a75f.io.bo.building.ZoneProfile;
+import a75f.io.bo.building.definitions.Port;
 import a75f.io.bo.building.definitions.ProfileType;
 import a75f.io.bo.building.definitions.ScheduleMode;
 import a75f.io.logic.L;
@@ -37,32 +39,31 @@ import butterknife.OnClick;
 public class LightScheduleFragment extends BaseDialogFragment
 {
     
-    public static final String ID = LightScheduleFragment.class.getSimpleName();
-    
+    public static final  String ID                = LightScheduleFragment.class.getSimpleName();
+    private static final String ScheduableTypeKey = "ScheduableType";
     //TODO: most of the UI for this...
-    UUID   mCurrentPortId = null;
-    Output mCurrentPort   = null;
-    
-    Schedule mSchedule = null;
-    
-    Floor floor;
-    Zone  zone;
-    
+    UUID                mCurrentPortId = null;
+    ArrayList<Schedule> mSchedules     = null;
+    ZoneProfile mZoneProfile;
+    Circuit     mCircuit;
+    Floor       floor;
+    Zone        zone;
     @BindView(R.id.timePickerSt)
-    TimePicker startTimePicker;
-    
+    TimePicker     startTimePicker;
     @BindView(R.id.timePickerEt)
-    TimePicker endTimePicker;
-    
+    TimePicker     endTimePicker;
     @BindView(R.id.scheduleCancel)
-    Button cancelBtn;
-    
+    Button         cancelBtn;
     @BindView(R.id.scheduleSave)
-    Button saveBtn;
-    
+    Button         saveBtn;
     @BindViews({R.id.checkBoxMon, R.id.checkBoxTue, R.id.checkBoxWed, R.id.checkBoxThu,
                        R.id.checkBoxFri, R.id.checkBoxSat, R.id.checkBoxSun})
     List<CheckBox> daysList;
+    
+    @BindView(R.id.temperatureEditText)
+    EditText mValueEditText;
+    
+    private SchedulableType mSchedulableType;
     
     
     public LightScheduleFragment()
@@ -70,13 +71,33 @@ public class LightScheduleFragment extends BaseDialogFragment
     }
     
     
-    public static LightScheduleFragment newInstance(Floor floor, Zone zone, Output port)
+    public static LightScheduleFragment newZoneProfileInstance(Floor floor, Zone zone,
+                                                               ZoneProfile zoneProfile)
     {
         LightScheduleFragment fragment = new LightScheduleFragment();
         Bundle bundle = new Bundle();
-        bundle.putSerializable(FragmentCommonBundleArgs.SNOUTPUT_UUID, port.getUuid());
+        bundle.putString(FragmentCommonBundleArgs.PROFILE_TYPE, zoneProfile.getProfileType()
+                                                                           .name());
         bundle.putString(FragmentCommonBundleArgs.FLOOR_NAME, floor.mFloorName);
         bundle.putString(FragmentCommonBundleArgs.ZONE_NAME, zone.roomName);
+        bundle.putString(ScheduableTypeKey, SchedulableType.Zone.name());
+        fragment.setArguments(bundle);
+        return fragment;
+    }
+    
+    
+    public static LightScheduleFragment newPortInstance(Floor floor, Zone zone,
+                                                        ZoneProfile zoneProfile, Circuit port)
+    {
+        LightScheduleFragment fragment = new LightScheduleFragment();
+        Bundle bundle = new Bundle();
+        bundle.putString(FragmentCommonBundleArgs.FLOOR_NAME, floor.mFloorName);
+        bundle.putString(FragmentCommonBundleArgs.ZONE_NAME, zone.roomName);
+        bundle.putString(FragmentCommonBundleArgs.PROFILE_TYPE, zoneProfile.getProfileType()
+                                                                           .name());
+        bundle.putString(FragmentCommonBundleArgs.PORT, port.getPort().name());
+        bundle.putShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR, port.getAddress());
+        bundle.putString(ScheduableTypeKey, SchedulableType.Output.name());
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -87,13 +108,22 @@ public class LightScheduleFragment extends BaseDialogFragment
                              Bundle savedInstanceState)
     {
         View rootView = inflater.inflate(R.layout.fragment_light_schedule, container, false);
-        mCurrentPortId =
-                (UUID) getArguments().getSerializable(FragmentCommonBundleArgs.SNOUTPUT_UUID);
+        String scheduableType = getArguments().getString(ScheduableTypeKey);
+        mSchedulableType = SchedulableType.valueOf(scheduableType);
         String zoneName = getArguments().getString(FragmentCommonBundleArgs.ZONE_NAME);
         String floorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
+        ProfileType profileType = ProfileType.valueOf(getArguments()
+                                                              .getString(FragmentCommonBundleArgs.PROFILE_TYPE));
         zone = L.findZoneByName(floorName, zoneName);
+        mZoneProfile = zone.findProfile(profileType);
+        if (mSchedulableType == SchedulableType.Output)
+        {
+            Port port = Port.valueOf(getArguments().getString(FragmentCommonBundleArgs.PORT));
+            short pairingAddress =
+                    getArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR);
+            mCircuit = mZoneProfile.getProfileConfiguration().get(pairingAddress).findPort(port);
+        }
         ButterKnife.bind(this, rootView);
-        //int titleTextId = getResources().getIdentifier("title", "id", "android");
         setTitle("Lighting Schedule");
         return rootView;
     }
@@ -103,29 +133,35 @@ public class LightScheduleFragment extends BaseDialogFragment
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
     {
         super.onViewCreated(view, savedInstanceState);
-        for (Short addresses : zone.findProfile(ProfileType.LIGHT).getNodeAddresses())
-        {
-            for (Output output : zone.findProfile(ProfileType.LIGHT)
-                                     .getProfileConfiguration(addresses).getOutputs())
-            {
-                if (output.getUuid().equals(mCurrentPortId))
-                {
-                    mCurrentPort = output;
-                }
-            }
-        }
-        // else {
-        //			mSchedule = mCurrentPort.mSchedules.get(0);
-        //			fillScheduleData();
-        //		}
+        fillScheduleData();
     }
     
     
     public void fillScheduleData()
     {
-        for (int i = 0; i < 7; i++)
+        //If mScheduableType == SchedualbeType.Output && it's not a zone schedule
+        // resolve schedule will resolve the circuits named schedule or zone schedule.
+        if (mSchedulableType == SchedulableType.Output &&
+            mCircuit.getScheduleMode() != ScheduleMode.ZoneSchedule)
         {
-            //if ((CheckBox)daysList.get(i).)
+            mSchedules = L.resolveSchedules(mCircuit);
+        }
+        else
+        {
+            mSchedules = L.resolveSchedules(mZoneProfile);
+        }
+        //TODO: what's a multi schedule?
+        if (mSchedules != null && mSchedules.size() > 0)
+        {
+            for (Day day : mSchedules.get(0).getDays())
+            {
+                ((CheckBox) daysList.get(day.getDay())).setChecked(true);
+                //TODO: which is the start / end value .. need to get new UI for this.
+                startTimePicker.setCurrentHour(day.getSthh());
+                startTimePicker.setCurrentMinute(day.getStmm());
+                endTimePicker.setCurrentHour(day.getEthh());
+                endTimePicker.setCurrentMinute(day.getEtmm());
+            }
         }
     }
     
@@ -140,39 +176,51 @@ public class LightScheduleFragment extends BaseDialogFragment
     @OnClick(R.id.scheduleSave)
     public void saveSchedule()
     {
-        if (mSchedule == null)
+        if (mValueEditText.getText() == null ||  mValueEditText.getText().length() == 0)
         {
-            mSchedule = new Schedule();
+            mValueEditText.setError("Requires a edit value");
         }
-        ArrayList<Integer> days = new ArrayList<Integer>();
-        for (int i = 0; i < 7; i++)
+        else
         {
-            if (((CheckBox) daysList.get(i)).isChecked())
+            if (mSchedules == null)
             {
-                days.add(i);
+                mSchedules = new ArrayList<Schedule>();
+                mSchedules.add(new Schedule());
+                if (mSchedulableType == SchedulableType.Output)
+                {
+                    mCircuit.addSchedules(mSchedules, ScheduleMode.CircuitSchedule);
+                }
+                else
+                {
+                    mZoneProfile.setSchedules(mSchedules);
+                    mZoneProfile.setScheduleMode(ScheduleMode.ZoneSchedule);
+                }
             }
+            ArrayList<Integer> days = new ArrayList<Integer>();
+            for (int i = 0; i < 7; i++)
+            {
+                if (((CheckBox) daysList.get(i)).isChecked())
+                {
+                    days.add(i);
+                }
+            }
+            ArrayList<Day> daysList = new ArrayList<Day>();
+            for (int dayOfWeek : days)
+            {
+                Day day = new Day();
+                day.setDay(dayOfWeek);
+                day.setSthh(startTimePicker.getCurrentHour());
+                day.setStmm(startTimePicker.getCurrentMinute());
+                day.setEthh(endTimePicker.getCurrentHour());
+                day.setEtmm(endTimePicker.getCurrentMinute());
+                //TODO: hook up day.
+                day.setVal(Short.valueOf(mValueEditText.getText().toString()));
+                daysList.add(day);
+            }
+            mSchedules.get(0).setDays(daysList);
+            L.saveCCUState();
+            dismiss();
         }
-        
-        ArrayList<Day> daysList = new ArrayList<Day>();
-        Day day = new Day();
-        for(int dayOfWeek : days)
-        {
-            day.setDay(dayOfWeek);
-            day.setSthh(startTimePicker.getCurrentHour());
-            day.setStmm(startTimePicker.getCurrentMinute());
-            day.setEthh(endTimePicker.getCurrentHour());
-            day.setEtmm(endTimePicker.getCurrentMinute());
-            //TODO: hook up day.
-            day.setVal((short) 69);
-            daysList.add(day);
-            
-        }
-        Schedule schedule = new Schedule(daysList);
-        ArrayList<Schedule> schedules = new ArrayList<Schedule>();
-        schedules.add(schedule);
-        mCurrentPort.addSchedules(schedules, ScheduleMode.CircuitSchedule);
-        Log.i("Schedule", "mSchedule to add: " + mSchedule.toString());
-        L.saveCCUState();
     }
     
     
@@ -180,5 +228,11 @@ public class LightScheduleFragment extends BaseDialogFragment
     public String getIdString()
     {
         return ID;
+    }
+    
+    
+    public enum SchedulableType
+    {
+        Output, Zone
     }
 }

@@ -2,6 +2,8 @@ package a75f.io.bo.building;
 
 import android.util.Log;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.HashMap;
 import java.util.Set;
 
@@ -36,7 +38,7 @@ public class SingleStageProfile extends ZoneProfile
         Log.i("SingleStageProfile", "SingleStageProfile RoomTemperature Update: " + roomTemperature + "");
     }
  
-    
+    @JsonIgnore
     @Override
     public ProfileType getProfileType()
     {

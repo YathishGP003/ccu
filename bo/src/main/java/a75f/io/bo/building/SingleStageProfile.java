@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Set;
 
 import a75f.io.bo.building.definitions.ProfileType;
+import a75f.io.bo.building.definitions.RoomDataInterface;
 import a75f.io.bo.building.definitions.SingleStageMode;
 import a75f.io.bo.building.sse.SingleStageLogicalMap;
 import a75f.io.bo.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
@@ -22,6 +23,10 @@ public class SingleStageProfile extends ZoneProfile
     //There can be multiple single stage profiles in a zone.
     //We need to keep track of if they are heating, cooling, or non-functional.
     HashMap<Short, SingleStageLogicalMap> mLogicalMap = new HashMap<>();
+    
+    //MARK
+    @JsonIgnore
+    private RoomDataInterface mInterface;
     //SSE works independtly just an aggregator for the smart node.
     //Relay 1 is heating or cooling
     //Relay 2 is fan
@@ -37,7 +42,7 @@ public class SingleStageProfile extends ZoneProfile
         mLogicalMap.get(Short.valueOf((short) regularUpdateMessage.update.smartNodeAddress.get())).setRoomTemperature(roomTemperature);
         Log.i("SingleStageProfile", "SingleStageProfile RoomTemperature Update: " + roomTemperature + "");
     }
- 
+    
     @JsonIgnore
     @Override
     public ProfileType getProfileType()
@@ -58,5 +63,32 @@ public class SingleStageProfile extends ZoneProfile
     public void setLogicalMap(HashMap<Short, SingleStageLogicalMap> logicalMap)
     {
         this.mLogicalMap = logicalMap;
+    }
+    
+    //MARK
+    public double getCMCurrentTemp(boolean b)
+    {
+        return 75;
+    }
+    
+    //MARK
+    @JsonIgnore
+    public void setZoneProfileInterface(RoomDataInterface zoneProfileInterface)
+    {
+        mInterface = zoneProfileInterface;
+    }
+    
+    @JsonIgnore
+    //MARK
+    public double getDisplayCurrentTemp()
+    {
+        return 74;
+    }
+    
+    //MARK
+    @JsonIgnore
+    public double getActualDesiredTemp()
+    {
+        return 78;
     }
 }

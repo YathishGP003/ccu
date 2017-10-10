@@ -22,6 +22,8 @@ public class SimulationTestInfo
     
     public int nodeAddress;
     
+    public long startTime;
+    
     public SimulationResult simulationResult;
     
     public List<String[]> simulationInput = null;
@@ -52,7 +54,7 @@ public class SimulationTestInfo
         }
        
         for (SmartNodeParams param : nodeParams) {
-            String paramString = param.convertToJsonString();
+            String paramString = boldenEnabledParams(param.convertToJsonString());
             paramsString += decorateChangedParams(prevParam, paramString).concat("<br><br>");
             prevParam = paramString;
         }
@@ -68,6 +70,29 @@ public class SimulationTestInfo
                              .concat("<td>").concat(paramsString).concat("</td>")
                              .concat("</tr>");
         return testInfoRow;
+    }
+    
+    public String boldenEnabledParams(String param){
+        final ObjectMapper mapper = new ObjectMapper();
+        try
+        {
+            final JsonNode paramsTree = mapper.readTree(param);
+            Iterator<String> fields = paramsTree.fieldNames();
+            while (fields.hasNext()) {
+                String key = fields.next();
+                if (paramsTree.get(key).asText() != "0" && paramsTree.get(key).asText() != "0.0") {
+                    ObjectNode n = (ObjectNode) paramsTree;
+                    String newField = "<em><b>"+paramsTree.get(key).asText()+"</b></em>";
+                    n.put(key,newField);
+                }
+            }
+            return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(paramsTree);
+        
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    
+        return param;
     }
     
     public String decorateChangedParams(String params1, String params2) {
@@ -88,13 +113,13 @@ public class SimulationTestInfo
             Iterator<String> fields1 = params1Tree.fieldNames();
             Iterator<String> fields2 = params2Tree.fieldNames();
             while (fields1.hasNext()) {
-                String x = fields1.next();
-                String y = fields2.next();
+                String key1 = fields1.next();
+                String key2 = fields2.next();
                 
-                if (!params1Tree.get(x).asText().equals(params2Tree.get(y).asText())) {
+                if (!params1Tree.get(key1).asText().equals(params2Tree.get(key2).asText()) && !key1.equals("timestamp")) {
                     ObjectNode n = (ObjectNode) params2Tree;
-                    String newField = "<span style=color:red>"+params2Tree.get(y).asText()+"</span>";
-                    n.put(y,newField);
+                    String newVal = "<span style=color:red>"+params2Tree.get(key2).asText()+"</span>";
+                    n.put(key2,newVal);
                 }
             }
             return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(params2Tree);

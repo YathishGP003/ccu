@@ -9,6 +9,10 @@ import android.text.format.DateFormat;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -41,6 +45,9 @@ import static java.lang.Thread.sleep;
  */
 public class SimulationRunner
 {
+    public static final String NODE_TYPE_REST_URL = "http://10.0.2.2:5000/nodetype/";
+    public static final String SMARTNODE_LOG_REST_URL = "http://10.0.2.2:5000/log/smartnode?address=";
+    public static final String SMARTNODE_STATE_REST_URL = "http://10.0.2.2:5000/state/smartnode?address=";
     
     public  List<String[]>    csvDataList = null;
     private SimulationContext mEnv        = null;
@@ -54,7 +61,7 @@ public class SimulationRunner
     
     private List<Integer> mNodes = new ArrayList<>();
     
-    String curTime = null;
+    long startTime;
     
     SimulationRunner(BaseSimulationTest ccuTest) {
         mCurrentTest = ccuTest;
@@ -71,7 +78,7 @@ public class SimulationRunner
      */
     public void runSimulation() {
     
-        curTime = DateFormat.format("dd-MMMM-yyyy_hh:mm:ss", (System.currentTimeMillis()-15000)).toString();
+        startTime = System.currentTimeMillis();
         injectState(appState);
         
         for (int simIndex = 1; simIndex < csvDataList.size(); simIndex ++) {
@@ -109,7 +116,7 @@ public class SimulationRunner
             secondsElapsed += waitTime;
             SimulationParams params  = new SimulationParams().build(testVals);
             String paramsJson = params.convertToJsonString();
-            executePost("http://10.0.2.2:5000/state/smartnode?address="+testVals[1].trim(), getHttpPostParams(paramsJson) );
+            executePost(SMARTNODE_STATE_REST_URL+testVals[1].trim(), getHttpPostParams(paramsJson) );
         }
         catch (ParseException e)
         {
@@ -192,36 +199,7 @@ public class SimulationRunner
             }
         }
     }
-    
-    /*private void postJson(String url, String data){
-        HttpURLConnection httpURLConnection = null;
-        try {
-            URL restUrl = new URL(url);
-            httpURLConnection = (HttpURLConnection)restUrl.openConnection();
-            httpURLConnection.setDoOutput(true);
-            httpURLConnection.setRequestMethod("POST");
-            //httpURLConnection.setRequestProperty("Content-Type", "application/json");
-            httpURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-            httpURLConnection.setRequestProperty("Content-Length", data.getBytes().length+"");
-    
-    
-            httpURLConnection.connect();
-            DataOutputStream wr = new DataOutputStream(httpURLConnection.getOutputStream());
-            wr.writeBytes(data);
-            wr.flush();
-            wr.close();
-        
-        } catch (MalformedURLException e)
-        {
-            e.printStackTrace();
-        } catch (IOException e)
-        {
-            e.printStackTrace();
-        } finally {
-            httpURLConnection.disconnect();
-        }
-    }*/
-    
+          
     private String getResult(String url){
         
         StringBuilder result = new StringBuilder();
@@ -269,14 +247,14 @@ public class SimulationRunner
             info.inputCcuState = appState;
             mEnv.testSuite.addSimulationTest(mCurrentTest.getTestDescription(),info);
         }
-        //String params = SimulationInputParser.readFileFromAssets(SimulationContext.getInstance().getContext(), "ccustates/testresult.json");
+      
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("dd MMM yyyy HH:mm:ss");
         
-        //http://localhost:5000/log/smartnode?address=2000&since=05-April-2017_17:00:40&limit_results=1
         for(int node = 0; node < mNodes.size();node++)
         {
             //executePost("http://10.0.2.2:5000/nodetype/", getSmartnodeType());
             //String params = getResult("http://10.0.2.2:5000/log/smartnode?address=" + mNodes.get(node) + "&since=" + curTime + "&limit_results=1");
-            String params = getResult("http://10.0.2.2:5000/log/smartnode?address=" + mNodes.get(node) + "&since=" + curTime);
+            String params = getResult(SMARTNODE_LOG_REST_URL + mNodes.get(node) + "&since=" + DateFormat.format("dd-MMMM-yyyy_hh:mm:ss", startTime).toString());
             try
             {
                 JSONArray jsonArray = new JSONArray(params);
@@ -285,7 +263,15 @@ public class SimulationRunner
                 for (int i = 0; i < jsonArray.length(); i++)
                 {
                     list.add(jsonArray.get(i).toString());
-                    info.nodeParams.add(SmartNodeParams.getParamsFromJson(jsonArray.get(i).toString()));
+                    SmartNodeParams result = SmartNodeParams.getParamsFromJson(jsonArray.get(i).toString());
+                   
+                    Date localSt = new DateTime(startTime, DateTimeZone.getDefault()).toDate();
+                    Date resultSt = formatter.parseDateTime(result.timestamp).toDate();
+                   
+                    if (resultSt.getTime() >= localSt.getTime() )
+                    {
+                        info.nodeParams.add(result);
+                    }
                 }
                 
             } catch (JSONException e) {
@@ -293,11 +279,11 @@ public class SimulationRunner
             }
         }
         info.simulationResult.result = mCurrentTest.analyzeTestResults(info);
-        //String params2 = SimulationInputParser.readFileFromAssets(SimulationContext.getInstance().getContext(), "ccustates/testresult1.json");
-        //info.nodeParams.add(SmartNodeParams.getParamsFromJson(params2));
-        
     }
     
+    public void resetRunner() {
+        secondsElapsed = 0;
+    }
     public List<String[]> getSimulationInput() {
         return csvDataList;
     }

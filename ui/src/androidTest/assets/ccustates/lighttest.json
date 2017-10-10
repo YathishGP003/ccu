@@ -49,14 +49,14 @@
         },
         "schedules" : [ {
           "days" : [ {
-            "day" : 1,
+            "day" : 0,
             "sthh" : 9,
             "stmm" : 0,
             "ethh" : 17,
             "etmm" : 30,
             "val" : 80
           }, {
-            "day" : 2,
+            "day" : 1,
             "sthh" : 9,
             "stmm" : 0,
             "ethh" : 17,

@@ -3,6 +3,8 @@ package a75f.io.renatus;
 import org.junit.After;
 import org.junit.Before;
 
+import a75f.io.bo.building.definitions.MockTime;
+
 /**
  * Created by samjithsadasivan on 9/22/17.
  */
@@ -66,6 +68,9 @@ public class LightControlSimulationTest extends BaseSimulationTest
         
         System.out.println("runTest.........");
         
+        mRunner.runSimulation();
+        MockTime.getInstance().setMockTime(true, System.currentTimeMillis()+ (8 * 3600000)); // Force the mocktime to out of schedule interval
+        mRunner.resetRunner();
         mRunner.runSimulation();
    }
     

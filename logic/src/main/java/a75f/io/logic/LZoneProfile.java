@@ -27,9 +27,7 @@ class LZoneProfile
     //be overrode at a specific profile level.
     public static short resolveZoneProfileLogicalValue(ZoneProfile zoneProfile, Output output)
     {
- 
-        if ((isOverride(output) && !output.hasSchedules() &&
-             !checkCircuitOverrides(output, zoneProfile)) || output.hasSchedules())
+        if ((isOverride(output) && !output.hasSchedules() && !checkCircuitOverrides(output, zoneProfile)) || output.hasSchedules())
         {
             return resolveLogicalValue(output);
         }
@@ -38,7 +36,6 @@ class LZoneProfile
             return resolveLogicalValue(zoneProfile);
         }
     }
-    
     
     /***
      * This circuit is in manual control mode, zone profile and schedules will be ignored.
@@ -53,22 +50,19 @@ class LZoneProfile
         return schedulable.getOverrideType() != OverrideType.NONE;
     }
     
-    
     /*
     If a circuit is overrode & has no schedules, check it against the zone's list of schedules.
     returns if override was removed.
      */
     public static boolean checkCircuitOverrides(Circuit circuit, Schedulable scheduable)
     {
-        if (circuit.getOverrideType() == OverrideType.OVERRIDE_TIME_RELEASE_NEXT_SCHEDULE_BOUND &&
-            checkBoundCrossed(scheduable.getSchedules(), circuit.getOverrideMillis()))
+        if (circuit.getOverrideType() == OverrideType.OVERRIDE_TIME_RELEASE_NEXT_SCHEDULE_BOUND && checkBoundCrossed(scheduable.getSchedules(), circuit.getOverrideMillis()))
         {
             circuit.removeOverride();
             return true;
         }
         return false;
     }
-    
     
     public static boolean checkBoundCrossed(ArrayList<Schedule> schedules, long mOverrideMillis)
     {
@@ -85,24 +79,20 @@ class LZoneProfile
         return false;
     }
     
-    
     protected static boolean checkOverrides(Schedulable schedulable)
     {
-        if (schedulable.getOverrideType() ==
-            OverrideType.OVERRIDE_TIME_RELEASE_NEXT_SCHEDULE_BOUND && crossedBound(schedulable))
+        if (schedulable.getOverrideType() == OverrideType.OVERRIDE_TIME_RELEASE_NEXT_SCHEDULE_BOUND && crossedBound(schedulable))
         {
             schedulable.removeOverride();
             return true;
         }
-        else if (schedulable.getOverrideType() == OverrideType.RELEASE_TIME &&
-                 crossedReleaseTime(schedulable))
+        else if (schedulable.getOverrideType() == OverrideType.RELEASE_TIME && crossedReleaseTime(schedulable))
         {
             schedulable.removeOverride();
             return true;
         }
         return false;
     }
-    
     
     public static short resolveLogicalValue(Schedulable schedulable)
     {
@@ -140,7 +130,6 @@ class LZoneProfile
         return 0;
     }
     
-    
     public static short getScheduledVal(Schedulable schedulable)
     {
         for (Schedule schedule : schedulable.getSchedules())
@@ -153,27 +142,22 @@ class LZoneProfile
         return 0;
     }
     
-    
     private static boolean crossedBound(Schedulable schedulable)
     {
         //if the smartnode output has schedules, wait for it to cross a bound to remove the
         // override.
         if (schedulable.hasSchedules())
         {
-            return checkBoundCrossed(L.resolveSchedules(schedulable), schedulable
-                                                                                .getOverrideMillis());
+            return checkBoundCrossed(L.resolveSchedules(schedulable), schedulable.getOverrideMillis());
         }
         return false;
     }
-    
     
     //If the override time is a time limit.   As soon as it crosses the curren time release it.
     private static boolean crossedReleaseTime(Schedulable schedulable)
     {
         return schedulable.getOverrideMillis() > MockTime.getInstance().getMockTime();
     }
-
-  
     
     public static Day getCurrentSchedule(Schedule schedule)
     {
@@ -188,10 +172,24 @@ class LZoneProfile
         return null;
     }
     
-    
+    public static short resolveAnyValue(ZoneProfile zoneProfile)
+    {
+        if(zoneProfile.hasSchedules())
+        {
+            Schedule schedule = zoneProfile.getSchedules().get(0);
+            Day day = schedule.getDays().get(0);
+            return day.getVal();
+        }
+        
+        return 0;
+    }
     
     public static boolean isNamedSchedule(Schedulable schedulable)
     {
         return schedulable.getNamedSchedule() != null && !schedulable.getNamedSchedule().equals("");
+    }
+    public static short resolveZoneProfileLogicalValue(ZoneProfile profile)
+    {
+        return resolveLogicalValue(profile);
     }
 }

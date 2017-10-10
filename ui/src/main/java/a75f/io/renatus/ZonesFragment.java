@@ -41,9 +41,11 @@ import a75f.io.bo.building.LightProfile;
 import a75f.io.bo.building.SingleStageProfile;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.ZoneProfile;
+import a75f.io.bo.building.definitions.OverrideType;
 import a75f.io.bo.building.definitions.ProfileType;
 import a75f.io.bo.building.definitions.ScheduleMode;
 import a75f.io.logic.L;
+import a75f.io.renatus.VIEWS.SeekArcWidget;
 import a75f.io.renatus.VIEWS.ZoneImageWidget;
 
 import static a75f.io.bo.building.definitions.ScheduleMode.NamedSchedule;
@@ -63,9 +65,9 @@ public class ZonesFragment extends Fragment
     boolean                    mDetailsView              = false;
     ZoneImageWidget            selectedDevice            = null;
     int                        nRoomDetailsLocationIndex = -1;
-    SeekArc                    rbSelectedRoom            = null;
+    SeekArcWidget                    rbSelectedRoom            = null;
     int                        nSelectedRoomIndex        = -1;
-    ArrayList<SeekArc>         seekArcWidgetList         = null;
+    ArrayList<SeekArcWidget>         seekArcWidgetList         = null;
     ArrayList<ZoneImageWidget> zoneWidgetList            = null;
     
     private ListView       lvFloorList;
@@ -90,21 +92,21 @@ public class ZonesFragment extends Fragment
     private LinearLayout mLightingRow   = null;
     private View         mLcmHeaderView = null;
     private DataArrayAdapter<Floor> floorDataAdapter;
-    private SeekArc.OnSeekArcChangeListener seekArcChangeListener = new SeekArc.OnSeekArcChangeListener()
+    private SeekArcWidget.OnSeekArcChangeListener seekArcChangeListener = new SeekArcWidget.OnSeekArcChangeListener()
     {
         @Override
-        public void onProgressChanged(SeekArc seekArc, int progress, boolean fromUser)
+        public void onProgressChanged(SeekArcWidget seekArc, int progress, boolean fromUser)
         {
         }
         
         @Override
-        public void onStartTrackingTouch(SeekArc seekArc)
+        public void onStartTrackingTouch(SeekArcWidget seekArc)
         {
             mDesiredTempScrolling = true;
         }
         
         @Override
-        public void onStopTrackingTouch(final SeekArc seekArc)
+        public void onStopTrackingTouch(final SeekArcWidget seekArc)
         {
             Handler handler = new Handler();
             handler.postDelayed(new Runnable()
@@ -436,162 +438,169 @@ public class ZonesFragment extends Fragment
     private RelativeLayout mRoomDetailsWidget = null;
     private int            mod                = 3;
     
-    private SeekArc.OnClickListener seekArcClickListener = new SeekArc.OnClickListener()
+    private SeekArcWidget.OnClickListener seekArcClickListener = new SeekArcWidget.OnClickListener()
     {
         @Override
-        public void onClick(SeekArc r)
+        public void onClick(SeekArcWidget r)
         {
-            int index = r.getIndex();
-            if (r.getRoomData().mZoneProfiles.size() <= 0)
-            {
-                if (bDetailsShowing)
-                {
-                    if (rbSelectedRoom != null)
-                    {
-                        rbSelectedRoom.SetSelected(false);
-                    }
-                    //?
-                    //                    if (selectedDevice != null)
-                    //                    {
-                    //                        selectedDevice.SetSelected(false);
-                    //                    }
-                    roomButtonGrid.removeViewAt(nRoomDetailsLocationIndex);
-                    //showWeather();
-                    bDetailsShowing = false;
-                    nSelectedRoomIndex = index;
-                    nRoomDetailsLocationIndex = -1;
-                    rbSelectedRoom = null;
-                    //totalSaUnitsInZone = 0;
-                }
-                else
-                {
-                    if (rbSelectedRoom != null)
-                    {
-                        rbSelectedRoom.SetSelected(false);
-                    }
-                    //?
-                    //                    if (selectedDevice != null)
-                    //                    {
-                    //                        selectedDevice.SetSelected(false);
-                    //                    }
-                    if (roomButtonGrid.getChildCount() > 0)
-                    {
-                        roomButtonGrid.clearAnimation();
-                    }
-                    //  showWeather();
-                    bDetailsShowing = false;
-                    nSelectedRoomIndex = index;
-                    nRoomDetailsLocationIndex = -1;
-                    rbSelectedRoom = null;
-                    ///  totalSaUnitsInZone = 0;
-                }
-                return;
-            }
-            int nDetailsLoc = ((index - 1) / mod) + 1;
-            if (!bDetailsShowing)
-            {
-                r.SetSelected(true);
-                //                if (r.mDeviceType == SeekArc.DEVICE_TYPE.LCM_DAB)
-                //                {
-                //                    hideWeather();
-                //                    roomButtonGrid.addView(mLightingRow, nDetailsLoc);
-                //                    UpdateRoomLightingWidget(r.getlcmdabfsv(), r.getRoomData(), true);
-                //                    mLightingRow.startAnimation(in);
-                //                }
-                //                else if (r.mDeviceType == SeekArc.DEVICE_TYPE.IFTT_DAB)
-                //                {
-                //                    hideWeather();
-                //                    roomButtonGrid.addView(mIfttRow, nDetailsLoc);
-                //                    UpdateRoomIfttWidget(r.getifttdabfsv(), r.getRoomData(), true);
-                //                    mIfttRow.startAnimation(in);
-                //                }
-                //                else if (r.mDeviceType == SeekArc.DEVICE_TYPE.PURE_DAB)
-                //                {
-                //                    hideWeather();
-                //                    roomButtonGrid.addView(mRoomDetailsWidget, nDetailsLoc);
-                //                    initStandaloneWidgets(r.getRoomData(), mRoomDetailsWidget);
-                //                    updateRoomDetailsWidget(r.getRoomData());
-                //                    mRoomDetailsWidget.startAnimation(in);
-                //                }
-                //initStandaloneWidgets(r.getRoomData(), mRoomDetailsWidget);
-                bDetailsShowing = true;
-                nSelectedRoomIndex = index;
-                nRoomDetailsLocationIndex = nDetailsLoc;
-                rbSelectedRoom = r;
-                selectedDevice = null;
-                //hmpSelected = null;
-                if (nDetailsLoc < 2)
-                {
-                    scrollView.fullScroll(ScrollView.FOCUS_UP);
-                }
-                else
-                {
-                    scrollView.scrollTo(0, mRoomDetailsWidget.getHeight());
-                }
-            }
-            else
-            {
-                if (rbSelectedRoom != null)
-                {
-                    rbSelectedRoom.SetSelected(false);
-                }
-                //                if (selectedDevice != null)
-                //                {
-                //                    selectedDevice.SetSelected(false);
-                //                }
-                //if(hmpSelected != null) hmpSelected.SetSelected(false);
-                roomButtonGrid.removeViewAt(nRoomDetailsLocationIndex);
-                if (nSelectedRoomIndex == index)
-                {
-                    //showWeather();
-                    bDetailsShowing = false;
-                    nSelectedRoomIndex = index;
-                    nRoomDetailsLocationIndex = -1;
-                    rbSelectedRoom = null;
-                }
-                else
-                {
-                    r.SetSelected(true);
-                    //                    if (r.getlcmdabfsv() != null && r.getlcmdabfsv().size() != 0)
-                    //                    {
-                    //                        hideWeather();
-                    //                        roomButtonGrid.addView(mLightingRow, nDetailsLoc);
-                    //                        UpdateRoomLightingWidget(r.getlcmdabfsv(), r.getRoomData(), true);
-                    //                        mLightingRow.startAnimation(in);
-                    //                    }
-                    //                    else if (r.getifttdabfsv() != null && r.getifttdabfsv().size() != 0)
-                    //                    {
-                    //                        hideWeather();
-                    //                        roomButtonGrid.addView(mIfttRow, nDetailsLoc);
-                    //                        UpdateRoomIfttWidget(r.getifttdabfsv(), r.getRoomData(), true);
-                    //                        mIfttRow.startAnimation(in);
-                    //                    }
-                    //                    else
-                    //                    {
-                    //#MARK !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                    //                        initStandaloneWidgets(r.getRoomData(), mRoomDetailsWidget);
-                    //                        hideWeather();
-                    //                        roomButtonGrid.addView(mRoomDetailsWidget, nDetailsLoc);
-                    //                        updateRoomDetailsWidget(r.getRoomData());
-                    //                        mRoomDetailsWidget.startAnimation(in);
-                    //#MARK END !!!!!!!!!!!!!!!!
-                    //                    }
-                    bDetailsShowing = true;
-                    nSelectedRoomIndex = index;
-                    nRoomDetailsLocationIndex = nDetailsLoc;
-                    rbSelectedRoom = r;
-                    selectedDevice = null;
-                    //hmpSelected = null;
-                    if (nDetailsLoc < 2)
-                    {
-                        scrollView.fullScroll(ScrollView.FOCUS_UP);
-                    }
-                    else
-                    {
-                        scrollView.scrollTo(0, mRoomDetailsWidget.getHeight());
-                    }
-                }
-            }
+            
+            Zone zone = r.getZone();
+            SingleStageProfile singleStageProfile = (SingleStageProfile) zone.findProfile(ProfileType.SSE);
+            singleStageProfile.setOverride(1000 * 4 * 60, OverrideType.RELEASE_TIME, (short) 70);
+            
+            
+            
+            //int index = r.getIndex();
+//            if (r.getRoomData().mZoneProfiles.size() <= 0)
+//            {
+//                if (bDetailsShowing)
+//                {
+//                    if (rbSelectedRoom != null)
+//                    {
+//                        rbSelectedRoom.SetSelected(false);
+//                    }
+//                    //?
+//                    //                    if (selectedDevice != null)
+//                    //                    {
+//                    //                        selectedDevice.SetSelected(false);
+//                    //                    }
+//                    roomButtonGrid.removeViewAt(nRoomDetailsLocationIndex);
+//                    //showWeather();
+//                    bDetailsShowing = false;
+//                    nSelectedRoomIndex = index;
+//                    nRoomDetailsLocationIndex = -1;
+//                    rbSelectedRoom = null;
+//                    //totalSaUnitsInZone = 0;
+//                }
+//                else
+//                {
+//                    if (rbSelectedRoom != null)
+//                    {
+//                        rbSelectedRoom.SetSelected(false);
+//                    }
+//                    //?
+//                    //                    if (selectedDevice != null)
+//                    //                    {
+//                    //                        selectedDevice.SetSelected(false);
+//                    //                    }
+//                    if (roomButtonGrid.getChildCount() > 0)
+//                    {
+//                        roomButtonGrid.clearAnimation();
+//                    }
+//                    //  showWeather();
+//                    bDetailsShowing = false;
+//                    nSelectedRoomIndex = index;
+//                    nRoomDetailsLocationIndex = -1;
+//                    rbSelectedRoom = null;
+//                    ///  totalSaUnitsInZone = 0;
+//                }
+//                return;
+//            }
+//            int nDetailsLoc = ((index - 1) / mod) + 1;
+//            if (!bDetailsShowing)
+//            {
+//                r.SetSelected(true);
+//                //                if (r.mDeviceType == SeekArc.DEVICE_TYPE.LCM_DAB)
+//                //                {
+//                //                    hideWeather();
+//                //                    roomButtonGrid.addView(mLightingRow, nDetailsLoc);
+//                //                    UpdateRoomLightingWidget(r.getlcmdabfsv(), r.getRoomData(), true);
+//                //                    mLightingRow.startAnimation(in);
+//                //                }
+//                //                else if (r.mDeviceType == SeekArc.DEVICE_TYPE.IFTT_DAB)
+//                //                {
+//                //                    hideWeather();
+//                //                    roomButtonGrid.addView(mIfttRow, nDetailsLoc);
+//                //                    UpdateRoomIfttWidget(r.getifttdabfsv(), r.getRoomData(), true);
+//                //                    mIfttRow.startAnimation(in);
+//                //                }
+//                //                else if (r.mDeviceType == SeekArc.DEVICE_TYPE.PURE_DAB)
+//                //                {
+//                //                    hideWeather();
+//                //                    roomButtonGrid.addView(mRoomDetailsWidget, nDetailsLoc);
+//                //                    initStandaloneWidgets(r.getRoomData(), mRoomDetailsWidget);
+//                //                    updateRoomDetailsWidget(r.getRoomData());
+//                //                    mRoomDetailsWidget.startAnimation(in);
+//                //                }
+//                //initStandaloneWidgets(r.getRoomData(), mRoomDetailsWidget);
+//                bDetailsShowing = true;
+//                nSelectedRoomIndex = index;
+//                nRoomDetailsLocationIndex = nDetailsLoc;
+//                rbSelectedRoom = r;
+//                selectedDevice = null;
+//                //hmpSelected = null;
+//                if (nDetailsLoc < 2)
+//                {
+//                    scrollView.fullScroll(ScrollView.FOCUS_UP);
+//                }
+//                else
+//                {
+//                    scrollView.scrollTo(0, mRoomDetailsWidget.getHeight());
+//                }
+//            }
+//            else
+//            {
+//                if (rbSelectedRoom != null)
+//                {
+//                    rbSelectedRoom.SetSelected(false);
+//                }
+//                //                if (selectedDevice != null)
+//                //                {
+//                //                    selectedDevice.SetSelected(false);
+//                //                }
+//                //if(hmpSelected != null) hmpSelected.SetSelected(false);
+//                roomButtonGrid.removeViewAt(nRoomDetailsLocationIndex);
+//                if (nSelectedRoomIndex == index)
+//                {
+//                    //showWeather();
+//                    bDetailsShowing = false;
+//                    nSelectedRoomIndex = index;
+//                    nRoomDetailsLocationIndex = -1;
+//                    rbSelectedRoom = null;
+//                }
+//                else
+//                {
+//                    r.SetSelected(true);
+//                    //                    if (r.getlcmdabfsv() != null && r.getlcmdabfsv().size() != 0)
+//                    //                    {
+//                    //                        hideWeather();
+//                    //                        roomButtonGrid.addView(mLightingRow, nDetailsLoc);
+//                    //                        UpdateRoomLightingWidget(r.getlcmdabfsv(), r.getRoomData(), true);
+//                    //                        mLightingRow.startAnimation(in);
+//                    //                    }
+//                    //                    else if (r.getifttdabfsv() != null && r.getifttdabfsv().size() != 0)
+//                    //                    {
+//                    //                        hideWeather();
+//                    //                        roomButtonGrid.addView(mIfttRow, nDetailsLoc);
+//                    //                        UpdateRoomIfttWidget(r.getifttdabfsv(), r.getRoomData(), true);
+//                    //                        mIfttRow.startAnimation(in);
+//                    //                    }
+//                    //                    else
+//                    //                    {
+//                    //#MARK !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//                    //                        initStandaloneWidgets(r.getRoomData(), mRoomDetailsWidget);
+//                    //                        hideWeather();
+//                    //                        roomButtonGrid.addView(mRoomDetailsWidget, nDetailsLoc);
+//                    //                        updateRoomDetailsWidget(r.getRoomData());
+//                    //                        mRoomDetailsWidget.startAnimation(in);
+//                    //#MARK END !!!!!!!!!!!!!!!!
+//                    //                    }
+//                    bDetailsShowing = true;
+//                    nSelectedRoomIndex = index;
+//                    nRoomDetailsLocationIndex = nDetailsLoc;
+//                    rbSelectedRoom = r;
+//                    selectedDevice = null;
+//                    //hmpSelected = null;
+//                    if (nDetailsLoc < 2)
+//                    {
+//                        scrollView.fullScroll(ScrollView.FOCUS_UP);
+//                    }
+//                    else
+//                    {
+//                        scrollView.scrollTo(0, mRoomDetailsWidget.getHeight());
+//                    }
+//                }
+//            }
         }
     };
     
@@ -646,9 +655,9 @@ public class ZonesFragment extends Fragment
         attributeSet = getSeekbarXmlAttributes();
         Log.e("ZONE", "END ONSTART");
     }
-    public void AddNewArc(Zone zone, SingleStageProfile zoneProfile, LinearLayout.LayoutParams lp)
+    public SeekArcWidget AddNewArc(Zone zone, SingleStageProfile zoneProfile, LinearLayout.LayoutParams lp)
     {
-        SeekArc rmSeekArc = new SeekArc(getActivity().getApplicationContext(), attributeSet, null);
+        SeekArcWidget rmSeekArc = new SeekArcWidget(getActivity().getApplicationContext(), attributeSet);
         
         rmSeekArc.setLayoutParams(lp);
         rmSeekArc.setmPathStartAngle(120);
@@ -658,7 +667,7 @@ public class ZonesFragment extends Fragment
         rmSeekArc.setLimitStartAngle(68);  //AlgoTuningParameters.getHandle().getUserAllowNoCooler());
         rmSeekArc.setLimitEndAngle(75);  //AlgoTuningParameters.getHandle().getUserAllowNoHotter());
         //rmSeekArc.setRoomData(zone);
-        rmSeekArc.setCMDataToSeekArc(zoneProfile, 0);
+        //rmSeekArc.setCMDataToSeekArc(zoneProfile, 0);
         
        
        /* int nPairedSensor = roomList.get(nRoomIndex - count).getFSVData().size();
@@ -697,13 +706,16 @@ public class ZonesFragment extends Fragment
         //            rmSeekArc.setdablcmfsv(lcmdabfsv);
         //            rmSeekArc.setdabifttfsv(ifttdabfsv);
         rmSeekArc.invalidate();
+        
         rmSeekArc.setOnSeekArcChangeListener(seekArcChangeListener);
         rmSeekArc.setOnClickChangeListener(seekArcClickListener);
         
-        
+        rmSeekArc.setZone(zone);
         //}
         seekArcWidgetList.add(rmSeekArc);
         roomRow.addView(rmSeekArc);
+        
+        
         //rmSeekArc.refreshView();
         //        if (!showCCUDial && (count > 1))
         //        {
@@ -722,6 +734,7 @@ public class ZonesFragment extends Fragment
         //{
         //  roomRow.addView(rmSeekArc);
         //}
+        return rmSeekArc;
     }
     @Override
     public void onResume()
@@ -761,7 +774,9 @@ public class ZonesFragment extends Fragment
                     }
                     else if (zoneProfile.getProfileType() == ProfileType.SSE)
                     {
-                        AddNewArc(z, (SingleStageProfile) zoneProfile, new LinearLayout.LayoutParams(room_width, room_height));
+                        SeekArcWidget seekArcWidget = AddNewArc(z, (SingleStageProfile) zoneProfile, new LinearLayout.LayoutParams(room_width, room_height));
+                        
+                        
                     }
                 }
             }

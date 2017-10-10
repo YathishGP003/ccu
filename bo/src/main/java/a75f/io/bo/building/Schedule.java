@@ -19,6 +19,7 @@ public class Schedule
     public static final String         TAG            = "Schedule";
     /*The value when scheduled parameters are active. */
     protected           ArrayList<Day> days           = new ArrayList<Day>();
+    @JsonIgnore
     protected           boolean        mValidSchedule = false;
     @JsonIgnore
     ArrayList<Interval> mScheduledIntervals = new ArrayList<Interval>();

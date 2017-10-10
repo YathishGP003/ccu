@@ -2,7 +2,6 @@ package a75f.io.bo.building.sse;
 
 import java.util.HashMap;
 
-import a75f.io.bo.building.Circuit;
 import a75f.io.bo.building.definitions.Port;
 import a75f.io.bo.building.definitions.SingleStageMode;
 
@@ -15,6 +14,8 @@ public class SingleStageLogicalMap
     
     private float mRoomTemperature;
     private HashMap<Port, SingleStageMode> mLogicalMap = new HashMap<>();
+    private boolean cooling;
+    
     
     public HashMap<Port, SingleStageMode> getLogicalMap()
     {
@@ -35,4 +36,5 @@ public class SingleStageLogicalMap
     {
         this.mRoomTemperature = roomTemperature;
     }
+  
 }

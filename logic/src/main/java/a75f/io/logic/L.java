@@ -13,6 +13,7 @@ import a75f.io.bo.building.Output;
 import a75f.io.bo.building.Schedulable;
 import a75f.io.bo.building.Schedule;
 import a75f.io.bo.building.Zone;
+import a75f.io.bo.building.ZoneProfile;
 
 import static a75f.io.logic.LZoneProfile.isNamedSchedule;
 
@@ -130,7 +131,13 @@ public class L
     }
     
     
-    public static int resolveZoneProfileLogicalValue(LightProfile profile, Output snOutput)
+    public static int resolveZoneProfileLogicalValue(ZoneProfile profile)
+    {
+        return LZoneProfile.resolveZoneProfileLogicalValue(profile);
+    }
+    
+    
+    public static int resolveZoneProfileLogicalValue(ZoneProfile profile, Output snOutput)
     {
         return LZoneProfile.resolveZoneProfileLogicalValue(profile, snOutput);
     }

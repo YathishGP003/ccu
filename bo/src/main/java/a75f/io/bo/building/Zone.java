@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.UUID;
 
 import a75f.io.bo.building.definitions.ProfileType;
+import a75f.io.bo.building.definitions.RoomDataInterface;
 import a75f.io.bo.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 
 /**
@@ -22,6 +23,8 @@ public class Zone
     public  String                  roomName          = "Default Zone";
     public  ArrayList<ZoneProfile>  mZoneProfiles     = new ArrayList<>();
     private HashMap<String, Object> mTuningParameters = new HashMap<>();
+    @JsonIgnore
+    private RoomDataInterface mRoomDataInterface;
     
     public Zone()
     {
@@ -127,6 +130,24 @@ public class Zone
     public void setTuningParameters(HashMap<String, Object> tuningParameters)
     {
         this.mTuningParameters = tuningParameters;
+    }
+    
+    @JsonIgnore
+    public double getDisplayCurrentTemp()
+    {
+        return 69;
+    }
+    
+    @JsonIgnore
+    public double getActualDesiredTemp()
+    {
+        return 64;
+    }
+    
+    @JsonIgnore
+    public void setRoomDataInterface(RoomDataInterface roomDataInterface)
+    {
+        this.mRoomDataInterface = roomDataInterface;
     }
     //Scratch
     //    @JsonIgnore

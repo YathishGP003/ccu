@@ -6,5 +6,5 @@ package a75f.io.bo.building.definitions;
 
 public enum ScheduleMode
 {
-	ZoneSchedule, CircuitSchedule, SystemSchedule, NamedSchedule
+    ZoneSchedule, CircuitSchedule, NamedSchedule, SystemSchedule
 }

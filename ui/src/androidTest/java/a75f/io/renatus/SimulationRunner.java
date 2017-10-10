@@ -6,6 +6,10 @@ package a75f.io.renatus;
 
 import android.text.format.DateFormat;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -16,12 +20,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
@@ -65,7 +70,8 @@ public class SimulationRunner
      * Must be called from @Test method of SimulationTest
      */
     public void runSimulation() {
-        
+    
+        curTime = DateFormat.format("dd-MMMM-yyyy_hh:mm:ss", (System.currentTimeMillis()-15000)).toString();
         injectState(appState);
         
         for (int simIndex = 1; simIndex < csvDataList.size(); simIndex ++) {
@@ -75,9 +81,10 @@ public class SimulationRunner
             }
             injectSimulation(simData);
     
-            addTestLog();//TODO - should wait ?
+            
         }
-        
+        threadSleep(60);
+        addTestLog();//TODO - should wait ?
     }
     
     private void injectState(CCUApplication state) {
@@ -94,19 +101,15 @@ public class SimulationRunner
     {
         final String TIME_FORMAT = "hh:mm:ss";
         SimpleDateFormat sdf = new SimpleDateFormat(TIME_FORMAT, Locale.getDefault());
-        curTime = DateFormat.format("dd-MMMM-yyyy_hh:mm:ss", System.currentTimeMillis()).toString();
         try
         {
             Date d = sdf.parse(testVals[0]);
             int waitTime = d.getHours()*3600+d.getMinutes()*60+d.getSeconds() - secondsElapsed;
             threadSleep(waitTime);
             secondsElapsed += waitTime;
-            
             SimulationParams params  = new SimulationParams().build(testVals);
             String paramsJson = params.convertToJsonString();
-    
-            postJson("http://10.0.2.2:5000/nodetype/", getSmartnodeType());
-            postJson("http://10.0.2.2:5000/state/smartnode?address="+testVals[1].trim(), paramsJson);
+            executePost("http://10.0.2.2:5000/state/smartnode?address="+testVals[1].trim(), getHttpPostParams(paramsJson) );
         }
         catch (ParseException e)
         {
@@ -115,16 +118,94 @@ public class SimulationRunner
         }
     }
     
-    private void postJson(String url, String data){
+    public String getHttpPostParams(String json) {
+        final ObjectMapper mapper = new ObjectMapper();
+        StringBuilder urlParameters = new StringBuilder();
+        try
+        {
+            final JsonNode paramsTree = mapper.readTree(json);
+            Iterator<String> fields = paramsTree.fieldNames();
+            while (fields.hasNext())
+            {
+                String key = fields.next();
+                String val = paramsTree.get(key).asText();
+                if (urlParameters.toString() == "")
+                {
+                    urlParameters.append(key + "=" + URLEncoder.encode(val, "UTF-8"));
+                } else {
+                    urlParameters.append("&"+ key + "=" + URLEncoder.encode(val, "UTF-8"));
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return urlParameters.toString();
+    }
+    
+    private String executePost(String targetURL, String urlParameters)
+    {
+        URL url;
+        HttpURLConnection connection = null;
+        try {
+            //Create connection
+            url = new URL(targetURL);
+            connection = (HttpURLConnection)url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Content-Type",
+                    "application/x-www-form-urlencoded");
+            
+            connection.setRequestProperty("Content-Length", "" +
+                                                            Integer.toString(urlParameters.getBytes().length));
+            connection.setRequestProperty("Content-Language", "en-US");
+            
+            connection.setUseCaches (false);
+            connection.setDoInput(true);
+            connection.setDoOutput(true);
+            
+            //Send request
+            DataOutputStream wr = new DataOutputStream (connection.getOutputStream ());
+            wr.writeBytes (urlParameters);
+            wr.flush ();
+            wr.close ();
+            
+            //Get Response
+            InputStream is = connection.getInputStream();
+            BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+            String line;
+            StringBuffer response = new StringBuffer();
+            while((line = rd.readLine()) != null) {
+                response.append(line);
+                response.append('\r');
+            }
+            rd.close();
+            return response.toString();
+            
+        } catch (Exception e) {
+            
+            e.printStackTrace();
+            return null;
+            
+        } finally {
+            
+            if(connection != null) {
+                connection.disconnect();
+            }
+        }
+    }
+    
+    /*private void postJson(String url, String data){
         HttpURLConnection httpURLConnection = null;
         try {
             URL restUrl = new URL(url);
             httpURLConnection = (HttpURLConnection)restUrl.openConnection();
             httpURLConnection.setDoOutput(true);
             httpURLConnection.setRequestMethod("POST");
-            httpURLConnection.setRequestProperty("Content-Type", "application/json");
+            //httpURLConnection.setRequestProperty("Content-Type", "application/json");
+            httpURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            httpURLConnection.setRequestProperty("Content-Length", data.getBytes().length+"");
+    
+    
             httpURLConnection.connect();
-        
             DataOutputStream wr = new DataOutputStream(httpURLConnection.getOutputStream());
             wr.writeBytes(data);
             wr.flush();
@@ -139,7 +220,7 @@ public class SimulationRunner
         } finally {
             httpURLConnection.disconnect();
         }
-    }
+    }*/
     
     private String getResult(String url){
         
@@ -184,8 +265,6 @@ public class SimulationRunner
             info = new SimulationTestInfo();
             info.name = mCurrentTest.getTestDescription();
             info.simulationResult = new SimulationResult();
-            info.simulationResult.result = TestResult.NA;
-            
             info.simulationInput = csvDataList;
             info.inputCcuState = appState;
             mEnv.testSuite.addSimulationTest(mCurrentTest.getTestDescription(),info);
@@ -195,14 +274,27 @@ public class SimulationRunner
         //http://localhost:5000/log/smartnode?address=2000&since=05-April-2017_17:00:40&limit_results=1
         for(int node = 0; node < mNodes.size();node++)
         {
-            postJson("http://10.0.2.2:5000/nodetype/", getSmartnodeType());
-            String params = getResult("http://10.0.2.2:5000/log/smartnode?address=" + mNodes.get(node) + "&since=" + curTime + "&limit_results=1");
-            info.nodeParams.add(SmartNodeParams.getParamsFromJson(params));
+            //executePost("http://10.0.2.2:5000/nodetype/", getSmartnodeType());
+            //String params = getResult("http://10.0.2.2:5000/log/smartnode?address=" + mNodes.get(node) + "&since=" + curTime + "&limit_results=1");
+            String params = getResult("http://10.0.2.2:5000/log/smartnode?address=" + mNodes.get(node) + "&since=" + curTime);
+            try
+            {
+                JSONArray jsonArray = new JSONArray(params);
+                ArrayList<String> list = new ArrayList<String>();
+    
+                for (int i = 0; i < jsonArray.length(); i++)
+                {
+                    list.add(jsonArray.get(i).toString());
+                    info.nodeParams.add(SmartNodeParams.getParamsFromJson(jsonArray.get(i).toString()));
+                }
+                
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
-        
+        info.simulationResult.result = mCurrentTest.analyzeTestResults(info);
         //String params2 = SimulationInputParser.readFileFromAssets(SimulationContext.getInstance().getContext(), "ccustates/testresult1.json");
         //info.nodeParams.add(SmartNodeParams.getParamsFromJson(params2));
-        
         
     }
     

@@ -234,5 +234,4 @@ public class Schedule
         boolean isCurrentTimeInSchedule = isInSchedule(MockTime.getInstance().getMockTime());
         return isOverrideTimeInSchedule != isCurrentTimeInSchedule;
     }
-
 }

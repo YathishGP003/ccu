@@ -1,1 +1,281 @@
-{ "controlMote" : { "controlMoteOutputInput" : "Control Mote settings go here" }, "systemProfile" : { "schedule" : { "days" : [ ], "mValidSchedule" : false } }, "defaultCCUTuners" : { "userMinTemp" : 70, "buildingMaxTemp" : 85, "sseHeatingDeadBand" : 1, "buildingMinTemp" : 60, "lightingIntensityOccupantDetected" : 75, "userMaxTemp" : 73, "minLightControlOverInMinutes" : 20, "sseCoolingDeadBand" : 1, "zoneSetBack" : 5 }, "defaultLightSchedule" : [ { "days" : [ { "day" : 0, "ethh" : 17, "etmm" : 30, "sthh" : 8, "stmm" : 0, "sunrise" : false, "sunset" : false, "val" : 100 }, { "day" : 1, "ethh" : 17, "etmm" : 30, "sthh" : 8, "stmm" : 0, "sunrise" : false, "sunset" : false, "val" : 100 }, { "day" : 2, "ethh" : 17, "etmm" : 30, "sthh" : 8, "stmm" : 0, "sunrise" : false, "sunset" : false, "val" : 100 }, { "day" : 3, "ethh" : 17, "etmm" : 30, "sthh" : 8, "stmm" : 0, "sunrise" : false, "sunset" : false, "val" : 100 }, { "day" : 4, "ethh" : 17, "etmm" : 30, "sthh" : 8, "stmm" : 0, "sunrise" : false, "sunset" : false, "val" : 100 } ], "mValidSchedule" : false } ], "defaultTemperatureSchedule" : [ { "days" : [ { "day" : 0, "ethh" : 17, "etmm" : 30, "sthh" : 8, "stmm" : 0, "sunrise" : false, "sunset" : false, "val" : 100 }, { "day" : 1, "ethh" : 17, "etmm" : 30, "sthh" : 8, "stmm" : 0, "sunrise" : false, "sunset" : false, "val" : 100 }, { "day" : 2, "ethh" : 17, "etmm" : 30, "sthh" : 8, "stmm" : 0, "sunrise" : false, "sunset" : false, "val" : 100 }, { "day" : 3, "ethh" : 17, "etmm" : 30, "sthh" : 8, "stmm" : 0, "sunrise" : false, "sunset" : false, "val" : 100 }, { "day" : 4, "ethh" : 17, "etmm" : 30, "sthh" : 8, "stmm" : 0, "sunrise" : false, "sunset" : false, "val" : 100 } ], "mValidSchedule" : false } ], "floors" : [ { "mFloorId" : 0, "mFloorName" : "ssefloor", "mKinveyWebId" : "", "mRoomList" : [ { "mZoneProfiles" : [ { "clazz" : "a75f.io.bo.building.LightProfile", "mLogicalValue" : 0, "mNamedSchedule" : "", "mOverrideType" : "NONE", "mScheduleMode" : "ZoneSchedule", "mSchedules" : [ ], "mProfileConfiguration" : { }, "profileConfiguration" : { }, "logicalValue" : 0, "namedSchedule" : "", "overrideMillis" : 0, "overrideType" : "NONE", "scheduleMode" : "ZoneSchedule", "schedules" : [ ] }, { "clazz" : "a75f.io.bo.building.SingleStageProfile", "mLogicalValue" : 0, "mNamedSchedule" : "", "mOverrideType" : "NONE", "mScheduleMode" : "SystemSchedule", "mSchedules" : [ { "days" : [ { "day" : 0, "ethh" : 17, "etmm" : 30, "sthh" : 8, "stmm" : 0, "sunrise" : false, "sunset" : false, "val" : 100 }, { "day" : 1, "ethh" : 17, "etmm" : 30, "sthh" : 8, "stmm" : 0, "sunrise" : false, "sunset" : false, "val" : 100 }, { "day" : 2, "ethh" : 17, "etmm" : 30, "sthh" : 8, "stmm" : 0, "sunrise" : false, "sunset" : false, "val" : 100 }, { "day" : 3, "ethh" : 17, "etmm" : 30, "sthh" : 8, "stmm" : 0, "sunrise" : false, "sunset" : false, "val" : 100 }, { "day" : 4, "ethh" : 17, "etmm" : 30, "sthh" : 8, "stmm" : 0, "sunrise" : false, "sunset" : false, "val" : 100 } ], "mValidSchedule" : false } ], "mProfileConfiguration" : { "0" : { "clazz" : "a75f.io.bo.building.BaseProfileConfiguration", "mInputs" : [ ], "mNodeAddress" : 0, "mNodeType" : "SMART_NODE", "mOutputs" : [ { "mLogicalValue" : 0, "mNamedSchedule" : "", "mOverrideType" : "NONE", "mScheduleMode" : "ZoneSchedule", "mSchedules" : [ ], "mAddress" : 0, "mName" : "sseheat", "mPort" : "RELAY_ONE", "mTestVal" : 0, "uuid" : "d6475023-d6c1-4cd7-ba31-095f21826951", "mOutputRelayActuatorType" : "NormallyOpen", "address" : 0, "name" : "sseheat", "port" : "RELAY_ONE", "logicalValue" : 0, "namedSchedule" : "", "overrideMillis" : 0, "overrideType" : "NONE", "scheduleMode" : "ZoneSchedule", "schedules" : [ ] }, { "mLogicalValue" : 0, "mNamedSchedule" : "", "mOverrideType" : "NONE", "mScheduleMode" : "ZoneSchedule", "mSchedules" : [ ], "mAddress" : 0, "mName" : "ssefan", "mPort" : "RELAY_TWO", "mTestVal" : 0, "uuid" : "ad0372d8-458e-46e5-bc1e-2c6fb6388aa1", "mOutputRelayActuatorType" : "NormallyOpen", "address" : 0, "name" : "ssefan", "port" : "RELAY_TWO", "logicalValue" : 0, "namedSchedule" : "", "overrideMillis" : 0, "overrideType" : "NONE", "scheduleMode" : "ZoneSchedule", "schedules" : [ ] } ], "inputs" : [ ], "nodeAddress" : 0, "nodeType" : "SMART_NODE", "outputs" : [ { "mLogicalValue" : 0, "mNamedSchedule" : "", "mOverrideType" : "NONE", "mScheduleMode" : "ZoneSchedule", "mSchedules" : [ ], "mAddress" : 0, "mName" : "sseheat", "mPort" : "RELAY_ONE", "mTestVal" : 0, "uuid" : "d6475023-d6c1-4cd7-ba31-095f21826951", "mOutputRelayActuatorType" : "NormallyOpen", "address" : 0, "name" : "sseheat", "port" : "RELAY_ONE", "logicalValue" : 0, "namedSchedule" : "", "overrideMillis" : 0, "overrideType" : "NONE", "scheduleMode" : "ZoneSchedule", "schedules" : [ ] }, { "mLogicalValue" : 0, "mNamedSchedule" : "", "mOverrideType" : "NONE", "mScheduleMode" : "ZoneSchedule", "mSchedules" : [ ], "mAddress" : 0, "mName" : "ssefan", "mPort" : "RELAY_TWO", "mTestVal" : 0, "uuid" : "ad0372d8-458e-46e5-bc1e-2c6fb6388aa1", "mOutputRelayActuatorType" : "NormallyOpen", "address" : 0, "name" : "ssefan", "port" : "RELAY_TWO", "logicalValue" : 0, "namedSchedule" : "", "overrideMillis" : 0, "overrideType" : "NONE", "scheduleMode" : "ZoneSchedule", "schedules" : [ ] } ] } }, "mLogicalMap" : { "0" : { "logicalMap" : { "RELAY_ONE" : "HEATING", "RELAY_TWO" : "FAN" }, "roomTemperature" : 0.0 } }, "logicalMap" : { "0" : { "logicalMap" : { "RELAY_ONE" : "HEATING", "RELAY_TWO" : "FAN" }, "roomTemperature" : 0.0 } }, "profileConfiguration" : { "0" : { "clazz" : "a75f.io.bo.building.BaseProfileConfiguration", "mInputs" : [ ], "mNodeAddress" : 0, "mNodeType" : "SMART_NODE", "mOutputs" : [ { "mLogicalValue" : 0, "mNamedSchedule" : "", "mOverrideType" : "NONE", "mScheduleMode" : "ZoneSchedule", "mSchedules" : [ ], "mAddress" : 0, "mName" : "sseheat", "mPort" : "RELAY_ONE", "mTestVal" : 0, "uuid" : "d6475023-d6c1-4cd7-ba31-095f21826951", "mOutputRelayActuatorType" : "NormallyOpen", "address" : 0, "name" : "sseheat", "port" : "RELAY_ONE", "logicalValue" : 0, "namedSchedule" : "", "overrideMillis" : 0, "overrideType" : "NONE", "scheduleMode" : "ZoneSchedule", "schedules" : [ ] }, { "mLogicalValue" : 0, "mNamedSchedule" : "", "mOverrideType" : "NONE", "mScheduleMode" : "ZoneSchedule", "mSchedules" : [ ], "mAddress" : 0, "mName" : "ssefan", "mPort" : "RELAY_TWO", "mTestVal" : 0, "uuid" : "ad0372d8-458e-46e5-bc1e-2c6fb6388aa1", "mOutputRelayActuatorType" : "NormallyOpen", "address" : 0, "name" : "ssefan", "port" : "RELAY_TWO", "logicalValue" : 0, "namedSchedule" : "", "overrideMillis" : 0, "overrideType" : "NONE", "scheduleMode" : "ZoneSchedule", "schedules" : [ ] } ], "inputs" : [ ], "nodeAddress" : 0, "nodeType" : "SMART_NODE", "outputs" : [ { "mLogicalValue" : 0, "mNamedSchedule" : "", "mOverrideType" : "NONE", "mScheduleMode" : "ZoneSchedule", "mSchedules" : [ ], "mAddress" : 0, "mName" : "sseheat", "mPort" : "RELAY_ONE", "mTestVal" : 0, "uuid" : "d6475023-d6c1-4cd7-ba31-095f21826951", "mOutputRelayActuatorType" : "NormallyOpen", "address" : 0, "name" : "sseheat", "port" : "RELAY_ONE", "logicalValue" : 0, "namedSchedule" : "", "overrideMillis" : 0, "overrideType" : "NONE", "scheduleMode" : "ZoneSchedule", "schedules" : [ ] }, { "mLogicalValue" : 0, "mNamedSchedule" : "", "mOverrideType" : "NONE", "mScheduleMode" : "ZoneSchedule", "mSchedules" : [ ], "mAddress" : 0, "mName" : "ssefan", "mPort" : "RELAY_TWO", "mTestVal" : 0, "uuid" : "ad0372d8-458e-46e5-bc1e-2c6fb6388aa1", "mOutputRelayActuatorType" : "NormallyOpen", "address" : 0, "name" : "ssefan", "port" : "RELAY_TWO", "logicalValue" : 0, "namedSchedule" : "", "overrideMillis" : 0, "overrideType" : "NONE", "scheduleMode" : "ZoneSchedule", "schedules" : [ ] } ] } }, "logicalValue" : 0, "namedSchedule" : "", "overrideMillis" : 0, "overrideType" : "NONE", "scheduleMode" : "SystemSchedule", "schedules" : [ { "days" : [ { "day" : 0, "ethh" : 17, "etmm" : 30, "sthh" : 8, "stmm" : 0, "sunrise" : false, "sunset" : false, "val" : 100 }, { "day" : 1, "ethh" : 17, "etmm" : 30, "sthh" : 8, "stmm" : 0, "sunrise" : false, "sunset" : false, "val" : 100 }, { "day" : 2, "ethh" : 17, "etmm" : 30, "sthh" : 8, "stmm" : 0, "sunrise" : false, "sunset" : false, "val" : 100 }, { "day" : 3, "ethh" : 17, "etmm" : 30, "sthh" : 8, "stmm" : 0, "sunrise" : false, "sunset" : false, "val" : 100 }, { "day" : 4, "ethh" : 17, "etmm" : 30, "sthh" : 8, "stmm" : 0, "sunrise" : false, "sunset" : false, "val" : 100 } ], "mValidSchedule" : false } ] } ], "roomName" : "sseroom", "nodes" : [ 0 ], "tuningParameters" : { } } ] } ], "lcmnamedSchedules" : { "LCM Named Schedule" : { "name" : "LCM Named Schedule", "schedule" : [ { "days" : [ { "day" : 0, "ethh" : 17, "etmm" : 30, "sthh" : 8, "stmm" : 0, "sunrise" : false, "sunset" : false, "val" : 100 }, { "day" : 1, "ethh" : 17, "etmm" : 30, "sthh" : 8, "stmm" : 0, "sunrise" : false, "sunset" : false, "val" : 100 }, { "day" : 2, "ethh" : 17, "etmm" : 30, "sthh" : 8, "stmm" : 0, "sunrise" : false, "sunset" : false, "val" : 100 }, { "day" : 3, "ethh" : 17, "etmm" : 30, "sthh" : 8, "stmm" : 0, "sunrise" : false, "sunset" : false, "val" : 100 }, { "day" : 4, "ethh" : 17, "etmm" : 30, "sthh" : 8, "stmm" : 0, "sunrise" : false, "sunset" : false, "val" : 100 } ], "mValidSchedule" : false } ] } }, "smartNodeAddressBand" : 0, "title" : "" }
+{
+  "controlMote" : {
+    "controlMoteOutputInput" : "Control Mote settings go here"
+  },
+  "systemProfile" : {
+    "schedule" : {
+      "days" : [ ]
+    }
+  },
+  "defaultCCUTuners" : {
+    "userMinTemp" : 70,
+    "buildingMaxTemp" : 85,
+    "sseHeatingDeadBand" : 1,
+    "buildingMinTemp" : 60,
+    "lightingIntensityOccupantDetected" : 75,
+    "userMaxTemp" : 73,
+    "minLightControlOverInMinutes" : 20,
+    "sseCoolingDeadBand" : 1,
+    "zoneSetBack" : 5
+  },
+  "defaultLightSchedule" : [ {
+    "days" : [ {
+      "day" : 0,
+      "ethh" : 17,
+      "etmm" : 30,
+      "sthh" : 8,
+      "stmm" : 0,
+      "val" : 100
+    }, {
+      "day" : 1,
+      "ethh" : 17,
+      "etmm" : 30,
+      "sthh" : 8,
+      "stmm" : 0,
+      "val" : 100
+    }, {
+      "day" : 2,
+      "ethh" : 17,
+      "etmm" : 30,
+      "sthh" : 8,
+      "stmm" : 0,
+      "val" : 100
+    }, {
+      "day" : 3,
+      "ethh" : 17,
+      "etmm" : 30,
+      "sthh" : 8,
+      "stmm" : 0,
+      "val" : 100
+    }, {
+      "day" : 4,
+      "ethh" : 17,
+      "etmm" : 30,
+      "sthh" : 8,
+      "stmm" : 0,
+      "val" : 100
+    } ]
+  } ],
+  "defaultTemperatureSchedule" : [ {
+    "days" : [ {
+      "day" : 0,
+      "ethh" : 17,
+      "etmm" : 30,
+      "sthh" : 8,
+      "stmm" : 0,
+      "val" : 75
+    }, {
+      "day" : 1,
+      "ethh" : 17,
+      "etmm" : 30,
+      "sthh" : 8,
+      "stmm" : 0,
+      "val" : 75
+    }, {
+      "day" : 2,
+      "ethh" : 17,
+      "etmm" : 30,
+      "sthh" : 8,
+      "stmm" : 0,
+      "val" : 75
+    }, {
+      "day" : 3,
+      "ethh" : 17,
+      "etmm" : 30,
+      "sthh" : 8,
+      "stmm" : 0,
+      "val" : 75
+    }, {
+      "day" : 4,
+      "ethh" : 17,
+      "etmm" : 30,
+      "sthh" : 8,
+      "stmm" : 0,
+      "val" : 75
+    } ]
+  } ],
+  "floors" : [ {
+    "mFloorId" : 0,
+    "mFloorName" : "floorsse",
+    "mKinveyWebId" : "",
+    "mRoomList" : [ {
+      "mZoneProfiles" : [ {
+        "clazz" : "a75f.io.bo.building.SingleStageProfile",
+        "logicalMap" : {
+          "7001" : {
+            "logicalMap" : {
+              "RELAY_ONE" : "HEATING",
+              "RELAY_TWO" : "FAN"
+            },
+            "roomTemperature" : 0.0
+          }
+        },
+        "profileConfiguration" : {
+          "7001" : {
+            "clazz" : "a75f.io.bo.building.BaseProfileConfiguration",
+            "inputs" : [ ],
+            "nodeAddress" : 7001,
+            "nodeType" : "SMART_NODE",
+            "outputs" : [ {
+              "uuid" : "cbdc7da4-debf-4744-9ec1-a4191d7c81be",
+              "mOutputRelayActuatorType" : "NormallyOpen",
+              "address" : 0,
+              "name" : "he",
+              "port" : "RELAY_ONE",
+              "logicalValue" : 0,
+              "namedSchedule" : "",
+              "overrideMillis" : 0,
+              "overrideType" : "NONE",
+              "scheduleMode" : "ZoneSchedule",
+              "schedules" : [ ]
+            }, {
+              "uuid" : "a217d4dc-3682-4600-b477-0f9353142428",
+              "mOutputRelayActuatorType" : "NormallyOpen",
+              "address" : 7001,
+              "name" : "fa",
+              "port" : "RELAY_TWO",
+              "logicalValue" : 0,
+              "namedSchedule" : "",
+              "overrideMillis" : 0,
+              "overrideType" : "NONE",
+              "scheduleMode" : "ZoneSchedule",
+              "schedules" : [ ]
+            } ]
+          }
+        },
+        "logicalValue" : 0,
+        "namedSchedule" : "",
+        "overrideMillis" : 0,
+        "overrideType" : "NONE",
+        "scheduleMode" : "SystemSchedule",
+        "schedules" : [ {
+          "days" : [ {
+            "day" : 0,
+            "ethh" : 17,
+            "etmm" : 30,
+            "sthh" : 8,
+            "stmm" : 0,
+            "val" : 75
+          }, {
+            "day" : 1,
+            "ethh" : 17,
+            "etmm" : 30,
+            "sthh" : 8,
+            "stmm" : 0,
+            "val" : 75
+          }, {
+            "day" : 2,
+            "ethh" : 17,
+            "etmm" : 30,
+            "sthh" : 8,
+            "stmm" : 0,
+            "val" : 75
+          }, {
+            "day" : 3,
+            "ethh" : 17,
+            "etmm" : 30,
+            "sthh" : 8,
+            "stmm" : 0,
+            "val" : 75
+          }, {
+            "day" : 4,
+            "ethh" : 17,
+            "etmm" : 30,
+            "sthh" : 8,
+            "stmm" : 0,
+            "val" : 75
+          } ]
+        } ]
+      } ],
+      "roomName" : "roomsse",
+      "nodes" : [ 7001 ],
+      "tuningParameters" : { }
+    } ]
+  } ],
+  "lcmnamedSchedules" : {
+    "LCM Named Schedule 100" : {
+      "name" : "LCM Named Schedule 100",
+      "schedule" : [ {
+        "days" : [ {
+          "day" : 0,
+          "ethh" : 17,
+          "etmm" : 30,
+          "sthh" : 8,
+          "stmm" : 0,
+          "val" : 100
+        }, {
+          "day" : 1,
+          "ethh" : 17,
+          "etmm" : 30,
+          "sthh" : 8,
+          "stmm" : 0,
+          "val" : 100
+        }, {
+          "day" : 2,
+          "ethh" : 17,
+          "etmm" : 30,
+          "sthh" : 8,
+          "stmm" : 0,
+          "val" : 100
+        }, {
+          "day" : 3,
+          "ethh" : 17,
+          "etmm" : 30,
+          "sthh" : 8,
+          "stmm" : 0,
+          "val" : 100
+        }, {
+          "day" : 4,
+          "ethh" : 17,
+          "etmm" : 30,
+          "sthh" : 8,
+          "stmm" : 0,
+          "val" : 100
+        } ]
+      } ]
+    },
+    "LCM Named Schedule 75" : {
+      "name" : "LCM Named Schedule 75",
+      "schedule" : [ {
+        "days" : [ {
+          "day" : 0,
+          "ethh" : 17,
+          "etmm" : 30,
+          "sthh" : 8,
+          "stmm" : 0,
+          "val" : 75
+        }, {
+          "day" : 1,
+          "ethh" : 17,
+          "etmm" : 30,
+          "sthh" : 8,
+          "stmm" : 0,
+          "val" : 75
+        }, {
+          "day" : 2,
+          "ethh" : 17,
+          "etmm" : 30,
+          "sthh" : 8,
+          "stmm" : 0,
+          "val" : 75
+        }, {
+          "day" : 3,
+          "ethh" : 17,
+          "etmm" : 30,
+          "sthh" : 8,
+          "stmm" : 0,
+          "val" : 75
+        }, {
+          "day" : 4,
+          "ethh" : 17,
+          "etmm" : 30,
+          "sthh" : 8,
+          "stmm" : 0,
+          "val" : 75
+        } ]
+      } ]
+    }
+  },
+  "smartNodeAddressBand" : 7001,
+  "title" : ""
+}

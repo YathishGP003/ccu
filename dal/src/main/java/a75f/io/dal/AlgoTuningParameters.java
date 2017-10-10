@@ -10,44 +10,44 @@ import java.util.HashMap;
 
 public class AlgoTuningParameters
 {
-            //Max volume limit is 7;
+    //Max volume limit is 7;
     public static final int     LIGHTING_INTENSITY_OCCUPANT_DETECTED     = 75;
     public static final int     MIN_LIGHTING_CONTROL_OVERRIDE_IN_MINUTES = 20;
-    static final String KINVEY_COLLECTION_NAME = "00AlgoTuningParameters";
-    static final int    ALGO_TUNERS_VERSION    = 62;
-    static final int     ZONE_DEAD_TIME                    = 15;
-    static final int     BUILDING_TO_ZONE_DIFF             = 3;
-    static final int     CM_HEART_BEAT_INTERVAL            = 1;
-    static final int     HEART_BEAT_TO_SKIP                = 5;
-    static final double  AUTO_MODE_CHANGE_OVER_MULTIPLER   = 1.0;
-    static final int     AUTO_WAY_TIME                     = 60;
-    static final int     REBALANCE_HOLD_TIME               = 20;
-    static final int     FORCED_OCCUPIED_TIME              = 120;
-    static final int     COOLING_AIRFLOW_TEMP              = 60;
-    static final int     HEATING_AIRFLOW_TEMP              = 105;
-    static final int     COOLING_AIRFLOW_TEMP_LOWER_OFFSET = -20;
-    static final int     COOLING_AIRFLOW_TEMP_UPPER_OFFSET = -8;
-    static final int     HEATING_AIRFLOW_TEMP_LOWER_OFFSET = 25;
-    static final int     HEATING_AIRFLOW_TEMP_UPPER_OFFSET = 40;
-    static final int     AIRFLOW_TEMP_BREACH_HOLD_DOWN     = 5;
-    static final int     HUMIDITY_THRESHOLD                = 35;
-    static final int     HUMIDITY_COMP_FACTOR              = 10;
-    static final boolean USE_SAME_OCCU_TEMP_ACROSS_DAYS    = true;
-    static final int     DCV_CO2_THRESHOLD_LEVEL           = 1000;
-    static final int     DCV_DAMPER_OPENING_RATE           = 10;
-    static final int     DUMB_MODE_DCV_DAMPER_OPENING      = 30;
-    static final int     ABNORMAL_CUR_TEMP_TRIGGER_VAL     = 4;
-    static final int     USER_LIMIT_SPREAD                 = 3;
-    static final int     PRECONDTION_RATE                  = 15;
-    static final double  SETBACK_MULTIPLIER                = 1.5;
-    static final int     ENTHALPY_COMPENSATION             = 0;
-    static final int     OUTSIDE_AIR_MIN_TEMP              = 0;
-    static final int     OUTSIDE_AIR_MAX_TEMP              = 70;
-    static final int     OUTSIDE_AIR_MIN_HUMIDITY          = 10;
-    static final int     OUTSIDE_AIR_MAX_HUMIDITY          = 95;
-    static final int     ECONOMIZER_LOAD_THRESHOLD         = 30;
-    static final int     ECONOMIZER_HOLDTIME               = 15;
-    static final int     ECONOMIZER_LOAD_DROP              = 30;
+    static final        String  KINVEY_COLLECTION_NAME                   = "00AlgoTuningParameters";
+    static final        int     ALGO_TUNERS_VERSION                      = 62;
+    static final        int     ZONE_DEAD_TIME                           = 15;
+    static final        int     BUILDING_TO_ZONE_DIFF                    = 3;
+    static final        int     CM_HEART_BEAT_INTERVAL                   = 1;
+    static final        int     HEART_BEAT_TO_SKIP                       = 5;
+    static final        double  AUTO_MODE_CHANGE_OVER_MULTIPLER          = 1.0;
+    static final        int     AUTO_WAY_TIME                            = 60;
+    static final        int     REBALANCE_HOLD_TIME                      = 20;
+    static final        int     FORCED_OCCUPIED_TIME                     = 120;
+    static final        int     COOLING_AIRFLOW_TEMP                     = 60;
+    static final        int     HEATING_AIRFLOW_TEMP                     = 105;
+    static final        int     COOLING_AIRFLOW_TEMP_LOWER_OFFSET        = -20;
+    static final        int     COOLING_AIRFLOW_TEMP_UPPER_OFFSET        = -8;
+    static final        int     HEATING_AIRFLOW_TEMP_LOWER_OFFSET        = 25;
+    static final        int     HEATING_AIRFLOW_TEMP_UPPER_OFFSET        = 40;
+    static final        int     AIRFLOW_TEMP_BREACH_HOLD_DOWN            = 5;
+    static final        int     HUMIDITY_THRESHOLD                       = 35;
+    static final        int     HUMIDITY_COMP_FACTOR                     = 10;
+    static final        boolean USE_SAME_OCCU_TEMP_ACROSS_DAYS           = true;
+    static final        int     DCV_CO2_THRESHOLD_LEVEL                  = 1000;
+    static final        int     DCV_DAMPER_OPENING_RATE                  = 10;
+    static final        int     DUMB_MODE_DCV_DAMPER_OPENING             = 30;
+    static final        int     ABNORMAL_CUR_TEMP_TRIGGER_VAL            = 4;
+    static final        int     USER_LIMIT_SPREAD                        = 3;
+    static final        int     PRECONDTION_RATE                         = 15;
+    static final        double  SETBACK_MULTIPLIER                       = 1.5;
+    static final        int     ENTHALPY_COMPENSATION                    = 0;
+    static final        int     OUTSIDE_AIR_MIN_TEMP                     = 0;
+    static final        int     OUTSIDE_AIR_MAX_TEMP                     = 70;
+    static final        int     OUTSIDE_AIR_MIN_HUMIDITY                 = 10;
+    static final        int     OUTSIDE_AIR_MAX_HUMIDITY                 = 95;
+    static final        int     ECONOMIZER_LOAD_THRESHOLD                = 30;
+    static final        int     ECONOMIZER_HOLDTIME                      = 15;
+    static final        int     ECONOMIZER_LOAD_DROP                     = 30;
     static final        double  ANALOG_FAN_SPEED_MULTIPLIER              = 1.0;
     static final        int     ANALOG_MIN_HEATING                       = 50;
     static final        int     ANALOG_MAX_HEATING                       = 20;
@@ -56,7 +56,7 @@ public class AlgoTuningParameters
     //default values for algo tuners
     static final        double  PC_CONST                                 = 0.5; //prpcontrlConstant
     static final        double  IC_CONST                                 = 0.5;
-            // mIntegCtrlConstant
+    // mIntegCtrlConstant
     static final        int     CUM_DAMPER_POS_TARGET                    = 70;
     static final        int     IC_TIMEOUT                               = 30;
     static final        double  PC_SPREAD                                = 2.0;
@@ -149,6 +149,7 @@ public class AlgoTuningParameters
     static final        int     SSE_COOLING_DEADBAND                     = 1;  //(°F)
     static final        int     SSE_HEATING_DEADBAND                     = 1;  //(°F)
     static final        int     ENERGY_METER_SETPOINT                    = 10;
+    static final        int     SSE_ZONE_SETBACK                         = 5;
     
     @Key("_id")
     private String id = "0";
@@ -451,34 +452,34 @@ public class AlgoTuningParameters
     private int mAnalog3MaxValue               = ANALOG3_MAX_VALUE;
     @Key
     private int mCoolingAirflowTempLowerOffset = COOLING_AIRFLOW_TEMP_LOWER_OFFSET;
-            // default offset -20
+    // default offset -20
     
     @Key
     private int mCoolingAirflowTempUpperOffset = COOLING_AIRFLOW_TEMP_UPPER_OFFSET;
-            //default offset -8
+    //default offset -8
     
     @Key
     private int mHeatingAirflowTempLowerOffset = HEATING_AIRFLOW_TEMP_LOWER_OFFSET;
-            //default offset 25
+    //default offset 25
     
     @Key
     private int mHeatingAirflowTempUpperOffset  = HEATING_AIRFLOW_TEMP_UPPER_OFFSET;
-            //default offset 40
+    //default offset 40
     @Key
     private int mCoolingAirflow2TempLowerOffset = COOLING_AIRFLOW_TEMP_STAGE2_LOWER_OFFSET;
-            //default offset -25
+    //default offset -25
     
     @Key
     private int mCoolingAirflow2TempUpperOffset = COOLING_AIRFLOW_TEMP_STAGE2_UPPER_OFFSET;
-            //default offset -12
+    //default offset -12
     
     @Key
     private int mHeatingAirflow2TempLowerOffset = HEATING_AIRFLOW_TEMP_STAGE2_LOWER_OFFSET;
-            //default offset 35
+    //default offset 35
     
     @Key
     private int mHeatingAirflow2TempUpperOffset = HEATING_AIRFLOW_TEMP_STAGE2_UPPER_OFFSET;
-            //default offset 50
+    //default offset 50
     
     @Key
     private int mChilledWaterDeltaTSetpoint = CHILLED_WATER_DELTAT_SETPOINT; // default 10
@@ -2166,6 +2167,13 @@ public class AlgoTuningParameters
         algoHashMap
                 .put("lightingIntensityOccupantDetected", getmLightingIntensityForOccupancyDetect());
         algoHashMap.put("minLightControlOverInMinutes", getmMinLightingControlOverrideInMinutes());
+        algoHashMap.put("sseCoolingDeadBand", SSE_COOLING_DEADBAND);
+        algoHashMap.put("sseHeatingDeadBand", SSE_HEATING_DEADBAND);
+        algoHashMap.put("buildingMaxTemp", mBuildingAllowNoHotter);
+        algoHashMap.put("buildingMinTemp", mBuildingAllowNoCooler);
+        algoHashMap.put("userMaxTemp", mUserAllowNoHotter);
+        algoHashMap.put("userMinTemp", mUserAllowNoCooler);
+        algoHashMap.put("zoneSetBack", SSE_ZONE_SETBACK);
         return algoHashMap;
     }
     //lightingIntensityOccupantDetected

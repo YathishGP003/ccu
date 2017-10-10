@@ -141,29 +141,45 @@ class Globals
         {
             //Mock schedule M-F, 8AM - 5:30PM turn isOn lights to value 100.
             //Mock schedule M-F, 8AM - 5:30PM turn isOn lights to value 100.
-            Schedule schedule = new Schedule();
-            int[] ints = {0, 1, 2, 3, 4};
-            ArrayList<Day> intsaslist = new ArrayList<Day>();
-            for(int i : ints)
-            { //as
-                Day day = new Day();
-                day.setDay(i);
-                day.setSthh(8);
-                day.setStmm(00);
-                day.setEthh(17);
-                day.setEtmm(30);
-                day.setVal((short) 100);
-                intsaslist.add(day);
-            }
-            schedule.setDays(intsaslist);
+            
+            
             NamedSchedule namedSchedule = new NamedSchedule();
-            namedSchedule.setName("LCM Named Schedule");
-            ArrayList<Schedule> schedules = new ArrayList<Schedule>();
-            schedules.add(schedule);
-            namedSchedule.setSchedule(schedules);
+            namedSchedule.setName("LCM Named Schedule 100");
+            namedSchedule.setSchedule(getSchedules(100));
+    
+    
+            NamedSchedule namedScheduleTwo = new NamedSchedule();
+            namedScheduleTwo.setName("LCM Named Schedule 75");
+            namedScheduleTwo.setSchedule(getSchedules(75));
+            
             ccu().getLCMNamedSchedules().put(namedSchedule.getName(), namedSchedule);
-            ccu().setDefaultLightSchedule(schedules);
-            ccu().setDefaultTemperatureSchedule(schedules);
+            ccu().getLCMNamedSchedules().put(namedScheduleTwo.getName(), namedScheduleTwo);
+            ccu().setDefaultLightSchedule(getSchedules(100));
+            ccu().setDefaultTemperatureSchedule(getSchedules(75));
         }
     }
+    
+    private ArrayList<Schedule> getSchedules(int val)
+    {
+        Schedule schedule = new Schedule();
+        int[] ints = {0, 1, 2, 3, 4};
+        ArrayList<Day> intsaslist = new ArrayList<Day>();
+        for(int i : ints)
+        { //as
+            Day day = new Day();
+            day.setDay(i);
+            day.setSthh(8);
+            day.setStmm(00);
+            day.setEthh(17);
+            day.setEtmm(30);
+            day.setVal((short) val);
+            intsaslist.add(day);
+        }
+        schedule.setDays(intsaslist);
+        ArrayList<Schedule> schedules = new ArrayList<Schedule>();
+        schedules.add(schedule);
+        
+        return schedules;
+    }
+    
 }

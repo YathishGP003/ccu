@@ -30,7 +30,7 @@ public class SSEHeatingTest extends BaseSimulationTest
     
     @Override
     public String getCCUStateFileName() {
-        return "demoappstate.json";
+        return "sseheatccustate.json";
     }
     
     @Override

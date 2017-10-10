@@ -38,7 +38,7 @@ public class SingleStageProfile extends ZoneProfile
     @Override
     public void mapRegularUpdate(CmToCcuOverUsbSnRegularUpdateMessage_t regularUpdateMessage)
     {
-        float roomTemperature = (float) regularUpdateMessage.update.roomTemperature.get() / 2.0f;
+        float roomTemperature = (float) regularUpdateMessage.update.roomTemperature.get() / 10.0f;
         mLogicalMap.get(Short.valueOf((short) regularUpdateMessage.update.smartNodeAddress.get())).setRoomTemperature(roomTemperature);
         Log.i("SingleStageProfile", "SingleStageProfile RoomTemperature Update: " + roomTemperature + "");
     }

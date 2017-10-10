@@ -23,7 +23,7 @@
 -->
 <resources>
 
-    <declare-styleable name="SeekArc">
+    <declare-styleable name="SeekArcWidget">
         <attr name="thumb" format="reference" />
         <attr name="thumbOffset" format="dimension" />
         <attr name="max" format="integer" />

@@ -172,11 +172,23 @@ class LZoneProfile
         return null;
     }
     
+    public static short resolveAnyValue(ZoneProfile zoneProfile)
+    {
+        if(zoneProfile.hasSchedules())
+        {
+            Schedule schedule = zoneProfile.getSchedules().get(0);
+            Day day = schedule.getDays().get(0);
+            return day.getVal();
+        }
+        
+        return 0;
+    }
+    
     public static boolean isNamedSchedule(Schedulable schedulable)
     {
         return schedulable.getNamedSchedule() != null && !schedulable.getNamedSchedule().equals("");
     }
-    public static int resolveZoneProfileLogicalValue(ZoneProfile profile)
+    public static short resolveZoneProfileLogicalValue(ZoneProfile profile)
     {
         return resolveLogicalValue(profile);
     }

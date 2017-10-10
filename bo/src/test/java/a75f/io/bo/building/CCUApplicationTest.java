@@ -5,9 +5,12 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import a75f.io.bo.building.definitions.OutputAnalogActuatorType;
+import a75f.io.bo.building.definitions.Port;
 import a75f.io.bo.building.definitions.ProfileType;
+import a75f.io.bo.building.definitions.ScheduleMode;
 import a75f.io.bo.json.serializers.JsonSerializer;
 
 /**
@@ -31,6 +34,7 @@ public class CCUApplicationTest
         ccuApplication.getFloors().add(floor);
         //ccuApplication.floors.get(0).mRoomList.get(0).add(p1);
         Output op1 = new Output();
+        op1.setPort(Port.ANALOG_OUT_ONE);
         op1.setAddress(nodeAddress);
         op1.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
         op1.mName = "Dining Room";
@@ -39,7 +43,28 @@ public class CCUApplicationTest
         op2.setAddress(nodeAddress);
         op2.mOutputAnalogActuatorType = OutputAnalogActuatorType.ZeroToTenV;
         op2.mName = "Kitchen";
+        op2.setPort(Port.ANALOG_OUT_TWO);
         lightProfileConfiguration.getOutputs().add(op2);
+        
+        Schedule schedule = new Schedule();
+        int[] ints = {1, 2, 3, 4, 5};
+        ArrayList<Day> intsaslist = new ArrayList<Day>();
+        for(int i : ints)
+        { //as
+            Day day = new Day();
+            day.setDay(i);
+            day.setSthh(8);
+            day.setStmm(00);
+            day.setEthh(17);
+            day.setEtmm(30);
+            day.setVal((short) 100);
+            intsaslist.add(day);
+        }
+        schedule.setDays(intsaslist);
+        ArrayList<Schedule> s = new ArrayList<>();
+        s.add(schedule);
+        p1.setScheduleMode(ScheduleMode.ZoneSchedule);
+        p1.setSchedules(s);
         try
         {
             String ccuApplicationJSON = JsonSerializer.toJson(ccuApplication, true);

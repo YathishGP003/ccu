@@ -703,7 +703,7 @@ public class ZonesFragment extends Fragment
         
         //}
         seekArcWidgetList.add(rmSeekArc);
-        roomRow.addView(rmSeekArc);\
+        roomRow.addView(rmSeekArc);
         //rmSeekArc.refreshView();
         //        if (!showCCUDial && (count > 1))
         //        {

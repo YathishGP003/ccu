@@ -2,7 +2,6 @@ package a75f.io.renatus;
 
 import android.content.DialogInterface;
 import android.content.res.XmlResourceParser;
-import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
@@ -18,6 +17,7 @@ import android.util.Xml;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -65,9 +65,9 @@ public class ZonesFragment extends Fragment
     boolean                    mDetailsView              = false;
     ZoneImageWidget            selectedDevice            = null;
     int                        nRoomDetailsLocationIndex = -1;
-    SeekArcWidget                    rbSelectedRoom            = null;
+    SeekArcWidget              rbSelectedRoom            = null;
     int                        nSelectedRoomIndex        = -1;
-    ArrayList<SeekArcWidget>         seekArcWidgetList         = null;
+    ArrayList<SeekArcWidget>   seekArcWidgetList         = null;
     ArrayList<ZoneImageWidget> zoneWidgetList            = null;
     
     private ListView       lvFloorList;
@@ -443,10 +443,7 @@ public class ZonesFragment extends Fragment
         @Override
         public void onClick(SeekArcWidget r)
         {
-            
-            Zone zone = r.getZone();
-            SingleStageProfile singleStageProfile = (SingleStageProfile) zone.findProfile(ProfileType.SSE);
-            singleStageProfile.setOverride(1000 * 4 * 60, OverrideType.RELEASE_TIME, (short) 70);
+            r.getCmData().setOverride(1000 * 4 * 60, OverrideType.RELEASE_TIME, (short) 70);
             
             
             
@@ -657,8 +654,11 @@ public class ZonesFragment extends Fragment
     }
     public SeekArcWidget AddNewArc(Zone zone, SingleStageProfile zoneProfile, LinearLayout.LayoutParams lp)
     {
-        SeekArcWidget rmSeekArc = new SeekArcWidget(getActivity().getApplicationContext(), attributeSet);
         
+        SeekArcWidget rmSeekArc = new SeekArcWidget(getActivity().getApplicationContext(),
+                                                           attributeSet, null);
+        rmSeekArc.setCMDataToSeekArc(zoneProfile,0);
+        ViewDebug.dumpCapturedView("Captured", rmSeekArc);
         rmSeekArc.setLayoutParams(lp);
         rmSeekArc.setmPathStartAngle(120);
         rmSeekArc.setmBuildingLimitStartAngle(65); //MARK //L.resolveTuningParameter(AlgoTuningParameters.getHandle().getBuildingAllowNoCooler());
@@ -710,10 +710,10 @@ public class ZonesFragment extends Fragment
         rmSeekArc.setOnSeekArcChangeListener(seekArcChangeListener);
         rmSeekArc.setOnClickChangeListener(seekArcClickListener);
         
-        rmSeekArc.setZone(zone);
+      
+//        rmSeekArc.setZone(zone);
+//        rmSeekArc.setZone(zone, 0);
         //}
-        seekArcWidgetList.add(rmSeekArc);
-        roomRow.addView(rmSeekArc);
         
         
         //rmSeekArc.refreshView();
@@ -775,7 +775,9 @@ public class ZonesFragment extends Fragment
                     else if (zoneProfile.getProfileType() == ProfileType.SSE)
                     {
                         SeekArcWidget seekArcWidget = AddNewArc(z, (SingleStageProfile) zoneProfile, new LinearLayout.LayoutParams(room_width, room_height));
-                        
+    
+                        seekArcWidgetList.add(seekArcWidget);
+                        roomRow.addView(seekArcWidget);
                         
                     }
                 }
@@ -805,6 +807,7 @@ public class ZonesFragment extends Fragment
             {
                 if (parser.getName().equals("a75f.io.renatus.VIEWS.SeekArcWidget"))
                 {
+                    Log.i("WHYMEGOD", "Found seekarc widget");
                     as = Xml.asAttributeSet(parser);
                     break;
                 }

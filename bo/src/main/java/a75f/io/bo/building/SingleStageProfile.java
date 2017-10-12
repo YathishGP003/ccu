@@ -4,12 +4,11 @@ import android.util.Log;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import org.javolution.lang.MathLib;
+
 import java.util.HashMap;
-import java.util.Set;
 
 import a75f.io.bo.building.definitions.ProfileType;
-import a75f.io.bo.building.definitions.RoomDataInterface;
-import a75f.io.bo.building.definitions.SingleStageMode;
 import a75f.io.bo.building.sse.SingleStageLogicalMap;
 import a75f.io.bo.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 
@@ -24,9 +23,7 @@ public class SingleStageProfile extends ZoneProfile
     //We need to keep track of if they are heating, cooling, or non-functional.
     HashMap<Short, SingleStageLogicalMap> mLogicalMap = new HashMap<>();
     
-    //MARK
-    @JsonIgnore
-    private RoomDataInterface mInterface;
+
     //SSE works independtly just an aggregator for the smart node.
     //Relay 1 is heating or cooling
     //Relay 2 is fan
@@ -35,13 +32,22 @@ public class SingleStageProfile extends ZoneProfile
     //Multiple smart nodes can be in the zone.  The smart node should be assigned to heating or
     // cooling.
     
+    
     @Override
     public void mapRegularUpdate(CmToCcuOverUsbSnRegularUpdateMessage_t regularUpdateMessage)
     {
         float roomTemperature = (float) regularUpdateMessage.update.roomTemperature.get() / 10.0f;
-        mLogicalMap.get(Short.valueOf((short) regularUpdateMessage.update.smartNodeAddress.get())).setRoomTemperature(roomTemperature);
-        Log.i("SingleStageProfile", "SingleStageProfile RoomTemperature Update: " + roomTemperature + "");
+        mLogicalMap.get(Short.valueOf((short) regularUpdateMessage.update.smartNodeAddress.get()))
+                   .setRoomTemperature(roomTemperature);
+        
+        if(mInterface != null)
+        {
+            mInterface.refreshView();
+        }
+        Log.i("SingleStageProfile",
+                "SingleStageProfile RoomTemperature Update: " + roomTemperature + "");
     }
+    
     
     @JsonIgnore
     @Override
@@ -50,45 +56,63 @@ public class SingleStageProfile extends ZoneProfile
         return ProfileType.SSE;
     }
     
+    
     @Override
     public BaseProfileConfiguration getProfileConfiguration(short address)
     {
         return mProfileConfiguration.get(address);
     }
     
+    
     public HashMap<Short, SingleStageLogicalMap> getLogicalMap()
     {
         return mLogicalMap;
     }
+    
+    
     public void setLogicalMap(HashMap<Short, SingleStageLogicalMap> logicalMap)
     {
         this.mLogicalMap = logicalMap;
     }
     
-    //MARK
-    public double getCMCurrentTemp(boolean b)
-    {
-        return 75;
-    }
+ 
     
-    //MARK
-    @JsonIgnore
-    public void setZoneProfileInterface(RoomDataInterface zoneProfileInterface)
-    {
-        mInterface = zoneProfileInterface;
-    }
     
+    /**
+     * The temperature displayed is an average for all the SSE in a zone.   This should be
+     * reexamined.
+     * @return the display temp for the zone's SSE.
+     */
     @JsonIgnore
-    //MARK
     public double getDisplayCurrentTemp()
     {
-        return 74;
+        return getAverageTemperature();
     }
     
-    //MARK
     @JsonIgnore
-    public double getActualDesiredTemp()
+    public double getAverageTemperature()
     {
-        return 78;
+        double[] temperature = new double[mLogicalMap.size()];
+        int i = 0;
+        for (short nodeAddress : mLogicalMap.keySet())
+        {
+            temperature[i] = mLogicalMap.get(Short.valueOf(nodeAddress)).getRoomTemperature();
+            i++;
+        }
+        return MathLib.mean(temperature);
+    }
+    
+    
+    //TODO: organize tuners this way?
+    public static class Tuners
+    {
+        public static final String SSE_COOLING_DEADBAND  = "sseCoolingDeadBand";
+        public static final String SSE_HEATING_DEADBAND  = "sseHeatingDeadBand";
+        public static final String SSE_BUILDING_MAX_TEMP = "buildingMaxTemp";
+        public static final String SSE_BUILDING_MIN_TEMP = "buildingMinTemp";
+        public static final String SSE_USER_MIN_TEMP     = "userMinTemp";
+        public static final String SSE_USER_MAX_TEMP     = "userMaxTemp";
+        public static final String SSE_USER_ZONE_SETBACK = "zoneSetBack";
+        public static final String SSE_FORCED_OCCU_TIME = "forcedOccupiedTime";
     }
 }

@@ -7,25 +7,18 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import a75f.io.bo.building.BaseProfileConfiguration;
 import a75f.io.bo.building.Floor;
-import a75f.io.bo.building.LightProfile;
 import a75f.io.bo.building.Output;
 import a75f.io.bo.building.SingleStageProfile;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.ZoneProfile;
 import a75f.io.bo.building.definitions.Port;
-import a75f.io.bo.building.definitions.ProfileType;
-import a75f.io.bo.building.definitions.ScheduleMode;
-import a75f.io.bo.building.definitions.SingleStageMode;
-import a75f.io.bo.building.sse.SingleStageLogicalMap;
 import a75f.io.bo.serial.AddressedStruct;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.bo.serial.MessageType;
 
 import static a75f.io.logic.L.ccu;
-import static a75f.io.logic.LZoneProfile.resolveZoneProfileLogicalValue;
 
 /**
  * Created by Yinten isOn 8/17/2017.
@@ -191,15 +184,5 @@ class LSmartNode
     
     /********************************END SEED MESSAGES**************************************/
     
-    public static Object resolveTuningParameter(Zone zone, String key)
-    {
-        if (zone.getTuningParameters().containsKey(key))
-        {
-            return zone.getTuningParameters().get(key);
-        }
-        else
-        {
-            return ccu().getDefaultCCUTuners().get(key);
-        }
-    }
+
 }

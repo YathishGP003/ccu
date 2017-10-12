@@ -12,8 +12,10 @@ import a75f.io.bo.building.Node;
 import a75f.io.bo.building.Output;
 import a75f.io.bo.building.Schedulable;
 import a75f.io.bo.building.Schedule;
+import a75f.io.bo.building.SingleStageProfile;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.ZoneProfile;
+import a75f.io.bo.building.definitions.OverrideType;
 
 import static a75f.io.logic.LZoneProfile.isNamedSchedule;
 
@@ -23,6 +25,9 @@ import static a75f.io.logic.LZoneProfile.isNamedSchedule;
 
 public class L
 {
+    
+    
+    
     public static Context app()
     {
         return Globals.getInstance().getApplicationContext();
@@ -155,5 +160,31 @@ public class L
         }
         
         return null;
+    }
+    
+    public static Object resolveTuningParameter(Zone zone, String key)
+    {
+        if (zone.getTuningParameters().containsKey(key))
+        {
+            return zone.getTuningParameters().get(key);
+        }
+        else
+        {
+            return ccu().getDefaultCCUTuners().get(key);
+        }
+    }
+    
+    
+    public static void forceOverride(Zone zone, ZoneProfile zoneProfile, float desireTemp)
+    {
+        zoneProfile.setOverride(System.currentTimeMillis() + (int)resolveTuningParameter(zone,
+                SingleStageProfile.Tuners.SSE_FORCED_OCCU_TIME), OverrideType.RELEASE_TIME,
+                (short)Math.round(desireTemp * 2));
+    }
+    
+    
+    public static boolean isOccupied(Zone zone, ZoneProfile zoneProfile)
+    {
+        return false;
     }
 }

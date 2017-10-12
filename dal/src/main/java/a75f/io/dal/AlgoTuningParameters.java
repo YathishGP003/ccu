@@ -2174,10 +2174,9 @@ public class AlgoTuningParameters
         algoHashMap.put("userMaxTemp", mUserAllowNoHotter);
         algoHashMap.put("userMinTemp", mUserAllowNoCooler);
         algoHashMap.put("zoneSetBack", SSE_ZONE_SETBACK);
+        algoHashMap.put("forcedOccupiedTime", FORCED_OCCUPIED_TIME);
         return algoHashMap;
     }
-    //lightingIntensityOccupantDetected
-    //minLightControlOverInMinutes
     
     
     public short getmLightingIntensityForOccupancyDetect()

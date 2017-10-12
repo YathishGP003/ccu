@@ -29,19 +29,20 @@ import a75f.io.bo.building.SingleStageProfile;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.ZoneProfile;
 import a75f.io.bo.building.definitions.RoomDataInterface;
+import a75f.io.logic.L;
 import a75f.io.renatus.R;
 
 public class SeekArcWidget extends View implements RoomDataInterface
 {
     
-    private static final String TAG                    = "Kumar";
-    public static        double LEFT_BOUND             = 210;
-    public static        double RIGHT_BOUND            = 150;
-    private static       int    INVALID_PROGRESS_VALUE = -1;
+    private static final String  TAG                    = "Kumar";
+    public static        double  LEFT_BOUND             = 210;
+    public static        double  RIGHT_BOUND            = 150;
+    private static       int     INVALID_PROGRESS_VALUE = -1;
     // The initial rotational offset -90 means we start at 12 o'clock
-    private final        int    mAngleOffset           = -90;
-    public boolean mDetailedView = false;
-    public  Canvas mCanvas;
+    private final        int     mAngleOffset           = -90;
+    public               boolean mDetailedView          = false;
+    public Canvas mCanvas;
     public DEVICE_TYPE mDeviceType = DEVICE_TYPE.PURE_DAB;
     Drawable nUnSelColor    = getContext().getResources().getDrawable(R.drawable.buttonback);
     Drawable nSelectedColor =
@@ -54,51 +55,51 @@ public class SeekArcWidget extends View implements RoomDataInterface
     /**
      * The Maximum value that this SeekArc can be set to
      */
-    private int mMax = 360;
+    private int     mMax               = 360;
     /**
      * The Current value that the SeekArc is set to
      */
-    private int mProgress = 50;
+    private int     mProgress          = 50;
     /**
      * The width of the progress line for this SeekArc
      */
-    private int mProgressWidth = 0;
+    private int     mProgressWidth     = 0;
     /**
      * The Width of the background arc for the SeekArc
      */
-    private int mArcWidth = 0;
+    private int     mArcWidth          = 0;
     /**
      * The Angle to start drawing this Arc from
      */
-    private int mStartAngle = -90;
+    private int     mStartAngle        = -90;
     /**
      * The Angle through which to draw the arc (Max is 360)
      */
-    private float MAX_SWEEP_PROGRESS = 300;
-    private int   mSweepAngle        = 300;
+    private float   MAX_SWEEP_PROGRESS = 300;
+    private int     mSweepAngle        = 300;
     /**
      * The rotation of the SeekArc- 0 is twelve o'clock
      */
-    private int mRotation = 0;
+    private int     mRotation          = 0;
     /**
      * Give the SeekArc rounded edges
      */
-    private boolean mRoundedEdges = false;
+    private boolean mRoundedEdges      = false;
     /**
      * Enable touch inside the SeekArc
      */
-    private boolean mTouchInside = false;
+    private boolean mTouchInside       = false;
     /**
      * Will the progress increase clockwise or anti-clockwise
      */
-    private boolean mClockwise = true;
+    private boolean mClockwise         = true;
     // Internal variables
-    private int   mArcRadius     = 0;
-    private float mProgressSweep = 0;
-    private RectF mArcRect       = new RectF();
-    private RectF mArcLimit      = new RectF();
-    private RectF mArcRectText   = new RectF();
-    private RectF mArcLimitBound = new RectF();
+    private int     mArcRadius         = 0;
+    private float   mProgressSweep     = 0;
+    private RectF   mArcRect           = new RectF();
+    private RectF   mArcLimit          = new RectF();
+    private RectF   mArcRectText       = new RectF();
+    private RectF   mArcLimitBound     = new RectF();
     private Paint                   mArcPaint;
     private Paint                   mProgressPaint;
     private Paint                   mUserLimitProgressPaint;
@@ -121,8 +122,8 @@ public class SeekArcWidget extends View implements RoomDataInterface
     private OnSeekArcChangeListener mOnSeekArcChangeListener;
     private int width  = 0;
     private int height = 0;
-    private float  cx;
-    private float  cy;
+    private float cx;
+    private float cy;
     private boolean isFirstRun = true;
     private Path  path;
     //MARK
@@ -140,10 +141,10 @@ public class SeekArcWidget extends View implements RoomDataInterface
     private boolean mTouchOutSide = false;
     private float          mTouchIgnoreRadiusOutSide;
     private CountDownTimer timer;
-    private boolean isTimerFinished = false;
-    private float  userLimitStartPoint = 0;
-    private float  userLimitEndPoint   = 0;
-    private double originalDesireTemp  = 0;
+    private boolean isTimerFinished     = false;
+    private float   userLimitStartPoint = 0;
+    private float   userLimitEndPoint   = 0;
+    private double  originalDesireTemp  = 0;
     private int originalTranslateX;
     private int originalTranslateY;
     private int originalThumbXPos;
@@ -175,20 +176,20 @@ public class SeekArcWidget extends View implements RoomDataInterface
     private int   mThumbTextHeight;
     private Paint mThumbOuterLimitCirclePaint;
     private Paint mThumbeOuterLimitCircleTextPaint;
-    private double  originalCurrentTemp = 0;
-    private boolean isCurrBeyondLimit   = false;
-    private boolean isMoveStarted       = false;
-    private float   mGapAngle           = 7.5f;
-    private double  mMiddleAngle        = 70;
-    private double mBuildingLimitStartAngle = 50;
-    private double mBuildingLimitEndAngle   = 90;
-    private double mLeftMarginAngle         = 48;
+    private double  originalCurrentTemp      = 0;
+    private boolean isCurrBeyondLimit        = false;
+    private boolean isMoveStarted            = false;
+    private float   mGapAngle                = 7.5f;
+    private double  mMiddleAngle             = 70;
+    private double  mBuildingLimitStartAngle = 50;
+    private double  mBuildingLimitEndAngle   = 90;
+    private double  mLeftMarginAngle         = 48;
     //MARK
     //private RoomData roomData;
     //private CMData cmData;
-    private int       nIndex;
-    private TextPaint mRoomTextPaint;
-    private String    roomName;
+    private int             nIndex;
+    private TextPaint       mRoomTextPaint;
+    private String          roomName;
     private OnClickListener mOnClickListener;
     private boolean isSensorPaired = false;
     private int mUserLimitDiff;
@@ -198,7 +199,7 @@ public class SeekArcWidget extends View implements RoomDataInterface
     private SingleStageProfile mSSEProfile;
     private Zone               mZone;
     
-    ;
+    
     public SeekArcWidget(Context context)
     {
         super(context);
@@ -220,9 +221,8 @@ public class SeekArcWidget extends View implements RoomDataInterface
         int thumbOuterColor = res.getColor(R.color.accent);
         int thumbInnerColor = res.getColor(R.color.thumb_inner_white);
         delimeterColor = res.getColor(R.color.progress_delimeter_white);
-        
-        @ColorInt int statusTempText = ContextCompat.getColor(context, R.color
-                                                                        .outer_temp_text_darker_gray);
+        @ColorInt int statusTempText =
+                ContextCompat.getColor(context, R.color.outer_temp_text_darker_gray);
         //int outerTempText = res.getColor(R.color.progress_color_orange);
         int outerTempText = res.getColor(R.color.accent);
         int thumbOuterLimitColor = res.getColor(R.color.userlimit_outbound_color);
@@ -374,7 +374,6 @@ public class SeekArcWidget extends View implements RoomDataInterface
         mStatusTextTestPaint.setTextSize(57);
         mStatusTextPaint = new Paint();
         mStatusTextPaint.setColor(statusTempText);
-        
         mStatusTextPaint.setAntiAlias(true);
         mStatusTextPaint.setTextAlign(Paint.Align.LEFT);
         mStatusTextPaint.setStyle(Paint.Style.FILL);
@@ -435,7 +434,6 @@ public class SeekArcWidget extends View implements RoomDataInterface
     public SeekArcWidget(Context context, AttributeSet attrs, SingleStageProfile zoneProfile)
     {
         super(context, attrs);
-        this.mDeviceType = mDeviceType;
         this.mSSEProfile = zoneProfile;
         if (zoneProfile != null)
         {
@@ -443,6 +441,7 @@ public class SeekArcWidget extends View implements RoomDataInterface
         }
         init(context, attrs, R.attr.seekArcWidgetStyle);
     }
+    
     
     public SeekArcWidget(Context context, AttributeSet attrs, int defStyle)
     {
@@ -460,15 +459,10 @@ public class SeekArcWidget extends View implements RoomDataInterface
             @Override
             public void run()
             {
-                if (/*nIndex == 1 && */showCCUDial && mZone != null)
-                {
-                    setCurrentTemp(mSSEProfile.getCMCurrentTemp(true));
-                    setDesireTemp(mSSEProfile.getCMCurrentTemp(true));
-                }
-                else if ((mSSEProfile != null) /*&& (nIndex != 1)*/ && (!isSensorPaired))
+                if (mSSEProfile != null)
                 {
                     setCurrentTemp(mSSEProfile.getDisplayCurrentTemp());
-                    setDesireTemp(mSSEProfile.getActualDesiredTemp());
+                    setDesireTemp(L.resolveZoneProfileLogicalValue(mSSEProfile));
                 }
                 invalidate();
             }
@@ -809,7 +803,6 @@ public class SeekArcWidget extends View implements RoomDataInterface
                 canvas.drawText(firstTemp,
                         cx - (bounds.width() / 2),
                         cy + mStatusTextHeight - (bounds.height() / 2), mStatusTextPaint);
-                
             }
             else
             {
@@ -824,12 +817,12 @@ public class SeekArcWidget extends View implements RoomDataInterface
             }
             if (isCurrBeyondLimit)
             {
-                //NOTE cmData = zoneProfile, roomData = zone ?
-                if (showCCUDial)
-                {
-                    firstTemp = Double.toString(mSSEProfile.getCMCurrentTemp(true)); //MARK
-                }
-                else if (mSSEProfile != null)
+                //NOTE cmData = zoneProfile, roomData = mZone ?
+//                if (showCCUDial)
+//                {
+//                    firstTemp = Double.toString(mSSEProfile.getCMCurrentTemp(true)); //MARK
+//                }
+                if (mSSEProfile != null)
                 {
                     firstTemp = Double.toString(mSSEProfile.getDisplayCurrentTemp()); //MARK
                 }
@@ -858,43 +851,9 @@ public class SeekArcWidget extends View implements RoomDataInterface
             {
                 curTemp = "Current";
                 mStatusTextPaint.getTextBounds(curTemp, 0, curTemp.length(), bounds);
-                
-                
-                /*
-                        firstTemp = "No Sensor Paired";
-                mStatusTextPaint.setTextSize(14);
-                mStatusTextPaint.setColor(Color.RED);
-                mStatusTextPaint.getTextBounds(firstTemp, 0, firstTemp.length(), bounds);
-                //canvas.drawText("No Sensor Paired", cx - (bounds.width()/2) , cy + mStatusTextHeight - (bounds.height()/2), mStatusTextPaint);
-                canvas.drawText(firstTemp,
-                        cx - (bounds.width() / 2),
-                        cy + mStatusTextHeight - (bounds.height()), mStatusTextPaint);
-                 */
-    
-    
-    
-                
-                Log.i(TAG, "Bounds: " + bounds.toString());
                 float x = cx - (bounds.width() / 2);
                 float y = cy + mStatusTextHeight - (bounds.height() / 2);
                 canvas.drawText(curTemp, x, y, mStatusTextPaint);
-                canvas.drawText(curTemp, x, y, mStatusTextTestPaint);
-                Log.i(TAG, "X: " + x + " Y: " + y + " mStatusTextHeight: " + mStatusTextHeight);
-    
-    
-    
-    
-//                mStatusTextTestPaint.setTextSize(14);
-//                mStatusTextTestPaint.setColor(Color.RED);
-//                mStatusTextTestPaint.getTextBounds(curTemp, 0, curTemp.length(), bounds);
-//
-                x = cx - (bounds.width() / 2);
-                y = cy + mStatusTextHeight - (bounds.height());
-                Log.i(TAG, "Bounds: " + bounds.toString());
-                Log.i(TAG, "X: " + x + " Y: " + y + " mStatusTextHeight: " + mStatusTextHeight);
-                canvas.drawText(curTemp,
-                        x,
-                        y, mStatusTextTestPaint);
             }
             else
             {
@@ -908,11 +867,11 @@ public class SeekArcWidget extends View implements RoomDataInterface
             }
             if (isCurrBeyondLimit)
             {
-                if (showCCUDial)
-                {
-                    curTemp = Double.toString(mSSEProfile.getCMCurrentTemp(true));
-                }
-                else if (mSSEProfile != null)
+//                if (showCCUDial)
+//                {
+//                    curTemp = Double.toString(mSSEProfile.getCMCurrentTemp(true));
+//                }
+                if (mSSEProfile != null)
                 {
                     curTemp = Double.toString(mSSEProfile.getDisplayCurrentTemp());
                 }
@@ -1063,7 +1022,7 @@ public class SeekArcWidget extends View implements RoomDataInterface
                         cy + mStatusTextHeight - (bounds.height() / 2) + 75, mRoomTextPaint);
             }
         }
-       // isFirstRun = false;
+        isFirstRun = false;
     }
     
     
@@ -1195,61 +1154,15 @@ public class SeekArcWidget extends View implements RoomDataInterface
     }
     
     
-    private void updateProgress(int progress, boolean fromUser)
+    public double getmBuildingLimitEndAngle()
     {
-        // Log.d(TAG,"Update Prigress----============>>> "+progress);
-        if (progress == INVALID_PROGRESS_VALUE)
-        {
-            return;
-        }
-        if (mOnSeekArcChangeListener != null)
-        {
-            mOnSeekArcChangeListener.onProgressChanged(this, progress, fromUser);
-        }
-        progress = (progress > mMax) ? mMax : progress;
-        if (progress > 180)
-        {
-            progress = progress - 360;
-        }
-        mProgress = progress;
-        mProgressSweep = progress;
-        updateThumbPosition();
-        invalidate();
+        return Math.round(mBuildingLimitEndAngle);
     }
 
 	/*private float valuePerDegree() {
 
         return (float) mMax / mSweepAngle;
 	}*/
-    
-    
-    public double getmBuildingLimitEndAngle()
-    {
-        return Math.round(mBuildingLimitEndAngle);
-    }
-    
-    
-    public float getLimitStartAngle()
-    {
-        return this.mLimitStartAngle;
-    }
-    
-    
-    public void setLimitStartAngle(float LimitStartAngle)
-    {
-        setUserLimitStartPoint(LimitStartAngle);
-        float tempLimitStartAngle =
-                (float) (210 + mGapAngle * (LimitStartAngle - mBuildingLimitStartAngle));
-        if (tempLimitStartAngle < 360)
-        {
-            this.mLimitStartAngle = tempLimitStartAngle;
-        }
-        else
-        {
-            this.mLimitStartAngle = tempLimitStartAngle - 360;
-        }
-        //LEFT_BOUND = mLimitStartAngle;
-    }
     
     
     public float getLimitSweepAngle()
@@ -1283,45 +1196,9 @@ public class SeekArcWidget extends View implements RoomDataInterface
     }
     
     
-    public float getLimitEndAngle()
-    {
-        return this.mLimitEndAngle;
-    }
-    
-    
-    public void setLimitEndAngle(float LimitEndAngle)
-    {
-        setUserLimitEndPoint(LimitEndAngle);
-        float tempLimitEndAngle =
-                (float) (210 + mGapAngle * (LimitEndAngle - mBuildingLimitStartAngle));
-        if (tempLimitEndAngle <= 360)
-        {
-            this.mLimitEndAngle = tempLimitEndAngle;
-        }
-        else
-        {
-            this.mLimitEndAngle = tempLimitEndAngle - 360;
-        }
-        //RIGHT_BOUND = mLimitEndAngle;
-    }
-    
-    
     public double getmBuildingLimitStartAngle()
     {
         return Math.round(mBuildingLimitStartAngle);
-    }
-    
-    
-    private void updateThumbPosition()
-    {
-        int thumbAngle = (int) (mStartAngle + mProgressSweep + mRotation + 90);
-        //int thumbAngle = (int) (180 + dSweepAngle + mRotation + 90);
-        mThumbXPos = (int) (mArcRadius * Math.cos(Math.toRadians(thumbAngle)));
-        mThumbYPos = (int) (mArcRadius * Math.sin(Math.toRadians(thumbAngle)));
-        mThumbXPos2 =
-                (int) ((mArcRadius + mThumbDifference) * Math.cos(Math.toRadians(thumbAngle)));
-        mThumbYPos2 =
-                (int) ((mArcRadius + mThumbDifference) * Math.sin(Math.toRadians(thumbAngle)));
     }
     
     
@@ -1367,37 +1244,6 @@ public class SeekArcWidget extends View implements RoomDataInterface
             setArcWidth(5);
         }
     }
-
-    
-    /* MARK
-    public void setdablcmfsv(ArrayList<FSVData> lcmdabfsv) {
-        this.lcmdabfsv = lcmdabfsv;
-        if (lcmdabfsv != null && lcmdabfsv.size() != 0) {
-            mDeviceType = DEVICE_TYPE.LCM_DAB;
-        }
-    }
-    
-    
-    
-    
-    public ArrayList<FSVData> getlcmdabfsv() {
-        return lcmdabfsv;
-    }
-    
-    
-    public void setdabifttfsv(ArrayList<FSVData> ifttdabfsv) {
-        this.ifttdabfsv = ifttdabfsv;
-        
-        if (ifttdabfsv != null && ifttdabfsv.size() != 0) {
-            mDeviceType = DEVICE_TYPE.IFTT_DAB;
-        }
-    }
-    
-    
-    public ArrayList<FSVData> getifttdabfsv() {
-        return ifttdabfsv;
-    }
-    */
     
     
     public void setCurrentTemp(double CurrentTemp)
@@ -1569,6 +1415,37 @@ public class SeekArcWidget extends View implements RoomDataInterface
         }
         return ignore;
     }
+
+    
+    /* MARK
+    public void setdablcmfsv(ArrayList<FSVData> lcmdabfsv) {
+        this.lcmdabfsv = lcmdabfsv;
+        if (lcmdabfsv != null && lcmdabfsv.size() != 0) {
+            mDeviceType = DEVICE_TYPE.LCM_DAB;
+        }
+    }
+    
+    
+    
+    
+    public ArrayList<FSVData> getlcmdabfsv() {
+        return lcmdabfsv;
+    }
+    
+    
+    public void setdabifttfsv(ArrayList<FSVData> ifttdabfsv) {
+        this.ifttdabfsv = ifttdabfsv;
+        
+        if (ifttdabfsv != null && ifttdabfsv.size() != 0) {
+            mDeviceType = DEVICE_TYPE.IFTT_DAB;
+        }
+    }
+    
+    
+    public ArrayList<FSVData> getifttdabfsv() {
+        return ifttdabfsv;
+    }
+    */
     
     
     private double getTouchDegrees(float xPos, float yPos)
@@ -1593,9 +1470,91 @@ public class SeekArcWidget extends View implements RoomDataInterface
     }
     
     
+    public float getLimitEndAngle()
+    {
+        return this.mLimitEndAngle;
+    }
+    
+    
+    public float getLimitStartAngle()
+    {
+        return this.mLimitStartAngle;
+    }
+    
+    
+    public void setLimitStartAngle(float LimitStartAngle)
+    {
+        setUserLimitStartPoint(LimitStartAngle);
+        float tempLimitStartAngle =
+                (float) (210 + mGapAngle * (LimitStartAngle - mBuildingLimitStartAngle));
+        if (tempLimitStartAngle < 360)
+        {
+            this.mLimitStartAngle = tempLimitStartAngle;
+        }
+        else
+        {
+            this.mLimitStartAngle = tempLimitStartAngle - 360;
+        }
+        //LEFT_BOUND = mLimitStartAngle;
+    }
+    
+    
     private void onProgressRefresh(int progress, boolean fromUser)
     {
         updateProgress(progress, fromUser);
+    }
+    
+    
+    private void updateProgress(int progress, boolean fromUser)
+    {
+        // Log.d(TAG,"Update Prigress----============>>> "+progress);
+        if (progress == INVALID_PROGRESS_VALUE)
+        {
+            return;
+        }
+        if (mOnSeekArcChangeListener != null)
+        {
+            mOnSeekArcChangeListener.onProgressChanged(this, progress, fromUser);
+        }
+        progress = (progress > mMax) ? mMax : progress;
+        if (progress > 180)
+        {
+            progress = progress - 360;
+        }
+        mProgress = progress;
+        mProgressSweep = progress;
+        updateThumbPosition();
+        invalidate();
+    }
+    
+    
+    private void updateThumbPosition()
+    {
+        int thumbAngle = (int) (mStartAngle + mProgressSweep + mRotation + 90);
+        //int thumbAngle = (int) (180 + dSweepAngle + mRotation + 90);
+        mThumbXPos = (int) (mArcRadius * Math.cos(Math.toRadians(thumbAngle)));
+        mThumbYPos = (int) (mArcRadius * Math.sin(Math.toRadians(thumbAngle)));
+        mThumbXPos2 =
+                (int) ((mArcRadius + mThumbDifference) * Math.cos(Math.toRadians(thumbAngle)));
+        mThumbYPos2 =
+                (int) ((mArcRadius + mThumbDifference) * Math.sin(Math.toRadians(thumbAngle)));
+    }
+    
+    
+    public void setLimitEndAngle(float LimitEndAngle)
+    {
+        setUserLimitEndPoint(LimitEndAngle);
+        float tempLimitEndAngle =
+                (float) (210 + mGapAngle * (LimitEndAngle - mBuildingLimitStartAngle));
+        if (tempLimitEndAngle <= 360)
+        {
+            this.mLimitEndAngle = tempLimitEndAngle;
+        }
+        else
+        {
+            this.mLimitEndAngle = tempLimitEndAngle - 360;
+        }
+        //RIGHT_BOUND = mLimitEndAngle;
     }
     
     
@@ -1654,19 +1613,7 @@ public class SeekArcWidget extends View implements RoomDataInterface
     }
     
     
-    public boolean isCurrBeyondLimit()
-    {
-        return isCurrBeyondLimit;
-    }
-    
-    
-    public void setIsCurrBeyondLimit(boolean isCurrBeyondLimit)
-    {
-        this.isCurrBeyondLimit = isCurrBeyondLimit;
-    }
-    
-    
-    public void setCMDataToSeekArc(SingleStageProfile data, int index)
+    public void setCMDataToSeekArc(SingleStageProfile data, String zoneName, int index)
     {
         this.mSSEProfile = data;
         this.nIndex = index;
@@ -1720,23 +1667,23 @@ public class SeekArcWidget extends View implements RoomDataInterface
     }
     
     
-    public Zone getRoomData()
-    {
-        return mZone;
-    }
+//    public Zone getRoomData()
+//    {
+//        return mZone;
+//    }
+//
+//
+//    public void setRoomData(Zone data)
+//    {
+//        this.mZone = data;
+//        data.setRoomDataInterface(this);
+//        roomName = mZone.roomName;
+//        setDetailedView(false);
+//        setLimitbounds();
+//    }
+//
     
-    
-    public void setRoomData(Zone data)
-    {
-        this.mZone = data;
-        data.setRoomDataInterface(this);
-        roomName = mZone.roomName;
-        setDetailedView(false);
-        setLimitbounds();
-    }
-    
-    
-    public ZoneProfile getCmData()
+    public ZoneProfile getZoneProfile()
     {
         return mSSEProfile;
     }
@@ -1780,17 +1727,26 @@ public class SeekArcWidget extends View implements RoomDataInterface
     }
     
     
+    public void setZone(Zone zone)
+    {
+        this.mZone = zone;
+    }
+    
+    public Zone getZone()
+    {
+        return mZone;
+    }
+    
+    
     public static enum DEVICE_TYPE
     {
         PURE_DAB, LCM_DAB, IFTT_DAB
     }
     
-    
     public interface OnClickListener
     {
         void onClick(SeekArcWidget seekArcWidget);
     }
-    
     
     public interface OnSeekArcChangeListener
     {

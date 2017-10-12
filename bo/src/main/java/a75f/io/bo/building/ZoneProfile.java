@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import a75f.io.bo.building.definitions.ProfileType;
+import a75f.io.bo.building.definitions.RoomDataInterface;
 import a75f.io.bo.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 
 /**
@@ -48,6 +49,16 @@ public abstract class ZoneProfile extends Schedulable
         this.mIsCircuitTest = isCircuitTest;
     }
     
+    //MARK
+    @JsonIgnore
+    protected RoomDataInterface mInterface;
+    //MARK
+    @JsonIgnore
+    public void setZoneProfileInterface(RoomDataInterface zoneProfileInterface)
+    {
+        mInterface = zoneProfileInterface;
+    }
+    
     
     @JsonIgnore
     public Set<Short> getNodeAddresses()
@@ -71,5 +82,11 @@ public abstract class ZoneProfile extends Schedulable
     public void removeProfileConfiguration(Short selectedModule)
     {
         this.mProfileConfiguration.remove(selectedModule);
+    }
+    
+    
+    public void refreshRoomDataInterface() {
+        if (mInterface != null)
+            mInterface.refreshView();
     }
 }

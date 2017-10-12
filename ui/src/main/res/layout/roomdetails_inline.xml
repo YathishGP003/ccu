@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:background="@color/orange_multi">
+
+    <Space
+        android:layout_width="36dp"
+        android:id="@+id/spacer"
+        android:layout_height="match_parent"/>
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="0.4"
+        android:orientation="vertical"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/spacer">
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="10dp"
+            android:layout_gravity="center">
+
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:text="Status"
+                android:textSize="@dimen/text_medium_xlarge"
+                android:textColor="#202020"
+                android:layout_gravity="center|left" />
+
+            <EditText
+                android:id="@+id/manualStatusNow"
+                android:layout_width="750dp"
+                android:layout_height="wrap_content"
+                android:clickable="false"
+                android:ems="10"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:gravity="center"
+                android:text="In preconditioning now. Changes to 82F at 14:45"
+                android:textSize="@dimen/text_small_xlarge"
+                android:layout_marginLeft="10dp"
+                android:textColor="#202020"
+                android:layout_gravity="center|left">
+
+                <requestFocus />
+            </EditText>
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="100"/>
+
+            <ImageView
+                android:id="@+id/imageOccupied"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/occupied"
+                android:layout_gravity="center" />
+
+            <ImageView
+                android:id="@+id/imageSignal"
+                android:layout_width="39dp"
+                android:layout_height="39dp"
+                android:padding="4dp"
+                android:src="@drawable/signal"
+                android:layout_gravity="center" />
+
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:id="@+id/standalonelayout"
+            android:paddingTop="10dp"
+            android:weightSum="1"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:padding="10dp"
+                android:orientation="horizontal"
+                android:weightSum="1">
+
+                <TextView
+                    android:id="@+id/conditioningMode"
+                    android:layout_width="250dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0"
+                    android:gravity="center_vertical"
+                    android:text="Zone Conditioning Mode"
+                    android:textSize="@dimen/text_medium_xlarge"
+                    android:textColor="#202020" />
+
+                <Spinner
+                    android:id="@+id/spinnerConditioningMode"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    style="@style/Base.Widget.AppCompat.Spinner.Underlined"
+                    android:layout_marginLeft="10dp"
+                    android:layout_weight="0.5"
+                    />
+
+
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:weightSum="1.0"
+                android:gravity="left">
+
+                <TextView
+                    android:id="@+id/fanMode"
+                    android:layout_width="250dp"
+                    android:layout_height="fill_parent"
+                    android:layout_gravity="center"
+                    android:layout_weight="0.01"
+                    android:gravity="center_vertical"
+                    android:text="Zone Fan Mode"
+                    android:textColor="#202020"
+                    android:textSize="@dimen/text_medium_xlarge" />
+
+                <Spinner
+                    android:id="@+id/spinnerFanMode"
+                    style="@style/Base.Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="10dp"
+                    android:layout_weight="0.5" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <EditText
+            android:id="@+id/manualToday"
+            android:layout_width="444dp"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:ems="10"
+            android:focusable="false"
+            android:focusableInTouchMode="true"
+            android:gravity="center"
+            android:text="75F Now. Changes to 82F at 14:45"
+            android:textSize="@dimen/text_small_xlarge"
+            android:textColor="#202020"
+            android:layout_gravity="center|left"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="10dp"
+            android:paddingLeft="10dp"
+            android:weightSum="1">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:orientation="horizontal"
+                android:weightSum="1">
+
+                <TextView
+                    android:id="@+id/textView3"
+                    android:layout_width="250dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0"
+                    android:gravity="center_vertical"
+                    android:text="Schedule"
+                    android:textColor="#202020"
+                    android:textSize="@dimen/text_medium_xlarge" />
+
+                <Spinner
+                    android:id="@+id/spinnerSchedule"
+                    style="@style/Base.Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="10dp"
+                    android:layout_weight="0.5" />
+
+                <ImageView
+                    android:id="@+id/scheduleEdit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="10dp"
+                    android:layout_weight="0.1"
+                    android:padding="10dp"
+                    android:src="@drawable/content_edit" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:gravity="left"
+                android:weightSum="1.0">
+
+                <TextView
+                    android:id="@+id/textView5"
+                    android:layout_width="250dp"
+                    android:layout_height="fill_parent"
+                    android:layout_gravity="center"
+                    android:layout_weight="0.01"
+                    android:gravity="center_vertical"
+                    android:text="Vacation"
+                    android:textColor="#202020"
+                    android:textSize="@dimen/text_medium_xlarge" />
+
+                <EditText
+                    android:id="@+id/vacationFromTo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_weight="0.98"
+                    android:clickable="false"
+                    android:ems="15"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="center_vertical|center_horizontal"
+                    android:text="[System] Oct 18  To Oct 19"
+                    android:textColor="#202020"
+                    android:textSize="@dimen/text_small_xlarge" />
+
+                <ImageView
+                    android:id="@+id/vacationEdit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_weight="0.01"
+                    android:padding="10dp"
+                    android:src="@drawable/content_edit" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:layout_weight="100"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0.10dp"
+            android:layout_marginTop="20dp"
+            android:visibility="gone"
+            android:background="@color/button_bordercolor">
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayout21"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.4"
+            android:visibility="gone"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="horizontal"
+
+                android:padding="10dp">
+
+
+                <TextView
+                    android:id="@+id/textView32"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center|left"
+                    android:gravity="center_vertical"
+                    android:text="Lighting Control "
+                    android:textStyle="bold"
+                    android:textSize="@dimen/text_medium_xlarge"
+                    android:textColor="#202020" />
+                <Space
+                    android:layout_width="120dp"
+                    android:layout_height="match_parent" />
+                <TextView
+                    android:id="@+id/textView31"
+                    android:layout_width="120dp"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:text="Schedule"
+                    android:textSize="@dimen/text_medium_xlarge"
+                    android:textColor="#202020" />
+
+                <Spinner
+                    android:id="@+id/spinnerSchedule1"
+                    android:layout_width="250dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    style="@style/Base.Widget.AppCompat.Spinner.Underlined"
+                    android:gravity="center" />
+                <ImageView
+                    android:id="@+id/scheduleEdit1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="10dp"
+                    android:visibility="invisible"
+                    android:padding="10dp"
+                    android:src="@drawable/content_edit" />
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="100" />
+
+                <ImageView
+                    android:id="@+id/imageOccupied1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:src="@drawable/occupied" />
+
+                <ImageView
+                    android:id="@+id/imageSignal1"
+                    android:layout_width="39dp"
+                    android:layout_height="39dp"
+                    android:layout_gravity="center"
+                    android:padding="4dp"
+                    android:src="@drawable/signal" />
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="@color/listview_divider_color"></LinearLayout>
+        </LinearLayout>
+
+        <!--<LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@color/orange"></LinearLayout>-->
+    </LinearLayout>
+
+    <Space
+        android:layout_width="36dp"
+        android:id="@+id/spacer1"
+        android:layout_alignParentRight="true"
+        android:layout_height="match_parent"/>
+
+
+
+</RelativeLayout>

@@ -18,16 +18,20 @@ import static a75f.io.logic.LZoneProfile.resolveZoneProfileLogicalValue;
 
 public class LLights
 {
-    public static void mapLightCircuits(CcuToCmOverUsbSnControlsMessage_t controlsMessage_t, short nodeAddress, Zone zone, ZoneProfile zp)
+    public static void mapLightCircuits(CcuToCmOverUsbSnControlsMessage_t controlsMessage_t,
+                                        short nodeAddress, Zone zone, ZoneProfile zp)
     {
         for (Output output : zp.getProfileConfiguration(nodeAddress).getOutputs())
         {
             short dimmablePercent = resolveZoneProfileLogicalValue(zp, output);
-            LSmartNode.getSmartNodePort(controlsMessage_t, output.getPort()).set(LSmartNode.mapRawValue(output, dimmablePercent));
+            LSmartNode.getSmartNodePort(controlsMessage_t, output.getPort())
+                      .set(LSmartNode.mapRawValue(output, dimmablePercent));
         }
     }
     
-    public static void mapLightProfileSeed(Zone zone, CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage)
+    
+    public static void mapLightProfileSeed(Zone zone,
+                                           CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage)
     {
         //If a light profile doesn't have a schedule applied to it.   Inject the system schedule.
         //Following, resolve the logical value for the output using the zone profile.
@@ -38,8 +42,10 @@ public class LLights
         {
             lightProfile.addSchedules(ccu().getDefaultLightSchedule(), ScheduleMode.ZoneSchedule);
         }
-        seedMessage.settings.lightingIntensityForOccupantDetected.set((short) LSmartNode.resolveTuningParameter(zone, "lightingIntensityOccupantDetected"));
-        seedMessage.settings.minLightingControlOverrideTimeInMinutes.set((short) LSmartNode.resolveTuningParameter(zone, "minLightControlOverInMinutes"));
+        seedMessage.settings.lightingIntensityForOccupantDetected
+                .set((short) L.resolveTuningParameter(zone, "lightingIntensityOccupantDetected"));
+        seedMessage.settings.minLightingControlOverrideTimeInMinutes
+                .set((short) L.resolveTuningParameter(zone, "minLightControlOverInMinutes"));
         seedMessage.settings.profileBitmap.lightingControl.set((short) 1);
     }
 }

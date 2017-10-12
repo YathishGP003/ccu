@@ -32,13 +32,22 @@ public class LSSE
         
         float currentTemperature = logicalMap.getRoomTemperature();
         //Tuners
-        int coolingDeadband = (int) LSmartNode.resolveTuningParameter(zone, "sseCoolingDeadBand");
-        int heatingDeadband = (int) LSmartNode.resolveTuningParameter(zone, "sseHeatingDeadBand");
-        int buildingMaxTemp = (int) LSmartNode.resolveTuningParameter(zone, "buildingMaxTemp");
-        int buildingMinTemp = (int) LSmartNode.resolveTuningParameter(zone, "buildingMinTemp");
-        int userMaxTemp = (int) LSmartNode.resolveTuningParameter(zone, "userMaxTemp");
-        int userMinTemp = (int) LSmartNode.resolveTuningParameter(zone, "userMinTemp");
-        int zoneSetBack = (int) LSmartNode.resolveTuningParameter(zone, "zoneSetBack");
+        int coolingDeadband = (int) L.resolveTuningParameter(zone,
+                SingleStageProfile.Tuners.SSE_COOLING_DEADBAND);
+        int heatingDeadband = (int) L.resolveTuningParameter(zone, SingleStageProfile.Tuners
+                                                                           .SSE_HEATING_DEADBAND);
+                
+        int buildingMaxTemp = (int) L.resolveTuningParameter(zone, SingleStageProfile.Tuners.SSE_BUILDING_MAX_TEMP);
+        int buildingMinTemp = (int) L.resolveTuningParameter(zone, SingleStageProfile.Tuners.SSE_BUILDING_MIN_TEMP);
+        int userMaxTemp = (int) L.resolveTuningParameter(zone, SingleStageProfile
+                                                                       .Tuners
+                                                                       .SSE_USER_MAX_TEMP);
+        
+        int userMinTemp = (int) L.resolveTuningParameter(zone, SingleStageProfile
+                                                                       .Tuners
+                                                                       .SSE_USER_MIN_TEMP);
+        int zoneSetBack = (int) L.resolveTuningParameter(zone, SingleStageProfile.Tuners
+                                                                       .SSE_USER_ZONE_SETBACK);
         boolean coolingOn = false;
         boolean fanOn = false;
         boolean heatingOn = false;

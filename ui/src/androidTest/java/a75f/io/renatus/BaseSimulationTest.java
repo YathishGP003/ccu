@@ -34,6 +34,10 @@ public abstract class BaseSimulationTest
     //Columns to graph
     public abstract String[] graphColumns();
     
+    //Manipulate state or input from individual tests
+    public void customizeTestData() {
+    }
+    
     @Test
     public abstract void runTest();
 }

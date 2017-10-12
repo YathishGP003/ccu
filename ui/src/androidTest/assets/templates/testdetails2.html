@@ -1,131 +1,112 @@
 <!DOCTYPE HTML>
-<html>
+<html xmlns="http://www.w3.org/1999/html">
 <head>
-    <script>
-window.onload = function () {
-    var relay1Chart = new CanvasJS.Chart("relay1ChartContainer",{
-        animationEnabled: true,
-        theme: "light2",
-        title:{
-            text: "Relay 1"
-        },
-        axisY:{
-            includeZero: true
-        },
-        axisX:{
-            includeZero: true
-        },
-        data: [{
-        type: "stepLine",
-        color: "red",
-            dataPoints :[{ x: 1, y: 0, indexLabel:"relay1",markerColor: "red" ,color:"red" }, //dataPoint
-                { x: 2, y: 0},
-                { x: 3, y: 1},
-                { x: 4, y: 0}]
-        },
-        {
-        type: "stepLine",
-            dataPoints :[{ x: 1, y: 0, indexLabel:"room-temp",markerColor: "green"  }, //dataPoint
-                { x: 2, y: 7.3,indexLabel:"",markerColor: "green" },
-                { x: 3, y: 1, indexLabel:"",markerColor: "green" },
-                { x: 4, y: 0,indexLabel:"",markerColor: "green" }]
-        }]
-    });
-    relay1Chart.render();
-    console.log(dataG3);
-    var relay2Chart = new CanvasJS.Chart("relay2ChartContainer",{
-        animationEnabled: true,
-        theme: "light2",
-        title:{
-            text: "Relay 2"
-        },
-        axisY:{
-            includeZero: true
-        },
-        axisX:{
-            includeZero: true
-        },
-        data: [{
-        type: "stepLine",
-        color: "red",
-        dataPoints :dataG3
-
-
-        }]
-    });
+    <script id="relay1chart">
+    function loadChart1() {
+        var relay1Chart = new CanvasJS.Chart("relay1ChartContainer",{
+            animationEnabled: true,
+            theme: "light2",
+            title:{
+                text: "Relay 1"
+            },
+            axisY:{
+                includeZero: true
+            },
+            axisX:{
+                includeZero: true
+            },
+            data:char1Data
+        });
+        relay1Chart.render();
+    }
+    </script>
+    <script id="relay2chart">
+    function loadChart2() {
+        var relay2Chart = new CanvasJS.Chart("relay2ChartContainer",{
+            animationEnabled: true,
+            theme: "light2",
+            title:{
+                text: "Relay 2"
+            },
+            axisY:{
+                includeZero: true
+            },
+            axisX:{
+                includeZero: true
+            },
+            data:char2Data
+        });
     relay2Chart.render();
-
-
-    var analog1Chart = new CanvasJS.Chart("analog1ChartContainer",{
-        animationEnabled: true,
-        theme: "light2",
-        title:{
-            text: "Analog 1"
-        },
-        axisY:{
-            includeZero: true
-        },
-        axisX:{
-            includeZero: true
-        },
-        data: [{
-        type: "stepLine",
-        color: "red",
-            dataPoints :[{ x: 1, y: 0, indexLabel:"analog1",markerColor: "red" ,color:"red" }, //dataPoint
-                { x: 2, y: 0},
-                { x: 3, y: 1},
-                { x: 4, y: 0}]
-        }
-        ]
-    });
-    analog1Chart.render();
-
-    var analog2Chart = new CanvasJS.Chart("analog2ChartContainer",{
-        animationEnabled: true,
-        theme: "light2",
-        title:{
-            text: "Analog 2"
-        },
-        axisY:{
-            includeZero: true
-        },
-        axisX:{
-            includeZero: true
-        },
-        data: [{
-        type: "stepLine",
-        color: "red",
-            dataPoints :[{ x: 1, y: 0, indexLabel:"analog2",markerColor: "red" ,color:"red" }, //dataPoint
-                { x: 2, y: 0},
-                { x: 3, y: 1},
-                { x: 4, y: 0}]
-        }
-        ]
-    });
-    analog2Chart.render();
-
+    }
+    </script>
+    <script id="analog1chart">
+    function loadChart3() {
+        var analog1Chart = new CanvasJS.Chart("analog1ChartContainer",{
+            animationEnabled: true,
+            theme: "light2",
+            title:{
+                text: "Analog 1"
+            },
+            axisY:{
+                includeZero: true
+            },
+            axisX:{
+                includeZero: true
+            },
+            data:char3Data
+        });
+        analog1Chart.render();
+    }
+    </script>
+    <script id="analog2chart">
+    function loadChart4() {
+        var analog2Chart = new CanvasJS.Chart("analog2ChartContainer",{
+            animationEnabled: true,
+            theme: "light2",
+            title:{
+                text: "Analog 2"
+            },
+            axisY:{
+                includeZero: true
+            },
+            axisX:{
+                includeZero: true
+            },
+            data:chart4Data
+        });
+        analog2Chart.render();
+    }
+</script>
+<script>
+window.onload = function () {
+	loadChart1();
+	loadChart2();
+	loadChart3();
+	loadChart4();
 };
 </script>
     <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
     <script type="text/javascript" src="jquery-3.2.1.js"></script>
     <script type="text/javascript" src="data.js"></script>
-    <title>Test Name</title>
+    <title><span id="title"></span></title>
 </head>
 <body>
-<h3>Name</h3>
-<h3>Description</h3>
-<h3>Analysis</h3>
+<h3>Name: <span id="name"></span></h3><hr>
+<h3>Analysis</h3><p><span id="analysis"> </span></p><hr>
 <div id="relay1ChartContainer" style=" display:block; height: 200px; width: 100%;"></div>
 <div id="relay2ChartContainer" style=" display:block; height: 200px; width: 100%;"></div>
 <div id="analog1ChartContainer" style=" display:block; height: 200px; width: 100%;"></div>
 <div id="analog2ChartContainer" style=" display:block; height: 200px; width: 100%;"></div>
 
-
-<h3>Ccu State</h3>
+<hr>
+<h3>Ccu State</h3><p><span id="ccustate"></span></p><hr>
 <h3>History</h3>
 <table width:400; border=1; cellspacing=0; cellpadding=0; table-layout:fixed; word-wrap:break-word;>
     <tr><th> Simulation Input </th>
         <th> SmartNode State  </th>
+    </tr>
+    <tr><td id="input"> </td>
+	    <td id="output"> </td>
     </tr>
 </table>
 </body>

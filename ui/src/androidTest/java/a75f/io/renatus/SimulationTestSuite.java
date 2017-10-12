@@ -1,12 +1,17 @@
 package a75f.io.renatus;
 
+import android.content.Context;
 import android.os.Environment;
 import android.text.format.DateFormat;
+import android.util.Log;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,27 +34,30 @@ public class SimulationTestSuite
     public void saveReport() {
         
         String path = Environment.getExternalStorageDirectory().getPath();
-        String testReport = "<br /><br /><h3>Simulation Test Summary</h3>"
+        String testReport = "<br /><br /><h3><u>Simulation Test Summary</u></h3>"
                                     .concat("<table width:200; border=1; cellspacing=0; cellpadding=0; table-layout:fixed; word-wrap:break-word;>")
                                     .concat("<tr>")
                                     .concat("<th> Test Case </th>")
-                                    .concat("<th> Status </th>")
-                                    .concat("<th> Simulation Input </th>")
-                                    .concat("<th> Ccu State </th>")
-                                    .concat("<th> SmartNode State</th>")
+                                    .concat("<th> Description </th>")
+                                    .concat("<th> Result </th>")
                                     .concat("</tr>");
-        
-        for (Map.Entry<String, SimulationTestInfo> test : testMap.entrySet()) {
-            testReport = testReport.concat(test.getValue().getHtml());
-        }
-        
-        testReport = testReport.concat("</table>");
-        
-        String fileName = DateFormat.format("dd_MM_yyyy_hh_mm_ss", System.currentTimeMillis()).toString();
-        File file = new File(path, fileName + "_Simulation.html");
-        String html = "<html><head><title>Simulation Test Report</title></head><body>"+testReport+"</body></html>";
-        
         try {
+            for (Map.Entry<String, SimulationTestInfo> test : testMap.entrySet()) {
+                testReport = testReport.concat(test.getValue().getHtml());
+                File detailFile = new File(path+"/simulation/", test.getValue().name + ".html");
+                FileOutputStream out = new FileOutputStream(detailFile);
+                byte[] data = test.getValue().getHtmlDetails().getBytes();
+                out.write(data);
+                out.close();
+            }
+            
+            testReport = testReport.concat("</table>");
+            
+            String fileName = DateFormat.format("dd_MM_yyyy_hh_mm_ss", System.currentTimeMillis()).toString();
+            File file = new File(path+"/simulation/", fileName + "_summary.html");
+            String html = "<html><head><title>Simulation Test Report</title></head><body>"+testReport+"</body></html>";
+            
+            
             FileOutputStream out = new FileOutputStream(file);
             byte[] data = html.getBytes();
             out.write(data);
@@ -59,5 +67,25 @@ public class SimulationTestSuite
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    public void copyAssetsToStorage(String path){
+        InputStream in;
+        try {
+            in = SimulationContext.getInstance().getContext().getAssets().open(path);
+            File outFile = new File(Environment.getExternalStorageDirectory().getPath()+"/simulation", "jquery-3.2.1.js");
+            OutputStream out = new FileOutputStream(outFile);;
+    
+            byte[] buffer = new byte[1024];
+            int read;
+            while((read = in.read(buffer)) != -1){
+                out.write(buffer, 0, read);
+            }
+            out.close();
+            in.close();
+        } catch (IOException e) {
+            Log.e("Error", e.toString());
+        }
+        //return rawOutput != null ? rawOutput.toString() : null;
+        
     }
 }

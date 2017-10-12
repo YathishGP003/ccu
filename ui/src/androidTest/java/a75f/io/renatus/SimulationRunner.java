@@ -9,6 +9,8 @@ import android.text.format.DateFormat;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import junit.framework.Assert;
+
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
@@ -70,6 +72,7 @@ public class SimulationRunner
         appState = SimulationInputParser.parseStateConfig(mEnv, ccuTest.getCCUStateFileName());
     
         csvDataList = SimulationInputParser.parseSimulationFile(mEnv, ccuTest.getSimulationFileName());
+        mCurrentTest.customizeTestData();
         testVectorParams = csvDataList.get(0);
     }
     
@@ -78,6 +81,10 @@ public class SimulationRunner
      */
     public void runSimulation() {
     
+        if (mCurrentTest == null) {
+            Assert.fail("Invalid test configuration");
+        }
+        
         startTime = System.currentTimeMillis();
         injectState(appState);
         
@@ -87,8 +94,6 @@ public class SimulationRunner
                 mNodes.add(Integer.parseInt(simData[1].trim()));
             }
             injectSimulation(simData);
-    
-            
         }
         threadSleep(60);
         addTestLog();//TODO - should wait ?
@@ -241,7 +246,8 @@ public class SimulationRunner
         SimulationTestInfo info = mEnv.testSuite.getSimulationTest(mCurrentTest.getTestDescription());
         if (info == null) {
             info = new SimulationTestInfo();
-            info.name = mCurrentTest.getTestDescription();
+            info.name = mCurrentTest.getClass().getSimpleName();;
+            info.description = mCurrentTest.getTestDescription();
             info.simulationResult = new SimulationResult();
             info.simulationInput = csvDataList;
             info.inputCcuState = appState;

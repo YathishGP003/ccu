@@ -1,10 +1,23 @@
 package a75f.io.renatus;
 
+import android.content.Context;
+import android.util.Log;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.TextNode;
+import org.jsoup.select.Elements;
+
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -24,6 +37,8 @@ public class SimulationTestInfo
     
     public long startTime;
     
+    public String description;
+    
     public SimulationResult simulationResult;
     
     public List<String[]> simulationInput = null;
@@ -32,44 +47,124 @@ public class SimulationTestInfo
     
     public ArrayList<SmartNodeParams> nodeParams = new ArrayList<>();
     
-    
     public String getHtml() {
+        String resultHtml = simulationResult.result==TestResult.PASS ? "<span style=color:green>PASS</span>"
+                                    : "<span style=color:red>FAIL</span>";
+        
+        String resultDetails = "<a href="+name+".html>"+" Details "+"</a>";
+    
+        String testInfoRow = "<tr style=color:blue>"
+                                     .concat("<td>").concat(" "+name+" ").concat("</td>")
+                                     .concat("<td>").concat(description).concat("</td>")
+                                     .concat("<td>").concat(resultHtml+resultDetails).concat("</td>")
+                                     .concat("</tr>");
+        return testInfoRow;
+    }
+    
+    public String getHtmlDetails() {
     
         String inputString = "",stateString = "",paramsString = "";
-        
+    
         String prevParam = null;
-        
+    
         for(String[] row : simulationInput) {
             for (String s : row) {
                 inputString += s+", ";
             }
             inputString += "<br>";
         }
-      
+    
         try {
             stateString = JsonSerializer.toJson(inputCcuState,true);
         } catch (IOException e)
         {
             e.printStackTrace();
         }
-       
+    
         for (SmartNodeParams param : nodeParams) {
             String paramString = boldenEnabledParams(param.convertToJsonString());
             paramsString += decorateChangedParams(prevParam, paramString).concat("<br><br>");
             prevParam = paramString;
         }
         
-        String resultHtml = simulationResult.result==TestResult.PASS ? "<span style=color:green>PASS</span>"
-                                                                    : "<span style=color:red>FAIL</span>";
-                                                
-        String testInfoRow = "<tr style=color:blue>"
-                             .concat("<td>").concat(" "+name+" ").concat("</td>")
-                             .concat("<td>").concat(resultHtml).concat("</td>")
-                             .concat("<td>").concat(inputString).concat("</td>")
-                             .concat("<td>").concat(stateString).concat("</td>")
-                             .concat("<td>").concat(paramsString).concat("</td>")
-                             .concat("</tr>");
-        return testInfoRow;
+        String templateHtml = SimulationTestInfo.readFileFromAssets("templates/testdetails2.html");
+        Document doc = Jsoup.parse(templateHtml);
+    
+        doc.getElementById("name").text(name);
+        doc.getElementById("analysis").text("Coming soon");
+        doc.getElementById("input").text(inputString);
+        doc.getElementById("output").text(paramsString);
+        doc.getElementById("ccustate").text(stateString);
+        /*Element div = doc.getElementById("analog1ChartContainer");
+        div.attr("style","display:none; height: 200px; width: 100%;");
+        //doc.getElementById("analog1ChartContainer").attr("style","display:none; height: 200px; width: 100%;");
+        for (TextNode tn : div.textNodes()) {
+            String tagText = tn.text().trim();
+        
+            if (tagText.length() > 0) {
+                //tn.text("");
+            }
+        }
+        Elements tags = doc.select("*");
+        for (Element tag : tags) {
+            for (TextNode tn : tag.textNodes()) {
+                String tagText = tn.text().trim();
+            
+                if (tagText.length() > 0) {
+                    tn.text("");
+                }
+            }
+        }*/
+    
+        return doc.toString();
+    }
+    
+    public String createGraphData() {
+        //TODO - for the time being  data points are hard-coded as char1Data, char2Data, chart3Data, chart4Data
+       /* var dataG1 = [{
+                        type: "stepLine",
+                        color: "red",
+                        dataPoints :[
+                        { x: 1, y: 0, indexLabel:"relay1",markerColor: "red" ,color:"red" }, //dataPoint
+                        { x: 2, y: 0},
+                        { x: 3, y: 1},
+                        { x: 4, y: 0}]
+                        },
+                        {
+                        type: "stepLine",
+                        dataPoints :[
+                        { x: 1, y: 0, indexLabel:"room-temp",markerColor: "green"  }, //dataPoint
+                        { x: 2, y: 7.3,indexLabel:"",markerColor: "green" },
+                        { x: 3, y: 1, indexLabel:"",markerColor: "green" },
+                        { x: 4, y: 0,indexLabel:"",markerColor: "green" }]
+                        }]*/
+    
+        JSONObject snType = new JSONObject();
+        try
+        {
+            snType.put("node_type", "smartnode");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return snType.toString();
+    }
+    
+    public static String readFileFromAssets(String path){
+        InputStream rawInput;
+        ByteArrayOutputStream rawOutput = null;
+        try {
+            rawInput = SimulationContext.getInstance().getContext().getAssets().open(path);
+            byte[] buffer = new byte[rawInput.available()];
+            rawInput.read(buffer);
+            rawOutput = new ByteArrayOutputStream();
+            rawOutput.write(buffer);
+            rawOutput.close();
+            rawInput.close();
+            ;
+        } catch (IOException e) {
+            Log.e("Error", e.toString());
+        }
+        return rawOutput != null ? rawOutput.toString() : null;
     }
     
     public String boldenEnabledParams(String param){

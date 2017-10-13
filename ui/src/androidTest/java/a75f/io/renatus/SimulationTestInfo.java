@@ -1,6 +1,8 @@
 package a75f.io.renatus;
 
 import android.content.Context;
+import android.os.Environment;
+import android.text.format.DateFormat;
 import android.util.Log;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -16,11 +18,15 @@ import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import a75f.io.bo.building.CCUApplication;
 import a75f.io.bo.json.serializers.JsonSerializer;
@@ -46,6 +52,8 @@ public class SimulationTestInfo
     public CCUApplication inputCcuState = null;
     
     public ArrayList<SmartNodeParams> nodeParams = new ArrayList<>();
+    
+    public String[] graphColumns;
     
     public String getHtml() {
         String resultHtml = simulationResult.result==TestResult.PASS ? "<span style=color:green>PASS</span>"
@@ -119,8 +127,11 @@ public class SimulationTestInfo
         return doc.toString();
     }
     
-    public String createGraphData() {
-        //TODO - for the time being  data points are hard-coded as char1Data, char2Data, chart3Data, chart4Data
+    public String getGraphDataFile() {
+        if (graphColumns == null) {
+            return null;
+        }
+        //TODO - for the time being  data points are hard-coded as chart1Data, chart2Data, chart3Data, chart4Data
        /* var dataG1 = [{
                         type: "stepLine",
                         color: "red",
@@ -138,15 +149,63 @@ public class SimulationTestInfo
                         { x: 3, y: 1, indexLabel:"",markerColor: "green" },
                         { x: 4, y: 0,indexLabel:"",markerColor: "green" }]
                         }]*/
+        
+        
+        
     
-        JSONObject snType = new JSONObject();
-        try
-        {
-            snType.put("node_type", "smartnode");
-        } catch (JSONException e) {
-            e.printStackTrace();
+        for (String g: graphColumns) {
+            ArrayList<GraphData> gdArray = new ArrayList<>();
+            String varName = null;
+            GraphData gd = new GraphData();
+            gd.type="stepLine";
+            int i = 0;
+            for (SmartNodeParams param : nodeParams) {
+                if (gd.dataPoints.size() == 0) {
+                    gd.dataPoints.add(new DataPoint(i++,param.digital_out_1,g));
+                } else {
+                    gd.dataPoints.add(new DataPoint(i++,param.digital_out_1));
+                }
+        
+            }
+            switch(g) {
+                case "Relay1_Out":
+                    gd.color = "red";
+                    varName = "var chart1Data = ";
+                    break;
+                case "Relay2_Out":
+                    gd.color = "green";
+                    varName = "var chart2Data = ";
+                    break;
+                case "Analog1_Out":
+                    gd.color="blue";
+                    varName = "var chart3Data = ";
+                    break;
+                case "Analog2_Out":
+                    gd.color="yellow";
+                    varName = "var chart4Data = ";
+                    break;
+                    
+            }
+            gdArray.add(gd);
+            String graphData;
+            try
+            {
+                graphData = JsonSerializer.toJson(gdArray, true);
+                String path = Environment.getExternalStorageDirectory().getPath();
+                File graph = new File(path + "/simulation/", name + ".js");
+                FileOutputStream out = new FileOutputStream(graph);
+                byte[] data = (varName+graphData).getBytes();
+                out.write(data);
+                out.close();
+                
+            }catch (IOException e) {
+                e.printStackTrace();
+            }
+            
+            
         }
-        return snType.toString();
+    
+        return name+".js";
     }
     
     public static String readFileFromAssets(String path){

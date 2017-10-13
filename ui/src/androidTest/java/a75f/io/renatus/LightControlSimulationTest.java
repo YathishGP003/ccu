@@ -21,6 +21,9 @@ import java.util.Map;
 
 import a75f.io.bo.building.definitions.MockTime;
 
+import static a75f.io.renatus.GraphColumns.Analog1_Out;
+import static a75f.io.renatus.GraphColumns.Relay1_Out;
+
 /**
  * Created by samjithsadasivan on 9/22/17.
  */
@@ -76,33 +79,12 @@ public class LightControlSimulationTest extends BaseSimulationTest
     
     @Override
     public String[] graphColumns() {
-        return null;
+        String[] graphCol = {Relay1_Out.toString(),Analog1_Out.toString()};
+        return graphCol;
     }
     
     @Override
     public void runTest() {
-    
-        String templateHtml = SimulationTestInfo.readFileFromAssets("templates/testdetails2.html");
-        Document doc = Jsoup.parse(templateHtml);
-        Element script = doc.getElementById("relay1chart");
-    
-        for (DataNode node : script.dataNodes()) {
-            Attributes a = node.attributes();
-            String x = node.attr("data");
-            String s = node.getWholeData();
-            String b = "";
-        }
-        
-        Element scrip1 = doc.getElementById("analog1chart");
-        
-        Elements scripts = doc.getElementsByTag("script");
-        for (Element scrit : scripts) {
-            for (DataNode node : script.dataNodes()) {
-                String a = node.attr("data");
-                String s = node.getWholeData();
-                String b = "";
-            }
-        }
         
         mRunner.runSimulation();
         //MockTime.getInstance().setMockTime(true, System.currentTimeMillis()+ (8 * 3600000)); // Force the mocktime to out of schedule interval

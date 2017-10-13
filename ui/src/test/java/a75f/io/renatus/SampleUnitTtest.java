@@ -30,43 +30,13 @@ Process finished with exit code 0
 	@Test
 	public void test_LittleEndian() throws Exception
 	{
-		
-		/*var dataG1 = [{
-						type: "stepLine",
-		                color: "red",
-				        dataPoints :[
-		{ x: 1, y: 0, indexLabel:"relay1",markerColor: "red" }, //dataPoint
-		{ x: 2, y: 0},
-		{ x: 3, y: 1},
-		{ x: 4, y: 0}]
-	},
-		{
-type: "stepLine",
-		      dataPoints :[
-			{ x: 1, y: 0, indexLabel:"room-temp",markerColor: "green"  }, //dataPoint
-			{ x: 2, y: 7.3,indexLabel:"",markerColor: "green" },
-			{ x: 3, y: 1, indexLabel:"",markerColor: "green" },
-			{ x: 4, y: 0,indexLabel:"",markerColor: "green" }]
-		}]*/
-		JSONArray data = new JSONArray();
-		JSONObject snType = new JSONObject();
-		JSONArray dp = new JSONArray();
-		try
-		{
-			snType.put("type", "stepLine");
-			snType.put("color", "red");
-			dp
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		System.out.print(snType.toString());
-		/*CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage =
+		CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage =
 				new CcuToCmOverUsbDatabaseSeedSnMessage_t();
 		seedMessage.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN);
 		seedMessage.putEncrptionKey(new byte[16]);
 		seedMessage.smartNodeAddress.set(2000);
 		seedMessage.controls.digitalOut1.set((short) 1);
-		System.out.println(seedMessage.toString());*/
+		System.out.println(seedMessage.toString());
 		//        seedMessage.controls.time.day.set((short) 1);
 		//        seedMessage.controls.time.hours.set((short) 1);
 		//        seedMessage.controls.time.minutes.set((short) 1);

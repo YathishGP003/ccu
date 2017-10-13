@@ -251,6 +251,7 @@ public class SimulationRunner
             info.simulationResult = new SimulationResult();
             info.simulationInput = csvDataList;
             info.inputCcuState = appState;
+            info.graphColumns = mCurrentTest.graphColumns();
             mEnv.testSuite.addSimulationTest(mCurrentTest.getTestDescription(),info);
         }
       

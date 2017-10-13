@@ -1,32 +1,26 @@
 package a75f.io.renatus;
 
-import android.content.Context;
 import android.os.Environment;
-import android.text.format.DateFormat;
 import android.util.Log;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import a75f.io.bo.building.CCUApplication;
 import a75f.io.bo.json.serializers.JsonSerializer;
@@ -56,10 +50,10 @@ public class SimulationTestInfo
     public String[] graphColumns;
     
     public String getHtml() {
-        String resultHtml = simulationResult.result==TestResult.PASS ? "<span style=color:green>PASS</span>"
+        String resultHtml = simulationResult.status==TestResult.PASS ? "<span style=color:green>PASS</span>"
                                     : "<span style=color:red>FAIL</span>";
         
-        String resultDetails = "<a href="+name+".html>"+" Details "+"</a>";
+        String resultDetails = "<a href="+name+".html>"+"......... Graphs and Logs "+"</a>";
     
         String testInfoRow = "<tr style=color:blue>"
                                      .concat("<td>").concat(" "+name+" ").concat("</td>")
@@ -95,14 +89,20 @@ public class SimulationTestInfo
             prevParam = paramString;
         }
         
-        String templateHtml = SimulationTestInfo.readFileFromAssets("templates/testdetails2.html");
+        String templateHtml = SimulationTestInfo.readFileFromAssets("templates/testdetails.html");
         Document doc = Jsoup.parse(templateHtml);
     
         doc.getElementById("name").text(name);
-        doc.getElementById("analysis").text("Coming soon");
+        doc.getElementById("analysis").text(simulationResult.analysis);
         doc.getElementById("input").text(inputString);
         doc.getElementById("output").text(paramsString);
         doc.getElementById("ccustate").text(stateString);
+    
+        Elements els = doc.getElementsByTag("head");
+        for (Element el : els) {
+            Element j = el.appendElement("script").attr("type","text/javascript").attr("src",getGraphDataFile());
+        }
+        
         /*Element div = doc.getElementById("analog1ChartContainer");
         div.attr("style","display:none; height: 200px; width: 100%;");
         //doc.getElementById("analog1ChartContainer").attr("style","display:none; height: 200px; width: 100%;");
@@ -151,61 +151,96 @@ public class SimulationTestInfo
                         }]*/
         
         
-        
+        String chartData="";
     
         for (String g: graphColumns) {
             ArrayList<GraphData> gdArray = new ArrayList<>();
             String varName = null;
             GraphData gd = new GraphData();
             gd.type="stepLine";
-            int i = 0;
-            for (SmartNodeParams param : nodeParams) {
-                if (gd.dataPoints.size() == 0) {
-                    gd.dataPoints.add(new DataPoint(i++,param.digital_out_1,g));
-                } else {
-                    gd.dataPoints.add(new DataPoint(i++,param.digital_out_1));
-                }
-        
-            }
+            int xCounter = 0;
+            
             switch(g) {
                 case "Relay1_Out":
                     gd.color = "red";
                     varName = "var chart1Data = ";
+                    for (SmartNodeParams param : nodeParams) {
+                        if (gd.dataPoints.size() == 0) {
+                            gd.dataPoints.add(new DataPoint(xCounter++,param.digital_out_1,g));
+                        } else {
+                            gd.dataPoints.add(new DataPoint(xCounter++,param.digital_out_1));
+                        }
+        
+                    }
                     break;
                 case "Relay2_Out":
                     gd.color = "green";
                     varName = "var chart2Data = ";
+                    for (SmartNodeParams param : nodeParams) {
+                        if (gd.dataPoints.size() == 0) {
+                            gd.dataPoints.add(new DataPoint(xCounter++,param.digital_out_2,g));
+                        } else {
+                            gd.dataPoints.add(new DataPoint(xCounter++,param.digital_out_2));
+                        }
+        
+                    }
                     break;
                 case "Analog1_Out":
                     gd.color="blue";
                     varName = "var chart3Data = ";
+                    for (SmartNodeParams param : nodeParams) {
+                        if (gd.dataPoints.size() == 0) {
+                            gd.dataPoints.add(new DataPoint(xCounter++,param.analog_out_1,g));
+                        } else {
+                            gd.dataPoints.add(new DataPoint(xCounter++,param.analog_out_1));
+                        }
+        
+                    }
                     break;
                 case "Analog2_Out":
                     gd.color="yellow";
                     varName = "var chart4Data = ";
+                    for (SmartNodeParams param : nodeParams) {
+                        if (gd.dataPoints.size() == 0) {
+                            gd.dataPoints.add(new DataPoint(xCounter++,param.analog_out_2,g));
+                        } else {
+                            gd.dataPoints.add(new DataPoint(xCounter++,param.analog_out_2));
+                        }
+        
+                    }
                     break;
                     
             }
             gdArray.add(gd);
-            String graphData;
-            try
-            {
-                graphData = JsonSerializer.toJson(gdArray, true);
-                String path = Environment.getExternalStorageDirectory().getPath();
-                File graph = new File(path + "/simulation/", name + ".js");
-                FileOutputStream out = new FileOutputStream(graph);
-                byte[] data = (varName+graphData).getBytes();
-                out.write(data);
-                out.close();
-                
-            }catch (IOException e) {
-                e.printStackTrace();
-            }
-            
-            
+            chartData += varName+toJson(gdArray)+";\n";
         }
     
+        try
+        {
+            String path = Environment.getExternalStorageDirectory().getPath();
+            File graph = new File(path + "/simulation/", name + ".js");
+            FileOutputStream out = new FileOutputStream(graph);
+            byte[] data = chartData.getBytes();
+            out.write(data);
+            out.close();
+        
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
         return name+".js";
+    }
+    
+    private String toJson(Object o){
+        ObjectMapper m  = new ObjectMapper();
+        try
+        {
+            m.disable(JsonGenerator.Feature.QUOTE_FIELD_NAMES);
+            m.disable(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS);
+            return m.writerWithDefaultPrettyPrinter().writeValueAsString(o);
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
     
     public static String readFileFromAssets(String path){

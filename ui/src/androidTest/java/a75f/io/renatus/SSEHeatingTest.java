@@ -3,6 +3,10 @@ package a75f.io.renatus;
 import org.junit.After;
 import org.junit.Before;
 
+import static a75f.io.renatus.GraphColumns.Analog1_Out;
+import static a75f.io.renatus.GraphColumns.Analog2_Out;
+import static a75f.io.renatus.GraphColumns.Relay1_Out;
+import static a75f.io.renatus.GraphColumns.Relay2_Out;
 /**
  * Created by samjithsadasivan on 10/4/17.
  */
@@ -16,7 +20,7 @@ public class SSEHeatingTest extends BaseSimulationTest
     
     @Before
     public void setUp() {
-        mRunner =  new SimulationRunner(this);
+        mRunner =  new SimulationRunner(this, new SamplingProfile(10, 180));
     }
     
     @After
@@ -39,8 +43,10 @@ public class SSEHeatingTest extends BaseSimulationTest
     }
     
     @Override
-    public TestResult analyzeTestResults(SimulationTestInfo testLog) {
-        return TestResult.PASS;
+    public SimulationResult analyzeTestResults(SimulationTestInfo testLog) {
+        SimulationResult result = new SimulationResult();
+        result.status = TestResult.PASS;
+        return result;
     }
     
     @Override
@@ -55,7 +61,8 @@ public class SSEHeatingTest extends BaseSimulationTest
     
     @Override
     public String[] graphColumns() {
-        return null;
+        String[] graphCol = {Relay1_Out.toString(),Relay2_Out.toString(),Analog1_Out.toString(), Analog2_Out.toString()};
+        return graphCol;
     }
     
     @Override

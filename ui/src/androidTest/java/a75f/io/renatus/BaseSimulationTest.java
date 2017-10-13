@@ -7,6 +7,8 @@ package a75f.io.renatus;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import a75f.io.bo.building.CCUApplication;
+
 /**
  * Base class for functional test cases , runs with SimulationRunner and enforces each test to have config and test input files
  */
@@ -23,7 +25,7 @@ public abstract class BaseSimulationTest
     public abstract String getSimulationFileName();
     
     //JSON from http:localhost:5000/log/smartnode?address=2000 returns test result, open ended. Pass / Fail, reason for failing.
-    public abstract TestResult analyzeTestResults(SimulationTestInfo testLog);
+    public abstract SimulationResult analyzeTestResults(SimulationTestInfo testLog);
     
     //How long this test should run
     public abstract long testDuration();
@@ -35,7 +37,7 @@ public abstract class BaseSimulationTest
     public abstract String[] graphColumns();
     
     //Manipulate state or input from individual tests
-    public void customizeTestData() {
+    public void customizeTestData(CCUApplication app) {
     }
     
     @Test

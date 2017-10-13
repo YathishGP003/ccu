@@ -61,29 +61,43 @@
             "stmm" : 0,
             "ethh" : 17,
             "etmm" : 30,
-            "val" : 81
+            "val" : 80
           }, {
             "day" : 3,
             "sthh" : 17,
             "stmm" : 0,
             "ethh" : 17,
             "etmm" : 30,
-            "val" : 82
+            "val" : 80
           }, {
             "day" : 4,
             "sthh" : 17,
             "stmm" : 0,
             "ethh" : 17,
             "etmm" : 30,
-            "val" : 83
+            "val" : 80
           }, {
             "day" : 5,
             "sthh" : 17,
             "stmm" : 0,
             "ethh" : 17,
             "etmm" : 30,
-            "val" : 84
-          } ]
+            "val" : 80
+          }, {
+              "day" : 5,
+              "sthh" : 17,
+              "stmm" : 0,
+              "ethh" : 17,
+              "etmm" : 30,
+              "val" : 80
+          }, {
+              "day" : 5,
+              "sthh" : 17,
+              "stmm" : 0,
+              "ethh" : 17,
+              "etmm" : 30,
+              "val" : 80
+          }]
         } ],
         "scheduleMode" : "ZoneSchedule",
         "overrideMillis" : 0,

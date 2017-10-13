@@ -6,6 +6,6 @@ package a75f.io.renatus;
 
 public class SimulationResult
 {
-    public TestResult result;
-    public TestLog log;
+    public TestResult status;
+    public String   analysis;
 }

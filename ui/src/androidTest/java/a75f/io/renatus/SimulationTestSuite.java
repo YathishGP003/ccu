@@ -37,9 +37,9 @@ public class SimulationTestSuite
         String testReport = "<br /><br /><h3><u>Simulation Test Summary</u></h3>"
                                     .concat("<table width:200; border=1; cellspacing=0; cellpadding=0; table-layout:fixed; word-wrap:break-word;>")
                                     .concat("<tr>")
-                                    .concat("<th> Test Case </th>")
-                                    .concat("<th> Description </th>")
-                                    .concat("<th> Result </th>")
+                                    .concat("<th width=500px> Test Case </th>")
+                                    .concat("<th width=500px> Description </th>")
+                                    .concat("<th width=500px> Result </th>")
                                     .concat("</tr>");
         try {
             for (Map.Entry<String, SimulationTestInfo> test : testMap.entrySet()) {

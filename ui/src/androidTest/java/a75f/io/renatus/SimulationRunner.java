@@ -63,16 +63,19 @@ public class SimulationRunner
     
     private List<Integer> mNodes = new ArrayList<>();
     
-    long startTime;
+    private SamplingProfile mProfile;
     
-    SimulationRunner(BaseSimulationTest ccuTest) {
+    long resultTime;
+    int loopCount;
+    
+    SimulationRunner(BaseSimulationTest ccuTest, SamplingProfile profile) {
         mCurrentTest = ccuTest;
+        mProfile = profile;
         mEnv = SimulationContext.getInstance();
     
         appState = SimulationInputParser.parseStateConfig(mEnv, ccuTest.getCCUStateFileName());
     
         csvDataList = SimulationInputParser.parseSimulationFile(mEnv, ccuTest.getSimulationFileName());
-        mCurrentTest.customizeTestData();
         testVectorParams = csvDataList.get(0);
     }
     
@@ -80,23 +83,39 @@ public class SimulationRunner
      * Must be called from @Test method of SimulationTest
      */
     public void runSimulation() {
-    
         if (mCurrentTest == null) {
             Assert.fail("Invalid test configuration");
         }
-        
-        startTime = System.currentTimeMillis();
+        mCurrentTest.customizeTestData(appState);
         injectState(appState);
-        
+        resultTime = System.currentTimeMillis();
+        threadSleep(45);
+        addTestLog();
+        loopCount = 0;
         for (int simIndex = 1; simIndex < csvDataList.size(); simIndex ++) {
             String[] simData = csvDataList.get(simIndex);
             if (!mNodes.contains(Integer.parseInt(simData[1].trim()))) {
                 mNodes.add(Integer.parseInt(simData[1].trim()));
             }
-            injectSimulation(simData);
+            //injectSimulation(simData);
+            SimulationParams params  = new SimulationParams().build(simData);
+            String paramsJson = params.convertToJsonString();
+            executePost(SMARTNODE_STATE_REST_URL+simData[1].trim(), getHttpPostParams(paramsJson) );
+            threadSleep(mProfile.resultPeriodSecs);
+            addTestLog();
+            resultTime = System.currentTimeMillis();
+            loopCount++;
         }
-        threadSleep(60);
-        addTestLog();//TODO - should wait ?
+        
+        runResultLoop();
+    }
+    
+    private void runResultLoop() {
+        while (loopCount <  mProfile.resultCount )
+        {
+            threadSleep(mProfile.resultPeriodSecs);
+            addTestLog();
+        }
     }
     
     private void injectState(CCUApplication state) {
@@ -253,23 +272,21 @@ public class SimulationRunner
             info.inputCcuState = appState;
             info.graphColumns = mCurrentTest.graphColumns();
             mEnv.testSuite.addSimulationTest(mCurrentTest.getTestDescription(),info);
+            info.nodeParams.add(new SmartNodeParams());
         }
       
         DateTimeFormatter formatter = DateTimeFormat.forPattern("dd MMM yyyy HH:mm:ss");
         
         for(int node = 0; node < mNodes.size();node++)
         {
-            //executePost("http://10.0.2.2:5000/nodetype/", getSmartnodeType());
-            //String params = getResult("http://10.0.2.2:5000/log/smartnode?address=" + mNodes.get(node) + "&since=" + curTime + "&limit_results=1");
-            String params = getResult(SMARTNODE_LOG_REST_URL + mNodes.get(node) + "&since=" + DateFormat.format("dd-MMMM-yyyy_hh:mm:ss", startTime).toString());
+            String params = getResult(SMARTNODE_LOG_REST_URL + mNodes.get(node) + "&since=" + DateFormat.format("dd-MMMM-yyyy_hh:mm:ss", resultTime).toString());
             try
             {
                 JSONArray jsonArray = new JSONArray(params);
-                ArrayList<String> list = new ArrayList<String>();
-    
-                for (int i = 0; i < jsonArray.length(); i++)
+                SmartNodeParams result = SmartNodeParams.getParamsFromJson(jsonArray.get(jsonArray.length()-1).toString());
+                info.nodeParams.add(result);
+                /*for (int i = 0; i < jsonArray.length(); i++)
                 {
-                    list.add(jsonArray.get(i).toString());
                     SmartNodeParams result = SmartNodeParams.getParamsFromJson(jsonArray.get(i).toString());
                    
                     Date localSt = new DateTime(startTime, DateTimeZone.getDefault()).toDate();
@@ -279,13 +296,13 @@ public class SimulationRunner
                     {
                         info.nodeParams.add(result);
                     }
-                }
+                }*/
                 
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
-        info.simulationResult.result = mCurrentTest.analyzeTestResults(info);
+        info.simulationResult.status = mCurrentTest.analyzeTestResults(info).status;
     }
     
     public void resetRunner() {

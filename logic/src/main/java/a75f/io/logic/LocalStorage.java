@@ -37,6 +37,14 @@ class LocalStorage
 		}
 		return new CCUApplication();
 	}
+	
+	public static String getApplicationSettingsAsString()
+	{
+		String ccuSettings = getCCUSettings(L.app()).getString(VAR_CCU_SETTINGS, null);
+		Logd("==========GET APPLICATION SETTINGS================");
+		Logd(ccuSettings != null ? ccuSettings : "Settings are empty");
+		return ccuSettings;
+	}
 
 	public static SharedPreferences getCCUSettings(Context context)
 	{

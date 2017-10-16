@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.TreeMap;
 
 import a75f.io.bo.building.CCUApplication;
 import a75f.io.bo.json.serializers.JsonSerializer;
@@ -33,10 +34,6 @@ public class SimulationTestInfo
 {
     public String name;
     
-    public int nodeAddress;
-    
-    public long startTime;
-    
     public String description;
     
     public SimulationResult simulationResult;
@@ -45,9 +42,13 @@ public class SimulationTestInfo
     
     public CCUApplication inputCcuState = null;
     
-    public ArrayList<SmartNodeParams> nodeParams = new ArrayList<>();
+    //public ArrayList<SmartNodeParams> nodeParams = new ArrayList<>();
+    
+    public TreeMap<Integer , ArrayList<SmartNodeParams>> resultParamsMap = new TreeMap<>();
     
     public String[] graphColumns;
+        
+    public SamplingProfile profile;
     
     public String getHtml() {
         String resultHtml = simulationResult.status==TestResult.PASS ? "<span style=color:green>PASS</span>"
@@ -63,30 +64,33 @@ public class SimulationTestInfo
         return testInfoRow;
     }
     
-    public String getHtmlDetails() {
-    
-        String inputString = "",stateString = "",paramsString = "";
-    
+    public String getHtmlDetails()
+    {
+        String inputString = "", stateString = "", paramsString = "";
         String prevParam = null;
-    
-        for(String[] row : simulationInput) {
-            for (String s : row) {
-                inputString += s+", ";
+        for (String[] row : simulationInput)
+        {
+            for (String s : row)
+            {
+                inputString += s + ", ";
             }
             inputString += "<br>";
         }
-    
-        try {
-            stateString = JsonSerializer.toJson(inputCcuState,true);
-        } catch (IOException e)
+        try
+        {
+            stateString = JsonSerializer.toJson(inputCcuState, true);
+        }
+        catch (IOException e)
         {
             e.printStackTrace();
         }
-    
-        for (SmartNodeParams param : nodeParams) {
-            String paramString = boldenEnabledParams(param.convertToJsonString());
-            paramsString += decorateChangedParams(prevParam, paramString).concat("<br><br>");
-            prevParam = paramString;
+        for (Integer node : resultParamsMap.keySet()) {
+            for (SmartNodeParams param : resultParamsMap.get(node))
+            {
+                String paramString = boldenEnabledParams(param.convertToJsonString());
+                paramsString += decorateChangedParams(prevParam, paramString).concat("<br><br>");
+                prevParam = paramString;
+            }
         }
         
         String templateHtml = SimulationTestInfo.readFileFromAssets("templates/testdetails.html");
@@ -94,6 +98,7 @@ public class SimulationTestInfo
     
         doc.getElementById("name").text(name);
         doc.getElementById("analysis").text(simulationResult.analysis);
+        doc.getElementById("graph").text("Charts");
         doc.getElementById("input").text(inputString);
         doc.getElementById("output").text(paramsString);
         doc.getElementById("ccustate").text(stateString);
@@ -123,16 +128,20 @@ public class SimulationTestInfo
                 }
             }
         }*/
-    
-        return doc.toString();
+        
+        String htmlData = doc.toString();
+        htmlData = htmlData.replaceAll("&lt;","<");
+        htmlData = htmlData.replaceAll("&gt;",">");
+       
+        return htmlData;
     }
     
     public String getGraphDataFile() {
         if (graphColumns == null) {
             return null;
         }
-        //TODO - for the time being  data points are hard-coded as chart1Data, chart2Data, chart3Data, chart4Data
-       /* var dataG1 = [{
+        //TODO - for the time being  data points are hard-coded as chart1Data, chart2Data, chart3Data, chart4Data in below format
+       /* var chart1Data = [{
                         type: "stepLine",
                         color: "red",
                         dataPoints :[
@@ -157,56 +166,84 @@ public class SimulationTestInfo
             ArrayList<GraphData> gdArray = new ArrayList<>();
             String varName = null;
             GraphData gd = new GraphData();
-            gd.type="stepLine";
+            gd.type="line";
             int xCounter = 0;
             
             switch(g) {
                 case "Relay1_Out":
                     gd.color = "red";
                     varName = "var chart1Data = ";
-                    for (SmartNodeParams param : nodeParams) {
-                        if (gd.dataPoints.size() == 0) {
-                            gd.dataPoints.add(new DataPoint(xCounter++,param.digital_out_1,g));
-                        } else {
-                            gd.dataPoints.add(new DataPoint(xCounter++,param.digital_out_1));
+                    for (Integer node : resultParamsMap.keySet())
+                    {
+                        for (SmartNodeParams param : resultParamsMap.get(node))
+                        {
+                            if (gd.dataPoints.size() == 0)
+                            {
+                                gd.dataPoints.add(new DataPoint(xCounter, param.digital_out_1, node.toString()));
+                            }
+                            else
+                            {
+                                gd.dataPoints.add(new DataPoint(xCounter, param.digital_out_1));
+                            }
+                            xCounter += (profile.resultPeriodSecs / 60);
                         }
-        
                     }
                     break;
                 case "Relay2_Out":
                     gd.color = "green";
                     varName = "var chart2Data = ";
-                    for (SmartNodeParams param : nodeParams) {
-                        if (gd.dataPoints.size() == 0) {
-                            gd.dataPoints.add(new DataPoint(xCounter++,param.digital_out_2,g));
-                        } else {
-                            gd.dataPoints.add(new DataPoint(xCounter++,param.digital_out_2));
+                    for (Integer node : resultParamsMap.keySet())
+                    {
+                        for (SmartNodeParams param : resultParamsMap.get(node))
+                        {
+                            if (gd.dataPoints.size() == 0)
+                            {
+                                gd.dataPoints.add(new DataPoint(xCounter, param.digital_out_2, node.toString()));
+                            }
+                            else
+                            {
+                                gd.dataPoints.add(new DataPoint(xCounter, param.digital_out_2));
+                            }
+                            xCounter += (profile.resultPeriodSecs / 60);
                         }
-        
                     }
                     break;
                 case "Analog1_Out":
                     gd.color="blue";
                     varName = "var chart3Data = ";
-                    for (SmartNodeParams param : nodeParams) {
-                        if (gd.dataPoints.size() == 0) {
-                            gd.dataPoints.add(new DataPoint(xCounter++,param.analog_out_1,g));
-                        } else {
-                            gd.dataPoints.add(new DataPoint(xCounter++,param.analog_out_1));
+                    for (Integer node : resultParamsMap.keySet())
+                    {
+                        for (SmartNodeParams param : resultParamsMap.get(node))
+                        {
+                            if (gd.dataPoints.size() == 0)
+                            {
+                                gd.dataPoints.add(new DataPoint(xCounter, param.analog_out_1, node.toString()));
+                            }
+                            else
+                            {
+                                gd.dataPoints.add(new DataPoint(xCounter, param.analog_out_1));
+                            }
+                            xCounter += (profile.resultPeriodSecs / 60);
                         }
-        
                     }
                     break;
                 case "Analog2_Out":
                     gd.color="yellow";
                     varName = "var chart4Data = ";
-                    for (SmartNodeParams param : nodeParams) {
-                        if (gd.dataPoints.size() == 0) {
-                            gd.dataPoints.add(new DataPoint(xCounter++,param.analog_out_2,g));
-                        } else {
-                            gd.dataPoints.add(new DataPoint(xCounter++,param.analog_out_2));
+                    for (Integer node : resultParamsMap.keySet())
+                    {
+                        for (SmartNodeParams param : resultParamsMap.get(node))
+                        {
+                            if (gd.dataPoints.size() == 0)
+                            {
+                                gd.dataPoints.add(new DataPoint(xCounter, param.analog_out_2, node.toString()));
+                            }
+                            else
+                            {
+                                gd.dataPoints.add(new DataPoint(xCounter, param.analog_out_2));
+                            }
+                            xCounter += (profile.resultPeriodSecs / 60);
                         }
-        
                     }
                     break;
                     

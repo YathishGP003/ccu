@@ -25,7 +25,7 @@ public abstract class BaseSimulationTest
     public abstract String getSimulationFileName();
     
     //JSON from http:localhost:5000/log/smartnode?address=2000 returns test result, open ended. Pass / Fail, reason for failing.
-    public abstract SimulationResult analyzeTestResults(SimulationTestInfo testLog);
+    public abstract void analyzeTestResults(SimulationTestInfo testLog);
     
     //How long this test should run
     public abstract long testDuration();

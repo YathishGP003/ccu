@@ -62,12 +62,11 @@ public class SimulationRunner
     int secondsElapsed = 0;
     
     private List<Integer> mNodes = new ArrayList<>();
-    
     private SamplingProfile mProfile;
     
     long resultTime;
-    int loopCount;
-    
+    int loopCounter;
+       
     SimulationRunner(BaseSimulationTest ccuTest, SamplingProfile profile) {
         mCurrentTest = ccuTest;
         mProfile = profile;
@@ -77,6 +76,7 @@ public class SimulationRunner
     
         csvDataList = SimulationInputParser.parseSimulationFile(mEnv, ccuTest.getSimulationFileName());
         testVectorParams = csvDataList.get(0);
+        fillNodes();
     }
     
     /**
@@ -86,36 +86,37 @@ public class SimulationRunner
         if (mCurrentTest == null) {
             Assert.fail("Invalid test configuration");
         }
+        loopCounter = 0;
         mCurrentTest.customizeTestData(appState);
         injectState(appState);
         resultTime = System.currentTimeMillis();
         threadSleep(45);
         addTestLog();
-        loopCount = 0;
         for (int simIndex = 1; simIndex < csvDataList.size(); simIndex ++) {
             String[] simData = csvDataList.get(simIndex);
-            if (!mNodes.contains(Integer.parseInt(simData[1].trim()))) {
-                mNodes.add(Integer.parseInt(simData[1].trim()));
-            }
             //injectSimulation(simData);
             SimulationParams params  = new SimulationParams().build(simData);
             String paramsJson = params.convertToJsonString();
             executePost(SMARTNODE_STATE_REST_URL+simData[1].trim(), getHttpPostParams(paramsJson) );
             threadSleep(mProfile.resultPeriodSecs);
+            loopCounter++;
             addTestLog();
             resultTime = System.currentTimeMillis();
-            loopCount++;
         }
         
         runResultLoop();
     }
     
     private void runResultLoop() {
-        while (loopCount <  mProfile.resultCount )
+        while (++loopCounter <= mProfile.resultCount)
         {
             threadSleep(mProfile.resultPeriodSecs);
             addTestLog();
         }
+    }
+    
+    public int getLoopCounter() {
+        return loopCounter;
     }
     
     private void injectState(CCUApplication state) {
@@ -271,20 +272,26 @@ public class SimulationRunner
             info.simulationInput = csvDataList;
             info.inputCcuState = appState;
             info.graphColumns = mCurrentTest.graphColumns();
+            info.profile= mProfile;
             mEnv.testSuite.addSimulationTest(mCurrentTest.getTestDescription(),info);
-            info.nodeParams.add(new SmartNodeParams());
+            //info.nodeParams.add(new SmartNodeParams());
+            for(int node : mNodes)
+            {
+                info.resultParamsMap.put(node, new ArrayList<SmartNodeParams>());
+            }
         }
       
         DateTimeFormatter formatter = DateTimeFormat.forPattern("dd MMM yyyy HH:mm:ss");
         
-        for(int node = 0; node < mNodes.size();node++)
+        for(int node : mNodes)
         {
-            String params = getResult(SMARTNODE_LOG_REST_URL + mNodes.get(node) + "&since=" + DateFormat.format("dd-MMMM-yyyy_hh:mm:ss", resultTime).toString());
+            String params = getResult(SMARTNODE_LOG_REST_URL + node + "&since=" + DateFormat.format("dd-MMMM-yyyy_hh:mm:ss", resultTime).toString());
             try
             {
                 JSONArray jsonArray = new JSONArray(params);
                 SmartNodeParams result = SmartNodeParams.getParamsFromJson(jsonArray.get(jsonArray.length()-1).toString());
-                info.nodeParams.add(result);
+                //info.nodeParams.add(result);
+                info.resultParamsMap.get(node).add(result);
                 /*for (int i = 0; i < jsonArray.length(); i++)
                 {
                     SmartNodeParams result = SmartNodeParams.getParamsFromJson(jsonArray.get(i).toString());
@@ -302,12 +309,23 @@ public class SimulationRunner
                 e.printStackTrace();
             }
         }
-        info.simulationResult.status = mCurrentTest.analyzeTestResults(info).status;
+        mCurrentTest.analyzeTestResults(info); //result is updated in info object
     }
     
+    private void fillNodes() {
+        for (int i = 1; i < csvDataList.size(); i++)
+        {
+            String[] simData = csvDataList.get(i);
+            if (!mNodes.contains(Integer.parseInt(simData[1].trim())))
+            {
+                mNodes.add(Integer.parseInt(simData[1].trim()));
+            }
+        }
+    }
     public void resetRunner() {
         secondsElapsed = 0;
     }
+    
     public List<String[]> getSimulationInput() {
         return csvDataList;
     }

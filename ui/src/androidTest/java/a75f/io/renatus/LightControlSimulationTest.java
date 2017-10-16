@@ -35,9 +35,9 @@ public class LightControlSimulationTest extends BaseSimulationTest
     
     @Override
     public String getTestDescription() {
-        return new String(" The test injects CcuApp state with a valid lightprofile." +
+        return " The test injects CcuApp state with a valid lightprofile with two analog out ports of smartnode 7000 " +
                           "It then creates a schedule starting at current system time and ends 15 minutes later, configuring analog1_out and analog2_out at val=80." +
-                          "Test runs for 30 minutes and fetches smartnode state every 3 seconds");
+                          "Test runs for 30 minutes and fetches smartnode state every 3 minutes";
     }
     
     @Override
@@ -51,19 +51,54 @@ public class LightControlSimulationTest extends BaseSimulationTest
     }
     
     @Override
-    public SimulationResult analyzeTestResults(SimulationTestInfo testLog) {
+    public void analyzeTestResults(SimulationTestInfo testLog) {
     
-        SimulationResult result = new SimulationResult();
-        result.status = TestResult.FAIL;
-        result.analysis = "Verified that lighting_control_enabled is set since the test inject a light profile configuration." +
-                          "Verified that lights are turned on with val=80 for during schedule" +
-                          "Verified that lights are turned off when schedule expires";
-        for (SmartNodeParams param : testLog.nodeParams) {
-            if (param.lighting_control_enabled == 0) {
-                result.status = TestResult.PASS;
+        if (mRunner.loopCounter == 0) {
+            return; // Test run not started , nothing to analyze
+        }
+        SimulationResult result = testLog.simulationResult;
+        if (testLog.resultParamsMap.get(new Integer(7000)) != null)
+        {
+            SmartNodeParams params = testLog.resultParamsMap.get(new Integer(7000)).get(mRunner.getLoopCounter());
+            switch (mRunner.loopCounter)
+            {
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                    if ((params.lighting_control_enabled == 1) && (params.analog_out_1 == 80) && (params.analog_out_2 == 80))
+                    {
+                        result.analysis += "<p>Check Point " + mRunner.loopCounter + ": PASS" + "</p>";
+                    }
+                    else
+                    {
+                        result.analysis += "<p>Check Point " + mRunner.loopCounter + ": FAIL" + "</p>";
+                        result.status = TestResult.FAIL;
+                    }
+                    break;
+                case 6:
+                case 7:
+                case 8:
+                case 9:
+                case 10:
+                    if ((params.lighting_control_enabled == 1) && (params.analog_out_1 == 0) && (params.analog_out_2 == 0))
+                    {
+                        result.analysis += "<p>Check Point " + mRunner.loopCounter + ": PASS" + "</p>";
+                    }
+                    else
+                    {
+                        result.analysis += "<p>Check Point " + mRunner.loopCounter + ": FAIL" + "</p>";
+                        result.status = TestResult.FAIL;
+                    }
+                    break;
+            }
+            if (mRunner.loopCounter == testLog.profile.resultCount)
+            {
+                result.analysis += "<p>Verified that lighting_control_enabled is set since the test injected a light profile configuration." +
+                                   "Verified that lights are turned on with val=80 when schedule is active." + "Verified that lights are turned off when schedule expired.</p>";
             }
         }
-        return result;
     }
     
     @Override

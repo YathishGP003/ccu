@@ -102,17 +102,5 @@ public class SingleStageProfile extends ZoneProfile
         return MathLib.mean(temperature);
     }
     
-    
-    //TODO: organize tuners this way?
-    public static class Tuners
-    {
-        public static final String SSE_COOLING_DEADBAND  = "sseCoolingDeadBand";
-        public static final String SSE_HEATING_DEADBAND  = "sseHeatingDeadBand";
-        public static final String SSE_BUILDING_MAX_TEMP = "buildingMaxTemp";
-        public static final String SSE_BUILDING_MIN_TEMP = "buildingMinTemp";
-        public static final String SSE_USER_MIN_TEMP     = "userMinTemp";
-        public static final String SSE_USER_MAX_TEMP     = "userMaxTemp";
-        public static final String SSE_USER_ZONE_SETBACK = "zoneSetBack";
-        public static final String SSE_FORCED_OCCU_TIME = "forcedOccupiedTime";
-    }
+
 }

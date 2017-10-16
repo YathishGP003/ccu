@@ -60,8 +60,9 @@
         <!-- TODO we don't want this and shouldn't need it, we should monitor the USB connection, not kick the application whenever it restarts -->
 
         <activity
-            android:name=".RenatusLandingActivity"
+            android:name=".RenatusLandingActivity" android:launchMode="singleTask"
             android:label="@string/title_activity_renatus_landing"
+            android:alwaysRetainTaskState="true"
             android:theme="@style/RenatusAppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -75,6 +76,14 @@
             android:name=".ENGG.RenatusEngineeringActivity"
             android:theme="@style/RenatusAppTheme.NoActionBar">
         </activity>
+
+
+        <activity
+            android:name=".SplashActivity" android:launchMode="singleTask"
+            android:theme="@style/RenatusAppTheme.NoActionBar">
+        </activity>
+
+
 
         <receiver
             android:name="a75f.io.logic.GCMReceiver"

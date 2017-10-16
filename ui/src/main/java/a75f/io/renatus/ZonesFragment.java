@@ -43,6 +43,7 @@ import a75f.io.bo.building.SingleStageProfile;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.ZoneProfile;
 import a75f.io.bo.building.definitions.ProfileType;
+import a75f.io.bo.kinvey.AlgoTuningParameters;
 import a75f.io.logic.L;
 import a75f.io.renatus.VIEWS.SeekArcWidget;
 import a75f.io.renatus.VIEWS.ZoneImageWidget;
@@ -378,7 +379,7 @@ public class ZonesFragment extends Fragment
     //
     //    }
     //
-    private ZoneImageWidget.OnClickListener zoneWidgetListener   =
+    private ZoneImageWidget.OnClickListener zoneWidgetListener =
             new ZoneImageWidget.OnClickListener()
             {
                 
@@ -465,9 +466,9 @@ public class ZonesFragment extends Fragment
                     }
                 }
             };
-    private RelativeLayout                  mRoomDetailsWidget   = null;
-    private int                             mod                  = 3;
-  
+    private RelativeLayout                  mRoomDetailsWidget = null;
+    private int                             mod                = 3;
+    
     private ImageView                  ivSignal;
     private ImageView                  ivOccupied;
     private Spinner                    spinSelectedSchedule;
@@ -634,24 +635,23 @@ public class ZonesFragment extends Fragment
         //ivSignal.setImageDrawable(getSignalDrawable(roomData.getSignalStatus()));
         boolean isOccupied = L.isOccupied(roomData.getZone(), roomData.getZoneProfile());
         ivOccupied.setVisibility(isOccupied ? View.VISIBLE : View.INVISIBLE);
-   
         //tvDesiredLabel.setText(getCurrentModeText(roomData));
-//        if (roomData.isForcedOccupied())
-//        {
-//            ivOccupied.setImageResource(R.drawable.forced_occupied);
-//        }
-//        else if (roomData.isAutoAway())
-//        {
-//            ivOccupied.setImageResource(R.drawable.occupied_away_blue);
-//        }
-//        else if (roomData.isVacationSlotActive())
-//        {
-//            ivOccupied.setVisibility(View.INVISIBLE);
-//        }
-//        else
-//        {
-            ivOccupied.setImageResource(R.drawable.occupied);
-//        }
+        //        if (roomData.isForcedOccupied())
+        //        {
+        //            ivOccupied.setImageResource(R.drawable.forced_occupied);
+        //        }
+        //        else if (roomData.isAutoAway())
+        //        {
+        //            ivOccupied.setImageResource(R.drawable.occupied_away_blue);
+        //        }
+        //        else if (roomData.isVacationSlotActive())
+        //        {
+        //            ivOccupied.setVisibility(View.INVISIBLE);
+        //        }
+        //        else
+        //        {
+        ivOccupied.setImageResource(R.drawable.occupied);
+        //        }
         //updateStandaloneParams(roomData);
         //spinSelectedSchedule.setSelection(roomData.getSchedulingMode().ordinal());
         //updateVacationString("vacation string");
@@ -781,14 +781,14 @@ public class ZonesFragment extends Fragment
         rmSeekArc.setLayoutParams(lp);
         rmSeekArc.setmPathStartAngle(120);
         rmSeekArc
-                .setmBuildingLimitStartAngle((int) L.resolveTuningParameter(zone, SingleStageProfile.Tuners.SSE_BUILDING_MIN_TEMP));
+                .setmBuildingLimitStartAngle((int) L.resolveTuningParameter(zone, AlgoTuningParameters.SSETuners.SSE_BUILDING_MIN_TEMP));
         rmSeekArc
-                .setmBuildingLimitEndAngle((int) L.resolveTuningParameter(zone, SingleStageProfile.Tuners.SSE_BUILDING_MAX_TEMP));
+                .setmBuildingLimitEndAngle((int) L.resolveTuningParameter(zone, AlgoTuningParameters.SSETuners.SSE_BUILDING_MAX_TEMP));
         rmSeekArc.prepareAngle();
         rmSeekArc
-                .setLimitStartAngle((int) L.resolveTuningParameter(zone, SingleStageProfile.Tuners.SSE_USER_MIN_TEMP));
+                .setLimitStartAngle((int) L.resolveTuningParameter(zone, AlgoTuningParameters.SSETuners.SSE_USER_MIN_TEMP));
         rmSeekArc
-                .setLimitEndAngle((int) L.resolveTuningParameter(zone, SingleStageProfile.Tuners.SSE_USER_MAX_TEMP));
+                .setLimitEndAngle((int) L.resolveTuningParameter(zone, AlgoTuningParameters.SSETuners.SSE_USER_MAX_TEMP));
         rmSeekArc.setTouchInSide(true);
         rmSeekArc.setTouchOutSide(false);
         rmSeekArc.setCurrentTemp(zoneProfile.getDisplayCurrentTemp());
@@ -940,8 +940,7 @@ public class ZonesFragment extends Fragment
             aaOccupancyMode.setDropDownViewResource(R.layout.spinner_dropdown_item);
             spinnerSchedule.setAdapter(aaOccupancyMode);
             spinnerSchedule.setOnItemSelectedListener(null);
-            spinnerSchedule
-                    .setSelection(roomData.getScheduleMode() == ZoneSchedule ? 0 : 1);
+            spinnerSchedule.setSelection(roomData.getScheduleMode() == ZoneSchedule ? 0 : 1);
             spinnerSchedule.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
             {
                 @Override

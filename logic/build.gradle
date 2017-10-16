@@ -47,9 +47,7 @@ dependencies {
     compile fileTree(include: '*.jar', dir: 'libs')
     testCompile 'junit:junit:4.12'
     compile project(':bo')
-    compile project(path: ':util')
     compile project(path: ':usbserial')
-    compile project(path: ':dal')
     compile(name: 'kinvey-android-3.0.3', ext: 'aar')
     compile(name: 'realm-android-library-3.2.1', ext: 'aar')
     compile(name: 'relinker-1.2.2', ext: 'aar')

@@ -6,6 +6,7 @@ import a75f.io.bo.building.SingleStageProfile;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.definitions.SingleStageMode;
 import a75f.io.bo.building.sse.SingleStageLogicalMap;
+import a75f.io.bo.kinvey.AlgoTuningParameters;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
 
@@ -29,25 +30,22 @@ public class LSSE
         }
         SingleStageLogicalMap logicalMap = zp.getLogicalMap().get(Short.valueOf(nodeAddress));
         BaseProfileConfiguration circuitConfig = zp.getProfileConfiguration(nodeAddress);
-        
         float currentTemperature = logicalMap.getRoomTemperature();
         //Tuners
-        int coolingDeadband = (int) L.resolveTuningParameter(zone,
-                SingleStageProfile.Tuners.SSE_COOLING_DEADBAND);
-        int heatingDeadband = (int) L.resolveTuningParameter(zone, SingleStageProfile.Tuners
-                                                                           .SSE_HEATING_DEADBAND);
-                
-        int buildingMaxTemp = (int) L.resolveTuningParameter(zone, SingleStageProfile.Tuners.SSE_BUILDING_MAX_TEMP);
-        int buildingMinTemp = (int) L.resolveTuningParameter(zone, SingleStageProfile.Tuners.SSE_BUILDING_MIN_TEMP);
-        int userMaxTemp = (int) L.resolveTuningParameter(zone, SingleStageProfile
-                                                                       .Tuners
-                                                                       .SSE_USER_MAX_TEMP);
-        
-        int userMinTemp = (int) L.resolveTuningParameter(zone, SingleStageProfile
-                                                                       .Tuners
-                                                                       .SSE_USER_MIN_TEMP);
-        int zoneSetBack = (int) L.resolveTuningParameter(zone, SingleStageProfile.Tuners
-                                                                       .SSE_USER_ZONE_SETBACK);
+        int coolingDeadband =
+                (int) L.resolveTuningParameter(zone, AlgoTuningParameters.SSETuners.SSE_COOLING_DEADBAND);
+        int heatingDeadband =
+                (int) L.resolveTuningParameter(zone, AlgoTuningParameters.SSETuners.SSE_HEATING_DEADBAND);
+        int buildingMaxTemp =
+                (int) L.resolveTuningParameter(zone, AlgoTuningParameters.SSETuners.SSE_BUILDING_MAX_TEMP);
+        int buildingMinTemp =
+                (int) L.resolveTuningParameter(zone, AlgoTuningParameters.SSETuners.SSE_BUILDING_MIN_TEMP);
+        int userMaxTemp =
+                (int) L.resolveTuningParameter(zone, AlgoTuningParameters.SSETuners.SSE_USER_MAX_TEMP);
+        int userMinTemp =
+                (int) L.resolveTuningParameter(zone, AlgoTuningParameters.SSETuners.SSE_USER_MIN_TEMP);
+        int zoneSetBack =
+                (int) L.resolveTuningParameter(zone, AlgoTuningParameters.SSETuners.SSE_USER_ZONE_SETBACK);
         boolean coolingOn = false;
         boolean fanOn = false;
         boolean heatingOn = false;
@@ -103,12 +101,8 @@ public class LSSE
     }
     
     
-    
-    
-    
     public static void mapSSESeed(Zone zone, CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage)
     {
         seedMessage.settings.profileBitmap.singleStageEquipment.set((short) 1);
     }
-    
 }

@@ -6,6 +6,7 @@ import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.ZoneProfile;
 import a75f.io.bo.building.definitions.ProfileType;
 import a75f.io.bo.building.definitions.ScheduleMode;
+import a75f.io.bo.kinvey.AlgoTuningParameters;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
 
@@ -43,9 +44,9 @@ public class LLights
             lightProfile.addSchedules(ccu().getDefaultLightSchedule(), ScheduleMode.ZoneSchedule);
         }
         seedMessage.settings.lightingIntensityForOccupantDetected
-                .set((short) L.resolveTuningParameter(zone, "lightingIntensityOccupantDetected"));
+                .set((short) L.resolveTuningParameter(zone, AlgoTuningParameters.LightTuners.LIGHT_INTENSITY_OCCUPANT_DETECTED));
         seedMessage.settings.minLightingControlOverrideTimeInMinutes
-                .set((short) L.resolveTuningParameter(zone, "minLightControlOverInMinutes"));
+                .set((short) L.resolveTuningParameter(zone, AlgoTuningParameters.LightTuners.LIGHT_MIN_LIGHTING_CONTROL_OVERRIDE_IN_MINUTES));
         seedMessage.settings.profileBitmap.lightingControl.set((short) 1);
     }
 }

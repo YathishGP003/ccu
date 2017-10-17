@@ -1,4 +1,4 @@
-package a75f.io.renatus;
+package a75f.io.renatus.framework;
 
 import android.os.Environment;
 import android.util.Log;
@@ -25,7 +25,6 @@ import java.util.TreeMap;
 
 import a75f.io.bo.building.CCUApplication;
 import a75f.io.bo.json.serializers.JsonSerializer;
-
 /**
  * Created by samjithsadasivan on 9/26/17.
  */
@@ -45,8 +44,6 @@ public class SimulationTestInfo
     
     public CCUApplication inputCcuState = null;
     
-    //public ArrayList<SmartNodeParams> nodeParams = new ArrayList<>();
-    
     public TreeMap<Integer , ArrayList<SmartNodeParams>> resultParamsMap = new TreeMap<>();
     
     public String[] graphColumns;
@@ -54,7 +51,7 @@ public class SimulationTestInfo
     public SamplingProfile profile;
     
     public String getHtml() {
-        String resultHtml = simulationResult.status==TestResult.PASS ? "<span style=color:green>PASS</span>"
+        String resultHtml = simulationResult.status == TestResult.PASS ? "<span style=color:green>PASS</span>"
                                     : "<span style=color:red>FAIL</span>";
         
         String resultDetails = "<a href="+name+".html>"+"......... Graphs and Logs "+"</a>";
@@ -110,28 +107,7 @@ public class SimulationTestInfo
         for (Element el : els) {
             Element j = el.appendElement("script").attr("type","text/javascript").attr("src",getGraphDataFile());
         }
-        
-        /*Element div = doc.getElementById("analog1ChartContainer");
-        div.attr("style","display:none; height: 200px; width: 100%;");
-        //doc.getElementById("analog1ChartContainer").attr("style","display:none; height: 200px; width: 100%;");
-        for (TextNode tn : div.textNodes()) {
-            String tagText = tn.text().trim();
-        
-            if (tagText.length() > 0) {
-                //tn.text("");
-            }
-        }
-        Elements tags = doc.select("*");
-        for (Element tag : tags) {
-            for (TextNode tn : tag.textNodes()) {
-                String tagText = tn.text().trim();
-            
-                if (tagText.length() > 0) {
-                    tn.text("");
-                }
-            }
-        }*/
-        
+      
         String htmlData = doc.toString();
         htmlData = htmlData.replaceAll("&lt;","<");
         htmlData = htmlData.replaceAll("&gt;",">");
@@ -294,7 +270,6 @@ public class SimulationTestInfo
             rawOutput.write(buffer);
             rawOutput.close();
             rawInput.close();
-            ;
         } catch (IOException e) {
             Log.e("Error", e.toString());
         }
@@ -347,7 +322,7 @@ public class SimulationTestInfo
                 
                 if (!params1Tree.get(key1).asText().equals(params2Tree.get(key2).asText()) && !key1.equals("timestamp")) {
                     ObjectNode n = (ObjectNode) params2Tree;
-                    String newVal = "<span style=color:red>"+params2Tree.get(key2).asText()+"</span>";
+                    String newVal = "<span style=color:red><b>"+params2Tree.get(key2).asText()+"</b></span>";
                     n.put(key2,newVal);
                 }
             }

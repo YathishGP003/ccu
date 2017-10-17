@@ -1,4 +1,4 @@
-package a75f.io.renatus;
+package a75f.io.renatus.framework;
 
 /**
  * Created by samjithsadasivan on 10/12/17.

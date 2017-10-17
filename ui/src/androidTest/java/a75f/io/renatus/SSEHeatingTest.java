@@ -3,10 +3,18 @@ package a75f.io.renatus;
 import org.junit.After;
 import org.junit.Before;
 
-import static a75f.io.renatus.GraphColumns.Analog1_Out;
-import static a75f.io.renatus.GraphColumns.Analog2_Out;
-import static a75f.io.renatus.GraphColumns.Relay1_Out;
-import static a75f.io.renatus.GraphColumns.Relay2_Out;
+import a75f.io.renatus.framework.BaseSimulationTest;
+import a75f.io.renatus.framework.SamplingProfile;
+import a75f.io.renatus.framework.SimulationResult;
+import a75f.io.renatus.framework.SimulationRunner;
+import a75f.io.renatus.framework.SimulationTestInfo;
+import a75f.io.renatus.framework.SmartNodeParams;
+import a75f.io.renatus.framework.TestResult;
+
+import static a75f.io.renatus.framework.GraphColumns.Analog1_Out;
+import static a75f.io.renatus.framework.GraphColumns.Analog2_Out;
+import static a75f.io.renatus.framework.GraphColumns.Relay1_Out;
+import static a75f.io.renatus.framework.GraphColumns.Relay2_Out;
 /**
  * Created by samjithsadasivan on 10/4/17.
  */
@@ -20,7 +28,7 @@ public class SSEHeatingTest extends BaseSimulationTest
     
     @Before
     public void setUp() {
-        mRunner =  new SimulationRunner(this, new SamplingProfile(10, 120));
+        mRunner =  new SimulationRunner(this, new SamplingProfile(10, 180));
     }
     
     @After
@@ -48,25 +56,25 @@ public class SSEHeatingTest extends BaseSimulationTest
     
     @Override
     public void analyzeTestResults(SimulationTestInfo testLog) {
-        if (mRunner.loopCounter == 0) {
+        if (mRunner.getLoopCounter() == 0) {
             return; // Test run not started , nothing to analyze
         }
         SimulationResult result = testLog.simulationResult;
         if (testLog.resultParamsMap.get(new Integer(7001)) != null)
         {
             SmartNodeParams params = testLog.resultParamsMap.get(new Integer(7001)).get(mRunner.getLoopCounter());
-            switch (mRunner.loopCounter)
+            switch (mRunner.getLoopCounter())
             {
                 case 1:
                 case 2:
                 case 7:
                     if ((params.digital_out_1 == 0) && (params.digital_out_2 == 0))
                     {
-                        result.analysis += "<p>Check Point " + mRunner.loopCounter + ": PASS" + "</p>";
+                        result.analysis += "<p>Check Point " + mRunner.getLoopCounter() + ": PASS" + "</p>";
                     }
                     else
                     {
-                        result.analysis += "<p>Check Point " + mRunner.loopCounter + ": FAIL" + "</p>";
+                        result.analysis += "<p>Check Point " + mRunner.getLoopCounter() + ": FAIL" + "</p>";
                         result.status = TestResult.FAIL;
                     }
                     break;
@@ -79,16 +87,16 @@ public class SSEHeatingTest extends BaseSimulationTest
                 case 10:
                     if ((params.digital_out_1 == 1) && (params.digital_out_2 == 1))
                     {
-                        result.analysis += "<p>Check Point " + mRunner.loopCounter + ": PASS" + "</p>";
+                        result.analysis += "<p>Check Point " + mRunner.getLoopCounter() + ": PASS" + "</p>";
                     }
                     else
                     {
-                        result.analysis += "<p>Check Point " + mRunner.loopCounter + ": FAIL" + "</p>";
+                        result.analysis += "<p>Check Point " + mRunner.getLoopCounter() + ": FAIL" + "</p>";
                         result.status = TestResult.FAIL;
                     }
                     break;
             }
-            if (mRunner.loopCounter == testLog.profile.resultCount)
+            if (mRunner.getLoopCounter() == testLog.profile.getResultCount())
             {
                 result.analysis += "<p>Verified that heating on relay_1 and fan on digital_2 are turned on when the room temperature is below set temperature by" +
                                    "heating deadband config.</p> ";

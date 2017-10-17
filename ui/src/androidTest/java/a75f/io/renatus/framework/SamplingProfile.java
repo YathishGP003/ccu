@@ -1,4 +1,4 @@
-package a75f.io.renatus;
+package a75f.io.renatus.framework;
 
 /**
  * Created by samjithsadasivan on 10/14/2017.
@@ -9,11 +9,21 @@ package a75f.io.renatus;
  */
 public class SamplingProfile
 {
+	int resultCount;
+	int resultPeriodSecs;
+	
 	public SamplingProfile(int count, int period){
 		resultCount = count;
 		resultPeriodSecs = period;
 	}
-	int resultCount;
-	int resultPeriodSecs;
+	
+	public int getResultCount() {
+		return resultCount;
+	}
+	
+	public int getResultInterval() {
+		return resultPeriodSecs;
+	}
+	
 	
 }

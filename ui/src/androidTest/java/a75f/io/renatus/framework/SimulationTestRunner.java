@@ -1,4 +1,4 @@
-package a75f.io.renatus;
+package a75f.io.renatus.framework;
 
 import org.junit.Test;
 import org.junit.internal.runners.statements.FailOnTimeout;
@@ -8,6 +8,8 @@ import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
 
+import a75f.io.renatus.framework.SimulationContext;
+import a75f.io.renatus.framework.SimulationRunListener;
 /**
  * Created by samjithsadasivan on 9/26/17.
  */

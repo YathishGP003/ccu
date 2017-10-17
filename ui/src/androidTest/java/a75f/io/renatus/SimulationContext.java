@@ -8,7 +8,10 @@ import java.util.HashMap;
 /**
  * Created by samjithsadasivan on 9/21/17.
  */
-
+/**
+ * Global static wrapper around android instrumentation context.
+ * It also helps track all the tests part of current suite.
+ */
 public class SimulationContext
 {
     private static SimulationContext INSTANCE = null;

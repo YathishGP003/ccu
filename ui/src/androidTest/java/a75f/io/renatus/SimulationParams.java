@@ -10,6 +10,9 @@ import java.io.IOException;
  * Created by samjithsadasivan on 9/25/17.
  */
 
+/**
+ * Class representation of simulation input data fed through csv.
+ */
 public class SimulationParams
 {
     public float room_temperature;

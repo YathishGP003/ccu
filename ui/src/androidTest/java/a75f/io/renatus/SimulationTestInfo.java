@@ -30,6 +30,9 @@ import a75f.io.bo.json.serializers.JsonSerializer;
  * Created by samjithsadasivan on 9/26/17.
  */
 
+/**
+ * Class that aggregates the complete data/details of a test.
+ */
 public class SimulationTestInfo
 {
     public String name;

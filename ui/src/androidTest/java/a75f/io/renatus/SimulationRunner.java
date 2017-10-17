@@ -306,10 +306,19 @@ public class SimulationRunner
                 }*/
                 
             } catch (JSONException e) {
+                //TODO- Refactor
+                //Random failures observed while retrieving json params.We just proceed with adding an empty struct to avoid losing check point mapping.
+                info.resultParamsMap.get(node).add(new SmartNodeParams());
                 e.printStackTrace();
             }
         }
-        mCurrentTest.analyzeTestResults(info); //result is updated in info object
+        try
+        {
+            mCurrentTest.analyzeTestResults(info); //result is updated in info object
+        } catch (Exception e) {
+            //Test should go on even if one check point analysis failed
+            info.simulationResult.analysis += "<p>Check Point " + loopCounter + " NA : Exception "+e.getMessage() + "</p>";
+        }
     }
     
     private void fillNodes() {

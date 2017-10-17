@@ -2,10 +2,13 @@ package a75f.io.renatus;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.junit.After;
 import org.junit.Before;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import a75f.io.bo.building.CCUApplication;
 import a75f.io.bo.building.Day;
@@ -24,9 +27,12 @@ public class LightControlSimulationTest extends BaseSimulationTest
 {
     SimulationRunner mRunner = null;
     
+    DateTime sStart;
+    DateTime sEnd;
+    
     @Before
     public void setUp() {
-        mRunner =  new SimulationRunner(this,  new SamplingProfile(10, 180));
+        mRunner =  new SimulationRunner(this,  new SamplingProfile(10, 120));
     }
     
     @After
@@ -35,9 +41,9 @@ public class LightControlSimulationTest extends BaseSimulationTest
     
     @Override
     public String getTestDescription() {
-        return " The test injects CcuApp state with a valid lightprofile with two analog out ports of smartnode 7000 " +
+        return " The test injects CcuApp state with a valid lightprofile with two analog out ports of smartnode 7000. " +
                           "It then creates a schedule starting at current system time and ends 15 minutes later, configuring analog1_out and analog2_out at val=80." +
-                          "Test runs for 30 minutes and fetches smartnode state every 3 minutes";
+                          "Test runs for 30 minutes and fetches smartnode state every 3 minutes.";
     }
     
     @Override
@@ -67,14 +73,23 @@ public class LightControlSimulationTest extends BaseSimulationTest
                 case 3:
                 case 4:
                 case 5:
+                    
                     if ((params.lighting_control_enabled == 1) && (params.analog_out_1 == 80) && (params.analog_out_2 == 80))
                     {
                         result.analysis += "<p>Check Point " + mRunner.loopCounter + ": PASS" + "</p>";
                     }
                     else
                     {
-                        result.analysis += "<p>Check Point " + mRunner.loopCounter + ": FAIL" + "</p>";
-                        result.status = TestResult.FAIL;
+                        /*DateTimeFormatter formatter = DateTimeFormat.forPattern("dd MMM yyyy HH:mm:ss");
+                        DateTime resultSt = formatter.parseDateTime(params.timestamp);
+                        if (resultSt.isAfter(sEnd)) {
+                            //Work around for a case when schedule ends even before the local loop reaches 5
+                            result.analysis += "<p>Check Point " + mRunner.loopCounter + ": PASS" + "</p>";
+                        } else*/
+                        {
+                            result.analysis += "<p>Check Point " + mRunner.loopCounter + ": FAIL" + "</p>";
+                            result.status = TestResult.FAIL;
+                        }
                     }
                     break;
                 case 6:
@@ -119,24 +134,19 @@ public class LightControlSimulationTest extends BaseSimulationTest
     
     @Override
     public void customizeTestData(CCUApplication app) {
-        DateTime startTime = new DateTime(System.currentTimeMillis(), DateTimeZone.getDefault());
-        DateTime endTime = new DateTime(System.currentTimeMillis() + 15*60000, DateTimeZone.getDefault());
+        DateTime sStart = new DateTime(System.currentTimeMillis(), DateTimeZone.getDefault());
+        DateTime sEnd = new DateTime(System.currentTimeMillis() + 15*60000, DateTimeZone.getDefault());
         ArrayList<Schedule> schedules     = app.getFloors().get(0).mRoomList.get(0).mZoneProfiles.get(0).getSchedules();
-        Day testDay = schedules.get(0).getDays().get(startTime.getDayOfWeek()-1);
-        testDay.setSthh(startTime.getHourOfDay());
-        testDay.setEthh(endTime.getHourOfDay());
-        testDay.setStmm(startTime.getMinuteOfHour());
-        testDay.setEtmm(endTime.getMinuteOfHour());
+        Day testDay = schedules.get(0).getDays().get(sStart.getDayOfWeek()-1);
+        testDay.setSthh(sStart.getHourOfDay());
+        testDay.setEthh(sEnd.getHourOfDay());
+        testDay.setStmm(sStart.getMinuteOfHour());
+        testDay.setEtmm(sEnd.getMinuteOfHour());
     }
-    
     
     @Override
     public void runTest() {
-    
-       
         mRunner.runSimulation();
-        
-        
         //MockTime.getInstance().setMockTime(true, System.currentTimeMillis()+ (8 * 3600000)); // Force the mocktime to out of schedule interval
         //mRunner.resetRunner();
         //mRunner.runSimulation();

@@ -12,6 +12,9 @@ import org.junit.runners.model.Statement;
  * Created by samjithsadasivan on 9/26/17.
  */
 
+/**
+ * Custom runner to complement features not supported by default AndroidJunitRunner
+ */
 //TODO - May override timeout, and implement junit testwatcher/testlistener
     
 public class SimulationTestRunner extends BlockJUnit4ClassRunner

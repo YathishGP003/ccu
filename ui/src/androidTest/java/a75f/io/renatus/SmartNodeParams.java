@@ -10,6 +10,9 @@ import java.io.IOException;
  * Created by samjithsadasivan on 9/26/17.
  */
 
+/**
+ * Class represenation of biskit smartnode params
+ */
 public class SmartNodeParams
 {
     public String timestamp;

@@ -1,5 +1,7 @@
 package a75f.io.logic;
 
+import android.util.Log;
+
 import org.javolution.io.Struct;
 
 import java.util.ArrayList;
@@ -27,7 +29,9 @@ import static a75f.io.logic.L.ccu;
 class LSmartNode
 {
     
-    private static final short TODO = 0;
+    private static final short  TODO = 0;
+    private static final String TAG  = "LSmartNode";
+    
     
     public static short nextSmartNodeAddress()
     {
@@ -46,10 +50,12 @@ class LSmartNode
         return (short) (currentBand + amountOfNodes);
     }
     
+    
     public static AddressedStruct[] getExtraMessages(Floor floor, Zone zone)
     {
         return new AddressedStruct[0];
     }
+    
     
     /**************************** TEST MESSAGES ****************************/
     public static ArrayList<Struct> getTestMessages(Zone zone)
@@ -59,6 +65,7 @@ class LSmartNode
         retVal.addAll(getControlMessages(zone));
         return retVal;
     }
+    
     
     /***************************** SEED MESSAGES ****************************/
     
@@ -75,6 +82,7 @@ class LSmartNode
         }
         return seedMessages;
     }
+    
     
     /********************************CONTROLS MESSAGES*************************************/
     
@@ -107,9 +115,11 @@ class LSmartNode
                     switch (zp.getProfileType())
                     {
                         case LIGHT:
+                            Log.i(TAG, "Mapping Light control messages");
                             LLights.mapLightCircuits(controlsMessage_t, node, zone, zp);
                             break;
                         case SSE:
+                            Log.i(TAG, "Mapping SSE control messages");
                             LSSE.mapSSECircuits(controlsMessage_t, node, zone, (SingleStageProfile) zp);
                             break;
                     }
@@ -119,9 +129,11 @@ class LSmartNode
         return controlMessagesHash.values();
     }
     
+    
     public static CcuToCmOverUsbDatabaseSeedSnMessage_t getSeedMessage(Zone zone, short address)
     {
-        CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = new CcuToCmOverUsbDatabaseSeedSnMessage_t();
+        CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage =
+                new CcuToCmOverUsbDatabaseSeedSnMessage_t();
         seedMessage.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN);
         seedMessage.settings.roomName.set(zone.roomName);
         seedMessage.smartNodeAddress.set(address);
@@ -131,20 +143,25 @@ class LSmartNode
             switch (zp.getProfileType())
             {
                 case LIGHT:
+                    Log.i(TAG, "Mapping Light Profile Seed messages");
                     LLights.mapLightProfileSeed(zone, seedMessage);
                     break;
                 case SSE:
+                    Log.i(TAG, "Mapping SSE Profile Seed messages");
                     LSSE.mapSSESeed(zone, seedMessage);
                     break;
                 case TEST:
-                    LLights.mapLightProfileSeed(zone, seedMessage);
+                    Log.i(TAG, "Mapping TEST Profile Seed messages");
+                    LTest.mapTestProfileSeed(zone, seedMessage);
                     break;
             }
         }
         return seedMessage;
     }
     
-    private static void mapTestCircuits(CcuToCmOverUsbSnControlsMessage_t controlsMessage_t, short nodeAddress, ZoneProfile zp)
+    
+    private static void mapTestCircuits(CcuToCmOverUsbSnControlsMessage_t controlsMessage_t,
+                                        short nodeAddress, ZoneProfile zp)
     {
         for (Output output : zp.getProfileConfiguration(nodeAddress).getOutputs())
         {
@@ -153,7 +170,9 @@ class LSmartNode
         }
     }
     
-    public static Struct.Unsigned8 getSmartNodePort(CcuToCmOverUsbSnControlsMessage_t controlsMessage_t, Port smartNodePort)
+    
+    public static Struct.Unsigned8 getSmartNodePort(CcuToCmOverUsbSnControlsMessage_t controlsMessage_t,
+                                                    Port smartNodePort)
     {
         switch (smartNodePort)
         {
@@ -170,6 +189,7 @@ class LSmartNode
         }
     }
     
+    
     public static short mapRawValue(Output output, short rawValue)
     {
         switch (output.getOutputType())
@@ -181,8 +201,6 @@ class LSmartNode
         }
         return 0;
     }
-    
     /********************************END SEED MESSAGES**************************************/
     
-
 }

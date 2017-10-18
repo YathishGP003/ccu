@@ -26,6 +26,8 @@ public class ProfileTest
 		Zone zone = new Zone("DefaultZone");
 		LightProfileConfiguration lightProfileConfiguration = new LightProfileConfiguration();
 		floor.mRoomList.add(zone);
+		SingleStageProfile profile = new SingleStageProfile();
+		zone.mZoneProfiles.add(profile);
 		zone.findProfile(ProfileType.SSE);
 		ccuApplication.getFloors().add(floor);
 		//ccuApplication.floors.get(0).mRoomList.get(0).zoneProfiles.add(p1);

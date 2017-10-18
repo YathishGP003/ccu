@@ -1,13 +1,10 @@
 package a75f.io.bo.building;
 
-import android.provider.ContactsContract;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.UUID;
 
 import a75f.io.bo.building.definitions.ProfileType;
 import a75f.io.bo.building.definitions.RoomDataInterface;
@@ -64,26 +61,14 @@ public class Zone
         ZoneProfile retVal = null;
         for (ZoneProfile zoneProfile : mZoneProfiles)
         {
-            if(zoneProfile.getProfileType() == profileType)
+            if(zoneProfile.getProfileType().equals(profileType))
             {
                 return zoneProfile;
             }
         }
         
         
-        if (profileType == ProfileType.LIGHT)
-        {
-            retVal = new LightProfile();
-        }
-        else if (profileType == ProfileType.SSE)
-        {
-            retVal = new SingleStageProfile();
-        }
-        else if (profileType == ProfileType.TEST)
-        {
-            retVal = new TestProfile();
-        }
-        mZoneProfiles.add(retVal);
+
         return retVal;
     }
     

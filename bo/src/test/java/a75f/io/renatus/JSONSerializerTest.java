@@ -114,7 +114,8 @@ public class JSONSerializerTest
 		ccuApplication.setTitle("Light Test");
 		Floor floor = new Floor(1, "webid", "Floor1");
 		Zone zone = new Zone("Zone1");
-		LightProfile lightProfile5K = (LightProfile) zone.findProfile(ProfileType.LIGHT);
+		LightProfile lightProfile5K = new LightProfile();
+		zone.mZoneProfiles.add(lightProfile5K);
 		LightProfileConfiguration lightProfileConfiguration = new LightProfileConfiguration();
         
 		Output output5K = new Output();

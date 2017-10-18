@@ -1,6 +1,7 @@
 package a75f.io.logic;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.google.api.client.json.jackson2.JacksonFactory;
 
@@ -236,6 +237,8 @@ public class L
     
     public static AlgoTuningParameters getDefaultTuners()
     {
+        
+        Log.e("Tuners", "Get default tuners");
         AlgoTuningParameters algoTuningParameters = null;
         try
         {

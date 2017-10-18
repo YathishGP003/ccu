@@ -24,23 +24,20 @@ import android.widget.ToggleButton;
 import java.util.ArrayList;
 
 import a75f.io.bo.building.BaseProfileConfiguration;
-import a75f.io.bo.building.LightProfile;
-import a75f.io.bo.building.LightProfileConfiguration;
 import a75f.io.bo.building.NodeType;
 import a75f.io.bo.building.Output;
 import a75f.io.bo.building.SingleStageProfile;
+import a75f.io.bo.building.TestProfile;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.ZoneProfile;
 import a75f.io.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.bo.building.definitions.Port;
-import a75f.io.bo.building.definitions.ProfileType;
 import a75f.io.bo.building.definitions.ScheduleMode;
 import a75f.io.bo.building.definitions.SingleStageMode;
 import a75f.io.bo.building.sse.SingleStageLogicalMap;
 import a75f.io.logic.L;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
-import rx.Single;
 
 import static a75f.io.logic.L.ccu;
 
@@ -144,7 +141,8 @@ public class FragmentSSEConfiguration extends BaseDialogFragment implements Comp
             public void onClick(View v)
             {
                 BaseProfileConfiguration baseProfileConfiguration = new BaseProfileConfiguration();
-                SingleStageProfile mSingleStageProfile = (SingleStageProfile) mZone.findProfile(ProfileType.SSE);
+                SingleStageProfile mSingleStageProfile = new SingleStageProfile();
+                mZone.mZoneProfiles.add(mSingleStageProfile);
                 bindData(baseProfileConfiguration, mSingleStageProfile, false);
                 SingleStageLogicalMap singleStageLogicalMap = null;
                 if(mSingleStageProfile.getLogicalMap().containsKey(mSmartNodeAddress))
@@ -203,7 +201,9 @@ public class FragmentSSEConfiguration extends BaseDialogFragment implements Comp
     private void setUpTestTriggers()
     {
         final Zone testZone = new Zone();
-        final SingleStageProfile testSingleStage = (SingleStageProfile) testZone.findProfile(ProfileType.SSE);
+        final TestProfile testSingleStage = new TestProfile();
+        testZone.mZoneProfiles.add(testSingleStage);
+        
         testSingleStage.setCircuitTest(true);
         lcmRelay1Override = (ToggleButton) view.findViewById(R.id.testr1);
         lcmRelay2Override = (ToggleButton) view.findViewById(R.id.testr2);

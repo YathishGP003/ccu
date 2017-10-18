@@ -12,25 +12,16 @@ import com.kinvey.android.store.UserStore;
 import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.store.StoreType;
 
-import junit.framework.Assert;
-
-import org.joda.time.DateTime;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 import a75f.io.bo.building.CCUApplication;
-import a75f.io.dal.CCUPreconfiguration;
-import a75f.io.dal.Constants;
-import a75f.io.dal.DalContext;
-
-import static java.lang.Thread.sleep;
+import a75f.io.bo.kinvey.CCUPreconfiguration;
+import a75f.io.bo.kinvey.Constants;
+import a75f.io.bo.kinvey.DalContext;
 
 /**
  * Created by samjithsadasivan on 9/11/17.

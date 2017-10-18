@@ -11,8 +11,8 @@ import a75f.io.bo.building.CCUApplication;
 import a75f.io.bo.building.Day;
 import a75f.io.bo.building.NamedSchedule;
 import a75f.io.bo.building.Schedule;
-import a75f.io.dal.AlgoTuningParameters;
-import a75f.io.dal.DalContext;
+import a75f.io.bo.kinvey.AlgoTuningParameters;
+import a75f.io.bo.kinvey.DalContext;
 
 import static a75f.io.logic.LLog.Logd;
 
@@ -38,6 +38,7 @@ class Globals
     private CCUApplication           mCCUApplication;
     private LZoneProfile             mLZoneProfile;
     private boolean isSimulation = false;
+    private boolean isDeveloperTest = false;
     
     
     private Globals()
@@ -58,7 +59,10 @@ class Globals
             globals = new Globals();
         }
         return globals;
-    }    public CCUApplication ccu()
+    }
+    
+    
+    public CCUApplication ccu()
     {
         if (getInstance().mCCUApplication == null)
         {
@@ -123,8 +127,12 @@ class Globals
         //--Adds sleeps between any Serial Activity to work with biskit.
         isSimulation = getApplicationContext().getResources().getBoolean(R.bool.simulation);
         Logd("Simulation ----- " + isSimulation);
-        
-        
+        isDeveloperTest = getApplicationContext().getResources().getBoolean(R.bool.developer_test);
+    }
+    
+    public DalContext getDalContext()
+    {
+        return DalContext.getInstance();
     }
     
     
@@ -133,8 +141,13 @@ class Globals
         //TODO: get this from kinvey.
         //This seems like overkill, but it has to follow the meta to support the unit test
         // framework.
-        AlgoTuningParameters algoTuningParameters = new AlgoTuningParameters();
-        ccu().setDefaultCCUTuners(algoTuningParameters.getHashMap());
+        
+        
+        if(ccu().getDefaultCCUTuners() == null)
+        {
+            AlgoTuningParameters algoTuningParameters = new AlgoTuningParameters();
+            ccu().setDefaultCCUTuners(L.getDefaultTuners());
+        }
         
         //TODO test method
         if(ccu().getLCMNamedSchedules().size() == 0)
@@ -182,4 +195,9 @@ class Globals
         return schedules;
     }
     
+    
+    public boolean isDeveloperTesting()
+    {
+        return isDeveloperTest;
+    }
 }

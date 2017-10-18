@@ -38,16 +38,6 @@ public class Schedulable
     }
     
     
-
-    
-    
-    public void setNamedSchedule(String namedSchedule)
-    {
-        this.setScheduleMode(ScheduleMode.NamedSchedule);
-        this.mNamedSchedule = namedSchedule;
-    }
-    
-    
     public short getLogicalValue()
     {
         return mLogicalValue;
@@ -135,5 +125,12 @@ public class Schedulable
     public String getNamedSchedule()
     {
         return mNamedSchedule;
+    }
+    
+    
+    public void setNamedSchedule(String namedSchedule)
+    {
+        this.setScheduleMode(ScheduleMode.NamedSchedule);
+        this.mNamedSchedule = namedSchedule;
     }
 }

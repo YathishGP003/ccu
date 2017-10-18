@@ -24,6 +24,21 @@ public final class MathLib {
      */
     private MathLib() {
     }
+    
+    
+    /**
+     * Returns the average for the set of doubles.
+     * @param numbers to be averaged.
+     * @return the average
+     */
+    public static double mean(double[] numbers)
+    {
+        double sum = 0;
+        for (int i = 0; i < numbers.length; i++) {
+            sum += numbers[i];
+        }
+        return sum / numbers.length;
+    }
 
     /**
      * Returns the 64 bits value corresponding to the specified unsigned value.

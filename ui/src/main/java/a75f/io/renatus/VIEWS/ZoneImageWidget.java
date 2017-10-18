@@ -36,12 +36,13 @@ public class ZoneImageWidget extends RelativeLayout
 	private String          mZoneName;
 	
 	
-	public ZoneImageWidget(Context context, String name, ZoneProfile profile)
+	public ZoneImageWidget(Context context, String name, ZoneProfile profile, int index)
 	{
 		super(context);
 		mContext = context;
 		this.mProfile = profile;
 		this.mZoneName = name;
+		this.mIndex = index;
 		init();
 	}
 	

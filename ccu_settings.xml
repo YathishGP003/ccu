@@ -1,0 +1,345 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<map>
+    <string name="ccu_key">{
+  &quot;controlMote&quot; : {
+    &quot;controlMoteOutputInput&quot; : &quot;Control Mote settings go here&quot;
+  },
+  &quot;systemProfile&quot; : {
+    &quot;schedule&quot; : {
+      &quot;days&quot; : [ ]
+    }
+  },
+  &quot;defaultCCUTuners&quot; : {
+    &quot;userMinTemp&quot; : 70,
+    &quot;buildingMaxTemp&quot; : 85,
+    &quot;sseHeatingDeadBand&quot; : 1,
+    &quot;buildingMinTemp&quot; : 60,
+    &quot;lightingIntensityOccupantDetected&quot; : 75,
+    &quot;userMaxTemp&quot; : 73,
+    &quot;minLightControlOverInMinutes&quot; : 20,
+    &quot;sseCoolingDeadBand&quot; : 1,
+    &quot;zoneSetBack&quot; : 5
+  },
+  &quot;defaultLightSchedule&quot; : [ {
+    &quot;days&quot; : [ {
+      &quot;day&quot; : 0,
+      &quot;ethh&quot; : 17,
+      &quot;etmm&quot; : 30,
+      &quot;sthh&quot; : 8,
+      &quot;stmm&quot; : 0,
+      &quot;val&quot; : 100
+    }, {
+      &quot;day&quot; : 1,
+      &quot;ethh&quot; : 17,
+      &quot;etmm&quot; : 30,
+      &quot;sthh&quot; : 8,
+      &quot;stmm&quot; : 0,
+      &quot;val&quot; : 100
+    }, {
+      &quot;day&quot; : 2,
+      &quot;ethh&quot; : 17,
+      &quot;etmm&quot; : 30,
+      &quot;sthh&quot; : 8,
+      &quot;stmm&quot; : 0,
+      &quot;val&quot; : 100
+    }, {
+      &quot;day&quot; : 3,
+      &quot;ethh&quot; : 17,
+      &quot;etmm&quot; : 30,
+      &quot;sthh&quot; : 8,
+      &quot;stmm&quot; : 0,
+      &quot;val&quot; : 100
+    }, {
+      &quot;day&quot; : 4,
+      &quot;ethh&quot; : 17,
+      &quot;etmm&quot; : 30,
+      &quot;sthh&quot; : 8,
+      &quot;stmm&quot; : 0,
+      &quot;val&quot; : 100
+    } ]
+  } ],
+  &quot;defaultTemperatureSchedule&quot; : [ {
+    &quot;days&quot; : [ {
+      &quot;day&quot; : 0,
+      &quot;ethh&quot; : 17,
+      &quot;etmm&quot; : 30,
+      &quot;sthh&quot; : 8,
+      &quot;stmm&quot; : 0,
+      &quot;val&quot; : 100
+    }, {
+      &quot;day&quot; : 1,
+      &quot;ethh&quot; : 17,
+      &quot;etmm&quot; : 30,
+      &quot;sthh&quot; : 8,
+      &quot;stmm&quot; : 0,
+      &quot;val&quot; : 100
+    }, {
+      &quot;day&quot; : 2,
+      &quot;ethh&quot; : 17,
+      &quot;etmm&quot; : 30,
+      &quot;sthh&quot; : 8,
+      &quot;stmm&quot; : 0,
+      &quot;val&quot; : 100
+    }, {
+      &quot;day&quot; : 3,
+      &quot;ethh&quot; : 17,
+      &quot;etmm&quot; : 30,
+      &quot;sthh&quot; : 8,
+      &quot;stmm&quot; : 0,
+      &quot;val&quot; : 100
+    }, {
+      &quot;day&quot; : 4,
+      &quot;ethh&quot; : 17,
+      &quot;etmm&quot; : 30,
+      &quot;sthh&quot; : 8,
+      &quot;stmm&quot; : 0,
+      &quot;val&quot; : 100
+    } ]
+  } ],
+  &quot;floors&quot; : [ {
+    &quot;mFloorId&quot; : 0,
+    &quot;mFloorName&quot; : &quot;floor&quot;,
+    &quot;mKinveyWebId&quot; : &quot;&quot;,
+    &quot;mRoomList&quot; : [ {
+      &quot;mZoneProfiles&quot; : [ {
+        &quot;clazz&quot; : &quot;a75f.io.bo.building.LightProfile&quot;,
+        &quot;profileConfiguration&quot; : {
+          &quot;0&quot; : {
+            &quot;clazz&quot; : &quot;a75f.io.bo.building.LightProfileConfiguration&quot;,
+            &quot;inputs&quot; : [ ],
+            &quot;nodeAddress&quot; : 0,
+            &quot;nodeType&quot; : &quot;SMART_NODE&quot;,
+            &quot;outputs&quot; : [ {
+              &quot;uuid&quot; : &quot;1e067907-cd76-4e19-82d1-4fdfa707cc69&quot;,
+              &quot;mOutputRelayActuatorType&quot; : &quot;NormallyOpen&quot;,
+              &quot;address&quot; : 0,
+              &quot;name&quot; : &quot;light3&quot;,
+              &quot;port&quot; : &quot;RELAY_ONE&quot;,
+              &quot;logicalValue&quot; : 0,
+              &quot;namedSchedule&quot; : &quot;&quot;,
+              &quot;overrideMillis&quot; : 0,
+              &quot;overrideType&quot; : &quot;NONE&quot;,
+              &quot;scheduleMode&quot; : &quot;ZoneSchedule&quot;,
+              &quot;schedules&quot; : [ ]
+            }, {
+              &quot;uuid&quot; : &quot;a8d4a7c3-69c3-4d0d-b9b9-4c4f9293c832&quot;,
+              &quot;mOutputRelayActuatorType&quot; : &quot;NormallyOpen&quot;,
+              &quot;address&quot; : 0,
+              &quot;name&quot; : &quot;light4&quot;,
+              &quot;port&quot; : &quot;RELAY_TWO&quot;,
+              &quot;logicalValue&quot; : 0,
+              &quot;namedSchedule&quot; : &quot;&quot;,
+              &quot;overrideMillis&quot; : 0,
+              &quot;overrideType&quot; : &quot;NONE&quot;,
+              &quot;scheduleMode&quot; : &quot;ZoneSchedule&quot;,
+              &quot;schedules&quot; : [ ]
+            }, {
+              &quot;uuid&quot; : &quot;bfcfc38b-3290-4d49-a35d-d8d3079d8d69&quot;,
+              &quot;mOutputAnalogActuatorType&quot; : &quot;ZeroToTenV&quot;,
+              &quot;address&quot; : 0,
+              &quot;name&quot; : &quot;light1&quot;,
+              &quot;port&quot; : &quot;ANALOG_OUT_ONE&quot;,
+              &quot;logicalValue&quot; : 0,
+              &quot;namedSchedule&quot; : &quot;&quot;,
+              &quot;overrideMillis&quot; : 0,
+              &quot;overrideType&quot; : &quot;NONE&quot;,
+              &quot;scheduleMode&quot; : &quot;ZoneSchedule&quot;,
+              &quot;schedules&quot; : [ ]
+            }, {
+              &quot;uuid&quot; : &quot;fb5a3425-879b-461d-ac88-b6bd13bc0bbe&quot;,
+              &quot;mOutputAnalogActuatorType&quot; : &quot;ZeroToTenV&quot;,
+              &quot;address&quot; : 0,
+              &quot;name&quot; : &quot;light2&quot;,
+              &quot;port&quot; : &quot;ANALOG_OUT_TWO&quot;,
+              &quot;logicalValue&quot; : 0,
+              &quot;namedSchedule&quot; : &quot;&quot;,
+              &quot;overrideMillis&quot; : 0,
+              &quot;overrideType&quot; : &quot;NONE&quot;,
+              &quot;scheduleMode&quot; : &quot;ZoneSchedule&quot;,
+              &quot;schedules&quot; : [ ]
+            } ]
+          }
+        },
+        &quot;logicalValue&quot; : 0,
+        &quot;namedSchedule&quot; : &quot;&quot;,
+        &quot;overrideMillis&quot; : 0,
+        &quot;overrideType&quot; : &quot;NONE&quot;,
+        &quot;scheduleMode&quot; : &quot;ZoneSchedule&quot;,
+        &quot;schedules&quot; : [ {
+          &quot;days&quot; : [ {
+            &quot;day&quot; : 0,
+            &quot;ethh&quot; : 17,
+            &quot;etmm&quot; : 30,
+            &quot;sthh&quot; : 8,
+            &quot;stmm&quot; : 0,
+            &quot;val&quot; : 100
+          }, {
+            &quot;day&quot; : 1,
+            &quot;ethh&quot; : 17,
+            &quot;etmm&quot; : 30,
+            &quot;sthh&quot; : 8,
+            &quot;stmm&quot; : 0,
+            &quot;val&quot; : 100
+          }, {
+            &quot;day&quot; : 2,
+            &quot;ethh&quot; : 17,
+            &quot;etmm&quot; : 30,
+            &quot;sthh&quot; : 8,
+            &quot;stmm&quot; : 0,
+            &quot;val&quot; : 100
+          }, {
+            &quot;day&quot; : 3,
+            &quot;ethh&quot; : 17,
+            &quot;etmm&quot; : 30,
+            &quot;sthh&quot; : 8,
+            &quot;stmm&quot; : 0,
+            &quot;val&quot; : 100
+          }, {
+            &quot;day&quot; : 4,
+            &quot;ethh&quot; : 17,
+            &quot;etmm&quot; : 30,
+            &quot;sthh&quot; : 8,
+            &quot;stmm&quot; : 0,
+            &quot;val&quot; : 100
+          } ]
+        } ]
+      }, {
+        &quot;clazz&quot; : &quot;a75f.io.bo.building.SingleStageProfile&quot;,
+        &quot;logicalMap&quot; : {
+          &quot;1&quot; : {
+            &quot;logicalMap&quot; : {
+              &quot;RELAY_ONE&quot; : &quot;COOLING&quot;,
+              &quot;RELAY_TWO&quot; : &quot;FAN&quot;
+            },
+            &quot;roomTemperature&quot; : 0.0
+          }
+        },
+        &quot;profileConfiguration&quot; : {
+          &quot;1&quot; : {
+            &quot;clazz&quot; : &quot;a75f.io.bo.building.BaseProfileConfiguration&quot;,
+            &quot;inputs&quot; : [ ],
+            &quot;nodeAddress&quot; : 0,
+            &quot;nodeType&quot; : &quot;SMART_NODE&quot;,
+            &quot;outputs&quot; : [ {
+              &quot;uuid&quot; : &quot;2a3fd236-6577-4951-ac05-a8fd0f697014&quot;,
+              &quot;mOutputRelayActuatorType&quot; : &quot;NormallyOpen&quot;,
+              &quot;address&quot; : 1,
+              &quot;name&quot; : &quot;ssecool&quot;,
+              &quot;port&quot; : &quot;RELAY_ONE&quot;,
+              &quot;logicalValue&quot; : 0,
+              &quot;namedSchedule&quot; : &quot;&quot;,
+              &quot;overrideMillis&quot; : 0,
+              &quot;overrideType&quot; : &quot;NONE&quot;,
+              &quot;scheduleMode&quot; : &quot;ZoneSchedule&quot;,
+              &quot;schedules&quot; : [ ]
+            }, {
+              &quot;uuid&quot; : &quot;7fbcb8fa-61fb-4608-b87c-094c85115e1a&quot;,
+              &quot;mOutputRelayActuatorType&quot; : &quot;NormallyOpen&quot;,
+              &quot;address&quot; : 1,
+              &quot;name&quot; : &quot;ssefan&quot;,
+              &quot;port&quot; : &quot;RELAY_TWO&quot;,
+              &quot;logicalValue&quot; : 0,
+              &quot;namedSchedule&quot; : &quot;&quot;,
+              &quot;overrideMillis&quot; : 0,
+              &quot;overrideType&quot; : &quot;NONE&quot;,
+              &quot;scheduleMode&quot; : &quot;ZoneSchedule&quot;,
+              &quot;schedules&quot; : [ ]
+            } ]
+          }
+        },
+        &quot;logicalValue&quot; : 0,
+        &quot;namedSchedule&quot; : &quot;&quot;,
+        &quot;overrideMillis&quot; : 0,
+        &quot;overrideType&quot; : &quot;NONE&quot;,
+        &quot;scheduleMode&quot; : &quot;SystemSchedule&quot;,
+        &quot;schedules&quot; : [ {
+          &quot;days&quot; : [ {
+            &quot;day&quot; : 0,
+            &quot;ethh&quot; : 17,
+            &quot;etmm&quot; : 30,
+            &quot;sthh&quot; : 8,
+            &quot;stmm&quot; : 0,
+            &quot;val&quot; : 100
+          }, {
+            &quot;day&quot; : 1,
+            &quot;ethh&quot; : 17,
+            &quot;etmm&quot; : 30,
+            &quot;sthh&quot; : 8,
+            &quot;stmm&quot; : 0,
+            &quot;val&quot; : 100
+          }, {
+            &quot;day&quot; : 2,
+            &quot;ethh&quot; : 17,
+            &quot;etmm&quot; : 30,
+            &quot;sthh&quot; : 8,
+            &quot;stmm&quot; : 0,
+            &quot;val&quot; : 100
+          }, {
+            &quot;day&quot; : 3,
+            &quot;ethh&quot; : 17,
+            &quot;etmm&quot; : 30,
+            &quot;sthh&quot; : 8,
+            &quot;stmm&quot; : 0,
+            &quot;val&quot; : 100
+          }, {
+            &quot;day&quot; : 4,
+            &quot;ethh&quot; : 17,
+            &quot;etmm&quot; : 30,
+            &quot;sthh&quot; : 8,
+            &quot;stmm&quot; : 0,
+            &quot;val&quot; : 100
+          } ]
+        } ]
+      } ],
+      &quot;roomName&quot; : &quot;room&quot;,
+      &quot;nodes&quot; : [ 1, 0 ],
+      &quot;tuningParameters&quot; : { }
+    } ]
+  } ],
+  &quot;lcmnamedSchedules&quot; : {
+    &quot;LCM Named Schedule&quot; : {
+      &quot;name&quot; : &quot;LCM Named Schedule&quot;,
+      &quot;schedule&quot; : [ {
+        &quot;days&quot; : [ {
+          &quot;day&quot; : 0,
+          &quot;ethh&quot; : 17,
+          &quot;etmm&quot; : 30,
+          &quot;sthh&quot; : 8,
+          &quot;stmm&quot; : 0,
+          &quot;val&quot; : 100
+        }, {
+          &quot;day&quot; : 1,
+          &quot;ethh&quot; : 17,
+          &quot;etmm&quot; : 30,
+          &quot;sthh&quot; : 8,
+          &quot;stmm&quot; : 0,
+          &quot;val&quot; : 100
+        }, {
+          &quot;day&quot; : 2,
+          &quot;ethh&quot; : 17,
+          &quot;etmm&quot; : 30,
+          &quot;sthh&quot; : 8,
+          &quot;stmm&quot; : 0,
+          &quot;val&quot; : 100
+        }, {
+          &quot;day&quot; : 3,
+          &quot;ethh&quot; : 17,
+          &quot;etmm&quot; : 30,
+          &quot;sthh&quot; : 8,
+          &quot;stmm&quot; : 0,
+          &quot;val&quot; : 100
+        }, {
+          &quot;day&quot; : 4,
+          &quot;ethh&quot; : 17,
+          &quot;etmm&quot; : 30,
+          &quot;sthh&quot; : 8,
+          &quot;stmm&quot; : 0,
+          &quot;val&quot; : 100
+        } ]
+      } ]
+    }
+  },
+  &quot;smartNodeAddressBand&quot; : 0,
+  &quot;title&quot; : &quot;&quot;
+}</string>
+</map>

@@ -1,6 +1,7 @@
 package a75f.io.dal;
 
 import android.content.Context;
+import android.provider.Settings;
 
 import com.kinvey.android.Client;
 
@@ -33,6 +34,21 @@ public class DalContext
 			mDalContext = new DalContext(new Client.Builder(context).build());
 			mDalContext.mSharedClient.setUseDeltaCache(true);
 			
+			
 		}
 	}
+	
+	
+	public static DalContext getInstance()
+	{
+		return mDalContext;
+	}
+	
+	
+	public String getKinveyId() {
+		return Settings.Secure
+					   .getString(mSharedClient.getContext().getContentResolver(), Settings.Secure
+																				 .ANDROID_ID);
+	}
+	
 }

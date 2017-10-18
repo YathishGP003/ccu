@@ -33,7 +33,7 @@ public class SSECoolingTest extends BaseSimulationTest
 	
 	@Before
 	public void setUp() {
-		mRunner =  new SimulationRunner(this, new SamplingProfile(10, 180));
+		mRunner =  new SimulationRunner(this, new SamplingProfile(10, 120));
 	}
 	
 	@After
@@ -76,7 +76,7 @@ public class SSECoolingTest extends BaseSimulationTest
 				case 8:
 				case 9:
 				case 10:
-					if ((params.digital_out_1 == 0) && (params.digital_out_2 == 0))
+					if ((params.digital_out_1 == 0) && (params.digital_out_2 == 1))
 					{
 						result.analysis += "<p>Check Point " + mRunner.getLoopCounter() + ": PASS" + "</p>";
 					}

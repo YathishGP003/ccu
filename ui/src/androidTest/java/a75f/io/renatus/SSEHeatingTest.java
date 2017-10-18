@@ -74,7 +74,7 @@ public class SSEHeatingTest extends BaseSimulationTest
                 case 1:
                 case 2:
                 case 7:
-                    if ((params.digital_out_1 == 0) && (params.digital_out_2 == 0))
+                    if ((params.digital_out_1 == 0) && (params.digital_out_2 == 1))
                     {
                         result.analysis += "<p>Check Point " + mRunner.getLoopCounter() + ": PASS" + "</p>";
                     }
@@ -129,7 +129,7 @@ public class SSEHeatingTest extends BaseSimulationTest
     @Override
     public void customizeTestData(CCUApplication app) {
         DateTime sStart = new DateTime(System.currentTimeMillis(), DateTimeZone.getDefault());
-        DateTime sEnd = new DateTime(System.currentTimeMillis() + 15*60000, DateTimeZone.getDefault());
+        DateTime sEnd = new DateTime(System.currentTimeMillis() + 30*60000, DateTimeZone.getDefault());
         ArrayList<Schedule> schedules     = app.getFloors().get(0).mRoomList.get(0).mZoneProfiles.get(0).getSchedules();
         Day testDay = schedules.get(0).getDays().get(sStart.getDayOfWeek() - 1);
         testDay.setSthh(sStart.getHourOfDay());

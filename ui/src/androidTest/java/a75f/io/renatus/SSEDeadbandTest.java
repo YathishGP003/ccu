@@ -6,6 +6,8 @@ import org.junit.After;
 import org.junit.Before;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Objects;
 
 import a75f.io.bo.building.CCUApplication;
 import a75f.io.bo.building.Day;
@@ -30,10 +32,12 @@ import static a75f.io.renatus.framework.GraphColumns.Relay2_Out;
 public class SSEDeadbandTest extends BaseSimulationTest
 {
     SimulationRunner mRunner = null;
+    int runCounter = 0;
+    int testDeadBandVal;
     
     @Before
     public void setUp() {
-        mRunner =  new SimulationRunner(this, new SamplingProfile(10, 180));
+        mRunner =  new SimulationRunner(this, new SamplingProfile(1, 120));
     }
     
     @After
@@ -42,17 +46,19 @@ public class SSEDeadbandTest extends BaseSimulationTest
     
     @Override
     public String getTestDescription() {
-        return "Tests various deadband values under constant room_temperature and set temperature";
+        return "Tests various deadband values under constant room_temperature and set temperature." +
+               "Creates a 30 minute schedule to start cooling immediately.Relay1 and Relay2 outputs of smartnode 7003 configured as Cooling and Fan respectively." +
+               "Room temperature is kept above set temperature. Activation of cooling is monitored for different deadband values.";
     }
     
     @Override
     public String getCCUStateFileName() {
-        return null;
+        return "ssedeadband.json";
     }
     
     @Override
     public String getSimulationFileName() {
-        return null;
+        return "ssedeadband.csv";
     }
     
     @Override
@@ -61,9 +67,42 @@ public class SSEDeadbandTest extends BaseSimulationTest
             return; // Test run not started , nothing to analyze
         }
         SimulationResult result = testLog.simulationResult;
-        if (testLog.resultParamsMap.get(new Integer(7002)) != null)
+        if (testLog.resultParamsMap.get(new Integer(7003)) != null)
         {
-            SmartNodeParams params = testLog.resultParamsMap.get(new Integer(7002)).get(mRunner.getLoopCounter());
+            SmartNodeParams params = testLog.resultParamsMap.get(new Integer(7003)).get(runCounter);
+            switch (runCounter)
+            {
+                case 1:
+                case 5:
+                    //cooling and fan should be ON
+                    if ((params.digital_out_1 == 1) && (params.digital_out_2 == 1))
+                    {
+                        result.analysis += "<p>Check Point " + mRunner.getLoopCounter() + ": PASS" + "</p>";
+                    }
+                    else
+                    {
+                        result.analysis += "<p>Check Point " + mRunner.getLoopCounter() + ": FAIL" + "</p>";
+                        result.status = TestResult.FAIL;
+                    }
+                    break;
+                case 3:
+                case 7:
+                    //cooling should be OFF with fan ON
+                    if ((params.digital_out_1 == 0) && (params.digital_out_2 == 1))
+                    {
+                        result.analysis += "<p>Check Point " + mRunner.getLoopCounter() + ": PASS" + "</p>";
+                    }
+                    else
+                    {
+                        result.analysis += "<p>Check Point " + mRunner.getLoopCounter() + ": FAIL" + "</p>";
+                        result.status = TestResult.FAIL;
+                    }
+                    break;
+            }
+            if (mRunner.getLoopCounter() == testLog.profile.getResultCount())
+            {
+                result.analysis += "<p>Verified that cooling on relay_1 is turned ON/OFF appropriately for current value of deadband</p> ";
+            }
         }
     }
     
@@ -85,20 +124,37 @@ public class SSEDeadbandTest extends BaseSimulationTest
     
     @Override
     public void customizeTestData(CCUApplication app) {
-        DateTime sStart = new DateTime(System.currentTimeMillis(), DateTimeZone.getDefault());
-        DateTime sEnd = new DateTime(System.currentTimeMillis() + 30*60000, DateTimeZone.getDefault());
-        ArrayList<Schedule> schedules     = app.getFloors().get(0).mRoomList.get(0).mZoneProfiles.get(0).getSchedules();
-        Day testDay = schedules.get(0).getDays().get(sStart.getDayOfWeek() - 1);
-        testDay.setSthh(sStart.getHourOfDay());
-        testDay.setEthh(sEnd.getHourOfDay());
-        testDay.setStmm(sStart.getMinuteOfHour());
-        testDay.setEtmm(sEnd.getMinuteOfHour());
+        if (runCounter <= 1)
+        {
+            DateTime sStart = new DateTime(System.currentTimeMillis(), DateTimeZone.getDefault());
+            DateTime sEnd = new DateTime(System.currentTimeMillis() + 30 * 60000, DateTimeZone.getDefault());
+            ArrayList<Schedule> schedules = app.getFloors().get(0).mRoomList.get(0).mZoneProfiles.get(0).getSchedules();
+            Day testDay = schedules.get(0).getDays().get(sStart.getDayOfWeek() - 1);
+            testDay.setSthh(sStart.getHourOfDay());
+            testDay.setEthh(sEnd.getHourOfDay());
+            testDay.setStmm(sStart.getMinuteOfHour());
+            testDay.setEtmm(sEnd.getMinuteOfHour());
+        }
+    
+        HashMap<String, Object> algoMap = app.getDefaultCCUTuners();
+        algoMap.put("sseCoolingDeadBand", testDeadBandVal);
     }
     @Override
     public void runTest() {
         
         System.out.println("runTest.........");
-        
+        //rt=72, st= 70
+        runCounter++;
+        testDeadBandVal = 0;
+        mRunner.runSimulation();
+        runCounter +=2;
+        testDeadBandVal = 0;
+        mRunner.runSimulation();
+        runCounter +=2;
+        testDeadBandVal = 1;
+        mRunner.runSimulation();
+        runCounter +=2;
+        testDeadBandVal = 3;
         mRunner.runSimulation();
     }
 }

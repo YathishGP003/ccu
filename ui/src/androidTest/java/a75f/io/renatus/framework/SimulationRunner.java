@@ -79,6 +79,7 @@ public class SimulationRunner
     
     /**
      * Must be called from @Test method of SimulationTest
+     * Each invocation of method seeds the current app state to mesh network and starts a fresh round of injection of simulation values.
      */
     public void runSimulation() {
         if (mCurrentTest == null) {

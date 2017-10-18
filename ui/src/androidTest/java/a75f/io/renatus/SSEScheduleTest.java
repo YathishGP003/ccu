@@ -33,7 +33,7 @@ public class SSEScheduleTest extends BaseSimulationTest
     
     @Before
     public void setUp() {
-        mRunner =  new SimulationRunner(this, new SamplingProfile(10, 180));
+        mRunner =  new SimulationRunner(this, new SamplingProfile(10, 120));
     }
     
     @After
@@ -42,18 +42,19 @@ public class SSEScheduleTest extends BaseSimulationTest
     
     @Override
     public String getTestDescription() {
-        return "Creates a schedule to start 15 minutes later to start cooling." +
-               "Room temperature is kept below set temperature by deadband value to trigger cooling immediately";
+        return "Tests whether a future cooling schedule is fired on time." +
+               "Creates a schedule to start cooling 15 minutes later.Relay1 and Relay2 outputs of smartnode 7004 configured as Cooling and Fan respectively." +
+               "Room temperature is kept above set temperature beyond the deadband value to trigger cooling at the start of schedule.";
     }
     
     @Override
     public String getCCUStateFileName() {
-        return null;
+        return "sseschedule.json";
     }
     
     @Override
     public String getSimulationFileName() {
-        return null;
+        return "sseschedule.csv";
     }
     
     @Override
@@ -62,10 +63,48 @@ public class SSEScheduleTest extends BaseSimulationTest
             return; // Test run not started , nothing to analyze
         }
         SimulationResult result = testLog.simulationResult;
-        if (testLog.resultParamsMap.get(new Integer(7002)) != null)
+        if (testLog.resultParamsMap.get(new Integer(7004)) != null)
         {
-            SmartNodeParams params = testLog.resultParamsMap.get(new Integer(7002)).get(mRunner.getLoopCounter());
-            
+            SmartNodeParams params = testLog.resultParamsMap.get(new Integer(7004)).get(mRunner.getLoopCounter());
+            switch (mRunner.getLoopCounter())
+            {
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                    // Not in schedule ; both cooling and fan should be OFF
+                    if ((params.digital_out_1 == 0) && (params.digital_out_2 == 0))
+                    {
+                        result.analysis += "<p>Check Point " + mRunner.getLoopCounter() + ": PASS" + "</p>";
+                    }
+                    else
+                    {
+                        result.analysis += "<p>Check Point " + mRunner.getLoopCounter() + ": FAIL" + "</p>";
+                        result.status = TestResult.FAIL;
+                    }
+                    break;
+                case 6:
+                case 7:
+                case 8:
+                case 9:
+                case 10:
+                    //IN schedule ; both cooling and fan should be on
+                    if ((params.digital_out_1 == 1) && (params.digital_out_2 == 1))
+                    {
+                        result.analysis += "<p>Check Point " + mRunner.getLoopCounter() + ": PASS" + "</p>";
+                    }
+                    else
+                    {
+                        result.analysis += "<p>Check Point " + mRunner.getLoopCounter() + ": FAIL" + "</p>";
+                        result.status = TestResult.FAIL;
+                    }
+                    break;
+            }
+            if (mRunner.getLoopCounter() == testLog.profile.getResultCount())
+            {
+                result.analysis += "<p>Verified that cooling on relay_1 and fan on digital_2 are turned ON after 15 mins when schedule started</p> ";
+            }
         }
     }
     

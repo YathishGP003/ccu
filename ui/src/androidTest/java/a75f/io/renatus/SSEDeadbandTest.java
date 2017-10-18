@@ -6,12 +6,11 @@ import org.junit.After;
 import org.junit.Before;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Objects;
 
 import a75f.io.bo.building.CCUApplication;
 import a75f.io.bo.building.Day;
 import a75f.io.bo.building.Schedule;
+import a75f.io.bo.kinvey.AlgoTuningParameters;
 import a75f.io.renatus.framework.BaseSimulationTest;
 import a75f.io.renatus.framework.SamplingProfile;
 import a75f.io.renatus.framework.SimulationResult;
@@ -136,7 +135,7 @@ public class SSEDeadbandTest extends BaseSimulationTest
             testDay.setEtmm(sEnd.getMinuteOfHour());
         }
     
-        HashMap<String, Object> algoMap = app.getDefaultCCUTuners();
+        AlgoTuningParameters algoMap = app.getDefaultCCUTuners();
         algoMap.put("sseCoolingDeadBand", testDeadBandVal);
     }
     @Override

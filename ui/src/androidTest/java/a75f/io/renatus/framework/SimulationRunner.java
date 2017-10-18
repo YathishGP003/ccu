@@ -1,4 +1,4 @@
-package a75f.io.renatus;
+package a75f.io.renatus.framework;
 
 /**
  * Created by samjithsadasivan on 9/21/17.
@@ -11,8 +11,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import junit.framework.Assert;
 
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONArray;
@@ -67,7 +65,7 @@ public class SimulationRunner
     long resultTime;
     int loopCounter;
        
-    SimulationRunner(BaseSimulationTest ccuTest, SamplingProfile profile) {
+    public SimulationRunner(BaseSimulationTest ccuTest, SamplingProfile profile) {
         mCurrentTest = ccuTest;
         mProfile = profile;
         mEnv = SimulationContext.getInstance();
@@ -85,6 +83,10 @@ public class SimulationRunner
     public void runSimulation() {
         if (mCurrentTest == null) {
             Assert.fail("Invalid test configuration");
+        }
+        if (appState == null || csvDataList == null)
+        {
+            addNTTestInfo();
         }
         loopCounter = 0;
         mCurrentTest.customizeTestData(appState);
@@ -280,8 +282,6 @@ public class SimulationRunner
                 info.resultParamsMap.put(node, new ArrayList<SmartNodeParams>());
             }
         }
-      
-        DateTimeFormatter formatter = DateTimeFormat.forPattern("dd MMM yyyy HH:mm:ss");
         
         for(int node : mNodes)
         {
@@ -290,20 +290,7 @@ public class SimulationRunner
             {
                 JSONArray jsonArray = new JSONArray(params);
                 SmartNodeParams result = SmartNodeParams.getParamsFromJson(jsonArray.get(jsonArray.length()-1).toString());
-                //info.nodeParams.add(result);
                 info.resultParamsMap.get(node).add(result);
-                /*for (int i = 0; i < jsonArray.length(); i++)
-                {
-                    SmartNodeParams result = SmartNodeParams.getParamsFromJson(jsonArray.get(i).toString());
-                   
-                    Date localSt = new DateTime(startTime, DateTimeZone.getDefault()).toDate();
-                    Date resultSt = formatter.parseDateTime(result.timestamp).toDate();
-                   
-                    if (resultSt.getTime() >= localSt.getTime() )
-                    {
-                        info.nodeParams.add(result);
-                    }
-                }*/
                 
             } catch (JSONException e) {
                 //TODO- Refactor
@@ -321,6 +308,21 @@ public class SimulationRunner
         }
     }
     
+    private void addNTTestInfo() {
+        SimulationTestInfo info = mEnv.testSuite.getSimulationTest(mCurrentTest.getTestDescription());
+        if (info == null) {
+            info = new SimulationTestInfo();
+            info.name = mCurrentTest.getClass().getSimpleName();;
+            info.description = mCurrentTest.getTestDescription();
+            info.simulationResult = new SimulationResult();
+            info.simulationResult.status = TestResult.NT;
+            info.simulationInput = csvDataList;
+            info.inputCcuState = appState;
+            info.graphColumns = mCurrentTest.graphColumns();
+            info.profile= mProfile;
+            mEnv.testSuite.addSimulationTest(mCurrentTest.getTestDescription(),info);
+        }
+    }
     private void fillNodes() {
         for (int i = 1; i < csvDataList.size(); i++)
         {

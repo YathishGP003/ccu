@@ -1,10 +1,7 @@
-package a75f.io.renatus;
+package a75f.io.renatus.framework;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
-
-import java.util.HashMap;
-
 /**
  * Created by samjithsadasivan on 9/21/17.
  */

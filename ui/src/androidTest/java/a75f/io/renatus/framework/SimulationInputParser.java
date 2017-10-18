@@ -1,4 +1,4 @@
-package a75f.io.renatus;
+package a75f.io.renatus.framework;
 
 import android.content.Context;
 import android.util.Log;
@@ -14,6 +14,7 @@ import java.util.List;
 
 import a75f.io.bo.building.CCUApplication;
 import a75f.io.bo.json.serializers.JsonSerializer;
+import a75f.io.renatus.framework.SimulationContext;
 
 /**
  * Created by samjithsadasivan on 9/21/17.

@@ -1,4 +1,4 @@
-package a75f.io.renatus;
+package a75f.io.renatus.framework;
 
 /**
  * Created by samjithsadasivan on 9/21/17.
@@ -6,5 +6,5 @@ package a75f.io.renatus;
 
 public enum TestResult
 {
-    FAIL, NA, PASS
+    FAIL, NT, PASS
 }

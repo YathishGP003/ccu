@@ -1,11 +1,9 @@
-package a75f.io.renatus;
+package a75f.io.renatus.framework;
 
-import android.content.Context;
 import android.os.Environment;
 import android.text.format.DateFormat;
 import android.util.Log;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -14,6 +12,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
+
+import a75f.io.renatus.framework.SimulationContext;
+import a75f.io.renatus.framework.SimulationTestInfo;
 
 /**
  * Created by samjithsadasivan on 10/4/17.
@@ -44,11 +45,14 @@ public class SimulationTestSuite
         try {
             for (Map.Entry<String, SimulationTestInfo> test : testMap.entrySet()) {
                 testReport = testReport.concat(test.getValue().getHtml());
-                File detailFile = new File(path+"/simulation/", test.getValue().name + ".html");
-                FileOutputStream out = new FileOutputStream(detailFile);
-                byte[] data = test.getValue().getHtmlDetails().getBytes();
-                out.write(data);
-                out.close();
+                if (test.getValue().simulationResult.status != TestResult.NT)
+                {
+                    File detailFile = new File(path + "/simulation/", test.getValue().name + ".html");
+                    FileOutputStream out = new FileOutputStream(detailFile);
+                    byte[] data = test.getValue().getHtmlDetails().getBytes();
+                    out.write(data);
+                    out.close();
+                }
             }
             
             testReport = testReport.concat("</table>");
@@ -68,6 +72,7 @@ public class SimulationTestSuite
             e.printStackTrace();
         }
     }
+    
     public void copyAssetsToStorage(String path){
         InputStream in;
         try {
@@ -85,7 +90,5 @@ public class SimulationTestSuite
         } catch (IOException e) {
             Log.e("Error", e.toString());
         }
-        //return rawOutput != null ? rawOutput.toString() : null;
-        
     }
 }

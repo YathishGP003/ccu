@@ -13,11 +13,18 @@ import java.util.Date;
 import a75f.io.bo.building.CCUApplication;
 import a75f.io.bo.building.Day;
 import a75f.io.bo.building.Schedule;
+import a75f.io.renatus.framework.BaseSimulationTest;
+import a75f.io.renatus.framework.SamplingProfile;
+import a75f.io.renatus.framework.SimulationResult;
+import a75f.io.renatus.framework.SimulationRunner;
+import a75f.io.renatus.framework.SimulationTestInfo;
+import a75f.io.renatus.framework.SmartNodeParams;
+import a75f.io.renatus.framework.TestResult;
 
-import static a75f.io.renatus.GraphColumns.Analog1_Out;
-import static a75f.io.renatus.GraphColumns.Analog2_Out;
-import static a75f.io.renatus.GraphColumns.Relay1_Out;
-import static a75f.io.renatus.GraphColumns.Relay2_Out;
+import static a75f.io.renatus.framework.GraphColumns.Analog1_Out;
+import static a75f.io.renatus.framework.GraphColumns.Analog2_Out;
+import static a75f.io.renatus.framework.GraphColumns.Relay1_Out;
+import static a75f.io.renatus.framework.GraphColumns.Relay2_Out;
 
 /**
  * Created by samjithsadasivan on 9/22/17.
@@ -34,6 +41,9 @@ public class LightControlSimulationTest extends BaseSimulationTest
     public void setUp() {
         mRunner =  new SimulationRunner(this,  new SamplingProfile(10, 120));
     }
+    
+    
+    
     
     @After
     public void tearDown() {
@@ -59,14 +69,14 @@ public class LightControlSimulationTest extends BaseSimulationTest
     @Override
     public void analyzeTestResults(SimulationTestInfo testLog) {
     
-        if (mRunner.loopCounter == 0) {
+        if (mRunner.getLoopCounter() == 0) {
             return; // Test run not started , nothing to analyze
         }
         SimulationResult result = testLog.simulationResult;
         if (testLog.resultParamsMap.get(new Integer(7000)) != null)
         {
             SmartNodeParams params = testLog.resultParamsMap.get(new Integer(7000)).get(mRunner.getLoopCounter());
-            switch (mRunner.loopCounter)
+            switch (mRunner.getLoopCounter())
             {
                 case 1:
                 case 2:
@@ -76,7 +86,7 @@ public class LightControlSimulationTest extends BaseSimulationTest
                     
                     if ((params.lighting_control_enabled == 1) && (params.analog_out_1 == 80) && (params.analog_out_2 == 80))
                     {
-                        result.analysis += "<p>Check Point " + mRunner.loopCounter + ": PASS" + "</p>";
+                        result.analysis += "<p>Check Point " + mRunner.getLoopCounter() + ": PASS" + "</p>";
                     }
                     else
                     {
@@ -87,7 +97,7 @@ public class LightControlSimulationTest extends BaseSimulationTest
                             result.analysis += "<p>Check Point " + mRunner.loopCounter + ": PASS" + "</p>";
                         } else*/
                         {
-                            result.analysis += "<p>Check Point " + mRunner.loopCounter + ": FAIL" + "</p>";
+                            result.analysis += "<p>Check Point " + mRunner.getLoopCounter() + ": FAIL" + "</p>";
                             result.status = TestResult.FAIL;
                         }
                     }
@@ -99,16 +109,16 @@ public class LightControlSimulationTest extends BaseSimulationTest
                 case 10:
                     if ((params.lighting_control_enabled == 1) && (params.analog_out_1 == 0) && (params.analog_out_2 == 0))
                     {
-                        result.analysis += "<p>Check Point " + mRunner.loopCounter + ": PASS" + "</p>";
+                        result.analysis += "<p>Check Point " + mRunner.getLoopCounter() + ": PASS" + "</p>";
                     }
                     else
                     {
-                        result.analysis += "<p>Check Point " + mRunner.loopCounter + ": FAIL" + "</p>";
+                        result.analysis += "<p>Check Point " + mRunner.getLoopCounter() + ": FAIL" + "</p>";
                         result.status = TestResult.FAIL;
                     }
                     break;
             }
-            if (mRunner.loopCounter == testLog.profile.resultCount)
+            if (mRunner.getLoopCounter() == testLog.profile.getResultCount())
             {
                 result.analysis += "<p>Verified that lighting_control_enabled is set since the test injected a light profile configuration." +
                                    "Verified that lights are turned on with val=80 when schedule is active." + "Verified that lights are turned off when schedule expired.</p>";

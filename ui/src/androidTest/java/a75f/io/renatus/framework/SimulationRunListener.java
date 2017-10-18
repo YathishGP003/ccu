@@ -1,9 +1,11 @@
-package a75f.io.renatus;
+package a75f.io.renatus.framework;
 
 import org.junit.runner.Description;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
+
+import a75f.io.renatus.framework.SimulationContext;
 
 /**
  * Created by samjithsadasivan on 10/4/17.
@@ -13,7 +15,6 @@ public class SimulationRunListener extends RunListener
 {
     SimulationContext tContext = SimulationContext.getInstance();
     public void testRunStarted(Description description) throws Exception {
-        //tContext.testCount++;
     }
     
     public void testRunFinished(Result result) throws Exception {

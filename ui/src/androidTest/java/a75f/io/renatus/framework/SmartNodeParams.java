@@ -1,4 +1,4 @@
-package a75f.io.renatus;
+package a75f.io.renatus.framework;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -10,6 +10,9 @@ import java.io.IOException;
  * Created by samjithsadasivan on 9/26/17.
  */
 
+/**
+ * Class represenation of biskit smartnode params
+ */
 public class SmartNodeParams
 {
     public String timestamp;
@@ -63,12 +66,6 @@ public class SmartNodeParams
     public float measured_motor_1_reverse_rpm;
     public float measured_motor_2_forward_rpm;
     public float measured_motor_2_reverse_rpm;
-    //public SensorReading sensor_reading_0;
-    //public SensorReading sensor_reading_1;
-    //public SensorReading sensor_reading_2;
-    //public SensorReading sensor_reading_3;
-    //public SensorReading sensor_reading_4;
-    //public SensorReading sensor_reading_5;
     public int sensor_reading_0_type;
     public int sensor_reading_0_data;
     public int sensor_reading_1_type;

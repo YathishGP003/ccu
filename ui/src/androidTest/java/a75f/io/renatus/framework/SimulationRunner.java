@@ -1,4 +1,4 @@
-package a75f.io.renatus;
+package a75f.io.renatus.framework;
 
 /**
  * Created by samjithsadasivan on 9/21/17.
@@ -9,6 +9,10 @@ import android.text.format.DateFormat;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import junit.framework.Assert;
+
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -41,6 +45,9 @@ import static java.lang.Thread.sleep;
  */
 public class SimulationRunner
 {
+    public static final String NODE_TYPE_REST_URL = "http://10.0.2.2:5000/nodetype/";
+    public static final String SMARTNODE_LOG_REST_URL = "http://10.0.2.2:5000/log/smartnode?address=";
+    public static final String SMARTNODE_STATE_REST_URL = "http://10.0.2.2:5000/state/smartnode?address=";
     
     public  List<String[]>    csvDataList = null;
     private SimulationContext mEnv        = null;
@@ -53,38 +60,66 @@ public class SimulationRunner
     int secondsElapsed = 0;
     
     private List<Integer> mNodes = new ArrayList<>();
+    private SamplingProfile mProfile;
     
-    String curTime = null;
-    
-    SimulationRunner(BaseSimulationTest ccuTest) {
+    long resultTime;
+    int loopCounter;
+       
+    public SimulationRunner(BaseSimulationTest ccuTest, SamplingProfile profile) {
         mCurrentTest = ccuTest;
+        mProfile = profile;
         mEnv = SimulationContext.getInstance();
     
         appState = SimulationInputParser.parseStateConfig(mEnv, ccuTest.getCCUStateFileName());
     
         csvDataList = SimulationInputParser.parseSimulationFile(mEnv, ccuTest.getSimulationFileName());
         testVectorParams = csvDataList.get(0);
+        fillNodes();
     }
     
     /**
      * Must be called from @Test method of SimulationTest
+     * Each invocation of method seeds the current app state to mesh network and starts a fresh round of injection of simulation values.
      */
     public void runSimulation() {
-    
-        curTime = DateFormat.format("dd-MMMM-yyyy_hh:mm:ss", (System.currentTimeMillis()-15000)).toString();
+        if (mCurrentTest == null) {
+            Assert.fail("Invalid test configuration");
+        }
+        if (appState == null || csvDataList == null)
+        {
+            addNTTestInfo();
+        }
+        loopCounter = 0;
+        mCurrentTest.customizeTestData(appState);
         injectState(appState);
-        
+        resultTime = System.currentTimeMillis();
+        threadSleep(45);
+        addTestLog();
         for (int simIndex = 1; simIndex < csvDataList.size(); simIndex ++) {
             String[] simData = csvDataList.get(simIndex);
-            if (!mNodes.contains(Integer.parseInt(simData[1].trim()))) {
-                mNodes.add(Integer.parseInt(simData[1].trim()));
-            }
-            injectSimulation(simData);
-    
-            
+            //injectSimulation(simData);
+            SimulationParams params  = new SimulationParams().build(simData);
+            String paramsJson = params.convertToJsonString();
+            executePost(SMARTNODE_STATE_REST_URL+simData[1].trim(), getHttpPostParams(paramsJson) );
+            threadSleep(mProfile.resultPeriodSecs);
+            loopCounter++;
+            addTestLog();
+            resultTime = System.currentTimeMillis();
         }
-        threadSleep(60);
-        addTestLog();//TODO - should wait ?
+        
+        runResultLoop();
+    }
+    
+    private void runResultLoop() {
+        while (++loopCounter <= mProfile.resultCount)
+        {
+            threadSleep(mProfile.resultPeriodSecs);
+            addTestLog();
+        }
+    }
+    
+    public int getLoopCounter() {
+        return loopCounter;
     }
     
     private void injectState(CCUApplication state) {
@@ -109,7 +144,7 @@ public class SimulationRunner
             secondsElapsed += waitTime;
             SimulationParams params  = new SimulationParams().build(testVals);
             String paramsJson = params.convertToJsonString();
-            executePost("http://10.0.2.2:5000/state/smartnode?address="+testVals[1].trim(), getHttpPostParams(paramsJson) );
+            executePost(SMARTNODE_STATE_REST_URL+testVals[1].trim(), getHttpPostParams(paramsJson) );
         }
         catch (ParseException e)
         {
@@ -192,36 +227,7 @@ public class SimulationRunner
             }
         }
     }
-    
-    /*private void postJson(String url, String data){
-        HttpURLConnection httpURLConnection = null;
-        try {
-            URL restUrl = new URL(url);
-            httpURLConnection = (HttpURLConnection)restUrl.openConnection();
-            httpURLConnection.setDoOutput(true);
-            httpURLConnection.setRequestMethod("POST");
-            //httpURLConnection.setRequestProperty("Content-Type", "application/json");
-            httpURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-            httpURLConnection.setRequestProperty("Content-Length", data.getBytes().length+"");
-    
-    
-            httpURLConnection.connect();
-            DataOutputStream wr = new DataOutputStream(httpURLConnection.getOutputStream());
-            wr.writeBytes(data);
-            wr.flush();
-            wr.close();
-        
-        } catch (MalformedURLException e)
-        {
-            e.printStackTrace();
-        } catch (IOException e)
-        {
-            e.printStackTrace();
-        } finally {
-            httpURLConnection.disconnect();
-        }
-    }*/
-    
+          
     private String getResult(String url){
         
         StringBuilder result = new StringBuilder();
@@ -263,39 +269,73 @@ public class SimulationRunner
         SimulationTestInfo info = mEnv.testSuite.getSimulationTest(mCurrentTest.getTestDescription());
         if (info == null) {
             info = new SimulationTestInfo();
-            info.name = mCurrentTest.getTestDescription();
+            info.name = mCurrentTest.getClass().getSimpleName();;
+            info.description = mCurrentTest.getTestDescription();
             info.simulationResult = new SimulationResult();
             info.simulationInput = csvDataList;
             info.inputCcuState = appState;
+            info.graphColumns = mCurrentTest.graphColumns();
+            info.profile= mProfile;
             mEnv.testSuite.addSimulationTest(mCurrentTest.getTestDescription(),info);
+            //info.nodeParams.add(new SmartNodeParams());
+            for(int node : mNodes)
+            {
+                info.resultParamsMap.put(node, new ArrayList<SmartNodeParams>());
+            }
         }
-        //String params = SimulationInputParser.readFileFromAssets(SimulationContext.getInstance().getContext(), "ccustates/testresult.json");
         
-        //http://localhost:5000/log/smartnode?address=2000&since=05-April-2017_17:00:40&limit_results=1
-        for(int node = 0; node < mNodes.size();node++)
+        for(int node : mNodes)
         {
-            //executePost("http://10.0.2.2:5000/nodetype/", getSmartnodeType());
-            //String params = getResult("http://10.0.2.2:5000/log/smartnode?address=" + mNodes.get(node) + "&since=" + curTime + "&limit_results=1");
-            String params = getResult("http://10.0.2.2:5000/log/smartnode?address=" + mNodes.get(node) + "&since=" + curTime);
+            String params = getResult(SMARTNODE_LOG_REST_URL + node + "&since=" + DateFormat.format("dd-MMMM-yyyy_hh:mm:ss", resultTime).toString());
             try
             {
                 JSONArray jsonArray = new JSONArray(params);
-                ArrayList<String> list = new ArrayList<String>();
-    
-                for (int i = 0; i < jsonArray.length(); i++)
-                {
-                    list.add(jsonArray.get(i).toString());
-                    info.nodeParams.add(SmartNodeParams.getParamsFromJson(jsonArray.get(i).toString()));
-                }
+                SmartNodeParams result = SmartNodeParams.getParamsFromJson(jsonArray.get(jsonArray.length()-1).toString());
+                info.resultParamsMap.get(node).add(result);
                 
             } catch (JSONException e) {
+                //TODO- Refactor
+                //Random failures observed while retrieving json params.We just proceed with adding an empty struct to avoid losing check point mapping.
+                info.resultParamsMap.get(node).add(new SmartNodeParams());
                 e.printStackTrace();
             }
         }
-        info.simulationResult.result = mCurrentTest.analyzeTestResults(info);
-        //String params2 = SimulationInputParser.readFileFromAssets(SimulationContext.getInstance().getContext(), "ccustates/testresult1.json");
-        //info.nodeParams.add(SmartNodeParams.getParamsFromJson(params2));
-        
+        try
+        {
+            mCurrentTest.analyzeTestResults(info); //result is updated in info object
+        } catch (Exception e) {
+            //Test should go on even if one check point analysis failed
+            info.simulationResult.analysis += "<p>Check Point " + loopCounter + " NA : Exception "+e.getMessage() + "</p>";
+        }
+    }
+    
+    private void addNTTestInfo() {
+        SimulationTestInfo info = mEnv.testSuite.getSimulationTest(mCurrentTest.getTestDescription());
+        if (info == null) {
+            info = new SimulationTestInfo();
+            info.name = mCurrentTest.getClass().getSimpleName();;
+            info.description = mCurrentTest.getTestDescription();
+            info.simulationResult = new SimulationResult();
+            info.simulationResult.status = TestResult.NT;
+            info.simulationInput = csvDataList;
+            info.inputCcuState = appState;
+            info.graphColumns = mCurrentTest.graphColumns();
+            info.profile= mProfile;
+            mEnv.testSuite.addSimulationTest(mCurrentTest.getTestDescription(),info);
+        }
+    }
+    private void fillNodes() {
+        for (int i = 1; i < csvDataList.size(); i++)
+        {
+            String[] simData = csvDataList.get(i);
+            if (!mNodes.contains(Integer.parseInt(simData[1].trim())))
+            {
+                mNodes.add(Integer.parseInt(simData[1].trim()));
+            }
+        }
+    }
+    public void resetRunner() {
+        secondsElapsed = 0;
     }
     
     public List<String[]> getSimulationInput() {

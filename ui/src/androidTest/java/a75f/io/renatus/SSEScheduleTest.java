@@ -22,14 +22,12 @@ import static a75f.io.renatus.framework.GraphColumns.Analog1_Out;
 import static a75f.io.renatus.framework.GraphColumns.Analog2_Out;
 import static a75f.io.renatus.framework.GraphColumns.Relay1_Out;
 import static a75f.io.renatus.framework.GraphColumns.Relay2_Out;
-/**
- * Created by samjithsadasivan on 10/4/17.
- */
 
 /**
- * Test the heating is turned on when current temp drops below set temp
+ * Created by samjithsadasivan on 10/17/17.
  */
-public class SSEHeatingTest extends BaseSimulationTest
+
+public class SSEScheduleTest extends BaseSimulationTest
 {
     SimulationRunner mRunner = null;
     
@@ -44,20 +42,19 @@ public class SSEHeatingTest extends BaseSimulationTest
     
     @Override
     public String getTestDescription() {
-        return "Verifies SSE cooling during an occupied schedule." +
-               "The test injects a CcuState with a 30 mins schedule starting at current time.Relay1 and Relay2 outputs of smartnode 7001 configured as Heating and Fan respectively." +
-               "It sends 10 sets of inputs with varying room-temperature and set-temperature evey 3 minutes." +
-               "and fetches smart node params corresponding to each input.";
+        return "Tests whether a future cooling schedule is fired on time." +
+               "Creates a schedule to start cooling 15 minutes later.Relay1 and Relay2 outputs of smartnode 7004 configured as Cooling and Fan respectively." +
+               "Room temperature is kept above set temperature beyond the deadband value to trigger cooling at the start of schedule.";
     }
     
     @Override
     public String getCCUStateFileName() {
-        return "sseheatccustate.json";
+        return "sseschedule.json";
     }
     
     @Override
     public String getSimulationFileName() {
-        return "sseheatingtest.csv";
+        return "sseschedule.csv";
     }
     
     @Override
@@ -66,15 +63,18 @@ public class SSEHeatingTest extends BaseSimulationTest
             return; // Test run not started , nothing to analyze
         }
         SimulationResult result = testLog.simulationResult;
-        if (testLog.resultParamsMap.get(new Integer(7001)) != null)
+        if (testLog.resultParamsMap.get(new Integer(7004)) != null)
         {
-            SmartNodeParams params = testLog.resultParamsMap.get(new Integer(7001)).get(mRunner.getLoopCounter());
+            SmartNodeParams params = testLog.resultParamsMap.get(new Integer(7004)).get(mRunner.getLoopCounter());
             switch (mRunner.getLoopCounter())
             {
                 case 1:
                 case 2:
-                case 7:
-                    if ((params.digital_out_1 == 0) && (params.digital_out_2 == 1))
+                case 3:
+                case 4:
+                case 5:
+                    // Not in schedule ; both cooling and fan should be OFF
+                    if ((params.digital_out_1 == 0) && (params.digital_out_2 == 0))
                     {
                         result.analysis += "<p>Check Point " + mRunner.getLoopCounter() + ": PASS" + "</p>";
                     }
@@ -84,13 +84,12 @@ public class SSEHeatingTest extends BaseSimulationTest
                         result.status = TestResult.FAIL;
                     }
                     break;
-                case 3:
-                case 4:
-                case 5:
                 case 6:
+                case 7:
                 case 8:
                 case 9:
                 case 10:
+                    //IN schedule ; both cooling and fan should be on
                     if ((params.digital_out_1 == 1) && (params.digital_out_2 == 1))
                     {
                         result.analysis += "<p>Check Point " + mRunner.getLoopCounter() + ": PASS" + "</p>";
@@ -104,8 +103,7 @@ public class SSEHeatingTest extends BaseSimulationTest
             }
             if (mRunner.getLoopCounter() == testLog.profile.getResultCount())
             {
-                result.analysis += "<p>Verified that heating on relay_1 and fan on digital_2 are turned on when the room temperature is below set temperature by" +
-                                   "heating deadband config.</p> ";
+                result.analysis += "<p>Verified that cooling on relay_1 and fan on digital_2 are turned ON after 15 mins when schedule started</p> ";
             }
         }
     }
@@ -128,7 +126,7 @@ public class SSEHeatingTest extends BaseSimulationTest
     
     @Override
     public void customizeTestData(CCUApplication app) {
-        DateTime sStart = new DateTime(System.currentTimeMillis(), DateTimeZone.getDefault());
+        DateTime sStart = new DateTime(System.currentTimeMillis() + 15*60000, DateTimeZone.getDefault());
         DateTime sEnd = new DateTime(System.currentTimeMillis() + 30*60000, DateTimeZone.getDefault());
         ArrayList<Schedule> schedules     = app.getFloors().get(0).mRoomList.get(0).mZoneProfiles.get(0).getSchedules();
         Day testDay = schedules.get(0).getDays().get(sStart.getDayOfWeek() - 1);
@@ -137,7 +135,6 @@ public class SSEHeatingTest extends BaseSimulationTest
         testDay.setStmm(sStart.getMinuteOfHour());
         testDay.setEtmm(sEnd.getMinuteOfHour());
     }
-    
     @Override
     public void runTest() {
         

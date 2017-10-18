@@ -14,9 +14,7 @@ public class SingleStageLogicalMap
     
     private float mRoomTemperature;
     private HashMap<Port, SingleStageMode> mLogicalMap = new HashMap<>();
-    private boolean cooling;
-    
-    
+   
     public HashMap<Port, SingleStageMode> getLogicalMap()
     {
         return mLogicalMap;

@@ -1,4 +1,4 @@
-package a75f.io.renatus;
+package a75f.io.renatus.framework;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -10,6 +10,9 @@ import java.io.IOException;
  * Created by samjithsadasivan on 9/25/17.
  */
 
+/**
+ * Class representation of simulation input data fed through csv.
+ */
 public class SimulationParams
 {
     public float room_temperature;

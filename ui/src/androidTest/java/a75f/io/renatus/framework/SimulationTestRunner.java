@@ -1,4 +1,4 @@
-package a75f.io.renatus;
+package a75f.io.renatus.framework;
 
 import org.junit.Test;
 import org.junit.internal.runners.statements.FailOnTimeout;
@@ -8,10 +8,15 @@ import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
 
+import a75f.io.renatus.framework.SimulationContext;
+import a75f.io.renatus.framework.SimulationRunListener;
 /**
  * Created by samjithsadasivan on 9/26/17.
  */
 
+/**
+ * Custom runner to complement features not supported by default AndroidJunitRunner
+ */
 //TODO - May override timeout, and implement junit testwatcher/testlistener
     
 public class SimulationTestRunner extends BlockJUnit4ClassRunner

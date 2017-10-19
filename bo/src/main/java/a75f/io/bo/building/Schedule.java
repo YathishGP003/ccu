@@ -120,10 +120,12 @@ public class Schedule
                 {
                     DateTime startDateTime = new DateTime(MockTime.getInstance().getMockTime())
                                                      .withHourOfDay(day.getSthh())
-                                                     .withMinuteOfHour(day.getStmm());
+                                                     .withMinuteOfHour(day.getStmm())
+                                                     .withSecondOfMinute(0);
                     DateTime endDateTime = new DateTime(MockTime.getInstance().getMockTime())
                                                    .withHourOfDay(day.getEthh())
-                                                   .withMinuteOfHour(day.getEtmm());
+                                                   .withMinuteOfHour(day.getEtmm())
+                                                   .withSecondOfMinute(0);
                     Interval scheduledInterval =
                             new Interval(startDateTime.withDayOfWeek(day.getDay() + 1), endDateTime
                                                                                                 .withDayOfWeek(

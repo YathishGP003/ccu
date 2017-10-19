@@ -121,13 +121,13 @@ public class L
     }
     
     
-    public static int resolveZoneProfileLogicalValue(ZoneProfile profile)
+    public static float resolveZoneProfileLogicalValue(ZoneProfile profile)
     {
         return LZoneProfile.resolveZoneProfileLogicalValue(profile);
     }
     
     
-    public static int resolveZoneProfileLogicalValue(ZoneProfile profile, Output snOutput)
+    public static float resolveZoneProfileLogicalValue(ZoneProfile profile, Output snOutput)
     {
         return LZoneProfile.resolveZoneProfileLogicalValue(profile, snOutput);
     }

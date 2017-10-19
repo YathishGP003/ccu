@@ -1,5 +1,7 @@
 package a75f.io.logic;
 
+import android.util.Log;
+
 import a75f.io.bo.building.BaseProfileConfiguration;
 import a75f.io.bo.building.Output;
 import a75f.io.bo.building.SingleStageProfile;
@@ -19,10 +21,13 @@ import static a75f.io.logic.LZoneProfile.resolveZoneProfileLogicalValue;
 public class LSSE
 {
     
+    private static final String TAG = "LSSE";
+    
+    
     public static void mapSSECircuits(CcuToCmOverUsbSnControlsMessage_t controlsMessage_t,
                                       short nodeAddress, Zone zone, SingleStageProfile zp)
     {
-        short desiredTemperature = resolveZoneProfileLogicalValue(zp);
+        float desiredTemperature = resolveZoneProfileLogicalValue(zp);
         boolean occupied = desiredTemperature > 0;
         if (!occupied)
         {
@@ -34,8 +39,10 @@ public class LSSE
         //Tuners
         int coolingDeadband =
                 (int) L.resolveTuningParameter(zone, AlgoTuningParameters.SSETuners.SSE_COOLING_DEADBAND);
+        Log.i(TAG, "Cooling Deadband:" + coolingDeadband); 
         int heatingDeadband =
                 (int) L.resolveTuningParameter(zone, AlgoTuningParameters.SSETuners.SSE_HEATING_DEADBAND);
+        Log.i(TAG, "Heating Deadband:" + heatingDeadband);
         int buildingMaxTemp =
                 (int) L.resolveTuningParameter(zone, AlgoTuningParameters.SSETuners.SSE_BUILDING_MAX_TEMP);
         int buildingMinTemp =

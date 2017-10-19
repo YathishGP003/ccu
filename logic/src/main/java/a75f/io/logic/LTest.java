@@ -19,7 +19,7 @@ public class LTest
     {
         for (Output output : zp.getProfileConfiguration(nodeAddress).getOutputs())
         {
-            short dimmablePercent = resolveZoneProfileLogicalValue(zp, output);
+            short dimmablePercent = (short)resolveZoneProfileLogicalValue(zp, output);
             LSmartNode.getSmartNodePort(controlsMessage_t, output.getPort())
                       .set(LSmartNode.mapRawValue(output, dimmablePercent));
         }

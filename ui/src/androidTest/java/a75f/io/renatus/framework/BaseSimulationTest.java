@@ -15,6 +15,8 @@ import a75f.io.bo.building.CCUApplication;
 @RunWith(SimulationTestRunner.class)
 public abstract class BaseSimulationTest
 {
+    
+    public static final String TAG = "BaseSimulationTest";
     //Description of test
     public abstract String getTestDescription();
     

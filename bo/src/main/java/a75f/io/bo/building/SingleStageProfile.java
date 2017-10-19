@@ -8,6 +8,7 @@ import org.javolution.lang.MathLib;
 
 import java.util.HashMap;
 
+import a75f.io.bo.building.definitions.OverrideType;
 import a75f.io.bo.building.definitions.ProfileType;
 import a75f.io.bo.building.sse.SingleStageLogicalMap;
 import a75f.io.bo.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
@@ -39,6 +40,12 @@ public class SingleStageProfile extends ZoneProfile
         float roomTemperature = (float) regularUpdateMessage.update.roomTemperature.get() / 10.0f;
         mLogicalMap.get(Short.valueOf((short) regularUpdateMessage.update.smartNodeAddress.get()))
                    .setRoomTemperature(roomTemperature);
+        
+        float setTemperature = (float) regularUpdateMessage.update.setTemperature.get();
+        if (setTemperature > 0)
+        {
+            this.setOverride(60 * 120 * 60 * 1000, OverrideType.RELEASE_TIME,  setTemperature  / 2);
+        }
         
         if(mInterface != null)
         {

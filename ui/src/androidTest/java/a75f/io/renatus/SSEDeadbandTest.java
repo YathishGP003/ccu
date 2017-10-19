@@ -1,5 +1,7 @@
 package a75f.io.renatus;
 
+import android.util.Log;
+
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.After;
@@ -136,18 +138,18 @@ public class SSEDeadbandTest extends BaseSimulationTest
         }
     
         AlgoTuningParameters algoMap = app.getDefaultCCUTuners();
-        algoMap.put("sseCoolingDeadBand", testDeadBandVal);
+        Log.i(TAG, "Putting " + AlgoTuningParameters.SSETuners.SSE_COOLING_DEADBAND + " : " +
+                   testDeadBandVal);
+        algoMap.put(AlgoTuningParameters.SSETuners.SSE_COOLING_DEADBAND, testDeadBandVal);
     }
     @Override
     public void runTest() {
         
         System.out.println("runTest.........");
-        //rt=72, st= 70
-        runCounter++;
         testDeadBandVal = 0;
         mRunner.runSimulation();
         runCounter +=2;
-        testDeadBandVal = 0;
+        testDeadBandVal = 2;
         mRunner.runSimulation();
         runCounter +=2;
         testDeadBandVal = 1;
@@ -155,5 +157,6 @@ public class SSEDeadbandTest extends BaseSimulationTest
         runCounter +=2;
         testDeadBandVal = 3;
         mRunner.runSimulation();
+        //rt=72, st= 70
     }
 }

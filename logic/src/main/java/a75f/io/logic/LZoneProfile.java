@@ -25,7 +25,7 @@ class LZoneProfile
     //profile schedules to see if it can release it's override.
     // or if it has schedules, it should use the circuit's logical values.  This behavior can
     //be overrode at a specific profile level.
-    public static short resolveZoneProfileLogicalValue(ZoneProfile zoneProfile, Output output)
+    public static float resolveZoneProfileLogicalValue(ZoneProfile zoneProfile, Output output)
     {
         if ((isOverride(output) && !output.hasSchedules() && !checkCircuitOverrides(output, zoneProfile)) || output.hasSchedules())
         {
@@ -94,7 +94,7 @@ class LZoneProfile
         return false;
     }
     
-    public static short resolveLogicalValue(Schedulable schedulable)
+    public static float resolveLogicalValue(Schedulable schedulable)
     {
         if (schedulable.getOverrideType() == OverrideType.OVERRIDE_TIME_RELEASE_NEXT_SCHEDULE_BOUND)
         {
@@ -188,7 +188,7 @@ class LZoneProfile
     {
         return schedulable.getNamedSchedule() != null && !schedulable.getNamedSchedule().equals("");
     }
-    public static short resolveZoneProfileLogicalValue(ZoneProfile profile)
+    public static float resolveZoneProfileLogicalValue(ZoneProfile profile)
     {
         return resolveLogicalValue(profile);
     }

@@ -79,11 +79,11 @@ public class SSEDeadbandTest extends BaseSimulationTest
                     //cooling and fan should be ON
                     if ((params.digital_out_1 == 1) && (params.digital_out_2 == 1))
                     {
-                        result.analysis += "<p>Check Point " + mRunner.getLoopCounter() + ": PASS" + "</p>";
+                        result.analysis += "<p>Check Point " + runCounter + ": PASS" + "</p>";
                     }
                     else
                     {
-                        result.analysis += "<p>Check Point " + mRunner.getLoopCounter() + ": FAIL" + "</p>";
+                        result.analysis += "<p>Check Point " + runCounter + ": FAIL" + "</p>";
                         result.status = TestResult.FAIL;
                     }
                     break;
@@ -92,16 +92,16 @@ public class SSEDeadbandTest extends BaseSimulationTest
                     //cooling should be OFF with fan ON
                     if ((params.digital_out_1 == 0) && (params.digital_out_2 == 1))
                     {
-                        result.analysis += "<p>Check Point " + mRunner.getLoopCounter() + ": PASS" + "</p>";
+                        result.analysis += "<p>Check Point " + runCounter + ": PASS" + "</p>";
                     }
                     else
                     {
-                        result.analysis += "<p>Check Point " + mRunner.getLoopCounter() + ": FAIL" + "</p>";
+                        result.analysis += "<p>Check Point " + runCounter + ": FAIL" + "</p>";
                         result.status = TestResult.FAIL;
                     }
                     break;
             }
-            if (mRunner.getLoopCounter() == testLog.profile.getResultCount())
+            if (runCounter ==7)
             {
                 result.analysis += "<p>Verified that cooling on relay_1 is turned ON/OFF appropriately for current value of deadband</p> ";
             }
@@ -148,6 +148,7 @@ public class SSEDeadbandTest extends BaseSimulationTest
     public void runTest() {
         
         System.out.println("runTest.........");
+        runCounter++;
         testDeadBandVal = 0;
         mRunner.runSimulation();
         runCounter +=2;

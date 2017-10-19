@@ -63,6 +63,13 @@
             "etmm" : 30,
             "val" : 80
           }, {
+            "day" : 2,
+            "sthh" : 17,
+            "stmm" : 0,
+            "ethh" : 17,
+            "etmm" : 30,
+            "val" : 80
+          }, {
             "day" : 3,
             "sthh" : 17,
             "stmm" : 0,
@@ -77,13 +84,6 @@
             "etmm" : 30,
             "val" : 80
           }, {
-            "day" : 5,
-            "sthh" : 17,
-            "stmm" : 0,
-            "ethh" : 17,
-            "etmm" : 30,
-            "val" : 80
-          }, {
               "day" : 5,
               "sthh" : 17,
               "stmm" : 0,
@@ -91,7 +91,7 @@
               "etmm" : 30,
               "val" : 80
           }, {
-              "day" : 5,
+              "day" : 6,
               "sthh" : 17,
               "stmm" : 0,
               "ethh" : 17,

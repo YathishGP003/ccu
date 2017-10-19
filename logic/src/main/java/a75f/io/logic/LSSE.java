@@ -58,13 +58,13 @@ public class LSSE
         boolean heatingOn = false;
         if (occupied) // occupied
         {
-            if (currentTemperature > (desiredTemperature + coolingDeadband))
+            if (currentTemperature >= (desiredTemperature + coolingDeadband))
             {
                 coolingOn = true;
                 fanOn = true;
                 //turn on cooling & fan
             }
-            else if (currentTemperature < (desiredTemperature - heatingDeadband))
+            else if (currentTemperature <= (desiredTemperature - heatingDeadband))
             {
                 heatingOn = true;
                 fanOn = true;
@@ -74,12 +74,12 @@ public class LSSE
         }
         else // not occupied
         {
-            if (currentTemperature > (desiredTemperature + zoneSetBack))
+            if (currentTemperature >= (desiredTemperature + zoneSetBack))
             {
                 coolingOn = true;
                 fanOn = true;
             }
-            else if (currentTemperature < (desiredTemperature - zoneSetBack))
+            else if (currentTemperature <= (desiredTemperature - zoneSetBack))
             {
                 heatingOn = true;
                 fanOn = true;

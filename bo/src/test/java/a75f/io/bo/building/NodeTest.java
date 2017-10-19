@@ -58,7 +58,8 @@ public class NodeTest
         Floor floor = new Floor(1, "webid", "Floor1");
         Zone z = new Zone("75FRoom1");
         floor.mRoomList.add(z);
-        LightProfile p1 = (LightProfile) z.findProfile(ProfileType.LIGHT);
+        LightProfile p1 = new LightProfile();
+        z.mZoneProfiles.add(p1);
 
         LightProfileConfiguration testSn1Config = new LightProfileConfiguration();
         LightProfileConfiguration testSN2Config = new LightProfileConfiguration();

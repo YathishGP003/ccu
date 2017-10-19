@@ -1,17 +1,18 @@
 package a75f.io.renatus;
 
+import android.util.Log;
+
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.After;
 import org.junit.Before;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Objects;
 
 import a75f.io.bo.building.CCUApplication;
 import a75f.io.bo.building.Day;
 import a75f.io.bo.building.Schedule;
+import a75f.io.bo.kinvey.AlgoTuningParameters;
 import a75f.io.renatus.framework.BaseSimulationTest;
 import a75f.io.renatus.framework.SamplingProfile;
 import a75f.io.renatus.framework.SimulationResult;
@@ -20,6 +21,7 @@ import a75f.io.renatus.framework.SimulationTestInfo;
 import a75f.io.renatus.framework.SmartNodeParams;
 import a75f.io.renatus.framework.TestResult;
 
+import static a75f.io.logic.L.ccu;
 import static a75f.io.renatus.framework.GraphColumns.Analog1_Out;
 import static a75f.io.renatus.framework.GraphColumns.Analog2_Out;
 import static a75f.io.renatus.framework.GraphColumns.Relay1_Out;
@@ -128,7 +130,8 @@ public class SSEDeadbandTest extends BaseSimulationTest
         {
             DateTime sStart = new DateTime(System.currentTimeMillis(), DateTimeZone.getDefault());
             DateTime sEnd = new DateTime(System.currentTimeMillis() + 30 * 60000, DateTimeZone.getDefault());
-            ArrayList<Schedule> schedules = app.getFloors().get(0).mRoomList.get(0).mZoneProfiles.get(0).getSchedules();
+            ArrayList<Schedule> schedules = app.getFloors().get(0).mRoomList.get(0).mZoneProfiles
+                                                    .get(0).getSchedules();
             Day testDay = schedules.get(0).getDays().get(sStart.getDayOfWeek() - 1);
             testDay.setSthh(sStart.getHourOfDay());
             testDay.setEthh(sEnd.getHourOfDay());
@@ -136,19 +139,19 @@ public class SSEDeadbandTest extends BaseSimulationTest
             testDay.setEtmm(sEnd.getMinuteOfHour());
         }
     
-        HashMap<String, Object> algoMap = app.getDefaultCCUTuners();
-        algoMap.put("sseCoolingDeadBand", testDeadBandVal);
+        AlgoTuningParameters algoMap = ccu().getDefaultCCUTuners();
+        Log.i(TAG, "Putting " + AlgoTuningParameters.SSETuners.SSE_COOLING_DEADBAND + " : " +
+                   testDeadBandVal);
+        algoMap.put(AlgoTuningParameters.SSETuners.SSE_COOLING_DEADBAND, testDeadBandVal);
     }
     @Override
     public void runTest() {
         
         System.out.println("runTest.........");
-        //rt=72, st= 70
-        runCounter++;
         testDeadBandVal = 0;
         mRunner.runSimulation();
         runCounter +=2;
-        testDeadBandVal = 0;
+        testDeadBandVal = 2;
         mRunner.runSimulation();
         runCounter +=2;
         testDeadBandVal = 1;
@@ -156,5 +159,6 @@ public class SSEDeadbandTest extends BaseSimulationTest
         runCounter +=2;
         testDeadBandVal = 3;
         mRunner.runSimulation();
+        //rt=72, st= 70
     }
 }

@@ -16,7 +16,7 @@ public class Schedulable
     
     protected String              mNamedSchedule = "";
     protected ArrayList<Schedule> mSchedules     = new ArrayList<>();
-    protected short mLogicalValue;
+    protected float mLogicalValue;
     protected OverrideType mOverrideType = OverrideType.NONE;
     protected ScheduleMode mScheduleMode = ScheduleMode.ZoneSchedule;
     
@@ -38,23 +38,13 @@ public class Schedulable
     }
     
     
-
-    
-    
-    public void setNamedSchedule(String namedSchedule)
-    {
-        this.setScheduleMode(ScheduleMode.NamedSchedule);
-        this.mNamedSchedule = namedSchedule;
-    }
-    
-    
-    public short getLogicalValue()
+    public float getLogicalValue()
     {
         return mLogicalValue;
     }
     
     
-    public void setLogicalValue(short logicalValue)
+    public void setLogicalValue(float logicalValue)
     {
         this.mLogicalValue = mLogicalValue;
     }
@@ -116,7 +106,7 @@ public class Schedulable
     
     
     @JsonIgnore
-    public void setOverride(long overrideTimeMillis, OverrideType overrideType, short val)
+    public void setOverride(long overrideTimeMillis, OverrideType overrideType, float val)
     {
         this.mOverrideType = overrideType;
         this.mOverrideMillis = overrideTimeMillis;
@@ -135,5 +125,12 @@ public class Schedulable
     public String getNamedSchedule()
     {
         return mNamedSchedule;
+    }
+    
+    
+    public void setNamedSchedule(String namedSchedule)
+    {
+        this.setScheduleMode(ScheduleMode.NamedSchedule);
+        this.mNamedSchedule = namedSchedule;
     }
 }

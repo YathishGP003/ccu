@@ -40,7 +40,6 @@ import a75f.io.bo.building.definitions.MockTime;
 import a75f.io.bo.building.definitions.OverrideType;
 import a75f.io.bo.building.definitions.ProfileType;
 import a75f.io.logic.L;
-import a75f.io.logic.LOutput;
 
 import static a75f.io.bo.building.definitions.Port.ANALOG_OUT_ONE;
 import static a75f.io.bo.building.definitions.Port.ANALOG_OUT_TWO;
@@ -148,7 +147,7 @@ public class LightingDetailAdapter extends BaseAdapter
             viewHolder.spinnerSchedule.setOnItemSelectedListener(null);
             viewHolder.spinnerSchedule.setTag(position);
             viewHolder.spinnerSchedule.setAdapter(aaOccupancyMode);
-            int logicalVal = L.resolveZoneProfileLogicalValue(profile, snOutput);
+            float logicalVal = L.resolveZoneProfileLogicalValue(profile, snOutput);
             Log.i(TAG, "Position: " + position + " LogicalValue: " + logicalVal);
                     
             String brightnessVal = L.resolveZoneProfileLogicalValue(profile, snOutput) + "";
@@ -167,7 +166,7 @@ public class LightingDetailAdapter extends BaseAdapter
                 case Analog:
                     viewHolder.brightness.setMax(100);
                     viewHolder.brightness
-                            .setProgress(logicalVal);
+                            .setProgress((int)logicalVal);
                     viewHolder.brightnessVal
                             .setText(logicalVal + "");
                     break;

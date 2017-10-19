@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import a75f.io.bo.kinvey.AlgoTuningParameters;
+import a75f.io.bo.kinvey.CCUUser;
+
 /**
  * Created by Yinten isOn 8/15/2017.
  */
@@ -23,12 +26,13 @@ public class CCUApplication
      */
     private HashMap<String, NamedSchedule> mLCMNamedSchedules = new HashMap<>();
     
-    private  HashMap<String, Object> mDefaultCCUTuners = new HashMap<>();
-    public  SystemProfile           systemProfile    = new SystemProfile();
-    public  ControlMote             controlMote      = new ControlMote();
-    private String                  mTitle           = "";
-    private ArrayList<Floor>        mfloors          = new ArrayList<Floor>();
-    private short                mSmartNodeAddressBand;
+    private  AlgoTuningParameters mDefaultCCUTuners;
+    public  SystemProfile    systemProfile = new SystemProfile();
+    public  ControlMote      controlMote   = new ControlMote();
+    private String           mTitle        = "";
+    private ArrayList<Floor> mfloors       = new ArrayList<Floor>();
+    private CCUUser          mUser;
+    private short           mSmartNodeAddressBand;
     
     public short getSmartNodeAddressBand()
     {
@@ -110,13 +114,13 @@ public class CCUApplication
         this.mTitle = title;
     }
     
-    public HashMap<String, Object> getDefaultCCUTuners()
+    public AlgoTuningParameters getDefaultCCUTuners()
     {
         return mDefaultCCUTuners;
     }
     
     
-    public void setDefaultCCUTuners(HashMap<String, Object> defaultCCUTuners)
+    public void setDefaultCCUTuners(AlgoTuningParameters defaultCCUTuners)
     {
         this.mDefaultCCUTuners = defaultCCUTuners;
     }
@@ -158,4 +162,15 @@ public class CCUApplication
         this.mLCMNamedSchedules = namedSchedules;
     }
     
+    
+    public CCUUser getUser()
+    {
+        return mUser;
+    }
+    
+    
+    public void setUser(CCUUser user)
+    {
+        this.mUser = mUser;
+    }
 }

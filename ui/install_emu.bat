@@ -17,7 +17,7 @@ del /F /Q %apk_host%
 ECHO Stop the app
 %ADB% shell am force-stop %app_package%
 
-::%ADB% root
+%ADB% root
 
 
 ECHO Compile the APK

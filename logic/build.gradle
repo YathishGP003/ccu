@@ -47,9 +47,7 @@ dependencies {
     compile fileTree(include: '*.jar', dir: 'libs')
     testCompile 'junit:junit:4.12'
     compile project(':bo')
-    compile project(path: ':util')
     compile project(path: ':usbserial')
-    compile project(path: ':dal')
     compile(name: 'kinvey-android-3.0.3', ext: 'aar')
     compile(name: 'realm-android-library-3.2.1', ext: 'aar')
     compile(name: 'relinker-1.2.2', ext: 'aar')
@@ -57,5 +55,6 @@ dependencies {
     androidTestCompile 'com.android.support.test:runner:0.5'
     androidTestCompile 'com.android.support.test:rules:0.5'
     compile 'com.android.support:multidex:1.0.1'
+    compile 'com.github.pschroen:slack-api-android:c66cc8d997'
 
 }

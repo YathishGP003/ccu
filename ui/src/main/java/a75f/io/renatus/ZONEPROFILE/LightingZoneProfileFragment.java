@@ -30,12 +30,12 @@ import a75f.io.bo.building.LightProfile;
 import a75f.io.bo.building.LightProfileConfiguration;
 import a75f.io.bo.building.NodeType;
 import a75f.io.bo.building.Output;
+import a75f.io.bo.building.TestProfile;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.ZoneProfile;
 import a75f.io.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.bo.building.definitions.Port;
-import a75f.io.bo.building.definitions.ProfileType;
 import a75f.io.bo.building.definitions.ScheduleMode;
 import a75f.io.logic.L;
 import a75f.io.renatus.BASE.BaseDialogFragment;
@@ -215,7 +215,8 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
             {
                 LightProfileConfiguration lightProfileConfiguration =
                         new LightProfileConfiguration();
-                LightProfile mLightProfile = (LightProfile) mZone.findProfile(ProfileType.LIGHT);
+                LightProfile mLightProfile =  new LightProfile();
+                mZone.mZoneProfiles.add(mLightProfile);
                 bindData(lightProfileConfiguration, mLightProfile, false);
                 if (!mLightProfile.hasSchedules())
                 {
@@ -244,8 +245,8 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
     private void setUpTestTriggers()
     {
         final Zone testZone = new Zone();
-        final LightProfile testLightProfile =
-                (LightProfile) testZone.findProfile(ProfileType.LIGHT);
+        final TestProfile testLightProfile = new TestProfile();
+        testZone.mZoneProfiles.add(testLightProfile);
         testLightProfile.setCircuitTest(true);
 
         //TODO: if they close dialog how do we remove seed from CM?

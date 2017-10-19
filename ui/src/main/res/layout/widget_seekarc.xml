@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.x75fahrenheit.ccu.SeekArc
+<a75f.io.renatus.VIEWS.SeekArcWidget
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:seekarc="http://schemas.android.com/apk/res-auto"
     android:id="@+id/seekArc"

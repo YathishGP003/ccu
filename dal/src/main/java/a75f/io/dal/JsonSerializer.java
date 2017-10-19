@@ -27,6 +27,7 @@ public class JsonSerializer
 	
 	public static<T> T fromJson(InputStream jsonInputStream, Class<T> pojoClass) throws IOException
 	{
+		
 		return m.readValue(jsonInputStream, pojoClass);
 	}
 	

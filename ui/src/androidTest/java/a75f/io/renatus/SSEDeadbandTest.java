@@ -21,6 +21,7 @@ import a75f.io.renatus.framework.SimulationTestInfo;
 import a75f.io.renatus.framework.SmartNodeParams;
 import a75f.io.renatus.framework.TestResult;
 
+import static a75f.io.logic.L.ccu;
 import static a75f.io.renatus.framework.GraphColumns.Analog1_Out;
 import static a75f.io.renatus.framework.GraphColumns.Analog2_Out;
 import static a75f.io.renatus.framework.GraphColumns.Relay1_Out;
@@ -129,7 +130,8 @@ public class SSEDeadbandTest extends BaseSimulationTest
         {
             DateTime sStart = new DateTime(System.currentTimeMillis(), DateTimeZone.getDefault());
             DateTime sEnd = new DateTime(System.currentTimeMillis() + 30 * 60000, DateTimeZone.getDefault());
-            ArrayList<Schedule> schedules = app.getFloors().get(0).mRoomList.get(0).mZoneProfiles.get(0).getSchedules();
+            ArrayList<Schedule> schedules = app.getFloors().get(0).mRoomList.get(0).mZoneProfiles
+                                                    .get(0).getSchedules();
             Day testDay = schedules.get(0).getDays().get(sStart.getDayOfWeek() - 1);
             testDay.setSthh(sStart.getHourOfDay());
             testDay.setEthh(sEnd.getHourOfDay());
@@ -137,7 +139,7 @@ public class SSEDeadbandTest extends BaseSimulationTest
             testDay.setEtmm(sEnd.getMinuteOfHour());
         }
     
-        AlgoTuningParameters algoMap = app.getDefaultCCUTuners();
+        AlgoTuningParameters algoMap = ccu().getDefaultCCUTuners();
         Log.i(TAG, "Putting " + AlgoTuningParameters.SSETuners.SSE_COOLING_DEADBAND + " : " +
                    testDeadBandVal);
         algoMap.put(AlgoTuningParameters.SSETuners.SSE_COOLING_DEADBAND, testDeadBandVal);

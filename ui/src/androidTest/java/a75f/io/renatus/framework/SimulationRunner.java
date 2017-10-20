@@ -266,7 +266,7 @@ public class SimulationRunner
     }
     
     private void addTestLog() {
-        SimulationTestInfo info = mEnv.testSuite.getSimulationTest(mCurrentTest.getTestDescription());
+        SimulationTestInfo info = mEnv.testSuite.getSimulationTest(getClass().getSimpleName());
         if (info == null) {
             info = new SimulationTestInfo();
             info.name = mCurrentTest.getClass().getSimpleName();;
@@ -274,6 +274,7 @@ public class SimulationRunner
             info.simulationResult = new SimulationResult();
             info.simulationInput = csvDataList;
             info.inputCcuState = appState;
+            info.ipGraphColumns = mCurrentTest.inputGraphData();
             info.graphColumns = mCurrentTest.graphColumns();
             info.profile= mProfile;
             mEnv.testSuite.addSimulationTest(mCurrentTest.getTestDescription(),info);
@@ -334,6 +335,7 @@ public class SimulationRunner
             }
         }
     }
+    
     public void resetRunner() {
         secondsElapsed = 0;
     }

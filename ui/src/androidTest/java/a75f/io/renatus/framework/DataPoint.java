@@ -7,17 +7,17 @@ package a75f.io.renatus.framework;
 public class DataPoint
 {
     public int x;
-    public int y;
+    public float y;
     public String indexLabel;
     public DataPoint() {
         
     }
-    public DataPoint(int x, int y, String i) {
+    public DataPoint(int x, float y, String i) {
         this.x = x;
         this.y = y;
         this.indexLabel =i;
     }
-    public DataPoint(int x, int y) {
+    public DataPoint(int x, float y) {
         this.x = x;
         this.y = y;
         this.indexLabel =null;

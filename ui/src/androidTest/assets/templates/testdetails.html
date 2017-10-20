@@ -1,6 +1,25 @@
 <!DOCTYPE HTML>
 <html xmlns="http://www.w3.org/1999/html">
 <head>
+    <script id="inputchart">
+    function loadInputChart() {
+        var inputChart = new CanvasJS.Chart("inputChartContainer",{
+            animationEnabled: true,
+            theme: "light2",
+            title:{
+                text: "Relay 1"
+            },
+            axisY:{
+                includeZero: true
+            },
+            axisX:{
+                includeZero: true
+            },
+            data:inputData
+        });
+        inputChart.render();
+    }
+    </script>
     <script id="relay1chart">
     function loadChart1() {
         var relay1Chart = new CanvasJS.Chart("relay1ChartContainer",{
@@ -79,6 +98,7 @@
 </script>
 <script>
 window.onload = function () {
+    loadInputChart();
 	loadChart1();
 	loadChart2();
 	loadChart3();
@@ -93,6 +113,7 @@ window.onload = function () {
 <h2>Name: <span id="name"></span></h2><hr>
 <h2>Analysis</h2><p><span id="analysis"> </span></p><hr>
 <h2>Charts</h2><p><span id="graph"> </span></p><hr>
+<div id="inputChartContainer" style=" display:block; height: 200px; width: 100%;"></div>
 <div id="relay1ChartContainer" style=" display:block; height: 200px; width: 100%;"></div>
 <div id="relay2ChartContainer" style=" display:block; height: 200px; width: 100%;"></div>
 <div id="analog1ChartContainer" style=" display:block; height: 200px; width: 100%;"></div>

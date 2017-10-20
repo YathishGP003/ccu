@@ -8,6 +8,8 @@ import org.junit.After;
 import org.junit.Before;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import a75f.io.bo.building.CCUApplication;
 import a75f.io.bo.building.Day;
@@ -15,6 +17,7 @@ import a75f.io.bo.building.Schedule;
 import a75f.io.bo.kinvey.AlgoTuningParameters;
 import a75f.io.renatus.framework.BaseSimulationTest;
 import a75f.io.renatus.framework.SamplingProfile;
+import a75f.io.renatus.framework.SimulationParams;
 import a75f.io.renatus.framework.SimulationResult;
 import a75f.io.renatus.framework.SimulationRunner;
 import a75f.io.renatus.framework.SimulationTestInfo;
@@ -35,11 +38,13 @@ public class SSEDeadbandTest extends BaseSimulationTest
 {
     SimulationRunner mRunner = null;
     int runCounter = 0;
-    int testDeadBandVal;
+    Float testDeadBandVal;
+    
+    Float[] deadBandValArray = {0f,0f,2f,2f,1f,1f,3f,3f};
     
     @Before
     public void setUp() {
-        mRunner =  new SimulationRunner(this, new SamplingProfile(1, 120));
+        mRunner =  new SimulationRunner(this, new SamplingProfile(1, 180));
     }
     
     @After
@@ -119,6 +124,43 @@ public class SSEDeadbandTest extends BaseSimulationTest
     }
     
     @Override
+    public HashMap<String,ArrayList<Float>> inputGraphData() {
+        ArrayList<Float> rt = new ArrayList<>();
+        ArrayList<Float> st = new ArrayList<>();
+        final int maxRunCount = 7;
+        HashMap<String,ArrayList<Float>> graphData = new HashMap<>();
+        List<String[]> ip = mRunner.getSimulationInput();
+        for (int simIndex = 1; simIndex < ip.size(); simIndex ++)
+        {
+            String[] simData = ip.get(simIndex);
+            SimulationParams params = new SimulationParams().build(simData);
+            rt.add(params.room_temperature);
+            st.add(params.set_temperature);
+        }
+    
+        while (rt.size() < maxRunCount)
+        {
+            Float lastVal = rt.get(rt.size());
+            rt.add(lastVal);
+        }
+        while (rt.size() < maxRunCount)
+        {
+            Float lastVal = st.get(rt.size());
+            st.add(lastVal);
+        }
+        
+        graphData.put("room_temperature",rt);
+        graphData.put("set_temperature",st);
+    
+        ArrayList<Float> db = new ArrayList<>();
+        for (Float val : deadBandValArray) {
+            db.add(val);
+        }
+        graphData.put("cooling-deadband",db);
+        return graphData;
+    }
+    
+    @Override
     public String[] graphColumns() {
         String[] graphCol = {Relay1_Out.toString(),Relay2_Out.toString(),Analog1_Out.toString(), Analog2_Out.toString()};
         return graphCol;
@@ -144,21 +186,22 @@ public class SSEDeadbandTest extends BaseSimulationTest
                    testDeadBandVal);
         algoMap.put(AlgoTuningParameters.SSETuners.SSE_COOLING_DEADBAND, testDeadBandVal);
     }
+    
     @Override
     public void runTest() {
         
         System.out.println("runTest.........");
         runCounter++;
-        testDeadBandVal = 0;
+        testDeadBandVal = deadBandValArray[runCounter];
         mRunner.runSimulation();
         runCounter +=2;
-        testDeadBandVal = 2;
+        testDeadBandVal = deadBandValArray[runCounter];
         mRunner.runSimulation();
         runCounter +=2;
-        testDeadBandVal = 1;
+        testDeadBandVal = deadBandValArray[runCounter];
         mRunner.runSimulation();
         runCounter +=2;
-        testDeadBandVal = 3;
+        testDeadBandVal = deadBandValArray[runCounter];
         mRunner.runSimulation();
         //rt=72, st= 70
     }

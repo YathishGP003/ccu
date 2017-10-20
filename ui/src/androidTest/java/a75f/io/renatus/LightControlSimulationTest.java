@@ -1,20 +1,19 @@
 package a75f.io.renatus;
 
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.junit.After;
 import org.junit.Before;
 
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 
 import a75f.io.bo.building.CCUApplication;
 import a75f.io.bo.building.Day;
 import a75f.io.bo.building.Schedule;
 import a75f.io.renatus.framework.BaseSimulationTest;
 import a75f.io.renatus.framework.SamplingProfile;
+import a75f.io.renatus.framework.SimulationParams;
 import a75f.io.renatus.framework.SimulationResult;
 import a75f.io.renatus.framework.SimulationRunner;
 import a75f.io.renatus.framework.SimulationTestInfo;
@@ -39,7 +38,7 @@ public class LightControlSimulationTest extends BaseSimulationTest
     
     @Before
     public void setUp() {
-        mRunner =  new SimulationRunner(this,  new SamplingProfile(10, 120));
+        mRunner =  new SimulationRunner(this,  new SamplingProfile(10, 180));
     }
     
     
@@ -134,6 +133,22 @@ public class LightControlSimulationTest extends BaseSimulationTest
     @Override
     public void reportTestResults(SimulationTestInfo testLog, TestResult result) {
         
+    }
+    
+    @Override
+    public HashMap<String,ArrayList<Float>> inputGraphData() {
+        ArrayList<Float> rt = new ArrayList<>();
+        HashMap<String,ArrayList<Float>> graphData = new HashMap<>();
+        List<String[]> ip = mRunner.getSimulationInput();
+        for (int simIndex = 1; simIndex < ip.size(); simIndex ++)
+        {
+            String[] simData = ip.get(simIndex);
+            SimulationParams params = new SimulationParams().build(simData);
+            rt.add(params.room_temperature);
+        }
+        graphData.put("room_temperature",rt);
+        
+        return graphData;
     }
     
     @Override

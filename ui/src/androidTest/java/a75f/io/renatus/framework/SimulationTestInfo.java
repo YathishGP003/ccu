@@ -19,6 +19,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TreeMap;
@@ -47,6 +48,8 @@ public class SimulationTestInfo
     public TreeMap<Integer , ArrayList<SmartNodeParams>> resultParamsMap = new TreeMap<>();
     
     public String[] graphColumns;
+    
+    public HashMap<String,ArrayList<Float>> ipGraphColumns;
         
     public SamplingProfile profile;
     
@@ -147,11 +150,38 @@ public class SimulationTestInfo
                         }]*/
         
         
-        String chartData="";
-    
+        
+        String ipVar = "var inputData = ";
+        ArrayList<GraphData> gdIpArray = new ArrayList<>();
+        for(String ip : ipGraphColumns.keySet()) {
+            GraphData gd = new GraphData();
+            gd.type="line";
+            int xCounter = 0;
+            for ( Float val : ipGraphColumns.get(ip)) {
+                if (gd.dataPoints.size() == 0)
+                {
+                    gd.dataPoints.add(new DataPoint(xCounter, val, ip));
+                }
+                else
+                {
+                    gd.dataPoints.add(new DataPoint(xCounter, val));
+                }
+                xCounter += (profile.resultPeriodSecs / 60);
+            }
+            //extend the graph by copying y-value of last data point
+            while (gd.dataPoints.size() < profile.getResultCount()) {
+                Float lastVal = gd.dataPoints.get(gd.dataPoints.size()).y;
+                gd.dataPoints.add(new DataPoint(xCounter, lastVal));
+                xCounter += (profile.resultPeriodSecs / 60);
+            }
+            
+            gdIpArray.add(gd);
+        }
+        String chartData = ipVar+toJson(gdIpArray)+";\n";
+        
         for (String g: graphColumns) {
-            ArrayList<GraphData> gdArray = new ArrayList<>();
-            String varName = null;
+            ArrayList<GraphData> gdOpArray = new ArrayList<>();
+            String opVar = null;
             GraphData gd = new GraphData();
             gd.type="line";
             int xCounter = 0;
@@ -159,7 +189,7 @@ public class SimulationTestInfo
             switch(g) {
                 case "Relay1_Out":
                     gd.color = "red";
-                    varName = "var chart1Data = ";
+                    opVar = "var chart1Data = ";
                     for (Integer node : resultParamsMap.keySet())
                     {
                         for (SmartNodeParams param : resultParamsMap.get(node))
@@ -178,7 +208,7 @@ public class SimulationTestInfo
                     break;
                 case "Relay2_Out":
                     gd.color = "green";
-                    varName = "var chart2Data = ";
+                    opVar = "var chart2Data = ";
                     for (Integer node : resultParamsMap.keySet())
                     {
                         for (SmartNodeParams param : resultParamsMap.get(node))
@@ -197,7 +227,7 @@ public class SimulationTestInfo
                     break;
                 case "Analog1_Out":
                     gd.color="blue";
-                    varName = "var chart3Data = ";
+                    opVar = "var chart3Data = ";
                     for (Integer node : resultParamsMap.keySet())
                     {
                         for (SmartNodeParams param : resultParamsMap.get(node))
@@ -216,7 +246,7 @@ public class SimulationTestInfo
                     break;
                 case "Analog2_Out":
                     gd.color="yellow";
-                    varName = "var chart4Data = ";
+                    opVar = "var chart4Data = ";
                     for (Integer node : resultParamsMap.keySet())
                     {
                         for (SmartNodeParams param : resultParamsMap.get(node))
@@ -235,8 +265,8 @@ public class SimulationTestInfo
                     break;
                     
             }
-            gdArray.add(gd);
-            chartData += varName+toJson(gdArray)+";\n";
+            gdOpArray.add(gd);
+            chartData += opVar+toJson(gdOpArray)+";\n";
         }
     
         try

@@ -266,7 +266,7 @@ public class SimulationRunner
     }
     
     private void addTestLog() {
-        SimulationTestInfo info = mEnv.testSuite.getSimulationTest(getClass().getSimpleName());
+        SimulationTestInfo info = mEnv.testSuite.getSimulationTest(mCurrentTest.getClass().getSimpleName());
         if (info == null) {
             info = new SimulationTestInfo();
             info.name = mCurrentTest.getClass().getSimpleName();;
@@ -277,7 +277,7 @@ public class SimulationRunner
             info.ipGraphColumns = mCurrentTest.inputGraphData();
             info.graphColumns = mCurrentTest.graphColumns();
             info.profile= mProfile;
-            mEnv.testSuite.addSimulationTest(mCurrentTest.getTestDescription(),info);
+            mEnv.testSuite.addSimulationTest(mCurrentTest.getClass().getSimpleName(),info);
             //info.nodeParams.add(new SmartNodeParams());
             for(int node : mNodes)
             {
@@ -311,7 +311,7 @@ public class SimulationRunner
     }
     
     private void addNTTestInfo() {
-        SimulationTestInfo info = mEnv.testSuite.getSimulationTest(mCurrentTest.getTestDescription());
+        SimulationTestInfo info = mEnv.testSuite.getSimulationTest(mCurrentTest.getClass().getSimpleName());
         if (info == null) {
             info = new SimulationTestInfo();
             info.name = mCurrentTest.getClass().getSimpleName();;
@@ -322,7 +322,7 @@ public class SimulationRunner
             info.inputCcuState = appState;
             info.graphColumns = mCurrentTest.graphColumns();
             info.profile= mProfile;
-            mEnv.testSuite.addSimulationTest(mCurrentTest.getTestDescription(),info);
+            mEnv.testSuite.addSimulationTest(mCurrentTest.getClass().getSimpleName(),info);
         }
     }
     private void fillNodes() {

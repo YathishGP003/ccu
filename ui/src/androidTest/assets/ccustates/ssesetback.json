@@ -86,13 +86,13 @@
   } ],
   "floors" : [ {
     "mFloorId" : 0,
-    "mFloorName" : "floorsseCool",
+    "mFloorName" : "floorsse",
     "mKinveyWebId" : "",
     "mRoomList" : [ {
       "mZoneProfiles" : [ {
         "clazz" : "a75f.io.bo.building.SingleStageProfile",
         "logicalMap" : {
-          "7002" : {
+          "7005" : {
             "logicalMap" : {
               "RELAY_ONE" : "COOLING",
               "RELAY_TWO" : "FAN"
@@ -101,10 +101,10 @@
           }
         },
         "profileConfiguration" : {
-          "7002" : {
+          "7005" : {
             "clazz" : "a75f.io.bo.building.BaseProfileConfiguration",
             "inputs" : [ ],
-            "nodeAddress" : 7002,
+            "nodeAddress" : 7005,
             "nodeType" : "SMART_NODE",
             "outputs" : [ {
               "uuid" : "cbdc7da4-debf-4744-9ec1-a4191d7c81be",
@@ -121,7 +121,7 @@
             }, {
               "uuid" : "a217d4dc-3682-4600-b477-0f9353142428",
               "mOutputRelayActuatorType" : "NormallyOpen",
-              "address" : 7002,
+              "address" : 7005,
               "name" : "fa",
               "port" : "RELAY_TWO",
               "logicalValue" : 0,
@@ -145,54 +145,54 @@
             "etmm" : 30,
             "sthh" : 8,
             "stmm" : 0,
-            "val" : 75
+            "val" : 70
           }, {
             "day" : 1,
             "ethh" : 17,
             "etmm" : 30,
             "sthh" : 8,
             "stmm" : 0,
-            "val" : 75
+            "val" : 70
           }, {
             "day" : 2,
             "ethh" : 17,
             "etmm" : 30,
             "sthh" : 8,
             "stmm" : 0,
-            "val" : 75
+            "val" : 70
           }, {
             "day" : 3,
             "ethh" : 17,
             "etmm" : 30,
             "sthh" : 8,
             "stmm" : 0,
-            "val" : 75
+            "val" : 70
           }, {
-            "day" : 4,
+            "day" : 3,
             "ethh" : 17,
             "etmm" : 30,
             "sthh" : 8,
             "stmm" : 0,
-            "val" : 75
-          },{
+            "val" : 70
+          }, {
             "day" : 5,
             "ethh" : 17,
             "etmm" : 30,
             "sthh" : 8,
             "stmm" : 0,
-            "val" : 75
+            "val" : 70
           }, {
             "day" : 6,
             "ethh" : 17,
             "etmm" : 30,
             "sthh" : 8,
             "stmm" : 0,
-            "val" : 75
-          } ]
+            "val" : 70
+          }]
         } ]
       } ],
-      "roomName" : "roomsseCool",
-      "nodes" : [ 7002 ],
+      "roomName" : "roomsse-setback",
+      "nodes" : [ 7005 ],
       "tuningParameters" : { }
     } ]
   } ],
@@ -280,6 +280,6 @@
       } ]
     }
   },
-  "smartNodeAddressBand" : 7002,
+  "smartNodeAddressBand" : 7005,
   "title" : ""
 }

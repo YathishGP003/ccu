@@ -153,12 +153,20 @@ public class SimulationTestInfo
         
         String ipVar = "var inputData = ";
         ArrayList<GraphData> gdIpArray = new ArrayList<>();
+        int lineCount = 0;
         for(String ip : ipGraphColumns.keySet()) {
             GraphData gd = new GraphData();
             gd.type="line";
+            lineCount++;
             int xCounter = 0;
             for ( Float val : ipGraphColumns.get(ip)) {
-                if (gd.dataPoints.size() == 0)
+                if (gd.dataPoints.size() == 0 && lineCount == 1)
+                {
+                    gd.dataPoints.add(new DataPoint(xCounter, val, ip));
+                }else if (gd.dataPoints.size() == 1 && lineCount == 2)
+                {
+                    gd.dataPoints.add(new DataPoint(xCounter, val, ip));
+                }else if (gd.dataPoints.size() == 2 && lineCount == 3)
                 {
                     gd.dataPoints.add(new DataPoint(xCounter, val, ip));
                 }
@@ -170,7 +178,7 @@ public class SimulationTestInfo
             }
             //extend the graph by copying y-value of last data point
             while (gd.dataPoints.size() < profile.getResultCount()) {
-                Float lastVal = gd.dataPoints.get(gd.dataPoints.size()).y;
+                Float lastVal = gd.dataPoints.get(gd.dataPoints.size()-1).y;
                 gd.dataPoints.add(new DataPoint(xCounter, lastVal));
                 xCounter += (profile.resultPeriodSecs / 60);
             }

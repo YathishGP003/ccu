@@ -38,9 +38,9 @@ public class SSEDeadbandTest extends BaseSimulationTest
 {
     SimulationRunner mRunner = null;
     int runCounter = 0;
-    Float testDeadBandVal;
+    int testDeadBandVal;
     
-    Float[] deadBandValArray = {0f,0f,2f,2f,1f,1f,3f,3f};
+    int[] deadBandValArray = {0,0,4,4,1,1,3,3};
     
     @Before
     public void setUp() {
@@ -140,12 +140,12 @@ public class SSEDeadbandTest extends BaseSimulationTest
     
         while (rt.size() < maxRunCount)
         {
-            Float lastVal = rt.get(rt.size());
+            Float lastVal = rt.get(rt.size()-1);
             rt.add(lastVal);
         }
-        while (rt.size() < maxRunCount)
+        while (st.size() < maxRunCount)
         {
-            Float lastVal = st.get(rt.size());
+            Float lastVal = st.get(rt.size()-1);
             st.add(lastVal);
         }
         
@@ -153,8 +153,8 @@ public class SSEDeadbandTest extends BaseSimulationTest
         graphData.put("set_temperature",st);
     
         ArrayList<Float> db = new ArrayList<>();
-        for (Float val : deadBandValArray) {
-            db.add(val);
+        for (int val : deadBandValArray) {
+            db.add((float)val);
         }
         graphData.put("cooling-deadband",db);
         return graphData;

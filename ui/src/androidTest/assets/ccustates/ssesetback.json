@@ -138,58 +138,8 @@
         "overrideMillis" : 0,
         "overrideType" : "NONE",
         "scheduleMode" : "SystemSchedule",
-        "schedules" : [ {
-          "days" : [ {
-            "day" : 0,
-            "ethh" : 17,
-            "etmm" : 30,
-            "sthh" : 8,
-            "stmm" : 0,
-            "val" : 70
-          }, {
-            "day" : 1,
-            "ethh" : 17,
-            "etmm" : 30,
-            "sthh" : 8,
-            "stmm" : 0,
-            "val" : 70
-          }, {
-            "day" : 2,
-            "ethh" : 17,
-            "etmm" : 30,
-            "sthh" : 8,
-            "stmm" : 0,
-            "val" : 70
-          }, {
-            "day" : 3,
-            "ethh" : 17,
-            "etmm" : 30,
-            "sthh" : 8,
-            "stmm" : 0,
-            "val" : 70
-          }, {
-            "day" : 3,
-            "ethh" : 17,
-            "etmm" : 30,
-            "sthh" : 8,
-            "stmm" : 0,
-            "val" : 70
-          }, {
-            "day" : 5,
-            "ethh" : 17,
-            "etmm" : 30,
-            "sthh" : 8,
-            "stmm" : 0,
-            "val" : 70
-          }, {
-            "day" : 6,
-            "ethh" : 17,
-            "etmm" : 30,
-            "sthh" : 8,
-            "stmm" : 0,
-            "val" : 70
-          }]
-        } ]
+        "schedules" : [
+         ]
       } ],
       "roomName" : "roomsse-setback",
       "nodes" : [ 7005 ],

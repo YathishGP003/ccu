@@ -145,7 +145,7 @@ public class SSEDeadbandTest extends BaseSimulationTest
         }
         while (st.size() < maxRunCount)
         {
-            Float lastVal = st.get(rt.size()-1);
+            Float lastVal = st.get(st.size()-1);
             st.add(lastVal);
         }
         

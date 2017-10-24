@@ -1,4 +1,7 @@
 {
+  "testTimeHH" : 1,
+  "testTimeMM" : 29,
+  "testTimeDoW": 0,
   "controlMote" : {
     "controlMoteOutputInput" : "Control Mote settings go here"
   },

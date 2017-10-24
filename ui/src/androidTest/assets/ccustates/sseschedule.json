@@ -1,4 +1,7 @@
 {
+  "testTimeHH" : 1,
+  "testTimeMM" : 29,
+  "testTimeDoW": 0,
   "controlMote" : {
     "controlMoteOutputInput" : "Control Mote settings go here"
   },
@@ -152,43 +155,7 @@
         "overrideMillis" : 0,
         "overrideType" : "NONE",
         "scheduleMode" : "SystemSchedule",
-        "schedules" : [ {
-          "days" : [ {
-            "day" : 0,
-            "ethh" : 17,
-            "etmm" : 30,
-            "sthh" : 8,
-            "stmm" : 0,
-            "val" : 72
-          }, {
-            "day" : 1,
-            "ethh" : 17,
-            "etmm" : 30,
-            "sthh" : 8,
-            "stmm" : 0,
-            "val" : 72
-          }, {
-            "day" : 2,
-            "ethh" : 17,
-            "etmm" : 30,
-            "sthh" : 8,
-            "stmm" : 0,
-            "val" : 72
-          }, {
-            "day" : 3,
-            "ethh" : 17,
-            "etmm" : 30,
-            "sthh" : 8,
-            "stmm" : 0,
-            "val" : 72
-          }, {
-            "day" : 4,
-            "ethh" : 17,
-            "etmm" : 30,
-            "sthh" : 8,
-            "stmm" : 0,
-            "val" : 72
-          } ]
+        "schedules" : []
         } ]
       } ],
       "roomName" : "roomsse-schedule",

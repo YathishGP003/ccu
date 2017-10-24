@@ -105,7 +105,7 @@ public class SSECoolingTest extends BaseSimulationTest
 			}
 			if (mRunner.getLoopCounter() == testLog.profile.getResultCount())
 			{
-				result.analysis += "<p>Verified that heating on relay_1 and fan on digital_2 are turned on when the room temperature is below set temperature by" + "heating deadband config.</p> ";
+				result.analysis += "<p>Verified that heating on relay_1 and fan on digital_2 are turned on when the room temperature is above set temperature by" + "deadband value.</p> ";
 			}
 		}
 	}

@@ -1,4 +1,8 @@
 {
+
+  "testTimeHH" : 1,
+  "testTimeMM" : 29,
+  "testTimeDoW": 0,
   "systemProfile" : {
     "schedule" : {
       "days" : [ ]

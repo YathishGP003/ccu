@@ -20,6 +20,35 @@ public class CCUApplication
     private ArrayList<Schedule> mDefaultLightSchedule = new ArrayList<Schedule>();
     private ArrayList<Schedule> mDefaultTemperatureSchedule = new ArrayList<Schedule>();
     
+    private int mTestTimeHH;
+    private int mTestTimeMM;
+    private int mTestTimeDoW;
+    
+    public int getTestTimeHH()
+    {
+        return mTestTimeHH;
+    }
+    public void setTestTimeHH(int testTimeHH)
+    {
+        this.mTestTimeHH = testTimeHH;
+    }
+    public int getTestTimeMM()
+    {
+        return mTestTimeMM;
+    }
+    public void setTestTimeMM(int testTimeMM)
+    {
+        this.mTestTimeMM = testTimeMM;
+    }
+    public int getTestTimeDoW()
+    {
+        return mTestTimeDoW;
+    }
+    public void setTestTimeDoW(int testTimeDoW)
+    {
+        this.mTestTimeDoW = testTimeDoW;
+    }
+    
     
     /*
         Named Schedules

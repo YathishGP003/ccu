@@ -42,8 +42,9 @@ public class SingleStageProfile extends ZoneProfile
                    .setRoomTemperature(roomTemperature);
         
         float setTemperature = (float) regularUpdateMessage.update.setTemperature.get();
-        if (setTemperature > 0)
+        if (setTemperature > 0.0f)
         {
+            
             this.setOverride(60 * 120 * 60 * 1000, OverrideType.RELEASE_TIME,  setTemperature  / 2);
         }
         

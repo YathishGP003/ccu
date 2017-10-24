@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import junit.framework.Assert;
 
+import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONArray;
@@ -35,6 +36,7 @@ import java.util.List;
 import java.util.Locale;
 
 import a75f.io.bo.building.CCUApplication;
+import a75f.io.logic.L;
 
 import static a75f.io.logic.L.ccu;
 import static java.lang.Thread.sleep;
@@ -92,6 +94,7 @@ public class SimulationRunner
         loopCounter = 0;
         mCurrentTest.customizeTestData(appState);
         injectState(appState);
+        DateTime currentSystemTime = new DateTime(System.currentTimeMillis());
         resultTime = System.currentTimeMillis();
         threadSleep(45);
         addTestLog();
@@ -100,7 +103,7 @@ public class SimulationRunner
             //injectSimulation(simData);
             SimulationParams params  = new SimulationParams().build(simData);
             String paramsJson = params.convertToJsonString();
-            executePost(SMARTNODE_STATE_REST_URL+simData[1].trim(), getHttpPostParams(paramsJson) );
+            executePost(SMARTNODE_STATE_REST_URL + simData[1].trim(), getHttpPostParams(paramsJson));
             threadSleep(mProfile.resultPeriodSecs);
             loopCounter++;
             addTestLog();
@@ -109,6 +112,19 @@ public class SimulationRunner
         
         runResultLoop();
     }
+    
+    public void setDate(DateTime dateTime)
+    {
+        try {
+            Process process = Runtime.getRuntime().exec("su");
+            DataOutputStream os = new DataOutputStream(process.getOutputStream());
+            
+            os.writeBytes("date -s 20120419.024012; \n");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
     
     private void runResultLoop() {
         while (++loopCounter <= mProfile.resultCount)
@@ -123,13 +139,7 @@ public class SimulationRunner
     }
     
     private void injectState(CCUApplication state) {
-        CCUApplication currentState = ccu();
-        currentState.setTitle(state.getTitle());
-        currentState.setFloors(state.getFloors());
-        currentState.setSmartNodeAddressBand(state.getSmartNodeAddressBand());
-        currentState.systemProfile = state.systemProfile;
-        currentState.controlMote = state.controlMote;
-        
+        L.saveCCUState(state);
     }
     
     private void injectSimulation(String[] testVals)

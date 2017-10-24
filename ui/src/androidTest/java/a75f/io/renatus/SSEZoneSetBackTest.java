@@ -42,7 +42,7 @@ public class SSEZoneSetBackTest extends BaseSimulationTest
 	
 	@Before
 	public void setUp() {
-		mRunner =  new SimulationRunner(this, new SamplingProfile(1, 180));
+		mRunner =  new SimulationRunner(this, new SamplingProfile(1, 120));
 	}
 	
 	@After
@@ -52,7 +52,7 @@ public class SSEZoneSetBackTest extends BaseSimulationTest
 	@Override
 	public String getTestDescription() {
 		return "Tests various setback values under constant room_temperature and set temperature." +
-		       "Creates a schedule to start cooling 30 minutes later.Relay1 and Relay2 outputs of smartnode 7003 configured as Cooling and Fan respectively." +
+		       "Creates a schedule to start cooling 30 minutes later.Relay1 and Relay2 outputs of smartnode 7005 configured as Cooling and Fan respectively." +
 		       "Room temperature is kept above set temperature. Activation of cooling is monitored for different setback values.";
 	}
 	
@@ -133,7 +133,7 @@ public class SSEZoneSetBackTest extends BaseSimulationTest
 			String[] simData = ip.get(simIndex);
 			SimulationParams params = new SimulationParams().build(simData);
 			rt.add(params.room_temperature);
-			st.add(params.set_temperature);
+			st.add(70.0f);
 		}
 		
 		while (rt.size() < maxRunCount)
@@ -143,7 +143,7 @@ public class SSEZoneSetBackTest extends BaseSimulationTest
 		}
 		while (st.size() < maxRunCount)
 		{
-			Float lastVal = st.get(rt.size()-1);
+			Float lastVal = st.get(st.size()-1);
 			st.add(lastVal);
 		}
 		
@@ -170,13 +170,13 @@ public class SSEZoneSetBackTest extends BaseSimulationTest
 		{
 			DateTime sStart = new DateTime(System.currentTimeMillis() + 30 * 60000, DateTimeZone.getDefault());
 			DateTime sEnd = new DateTime(System.currentTimeMillis() + 60 * 60000, DateTimeZone.getDefault());
-			ArrayList<Schedule> schedules = app.getFloors().get(0).mRoomList.get(0).mZoneProfiles
-					                                .get(0).getSchedules();
-			Day testDay = schedules.get(0).getDays().get(sStart.getDayOfWeek() - 1);
+			ArrayList<Schedule> schedules = app.getDefaultTemperatureSchedule();
+            Day testDay = schedules.get(0).getDays().get(sStart.getDayOfWeek() - 1);
 			testDay.setSthh(sStart.getHourOfDay());
 			testDay.setEthh(sEnd.getHourOfDay());
 			testDay.setStmm(sStart.getMinuteOfHour());
 			testDay.setEtmm(sEnd.getMinuteOfHour());
+            testDay.setVal((short)70);
 		}
 		
 		AlgoTuningParameters algoMap = ccu().getDefaultCCUTuners();

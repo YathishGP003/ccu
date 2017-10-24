@@ -1,5 +1,7 @@
 package a75f.io.logic;
 
+import android.util.Log;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.ArrayList;
@@ -174,10 +176,12 @@ class LZoneProfile
     
     public static short resolveAnyValue(ZoneProfile zoneProfile)
     {
+        Log.i(TAG, "This should be getting the next schedule, not 0");
         if(zoneProfile.hasSchedules())
         {
             Schedule schedule = zoneProfile.getSchedules().get(0);
             Day day = schedule.getDays().get(0);
+            Log.i(TAG, "Using Day.getVal(): " + day.getVal());
             return day.getVal();
         }
         

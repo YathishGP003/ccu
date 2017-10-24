@@ -165,8 +165,8 @@ public class LightControlSimulationTest extends BaseSimulationTest
         Day testDay = schedules.get(0).getDays().get(sStart.getDayOfWeek()-1);
         testDay.setSthh(sStart.getHourOfDay());
         testDay.setEthh(sEnd.getHourOfDay());
-        testDay.setStmm(sStart.getMinuteOfHour()+1); //seconds are rounded-off by the scheduler , so adding a minute of padding to avoid scheduler firing earlier than 15 mins
-        testDay.setEtmm(sEnd.getMinuteOfHour());
+        testDay.setStmm(sStart.getMinuteOfHour());
+        testDay.setEtmm(sEnd.getMinuteOfHour()+1); //seconds are rounded-off by the scheduler , so adding a minute of padding to avoid scheduler firing earlier than 15 mins
     }
     
     @Override

@@ -280,4 +280,9 @@ public class L
     {
         LocalStorage.setIsUserRegistered(userRegistered);
     }
+    public static void saveCCUState(CCUApplication state)
+    {
+        Globals.getInstance().setCCU(state);
+        saveCCUState();
+    }
 }

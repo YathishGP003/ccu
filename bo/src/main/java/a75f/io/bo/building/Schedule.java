@@ -177,12 +177,8 @@ public class Schedule
     
     
     @JsonIgnore
-    public long getNextScheduleTransistionTime() throws Exception
+    public Day getNextScheduleTransistion()
     {
-        if (!isValidSchedule())
-        {
-            throw new Exception("Schedule is invalid");
-        }
         
 		/* If intervals are not built */
         if (mScheduledIntervals.isEmpty() && days != null && days.size() > 0)
@@ -196,14 +192,13 @@ public class Schedule
             //Before start of first
             if (now.isBefore(interval.getStart()))
             {
-                return interval.getStartMillis();
+                return days.get(i);
             }
-            else if (interval.contains(now))
-            {
-                return interval.getEndMillis();
-            }
+          
         }
-        return -1;
+        
+        //TODO: ask deep about this, what to do if there is only one schedule.
+        return days.get(0);
     }
     
     

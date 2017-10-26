@@ -90,6 +90,7 @@ public class SimulationRunner
         if (appState == null || csvDataList == null)
         {
             addNTTestInfo();
+            return;
         }
         loopCounter = 0;
         mCurrentTest.customizeTestData(appState);

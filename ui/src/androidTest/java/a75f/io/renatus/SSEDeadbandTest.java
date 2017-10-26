@@ -44,7 +44,7 @@ public class SSEDeadbandTest extends BaseSimulationTest
     
     @Before
     public void setUp() {
-        mRunner =  new SimulationRunner(this, new SamplingProfile(1, 180));
+        mRunner =  new SimulationRunner(this, new SamplingProfile(1, 120));
     }
     
     @After
@@ -172,13 +172,13 @@ public class SSEDeadbandTest extends BaseSimulationTest
         {
             DateTime sStart = new DateTime(System.currentTimeMillis(), DateTimeZone.getDefault());
             DateTime sEnd = new DateTime(System.currentTimeMillis() + 30 * 60000, DateTimeZone.getDefault());
-            ArrayList<Schedule> schedules = app.getFloors().get(0).mRoomList.get(0).mZoneProfiles
-                                                    .get(0).getSchedules();
+            ArrayList<Schedule> schedules = app.getDefaultTemperatureSchedule();
             Day testDay = schedules.get(0).getDays().get(sStart.getDayOfWeek() - 1);
             testDay.setSthh(sStart.getHourOfDay());
             testDay.setEthh(sEnd.getHourOfDay());
             testDay.setStmm(sStart.getMinuteOfHour());
             testDay.setEtmm(sEnd.getMinuteOfHour());
+            testDay.setVal((short)70);
         }
     
         AlgoTuningParameters algoMap = ccu().getDefaultCCUTuners();

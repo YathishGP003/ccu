@@ -3,31 +3,43 @@ var inputData = [ {
   dataPoints : [ {
     indexLabel : "set_temperature",
     x : 0,
-    y : 70.0
+    y : 72.0
   }, {
     indexLabel : null,
-    x : 2,
-    y : 70.0
-  }, {
-    indexLabel : null,
-    x : 4,
-    y : 70.0
+    x : 3,
+    y : 72.0
   }, {
     indexLabel : null,
     x : 6,
-    y : 70.0
+    y : 72.0
   }, {
     indexLabel : null,
-    x : 8,
-    y : 70.0
-  }, {
-    indexLabel : null,
-    x : 10,
-    y : 70.0
+    x : 9,
+    y : 72.0
   }, {
     indexLabel : null,
     x : 12,
-    y : 70.0
+    y : 73.0
+  }, {
+    indexLabel : null,
+    x : 15,
+    y : 73.0
+  }, {
+    indexLabel : null,
+    x : 18,
+    y : 72.0
+  }, {
+    indexLabel : null,
+    x : 21,
+    y : 72.0
+  }, {
+    indexLabel : null,
+    x : 24,
+    y : 72.0
+  }, {
+    indexLabel : null,
+    x : 27,
+    y : 72.0
   } ],
   type : "line"
 }, {
@@ -35,95 +47,63 @@ var inputData = [ {
   dataPoints : [ {
     indexLabel : null,
     x : 0,
-    y : 74.0
+    y : 73.0
   }, {
     indexLabel : "room_temperature",
-    x : 2,
-    y : 74.0
-  }, {
-    indexLabel : null,
-    x : 4,
-    y : 74.0
+    x : 3,
+    y : 72.0
   }, {
     indexLabel : null,
     x : 6,
-    y : 74.0
+    y : 71.0
   }, {
     indexLabel : null,
-    x : 8,
-    y : 74.0
-  }, {
-    indexLabel : null,
-    x : 10,
-    y : 74.0
+    x : 9,
+    y : 70.0
   }, {
     indexLabel : null,
     x : 12,
-    y : 74.0
-  } ],
-  type : "line"
-}, {
-  color : null,
-  dataPoints : [ {
-    indexLabel : null,
-    x : 0,
-    y : 5.0
+    y : 71.0
   }, {
     indexLabel : null,
-    x : 2,
-    y : 5.0
-  }, {
-    indexLabel : "zone-setback",
-    x : 4,
-    y : 4.0
+    x : 15,
+    y : 72.0
   }, {
     indexLabel : null,
-    x : 6,
-    y : 4.0
+    x : 18,
+    y : 76.0
   }, {
     indexLabel : null,
-    x : 8,
-    y : 6.0
+    x : 21,
+    y : 70.0
   }, {
     indexLabel : null,
-    x : 10,
-    y : 6.0
+    x : 24,
+    y : 70.0
   }, {
     indexLabel : null,
-    x : 12,
-    y : 3.0
-  }, {
-    indexLabel : null,
-    x : 14,
-    y : 3.0
+    x : 27,
+    y : 70.0
   } ],
   type : "line"
 } ];
 var chart1Data = [ {
   color : "red",
   dataPoints : [ {
-    indexLabel : "7005",
+    indexLabel : "7001",
     x : 0,
     y : 0.0
   }, {
     indexLabel : null,
-    x : 2,
+    x : 3,
     y : 0.0
-  }, {
-    indexLabel : null,
-    x : 4,
-    y : 1.0
   }, {
     indexLabel : null,
     x : 6,
-    y : 1.0
-  }, {
-    indexLabel : null,
-    x : 8,
     y : 0.0
   }, {
     indexLabel : null,
-    x : 10,
+    x : 9,
     y : 0.0
   }, {
     indexLabel : null,
@@ -131,36 +111,48 @@ var chart1Data = [ {
     y : 0.0
   }, {
     indexLabel : null,
-    x : 14,
-    y : 1.0
+    x : 15,
+    y : 0.0
+  }, {
+    indexLabel : null,
+    x : 18,
+    y : 0.0
+  }, {
+    indexLabel : null,
+    x : 21,
+    y : 0.0
+  }, {
+    indexLabel : null,
+    x : 24,
+    y : 0.0
+  }, {
+    indexLabel : null,
+    x : 27,
+    y : 0.0
+  }, {
+    indexLabel : null,
+    x : 30,
+    y : 0.0
   } ],
   type : "line"
 } ];
 var chart2Data = [ {
   color : "green",
   dataPoints : [ {
-    indexLabel : "7005",
+    indexLabel : "7001",
     x : 0,
     y : 0.0
   }, {
     indexLabel : null,
-    x : 2,
+    x : 3,
     y : 0.0
-  }, {
-    indexLabel : null,
-    x : 4,
-    y : 1.0
   }, {
     indexLabel : null,
     x : 6,
-    y : 1.0
-  }, {
-    indexLabel : null,
-    x : 8,
     y : 0.0
   }, {
     indexLabel : null,
-    x : 10,
+    x : 9,
     y : 0.0
   }, {
     indexLabel : null,
@@ -168,24 +160,40 @@ var chart2Data = [ {
     y : 0.0
   }, {
     indexLabel : null,
-    x : 14,
-    y : 1.0
+    x : 15,
+    y : 0.0
+  }, {
+    indexLabel : null,
+    x : 18,
+    y : 0.0
+  }, {
+    indexLabel : null,
+    x : 21,
+    y : 0.0
+  }, {
+    indexLabel : null,
+    x : 24,
+    y : 0.0
+  }, {
+    indexLabel : null,
+    x : 27,
+    y : 0.0
+  }, {
+    indexLabel : null,
+    x : 30,
+    y : 0.0
   } ],
   type : "line"
 } ];
 var chart3Data = [ {
   color : "blue",
   dataPoints : [ {
-    indexLabel : "7005",
+    indexLabel : "7001",
     x : 0,
     y : 0.0
   }, {
     indexLabel : null,
-    x : 2,
-    y : 0.0
-  }, {
-    indexLabel : null,
-    x : 4,
+    x : 3,
     y : 0.0
   }, {
     indexLabel : null,
@@ -193,11 +201,7 @@ var chart3Data = [ {
     y : 0.0
   }, {
     indexLabel : null,
-    x : 8,
-    y : 0.0
-  }, {
-    indexLabel : null,
-    x : 10,
+    x : 9,
     y : 0.0
   }, {
     indexLabel : null,
@@ -205,7 +209,27 @@ var chart3Data = [ {
     y : 0.0
   }, {
     indexLabel : null,
-    x : 14,
+    x : 15,
+    y : 0.0
+  }, {
+    indexLabel : null,
+    x : 18,
+    y : 0.0
+  }, {
+    indexLabel : null,
+    x : 21,
+    y : 0.0
+  }, {
+    indexLabel : null,
+    x : 24,
+    y : 0.0
+  }, {
+    indexLabel : null,
+    x : 27,
+    y : 0.0
+  }, {
+    indexLabel : null,
+    x : 30,
     y : 0.0
   } ],
   type : "line"
@@ -213,16 +237,12 @@ var chart3Data = [ {
 var chart4Data = [ {
   color : "yellow",
   dataPoints : [ {
-    indexLabel : "7005",
+    indexLabel : "7001",
     x : 0,
     y : 0.0
   }, {
     indexLabel : null,
-    x : 2,
-    y : 0.0
-  }, {
-    indexLabel : null,
-    x : 4,
+    x : 3,
     y : 0.0
   }, {
     indexLabel : null,
@@ -230,11 +250,7 @@ var chart4Data = [ {
     y : 0.0
   }, {
     indexLabel : null,
-    x : 8,
-    y : 0.0
-  }, {
-    indexLabel : null,
-    x : 10,
+    x : 9,
     y : 0.0
   }, {
     indexLabel : null,
@@ -242,7 +258,27 @@ var chart4Data = [ {
     y : 0.0
   }, {
     indexLabel : null,
-    x : 14,
+    x : 15,
+    y : 0.0
+  }, {
+    indexLabel : null,
+    x : 18,
+    y : 0.0
+  }, {
+    indexLabel : null,
+    x : 21,
+    y : 0.0
+  }, {
+    indexLabel : null,
+    x : 24,
+    y : 0.0
+  }, {
+    indexLabel : null,
+    x : 27,
+    y : 0.0
+  }, {
+    indexLabel : null,
+    x : 30,
     y : 0.0
   } ],
   type : "line"

@@ -55,6 +55,7 @@ public class SimulationTestInfo
     
     public String getHtml() {
         String resultHtml;
+        String resultDetails="";
         if (simulationResult.status == TestResult.NT)
         {
             resultHtml = "NT";
@@ -63,10 +64,9 @@ public class SimulationTestInfo
         {
             resultHtml = simulationResult.status == TestResult.PASS ? "<span style=color:green>PASS</span>"
                                     : "<span style=color:red>FAIL</span>";
+            resultDetails = "<a href="+name+".html>"+"......... Graphs and Logs "+"</a>";
         }
         
-        String resultDetails = "<a href="+name+".html>"+"......... Graphs and Logs "+"</a>";
-    
         String testInfoRow = "<tr style=color:blue>"
                                      .concat("<td>").concat(" "+name+" ").concat("</td>")
                                      .concat("<td>").concat(description).concat("</td>")

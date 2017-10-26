@@ -57,8 +57,8 @@ public class SimulationTestSuite
             
             testReport = testReport.concat("</table>");
             
-            String fileName = DateFormat.format("dd_MM_yyyy_hh_mm_ss", System.currentTimeMillis()).toString();
-            File file = new File(path+"/simulation/", fileName + "_summary.html");
+            //String fileName = DateFormat.format("dd_MM_yyyy_hh_mm_ss", System.currentTimeMillis()).toString();
+            File file = new File(path+"/simulation/", "simulation_summary.html");
             String html = "<html><head><title>Simulation Test Report</title></head><body>"+testReport+"</body></html>";
             
             

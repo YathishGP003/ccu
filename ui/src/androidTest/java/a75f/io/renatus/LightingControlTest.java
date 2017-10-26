@@ -29,7 +29,7 @@ import static a75f.io.renatus.framework.GraphColumns.Relay2_Out;
  * Created by samjithsadasivan on 9/22/17.
  */
 
-public class LightControlSimulationTest extends BaseSimulationTest
+public class LightingControlTest extends BaseSimulationTest
 {
     SimulationRunner mRunner = null;
     

@@ -141,58 +141,7 @@
         "overrideMillis" : 0,
         "overrideType" : "NONE",
         "scheduleMode" : "SystemSchedule",
-        "schedules" : [ {
-          "days" : [ {
-            "day" : 0,
-            "ethh" : 17,
-            "etmm" : 30,
-            "sthh" : 8,
-            "stmm" : 0,
-            "val" : 75
-          }, {
-            "day" : 1,
-            "ethh" : 17,
-            "etmm" : 30,
-            "sthh" : 8,
-            "stmm" : 0,
-            "val" : 75
-          }, {
-            "day" : 2,
-            "ethh" : 17,
-            "etmm" : 30,
-            "sthh" : 8,
-            "stmm" : 0,
-            "val" : 75
-          }, {
-            "day" : 3,
-            "ethh" : 17,
-            "etmm" : 30,
-            "sthh" : 8,
-            "stmm" : 0,
-            "val" : 75
-          }, {
-            "day" : 3,
-            "ethh" : 17,
-            "etmm" : 30,
-            "sthh" : 8,
-            "stmm" : 0,
-            "val" : 75
-          }, {
-            "day" : 5,
-            "ethh" : 17,
-            "etmm" : 30,
-            "sthh" : 8,
-            "stmm" : 0,
-            "val" : 75
-          }, {
-            "day" : 6,
-            "ethh" : 17,
-            "etmm" : 30,
-            "sthh" : 8,
-            "stmm" : 0,
-            "val" : 75
-          }]
-        } ]
+        "schedules" : [ ]
       } ],
       "roomName" : "roomsse-deadband",
       "nodes" : [ 7003 ],

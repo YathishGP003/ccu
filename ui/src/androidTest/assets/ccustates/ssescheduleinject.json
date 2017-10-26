@@ -1,7 +1,4 @@
 {
-  "testTimeHH" : 1,
-  "testTimeMM" : 29,
-  "testTimeDoW": 0,
   "controlMote" : {
     "controlMoteOutputInput" : "Control Mote settings go here"
   },
@@ -109,7 +106,7 @@
       "mZoneProfiles" : [ {
         "clazz" : "a75f.io.bo.building.SingleStageProfile",
         "logicalMap" : {
-          "7004" : {
+          "7007" : {
             "logicalMap" : {
               "RELAY_ONE" : "COOLING",
               "RELAY_TWO" : "FAN"
@@ -118,10 +115,10 @@
           }
         },
         "profileConfiguration" : {
-          "7004" : {
+          "7007" : {
             "clazz" : "a75f.io.bo.building.BaseProfileConfiguration",
             "inputs" : [ ],
-            "nodeAddress" : 7004,
+            "nodeAddress" : 7007,
             "nodeType" : "SMART_NODE",
             "outputs" : [ {
               "uuid" : "cbdc7da4-debf-4744-9ec1-a4191d7c81be",
@@ -138,7 +135,7 @@
             }, {
               "uuid" : "a217d4dc-3682-4600-b477-0f9353142428",
               "mOutputRelayActuatorType" : "NormallyOpen",
-              "address" : 7004,
+              "address" : 7007,
               "name" : "fa",
               "port" : "RELAY_TWO",
               "logicalValue" : 0,
@@ -156,96 +153,96 @@
         "overrideType" : "NONE",
         "scheduleMode" : "SystemSchedule",
         "schedules" : []
-      } ],
-      "roomName" : "roomsse-schedule",
-      "nodes" : [ 7004 ],
-      "tuningParameters" : { }
+    } ],
+    "roomName" : "sn-scheduleinject",
+    "nodes" : [ 7007 ],
+    "tuningParameters" : { }
   } ]
 } ],
-  "lcmnamedSchedules" : {
-    "LCM Named Schedule 100" : {
-      "name" : "LCM Named Schedule 100",
-      "schedule" : [ {
-        "days" : [ {
-          "day" : 0,
-          "ethh" : 17,
-          "etmm" : 30,
-          "sthh" : 8,
-          "stmm" : 0,
-          "val" : 100
-        }, {
-          "day" : 1,
-          "ethh" : 17,
-          "etmm" : 30,
-          "sthh" : 8,
-          "stmm" : 0,
-          "val" : 100
-        }, {
-          "day" : 2,
-          "ethh" : 17,
-          "etmm" : 30,
-          "sthh" : 8,
-          "stmm" : 0,
-          "val" : 100
-        }, {
-          "day" : 3,
-          "ethh" : 17,
-          "etmm" : 30,
-          "sthh" : 8,
-          "stmm" : 0,
-          "val" : 100
-        }, {
-          "day" : 4,
-          "ethh" : 17,
-          "etmm" : 30,
-          "sthh" : 8,
-          "stmm" : 0,
-          "val" : 100
-        } ]
-      } ]
-    },
-    "LCM Named Schedule 75" : {
-      "name" : "LCM Named Schedule 75",
-      "schedule" : [ {
-        "days" : [ {
-          "day" : 0,
-          "ethh" : 17,
-          "etmm" : 30,
-          "sthh" : 8,
-          "stmm" : 0,
-          "val" : 75
-        }, {
-          "day" : 1,
-          "ethh" : 17,
-          "etmm" : 30,
-          "sthh" : 8,
-          "stmm" : 0,
-          "val" : 75
-        }, {
-          "day" : 2,
-          "ethh" : 17,
-          "etmm" : 30,
-          "sthh" : 8,
-          "stmm" : 0,
-          "val" : 75
-        }, {
-          "day" : 3,
-          "ethh" : 17,
-          "etmm" : 30,
-          "sthh" : 8,
-          "stmm" : 0,
-          "val" : 75
-        }, {
-          "day" : 4,
-          "ethh" : 17,
-          "etmm" : 30,
-          "sthh" : 8,
-          "stmm" : 0,
-          "val" : 75
-        } ]
-      } ]
-    }
-  },
-  "smartNodeAddressBand" : 7004,
-  "title" : ""
+"lcmnamedSchedules" : {
+"LCM Named Schedule 100" : {
+"name" : "LCM Named Schedule 100",
+"schedule" : [ {
+"days" : [ {
+"day" : 0,
+"ethh" : 17,
+"etmm" : 30,
+"sthh" : 8,
+"stmm" : 0,
+"val" : 100
+}, {
+"day" : 1,
+"ethh" : 17,
+"etmm" : 30,
+"sthh" : 8,
+"stmm" : 0,
+"val" : 100
+}, {
+"day" : 2,
+"ethh" : 17,
+"etmm" : 30,
+"sthh" : 8,
+"stmm" : 0,
+"val" : 100
+}, {
+"day" : 3,
+"ethh" : 17,
+"etmm" : 30,
+"sthh" : 8,
+"stmm" : 0,
+"val" : 100
+}, {
+"day" : 4,
+"ethh" : 17,
+"etmm" : 30,
+"sthh" : 8,
+"stmm" : 0,
+"val" : 100
+} ]
+} ]
+},
+"LCM Named Schedule 75" : {
+"name" : "LCM Named Schedule 75",
+"schedule" : [ {
+"days" : [ {
+"day" : 0,
+"ethh" : 17,
+"etmm" : 30,
+"sthh" : 8,
+"stmm" : 0,
+"val" : 75
+}, {
+"day" : 1,
+"ethh" : 17,
+"etmm" : 30,
+"sthh" : 8,
+"stmm" : 0,
+"val" : 75
+}, {
+"day" : 2,
+"ethh" : 17,
+"etmm" : 30,
+"sthh" : 8,
+"stmm" : 0,
+"val" : 75
+}, {
+"day" : 3,
+"ethh" : 17,
+"etmm" : 30,
+"sthh" : 8,
+"stmm" : 0,
+"val" : 75
+}, {
+"day" : 4,
+"ethh" : 17,
+"etmm" : 30,
+"sthh" : 8,
+"stmm" : 0,
+"val" : 75
+} ]
+} ]
+}
+},
+"smartNodeAddressBand" : 7007,
+"title" : ""
 }

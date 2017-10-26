@@ -12,7 +12,6 @@ import java.util.List;
 import a75f.io.bo.building.CCUApplication;
 import a75f.io.bo.building.Day;
 import a75f.io.bo.building.Schedule;
-import a75f.io.bo.kinvey.AlgoTuningParameters;
 import a75f.io.renatus.framework.BaseSimulationTest;
 import a75f.io.renatus.framework.SamplingProfile;
 import a75f.io.renatus.framework.SimulationParams;
@@ -22,7 +21,6 @@ import a75f.io.renatus.framework.SimulationTestInfo;
 import a75f.io.renatus.framework.SmartNodeParams;
 import a75f.io.renatus.framework.TestResult;
 
-import static a75f.io.logic.L.ccu;
 import static a75f.io.renatus.framework.GraphColumns.Analog1_Out;
 import static a75f.io.renatus.framework.GraphColumns.Analog2_Out;
 import static a75f.io.renatus.framework.GraphColumns.Relay1_Out;
@@ -54,12 +52,12 @@ public class SSEZonePreconditioningTest extends BaseSimulationTest
 	
 	@Override
 	public String getCCUStateFileName() {
-		return "sseschedule.json";
+		return "sseprecondition.json";
 	}
 	
 	@Override
 	public String getSimulationFileName() {
-		return "sseschedule.csv";
+		return "sseprecondition.csv";
 	}
 	
 	@Override
@@ -165,6 +163,6 @@ public class SSEZonePreconditioningTest extends BaseSimulationTest
 		
 		System.out.println("runTest.........");
 		
-		mRunner.runSimulation();
+		//mRunner.runSimulation();
 	}
 }

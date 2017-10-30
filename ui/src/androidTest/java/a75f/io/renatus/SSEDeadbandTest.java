@@ -44,7 +44,7 @@ public class SSEDeadbandTest extends BaseSimulationTest
     
     @Before
     public void setUp() {
-        mRunner =  new SimulationRunner(this, new SamplingProfile(1, 120));
+        mRunner =  new SimulationRunner(this, new SamplingProfile(1, 180));
     }
     
     @After

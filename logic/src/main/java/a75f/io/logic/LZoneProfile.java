@@ -139,7 +139,7 @@ class LZoneProfile
         //If any of the overrides were removed or there wasn't one in the first place
         if (schedulable.getOverrideType() == OverrideType.NONE)
         {
-            if (schedulable.hasSchedules())
+            if (schedulable.hasSchedules() || (L.resolveSchedules(schedulable) != null))
             {
                 return getScheduledVal(schedulable);
             }

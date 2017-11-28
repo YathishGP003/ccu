@@ -1,4 +1,7 @@
 {
+  "testTimeHH" : 1,
+  "testTimeMM" : 29,
+  "testTimeDoW": 0,
   "controlMote" : {
     "controlMoteOutputInput" : "Control Mote settings go here"
   },
@@ -169,6 +172,20 @@
             "val" : 75
           }, {
             "day" : 4,
+            "ethh" : 17,
+            "etmm" : 30,
+            "sthh" : 8,
+            "stmm" : 0,
+            "val" : 75
+          },{
+            "day" : 5,
+            "ethh" : 17,
+            "etmm" : 30,
+            "sthh" : 8,
+            "stmm" : 0,
+            "val" : 75
+          }, {
+            "day" : 6,
             "ethh" : 17,
             "etmm" : 30,
             "sthh" : 8,

@@ -1,4 +1,7 @@
 {
+  "testTimeHH" : 1,
+  "testTimeMM" : 29,
+  "testTimeDoW": 0,
   "controlMote" : {
     "controlMoteOutputInput" : "Control Mote settings go here"
   },
@@ -44,7 +47,21 @@
       "sthh" : 8,
       "stmm" : 0,
       "val" : 100
-    } ]
+    }, {
+      "day" : 5,
+      "ethh" : 17,
+      "etmm" : 30,
+      "sthh" : 8,
+      "stmm" : 0,
+      "val" : 75
+    }, {
+      "day" : 6,
+      "ethh" : 17,
+      "etmm" : 30,
+      "sthh" : 8,
+      "stmm" : 0,
+      "val" : 75
+    }]
   } ],
   "defaultTemperatureSchedule" : [ {
     "days" : [ {
@@ -53,35 +70,35 @@
       "etmm" : 30,
       "sthh" : 8,
       "stmm" : 0,
-      "val" : 75
+      "val" : 72
     }, {
       "day" : 1,
       "ethh" : 17,
       "etmm" : 30,
       "sthh" : 8,
       "stmm" : 0,
-      "val" : 75
+      "val" : 72
     }, {
       "day" : 2,
       "ethh" : 17,
       "etmm" : 30,
       "sthh" : 8,
       "stmm" : 0,
-      "val" : 75
+      "val" : 72
     }, {
       "day" : 3,
       "ethh" : 17,
       "etmm" : 30,
       "sthh" : 8,
       "stmm" : 0,
-      "val" : 75
+      "val" : 72
     }, {
       "day" : 4,
       "ethh" : 17,
       "etmm" : 30,
       "sthh" : 8,
       "stmm" : 0,
-      "val" : 75
+      "val" : 72
     } ]
   } ],
   "floors" : [ {
@@ -138,50 +155,13 @@
         "overrideMillis" : 0,
         "overrideType" : "NONE",
         "scheduleMode" : "SystemSchedule",
-        "schedules" : [ {
-          "days" : [ {
-            "day" : 0,
-            "ethh" : 17,
-            "etmm" : 30,
-            "sthh" : 8,
-            "stmm" : 0,
-            "val" : 75
-          }, {
-            "day" : 1,
-            "ethh" : 17,
-            "etmm" : 30,
-            "sthh" : 8,
-            "stmm" : 0,
-            "val" : 75
-          }, {
-            "day" : 2,
-            "ethh" : 17,
-            "etmm" : 30,
-            "sthh" : 8,
-            "stmm" : 0,
-            "val" : 75
-          }, {
-            "day" : 3,
-            "ethh" : 17,
-            "etmm" : 30,
-            "sthh" : 8,
-            "stmm" : 0,
-            "val" : 75
-          }, {
-            "day" : 4,
-            "ethh" : 17,
-            "etmm" : 30,
-            "sthh" : 8,
-            "stmm" : 0,
-            "val" : 75
-          } ]
-        } ]
+        "schedules" : []
       } ],
       "roomName" : "roomsse-schedule",
       "nodes" : [ 7004 ],
       "tuningParameters" : { }
-    } ]
-  } ],
+  } ]
+} ],
   "lcmnamedSchedules" : {
     "LCM Named Schedule 100" : {
       "name" : "LCM Named Schedule 100",

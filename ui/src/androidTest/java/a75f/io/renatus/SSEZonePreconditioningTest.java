@@ -27,10 +27,10 @@ import static a75f.io.renatus.framework.GraphColumns.Relay1_Out;
 import static a75f.io.renatus.framework.GraphColumns.Relay2_Out;
 
 /**
- * Created by ryant on 10/17/2017.
+ * Created by ryant on 10/23/2017.
  */
 
-public class SSECoolingTest extends BaseSimulationTest
+public class SSEZonePreconditioningTest extends BaseSimulationTest
 {
 	SimulationRunner mRunner = null;
 	
@@ -45,20 +45,19 @@ public class SSECoolingTest extends BaseSimulationTest
 	
 	@Override
 	public String getTestDescription() {
-		return "Verifies SSE cooling during an occupied schedule." +
-		       "The test injects a CcuState with a 30 mins schedule starting at current time,  Relay1 and Relay2 outputs of smartnode 7002 configured as Cooling and Fan respectively." +
-		       "Sends 10 sets of inputs with varying room-temperature and set-temperature evey 3 minutes." +
-		       "and fetches smart node params corresponding to each input.";
+		return "Tests whether cooling started 15 minutes before the actual schedule owing to preconditioning." +
+		       "Creates a schedule to start cooling 30 minutes later.Relay1 and Relay2 outputs of smartnode 7006 configured as Cooling and Fan respectively." +
+		       "Room temperature is kept above set temperature by 1 degree and default precondition rate is 15";
 	}
 	
 	@Override
 	public String getCCUStateFileName() {
-		return "ssecoolingstate.json";
+		return "sseprecondition.json";
 	}
 	
 	@Override
 	public String getSimulationFileName() {
-		return "ssecoolingtest.csv";
+		return "sseprecondition.csv";
 	}
 	
 	@Override
@@ -67,19 +66,18 @@ public class SSECoolingTest extends BaseSimulationTest
 			return; // Test run not started , nothing to analyze
 		}
 		SimulationResult result = testLog.simulationResult;
-		if (testLog.resultParamsMap.get(new Integer(7002)) != null)
+		if (testLog.resultParamsMap.get(new Integer(7006)) != null)
 		{
-			SmartNodeParams params = testLog.resultParamsMap.get(new Integer(7002)).get(mRunner.getLoopCounter());
+			SmartNodeParams params = testLog.resultParamsMap.get(new Integer(7006)).get(mRunner.getLoopCounter());
 			switch (mRunner.getLoopCounter())
 			{
 				case 1:
 				case 2:
+				case 3:
+				case 4:
 				case 5:
-				case 6:
-				case 8:
-				case 9:
-				case 10:
-					if ((params.digital_out_1 == 0) && (params.digital_out_2 == 1))
+					// Not in schedule ; both cooling and fan should be OFF
+					if ((params.digital_out_1 == 0) && (params.digital_out_2 == 0))
 					{
 						result.analysis += "<p>Check Point " + mRunner.getLoopCounter() + ": PASS" + "</p>";
 					}
@@ -89,9 +87,12 @@ public class SSECoolingTest extends BaseSimulationTest
 						result.status = TestResult.FAIL;
 					}
 					break;
-				case 3:
-				case 4:
+				case 6:
 				case 7:
+				case 8:
+				case 9:
+				case 10:
+					//Not is schedule, but preconditioning triggered ; both cooling and fan should be on
 					if ((params.digital_out_1 == 1) && (params.digital_out_2 == 1))
 					{
 						result.analysis += "<p>Check Point " + mRunner.getLoopCounter() + ": PASS" + "</p>";
@@ -105,7 +106,7 @@ public class SSECoolingTest extends BaseSimulationTest
 			}
 			if (mRunner.getLoopCounter() == testLog.profile.getResultCount())
 			{
-				result.analysis += "<p>Verified that heating on relay_1 and fan on digital_2 are turned on when the room temperature is above set temperature by" + "deadband value.</p> ";
+				result.analysis += "<p>Verified that cooling on relay_1 and fan on digital_2 are turned ON 15 mins before actual schedule to precondition the temperature</p> ";
 			}
 		}
 	}
@@ -123,7 +124,6 @@ public class SSECoolingTest extends BaseSimulationTest
 	@Override
 	public HashMap<String,ArrayList<Float>> inputGraphData() {
 		ArrayList<Float> rt = new ArrayList<>();
-		ArrayList<Float> st = new ArrayList<>();
 		HashMap<String,ArrayList<Float>> graphData = new HashMap<>();
 		List<String[]> ip = mRunner.getSimulationInput();
 		for (int simIndex = 1; simIndex < ip.size(); simIndex ++)
@@ -131,10 +131,12 @@ public class SSECoolingTest extends BaseSimulationTest
 			String[] simData = ip.get(simIndex);
 			SimulationParams params = new SimulationParams().build(simData);
 			rt.add(params.room_temperature);
-			st.add(params.set_temperature);
 		}
 		graphData.put("room_temperature",rt);
-		graphData.put("set_temperature",st);
+		
+		
+		//AlgoTuningParameters algoMap = ccu().getDefaultCCUTuners();
+		//int preconrate = algoMap.get(AlgoTuningParameters.SSETuners.);
 		
 		return graphData;
 	}
@@ -147,13 +149,13 @@ public class SSECoolingTest extends BaseSimulationTest
 	
 	@Override
 	public void customizeTestData(CCUApplication app) {
-		DateTime sStart = new DateTime(System.currentTimeMillis(), DateTimeZone.getDefault());
-		DateTime sEnd = new DateTime(System.currentTimeMillis() + 30*60000, DateTimeZone.getDefault());
-		ArrayList<Schedule> schedules     = app.getFloors().get(0).mRoomList.get(0).mZoneProfiles.get(0).getSchedules();
+		DateTime sStart = new DateTime(System.currentTimeMillis() + 30 * 60000, DateTimeZone.getDefault());
+		DateTime sEnd = new DateTime(System.currentTimeMillis() + 60*60000, DateTimeZone.getDefault());
+		ArrayList<Schedule> schedules     = app.getDefaultTemperatureSchedule();
 		Day testDay = schedules.get(0).getDays().get(sStart.getDayOfWeek() - 1);
 		testDay.setSthh(sStart.getHourOfDay());
 		testDay.setEthh(sEnd.getHourOfDay());
-		testDay.setStmm(sStart.getMinuteOfHour());
+		testDay.setStmm(sStart.getMinuteOfHour()+1);
 		testDay.setEtmm(sEnd.getMinuteOfHour());
 	}
 	@Override
@@ -161,6 +163,6 @@ public class SSECoolingTest extends BaseSimulationTest
 		
 		System.out.println("runTest.........");
 		
-		mRunner.runSimulation();
+		//mRunner.runSimulation();
 	}
 }

@@ -7,6 +7,9 @@ package a75f.io.renatus.framework;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import a75f.io.bo.building.CCUApplication;
 
 /**
@@ -37,6 +40,11 @@ public abstract class BaseSimulationTest
     
     //Columns to graph
     public abstract String[] graphColumns();
+    
+    //Feeds simulation framework with input changes such as temp or tuners for plotting
+    public HashMap<String,ArrayList<Float>> inputGraphData() {
+        return null;
+    }
     
     //Manipulate state or input from individual tests
     public void customizeTestData(CCUApplication app) {

@@ -8,11 +8,11 @@ public class Day
 {
     boolean sunrise;
     boolean sunset;
-    private int day;
-    private int sthh;
-    private int stmm;
-    private int ethh;
-    private int etmm;
+    private int   day;
+    private int   sthh;
+    private int   stmm;
+    private int   ethh;
+    private int   etmm;
     private short val;
     
     
@@ -76,15 +76,22 @@ public class Day
     }
     
     
-        public short getVal()
-        {
-            return val;
-        }
-
-
-        public void setVal(short val)
-        {
-            this.val = val;
-        }
-
+    @Override
+    public String toString()
+    {
+        return "Day{" + "sunrise=" + sunrise + ", sunset=" + sunset + ", day=" + day + ", sthh=" +
+               sthh + ", stmm=" + stmm + ", ethh=" + ethh + ", etmm=" + etmm + ", val=" + val + '}';
+    }
+    
+    
+    public short getVal()
+    {
+        return val;
+    }
+    
+    
+    public void setVal(short val)
+    {
+        this.val = val;
+    }
 }

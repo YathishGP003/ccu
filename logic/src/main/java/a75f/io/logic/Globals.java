@@ -200,4 +200,10 @@ class Globals
     {
         return isDeveloperTest;
     }
+    
+    
+    public void setCCU(CCUApplication CCU)
+    {
+        this.mCCUApplication = CCU;
+    }
 }

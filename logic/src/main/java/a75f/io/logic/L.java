@@ -20,6 +20,7 @@ import a75f.io.bo.building.Schedule;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.ZoneProfile;
 import a75f.io.bo.building.definitions.OverrideType;
+import a75f.io.bo.building.definitions.ScheduleMode;
 import a75f.io.bo.kinvey.AlgoTuningParameters;
 import a75f.io.bo.kinvey.CCUUser;
 import a75f.io.bo.kinvey.DalContext;
@@ -142,6 +143,10 @@ public class L
         else if (schedulable.hasSchedules())
         {
             return schedulable.getSchedules();
+        }
+        else if(schedulable.getScheduleMode() == ScheduleMode.SystemSchedule)
+        {
+            return ccu().getDefaultTemperatureSchedule();
         }
         return null;
     }
@@ -279,5 +284,10 @@ public class L
     public static void setUserRegistered(boolean userRegistered)
     {
         LocalStorage.setIsUserRegistered(userRegistered);
+    }
+    public static void saveCCUState(CCUApplication state)
+    {
+        Globals.getInstance().setCCU(state);
+        saveCCUState();
     }
 }

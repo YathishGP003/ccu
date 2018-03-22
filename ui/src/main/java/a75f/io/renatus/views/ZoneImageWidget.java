@@ -1,4 +1,4 @@
-package a75f.io.renatus.VIEWS;
+package a75f.io.renatus.views;
 
 import android.content.Context;
 import android.view.MotionEvent;
@@ -19,23 +19,23 @@ import butterknife.ButterKnife;
 
 public class ZoneImageWidget extends RelativeLayout
 {
-	
+
 	@BindView(R.id.zoneImage)
 	ImageView zoneImage;
-	
+
 	@BindView(R.id.zoneName)
 	TextView zoneName;
-	
+
 	@BindView(R.id.zoneRefTemp)
 	TextView zoneRefTemp;
-	
+
 	private Context         mContext;
 	private OnClickListener mOnClickListener;
 	private ZoneProfile     mProfile;
 	private int             mIndex;
 	private String          mZoneName;
-	
-	
+
+
 	public ZoneImageWidget(Context context, String name, ZoneProfile profile, int index)
 	{
 		super(context);
@@ -45,8 +45,8 @@ public class ZoneImageWidget extends RelativeLayout
 		this.mIndex = index;
 		init();
 	}
-	
-	
+
+
 	public void init()
 	{
 		View v = inflate(getContext(), R.layout.widget_imageview, this);
@@ -58,14 +58,14 @@ public class ZoneImageWidget extends RelativeLayout
 					.setImageDrawable(mContext.getResources().getDrawable(R.drawable.light_orange));
 		}
 	}
-	
-	
+
+
 	public void setOnClickChangeListener(ZoneImageWidget.OnClickListener l)
 	{
 		mOnClickListener = l;
 	}
-	
-	
+
+
 	@Override
 	public boolean onTouchEvent(MotionEvent event)
 	{
@@ -81,8 +81,8 @@ public class ZoneImageWidget extends RelativeLayout
 		}
 		return true;
 	}
-	
-	
+
+
 	public void setSelected(boolean bSelected)
 	{
 		if (bSelected)
@@ -95,20 +95,20 @@ public class ZoneImageWidget extends RelativeLayout
 		}
 		invalidate();
 	}
-	
-	
+
+
 	public ZoneProfile getProfile()
 	{
 		return mProfile;
 	}
-	
-	
+
+
 	public int getIndex()
 	{
 		return mIndex;
 	}
-	
-	
+
+
 	public interface OnClickListener
 	{
 		void onClick(ZoneImageWidget v);

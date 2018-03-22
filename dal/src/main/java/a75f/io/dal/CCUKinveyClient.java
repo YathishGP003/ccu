@@ -20,8 +20,8 @@ public class  CCUKinveyClient extends Client<CCUUser>
                               HttpRequestInitializer httpRequestInitializer, String rootUrl,
                               String servicePath, JsonObjectParser objectParser,
                               KinveyClientRequestInitializer kinveyRequestInitializer,
-                              CredentialStore store, BackOffPolicy requestPolicy, Context context)
+                              CredentialStore store, BackOffPolicy requestPolicy, byte[] encrypt, Context context)
     {
-        super(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kinveyRequestInitializer, store, requestPolicy, context);
+        super(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kinveyRequestInitializer, store, requestPolicy,encrypt, context);
     }
 }

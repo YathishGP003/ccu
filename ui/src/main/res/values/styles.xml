@@ -64,6 +64,41 @@
         <item name="colorAccent">@color/accent</item>
 
     </style>
+    <style name="FButton" parent="@android:style/Widget.Button">
+        <item name="android:background">@drawable/button_background</item>
+        <item name="android:textColor">@color/buttonTextColor</item>
+        <item name="android:shadowColor">#FF4F4F4F</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="FButton.Toggle" parent="@android:style/Widget.Button">
+        <item name="android:background">@drawable/button_toggle_background</item>
+        <item name="android:textColor">@color/buttonTextColor</item>
+        <item name="android:shadowColor">#FF4F4F4F</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="FButton.Featured">
+        <item name="android:background">@drawable/button_featured_background</item>
+        <item name="android:textColor">@color/buttonTextColorFeatured</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="FButton.Decline">
+        <item name="android:background">@drawable/button_decline_background</item>
+        <item name="android:textColor">@color/buttonTextColorFeatured</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="LoginFormContainer">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:padding">16dp</item>
+    </style>
 
 
 </resources>

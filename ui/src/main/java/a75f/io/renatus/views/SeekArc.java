@@ -1,4 +1,4 @@
-package a75f.io.renatus.VIEWS;
+package a75f.io.renatus.views;
 /**
  * Created by Yinten on 10/9/2017.
  */
@@ -32,9 +32,9 @@ import a75f.io.bo.building.definitions.RoomDataInterface;
 import a75f.io.logic.L;
 import a75f.io.renatus.R;
 
-public class SeekArcWidget extends View implements RoomDataInterface
+public class SeekArc extends View implements RoomDataInterface
 {
-    
+
     private static final String  TAG                    = "Kumar";
     public static        double  LEFT_BOUND             = 210;
     public static        double  RIGHT_BOUND            = 150;
@@ -198,15 +198,15 @@ public class SeekArcWidget extends View implements RoomDataInterface
     private boolean showCCUDial = false;
     private SingleStageProfile mSSEProfile;
     private Zone               mZone;
-    
-    
-    public SeekArcWidget(Context context)
+
+
+    public SeekArc(Context context)
     {
         super(context);
-        init(context, null, R.attr.seekArcWidgetStyle);
+        init(context, null, R.attr.seekArcStyle);
     }
-    
-    
+
+
     public void init(Context context, AttributeSet attrs, int defStyle)
     {
         final Resources res = getResources();
@@ -233,12 +233,12 @@ public class SeekArcWidget extends View implements RoomDataInterface
         mProgressWidth = (int) (mProgressWidth * density);
         timer = new CountDownTimer(3000, 1000)
         {
-            
+
             public void onTick(long millisUntilFinished)
             {
             }
-            
-            
+
+
             public void onFinish()
             {
                 invalidate();
@@ -249,8 +249,8 @@ public class SeekArcWidget extends View implements RoomDataInterface
         {
             // Attribute initialization
             final TypedArray a =
-                    context.obtainStyledAttributes(attrs, R.styleable.SeekArcWidget, defStyle, 0);
-            Drawable thumb = a.getDrawable(R.styleable.SeekArcWidget_thumb);
+                    context.obtainStyledAttributes(attrs, R.styleable.SeekArc, defStyle, 0);
+            Drawable thumb = a.getDrawable(R.styleable.SeekArc_thumb);
             if (thumb != null)
             {
                 mThumb = thumb;
@@ -258,59 +258,59 @@ public class SeekArcWidget extends View implements RoomDataInterface
             thumbHalfheight = (int) mThumb.getIntrinsicHeight() / 2;
             thumbHalfWidth = (int) mThumb.getIntrinsicWidth() / 2;
             mThumb.setBounds(-thumbHalfWidth, -thumbHalfheight, thumbHalfWidth, thumbHalfheight);
-            mMax = a.getInteger(R.styleable.SeekArcWidget_max, mMax);
-            mProgress = a.getInteger(R.styleable.SeekArcWidget_progress, mProgress);
+            mMax = a.getInteger(R.styleable.SeekArc_max, mMax);
+            mProgress = a.getInteger(R.styleable.SeekArc_progress, mProgress);
             mProgressWidth =
-                    (int) a.getDimension(R.styleable.SeekArcWidget_progressWidth, mProgressWidth);
-            mArcWidth = (int) a.getDimension(R.styleable.SeekArcWidget_arcWidth, mArcWidth);
-            mStartAngle = a.getInt(R.styleable.SeekArcWidget_startAngle, mStartAngle);
-            mSweepAngle = a.getInt(R.styleable.SeekArcWidget_sweepAngle, mSweepAngle);
-            mRotation = a.getInt(R.styleable.SeekArcWidget_rotation, mRotation);
-            mRoundedEdges = a.getBoolean(R.styleable.SeekArcWidget_roundEdges, mRoundedEdges);
-            mTouchInside = a.getBoolean(R.styleable.SeekArcWidget_touchInside, mTouchInside);
-            /*mTouchOutSide = a.getBoolean(R.styleable.SeekArcWidget_touchInside,
+                    (int) a.getDimension(R.styleable.SeekArc_progressWidth, mProgressWidth);
+            mArcWidth = (int) a.getDimension(R.styleable.SeekArc_arcWidth, mArcWidth);
+            mStartAngle = a.getInt(R.styleable.SeekArc_startAngle, mStartAngle);
+            mSweepAngle = a.getInt(R.styleable.SeekArc_sweepAngle, mSweepAngle);
+            mRotation = a.getInt(R.styleable.SeekArc_rotation, mRotation);
+            mRoundedEdges = a.getBoolean(R.styleable.SeekArc_roundEdges, mRoundedEdges);
+            mTouchInside = a.getBoolean(R.styleable.SeekArc_touchInside, mTouchInside);
+            /*mTouchOutSide = a.getBoolean(R.styleable.SeekArc_touchInside,
                     mTouchOutSide);*/
-            mClockwise = a.getBoolean(R.styleable.SeekArcWidget_clockwise, mClockwise);
+            mClockwise = a.getBoolean(R.styleable.SeekArc_clockwise, mClockwise);
             mProgressTextSize =
-                    (int) a.getDimension(R.styleable.SeekArcWidget_progresstextsize, mProgressTextSize);
+                    (int) a.getDimension(R.styleable.SeekArc_progresstextsize, mProgressTextSize);
             mOuterTextSize =
-                    (int) a.getDimension(R.styleable.SeekArcWidget_outertextsize, mOuterTextSize);
+                    (int) a.getDimension(R.styleable.SeekArc_outertextsize, mOuterTextSize);
             mStatusTextSize =
-                    (int) a.getDimension(R.styleable.SeekArcWidget_statustextsize, mStatusTextSize);
+                    (int) a.getDimension(R.styleable.SeekArc_statustextsize, mStatusTextSize);
             mUserLimitTextSize =
-                    (int) a.getDimension(R.styleable.SeekArcWidget_userlimittextsize, mUserLimitTextSize);
+                    (int) a.getDimension(R.styleable.SeekArc_userlimittextsize, mUserLimitTextSize);
             mThumbCircleTextSize =
-                    (int) a.getDimension(R.styleable.SeekArcWidget_thumbcircletextsize, mThumbCircleTextSize);
+                    (int) a.getDimension(R.styleable.SeekArc_thumbcircletextsize, mThumbCircleTextSize);
             mThumbOuterRadius =
-                    (int) a.getDimension(R.styleable.SeekArcWidget_thumbouterradius, mThumbOuterRadius);
+                    (int) a.getDimension(R.styleable.SeekArc_thumbouterradius, mThumbOuterRadius);
             mThumbInnerRadius =
-                    (int) a.getDimension(R.styleable.SeekArcWidget_thumbinnerradius, mThumbInnerRadius);
+                    (int) a.getDimension(R.styleable.SeekArc_thumbinnerradius, mThumbInnerRadius);
             mMarkerTextHeight =
-                    (int) a.getDimension(R.styleable.SeekArcWidget_markertextheight, mMarkerTextHeight);
+                    (int) a.getDimension(R.styleable.SeekArc_markertextheight, mMarkerTextHeight);
             mStatusTextHeight =
-                    (int) a.getDimension(R.styleable.SeekArcWidget_statustextheight, mStatusTextHeight);
+                    (int) a.getDimension(R.styleable.SeekArc_statustextheight, mStatusTextHeight);
             mMarkerTextWidthX =
-                    (int) a.getDimension(R.styleable.SeekArcWidget_markertextwidthx, mMarkerTextWidthX);
+                    (int) a.getDimension(R.styleable.SeekArc_markertextwidthx, mMarkerTextWidthX);
             mMarkerTextWidthY =
-                    (int) a.getDimension(R.styleable.SeekArcWidget_markertextwidthy, mMarkerTextWidthY);
+                    (int) a.getDimension(R.styleable.SeekArc_markertextwidthy, mMarkerTextWidthY);
             mStatusTextWidth =
-                    (int) a.getDimension(R.styleable.SeekArcWidget_statustextwidth, mStatusTextWidth);
+                    (int) a.getDimension(R.styleable.SeekArc_statustextwidth, mStatusTextWidth);
             mStatusOutsideTextWidth =
-                    (int) a.getDimension(R.styleable.SeekArcWidget_statusoutsidetextwidth, mStatusOutsideTextWidth);
+                    (int) a.getDimension(R.styleable.SeekArc_statusoutsidetextwidth, mStatusOutsideTextWidth);
             mStatusOutsideTextHeight =
-                    (int) a.getDimension(R.styleable.SeekArcWidget_statusoutsidetextheight, mStatusOutsideTextHeight);
+                    (int) a.getDimension(R.styleable.SeekArc_statusoutsidetextheight, mStatusOutsideTextHeight);
             mTempTextWidth =
-                    (int) a.getDimension(R.styleable.SeekArcWidget_temptextwidth, mTempTextWidth);
+                    (int) a.getDimension(R.styleable.SeekArc_temptextwidth, mTempTextWidth);
             mTempTextHeight =
-                    (int) a.getDimension(R.styleable.SeekArcWidget_temptextheight, mTempTextHeight);
+                    (int) a.getDimension(R.styleable.SeekArc_temptextheight, mTempTextHeight);
             mThumbTextWidth =
-                    (int) a.getDimension(R.styleable.SeekArcWidget_thumbtextwidth, mThumbTextWidth);
+                    (int) a.getDimension(R.styleable.SeekArc_thumbtextwidth, mThumbTextWidth);
             mThumbTextHeight =
-                    (int) a.getDimension(R.styleable.SeekArcWidget_thumbtextheight, mThumbTextHeight);
+                    (int) a.getDimension(R.styleable.SeekArc_thumbtextheight, mThumbTextHeight);
             mSmallThumbRadius =
-                    (int) a.getDimension(R.styleable.SeekArcWidget_smallthumbradius, mSmallThumbRadius);
+                    (int) a.getDimension(R.styleable.SeekArc_smallthumbradius, mSmallThumbRadius);
             mThumbDifference =
-                    (int) a.getDimension(R.styleable.SeekArcWidget_thumbdifference, mThumbDifference);
+                    (int) a.getDimension(R.styleable.SeekArc_thumbdifference, mThumbDifference);
             a.recycle();
         }
         mProgress = (mProgress > mMax) ? mMax : mProgress;
@@ -429,9 +429,9 @@ public class SeekArcWidget extends View implements RoomDataInterface
         mThumbeOuterLimitCircleTextPaint.setStyle(Paint.Style.FILL);
         mThumbeOuterLimitCircleTextPaint.setTextSize(mThumbCircleTextSize);
     }
-    
-    
-    public SeekArcWidget(Context context, AttributeSet attrs, SingleStageProfile zoneProfile)
+
+
+    public SeekArc(Context context, AttributeSet attrs, SingleStageProfile zoneProfile)
     {
         super(context, attrs);
         this.mSSEProfile = zoneProfile;
@@ -439,23 +439,23 @@ public class SeekArcWidget extends View implements RoomDataInterface
         {
             mSSEProfile.setZoneProfileInterface(this);
         }
-        init(context, attrs, R.attr.seekArcWidgetStyle);
+        init(context, attrs, R.attr.seekArcStyle);
     }
-    
-    
-    public SeekArcWidget(Context context, AttributeSet attrs, int defStyle)
+
+
+    public SeekArc(Context context, AttributeSet attrs, int defStyle)
     {
         super(context, attrs, defStyle);
         init(context, attrs, defStyle);
     }
-    
-    
+
+
     @Override
     public void refreshView()
     {
         this.post(new Runnable()
         {
-            
+
             @Override
             public void run()
             {
@@ -468,8 +468,8 @@ public class SeekArcWidget extends View implements RoomDataInterface
             }
         });
     }
-    
-    
+
+
     @Override
     public boolean onTouchEvent(MotionEvent event)
     {
@@ -516,8 +516,8 @@ public class SeekArcWidget extends View implements RoomDataInterface
         }
         return true;
     }
-    
-    
+
+
     @Override
     protected void onDraw(Canvas canvas)
     {
@@ -1024,8 +1024,8 @@ public class SeekArcWidget extends View implements RoomDataInterface
         }
         isFirstRun = false;
     }
-    
-    
+
+
     @Override
     protected void drawableStateChanged()
     {
@@ -1037,8 +1037,8 @@ public class SeekArcWidget extends View implements RoomDataInterface
         }
         invalidate();
     }
-    
-    
+
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
     {
@@ -1068,8 +1068,8 @@ public class SeekArcWidget extends View implements RoomDataInterface
         setTouchOutSide(mTouchOutSide);
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
-    
-    
+
+
     public void setTouchInSide(boolean isEnabled)
     {
         int thumbHalfheight = (int) mThumb.getIntrinsicHeight() / 2;
@@ -1085,8 +1085,8 @@ public class SeekArcWidget extends View implements RoomDataInterface
             mTouchIgnoreRadius = mArcRadius - Math.min(thumbHalfWidth, thumbHalfheight);
         }
     }
-    
-    
+
+
     public void setTouchOutSide(boolean isEnabled)
     {
         int thumbHalfheight = (int) mThumb.getIntrinsicHeight() / 2;
@@ -1101,14 +1101,14 @@ public class SeekArcWidget extends View implements RoomDataInterface
         mTouchIgnoreRadiusOutSide = mArcRadius - Math.min(thumbHalfWidth, thumbHalfheight);
         //}
     }
-    
-    
+
+
     public double getCurrentTemp()
     {
         return mCurrentTemp;
     }
-    
-    
+
+
     public void prepareAngle()
     {
         mGapAngle = (float) (300 / (mBuildingLimitEndAngle - mBuildingLimitStartAngle));
@@ -1116,44 +1116,44 @@ public class SeekArcWidget extends View implements RoomDataInterface
                        ((mBuildingLimitEndAngle - mBuildingLimitStartAngle) / 2);
         mLeftMarginAngle = (mBuildingLimitEndAngle - mBuildingLimitStartAngle) * 1.2;
     }
-    
-    
+
+
     public float getmPathStartAngle()
     {
         return mPathStartAngle;
     }
-    
-    
+
+
     public void setmPathStartAngle(float mPathStartAngle)
     {
         this.mPathStartAngle = mPathStartAngle;
     }
-    
-    
+
+
     public boolean isDetailedView()
     {
         return mDetailedView;
     }
-    
-    
+
+
     public double getDesireTemp()
     {
         return mDesireTemp;
     }
-    
-    
+
+
     public float getUserLimitEndPoint()
     {
         return userLimitEndPoint;
     }
-    
-    
+
+
     public float getUserLimitStartPoint()
     {
         return userLimitStartPoint;
     }
-    
-    
+
+
     public double getmBuildingLimitEndAngle()
     {
         return Math.round(mBuildingLimitEndAngle);
@@ -1163,8 +1163,8 @@ public class SeekArcWidget extends View implements RoomDataInterface
 
         return (float) mMax / mSweepAngle;
 	}*/
-    
-    
+
+
     public float getLimitSweepAngle()
     {
         if (this.mLimitStartAngle < 180 && this.mLimitEndAngle < 180)
@@ -1194,44 +1194,44 @@ public class SeekArcWidget extends View implements RoomDataInterface
             }
         }
     }
-    
-    
+
+
     public double getmBuildingLimitStartAngle()
     {
         return Math.round(mBuildingLimitStartAngle);
     }
-    
-    
+
+
     public void setmBuildingLimitStartAngle(double mBuildingLimitStartAngle)
     {
         this.mBuildingLimitStartAngle = mBuildingLimitStartAngle;
     }
-    
-    
+
+
     public void setmBuildingLimitEndAngle(double mBuildingLimitEndAngle)
     {
         this.mBuildingLimitEndAngle = mBuildingLimitEndAngle;
     }
-    
-    
+
+
     public void setUserLimitStartPoint(float userLimitStartPoint)
     {
         this.userLimitStartPoint = userLimitStartPoint;
     }
-    
-    
+
+
     public void setUserLimitEndPoint(float userLimitEndPoint)
     {
         this.userLimitEndPoint = userLimitEndPoint;
     }
-    
-    
+
+
     public void setDesireTemp(double DesireTemp)
     {
         this.mDesireTemp = DesireTemp;
     }
-    
-    
+
+
     public void setDetailedView(boolean isDetailedView)
     {
         this.mDetailedView = isDetailedView;
@@ -1244,14 +1244,14 @@ public class SeekArcWidget extends View implements RoomDataInterface
             setArcWidth(5);
         }
     }
-    
-    
+
+
     public void setCurrentTemp(double CurrentTemp)
     {
         this.mCurrentTemp = CurrentTemp;
     }
-    
-    
+
+
     private boolean isThumbPressed(float xpos, float ypos)
     {
         double curTouch = getTouchDegrees(xpos, ypos);
@@ -1263,8 +1263,8 @@ public class SeekArcWidget extends View implements RoomDataInterface
         return ((32 > Math.abs((curThumbXPos - mThumbXPos) + (curThumbYpos - mThumbYPos))) &&
                 (32 > Math.abs((curThumbXPos - mThumbXPos) - (curThumbYpos - mThumbYPos))));
     }
-    
-    
+
+
     private void onStartTrackingTouch()
     {
         if (mOnSeekArcChangeListener != null)
@@ -1272,8 +1272,8 @@ public class SeekArcWidget extends View implements RoomDataInterface
             mOnSeekArcChangeListener.onStartTrackingTouch(this);
         }
     }
-    
-    
+
+
     private void updateOnTouch(MotionEvent event)
     {
         if (!isMoveStarted && !isTouched)
@@ -1391,8 +1391,8 @@ public class SeekArcWidget extends View implements RoomDataInterface
         setPressed(true);
         onProgressRefresh(progress, true);
     }
-    
-    
+
+
     private void onStopTrackingTouch()
     {
         if (mOnSeekArcChangeListener != null)
@@ -1400,8 +1400,8 @@ public class SeekArcWidget extends View implements RoomDataInterface
             mOnSeekArcChangeListener.onStopTrackingTouch(this);
         }
     }
-    
-    
+
+
     private boolean ignoreTouch(float xPos, float yPos)
     {
         boolean ignore = false;
@@ -1416,7 +1416,7 @@ public class SeekArcWidget extends View implements RoomDataInterface
         return ignore;
     }
 
-    
+
     /* MARK
     public void setdablcmfsv(ArrayList<FSVData> lcmdabfsv) {
         this.lcmdabfsv = lcmdabfsv;
@@ -1424,30 +1424,30 @@ public class SeekArcWidget extends View implements RoomDataInterface
             mDeviceType = DEVICE_TYPE.LCM_DAB;
         }
     }
-    
-    
-    
-    
+
+
+
+
     public ArrayList<FSVData> getlcmdabfsv() {
         return lcmdabfsv;
     }
-    
-    
+
+
     public void setdabifttfsv(ArrayList<FSVData> ifttdabfsv) {
         this.ifttdabfsv = ifttdabfsv;
-        
+
         if (ifttdabfsv != null && ifttdabfsv.size() != 0) {
             mDeviceType = DEVICE_TYPE.IFTT_DAB;
         }
     }
-    
-    
+
+
     public ArrayList<FSVData> getifttdabfsv() {
         return ifttdabfsv;
     }
     */
-    
-    
+
+
     private double getTouchDegrees(float xPos, float yPos)
     {
         float x = xPos - mTranslateX;
@@ -1459,8 +1459,8 @@ public class SeekArcWidget extends View implements RoomDataInterface
         }
         return angle;
     }
-    
-    
+
+
     private int getProgressForAngle(double angle)
     {
         int touchProgress = (int) Math.round(1 * angle);
@@ -1468,20 +1468,20 @@ public class SeekArcWidget extends View implements RoomDataInterface
         touchProgress = (touchProgress > mMax) ? INVALID_PROGRESS_VALUE : touchProgress;
         return touchProgress;
     }
-    
-    
+
+
     public float getLimitEndAngle()
     {
         return this.mLimitEndAngle;
     }
-    
-    
+
+
     public float getLimitStartAngle()
     {
         return this.mLimitStartAngle;
     }
-    
-    
+
+
     public void setLimitStartAngle(float LimitStartAngle)
     {
         setUserLimitStartPoint(LimitStartAngle);
@@ -1497,14 +1497,14 @@ public class SeekArcWidget extends View implements RoomDataInterface
         }
         //LEFT_BOUND = mLimitStartAngle;
     }
-    
-    
+
+
     private void onProgressRefresh(int progress, boolean fromUser)
     {
         updateProgress(progress, fromUser);
     }
-    
-    
+
+
     private void updateProgress(int progress, boolean fromUser)
     {
         // Log.d(TAG,"Update Prigress----============>>> "+progress);
@@ -1526,8 +1526,8 @@ public class SeekArcWidget extends View implements RoomDataInterface
         updateThumbPosition();
         invalidate();
     }
-    
-    
+
+
     private void updateThumbPosition()
     {
         int thumbAngle = (int) (mStartAngle + mProgressSweep + mRotation + 90);
@@ -1539,8 +1539,8 @@ public class SeekArcWidget extends View implements RoomDataInterface
         mThumbYPos2 =
                 (int) ((mArcRadius + mThumbDifference) * Math.sin(Math.toRadians(thumbAngle)));
     }
-    
-    
+
+
     public void setLimitEndAngle(float LimitEndAngle)
     {
         setUserLimitEndPoint(LimitEndAngle);
@@ -1556,8 +1556,8 @@ public class SeekArcWidget extends View implements RoomDataInterface
         }
         //RIGHT_BOUND = mLimitEndAngle;
     }
-    
-    
+
+
     /**
      * Sets a listener to receive notifications of changes to the SeekArc's
      * progress level. Also provides notifications of when the user starts and
@@ -1570,39 +1570,39 @@ public class SeekArcWidget extends View implements RoomDataInterface
     {
         mOnSeekArcChangeListener = l;
     }
-    
-    
+
+
     public void setOnClickChangeListener(OnClickListener l)
     {
         mOnClickListener = l;
     }
-    
-    
+
+
     public void setProgress(int progress)
     {
         updateProgress(progress, false);
     }
-    
-    
+
+
     public int getProgressWidth()
     {
         return mProgressWidth;
     }
-    
-    
+
+
     public void setProgressWidth(int mProgressWidth)
     {
         this.mProgressWidth = mProgressWidth;
         mProgressPaint.setStrokeWidth(mProgressWidth);
     }
-    
-    
+
+
     public int getArcWidth()
     {
         return mArcWidth;
     }
-    
-    
+
+
     public void setArcWidth(int mArcWidth)
     {
         this.mArcWidth = mArcWidth;
@@ -1611,8 +1611,8 @@ public class SeekArcWidget extends View implements RoomDataInterface
         mProgressPaint.setStrokeWidth(mArcWidth);
         mUserLimitProgressPaint.setStrokeWidth(mArcWidth);
     }
-    
-    
+
+
     public void setCMDataToSeekArc(SingleStageProfile data, String zoneName, int index)
     {
         this.mSSEProfile = data;
@@ -1623,8 +1623,8 @@ public class SeekArcWidget extends View implements RoomDataInterface
         setDetailedView(false);
         setLimitbounds();
     }
-    
-    
+
+
     public void setLimitbounds()
     {
         if ((getLimitEndAngle() > 180 && getLimitStartAngle() > 180) ||
@@ -1665,8 +1665,8 @@ public class SeekArcWidget extends View implements RoomDataInterface
             mOutsideLimitDiffRight = (int) Math.round(rightdiff) + 1;
         }
     }
-    
-    
+
+
 //    public Zone getRoomData()
 //    {
 //        return mZone;
@@ -1682,19 +1682,19 @@ public class SeekArcWidget extends View implements RoomDataInterface
 //        setLimitbounds();
 //    }
 //
-    
+
     public ZoneProfile getZoneProfile()
     {
         return mSSEProfile;
     }
-    
-    
+
+
     public int getIndex()
     {
         return nIndex;
     }
-    
-    
+
+
     public void SetSelected(boolean bSelected)
     {
         if (bSelected)
@@ -1707,78 +1707,78 @@ public class SeekArcWidget extends View implements RoomDataInterface
         }
         invalidate();
     }
-    
-    
+
+
     public boolean getIsSensorPaired()
     {
         return this.isSensorPaired;
     }
-    
-    
+
+
     public void setIsSensorPaired(boolean isPaired)
     {
         isSensorPaired = isPaired;
     }
-    
-    
+
+
     public boolean getIsCCU()
     {
         return this.showCCUDial;
     }
-    
-    
+
+
     public void setZone(Zone zone)
     {
         this.mZone = zone;
     }
-    
+
     public Zone getZone()
     {
         return mZone;
     }
-    
-    
+
+
     public static enum DEVICE_TYPE
     {
         PURE_DAB, LCM_DAB, IFTT_DAB
     }
-    
+
     public interface OnClickListener
     {
-        void onClick(SeekArcWidget seekArcWidget);
+        void onClick(SeekArc seekArc);
     }
-    
+
     public interface OnSeekArcChangeListener
     {
-        
+
         /**
          * Notification that the progress level has changed. Clients can use the
          * fromUser parameter to distinguish user-initiated changes from those
          * that occurred programmatically.
          *
-         * @param seekArcWidget The SeekArc whose progress has changed
+         * @param seekArc The SeekArc whose progress has changed
          * @param progress      The current progress level. This will be in the range
          *                      0..max where max was set by
          *                      //   {@link //ProgressArc#setMax(int)}. (The default value for
          *                      max is 100.)
          * @param fromUser      True if the progress change was initiated by the user.
          */
-        void onProgressChanged(SeekArcWidget seekArcWidget, int progress, boolean fromUser);
-        
+        void onProgressChanged(SeekArc seekArc, int progress, boolean fromUser);
+
         /**
          * Notification that the user has started a touch gesture. Clients may
          * want to use this to disable advancing the seekbar.
          *
-         * @param seekArcWidget The SeekArc in which the touch gesture began
+         * @param seekArc The SeekArc in which the touch gesture began
          */
-        void onStartTrackingTouch(SeekArcWidget seekArcWidget);
-        
+        void onStartTrackingTouch(SeekArc seekArc);
+
         /**
          * Notification that the user has finished a touch gesture. Clients may
          * want to use this to re-enable advancing the seekarc.
          *
-         * @param seekArcWidget The SeekArc in which the touch gesture began
+         * @param seekArc The SeekArc in which the touch gesture began
          */
-        void onStopTrackingTouch(SeekArcWidget seekArcWidget);
+        void onStopTrackingTouch(SeekArc seekArc);
     }
 }

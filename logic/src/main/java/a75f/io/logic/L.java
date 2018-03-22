@@ -34,13 +34,13 @@ import static a75f.io.logic.LZoneProfile.isNamedSchedule;
 
 public class L
 {
-    
+
     public static Context app()
     {
         return Globals.getInstance().getApplicationContext();
     }
-    
-    
+
+
     /****
      *
      * @return
@@ -49,8 +49,8 @@ public class L
     {
         return EncryptionPrefs.getEncryptionKey();
     }
-    
-    
+
+
     /****
      *
      * @return
@@ -59,8 +59,8 @@ public class L
     {
         return EncryptionPrefs.getFirmwareSignatureKey();
     }
-    
-    
+
+
     /****
      *
      * @return
@@ -69,40 +69,40 @@ public class L
     {
         return EncryptionPrefs.getBLELinkKey();
     }
-    
-    
+
+
     public static short generateSmartNodeAddress()
     {
         return LSmartNode.nextSmartNodeAddress();
     }
-    
-    
+
+
     public static Zone findZoneByName(String mFloorName, String mRoomName)
     {
         return ZoneBLL.findZoneByName(mFloorName, mRoomName);
     }
-    
-    
+
+
     public static void sendLightControlsMessage(Zone zone)
     {
         //TODO: revist
         //ZoneBLL.sendControlsMessage(zone);
     }
-    
-    
+
+
     public static void addZoneProfileToZone(Node node, Zone zone, LightProfile mLightProfile)
     {
         saveCCUState();
     }
-    
-    
+
+
     public static void saveCCUState()
     {
         LocalStorage.setApplicationSettings();
         sync();
     }
-    
-    
+
+
     private static void sync()
     {
         //seed all ccus
@@ -110,8 +110,8 @@ public class L
         //send controls messages
     }
     ////Schedules////
-    
-    
+
+
     public static void sendTestMessage(short nodeAddress, Zone zone)
     {
         ArrayList<Struct> messages = LSmartNode.getTestMessages(zone);
@@ -120,20 +120,20 @@ public class L
             MeshUpdateJob.sendStruct(nodeAddress, message);
         }
     }
-    
-    
+
+
     public static float resolveZoneProfileLogicalValue(ZoneProfile profile)
     {
         return LZoneProfile.resolveZoneProfileLogicalValue(profile);
     }
-    
-    
+
+
     public static float resolveZoneProfileLogicalValue(ZoneProfile profile, Output snOutput)
     {
         return LZoneProfile.resolveZoneProfileLogicalValue(profile, snOutput);
     }
-    
-    
+
+
     public static ArrayList<Schedule> resolveSchedules(Schedulable schedulable)
     {
         if (isNamedSchedule(schedulable))
@@ -150,8 +150,8 @@ public class L
         }
         return null;
     }
-    
-    
+
+
     /****
      *
      * @return
@@ -160,8 +160,8 @@ public class L
     {
         return Globals.getInstance().ccu();
     }
-    
-    
+
+
     public static void setupTestUserIfNeeded()
     {
         if (isDeveloperTesting())
@@ -198,20 +198,22 @@ public class L
             }
         }
     }
-    
-    
+
+
     public static boolean isDeveloperTesting()
     {
         return Globals.getInstance().isDeveloperTesting();
     }
-    
-    
+
+
     public static boolean isSimulation()
     {
         return Globals.getInstance().isSimulation();
     }
-    
-    
+
+
+
+
     public static void forceOverride(Zone zone, ZoneProfile zoneProfile, float desireTemp)
     {
         zoneProfile.setOverride(System.currentTimeMillis() +
@@ -219,8 +221,8 @@ public class L
                                 60 * 1000, OverrideType.RELEASE_TIME, (short) Math.round(
                 desireTemp * 2));
     }
-    
-    
+
+
     public static Object resolveTuningParameter(Zone zone, String key)
     {
         if (zone.getTuningParameters().containsKey(key))
@@ -232,17 +234,17 @@ public class L
             return ccu().getDefaultCCUTuners().get(key);
         }
     }
-    
-    
+
+
     public static boolean isOccupied(Zone zone, ZoneProfile zoneProfile)
     {
         return false;
     }
-    
-    
+
+
     public static AlgoTuningParameters getDefaultTuners()
     {
-        
+
         Log.e("Tuners", "Get default tuners");
         AlgoTuningParameters algoTuningParameters = null;
         try
@@ -257,20 +259,20 @@ public class L
         }
         return algoTuningParameters;
     }
-    
-    
+
+
     public static DalContext getKinveyClient()
     {
         return Globals.getInstance().getDalContext();
     }
-    
-    
+
+
     //TODO: implement clear caches.
     public static void clearCaches()
     {
     }
-    
-    
+
+
     /*
     User can exist and not be registered, user can exist and already be registered, just need
     login, or user can just be logged in.
@@ -279,8 +281,8 @@ public class L
     {
         return LocalStorage.getIsUserRegistered();
     }
-    
-    
+
+
     public static void setUserRegistered(boolean userRegistered)
     {
         LocalStorage.setIsUserRegistered(userRegistered);
@@ -289,5 +291,15 @@ public class L
     {
         Globals.getInstance().setCCU(state);
         saveCCUState();
+    }
+
+
+    //TODO samjith
+    /*
+    This should set a preference to what environment
+    the user would like to use with Kinvey for testing and development purposes.
+     */
+    public static void setServerEnvironment(String serverEnvironment) {
+        //L.serverEnvironment = serverEnvironment;
     }
 }

@@ -27,8 +27,6 @@ ECHO  mount system
 %ADB% push %apk_host%/%apk_name% %apk_target_dir%
 
 
-ECHO Reinstall app %ADB_SH% 'pm install -r %apk_target_sys%'
-%ADB_SH% 'pm install -r %apk_target_sys%'
 
 ECHO Start the app
 %ADB% shell "am start -n %app_package%/%app_package%.%MAIN_ACTIVITY% -a android.intent.action.MAIN -c android.intent.category.LAUNCHER"

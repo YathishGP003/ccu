@@ -87,15 +87,15 @@
 
 
 
-        <receiver
-            android:name="a75f.io.logic.GCMReceiver"
-            android:permission="com.google.android.c2dm.permission.SEND">
-            <intent-filter>
-                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
-                <category android:name="com.myPackage"/>
-            </intent-filter>
-        </receiver>
-        <service android:name="a75f.io.logic.GCMService"/>
+        <!--<receiver-->
+            <!--android:name="a75f.io.logic.GCMReceiver"-->
+            <!--android:permission="com.google.android.c2dm.permission.SEND">-->
+            <!--<intent-filter>-->
+                <!--<action android:name="com.google.android.c2dm.intent.RECEIVE"/>-->
+                <!--<category android:name="com.myPackage"/>-->
+            <!--</intent-filter>-->
+        <!--</receiver>-->
+        <!--<service android:name="a75f.io.logic.GCMService"/>-->
 
         <meta-data
             android:name="io.fabric.ApiKey"

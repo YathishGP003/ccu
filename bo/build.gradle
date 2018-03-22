@@ -1,14 +1,18 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion '25.0.3'
+    compileSdkVersion 26
 
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 19
         versionCode 1
         versionName "1.0"
+        javaCompileOptions {
+            annotationProcessorOptions {
+                includeCompileClasspath true
+            }
+        }
     }
 
     packagingOptions {
@@ -35,9 +39,7 @@ dependencies {
     compile 'joda-time:joda-time:2.9.9'
 
     testCompile 'junit:junit:4.12'
-    androidTestCompile 'com.android.support:support-annotations:25.3.1'
-    androidTestCompile 'com.android.support.test:runner:0.5'
-    androidTestCompile 'com.android.support.test:rules:0.5'
+
     // Optional -- Hamcrest library
     androidTestCompile 'org.hamcrest:hamcrest-library:1.3'
     // Optional -- UI testing with Espresso
@@ -46,9 +48,6 @@ dependencies {
         exclude group: 'com.google.code.findbugs'
     })
     // Optional -- UI testing with UI Automator
-    androidTestCompile 'com.android.support.test.uiautomator:uiautomator-v18:2.1.2'
-    compile 'com.android.support:appcompat-v7:25.3.1'
-    compile 'com.android.support:design:25.3.1'
     compile 'com.android.support:multidex:1.0.1'
     compile 'com.facebook.android:facebook-android-sdk:[4,5)'
     compile 'com.fasterxml.jackson.core:jackson-core:2.7.3'
@@ -60,7 +59,6 @@ dependencies {
     compile 'com.google.http-client:google-http-client:1.19.0'
     compile 'commons-io:commons-io:2.4'
     compile 'com.google.guava:guava:18.0'
-    compile 'com.google.android.gms:play-services:11.0.4'
 
 }
 

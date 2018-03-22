@@ -1,8 +1,8 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion '25.0.3'
+    compileSdkVersion 26
+
 
     defaultConfig {
         minSdkVersion 19
@@ -11,7 +11,11 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-
+        javaCompileOptions {
+            annotationProcessorOptions {
+                includeCompileClasspath true
+            }
+        }
     }
     buildTypes {
         release {
@@ -29,6 +33,5 @@ dependencies {
 
     testCompile 'junit:junit:4.12'
     compile 'org.greenrobot:eventbus:3.0.0'
-    compile project(path: ':bo')
     compile project(path: ':bo')
 }

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Calculate 15% brightness for pressed state -->
+    <item android:state_pressed="true">
+        <shape>
+            <gradient android:startColor="#23AB40"
+                android:endColor="#168E1C" android:angle="270" />
+            <stroke android:width="1px" android:color="#216B29" />
+            <corners android:radius="2dp" />
+            <padding android:left="5dp" android:top="10dp"
+                android:right="5dp" android:bottom="10dp" />
+        </shape>
+    </item>
+
+    <item android:state_focused="true">
+        <shape>
+            <gradient android:startColor="#33BB50"
+                android:endColor="#269E2C" android:angle="270" />
+            <stroke android:width="1px" android:color="#326B29" />
+            <corners android:radius="2dp" />
+            <padding android:left="5dp" android:top="10dp"
+                android:right="5dp" android:bottom="10dp" />
+        </shape>
+    </item>
+
+    <item android:state_enabled="false">
+        <shape>
+            <gradient android:startColor="#6623AB40"
+                android:endColor="#66168E1C" android:angle="270" />
+            <stroke android:width="1px" android:color="#66216B29" />
+            <corners android:radius="2dp" />
+            <padding android:left="5dp" android:top="10dp"
+                android:right="5dp" android:bottom="10dp" />
+        </shape>
+    </item>
+
+    <item>
+        <shape>
+            <gradient android:startColor="#43CB60"
+                android:endColor="#36AE3C" android:angle="270" />
+            <stroke android:width="1px" android:color="#216B29" />
+            <corners android:radius="2dp" />
+            <padding android:left="5dp" android:top="10dp"
+                android:right="5dp" android:bottom="10dp" />
+        </shape>
+    </item>
+
+</selector>
+

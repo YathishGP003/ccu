@@ -45,8 +45,8 @@ import a75f.io.bo.building.ZoneProfile;
 import a75f.io.bo.building.definitions.ProfileType;
 import a75f.io.bo.kinvey.AlgoTuningParameters;
 import a75f.io.logic.L;
-import a75f.io.renatus.VIEWS.SeekArcWidget;
-import a75f.io.renatus.VIEWS.ZoneImageWidget;
+import a75f.io.renatus.views.SeekArc;
+import a75f.io.renatus.views.ZoneImageWidget;
 
 import static a75f.io.bo.building.definitions.ScheduleMode.NamedSchedule;
 import static a75f.io.bo.building.definitions.ScheduleMode.ZoneSchedule;
@@ -65,9 +65,9 @@ public class ZonesFragment extends Fragment
     boolean                    mDetailsView              = false;
     ZoneImageWidget            selectedDevice            = null;
     int                        nRoomDetailsLocationIndex = -1;
-    SeekArcWidget              rbSelectedRoom            = null;
+    SeekArc rbSelectedRoom            = null;
     int                        nSelectedRoomIndex        = -1;
-    ArrayList<SeekArcWidget>   seekArcWidgetList         = null;
+    ArrayList<SeekArc> seekArcList = null;
     ArrayList<ZoneImageWidget> zoneWidgetList            = null;
     boolean                    showCCUDial               = false;
     boolean                    bDetailsShowing           = false;
@@ -90,28 +90,28 @@ public class ZonesFragment extends Fragment
     private int          room_height;
     private int          eSelectedMode;
     private LinearLayout roomRow;
-    
+
     private LinearLayout mLightingRow   = null;
     private View         mLcmHeaderView = null;
     private DataArrayAdapter<Floor> floorDataAdapter;
-    private SeekArcWidget.OnSeekArcChangeListener seekArcChangeListener =
-            new SeekArcWidget.OnSeekArcChangeListener()
+    private SeekArc.OnSeekArcChangeListener seekArcChangeListener =
+            new SeekArc.OnSeekArcChangeListener()
             {
                 @Override
-                public void onProgressChanged(SeekArcWidget seekArc, int progress, boolean fromUser)
+                public void onProgressChanged(SeekArc seekArc, int progress, boolean fromUser)
                 {
                 }
-                
-                
+
+
                 @Override
-                public void onStartTrackingTouch(SeekArcWidget seekArc)
+                public void onStartTrackingTouch(SeekArc seekArc)
                 {
                     mDesiredTempScrolling = true;
                 }
-                
-                
+
+
                 @Override
-                public void onStopTrackingTouch(final SeekArcWidget seekArc)
+                public void onStopTrackingTouch(final SeekArc seekArc)
                 {
                     Handler handler = new Handler();
                     handler.postDelayed(new Runnable()
@@ -155,7 +155,7 @@ public class ZonesFragment extends Fragment
     //
     //        roomData.refreshRoomDataInterface();
     //    }
-    
+
     //MARK
     //    private void initStandaloneWidgets(RoomData roomData, View view){
     //        if(updateRelayStatus(roomData)) {
@@ -382,7 +382,7 @@ public class ZonesFragment extends Fragment
     private ZoneImageWidget.OnClickListener zoneWidgetListener =
             new ZoneImageWidget.OnClickListener()
             {
-                
+
                 @Override
                 public void onClick(ZoneImageWidget w)
                 {
@@ -468,7 +468,7 @@ public class ZonesFragment extends Fragment
             };
     private RelativeLayout                  mRoomDetailsWidget = null;
     private int                             mod                = 3;
-    
+
     private ImageView                  ivSignal;
     private ImageView                  ivOccupied;
     private Spinner                    spinSelectedSchedule;
@@ -479,10 +479,10 @@ public class ZonesFragment extends Fragment
     private ImageView                  ivVacationEdit;
     private TextView                   tvVacationFromTo;
     private Animation                     in                   = null;
-    private SeekArcWidget.OnClickListener seekArcClickListener = new SeekArcWidget.OnClickListener()
+    private SeekArc.OnClickListener seekArcClickListener = new SeekArc.OnClickListener()
     {
         @Override
-        public void onClick(SeekArcWidget r)
+        public void onClick(SeekArc r)
         {
             if (showCCUDial && (r.getIndex() == 1))
             {
@@ -621,15 +621,15 @@ public class ZonesFragment extends Fragment
             }
         }
     };
-    
-    
+
+
     public static ZonesFragment newInstance()
     {
         return new ZonesFragment();
     }
-    
-    
-    private void updateRoomDetailsWidget(SeekArcWidget roomData)
+
+
+    private void updateRoomDetailsWidget(SeekArc roomData)
     {
         //TODO: signal
         //ivSignal.setImageDrawable(getSignalDrawable(roomData.getSignalStatus()));
@@ -659,8 +659,8 @@ public class ZonesFragment extends Fragment
         spinSelectedSchedule.setEnabled(true);
         roomData.getZoneProfile().refreshRoomDataInterface();
     }
-    
-    
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState)
@@ -670,8 +670,8 @@ public class ZonesFragment extends Fragment
         createDetailsWidget(inflater);
         return inflate;
     }
-    
-    
+
+
     @Override
     public void onStart()
     {
@@ -709,8 +709,8 @@ public class ZonesFragment extends Fragment
         attributeSet = getSeekbarXmlAttributes();
         Log.e("ZONE", "END ONSTART");
     }
-    
-    
+
+
     @Override
     public void onResume()
     {
@@ -721,8 +721,8 @@ public class ZonesFragment extends Fragment
         floorDataAdapter.setSelectedItem(mCurFloorIndex);
         Log.e("ZONE", "END onResume");
     }
-    
-    
+
+
     public void fillZoneData()
     {
         ArrayList<Floor> floorList = ccu().getFloors();
@@ -750,10 +750,10 @@ public class ZonesFragment extends Fragment
                     }
                     else if (zoneProfile.getProfileType() == ProfileType.SSE)
                     {
-                        SeekArcWidget seekArcWidget =
+                        SeekArc seekArc =
                                 AddNewArc(z, (SingleStageProfile) zoneProfile, new LinearLayout.LayoutParams(room_width, room_height), index);
-                        seekArcWidgetList.add(seekArcWidget);
-                        viewToAdd = seekArcWidget;
+                        seekArcList.add(seekArc);
+                        viewToAdd = seekArc;
                     }
                     if (index % mod == 0)
                     {
@@ -770,13 +770,13 @@ public class ZonesFragment extends Fragment
             }
         }
     }
-    
-    
-    public SeekArcWidget AddNewArc(Zone zone, SingleStageProfile zoneProfile,
-                                   LinearLayout.LayoutParams lp, int index)
+
+
+    public SeekArc AddNewArc(Zone zone, SingleStageProfile zoneProfile,
+                             LinearLayout.LayoutParams lp, int index)
     {
-        SeekArcWidget rmSeekArc =
-                new SeekArcWidget(getActivity().getApplicationContext(), attributeSet, null);
+        SeekArc rmSeekArc =
+                new SeekArc(getActivity().getApplicationContext(), attributeSet, null);
         rmSeekArc.setCMDataToSeekArc(zoneProfile, zone.roomName, index);
         rmSeekArc.setLayoutParams(lp);
         rmSeekArc.setmPathStartAngle(120);
@@ -800,8 +800,8 @@ public class ZonesFragment extends Fragment
         //rmSeekArc.refreshView();
         return rmSeekArc;
     }
-    
-    
+
+
     private AttributeSet getSeekbarXmlAttributes()
     {
         AttributeSet as = null;
@@ -834,24 +834,24 @@ public class ZonesFragment extends Fragment
         while (state != XmlPullParser.END_DOCUMENT);
         return as;
     }
-    
-    
+
+
     private void createDetailsWidget(LayoutInflater inflater)
     {
-        seekArcWidgetList = new ArrayList<>();
+        seekArcList = new ArrayList<>();
         zoneWidgetList = new ArrayList<>();
         createLighting(inflater);
         createSSE(inflater);
     }
-    
-    
+
+
     private void createLighting(LayoutInflater inflater)
     {
         mLightingRow = (LinearLayout) inflater.inflate(R.layout.zone_detail_list, null);
         mLightsDetailsView = (ListView) mLightingRow.findViewById(R.id.lighting_detail_list);
     }
-    
-    
+
+
     private void createSSE(LayoutInflater inflater)
     {
         mRoomDetailsWidget = (RelativeLayout) inflater.inflate(R.layout.roomdetails_inline, null);
@@ -875,8 +875,8 @@ public class ZonesFragment extends Fragment
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
             {
             }
-            
-            
+
+
             @Override
             public void onNothingSelected(AdapterView<?> parent)
             {
@@ -905,8 +905,8 @@ public class ZonesFragment extends Fragment
         });
         tvVacationFromTo = (TextView) mRoomDetailsWidget.findViewById(R.id.vacationFromTo);
     }
-    
-    
+
+
     public void UpdateRoomLightingWidget(final LightProfile roomData, Boolean lcmdabfsv)
     {
         mLightsDetailsView.setAdapter(null);
@@ -955,8 +955,8 @@ public class ZonesFragment extends Fragment
                         roomData.setScheduleMode(ZoneSchedule);
                     }
                 }
-                
-                
+
+
                 @Override
                 public void onNothingSelected(AdapterView<?> parent)
                 {
@@ -971,15 +971,15 @@ public class ZonesFragment extends Fragment
         mLightsDetailsView.setAdapter(adapter);
         new LayoutHelper(getActivity()).setListViewParams(mLightsDetailsView, null, 0, 0, expand);
     }
-    
-    
+
+
     private void showLCMLightScheduleFragment(Floor floor, Zone zone, ZoneProfile zoneProfile)
     {
         showDialogFragment(LightScheduleFragment
                                    .newZoneProfileInstance(floor, zone, zoneProfile), LightScheduleFragment.ID);
     }
-    
-    
+
+
     private Floor getFloorForLightProfile(ZoneProfile zoneProfile)
     {
         for (Floor f : ccu().getFloors())
@@ -994,8 +994,8 @@ public class ZonesFragment extends Fragment
         }
         return null;
     }
-    
-    
+
+
     private Zone getZoneForLightProfile(ZoneProfile zoneProfile)
     {
         for (Floor f : ccu().getFloors())
@@ -1010,8 +1010,8 @@ public class ZonesFragment extends Fragment
         }
         return null;
     }
-    
-    
+
+
     private void showLCMNamedScheduleSelector(final ZoneProfile zoneProfile)
     {
         final ArrayList<String> strings =
@@ -1033,8 +1033,8 @@ public class ZonesFragment extends Fragment
                });
         builder.create().show();
     }
-    
-    
+
+
     protected void showDialogFragment(DialogFragment dialogFragment, String id)
     {
         FragmentTransaction ft = getFragmentManager().beginTransaction();

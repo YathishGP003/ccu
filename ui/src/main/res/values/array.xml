@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="environment_items">
+        <item>Production</item>
+        <item>Stage</item>
+        <item>QA</item>
+        <item>Dev</item>
+    </string-array>
+    <!-- Prod must come first! -->
+    <string-array name="environment_url_items">
+        <item>kinveyid1</item>
+        <item>kinveyid2</item>
+        <item>kinveyid3</item>
+        <item>kinveyid4</item>
+    </string-array>
+</resources>

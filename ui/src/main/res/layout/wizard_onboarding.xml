@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/registerBackground">
+
+    <!--
+            **********************************************************************
+            **You MUST have this FrameLayout as the container for wizard's steps**
+            **********************************************************************
+    -->
+    <FrameLayout
+            android:id="@+id/step_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    <!--
+            Button for signalling the wizard to proceed to the next step
+    -->
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <View android:layout_height="0dp"
+            android:layout_width="0dp"
+            android:layout_weight="20" />
+    <Button
+            android:id="@+id/next_button"
+            android:layout_height="48dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+        android:layout_width="0dp"
+        android:layout_weight="60"
+            android:layout_marginTop="10dp"
+        android:background="@drawable/rounded_button"
+        style="@style/FButton.Featured"
+        android:text=""
+        />
+        <View android:layout_height="0dp"
+            android:layout_width="0dp"
+            android:layout_weight="20" />
+    </LinearLayout>
+</LinearLayout>

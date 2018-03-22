@@ -18,7 +18,11 @@ android {
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
-
+        javaCompileOptions {
+            annotationProcessorOptions {
+                includeCompileClasspath true
+            }
+        }
     }
 
     packagingOptions {
@@ -60,7 +64,7 @@ dependencies {
     compile 'com.fasterxml.jackson.core:jackson-core:2.7.3'
     compile 'com.fasterxml.jackson.core:jackson-annotations:2.7.3'
     compile 'com.fasterxml.jackson.core:jackson-databind:2.7.3'
-    compile(name: 'kinvey-android-3.0.3', ext: 'aar')
+    compile(name: 'kinvey-android-3.0.16', ext: 'aar')
     compile(name: 'realm-android-library-3.2.1', ext: 'aar')
     compile(name: 'relinker-1.2.2', ext: 'aar')
     compile 'com.google.http-client:google-http-client:1.19.0'

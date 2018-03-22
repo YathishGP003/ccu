@@ -76,7 +76,7 @@ dependencies {
     compile('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') {
         transitive = true
     }
-    compile(name: 'kinvey-android-3.0.3', ext: 'aar')
+    compile(name: 'kinvey-android-3.0.16', ext: 'aar')
     compile(name: 'realm-android-library-3.2.1', ext: 'aar')
     compile(name: 'relinker-1.2.2', ext: 'aar')
     compile 'com.opencsv:opencsv:4.0'

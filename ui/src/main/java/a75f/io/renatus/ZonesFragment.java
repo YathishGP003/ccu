@@ -823,7 +823,7 @@ public class ZonesFragment extends Fragment
             }
             if (state == XmlPullParser.START_TAG)
             {
-                if (parser.getName().equals("a75f.io.renatus.VIEWS.SeekArcWidget"))
+                if (parser.getName().equals("a75f.io.renatus.views.SeekArc"))
                 {
                     Log.i("WHYMEGOD", "Found seekarc widget");
                     as = Xml.asAttributeSet(parser);

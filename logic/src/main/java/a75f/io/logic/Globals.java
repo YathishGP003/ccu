@@ -26,7 +26,7 @@ import static a75f.io.logic.LLog.Logd;
  */
 class Globals
 {
-    
+
     private static final int      NUMBER_OF_CYCLICAL_TASKS_RENATUS_REQUIRES = 10;
     private static final int      TASK_SEPERATION                           = 3;
     private static final TimeUnit TASK_SERERATION_TIMEUNIT                  = TimeUnit.SECONDS;
@@ -38,20 +38,20 @@ class Globals
     private CCUApplication           mCCUApplication;
     private LZoneProfile             mLZoneProfile;
     private boolean isSimulation = false;
-    private boolean isDeveloperTest = false;
-    
-    
+    private boolean isDeveloperTest = true;
+
+
     private Globals()
     {
     }
-    
-    
+
+
     public ScheduledExecutorService getScheduledThreadPool()
     {
         return getInstance().taskExecutor;
     }
-    
-    
+
+
     public static Globals getInstance()
     {
         if (globals == null)
@@ -60,8 +60,8 @@ class Globals
         }
         return globals;
     }
-    
-    
+
+
     public CCUApplication ccu()
     {
         if (getInstance().mCCUApplication == null)
@@ -70,8 +70,8 @@ class Globals
         }
         return getInstance().mCCUApplication;
     }
-    
-    
+
+
     public LZoneProfile getLZoneProfile()
     {
         if (getInstance().mLZoneProfile == null)
@@ -80,23 +80,23 @@ class Globals
         }
         return getInstance().mLZoneProfile;
     }
-    
-    
+
+
     public boolean isSimulation()
     {
         return isSimulation;
     }
-    
-    
 
-    
-    
+
+
+
+
     public Context getApplicationContext()
     {
         return mApplicationContext;
     }
-    
-    
+
+
     public void setApplicationContext(Context mApplicationContext)
     {
         if (this.mApplicationContext == null)
@@ -105,8 +105,8 @@ class Globals
             initilize();
         }
     }
-    
-    
+
+
     public void initilize()
     {
         taskExecutor = Executors.newScheduledThreadPool(NUMBER_OF_CYCLICAL_TASKS_RENATUS_REQUIRES);
@@ -129,49 +129,49 @@ class Globals
         Logd("Simulation ----- " + isSimulation);
         isDeveloperTest = getApplicationContext().getResources().getBoolean(R.bool.developer_test);
     }
-    
+
     public DalContext getDalContext()
     {
         return DalContext.getInstance();
     }
-    
-    
+
+
     private void populate()
     {
         //TODO: get this from kinvey.
         //This seems like overkill, but it has to follow the meta to support the unit test
         // framework.
-        
-        
+
+
         if(ccu().getDefaultCCUTuners() == null)
         {
             AlgoTuningParameters algoTuningParameters = new AlgoTuningParameters();
             ccu().setDefaultCCUTuners(L.getDefaultTuners());
         }
-        
+
         //TODO test method
         if(ccu().getLCMNamedSchedules().size() == 0)
         {
             //Mock schedule M-F, 8AM - 5:30PM turn isOn lights to value 100.
             //Mock schedule M-F, 8AM - 5:30PM turn isOn lights to value 100.
-            
-            
+
+
             NamedSchedule namedSchedule = new NamedSchedule();
             namedSchedule.setName("LCM Named Schedule 100");
             namedSchedule.setSchedule(getSchedules(100));
-    
-    
+
+
             NamedSchedule namedScheduleTwo = new NamedSchedule();
             namedScheduleTwo.setName("LCM Named Schedule 75");
             namedScheduleTwo.setSchedule(getSchedules(75));
-            
+
             ccu().getLCMNamedSchedules().put(namedSchedule.getName(), namedSchedule);
             ccu().getLCMNamedSchedules().put(namedScheduleTwo.getName(), namedScheduleTwo);
             ccu().setDefaultLightSchedule(getSchedules(100));
             ccu().setDefaultTemperatureSchedule(getSchedules(75));
         }
     }
-    
+
     private ArrayList<Schedule> getSchedules(int val)
     {
         Schedule schedule = new Schedule();
@@ -191,17 +191,17 @@ class Globals
         schedule.setDays(intsaslist);
         ArrayList<Schedule> schedules = new ArrayList<Schedule>();
         schedules.add(schedule);
-        
+
         return schedules;
     }
-    
-    
+
+
     public boolean isDeveloperTesting()
     {
         return isDeveloperTest;
     }
-    
-    
+
+
     public void setCCU(CCUApplication CCU)
     {
         this.mCCUApplication = CCU;

@@ -6,9 +6,9 @@ set ADB=adb
 set ADB_SH=%ADB% shell su -c
 
 set path_sysapp=/system/priv-app
-set apk_host=../ui/build/outputs/apk/
+set apk_host=C:\Users\Yinten\repos\75F\renatus\ui\build\outputs\apk\debug\
 set apk_name=%dir_app_name%.apk
-set apk_target_dir=%path_sysapp%/
+set apk_target_dir=%path_sysapp%
 set apk_target_sys=%apk_target_dir%/%apk_name%
 
 ECHO Delete previous APK

@@ -14,7 +14,7 @@
             android:id="@+id/selectCountryTV"
             android:textSize="22sp"
             android:gravity="center_vertical"
-            android:background="#CCCCCC"/>
+            android:background="#666666"/>
     </TableRow>
     <TableRow
         android:layout_width="wrap_content"
@@ -37,7 +37,7 @@
             android:id="@+id/textView1"
             android:textSize="22sp"
             android:gravity="center_vertical"
-            android:background="#CCCCCC"/>
+            android:background="#666666"/>
     </TableRow>
     <TableRow
         android:layout_width="wrap_content"

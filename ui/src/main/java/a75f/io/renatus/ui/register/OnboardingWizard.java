@@ -27,9 +27,11 @@ public class OnboardingWizard extends WizardActivity {
 				.setActivity(this)
 				.setContainerId(R.id.step_container);
 
-		if (L.isDeveloperTesting()) {
+
+		//TODO: test mode.
+		//if (L.isDeveloperTesting()) {
 			builder.addStep(PickEnvironment.class);
-		}
+		//}
 
 		flow = builder.addStep(WelcomeScreen.class).addStep(ExampleSamjith.class).create();                  //to create the wizard flow.
 

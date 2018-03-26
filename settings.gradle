@@ -1,2 +1,2 @@
-include ':ui', ':logic', ':bo', ':bluetooth', ':usbserial', ':dal', ':daltest'
+include ':ui', ':logic', ':bo', ':bluetooth', ':usbserial'
 

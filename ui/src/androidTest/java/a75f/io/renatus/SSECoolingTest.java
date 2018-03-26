@@ -33,16 +33,16 @@ import static a75f.io.renatus.framework.GraphColumns.Relay2_Out;
 public class SSECoolingTest extends BaseSimulationTest
 {
 	SimulationRunner mRunner = null;
-	
+
 	@Before
 	public void setUp() {
 		mRunner =  new SimulationRunner(this, new SamplingProfile(10, 180));
 	}
-	
+
 	@After
 	public void tearDown() {
 	}
-	
+
 	@Override
 	public String getTestDescription() {
 		return "Verifies SSE cooling during an occupied schedule." +
@@ -50,17 +50,17 @@ public class SSECoolingTest extends BaseSimulationTest
 		       "Sends 10 sets of inputs with varying room-temperature and set-temperature evey 3 minutes." +
 		       "and fetches smart node params corresponding to each input.";
 	}
-	
+
 	@Override
 	public String getCCUStateFileName() {
 		return "ssecoolingstate.json";
 	}
-	
+
 	@Override
 	public String getSimulationFileName() {
 		return "ssecoolingtest.csv";
 	}
-	
+
 	@Override
 	public void analyzeTestResults(SimulationTestInfo testLog) {
 		if (mRunner.getLoopCounter() == 0) {
@@ -109,17 +109,17 @@ public class SSECoolingTest extends BaseSimulationTest
 			}
 		}
 	}
-	
+
 	@Override
 	public long testDuration() {
 		return mRunner.duration();
 	}
-	
+
 	@Override
 	public void reportTestResults(SimulationTestInfo testLog, TestResult result) {
-		
+
 	}
-	
+
 	@Override
 	public HashMap<String,ArrayList<Float>> inputGraphData() {
 		ArrayList<Float> rt = new ArrayList<>();
@@ -135,32 +135,33 @@ public class SSECoolingTest extends BaseSimulationTest
 		}
 		graphData.put("room_temperature",rt);
 		graphData.put("set_temperature",st);
-		
+
 		return graphData;
 	}
-	
+
 	@Override
 	public String[] graphColumns() {
 		String[] graphCol = {Relay1_Out.toString(),Relay2_Out.toString(),Analog1_Out.toString(), Analog2_Out.toString()};
 		return graphCol;
 	}
-	
+
 	@Override
 	public void customizeTestData(CCUApplication app) {
 		DateTime sStart = new DateTime(System.currentTimeMillis(), DateTimeZone.getDefault());
 		DateTime sEnd = new DateTime(System.currentTimeMillis() + 30*60000, DateTimeZone.getDefault());
 		ArrayList<Schedule> schedules     = app.getFloors().get(0).mRoomList.get(0).mZoneProfiles.get(0).getSchedules();
-		Day testDay = schedules.get(0).getDays().get(sStart.getDayOfWeek() - 1);
-		testDay.setSthh(sStart.getHourOfDay());
-		testDay.setEthh(sEnd.getHourOfDay());
-		testDay.setStmm(sStart.getMinuteOfHour());
-		testDay.setEtmm(sEnd.getMinuteOfHour());
+		//TODO: KINVEYREFACTOR
+		//Day testDay = schedules.get(0).getDays().get(sStart.getDayOfWeek() - 1);
+		//testDay.setSthh(sStart.getHourOfDay());
+		//testDay.setEthh(sEnd.getHourOfDay());
+		//testDay.setStmm(sStart.getMinuteOfHour());
+		//testDay.setEtmm(sEnd.getMinuteOfHour());
 	}
 	@Override
 	public void runTest() {
-		
+
 		System.out.println("runTest.........");
-		
+
 		mRunner.runSimulation();
 	}
 }

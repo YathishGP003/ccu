@@ -1,4 +1,4 @@
-package a75f.io.daltest;
+package a75f.io.renatus.kinvey;
 
 import android.content.Context;
 import android.os.Handler;
@@ -10,6 +10,8 @@ import android.util.Log;
 
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.kinvey.android.store.DataStore;
 import com.kinvey.android.store.UserStore;
 import com.kinvey.java.core.KinveyClientCallback;
@@ -23,6 +25,8 @@ import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.concurrent.CountDownLatch;
 
 import a75f.io.bo.kinvey.AlgoTuningParameters;
@@ -34,392 +38,332 @@ import a75f.io.bo.kinvey.CCUZones;
 import a75f.io.bo.kinvey.Constants;
 import a75f.io.bo.kinvey.DalContext;
 import a75f.io.bo.kinvey.JsonSerializer;
+import a75f.io.renatus.RenatusLandingActivity;
+import a75f.io.renatus.ui.register.OnboardingWizard;
 
 import static a75f.io.bo.kinvey.DalContext.getSharedClient;
 import static a75f.io.bo.kinvey.JsonSerializer.fromJson;
 
 @RunWith(AndroidJUnit4.class)
 @LargeTest
-public class DALTest
-{
-    public static final String                         TAG           = "ApplicationTest";
+public class DALTest {
+    public static final String TAG = "ApplicationTest";
     @Rule
-    public              ActivityTestRule<MainActivity> mActivityRule =
-            new ActivityTestRule<>(MainActivity.class);
-    //Context mMockContext;
-    String   userId   = "userId";
-    String   password = "password";
-    String   zone     = "";
-    String   floor    = "";
+    public ActivityTestRule<OnboardingWizard> mActivityRule =
+            new ActivityTestRule<>(OnboardingWizard.class);
+
+    String userId = "userId";
+    String password = "password";
+    String zone = "";
+    String floor = "";
     CCUZones ccuZones = new CCUZones();
     CountDownLatch countDownLatch;
     private String entityId = "";
     private Context context;
-    
-    
+
+
     @Before
-    public void setUp()
-    {
-        context = mActivityRule.getActivity().getApplicationContext();
+    public void setUp() {
+        context = mActivityRule.getActivity();
     }
-    
-    
+
+
     @Test
-    public void testKinveyContext()
-    {
+    public void testKinveyContext() {
         Assert.assertNotNull(context);
     }
     //TODO: organize tuners this way?
-    
-    
+
+
     @Test
-    public void testRegisteringNewUser()
-    {
+    public void testRegisteringNewUser() {
         countDownLatch = new CountDownLatch(1);
         Handler h = new Handler(Looper.getMainLooper());
-        h.post(new Runnable()
-        {
-            
-            public void run()
-            {
+        h.post(new Runnable() {
+
+            public void run() {
                 DalContext.instantiate(context);
-                if (getSharedClient().isUserLoggedIn())
-                {
-                    UserStore.logout(getSharedClient(), new KinveyClientCallback<Void>()
-                    {
+                if (getSharedClient().isUserLoggedIn()) {
+                    UserStore.logout(getSharedClient(), new KinveyClientCallback<Void>() {
                         @Override
-                        public void onSuccess(Void aVoid)
-                        {
+                        public void onSuccess(Void aVoid) {
                             registerUserTestExtension();
                         }
-        
-        
+
+
                         @Override
-                        public void onFailure(Throwable throwable)
-                        {
+                        public void onFailure(Throwable throwable) {
                             Assert.fail(throwable.getMessage());
                             countDownLatch.countDown();
                         }
                     });
-                }
-                else
-                {
+                } else {
                     registerUserTestExtension();
                 }
-                
+
             }
         });
-        try
-        {
+        try {
             countDownLatch.await();
-        }
-        catch (InterruptedException e)
-        {
+        } catch (InterruptedException e) {
             e.printStackTrace();
+            Assert.fail(e.getMessage());
         }
     }
-    
-    
-    private void registerUserTestExtension()
-    {
-    
-        try
-        {
+
+
+    private void registerUserTestExtension() {
+
+        try {
             DalContext.instantiate(context);
-            JacksonFactory jacksonFactory = new JacksonFactory();
             InputStream inputStream = context.getAssets().open("User.json");
             CCUUser user = fromJson(inputStream, CCUUser.class);
             Assert.assertNotNull(user);
-        
+            Assert.assertNotNull(user.getAddressInformation());
+            Assert.assertSame(user.getFirstname(), "Ryan");
+            Assert.assertSame(user.getAddressInformation().getCity(), "Ryan City");
             UserStore
-                    .signUp(user.getUsername(), user.getPassword(), user, getSharedClient(), new KinveyClientCallback<CCUUser>()
-                    {
+                    .signUp(user.getUsername(), user.getPassword(), user, getSharedClient(), new KinveyClientCallback<CCUUser>() {
                         @Override
-                        public void onSuccess(CCUUser ccuUser)
-                        {
-                            try
-                            {
+                        public void onSuccess(CCUUser ccuUser) {
+                            try {
                                 Log.i(TAG,
                                         "Logged in: " + ccuUser.toPrettyString());
                                 countDownLatch.countDown();
-                            }
-                            catch (IOException e)
-                            {
+                            } catch (IOException e) {
                                 e.printStackTrace();
                             }
                         }
-                    
-                    
+
+
                         @Override
-                        public void onFailure(Throwable throwable)
-                        {
+                        public void onFailure(Throwable throwable) {
                             Assert.fail(throwable.getMessage());
                             countDownLatch.countDown();
                         }
                     });
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
             Assert.fail(e.getMessage());
             countDownLatch.countDown();
         }
     }
-    
-    
+
+
     @Test
-    public void testDalContext()
-    {
+    public void testDalContext() {
         DalContext.instantiate(context);
         Assert.assertNotNull(getSharedClient());
+        Assert.fail("Message");
     }
-    
-    
+
     @Test
-    public void testSavingTuningParameters()
+    public void testAssertFail()
     {
+        Assert.fail("Message Failure");
+    }
+
+    @Test
+    public void testAssertSuccess()
+    {
+        String s = "";
+
+
+    }
+
+    @Test
+    public void testSavingTuningParameters() {
         countDownLatch = new CountDownLatch(1);
         DalContext.instantiate(context);
         Handler h = new Handler(Looper.getMainLooper());
-        h.post(new Runnable()
-        {
-            
-            public void run()
-            {
+        h.post(new Runnable() {
+
+            public void run() {
                 testSavingTuningParametersUserLogin();
             }
         });
-        try
-        {
+        try {
             countDownLatch.await();
             Log.i(TAG, "LATCH: :This happens after");
-        }
-        catch (InterruptedException e)
-        {
+        } catch (InterruptedException e) {
             e.printStackTrace();
+            Assert.fail(e.getMessage());
         }
     }
-    
-    
-    private void testSavingTuningParametersUserLogin()
-    {
-        try
-        {
-            if (!getSharedClient().isUserLoggedIn())
-            {
-                UserStore.login(userId, password, getSharedClient(), new KinveyClientCallback()
-                {
-                    
+
+
+    private void testSavingTuningParametersUserLogin() {
+        try {
+            if (!getSharedClient().isUserLoggedIn()) {
+                UserStore.login(userId, password, getSharedClient(), new KinveyClientCallback() {
+
                     @Override
-                    public void onSuccess(Object o)
-                    {
+                    public void onSuccess(Object o) {
                         testSavingTuningParametersActual();
                     }
-                    
-                    
+
+
                     @Override
-                    public void onFailure(Throwable throwable)
-                    {
+                    public void onFailure(Throwable throwable) {
                         Assert.fail(throwable.getMessage());
                         throwable.printStackTrace();
                         countDownLatch.countDown();
                     }
                 });
-            }
-            else
-            {
+            } else {
                 testSavingTuningParametersActual();
             }
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             Assert.fail(e.getMessage());
             e.printStackTrace();
         }
     }
-    
-    
-    private void testSavingTuningParametersActual()
-    {
-        new Thread()
-        {
+
+
+    private void testSavingTuningParametersActual() {
+        new Thread() {
             @Override
-            public void run()
-            {
+            public void run() {
                 super.run();
-                try
-                {
+                try {
                     InputStream inputStream =
                             context.getAssets().open("DefaultTuningParameters_v100.json");
                     AlgoTuningParameters algoTuningParameters =
                             JsonSerializer.fromJson(inputStream, AlgoTuningParameters.class);
                     int buildingNoHotter = (int) algoTuningParameters
-                                                         .get(AlgoTuningParameters.SSETuners.SSE_BUILDING_MAX_TEMP);
+                            .get(AlgoTuningParameters.SSETuners.SSE_BUILDING_MAX_TEMP);
                     Assert.assertTrue(buildingNoHotter == 85);
                     final DataStore<AlgoTuningParameters> schedulesDataStore = DataStore
-                                                                                       .collection(Constants.TUNERS_COLLECTION_NAME, AlgoTuningParameters.class, StoreType.NETWORK, getSharedClient());
+                            .collection(Constants.TUNERS_COLLECTION_NAME, AlgoTuningParameters.class, StoreType.NETWORK, getSharedClient());
                     schedulesDataStore.save(algoTuningParameters);
                     Log.i(TAG, "LATCH: This happens before");
                     countDownLatch.countDown();
-                }
-                catch (Exception e)
-                {
+                } catch (Exception e) {
                     e.printStackTrace();
                     Assert.fail(e.getMessage());
                 }
             }
         }.start();
     }
-    
-    
+
+
     @Test
-    public void testDalUserParsing()
-    {
-        try
-        {
-            JacksonFactory jacksonFactory = new JacksonFactory();
+    public void testDalUserParsing() {
+        try {
             InputStream inputStream = context.getAssets().open("User.json");
-            CCUUser user = fromJson(inputStream, CCUUser.class);
+            Reader reader = new InputStreamReader(inputStream, "UTF-8");
+            GsonBuilder gsonBuilder = new GsonBuilder();
+
+            CCUUser user = gsonBuilder.create().fromJson(reader, CCUUser.class);
+            //fromJson(inputStream, CCUUser.class);
             Assert.assertNotNull(user);
-            Assert.assertEquals(user.getUsername(), "userId");
-        }
-        catch (IOException e)
-        {
+            Assert.assertEquals(user.getUsername(), "ryan10:27PM");
+        } catch (IOException e) {
             e.printStackTrace();
-            Assert.fail();
+            Assert.fail(e.getMessage());
         }
     }
-    
-    
+
+
     @Test
-    public void getDALHashMap()
-    {
+    public void getDALHashMap() {
         DalContext.instantiate(context);
         AlgoTuningParameters2 algoTuningParameters2 = new AlgoTuningParameters2();
         GenericJson json = algoTuningParameters2.algoTunerBackup();
-        try
-        {
+        try {
             JacksonFactory jacksonFactory = new JacksonFactory();
             Log.i(TAG, "Jackson Pretty string: " + jacksonFactory.toString(algoTuningParameters2));
             json.setFactory(jacksonFactory);
             Log.i(TAG, "GenericJSON: " + json.toPrettyString());
             Assert.fail(json.toString());
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
+            Assert.fail(e.getMessage());
         }
     }
-    
-    
+
+
     @Test
-    public void testDalLCMParsing()
-    {
+    public void testDalLCMParsing() {
         DalContext.instantiate(context);
-        try
-        {
+        try {
             Handler h = new Handler(Looper.getMainLooper());
-            h.post(new Runnable()
-            {
-                
-                public void run()
-                {
-                    try
-                    {
-                        if (!getSharedClient().isUserLoggedIn())
-                        {
+            h.post(new Runnable() {
+
+                public void run() {
+                    try {
+                        if (!getSharedClient().isUserLoggedIn()) {
                             UserStore
-                                    .login(userId, password, getSharedClient(), new KinveyClientCallback()
-                                    {
-                                        
+                                    .login(userId, password, getSharedClient(), new KinveyClientCallback() {
+
                                         @Override
-                                        public void onSuccess(Object o)
-                                        {
+                                        public void onSuccess(Object o) {
                                             saveSchedule();
                                         }
-                                        
-                                        
+
+
                                         @Override
-                                        public void onFailure(Throwable throwable)
-                                        {
+                                        public void onFailure(Throwable throwable) {
                                             Assert.fail(throwable.getMessage());
                                         }
                                     });
-                        }
-                        else
-                        {
+                        } else {
                             saveSchedule();
                         }
-                    }
-                    catch (IOException e)
-                    {
+                    } catch (IOException e) {
                         e.printStackTrace();
                         Assert.fail(e.getMessage());
                     }
                 }
             });
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
             Assert.fail(e.getMessage());
         }
-        try
-        {
+        try {
             Thread.sleep(20000);
-        }
-        catch (InterruptedException e)
-        {
+        } catch (InterruptedException e) {
             Assert.fail(e.getMessage());
             e.printStackTrace();
         }
     }
-    
-    
-    private void saveSchedule()
-    {
+
+
+    private void saveSchedule() {
         InputStream inputStream = null;
-        try
-        {
+        try {
             inputStream = context.getAssets().open("CCUSchedules.json");
             CCUSchedules schedule = fromJson(inputStream, CCUSchedules.class);
             final DataStore<CCUSchedules> schedulesDataStore = DataStore
-                                                                       .collection(Constants.SCHEDULE_COLLECTION_NAME, CCUSchedules.class, StoreType.NETWORK, getSharedClient());
-            schedulesDataStore.save(schedule, new KinveyClientCallback<CCUSchedules>()
-            {
+                    .collection(Constants.SCHEDULE_COLLECTION_NAME, CCUSchedules.class, StoreType.NETWORK, getSharedClient());
+            schedulesDataStore.save(schedule, new KinveyClientCallback<CCUSchedules>() {
                 @Override
-                public void onSuccess(CCUSchedules ccuSchedules)
-                {
+                public void onSuccess(CCUSchedules ccuSchedules) {
                     Log.i(TAG, "Schedule SaVED");
                     Assert.assertNotNull(ccuSchedules);
                 }
-                
-                
+
+
                 @Override
-                public void onFailure(Throwable throwable)
-                {
+                public void onFailure(Throwable throwable) {
                     Log.i(TAG, "Schedule fAILED");
                     Assert.fail(throwable.getMessage());
                 }
             });
             Assert.assertNotNull(schedule);
-            Assert.assertNotNull(schedule.getLcm_zone_schedule());
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
             Assert.fail(e.getMessage());
         }
     }
-    
-    
+
+
     @Test
-    public void testCCUPreconfiguration()
-    {
+    public void testCCUPreconfiguration() {
         //59c8ec3c8f57b7f96ed57ca5
         DalContext.instantiate(context);
         final DataStore<CCUPreconfiguration> preconfigurationDataStore = DataStore
-                                                                                 .collection(Constants.PRECONFIGURATION_NAME, CCUPreconfiguration.class, StoreType.CACHE, getSharedClient());
+                .collection(Constants.PRECONFIGURATION_NAME, CCUPreconfiguration.class, StoreType.CACHE, getSharedClient());
         final long currTime = System.nanoTime();
         zone = "zone";
         floor = "floor";
@@ -427,158 +371,126 @@ public class DALTest
         ccuZones.setFloor_name(floor);
         ccuZones.set_zone(floor + "_" + zone);
         Handler h = new Handler(Looper.getMainLooper());
-        h.post(new Runnable()
-        {
-            
-            public void run()
-            {
-                try
-                {
-                    UserStore.login(userId, password, getSharedClient(), new KinveyClientCallback()
-                    {
-                        
+        h.post(new Runnable() {
+
+            public void run() {
+                try {
+                    UserStore.login(userId, password, getSharedClient(), new KinveyClientCallback() {
+
                         @Override
-                        public void onSuccess(Object o)
-                        {
+                        public void onSuccess(Object o) {
                             Log.i(TAG, "USER LOGIN SUCCESS");
                             preconfigurationDataStore
-                                    .find("59c8ec3c8f57b7f96ed57ca5", new KinveyClientCallback<CCUPreconfiguration>()
-                                    {
+                                    .find("59c8ec3c8f57b7f96ed57ca5", new KinveyClientCallback<CCUPreconfiguration>() {
                                         @Override
-                                        public void onSuccess(CCUPreconfiguration ccuPreconfiguration)
-                                        {
+                                        public void onSuccess(CCUPreconfiguration ccuPreconfiguration) {
                                             long lengthToPullAndParse =
                                                     System.nanoTime() - currTime;
                                             Log.i(TAG, "Length to pull and parse in nanoseconds: " +
-                                                       lengthToPullAndParse);
-                                            try
-                                            {
+                                                    lengthToPullAndParse);
+                                            try {
                                                 Log.i(TAG, "CCUPreconfiguration: " +
-                                                           ccuPreconfiguration.toPrettyString());
-                                            }
-                                            catch (IOException e)
-                                            {
+                                                        ccuPreconfiguration.toPrettyString());
+                                            } catch (IOException e) {
                                                 e.printStackTrace();
                                             }
                                         }
-                                        
-                                        
+
+
                                         @Override
-                                        public void onFailure(Throwable throwable)
-                                        {
+                                        public void onFailure(Throwable throwable) {
                                             throwable.printStackTrace();
+                                            Assert.fail(throwable.getMessage());
                                         }
                                     });
                         }
-                        
-                        
+
+
                         @Override
-                        public void onFailure(Throwable throwable)
-                        {
+                        public void onFailure(Throwable throwable) {
                             throwable.printStackTrace();
                         }
                     });
-                }
-                catch (IOException e)
-                {
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
         });
-        try
-        {
+        try {
             Thread.sleep(30000);
-        }
-        catch (InterruptedException e)
-        {
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
-    
-    
+
+
     @Test
-    public void testCCUZones()
-    {
+    public void testCCUZones() {
         DalContext.instantiate(context);
         final DataStore<CCUZones> zoneStore = DataStore
-                                                      .collection(Constants.ZONE_COLLECTION_NAME, CCUZones.class, StoreType.CACHE, getSharedClient());
+                .collection(Constants.ZONE_COLLECTION_NAME, CCUZones.class, StoreType.CACHE, getSharedClient());
         zone = "zone";
         floor = "floor";
         entityId = "";
         ccuZones.setFloor_name(floor);
         ccuZones.set_zone(floor + "_" + zone);
         Handler h = new Handler(Looper.getMainLooper());
-        h.post(new Runnable()
-        {
-            
-            public void run()
-            {
-                try
-                {
-                    UserStore.login(userId, password, getSharedClient(), new KinveyClientCallback()
-                    {
-                        
+        h.post(new Runnable() {
+
+            public void run() {
+                try {
+                    UserStore.login(userId, password, getSharedClient(), new KinveyClientCallback() {
+
                         @Override
-                        public void onSuccess(Object o)
-                        {
+                        public void onSuccess(Object o) {
                             Log.i(TAG, "USER LOGIN SUCCESS");
-                            zoneStore.save(ccuZones, new KinveyClientCallback<CCUZones>()
-                            {
+                            zoneStore.save(ccuZones, new KinveyClientCallback<CCUZones>() {
                                 @Override
-                                public void onSuccess(CCUZones result)
-                                {
+                                public void onSuccess(CCUZones result) {
                                     Log.i(TAG, "CCU SAVE ZONES SUCCESS");
                                     Assert.assertNotNull(result.getId());
                                     entityId = result.getId();
-                                    zoneStore.find(entityId, new KinveyClientCallback<CCUZones>()
-                                    {
+                                    zoneStore.find(entityId, new KinveyClientCallback<CCUZones>() {
                                         @Override
-                                        public void onSuccess(CCUZones ccuZones)
-                                        {
+                                        public void onSuccess(CCUZones ccuZones) {
                                             Log.i(TAG, "CCU FIND ZONES SUCCESS");
                                             Assert.assertEquals(
                                                     floor + "_" + zone, ccuZones.get_zone());
                                             Assert.assertEquals(floor, ccuZones.getFloor_name());
                                         }
-                                        
-                                        
+
+
                                         @Override
-                                        public void onFailure(Throwable error)
-                                        {
+                                        public void onFailure(Throwable error) {
                                             Assert.fail(error.getMessage());
                                         }
                                     });
                                 }
-                                
-                                
+
+
                                 @Override
-                                public void onFailure(Throwable error)
-                                {
+                                public void onFailure(Throwable error) {
                                     Assert.fail(error.getMessage());
                                     error.printStackTrace();
                                 }
                             });
                         }
-                        
-                        
+
+
                         @Override
-                        public void onFailure(Throwable throwable)
-                        {
+                        public void onFailure(Throwable throwable) {
+                            Assert.fail(throwable.getMessage());
                         }
                     });
-                }
-                catch (IOException e)
-                {
+                } catch (IOException e) {
                     e.printStackTrace();
+                    Assert.fail(e.getMessage());
                 }
             }
         });
-        try
-        {
+        try {
             Thread.sleep(5000);
-        }
-        catch (InterruptedException e)
-        {
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }

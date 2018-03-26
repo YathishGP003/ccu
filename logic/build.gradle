@@ -55,5 +55,8 @@ dependencies {
     compile(name: 'realm-android-library-3.2.1', ext: 'aar')
     compile(name: 'relinker-1.2.2', ext: 'aar')
     compile 'com.github.pschroen:slack-api-android:c66cc8d997'
+    androidTestCompile 'com.android.support.test:runner:1.0.1'
+    androidTestCompile 'com.android.support.test:rules:1.0.1'
+
 
 }

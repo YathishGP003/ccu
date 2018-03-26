@@ -35,15 +35,15 @@ public class SchedulerTest
     String   userId   = "userId";
     String   password = "password";
 
-    
+
     @Before
     public void setup() {
         context = InstrumentationRegistry.getTargetContext().getApplicationContext();
         Globals.getInstance().setApplicationContext(context);
 
     }
-    
-    
+
+
     @Test
     public void testCCUPreconfiguration()
     {
@@ -52,12 +52,12 @@ public class SchedulerTest
         final DataStore<CCUPreconfiguration> preconfigurationDataStore = DataStore
                                                                                  .collection(Constants.PRECONFIGURATION_NAME, CCUPreconfiguration.class, StoreType.CACHE, DalContext
                                                                                                                                                                                   .getSharedClient());
-        
+
         final long currTime = System.nanoTime();
         Handler h = new Handler(Looper.getMainLooper());
         h.post(new Runnable()
         {
-            
+
             public void run()
             {
                 try
@@ -65,7 +65,7 @@ public class SchedulerTest
                     UserStore.login(userId, password, DalContext
                                                               .getSharedClient(), new KinveyClientCallback()
                     {
-                        
+
                         @Override
                         public void onSuccess(Object o)
                         {
@@ -77,7 +77,7 @@ public class SchedulerTest
                                 {
                                     long lengthToPullAndParse = System.nanoTime() - currTime;
                                     Log.i(TAG, "Length to pull and parse in nanoseconds: " + lengthToPullAndParse);
-                                    
+
                                     try
                                     {
                                         Log.i(TAG, "CCUPreconfiguration: "  + ccuPreconfiguration.toPrettyString());
@@ -94,8 +94,8 @@ public class SchedulerTest
                                 }
                             });
                         }
-                        
-                        
+
+
                         @Override
                         public void onFailure(Throwable throwable)
                         {
@@ -117,10 +117,10 @@ public class SchedulerTest
         {
             e.printStackTrace();
         }
-        
+
     }
-    
-    
-    
-    
+
+
+
+
 }

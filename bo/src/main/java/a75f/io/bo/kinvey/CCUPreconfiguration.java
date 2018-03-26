@@ -10,7 +10,7 @@ import com.kinvey.java.model.KinveyMetaData;
 
 public class CCUPreconfiguration extends GenericJson
 {
-    
+
     @Key("_id")
     private String                           id;
     @Key
@@ -43,11 +43,13 @@ public class CCUPreconfiguration extends GenericJson
     private String                           otp;
     @Key
     private String                           config_type;
+
     @Key("_kmd")
     private KinveyMetaData                   meta;
+
     @Key("_acl")
     private KinveyMetaData.AccessControlList acl;
-    
+
     public CCUPreconfiguration()
     {
     }  //GenericJson classes must have a public empty constructor

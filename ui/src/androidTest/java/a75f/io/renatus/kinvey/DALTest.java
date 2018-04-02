@@ -1,6 +1,7 @@
 package a75f.io.renatus.kinvey;
 
 import android.content.Context;
+import android.location.Address;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.test.filters.LargeTest;
@@ -29,20 +30,21 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.concurrent.CountDownLatch;
 
-import a75f.io.bo.kinvey.AlgoTuningParameters;
-import a75f.io.bo.kinvey.AlgoTuningParameters2;
-import a75f.io.bo.kinvey.CCUPreconfiguration;
-import a75f.io.bo.kinvey.CCUSchedules;
-import a75f.io.bo.kinvey.CCUUser;
-import a75f.io.bo.kinvey.CCUZones;
-import a75f.io.bo.kinvey.Constants;
-import a75f.io.bo.kinvey.DalContext;
-import a75f.io.bo.kinvey.JsonSerializer;
-import a75f.io.renatus.RenatusLandingActivity;
+import a75f.io.kinveybo.AlgoTuningParameters;
+import a75f.io.kinveybo.AlgoTuningParameters2;
+import a75f.io.kinveybo.CAddress;
+import a75f.io.kinveybo.CCUPreconfiguration;
+import a75f.io.kinveybo.CCUSchedules;
+import a75f.io.kinveybo.CCUUser;
+import a75f.io.kinveybo.CCUZones;
+import a75f.io.kinveybo.Constants;
+import a75f.io.kinveybo.DalContext;
+import a75f.io.logic.JsonSerializer;
 import a75f.io.renatus.ui.register.OnboardingWizard;
 
-import static a75f.io.bo.kinvey.DalContext.getSharedClient;
-import static a75f.io.bo.kinvey.JsonSerializer.fromJson;
+import static a75f.io.kinveybo.DalContext.getSharedClient;
+import static a75f.io.logic.JsonSerializer.fromJson;
+
 
 @RunWith(AndroidJUnit4.class)
 @LargeTest
@@ -116,14 +118,23 @@ public class DALTest {
 
         try {
             DalContext.instantiate(context);
-            InputStream inputStream = context.getAssets().open("User.json");
-            CCUUser user = fromJson(inputStream, CCUUser.class);
-            Assert.assertNotNull(user);
-            Assert.assertNotNull(user.getAddressInformation());
-            Assert.assertSame(user.getFirstname(), "Ryan");
-            Assert.assertSame(user.getAddressInformation().getCity(), "Ryan City");
+            //InputStream inputStream = context.getAssets().open("User.json");
+            //CCUUser user = fromJson(inputStream, CCUUser.class);
+
+            CCUUser ccuUser = new CCUUser();
+            ccuUser.setUsername("YintenStole22");
+            ccuUser.setPassword("Password");
+            CAddress address = new CAddress();
+            address.setAddress("address");
+            ccuUser.setFirstname("Ryan");
+            ccuUser.setAddressInformation(address);
+
+            Assert.assertNotNull(ccuUser);
+            Assert.assertNotNull(ccuUser.getAddressInformation());
+            Assert.assertSame(ccuUser.getFirstname(), "Ryan");
+            Assert.assertSame(ccuUser.getAddressInformation().getAddress(), "address");
             UserStore
-                    .signUp(user.getUsername(), user.getPassword(), user, getSharedClient(), new KinveyClientCallback<CCUUser>() {
+                    .signUp(ccuUser.getUsername(), ccuUser.getPassword(), ccuUser, getSharedClient(), new KinveyClientCallback<CCUUser>() {
                         @Override
                         public void onSuccess(CCUUser ccuUser) {
                             try {
@@ -229,7 +240,7 @@ public class DALTest {
                     InputStream inputStream =
                             context.getAssets().open("DefaultTuningParameters_v100.json");
                     AlgoTuningParameters algoTuningParameters =
-                            JsonSerializer.fromJson(inputStream, AlgoTuningParameters.class);
+                            fromJson(inputStream, AlgoTuningParameters.class);
                     int buildingNoHotter = (int) algoTuningParameters
                             .get(AlgoTuningParameters.SSETuners.SSE_BUILDING_MAX_TEMP);
                     Assert.assertTrue(buildingNoHotter == 85);

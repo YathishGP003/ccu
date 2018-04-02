@@ -11,8 +11,8 @@ import android.widget.TextView;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import a75f.io.bo.kinvey.BuildingAddresses;
-import a75f.io.bo.kinvey.CCUZones;
+import a75f.io.kinveybo.BuildingAddresses;
+import a75f.io.kinveybo.CCUZones;
 import a75f.io.renatus.R;
 
 public class LoginAdapter extends BaseAdapter {

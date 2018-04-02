@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import a75f.io.bo.kinvey.AlgoTuningParameters;
-import a75f.io.bo.kinvey.CCUUser;
+import a75f.io.kinveybo.AlgoTuningParameters;
+import a75f.io.kinveybo.CCUUser;
 
 /**
  * Created by Yinten isOn 8/15/2017.
@@ -19,11 +19,11 @@ public class CCUApplication
      */
     private ArrayList<Schedule> mDefaultLightSchedule = new ArrayList<Schedule>();
     private ArrayList<Schedule> mDefaultTemperatureSchedule = new ArrayList<Schedule>();
-    
+
     private int mTestTimeHH;
     private int mTestTimeMM;
     private int mTestTimeDoW;
-    
+
     public int getTestTimeHH()
     {
         return mTestTimeHH;
@@ -48,26 +48,26 @@ public class CCUApplication
     {
         this.mTestTimeDoW = testTimeDoW;
     }
-    
-    
+
+
     /*
         Named Schedules
      */
     private HashMap<String, NamedSchedule> mLCMNamedSchedules = new HashMap<>();
-    
-    private  AlgoTuningParameters mDefaultCCUTuners;
+
+    private AlgoTuningParameters mDefaultCCUTuners;
     public  SystemProfile    systemProfile = new SystemProfile();
     public  ControlMote      controlMote   = new ControlMote();
     private String           mTitle        = "";
     private ArrayList<Floor> mfloors       = new ArrayList<Floor>();
-    private CCUUser          mUser;
+    private CCUUser mUser;
     private short           mSmartNodeAddressBand;
-    
+
     public short getSmartNodeAddressBand()
     {
         return mSmartNodeAddressBand;
     }
-    
+
     public void setSmartNodeAddressBand(short smartNodeAddressBand)
     {
         this.mSmartNodeAddressBand = smartNodeAddressBand;
@@ -122,82 +122,82 @@ public class CCUApplication
     //		}
     //		return zoneProfiles;
     //	}
-    
+
     public ArrayList<Floor> getFloors()
     {
         return mfloors;
     }
-    
+
     public void setFloors(ArrayList<Floor> floors)
     {
         this.mfloors = floors;
     }
-    
+
     public String getTitle()
     {
         return mTitle;
     }
-    
+
     public void setTitle(String title)
     {
         this.mTitle = title;
     }
-    
+
     public AlgoTuningParameters getDefaultCCUTuners()
     {
         return mDefaultCCUTuners;
     }
-    
-    
+
+
     public void setDefaultCCUTuners(AlgoTuningParameters defaultCCUTuners)
     {
         this.mDefaultCCUTuners = defaultCCUTuners;
     }
-    
+
     //These will be provided as tuners when I get around ot it.
     public ArrayList<Schedule> getDefaultLightSchedule()
     {
         return mDefaultLightSchedule;
     }
-    
-    
+
+
     public void setDefaultLightSchedule(ArrayList<Schedule> defaultLightSchedule)
     {
         this.mDefaultLightSchedule = defaultLightSchedule;
     }
-    
-    
+
+
     //These will be provided as tuners when I get around to it.
     public ArrayList<Schedule> getDefaultTemperatureSchedule()
     {
         return mDefaultTemperatureSchedule;
     }
-    
-    
+
+
     public void setDefaultTemperatureSchedule(ArrayList<Schedule> defaultTemperatureSchedule)
     {
         this.mDefaultTemperatureSchedule = defaultTemperatureSchedule;
     }
-    
-    
+
+
     public HashMap<String, NamedSchedule> getLCMNamedSchedules()
     {
         return mLCMNamedSchedules;
     }
-    
-    
+
+
     public void setLCMNamedSchedules(HashMap<String, NamedSchedule> namedSchedules)
     {
         this.mLCMNamedSchedules = namedSchedules;
     }
-    
-    
+
+
     public CCUUser getUser()
     {
         return mUser;
     }
-    
-    
+
+
     public void setUser(CCUUser user)
     {
         this.mUser = mUser;

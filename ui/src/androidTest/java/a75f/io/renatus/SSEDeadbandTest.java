@@ -14,7 +14,7 @@ import java.util.List;
 import a75f.io.bo.building.CCUApplication;
 import a75f.io.bo.building.Day;
 import a75f.io.bo.building.Schedule;
-import a75f.io.bo.kinvey.AlgoTuningParameters;
+import a75f.io.kinveybo.AlgoTuningParameters;
 import a75f.io.renatus.framework.BaseSimulationTest;
 import a75f.io.renatus.framework.SamplingProfile;
 import a75f.io.renatus.framework.SimulationParams;
@@ -39,35 +39,35 @@ public class SSEDeadbandTest extends BaseSimulationTest
     SimulationRunner mRunner = null;
     int runCounter = 0;
     int testDeadBandVal;
-    
+
     int[] deadBandValArray = {0,0,4,4,1,1,3,3};
-    
+
     @Before
     public void setUp() {
         mRunner =  new SimulationRunner(this, new SamplingProfile(1, 180));
     }
-    
+
     @After
     public void tearDown() {
     }
-    
+
     @Override
     public String getTestDescription() {
         return "Tests various deadband values under constant room_temperature and set temperature." +
                "Creates a 30 minute schedule to start cooling immediately.Relay1 and Relay2 outputs of smartnode 7003 configured as Cooling and Fan respectively." +
                "Room temperature is kept above set temperature. Activation of cooling is monitored for different deadband values.";
     }
-    
+
     @Override
     public String getCCUStateFileName() {
         return "ssedeadband.json";
     }
-    
+
     @Override
     public String getSimulationFileName() {
         return "ssedeadband.csv";
     }
-    
+
     @Override
     public void analyzeTestResults(SimulationTestInfo testLog) {
         if (mRunner.getLoopCounter() == 0) {
@@ -112,17 +112,17 @@ public class SSEDeadbandTest extends BaseSimulationTest
             }
         }
     }
-    
+
     @Override
     public long testDuration() {
         return mRunner.duration();
     }
-    
+
     @Override
     public void reportTestResults(SimulationTestInfo testLog, TestResult result) {
-        
+
     }
-    
+
     @Override
     public HashMap<String,ArrayList<Float>> inputGraphData() {
         ArrayList<Float> rt = new ArrayList<>();
@@ -137,7 +137,7 @@ public class SSEDeadbandTest extends BaseSimulationTest
             rt.add(params.room_temperature);
             st.add(params.set_temperature);
         }
-    
+
         while (rt.size() < maxRunCount)
         {
             Float lastVal = rt.get(rt.size()-1);
@@ -148,10 +148,10 @@ public class SSEDeadbandTest extends BaseSimulationTest
             Float lastVal = st.get(st.size()-1);
             st.add(lastVal);
         }
-        
+
         graphData.put("room_temperature",rt);
         graphData.put("set_temperature",st);
-    
+
         ArrayList<Float> db = new ArrayList<>();
         for (int val : deadBandValArray) {
             db.add((float)val);
@@ -159,13 +159,13 @@ public class SSEDeadbandTest extends BaseSimulationTest
         graphData.put("cooling-deadband",db);
         return graphData;
     }
-    
+
     @Override
     public String[] graphColumns() {
         String[] graphCol = {Relay1_Out.toString(),Relay2_Out.toString(),Analog1_Out.toString(), Analog2_Out.toString()};
         return graphCol;
     }
-    
+
     @Override
     public void customizeTestData(CCUApplication app) {
         if (runCounter <= 1)
@@ -180,16 +180,16 @@ public class SSEDeadbandTest extends BaseSimulationTest
             testDay.setEtmm(sEnd.getMinuteOfHour());
             testDay.setVal((short)70);
         }
-    
+
         AlgoTuningParameters algoMap = ccu().getDefaultCCUTuners();
         Log.i(TAG, "Putting " + AlgoTuningParameters.SSETuners.SSE_COOLING_DEADBAND + " : " +
                    testDeadBandVal);
         algoMap.put(AlgoTuningParameters.SSETuners.SSE_COOLING_DEADBAND, testDeadBandVal);
     }
-    
+
     @Override
     public void runTest() {
-        
+
         System.out.println("runTest.........");
         runCounter++;
         testDeadBandVal = deadBandValArray[runCounter];

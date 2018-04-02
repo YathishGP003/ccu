@@ -15,7 +15,7 @@ import a75f.io.renatus.ENGG.RenatusEngineeringActivity;
 
 public class RenatusLandingActivity extends AppCompatActivity
 {
-    
+
     private static final String  TAG         = RenatusLandingActivity.class.getSimpleName();
     //TODO - refactor
     public               boolean settingView = false;
@@ -36,8 +36,8 @@ public class RenatusLandingActivity extends AppCompatActivity
      */
     private ViewPager            mViewPager;
     private TabLayout            mTabLayout;
-    
-    
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -46,7 +46,7 @@ public class RenatusLandingActivity extends AppCompatActivity
         if (!isFinishing())
         {
             setContentView(R.layout.activity_renatus_landing);
-    
+
 //            if (!DalContext.getSharedClient().isUserLoggedIn())
 //            {
 //                loadSplash();
@@ -100,15 +100,10 @@ public class RenatusLandingActivity extends AppCompatActivity
             setViewPager();
         }
     }
-    
-    
-    private void loadSplash()
-    {
-        startActivity(new Intent(this, SplashActivity.class));
-        finish();
-    }
-    
-    
+
+
+
+
     public void setViewPager()
     {
         if (settingView == true)
@@ -140,8 +135,8 @@ public class RenatusLandingActivity extends AppCompatActivity
             pageSwitchButton.setImageResource(R.drawable.status);
         }
     }
-    
-    
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
@@ -149,8 +144,8 @@ public class RenatusLandingActivity extends AppCompatActivity
         getMenuInflater().inflate(R.menu.menu_renatus_landing, menu);
         return true;
     }
-    
-    
+
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
@@ -165,8 +160,8 @@ public class RenatusLandingActivity extends AppCompatActivity
         }
         return super.onOptionsItemSelected(item);
     }
-    
-    
+
+
     @Override
     public void onPause()
     {

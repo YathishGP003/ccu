@@ -14,8 +14,8 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Spinner;
 
-import a75f.io.bo.kinvey.BuildingAddresses;
-import a75f.io.bo.kinvey.CCUZones;
+import a75f.io.kinveybo.BuildingAddresses;
+import a75f.io.kinveybo.CCUZones;
 import a75f.io.renatus.R;
 import a75f.io.renatus.ui.register.adapters.LoginAdapter;
 import a75f.io.renatus.views.wizard.ContextVariable;

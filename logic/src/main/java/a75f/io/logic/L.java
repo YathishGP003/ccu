@@ -21,11 +21,11 @@ import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.ZoneProfile;
 import a75f.io.bo.building.definitions.OverrideType;
 import a75f.io.bo.building.definitions.ScheduleMode;
-import a75f.io.bo.kinvey.AlgoTuningParameters;
-import a75f.io.bo.kinvey.CCUUser;
-import a75f.io.bo.kinvey.DalContext;
+import a75f.io.kinveybo.AlgoTuningParameters;
+import a75f.io.kinveybo.CCUUser;
+import a75f.io.kinveybo.DalContext;
 
-import static a75f.io.bo.kinvey.JsonSerializer.fromJson;
+import static a75f.io.logic.JsonSerializer.fromJson;
 import static a75f.io.logic.LZoneProfile.isNamedSchedule;
 
 /**

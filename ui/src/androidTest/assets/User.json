@@ -1,0 +1,21 @@
+{
+  "firstname": "Ryan",
+  "lastname": "Mattison",
+  "username": "ryan10:27PM",
+  "password": "password",
+  "contactInformation": {
+    "phone": "6122762054",
+    "email": "ryan@75f.io"
+  },
+  "addressInformation": {
+    "street": "Ryan Building Address",
+    "city": "Ryan City",
+    "zipcode": 54016,
+    "state": "mn",
+    "country": "USA"
+  },
+  "_geoloc": [
+    12.22222,
+    13.222222
+  ]
+}

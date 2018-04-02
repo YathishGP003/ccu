@@ -2,7 +2,7 @@
  * Javolution - Java(TM) Solution for Real-Time and Embedded Systems
  * Copyright (C) 2012 - Javolution (http://javolution.org/)
  * All rights reserved.
- * 
+ *
  * Permission to use, copy, modify, and distribute this software is
  * freely granted, provided that this notice is preserved.
  */
@@ -25,13 +25,6 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import a75f.io.bo.json.deserializers.Enum4Deserializer;
-import a75f.io.bo.json.deserializers.Enum8Deserializer;
-import a75f.io.bo.json.deserializers.Signed16Deserializer;
-import a75f.io.bo.json.deserializers.Signed8Deserializer;
-import a75f.io.bo.json.deserializers.UTF8Deserializer;
-import a75f.io.bo.json.deserializers.Unsigned16Deserializer;
-import a75f.io.bo.json.deserializers.Unsigned8Deserializer;
 import a75f.io.bo.json.serializers.Enum4Serializer;
 import a75f.io.bo.json.serializers.Enum8Serializaer;
 import a75f.io.bo.json.serializers.Signed16Serializer;
@@ -195,7 +188,7 @@ public class Struct {
      * Holds the offset of this struct relative to the outer struct or
      * to the byte buffer if there is no outer.
      */
-    
+
     int _outerOffset;
     /**
      * Holds this struct alignment in bytes (largest word size of its members).
@@ -359,11 +352,11 @@ public class Struct {
      * (convenience method when using Stream I/O). For better performance,
      * use of Block I/O (e.g. <code>java.nio.channels.*</code>) is recommended.
      *  This method behaves appropriately when not all of the data is available
-     *  from the input stream. Incomplete data is extremely common when the 
-     *  input stream is associated with something like a TCP connection. 
+     *  from the input stream. Incomplete data is extremely common when the
+     *  input stream is associated with something like a TCP connection.
      *  The typical usage pattern in those scenarios is to repeatedly call
      *  read() until the entire message is received.
-     *  
+     *
      * @param in the input stream being read from.
      * @return the number of bytes read (typically the {@link #size() size}
      *         of this struct.
@@ -421,9 +414,9 @@ public class Struct {
     }
 
     /**
-     * Returns this struct address (if supported by the platform). 
-     * This method allows for structs to be referenced (e.g. pointer) 
-     * from other structs. 
+     * Returns this struct address (if supported by the platform).
+     * This method allows for structs to be referenced (e.g. pointer)
+     * from other structs.
      *
      * @return the struct memory address.
      * @throws UnsupportedOperationException if not supported by the platform.
@@ -773,7 +766,7 @@ public class Struct {
      * Defines the specified three-dimensional array member. For predefined
      * members, the array is populated when empty; custom members should use
      * literal (populated) arrays.
-     * 
+     *
      * @param <M> Type of the Array Member
      * @param  arrayMember the three-dimensional array member.
      * @return the specified array member.
@@ -829,7 +822,7 @@ public class Struct {
                 "Attempt to read outside the Struct");
         int offset = bitOffset >> 3;
         int bitStart = bitOffset - (offset << 3);
-        
+
         bitStart = (byteOrder() == ByteOrder.BIG_ENDIAN) ? bitStart : 64
                 - bitSize - bitStart;
         int index = getByteBufferPosition() + offset;
@@ -1052,7 +1045,7 @@ public class Struct {
          * Holds the bit offset of this member (if any).
          * The actual position of the bits data depends upon the endianess and
          * the word size.
-         * 
+         *
          * @return Integer representing the bit index
          */
         public final int bitIndex() {
@@ -1179,7 +1172,7 @@ public class Struct {
                 }
             }
         }
-        
+
         @JsonSetter
         public void setUTF8(String value)
         {
@@ -1233,7 +1226,6 @@ public class Struct {
      * This class represents a 8 bits signed integer.
      */
     @JsonSerialize(using = Signed8Serializer.class)
-    @JsonDeserialize(using = Signed8Deserializer.class)
     public class Signed8 extends Member {
 
         public Signed8() {
@@ -1269,7 +1261,6 @@ public class Struct {
      * This class represents a 8 bits unsigned integer.
      */
 	@JsonSerialize(using = Unsigned8Serializer.class)
-    @JsonDeserialize(using = Unsigned8Deserializer.class)
     public class Unsigned8 extends Member {
 
         public Unsigned8() {
@@ -1286,7 +1277,7 @@ public class Struct {
             int word = getByteBuffer().get(index);
             return (short) (0xFF & ((bitLength() == 8) ? word : get(1, word)));
         }
-        
+
 
         public void set(short value) {
             final int index = getByteBufferPosition() + offset();
@@ -1297,15 +1288,15 @@ public class Struct {
                         (byte) set(value, 1, getByteBuffer().get(index)));
             }
         }
-    
+
         @JsonSetter
         public void setThis(int setter)
         {
             this.set((short)setter);
-    
+
         }
-        
-        
+
+
 
         public String toString() {
             return String.valueOf(this.get());
@@ -1316,7 +1307,6 @@ public class Struct {
      * This class represents a 16 bits signed integer.
      */
     @JsonSerialize (using = Signed16Serializer.class)
-    @JsonDeserialize (using = Signed16Deserializer.class)
     public  class Signed16 extends Member {
 
         public Signed16() {
@@ -1351,9 +1341,8 @@ public class Struct {
     /**
      * This class represents a 16 bits unsigned integer.
      */
-    
+
     @JsonSerialize(using = Unsigned16Serializer.class)
-    @JsonDeserialize(using = Unsigned16Deserializer.class)
     public class Unsigned16 extends Member {
 
         public Unsigned16() {
@@ -1676,41 +1665,40 @@ public class Struct {
             } else {
                 return getByteBuffer().getLong(index) == 0L;
             }
-            
+
         }
     }
-    
+
     /**
      * This class represents a 8 bits {@link Enum}.
      */
     @JsonSerialize(using = Enum4Serializer.class)
-    @JsonDeserialize(using = Enum4Deserializer.class)
     public class Enum4<T extends Enum<T>> extends Member {
-        
+
         private final T[] _values;
-        
+
         public T[] getValues()
         {
             return _values;
         }
-        
+
         public Enum4(T[] values) {
             super(4, 1);
             _values = values;
         }
-        
+
         public Enum4(T[] values, int nbrOfBits) {
             super(nbrOfBits, 1);
             _values = values;
         }
-        
+
         public T get() {
             final int index = getByteBufferPosition() + offset();
             int word = getByteBuffer().get(index);
             return _values[0xFF & get(1, word)];
         }
-       
-        
+
+
         public void set(T e) {
             int value = e.ordinal();
             if (_values[value] != e) throw new IllegalArgumentException("enum: "
@@ -1720,7 +1708,7 @@ public class Struct {
             int word = getByteBuffer().get(index);
             getByteBuffer().put(index, (byte) set(value, 1, word));
         }
-        
+
         public String toString() {
             return String.valueOf(this.get());
         }
@@ -1730,11 +1718,10 @@ public class Struct {
      * This class represents a 8 bits {@link Enum}.
      */
     @JsonSerialize(using = Enum8Serializaer.class)
-    @JsonDeserialize(using = Enum8Deserializer.class)
     public class Enum8<T extends Enum<T>> extends Member {
 
         private final T[] _values;
-    
+
         public T[] getValues()
         {
             return _values;
@@ -1770,8 +1757,8 @@ public class Struct {
         public String toString() {
             return String.valueOf(this.get());
         }
-        
-   
+
+
     }
 
     /**

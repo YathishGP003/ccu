@@ -18,25 +18,28 @@ public class Schedule
 {
     public static final String         TAG            = "Schedule";
     /*The value when scheduled parameters are active. */
+
+
+
     protected           ArrayList<Day> days           = new ArrayList<Day>();
     @JsonIgnore
     protected           boolean        mValidSchedule = false;
     @JsonIgnore
     ArrayList<Interval> mScheduledIntervals = new ArrayList<Interval>();
-    
-    
+
+
     public Schedule()
     {
     }
-    
-    
+
+
     public Schedule(ArrayList<Day> days)
     {
         this.days = days;
         sort();
     }
-    
-    
+
+
     private void sort()
     {
         Collections.sort(days, new Comparator<Day>()
@@ -48,15 +51,15 @@ public class Schedule
             }
         });
     }
-    
-    
+
+
     @JsonIgnore
     public boolean isInSchedule()
     {
         return isInSchedule(MockTime.getInstance().getMockTime());
     }
-    
-    
+
+
     @JsonIgnore
     public boolean isInSchedule(long time)
     {
@@ -72,8 +75,8 @@ public class Schedule
         }
         return false;
     }
-    
-    
+
+
     @JsonIgnore
     public boolean isValidSchedule()
     {
@@ -88,8 +91,8 @@ public class Schedule
         }
         return mValidSchedule = false;
     }
-    
-    
+
+
     @JsonIgnore
     public ArrayList<Interval> getScheduledIntervals()
     {
@@ -103,8 +106,8 @@ public class Schedule
         }
         return mScheduledIntervals;
     }
-    
-    
+
+
     @JsonIgnore
     public void buildIntervals()
     {
@@ -141,8 +144,8 @@ public class Schedule
         }
     }
     //
-    
-    
+
+
     /*****************
      *ONLY USED FOR CIRCUITS BELOW
      ******************/
@@ -161,25 +164,25 @@ public class Schedule
                                 0x00);
         return dayBytes;
     }
-    
-    
+
+
     public ArrayList<Day> getDays()
     {
         return days;
     }
-    
-    
+
+
     public void setDays(ArrayList<Day> days)
     {
         this.days = days;
         sort();
     }
-    
-    
+
+
     @JsonIgnore
     public Day getNextScheduleTransistion()
     {
-        
+
 		/* If intervals are not built */
         if (mScheduledIntervals.isEmpty() && days != null && days.size() > 0)
         {
@@ -194,14 +197,14 @@ public class Schedule
             {
                 return days.get(i);
             }
-          
+
         }
-        
+
         //TODO: ask deep about this, what to do if there is only one schedule.
         return days.get(0);
     }
-    
-    
+
+
     /****
      *Takes in a time and checks to see if it crossed a boundry.
      * ot = override time.

@@ -24,8 +24,9 @@ import java.util.Set;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.definitions.OverrideType;
 import a75f.io.bo.building.definitions.ProfileType;
-import a75f.io.bo.kinvey.DalContext;
+
 import a75f.io.bo.serial.comm.SerialEvent;
+import a75f.io.kinveybo.DalContext;
 import a75f.io.usbserial.UsbService;
 import allbegray.slack.SlackClientFactory;
 import allbegray.slack.exception.SlackResponseErrorException;
@@ -45,7 +46,7 @@ import static a75f.io.logic.L.ccu;
 
 public abstract class UtilityApplication extends Application
 {
-    
+
     private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver()
     {
         @Override
@@ -88,16 +89,16 @@ public abstract class UtilityApplication extends Application
             //TODO: research what cts and dsr changes are.  For now no handler will be used, because I'm uncertain if the information is relevant.
             usbService.setHandler(null);
         }
-        
-        
+
+
         @Override
         public void onServiceDisconnected(ComponentName arg0)
         {
             usbService = null;
         }
     };
-    
-    
+
+
     @Override
     public void onCreate()
     {
@@ -117,8 +118,8 @@ public abstract class UtilityApplication extends Application
 //            }
 //        }.start();
     }
-    
-    
+
+
     private void setFilters()
     {
         IntentFilter filter = new IntentFilter();
@@ -129,8 +130,8 @@ public abstract class UtilityApplication extends Application
         filter.addAction(UsbService.ACTION_USB_PERMISSION_NOT_GRANTED);
         registerReceiver(mUsbReceiver, filter);
     }
-    
-    
+
+
     private void startService(Class<?> service, ServiceConnection serviceConnection, Bundle extras)
     {
         if (!UsbService.SERVICE_CONNECTED)
@@ -150,14 +151,11 @@ public abstract class UtilityApplication extends Application
         Intent bindingIntent = new Intent(this, service);
         bindService(bindingIntent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
-    
-    
-    public void disablePush()
-    {
-        DalContext.getSharedClient().push(GCMService.class).disablePush();
-    }
-    
-    
+
+
+
+
+
     public void openBot()
     {
         final String slackToken = "xoxb-255909669140-FdBDuw3yE0Syn2O7hLXQsjOO";
@@ -166,7 +164,7 @@ public abstract class UtilityApplication extends Application
         mRtmClient = new SlackRealTimeMessagingClient(webSocketUrl);
         mRtmClient.addListener(Event.HELLO, new EventListener()
         {
-            
+
             @Override
             public void onMessage(JsonNode message)
             {
@@ -181,8 +179,8 @@ public abstract class UtilityApplication extends Application
         mRtmClient.addListener(Event.MESSAGE, new EventListener()
         {
             Zone selectedZone = null;
-            
-            
+
+
             @Override
             public void onMessage(JsonNode message)
             {
@@ -291,8 +289,8 @@ public abstract class UtilityApplication extends Application
             }
         }); mRtmClient.connect();
     }
-    
-    
+
+
     @Override
     public void onTerminate()
     {
@@ -301,18 +299,14 @@ public abstract class UtilityApplication extends Application
         unbindService(usbConnection);
         super.onTerminate();
     }
-    
-    
+
+
     // Called in a separate thread
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void onSerialEvent(SerialEvent event)
     {
         LSerial.handleSerialEvent(event);
     }
-    
-    
-    public void enablePush()
-    {
-        DalContext.getSharedClient().push(GCMService.class).initialize(this);
-    }
+
+
 }

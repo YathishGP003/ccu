@@ -6,9 +6,9 @@ import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.ZoneProfile;
 import a75f.io.bo.building.definitions.ProfileType;
 import a75f.io.bo.building.definitions.ScheduleMode;
-import a75f.io.bo.kinvey.AlgoTuningParameters;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
+import a75f.io.kinveybo.AlgoTuningParameters;
 
 import static a75f.io.logic.L.ccu;
 import static a75f.io.logic.LZoneProfile.resolveZoneProfileLogicalValue;
@@ -29,8 +29,8 @@ public class LLights
                       .set(LSmartNode.mapRawValue(output, dimmablePercent));
         }
     }
-    
-    
+
+
     public static void mapLightProfileSeed(Zone zone,
                                            CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage)
     {

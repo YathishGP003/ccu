@@ -1,6 +1,5 @@
 package a75f.io.logic;
 
-import android.support.annotation.NonNull;
 
 import org.javolution.io.Struct;
 
@@ -28,7 +27,7 @@ class LSerial
 {
     private static LSerial    mLSerial;
     private        UsbService mUsbService;
-    
+
     /***
      * D
     * Node 1001 -
@@ -38,16 +37,16 @@ class LSerial
      */
     private HashMap<Short, HashMap<String, Integer>> structs =
             new HashMap<Short, HashMap<String, Integer>>();
-    
-    
+
+
     /***
      * Default empty constructor for a singleton.
      */
     private LSerial()
     {
     }
-    
-    
+
+
     public static LSerial getInstance()
     {
         if (mLSerial == null)
@@ -56,8 +55,8 @@ class LSerial
         }
         return mLSerial;
     }
-    
-    
+
+
     /***
      * Handles all incoming messages from the CM.   It will parse them and
      * determine where they should be sent.
@@ -66,7 +65,7 @@ class LSerial
      *
      * @param event The serial event from the CM
      */
-    
+
     public static void handleSerialEvent(SerialEvent event)
     {
         LogdSerial("Event Type: " + event.getSerialAction().name());
@@ -84,8 +83,8 @@ class LSerial
             }
         }
     }
-    
-    
+
+
     /***
      * Construct the Struct based on a class type.   It will log message type, data return size,
      * incoming hexadecimal, and json.
@@ -118,8 +117,8 @@ class LSerial
         LogdStructAsJson(struct);
         return struct;
     }
-    
-    
+
+
     public boolean isConnected()
     {
         if (mUsbService == null)
@@ -128,8 +127,8 @@ class LSerial
         }
         return mUsbService.isConnected();
     }
-    
-    
+
+
     /***
      * This is the setter method for the USB Service.
      *
@@ -147,10 +146,10 @@ class LSerial
         structs.clear();
         mUsbService = usbService;
     }
-    
-    
-    
-    
+
+
+
+
     /***
      * This method will handle all  messages being sent to the Nodes.
      * This method is synchronized with sendSerialToCM, so a heartbeat doesn't write in the
@@ -166,8 +165,8 @@ class LSerial
      * either the CM or the Node.
      *
      */
-    
-    public synchronized boolean sendSerialStructToNode(short smartNodeAddress, @NonNull Struct struct)
+
+    public synchronized boolean sendSerialStructToNode(short smartNodeAddress, Struct struct)
     {
 
         Integer structHash = Arrays.hashCode(struct.getOrderedBuffer());
@@ -182,14 +181,14 @@ class LSerial
             LLog.logUSBServiceNotInitialized();
             return false;
         }
-        
+
         //Only if the struct was wrote to serial should it be logged.
         LogdStructAsJson(struct);
         mUsbService.write(struct.getOrderedBuffer());
         return true;
     }
-    
-    
+
+
     /***
      * This method will handle all  messages being sent to the CM.  Do not use this method when
      * dealing with structures that are supposed to go to the Smart Stat or Smart Node
@@ -204,23 +203,23 @@ class LSerial
      * either the CM or the Node.
      *
      */
-    
-    public synchronized boolean sendSerialToCM(@NonNull Struct struct)
+
+    public synchronized boolean sendSerialToCM(Struct struct)
     {
-        
+
         if (mUsbService == null)
         {
             LLog.logUSBServiceNotInitialized();
             return false;
         }
-        
+
         //Only if the struct was wrote to serial should it be logged.
         LogdStructAsJson(struct);
         mUsbService.write(struct.getOrderedBuffer());
         return true;
     }
-    
-    
+
+
     /***
      *  This method maintains the hash, if it returns false, proceed without needing to add extra
      *  data to the hash.
@@ -252,8 +251,8 @@ class LSerial
         structs.get(Short.valueOf(smartNodeAddress)).put(simpleName, structHash);
         return false;
     }
-    
-    
+
+
     public boolean sendSerialStructToNodeWithoutHashCheck(short smartNodeAddress, Struct struct)
     {
         mUsbService.write(struct.getOrderedBuffer());

@@ -63,7 +63,7 @@
 
         <activity
             android:name=".ui.register.OnboardingWizard" android:launchMode="singleTask"
-            android:label="@string/title_activity_renatus_landing"
+            android:label="OnBoardingWizard"
             android:alwaysRetainTaskState="true"
             android:theme="@style/RenatusAppTheme.NoActionBar">
             <intent-filter>

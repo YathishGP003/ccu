@@ -11,8 +11,8 @@ import a75f.io.bo.building.CCUApplication;
 import a75f.io.bo.building.Day;
 import a75f.io.bo.building.NamedSchedule;
 import a75f.io.bo.building.Schedule;
-import a75f.io.bo.kinvey.AlgoTuningParameters;
-import a75f.io.bo.kinvey.DalContext;
+import a75f.io.kinveybo.AlgoTuningParameters;
+import a75f.io.kinveybo.DalContext;
 
 import static a75f.io.logic.LLog.Logd;
 

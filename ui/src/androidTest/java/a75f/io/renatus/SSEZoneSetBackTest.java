@@ -12,7 +12,7 @@ import java.util.List;
 import a75f.io.bo.building.CCUApplication;
 import a75f.io.bo.building.Day;
 import a75f.io.bo.building.Schedule;
-import a75f.io.bo.kinvey.AlgoTuningParameters;
+import a75f.io.kinveybo.AlgoTuningParameters;
 import a75f.io.renatus.framework.BaseSimulationTest;
 import a75f.io.renatus.framework.SamplingProfile;
 import a75f.io.renatus.framework.SimulationParams;
@@ -37,35 +37,35 @@ public class SSEZoneSetBackTest extends BaseSimulationTest
 	SimulationRunner mRunner    = null;
 	int              runCounter = 0;
 	int testSetBackVal;
-	
+
 	int[] setBackValArray = {5,5,4,4,6,6,3,3};
-	
+
 	@Before
 	public void setUp() {
 		mRunner =  new SimulationRunner(this, new SamplingProfile(1, 120));
 	}
-	
+
 	@After
 	public void tearDown() {
 	}
-	
+
 	@Override
 	public String getTestDescription() {
 		return "Tests various setback values under constant room_temperature and set temperature." +
 		       "Creates a schedule to start cooling 30 minutes later.Relay1 and Relay2 outputs of smartnode 7005 configured as Cooling and Fan respectively." +
 		       "Room temperature is kept above set temperature. Activation of cooling is monitored for different setback values.";
 	}
-	
+
 	@Override
 	public String getCCUStateFileName() {
 		return "ssesetback.json";
 	}
-	
+
 	@Override
 	public String getSimulationFileName() {
 		return "ssesetback.csv";
 	}
-	
+
 	@Override
 	public void analyzeTestResults(SimulationTestInfo testLog) {
 		if (mRunner.getLoopCounter() == 0) {
@@ -110,17 +110,17 @@ public class SSEZoneSetBackTest extends BaseSimulationTest
 			}
 		}
 	}
-	
+
 	@Override
 	public long testDuration() {
 		return mRunner.duration();
 	}
-	
+
 	@Override
 	public void reportTestResults(SimulationTestInfo testLog, TestResult result) {
-		
+
 	}
-	
+
 	@Override
 	public HashMap<String,ArrayList<Float>> inputGraphData() {
 		ArrayList<Float> rt = new ArrayList<>();
@@ -135,7 +135,7 @@ public class SSEZoneSetBackTest extends BaseSimulationTest
 			rt.add(params.room_temperature);
 			st.add(70.0f);
 		}
-		
+
 		while (rt.size() < maxRunCount)
 		{
 			Float lastVal = rt.get(rt.size()-1);
@@ -146,10 +146,10 @@ public class SSEZoneSetBackTest extends BaseSimulationTest
 			Float lastVal = st.get(st.size()-1);
 			st.add(lastVal);
 		}
-		
+
 		graphData.put("room_temperature",rt);
 		graphData.put("set_temperature",st);
-		
+
 		ArrayList<Float> sb = new ArrayList<>();
 		for (int val : setBackValArray) {
 			sb.add((float)val);
@@ -157,13 +157,13 @@ public class SSEZoneSetBackTest extends BaseSimulationTest
 		graphData.put("zone-setback",sb);
 		return graphData;
 	}
-	
+
 	@Override
 	public String[] graphColumns() {
 		String[] graphCol = {Relay1_Out.toString(),Relay2_Out.toString(),Analog1_Out.toString(), Analog2_Out.toString()};
 		return graphCol;
 	}
-	
+
 	@Override
 	public void customizeTestData(CCUApplication app) {
 		if (runCounter <= 1)
@@ -178,14 +178,14 @@ public class SSEZoneSetBackTest extends BaseSimulationTest
 			testDay.setEtmm(sEnd.getMinuteOfHour());
             testDay.setVal((short)70);
 		}
-		
+
 		AlgoTuningParameters algoMap = ccu().getDefaultCCUTuners();
 		algoMap.put(AlgoTuningParameters.SSETuners.SSE_USER_ZONE_SETBACK, testSetBackVal);
 	}
-	
+
     @Override
 	public void runTest() {
-		
+
 		System.out.println("runTest.........");
 		runCounter++;
 		testSetBackVal = setBackValArray[runCounter];

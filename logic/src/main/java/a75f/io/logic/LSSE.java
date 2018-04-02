@@ -8,9 +8,9 @@ import a75f.io.bo.building.SingleStageProfile;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.definitions.SingleStageMode;
 import a75f.io.bo.building.sse.SingleStageLogicalMap;
-import a75f.io.bo.kinvey.AlgoTuningParameters;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
+import a75f.io.kinveybo.AlgoTuningParameters;
 
 import static a75f.io.logic.LZoneProfile.resolveZoneProfileLogicalValue;
 
@@ -20,10 +20,10 @@ import static a75f.io.logic.LZoneProfile.resolveZoneProfileLogicalValue;
 
 public class LSSE
 {
-    
+
     private static final String TAG = "LSSE";
-    
-    
+
+
     public static void mapSSECircuits(CcuToCmOverUsbSnControlsMessage_t controlsMessage_t,
                                       short nodeAddress, Zone zone, SingleStageProfile zp)
     {
@@ -39,7 +39,7 @@ public class LSSE
         //Tuners
         int coolingDeadband =
                 (int) L.resolveTuningParameter(zone, AlgoTuningParameters.SSETuners.SSE_COOLING_DEADBAND);
-        Log.i(TAG, "Cooling Deadband:" + coolingDeadband); 
+        Log.i(TAG, "Cooling Deadband:" + coolingDeadband);
         int heatingDeadband =
                 (int) L.resolveTuningParameter(zone, AlgoTuningParameters.SSETuners.SSE_HEATING_DEADBAND);
         Log.i(TAG, "Heating Deadband:" + heatingDeadband);
@@ -106,8 +106,8 @@ public class LSSE
             LSmartNode.getSmartNodePort(controlsMessage_t, output.getPort()).set(circuitMapped);
         }
     }
-    
-    
+
+
     public static void mapSSESeed(Zone zone, CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage)
     {
         seedMessage.settings.profileBitmap.singleStageEquipment.set((short) 1);

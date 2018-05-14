@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import a75f.io.bo.building.Floor;
+import a75f.io.bo.building.HmpProfile;
 import a75f.io.bo.building.Output;
 import a75f.io.bo.building.SingleStageProfile;
 import a75f.io.bo.building.Zone;
@@ -121,6 +122,10 @@ class LSmartNode
                         case SSE:
                             Log.i(TAG, "Mapping SSE control messages");
                             LSSE.mapSSECircuits(controlsMessage_t, node, zone, (SingleStageProfile) zp);
+                            break;
+                        case HMP:
+                            Log.i(TAG, "Mapping HMP control messages");
+                            LHMP.mapHMPCircuits(controlsMessage_t, node, zone, (HmpProfile)zp);
                             break;
                     }
                 }

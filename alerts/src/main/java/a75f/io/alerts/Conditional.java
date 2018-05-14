@@ -8,6 +8,11 @@ import java.util.Map;
  * Created by samjithsadasivan on 4/27/18.
  */
 
+/**
+ * A conditional defines evaluable key-value pair and a condition.
+ * Its evaluate() method returns true if the conditional is satisfied for current KVP.
+ *
+ */
 public class Conditional
 {
     //LHS

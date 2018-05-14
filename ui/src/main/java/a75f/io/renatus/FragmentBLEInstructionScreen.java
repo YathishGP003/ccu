@@ -106,6 +106,20 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
             }
         }
+        else if (mProfileType == ProfileType.HMP)
+        {
+            if (L.isSimulation())
+            {
+                showDialogFragment(FragmentHMPConfiguration
+                                           .newInstance(mNodeAddress, mRoomName, mNodeType, mFloorName), FragmentHMPConfiguration.ID);
+            }
+            else
+            {
+                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan
+                                                                .getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.SSE);
+                showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
+            }
+        }
     }
     
     

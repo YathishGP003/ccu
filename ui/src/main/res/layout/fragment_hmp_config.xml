@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:layout_marginLeft="50dp"
+              android:layout_marginRight="50dp"
+              android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="20dp">
+
+        <TextView
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:layout_column="0"
+            android:layout_gravity="center|left"
+            android:layout_marginBottom="10dp"
+            android:layout_row="1"
+            android:text="Target Set Point (°F)"
+            android:textSize="@dimen/text_medium_xlarge" />
+
+        <Spinner
+            android:id="@+id/hmpSetpoint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="20dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="20dp">
+
+        <TextView
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:layout_column="0"
+            android:layout_gravity="center|left"
+            android:layout_marginBottom="10dp"
+            android:layout_row="1"
+            android:text="Actuator Type "
+            android:textSize="@dimen/text_medium_xlarge" />
+
+        <Spinner
+            android:id="@+id/actuator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:gravity="center_vertical"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="20dp">
+
+            <TextView
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:layout_column="0"
+                android:layout_gravity="center|left"
+                android:layout_marginBottom="10dp"
+                android:layout_row="1"
+                android:text="Maximum Valve Position "
+                android:textSize="@dimen/text_medium_xlarge" />
+
+            <Spinner
+                android:id="@+id/maxValveSpinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:gravity="center_vertical"/>
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="20dp">
+
+            <TextView
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:layout_column="0"
+                android:layout_gravity="center|left"
+                android:layout_marginBottom="10dp"
+                android:layout_row="1"
+                android:text="Minimum Valve Position "
+                android:textSize="@dimen/text_medium_xlarge" />
+
+            <Spinner
+                android:id="@+id/minValveSpinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:gravity="center_vertical"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="20dp">
+
+            <TextView
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:layout_column="0"
+                android:layout_gravity="center|left"
+                android:layout_marginBottom="10dp"
+                android:layout_row="1"
+                android:text="Max Error Range"
+                android:textSize="@dimen/text_medium_xlarge" />
+
+            <Spinner
+                android:id="@+id/pSpreadSpinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:gravity="center_vertical"/>
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="20dp">
+
+            <TextView
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:layout_column="0"
+                android:layout_gravity="center|left"
+                android:layout_marginBottom="10dp"
+                android:layout_row="1"
+                android:text="Integration Time"
+                android:textSize="@dimen/text_medium_xlarge" />
+
+            <Spinner
+                android:id="@+id/iTimeoutSpinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:gravity="center_vertical"/>
+        </LinearLayout>
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="20dp">
+
+            <TextView
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:layout_column="0"
+                android:layout_gravity="center|left"
+                android:layout_marginBottom="10dp"
+                android:layout_row="1"
+                android:text="Proportional Gain "
+                android:textSize="@dimen/text_medium_xlarge" />
+
+            <Spinner
+                android:id="@+id/pGainSpinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:gravity="center_vertical"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="20dp">
+
+            <TextView
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:layout_column="0"
+                android:layout_gravity="center|left"
+                android:layout_marginBottom="10dp"
+                android:layout_row="1"
+                android:text="Integral Gain "
+                android:textSize="@dimen/text_medium_xlarge" />
+
+            <Spinner
+                android:id="@+id/iGainSpinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:gravity="center_vertical"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="40dp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="50dp"
+        android:layout_marginTop="30dp"
+        android:layout_weight="1"
+        android:text="Connect Analog-Out1 for Control and Thermistor1 for Hot Water Temperature"
+        android:textSize="@dimen/text_medium_xlarge" />
+
+    <Button
+        android:id="@+id/setBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Set"
+        android:layout_gravity="center"
+        android:padding="16dp"/>
+</LinearLayout>
+

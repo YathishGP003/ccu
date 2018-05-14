@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import a75f.io.bo.building.Floor;
+import a75f.io.bo.building.HmpProfile;
 import a75f.io.bo.building.LightProfile;
 import a75f.io.bo.building.SingleStageProfile;
 import a75f.io.bo.building.Zone;
@@ -93,6 +94,10 @@ public class ZonesFragment extends Fragment
 
     private LinearLayout mLightingRow   = null;
     private View         mLcmHeaderView = null;
+    
+    private LinearLayout zoneDetailsRow;
+    private TextView zoneStatusView;
+    
     private DataArrayAdapter<Floor> floorDataAdapter;
     private SeekArc.OnSeekArcChangeListener seekArcChangeListener =
             new SeekArc.OnSeekArcChangeListener()
@@ -402,6 +407,9 @@ public class ZonesFragment extends Fragment
                             roomButtonGrid.addView(mLightingRow, nDetailsLoc);
                             UpdateRoomLightingWidget((LightProfile) w.getProfile(), false);
                             //mLightingRow.startAnimation(in);
+                        } else if (w.getProfile() instanceof  HmpProfile) {
+                            roomButtonGrid.addView(zoneDetailsRow, nDetailsLoc);
+                            updateHmpWidget((HmpProfile) w.getProfile());
                         }
                         mDetailsView = true;
                         nSelectedRoomIndex = index;
@@ -446,6 +454,9 @@ public class ZonesFragment extends Fragment
                                 roomButtonGrid.addView(mLightingRow, nDetailsLoc);
                                 UpdateRoomLightingWidget((LightProfile) w.getProfile(), false);
                                 //mLightingRow.startAnimation(in);
+                            }else if (w.getProfile() instanceof  HmpProfile) {
+                                roomButtonGrid.addView(zoneDetailsRow, nDetailsLoc);
+                                updateHmpWidget((HmpProfile) w.getProfile());
                             }
                             mDetailsView = true;
                             nSelectedRoomIndex = index;
@@ -742,10 +753,23 @@ public class ZonesFragment extends Fragment
                     if (zoneProfile.getProfileType() == ProfileType.LIGHT)
                     {
                         ZoneImageWidget zWidget = new ZoneImageWidget(getActivity()
-                                                                              .getApplicationContext(), z.roomName, z.findProfile(ProfileType.LIGHT), index);
+                                                                              .getApplicationContext(),z.roomName, z.findProfile(ProfileType.LIGHT), index);
                         zWidget.setLayoutParams(new LinearLayout.LayoutParams(room_width, room_height));
+                        zWidget.setZoneImage(R.drawable.light_orange);
                         zWidget.setOnClickChangeListener(zoneWidgetListener);
                         zoneWidgetList.add(zWidget);
+                        viewToAdd = zWidget;
+                    }else if (zoneProfile.getProfileType() == ProfileType.HMP)
+                    {
+                        ZoneImageWidget zWidget = new ZoneImageWidget(getActivity()
+                                                                              .getApplicationContext(), z.roomName, z.findProfile(ProfileType.HMP), index);
+                        zWidget.setLayoutParams(new LinearLayout.LayoutParams(room_width, room_height));
+                        zWidget.setZoneImage(R.drawable.hotwater_mixture_orange);
+                        zWidget.setOnClickChangeListener(zoneWidgetListener);
+                        HmpProfile profile = (HmpProfile) zoneProfile;
+                        zWidget.setZoneTemp(profile.getHwTemperature()+"/"+profile.getSetTemperature());
+                        zoneWidgetList.add(zWidget);
+                        
                         viewToAdd = zWidget;
                     }
                     else if (zoneProfile.getProfileType() == ProfileType.SSE)
@@ -842,6 +866,7 @@ public class ZonesFragment extends Fragment
         zoneWidgetList = new ArrayList<>();
         createLighting(inflater);
         createSSE(inflater);
+        createHmp(inflater);
     }
 
 
@@ -850,8 +875,7 @@ public class ZonesFragment extends Fragment
         mLightingRow = (LinearLayout) inflater.inflate(R.layout.zone_detail_list, null);
         mLightsDetailsView = (ListView) mLightingRow.findViewById(R.id.lighting_detail_list);
     }
-
-
+    
     private void createSSE(LayoutInflater inflater)
     {
         mRoomDetailsWidget = (RelativeLayout) inflater.inflate(R.layout.roomdetails_inline, null);
@@ -905,8 +929,16 @@ public class ZonesFragment extends Fragment
         });
         tvVacationFromTo = (TextView) mRoomDetailsWidget.findViewById(R.id.vacationFromTo);
     }
-
-
+    
+    private void createHmp(LayoutInflater inflater)
+    {
+        zoneDetailsRow = (LinearLayout) inflater.inflate(R.layout.zone_details_hmp, null);
+        zoneStatusView = (TextView) zoneDetailsRow.findViewById(R.id.statusMsg);
+    }
+    
+    
+    
+    
     public void UpdateRoomLightingWidget(final LightProfile roomData, Boolean lcmdabfsv)
     {
         mLightsDetailsView.setAdapter(null);
@@ -972,6 +1004,9 @@ public class ZonesFragment extends Fragment
         new LayoutHelper(getActivity()).setListViewParams(mLightsDetailsView, null, 0, 0, expand);
     }
 
+    private void updateHmpWidget(HmpProfile p) {
+        zoneStatusView.setText("Current Hot Water Signal is "+(short)Math.round(p.getHmpValvePosition())+"%" );
+    }
 
     private void showLCMLightScheduleFragment(Floor floor, Zone zone, ZoneProfile zoneProfile)
     {

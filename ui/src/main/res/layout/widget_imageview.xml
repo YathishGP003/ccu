@@ -23,7 +23,7 @@
         android:text="Chris"/>
 
     <TextView
-        android:id="@+id/zoneRefTemp"
+        android:id="@+id/zoneTemp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"

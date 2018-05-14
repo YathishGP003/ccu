@@ -101,6 +101,10 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
         {
             showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.SSE, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
         }
+        else if (hwpModuleTypeRB.isChecked())
+        {
+            showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.HMP, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
+        }
     }
     
     @Override

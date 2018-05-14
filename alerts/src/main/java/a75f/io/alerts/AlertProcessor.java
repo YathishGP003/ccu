@@ -11,6 +11,10 @@ import java.util.Map;
  * Created by samjithsadasivan on 4/24/18.
  */
 
+/**
+ * Core processing module that iterates through all the alert definitions , evaluates the conditional
+ * and generates a new alert if needed.
+ */
 public class AlertProcessor
 {
     

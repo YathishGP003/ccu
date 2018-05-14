@@ -17,7 +17,6 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,8 +24,10 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import a75f.io.bo.building.BaseProfileConfiguration;
 import a75f.io.bo.building.Floor;
 import a75f.io.bo.building.Zone;
+import a75f.io.bo.building.ZoneProfile;
 import a75f.io.logic.L;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -50,11 +51,11 @@ public class FloorPlanFragment extends Fragment
 	public DataArrayAdapter<Short> mModuleListAdapter;
 	
 	@BindView(R.id.addFloorBtn)
-	ImageButton addFloorBtn;
+	TextView addFloorBtn;
 	@BindView(R.id.addRoomBtn)
-	ImageButton addRoomBtn;
+	TextView addRoomBtn;
 	@BindView(R.id.pairModuleBtn)
-	ImageButton pairModuleBtn;
+	TextView pairModuleBtn;
 	@BindView(R.id.addFloorEdit)
 	EditText    addFloorEdit;
 	@BindView(R.id.addRoomEdit)
@@ -113,7 +114,7 @@ public class FloorPlanFragment extends Fragment
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 	                         Bundle savedInstanceState)
 	{
-		View rootView = inflater.inflate(R.layout.fragment_floorplan, container, false);
+		View rootView = inflater.inflate(R.layout.floorplan, container, false);
 		ButterKnife.bind(this, rootView);
 		return rootView;
 	}
@@ -178,6 +179,7 @@ public class FloorPlanFragment extends Fragment
 		mFloorListAdapter =
 				new DataArrayAdapter<Floor>(this.getActivity(), R.layout.listviewitem, ccu().getFloors());
 		floorListView.setAdapter(mFloorListAdapter);
+		enableFloorButton();
 		if (mFloorListAdapter.getCount() > 0)
 		{
 			selectFloor(0);
@@ -214,6 +216,7 @@ public class FloorPlanFragment extends Fragment
 	{
 		mRoomListAdapter = new DataArrayAdapter<>(this.getActivity(), R.layout.listviewitem, zones);
 		roomListView.setAdapter(mRoomListAdapter);
+		enableRoomBtn();
 		if (mRoomListAdapter.getCount() > 0)
 		{
 			selectRoom(0);
@@ -296,7 +299,7 @@ public class FloorPlanFragment extends Fragment
 	{
 		enableFloorEdit();
 		addFloorEdit.setText("");
-		//addFloorEdit.requestFocus();
+		addFloorEdit.requestFocus();
 		InputMethodManager mgr =
 				(InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 		mgr.showSoftInput(addFloorEdit, InputMethodManager.SHOW_IMPLICIT);
@@ -393,6 +396,9 @@ public class FloorPlanFragment extends Fragment
 	@OnClick(R.id.pairModuleBtn)
 	public void startPairing()
 	{
+		//TODO - TEMP
+		ccu().setSmartNodeAddressBand((short)7000);
+		
 		short meshAddress =L.generateSmartNodeAddress();
 		Floor floor = ccu().getFloors().get(mFloorListAdapter.getSelectedPostion());
 		Zone room = floor.mRoomList.get(mRoomListAdapter.getSelectedPostion());
@@ -448,10 +454,40 @@ public class FloorPlanFragment extends Fragment
 	{
 		Floor floor = ccu().getFloors().get(mFloorListAdapter.getSelectedPostion());
 		Zone zone = floor.mRoomList.get(mRoomListAdapter.getSelectedPostion());
+		Short nodeAddr = mModuleListAdapter.getItem(position);
+		
+		
 //		DO NOTHING
 //		showDialogFragment(LightingZoneProfileFragment
 //				                   .newInstance((Short)createIntegerList(zone.getNodes()).get(position),
 //										   zone.roomName, mfloor.mFloorName),
 //				LightingZoneProfileFragment.ID);
+		
+		ZoneProfile profile = getProfile(zone, nodeAddr);
+		BaseProfileConfiguration config = profile.getProfileConfiguration().get(nodeAddr);
+		switch (profile.getProfileType()) {
+			case HMP:
+				showDialogFragment(FragmentHMPConfiguration
+						                   .newInstance(nodeAddr,getSelectedZone().roomName, config.getNodeType(), getSelectedFloor().mFloorName), FragmentHMPConfiguration.ID);
+			
+			
+		}
+		
+		
+	}
+	
+	
+	//TODO - Revisit
+	private ZoneProfile getProfile(Zone zone ,Short addr) {
+		
+		for (ZoneProfile zp : zone.mZoneProfiles) {
+			
+			BaseProfileConfiguration profConfig = zp.getProfileConfiguration().get(addr);
+			if (profConfig != null) {
+				return zp;
+			}
+			
+		}
+		return null;
 	}
 }

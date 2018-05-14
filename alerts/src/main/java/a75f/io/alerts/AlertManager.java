@@ -18,7 +18,7 @@ import java.util.Map;
  * --------------
  *  AlertManager m = AlertManager.getInstance();
  *  m.init(appContext);
- *  m.processAlerts(tsData);
+ *  m.processAlerts(tsMap);
  *
  */
 

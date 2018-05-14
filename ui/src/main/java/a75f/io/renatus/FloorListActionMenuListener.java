@@ -90,6 +90,7 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 			Floor floorData = selectedFloor.get(nCount);
 			ccu().getFloors().remove(floorData);
 			L.saveCCUState();
+			floorPlanActivity.refreshScreen();
 		}
 	}
 	

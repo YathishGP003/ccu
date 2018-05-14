@@ -46,7 +46,6 @@ android {
 }
 
 dependencies {
-
     compile fileTree(include: '*.jar', dir: 'libs')
     testCompile 'junit:junit:4.12'
     compile project(':bo')
@@ -57,6 +56,5 @@ dependencies {
     compile 'com.github.pschroen:slack-api-android:c66cc8d997'
     androidTestCompile 'com.android.support.test:runner:1.0.1'
     androidTestCompile 'com.android.support.test:rules:1.0.1'
-
-
+    implementation project(':algos')
 }

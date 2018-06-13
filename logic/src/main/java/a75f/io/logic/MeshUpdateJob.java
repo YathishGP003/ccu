@@ -64,6 +64,7 @@ class MeshUpdateJob extends BaseJob
                         }
                     }
                 }
+                LSystem.handleSystemControl();
             }
             else
             {

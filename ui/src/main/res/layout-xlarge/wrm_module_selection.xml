@@ -22,14 +22,14 @@
         android:layout_width="match_parent"
         android:orientation="vertical">
 
-        <TextView
+        <!--<TextView
             android:layout_gravity="left"
             android:layout_height="wrap_content"
             android:layout_marginLeft="60dp"
             android:layout_marginTop="40dp"
             android:layout_width="wrap_content"
             android:text="Select Module Type"
-            android:textSize="@dimen/text_large_xlarge"/>
+            android:textSize="@dimen/text_large_xlarge"/>-->
 
         <ScrollView
             android:layout_height="wrap_content"
@@ -59,6 +59,24 @@
                     android:layout_weight="0.1"
                     android:layout_width="match_parent"
                     android:text="Controls dampers in ductwork to provide zone by zone airflow control"
+                    android:textSize="@dimen/text_small_xlarge"/>
+
+                <RadioButton
+                    android:id="@+id/vavModuleTypeRB"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:layout_weight="0.1"
+                    android:layout_width="match_parent"
+                    android:text=" VAV Reheat Terminal"
+                    android:textSize="@dimen/text_medium_xlarge"/>
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="60dp"
+                    android:layout_marginRight="30dp"
+                    android:layout_weight="0.1"
+                    android:layout_width="match_parent"
+                    android:text="Manages reheat coils in VAV to control zone temperature"
                     android:textSize="@dimen/text_small_xlarge"/>
 
                 <RadioButton

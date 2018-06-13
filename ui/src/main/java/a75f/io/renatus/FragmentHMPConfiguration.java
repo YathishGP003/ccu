@@ -69,10 +69,11 @@ public class FragmentHMPConfiguration extends BaseDialogFragment
     
     int selection;
     
-    Zone mZone;
+    
     
     private HmpProfile mHmpProfile;
     
+    private Zone mZone;
     private short                      mSmartNodeAddress;
     private NodeType                   mNodeType;
     
@@ -109,6 +110,15 @@ public class FragmentHMPConfiguration extends BaseDialogFragment
             int height = ViewGroup.LayoutParams.WRAP_CONTENT;
             dialog.getWindow().setLayout(width, height);
         }
+        setTitle();
+    }
+    
+    private void setTitle() {
+        Dialog dialog = getDialog();
+        
+        if (dialog == null) {
+            return;
+        }
         dialog.setTitle("Hot Water Mixing Package");
         TextView titleView = this.getDialog().findViewById(android.R.id.title);
         if(titleView != null)
@@ -118,7 +128,7 @@ public class FragmentHMPConfiguration extends BaseDialogFragment
         }
         int titleDividerId = getContext().getResources()
                                          .getIdentifier("titleDivider", "id", "android");
-    
+        
         View titleDivider = dialog.findViewById(titleDividerId);
         if (titleDivider != null) {
             titleDivider.setBackgroundColor(getContext().getResources()
@@ -162,7 +172,6 @@ public class FragmentHMPConfiguration extends BaseDialogFragment
        
         
         ArrayList<String> analogTypes = new ArrayList<>();
-        
         for (OutputAnalogActuatorType actuator : OutputAnalogActuatorType.values()) {
             analogTypes.add(actuator.displayName);
         }

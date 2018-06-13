@@ -77,4 +77,28 @@
         <item>   Named Schedule</item>
     </string-array>
 
+    <string-array name="reheat_port">
+        <item>   ANALOG 2 OUT</item>
+        <item>   RELAY 1</item>
+    </string-array>
+
+    <string-array name="zone_priority">
+        <item >High</item>
+        <item >Normal</item>
+        <item >Low</item>
+        <item >No Priority</item>
+    </string-array>
+
+    <string-array name="damper_size">
+        <item >4</item>
+        <item >6</item>
+        <item >8</item>
+        <item >10</item>
+        <item >12</item>
+        <item >14</item>
+        <item >16</item>
+        <item >18</item>
+        <item >20</item>
+    </string-array>
+
 </resources>

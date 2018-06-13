@@ -16,7 +16,6 @@ import a75f.io.bo.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 //Also known as room.
 public class Zone
 {
-    
     public  String                  roomName          = "Default Zone";
     public  ArrayList<ZoneProfile>  mZoneProfiles     = new ArrayList<>();
     private HashMap<String, Object> mTuningParameters = new HashMap<>();

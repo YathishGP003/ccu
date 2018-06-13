@@ -41,6 +41,7 @@ import a75f.io.bo.building.Floor;
 import a75f.io.bo.building.HmpProfile;
 import a75f.io.bo.building.LightProfile;
 import a75f.io.bo.building.SingleStageProfile;
+import a75f.io.bo.building.VavProfile;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.ZoneProfile;
 import a75f.io.bo.building.definitions.ProfileType;
@@ -779,6 +780,13 @@ public class ZonesFragment extends Fragment
                         seekArcList.add(seekArc);
                         viewToAdd = seekArc;
                     }
+                    else if (zoneProfile.getProfileType() == ProfileType.VAV)
+                    {
+                        SeekArc seekArc =
+                                AddNewArc(z, (VavProfile) zoneProfile, new LinearLayout.LayoutParams(room_width, room_height), index);
+                        seekArcList.add(seekArc);
+                        viewToAdd = seekArc;
+                    }
                     if (index % mod == 0)
                     {
                         roomRow = new LinearLayout(getActivity());
@@ -824,8 +832,38 @@ public class ZonesFragment extends Fragment
         //rmSeekArc.refreshView();
         return rmSeekArc;
     }
-
-
+    
+    public SeekArc AddNewArc(Zone zone, ZoneProfile zoneProfile,
+                             LinearLayout.LayoutParams lp, int index)
+    {
+        SeekArc rmSeekArc =
+                new SeekArc(getActivity().getApplicationContext(), attributeSet, null);
+        rmSeekArc.setCMDataToSeekArc(zoneProfile, zone.roomName, index);
+        rmSeekArc.setLayoutParams(lp);
+        rmSeekArc.setmPathStartAngle(120);
+        rmSeekArc
+                .setmBuildingLimitStartAngle((int) L.resolveTuningParameter(zone, AlgoTuningParameters.SSETuners.SSE_BUILDING_MIN_TEMP));
+        rmSeekArc
+                .setmBuildingLimitEndAngle((int) L.resolveTuningParameter(zone, AlgoTuningParameters.SSETuners.SSE_BUILDING_MAX_TEMP));
+        rmSeekArc.prepareAngle();
+        rmSeekArc
+                .setLimitStartAngle((int) L.resolveTuningParameter(zone, AlgoTuningParameters.SSETuners.SSE_USER_MIN_TEMP));
+        rmSeekArc
+                .setLimitEndAngle((int) L.resolveTuningParameter(zone, AlgoTuningParameters.SSETuners.SSE_USER_MAX_TEMP));
+        rmSeekArc.setTouchInSide(true);
+        rmSeekArc.setTouchOutSide(false);
+        rmSeekArc.setCurrentTemp(zoneProfile.getDisplayCurrentTemp());
+        rmSeekArc.setDesireTemp(L.resolveZoneProfileLogicalValue(zoneProfile));
+        rmSeekArc.setZone(zone);
+        rmSeekArc.invalidate();
+        rmSeekArc.setOnSeekArcChangeListener(seekArcChangeListener);
+        rmSeekArc.setOnClickChangeListener(seekArcClickListener);
+        //rmSeekArc.refreshView();
+        return rmSeekArc;
+    }
+    
+    
+    
     private AttributeSet getSeekbarXmlAttributes()
     {
         AttributeSet as = null;

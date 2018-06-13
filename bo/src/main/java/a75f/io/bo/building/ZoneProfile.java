@@ -89,4 +89,10 @@ public abstract class ZoneProfile extends Schedulable
         if (mInterface != null)
             mInterface.refreshView();
     }
+    
+    @JsonIgnore
+    public double getDisplayCurrentTemp()
+    {
+        return 0;
+    }
 }

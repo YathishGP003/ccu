@@ -12,12 +12,12 @@ public class PiControllerTest
 {
     
     @Test
-    public void hmpPIControllerTest() throws Exception
+    public void hmpValveControllerTest() throws Exception
     {
         int hmpMinValve = 40;
         int hmpMaxValve = 80;
        
-        HmpPIController hmpPi = new HmpPIController(hmpMinValve,hmpMaxValve);
+        ValvePIController hmpPi = new ValvePIController(hmpMinValve,hmpMaxValve);
         hmpPi.setIntegralMaxTimeout(15);
         hmpPi.setMaxAllowedError(5.0);
         hmpPi.setProportionalGain(0.5);

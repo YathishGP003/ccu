@@ -17,64 +17,67 @@
     </TextView>
 
     <LinearLayout
-        android:background="@drawable/deviceselection"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:layout_width="match_parent"
+        android:background="@drawable/deviceselection"
         android:orientation="horizontal">
 
 
         <RadioGroup
             android:id="@+id/deviceTypeSelection"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_width="0dp">
+            android:layout_weight="1">
 
             <RadioButton
                 android:id="@+id/smartNode"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="50dp"
-                android:layout_marginTop="150dp"
                 android:layout_width="wrap_content"
-                android:text="Smartnode"/>
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="70dp"
+                android:layout_marginTop="135dp"
+                android:text="Smartnode"
+                android:textSize="@dimen/text_medium_xlarge" />
 
 
             <RadioButton
                 android:id="@+id/smartstat"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="50dp"
-                android:layout_marginTop="180dp"
                 android:layout_width="wrap_content"
-                android:text="ITM-Smartstat"/>
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="70dp"
+                android:layout_marginTop="200dp"
+                android:text="SmartStat"
+                android:textSize="@dimen/text_medium_xlarge" />
 
 
         </RadioGroup>
 
         <RadioGroup
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:layout_width="0dp">
+            android:visibility="gone">
 
             <RadioButton
-                android:clickable="false"
-                android:focusable="false"
                 android:id="@+id/hia"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="50dp"
                 android:layout_marginTop="150dp"
-                android:layout_width="wrap_content"
+                android:clickable="false"
+                android:focusable="false"
                 android:text="ITM-HIA"
                 android:textColor="@color/selection_gray"/>
 
 
             <RadioButton
-                android:clickable="false"
-                android:focusable="false"
                 android:id="@+id/lpi"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="50dp"
                 android:layout_marginTop="180dp"
-                android:layout_width="wrap_content"
+                android:clickable="false"
+                android:focusable="false"
                 android:text="ITM-LPI"
                 android:textColor="@color/selection_gray"/>
         </RadioGroup>

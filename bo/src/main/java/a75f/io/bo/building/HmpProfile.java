@@ -4,7 +4,7 @@ import android.util.Log;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import a75.io.algos.HmpPIController;
+import a75.io.algos.ValvePIController;
 import a75f.io.bo.building.definitions.ProfileType;
 import a75f.io.bo.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 
@@ -30,7 +30,7 @@ public class HmpProfile extends ZoneProfile
     
     double           hwTemperature;
     double           setTemperature = 110.0;
-    HmpPIController hmpPIController ;
+    ValvePIController hmpValveController ;
     
     int minValvePosition = 40; //TODO - Tuners
     int    maxValvePosition = 80;
@@ -40,11 +40,11 @@ public class HmpProfile extends ZoneProfile
     double integralGain = 0.5;
     
     public HmpProfile() {
-       hmpPIController = new HmpPIController(minValvePosition,maxValvePosition);
-       hmpPIController.setIntegralMaxTimeout(integralMaxTimeout);
-       hmpPIController.setMaxAllowedError(proportionalSpread);
-       hmpPIController.setProportionalGain(proportionalGain);
-       hmpPIController.setIntegralGain(integralGain);
+       hmpValveController = new ValvePIController(minValvePosition,maxValvePosition);
+       hmpValveController.setIntegralMaxTimeout(integralMaxTimeout);
+       hmpValveController.setMaxAllowedError(proportionalSpread);
+       hmpValveController.setProportionalGain(proportionalGain);
+       hmpValveController.setIntegralGain(integralGain);
     }
     
     public int getMinValvePosition()
@@ -137,7 +137,7 @@ public class HmpProfile extends ZoneProfile
             Log.d("HMP", "Skip PI update ; setTemperature ="+setTemperature+" , airflowTemperature ="+hwTemperature);
             return 0.0;
         }
-        return hmpPIController.getValveControlSignal(setTemperature, hwTemperature);
+        return hmpValveController.getValveControlSignal(setTemperature, hwTemperature);
     }
     
     @JsonIgnore
@@ -146,7 +146,7 @@ public class HmpProfile extends ZoneProfile
             Log.d("HMP", "Skip PI update ; setTemperature ="+setTemperature+" , airflowTemperature ="+hwTemperature);
             return 0.0;
         }
-        return hmpPIController.getValveControlSignal();
+        return hmpValveController.getValveControlSignal();
     }
     
     

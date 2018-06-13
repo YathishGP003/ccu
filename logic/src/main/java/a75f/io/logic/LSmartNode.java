@@ -13,6 +13,7 @@ import a75f.io.bo.building.Floor;
 import a75f.io.bo.building.HmpProfile;
 import a75f.io.bo.building.Output;
 import a75f.io.bo.building.SingleStageProfile;
+import a75f.io.bo.building.VavProfile;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.ZoneProfile;
 import a75f.io.bo.building.definitions.Port;
@@ -127,6 +128,10 @@ class LSmartNode
                             Log.i(TAG, "Mapping HMP control messages");
                             LHMP.mapHMPCircuits(controlsMessage_t, node, zone, (HmpProfile)zp);
                             break;
+                        case VAV:
+                            Log.i(TAG, "Mapping VAV control messages");
+                            LVAV.mapVAVCircuits(controlsMessage_t, node, zone, (VavProfile) zp);
+                            break;
                     }
                 }
             }
@@ -154,6 +159,10 @@ class LSmartNode
                 case SSE:
                     Log.i(TAG, "Mapping SSE Profile Seed messages");
                     LSSE.mapSSESeed(zone, seedMessage);
+                    break;
+                case VAV:
+                    Log.i(TAG, "Mapping VAV Profile Seed messages");
+                    LVAV.mapVAVSeed(zone, seedMessage);
                     break;
                 case TEST:
                     Log.i(TAG, "Mapping TEST Profile Seed messages");

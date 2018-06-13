@@ -6,5 +6,10 @@ package a75f.io.bo.building.definitions;
 
 public enum OutputRelayActuatorType
 {
-	NormallyOpen, NormallyClose
+	NormallyOpen("Relay N/O"), NormallyClose("Relay N/C");
+	public String displayName;
+	
+	OutputRelayActuatorType(String str) {
+		displayName = str;
+	}
 }

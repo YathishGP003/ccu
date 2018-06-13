@@ -470,6 +470,9 @@ public class FloorPlanFragment extends Fragment
 				showDialogFragment(FragmentHMPConfiguration
 						                   .newInstance(nodeAddr,getSelectedZone().roomName, config.getNodeType(), getSelectedFloor().mFloorName), FragmentHMPConfiguration.ID);
 			
+			case VAV:
+				showDialogFragment(FragmentVAVConfiguration
+						                   .newInstance(nodeAddr,getSelectedZone().roomName, config.getNodeType(), getSelectedFloor().mFloorName), FragmentVAVConfiguration.ID);
 			
 		}
 		

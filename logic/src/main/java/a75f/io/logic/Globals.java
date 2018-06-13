@@ -24,7 +24,7 @@ import static a75f.io.logic.LLog.Logd;
 /*
     This is used to keep track of global static associated with application context.
  */
-class Globals
+public class Globals
 {
 
     private static final int      NUMBER_OF_CYCLICAL_TASKS_RENATUS_REQUIRES = 10;

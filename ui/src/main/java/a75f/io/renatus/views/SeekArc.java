@@ -25,11 +25,9 @@ import android.view.View;
 
 import java.text.DecimalFormat;
 
-import a75f.io.bo.building.SingleStageProfile;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.ZoneProfile;
 import a75f.io.bo.building.definitions.RoomDataInterface;
-import a75f.io.logic.L;
 import a75f.io.renatus.R;
 
 public class SeekArc extends View implements RoomDataInterface
@@ -196,7 +194,8 @@ public class SeekArc extends View implements RoomDataInterface
     private int mOutsideLimitDiffLeft;
     private int mOutsideLimitDiffRight;
     private boolean showCCUDial = false;
-    private SingleStageProfile mSSEProfile;
+    //private SingleStageProfile mSSEProfile;
+    private  ZoneProfile zoneProfile;
     private Zone               mZone;
 
 
@@ -431,13 +430,13 @@ public class SeekArc extends View implements RoomDataInterface
     }
 
 
-    public SeekArc(Context context, AttributeSet attrs, SingleStageProfile zoneProfile)
+    public SeekArc(Context context, AttributeSet attrs, ZoneProfile zoneProfile)
     {
         super(context, attrs);
-        this.mSSEProfile = zoneProfile;
+        this.zoneProfile = zoneProfile;
         if (zoneProfile != null)
         {
-            mSSEProfile.setZoneProfileInterface(this);
+            zoneProfile.setZoneProfileInterface(this);
         }
         init(context, attrs, R.attr.seekArcStyle);
     }
@@ -459,10 +458,12 @@ public class SeekArc extends View implements RoomDataInterface
             @Override
             public void run()
             {
-                if (mSSEProfile != null)
+                if (zoneProfile != null)
                 {
-                    setCurrentTemp(mSSEProfile.getDisplayCurrentTemp());
-                    setDesireTemp(L.resolveZoneProfileLogicalValue(mSSEProfile));
+                    setCurrentTemp(zoneProfile.getDisplayCurrentTemp());
+                    //setDesireTemp(L.resolveZoneProfileLogicalValue(zoneProfile));
+                    //TODO- TEMP
+                    setDesireTemp(72.0);
                 }
                 invalidate();
             }
@@ -793,6 +794,7 @@ public class SeekArc extends View implements RoomDataInterface
         }
         if (isFirstRun)
         {
+            Log.d("VAV-TEMP","isFirstRun onDraw set temp "+originalCurrentTemp+" isCurrBeyondLimit "+isCurrBeyondLimit);
             Log.i(TAG, "Is first run");
             String firstTemp;
             if (!isSensorPaired)
@@ -822,9 +824,9 @@ public class SeekArc extends View implements RoomDataInterface
 //                {
 //                    firstTemp = Double.toString(mSSEProfile.getCMCurrentTemp(true)); //MARK
 //                }
-                if (mSSEProfile != null)
+                if (zoneProfile != null)
                 {
-                    firstTemp = Double.toString(mSSEProfile.getDisplayCurrentTemp()); //MARK
+                    firstTemp = Double.toString(zoneProfile.getDisplayCurrentTemp()); //MARK
                 }
                 else
                 {
@@ -865,15 +867,15 @@ public class SeekArc extends View implements RoomDataInterface
                         cx - (bounds.width() / 2),
                         cy + mStatusTextHeight - (bounds.height()), mStatusTextPaint);
             }
-            if (isCurrBeyondLimit)
+            /*if (isCurrBeyondLimit)
             {
 //                if (showCCUDial)
 //                {
 //                    curTemp = Double.toString(mSSEProfile.getCMCurrentTemp(true));
 //                }
-                if (mSSEProfile != null)
+                if (zoneProfile != null)
                 {
-                    curTemp = Double.toString(mSSEProfile.getDisplayCurrentTemp());
+                    curTemp = Double.toString(zoneProfile.getDisplayCurrentTemp());
                 }
                 else
                 {
@@ -891,7 +893,20 @@ public class SeekArc extends View implements RoomDataInterface
                 canvas.drawText(curTemp,
                         cx - (bounds.width() / 2),
                         cy + mTempTextHeight - (bounds.height() / 2), mProgressTextPaint);
+            }*/
+    
+            if (zoneProfile != null)
+            {
+                curTemp = Double.toString(zoneProfile.getDisplayCurrentTemp());
             }
+            else
+            {
+                curTemp = Double.toString(originalCurrentTemp);
+            }
+            mProgressTextPaint.getTextBounds(curTemp, 0, curTemp.length(), bounds);
+            canvas.drawText(curTemp,
+                    cx - (bounds.width() / 2),
+                    cy + mTempTextHeight - (bounds.height() / 2), mProgressTextPaint);
         }
         //outer arc numbers from 50 - 90
         if (isTouched)
@@ -1613,11 +1628,11 @@ public class SeekArc extends View implements RoomDataInterface
     }
 
 
-    public void setCMDataToSeekArc(SingleStageProfile data, String zoneName, int index)
+    public void setCMDataToSeekArc(ZoneProfile data, String zoneName, int index)
     {
-        this.mSSEProfile = data;
+        this.zoneProfile = data;
         this.nIndex = index;
-        this.roomName = "Single Stage Profile";
+        this.roomName = data.getProfileType().name();//TODO
         showCCUDial = true;
         data.setZoneProfileInterface(this);
         setDetailedView(false);
@@ -1685,7 +1700,7 @@ public class SeekArc extends View implements RoomDataInterface
 
     public ZoneProfile getZoneProfile()
     {
-        return mSSEProfile;
+        return zoneProfile;
     }
 
 

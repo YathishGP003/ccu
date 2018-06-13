@@ -1,5 +1,7 @@
 package a75.io.algos;
 
+import android.util.Log;
+
 /**
  * Created by samjithsadasivan on 5/1/18.
  */
@@ -11,18 +13,18 @@ public class GenericPIController
     private double integralGain;
     
     
-    private double proportionalError;
-    private double integralError;
+    public double proportionalError;
+    public double integralError;
     
-    private double maxAllowedError;
+    protected double maxAllowedError;
     
-    private double error;
+    protected double error;
     private double limitedError;
     
     private double cumulativeError;
     private int integralMaxTimeout;
     
-    private double controlVariable;
+    protected double controlVariable;
     
     public void updateControlVariable(double setPoint, double controlPoint) {
         error = setPoint - controlPoint;
@@ -115,6 +117,16 @@ public class GenericPIController
     }
     
     public double getControlVariable() {
+        Log.d("VAV","PE: "+proportionalError+", IE : "+integralError+", CV: "+controlVariable);
         return controlVariable;
+    }
+    
+    public void reset() {
+        error = 0;
+        limitedError = 0;
+        proportionalError = 0;
+        integralError = 0;
+        cumulativeError = 0;
+        controlVariable = 0;
     }
 }

@@ -116,7 +116,21 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
             else
             {
                 FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan
-                                                                .getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.SSE);
+                                                                .getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.HMP);
+                showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
+            }
+        }
+        else if (mProfileType == ProfileType.VAV)
+        {
+            if (L.isSimulation())
+            {
+                showDialogFragment(FragmentVAVConfiguration
+                                           .newInstance(mNodeAddress, mRoomName, mNodeType, mFloorName), FragmentVAVConfiguration.ID);
+            }
+            else
+            {
+                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan
+                                                                .getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.VAV);
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
             }
         }

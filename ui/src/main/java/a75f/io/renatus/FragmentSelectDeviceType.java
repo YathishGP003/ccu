@@ -3,6 +3,7 @@ package a75f.io.renatus;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -65,7 +66,8 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
-        defaultTextView.setText(mRoomName + " - " + "Select device type to pair");
+        //defaultTextView.setText(mRoomName + " - " + "Select device type to pair");
+        defaultTextView.setText(mRoomName);
     }
     
     
@@ -122,7 +124,32 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
             int height = ViewGroup.LayoutParams.MATCH_PARENT;
             dialog.getWindow().setLayout(width, height);
         }
+        setTitle();
     }
+    
+    private void setTitle() {
+        Dialog dialog = getDialog();
+        
+        if (dialog == null) {
+            return;
+        }
+        dialog.setTitle("Select device type to pair");
+        TextView titleView = this.getDialog().findViewById(android.R.id.title);
+        if(titleView != null)
+        {
+            titleView.setGravity(Gravity.CENTER);
+            titleView.setTextColor(getResources().getColor(R.color.progress_color_orange));
+        }
+        int titleDividerId = getContext().getResources()
+                                         .getIdentifier("titleDivider", "id", "android");
+    
+        View titleDivider = dialog.findViewById(titleDividerId);
+        if (titleDivider != null) {
+            titleDivider.setBackgroundColor(getContext().getResources()
+                                                        .getColor(R.color.transparent));
+        }
+    }
+    
     @Override
     public String getIdString()
     {

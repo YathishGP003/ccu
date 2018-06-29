@@ -11,6 +11,9 @@ import java.util.ArrayList;
  * Created by samjithsadasivan on 6/11/18.
  */
 
+/**
+ * Helper class to dump time series data in CSV format to the sdcard.
+ */
 public class CSVLogger
 {
     
@@ -23,12 +26,6 @@ public class CSVLogger
         csvName = name;
         csvData = new ArrayList<>();
         csvFile = new File(Environment.getExternalStorageDirectory(), csvName);
-        /*try
-        {
-            csvWriter = new FileWriter(csvFile);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
     }
     
     public void writeHeader(String [] headers) {
@@ -48,8 +45,6 @@ public class CSVLogger
     }
     
     public void dump() {
-        
-        //String filename = DateFormat.format("dd_MM_yyyy_hh_mm_ss", System.currentTimeMillis()).toString()+".csv";
         try
         {
             csvWriter = new FileWriter(csvFile);

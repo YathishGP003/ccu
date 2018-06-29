@@ -20,15 +20,8 @@ public class LVAV
 {
     public static void mapVAVCircuits(CcuToCmOverUsbSnControlsMessage_t controlsMessage_t,
                                       short nodeAddress, Zone zone, VavProfile vavProfile) {
-    
-        float desiredTemperature = 72;/*resolveZoneProfileLogicalValue(vavProfile);
-        boolean occupied = desiredTemperature > 0;
-        if (!occupied)
-        {
-            desiredTemperature = LZoneProfile.resolveAnyValue(vavProfile);
-        }*/
         
-        VavUnit vavControls = vavProfile.getVavControls(desiredTemperature);
+        VavUnit vavControls = vavProfile.getVavControls(nodeAddress);
         if (vavControls == null) {
             Log.d("VAV ","Vav controls do not exist");
             return;
@@ -37,15 +30,15 @@ public class LVAV
         if (L.ccu().systemProfile instanceof VAVSystemProfile)
         {
             VAVSystemProfile p = (VAVSystemProfile) L.ccu().systemProfile;
-            p.updateSATRequest(vavProfile.getSATRequest());
+            p.updateSATRequest(vavProfile.getSATRequest(nodeAddress));
             
-            //TODO - TEMP Should be done right after creating a profile.
+            //TODO - Should be done from VavProfile constructor.But that introduces cyclic dependency per current design.
             TrimResponseProcessor tp = p.getSystemTRProcessor();
             if (!tp.trListeners.contains(vavProfile)) {
                 tp.addTRListener(vavProfile);
-                Log.d("VAV ","Add TR Listener");
+                Log.d("VAV ","TR Listener added");
             } else {
-                Log.d("VAV ","TR Listener already added");
+                Log.d("VAV ","TR Listener exists");
             }
             
             //TODO - TEMP for testing

@@ -68,7 +68,7 @@ public class SystemTrimResponseBuilder
         return this;
     }
     
-    public SystemTrimResponse buidlTRSystem(){
+    public SystemTrimResponse buildTRSystem(){
         return new SystemTrimResponse(SP0, SPmin, SPmax, Td, T, I, SPtrim, SPres, SPresmax);
     }
 }

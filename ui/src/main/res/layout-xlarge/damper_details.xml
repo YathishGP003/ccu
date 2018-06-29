@@ -286,7 +286,7 @@
                     android:paddingTop="20dp"
                     android:layout_marginLeft="20dp"
                     android:layout_gravity="center"
-                    android:visibility="invisible"
+
                     android:layout_marginBottom="5dp">
 
                     <Spinner

@@ -95,4 +95,14 @@ public abstract class ZoneProfile extends Schedulable
     {
         return 0;
     }
+    
+    @JsonIgnore
+    public void updateZoneControls(double desiredVal) {
+    }
+    
+    @JsonIgnore
+    public HashMap<String, Double> getTSData() {
+        return null;
+    }
+    
 }

@@ -1,6 +1,5 @@
 package a75f.io.bo.building;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.util.ArrayList;
@@ -58,7 +57,6 @@ public class CCUApplication
 
     private AlgoTuningParameters mDefaultCCUTuners;
     
-    @JsonIgnore
     public  SystemProfile    systemProfile = new VAVSystemProfile();//TODO- TEMP
     
     public  ControlMote      controlMote   = new ControlMote();

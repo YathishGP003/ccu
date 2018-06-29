@@ -10,19 +10,24 @@ import java.util.ArrayList;
 
 public class TrimResponseProcessor
 {
-    double setPoint;
+    public double setPoint;
     
-    SystemTrimResponse trSetting;
+    public SystemTrimResponse trSetting;
     
     public ArrayList<TrimResetListener> trListeners;
     
-    int                          minuteCounter;//assuming TR processed every minute
+    public int minuteCounter;//assuming TR processed every minute
+    
+    public TrimResponseProcessor() {
+    
+    }
     
     public TrimResponseProcessor(SystemTrimResponse tr) {
         trSetting = tr;
         setPoint = tr.getSP0();
         trListeners = new ArrayList<>();
     }
+    
     
     public double getSetPoint() {
         return setPoint;
@@ -50,7 +55,6 @@ public class TrimResponseProcessor
         }
     
         double sp = setPoint + trSetting.getSPtrim();
-        Log.d("VAV", "trimmed sp "+sp);
         
         int netRequests = trSetting.getR() - trSetting.getI();
         
@@ -62,7 +66,6 @@ public class TrimResponseProcessor
                 response = trSetting.getSPresmax();
             }
             sp += response;
-            Log.d("VAV", "sp with response "+sp);
             trSetting.resetRequest(); //Reset request count whenever a response is generated.
             for (TrimResetListener l : trListeners) {
                 l.handleSystemReset();
@@ -74,8 +77,6 @@ public class TrimResponseProcessor
         } else if (sp > trSetting.getSPmax()) {
             sp = trSetting.getSPmax();
         }
-    
-        Log.d("VAV", "sp normalized "+sp);
         
         setPoint = sp;
         Log.d("VAV", "setpoint "+setPoint);

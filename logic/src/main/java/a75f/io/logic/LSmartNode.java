@@ -93,6 +93,7 @@ class LSmartNode
         HashMap<Short, CcuToCmOverUsbSnControlsMessage_t> controlMessagesHash = new HashMap<>();
         for (ZoneProfile zp : zone.mZoneProfiles)
         {
+            zp.updateZoneControls(getDesiredVal(zp));
             for (short node : zp.getNodeAddresses())
             {
                 CcuToCmOverUsbSnControlsMessage_t controlsMessage_t;
@@ -215,6 +216,19 @@ class LSmartNode
         }
         return 0;
     }
+    
+    public static double getDesiredVal(ZoneProfile z) {
+        //TODO- TEMP
+        return 72.0;
+        /*float desiredTemperature = LZoneProfile.resolveZoneProfileLogicalValue(z);
+        boolean occupied = desiredTemperature > 0;
+        if (!occupied)
+        {
+            desiredTemperature = LZoneProfile.resolveAnyValue(z);
+        }
+        return desiredTemperature;*/
+    }
+    
     /********************************END SEED MESSAGES**************************************/
     
 }

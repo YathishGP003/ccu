@@ -111,6 +111,9 @@ public class SystemTrimResponse
         this.SPresmax = SPresmax;
     }
     
+    public SystemTrimResponse() {
+    
+    }
     
     public SystemTrimResponse(double SP0, double SPmin, double SPmax, int Td, int T, int I, double SPtrim, double SPres, double SPresmax) {
         this.SP0 = SP0;

@@ -2,9 +2,6 @@ package a75f.io.bo.building;
 
 import junit.framework.Assert;
 
-import org.junit.Before;
-import org.junit.Test;
-
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -24,7 +21,7 @@ public class NodeTest
     private Schedule schedule;
 
 
-    @Before
+    //@Before
     public void setUpMockSchedule()
     {
         //Mock schedule M-F, 8AM - 5:30PM turn isOn lights to value 100.
@@ -46,7 +43,7 @@ public class NodeTest
     }
 
 
-    @Test
+    //@Test
     public void testSmartNode()
     {
         CCUApplication ccuApplication = new CCUApplication();

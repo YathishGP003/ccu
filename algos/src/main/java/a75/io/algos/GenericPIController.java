@@ -19,7 +19,7 @@ public class GenericPIController
     protected double maxAllowedError;
     
     protected double error;
-    private double limitedError;
+    protected double limitedError;
     
     private double cumulativeError;
     private int integralMaxTimeout;

@@ -13,10 +13,15 @@ public class Damper
     public Damper() {
         minPosition = 40;
         maxPosition = 80;
-        currentPosition = 40; // Required for accurate initial error in control loops
+        currentPosition = minPosition; // Required for accurate initial error in control loops
     }
     
-    public static enum TYPE { MAT_RADIAL1("MAT Radial",38, 12, 80, 5, 5),
+    public void normalize() {
+        currentPosition = Math.min(currentPosition, maxPosition);
+        currentPosition = Math.max(currentPosition, minPosition);
+    }
+    
+    public enum TYPE { MAT_RADIAL1("MAT Radial",38, 12, 80, 5, 5),
         MAT_RADIAL2("MAT Butterfly",18, 12, 60, 5, 5),
         GENERIC_0To10V("0-10V Damper", 0, 0, 0, 0, 0),
         GENERIC_2TO10V("2-10V Damper", 0, 0, 0, 0, 0),
@@ -64,9 +69,6 @@ public class Damper
         }
     };
     static enum SHAPE { ROUND, SQUARE };
-    
-    static final String SHARED_PREF_FILE = "damper_list";
-    static final String NO_OF_DAMPERS    = "no_of_dampers_v2";
     
     public static class Parameters {
         int    mDamperType       = -1;

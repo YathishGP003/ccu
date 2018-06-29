@@ -23,10 +23,10 @@ import android.widget.TextView;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
-import a75f.io.bo.building.BaseProfileConfiguration;
 import a75f.io.bo.building.NodeType;
 import a75f.io.bo.building.Output;
 import a75f.io.bo.building.VavProfile;
+import a75f.io.bo.building.VavProfileConfiguration;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.bo.building.definitions.OutputRelayActuatorType;
@@ -48,23 +48,6 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
     
     static final int TEMP_OFFSET_LIMIT = 100;
     
-    
-    //TODO
-    public static enum REHEAT_PORT { RELAY_1, ANALOG_2_OUT}
-    public static enum REHEAT_ACTUATOR_TYPE {
-        NORMALLY_OPEN("Relay N/O"), NORMALY_CLOSED("Relay N/C"), GENERIC_0_10V("0-10v"), GENERIC_2_10V("2-10v"), GENERIC_10_0V("10-0v"), GENERIC_10_2V("10-2v");
-        String name;
-        
-        REHEAT_ACTUATOR_TYPE(String val) {
-            name = val;
-        }
-        
-        public String toString() {
-            return name;
-        }
-    }
-    
-    
     private short    mSmartNodeAddress;
     private NodeType mNodeType;
     private Zone     mZone;
@@ -73,12 +56,15 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
     LinearLayout damper2layout;
     Spinner      damperType;
     Spinner      damper2Type;
-    CheckBox     fsvDabReheatMode;
-    Spinner      reheatPort;
     Spinner      damperActuator;
     Spinner      reheatActuator;
     LinearLayout reheatOptionLayout;
     Button       setButton;
+    Spinner      zonePriority;
+    NumberPicker maxCoolingDamperPos;
+    NumberPicker minCoolingDamperPos;
+    NumberPicker maxHeatingDamperPos;
+    NumberPicker minHeatingDamperPos;
     
     Damper mDamper;
     
@@ -179,6 +165,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
     
         if (mVavProfile == null) {
             mVavProfile = new VavProfile();
+            //L.ccu().systemProfile.getSystemTRProcessor().addTRListener(mVavProfile);
         }
     
     
@@ -290,40 +277,40 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         //temperatureOffset.setValue(mFSVData.getAttachedDamper().getTemperatureOffset() + TEMP_OFFSET_LIMIT);
         temperatureOffset.setWrapSelectorWheel(false);
     
-        final NumberPicker maxDamperPos = (NumberPicker) view.findViewById(R.id.maxDamperPos);
-        setNumberPickerDividerColor(maxDamperPos);
-        maxDamperPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
-        maxDamperPos.setMinValue(0);
-        maxDamperPos.setMaxValue(100);
-        //maxDamperPos.setValue(mFSVData.getAttachedDamper().getMaxCoolingDamperOpen());
-        maxDamperPos.setWrapSelectorWheel(false);
+        maxCoolingDamperPos = view.findViewById(R.id.maxDamperPos);
+        setNumberPickerDividerColor(maxCoolingDamperPos);
+        maxCoolingDamperPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+        maxCoolingDamperPos.setMinValue(0);
+        maxCoolingDamperPos.setMaxValue(100);
+        maxCoolingDamperPos.setValue(80);
+        maxCoolingDamperPos.setWrapSelectorWheel(false);
     
-        final NumberPicker minDamperPos = (NumberPicker) view.findViewById(R.id.minDamperPos);
-        setNumberPickerDividerColor(minDamperPos);
-        minDamperPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
-        minDamperPos.setMinValue(0);
-        minDamperPos.setMaxValue(100);
-        //minDamperPos.setValue(mFSVData.getAttachedDamper().getMinCoolingDamperOpen());
-        minDamperPos.setWrapSelectorWheel(false);
+        minCoolingDamperPos = view.findViewById(R.id.minDamperPos);
+        setNumberPickerDividerColor(minCoolingDamperPos);
+        minCoolingDamperPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+        minCoolingDamperPos.setMinValue(0);
+        minCoolingDamperPos.setMaxValue(100);
+        minCoolingDamperPos.setValue(40);
+        minCoolingDamperPos.setWrapSelectorWheel(false);
     
-        final NumberPicker maxHeatingDamperPos = (NumberPicker) view.findViewById(R.id.maxHeatingDamperPos);
+        maxHeatingDamperPos = view.findViewById(R.id.maxHeatingDamperPos);
         setNumberPickerDividerColor(maxHeatingDamperPos);
         maxHeatingDamperPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         maxHeatingDamperPos.setMinValue(0);
         maxHeatingDamperPos.setMaxValue(100);
-        //maxHeatingDamperPos.setValue(mFSVData.getAttachedDamper().getMaxHeatingDamperOpen());
+        maxHeatingDamperPos.setValue(80);
         maxHeatingDamperPos.setWrapSelectorWheel(false);
     
-        final NumberPicker minHeatingDamperPos = (NumberPicker) view.findViewById(R.id.minHeatingDamperPos);
+        minHeatingDamperPos = view.findViewById(R.id.minHeatingDamperPos);
         setNumberPickerDividerColor(minHeatingDamperPos);
         minHeatingDamperPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         minHeatingDamperPos.setMinValue(0);
         minHeatingDamperPos.setMaxValue(100);
-        //minHeatingDamperPos.setValue(mFSVData.getAttachedDamper().getMinHeatingDamperOpen());
+        minHeatingDamperPos.setValue(40);
         minHeatingDamperPos.setWrapSelectorWheel(false);
     
     
-        final Spinner zonePriority = (Spinner) view.findViewById(R.id.zonePriority);
+        zonePriority = view.findViewById(R.id.zonePriority);
         ArrayAdapter<CharSequence> zonePriorityAdapter = ArrayAdapter.createFromResource(getActivity(),
                 R.array.zone_priority, R.layout.spinner_dropdown_item);
         zonePriorityAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
@@ -339,6 +326,13 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         LinearLayout zonePriorityLayout = (LinearLayout) view.findViewById(R.id.zonePriorityLayout);
         //zonePriorityLayout.setVisibility((SystemSettingsData.getTier().ordinal() <= CCU_TIER.EXPERT.ordinal()) ? View.VISIBLE : View.GONE);
     
+        if (mVavProfile.getProfileConfiguration(mSmartNodeAddress) != null) {
+            VavProfileConfiguration config = (VavProfileConfiguration) mVavProfile.getProfileConfiguration(mSmartNodeAddress);
+            minCoolingDamperPos.setValue(config.getMinDamperCooling());
+            maxCoolingDamperPos.setValue(config.getMaxDamperCooliing());
+            minHeatingDamperPos.setValue(config.getMinDamperHeating());
+            maxHeatingDamperPos.setValue(config.getMaxDamperHeating());
+        }
     
         setButton.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -363,17 +357,19 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         analogTwo.setPort(Port.ANALOG_OUT_TWO);
         analogTwo.mOutputAnalogActuatorType = OutputAnalogActuatorType.values()[reheatActuatorSelection];
         
-        BaseProfileConfiguration vavProfileConfiguration = new BaseProfileConfiguration();
-        vavProfileConfiguration.setNodeType(mNodeType);
-        vavProfileConfiguration.setNodeAddress(mSmartNodeAddress);
-    
-        vavProfileConfiguration.getOutputs().add(analogOne);
-        vavProfileConfiguration.getOutputs().add(analogTwo);
+        VavProfileConfiguration vavConfig = new VavProfileConfiguration();
+        vavConfig.setNodeType(mNodeType);
+        vavConfig.setNodeAddress(mSmartNodeAddress);
+        vavConfig.setPriority(zonePriority.getSelectedItemPosition());
+        vavConfig.setMinDamperCooling(minCoolingDamperPos.getValue());
+        vavConfig.setMaxDamperCooliing(maxCoolingDamperPos.getValue());
+        vavConfig.setMinDamperHeating(minHeatingDamperPos.getValue());
+        vavConfig.setMaxDamperHeating(maxHeatingDamperPos.getValue());
+        vavConfig.getOutputs().add(analogOne);
+        vavConfig.getOutputs().add(analogTwo);
         
-        mVavProfile.getProfileConfiguration().put(mSmartNodeAddress, vavProfileConfiguration);
-    
-        //mHmpProfile.setSetTemperature(Integer.parseInt(setpointSpinner.getSelectedItem().toString()));
-    
+        mVavProfile.getProfileConfiguration().put(mSmartNodeAddress, vavConfig);
+        
         if (mZone.findProfile(ProfileType.VAV) == null)
             mZone.mZoneProfiles.add(mVavProfile);
     

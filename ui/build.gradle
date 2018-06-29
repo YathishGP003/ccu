@@ -36,6 +36,7 @@ android {
         exclude 'com/fasterxml/jackson/core/json/VERSION.txt'
         exclude 'com/fasterxml/jackson/core/Base64Variant'
         exclude 'com/google/api/client/http/AbstractHttpContent.class'
+        exclude 'thirdpartynotice.txt'
 
     }
     signingConfigs {

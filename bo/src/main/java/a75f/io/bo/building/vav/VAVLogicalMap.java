@@ -14,7 +14,7 @@ public class VAVLogicalMap
 {
     //TODO - Tuners
     int    integralMaxTimeout = 15;
-    int proportionalSpread = 5;
+    int proportionalSpread = 20;
     double proportionalGain = 0.5;
     double integralGain = 0.5;
     
@@ -22,11 +22,12 @@ public class VAVLogicalMap
     double      supplyAirTemp;
     double      dischargeTemp;
     double pressure;
+    double dischargeSp;
     
     VavUnit             vavUnit;
     ControlLoop         coolingLoop;
     ControlLoop         heatingLoop;
-    ControlLoop         damperLoop;
+    //ControlLoop         damperLoop;
     CO2Loop             co2Loop;
     GenericPIController valveController;// Use GenericPI as we need unmodulated op.
     
@@ -37,7 +38,8 @@ public class VAVLogicalMap
         vavUnit = new VavUnit();
         coolingLoop = new ControlLoop();
         heatingLoop = new ControlLoop();
-        damperLoop = new ControlLoop();
+        //damperLoop = new ControlLoop();
+        //damperLoop.setProportionalSpread(10);//Revisit
         co2Loop = new CO2Loop();
         valveController = new GenericPIController();
         valveController.setIntegralMaxTimeout(integralMaxTimeout);
@@ -82,6 +84,14 @@ public class VAVLogicalMap
     {
         this.pressure = pressure;
     }
+    public double getDischargeSp()
+    {
+        return dischargeSp;
+    }
+    public void setDischargeSp(double dischargeSp)
+    {
+        this.dischargeSp = dischargeSp;
+    }
     public VavUnit getVavUnit()
     {
         return vavUnit;
@@ -93,10 +103,6 @@ public class VAVLogicalMap
     public ControlLoop getHeatingLoop()
     {
         return heatingLoop;
-    }
-    public ControlLoop getDamperLoop()
-    {
-        return damperLoop;
     }
     public GenericPIController getValveController()
     {

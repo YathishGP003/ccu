@@ -69,6 +69,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
     Damper mDamper;
     
     private VavProfile mVavProfile;
+    private VavProfileConfiguration mProfileConfig;
     
     private ArrayList<Damper.Parameters> mDampers = new ArrayList<Damper.Parameters>();
     ArrayAdapter<String> analogoutActuatorAdapter;
@@ -163,9 +164,10 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
     
         mVavProfile = (VavProfile) mZone.findProfile(ProfileType.VAV);
     
-        if (mVavProfile == null) {
+        if (mVavProfile != null) {
+            mProfileConfig = (VavProfileConfiguration) mVavProfile.getProfileConfiguration(mSmartNodeAddress);
+        } else {
             mVavProfile = new VavProfile();
-            //L.ccu().systemProfile.getSystemTRProcessor().addTRListener(mVavProfile);
         }
     
     
@@ -315,7 +317,12 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
                 R.array.zone_priority, R.layout.spinner_dropdown_item);
         zonePriorityAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         zonePriority.setAdapter(zonePriorityAdapter);
-        //zonePriority.setSelection(mFSVData.getZonePriority());
+        if (mProfileConfig != null)
+        {
+            zonePriority.setSelection(mProfileConfig.getPriority());
+        } else {
+            zonePriority.setSelection(1);//LOW
+        }
     
         final SwitchCompat useOccupancyDetection = (SwitchCompat) view.findViewById(R.id.useOccupancyDetection);
         //useOccupancyDetection.setChecked(mFSVData.getUseOccupancyDetection());

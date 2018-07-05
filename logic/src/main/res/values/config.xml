@@ -2,4 +2,5 @@
 <resources>
     <bool name="developer_test">false</bool>
     <bool name="simulation">true</bool>
+    <integer name="heartbeat">60</integer>
 </resources>

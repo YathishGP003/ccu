@@ -22,6 +22,8 @@ public class VAVSystemProfile extends SystemProfile
     {
         buildSATTRSystem();
         
+        buildCO2TRSystem();
+        
         //TODO - temp
         //csvLogger = new CSVLogger("VavSystem.csv");
         //String[] header = {"Minutes", "Z1 RH", "Z2 RH", "SAT" ,};
@@ -51,20 +53,43 @@ public class VAVSystemProfile extends SystemProfile
         satTRProcessor = new TrimResponseProcessor(satTRResponse);
     }
     
+    /**
+     * Variable 	 Value
+     * SP0 	800
+     * SPmin 	800
+     * SPmax 	1000
+     * Td 	 10 minutes
+     * T 	2 minutes
+     * I	2
+     * R 	Zone CO2 Requests
+     * SPtrim 	+2 ppm
+     * SPres 	 -5 ppm
+     * SPres-max -10 ppm
+     *
+     * */
+    private void buildCO2TRSystem() {
+       co2TRResponse = new SystemTrimResponseBuilder().setSP0(800).setSPmin(800).setSPmax(1000).setTd(2)//TODO-TEST
+                                                      .setT(2).setI(2).setSPtrim(2).setSPres(-5).setSPresmax(-10).buildTRSystem();
+       co2TRProcessor = new TrimResponseProcessor(co2TRResponse);
+    }
+    
     @Override
     public void doSystemControl()
     {
         satTRProcessor.processTrimResponse();
-        Log.d("VAV ", "SAT : " + satTRProcessor.getSetPoint());
-        
-        
+        co2TRProcessor.processTrimResponse();
+        Log.d("VAV ", "SAT : " + satTRProcessor.getSetPoint()+", CO2 : "+co2TRProcessor.getSetPoint());
     }
     
     public void updateSATRequest(TrimResponseRequest req)
     {
         satTRResponse.updateRequest(req);
         satTRProcessor.getTrSetting().dump();
-        Log.d("VAV"," Updated request params requestHours : "+req.requestHours+" cum Request hours "+req.cumulativeRequestHoursPercent);
+    }
+    
+    public void updateCO2Request(TrimResponseRequest req) {
+        co2TRResponse.updateRequest(req);
+        co2TRProcessor.getTrSetting().dump();
     }
     
     @JsonIgnore
@@ -73,10 +98,22 @@ public class VAVSystemProfile extends SystemProfile
         return (int) satTRProcessor.getSetPoint();
     }
     
+    @JsonIgnore
+    public int getCurrentCO2()
+    {
+        return (int) co2TRProcessor.getSetPoint();
+    }
+    
     @Override
     @JsonIgnore
-    public TrimResponseProcessor getSystemTRProcessor() {
+    public TrimResponseProcessor getSystemSATTRProcessor() {
         return satTRProcessor;
+    }
+    
+    @Override
+    @JsonIgnore
+    public TrimResponseProcessor getSystemCO2TRProcessor() {
+        return co2TRProcessor;
     }
 }
     

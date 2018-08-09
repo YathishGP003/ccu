@@ -14,7 +14,7 @@ public class ControlLoop
 {
     
     int    integralMaxTimeout = 15;
-    int proportionalSpread = 5;
+    int proportionalSpread = 3;
     double proportionalGain = 0.5;
     double integralGain = 0.5;
     

@@ -1,27 +1,15 @@
 package a75f.io.logic;
 
 import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
-import android.util.Log;
-
-import com.kinvey.android.store.DataStore;
-import com.kinvey.android.store.UserStore;
-import com.kinvey.java.core.KinveyClientCallback;
-import com.kinvey.java.store.StoreType;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.IOException;
+import java.util.HashMap;
 
 import a75f.io.bo.building.CCUApplication;
-import a75f.io.bo.kinvey.CCUPreconfiguration;
-import a75f.io.bo.kinvey.Constants;
-import a75f.io.bo.kinvey.DalContext;
 
 /**
  * Created by samjithsadasivan on 9/11/17.
@@ -38,9 +26,31 @@ public class SchedulerTest
 
     @Before
     public void setup() {
-        context = InstrumentationRegistry.getTargetContext().getApplicationContext();
-        Globals.getInstance().setApplicationContext(context);
+        //context = InstrumentationRegistry.getTargetContext().getApplicationContext();
+        //Globals.getInstance().setApplicationContext(context);
 
+    }
+    
+    
+    @Test
+    public void testNewInfluxLib() {
+        
+        HashMap<String, String> msgStr = new HashMap<>();
+        
+        msgStr.put("setTemp", String.valueOf(72.0));
+        msgStr.put("roomTemp", String.valueOf(72.0));
+        
+        String url = new InfluxDbUtil.URLBuilder().setProtocol(InfluxDbUtil.HTTPS)
+                                                  .setHost("influx-a75f.aivencloud.com")
+                                                  .setPort(27304)
+                                                  .setOp(InfluxDbUtil.WRITE)
+                                                  .setDatabse("defaultdb")
+                                                  .setUser("avnadmin")
+                                                  .setPassword("mhur2n42y4l58xlx")
+                                                  .buildUrl();
+        
+        InfluxDbUtil.writeData(url,"VAVTest", msgStr, System.currentTimeMillis()/1000L);
+        
     }
 
 
@@ -48,7 +58,7 @@ public class SchedulerTest
     public void testCCUPreconfiguration()
     {
         //59c8ec3c8f57b7f96ed57ca5
-        DalContext.instantiate(context);
+        /*DalContext.instantiate(context);
         final DataStore<CCUPreconfiguration> preconfigurationDataStore = DataStore
                                                                                  .collection(Constants.PRECONFIGURATION_NAME, CCUPreconfiguration.class, StoreType.CACHE, DalContext
                                                                                                                                                                                   .getSharedClient());
@@ -116,7 +126,7 @@ public class SchedulerTest
         catch (InterruptedException e)
         {
             e.printStackTrace();
-        }
+        }*/
 
     }
 

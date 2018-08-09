@@ -9,11 +9,13 @@ public class Damper
     public int minPosition;
     public int maxPosition;
     public int currentPosition;
+    public int co2CompensatedMinPos;
     
     public Damper() {
         minPosition = 40;
         maxPosition = 80;
         currentPosition = minPosition; // Required for accurate initial error in control loops
+        co2CompensatedMinPos = minPosition;
     }
     
     public void normalize() {
@@ -21,7 +23,8 @@ public class Damper
         currentPosition = Math.max(currentPosition, minPosition);
     }
     
-    public enum TYPE { MAT_RADIAL1("MAT Radial",38, 12, 80, 5, 5),
+    public enum TYPE {
+        MAT_RADIAL1("MAT Radial",38, 12, 80, 5, 5),
         MAT_RADIAL2("MAT Butterfly",18, 12, 60, 5, 5),
         GENERIC_0To10V("0-10V Damper", 0, 0, 0, 0, 0),
         GENERIC_2TO10V("2-10V Damper", 0, 0, 0, 0, 0),

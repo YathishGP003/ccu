@@ -31,14 +31,19 @@ public class LVAV
         {
             VAVSystemProfile p = (VAVSystemProfile) L.ccu().systemProfile;
             p.updateSATRequest(vavProfile.getSATRequest(nodeAddress));
+            p.updateCO2Request(vavProfile.getCO2Requests(nodeAddress));
             
             //TODO - Should be done from VavProfile constructor.But that introduces cyclic dependency per current design.
-            TrimResponseProcessor tp = p.getSystemTRProcessor();
-            if (!tp.trListeners.contains(vavProfile)) {
-                tp.addTRListener(vavProfile);
-                Log.d("VAV ","TR Listener added");
-            } else {
-                Log.d("VAV ","TR Listener exists");
+            TrimResponseProcessor tpSAT = p.getSystemSATTRProcessor();
+            if (!tpSAT.trListeners.contains(vavProfile)) {
+                tpSAT.addTRListener(vavProfile);
+                Log.d("VAV ","SAT TR Listener added");
+            }
+    
+            TrimResponseProcessor tpCO2 = p.getSystemCO2TRProcessor();
+            if (!tpCO2.trListeners.contains(vavProfile)) {
+                tpCO2.addTRListener(vavProfile);
+                Log.d("VAV ","CO2 TR Listener added");
             }
             
             //TODO - TEMP for testing

@@ -56,22 +56,21 @@ public class GenericPIController
     
     public void calculateIntegralError() {
         
-        cumulativeError = integralError + limitedError/integralMaxTimeout;
+        integralError = limitedError * integralGain;
+        
+        cumulativeError = cumulativeError + integralError/integralMaxTimeout;
         
         //apply integral limits
         double integralLimit = maxAllowedError * integralGain;
         double negativeIntLimit = -1 * integralLimit;
-       
-        integralError = cumulativeError > integralLimit ? integralLimit : cumulativeError;
-        
-        if (integralError < negativeIntLimit) {
-            integralError = negativeIntLimit;
-        }
+    
+        cumulativeError = Math.min(cumulativeError, integralLimit);
+        cumulativeError = Math.max(cumulativeError, negativeIntLimit);
         
     }
     
     public void calculateControlVariable() {
-        controlVariable = proportionalError + integralError;
+        controlVariable = proportionalError + cumulativeError;
         
     }
     
@@ -117,7 +116,7 @@ public class GenericPIController
     }
     
     public double getControlVariable() {
-        Log.d("VAV","PE: "+proportionalError+", IE : "+integralError+", CV: "+controlVariable);
+        Log.d("VAV","PE: "+proportionalError+", IE : "+cumulativeError+", CV: "+controlVariable);
         return controlVariable;
     }
     

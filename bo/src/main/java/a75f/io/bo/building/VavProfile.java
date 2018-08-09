@@ -8,6 +8,7 @@ import org.javolution.lang.MathLib;
 
 import java.util.HashMap;
 
+import a75.io.algos.CO2Loop;
 import a75.io.algos.ControlLoop;
 import a75.io.algos.GenericPIController;
 import a75.io.algos.TrimResetListener;
@@ -67,19 +68,20 @@ public class VavProfile extends ZoneProfile implements TrimResetListener
         double roomTemp = (float) regularUpdateMessage.update.roomTemperature.get() / 10.0f;
         double dischargeTemp = (float) regularUpdateMessage.update.airflow1Temperature.get() / 10.0f;
         double supplyAirTemp = (float) regularUpdateMessage.update.airflow2Temperature.get() / 10.0f;
-        double pressure = 900;
+        double co2 = (float) regularUpdateMessage.update.externalAnalogVoltageInput1.get();
     
-        Log.d(TAG," RegularUpdate : rT :"+roomTemp+" dT :"+dischargeTemp+" sT :"+supplyAirTemp+" SN:"+regularUpdateMessage.update.smartNodeAddress.get());
+        Log.d(TAG," RegularUpdate : rT :"+roomTemp+" dT :"+dischargeTemp+" sT :"+supplyAirTemp+"CO2: "+co2+" SN:"+regularUpdateMessage.update.smartNodeAddress.get());
         VAVLogicalMap currentDevice = vavDeviceMap.get((short)regularUpdateMessage.update.smartNodeAddress.get());
         if (currentDevice == null) {
             currentDevice = new VAVLogicalMap();
             vavDeviceMap.put((short)regularUpdateMessage.update.smartNodeAddress.get(), currentDevice);
             currentDevice.satResetRequest.setImportanceMultiplier(getZonePriority());
+            currentDevice.co2ResetRequest.setImportanceMultiplier(getZonePriority());
         }
         currentDevice.setRoomTemp(roomTemp);
         currentDevice.setDischargeTemp(dischargeTemp);
         currentDevice.setSupplyAirTemp(supplyAirTemp);
-        currentDevice.setPressure(pressure);
+        currentDevice.setCO2(co2);
         
         if(mInterface != null)
         {
@@ -104,14 +106,14 @@ public class VavProfile extends ZoneProfile implements TrimResetListener
             VAVLogicalMap vavDevice = vavDeviceMap.get(node);
             ControlLoop coolingLoop = vavDevice.getCoolingLoop();
             ControlLoop heatingLoop = vavDevice.getHeatingLoop();
-            //CO2Loop co2Loop = vavDeviceMap.get(node).getCo2Loop();
+            CO2Loop co2Loop = vavDeviceMap.get(node).getCo2Loop();
             VavUnit vavUnit = vavDevice.getVavUnit();
             GenericPIController valveController = vavDevice.getValveController();
     
             double roomTemp = vavDevice.getRoomTemp();
             double dischargeTemp = vavDevice.getDischargeTemp();
             double supplyAirTemp = vavDevice.getSupplyAirTemp();
-            //double pressure = vavDeviceMap.get(node).getPressure();
+            double co2 = vavDeviceMap.get(node).getCO2();
             double dischargeSp = vavDevice.getDischargeSp();
             
             if (roomTemp == 0) {
@@ -123,7 +125,7 @@ public class VavProfile extends ZoneProfile implements TrimResetListener
             Damper damper = vavUnit.vavDamper;
             Valve valve = vavUnit.reheatValve;
             int loopOp;//New value of loopOp
-            //TODO -
+            //TODO
             //If supply air temperature from air handler is greater than room temperature, Cooling shall be
             //locked out.
             if (roomTemp > (setTemp + deadBand))
@@ -135,7 +137,7 @@ public class VavProfile extends ZoneProfile implements TrimResetListener
                     coolingLoop.setEnabled();
                     heatingLoop.setDisabled();
                 }
-                int coolingOp = (int) coolingLoop.getLoopOutput(roomTemp, setTemp);
+                int coolingOp = (int) coolingLoop.getLoopOutput(roomTemp, setTemp+deadBand);
                 loopOp = coolingOp;
                 valveController.reset();
             }
@@ -149,12 +151,13 @@ public class VavProfile extends ZoneProfile implements TrimResetListener
                     coolingLoop.setDisabled();
                 }
                 
-                int heatingLoopOp = (int) heatingLoop.getLoopOutput(setTemp, roomTemp);
+                int heatingLoopOp = (int) heatingLoop.getLoopOutput(setTemp-deadBand, roomTemp);
                 
                 if (heatingLoopOp <= 50)
                 {
                     //Control reheat valve when heating loop is <=50
-                    dischargeSp = (roomTemp + HEATING_LOOP_OFFSET) > MAX_DISCHARGE_TEMP ? MAX_DISCHARGE_TEMP : (roomTemp + HEATING_LOOP_OFFSET);
+                    double datMax = (roomTemp + HEATING_LOOP_OFFSET) > MAX_DISCHARGE_TEMP ? MAX_DISCHARGE_TEMP : (roomTemp + HEATING_LOOP_OFFSET);
+                    dischargeSp = supplyAirTemp + (datMax - supplyAirTemp) * heatingLoopOp/50;
                     vavDevice.setDischargeSp(dischargeSp);
                     valveController.updateControlVariable(dischargeSp, dischargeTemp);
                     valve.currentPosition = (int) (valveController.getControlVariable() * 100 / valveController.getMaxAllowedError());
@@ -165,6 +168,12 @@ public class VavProfile extends ZoneProfile implements TrimResetListener
                 {
                     //Control airflow when heating loop is 51-100
                     //Also update valve control to account for change in dischargeTemp
+                    //TODO- To be discussed
+                    if (dischargeSp == 0) {
+                        double datMax = (roomTemp + HEATING_LOOP_OFFSET) > MAX_DISCHARGE_TEMP ? MAX_DISCHARGE_TEMP : (roomTemp + HEATING_LOOP_OFFSET);
+                        dischargeSp = supplyAirTemp + (datMax - supplyAirTemp) * heatingLoopOp/100;
+                        vavDevice.setDischargeSp(dischargeSp);
+                    }
                     valveController.updateControlVariable(dischargeSp, dischargeTemp);
                     valve.currentPosition = (int) (valveController.getControlVariable() * 100 / valveController.getMaxAllowedError());
                     loopOp = heatingLoopOp;
@@ -187,23 +196,23 @@ public class VavProfile extends ZoneProfile implements TrimResetListener
             }
             
             setDamperLimits(node, damper);
-    
-            //do Co2 Control
-            //TODO
+            
             //CO2 loop output from 0-50% modulates damper min-max.
-            /*if (/*mode == occupied && *//*co2Loop.getLoopOutput() <= 50)
+            if (/*mode == occupied && */co2Loop.getLoopOutput(co2) <= 50)
             {
-                damper.minPosition = damper.minPosition + (damper.maxPosition - damper.minPosition) * co2Loop.getLoopOutput(pressure) / 50;
-            }*/
+                //TODO - Spec says upper limit is Vcool-max
+                damper.co2CompensatedMinPos = damper.minPosition + (damper.maxPosition - damper.minPosition) * co2Loop.getLoopOutput() / 50;
+                Log.d("VAV","damper.minPosition:"+damper.minPosition+"damper.maxPosition "+damper.maxPosition);
+                Log.d("VAV","CO2LoopOp :"+co2Loop.getLoopOutput()+", adjusted minposition "+damper.minPosition);
+            }
             
             if (loopOp == 0)
             {
-                damper.currentPosition = damper.minPosition;
+                damper.currentPosition = damper.co2CompensatedMinPos;
             }
             else
             {
-                //int unmodDamperOp = (int) damperLoop.getLoopOutput(loopOp, curLoopOp);
-                damper.currentPosition = damper.minPosition + (damper.maxPosition - damper.minPosition) * loopOp / 100;
+                damper.currentPosition = damper.co2CompensatedMinPos + (damper.maxPosition - damper.co2CompensatedMinPos) * loopOp / 100;
             }
             Log.d(TAG, "STATE :"+state+" ,loopOp: " + loopOp + " ,damper:" + damper.currentPosition+", valve:"+valve.currentPosition);
             
@@ -308,7 +317,7 @@ public class VavProfile extends ZoneProfile implements TrimResetListener
         } else if (co2LoopOp < 50) {
             co2ResetRequest.currentRequests = 0;
         }
-    
+        co2ResetRequest.handleRequestUpdate();
         return co2ResetRequest;
     }
     
@@ -329,7 +338,9 @@ public class VavProfile extends ZoneProfile implements TrimResetListener
         Log.d("VAV","handleSystemReset");
         for (short node : getNodeAddresses())
         {
+            //TODO - Should be done separately
             vavDeviceMap.get(node).satResetRequest.handleReset();
+            vavDeviceMap.get(node).co2ResetRequest.handleReset();
         }
     }
     
@@ -376,16 +387,19 @@ public class VavProfile extends ZoneProfile implements TrimResetListener
             if (vavDeviceMap.get(node) ==  null) {
                 continue;
             }
-            tsdata.put("SAT-requestHours:"+node,vavDeviceMap.get(node).satResetRequest.requestHours);
-            tsdata.put("currentTemp:"+node,vavDeviceMap.get(node).getRoomTemp());
-            tsdata.put("setTemp :"+node,setTemp);
-            tsdata.put("heatingLoopOp:"+node,vavDeviceMap.get(node).getHeatingLoop().getLoopOutput());
-            tsdata.put("coolingLoopOp:"+node,vavDeviceMap.get(node).getCoolingLoop().getLoopOutput());
-            tsdata.put("dischargeTemp:"+node,vavDeviceMap.get(node).getDischargeTemp());
-            tsdata.put("dischargeSp:"+node,vavDeviceMap.get(node).getDischargeSp());
-            tsdata.put("supplyAirTemp:"+node,vavDeviceMap.get(node).getDischargeSp());
-            tsdata.put("reheatValve:"+node,(double)vavDeviceMap.get(node).getVavUnit().reheatValve.currentPosition);
-            tsdata.put("vavDamper:"+node,(double)vavDeviceMap.get(node).getVavUnit().vavDamper.currentPosition);
+            tsdata.put("SAT-requestHours"+node,vavDeviceMap.get(node).satResetRequest.requestHours);
+            tsdata.put("currentTemp"+node,vavDeviceMap.get(node).getRoomTemp());
+            tsdata.put("setTemp"+node,setTemp);
+            tsdata.put("heatingLoopOp"+node,vavDeviceMap.get(node).getHeatingLoop().getLoopOutput());
+            tsdata.put("coolingLoopOp"+node,vavDeviceMap.get(node).getCoolingLoop().getLoopOutput());
+            tsdata.put("dischargeTemp"+node,vavDeviceMap.get(node).getDischargeTemp());
+            tsdata.put("dischargeSp"+node,vavDeviceMap.get(node).getDischargeSp());
+            tsdata.put("supplyAirTemp"+node,vavDeviceMap.get(node).getSupplyAirTemp());
+            tsdata.put("reheatValve"+node,(double)vavDeviceMap.get(node).getVavUnit().reheatValve.currentPosition);
+            tsdata.put("vavDamper"+node,(double)vavDeviceMap.get(node).getVavUnit().vavDamper.currentPosition);
+            tsdata.put("CO2"+node,vavDeviceMap.get(node).getCO2());
+            tsdata.put("co2LoopOp"+node,(double)vavDeviceMap.get(node).getCo2Loop().getLoopOutput());
+            tsdata.put("CO2-requestHours"+node,vavDeviceMap.get(node).co2ResetRequest.requestHours);
         }
         
         return tsdata;
@@ -401,6 +415,7 @@ public class VavProfile extends ZoneProfile implements TrimResetListener
                 continue;
             }
             VavProfileConfiguration config = (VavProfileConfiguration) mProfileConfiguration.get(nodeAddress);
+            Log.d("VAV", "Zone priority "+nodeAddress+" = "+config.getPriority());
             if (config.getPriority() > priority) {
                 priority = config.getPriority();
             }

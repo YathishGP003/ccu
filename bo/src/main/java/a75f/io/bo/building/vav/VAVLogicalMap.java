@@ -21,7 +21,7 @@ public class VAVLogicalMap
     double      roomTemp;
     double      supplyAirTemp;
     double      dischargeTemp;
-    double pressure;
+    double co2;
     double dischargeSp;
     
     VavUnit             vavUnit;
@@ -76,13 +76,13 @@ public class VAVLogicalMap
     {
         this.dischargeTemp = dischargeTemp;
     }
-    public double getPressure()
+    public double getCO2()
     {
-        return pressure;
+        return co2;
     }
-    public void setPressure(double pressure)
+    public void setCO2(double co2)
     {
-        this.pressure = pressure;
+        this.co2 = co2;
     }
     public double getDischargeSp()
     {

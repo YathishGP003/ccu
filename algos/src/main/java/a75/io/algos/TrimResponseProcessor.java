@@ -69,6 +69,7 @@ public class TrimResponseProcessor
             trSetting.resetRequest(); //Reset request count whenever a response is generated.
             for (TrimResetListener l : trListeners) {
                 l.handleSystemReset();
+                Log.d("VAV","handleSystemtreset "+l.toString());
             }
         }
         

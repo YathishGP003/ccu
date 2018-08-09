@@ -8,9 +8,6 @@ import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -37,12 +34,17 @@ public class LSystem
     //private static String deviceId = "AndroidCCU";
     
     public static int msgCntr = 0;
-    public static JSONObject msgStr = null;
+    public static HashMap<String, String> msgStr = null;
+    public static String measurementTag = "VAV";
+    public static long startTimeInMillis = System.currentTimeMillis();
+    //public static JSONObject msgStr = null;
     
     public static void handleSystemControl() {
         Log.d("VAV", "handleSystemControl");
         ccu().systemProfile.doSystemControl();
-        msgStr = new JSONObject();
+        msgStr = new HashMap<>();
+    
+        //int heartbeatInterval = L.app().getResources().getInteger(R.integer.heartbeat);
         
         collectTSData();
     
@@ -53,20 +55,23 @@ public class LSystem
             public void run()
             {
                 super.run();
-                try {
-                    SendTSDataMessage();
+                sendTSDataToInfluxDB();
+                msgCntr++;
+                /*try {
+                    //SendTSDataToAzure();
+                    
                 } catch (URISyntaxException|IOException e)
                 {
                     Log.d("VAV","Exception while opening IoTHub connection: " + e.toString());
-                }
+                }*/
             }
         }.start();
     }
     
     public static void collectTSData()
     {
-        addParamToMsg("deviceId", deviceId);
-        addParamToMsg("messageId", String.valueOf(++msgCntr));
+        //addParamToMsg("deviceId", deviceId);
+        addParamToMsg("messageId", String.valueOf(msgCntr));
     
         for (Floor floor : ccu().getFloors())
         {
@@ -88,20 +93,55 @@ public class LSystem
         {
             VAVSystemProfile p = (VAVSystemProfile) ccu().systemProfile;
             addParamToMsg("SAT", String.valueOf(p.getCurrentSAT()));
+            addParamToMsg("CO2", String.valueOf(p.getCurrentCO2()));
         }
     }
     
     public static void addParamToMsg(String key, String val){
-        try
-        {
             msgStr.put(key, val);
-        
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
     }
     
-    public static void SendTSDataMessage() throws URISyntaxException, IOException
+    public static void sendTSDataToInfluxDB() {
+    
+        String url = new InfluxDbUtil.URLBuilder().setProtocol(InfluxDbUtil.HTTPS)
+                                                  .setHost("influx-a75f.aivencloud.com")
+                                                  .setPort(27304)
+                                                  .setOp(InfluxDbUtil.WRITE)
+                                                  .setDatabse("defaultdb")
+                                                  .setUser("avnadmin")
+                                                  .setPassword("mhur2n42y4l58xlx")
+                                                  .buildUrl();
+        
+        if (L.app().getResources().getInteger(R.integer.heartbeat) != 60) {
+            //############# Testing  ##########################
+            
+            if (msgCntr < 60)
+            {
+                measurementTag = "VAVTest";
+                long testStartTime = SimulationTestHelper.getVavTestStartTime();
+                long testTime;
+                if (testStartTime == 0) {
+                    testTime = System.currentTimeMillis();
+                } else if (testStartTime == 100) {
+                    testTime = startTimeInMillis + msgCntr * 60000;
+                } else {
+                    testTime = testStartTime + msgCntr * 60000;
+                }
+                
+                InfluxDbUtil.writeData(url, measurementTag, msgStr, testTime);
+            } else {
+                Log.d("VAV"," Test time exceeded , not uploading data :msgCntr:"+msgCntr);
+            }
+            
+        } else {
+            InfluxDbUtil.writeData(url,measurementTag, msgStr, System.currentTimeMillis());
+        }
+        
+        
+    }
+    
+    
+    public static void SendTSDataToAzure() throws URISyntaxException, IOException
     {
         // Comment/uncomment from lines below to use HTTPS or MQTT protocol
         // IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;

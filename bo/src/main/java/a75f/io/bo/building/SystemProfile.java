@@ -29,12 +29,24 @@ public class SystemProfile
     public SystemTrimResponse    satTRResponse;
     
     @JsonIgnore
+    public TrimResponseProcessor co2TRProcessor;
+    
+    @JsonIgnore
+    public SystemTrimResponse    co2TRResponse;
+    
+    
+    @JsonIgnore
     public void doSystemControl(){
     
     }
     
     @JsonIgnore
-    public TrimResponseProcessor getSystemTRProcessor(){
+    public TrimResponseProcessor getSystemSATTRProcessor(){
+        return null;
+    }
+    
+    @JsonIgnore
+    public TrimResponseProcessor getSystemCO2TRProcessor(){
         return null;
     }
 }

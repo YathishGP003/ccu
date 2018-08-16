@@ -64,7 +64,10 @@ class MeshUpdateJob extends BaseJob
                         }
                     }
                 }
-                LSystem.handleSystemControl();
+                
+                Logw("=================NOW SENDING SYSTEM CONTROL MESSAGE ====================");
+                sendStructToCM(LSystem.getSystemControlMsg());
+            
             }
             else
             {
@@ -80,6 +83,18 @@ class MeshUpdateJob extends BaseJob
     public static boolean sendStruct(short smartNodeAddress, Struct struct)
     {
         boolean retVal = LSerial.getInstance().sendSerialStructToNode(smartNodeAddress, struct);
+        //If the application is in simualtion mode to work over FTDI with biskit,
+        // sleep between messages, so biskit doesn't fall behind.
+        if (Globals.getInstance().isSimulation())
+        {
+            tSleep(SIMULATION_SLEEP_TIME);
+        }
+        return retVal;
+    }
+    
+    public static boolean sendStructToCM(Struct struct)
+    {
+        boolean retVal = LSerial.getInstance().sendSerialToCM(struct);
         //If the application is in simualtion mode to work over FTDI with biskit,
         // sleep between messages, so biskit doesn't fall behind.
         if (Globals.getInstance().isSimulation())

@@ -1,4 +1,4 @@
-package a75f.io.bo.building;
+package a75f.io.bo.building.vav;
 
 import android.util.Log;
 
@@ -13,17 +13,18 @@ import a75.io.algos.ControlLoop;
 import a75.io.algos.GenericPIController;
 import a75.io.algos.TrimResetListener;
 import a75.io.algos.TrimResponseRequest;
+import a75f.io.bo.building.BaseProfileConfiguration;
+import a75f.io.bo.building.ZoneProfile;
 import a75f.io.bo.building.definitions.ProfileType;
 import a75f.io.bo.building.hvac.Damper;
 import a75f.io.bo.building.hvac.Valve;
 import a75f.io.bo.building.hvac.VavUnit;
-import a75f.io.bo.building.vav.VAVLogicalMap;
 import a75f.io.bo.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 
-import static a75f.io.bo.building.VavProfile.ZonePriority.LOW;
-import static a75f.io.bo.building.VavProfile.ZoneState.COOLING;
-import static a75f.io.bo.building.VavProfile.ZoneState.DEADBAND;
-import static a75f.io.bo.building.VavProfile.ZoneState.HEATING;
+import static a75f.io.bo.building.vav.VavProfile.ZonePriority.LOW;
+import static a75f.io.bo.building.vav.VavProfile.ZoneState.COOLING;
+import static a75f.io.bo.building.vav.VavProfile.ZoneState.DEADBAND;
+import static a75f.io.bo.building.vav.VavProfile.ZoneState.HEATING;
 
 /**
  * Created by samjithsadasivan on 5/31/18.
@@ -59,7 +60,17 @@ public class VavProfile extends ZoneProfile implements TrimResetListener
     ZoneState state = COOLING;
     ZonePriority priority = LOW;
     
-    HashMap<Short, VAVLogicalMap> vavDeviceMap = new HashMap<>();
+    HashMap<Short, VAVLogicalMap> vavDeviceMap;
+    SatResetListener satResetListener;
+    CO2ResetListener co2ResetListener;
+    SpResetListener spResetListener;
+    
+    public VavProfile() {
+        vavDeviceMap = new HashMap<>();
+        satResetListener = new SatResetListener();
+        co2ResetListener = new CO2ResetListener();
+        spResetListener = new SpResetListener();
+    }
     
     @Override
     public void mapRegularUpdate(CmToCcuOverUsbSnRegularUpdateMessage_t regularUpdateMessage)
@@ -69,8 +80,9 @@ public class VavProfile extends ZoneProfile implements TrimResetListener
         double dischargeTemp = (float) regularUpdateMessage.update.airflow1Temperature.get() / 10.0f;
         double supplyAirTemp = (float) regularUpdateMessage.update.airflow2Temperature.get() / 10.0f;
         double co2 = (float) regularUpdateMessage.update.externalAnalogVoltageInput1.get();
+        double sp =  (float) regularUpdateMessage.update.externalAnalogVoltageInput2.get();//TODO
     
-        Log.d(TAG," RegularUpdate : rT :"+roomTemp+" dT :"+dischargeTemp+" sT :"+supplyAirTemp+"CO2: "+co2+" SN:"+regularUpdateMessage.update.smartNodeAddress.get());
+        Log.d(TAG," RegularUpdate : rT :"+roomTemp+" dT :"+dischargeTemp+" sT :"+supplyAirTemp+" CO2: "+co2+" SN:"+regularUpdateMessage.update.smartNodeAddress.get());
         VAVLogicalMap currentDevice = vavDeviceMap.get((short)regularUpdateMessage.update.smartNodeAddress.get());
         if (currentDevice == null) {
             currentDevice = new VAVLogicalMap();
@@ -82,6 +94,7 @@ public class VavProfile extends ZoneProfile implements TrimResetListener
         currentDevice.setDischargeTemp(dischargeTemp);
         currentDevice.setSupplyAirTemp(supplyAirTemp);
         currentDevice.setCO2(co2);
+        currentDevice.setStaticPressure(sp);
         
         if(mInterface != null)
         {
@@ -168,7 +181,6 @@ public class VavProfile extends ZoneProfile implements TrimResetListener
                 {
                     //Control airflow when heating loop is 51-100
                     //Also update valve control to account for change in dischargeTemp
-                    //TODO- To be discussed
                     if (dischargeSp == 0) {
                         double datMax = (roomTemp + HEATING_LOOP_OFFSET) > MAX_DISCHARGE_TEMP ? MAX_DISCHARGE_TEMP : (roomTemp + HEATING_LOOP_OFFSET);
                         dischargeSp = supplyAirTemp + (datMax - supplyAirTemp) * heatingLoopOp/100;
@@ -197,12 +209,10 @@ public class VavProfile extends ZoneProfile implements TrimResetListener
             
             setDamperLimits(node, damper);
             
-            //CO2 loop output from 0-50% modulates damper min-max.
-            if (/*mode == occupied && */co2Loop.getLoopOutput(co2) <= 50)
+            //CO2 loop output from 0-50% modulates damper min position.
+            if (/*mode == OCCUPIED && */co2Loop.getLoopOutput(co2) <= 50)
             {
-                //TODO - Spec says upper limit is Vcool-max
                 damper.co2CompensatedMinPos = damper.minPosition + (damper.maxPosition - damper.minPosition) * co2Loop.getLoopOutput() / 50;
-                Log.d("VAV","damper.minPosition:"+damper.minPosition+"damper.maxPosition "+damper.maxPosition);
                 Log.d("VAV","CO2LoopOp :"+co2Loop.getLoopOutput()+", adjusted minposition "+damper.minPosition);
             }
             
@@ -319,9 +329,32 @@ public class VavProfile extends ZoneProfile implements TrimResetListener
         }
         co2ResetRequest.handleRequestUpdate();
         return co2ResetRequest;
+        
     }
     
-    
+    @JsonIgnore
+    public TrimResponseRequest getSpRequests(short node)
+    {
+        if (vavDeviceMap.get(node) ==  null) {
+            return null;
+        }
+        
+        Damper d = vavDeviceMap.get(node).getVavUnit().vavDamper;
+        int damperLoopOp = (d.currentPosition - d.co2CompensatedMinPos) * 100/ (d.maxPosition - d.co2CompensatedMinPos);
+        
+        TrimResponseRequest spResetRequest = vavDeviceMap.get(node).spResetRequest;
+        if (damperLoopOp > 95) {
+            spResetRequest.currentRequests = 3;
+        } else if (damperLoopOp > 85){
+            spResetRequest.currentRequests = 2;
+        } else if (damperLoopOp > 75) {
+            spResetRequest.currentRequests = 1;
+        } else if (damperLoopOp < 65) {
+            spResetRequest.currentRequests = 0;
+        }
+        spResetRequest.handleRequestUpdate();
+        return spResetRequest;
+    }
     
     @JsonIgnore
     public int getConditioningMode() {
@@ -400,6 +433,8 @@ public class VavProfile extends ZoneProfile implements TrimResetListener
             tsdata.put("CO2"+node,vavDeviceMap.get(node).getCO2());
             tsdata.put("co2LoopOp"+node,(double)vavDeviceMap.get(node).getCo2Loop().getLoopOutput());
             tsdata.put("CO2-requestHours"+node,vavDeviceMap.get(node).co2ResetRequest.requestHours);
+            tsdata.put("SP"+node,vavDeviceMap.get(node).getStaticPressure());
+            tsdata.put("SP-requestHours"+node,vavDeviceMap.get(node).spResetRequest.requestHours);
         }
         
         return tsdata;
@@ -483,4 +518,50 @@ public class VavProfile extends ZoneProfile implements TrimResetListener
         }
         return damperPos;
     }
+    
+    class SatResetListener implements TrimResetListener {
+        public void handleSystemReset() {
+            Log.d("VAV","handleSATReset");
+            for (short node : getNodeAddresses())
+            {
+                vavDeviceMap.get(node).satResetRequest.handleReset();
+            }
+        }
+    }
+    
+    @JsonIgnore
+    public SatResetListener getSatResetListener() {
+        return satResetListener;
+    }
+    
+    class CO2ResetListener implements TrimResetListener {
+        public void handleSystemReset() {
+            Log.d("VAV","handleCO2Reset");
+            for (short node : getNodeAddresses())
+            {
+                vavDeviceMap.get(node).co2ResetRequest.handleReset();
+            }
+        }
+    }
+    
+    @JsonIgnore
+    public CO2ResetListener getCO2ResetListener() {
+        return co2ResetListener;
+    }
+    
+    class SpResetListener implements TrimResetListener {
+        public void handleSystemReset() {
+            Log.d("VAV","handleSPReset");
+            for (short node : getNodeAddresses())
+            {
+                vavDeviceMap.get(node).spResetRequest.handleReset();
+            }
+        }
+    }
+    
+    @JsonIgnore
+    public SpResetListener getSpResetListener() {
+        return spResetListener;
+    }
+    
 }

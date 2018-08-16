@@ -53,6 +53,11 @@ android {
 
     }
     sourceSets { main { assets.srcDirs = ['src/main/assets', 'src/androidTest/assets'] } }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {
@@ -64,9 +69,7 @@ dependencies {
     compile 'org.greenrobot:eventbus:3.0.0'
     compile 'com.android.support:design:26.1.0'
     compile 'com.android.support:support-vector-drawable:26.1.0'
-    implementation ('com.jakewharton:butterknife:8.7.0'){
-        exclude group: 'com.google.guava'
-    }
+    implementation ('com.jakewharton:butterknife:8.7.0')
     compile 'com.android.support:support-v4:26.1.0'
     compile 'com.android.support:recyclerview-v7:26.1.0'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'

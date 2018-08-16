@@ -49,10 +49,10 @@
         <item>  0-50A Current Transformer</item>
     </string-array>
     <string-array name="hvac_equip_select">
-        <item>  DX-Unit</item>
-        <item>  Chiller/AHU </item>
-        <item>  Pneumatic VAV </item>
-        <item>  VAV with Reheat </item>
+        <item>  AHU </item>
+        <item>  RTU-IE </item>
+        <item>  Staged RTU </item>
+        <item>  Default (PI Control) </item>
     </string-array>
 
     <string-array name="mode">

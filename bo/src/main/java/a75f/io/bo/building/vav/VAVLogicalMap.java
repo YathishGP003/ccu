@@ -24,6 +24,8 @@ public class VAVLogicalMap
     double co2;
     double dischargeSp;
     
+    double staticPressure;
+    
     VavUnit             vavUnit;
     ControlLoop         coolingLoop;
     ControlLoop         heatingLoop;
@@ -33,6 +35,7 @@ public class VAVLogicalMap
     
     public TrimResponseRequest satResetRequest;
     public TrimResponseRequest co2ResetRequest;
+    public TrimResponseRequest spResetRequest;
     
     public VAVLogicalMap() {
         vavUnit = new VavUnit();
@@ -49,6 +52,7 @@ public class VAVLogicalMap
         
         satResetRequest = new TrimResponseRequest();
         co2ResetRequest = new TrimResponseRequest();
+        spResetRequest = new TrimResponseRequest();
         
     }
     
@@ -115,6 +119,14 @@ public class VAVLogicalMap
     public CO2Loop getCo2Loop()
     {
         return co2Loop;
+    }
+    public double getStaticPressure()
+    {
+        return staticPressure;
+    }
+    public void setStaticPressure(double staticPressure)
+    {
+        this.staticPressure = staticPressure;
     }
     
 }

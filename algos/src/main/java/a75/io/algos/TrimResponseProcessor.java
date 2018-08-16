@@ -45,11 +45,13 @@ public class TrimResponseProcessor
         trListeners.remove(l);
     }
     
-    public void processTrimResponse() {
+    public void processResetResponse() {
         if (++minuteCounter < trSetting.getTd()) {
             trSetting.resetRequest();
             return;
         }
+        
+        //TODO - requests now get updated every minute, it should change with the time step value here
         if (minuteCounter % trSetting.getT() != 0) {
             return;
         }
@@ -69,7 +71,6 @@ public class TrimResponseProcessor
             trSetting.resetRequest(); //Reset request count whenever a response is generated.
             for (TrimResetListener l : trListeners) {
                 l.handleSystemReset();
-                Log.d("VAV","handleSystemtreset "+l.toString());
             }
         }
         

@@ -13,7 +13,7 @@
         <color android:color="@color/orange_multi" />
     </item>
     <item android:state_checked="true">
-        <color android:color="@color/progress_gray" />
+        <color android:color="@color/accent" />
 
     </item>
 

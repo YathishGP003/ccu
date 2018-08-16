@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 public class SystemFragment extends Fragment
 {
+	
 	public SystemFragment()
 	{
 	}

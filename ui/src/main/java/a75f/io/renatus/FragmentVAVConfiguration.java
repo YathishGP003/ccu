@@ -25,8 +25,8 @@ import java.util.ArrayList;
 
 import a75f.io.bo.building.NodeType;
 import a75f.io.bo.building.Output;
-import a75f.io.bo.building.VavProfile;
-import a75f.io.bo.building.VavProfileConfiguration;
+import a75f.io.bo.building.vav.VavProfile;
+import a75f.io.bo.building.vav.VavProfileConfiguration;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.bo.building.definitions.OutputRelayActuatorType;

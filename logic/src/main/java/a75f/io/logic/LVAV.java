@@ -3,9 +3,9 @@ package a75f.io.logic;
 import android.util.Log;
 
 import a75.io.algos.TrimResponseProcessor;
+import a75.io.algos.vav.VavTRSystem;
 import a75f.io.bo.building.Output;
-import a75f.io.bo.building.VAVSystemProfile;
-import a75f.io.bo.building.VavProfile;
+import a75f.io.bo.building.vav.VavProfile;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.definitions.Port;
 import a75f.io.bo.building.hvac.VavUnit;
@@ -27,28 +27,31 @@ public class LVAV
             return;
         }
         
-        if (L.ccu().systemProfile instanceof VAVSystemProfile)
+        if (L.ccu().systemProfile.trSystem instanceof VavTRSystem)
         {
-            VAVSystemProfile p = (VAVSystemProfile) L.ccu().systemProfile;
+            VavTRSystem p = (VavTRSystem) L.ccu().systemProfile.trSystem;
             p.updateSATRequest(vavProfile.getSATRequest(nodeAddress));
             p.updateCO2Request(vavProfile.getCO2Requests(nodeAddress));
+            p.updateSpRequest(vavProfile.getSpRequests(nodeAddress));
             
             //TODO - Should be done from VavProfile constructor.But that introduces cyclic dependency per current design.
             TrimResponseProcessor tpSAT = p.getSystemSATTRProcessor();
-            if (!tpSAT.trListeners.contains(vavProfile)) {
-                tpSAT.addTRListener(vavProfile);
+            if (!tpSAT.trListeners.contains(vavProfile.getSatResetListener())) {
+                tpSAT.addTRListener(vavProfile.getSatResetListener());
                 Log.d("VAV ","SAT TR Listener added");
             }
     
             TrimResponseProcessor tpCO2 = p.getSystemCO2TRProcessor();
-            if (!tpCO2.trListeners.contains(vavProfile)) {
-                tpCO2.addTRListener(vavProfile);
+            if (!tpCO2.trListeners.contains(vavProfile.getCO2ResetListener())) {
+                tpCO2.addTRListener(vavProfile.getCO2ResetListener());
                 Log.d("VAV ","CO2 TR Listener added");
             }
-            
-            //TODO - TEMP for testing
-            Log.d("VAV ","Update System SAT , New SAT "+p.getCurrentSAT());
-            controlsMessage_t.controls.analogOut3.set((short)p.getCurrentSAT());
+    
+            TrimResponseProcessor tpSp = p.getSystemSpTRProcessor();
+            if (!tpSp.trListeners.contains(vavProfile.getSpResetListener())) {
+                tpSp.addTRListener(vavProfile.getSpResetListener());
+                Log.d("VAV ","SP TR Listener added");
+            }
         }
         
         for (Output output : vavProfile.getProfileConfiguration(nodeAddress).getOutputs()) {
@@ -63,7 +66,7 @@ public class LVAV
             }
         }
         controlsMessage_t.controls.conditioningMode.set((short)vavProfile.getConditioningMode());
-        Log.d("LVAV", " valve : "+vavControls.reheatValve.currentPosition+", damper : "+vavControls.vavDamper.currentPosition);
+        Log.d("LVAV", "Generate SN control, valve : "+vavControls.reheatValve.currentPosition+", damper : "+vavControls.vavDamper.currentPosition);
         
     }
     

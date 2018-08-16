@@ -116,7 +116,7 @@ public class GenericPIController
     }
     
     public double getControlVariable() {
-        Log.d("VAV","PE: "+proportionalError+", IE : "+cumulativeError+", CV: "+controlVariable);
+        Log.d("VAV", "PE: " + proportionalError + ", IE : " + cumulativeError + ", CV: " + controlVariable);
         return controlVariable;
     }
     

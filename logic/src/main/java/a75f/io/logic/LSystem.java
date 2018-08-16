@@ -8,13 +8,15 @@ import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
 
+import org.javolution.io.Struct;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
+import a75.io.algos.vav.VavTRSystem;
 import a75f.io.bo.building.Floor;
-import a75f.io.bo.building.VAVSystemProfile;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.ZoneProfile;
 
@@ -30,24 +32,22 @@ public class LSystem
     private static String connString = "HostName=RenatusIOTHub.azure-devices.net;DeviceId=MyAndroidDevice;SharedAccessKey=R0XZQPtgu8J4ayDc3hGLw5YQtxpOVmDn0kFxG0Xwf9k=";
     private static String deviceId = "MyAndroidDevice";
     
-    //private static String connString = "HostName=RenatusIOTHubTrial.azure-devices.net;DeviceId=AndroidCCU;SharedAccessKey=tYDsbTjcCuzQOnqcSiDw+2m71vbViOapCJ8K/pPQ54o=";
-    //private static String deviceId = "AndroidCCU";
-    
     public static int msgCntr = 0;
     public static HashMap<String, String> msgStr = null;
     public static String measurementTag = "VAV";
     public static long startTimeInMillis = System.currentTimeMillis();
     //public static JSONObject msgStr = null;
     
-    public static void handleSystemControl() {
-        Log.d("VAV", "handleSystemControl");
+    public static Struct getSystemControlMsg() {
+        if (ccu().systemProfile == null)
+        {
+            Log.d("VAV", "handleSystemControl : SystemProfile not configured");
+           return null;
+        }
         ccu().systemProfile.doSystemControl();
         msgStr = new HashMap<>();
-    
-        //int heartbeatInterval = L.app().getResources().getInteger(R.integer.heartbeat);
         
         collectTSData();
-    
         
         new Thread()
         {
@@ -57,15 +57,9 @@ public class LSystem
                 super.run();
                 sendTSDataToInfluxDB();
                 msgCntr++;
-                /*try {
-                    //SendTSDataToAzure();
-                    
-                } catch (URISyntaxException|IOException e)
-                {
-                    Log.d("VAV","Exception while opening IoTHub connection: " + e.toString());
-                }*/
             }
         }.start();
+        return ccu().systemProfile.getSystemControlMsg();
     }
     
     public static void collectTSData()
@@ -89,11 +83,12 @@ public class LSystem
                 }
             }
         }
-        if (L.ccu().systemProfile instanceof VAVSystemProfile)
+        if (L.ccu().systemProfile.trSystem instanceof VavTRSystem)
         {
-            VAVSystemProfile p = (VAVSystemProfile) ccu().systemProfile;
+            VavTRSystem p = (VavTRSystem) ccu().systemProfile.trSystem;
             addParamToMsg("SAT", String.valueOf(p.getCurrentSAT()));
             addParamToMsg("CO2", String.valueOf(p.getCurrentCO2()));
+            addParamToMsg("SP", String.valueOf(p.getCurrentSp()));
         }
     }
     
@@ -158,7 +153,7 @@ public class LSystem
         }
     
     
-        if (L.ccu().systemProfile instanceof VAVSystemProfile)
+        if (L.ccu().systemProfile.trSystem instanceof VavTRSystem)
         {
             Log.d("VAV"," Send TS Data : "+msgStr);
             try

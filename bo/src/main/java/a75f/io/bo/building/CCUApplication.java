@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import a75f.io.bo.building.system.SystemProfile;
 import a75f.io.kinveybo.AlgoTuningParameters;
 import a75f.io.kinveybo.CCUUser;
 
@@ -57,7 +58,8 @@ public class CCUApplication
 
     private AlgoTuningParameters mDefaultCCUTuners;
     
-    public  SystemProfile    systemProfile = new VAVSystemProfile();//TODO- TEMP
+    public SystemProfile systemProfile = null;
+    //public TRSystem      trSystem      = new VavTRSystem();//TODO- TEMP
     
     public  ControlMote      controlMote   = new ControlMote();
     private String           mTitle        = "";

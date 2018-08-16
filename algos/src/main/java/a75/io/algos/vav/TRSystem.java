@@ -1,4 +1,4 @@
-package a75f.io.bo.building;
+package a75.io.algos.vav;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
@@ -8,25 +8,22 @@ import a75.io.algos.SystemTrimResponse;
 import a75.io.algos.TrimResponseProcessor;
 
 /**
- * Created by Yinten isOn 8/15/2017.
+ * Created by samjithsadasivan on 8/13/18.
  */
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
 @JsonSubTypes({
-              @JsonSubTypes.Type(value = VAVSystemProfile.class, name = "VAVSystemProfile"),
-              }
+                      @JsonSubTypes.Type(value = VavTRSystem.class, name = "VavTRSystem"),
+}
 )
-public class SystemProfile
+public abstract class TRSystem
 {
-    
-    @JsonIgnore
-    public Schedule schedule = new Schedule();
     
     @JsonIgnore
     public TrimResponseProcessor satTRProcessor;
     
     @JsonIgnore
-    public SystemTrimResponse    satTRResponse;
+    public SystemTrimResponse satTRResponse;
     
     @JsonIgnore
     public TrimResponseProcessor co2TRProcessor;
@@ -34,19 +31,30 @@ public class SystemProfile
     @JsonIgnore
     public SystemTrimResponse    co2TRResponse;
     
+    @JsonIgnore
+    public TrimResponseProcessor spTRProcessor;
     
     @JsonIgnore
-    public void doSystemControl(){
+    public SystemTrimResponse    spTRResponse;
+    
+    
+    @JsonIgnore
+    public void processResetResponse(){
     
     }
     
     @JsonIgnore
     public TrimResponseProcessor getSystemSATTRProcessor(){
-        return null;
+        return satTRProcessor;
     }
     
     @JsonIgnore
     public TrimResponseProcessor getSystemCO2TRProcessor(){
-        return null;
+        return co2TRProcessor;
+    }
+    
+    @JsonIgnore
+    public TrimResponseProcessor getSystemSpTRProcessor(){
+        return spTRProcessor;
     }
 }

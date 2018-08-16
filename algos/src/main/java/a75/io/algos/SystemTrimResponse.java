@@ -141,7 +141,8 @@ public class SystemTrimResponse
     }
     
     public void updateRequest(TrimResponseRequest r) {
-        R += r.currentRequests * r.importanceMultiplier;
+        R += (r.currentRequests * r.importanceMultiplier);
+        Log.d("VAV"," updateRequest "+" current:"+r.currentRequests+" multiplier:"+r.importanceMultiplier+" R:"+R);
     }
     
     

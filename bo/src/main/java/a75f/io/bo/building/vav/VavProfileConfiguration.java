@@ -1,4 +1,6 @@
-package a75f.io.bo.building;
+package a75f.io.bo.building.vav;
+
+import a75f.io.bo.building.BaseProfileConfiguration;
 
 /**
  * Created by samjithsadasivan on 6/27/18.

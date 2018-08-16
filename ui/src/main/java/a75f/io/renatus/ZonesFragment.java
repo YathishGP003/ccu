@@ -41,7 +41,7 @@ import a75f.io.bo.building.Floor;
 import a75f.io.bo.building.HmpProfile;
 import a75f.io.bo.building.LightProfile;
 import a75f.io.bo.building.SingleStageProfile;
-import a75f.io.bo.building.VavProfile;
+import a75f.io.bo.building.vav.VavProfile;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.ZoneProfile;
 import a75f.io.bo.building.definitions.ProfileType;

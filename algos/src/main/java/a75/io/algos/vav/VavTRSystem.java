@@ -19,6 +19,7 @@ public class VavTRSystem extends TRSystem
         buildSATTRSystem();
         buildCO2TRSystem();
         buildSpTRSystem();
+        buildHwstTRSystem();
     }
     
     /**
@@ -83,14 +84,35 @@ public class VavTRSystem extends TRSystem
         spTRProcessor = new TrimResponseProcessor(spTRResponse);
     }
     
+    
+    /**
+     * SP0 	100ºF
+     * SPmin 	90ºF
+     * SPmax 	120ºF
+     * Td 	10 minutes
+     * T 	2 minutes
+     * I 	2
+     * R 	Zone Cooling SAT Requests
+     * SPtrim 	-0.4ºF
+     * SPres 	0.6ºF
+     * SPres-max 	1ºF
+     */
+    
+    private void buildHwstTRSystem() {
+        hwstTRResponse = new SystemTrimResponseBuilder().setSP0(100).setSPmin(90).setSPmax(120).setTd(2)//TODO-TEST
+                                                      .setT(2).setI(2).setSPtrim(-0.4).setSPres(0.6).setSPresmax(1.0).buildTRSystem();
+        hwstTRProcessor = new TrimResponseProcessor(hwstTRResponse);
+    }
+    
     @Override
     public void processResetResponse()
     {
         satTRProcessor.processResetResponse();
         co2TRProcessor.processResetResponse();
         spTRProcessor.processResetResponse();
+        hwstTRProcessor.processResetResponse();
         Log.d("VAV ", "SAT : " + satTRProcessor.getSetPoint() + ", CO2 : " +
-                      co2TRProcessor.getSetPoint()+", SP : "+spTRProcessor.getSetPoint());
+                      co2TRProcessor.getSetPoint()+", SP : "+spTRProcessor.getSetPoint()+" HWST : "+spTRProcessor.getSetPoint());
     }
     
     public void updateSATRequest(TrimResponseRequest req)
@@ -109,6 +131,11 @@ public class VavTRSystem extends TRSystem
         spTRProcessor.getTrSetting().dump();
     }
     
+    public void updateHwstRequest(TrimResponseRequest req) {
+        hwstTRResponse.updateRequest(req);
+        hwstTRProcessor.getTrSetting().dump();
+    }
+    
     @JsonIgnore
     public int getCurrentSAT()
     {
@@ -125,6 +152,12 @@ public class VavTRSystem extends TRSystem
     public double getCurrentSp()
     {
         return (double) spTRProcessor.getSetPoint();
+    }
+    
+    @JsonIgnore
+    public double getCurrentHwst()
+    {
+        return (double) hwstTRProcessor.getSetPoint();
     }
     
 }

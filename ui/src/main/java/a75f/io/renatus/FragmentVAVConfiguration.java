@@ -25,6 +25,7 @@ import java.util.ArrayList;
 
 import a75f.io.bo.building.NodeType;
 import a75f.io.bo.building.Output;
+import a75f.io.bo.building.vav.VavParallelFanProfile;
 import a75f.io.bo.building.vav.VavProfile;
 import a75f.io.bo.building.vav.VavProfileConfiguration;
 import a75f.io.bo.building.Zone;
@@ -33,6 +34,8 @@ import a75f.io.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.bo.building.definitions.Port;
 import a75f.io.bo.building.definitions.ProfileType;
 import a75f.io.bo.building.hvac.Damper;
+import a75f.io.bo.building.vav.VavReheatProfile;
+import a75f.io.bo.building.vav.VavSeriesFanProfile;
 import a75f.io.logic.L;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
@@ -68,6 +71,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
     
     Damper mDamper;
     
+    private ProfileType mProfileType;
     private VavProfile mVavProfile;
     private VavProfileConfiguration mProfileConfig;
     
@@ -81,7 +85,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
     {
     }
     
-    public static FragmentVAVConfiguration newInstance(short smartNodeAddress, String roomName, NodeType nodeType, String floorName)
+    public static FragmentVAVConfiguration newInstance(short smartNodeAddress, String roomName, NodeType nodeType, String floorName, ProfileType profileType)
     {
         FragmentVAVConfiguration f = new FragmentVAVConfiguration();
         Bundle bundle = new Bundle();
@@ -89,6 +93,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         bundle.putString(FragmentCommonBundleArgs.ARG_NAME, roomName);
         bundle.putString(FragmentCommonBundleArgs.FLOOR_NAME, floorName);
         bundle.putString(FragmentCommonBundleArgs.NODE_TYPE, nodeType.toString());
+        bundle.putInt(FragmentCommonBundleArgs.PROFILE_TYPE, profileType.ordinal());
         f.setArguments(bundle);
         return f;
     }
@@ -147,6 +152,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         String mFloorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
         mNodeType = NodeType.valueOf(getArguments().getString(FragmentCommonBundleArgs.NODE_TYPE));
         mZone = L.findZoneByName(mFloorName, mRoomName);
+        mProfileType = ProfileType.values()[getArguments().getInt(FragmentCommonBundleArgs.PROFILE_TYPE)];
         ButterKnife.bind(this, view);
         return view;
     }
@@ -162,12 +168,23 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         reheatActuator = (Spinner)view.findViewById(R.id.vavReheatActuator);
         setButton = (Button) view.findViewById(R.id.setBtn);
     
-        mVavProfile = (VavProfile) mZone.findProfile(ProfileType.VAV);
+        mVavProfile = (VavProfile) mZone.findProfile(mProfileType);
     
         if (mVavProfile != null) {
             mProfileConfig = (VavProfileConfiguration) mVavProfile.getProfileConfiguration(mSmartNodeAddress);
         } else {
-            mVavProfile = new VavProfile();
+            switch (mProfileType) {
+                case VAV_REHEAT:
+                    mVavProfile = new VavReheatProfile();
+                    break;
+                case VAV_SERIES_FAN:
+                    mVavProfile = new VavSeriesFanProfile();
+                    break;
+                case VAV_PARALLEL_FAN:
+                    mVavProfile = new VavParallelFanProfile();
+                    break;
+            }
+            
         }
     
     
@@ -377,7 +394,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         
         mVavProfile.getProfileConfiguration().put(mSmartNodeAddress, vavConfig);
         
-        if (mZone.findProfile(ProfileType.VAV) == null)
+        if (mZone.findProfile(mProfileType) == null)
             mZone.mZoneProfiles.add(mVavProfile);
     
         Log.d("VAVConfig", "Set Config: ");

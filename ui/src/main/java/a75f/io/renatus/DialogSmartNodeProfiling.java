@@ -60,6 +60,15 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     @BindView(R.id.hwpModuleTypeRB)
     RadioButton hwpModuleTypeRB;
     
+    @BindView(R.id.vavUnitSelector)
+    RadioGroup vavUnitSelector;
+    @BindView(R.id.vavReheat)
+    RadioButton vavReheat;
+    @BindView(R.id.vavSeriesFan)
+    RadioButton vavSeriesFan;
+    @BindView(R.id.vavParallelFan)
+    RadioButton vavParallelFan;
+    
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState)
     {
@@ -78,6 +87,11 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     void onSecondButtonClick()
     {
         openBLEPairingInstructions();
+    }
+    
+    @OnClick(R.id.vavModuleTypeRB)
+    void onVavSelected() {
+        vavUnitSelector.setVisibility(View.VISIBLE);
     }
     
     @Override
@@ -110,7 +124,20 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
         }
         else if (vavModuleTypeRB.isChecked())
         {
-            showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.VAV, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
+            ProfileType profile = null;
+            switch (vavUnitSelector.getCheckedRadioButtonId()) {
+                case R.id.vavReheat:
+                    profile = ProfileType.VAV_REHEAT;
+                    break;
+                case R.id.vavSeriesFan:
+                    profile = ProfileType.VAV_SERIES_FAN;
+                    break;
+                case R.id.vavParallelFan:
+                    profile = ProfileType.VAV_PARALLEL_FAN;
+                    break;
+                    
+            }
+            showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, profile, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
         }
     }
     

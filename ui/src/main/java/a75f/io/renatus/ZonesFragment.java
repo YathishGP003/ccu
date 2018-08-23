@@ -780,7 +780,9 @@ public class ZonesFragment extends Fragment
                         seekArcList.add(seekArc);
                         viewToAdd = seekArc;
                     }
-                    else if (zoneProfile.getProfileType() == ProfileType.VAV)
+                    else if (zoneProfile.getProfileType() == ProfileType.VAV_REHEAT ||
+                             zoneProfile.getProfileType() == ProfileType.VAV_SERIES_FAN ||
+                             zoneProfile.getProfileType() == ProfileType.VAV_PARALLEL_FAN)
                     {
                         SeekArc seekArc =
                                 AddNewArc(z, (VavProfile) zoneProfile, new LinearLayout.LayoutParams(room_width, room_height), index);

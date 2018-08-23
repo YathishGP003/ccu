@@ -79,6 +79,51 @@
                     android:text="Manages reheat coils in VAV to control zone temperature"
                     android:textSize="@dimen/text_small_xlarge"/>
 
+                <RadioGroup
+                    android:id="@+id/vavUnitSelector"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="60dp"
+                    android:orientation="vertical"
+                    android:checkedButton="@id/vavReheat"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textStyle="bold"
+                        android:layout_marginTop="30dp"
+                        android:text="Select Unit Type"/>
+
+                    <RadioButton
+                        android:id="@+id/vavReheat"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="25dp"
+                        android:layout_weight="0.1"
+                        android:layout_width="wrap_content"
+                        android:text=" Vav Reheat Terminal"
+                        android:textSize="@dimen/text_medium_xlarge"/>
+
+                    <RadioButton
+                        android:id="@+id/vavSeriesFan"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="25dp"
+                        android:layout_weight="0.1"
+                        android:layout_width="wrap_content"
+                        android:text=" Vav Series Fan Terminal"
+                        android:textSize="@dimen/text_medium_xlarge"/>
+
+                    <RadioButton
+                        android:id="@+id/vavParallelFan"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="25dp"
+                        android:layout_weight="0.1"
+                        android:layout_width="wrap_content"
+                        android:text=" Vav Parallel Fan Terminal"
+                        android:textSize="@dimen/text_medium_xlarge"/>
+
+                </RadioGroup>
+
                 <RadioButton
                     android:id="@+id/lcmModuleTypeRB"
                     android:layout_height="wrap_content"

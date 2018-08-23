@@ -6,5 +6,5 @@ package a75f.io.bo.building.definitions;
 
 public enum ProfileType
 {
-    LIGHT, TEST, SSE, HMP, VAV
+    LIGHT, TEST, SSE, HMP, VAV_REHEAT, VAV_SERIES_FAN, VAV_PARALLEL_FAN
 }

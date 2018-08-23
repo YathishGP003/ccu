@@ -120,17 +120,17 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
             }
         }
-        else if (mProfileType == ProfileType.VAV)
+        else if (mProfileType == ProfileType.VAV_REHEAT || mProfileType == ProfileType.VAV_SERIES_FAN || mProfileType == ProfileType.VAV_PARALLEL_FAN)
         {
             if (L.isSimulation())
             {
                 showDialogFragment(FragmentVAVConfiguration
-                                           .newInstance(mNodeAddress, mRoomName, mNodeType, mFloorName), FragmentVAVConfiguration.ID);
+                                           .newInstance(mNodeAddress, mRoomName, mNodeType, mFloorName, mProfileType), FragmentVAVConfiguration.ID);
             }
             else
             {
                 FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan
-                                                                .getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.VAV);
+                                                                .getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, mProfileType);
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
             }
         }

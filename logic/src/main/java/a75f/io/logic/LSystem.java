@@ -89,6 +89,7 @@ public class LSystem
             addParamToMsg("SAT", String.valueOf(p.getCurrentSAT()));
             addParamToMsg("CO2", String.valueOf(p.getCurrentCO2()));
             addParamToMsg("SP", String.valueOf(p.getCurrentSp()));
+            addParamToMsg("HWST", String.valueOf(p.getCurrentHwst()));
         }
     }
     
@@ -110,7 +111,7 @@ public class LSystem
         if (L.app().getResources().getInteger(R.integer.heartbeat) != 60) {
             //############# Testing  ##########################
             
-            if (msgCntr < 60)
+            if (msgCntr < 240)
             {
                 measurementTag = "VAVTest";
                 long testStartTime = SimulationTestHelper.getVavTestStartTime();

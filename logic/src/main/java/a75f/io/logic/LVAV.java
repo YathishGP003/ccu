@@ -33,6 +33,7 @@ public class LVAV
             p.updateSATRequest(vavProfile.getSATRequest(nodeAddress));
             p.updateCO2Request(vavProfile.getCO2Requests(nodeAddress));
             p.updateSpRequest(vavProfile.getSpRequests(nodeAddress));
+            p.updateHwstRequest(vavProfile.getHwstRequests(nodeAddress));
             
             //TODO - Should be done from VavProfile constructor.But that introduces cyclic dependency per current design.
             TrimResponseProcessor tpSAT = p.getSystemSATTRProcessor();
@@ -50,6 +51,12 @@ public class LVAV
             TrimResponseProcessor tpSp = p.getSystemSpTRProcessor();
             if (!tpSp.trListeners.contains(vavProfile.getSpResetListener())) {
                 tpSp.addTRListener(vavProfile.getSpResetListener());
+                Log.d("VAV ","SP TR Listener added");
+            }
+    
+            TrimResponseProcessor tpHwst = p.getSystemHwstTRProcessor();
+            if (!tpHwst.trListeners.contains(vavProfile.getHwstResetListener())) {
+                tpHwst.addTRListener(vavProfile.getHwstResetListener());
                 Log.d("VAV ","SP TR Listener added");
             }
         }

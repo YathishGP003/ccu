@@ -13,7 +13,7 @@ import a75f.io.bo.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
 import a75f.io.bo.serial.MessageType;
 
 /**
- * RP1455 Compliant System Profile
+ * RP1455 Compliant AHU control System Profile
  */
 public class AHU extends SystemProfile
 {

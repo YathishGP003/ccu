@@ -37,6 +37,12 @@ public abstract class TRSystem
     @JsonIgnore
     public SystemTrimResponse    spTRResponse;
     
+    @JsonIgnore
+    public TrimResponseProcessor hwstTRProcessor;
+    
+    @JsonIgnore
+    public SystemTrimResponse    hwstTRResponse;
+    
     
     @JsonIgnore
     public void processResetResponse(){
@@ -56,5 +62,10 @@ public abstract class TRSystem
     @JsonIgnore
     public TrimResponseProcessor getSystemSpTRProcessor(){
         return spTRProcessor;
+    }
+    
+    @JsonIgnore
+    public TrimResponseProcessor getSystemHwstTRProcessor(){
+        return hwstTRProcessor;
     }
 }

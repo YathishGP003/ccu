@@ -37,11 +37,6 @@ public class SystemProfile
     }
     
     @JsonIgnore
-    public TRSystem getTrSystem(){
-        return trSystem;
-    }
-    
-    @JsonIgnore
     public Struct getSystemControlMsg() {
         return null;
     }

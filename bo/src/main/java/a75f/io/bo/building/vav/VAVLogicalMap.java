@@ -36,6 +36,7 @@ public class VAVLogicalMap
     public TrimResponseRequest satResetRequest;
     public TrimResponseRequest co2ResetRequest;
     public TrimResponseRequest spResetRequest;
+    public TrimResponseRequest hwstResetRequest;
     
     public VAVLogicalMap() {
         vavUnit = new VavUnit();
@@ -53,7 +54,7 @@ public class VAVLogicalMap
         satResetRequest = new TrimResponseRequest();
         co2ResetRequest = new TrimResponseRequest();
         spResetRequest = new TrimResponseRequest();
-        
+        hwstResetRequest = new TrimResponseRequest();
     }
     
     public double getRoomTemp()

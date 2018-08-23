@@ -129,7 +129,9 @@ class LSmartNode
                             Log.i(TAG, "Mapping HMP control messages");
                             LHMP.mapHMPCircuits(controlsMessage_t, node, zone, (HmpProfile)zp);
                             break;
-                        case VAV:
+                        case VAV_REHEAT:
+                        case VAV_SERIES_FAN:
+                        case VAV_PARALLEL_FAN:
                             Log.i(TAG, "Mapping VAV control messages");
                             LVAV.mapVAVCircuits(controlsMessage_t, node, zone, (VavProfile) zp);
                             break;
@@ -161,7 +163,9 @@ class LSmartNode
                     Log.i(TAG, "Mapping SSE Profile Seed messages");
                     LSSE.mapSSESeed(zone, seedMessage);
                     break;
-                case VAV:
+                case VAV_REHEAT:
+                case VAV_SERIES_FAN:
+                case VAV_PARALLEL_FAN:
                     Log.i(TAG, "Mapping VAV Profile Seed messages");
                     LVAV.mapVAVSeed(zone, seedMessage);
                     break;

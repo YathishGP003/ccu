@@ -17,6 +17,8 @@ import a75f.io.bo.serial.MessageType;
  */
 public class AHU extends SystemProfile
 {
+    private static final int CO2_MAX = 1000;
+    private static final int CO2_MIN = 400;
     public AHU() {
         trSystem =  new VavTRSystem();
     }
@@ -29,7 +31,9 @@ public class AHU extends SystemProfile
         VavTRSystem tr = (VavTRSystem) trSystem;
         msg.analog0.set((short)tr.getCurrentSAT());
         msg.analog1.set((short)(tr.getCurrentSp()*10));
-        msg.analog2.set((short)tr.getCurrentCO2());
+        //Modulate OA damper 0-100 by CO2 MIN-MAX
+        int oaDamperPos = (tr.getCurrentCO2() - CO2_MIN) * 100 / (CO2_MAX - CO2_MIN);
+        msg.analog2.set((short)oaDamperPos);
         return msg;
     }
 

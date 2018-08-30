@@ -1,11 +1,10 @@
-package a75.io.algos.vav;
+package a75.io.algos.tr;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-import a75.io.algos.SystemTrimResponse;
-import a75.io.algos.TrimResponseProcessor;
+import a75.io.algos.vav.VavTRSystem;
 
 /**
  * Created by samjithsadasivan on 8/13/18.

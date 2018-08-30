@@ -75,12 +75,12 @@ public class VavReheatProfile extends VavProfile
                 if (state != COOLING)
                 {
                     state = COOLING;
+                    valveController.reset();
                     coolingLoop.setEnabled();
                     heatingLoop.setDisabled();
                 }
                 int coolingOp = (int) coolingLoop.getLoopOutput(roomTemp, setTemp+deadBand);
                 loopOp = coolingOp;
-                valveController.reset();
             }
             else if (roomTemp < (setTemp - deadBand))
             {
@@ -123,11 +123,14 @@ public class VavReheatProfile extends VavProfile
             else
             {
                 //Zone is in deadband
-                state = DEADBAND;
+                if (state != DEADBAND) {
+                    state = DEADBAND;
+                    valveController.reset();
+                    heatingLoop.setDisabled();
+                    coolingLoop.setDisabled();
+                    
+                }
                 loopOp = 0;
-                valveController.reset();
-                heatingLoop.setDisabled();
-                coolingLoop.setDisabled();
             }
             
             if (valveController.getControlVariable() == 0)
@@ -152,8 +155,6 @@ public class VavReheatProfile extends VavProfile
             {
                 damper.currentPosition = damper.co2CompensatedMinPos + (damper.maxPosition - damper.co2CompensatedMinPos) * loopOp / 100;
             }
-            Log.d(TAG, "STATE :"+state+" ,loopOp: " + loopOp + " ,damper:" + damper.currentPosition+", valve:"+valve.currentPosition);
-            
             //In any Mode except Unoccupied, the hot water valve shall be
             //modulated to maintain a supply air temperature no lower than 50°F.
             if (state != HEATING && supplyAirTemp < REHEAT_THRESHOLD_TEMP/* && mode != UNOCCUPIED*/)
@@ -166,6 +167,9 @@ public class VavReheatProfile extends VavProfile
             //Normalize
             damper.normalize();
             valve.normalize();
+    
+            Log.d(TAG, "STATE :"+state+" ,loopOp: " + loopOp + " ,damper:" + damper.currentPosition+", valve:"+valve.currentPosition);
+    
         }
     }
 }

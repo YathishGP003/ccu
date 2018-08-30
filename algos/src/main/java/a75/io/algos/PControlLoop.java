@@ -4,6 +4,9 @@ package a75.io.algos;
  * Created by samjithsadasivan on 6/13/18.
  */
 
+/**
+ * P - Only Control Loop
+ */
 public class PControlLoop extends GenericPIController
 {
     @Override

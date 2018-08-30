@@ -1,7 +1,5 @@
 package a75.io.algos;
 
-import android.util.Log;
-
 /**
  * Created by samjithsadasivan on 5/1/18.
  */
@@ -116,7 +114,7 @@ public class GenericPIController
     }
     
     public double getControlVariable() {
-        Log.d("VAV", "PE: " + proportionalError + ", IE : " + cumulativeError + ", CV: " + controlVariable);
+        //Log.d("VAV", "PE: " + proportionalError + ", IE : " + cumulativeError + ", CV: " + controlVariable);
         return controlVariable;
     }
     

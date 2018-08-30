@@ -8,11 +8,14 @@ import org.javolution.lang.MathLib;
 
 import java.util.HashMap;
 
-import a75.io.algos.TrimResetListener;
-import a75.io.algos.TrimResponseRequest;
+import a75.io.algos.tr.TrimResetListener;
+import a75.io.algos.tr.TrimResponseRequest;
 import a75f.io.bo.building.BaseProfileConfiguration;
 import a75f.io.bo.building.ZoneProfile;
+import a75f.io.bo.building.definitions.ProfileType;
 import a75f.io.bo.building.hvac.Damper;
+import a75f.io.bo.building.hvac.ParallelFanVavUnit;
+import a75f.io.bo.building.hvac.SeriesFanVavUnit;
 import a75f.io.bo.building.hvac.Valve;
 import a75f.io.bo.building.hvac.VavUnit;
 import a75f.io.bo.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
@@ -82,7 +85,7 @@ public abstract class VavProfile extends ZoneProfile
         Log.d(TAG," RegularUpdate : rT :"+roomTemp+" dT :"+dischargeTemp+" sT :"+supplyAirTemp+" CO2: "+co2+" SN:"+regularUpdateMessage.update.smartNodeAddress.get());
         VAVLogicalMap currentDevice = vavDeviceMap.get((short)regularUpdateMessage.update.smartNodeAddress.get());
         if (currentDevice == null) {
-            currentDevice = new VAVLogicalMap();
+            currentDevice = new VAVLogicalMap(getProfileType());
             vavDeviceMap.put((short)regularUpdateMessage.update.smartNodeAddress.get(), currentDevice);
             currentDevice.satResetRequest.setImportanceMultiplier(getZonePriority());
             currentDevice.co2ResetRequest.setImportanceMultiplier(getZonePriority());
@@ -319,6 +322,13 @@ public abstract class VavProfile extends ZoneProfile
             tsdata.put("supplyAirTemp"+node,vavDeviceMap.get(node).getSupplyAirTemp());
             tsdata.put("reheatValve"+node,(double)vavDeviceMap.get(node).getVavUnit().reheatValve.currentPosition);
             tsdata.put("vavDamper"+node,(double)vavDeviceMap.get(node).getVavUnit().vavDamper.currentPosition);
+            if (getProfileType() == ProfileType.VAV_SERIES_FAN) {
+                double fanStart = ((SeriesFanVavUnit)vavDeviceMap.get(node).getVavUnit()).fanStart ? 100 : 0;
+                tsdata.put("fanStart"+node, fanStart);
+            } else if (getProfileType() == ProfileType.VAV_PARALLEL_FAN) {
+                double fanStart = ((ParallelFanVavUnit)vavDeviceMap.get(node).getVavUnit()).fanStart ? 100 : 0;
+                tsdata.put("fanStart"+node, fanStart);
+            }
             tsdata.put("CO2"+node,vavDeviceMap.get(node).getCO2());
             tsdata.put("co2LoopOp"+node,(double)vavDeviceMap.get(node).getCo2Loop().getLoopOutput());
             tsdata.put("CO2-requestHours"+node,vavDeviceMap.get(node).co2ResetRequest.requestHours);

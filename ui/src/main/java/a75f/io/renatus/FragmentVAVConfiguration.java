@@ -380,6 +380,11 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         analogTwo.setAddress(mSmartNodeAddress);
         analogTwo.setPort(Port.ANALOG_OUT_TWO);
         analogTwo.mOutputAnalogActuatorType = OutputAnalogActuatorType.values()[reheatActuatorSelection];
+    
+        Output relayOne = new Output();
+        relayOne.setAddress(mSmartNodeAddress);
+        relayOne.setPort(Port.RELAY_ONE);
+        relayOne.mOutputRelayActuatorType = OutputRelayActuatorType.values()[0];//TODO
         
         VavProfileConfiguration vavConfig = new VavProfileConfiguration();
         vavConfig.setNodeType(mNodeType);
@@ -391,6 +396,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         vavConfig.setMaxDamperHeating(maxHeatingDamperPos.getValue());
         vavConfig.getOutputs().add(analogOne);
         vavConfig.getOutputs().add(analogTwo);
+        vavConfig.getOutputs().add(relayOne);
         
         mVavProfile.getProfileConfiguration().put(mSmartNodeAddress, vavConfig);
         

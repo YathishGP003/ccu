@@ -4,12 +4,14 @@ package a75f.io.bo.building.hvac;
  * Created by samjithsadasivan on 6/1/18.
  */
 
-public class Damper
+public class Damper implements Control
 {
     public int minPosition;
     public int maxPosition;
     public int currentPosition;
     public int co2CompensatedMinPos;
+    
+    public int overriddenVal;
     
     public Damper() {
         minPosition = 40;
@@ -97,5 +99,19 @@ public class Damper
         }
         
     };
+    
+    public void applyOverride(int val) {
+        overriddenVal = currentPosition;
+        currentPosition = val;
+    }
+    
+    public void releaseOverride() {
+        currentPosition = overriddenVal;
+        overriddenVal = 0;
+    }
+    
+    public boolean isOverrideActive() {
+        return overriddenVal != 0;
+    }
     
 }

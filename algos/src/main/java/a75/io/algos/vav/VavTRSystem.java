@@ -4,9 +4,10 @@ import android.util.Log;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import a75.io.algos.SystemTrimResponseBuilder;
-import a75.io.algos.TrimResponseProcessor;
-import a75.io.algos.TrimResponseRequest;
+import a75.io.algos.tr.SystemTrimResponseBuilder;
+import a75.io.algos.tr.TRSystem;
+import a75.io.algos.tr.TrimResponseProcessor;
+import a75.io.algos.tr.TrimResponseRequest;
 
 /**
  * Created by samjithsadasivan on 8/13/18.

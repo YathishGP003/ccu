@@ -3,7 +3,10 @@ package a75f.io.bo.building.vav;
 import a75.io.algos.CO2Loop;
 import a75.io.algos.ControlLoop;
 import a75.io.algos.GenericPIController;
-import a75.io.algos.TrimResponseRequest;
+import a75.io.algos.tr.TrimResponseRequest;
+import a75f.io.bo.building.definitions.ProfileType;
+import a75f.io.bo.building.hvac.ParallelFanVavUnit;
+import a75f.io.bo.building.hvac.SeriesFanVavUnit;
 import a75f.io.bo.building.hvac.VavUnit;
 
 /**
@@ -38,8 +41,8 @@ public class VAVLogicalMap
     public TrimResponseRequest spResetRequest;
     public TrimResponseRequest hwstResetRequest;
     
-    public VAVLogicalMap() {
-        vavUnit = new VavUnit();
+    public VAVLogicalMap(ProfileType T) {
+        
         coolingLoop = new ControlLoop();
         heatingLoop = new ControlLoop();
         //damperLoop = new ControlLoop();
@@ -55,6 +58,18 @@ public class VAVLogicalMap
         co2ResetRequest = new TrimResponseRequest();
         spResetRequest = new TrimResponseRequest();
         hwstResetRequest = new TrimResponseRequest();
+    
+        switch (T) {
+            case VAV_REHEAT:
+                vavUnit = new VavUnit();
+                break;
+            case VAV_SERIES_FAN:
+                vavUnit = new SeriesFanVavUnit();
+                break;
+            case VAV_PARALLEL_FAN:
+                vavUnit = new ParallelFanVavUnit();
+                break;
+        }
     }
     
     public double getRoomTemp()

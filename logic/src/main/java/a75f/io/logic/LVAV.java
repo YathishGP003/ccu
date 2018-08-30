@@ -2,13 +2,15 @@ package a75f.io.logic;
 
 import android.util.Log;
 
-import a75.io.algos.TrimResponseProcessor;
+import a75.io.algos.tr.TrimResponseProcessor;
 import a75.io.algos.vav.VavTRSystem;
 import a75f.io.bo.building.Output;
-import a75f.io.bo.building.vav.VavProfile;
 import a75f.io.bo.building.Zone;
 import a75f.io.bo.building.definitions.Port;
+import a75f.io.bo.building.hvac.ParallelFanVavUnit;
+import a75f.io.bo.building.hvac.SeriesFanVavUnit;
 import a75f.io.bo.building.hvac.VavUnit;
+import a75f.io.bo.building.vav.VavProfile;
 import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
 
@@ -71,6 +73,20 @@ public class LVAV
                LSmartNode.getSmartNodePort(controlsMessage_t, output.getPort())
                           .set(LSmartNode.mapRawValue(output, (short)vavControls.reheatValve.currentPosition));
             }
+            
+            if (output.getPort() == Port.RELAY_ONE) {
+                switch (vavProfile.getProfileType()) {
+                    case VAV_SERIES_FAN:
+                        LSmartNode.getSmartNodePort(controlsMessage_t, output.getPort())
+                                  .set(output.mapDigital(((SeriesFanVavUnit)vavControls).fanStart));
+                        break;
+                    case VAV_PARALLEL_FAN:
+                        LSmartNode.getSmartNodePort(controlsMessage_t, output.getPort())
+                                  .set(output.mapDigital(((ParallelFanVavUnit)vavControls).fanStart));
+                        break;
+                }
+            }
+            
         }
         controlsMessage_t.controls.conditioningMode.set((short)vavProfile.getConditioningMode());
         Log.d("LVAV", "Generate SN control, valve : "+vavControls.reheatValve.currentPosition+", damper : "+vavControls.vavDamper.currentPosition);

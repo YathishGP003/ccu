@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import org.javolution.io.Struct;
 
-import a75.io.algos.vav.TRSystem;
+import a75.io.algos.tr.TRSystem;
 import a75f.io.bo.building.Schedule;
 
 /**

@@ -2,8 +2,6 @@ package a75f.io.bo.building;
 
 import junit.framework.Assert;
 
-import org.junit.Test;
-
 import a75f.io.bo.building.definitions.InputActuatorType;
 import a75f.io.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.bo.building.definitions.ProfileType;
@@ -14,7 +12,7 @@ import a75f.io.bo.building.definitions.ProfileType;
 
 public class ProfileTest
 {
-	@Test
+	//@Test
 	public void testProfiles() {
 		CCUApplication ccuApplication = new CCUApplication();
 		

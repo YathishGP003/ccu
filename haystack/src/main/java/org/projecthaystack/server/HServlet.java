@@ -7,12 +7,15 @@
 //
 package org.projecthaystack.server;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import javax.servlet.*;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.*;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.URLDecoder;
+import java.util.Enumeration;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * HServlet implements the haystack HTTP REST API for
@@ -20,7 +23,7 @@ import javax.servlet.http.*;
  *
  * @see <a href='http://project-haystack.org/doc/Rest'>Project Haystack</a>
  */
-@WebServlet(name = "Haystack", urlPatterns = "/*")
+//@WebServlet(name = "Haystack", urlPatterns = "/*")
 public class HServlet extends HttpServlet
 {
 

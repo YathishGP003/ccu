@@ -1,4 +1,4 @@
-package a75.io.haystack;
+package haystacktest.android.com.a75;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -22,6 +22,6 @@ public class ExampleInstrumentedTest
     {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
-        assertEquals("a75.io.haystack.test", appContext.getPackageName());
+        assertEquals("haystacktest.android.com.haystack.test", appContext.getPackageName());
     }
 }

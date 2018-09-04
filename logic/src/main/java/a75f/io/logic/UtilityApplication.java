@@ -26,7 +26,6 @@ import a75f.io.bo.building.definitions.OverrideType;
 import a75f.io.bo.building.definitions.ProfileType;
 
 import a75f.io.bo.serial.comm.SerialEvent;
-import a75f.io.kinveybo.DalContext;
 import a75f.io.usbserial.UsbService;
 import allbegray.slack.SlackClientFactory;
 import allbegray.slack.exception.SlackResponseErrorException;

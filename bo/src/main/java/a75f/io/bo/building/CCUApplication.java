@@ -59,13 +59,14 @@ public class CCUApplication
     private AlgoTuningParameters mDefaultCCUTuners;
     
     public SystemProfile systemProfile = null;
-    //public TRSystem      trSystem      = new VavTRSystem();//TODO- TEMP
     
     public  ControlMote      controlMote   = new ControlMote();
     private String           mTitle        = "";
     private ArrayList<Floor> mfloors       = new ArrayList<Floor>();
     private CCUUser mUser;
     private short           mSmartNodeAddressBand;
+    
+    public HashMap tagsMap = new HashMap();
 
     public short getSmartNodeAddressBand()
     {

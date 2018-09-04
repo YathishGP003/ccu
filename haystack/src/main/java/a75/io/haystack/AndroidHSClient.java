@@ -1,26 +1,31 @@
-package org.projecthaystack.client;
+package a75.io.haystack;
 
 import org.projecthaystack.HGrid;
+import org.projecthaystack.client.HClient;
 import org.projecthaystack.server.HOp;
 import org.projecthaystack.server.HServer;
 
-
 /**
- * Created by samjithsadasivan on 7/9/18.
+ * Created by samjithsadasivan on 8/31/18.
  */
 
-public class AndroidHClient extends HClient
+/**
+ * Temporary haystack client to avoid dependency on backend.
+ * This makes a local API call into the HServer instead of REST call.
+ */
+public class AndroidHSClient extends HClient
 {
+    CCUTagsDb db = new CCUTagsDb();
     
     @Override
     public HClient open() {
-      return this;
+        return this;
     }
     
     @Override
     public HGrid call(String opName, HGrid req)
     {
-    
+        
         HServer db = db();
         HOp op = db.op(opName, false);
         if (op == null)
@@ -41,6 +46,8 @@ public class AndroidHClient extends HClient
     
     public HServer db()
     {
-        return new org.projecthaystack.server.TestDatabase();
+        return db;
     }
+    
+    
 }

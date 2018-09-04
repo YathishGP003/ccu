@@ -36,5 +36,6 @@ dependencies {
     compile 'com.fasterxml.jackson.core:jackson-databind:2.7.3'
     compile project(path: ':kinveybo')
     implementation project(':algos')
+    testCompile 'junit:junit:4.12'
 }
 

@@ -1,7 +1,5 @@
 package a75f.io.bo;
 
-import org.junit.Test;
-
 import java.util.UUID;
 
 import a75f.io.bo.building.CCUApplication;
@@ -22,7 +20,7 @@ import a75f.io.bo.json.serializers.JsonSerializer;
 public class LocalStorageUtilTest
 {
 	
-	@Test
+	//@Test
 	public void persistCcuAppSettingsTest()
 	{
 		CCUApplication orgCcu = new CCUApplication();

@@ -8,12 +8,32 @@
 //
 package org.projecthaystack.client;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import org.projecthaystack.*;
+import org.projecthaystack.HDict;
+import org.projecthaystack.HDictBuilder;
+import org.projecthaystack.HGrid;
+import org.projecthaystack.HGridBuilder;
+import org.projecthaystack.HHisItem;
+import org.projecthaystack.HNum;
+import org.projecthaystack.HProj;
+import org.projecthaystack.HRef;
+import org.projecthaystack.HStr;
+import org.projecthaystack.HVal;
+import org.projecthaystack.HWatch;
+import org.projecthaystack.UnknownRecException;
+import org.projecthaystack.UnknownWatchException;
 import org.projecthaystack.auth.AuthClientContext;
-import org.projecthaystack.io.*;
+import org.projecthaystack.io.HZincReader;
+import org.projecthaystack.io.HZincWriter;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.Writer;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.HashMap;
 
 /**
  * HClient manages a logical connection to a HTTP REST haystack server.
@@ -22,6 +42,13 @@ import org.projecthaystack.io.*;
  */
 public class HClient extends HProj
 {
+  
+  
+  //TODO- TEMP
+  public HClient()
+  {
+    uri = null;
+  }
 
 //////////////////////////////////////////////////////////////////////////
 // Construction

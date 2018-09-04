@@ -7,9 +7,28 @@
 //
 package org.projecthaystack.server;
 
-import java.net.*;
-import java.util.*;
-import org.projecthaystack.*;
+import org.projecthaystack.HBool;
+import org.projecthaystack.HDateTime;
+import org.projecthaystack.HDateTimeRange;
+import org.projecthaystack.HDict;
+import org.projecthaystack.HDictBuilder;
+import org.projecthaystack.HGrid;
+import org.projecthaystack.HGridBuilder;
+import org.projecthaystack.HHisItem;
+import org.projecthaystack.HMarker;
+import org.projecthaystack.HNum;
+import org.projecthaystack.HRef;
+import org.projecthaystack.HStr;
+import org.projecthaystack.HUri;
+import org.projecthaystack.HVal;
+import org.projecthaystack.HWatch;
+
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.StringTokenizer;
+
 
 /**
  * TestDatabase provides a simple implementation of
@@ -281,4 +300,5 @@ public class TestDatabase extends HServer
 //////////////////////////////////////////////////////////////////////////
 
   HashMap recs = new HashMap();
+  //HashMap recs = L.ccu().tagsMap;
 }

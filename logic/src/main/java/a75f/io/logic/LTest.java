@@ -1,10 +1,10 @@
 package a75f.io.logic;
 
-import a75f.io.bo.building.Output;
-import a75f.io.bo.building.Zone;
-import a75f.io.bo.building.ZoneProfile;
-import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
-import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
+import a75f.io.logic.bo.building.Output;
+import a75f.io.logic.bo.building.Zone;
+import a75f.io.logic.bo.building.ZoneProfile;
+import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
+import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 
 import static a75f.io.logic.LZoneProfile.resolveZoneProfileLogicalValue;
 

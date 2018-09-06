@@ -2,10 +2,10 @@ package a75f.io.logic;
 
 import android.util.Log;
 
-import a75f.io.bo.building.HmpProfile;
-import a75f.io.bo.building.Output;
-import a75f.io.bo.building.Zone;
-import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
+import a75f.io.logic.bo.building.HmpProfile;
+import a75f.io.logic.bo.building.Output;
+import a75f.io.logic.bo.building.Zone;
+import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 
 /**
  * Created by samjithsadasivan on 5/2/18.

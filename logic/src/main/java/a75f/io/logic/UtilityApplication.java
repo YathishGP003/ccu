@@ -21,11 +21,11 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.Random;
 import java.util.Set;
 
-import a75f.io.bo.building.Zone;
-import a75f.io.bo.building.definitions.OverrideType;
-import a75f.io.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.Zone;
+import a75f.io.logic.bo.building.definitions.OverrideType;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 
-import a75f.io.bo.serial.comm.SerialEvent;
+import a75f.io.device.serial.comm.SerialEvent;
 import a75f.io.usbserial.UsbService;
 import allbegray.slack.SlackClientFactory;
 import allbegray.slack.exception.SlackResponseErrorException;

@@ -29,8 +29,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import a75f.io.bo.serial.comm.SerialAction;
-import a75f.io.bo.serial.comm.SerialEvent;
+import a75f.io.device.serial.comm.SerialAction;
+import a75f.io.device.serial.comm.SerialEvent;
 
 /**
  * Created by rmatt isOn 7/30/2017.

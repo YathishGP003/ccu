@@ -1,12 +1,9 @@
 package a75f.io.renatus;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Test;
 
-import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
-import a75f.io.bo.serial.MessageType;
+import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
+import a75f.io.device.serial.MessageType;
 
 /**
  * Example local unit test, which will execute isOn the development machine (host).

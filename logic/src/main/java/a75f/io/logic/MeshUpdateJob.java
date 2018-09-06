@@ -4,12 +4,12 @@ import android.util.Log;
 
 import org.javolution.io.Struct;
 
-import a75f.io.bo.building.Floor;
-import a75f.io.bo.building.Zone;
-import a75f.io.bo.json.serializers.JsonSerializer;
-import a75f.io.bo.serial.AddressedStruct;
-import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
-import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
+import a75f.io.logic.bo.building.Floor;
+import a75f.io.logic.bo.building.Zone;
+import a75f.io.device.json.serializers.JsonSerializer;
+import a75f.io.device.serial.AddressedStruct;
+import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
+import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 
 import static a75f.io.logic.L.ccu;
 import static a75f.io.logic.LLog.Logd;

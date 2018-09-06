@@ -24,8 +24,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.TreeMap;
 
-import a75f.io.bo.building.CCUApplication;
-import a75f.io.bo.json.serializers.JsonSerializer;
+import a75f.io.logic.bo.building.CCUApplication;
+import a75f.io.device.json.serializers.JsonSerializer;
 /**
  * Created by samjithsadasivan on 9/26/17.
  */

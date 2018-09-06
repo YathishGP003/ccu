@@ -2,14 +2,14 @@ package a75f.io.logic;
 
 import android.util.Log;
 
-import a75f.io.bo.building.BaseProfileConfiguration;
-import a75f.io.bo.building.Output;
-import a75f.io.bo.building.SingleStageProfile;
-import a75f.io.bo.building.Zone;
-import a75f.io.bo.building.definitions.SingleStageMode;
-import a75f.io.bo.building.sse.SingleStageLogicalMap;
-import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
-import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
+import a75f.io.logic.bo.building.BaseProfileConfiguration;
+import a75f.io.logic.bo.building.Output;
+import a75f.io.logic.bo.building.sse.SingleStageProfile;
+import a75f.io.logic.bo.building.Zone;
+import a75f.io.logic.bo.building.definitions.SingleStageMode;
+import a75f.io.logic.bo.building.sse.SingleStageLogicalMap;
+import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
+import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.kinveybo.AlgoTuningParameters;
 
 import static a75f.io.logic.LZoneProfile.resolveZoneProfileLogicalValue;

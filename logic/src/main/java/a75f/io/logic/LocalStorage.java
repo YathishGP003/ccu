@@ -5,8 +5,7 @@ import android.content.SharedPreferences;
 
 import java.io.IOException;
 
-import a75f.io.bo.building.CCUApplication;
-import a75f.io.bo.json.serializers.JsonSerializer;
+import a75f.io.logic.bo.building.CCUApplication;
 
 import static a75f.io.logic.LLog.Logd;
 

@@ -4,15 +4,15 @@ import android.util.Log;
 
 import a75.io.algos.tr.TrimResponseProcessor;
 import a75.io.algos.vav.VavTRSystem;
-import a75f.io.bo.building.Output;
-import a75f.io.bo.building.Zone;
-import a75f.io.bo.building.definitions.Port;
-import a75f.io.bo.building.hvac.ParallelFanVavUnit;
-import a75f.io.bo.building.hvac.SeriesFanVavUnit;
-import a75f.io.bo.building.hvac.VavUnit;
-import a75f.io.bo.building.vav.VavProfile;
-import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
-import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
+import a75f.io.logic.bo.building.Output;
+import a75f.io.logic.bo.building.Zone;
+import a75f.io.logic.bo.building.definitions.Port;
+import a75f.io.logic.bo.building.hvac.ParallelFanVavUnit;
+import a75f.io.logic.bo.building.hvac.SeriesFanVavUnit;
+import a75f.io.logic.bo.building.hvac.VavUnit;
+import a75f.io.logic.bo.building.vav.VavProfile;
+import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
+import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 
 /**
  * Created by samjithsadasivan on 6/1/18.

@@ -37,21 +37,21 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import a75f.io.bo.building.Floor;
-import a75f.io.bo.building.HmpProfile;
-import a75f.io.bo.building.LightProfile;
-import a75f.io.bo.building.SingleStageProfile;
-import a75f.io.bo.building.vav.VavProfile;
-import a75f.io.bo.building.Zone;
-import a75f.io.bo.building.ZoneProfile;
-import a75f.io.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.Floor;
+import a75f.io.logic.bo.building.HmpProfile;
+import a75f.io.logic.bo.building.lights.LightProfile;
+import a75f.io.logic.bo.building.sse.SingleStageProfile;
+import a75f.io.logic.bo.building.vav.VavProfile;
+import a75f.io.logic.bo.building.Zone;
+import a75f.io.logic.bo.building.ZoneProfile;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.kinveybo.AlgoTuningParameters;
 import a75f.io.logic.L;
 import a75f.io.renatus.views.SeekArc;
 import a75f.io.renatus.views.ZoneImageWidget;
 
-import static a75f.io.bo.building.definitions.ScheduleMode.NamedSchedule;
-import static a75f.io.bo.building.definitions.ScheduleMode.ZoneSchedule;
+import static a75f.io.logic.bo.building.definitions.ScheduleMode.NamedSchedule;
+import static a75f.io.logic.bo.building.definitions.ScheduleMode.ZoneSchedule;
 import static a75f.io.logic.L.ccu;
 
 /**

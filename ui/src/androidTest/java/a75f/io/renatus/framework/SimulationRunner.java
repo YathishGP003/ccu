@@ -33,7 +33,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
-import a75f.io.bo.building.CCUApplication;
+import a75f.io.logic.bo.building.CCUApplication;
 import a75f.io.logic.L;
 
 import static java.lang.Thread.sleep;

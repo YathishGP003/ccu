@@ -7,8 +7,8 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import a75f.io.bo.building.LightProfile;
-import a75f.io.bo.building.ZoneProfile;
+import a75f.io.logic.bo.building.lights.LightProfile;
+import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.renatus.R;
 import butterknife.BindView;
 import butterknife.ButterKnife;

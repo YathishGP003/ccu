@@ -9,18 +9,18 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import a75f.io.bo.building.Floor;
-import a75f.io.bo.building.HmpProfile;
-import a75f.io.bo.building.Output;
-import a75f.io.bo.building.SingleStageProfile;
-import a75f.io.bo.building.vav.VavProfile;
-import a75f.io.bo.building.Zone;
-import a75f.io.bo.building.ZoneProfile;
-import a75f.io.bo.building.definitions.Port;
-import a75f.io.bo.serial.AddressedStruct;
-import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
-import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
-import a75f.io.bo.serial.MessageType;
+import a75f.io.logic.bo.building.Floor;
+import a75f.io.logic.bo.building.HmpProfile;
+import a75f.io.logic.bo.building.Output;
+import a75f.io.logic.bo.building.sse.SingleStageProfile;
+import a75f.io.logic.bo.building.vav.VavProfile;
+import a75f.io.logic.bo.building.Zone;
+import a75f.io.logic.bo.building.ZoneProfile;
+import a75f.io.logic.bo.building.definitions.Port;
+import a75f.io.device.serial.AddressedStruct;
+import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
+import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
+import a75f.io.device.serial.MessageType;
 
 import static a75f.io.logic.L.ccu;
 

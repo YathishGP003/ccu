@@ -7,10 +7,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import a75f.io.bo.building.CCUApplication;
-import a75f.io.bo.building.Day;
-import a75f.io.bo.building.NamedSchedule;
-import a75f.io.bo.building.Schedule;
+import a75f.io.logic.bo.building.CCUApplication;
+import a75f.io.logic.bo.building.Day;
+import a75f.io.logic.bo.building.NamedSchedule;
+import a75f.io.logic.bo.building.Schedule;
 import a75f.io.kinveybo.AlgoTuningParameters;
 import a75f.io.kinveybo.DalContext;
 

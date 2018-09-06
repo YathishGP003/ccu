@@ -1,9 +1,9 @@
 package a75f.io.logic;
 
-import a75f.io.bo.building.Floor;
-import a75f.io.bo.building.Zone;
-import a75f.io.bo.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
-import a75f.io.bo.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
+import a75f.io.logic.bo.building.Floor;
+import a75f.io.logic.bo.building.Zone;
+import a75f.io.device.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
+import a75f.io.device.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 
 import static a75f.io.logic.L.ccu;
 import static a75f.io.logic.LLog.Logd;

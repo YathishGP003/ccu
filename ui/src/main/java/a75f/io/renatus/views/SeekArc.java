@@ -25,9 +25,9 @@ import android.view.View;
 
 import java.text.DecimalFormat;
 
-import a75f.io.bo.building.Zone;
-import a75f.io.bo.building.ZoneProfile;
-import a75f.io.bo.building.definitions.RoomDataInterface;
+import a75f.io.logic.bo.building.Zone;
+import a75f.io.logic.bo.building.ZoneProfile;
+import a75f.io.logic.bo.building.definitions.RoomDataInterface;
 import a75f.io.renatus.R;
 
 public class SeekArc extends View implements RoomDataInterface

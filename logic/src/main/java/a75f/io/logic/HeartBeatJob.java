@@ -2,8 +2,8 @@ package a75f.io.logic;
 
 import android.util.Log;
 
-import a75f.io.bo.serial.CcuToCmOverUsbCcuHeartbeatMessage_t;
-import a75f.io.bo.serial.MessageType;
+import a75f.io.device.serial.CcuToCmOverUsbCcuHeartbeatMessage_t;
+import a75f.io.device.serial.MessageType;
 /**
  * Created by Yinten isOn 8/24/2017.
  */

@@ -9,7 +9,7 @@ import org.junit.runner.RunWith;
 
 import java.util.HashMap;
 
-import a75f.io.bo.building.CCUApplication;
+import a75f.io.logic.bo.building.CCUApplication;
 
 /**
  * Created by samjithsadasivan on 9/11/17.

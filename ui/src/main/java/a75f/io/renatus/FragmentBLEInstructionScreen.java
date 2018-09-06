@@ -9,9 +9,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import a75f.io.bo.building.NodeType;
-import a75f.io.bo.building.Zone;
-import a75f.io.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.NodeType;
+import a75f.io.logic.bo.building.Zone;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.L;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;

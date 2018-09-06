@@ -11,9 +11,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import a75f.io.bo.building.CCUApplication;
-import a75f.io.bo.building.Day;
-import a75f.io.bo.building.Schedule;
+import a75f.io.logic.bo.building.CCUApplication;
+import a75f.io.logic.bo.building.Day;
+import a75f.io.logic.bo.building.Schedule;
 import a75f.io.kinveybo.AlgoTuningParameters;
 import a75f.io.renatus.framework.BaseSimulationTest;
 import a75f.io.renatus.framework.SamplingProfile;

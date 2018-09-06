@@ -8,7 +8,7 @@ import android.widget.AbsListView.MultiChoiceModeListener;
 
 import java.util.ArrayList;
 
-import a75f.io.bo.building.Zone;
+import a75f.io.logic.bo.building.Zone;
 import a75f.io.logic.L;
 
 class RoomListActionMenuListener implements MultiChoiceModeListener

@@ -6,7 +6,7 @@ import org.javolution.io.Struct;
 
 import java.io.IOException;
 
-import a75f.io.bo.json.serializers.JsonSerializer;
+import a75f.io.device.json.serializers.JsonSerializer;
 /**
  * Created by Yinten isOn 8/21/2017.
  */

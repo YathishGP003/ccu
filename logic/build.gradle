@@ -56,7 +56,7 @@ android {
 dependencies {
     testCompile 'junit:junit:4.12'
     compile fileTree(include: '*.jar', dir: 'libs')
-    compile project(':bo')
+    compile project(':device')
     compile project(path: ':usbserial')
     compile(name: 'kinvey-android-3.0.8', ext: 'aar')
     compile(name: 'realm-android-library-3.2.1', ext: 'aar')
@@ -70,7 +70,7 @@ dependencies {
     }
     compile 'info.guardianproject.netcipher:netcipher:1.2'
 
-
+    implementation project(':haystack')
     //compile "cz.msebera.android:httpclient:4.4.1.2"
     //compile 'org.apache.httpcomponents:httpclient-android:4.3.5.1'
     //implementation files('/Users/samjithsadasivan/Downloads/httpcomponents-client-4.5.2/lib/httpclient-4.5.2.jar')

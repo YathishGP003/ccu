@@ -24,10 +24,10 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import a75f.io.bo.building.BaseProfileConfiguration;
-import a75f.io.bo.building.Floor;
-import a75f.io.bo.building.Zone;
-import a75f.io.bo.building.ZoneProfile;
+import a75f.io.logic.bo.building.BaseProfileConfiguration;
+import a75f.io.logic.bo.building.Floor;
+import a75f.io.logic.bo.building.Zone;
+import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.L;
 import butterknife.BindView;
 import butterknife.ButterKnife;

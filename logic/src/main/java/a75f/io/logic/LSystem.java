@@ -16,9 +16,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import a75.io.algos.vav.VavTRSystem;
-import a75f.io.bo.building.Floor;
-import a75f.io.bo.building.Zone;
-import a75f.io.bo.building.ZoneProfile;
+import a75f.io.logic.bo.building.Floor;
+import a75f.io.logic.bo.building.Zone;
+import a75f.io.logic.bo.building.ZoneProfile;
 
 import static a75f.io.logic.L.ccu;
 

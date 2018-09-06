@@ -1,6 +1,6 @@
 package a75f.io.logic;
 
-import a75f.io.bo.building.Output;
+import a75f.io.logic.bo.building.Output;
 
 import static a75f.io.logic.LZoneProfile.getScheduledVal;
 

@@ -14,8 +14,8 @@ import android.widget.TableLayout;
 
 import java.util.ArrayList;
 
-import a75f.io.bo.building.system.AHU;
-import a75f.io.bo.building.system.RtuIE;
+import a75f.io.logic.bo.building.system.AHU;
+import a75f.io.logic.bo.building.system.RtuIE;
 import a75f.io.logic.L;
 import butterknife.BindView;
 import butterknife.ButterKnife;

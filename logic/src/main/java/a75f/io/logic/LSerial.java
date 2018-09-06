@@ -8,11 +8,11 @@ import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import a75f.io.bo.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
-import a75f.io.bo.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
-import a75f.io.bo.serial.MessageType;
-import a75f.io.bo.serial.comm.SerialAction;
-import a75f.io.bo.serial.comm.SerialEvent;
+import a75f.io.device.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
+import a75f.io.device.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
+import a75f.io.device.serial.MessageType;
+import a75f.io.device.serial.comm.SerialAction;
+import a75f.io.device.serial.comm.SerialEvent;
 import a75f.io.usbserial.UsbService;
 
 import static a75f.io.logic.LLog.Logd;

@@ -11,9 +11,9 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
-import a75f.io.bo.building.LightProfile;
-import a75f.io.bo.building.Zone;
-import a75f.io.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.lights.LightProfile;
+import a75f.io.logic.bo.building.Zone;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.L;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;

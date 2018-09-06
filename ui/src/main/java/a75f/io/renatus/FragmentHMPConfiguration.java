@@ -17,14 +17,14 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-import a75f.io.bo.building.BaseProfileConfiguration;
-import a75f.io.bo.building.HmpProfile;
-import a75f.io.bo.building.NodeType;
-import a75f.io.bo.building.Output;
-import a75f.io.bo.building.Zone;
-import a75f.io.bo.building.definitions.OutputAnalogActuatorType;
-import a75f.io.bo.building.definitions.Port;
-import a75f.io.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.BaseProfileConfiguration;
+import a75f.io.logic.bo.building.HmpProfile;
+import a75f.io.logic.bo.building.NodeType;
+import a75f.io.logic.bo.building.Output;
+import a75f.io.logic.bo.building.Zone;
+import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
+import a75f.io.logic.bo.building.definitions.Port;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.L;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;

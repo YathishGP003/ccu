@@ -12,9 +12,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
 
-import a75f.io.bo.building.CCUApplication;
-import a75f.io.bo.json.serializers.JsonSerializer;
-import a75f.io.renatus.framework.SimulationContext;
+import a75f.io.logic.bo.building.CCUApplication;
+import a75f.io.device.json.serializers.JsonSerializer;
 
 /**
  * Created by samjithsadasivan on 9/21/17.

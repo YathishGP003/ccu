@@ -211,7 +211,7 @@ public abstract class HDict extends HVal
   /** Create Map.Entry for given name/value tag pair */
   static Entry toEntry(String key, HVal val) { return new MapEntry(key, val); }
 
-  static class MapEntry implements Entry
+  public static class MapEntry implements Entry
   {
     MapEntry(String key, Object val) { this.key = key; this.val = val; }
     public Object getKey() { return key; }

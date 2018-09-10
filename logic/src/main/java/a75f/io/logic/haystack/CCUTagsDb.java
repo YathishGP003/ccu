@@ -67,8 +67,8 @@ public class CCUTagsDb extends HServer
         //addAhu(site,   dis+"-AHU2");
     }
     
-    public HDict getSite(String dis) {
-        return (HDict) recs.get(dis);
+    public HDict getSite(String ref) {
+        return (HDict) recs.get(ref);
     }
     
     public void addMeter(HDict site, String dis)
@@ -146,20 +146,25 @@ public class CCUTagsDb extends HServer
             site.add(m);
         }
         
-        recs.put(s.getDisplayName(), site.toDict());
+        //recs.put(s.getDisplayName(), site.toDict());
+        HRef id = (HRef)site.get("id");
+        recs.put(id.toVal(), site.toDict());
     }
     
-    public void addEquip(Equip q)
+    public String addEquip(Equip q)
     {
         HDict site = getSite(q.getSiteRef());
         HDictBuilder equip = new HDictBuilder()
                                      .add("id",      HRef.make(UUID.randomUUID().toString()))
                                      .add("dis",     q.getDisplayName())
-                                     .add("siteRef", site.get("id"));
+                                     .add("siteRef", q.getSiteRef()/*site.get("id")*/);
         for (String m : q.getMarkers()) {
             equip.add(m);
         }
-        recs.put(q.getDisplayName(), equip.toDict());
+        HRef id = (HRef)equip.get("id");
+        //recs.put(q.getDisplayName(), equip.toDict());
+        recs.put(id.toVal(), equip.toDict());
+        return id.toCode();
     }
     
     
@@ -175,8 +180,8 @@ public class CCUTagsDb extends HServer
                                  .add("dis",      p.getDisplayName())
                                  .add("point",    HMarker.VAL)
                                  .add("his",      HMarker.VAL)
-                                 .add("siteRef",  eq.get("siteRef"))
-                                 .add("equipRef", eq.get("id"))
+                                 .add("siteRef",  p.getSiteRef()/*eq.get("siteRef")*/)
+                                 .add("equipRef", p.getEquipRef()/*eq.get("id")*/)
                                  .add("roomRef",  p.getRoomRef())
                                  .add("floorRef", p.getFloorRef())
                                  .add("kind",     p.getUnit() == null ? "Bool" : "Number")
@@ -187,7 +192,8 @@ public class CCUTagsDb extends HServer
             b.add(m);
         }
         HRef id = (HRef)b.get("id");
-        recs.put(p.getDisplayName(), b.toDict());
+        //recs.put(p.getDisplayName(), b.toDict());
+        recs.put(id.toVal(), b.toDict());
         return id.toCode();
     }
     
@@ -197,6 +203,7 @@ public class CCUTagsDb extends HServer
                                  .add("id",       HRef.make(UUID.randomUUID().toString()))
                                  .add("dis",      p.getDisplayName())
                                  .add("point",    HMarker.VAL)
+                                 .add("writable",    HMarker.VAL)
                                  .add("his",      HMarker.VAL)
                                  .add("deviceRef", p.getDeviceRef())
                                  .add("pointRef",p.getPointRef())
@@ -207,7 +214,8 @@ public class CCUTagsDb extends HServer
             b.add(m);
         }
         HRef id = (HRef)b.get("id");
-        recs.put(p.getDisplayName(), b.toDict());
+        //recs.put(p.getDisplayName(), b.toDict());
+        recs.put(id.toVal(), b.toDict());
         return id.toCode();
     }
     
@@ -217,14 +225,15 @@ public class CCUTagsDb extends HServer
                                  .add("id",       HRef.make(UUID.randomUUID().toString()))
                                  .add("dis",      d.getDisplayName())
                                  .add("device",    HMarker.VAL)
-                                 .add("his",      HMarker.VAL);
+                                 .add("his",      HMarker.VAL)
+                                 .add("deviceAddr",      d.getAddr());
     
         for (String m : d.getMarkers()) {
             b.add(m);
         }
         HRef id = (HRef)b.get("id");
-        recs.put(d.getDisplayName(), b.toDict());
-        
+        //recs.put(d.getDisplayName(), b.toDict());
+        recs.put(id.toVal(), b.toDict());
         return id.toCode();
     }
     
@@ -268,7 +277,9 @@ public class CCUTagsDb extends HServer
     // Reads
     //////////////////////////////////////////////////////////////////////////
     
-    protected HDict onReadById(HRef id) { return (HDict)recs.get(id.val); }
+    protected HDict onReadById(HRef id) {
+        return (HDict)recs.get(id.val);
+    }
     
     protected Iterator iterator() { return recs.values().iterator(); }
     

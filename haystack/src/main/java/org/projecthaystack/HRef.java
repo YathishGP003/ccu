@@ -58,6 +58,10 @@ public class HRef extends HVal
 
   /** Encode as "@id" */
   public String toCode() { return "@" + val; }
+  
+  public String toVal() {
+    return val;
+  }
 
   /** Encode as "r:<id> [dis]" */
   public String toJson()

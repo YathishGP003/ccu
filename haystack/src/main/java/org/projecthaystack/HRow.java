@@ -7,10 +7,8 @@
 //
 package org.projecthaystack;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.Map.Entry;
 
 /**
  * HRow is a row in a HGrid.  It implements the HDict interface also.
@@ -68,7 +66,7 @@ public class HRow extends HDict
 // RowIterator
 //////////////////////////////////////////////////////////////////////////
 
- class RowIterator implements Iterator
+ public class RowIterator implements Iterator
  {
    RowIterator()
    {

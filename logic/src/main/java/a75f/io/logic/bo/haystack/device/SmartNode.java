@@ -1,5 +1,6 @@
 package a75f.io.logic.bo.haystack.device;
 
+import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.haystack.Device;
 import a75f.io.logic.bo.haystack.RawPoint;
 
@@ -29,49 +30,48 @@ public class SmartNode
         createPoints();
     }
     
-    public void createPoints() {
+    private void createPoints() {
         analog1In = new RawPoint.Builder()
                                 .setDisplayName("Analog1In-"+smartNodeAddress)
                                 .setDeviceRef(deviceRef)
-                                .setPort("Analog1In")
+                                .setPort(Port.ANALOG_IN_ONE.toString())
                                 .setType("2-10v")
                                 .build();
     
         analog2In = new RawPoint.Builder()
                             .setDisplayName("Analog2In-"+smartNodeAddress)
                             .setDeviceRef(deviceRef)
-                            .setPort("Analog2In")
+                            .setPort(Port.ANALOG_IN_TWO.toString())
                             .setType("2-10v")
                             .build();
     
         analog1Out = new RawPoint.Builder()
                             .setDisplayName("Analog1Out-"+smartNodeAddress)
                             .setDeviceRef(deviceRef)
-                            .setPort("Analog1Out")
+                            .setPort(Port.ANALOG_OUT_ONE.toString())
                             .setType("2-10v")
                             .build();
     
         analog2Out = new RawPoint.Builder()
                              .setDisplayName("Analog2Out-"+smartNodeAddress)
                              .setDeviceRef(deviceRef)
-                             .setPort("Analog2Out")
+                             .setPort(Port.ANALOG_OUT_TWO.toString())
                              .setType("2-10v")
                              .build();
     
         relay1 = new RawPoint.Builder()
                              .setDisplayName("relay1-"+smartNodeAddress)
                              .setDeviceRef(deviceRef)
-                             .setPort("relay1")
+                             .setPort(Port.RELAY_ONE.toString())
                              .setType("NO")
                              .build();
     
         relay2 = new RawPoint.Builder()
                          .setDisplayName("relay2-"+smartNodeAddress)
                          .setDeviceRef(deviceRef)
-                         .setPort("relay2")
+                         .setPort(Port.RELAY_TWO.toString())
                          .setType("NO")
                          .build();
     }
-    
 
 }

@@ -13,6 +13,11 @@ public class Device
     private String            displayName;
     private ArrayList<String> markers;
     private String equipName;
+    private String addr;
+    public String getAddr()
+    {
+        return addr;
+    }
     public String getDisplayName()
     {
         return displayName;
@@ -33,6 +38,14 @@ public class Device
         private String            displayName;
         private ArrayList<String> markers = new ArrayList<>();
         private String equipName;
+        private String addr;
+    
+        public Builder setAddr(int addr)
+        {
+            this.addr = String.valueOf(addr);
+            return this;
+        }
+        
         public Builder setDisplayName(String displayName)
         {
             this.displayName = displayName;
@@ -58,6 +71,7 @@ public class Device
             Device d = new Device();
             d.displayName = this.displayName;
             d.markers = this.markers;
+            d.addr = this.addr;
             return CCUHsApi.getInstance().addDevice(d);
         }
     }

@@ -4,8 +4,11 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 import a75f.io.logic.bo.building.CCUApplication;
+import a75f.io.logic.bo.haystack.Site;
+import a75f.io.logic.haystack.CCUHsApi;
 
 import static a75f.io.logic.LLog.Logd;
 
@@ -35,7 +38,24 @@ class LocalStorage
                 e.printStackTrace();
             }
         }
-        return new CCUApplication();
+        CCUApplication ccu = new CCUApplication();
+        
+        //Add site point if not done already.
+        HashMap site = CCUHsApi.getInstance().read("site");
+        
+        if (site.size() == 0) {
+            //TODO - demo
+            Site s75f = new Site.Builder()
+                             .setDisplayName("75F")
+                             .addMarker("site")
+                             .setGeoCity("Burnsville")
+                             .setGeoState("MN")
+                             .setTz("Chicago")
+                             .setArea(20000).build();
+            CCUHsApi.getInstance().addSite(s75f);
+        }
+        
+        return ccu;
     }
     
     

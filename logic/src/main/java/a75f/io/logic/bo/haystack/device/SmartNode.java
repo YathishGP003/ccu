@@ -14,10 +14,13 @@ public class SmartNode
     
     public RawPoint analog1In;
     public RawPoint analog2In;
+    public RawPoint th1In;
+    public RawPoint th2In;
     public RawPoint analog1Out;
     public RawPoint analog2Out;
     public RawPoint relay1;
     public RawPoint relay2;
+    public RawPoint currentTemp;
     
     public String deviceRef;
     
@@ -26,7 +29,7 @@ public class SmartNode
                 .setDisplayName("SN-"+address)
                 .addMarker("network")
                 .build();
-        
+        smartNodeAddress = address;
         createPoints();
     }
     
@@ -38,12 +41,25 @@ public class SmartNode
                                 .setType("2-10v")
                                 .build();
     
+        
         analog2In = new RawPoint.Builder()
                             .setDisplayName("Analog2In-"+smartNodeAddress)
                             .setDeviceRef(deviceRef)
                             .setPort(Port.ANALOG_IN_TWO.toString())
                             .setType("2-10v")
                             .build();
+    
+        th1In = new RawPoint.Builder()
+                            .setDisplayName("Th1In-"+smartNodeAddress)
+                            .setDeviceRef(deviceRef)
+                            .setPort(Port.TH1_IN.toString())
+                            .build();
+    
+        th2In = new RawPoint.Builder()
+                        .setDisplayName("Th2In-"+smartNodeAddress)
+                        .setDeviceRef(deviceRef)
+                        .setPort(Port.TH2_IN.toString())
+                        .build();
     
         analog1Out = new RawPoint.Builder()
                             .setDisplayName("Analog1Out-"+smartNodeAddress)
@@ -71,6 +87,11 @@ public class SmartNode
                          .setDeviceRef(deviceRef)
                          .setPort(Port.RELAY_TWO.toString())
                          .setType("NO")
+                         .build();
+    
+        currentTemp = new RawPoint.Builder()
+                         .setDisplayName("currentTemp-"+smartNodeAddress)
+                         .setDeviceRef(deviceRef)
                          .build();
     }
 

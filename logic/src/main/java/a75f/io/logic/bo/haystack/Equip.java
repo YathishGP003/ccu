@@ -39,13 +39,15 @@ public class Equip
         private String            siteRef;
         private String roomRef;
         private String floorRef;
-        public void setRoomRef(String roomRef)
+        public Builder setRoomRef(String roomRef)
         {
             this.roomRef = roomRef;
+            return this;
         }
-        public void setFloorRef(String floorRef)
+        public Builder setFloorRef(String floorRef)
         {
             this.floorRef = floorRef;
+            return this;
         }
         public Builder setDisplayName(String displayName)
         {

@@ -1,12 +1,12 @@
 package a75.io.logic;
 
-import org.junit.Test;
-import org.projecthaystack.HDict;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.junit.Test;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 import a75f.io.logic.bo.haystack.Equip;
 import a75f.io.logic.bo.haystack.Point;
@@ -104,15 +104,20 @@ public class TestHayStack
     @Test
     public void testVAVPoints(){
     
-        Site s = new Site.Builder()
-                         .setDisplayName("75F")
-                         .addMarker("site")
-                         .setGeoCity("Burnsville")
-                         .setGeoState("MN")
-                         .setTz("Chicago")
-                         .setArea(1000).build();
-        CCUHsApi.getInstance().addSite(s);
-        
+        //Add site point if not done already.
+        HashMap site = CCUHsApi.getInstance().read("site");
+        if (site.size() == 0) {
+            //TODO - demo
+            Site s75f = new Site.Builder()
+                                .setDisplayName("75F")
+                                .addMarker("site")
+                                .setGeoCity("Burnsville")
+                                .setGeoState("MN")
+                                .setTz("Chicago")
+                                .setArea(10000).build();
+            CCUHsApi.getInstance().addSite(s75f);
+        }
+    
         //Create Logical points
         int nodeAddr = 7000;
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
@@ -125,28 +130,28 @@ public class TestHayStack
                           .addMarker("vav")
                           .build();
         String equipRef = CCUHsApi.getInstance().addEquip(v);
-        
-        Point dtPoint = new Point.Builder()
-                                .setDisplayName(siteDis+"VAV-"+nodeAddr+"-DischargeAirTemp")
-                                .setEquipRef(equipRef)
-                                .setSiteRef(siteRef)
-                                .addMarker("discharge")
-                                .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("writable")
-                                .setUnit("\u00B0F")
-                                .build();
-        
-        String dtID = CCUHsApi.getInstance().addPoint(dtPoint);
-        
-        Point etPoint = new Point.Builder()
-                                .setDisplayName(siteDis+"VAV-"+nodeAddr+"-EnteringAirTemp")
-                                .setEquipRef(equipRef)
-                                .setSiteRef(siteRef)
-                                .addMarker("entering")
-                                .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("writable")
-                                .setUnit("\u00B0F")
-                                .build();
-        String etID = CCUHsApi.getInstance().addPoint(etPoint);
-        
+    
+        Point datPoint = new Point.Builder()
+                                 .setDisplayName(siteDis+"VAV-"+nodeAddr+"-DischargeAirTemp")
+                                 .setEquipRef(equipRef)
+                                 .setSiteRef(siteRef)
+                                 .addMarker("discharge")
+                                 .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("writable")
+                                 .setUnit("\u00B0F")
+                                 .build();
+    
+        String datID = CCUHsApi.getInstance().addPoint(datPoint);
+    
+        Point eatPoint = new Point.Builder()
+                                 .setDisplayName(siteDis+"VAV-"+nodeAddr+"-EnteringAirTemp")
+                                 .setEquipRef(equipRef)
+                                 .setSiteRef(siteRef)
+                                 .addMarker("entering")
+                                 .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("writable")
+                                 .setUnit("\u00B0F")
+                                 .build();
+        String eatID = CCUHsApi.getInstance().addPoint(eatPoint);
+    
         Point damperPos = new Point.Builder()
                                   .setDisplayName(siteDis+"VAV-"+nodeAddr+"-DamperPos")
                                   .setEquipRef(equipRef)
@@ -155,9 +160,9 @@ public class TestHayStack
                                   .addMarker("damper").addMarker("cmd").addMarker("writable")
                                   .setUnit("\u00B0F")
                                   .build();
-        
+    
         String dpID = CCUHsApi.getInstance().addPoint(damperPos);
-        
+    
         Point reheatPos = new Point.Builder()
                                   .setDisplayName(siteDis+"VAV-"+nodeAddr+"-ReheatPos")
                                   .setEquipRef(equipRef)
@@ -167,17 +172,40 @@ public class TestHayStack
                                   .setUnit("\u00B0F")
                                   .build();
         String rhID = CCUHsApi.getInstance().addPoint(reheatPos);
-        
+    
+        Point currentTemp = new Point.Builder()
+                                    .setDisplayName(siteDis+"VAV-"+nodeAddr+"-currentTemp")
+                                    .setEquipRef(equipRef)
+                                    .setSiteRef(siteRef)
+                                    .addMarker("zone")
+                                    .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("writable")
+                                    .setUnit("\u00B0F")
+                                    .build();
+        String ctID = CCUHsApi.getInstance().addPoint(currentTemp);
+    
+        Point desiredTemp = new Point.Builder()
+                                    .setDisplayName(siteDis+"VAV-"+nodeAddr+"-desiredTemp")
+                                    .setEquipRef(equipRef)
+                                    .setSiteRef(siteRef)
+                                    .addMarker("zone")
+                                    .addMarker("air").addMarker("temp").addMarker("desired").addMarker("sp")
+                                    .setUnit("\u00B0F")
+                                    .build();
+        String dtID = CCUHsApi.getInstance().addPoint(desiredTemp);
+    
+    
         //Create Physical points and map
         SmartNode device = new SmartNode(nodeAddr);
-        device.analog1In.setPointRef(dtID);
-        CCUHsApi.getInstance().addPoint(device.analog1In);
-        device.analog2In.setPointRef(etID);
-        CCUHsApi.getInstance().addPoint(device.analog2In);
+        device.th1In.setPointRef(datID);
+        CCUHsApi.getInstance().addPoint(device.th1In);
+        device.th2In.setPointRef(eatID);
+        CCUHsApi.getInstance().addPoint(device.th2In);
         device.analog1Out.setPointRef(dpID);
         CCUHsApi.getInstance().addPoint(device.analog1Out);
         device.analog2Out.setPointRef(rhID);
         CCUHsApi.getInstance().addPoint(device.analog2Out);
+        device.currentTemp.setPointRef(ctID);
+        CCUHsApi.getInstance().addPoint(device.currentTemp);
     
         HashMap data = CCUHsApi.getInstance().tagsDb.getDbMap();
         System.out.println(data);
@@ -185,6 +213,8 @@ public class TestHayStack
         System.out.println(points);
     
         for (Object a : points) {
+            HashMap m1 = (HashMap)a;
+            System.out.print(m1.get("dis")+" -> ");
             System.out.println(a);
         }
         
@@ -204,7 +234,21 @@ public class TestHayStack
     @Test
     public void testAPI() {
     
-        Site s = new Site.Builder()
+        HashMap site = CCUHsApi.getInstance().read("site");
+        if (site.size() == 0) {
+            Site s75f = new Site.Builder()
+                                .setDisplayName("75F")
+                                .addMarker("site")
+                                .setGeoCity("Burnsville")
+                                .setGeoState("MN")
+                                .setTz("Chicago")
+                                .setArea(20000).build();
+            CCUHsApi.getInstance().addSite(s75f);
+        }
+        HashMap s = CCUHsApi.getInstance().read("site");
+        System.out.print(s);
+    
+        /*Site s = new Site.Builder()
                          .setDisplayName("75F")
                          .addMarker("site")
                          .setGeoCity("Burnsville")
@@ -234,8 +278,45 @@ public class TestHayStack
             map1.put(entry.getKey(), entry.getValue());
         }
         
-        System.out.println(map1);
+        System.out.println(map1);*/
         
         
+    }
+    
+    @Test
+    public void testSerialization() {
+        
+    
+        Site s = new Site.Builder()
+                         .setDisplayName("75F")
+                         .addMarker("site")
+                         .setGeoCity("Burnsville")
+                         .setGeoState("MN")
+                         .setTz("Chicago")
+                         .setArea(1000).build();
+        CCUHsApi.getInstance().addSite(s);
+        
+        System.out.println(CCUHsApi.getInstance().tagsDb);
+        System.out.println(CCUHsApi.getInstance().tagsDb.recs);
+    
+        System.out.println(toJson(CCUHsApi.getInstance().tagsDb.recs));
+        
+    }
+    
+    private String toJson(HashMap mm){
+        ObjectMapper m  = new ObjectMapper();
+        try
+        {
+            //m.disable(JsonGenerator.Feature.QUOTE_FIELD_NAMES);
+            //m.disable(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS);
+            //m.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
+            
+            return m.writerWithDefaultPrettyPrinter().writeValueAsString(mm);
+            
+            
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

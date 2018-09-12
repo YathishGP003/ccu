@@ -1,5 +1,9 @@
 package a75f.io.logic.haystack;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+
 import org.projecthaystack.HBool;
 import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDateTimeRange;
@@ -19,13 +23,16 @@ import org.projecthaystack.server.HOp;
 import org.projecthaystack.server.HServer;
 import org.projecthaystack.server.HStdOps;
 
+import java.lang.reflect.Type;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.UUID;
 
+import a75f.io.logic.L;
 import a75f.io.logic.bo.haystack.Device;
 import a75f.io.logic.bo.haystack.Equip;
 import a75f.io.logic.bo.haystack.Point;
@@ -38,13 +45,32 @@ import a75f.io.logic.bo.haystack.Site;
 
 public class CCUTagsDb extends HServer
 {
-    
-    HashMap recs = new HashMap();//L.ccu().tagsMap;
+    public HashMap recs;
+    //public String tagMap = null;
+    public CCUTagsDb() {
+        //recs = new HashMap();
+        if (L.ccu().tagsMap == null) {
+            recs = new HashMap();
+        } else
+        {
+            Gson gson = new Gson();
+            Type listType = new TypeToken<Map<String, HashMap>>()
+            {
+            }.getType();
+            recs = gson.fromJson(L.ccu().tagsMap, listType);
+        }
+        
+    }
     
     //TODO- TEMP for Unit testing
-    
     public HashMap getDbMap() {
         return recs;
+    }
+    
+    public void saveMap() {
+        
+        Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+        L.ccu().tagsMap = gson.toJson(recs);
     }
     
     
@@ -146,9 +172,9 @@ public class CCUTagsDb extends HServer
             site.add(m);
         }
         
-        //recs.put(s.getDisplayName(), site.toDict());
         HRef id = (HRef)site.get("id");
         recs.put(id.toVal(), site.toDict());
+        saveMap();
     }
     
     public String addEquip(Equip q)
@@ -162,8 +188,8 @@ public class CCUTagsDb extends HServer
             equip.add(m);
         }
         HRef id = (HRef)equip.get("id");
-        //recs.put(q.getDisplayName(), equip.toDict());
         recs.put(id.toVal(), equip.toDict());
+        saveMap();
         return id.toCode();
     }
     
@@ -184,16 +210,16 @@ public class CCUTagsDb extends HServer
                                  .add("equipRef", p.getEquipRef()/*eq.get("id")*/)
                                  .add("roomRef",  p.getRoomRef())
                                  .add("floorRef", p.getFloorRef())
-                                 .add("kind",     p.getUnit() == null ? "Bool" : "Number")
-                                 .add("tz",       p.getTz());
+                                 .add("kind",     p.getUnit() == null ? "Bool" : "Number");
+                                 //.add("tz",       p.getTz());
         if (p.getUnit() != null) b.add("unit", p.getUnit());
         
         for (String m : p.getMarkers()) {
             b.add(m);
         }
         HRef id = (HRef)b.get("id");
-        //recs.put(p.getDisplayName(), b.toDict());
         recs.put(id.toVal(), b.toDict());
+        saveMap();
         return id.toCode();
     }
     
@@ -214,8 +240,8 @@ public class CCUTagsDb extends HServer
             b.add(m);
         }
         HRef id = (HRef)b.get("id");
-        //recs.put(p.getDisplayName(), b.toDict());
         recs.put(id.toVal(), b.toDict());
+        saveMap();
         return id.toCode();
     }
     
@@ -232,8 +258,8 @@ public class CCUTagsDb extends HServer
             b.add(m);
         }
         HRef id = (HRef)b.get("id");
-        //recs.put(d.getDisplayName(), b.toDict());
         recs.put(id.toVal(), b.toDict());
+        saveMap();
         return id.toCode();
     }
     
@@ -281,7 +307,7 @@ public class CCUTagsDb extends HServer
         return (HDict)recs.get(id.val);
     }
     
-    protected Iterator iterator() { return recs.values().iterator(); }
+    protected Iterator iterator() { return recs.values().iterator();}
     
     //////////////////////////////////////////////////////////////////////////
     // Navigation

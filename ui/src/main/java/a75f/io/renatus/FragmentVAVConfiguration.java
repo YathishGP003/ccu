@@ -403,6 +403,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         if (mZone.findProfile(mProfileType) == null)
             mZone.mZoneProfiles.add(mVavProfile);
     
+        mVavProfile.addLogicalMap(mSmartNodeAddress);
         Log.d("VAVConfig", "Set Config: ");
     
     }

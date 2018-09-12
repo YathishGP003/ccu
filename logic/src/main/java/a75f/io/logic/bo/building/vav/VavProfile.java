@@ -70,15 +70,6 @@ public abstract class VavProfile extends ZoneProfile
         co2ResetListener = new CO2ResetListener();
         spResetListener = new SpResetListener();
         hwstResetListener = new HwstResetListener();
-        for (short node : mProfileConfiguration.keySet()) {
-            VAVLogicalMap deviceMap = new VAVLogicalMap(getProfileType(), node);
-            vavDeviceMap.put(node, deviceMap);
-            deviceMap.satResetRequest.setImportanceMultiplier(getZonePriority());
-            deviceMap.co2ResetRequest.setImportanceMultiplier(getZonePriority());
-            deviceMap.spResetRequest.setImportanceMultiplier(getZonePriority());
-            deviceMap.hwstResetRequest.setImportanceMultiplier(getZonePriority());
-        }
-        
     }
     
     @Override
@@ -91,17 +82,14 @@ public abstract class VavProfile extends ZoneProfile
         double co2 = (float) regularUpdateMessage.update.externalAnalogVoltageInput1.get();
         double sp =  (float) regularUpdateMessage.update.externalAnalogVoltageInput2.get();//TODO
     
-        Log.d(TAG," RegularUpdate : rT :"+roomTemp+" dT :"+dischargeTemp+" sT :"+supplyAirTemp+" CO2: "+co2+" SN:"+regularUpdateMessage.update.smartNodeAddress.get());
+        short nodeAddr = (short)regularUpdateMessage.update.smartNodeAddress.get();
+        Log.d(TAG," RegularUpdate : rT :"+roomTemp+" dT :"+dischargeTemp+" sT :"+supplyAirTemp+" CO2: "+co2+" SN:"+nodeAddr);
         
-        VAVLogicalMap currentDevice = vavDeviceMap.get((short)regularUpdateMessage.update.smartNodeAddress.get());
+        VAVLogicalMap currentDevice = vavDeviceMap.get(nodeAddr);
         if (currentDevice == null) {
             //When node is not added while constructing profile.
-            currentDevice = new VAVLogicalMap(getProfileType(), (short)regularUpdateMessage.update.smartNodeAddress.get());
-            vavDeviceMap.put((short)regularUpdateMessage.update.smartNodeAddress.get(), currentDevice);
-            currentDevice.satResetRequest.setImportanceMultiplier(getZonePriority());
-            currentDevice.co2ResetRequest.setImportanceMultiplier(getZonePriority());
-            currentDevice.spResetRequest.setImportanceMultiplier(getZonePriority());
-            currentDevice.hwstResetRequest.setImportanceMultiplier(getZonePriority());
+            addLogicalMap(nodeAddr);
+            currentDevice = vavDeviceMap.get(nodeAddr);
         }
         currentDevice.setRoomTemp(roomTemp);
         currentDevice.setDischargeTemp(dischargeTemp);
@@ -113,6 +101,15 @@ public abstract class VavProfile extends ZoneProfile
         {
             mInterface.refreshView();
         }
+    }
+    
+    public void addLogicalMap(short addr) {
+        VAVLogicalMap deviceMap = new VAVLogicalMap(getProfileType(), addr);
+        vavDeviceMap.put(addr, deviceMap);
+        deviceMap.satResetRequest.setImportanceMultiplier(getZonePriority());
+        deviceMap.co2ResetRequest.setImportanceMultiplier(getZonePriority());
+        deviceMap.spResetRequest.setImportanceMultiplier(getZonePriority());
+        deviceMap.hwstResetRequest.setImportanceMultiplier(getZonePriority());
     }
     
     @JsonIgnore

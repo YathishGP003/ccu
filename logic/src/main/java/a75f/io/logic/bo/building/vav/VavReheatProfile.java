@@ -44,6 +44,10 @@ public class VavReheatProfile extends VavProfile
                 Log.d(TAG, " Logical Map does not exist for node " + node);
                 continue;
             }
+            if (vavDeviceMap.get(node).getRoomTemp() == 0) {
+                Log.d(TAG,"Invalid Temp , skip controls update for "+node+" roomTemp : "+vavDeviceMap.get(node).getRoomTemp());
+                continue;
+            }
             VAVLogicalMap vavDevice = vavDeviceMap.get(node);
             ControlLoop coolingLoop = vavDevice.getCoolingLoop();
             ControlLoop heatingLoop = vavDevice.getHeatingLoop();
@@ -56,11 +60,6 @@ public class VavReheatProfile extends VavProfile
             double supplyAirTemp = vavDevice.getSupplyAirTemp();
             double co2 = vavDeviceMap.get(node).getCO2();
             double dischargeSp = vavDevice.getDischargeSp();
-            
-            if (roomTemp == 0) {
-                Log.d(TAG,"Skip PI update for "+node+" roomTemp : "+roomTemp);
-                continue;
-            }
             
             
             Damper damper = vavUnit.vavDamper;

@@ -5,9 +5,9 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import a75f.io.logic.bo.building.system.SystemProfile;
 import a75f.io.kinveybo.AlgoTuningParameters;
 import a75f.io.kinveybo.CCUUser;
+import a75f.io.logic.bo.building.system.SystemProfile;
 
 /**
  * Created by Yinten isOn 8/15/2017.
@@ -66,7 +66,8 @@ public class CCUApplication
     private CCUUser mUser;
     private short           mSmartNodeAddressBand;
     
-    public HashMap tagsMap = new HashMap();
+    //public HashMap tagsMap = new HashMap();
+    public String tagsMap;
 
     public short getSmartNodeAddressBand()
     {
@@ -206,5 +207,29 @@ public class CCUApplication
     public void setUser(CCUUser user)
     {
         this.mUser = mUser;
+    }
+    
+    public String getFloor(short addr) {
+        for (Floor f : mfloors) {
+            for (Zone z : f.mRoomList) {
+                for (ZoneProfile zp : z.mZoneProfiles) {
+                    zp.getNodeAddresses().contains(addr);
+                    return f.mFloorName;
+                }
+            }
+        }
+        return "";
+     }
+    
+    public String getRoom(short addr) {
+        for (Floor f : mfloors) {
+            for (Zone z : f.mRoomList) {
+                for (ZoneProfile zp : z.mZoneProfiles) {
+                    zp.getNodeAddresses().contains(addr);
+                    return z.roomName;
+                }
+            }
+        }
+        return "";
     }
 }

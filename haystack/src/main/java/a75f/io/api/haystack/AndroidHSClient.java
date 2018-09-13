@@ -1,4 +1,4 @@
-package a75f.io.logic.haystack;
+package a75f.io.api.haystack;
 
 import org.projecthaystack.HGrid;
 import org.projecthaystack.client.HClient;
@@ -18,7 +18,6 @@ public class AndroidHSClient extends HClient
     CCUTagsDb db = new CCUTagsDb();
     
     protected AndroidHSClient(){
-        super();
     }
     
     @Override

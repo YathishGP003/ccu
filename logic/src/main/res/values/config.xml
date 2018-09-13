@@ -3,4 +3,5 @@
     <bool name="developer_test">false</bool>
     <bool name="simulation">true</bool>
     <integer name="heartbeat">15</integer>
+    <bool name="unit_test">true</bool>
 </resources>

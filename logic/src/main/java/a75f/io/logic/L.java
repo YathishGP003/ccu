@@ -100,6 +100,7 @@ public class L
     {
         LocalStorage.setApplicationSettings();
         sync();
+        Globals.getInstance().saveTags();
     }
 
 
@@ -292,9 +293,7 @@ public class L
         Globals.getInstance().setCCU(state);
         saveCCUState();
     }
-
-
-    //TODO samjith
+    
     /*
     This should set a preference to what environment
     the user would like to use with Kinvey for testing and development purposes.

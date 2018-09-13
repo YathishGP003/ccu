@@ -1,4 +1,4 @@
-package a75f.io.logic.bo.haystack;
+package a75f.io.api.haystack;
 
 import java.util.ArrayList;
 
@@ -16,6 +16,11 @@ public class Point
     private String tz;
     private String roomRef;
     private String floorRef;
+    private String group;
+    public String getGroup()
+    {
+        return group;
+    }
     public String getRoomRef()
     {
         return roomRef;
@@ -48,6 +53,7 @@ public class Point
     {
         return tz;
     }
+    
     private Point(){
     }
     
@@ -60,6 +66,12 @@ public class Point
         private String tz;
         private String roomRef;
         private String floorRef;
+        private String group;
+        public Builder setGroup(String group)
+        {
+            this.group = group;
+            return this;
+        }
         public Builder setRoomRef(String roomRef)
         {
             this.roomRef = roomRef;
@@ -116,6 +128,7 @@ public class Point
             p.tz = this.tz;
             p.roomRef = this.roomRef;
             p.floorRef = this.floorRef;
+            p.group = this.group;
             //CCUHsApi.getInstance().addPoint(p);
             return p;
         }

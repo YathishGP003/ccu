@@ -1,4 +1,7 @@
-package a75f.io.logic.haystack;
+package a75f.io.api.haystack;
+
+import android.content.Context;
+import android.util.Log;
 
 import org.projecthaystack.HDict;
 import org.projecthaystack.HGrid;
@@ -12,29 +15,48 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import a75f.io.logic.bo.haystack.Device;
-import a75f.io.logic.bo.haystack.Equip;
-import a75f.io.logic.bo.haystack.Point;
-import a75f.io.logic.bo.haystack.RawPoint;
-import a75f.io.logic.bo.haystack.Site;
-
 /**
  * Created by samjithsadasivan on 9/3/18.
  */
 
 public class CCUHsApi
 {
-    private static CCUHsApi instance = new CCUHsApi();
+    private static CCUHsApi instance;
     
     public AndroidHSClient hsClient;
     public CCUTagsDb tagsDb;
     
     public static CCUHsApi getInstance(){
+        if (instance == null) {
+            throw new IllegalStateException("Hay stack api is not initialized");
+        }
         return instance;
     }
-    private CCUHsApi() {
+    
+    public CCUHsApi(Context c) {
+        if (instance != null) {
+            throw new IllegalStateException("Api instance already created , use getInstance()");
+        }
         hsClient = new AndroidHSClient();
         tagsDb = (CCUTagsDb) hsClient.db();
+        tagsDb.init(c);
+        instance = this;
+        Log.d("Haystack","Api created");
+    }
+    
+    //TODO - Temp for Unit test
+    public CCUHsApi() {
+        if (instance != null) {
+            throw new IllegalStateException("Api instance already created , use getInstance()");
+        }
+        hsClient = new AndroidHSClient();
+        tagsDb = (CCUTagsDb) hsClient.db();
+        tagsDb.setTagsDbMap(new HashMap());
+        instance = this;
+    }
+    
+    public void saveTagsData() {
+        tagsDb.saveTags();
     }
     
     public void addSite(Site s) {
@@ -111,7 +133,6 @@ public class CCUHsApi
      */
     public void writePoint(String id, int level, String who, Double val, int duration) {
         hsClient.pointWrite(HRef.make(id), level, who, HNum.make(val), HNum.make(duration));
-        tagsDb.saveMap();
     }
     
     /**
@@ -120,9 +141,44 @@ public class CCUHsApi
      * default user - ""
      */
     public void writePoint(String id, Double val) {
-        hsClient.pointWrite(HRef.make(id), 9, "", HNum.make(val), HNum.make(0));
-        tagsDb.saveMap();
+        hsClient.pointWrite(HRef.make(id), HayStackConstants.DEFAULT_POINT_LEVEL, "", HNum.make(val), HNum.make(0));
     }
+    
+    /**
+     * Write to the first 'writable' point fetched using query
+     * at default level  - 9
+     * default user - ""
+     */
+    public void writeDefaultVal(String query, Double val) {
+        ArrayList points = readAll(query);
+        String id = ((HashMap)points.get(0)).get("id").toString();
+        if (id == null || id == "") {
+            throw new IllegalArgumentException();
+        }
+        hsClient.pointWrite(HRef.make(id), HayStackConstants.DEFAULT_POINT_LEVEL, "", HNum.make(val), HNum.make(0));
+    }
+    
+    /**
+     * Write to a 'writable' point
+     * with default level  - 9
+     * default user - ""
+     */
+    public Double readDefaultVal(String query) {
+    
+        ArrayList points = readAll(query);
+        String id = ((HashMap)points.get(0)).get("id").toString();
+        if (id == null || id == "") {
+            return null;
+        }
+        ArrayList values = CCUHsApi.getInstance().readPoint(id);
+        if (values != null && values.size() > 0)
+        {
+            return Double.parseDouble(((HashMap) values.get(HayStackConstants.DEFAULT_POINT_LEVEL - 1)).get("val").toString());
+        } else {
+            return null;
+        }
+    }
+    
     
     /**
      * Returns an arrayList of point vals hashmaps for all levels in write array.

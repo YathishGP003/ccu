@@ -1,8 +1,6 @@
-package a75f.io.logic.bo.haystack;
+package a75f.io.api.haystack;
 
 import java.util.ArrayList;
-
-import a75f.io.logic.haystack.CCUHsApi;
 
 /**
  * Created by samjithsadasivan on 9/5/18.

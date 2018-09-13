@@ -1,4 +1,4 @@
-package a75f.io.logic.bo.haystack;
+package a75f.io.api.haystack;
 
 /**
  * Created by samjithsadasivan on 9/7/18.

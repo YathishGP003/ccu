@@ -1,4 +1,6 @@
-package a75f.io.logic.haystack;
+package a75f.io.api.haystack;
+
+import android.content.Context;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -29,15 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.StringTokenizer;
 import java.util.UUID;
-
-import a75f.io.logic.L;
-import a75f.io.logic.bo.haystack.Device;
-import a75f.io.logic.bo.haystack.Equip;
-import a75f.io.logic.bo.haystack.Point;
-import a75f.io.logic.bo.haystack.RawPoint;
-import a75f.io.logic.bo.haystack.Site;
 
 /**
  * Created by samjithsadasivan on 8/31/18.
@@ -45,34 +39,56 @@ import a75f.io.logic.bo.haystack.Site;
 
 public class CCUTagsDb extends HServer
 {
-    public HashMap recs;
-    //public String tagMap = null;
+    
+    private static final String PREFS_TAGS_DB = "ccu_tags";
+    private static final String PREFS_TAGS_MAP = "tagsMap";
+    
+    public HashMap tagsMap;
+    
+    public boolean unitTestMode = false;
+    
+    private Context appContext = null;
+    
+    private String tagsString;
+    //public String tagsString = null;
     public CCUTagsDb() {
-        //recs = new HashMap();
-        if (L.ccu().tagsMap == null) {
-            recs = new HashMap();
+    
+    }
+    
+    public void init(Context c) {
+        appContext = c;
+        tagsString = appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).getString(PREFS_TAGS_MAP, null);
+        if (tagsString == null) {
+            tagsMap = new HashMap();
         } else
         {
             Gson gson = new Gson();
             Type listType = new TypeToken<Map<String, HashMap>>()
             {
             }.getType();
-            recs = gson.fromJson(L.ccu().tagsMap, listType);
+            tagsMap = gson.fromJson(tagsString, listType);
         }
-        
+    }
+    
+    public void setUnitTestMode(boolean mode) {
+        unitTestMode = true;
     }
     
     //TODO- TEMP for Unit testing
     public HashMap getDbMap() {
-        return recs;
+        return tagsMap;
     }
     
-    public void saveMap() {
-        
+    public void setTagsDbMap(HashMap map) {
+        tagsMap = map;
+    }
+    
+    public void saveTags() {
+    
         Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-        L.ccu().tagsMap = gson.toJson(recs);
+        tagsString = gson.toJson(tagsMap);
+        appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).edit().putString(PREFS_TAGS_MAP, tagsString).apply();
     }
-    
     
     public HDict addSite(String dis, String geoCity, String geoState, String timeZone, int area)
     {
@@ -86,74 +102,14 @@ public class CCUTagsDb extends HServer
                              .add("tz",       timeZone)
                              .add("area",     HNum.make(area, "ft\u00B2"))
                              .toDict();
-        recs.put(dis, site);
+        tagsMap.put(dis, site);
         return site;
-        //addMeter(site, dis+"-Meter");
-        //addAhu(site,   dis+"-AHU1");
-        //addAhu(site,   dis+"-AHU2");
     }
     
     public HDict getSite(String ref) {
-        return (HDict) recs.get(ref);
+        return (HDict) tagsMap.get(ref);
     }
     
-    public void addMeter(HDict site, String dis)
-    {
-        HDict equip = new HDictBuilder()
-                              .add("id",       HRef.make(dis))
-                              .add("dis",      dis)
-                              .add("equip",     HMarker.VAL)
-                              .add("elecMeter", HMarker.VAL)
-                              .add("siteMeter", HMarker.VAL)
-                              .add("siteRef",   site.get("id"))
-                              .toDict();
-        recs.put(dis, equip);
-        //addPoint(equip, dis+"-KW",  "kW",  "elecKw");
-        //addPoint(equip, dis+"-KWH", "kWh", "elecKwh");
-    }
-    
-    public HDict addAhuEquip(HDict site, String dis)
-    {
-        HDict equip = new HDictBuilder()
-                              .add("id",      HRef.make(dis))
-                              .add("dis",     dis)
-                              .add("equip",   HMarker.VAL)
-                              .add("ahu",     HMarker.VAL)
-                              .add("siteRef", site.get("id"))
-                              .toDict();
-        recs.put(dis, equip);
-        //addPoint(equip, dis+"-Fan",    null,      "discharge air fan cmd");
-        //addPoint(equip, dis+"-Cool",   null,      "cool cmd");
-        //addPoint(equip, dis+"-Heat",   null,      "heat cmd");
-        //addPoint(equip, dis+"-DTemp",  "\u00B0F", "discharge air temp sensor");
-        //addPoint(equip, dis+"-RTemp",  "\u00B0F", "return air temp sensor");
-        //addPoint(equip, dis+"-ZoneSP", "\u00B0F", "zone air temp sp writable");
-        return equip;
-    }
-    
-    public HDict addVavEquip(HDict site, String dis)
-    {
-        HDict equip = new HDictBuilder()
-                              .add("id",      HRef.make(dis))
-                              .add("dis",     dis)
-                              .add("equip",   HMarker.VAL)
-                              .add("vav",     HMarker.VAL)
-                              .add("siteRef", site.get("id"))
-                              .toDict();
-        recs.put(dis, equip);
-        return equip;
-    }
-    
-    public void addEquip(HDict site, String dis, String markers)
-    {
-        HDictBuilder equip = new HDictBuilder()
-                              .add("id",      HRef.make(dis))
-                              .add("dis",     dis)
-                              .add("siteRef", site.get("id"));
-        StringTokenizer st = new StringTokenizer(markers);
-        while (st.hasMoreTokens()) equip.add(st.nextToken());
-        recs.put(dis, equip.toDict());
-    }
     
     public void addSite(Site s)
     {
@@ -166,41 +122,37 @@ public class CCUTagsDb extends HServer
                              .add("geoAddr", "" + s.getGeoCity() + "," + s.getGeoState())
                              .add("tz", s.getTz())
                              .add("area", HNum.make(s.getArea(), "ft\u00B2"));
-                
-    
+        
         for (String m : s.getMarkers()) {
             site.add(m);
         }
         
         HRef id = (HRef)site.get("id");
-        recs.put(id.toVal(), site.toDict());
-        saveMap();
+        tagsMap.put(id.toVal(), site.toDict());
     }
     
     public String addEquip(Equip q)
     {
-        HDict site = getSite(q.getSiteRef());
         HDictBuilder equip = new HDictBuilder()
                                      .add("id",      HRef.make(UUID.randomUUID().toString()))
                                      .add("dis",     q.getDisplayName())
-                                     .add("siteRef", q.getSiteRef()/*site.get("id")*/);
+                                     .add("siteRef", q.getSiteRef()/*site.get("id")*/)
+                                     .add("group",q.getGroup());
         for (String m : q.getMarkers()) {
             equip.add(m);
         }
         HRef id = (HRef)equip.get("id");
-        recs.put(id.toVal(), equip.toDict());
-        saveMap();
+        tagsMap.put(id.toVal(), equip.toDict());
         return id.toCode();
     }
     
     
     public HDict getEquip(String dis) {
-        return (HDict) recs.get(dis);
+        return (HDict) tagsMap.get(dis);
     }
     
     public String addPoint(Point p)
     {
-        HDict eq = getEquip(p.getEquipRef());
         HDictBuilder b = new HDictBuilder()
                                  .add("id",       HRef.make(UUID.randomUUID().toString()))
                                  .add("dis",      p.getDisplayName())
@@ -210,6 +162,7 @@ public class CCUTagsDb extends HServer
                                  .add("equipRef", p.getEquipRef()/*eq.get("id")*/)
                                  .add("roomRef",  p.getRoomRef())
                                  .add("floorRef", p.getFloorRef())
+                                 .add("group",p.getGroup())
                                  .add("kind",     p.getUnit() == null ? "Bool" : "Number");
                                  //.add("tz",       p.getTz());
         if (p.getUnit() != null) b.add("unit", p.getUnit());
@@ -218,8 +171,7 @@ public class CCUTagsDb extends HServer
             b.add(m);
         }
         HRef id = (HRef)b.get("id");
-        recs.put(id.toVal(), b.toDict());
-        saveMap();
+        tagsMap.put(id.toVal(), b.toDict());
         return id.toCode();
     }
     
@@ -240,8 +192,7 @@ public class CCUTagsDb extends HServer
             b.add(m);
         }
         HRef id = (HRef)b.get("id");
-        recs.put(id.toVal(), b.toDict());
-        saveMap();
+        tagsMap.put(id.toVal(), b.toDict());
         return id.toCode();
     }
     
@@ -258,8 +209,7 @@ public class CCUTagsDb extends HServer
             b.add(m);
         }
         HRef id = (HRef)b.get("id");
-        recs.put(id.toVal(), b.toDict());
-        saveMap();
+        tagsMap.put(id.toVal(), b.toDict());
         return id.toCode();
     }
     
@@ -304,10 +254,10 @@ public class CCUTagsDb extends HServer
     //////////////////////////////////////////////////////////////////////////
     
     protected HDict onReadById(HRef id) {
-        return (HDict)recs.get(id.val);
+        return (HDict)tagsMap.get(id.val);
     }
     
-    protected Iterator iterator() { return recs.values().iterator();}
+    protected Iterator iterator() { return tagsMap.values().iterator();}
     
     //////////////////////////////////////////////////////////////////////////
     // Navigation

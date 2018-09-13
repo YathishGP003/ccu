@@ -65,9 +65,6 @@ public class CCUApplication
     private ArrayList<Floor> mfloors       = new ArrayList<Floor>();
     private CCUUser mUser;
     private short           mSmartNodeAddressBand;
-    
-    //public HashMap tagsMap = new HashMap();
-    public String tagsMap;
 
     public short getSmartNodeAddressBand()
     {

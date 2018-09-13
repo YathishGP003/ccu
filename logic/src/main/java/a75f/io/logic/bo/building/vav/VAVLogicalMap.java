@@ -13,12 +13,12 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.ParallelFanVavUnit;
 import a75f.io.logic.bo.building.hvac.SeriesFanVavUnit;
 import a75f.io.logic.bo.building.hvac.VavUnit;
-import a75f.io.logic.bo.haystack.Equip;
-import a75f.io.logic.bo.haystack.Point;
-import a75f.io.logic.bo.haystack.Site;
-import a75f.io.logic.bo.haystack.Tags;
+import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.Site;
+import a75f.io.api.haystack.Tags;
 import a75f.io.logic.bo.haystack.device.SmartNode;
-import a75f.io.logic.haystack.CCUHsApi;
+import a75f.io.api.haystack.CCUHsApi;
 
 /**
  * Created by samjithsadasivan on 6/21/18.
@@ -33,8 +33,9 @@ public class VAVLogicalMap
     double integralGain = 0.5;
     
     double      roomTemp;
-    double      supplyAirTemp;
-    double      dischargeTemp;
+    double desiredTemp;
+    double supplyAirTemp;
+    double dischargeTemp;
     double co2;
     double dischargeSp;
     
@@ -91,6 +92,7 @@ public class VAVLogicalMap
         //Add site point if not done already.
         HashMap site = CCUHsApi.getInstance().read("site");
         
+        //TODO - Unit test
         String floor = L.ccu().getFloor((short)nodeAddr);
         String room = L.ccu().getRoom((short)nodeAddr);
         
@@ -117,6 +119,7 @@ public class VAVLogicalMap
                           .setFloorRef(floor)
                           .addMarker("equip")
                           .addMarker("vav")
+                          .setGroup(String.valueOf(nodeAddr))
                           .build();
         String equipRef = CCUHsApi.getInstance().addEquip(v);
     
@@ -128,6 +131,7 @@ public class VAVLogicalMap
                                 .setFloorRef(floor)
                                 .addMarker("discharge")
                                 .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("writable")
+                                .setGroup(String.valueOf(nodeAddr))
                                 .setUnit("\u00B0F")
                                 .build();
         
@@ -141,6 +145,7 @@ public class VAVLogicalMap
                                 .setFloorRef(floor)
                                 .addMarker("entering")
                                 .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("writable")
+                                .setGroup(String.valueOf(nodeAddr))
                                 .setUnit("\u00B0F")
                                 .build();
         String eatID = CCUHsApi.getInstance().addPoint(eatPoint);
@@ -153,6 +158,7 @@ public class VAVLogicalMap
                                 .setFloorRef(floor)
                                 .addMarker("air")
                                 .addMarker("damper").addMarker("cmd").addMarker("writable")
+                                .setGroup(String.valueOf(nodeAddr))
                                 .setUnit("\u00B0F")
                                 .build();
     
@@ -166,6 +172,7 @@ public class VAVLogicalMap
                                   .setFloorRef(floor)
                                   .addMarker("reheat")
                                   .addMarker("water").addMarker("valve").addMarker("cmd").addMarker("writable")
+                                  .setGroup(String.valueOf(nodeAddr))
                                   .setUnit("\u00B0F")
                                   .build();
         String rhID = CCUHsApi.getInstance().addPoint(reheatPos);
@@ -177,7 +184,8 @@ public class VAVLogicalMap
                                   .setRoomRef(room)
                                   .setFloorRef(floor)
                                   .addMarker("zone")
-                                  .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("writable")
+                                  .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("current").addMarker("writable")
+                                  .setGroup(String.valueOf(nodeAddr))
                                   .setUnit("\u00B0F")
                                   .build();
         String ctID = CCUHsApi.getInstance().addPoint(currentTemp);
@@ -189,10 +197,11 @@ public class VAVLogicalMap
                                     .setRoomRef(room)
                                     .setFloorRef(floor)
                                     .addMarker("zone")
-                                    .addMarker("air").addMarker("temp").addMarker("desired").addMarker("sp")
+                                    .addMarker("air").addMarker("temp").addMarker("desired").addMarker("sp").addMarker("writable")
+                                    .setGroup(String.valueOf(nodeAddr))
                                     .setUnit("\u00B0F")
                                     .build();
-        String dtID = CCUHsApi.getInstance().addPoint(currentTemp);
+        CCUHsApi.getInstance().addPoint(desiredTemp);
         
         
         //Create Physical points and map
@@ -207,34 +216,78 @@ public class VAVLogicalMap
         CCUHsApi.getInstance().addPoint(device.analog2Out);
         device.currentTemp.setPointRef(ctID);
         CCUHsApi.getInstance().addPoint(device.currentTemp);
-        Log.d("VAV", L.ccu().tagsMap.toString());
+        Log.d("VAV", CCUHsApi.getInstance().tagsDb.getDbMap().toString());
         
     }
     
     public double getRoomTemp()
     {
+        roomTemp = CCUHsApi.getInstance().readDefaultVal("point and air and temp and sensor and current and group == \""+nodeAddr+"\"");
         return roomTemp;
     }
     public void setRoomTemp(double roomTemp)
     {
+        CCUHsApi.getInstance().writeDefaultVal("point and air and temp and sensor and current and group == \""+nodeAddr+"\"", roomTemp);
         this.roomTemp = roomTemp;
     }
+    
+    public double getDesiredTemp()
+    {
+        desiredTemp = CCUHsApi.getInstance().readDefaultVal("point and air and temp and desired and sp and group == \""+nodeAddr+"\"");
+        return desiredTemp;
+    }
+    public void setDesiredTemp(double desiredTemp)
+    {
+        CCUHsApi.getInstance().writeDefaultVal("point and air and temp and desired and sp and group == \""+nodeAddr+"\"", desiredTemp);
+        this.desiredTemp = desiredTemp;
+    }
+    
     public double getSupplyAirTemp()
     {
+        supplyAirTemp = CCUHsApi.getInstance().readDefaultVal("point and air and temp and sensor and entering and group == \""+nodeAddr+"\"");
         return supplyAirTemp;
     }
     public void setSupplyAirTemp(double supplyAirTemp)
     {
+        CCUHsApi.getInstance().writeDefaultVal("point and air and temp and sensor and entering and group == \""+nodeAddr+"\"", supplyAirTemp);
+    
         this.supplyAirTemp = supplyAirTemp;
     }
     public double getDischargeTemp()
     {
+        dischargeTemp = CCUHsApi.getInstance().readDefaultVal("point and air and temp and sensor and discharge and group == \""+nodeAddr+"\"");
         return dischargeTemp;
     }
     public void setDischargeTemp(double dischargeTemp)
     {
+        CCUHsApi.getInstance().writeDefaultVal("point and air and temp and sensor and discharge and group == \""+nodeAddr+"\"", dischargeTemp);
         this.dischargeTemp = dischargeTemp;
     }
+    
+    public double getDamperPos()
+    {
+        Double damperpos = CCUHsApi.getInstance().readDefaultVal("point and air and damper and cmd and group == \""+nodeAddr+"\"");
+        this.vavUnit.vavDamper.currentPosition = damperpos.intValue();
+        return this.vavUnit.vavDamper.currentPosition;
+    }
+    public void setDamperPos(double damperPos)
+    {
+        CCUHsApi.getInstance().writeDefaultVal("point and air and damper and cmd and group == \""+nodeAddr+"\"", damperPos);
+        this.vavUnit.vavDamper.currentPosition = (int)damperPos;
+    }
+    
+    public double getReheatPos()
+    {
+        Double damperpos = CCUHsApi.getInstance().readDefaultVal("point and reheat and cmd and group == \""+nodeAddr+"\"");
+        this.vavUnit.reheatValve.currentPosition = damperpos.intValue();
+        return this.vavUnit.reheatValve.currentPosition;
+    }
+    public void setReheatPos(double reheatPos)
+    {
+        CCUHsApi.getInstance().writeDefaultVal("point and reheat and cmd and group == \""+nodeAddr+"\"", reheatPos);
+        this.vavUnit.reheatValve.currentPosition = (int)reheatPos;
+    }
+    
     public double getCO2()
     {
         return co2;

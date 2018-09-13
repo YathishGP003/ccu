@@ -13,6 +13,7 @@ import a75f.io.logic.bo.building.NamedSchedule;
 import a75f.io.logic.bo.building.Schedule;
 import a75f.io.kinveybo.AlgoTuningParameters;
 import a75f.io.kinveybo.DalContext;
+import a75f.io.api.haystack.CCUHsApi;
 
 import static a75f.io.logic.LLog.Logd;
 
@@ -39,6 +40,7 @@ public class Globals
     private LZoneProfile             mLZoneProfile;
     private boolean isSimulation = false;
     private boolean isDeveloperTest = true;
+    CCUHsApi apiInstance;
 
 
     private Globals()
@@ -135,6 +137,7 @@ public class Globals
         isSimulation = getApplicationContext().getResources().getBoolean(R.bool.simulation);
         Logd("Simulation ----- " + isSimulation);
         isDeveloperTest = getApplicationContext().getResources().getBoolean(R.bool.developer_test);
+        apiInstance = new CCUHsApi(this.mApplicationContext);
     }
 
     public DalContext getDalContext()
@@ -211,5 +214,9 @@ public class Globals
     public void setCCU(CCUApplication CCU)
     {
         this.mCCUApplication = CCU;
+    }
+    
+    public void saveTags(){
+        apiInstance.saveTagsData();
     }
 }

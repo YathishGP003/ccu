@@ -8,12 +8,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import a75f.io.logic.bo.haystack.Equip;
-import a75f.io.logic.bo.haystack.Point;
-import a75f.io.logic.bo.haystack.Site;
-import a75f.io.logic.bo.haystack.Tags;
+import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.Site;
+import a75f.io.api.haystack.Tags;
 import a75f.io.logic.bo.haystack.device.SmartNode;
-import a75f.io.logic.haystack.CCUHsApi;
+import a75f.io.api.haystack.CCUHsApi;
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -138,6 +138,7 @@ public class TestHayStack
                                  .addMarker("discharge")
                                  .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("writable")
                                  .setUnit("\u00B0F")
+                                 .setGroup(String.valueOf(nodeAddr))
                                  .build();
     
         String datID = CCUHsApi.getInstance().addPoint(datPoint);
@@ -149,6 +150,7 @@ public class TestHayStack
                                  .addMarker("entering")
                                  .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("writable")
                                  .setUnit("\u00B0F")
+                                 .setGroup(String.valueOf(nodeAddr))
                                  .build();
         String eatID = CCUHsApi.getInstance().addPoint(eatPoint);
     
@@ -159,6 +161,7 @@ public class TestHayStack
                                   .addMarker("air")
                                   .addMarker("damper").addMarker("cmd").addMarker("writable")
                                   .setUnit("\u00B0F")
+                                  .setGroup(String.valueOf(nodeAddr))
                                   .build();
     
         String dpID = CCUHsApi.getInstance().addPoint(damperPos);
@@ -170,6 +173,7 @@ public class TestHayStack
                                   .addMarker("reheat")
                                   .addMarker("water").addMarker("valve").addMarker("cmd").addMarker("writable")
                                   .setUnit("\u00B0F")
+                                  .setGroup(String.valueOf(nodeAddr))
                                   .build();
         String rhID = CCUHsApi.getInstance().addPoint(reheatPos);
     
@@ -177,9 +181,10 @@ public class TestHayStack
                                     .setDisplayName(siteDis+"VAV-"+nodeAddr+"-currentTemp")
                                     .setEquipRef(equipRef)
                                     .setSiteRef(siteRef)
-                                    .addMarker("zone")
+                                    .addMarker("zone").addMarker("current")
                                     .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("writable")
                                     .setUnit("\u00B0F")
+                                    .setGroup(String.valueOf(nodeAddr))
                                     .build();
         String ctID = CCUHsApi.getInstance().addPoint(currentTemp);
     
@@ -188,8 +193,9 @@ public class TestHayStack
                                     .setEquipRef(equipRef)
                                     .setSiteRef(siteRef)
                                     .addMarker("zone")
-                                    .addMarker("air").addMarker("temp").addMarker("desired").addMarker("sp")
+                                    .addMarker("air").addMarker("temp").addMarker("desired").addMarker("sp").addMarker("writable")
                                     .setUnit("\u00B0F")
+                                    .setGroup(String.valueOf(nodeAddr))
                                     .build();
         String dtID = CCUHsApi.getInstance().addPoint(desiredTemp);
     
@@ -207,18 +213,17 @@ public class TestHayStack
         device.currentTemp.setPointRef(ctID);
         CCUHsApi.getInstance().addPoint(device.currentTemp);
     
-        HashMap data = CCUHsApi.getInstance().tagsDb.getDbMap();
-        System.out.println(data);
-        ArrayList points = CCUHsApi.getInstance().readAll("point");
-        System.out.println(points);
+        //HashMap data = CCUHsApi.getInstance().tagsDb.getDbMap();
+        //System.out.println(data);
+        ArrayList points = CCUHsApi.getInstance().readAll("point and desired and group == \"7000\"");
+        //System.out.println(points);
     
         for (Object a : points) {
             HashMap m1 = (HashMap)a;
-            System.out.print(m1.get("dis")+" -> ");
             System.out.println(a);
         }
         
-        HashMap m1 = (HashMap)points.get(0);
+        /*HashMap m1 = (HashMap)points.get(0);
         String id = m1.get("id").toString();
         
         System.out.println(id);
@@ -227,7 +232,13 @@ public class TestHayStack
     
         for (Object a : b) {
             System.out.println(a);
-        }
+        }*/
+        
+        setRoomTemp(74.0);
+        System.out.println(getRoomTemp());
+        
+        setDesiredTemp(72.0);
+        System.out.println(getDesiredTemp());
         
     }
     
@@ -297,9 +308,9 @@ public class TestHayStack
         CCUHsApi.getInstance().addSite(s);
         
         System.out.println(CCUHsApi.getInstance().tagsDb);
-        System.out.println(CCUHsApi.getInstance().tagsDb.recs);
+        System.out.println(CCUHsApi.getInstance().tagsDb.tagsMap);
     
-        System.out.println(toJson(CCUHsApi.getInstance().tagsDb.recs));
+        System.out.println(toJson(CCUHsApi.getInstance().tagsDb.tagsMap));
         
     }
     
@@ -318,5 +329,26 @@ public class TestHayStack
             e.printStackTrace();
         }
         return null;
+    }
+    
+    public double getRoomTemp()
+    {
+        return CCUHsApi.getInstance().readDefaultVal("point and air and temp and sensor and current and group == \""+7000+"\"");
+        
+    }
+    public void setRoomTemp(double roomTemp)
+    {
+        String query ="point and air and temp and sensor and current and group == \""+7000+"\"";
+        CCUHsApi.getInstance().writeDefaultVal(query, roomTemp);
+    }
+    
+    public double getDesiredTemp()
+    {
+        return CCUHsApi.getInstance().readDefaultVal("point and air and temp and desired and sp and group == \""+7000+"\"");
+    }
+    public void setDesiredTemp(double desiredTemp)
+    {
+        String query ="point and air and temp and desired and sp and group == \""+7000+"\"";
+        CCUHsApi.getInstance().writeDefaultVal(query, desiredTemp);
     }
 }

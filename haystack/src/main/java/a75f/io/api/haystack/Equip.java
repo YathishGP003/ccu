@@ -1,4 +1,4 @@
-package a75f.io.logic.bo.haystack;
+package a75f.io.api.haystack;
 
 import java.util.ArrayList;
 
@@ -13,6 +13,11 @@ public class Equip
     private String            siteRef;
     private String roomRef;
     private String floorRef;
+    private String group;
+    public String getGroup()
+    {
+        return group;
+    }
     public String getRoomRef()
     {
         return roomRef;
@@ -39,6 +44,12 @@ public class Equip
         private String            siteRef;
         private String roomRef;
         private String floorRef;
+        private String group;
+        public Builder setGroup(String group)
+        {
+            this.group = group;
+            return this;
+        }
         public Builder setRoomRef(String roomRef)
         {
             this.roomRef = roomRef;
@@ -76,6 +87,7 @@ public class Equip
             q.siteRef = this.siteRef;
             q.roomRef = this.roomRef;
             q.floorRef = this.floorRef;
+            q.group = this.group;
             //CCUHsApi.getInstance().addEquip(q);
             return q;
         }

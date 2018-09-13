@@ -1,8 +1,8 @@
 package a75f.io.logic.bo.haystack.device;
 
 import a75f.io.logic.bo.building.definitions.Port;
-import a75f.io.logic.bo.haystack.Device;
-import a75f.io.logic.bo.haystack.RawPoint;
+import a75f.io.api.haystack.Device;
+import a75f.io.api.haystack.RawPoint;
 
 /**
  * Created by samjithsadasivan on 9/5/18.

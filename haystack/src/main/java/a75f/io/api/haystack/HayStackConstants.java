@@ -1,0 +1,10 @@
+package a75f.io.api.haystack;
+
+/**
+ * Created by samjithsadasivan on 9/12/18.
+ */
+
+public class HayStackConstants
+{
+    public static final int DEFAULT_POINT_LEVEL = 10;
+}

@@ -9,6 +9,7 @@ import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 import org.projecthaystack.HRow;
 import org.projecthaystack.UnknownRecException;
+import org.projecthaystack.client.HClient;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,6 +54,10 @@ public class CCUHsApi
         tagsDb = (CCUTagsDb) hsClient.db();
         tagsDb.setTagsDbMap(new HashMap());
         instance = this;
+    }
+    
+    public HClient getHSClient(){
+        return hsClient;
     }
     
     public void saveTagsData() {
@@ -173,7 +178,8 @@ public class CCUHsApi
         ArrayList values = CCUHsApi.getInstance().readPoint(id);
         if (values != null && values.size() > 0)
         {
-            return Double.parseDouble(((HashMap) values.get(HayStackConstants.DEFAULT_POINT_LEVEL - 1)).get("val").toString());
+            HashMap valMap = ((HashMap) values.get(HayStackConstants.DEFAULT_POINT_LEVEL - 1));
+            return Double.parseDouble(valMap.get("val").toString());
         } else {
             return null;
         }

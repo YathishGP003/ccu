@@ -1,4 +1,4 @@
-package a75f.io.logic.bo.ble;
+package a75f.io.device.ble;
 
 import android.util.Log;
 

@@ -1,5 +1,7 @@
 package a75f.io.logic.bo.building;
 
+import android.util.Log;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.ArrayList;
@@ -8,7 +10,6 @@ import java.util.HashSet;
 
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.RoomDataInterface;
-import a75f.io.device.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 
 /**
  * Created by Yinten isOn 8/15/2017.
@@ -72,16 +73,25 @@ public class Zone
     }
     
     @JsonIgnore
-    public void mapRegularUpdate(CmToCcuOverUsbSnRegularUpdateMessage_t smartNodeRegularUpdate)
+    public void updatePoints()
     {
-        Short address = Short.valueOf((short) smartNodeRegularUpdate.update.smartNodeAddress.get());
         for (ZoneProfile zp : mZoneProfiles)
         {
-            if (zp.getNodeAddresses().contains(address))
-            {
-                zp.mapRegularUpdate(smartNodeRegularUpdate);
-            }
+            Log.d("VAV"," updatePoints "+zp.getNodeAddresses());
+            zp.updateZonePoints();
         }
+    }
+    
+    public double getDesiredVal(ZoneProfile z) {
+        //TODO- TEMP
+        return 72.0;
+        /*float desiredTemperature = LZoneProfile.resolveZoneProfileLogicalValue(z);
+        boolean occupied = desiredTemperature > 0;
+        if (!occupied)
+        {
+            desiredTemperature = LZoneProfile.resolveAnyValue(z);
+        }
+        return desiredTemperature;*/
     }
     
     @JsonIgnore

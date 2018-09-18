@@ -1,6 +1,4 @@
-package a75f.io.logic;
-
-import android.util.Log;
+package a75f.io.device;
 
 import org.javolution.io.Struct;
 
@@ -9,20 +7,16 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import a75f.io.logic.bo.building.Floor;
-import a75f.io.logic.bo.building.HmpProfile;
-import a75f.io.logic.bo.building.Output;
-import a75f.io.logic.bo.building.sse.SingleStageProfile;
-import a75f.io.logic.bo.building.vav.VavProfile;
-import a75f.io.logic.bo.building.Zone;
-import a75f.io.logic.bo.building.ZoneProfile;
-import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.device.serial.AddressedStruct;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.device.serial.MessageType;
-
-import static a75f.io.logic.L.ccu;
+import a75f.io.logic.L;
+import a75f.io.logic.bo.building.Floor;
+import a75f.io.logic.bo.building.Output;
+import a75f.io.logic.bo.building.Zone;
+import a75f.io.logic.bo.building.ZoneProfile;
+import a75f.io.logic.bo.building.definitions.Port;
 
 /**
  * Created by Yinten isOn 8/17/2017.
@@ -37,9 +31,9 @@ class LSmartNode
     
     public static short nextSmartNodeAddress()
     {
-        short currentBand = ccu().getSmartNodeAddressBand();
+        short currentBand = L.ccu().getSmartNodeAddressBand();
         int amountOfNodes = 0;
-        for (Floor floors : ccu().getFloors())
+        for (Floor floors : L.ccu().getFloors())
         {
             for (Zone zone : floors.mRoomList)
             {
@@ -93,7 +87,7 @@ class LSmartNode
         HashMap<Short, CcuToCmOverUsbSnControlsMessage_t> controlMessagesHash = new HashMap<>();
         for (ZoneProfile zp : zone.mZoneProfiles)
         {
-            zp.updateZoneControls(getDesiredVal(zp));
+            zp.updateZonePoints();
             for (short node : zp.getNodeAddresses())
             {
                 CcuToCmOverUsbSnControlsMessage_t controlsMessage_t;
@@ -117,24 +111,24 @@ class LSmartNode
                 {
                     switch (zp.getProfileType())
                     {
-                        case LIGHT:
+                        /*case ProfileType.LIGHT:
                             Log.i(TAG, "Mapping Light control messages");
                             LLights.mapLightCircuits(controlsMessage_t, node, zone, zp);
                             break;
-                        case SSE:
+                        case ProfileType.SSE:
                             Log.i(TAG, "Mapping SSE control messages");
                             LSSE.mapSSECircuits(controlsMessage_t, node, zone, (SingleStageProfile) zp);
                             break;
-                        case HMP:
+                        case ProfileType.HMP:
                             Log.i(TAG, "Mapping HMP control messages");
                             LHMP.mapHMPCircuits(controlsMessage_t, node, zone, (HmpProfile)zp);
                             break;
-                        case VAV_REHEAT:
-                        case VAV_SERIES_FAN:
-                        case VAV_PARALLEL_FAN:
+                        case ProfileType.VAV_REHEAT:
+                        case ProfileType.VAV_SERIES_FAN:
+                        case ProfileType.VAV_PARALLEL_FAN:
                             Log.i(TAG, "Mapping VAV control messages");
                             LVAV.mapVAVCircuits(controlsMessage_t, node, zone, (VavProfile) zp);
-                            break;
+                            break;*/
                     }
                 }
             }
@@ -155,24 +149,24 @@ class LSmartNode
         {
             switch (zp.getProfileType())
             {
-                case LIGHT:
+                /*case ProfileType.LIGHT:
                     Log.i(TAG, "Mapping Light Profile Seed messages");
                     LLights.mapLightProfileSeed(zone, seedMessage);
                     break;
-                case SSE:
+                case ProfileType.SSE:
                     Log.i(TAG, "Mapping SSE Profile Seed messages");
                     LSSE.mapSSESeed(zone, seedMessage);
                     break;
-                case VAV_REHEAT:
-                case VAV_SERIES_FAN:
-                case VAV_PARALLEL_FAN:
+                case ProfileType.VAV_REHEAT:
+                case ProfileType.VAV_SERIES_FAN:
+                case ProfileType.VAV_PARALLEL_FAN:
                     Log.i(TAG, "Mapping VAV Profile Seed messages");
                     LVAV.mapVAVSeed(zone, seedMessage);
                     break;
-                case TEST:
+                case ProfileType.TEST:
                     Log.i(TAG, "Mapping TEST Profile Seed messages");
                     LTest.mapTestProfileSeed(zone, seedMessage);
-                    break;
+                    break;*/
             }
         }
         return seedMessage;
@@ -195,14 +189,14 @@ class LSmartNode
     {
         switch (smartNodePort)
         {
-            case ANALOG_OUT_ONE:
+            /*case Port.ANALOG_OUT_ONE:
                 return controlsMessage_t.controls.analogOut1;
-            case ANALOG_OUT_TWO:
+            case Port.ANALOG_OUT_TWO:
                 return controlsMessage_t.controls.analogOut2;
-            case RELAY_ONE:
+            case Port.RELAY_ONE:
                 return controlsMessage_t.controls.digitalOut1;
-            case RELAY_TWO:
-                return controlsMessage_t.controls.digitalOut2;
+            case Port.RELAY_TWO:
+                return controlsMessage_t.controls.digitalOut2;*/
             default:
                 return null;
         }

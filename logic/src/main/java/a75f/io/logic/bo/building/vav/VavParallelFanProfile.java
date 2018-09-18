@@ -31,15 +31,16 @@ public class VavParallelFanProfile extends VavProfile
     
     @JsonIgnore
     @Override
-    public void updateZoneControls(double desiredTemp) {
+    public void updateZonePoints() {
         Log.d(TAG, "VAV Parallel Fan Control");
     
-        setTemp = desiredTemp;
+        setTemp = 72.0;
     
         for (short node : getNodeAddresses())
         {
             if (vavDeviceMap.get(node) == null) {
-                Log.d(TAG, " Logical Map does not exist for node " + node);
+                addLogicalMap(node);
+                Log.d(TAG, " Logical Map added for node " + node);
                 continue;
             }
             VAVLogicalMap vavDevice = vavDeviceMap.get(node);

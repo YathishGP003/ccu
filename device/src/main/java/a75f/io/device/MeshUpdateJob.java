@@ -1,19 +1,8 @@
-package a75f.io.logic;
-
-import android.util.Log;
+package a75f.io.device;
 
 import org.javolution.io.Struct;
 
-import a75f.io.logic.bo.building.Floor;
-import a75f.io.logic.bo.building.Zone;
-import a75f.io.device.json.serializers.JsonSerializer;
-import a75f.io.device.serial.AddressedStruct;
-import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
-import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
-
-import static a75f.io.logic.L.ccu;
-import static a75f.io.logic.LLog.Logd;
-import static a75f.io.logic.LLog.Logw;
+import a75f.io.logic.Globals;
 
 /**
  * Created by Yinten isOn 8/24/2017.
@@ -28,17 +17,17 @@ class MeshUpdateJob extends BaseJob
     //This task should run every minute.
     public void doJob()
     {
-        try
+        /*try
         {
-            Logw("MeshUpdateJob running");
+            LLog.Logw("MeshUpdateJob running");
             if (LSerial.getInstance().isConnected())
             {
-                for (Floor floor : ccu().getFloors())
+                for (Floor floor : L.ccu().getFloors())
                 {
                     for (Zone zone : floor.mRoomList)
                     {
-                        Logw("=============Zone: " + zone.roomName + " ==================");
-                        Logw("=================NOW SENDING SEEDS=====================");
+                        LLog.Logw("=============Zone: " + zone.roomName + " ==================");
+                        LLog.Logw("=================NOW SENDING SEEDS=====================");
                         for (CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage : LSmartNode.getSeedMessages(zone))
                         {
                             if (sendStruct((short) seedMessage.smartNodeAddress.get(), seedMessage))
@@ -46,7 +35,7 @@ class MeshUpdateJob extends BaseJob
                                 Log.w(LLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
                             }
                         }
-                        Logw("=================NOW SENDING CONTROLS=====================");
+                        LLog.Logw("=================NOW SENDING CONTROLS=====================");
                         for (CcuToCmOverUsbSnControlsMessage_t controlsMessage : LSmartNode.getControlMessages(zone))
                         {
                             if (sendStruct((short) controlsMessage.smartNodeAddress.get(), controlsMessage))
@@ -54,7 +43,7 @@ class MeshUpdateJob extends BaseJob
                                 Log.w(LLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
                             }
                         }
-                        Logw("=================NOW SENDING EXTRA MESSAGES LIKE SCHEDULES====================");
+                        LLog.Logw("=================NOW SENDING EXTRA MESSAGES LIKE SCHEDULES====================");
                         for (AddressedStruct extraMessage : LSmartNode.getExtraMessages(floor, zone))
                         {
                             if (sendStruct(extraMessage.getAddress(), extraMessage.getStruct()))
@@ -65,8 +54,8 @@ class MeshUpdateJob extends BaseJob
                     }
                 }
                 
-                Logw("=================NOW SENDING SYSTEM CONTROL MESSAGE ====================");
-                sendStructToCM(LSystem.getSystemControlMsg());
+                LLog.Logw("=================NOW SENDING SYSTEM CONTROL MESSAGE ====================");
+                //sendStructToCM(LSystem.getSystemControlMsg());
             
             }
             else
@@ -77,7 +66,7 @@ class MeshUpdateJob extends BaseJob
         catch (Exception e)
         {
             e.printStackTrace();
-        }
+        }*/
     }
     
     public static boolean sendStruct(short smartNodeAddress, Struct struct)
@@ -121,7 +110,7 @@ class MeshUpdateJob extends BaseJob
     
     private static void tSleep(int sleepTime)
     {
-        Logd("sleeping: " + sleepTime);
+        LLog.Logd("sleeping: " + sleepTime);
         try
         {
             Thread.sleep(sleepTime);

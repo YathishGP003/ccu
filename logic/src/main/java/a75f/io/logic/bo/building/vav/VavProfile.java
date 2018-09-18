@@ -4,8 +4,6 @@ import android.util.Log;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import org.javolution.lang.MathLib;
-
 import java.util.HashMap;
 
 import a75.io.algos.tr.TrimResetListener;
@@ -18,7 +16,6 @@ import a75f.io.logic.bo.building.hvac.ParallelFanVavUnit;
 import a75f.io.logic.bo.building.hvac.SeriesFanVavUnit;
 import a75f.io.logic.bo.building.hvac.Valve;
 import a75f.io.logic.bo.building.hvac.VavUnit;
-import a75f.io.device.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 
 import static a75f.io.logic.bo.building.vav.VavProfile.ZonePriority.LOW;
 import static a75f.io.logic.bo.building.vav.VavProfile.ZoneState.COOLING;
@@ -72,7 +69,7 @@ public abstract class VavProfile extends ZoneProfile
         hwstResetListener = new HwstResetListener();
     }
     
-    @Override
+    /*@Override
     public void mapRegularUpdate(CmToCcuOverUsbSnRegularUpdateMessage_t regularUpdateMessage)
     {
         
@@ -101,7 +98,7 @@ public abstract class VavProfile extends ZoneProfile
         {
             mInterface.refreshView();
         }
-    }
+    }*/
     
     public void addLogicalMap(short addr) {
         VAVLogicalMap deviceMap = new VAVLogicalMap(getProfileType(), addr);
@@ -112,9 +109,19 @@ public abstract class VavProfile extends ZoneProfile
         deviceMap.hwstResetRequest.setImportanceMultiplier(getZonePriority());
     }
     
+    public void addLogicalMapAndPoints(short addr) {
+        VAVLogicalMap deviceMap = new VAVLogicalMap(getProfileType(), addr);
+        deviceMap.createHaystackPoints();
+        vavDeviceMap.put(addr, deviceMap);
+        deviceMap.satResetRequest.setImportanceMultiplier(getZonePriority());
+        deviceMap.co2ResetRequest.setImportanceMultiplier(getZonePriority());
+        deviceMap.spResetRequest.setImportanceMultiplier(getZonePriority());
+        deviceMap.hwstResetRequest.setImportanceMultiplier(getZonePriority());
+    }
+    
     @JsonIgnore
     @Override
-    public void updateZoneControls(double desiredTemp) {
+    public void updateZonePoints() {
         Log.d(TAG, " Invalid VAV Unit Type");
     }
     
@@ -305,9 +312,11 @@ public abstract class VavProfile extends ZoneProfile
                 temperature[tempIndex++] = vavDeviceMap.get(Short.valueOf(nodeAddress)).getRoomTemp();
             }
         }
-        Log.d("VAV","Average Zone Temp "+(tempIndex == 0 ? 0 : MathLib.mean(temperature)));
+        //Log.d("VAV","Average Zone Temp "+(tempIndex == 0 ? 0 : MathLib.mean(temperature)));
         
-        return tempIndex == 0 ? 0 : MathLib.mean(temperature);
+        //return tempIndex == 0 ? 0 : MathLib.mean(temperature);
+        
+        return 0;//TODO
     }
     
     

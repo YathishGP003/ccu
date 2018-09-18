@@ -9,7 +9,6 @@ import java.util.UUID;
 
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.RoomDataInterface;
-import a75f.io.device.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 
 /**
  * Created by Yinten isOn 8/15/2017.
@@ -29,7 +28,7 @@ public abstract class ZoneProfile extends Schedulable
     }
     
     
-    public abstract void mapRegularUpdate(CmToCcuOverUsbSnRegularUpdateMessage_t regularUpdateMessage);
+    public abstract void updateZonePoints();
     
     
     public abstract ProfileType getProfileType();
@@ -96,9 +95,9 @@ public abstract class ZoneProfile extends Schedulable
         return 0;
     }
     
-    @JsonIgnore
+    /*@JsonIgnore
     public void updateZoneControls(double desiredVal) {
-    }
+    }*/
     
     @JsonIgnore
     public HashMap<String, Double> getTSData() {

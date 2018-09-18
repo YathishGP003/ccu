@@ -1,28 +1,4 @@
-package a75.io.logic.renatus;
-
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-
-import org.junit.Assert;
-import org.junit.Test;
-
-import java.io.IOException;
-import java.util.UUID;
-
-import a75f.io.logic.bo.building.CCUApplication;
-import a75f.io.logic.bo.building.Floor;
-import a75f.io.logic.bo.building.lights.LightProfile;
-import a75f.io.logic.bo.building.lights.LightProfileConfiguration;
-import a75f.io.logic.bo.building.Output;
-import a75f.io.logic.bo.building.sse.SingleStageProfile;
-import a75f.io.logic.bo.building.Zone;
-import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
-import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.device.json.serializers.JsonSerializer;
-import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
-import a75f.io.device.serial.MessageType;
-
-import static a75f.io.device.json.serializers.JsonSerializer.toJson;
+package a75f.io.device;
 
 /**
  * Created by Yinten isOn 8/14/2017.
@@ -31,7 +7,7 @@ import static a75f.io.device.json.serializers.JsonSerializer.toJson;
 public class JSONSerializerTest
 {
 
-	@Test
+	/*@Test
 	public void simplePOJOTest()
 	{
 		String roomName = "Ryans Room";
@@ -140,6 +116,6 @@ public class JSONSerializerTest
 		{
 			e.printStackTrace();
 		}
-	}
+	}*/
 
 }

@@ -1,4 +1,4 @@
-package a75.io.logic.serial;
+package a75f.io.device;
 
 import junit.framework.Assert;
 

@@ -8,8 +8,6 @@ import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
 
-import org.javolution.io.Struct;
-
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -38,7 +36,7 @@ public class LSystem
     public static long startTimeInMillis = System.currentTimeMillis();
     //public static JSONObject msgStr = null;
     
-    public static Struct getSystemControlMsg() {
+    /*public static Struct getSystemControlMsg() {
         if (ccu().systemProfile == null)
         {
             Log.d("VAV", "handleSystemControl : SystemProfile not configured");
@@ -60,7 +58,7 @@ public class LSystem
             }
         }.start();
         return ccu().systemProfile.getSystemControlMsg();
-    }
+    }*/
     
     public static void collectTSData()
     {

@@ -1,5 +1,4 @@
-package a75f.io.logic;
-
+package a75f.io.device;
 
 import org.javolution.io.Struct;
 
@@ -11,19 +10,15 @@ import java.util.HashMap;
 import a75f.io.device.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 import a75f.io.device.serial.MessageType;
-import a75f.io.device.serial.comm.SerialAction;
-import a75f.io.device.serial.comm.SerialEvent;
+import a75f.io.usbserial.SerialAction;
+import a75f.io.usbserial.SerialEvent;
 import a75f.io.usbserial.UsbService;
-
-import static a75f.io.logic.LLog.Logd;
-import static a75f.io.logic.LLog.LogdSerial;
-import static a75f.io.logic.LLog.LogdStructAsJson;
 
 /**
  * Created by Yinten isOn 8/21/2017.
  */
 
-class LSerial
+public class LSerial
 {
     private static LSerial    mLSerial;
     private        UsbService mUsbService;
@@ -68,7 +63,7 @@ class LSerial
 
     public static void handleSerialEvent(SerialEvent event)
     {
-        LogdSerial("Event Type: " + event.getSerialAction().name());
+        LLog.LogdSerial("Event Type: " + event.getSerialAction().name());
         if (event.getSerialAction() == SerialAction.MESSAGE_FROM_SERIAL_PORT)
         {
             byte[] data = event.getBytes();
@@ -110,11 +105,11 @@ class LSerial
             e.printStackTrace();
         }
         struct.setByteBuffer(ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN), 0);
-        Logd("Message Type: " + pojoClass.getSimpleName());
-        Logd("Data return size: " + data.length);
+        LLog.Logd("Message Type: " + pojoClass.getSimpleName());
+        LLog.Logd("Data return size: " + data.length);
         //Log hexadecimal
-        Logd("Incoming Hexadecimal: " + struct.toString());
-        LogdStructAsJson(struct);
+        LLog.Logd("Incoming Hexadecimal: " + struct.toString());
+        LLog.LogdStructAsJson(struct);
         return struct;
     }
 
@@ -173,7 +168,7 @@ class LSerial
         if (checkDuplicate(Short.valueOf(smartNodeAddress), struct.getClass()
                                                                   .getSimpleName(), structHash))
         {
-            Logd("Struct " + struct.getClass().getSimpleName() + " was already sent, returning");
+            LLog.Logd("Struct " + struct.getClass().getSimpleName() + " was already sent, returning");
             return false;
         }
         if (mUsbService == null)
@@ -183,7 +178,7 @@ class LSerial
         }
 
         //Only if the struct was wrote to serial should it be logged.
-        LogdStructAsJson(struct);
+        LLog.LogdStructAsJson(struct);
         mUsbService.write(struct.getOrderedBuffer());
         return true;
     }
@@ -214,7 +209,7 @@ class LSerial
         }
 
         //Only if the struct was wrote to serial should it be logged.
-        LogdStructAsJson(struct);
+        LLog.LogdStructAsJson(struct);
         mUsbService.write(struct.getOrderedBuffer());
         return true;
     }
@@ -239,7 +234,7 @@ class LSerial
                 Integer previousHash = stringIntegerHashMap.get(simpleName);
                 if (previousHash.equals(structHash))
                 {
-                    Logd("Struct was already sent, returning");
+                    LLog.Logd("Struct was already sent, returning");
                     return true;
                 }
             }

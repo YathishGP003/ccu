@@ -185,7 +185,7 @@ public abstract class HDict extends HVal
 // MapImpl
 //////////////////////////////////////////////////////////////////////////
 
-  static class MapImpl extends HDict
+  /*static class MapImpl extends HDict
   {
     MapImpl(HashMap map) { this.map = map; }
 
@@ -202,7 +202,7 @@ public abstract class HDict extends HVal
     public Iterator iterator() { return map.entrySet().iterator(); }
 
     private final HashMap map;
-  }
+  }*/
 
 //////////////////////////////////////////////////////////////////////////
 // MapEntry

@@ -4,14 +4,13 @@ import java.util.UUID;
 
 import a75f.io.logic.bo.building.CCUApplication;
 import a75f.io.logic.bo.building.Floor;
-import a75f.io.logic.bo.building.lights.LightProfile;
-import a75f.io.logic.bo.building.lights.LightProfileConfiguration;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.Zone;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
-import a75f.io.device.json.serializers.JsonSerializer;
+import a75f.io.logic.bo.building.lights.LightProfile;
+import a75f.io.logic.bo.building.lights.LightProfileConfiguration;
 
 /**
  * Created by samjithsadasivan isOn 8/28/17.
@@ -50,7 +49,7 @@ public class LocalStorageUtilTest
 		relayOneOp.mOutputAnalogActuatorType = OutputAnalogActuatorType.TwoToTenV;
 		lightProfileConfiguration.getOutputs().add(relayOneOp);
 		
-		try
+		/*try
 		{
 			String jsonString = JsonSerializer.toJson(orgCcu, false);
 			System.out.println(jsonString);
@@ -61,6 +60,6 @@ public class LocalStorageUtilTest
 		catch (Exception c)
 		{
 			c.printStackTrace();
-		}
+		}*/
 	}
 }

@@ -1,4 +1,4 @@
-package a75f.io.logic;
+package a75f.io.device;
 
 import android.util.Log;
 

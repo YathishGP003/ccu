@@ -1,13 +1,4 @@
-package a75.io.logic.renatus;
-
-import org.javolution.text.TextBuilder;
-import org.junit.Test;
-
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-
-import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
-import a75f.io.device.serial.MessageType;
+package a75f.io.device;
 
 /**
  * Determine the feasibility of using Struct library from Javolution for Renatus.
@@ -16,7 +7,7 @@ import a75f.io.device.serial.MessageType;
  */
 public class LittleEndianUnitTest
 {
-	//region vars
+	/*//region vars
 	private static final char[] HEXA = {'0', '1', '2', '3', '4', '5', '6',
 			'7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 	
@@ -95,7 +86,7 @@ public class LittleEndianUnitTest
 		System.out.println("seedMessageStr.length: " + seedMessageStruct.length);
 		analogIn1 = 0;
 		restartDevice = false;
-		/*****
+		*//*****
 		 SeedMessageOld: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 		 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 		 04 00 00 00 00 72 6F 6F 6D 4E 61 6D 65 00 00 00
@@ -108,7 +99,7 @@ public class LittleEndianUnitTest
 		 00 00 00 00 00 00 00 00 00 20
 		 *
 		 *
-		 */
+		 *//*
 		
 	}
 	
@@ -144,7 +135,7 @@ public class LittleEndianUnitTest
 		messageType = MessageType.FSV_PAIRING_REQ;
 		encryptionKey = new byte[]{};
 		mSensorAddress = 0;
-		/****
+		*//****
 		 * SeedMessageOld: 23 D0 07 01 02 03 04 05 06 07 08 09 10 11 12 13
 		 14 15 16 00 00 00 00 00 00 00 00 00 00 00 00 00
 		 00 00 00 00 00 72 6F 6F 6D 4E 61 6D 65 00 00 00
@@ -155,7 +146,7 @@ public class LittleEndianUnitTest
 		 00 00 00 00 00 72 6F 6F 6D 4E 61 6D 65 00 00 00
 		 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 		 00 00 00 00 00 00 00 00 00 00
-		 */
+		 *//*
 	}
 	
 	
@@ -306,5 +297,5 @@ public class LittleEndianUnitTest
 		return value;
 	}
 	
-	//endregion old code
+	//endregion old code*/
 }

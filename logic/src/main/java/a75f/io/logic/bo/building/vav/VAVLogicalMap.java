@@ -1,24 +1,21 @@
 package a75f.io.logic.bo.building.vav;
 
-import android.util.Log;
-
 import java.util.HashMap;
 
 import a75.io.algos.CO2Loop;
 import a75.io.algos.ControlLoop;
 import a75.io.algos.GenericPIController;
 import a75.io.algos.tr.TrimResponseRequest;
-import a75f.io.logic.L;
-import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.hvac.ParallelFanVavUnit;
-import a75f.io.logic.bo.building.hvac.SeriesFanVavUnit;
-import a75f.io.logic.bo.building.hvac.VavUnit;
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.hvac.ParallelFanVavUnit;
+import a75f.io.logic.bo.building.hvac.SeriesFanVavUnit;
+import a75f.io.logic.bo.building.hvac.VavUnit;
 import a75f.io.logic.bo.haystack.device.SmartNode;
-import a75f.io.api.haystack.CCUHsApi;
 
 /**
  * Created by samjithsadasivan on 6/21/18.
@@ -84,7 +81,7 @@ public class VAVLogicalMap
                 break;
         }
         nodeAddr = node;
-        createHaystackPoints();
+        //createHaystackPoints();
     }
     
     public void createHaystackPoints() {
@@ -93,8 +90,8 @@ public class VAVLogicalMap
         HashMap site = CCUHsApi.getInstance().read("site");
         
         //TODO - Unit test
-        String floor = L.ccu().getFloor((short)nodeAddr);
-        String room = L.ccu().getRoom((short)nodeAddr);
+        String floor = "floor";//L.ccu().getFloor((short)nodeAddr);
+        String room = "room";//L.ccu().getRoom((short)nodeAddr);
         
         if (site.size() == 0) {
             //TODO - demo
@@ -216,7 +213,15 @@ public class VAVLogicalMap
         CCUHsApi.getInstance().addPoint(device.analog2Out);
         device.currentTemp.setPointRef(ctID);
         CCUHsApi.getInstance().addPoint(device.currentTemp);
-        Log.d("VAV", CCUHsApi.getInstance().tagsDb.getDbMap().toString());
+        //Log.d("VAV", CCUHsApi.getInstance().tagsDb.getDbMap().toString());
+    
+        //Create write array for points, otherwise a read before write will throw exception
+        setRoomTemp(0);
+        setDamperPos(0);
+        setReheatPos(0);
+        setDesiredTemp(0);
+        setDischargeTemp(0);
+        setSupplyAirTemp(0);
         
     }
     
@@ -250,7 +255,6 @@ public class VAVLogicalMap
     public void setSupplyAirTemp(double supplyAirTemp)
     {
         CCUHsApi.getInstance().writeDefaultVal("point and air and temp and sensor and entering and group == \""+nodeAddr+"\"", supplyAirTemp);
-    
         this.supplyAirTemp = supplyAirTemp;
     }
     public double getDischargeTemp()

@@ -6,7 +6,6 @@ import java.util.UUID;
 
 import a75f.io.logic.bo.building.definitions.OutputType;
 import a75f.io.logic.bo.building.definitions.Port;
-import a75f.io.device.serial.MessageConstants;
 /**
  * Created by Yinten on 9/12/2017.
  */
@@ -60,7 +59,7 @@ public abstract class Circuit extends Schedulable
     @JsonIgnore
     public String getCircuitName()
     {
-        if (mName.length() > MessageConstants.MAX_LIGHTING_CONTROL_CIRCUIT_LOGICAL_NAME_BYTES)
+        if (mName.length() > 20 /*MessageConstants.MAX_LIGHTING_CONTROL_CIRCUIT_LOGICAL_NAME_BYTES*/)
         {
             return mName.substring(0, 17) + "...";
         }

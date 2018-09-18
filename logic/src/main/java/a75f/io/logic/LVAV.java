@@ -1,26 +1,12 @@
 package a75f.io.logic;
 
-import android.util.Log;
-
-import a75.io.algos.tr.TrimResponseProcessor;
-import a75.io.algos.vav.VavTRSystem;
-import a75f.io.logic.bo.building.Output;
-import a75f.io.logic.bo.building.Zone;
-import a75f.io.logic.bo.building.definitions.Port;
-import a75f.io.logic.bo.building.hvac.ParallelFanVavUnit;
-import a75f.io.logic.bo.building.hvac.SeriesFanVavUnit;
-import a75f.io.logic.bo.building.hvac.VavUnit;
-import a75f.io.logic.bo.building.vav.VavProfile;
-import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
-import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
-
 /**
  * Created by samjithsadasivan on 6/1/18.
  */
 
 public class LVAV
 {
-    public static void mapVAVCircuits(CcuToCmOverUsbSnControlsMessage_t controlsMessage_t,
+    /*public static void mapVAVCircuits(CcuToCmOverUsbSnControlsMessage_t controlsMessage_t,
                                       short nodeAddress, Zone zone, VavProfile vavProfile) {
         
         VavUnit vavControls = vavProfile.getVavControls(nodeAddress);
@@ -96,5 +82,5 @@ public class LVAV
     public static void mapVAVSeed(Zone zone, CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage)
     {
         //seedMessage.settings.profileBitmap.singleStageEquipment.set((short) 1);
-    }
+    }*/
 }

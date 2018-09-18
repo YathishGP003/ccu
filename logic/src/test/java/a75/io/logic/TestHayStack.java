@@ -310,7 +310,7 @@ public class TestHayStack
         System.out.println(CCUHsApi.getInstance().tagsDb);
         System.out.println(CCUHsApi.getInstance().tagsDb.tagsMap);
     
-        System.out.println(toJson(CCUHsApi.getInstance().tagsDb.tagsMap));
+       // System.out.println(toJson(CCUHsApi.getInstance().tagsDb.tagsMap));
         
     }
     

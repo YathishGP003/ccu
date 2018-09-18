@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.device.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class LightProfile extends ZoneProfile
@@ -17,7 +16,7 @@ public class LightProfile extends ZoneProfile
     }
     
     @Override
-    public void mapRegularUpdate(CmToCcuOverUsbSnRegularUpdateMessage_t regularUpdateMessage)
+    public void updateZonePoints()
     {
     }
     

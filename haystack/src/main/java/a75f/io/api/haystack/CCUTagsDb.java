@@ -5,8 +5,12 @@ import android.content.Context;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
 
+import org.projecthaystack.HBin;
 import org.projecthaystack.HBool;
+import org.projecthaystack.HCoord;
+import org.projecthaystack.HDate;
 import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDateTimeRange;
 import org.projecthaystack.HDict;
@@ -14,13 +18,17 @@ import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HGridBuilder;
 import org.projecthaystack.HHisItem;
+import org.projecthaystack.HList;
 import org.projecthaystack.HMarker;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
+import org.projecthaystack.HRow;
 import org.projecthaystack.HStr;
+import org.projecthaystack.HTime;
 import org.projecthaystack.HUri;
 import org.projecthaystack.HVal;
 import org.projecthaystack.HWatch;
+import org.projecthaystack.MapImpl;
 import org.projecthaystack.server.HOp;
 import org.projecthaystack.server.HServer;
 import org.projecthaystack.server.HStdOps;
@@ -42,15 +50,38 @@ public class CCUTagsDb extends HServer
     
     private static final String PREFS_TAGS_DB = "ccu_tags";
     private static final String PREFS_TAGS_MAP = "tagsMap";
+    private static final String PREFS_TAGS_WA = "writeArrayMap";
     
-    public HashMap tagsMap;
+    public Map<String,HDict> tagsMap;
+    public HashMap<String,WriteArray> writeArrays;
     
     public boolean unitTestMode = false;
     
     private Context appContext = null;
     
-    private String tagsString;
+    public String tagsString;
+    public String waString;
     //public String tagsString = null;
+    RuntimeTypeAdapterFactory<HVal> hsTypeAdapter =
+            RuntimeTypeAdapterFactory
+                    .of(HVal.class)
+                    .registerSubtype(HBin.class)
+                    .registerSubtype(HBool.class)
+                    .registerSubtype(HCoord.class)
+                    .registerSubtype(HDate.class)
+                    .registerSubtype(HDict.class)
+                    .registerSubtype(HGrid.class)
+                    .registerSubtype(HHisItem.class)
+                    .registerSubtype(HList.class)
+                    .registerSubtype(HMarker.class)
+                    .registerSubtype(HNum.class)
+                    .registerSubtype(HRef.class)
+                    .registerSubtype(HRow.class)
+                    .registerSubtype(HStr.class)
+                    .registerSubtype(HTime.class)
+                    .registerSubtype(HUri.class)
+                    .registerSubtype(MapImpl.class);
+    
     public CCUTagsDb() {
     
     }
@@ -60,34 +91,69 @@ public class CCUTagsDb extends HServer
         tagsString = appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).getString(PREFS_TAGS_MAP, null);
         if (tagsString == null) {
             tagsMap = new HashMap();
+            writeArrays = new HashMap();
+            
         } else
         {
-            Gson gson = new Gson();
-            Type listType = new TypeToken<Map<String, HashMap>>()
+            Gson gson = new GsonBuilder().registerTypeAdapterFactory(hsTypeAdapter).create();
+            Type listType = new TypeToken<Map<String, MapImpl<String,HVal>>>()
             {
             }.getType();
             tagsMap = gson.fromJson(tagsString, listType);
+            Type waType = new TypeToken<HashMap<String, WriteArray>>()
+            {
+            }.getType();
+            writeArrays = gson.fromJson(waString,waType);
         }
-    }
-    
-    public void setUnitTestMode(boolean mode) {
-        unitTestMode = true;
-    }
-    
-    //TODO- TEMP for Unit testing
-    public HashMap getDbMap() {
-        return tagsMap;
-    }
-    
-    public void setTagsDbMap(HashMap map) {
-        tagsMap = map;
     }
     
     public void saveTags() {
     
-        Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-        tagsString = gson.toJson(tagsMap);
+        Gson gson = new GsonBuilder().registerTypeAdapterFactory(hsTypeAdapter).create();
+        Type listType = new TypeToken<Map<String, MapImpl<String,HVal>>>()
+        {
+        }.getType();
+        tagsString = gson.toJson(tagsMap,listType);
         appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).edit().putString(PREFS_TAGS_MAP, tagsString).apply();
+        Type waType = new TypeToken<Map<String, WriteArray>>()
+        {
+        }.getType();
+        waString = gson.toJson(writeArrays,waType);
+        appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).edit().putString(PREFS_TAGS_WA, waString).apply();
+    }
+    
+    //TODO- TEMP for Unit testing
+    public Map getDbMap() {
+        return tagsMap;
+    }
+    
+    public void setTagsDbMap(Map map) {
+        tagsMap = map;
+    }
+    
+    public void init(){
+        Gson gson = new GsonBuilder().registerTypeAdapterFactory(hsTypeAdapter).create();
+        Type listType = new TypeToken<Map<String, MapImpl<String,HVal>>>()
+        {
+        }.getType();
+        tagsMap = gson.fromJson(tagsString, listType);
+        Type waType = new TypeToken<HashMap<String, WriteArray>>()
+        {
+        }.getType();
+        writeArrays = gson.fromJson(waString,waType);
+    }
+    
+    public void saveString() {
+        Gson gson = new GsonBuilder().registerTypeAdapterFactory(hsTypeAdapter).create();
+        Type listType = new TypeToken<Map<String, MapImpl<String,HVal>>>()
+        {
+        }.getType();
+        tagsString = gson.toJson(tagsMap,listType);
+    
+        Type waType = new TypeToken<Map<String, WriteArray>>()
+        {
+        }.getType();
+        waString = gson.toJson(writeArrays,waType);
     }
     
     public HDict addSite(String dis, String geoCity, String geoState, String timeZone, int area)
@@ -320,7 +386,7 @@ public class CCUTagsDb extends HServer
     
     protected HGrid onPointWriteArray(HDict rec)
     {
-        CCUTagsDb.WriteArray array = (CCUTagsDb.WriteArray)writeArrays.get(rec.id());
+        CCUTagsDb.WriteArray array = (CCUTagsDb.WriteArray)writeArrays.get(rec.id().toVal());
         if (array == null) array = new CCUTagsDb.WriteArray();
         
         HGridBuilder b = new HGridBuilder();
@@ -343,7 +409,7 @@ public class CCUTagsDb extends HServer
     {
         System.out.println("onPointWrite: " + rec.dis() + "  " + val + " @ " + level + " [" + who + "]");
         CCUTagsDb.WriteArray array = (CCUTagsDb.WriteArray)writeArrays.get(rec.id());
-        if (array == null) writeArrays.put(rec.id(), array = new CCUTagsDb.WriteArray());
+        if (array == null) writeArrays.put(rec.id().toVal(), array = new CCUTagsDb.WriteArray());
         array.val[level-1] = val;
         array.who[level-1] = who;
     }
@@ -353,9 +419,6 @@ public class CCUTagsDb extends HServer
         final HVal[] val = new HVal[17];
         final String[] who = new String[17];
     }
-    
-    // hacky, but keep it simple for servlet environment
-    static HashMap writeArrays = new HashMap();
     
     //////////////////////////////////////////////////////////////////////////
     // History

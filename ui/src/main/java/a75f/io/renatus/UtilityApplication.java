@@ -1,4 +1,4 @@
-package a75f.io.logic;
+package a75f.io.renatus;
 
 import android.app.Application;
 import android.content.BroadcastReceiver;
@@ -9,10 +9,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.util.Log;
 import android.widget.Toast;
-
-import com.fasterxml.jackson.databind.JsonNode;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -21,23 +18,12 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.Random;
 import java.util.Set;
 
-import a75f.io.logic.bo.building.Zone;
-import a75f.io.logic.bo.building.definitions.OverrideType;
-import a75f.io.logic.bo.building.definitions.ProfileType;
-
-import a75f.io.device.serial.comm.SerialEvent;
+import a75f.io.device.LSerial;
+import a75f.io.logic.Globals;
+import a75f.io.usbserial.SerialEvent;
 import a75f.io.usbserial.UsbService;
-import allbegray.slack.SlackClientFactory;
-import allbegray.slack.exception.SlackResponseErrorException;
-import allbegray.slack.rtm.Event;
-import allbegray.slack.rtm.EventListener;
 import allbegray.slack.rtm.SlackRealTimeMessagingClient;
-import allbegray.slack.type.Authentication;
-import allbegray.slack.type.Channel;
-import allbegray.slack.type.User;
 import allbegray.slack.webapi.SlackWebApiClient;
-
-import static a75f.io.logic.L.ccu;
 
 /**
  * Created by rmatt isOn 7/19/2017.
@@ -155,7 +141,7 @@ public abstract class UtilityApplication extends Application
 
 
 
-    public void openBot()
+    /*public void openBot()
     {
         final String slackToken = "xoxb-255909669140-FdBDuw3yE0Syn2O7hLXQsjOO";
         mWebApiClient = SlackClientFactory.createWebApiClient(slackToken);
@@ -287,7 +273,7 @@ public abstract class UtilityApplication extends Application
                 }
             }
         }); mRtmClient.connect();
-    }
+    }*/
 
 
     @Override

@@ -4,13 +4,8 @@ package a75f.io.logic.bo.building.system;
  * Created by samjithsadasivan on 8/14/18.
  */
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import org.javolution.io.Struct;
-
 import a75.io.algos.vav.VavTRSystem;
-import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
-import a75f.io.device.serial.MessageType;
+
 
 /**
  * RP1455 Compliant AHU control System Profile
@@ -23,7 +18,7 @@ public class AHU extends SystemProfile
         trSystem =  new VavTRSystem();
     }
     
-    @JsonIgnore
+    /*@JsonIgnore
     @Override
     public Struct getSystemControlMsg() {
         CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
@@ -35,6 +30,6 @@ public class AHU extends SystemProfile
         int oaDamperPos = (tr.getCurrentCO2() - CO2_MIN) * 100 / (CO2_MAX - CO2_MIN);
         msg.analog2.set((short)oaDamperPos);
         return msg;
-    }
+    }*/
 
 }

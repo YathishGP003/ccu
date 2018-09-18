@@ -2,6 +2,8 @@ package a75.io.bo.haystack;
 
 import org.junit.Test;
 
+import a75f.io.api.haystack.Site;
+
 /**
  * Created by samjithsadasivan on 9/4/18.
  */

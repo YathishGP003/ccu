@@ -1,17 +1,11 @@
 package a75f.io.logic.bo.building.sse;
 
-import android.util.Log;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import org.javolution.lang.MathLib;
 
 import java.util.HashMap;
 
-import a75f.io.device.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.ZoneProfile;
-import a75f.io.logic.bo.building.definitions.OverrideType;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 
 /**
@@ -35,7 +29,7 @@ public class SingleStageProfile extends ZoneProfile
     // cooling.
     
     
-    @Override
+    /*@Override
     public void mapRegularUpdate(CmToCcuOverUsbSnRegularUpdateMessage_t regularUpdateMessage)
     {
         float roomTemperature = (float) regularUpdateMessage.update.roomTemperature.get() / 10.0f;
@@ -55,6 +49,11 @@ public class SingleStageProfile extends ZoneProfile
         }
         Log.i("SingleStageProfile",
                 "SingleStageProfile RoomTemperature Update: " + roomTemperature + "");
+    }*/
+    
+    @Override
+    public void updateZonePoints()
+    {
     }
     
     
@@ -108,7 +107,7 @@ public class SingleStageProfile extends ZoneProfile
             temperature[i] = mLogicalMap.get(Short.valueOf(nodeAddress)).getRoomTemperature();
             i++;
         }
-        return MathLib.mean(temperature);
+        return 0;//MathLib.mean(temperature);
     }
     
 

@@ -26,6 +26,13 @@ public class HRef extends HVal
   {
     return make(val, null);
   }
+  
+  /** Construct for string identifier and null display */
+  public static HRef copy(String id)
+  {
+    id = id.startsWith("@") ? id.substring(1) : id;
+    return make(id, null);
+  }
 
   /** Private constructor */
   private HRef(String val, String dis) { this.val = val; this.dis = dis; }

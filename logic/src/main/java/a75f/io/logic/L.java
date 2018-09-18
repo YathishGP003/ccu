@@ -5,14 +5,15 @@ import android.util.Log;
 
 import com.google.api.client.json.jackson2.JacksonFactory;
 
-import org.javolution.io.Struct;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
+import a75f.io.kinveybo.AlgoTuningParameters;
+import a75f.io.kinveybo.CCUUser;
+import a75f.io.kinveybo.DalContext;
 import a75f.io.logic.bo.building.CCUApplication;
-import a75f.io.logic.bo.building.lights.LightProfile;
+import a75f.io.logic.bo.building.Floor;
 import a75f.io.logic.bo.building.Node;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.Schedulable;
@@ -21,9 +22,7 @@ import a75f.io.logic.bo.building.Zone;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.OverrideType;
 import a75f.io.logic.bo.building.definitions.ScheduleMode;
-import a75f.io.kinveybo.AlgoTuningParameters;
-import a75f.io.kinveybo.CCUUser;
-import a75f.io.kinveybo.DalContext;
+import a75f.io.logic.bo.building.lights.LightProfile;
 
 import static a75f.io.logic.JsonSerializer.fromJson;
 import static a75f.io.logic.LZoneProfile.isNamedSchedule;
@@ -73,10 +72,21 @@ public class L
 
     public static short generateSmartNodeAddress()
     {
-        return LSmartNode.nextSmartNodeAddress();
+        short currentBand = L.ccu().getSmartNodeAddressBand();
+        int amountOfNodes = 0;
+        for (Floor floors : L.ccu().getFloors())
+        {
+            for (Zone zone : floors.mRoomList)
+            {
+                for (ZoneProfile zp : zone.mZoneProfiles)
+                {
+                    amountOfNodes += zp.getNodeAddresses().size();
+                }
+            }
+        }
+        return (short) (currentBand + amountOfNodes);
     }
-
-
+    
     public static Zone findZoneByName(String mFloorName, String mRoomName)
     {
         return ZoneBLL.findZoneByName(mFloorName, mRoomName);
@@ -115,11 +125,11 @@ public class L
 
     public static void sendTestMessage(short nodeAddress, Zone zone)
     {
-        ArrayList<Struct> messages = LSmartNode.getTestMessages(zone);
+        /*ArrayList<Struct> messages = LSmartNode.getTestMessages(zone);
         for (Struct message : messages)
         {
             MeshUpdateJob.sendStruct(nodeAddress, message);
-        }
+        }*/
     }
 
 

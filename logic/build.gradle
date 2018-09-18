@@ -56,7 +56,6 @@ android {
 dependencies {
     testCompile 'junit:junit:4.12'
     compile fileTree(include: '*.jar', dir: 'libs')
-    compile project(':device')
     compile project(path: ':usbserial')
     compile(name: 'kinvey-android-3.0.8', ext: 'aar')
     compile(name: 'realm-android-library-3.2.1', ext: 'aar')
@@ -71,11 +70,7 @@ dependencies {
     compile 'info.guardianproject.netcipher:netcipher:1.2'
 
     implementation project(':haystack')
-    //compile "cz.msebera.android:httpclient:4.4.1.2"
-    //compile 'org.apache.httpcomponents:httpclient-android:4.3.5.1'
-    //implementation files('/Users/samjithsadasivan/Downloads/httpcomponents-client-4.5.2/lib/httpclient-4.5.2.jar')
-    //implementation files('/Users/samjithsadasivan/Downloads/httpcomponents-client-4.5.2/lib/httpcore-4.4.4.jar')
-    //implementation files('/Users/samjithsadasivan/Downloads/httpcomponents-client-4.5.2/lib/commons-logging-1.2.jar')
-    //implementation files('/Users/samjithsadasivan/Downloads/httpcomponents-client-4.5.2/lib/jna-platform-4.1.0.jar')
-    //implementation files('/Users/samjithsadasivan/Downloads/httpcomponents-client-4.5.2/lib/jna-4.1.0.jar')
+    implementation project(':usbserial')
+    compile 'joda-time:joda-time:2.9.9'
+    compile project(path: ':kinveybo')
 }

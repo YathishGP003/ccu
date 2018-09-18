@@ -25,10 +25,10 @@ import java.util.TimerTask;
 
 import a75f.io.bluetooth.BLEAction;
 import a75f.io.bluetooth.BLEProvisionService;
-import a75f.io.logic.bo.ble.BLERoomName;
-import a75f.io.logic.bo.ble.GattAttributes;
-import a75f.io.logic.bo.ble.GattPin;
-import a75f.io.logic.bo.ble.StructShort;
+import a75f.io.device.ble.BLERoomName;
+import a75f.io.device.ble.GattAttributes;
+import a75f.io.device.ble.GattPin;
+import a75f.io.device.ble.StructShort;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.device.serial.SerialConsts;
 import a75f.io.logic.bo.util.ByteArrayUtils;

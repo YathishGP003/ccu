@@ -7,15 +7,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.kinveybo.AlgoTuningParameters;
+import a75f.io.kinveybo.DalContext;
 import a75f.io.logic.bo.building.CCUApplication;
 import a75f.io.logic.bo.building.Day;
 import a75f.io.logic.bo.building.NamedSchedule;
 import a75f.io.logic.bo.building.Schedule;
-import a75f.io.kinveybo.AlgoTuningParameters;
-import a75f.io.kinveybo.DalContext;
-import a75f.io.api.haystack.CCUHsApi;
-
-import static a75f.io.logic.LLog.Logd;
 
 /**
  * Created by rmatt isOn 7/19/2017.
@@ -32,8 +30,8 @@ public class Globals
     private static final int      TASK_SEPERATION                           = 3;
     private static final TimeUnit TASK_SERERATION_TIMEUNIT                  = TimeUnit.SECONDS;
     private static Globals globals;
-    HeartBeatJob mHeartBeatJob;
-    MeshUpdateJob mMeshUpdateJob = new MeshUpdateJob();
+    //HeartBeatJob mHeartBeatJob;
+    BuildingProcessJob mProcessJob = new BuildingProcessJob();
     private ScheduledExecutorService taskExecutor;
     private Context                  mApplicationContext;
     private CCUApplication           mCCUApplication;
@@ -114,28 +112,24 @@ public class Globals
         taskExecutor = Executors.newScheduledThreadPool(NUMBER_OF_CYCLICAL_TASKS_RENATUS_REQUIRES);
         DalContext.instantiate(this.mApplicationContext);
         populate();
-        mHeartBeatJob = new HeartBeatJob();
+        //mHeartBeatJob = new HeartBeatJob();
         //5 seconds after application initializes start heart beat
         int DEFAULT_HEARTBEAT_INTERVAL = 60;
-        Logd("Scheduling ---- HeartBeat Job");
+        //Logd("Scheduling ---- HeartBeat Job");
         
         int hearbeatInterval = getApplicationContext().getResources().getInteger(R.integer.heartbeat);
         if (hearbeatInterval == 0) {
             hearbeatInterval = DEFAULT_HEARTBEAT_INTERVAL;
         }
         
-        mHeartBeatJob
-                .scheduleJob("Heartbeat Job", hearbeatInterval, TASK_SEPERATION, TASK_SERERATION_TIMEUNIT);
-        Logd("Scheduling ---- MeshUpdate Job");
+        //mHeartBeatJob
+        //        .scheduleJob("Heartbeat Job", hearbeatInterval, TASK_SEPERATION, TASK_SERERATION_TIMEUNIT);
+        //Logd("Scheduling ---- MeshUpdate Job");
         
-        mMeshUpdateJob.scheduleJob("Mesh Update Job", hearbeatInterval,
+        mProcessJob.scheduleJob("Building Process Job", hearbeatInterval,
                 TASK_SEPERATION * 2, TASK_SERERATION_TIMEUNIT);
-        //5 seconds after heart beat initializes start profile scheduler.
-        //Application in simulation mode notes
-        //--Skips BLE
-        //--Adds sleeps between any Serial Activity to work with biskit.
+        
         isSimulation = getApplicationContext().getResources().getBoolean(R.bool.simulation);
-        Logd("Simulation ----- " + isSimulation);
         isDeveloperTest = getApplicationContext().getResources().getBoolean(R.bool.developer_test);
         apiInstance = new CCUHsApi(this.mApplicationContext);
     }

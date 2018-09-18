@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import a75.io.algos.ValvePIController;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.device.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 
 /**
  * Created by samjithsadasivan on 5/2/18.
@@ -108,13 +107,19 @@ public class HmpProfile extends ZoneProfile
         return hwTemperature;
     }
     
-    @Override
+    /*@Override
     public void mapRegularUpdate(CmToCcuOverUsbSnRegularUpdateMessage_t regularUpdateMessage)
     {
         //TODO - Setpoint
         hwTemperature = (float) regularUpdateMessage.update.airflow1Temperature.get() / 10.0f;
         //airflowTemperature = getThermisterValueToTemp(regularUpdateMessage.update.externalThermistorInput1.get() * 10);
         Log.d("HMPProfile","mapRegularUpdate :airflowTemp = "+hwTemperature);
+    }*/
+    
+    @JsonIgnore
+    @Override
+    public void updateZonePoints(){
+    
     }
     
     @JsonIgnore

@@ -1,19 +1,5 @@
 package a75f.io.logic;
 
-import android.util.Log;
-
-import a75f.io.logic.bo.building.BaseProfileConfiguration;
-import a75f.io.logic.bo.building.Output;
-import a75f.io.logic.bo.building.sse.SingleStageProfile;
-import a75f.io.logic.bo.building.Zone;
-import a75f.io.logic.bo.building.definitions.SingleStageMode;
-import a75f.io.logic.bo.building.sse.SingleStageLogicalMap;
-import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
-import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
-import a75f.io.kinveybo.AlgoTuningParameters;
-
-import static a75f.io.logic.LZoneProfile.resolveZoneProfileLogicalValue;
-
 /**
  * Created by ryant on 10/10/2017.
  */
@@ -24,7 +10,7 @@ public class LSSE
     private static final String TAG = "LSSE";
 
 
-    public static void mapSSECircuits(CcuToCmOverUsbSnControlsMessage_t controlsMessage_t,
+    /*public static void mapSSECircuits(CcuToCmOverUsbSnControlsMessage_t controlsMessage_t,
                                       short nodeAddress, Zone zone, SingleStageProfile zp)
     {
         float desiredTemperature = resolveZoneProfileLogicalValue(zp);
@@ -92,18 +78,18 @@ public class LSSE
             if (singleStageComponent == SingleStageMode.COOLING && coolingOn)
             {
                 circuitMapped = output.mapDigital(true);
-                controlsMessage_t.controls.conditioningMode.set((short) 0); /* 1 is heating, 0 is cooling - sent from CCU to Smart Node for display indication */
+                controlsMessage_t.controls.conditioningMode.set((short) 0); *//* 1 is heating, 0 is cooling - sent from CCU to Smart Node for display indication *//*
             }
             else if (singleStageComponent == SingleStageMode.HEATING && heatingOn)
             {
                 circuitMapped = output.mapDigital(true);
-                controlsMessage_t.controls.conditioningMode.set((short) 1); /* 1 is heating, 0 is cooling - sent from CCU to Smart Node for display indication */
+                controlsMessage_t.controls.conditioningMode.set((short) 1); *//* 1 is heating, 0 is cooling - sent from CCU to Smart Node for display indication *//*
             }
             else if (singleStageComponent == SingleStageMode.FAN && fanOn)
             {
                 circuitMapped = output.mapDigital(true);
             }
-            LSmartNode.getSmartNodePort(controlsMessage_t, output.getPort()).set(circuitMapped);
+            //LSmartNode.getSmartNodePort(controlsMessage_t, output.getPort()).set(circuitMapped);
         }
     }
 
@@ -111,5 +97,5 @@ public class LSSE
     public static void mapSSESeed(Zone zone, CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage)
     {
         seedMessage.settings.profileBitmap.singleStageEquipment.set((short) 1);
-    }
+    }*/
 }

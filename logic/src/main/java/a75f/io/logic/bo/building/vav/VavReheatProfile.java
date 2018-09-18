@@ -34,14 +34,15 @@ public class VavReheatProfile extends VavProfile
     //ASHRAE RP-1455: Advanced Control Sequences for HVAC Systems Phase I, Air Distribution and Terminal Systems
     @JsonIgnore
     @Override
-    public void updateZoneControls(double desiredTemp) {
+    public void updateZonePoints() {
         
-        setTemp = desiredTemp;
+        setTemp = 72.0;
         
         for (short node : getNodeAddresses())
         {
             if (vavDeviceMap.get(node) == null) {
-                Log.d(TAG, " Logical Map does not exist for node " + node);
+                addLogicalMap(node);
+                Log.d(TAG, " Logical Map added for node " + node);
                 continue;
             }
             if (vavDeviceMap.get(node).getRoomTemp() == 0) {

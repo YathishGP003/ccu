@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-import org.javolution.io.Struct;
-
 import a75.io.algos.tr.TRSystem;
 import a75f.io.logic.bo.building.Schedule;
 
@@ -36,9 +34,9 @@ public class SystemProfile
         }
     }
     
-    @JsonIgnore
+    /*@JsonIgnore
     public Struct getSystemControlMsg() {
         return null;
-    }
+    }*/
     
 }

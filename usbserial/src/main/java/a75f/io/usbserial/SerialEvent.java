@@ -1,4 +1,4 @@
-package a75f.io.device.serial.comm;
+package a75f.io.usbserial;
 
 public class SerialEvent
 {

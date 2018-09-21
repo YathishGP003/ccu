@@ -1,4 +1,4 @@
-package a75f.io.device;
+package a75f.io.device.mesh;
 
 import org.javolution.io.Struct;
 
@@ -63,7 +63,7 @@ public class LSerial
 
     public static void handleSerialEvent(SerialEvent event)
     {
-        LLog.LogdSerial("Event Type: " + event.getSerialAction().name());
+        DLog.LogdSerial("Event Type: " + event.getSerialAction().name());
         if (event.getSerialAction() == SerialAction.MESSAGE_FROM_SERIAL_PORT)
         {
             byte[] data = event.getBytes();
@@ -105,11 +105,11 @@ public class LSerial
             e.printStackTrace();
         }
         struct.setByteBuffer(ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN), 0);
-        LLog.Logd("Message Type: " + pojoClass.getSimpleName());
-        LLog.Logd("Data return size: " + data.length);
+        DLog.Logd("Message Type: " + pojoClass.getSimpleName());
+        DLog.Logd("Data return size: " + data.length);
         //Log hexadecimal
-        LLog.Logd("Incoming Hexadecimal: " + struct.toString());
-        LLog.LogdStructAsJson(struct);
+        DLog.Logd("Incoming Hexadecimal: " + struct.toString());
+        DLog.LogdStructAsJson(struct);
         return struct;
     }
 
@@ -168,17 +168,17 @@ public class LSerial
         if (checkDuplicate(Short.valueOf(smartNodeAddress), struct.getClass()
                                                                   .getSimpleName(), structHash))
         {
-            LLog.Logd("Struct " + struct.getClass().getSimpleName() + " was already sent, returning");
+            DLog.Logd("Struct " + struct.getClass().getSimpleName() + " was already sent, returning");
             return false;
         }
         if (mUsbService == null)
         {
-            LLog.logUSBServiceNotInitialized();
+            DLog.logUSBServiceNotInitialized();
             return false;
         }
 
         //Only if the struct was wrote to serial should it be logged.
-        LLog.LogdStructAsJson(struct);
+        DLog.LogdStructAsJson(struct);
         mUsbService.write(struct.getOrderedBuffer());
         return true;
     }
@@ -204,12 +204,12 @@ public class LSerial
 
         if (mUsbService == null)
         {
-            LLog.logUSBServiceNotInitialized();
+            DLog.logUSBServiceNotInitialized();
             return false;
         }
 
         //Only if the struct was wrote to serial should it be logged.
-        LLog.LogdStructAsJson(struct);
+        DLog.LogdStructAsJson(struct);
         mUsbService.write(struct.getOrderedBuffer());
         return true;
     }
@@ -234,7 +234,7 @@ public class LSerial
                 Integer previousHash = stringIntegerHashMap.get(simpleName);
                 if (previousHash.equals(structHash))
                 {
-                    LLog.Logd("Struct was already sent, returning");
+                    DLog.Logd("Struct was already sent, returning");
                     return true;
                 }
             }

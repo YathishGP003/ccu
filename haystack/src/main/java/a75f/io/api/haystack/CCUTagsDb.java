@@ -247,6 +247,7 @@ public class CCUTagsDb extends HServer
                                  .add("id",       HRef.make(UUID.randomUUID().toString()))
                                  .add("dis",      p.getDisplayName())
                                  .add("point",    HMarker.VAL)
+                                 .add("physical",    HMarker.VAL)
                                  .add("writable",    HMarker.VAL)
                                  .add("his",      HMarker.VAL)
                                  .add("deviceRef", p.getDeviceRef())
@@ -269,7 +270,7 @@ public class CCUTagsDb extends HServer
                                  .add("dis",      d.getDisplayName())
                                  .add("device",    HMarker.VAL)
                                  .add("his",      HMarker.VAL)
-                                 .add("deviceAddr",      d.getAddr());
+                                 .add("addr",      d.getAddr());
     
         for (String m : d.getMarkers()) {
             b.add(m);

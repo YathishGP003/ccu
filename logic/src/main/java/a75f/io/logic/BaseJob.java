@@ -13,7 +13,7 @@ public abstract class BaseJob
     protected String mName;
     
     
-    protected void scheduleJob(String name, int interval, int taskSeperation, TimeUnit unit)
+    public void scheduleJob(String name, int interval, int taskSeperation, TimeUnit unit)
     {
         mName = name;
         Log.i("CCU_LOGIC","Scheduling: " + name + " interval: " + interval + " task Seperation:  " + taskSeperation + " unit: " + unit.name());
@@ -29,5 +29,5 @@ public abstract class BaseJob
     }
     
     
-    protected abstract void doJob();
+    public abstract void doJob();
 }

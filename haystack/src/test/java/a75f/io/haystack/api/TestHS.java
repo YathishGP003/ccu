@@ -20,6 +20,7 @@ public class TestHS
     public void testSerialization(){
         CCUHsApi api = new CCUHsApi();
         api.tagsDb.tagsMap = new HashMap<>();
+        api.tagsDb.writeArrays = new HashMap<>();
         Site s = new Site.Builder()
                          .setDisplayName("Name")
                          .addMarker("site")
@@ -89,6 +90,4 @@ public class TestHS
         System.out.print(site);
         
     }
-    
-    
 }

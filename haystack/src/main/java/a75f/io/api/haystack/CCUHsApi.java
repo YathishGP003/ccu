@@ -146,7 +146,7 @@ public class CCUHsApi
      * default user - ""
      */
     public void writePoint(String id, Double val) {
-        hsClient.pointWrite(HRef.make(id), HayStackConstants.DEFAULT_POINT_LEVEL, "", HNum.make(val), HNum.make(0));
+        hsClient.pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "", HNum.make(val), HNum.make(0));
     }
     
     /**
@@ -160,7 +160,11 @@ public class CCUHsApi
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        hsClient.pointWrite(HRef.make(id), HayStackConstants.DEFAULT_POINT_LEVEL, "", HNum.make(val), HNum.make(0));
+        hsClient.pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "", HNum.make(val), HNum.make(0));
+    }
+    
+    public void writeDefaultValById(String id, Double val) {
+        hsClient.pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "", HNum.make(val), HNum.make(0));
     }
     
     /**
@@ -185,6 +189,17 @@ public class CCUHsApi
         }
     }
     
+    public Double readDefaultValById(String id) {
+        ArrayList values = CCUHsApi.getInstance().readPoint(id);
+        if (values != null && values.size() > 0)
+        {
+            HashMap valMap = ((HashMap) values.get(HayStackConstants.DEFAULT_POINT_LEVEL - 1));
+            return Double.parseDouble(valMap.get("val").toString());
+        } else {
+            return null;
+        }
+    }
+    
     
     /**
      * Returns an arrayList of point vals hashmaps for all levels in write array.
@@ -192,7 +207,7 @@ public class CCUHsApi
      * @return
      */
     public ArrayList<HashMap> readPoint(String id) {
-        HGrid pArr = hsClient.pointWriteArray(HRef.make(id));
+        HGrid pArr = hsClient.pointWriteArray(HRef.copy(id));
         ArrayList<HashMap> rowList = new ArrayList<>();
         Iterator it = pArr.iterator();
         while(it.hasNext()) {

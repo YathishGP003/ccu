@@ -1,5 +1,7 @@
 package a75f.io.logic.bo.building.vav;
 
+import android.util.Log;
+
 import java.util.HashMap;
 
 import a75.io.algos.CO2Loop;
@@ -11,6 +13,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.ParallelFanVavUnit;
 import a75f.io.logic.bo.building.hvac.SeriesFanVavUnit;
@@ -55,8 +58,6 @@ public class VAVLogicalMap
         
         coolingLoop = new ControlLoop();
         heatingLoop = new ControlLoop();
-        //damperLoop = new ControlLoop();
-        //damperLoop.setProportionalSpread(10);//Revisit
         co2Loop = new CO2Loop();
         valveController = new GenericPIController();
         valveController.setIntegralMaxTimeout(integralMaxTimeout);
@@ -90,8 +91,8 @@ public class VAVLogicalMap
         HashMap site = CCUHsApi.getInstance().read("site");
         
         //TODO - Unit test
-        String floor = "floor";//L.ccu().getFloor((short)nodeAddr);
-        String room = "room";//L.ccu().getRoom((short)nodeAddr);
+        String floor = L.ccu().getFloor((short)nodeAddr);
+        String room = L.ccu().getRoom((short)nodeAddr);
         
         if (site.size() == 0) {
             //TODO - demo
@@ -213,7 +214,7 @@ public class VAVLogicalMap
         CCUHsApi.getInstance().addPoint(device.analog2Out);
         device.currentTemp.setPointRef(ctID);
         CCUHsApi.getInstance().addPoint(device.currentTemp);
-        //Log.d("VAV", CCUHsApi.getInstance().tagsDb.getDbMap().toString());
+        Log.d("VAV", CCUHsApi.getInstance().tagsDb.getDbMap().toString());
     
         //Create write array for points, otherwise a read before write will throw exception
         setRoomTemp(0);

@@ -1,4 +1,4 @@
-package a75f.io.device;
+package a75f.io.device.mesh;
 
 import org.javolution.io.Struct;
 
@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.serial.AddressedStruct;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
@@ -16,13 +17,12 @@ import a75f.io.logic.bo.building.Floor;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.Zone;
 import a75f.io.logic.bo.building.ZoneProfile;
-import a75f.io.logic.bo.building.definitions.Port;
 
 /**
  * Created by Yinten isOn 8/17/2017.
  */
 
-class LSmartNode
+public class LSmartNode
 {
     
     private static final short  TODO = 0;
@@ -102,33 +102,26 @@ class LSmartNode
                     controlsMessage_t.smartNodeAddress.set(node);
                     controlsMessage_t.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_CONTROLS);
                 }
-                short outputMapped = 0;
-                if (zp.isCircuitTest())
+    
+                CCUHsApi hayStack = CCUHsApi.getInstance();
+                HashMap device = hayStack.read("device and addr == \""+node+"\"");
+                if (device != null && device.size() > 0)
                 {
-                    mapTestCircuits(controlsMessage_t, node, zp);
-                }
-                else
-                {
-                    switch (zp.getProfileType())
-                    {
-                        /*case ProfileType.LIGHT:
-                            Log.i(TAG, "Mapping Light control messages");
-                            LLights.mapLightCircuits(controlsMessage_t, node, zone, zp);
-                            break;
-                        case ProfileType.SSE:
-                            Log.i(TAG, "Mapping SSE control messages");
-                            LSSE.mapSSECircuits(controlsMessage_t, node, zone, (SingleStageProfile) zp);
-                            break;
-                        case ProfileType.HMP:
-                            Log.i(TAG, "Mapping HMP control messages");
-                            LHMP.mapHMPCircuits(controlsMessage_t, node, zone, (HmpProfile)zp);
-                            break;
-                        case ProfileType.VAV_REHEAT:
-                        case ProfileType.VAV_SERIES_FAN:
-                        case ProfileType.VAV_PARALLEL_FAN:
-                            Log.i(TAG, "Mapping VAV control messages");
-                            LVAV.mapVAVCircuits(controlsMessage_t, node, zone, (VavProfile) zp);
-                            break;*/
+                    ArrayList<HashMap> physicalOpPoints= hayStack.readAll("point and physical and output and deviceRef == \""+device.get("id")+"\"");
+                    
+                    for (HashMap opPoint : physicalOpPoints) {
+                        HashMap logicalOpPoint = hayStack.read("point and id=="+opPoint.get("pointRef"));
+                        double logicalVal = hayStack.readDefaultValById(logicalOpPoint.get("id").toString());
+                        
+                        String port = opPoint.get("port").toString();
+    
+                        short mappedVal = (isAnalog(port) ? mapAnalogOut(opPoint.get("type").toString(), (short)logicalVal)
+                                                        : mapDigitalOut(opPoint.get("type").toString(), logicalVal > 0));
+                        hayStack.writeDefaultValById(opPoint.get("id").toString(), (double)mappedVal);
+    
+                        LSmartNode.getSmartNodePort(controlsMessage_t, port)
+                                  .set(mappedVal);
+                        
                     }
                 }
             }
@@ -176,27 +169,73 @@ class LSmartNode
     private static void mapTestCircuits(CcuToCmOverUsbSnControlsMessage_t controlsMessage_t,
                                         short nodeAddress, ZoneProfile zp)
     {
-        for (Output output : zp.getProfileConfiguration(nodeAddress).getOutputs())
+        /*for (Output output : zp.getProfileConfiguration(nodeAddress).getOutputs())
         {
             short outputMapped = output.getTestVal();
             getSmartNodePort(controlsMessage_t, output.getPort()).set(outputMapped);
+        }*/
+    }
+    
+    public static boolean isAnalog(String port) {
+        switch (port) {
+            case "ANALOG_OUT_ONE":
+            case "ANALOG_OUT_TWO":
+            case "ANALOG_IN_ONE":
+            case "ANALOG_IN_TWO":
+                return true;
         }
+        return false;
+    }
+    
+    public static short mapAnalogOut(String type, short val) {
+        switch (type)
+        {
+            case "0-10v":
+                return val;
+            case "10-0v":
+                return (short) (100 - val);
+            case "2-10v":
+                return (short) (20 + scaleAnalog(val, 80));
+            case "10-2v":
+                return (short) (100 - scaleAnalog(val, 80));
+        }
+        return (short) 0;
+    }
+    
+    public static short mapDigitalOut(String type, boolean val)
+    {
+        
+        switch (type)
+        {
+            case "NC":
+                return (short) (val ? 0 : 1);
+            ///Defaults to normally open
+            case "NO":
+                return (short) (val ? 1 : 0);
+        }
+        
+        return 0;
+    }
+    
+    protected static short scaleAnalog(short analog, int scale)
+    {
+        return (short) ((float) scale * ((float) analog / 100.0f));
     }
     
     
     public static Struct.Unsigned8 getSmartNodePort(CcuToCmOverUsbSnControlsMessage_t controlsMessage_t,
-                                                    Port smartNodePort)
+                                                    String port)
     {
-        switch (smartNodePort)
+        switch (port)
         {
-            /*case Port.ANALOG_OUT_ONE:
+            case "ANALOG_OUT_ONE":
                 return controlsMessage_t.controls.analogOut1;
-            case Port.ANALOG_OUT_TWO:
+            case "ANALOG_OUT_TWO":
                 return controlsMessage_t.controls.analogOut2;
-            case Port.RELAY_ONE:
+            case "RELAY_ONE":
                 return controlsMessage_t.controls.digitalOut1;
-            case Port.RELAY_TWO:
-                return controlsMessage_t.controls.digitalOut2;*/
+            case "RELAY_TWO":
+                return controlsMessage_t.controls.digitalOut2;
             default:
                 return null;
         }

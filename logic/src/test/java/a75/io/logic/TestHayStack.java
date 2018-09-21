@@ -8,12 +8,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.haystack.device.SmartNode;
-import a75f.io.api.haystack.CCUHsApi;
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -350,5 +353,68 @@ public class TestHayStack
     {
         String query ="point and air and temp and desired and sp and group == \""+7000+"\"";
         CCUHsApi.getInstance().writeDefaultVal(query, desiredTemp);
+    }
+    
+    @Test
+    public void testValTypes() {
+        CCUHsApi hayStack = new CCUHsApi();
+        hayStack.tagsDb.tagsMap = new HashMap<>();
+        hayStack.tagsDb.writeArrays = new HashMap<>();
+        int nodeAddr = 7000;
+        
+        Site s = new Site.Builder()
+                         .setDisplayName("Name")
+                         .addMarker("site")
+                         .setGeoCity("Burnsville")
+                         .setGeoState("MN")
+                         .setTz("Chicago")
+                         .setArea(1000).build();
+        hayStack.addSite(s);
+        
+        HashMap siteMap = hayStack.read(Tags.SITE);
+        String siteRef = (String) siteMap.get(Tags.ID);
+        String siteDis = (String) siteMap.get("dis");
+        
+        Equip v = new Equip.Builder()
+                          .setSiteRef(siteRef)
+                          .setDisplayName(siteDis+"-VAV-"+nodeAddr)
+                          .setRoomRef("room")
+                          .setFloorRef("floor")
+                          .addMarker("equip")
+                          .addMarker("vav")
+                          .setGroup(String.valueOf(nodeAddr))
+                          .build();
+        String equipRef = hayStack.addEquip(v);
+        
+        Point testPoint = new Point.Builder()
+                                  .setDisplayName(siteDis+"AHU-"+nodeAddr+"-TestTemp")
+                                  .setEquipRef(equipRef)
+                                  .setSiteRef(siteRef)
+                                  .setRoomRef("room")
+                                  .setFloorRef("floor")
+                                  .addMarker("discharge")
+                                  .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("writable")
+                                  .setGroup(String.valueOf(nodeAddr))
+                                  .setUnit("\u00B0F")
+                                  .build();
+        
+        String datID = CCUHsApi.getInstance().addPoint(testPoint);
+        
+        String deviceRef = new Device.Builder()
+                                   .setDisplayName("SN-"+nodeAddr)
+                                   .addMarker("network")
+                                   .setAddr(nodeAddr)
+                                   .build();
+        RawPoint analog1Out  = new RawPoint.Builder()
+                                       .setDisplayName("Analog1Out-"+nodeAddr)
+                                       .setDeviceRef(deviceRef)
+                                       .setPort(Port.ANALOG_OUT_ONE.toString())
+                                       .setType("2-10v")
+                                       .addMarker("output")
+                                       .build();
+        analog1Out.setPointRef(datID);
+        
+        
+        
     }
 }

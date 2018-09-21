@@ -28,6 +28,7 @@ public class SmartNode
         deviceRef = new Device.Builder()
                 .setDisplayName("SN-"+address)
                 .addMarker("network")
+                .setAddr(address)
                 .build();
         smartNodeAddress = address;
         createPoints();
@@ -39,6 +40,7 @@ public class SmartNode
                                 .setDeviceRef(deviceRef)
                                 .setPort(Port.ANALOG_IN_ONE.toString())
                                 .setType("2-10v")
+                                .addMarker("input")
                                 .build();
     
         
@@ -47,18 +49,21 @@ public class SmartNode
                             .setDeviceRef(deviceRef)
                             .setPort(Port.ANALOG_IN_TWO.toString())
                             .setType("2-10v")
+                            .addMarker("input")
                             .build();
     
         th1In = new RawPoint.Builder()
                             .setDisplayName("Th1In-"+smartNodeAddress)
                             .setDeviceRef(deviceRef)
                             .setPort(Port.TH1_IN.toString())
+                            .addMarker("input")
                             .build();
     
         th2In = new RawPoint.Builder()
                         .setDisplayName("Th2In-"+smartNodeAddress)
                         .setDeviceRef(deviceRef)
                         .setPort(Port.TH2_IN.toString())
+                        .addMarker("input")
                         .build();
     
         analog1Out = new RawPoint.Builder()
@@ -66,6 +71,7 @@ public class SmartNode
                             .setDeviceRef(deviceRef)
                             .setPort(Port.ANALOG_OUT_ONE.toString())
                             .setType("2-10v")
+                            .addMarker("output")
                             .build();
     
         analog2Out = new RawPoint.Builder()
@@ -73,6 +79,7 @@ public class SmartNode
                              .setDeviceRef(deviceRef)
                              .setPort(Port.ANALOG_OUT_TWO.toString())
                              .setType("2-10v")
+                             .addMarker("output")
                              .build();
     
         relay1 = new RawPoint.Builder()
@@ -80,6 +87,7 @@ public class SmartNode
                              .setDeviceRef(deviceRef)
                              .setPort(Port.RELAY_ONE.toString())
                              .setType("NO")
+                             .addMarker("output")
                              .build();
     
         relay2 = new RawPoint.Builder()
@@ -87,11 +95,14 @@ public class SmartNode
                          .setDeviceRef(deviceRef)
                          .setPort(Port.RELAY_TWO.toString())
                          .setType("NO")
+                         .addMarker("output")
                          .build();
     
         currentTemp = new RawPoint.Builder()
                          .setDisplayName("currentTemp-"+smartNodeAddress)
                          .setDeviceRef(deviceRef)
+                         .addMarker("current")
+                         .addMarker("input")
                          .build();
     }
 

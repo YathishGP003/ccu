@@ -80,6 +80,11 @@ public class RawPoint
             this.type = type;
             return this;
         }
+        public Builder addMarker(String marker)
+        {
+            this.markers.add(marker);
+            return this;
+        }
         
         public RawPoint build(){
             RawPoint p = new RawPoint();

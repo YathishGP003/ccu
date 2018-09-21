@@ -17,8 +17,11 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
-import a75f.io.device.LSerial;
+import a75f.io.device.DeviceUpdateJob;
+import a75f.io.device.mesh.LSerial;
 import a75f.io.logic.Globals;
 import a75f.io.usbserial.SerialEvent;
 import a75f.io.usbserial.UsbService;
@@ -41,7 +44,7 @@ public abstract class UtilityApplication extends Application
             {
                 case UsbService.ACTION_USB_PERMISSION_GRANTED: // USB PERMISSION GRANTED
                     Toast.makeText(context, "USB Ready", Toast.LENGTH_SHORT).show();
-                    // HeartBeatJob.scheduleJob();
+                    // DeviceUpdateJobOld.scheduleJob();
                     break;
                 case UsbService.ACTION_USB_PERMISSION_NOT_GRANTED: // USB PERMISSION NOT GRANTED
                     Toast.makeText(context, "USB Permission not granted", Toast.LENGTH_SHORT)
@@ -63,7 +66,9 @@ public abstract class UtilityApplication extends Application
     SlackRealTimeMessagingClient mRtmClient;
     String                       mBotId;
     Random rand = new Random();
-    private UsbService usbService;
+    private UsbService               usbService;
+    private ScheduledExecutorService taskExecutor;
+    private DeviceUpdateJob          deviceUpdateJob;
     private final ServiceConnection usbConnection = new ServiceConnection()
     {
         @Override
@@ -71,6 +76,9 @@ public abstract class UtilityApplication extends Application
         {
             usbService = ((UsbService.UsbBinder) arg1).getService();
             LSerial.getInstance().setUSBService(usbService);
+            deviceUpdateJob.scheduleJob("Building Process Job", 15,
+                    3 * 2, TimeUnit.SECONDS);
+            
             //TODO: research what cts and dsr changes are.  For now no handler will be used, because I'm uncertain if the information is relevant.
             usbService.setHandler(null);
         }
@@ -102,6 +110,8 @@ public abstract class UtilityApplication extends Application
 //                openBot();
 //            }
 //        }.start();
+    
+        deviceUpdateJob = new DeviceUpdateJob();
     }
 
 

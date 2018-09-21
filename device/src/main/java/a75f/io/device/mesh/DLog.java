@@ -1,4 +1,4 @@
-package a75f.io.device;
+package a75f.io.device.mesh;
 
 import android.util.Log;
 
@@ -14,10 +14,10 @@ import a75f.io.device.json.serializers.JsonSerializer;
 /**
  * This class will log to crashlytics important information for development.
  */
-class LLog
+public class DLog
 {
 	
-	private static final String TAG             = LLog.class.getSimpleName();
+	private static final String TAG             = DLog.class.getSimpleName();
 	private static final String SERIAL_TAG      = "Serial";
     public static final String UPDATED_ZONE_TAG = "UPDATE_ZONE";
     public static final String UPDATED_STRUCT     = "UPDATED_STRUCT";

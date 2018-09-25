@@ -161,7 +161,7 @@ public class VavReheatProfile extends VavProfile
             {
                 valveController.updateControlVariable(REHEAT_THRESHOLD_TEMP, supplyAirTemp);
                 valve.currentPosition = (int) (valveController.getControlVariable() * 100 / valveController.getMaxAllowedError());
-                Log.d(TAG, "SAT below threshold valve :  " + valve.currentPosition);
+                Log.d(TAG, "SAT below threshold => valve :  " + valve.currentPosition);
             }
             
             //Normalize

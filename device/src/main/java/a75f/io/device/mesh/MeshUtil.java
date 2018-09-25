@@ -68,7 +68,7 @@ public class MeshUtil
         return retVal;
     }
     
-    private static void tSleep(int sleepTime)
+    public static void tSleep(int sleepTime)
     {
         DLog.Logd("sleeping: " + sleepTime);
         try

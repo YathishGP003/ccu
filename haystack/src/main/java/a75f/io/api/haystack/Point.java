@@ -62,7 +62,7 @@ public class Point
         private ArrayList<String> markers = new ArrayList<>();
         private String siteRef;
         private String equipRef;
-        private String unit;
+        private String unit = "F";
         private String tz;
         private String roomRef;
         private String floorRef;
@@ -129,6 +129,7 @@ public class Point
             p.roomRef = this.roomRef;
             p.floorRef = this.floorRef;
             p.group = this.group;
+            p.unit = this.unit;
             //CCUHsApi.getInstance().addPoint(p);
             return p;
         }

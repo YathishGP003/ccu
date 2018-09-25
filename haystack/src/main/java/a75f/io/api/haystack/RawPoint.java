@@ -14,11 +14,12 @@ public class RawPoint
     private String pointRef;
     private String port;
     private String type;
+    private String unit;
+    private String tz;
     public void setPointRef(String pointRef)
     {
         this.pointRef = pointRef;
     }
-    
     public String getDisplayName()
     {
         return displayName;
@@ -43,6 +44,14 @@ public class RawPoint
     {
         return type;
     }
+    public String getUnit()
+    {
+        return unit;
+    }
+    public String getTz()
+    {
+        return tz;
+    }
     public static class Builder{
         private String            displayName;
         private ArrayList<String> markers = new ArrayList<>();
@@ -50,6 +59,8 @@ public class RawPoint
         private String pointRef;
         private String port;
         private String type;
+        private String unit = "F";
+        private String tz;
         public Builder setDisplayName(String displayName)
         {
             this.displayName = displayName;
@@ -85,6 +96,16 @@ public class RawPoint
             this.markers.add(marker);
             return this;
         }
+        public Builder setUnit(String unit)
+        {
+            this.unit = unit;
+            return this;
+        }
+        public Builder setTz(String tz)
+        {
+            this.tz = tz;
+            return this;
+        }
         
         public RawPoint build(){
             RawPoint p = new RawPoint();
@@ -94,6 +115,8 @@ public class RawPoint
             p.pointRef = this.pointRef;
             p.port = this.port;
             p.type = this.type;
+            p.unit = this.unit;
+            p.tz = this.tz;
             //CCUHsApi.getInstance().addRawPoint(p);
             return p;
         }

@@ -111,13 +111,13 @@ public class LSmartNode
                     
                     for (HashMap opPoint : physicalOpPoints) {
                         HashMap logicalOpPoint = hayStack.read("point and id=="+opPoint.get("pointRef"));
-                        double logicalVal = hayStack.readDefaultValById(logicalOpPoint.get("id").toString());
+                        double logicalVal = hayStack.readHisValById(logicalOpPoint.get("id").toString());
                         
                         String port = opPoint.get("port").toString();
     
                         short mappedVal = (isAnalog(port) ? mapAnalogOut(opPoint.get("type").toString(), (short)logicalVal)
                                                         : mapDigitalOut(opPoint.get("type").toString(), logicalVal > 0));
-                        hayStack.writeDefaultValById(opPoint.get("id").toString(), (double)mappedVal);
+                        hayStack.writeHisValById(opPoint.get("id").toString(), (double)mappedVal);
     
                         LSmartNode.getSmartNodePort(controlsMessage_t, port)
                                   .set(mappedVal);

@@ -31,6 +31,8 @@ public class MeshNetwork extends DeviceNetwork
         
         MeshUtil.sendHeartbeat((short)0);
         
+        MeshUtil.tSleep(1000);
+        
         try
         {
             for (Floor floor : L.ccu().getFloors())

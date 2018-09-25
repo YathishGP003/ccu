@@ -40,7 +40,8 @@ public class SmartNode
                                 .setDeviceRef(deviceRef)
                                 .setPort(Port.ANALOG_IN_ONE.toString())
                                 .setType("2-10v")
-                                .addMarker("input")
+                                .addMarker("input").addMarker("his")
+                                .setTz("Chicago")
                                 .build();
     
         
@@ -49,21 +50,24 @@ public class SmartNode
                             .setDeviceRef(deviceRef)
                             .setPort(Port.ANALOG_IN_TWO.toString())
                             .setType("2-10v")
-                            .addMarker("input")
+                            .addMarker("input").addMarker("his")
+                            .setTz("Chicago")
                             .build();
     
         th1In = new RawPoint.Builder()
                             .setDisplayName("Th1In-"+smartNodeAddress)
                             .setDeviceRef(deviceRef)
                             .setPort(Port.TH1_IN.toString())
-                            .addMarker("input")
+                            .addMarker("input").addMarker("his")
+                            .setTz("Chicago")
                             .build();
     
         th2In = new RawPoint.Builder()
                         .setDisplayName("Th2In-"+smartNodeAddress)
                         .setDeviceRef(deviceRef)
                         .setPort(Port.TH2_IN.toString())
-                        .addMarker("input")
+                        .addMarker("input").addMarker("his")
+                        .setTz("Chicago")
                         .build();
     
         analog1Out = new RawPoint.Builder()
@@ -71,7 +75,8 @@ public class SmartNode
                             .setDeviceRef(deviceRef)
                             .setPort(Port.ANALOG_OUT_ONE.toString())
                             .setType("2-10v")
-                            .addMarker("output")
+                            .addMarker("output").addMarker("his")
+                            .setTz("Chicago")
                             .build();
     
         analog2Out = new RawPoint.Builder()
@@ -79,7 +84,8 @@ public class SmartNode
                              .setDeviceRef(deviceRef)
                              .setPort(Port.ANALOG_OUT_TWO.toString())
                              .setType("2-10v")
-                             .addMarker("output")
+                             .addMarker("output").addMarker("his")
+                             .setTz("Chicago")
                              .build();
     
         relay1 = new RawPoint.Builder()
@@ -87,7 +93,8 @@ public class SmartNode
                              .setDeviceRef(deviceRef)
                              .setPort(Port.RELAY_ONE.toString())
                              .setType("NO")
-                             .addMarker("output")
+                             .addMarker("output").addMarker("his")
+                             .setTz("Chicago")
                              .build();
     
         relay2 = new RawPoint.Builder()
@@ -95,14 +102,16 @@ public class SmartNode
                          .setDeviceRef(deviceRef)
                          .setPort(Port.RELAY_TWO.toString())
                          .setType("NO")
-                         .addMarker("output")
+                         .addMarker("output").addMarker("his")
+                         .setTz("Chicago")
                          .build();
     
         currentTemp = new RawPoint.Builder()
                          .setDisplayName("currentTemp-"+smartNodeAddress)
                          .setDeviceRef(deviceRef)
-                         .addMarker("current")
+                         .addMarker("current").addMarker("his")
                          .addMarker("input")
+                         .setTz("Chicago")
                          .build();
     }
 

@@ -27,9 +27,10 @@ public class Pulse
 			HashMap currentTemp = hayStack.read("point and physical and current and deviceRef == \""+device.get("id")+"\"");
 			HashMap logicalTemp = hayStack.read("point and id=="+currentTemp.get("pointRef"));
 			
-			double newTemp = hayStack.readDefaultValById(currentTemp.get("id").toString());
-			System.out.println("roomTemp Updated Val "+newTemp );
-			hayStack.writeDefaultValById(logicalTemp.get("id").toString(), 75.0);
+			double temp = smartNodeRegularUpdateMessage_t.update.roomTemperature.get() / 10.0;
+			hayStack.writeHisValById(currentTemp.get("id").toString(), temp);
+			System.out.println("roomTemp Updated Val "+temp );
+			hayStack.writeHisValById(logicalTemp.get("id").toString(), temp);
 		}
 	}
 	

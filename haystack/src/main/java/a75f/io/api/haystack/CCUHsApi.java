@@ -3,8 +3,10 @@ package a75f.io.api.haystack;
 import android.content.Context;
 import android.util.Log;
 
+import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HGrid;
+import org.projecthaystack.HHisItem;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 import org.projecthaystack.HRow;
@@ -12,6 +14,7 @@ import org.projecthaystack.UnknownRecException;
 import org.projecthaystack.client.HClient;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -221,5 +224,83 @@ public class CCUHsApi
             rowList.add(map);
         }
         return rowList;
+    }
+    
+    public void hisWrite(ArrayList<HisItem> hisList) {
+        HHisItem[] array = new HHisItem[hisList.size()];
+        for (int itr = 0; itr< array.length; itr++) {
+            HisItem item = hisList.get(itr);
+            array[itr] = HHisItem.make(HDateTime.make(item.date.getTime()),HNum.make(item.getVal()));
+        }
+        hsClient.hisWrite(HRef.copy(hisList.get(0).getRec()), array);
+    }
+    public void hisWrite(HisItem item) {
+        hsClient.hisWrite(HRef.copy(item.getRec()), new HHisItem[]{HHisItem.make(HDateTime.make(item.date.getTime()),HNum.make(item.val))});
+    }
+    
+    public ArrayList<HisItem> hisRead(String id, Object range) {
+        HGrid resGrid = hsClient.hisRead(HRef.copy(id),range);
+        ArrayList<HisItem> hisList = new ArrayList<>();
+        Iterator it = resGrid.iterator();
+        while(it.hasNext()) {
+            HisItem item = new HisItem();
+            HRow r = (HRow)it.next();
+            HDateTime date = (HDateTime) r.get("ts");
+            HNum val = (HNum) r.get("val");
+            hisList.add(new HisItem("",new Date(date.millis()),Double.parseDouble(val.toString())));
+        }
+        return hisList;
+    }
+    
+    /**
+     * Reads most recent value for a his point
+     * @param id
+     * @return
+     */
+    public HisItem hisRead(String id) {
+        HGrid resGrid = hsClient.hisRead(HRef.copy(id),"today");
+        if (resGrid.numRows() == 0) {
+            return null;
+        }
+        HRow r = resGrid.row(resGrid.numRows()-1);
+        HDateTime date = (HDateTime) r.get("ts");
+        HNum val = (HNum) r.get("val");
+        return new HisItem("",new Date(date.millis()),Double.parseDouble(val.toString()));
+    }
+    
+    public Double readHisValById(String id) {
+        HGrid resGrid = hsClient.hisRead(HRef.copy(id),"today");//TODO
+        if (resGrid.numRows() == 0) {
+            return 0.0;
+        }
+        HRow r = resGrid.row(resGrid.numRows()-1);
+        return Double.parseDouble(r.get("val").toString());
+    }
+    
+    public void writeHisValById(String id, Double val) {
+        hsClient.hisWrite(HRef.copy(id), new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()),HNum.make(val))});
+    }
+    public Double readHisValByQuery(String query) {
+        
+        ArrayList points = readAll(query);
+        String id = ((HashMap)points.get(0)).get("id").toString();
+        if (id == null || id == "") {
+            return null;
+        }
+        
+        HisItem item = hisRead(id);
+        return item == null ? 0 : item.getVal();
+    }
+    
+    public void writeHisValByQuery(String query, Double val) {
+        
+        ArrayList points = readAll(query);
+        String id = ((HashMap)points.get(0)).get("id").toString();
+        if (id == null || id == "") {
+            return;
+        }
+        
+        HisItem item = new HisItem(id, new Date(), val );
+        hisWrite(item);
     }
 }

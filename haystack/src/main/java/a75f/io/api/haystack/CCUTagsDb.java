@@ -33,13 +33,21 @@ import org.projecthaystack.server.HOp;
 import org.projecthaystack.server.HServer;
 import org.projecthaystack.server.HStdOps;
 
+import java.io.File;
 import java.lang.reflect.Type;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import io.objectbox.Box;
+import io.objectbox.BoxStore;
+import io.objectbox.DebugFlags;
+import io.objectbox.query.QueryBuilder;
 
 /**
  * Created by samjithsadasivan on 8/31/18.
@@ -61,6 +69,11 @@ public class CCUTagsDb extends HServer
     
     public String tagsString;
     public String waString;
+    
+    private BoxStore       boxStore;
+    private Box<HisItem>   hisBox;
+    private static final File TEST_DIRECTORY = new File("objectbox-example/test-db");
+    
     //public String tagsString = null;
     RuntimeTypeAdapterFactory<HVal> hsTypeAdapter =
             RuntimeTypeAdapterFactory
@@ -89,13 +102,22 @@ public class CCUTagsDb extends HServer
     public void init(Context c) {
         appContext = c;
         tagsString = appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).getString(PREFS_TAGS_MAP, null);
+        waString = appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).getString(PREFS_TAGS_WA, null);
+    
+        boxStore = MyObjectBox.builder().androidContext(appContext).build();
+        hisBox = boxStore.boxFor(HisItem.class);
+        
         if (tagsString == null) {
             tagsMap = new HashMap();
             writeArrays = new HashMap();
             
         } else
         {
-            Gson gson = new GsonBuilder().registerTypeAdapterFactory(hsTypeAdapter).create();
+            Gson gson = new GsonBuilder()
+                                .registerTypeAdapterFactory(hsTypeAdapter)
+                                .setPrettyPrinting()
+                                .disableHtmlEscaping()
+                                .create();
             Type listType = new TypeToken<Map<String, MapImpl<String,HVal>>>()
             {
             }.getType();
@@ -109,7 +131,11 @@ public class CCUTagsDb extends HServer
     
     public void saveTags() {
     
-        Gson gson = new GsonBuilder().registerTypeAdapterFactory(hsTypeAdapter).create();
+        Gson gson = new GsonBuilder()
+                            .registerTypeAdapterFactory(hsTypeAdapter)
+                            .setPrettyPrinting()
+                            .disableHtmlEscaping()
+                            .create();
         Type listType = new TypeToken<Map<String, MapImpl<String,HVal>>>()
         {
         }.getType();
@@ -132,7 +158,11 @@ public class CCUTagsDb extends HServer
     }
     
     public void init(){
-        Gson gson = new GsonBuilder().registerTypeAdapterFactory(hsTypeAdapter).create();
+        Gson gson = new GsonBuilder()
+                            .registerTypeAdapterFactory(hsTypeAdapter)
+                            .setPrettyPrinting()
+                            .disableHtmlEscaping()
+                            .create();
         Type listType = new TypeToken<Map<String, MapImpl<String,HVal>>>()
         {
         }.getType();
@@ -141,10 +171,23 @@ public class CCUTagsDb extends HServer
         {
         }.getType();
         writeArrays = gson.fromJson(waString,waType);
+    
+        BoxStore.deleteAllFiles(TEST_DIRECTORY);
+        boxStore = MyObjectBox.builder()
+                           // add directory flag to change where ObjectBox puts its database files
+                           .directory(TEST_DIRECTORY)
+                           // optional: add debug flags for more detailed ObjectBox log output
+                           .debugFlags(DebugFlags.LOG_QUERIES | DebugFlags.LOG_QUERY_PARAMETERS)
+                           .build();
+        hisBox = boxStore.boxFor(HisItem.class);
     }
     
     public void saveString() {
-        Gson gson = new GsonBuilder().registerTypeAdapterFactory(hsTypeAdapter).create();
+        Gson gson = new GsonBuilder()
+                            .registerTypeAdapterFactory(hsTypeAdapter)
+                            .setPrettyPrinting()
+                            .disableHtmlEscaping()
+                            .create();
         Type listType = new TypeToken<Map<String, MapImpl<String,HVal>>>()
         {
         }.getType();
@@ -223,14 +266,13 @@ public class CCUTagsDb extends HServer
                                  .add("id",       HRef.make(UUID.randomUUID().toString()))
                                  .add("dis",      p.getDisplayName())
                                  .add("point",    HMarker.VAL)
-                                 .add("his",      HMarker.VAL)
                                  .add("siteRef",  p.getSiteRef()/*eq.get("siteRef")*/)
                                  .add("equipRef", p.getEquipRef()/*eq.get("id")*/)
                                  .add("roomRef",  p.getRoomRef())
                                  .add("floorRef", p.getFloorRef())
                                  .add("group",p.getGroup())
-                                 .add("kind",     p.getUnit() == null ? "Bool" : "Number");
-                                 //.add("tz",       p.getTz());
+                                 .add("kind",     p.getUnit() == null ? "Bool" : "Number")
+                                 .add("tz",       p.getTz());
         if (p.getUnit() != null) b.add("unit", p.getUnit());
         
         for (String m : p.getMarkers()) {
@@ -248,12 +290,12 @@ public class CCUTagsDb extends HServer
                                  .add("dis",      p.getDisplayName())
                                  .add("point",    HMarker.VAL)
                                  .add("physical",    HMarker.VAL)
-                                 .add("writable",    HMarker.VAL)
-                                 .add("his",      HMarker.VAL)
                                  .add("deviceRef", p.getDeviceRef())
                                  .add("pointRef",p.getPointRef())
                                  .add("port",p.getPort())
-                                 .add("type",p.getType());
+                                 .add("type",p.getType())
+                                 .add("kind",     p.getUnit() == null ? "Bool" : "Number")
+                                 .add("tz",       p.getTz());
         
         for (String m : p.getMarkers()) {
             b.add(m);
@@ -295,6 +337,7 @@ public class CCUTagsDb extends HServer
                 HStdOps.read,
                 HStdOps.nav,
                 HStdOps.pointWrite,
+                HStdOps.hisWrite,
                 HStdOps.hisRead,
                 HStdOps.invokeAction,
         };
@@ -427,25 +470,35 @@ public class CCUTagsDb extends HServer
     
     public HHisItem[] onHisRead(HDict entity, HDateTimeRange range)
     {
-        // generate dummy 15min data
-        ArrayList acc = new ArrayList();
-        HDateTime ts = range.start;
+        QueryBuilder<HisItem> hisQuery = hisBox.query();
+        hisQuery.equal(HisItem_.rec, entity.get("id").toString())
+                .greater(HisItem_.date,range.start.millis())
+                .less(HisItem_.date,range.end.millis())
+                .order(HisItem_.date);
+        
+        List<HisItem> hisList =hisQuery.build().find();
+    
         boolean isBool = ((HStr)entity.get("kind")).val.equals("Bool");
-        while (ts.compareTo(range.end) <= 0)
-        {
-            HVal val = isBool ?
-                               (HVal) HBool.make(acc.size() % 2 == 0) :
-                                                                              (HVal)HNum.make(acc.size());
-            HDict item = HHisItem.make(ts, val);
-            if (ts != range.start) acc.add(item);
-            ts = HDateTime.make(ts.millis() + 15*60*1000);
+        ArrayList acc = new ArrayList();
+        for (HisItem item : hisList) {
+            HVal val = isBool ? HBool.make(item.val > 0) : HNum.make(item.val);
+            HDict hsItem = HHisItem.make(HDateTime.make(item.getDate().getTime()), val);
+            if (item.getDate().getTime() != range.start.millis()) {
+                acc.add(hsItem);
+            }
         }
         return (HHisItem[])acc.toArray(new HHisItem[acc.size()]);
     }
     
     public void onHisWrite(HDict rec, HHisItem[] items)
     {
-        throw new RuntimeException("Unsupported");
+       for (HHisItem item: items) {
+           HisItem hisItem = new HisItem();
+           hisItem.setDate(new Date(item.ts.millis()));
+           hisItem.setRec(rec.get("id").toString());
+           hisItem.setVal(Double.parseDouble(item.val.toString()));
+           hisBox.put(hisItem);
+       }
     }
     
     //////////////////////////////////////////////////////////////////////////

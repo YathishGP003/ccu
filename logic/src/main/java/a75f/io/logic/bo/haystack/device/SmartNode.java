@@ -109,8 +109,8 @@ public class SmartNode
         currentTemp = new RawPoint.Builder()
                          .setDisplayName("currentTemp-"+smartNodeAddress)
                          .setDeviceRef(deviceRef)
-                         .addMarker("current").addMarker("his")
-                         .addMarker("input")
+                         .addMarker("input").addMarker("his")
+                         .setPort(Port.RTH.toString())
                          .setTz("Chicago")
                          .build();
     }

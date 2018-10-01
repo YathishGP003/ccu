@@ -2,6 +2,7 @@ package a75f.io.device.mesh;
 
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -24,14 +25,47 @@ public class Pulse
 		HashMap device = hayStack.read("device and addr == \""+nodeAddr+"\"");
 		if (device != null && device.size() > 0)
 		{
-			HashMap currentTemp = hayStack.read("point and physical and current and deviceRef == \""+device.get("id")+"\"");
-			HashMap logicalTemp = hayStack.read("point and id=="+currentTemp.get("pointRef"));
+			ArrayList<HashMap> phyPoints = hayStack.readAll("point and physical and input and deviceRef == \"" + device.get("id") + "\"");
 			
-			double temp = smartNodeRegularUpdateMessage_t.update.roomTemperature.get() / 10.0;
-			hayStack.writeHisValById(currentTemp.get("id").toString(), temp);
-			System.out.println("roomTemp Updated Val "+temp );
-			hayStack.writeHisValById(logicalTemp.get("id").toString(), temp);
+			for(HashMap phyPoint : phyPoints) {
+				HashMap logPoint = hayStack.read("point and id=="+phyPoint.get("pointRef"));
+				double val;
+				Log.d(TAG,"phyPoint : "+phyPoint);
+				Log.d(TAG,"logPoint : "+logPoint);
+				switch (phyPoint.get("port").toString()){
+					case "RTH":
+						val = smartNodeRegularUpdateMessage_t.update.roomTemperature.get();
+						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+						hayStack.writeHisValById(logPoint.get("id").toString(), getRoomTempConversion(val));
+						Log.d(TAG,"regularSmartNodeUpdate : roomTemp "+getRoomTempConversion(val));
+						break;
+					case "ANALOG_IN_ONE":
+						break;
+					case "ANALOG_IN_TWO":
+						break;
+					case "TH1_IN":
+						val = smartNodeRegularUpdateMessage_t.update.externalThermistorInput1.get();
+						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+						hayStack.writeHisValById(logPoint.get("id").toString(), getThermistorConversion(val));
+						Log.d(TAG,"regularSmartNodeUpdate : Thermistor1 "+val);
+						break;
+					case "TH2_IN":
+						val = smartNodeRegularUpdateMessage_t.update.externalThermistorInput2.get();
+						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+						hayStack.writeHisValById(logPoint.get("id").toString(), getThermistorConversion(val));
+						Log.d(TAG,"regularSmartNodeUpdate : Thermistor2 "+val);
+						break;
+				}
+			}
+			
 		}
+	}
+	
+	public static Double getRoomTempConversion(Double temp) {
+		return temp/10.0;
+	}
+	public static Double getThermistorConversion(Double val) {
+		return val/10.0;
 	}
 	
 	public static void regularCMUpdate(CmToCcuOverUsbCmRegularUpdateMessage_t cmRegularUpdateMessage_t)

@@ -169,7 +169,7 @@ public class VavSeriesFanProfile extends VavProfile
     
             Log.d(TAG, "STATE :"+state+" ,loopOp: " + loopOp + " ,damper:" + damper.currentPosition
                                                         +", valve:"+valve.currentPosition+" fanStart: "+vavUnit.fanStart);
-            
+            updateTRResponse(node);
         }
     }
     

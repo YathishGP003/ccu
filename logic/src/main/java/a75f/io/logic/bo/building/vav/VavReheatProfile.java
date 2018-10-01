@@ -169,7 +169,7 @@ public class VavReheatProfile extends VavProfile
             valve.normalize();
     
             Log.d(TAG, "STATE :"+state+" ,loopOp: " + loopOp + " ,damper:" + damper.currentPosition+", valve:"+valve.currentPosition);
-    
+            updateTRResponse(node);
         }
     }
 }

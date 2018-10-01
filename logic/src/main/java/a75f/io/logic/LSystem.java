@@ -11,14 +11,8 @@ import com.microsoft.azure.sdk.iot.device.Message;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
-import java.util.Map;
 
 import a75.io.algos.vav.VavTRSystem;
-import a75f.io.logic.bo.building.Floor;
-import a75f.io.logic.bo.building.Zone;
-import a75f.io.logic.bo.building.ZoneProfile;
-
-import static a75f.io.logic.L.ccu;
 
 /**
  * Created by samjithsadasivan on 6/4/18.
@@ -60,7 +54,7 @@ public class LSystem
         return ccu().systemProfile.getSystemControlMsg();
     }*/
     
-    public static void collectTSData()
+    /*public static void collectTSData()
     {
         //addParamToMsg("deviceId", deviceId);
         addParamToMsg("messageId", String.valueOf(msgCntr));
@@ -89,7 +83,7 @@ public class LSystem
             addParamToMsg("SP", String.valueOf(p.getCurrentSp()));
             addParamToMsg("HWST", String.valueOf(p.getCurrentHwst()));
         }
-    }
+    }*/
     
     public static void addParamToMsg(String key, String val){
             msgStr.put(key, val);

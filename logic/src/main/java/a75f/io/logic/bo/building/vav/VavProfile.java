@@ -8,6 +8,8 @@ import java.util.HashMap;
 
 import a75.io.algos.tr.TrimResetListener;
 import a75.io.algos.tr.TrimResponseRequest;
+import a75.io.algos.vav.VavTRSystem;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -60,6 +62,7 @@ public abstract class VavProfile extends ZoneProfile
     CO2ResetListener co2ResetListener;
     SpResetListener spResetListener;
     HwstResetListener hwstResetListener;
+    VavTRSystem trSystem = null;
     
     public VavProfile() {
         vavDeviceMap = new HashMap<>();
@@ -67,6 +70,26 @@ public abstract class VavProfile extends ZoneProfile
         co2ResetListener = new CO2ResetListener();
         spResetListener = new SpResetListener();
         hwstResetListener = new HwstResetListener();
+        //initTRSystem();
+    }
+    
+    public void initTRSystem() {
+        VavTRSystem trSystem = (VavTRSystem) L.ccu().systemProfile.trSystem;
+        trSystem.getSystemSATTRProcessor().addTRListener(satResetListener);
+        trSystem.getSystemCO2TRProcessor().addTRListener(co2ResetListener);
+        trSystem.getSystemSpTRProcessor().addTRListener(spResetListener);
+        trSystem.getSystemHwstTRProcessor().addTRListener(hwstResetListener);
+    }
+    
+    public void updateTRResponse(short node) {
+        if (trSystem == null) {
+            initTRSystem();
+        }
+        VavTRSystem trSystem = (VavTRSystem) L.ccu().systemProfile.trSystem;
+        trSystem.updateSATRequest(getSATRequest(node));
+        trSystem.updateCO2Request(getCO2Requests(node));
+        trSystem.updateSpRequest(getSpRequests(node));
+        trSystem.updateHwstRequest(getHwstRequests(node));
     }
     
     /*@Override
@@ -330,15 +353,10 @@ public abstract class VavProfile extends ZoneProfile
                 continue;
             }
             tsdata.put("SAT-requestHours"+node,vavDeviceMap.get(node).satResetRequest.requestHours);
-            tsdata.put("currentTemp"+node,vavDeviceMap.get(node).getRoomTemp());
-            tsdata.put("setTemp"+node,setTemp);
             tsdata.put("heatingLoopOp"+node,vavDeviceMap.get(node).getHeatingLoop().getLoopOutput());
             tsdata.put("coolingLoopOp"+node,vavDeviceMap.get(node).getCoolingLoop().getLoopOutput());
-            tsdata.put("dischargeTemp"+node,vavDeviceMap.get(node).getDischargeTemp());
             tsdata.put("dischargeSp"+node,vavDeviceMap.get(node).getDischargeSp());
             tsdata.put("supplyAirTemp"+node,vavDeviceMap.get(node).getSupplyAirTemp());
-            tsdata.put("reheatValve"+node,(double)vavDeviceMap.get(node).getVavUnit().reheatValve.currentPosition);
-            tsdata.put("vavDamper"+node,(double)vavDeviceMap.get(node).getVavUnit().vavDamper.currentPosition);
             if (getProfileType() == ProfileType.VAV_SERIES_FAN) {
                 double fanStart = ((SeriesFanVavUnit)vavDeviceMap.get(node).getVavUnit()).fanStart ? 100 : 0;
                 tsdata.put("fanStart"+node, fanStart);
@@ -352,6 +370,8 @@ public abstract class VavProfile extends ZoneProfile
             tsdata.put("SP"+node,vavDeviceMap.get(node).getStaticPressure());
             tsdata.put("SP-requestHours"+node,vavDeviceMap.get(node).spResetRequest.requestHours);
             tsdata.put("HWST-requestHours"+node,vavDeviceMap.get(node).hwstResetRequest.requestHours);
+    
+            tsdata.put("setTemp"+node,setTemp);
         }
         
         return tsdata;

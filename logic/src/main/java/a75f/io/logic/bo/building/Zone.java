@@ -1,7 +1,5 @@
 package a75f.io.logic.bo.building;
 
-import android.util.Log;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.ArrayList;
@@ -72,7 +70,7 @@ public class Zone
         return retVal;
     }
     
-    @JsonIgnore
+    /*@JsonIgnore
     public void updatePoints()
     {
         for (ZoneProfile zp : mZoneProfiles)
@@ -80,7 +78,7 @@ public class Zone
             Log.d("VAV"," updatePoints "+zp.getNodeAddresses());
             zp.updateZonePoints();
         }
-    }
+    }*/
     
     public double getDesiredVal(ZoneProfile z) {
         //TODO- TEMP

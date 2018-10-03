@@ -40,8 +40,16 @@ public class Pulse
 						Log.d(TAG,"regularSmartNodeUpdate : roomTemp "+getRoomTempConversion(val));
 						break;
 					case "ANALOG_IN_ONE":
+						val = smartNodeRegularUpdateMessage_t.update.externalAnalogVoltageInput1.get();
+						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+						hayStack.writeHisValById(logPoint.get("id").toString(), getAnalogConversion(val));
+						Log.d(TAG,"regularSmartNodeUpdate : analog1In "+getAnalogConversion(val));
 						break;
 					case "ANALOG_IN_TWO":
+						val = smartNodeRegularUpdateMessage_t.update.externalAnalogVoltageInput1.get();
+						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+						hayStack.writeHisValById(logPoint.get("id").toString(), getAnalogConversion(val));
+						Log.d(TAG,"regularSmartNodeUpdate : analog2In "+getAnalogConversion(val));
 						break;
 					case "TH1_IN":
 						val = smartNodeRegularUpdateMessage_t.update.externalThermistorInput1.get();
@@ -65,6 +73,10 @@ public class Pulse
 		return temp/10.0;
 	}
 	public static Double getThermistorConversion(Double val) {
+		return val/10.0;
+	}
+	
+	public static Double getAnalogConversion(Double val) {
 		return val/10.0;
 	}
 	

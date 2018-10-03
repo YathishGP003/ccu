@@ -45,8 +45,8 @@ public class VavReheatProfile extends VavProfile
                 Log.d(TAG, " Logical Map added for node " + node);
                 continue;
             }
-            if (vavDeviceMap.get(node).getRoomTemp() == 0) {
-                Log.d(TAG,"Invalid Temp , skip controls update for "+node+" roomTemp : "+vavDeviceMap.get(node).getRoomTemp());
+            if (vavDeviceMap.get(node).getCurrentTemp() == 0) {
+                Log.d(TAG,"Invalid Temp , skip controls update for "+node+" roomTemp : "+vavDeviceMap.get(node).getCurrentTemp());
                 continue;
             }
             VAVLogicalMap vavDevice = vavDeviceMap.get(node);
@@ -56,7 +56,7 @@ public class VavReheatProfile extends VavProfile
             VavUnit vavUnit = vavDevice.getVavUnit();
             GenericPIController valveController = vavDevice.getValveController();
             
-            double roomTemp = vavDevice.getRoomTemp();
+            double roomTemp = vavDevice.getCurrentTemp();
             double dischargeTemp = vavDevice.getDischargeTemp();
             double supplyAirTemp = vavDevice.getSupplyAirTemp();
             double co2 = vavDeviceMap.get(node).getCO2();
@@ -170,6 +170,10 @@ public class VavReheatProfile extends VavProfile
     
             Log.d(TAG, "STATE :"+state+" ,loopOp: " + loopOp + " ,damper:" + damper.currentPosition+", valve:"+valve.currentPosition);
             updateTRResponse(node);
+    
+            vavDevice.setDamperPos(damper.currentPosition);
+            vavDevice.setReheatPos(valve.currentPosition);
+            
         }
     }
 }

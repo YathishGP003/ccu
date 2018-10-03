@@ -73,4 +73,5 @@ dependencies {
     implementation project(':usbserial')
     compile 'joda-time:joda-time:2.9.9'
     compile project(path: ':kinveybo')
+    compile 'org.influxdb:influxdb-java:2.10'
 }

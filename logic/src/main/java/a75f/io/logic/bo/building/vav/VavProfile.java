@@ -24,6 +24,7 @@ import static a75f.io.logic.bo.building.vav.VavProfile.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.vav.VavProfile.ZoneState.HEATING;
 
 /**
+ *
  * Created by samjithsadasivan on 5/31/18.
  */
 
@@ -184,7 +185,7 @@ public abstract class VavProfile extends ZoneProfile
         if (vavDeviceMap.get(node) ==  null) {
             return null;
         }
-        double roomTemp = vavDeviceMap.get(node).getRoomTemp();
+        double roomTemp = vavDeviceMap.get(node).getCurrentTemp();
         TrimResponseRequest satResetRequest = vavDeviceMap.get(node).satResetRequest;
         
         if (state == COOLING) {
@@ -330,9 +331,9 @@ public abstract class VavProfile extends ZoneProfile
             if (vavDeviceMap.get(nodeAddress) ==  null) {
                 continue;
             }
-            if (vavDeviceMap.get(Short.valueOf(nodeAddress)).getRoomTemp() > 0)
+            if (vavDeviceMap.get(Short.valueOf(nodeAddress)).getCurrentTemp() > 0)
             {
-                temperature[tempIndex++] = vavDeviceMap.get(Short.valueOf(nodeAddress)).getRoomTemp();
+                temperature[tempIndex++] = vavDeviceMap.get(Short.valueOf(nodeAddress)).getCurrentTemp();
             }
         }
         //Log.d("VAV","Average Zone Temp "+(tempIndex == 0 ? 0 : MathLib.mean(temperature)));

@@ -18,6 +18,7 @@ import static a75f.io.logic.bo.building.vav.VavProfile.ZoneState.HEATING;
 
 /**
  * Created by samjithsadasivan on 8/23/18.
+ *
  */
 
 public class VavParallelFanProfile extends VavProfile
@@ -50,7 +51,7 @@ public class VavParallelFanProfile extends VavProfile
             ParallelFanVavUnit vavUnit = (ParallelFanVavUnit) vavDevice.getVavUnit();
             GenericPIController valveController = vavDevice.getValveController();
         
-            double roomTemp = vavDevice.getRoomTemp();
+            double roomTemp = vavDevice.getCurrentTemp();
             double dischargeTemp = vavDevice.getDischargeTemp();
             double supplyAirTemp = vavDevice.getSupplyAirTemp();
             double co2 = vavDeviceMap.get(node).getCO2();
@@ -158,6 +159,8 @@ public class VavParallelFanProfile extends VavProfile
                                                     +", valve:"+valve.currentPosition+" fanStart: "+vavUnit.fanStart);
     
             updateTRResponse(node);
+            vavDevice.setDamperPos(damper.currentPosition);
+            vavDevice.setReheatPos(valve.currentPosition);
         }
     }
 }

@@ -29,21 +29,21 @@ public class VavHaystackTest
             System.out.println(a);
         }*/
     
-        System.out.println("getRoomTemp "+m.getRoomTemp());
+        System.out.println("getRoomTemp "+m.getCurrentTemp());
         System.out.println("getDamperPos "+m.getDamperPos());
         System.out.println("getReheatPos "+m.getReheatPos());
         System.out.println("getDesiredTemp "+m.getDesiredTemp());
         System.out.println("getDischargeTemp "+m.getDischargeTemp());
         System.out.println("getSupplyAirTemp "+m.getSupplyAirTemp());
         
-        m.setRoomTemp(70);
+        m.setCurrentTemp(70);
         m.setDamperPos(80);
         m.setReheatPos(60);
         m.setDesiredTemp(72);
         m.setDischargeTemp(87);
         m.setSupplyAirTemp(60);
         
-        System.out.println("getRoomTemp "+m.getRoomTemp());
+        System.out.println("getRoomTemp "+m.getCurrentTemp());
         System.out.println("getDamperPos "+m.getDamperPos());
         System.out.println("getReheatPos "+m.getReheatPos());
         System.out.println("getDesiredTemp "+m.getDesiredTemp());
@@ -62,7 +62,7 @@ public class VavHaystackTest
     
         VAVLogicalMap m1 = new VAVLogicalMap(ProfileType.VAV_REHEAT, 7000);
     
-        System.out.println("getRoomTemp "+m1.getRoomTemp());
+        System.out.println("getRoomTemp "+m1.getCurrentTemp());
         System.out.println("getDamperPos "+m1.getDamperPos());
         System.out.println("getReheatPos "+m1.getReheatPos());
         System.out.println("getDesiredTemp "+m1.getDesiredTemp());

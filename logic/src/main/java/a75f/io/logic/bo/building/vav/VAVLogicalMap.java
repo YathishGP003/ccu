@@ -2,6 +2,7 @@ package a75f.io.logic.bo.building.vav;
 
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75.io.algos.CO2Loop;
@@ -32,7 +33,7 @@ public class VAVLogicalMap
     double proportionalGain = 0.5;
     double integralGain = 0.5;
     
-    double      roomTemp;
+    double      currentTemp;
     double desiredTemp;
     double supplyAirTemp;
     double dischargeTemp;
@@ -199,8 +200,8 @@ public class VAVLogicalMap
                                     .setSiteRef(siteRef)
                                     .setRoomRef(room)
                                     .setFloorRef(floor)
-                                    .addMarker("zone")
-                                    .addMarker("air").addMarker("temp").addMarker("desired").addMarker("sp").addMarker("writable")
+                                    .addMarker("zone").addMarker("air").addMarker("temp").addMarker("desired")
+                                    .addMarker("sp").addMarker("writable").addMarker("his")
                                     .setGroup(String.valueOf(nodeAddr))
                                     .setUnit("\u00B0F")
                                     .setTz(tz)
@@ -223,7 +224,7 @@ public class VAVLogicalMap
         Log.d("VAV", CCUHsApi.getInstance().tagsDb.getDbMap().toString());
     
         //Create write array for points, otherwise a read before write will throw exception
-        setRoomTemp(0);
+        setCurrentTemp(0);
         setDamperPos(0);
         setReheatPos(0);
         setDesiredTemp(0);
@@ -232,25 +233,36 @@ public class VAVLogicalMap
         
     }
     
-    public double getRoomTemp()
+    public double getCurrentTemp()
     {
-        roomTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and group == \""+nodeAddr+"\"");
-        return roomTemp;
+        currentTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and group == \""+nodeAddr+"\"");
+        return currentTemp;
     }
-    public void setRoomTemp(double roomTemp)
+    public void setCurrentTemp(double roomTemp)
     {
         CCUHsApi.getInstance().writeHisValByQuery("point and air and temp and sensor and current and group == \""+nodeAddr+"\"", roomTemp);
-        this.roomTemp = roomTemp;
+        this.currentTemp = roomTemp;
     }
     
     public double getDesiredTemp()
     {
-        desiredTemp = CCUHsApi.getInstance().readDefaultVal("point and air and temp and desired and sp and group == \""+nodeAddr+"\"");
+        ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and desired and sp and group == \""+nodeAddr+"\"");
+        String id = ((HashMap)points.get(0)).get("id").toString();
+        if (id == null || id == "") {
+            throw new IllegalArgumentException();
+        }
+        desiredTemp = CCUHsApi.getInstance().readDefaultValById(id);
         return desiredTemp;
     }
     public void setDesiredTemp(double desiredTemp)
     {
-        CCUHsApi.getInstance().writeDefaultVal("point and air and temp and desired and sp and group == \""+nodeAddr+"\"", desiredTemp);
+        ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and desired and sp and group == \""+nodeAddr+"\"");
+        String id = ((HashMap)points.get(0)).get("id").toString();
+        if (id == null || id == "") {
+            throw new IllegalArgumentException();
+        }
+        CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
+        CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
         this.desiredTemp = desiredTemp;
     }
     

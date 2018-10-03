@@ -5,6 +5,8 @@ import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.influxdb.InfluxDB;
+import org.influxdb.InfluxDBFactory;
 import org.json.JSONObject;
 import org.junit.Test;
 
@@ -215,4 +217,15 @@ public class UnitTest
         
     
     
-}}
+}
+
+    @Test
+    public void testSetInfluxRetentionPolicy() {
+        InfluxDB influxDB = InfluxDBFactory.connect("https://influx-a75f.aivencloud.com:27304", "avnadmin", "mhur2n42y4l58xlx");
+        String rpName = "RenatusTest";
+        influxDB.createRetentionPolicy(rpName, "defaultdb", "365d", "30m", 1, true);
+        influxDB.setRetentionPolicy(rpName);
+    }
+
+
+}

@@ -324,8 +324,8 @@ public abstract class VavProfile extends ZoneProfile
     @JsonIgnore
     public double getAverageZoneTemp()
     {
-        double[] temperature = new double[vavDeviceMap.size()];
-        int tempIndex = 0;
+        double tempTotal = 0;
+        int nodeCount = 0;
         for (short nodeAddress : vavDeviceMap.keySet())
         {
             if (vavDeviceMap.get(nodeAddress) ==  null) {
@@ -333,14 +333,11 @@ public abstract class VavProfile extends ZoneProfile
             }
             if (vavDeviceMap.get(Short.valueOf(nodeAddress)).getCurrentTemp() > 0)
             {
-                temperature[tempIndex++] = vavDeviceMap.get(Short.valueOf(nodeAddress)).getCurrentTemp();
+                tempTotal += vavDeviceMap.get(Short.valueOf(nodeAddress)).getCurrentTemp();
+                nodeCount++;
             }
         }
-        //Log.d("VAV","Average Zone Temp "+(tempIndex == 0 ? 0 : MathLib.mean(temperature)));
-        
-        //return tempIndex == 0 ? 0 : MathLib.mean(temperature);
-        
-        return 0;//TODO
+        return nodeCount == 0 ? 0 : tempTotal/nodeCount;
     }
     
     

@@ -25,6 +25,7 @@ import android.view.View;
 
 import java.text.DecimalFormat;
 
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Zone;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.RoomDataInterface;
@@ -437,8 +438,10 @@ public class SeekArc extends View implements RoomDataInterface
         if (zoneProfile != null)
         {
             zoneProfile.setZoneProfileInterface(this);
+            mDesireTemp = L.getDesiredTemp(zoneProfile);
         }
         init(context, attrs, R.attr.seekArcStyle);
+        
     }
 
 
@@ -461,16 +464,13 @@ public class SeekArc extends View implements RoomDataInterface
                 if (zoneProfile != null)
                 {
                     setCurrentTemp(zoneProfile.getDisplayCurrentTemp());
-                    //setDesireTemp(L.resolveZoneProfileLogicalValue(zoneProfile));
-                    //TODO- TEMP
-                    setDesireTemp(72.0);
+                    //setDesireTemp(L.getDesiredTemp(zoneProfile));
                 }
                 invalidate();
             }
         });
     }
-
-
+    
     @Override
     public boolean onTouchEvent(MotionEvent event)
     {
@@ -724,6 +724,7 @@ public class SeekArc extends View implements RoomDataInterface
                 {
                     originalDesireTemp = angleProgress;
                 }
+                Log.d("VAV-TEMP", " Set desired "+originalDesireTemp+" desired "+getDesireTemp()+" angle "+angleProgress);
                 String curTemp = "Desired";
                 mStatusTextPaint.getTextBounds(curTemp, 0, curTemp.length(), bounds);
                 canvas.drawText(curTemp,
@@ -761,6 +762,7 @@ public class SeekArc extends View implements RoomDataInterface
         }
         if (isTouched)
         {
+            Log.d("VAV-TEMP","isTouched");
             if (getDesireTemp() >= getUserLimitStartPoint() &&
                 getDesireTemp() <= getUserLimitEndPoint())
             {
@@ -794,7 +796,6 @@ public class SeekArc extends View implements RoomDataInterface
         }
         if (isFirstRun)
         {
-            Log.d("VAV-TEMP","isFirstRun onDraw set temp "+originalCurrentTemp+" isCurrBeyondLimit "+isCurrBeyondLimit);
             Log.i(TAG, "Is first run");
             String firstTemp;
             if (!isSensorPaired)
@@ -898,6 +899,11 @@ public class SeekArc extends View implements RoomDataInterface
             if (zoneProfile != null)
             {
                 curTemp = Double.toString(zoneProfile.getDisplayCurrentTemp());
+                if (mDesireTemp != 0)
+                {
+                    L.setDesiredTemp(mDesireTemp, zoneProfile); //TODO - Optimize
+                    Log.d("CCU_TEMP", " mDesireTemp " + mDesireTemp);
+                }
             }
             else
             {

@@ -826,7 +826,8 @@ public class ZonesFragment extends Fragment
         rmSeekArc.setTouchInSide(true);
         rmSeekArc.setTouchOutSide(false);
         rmSeekArc.setCurrentTemp(zoneProfile.getDisplayCurrentTemp());
-        rmSeekArc.setDesireTemp(L.resolveZoneProfileLogicalValue(zoneProfile));
+        //rmSeekArc.setDesireTemp(L.resolveZoneProfileLogicalValue(zoneProfile));
+        rmSeekArc.setDesireTemp(L.getDesiredTemp(zoneProfile));
         rmSeekArc.setZone(zone);
         rmSeekArc.invalidate();
         rmSeekArc.setOnSeekArcChangeListener(seekArcChangeListener);
@@ -855,7 +856,8 @@ public class ZonesFragment extends Fragment
         rmSeekArc.setTouchInSide(true);
         rmSeekArc.setTouchOutSide(false);
         rmSeekArc.setCurrentTemp(zoneProfile.getDisplayCurrentTemp());
-        rmSeekArc.setDesireTemp(L.resolveZoneProfileLogicalValue(zoneProfile));
+        //rmSeekArc.setDesireTemp(L.resolveZoneProfileLogicalValue(zoneProfile));
+        rmSeekArc.setDesireTemp(L.getDesiredTemp(zoneProfile));
         rmSeekArc.setZone(zone);
         rmSeekArc.invalidate();
         rmSeekArc.setOnSeekArcChangeListener(seekArcChangeListener);

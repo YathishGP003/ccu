@@ -175,7 +175,7 @@ public class FragmentDeviceScan extends BaseDialogFragment
     private void finish(BluetoothDevice device)
     {
         DialogFragment newFragment = FragmentBLEDevicePin
-                                             .getInstance(mPairingAddress, mName, mFloorName, mNodeType, device);
+                                             .getInstance(mPairingAddress, mName, mFloorName, mNodeType, mProfileType, device);
         showDialogFragment(newFragment, FragmentBLEDevicePin.ID);
     }
     

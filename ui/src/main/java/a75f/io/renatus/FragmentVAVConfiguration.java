@@ -37,6 +37,7 @@ import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.building.vav.VavReheatProfile;
 import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
 import a75f.io.logic.L;
+import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import butterknife.ButterKnife;
@@ -404,6 +405,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
             mZone.mZoneProfiles.add(mVavProfile);
     
         mVavProfile.addLogicalMapAndPoints(mSmartNodeAddress);
+        BuildingTuners.getInstance().addVavTuners();
         L.saveCCUState();
         Log.d("VAVConfig", "Set Config: ");
     

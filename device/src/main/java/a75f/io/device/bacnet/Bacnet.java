@@ -8,4 +8,7 @@ import a75f.io.device.DeviceNetwork;
 
 public class Bacnet extends DeviceNetwork
 {
+    public void sendMessage(){
+    
+    }
 }

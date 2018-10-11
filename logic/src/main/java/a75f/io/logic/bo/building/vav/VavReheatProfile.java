@@ -11,6 +11,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.building.hvac.Valve;
 import a75f.io.logic.bo.building.hvac.VavUnit;
+import a75f.io.logic.tuners.VavTunerUtil;
 
 import static a75f.io.logic.bo.building.vav.VavProfile.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.vav.VavProfile.ZoneState.DEADBAND;
@@ -36,7 +37,10 @@ public class VavReheatProfile extends VavProfile
     @Override
     public void updateZonePoints() {
         
-        setTemp = 72.0;
+        if(mInterface != null)
+        {
+            mInterface.refreshView();
+        }
         
         for (short node : getNodeAddresses())
         {
@@ -61,6 +65,7 @@ public class VavReheatProfile extends VavProfile
             double supplyAirTemp = vavDevice.getSupplyAirTemp();
             double co2 = vavDeviceMap.get(node).getCO2();
             double dischargeSp = vavDevice.getDischargeSp();
+            setTemp = vavDevice.getDesiredTemp();
             
             
             Damper damper = vavUnit.vavDamper;
@@ -69,7 +74,7 @@ public class VavReheatProfile extends VavProfile
             //TODO
             //If supply air temperature from air handler is greater than room temperature, Cooling shall be
             //locked out.
-            if (roomTemp > (setTemp + deadBand))
+            if (roomTemp > (setTemp + VavTunerUtil.getCoolingDeadband()))
             {
                 //Zone is in Cooling
                 if (state != COOLING)
@@ -82,7 +87,7 @@ public class VavReheatProfile extends VavProfile
                 int coolingOp = (int) coolingLoop.getLoopOutput(roomTemp, setTemp+deadBand);
                 loopOp = coolingOp;
             }
-            else if (roomTemp < (setTemp - deadBand))
+            else if (roomTemp < (setTemp - VavTunerUtil.getHeatingDeadband()))
             {
                 //Zone is in heating
                 if (state != HEATING)

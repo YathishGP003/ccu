@@ -10,8 +10,11 @@ import org.influxdb.InfluxDBFactory;
 import org.json.JSONObject;
 import org.junit.Test;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
@@ -227,5 +230,96 @@ public class UnitTest
         influxDB.setRetentionPolicy(rpName);
     }
 
+    @Test
+    public void testRemoteHaystack() {
+    
+        String urlString = "http://127.0.0.1:8080/haystack/";
+        
+        String response = getResult(urlString+"about");
+        System.out.println(response);
+        String addCmd = "ver:\"3.0\" \n" + "geoCity,area,point\n" + "\"Chicago\",76,\"m\"\n" + "\"Miami\",52,\"m\"";
+    
+        String presponse = executePost(urlString+"addEntity", addCmd);
+        System.out.println(presponse);
+    }
+    
+    private String executePost(String targetURL, String urlParameters)
+    {
+        URL url;
+        HttpURLConnection connection = null;
+        try {
+            //Create connection
+            url = new URL(targetURL);
+            connection = (HttpURLConnection)url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Content-Type",
+                    "text/zinc");
+            
+            System.out.println(targetURL);
+            System.out.println(urlParameters);
+            connection.setRequestProperty("Content-Length", "" +
+                                                            Integer.toString(urlParameters.getBytes().length));
+            connection.setRequestProperty("Content-Language", "en-US");
+            
+            connection.setUseCaches (false);
+            connection.setDoInput(true);
+            connection.setDoOutput(true);
+            
+            //Send request
+            DataOutputStream wr = new DataOutputStream (connection.getOutputStream());
+            wr.writeBytes (urlParameters);
+            wr.flush ();
+            wr.close ();
+            
+            //Get Response
+            InputStream is = connection.getInputStream();
+            BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+            String line;
+            StringBuffer response = new StringBuffer();
+            while((line = rd.readLine()) != null) {
+                response.append(line);
+                response.append('\r');
+            }
+            rd.close();
+            return response.toString();
+            
+        } catch (Exception e) {
+            
+            e.printStackTrace();
+            return null;
+            
+        } finally {
+            
+            if(connection != null) {
+                connection.disconnect();
+            }
+        }
+    }
+    
+    private String getResult(String url){
+        
+        StringBuilder result = new StringBuilder();
+        
+        HttpURLConnection urlConnection = null;
+        
+        try {
+            URL restUrl = new URL(url);
+            urlConnection = (HttpURLConnection) restUrl.openConnection();
+            InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+            
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                result.append(line);
+            }
+            
+        }catch( Exception e) {
+            e.printStackTrace();
+        }
+        finally {
+            urlConnection.disconnect();
+        }
+        return result.toString();
+    }
 
 }

@@ -36,9 +36,12 @@ public class VavSeriesFanProfile extends VavProfile
     @Override
     public void updateZonePoints() {
         Log.d(TAG, "VAV Series Fan Control");
-    
-        setTemp = 72.0;
-    
+        
+        if(mInterface != null)
+        {
+            mInterface.refreshView();
+        }
+        
         for (short node : getNodeAddresses())
         {
             if (vavDeviceMap.get(node) == null) {
@@ -58,6 +61,7 @@ public class VavSeriesFanProfile extends VavProfile
             double supplyAirTemp = vavDevice.getSupplyAirTemp();
             double co2 = vavDeviceMap.get(node).getCO2();
             double dischargeSp = vavDevice.getDischargeSp();
+            setTemp = vavDevice.getDesiredTemp();
         
             if (roomTemp == 0) {
                 Log.d(TAG,"Skip PI update for "+node+" roomTemp : "+roomTemp);

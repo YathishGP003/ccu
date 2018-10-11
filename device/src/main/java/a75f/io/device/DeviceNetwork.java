@@ -4,9 +4,7 @@ package a75f.io.device;
  * Created by samjithsadasivan on 9/19/18.
  */
 
-public class DeviceNetwork
+public abstract class DeviceNetwork
 {
-    public void sendMessage() {
-    
-    }
+    public abstract void sendMessage();
 }

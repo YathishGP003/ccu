@@ -8,7 +8,9 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.kinveybo.AlgoTuningParameters;
 import a75f.io.kinveybo.CCUUser;
 import a75f.io.kinveybo.DalContext;
@@ -136,6 +138,38 @@ public class L
     public static float resolveZoneProfileLogicalValue(ZoneProfile profile)
     {
         return LZoneProfile.resolveZoneProfileLogicalValue(profile);
+    }
+    
+    public static float getDesiredTemp(ZoneProfile profile)
+    {
+        for (short node : profile.getNodeAddresses())
+        {
+            ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and desired and sp and group == \"" + node + "\"");
+            String id = ((HashMap)points.get(0)).get("id").toString();
+            if (id == null || id == "") {
+                throw new IllegalArgumentException();
+            }
+            float desiredTemp = CCUHsApi.getInstance().readDefaultValById(id).floatValue();
+            Log.d("CCU", "DesiredTemp : "+desiredTemp);
+            return desiredTemp;
+        }
+        return 0;
+    }
+    
+    public static void setDesiredTemp(double desiredTemp, ZoneProfile profile)
+    {
+        for (short node : profile.getNodeAddresses())
+        {
+            ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and desired and sp and group == \"" + node + "\"");
+            String id = ((HashMap) points.get(0)).get("id").toString();
+            if (id == null || id == "")
+            {
+                throw new IllegalArgumentException();
+            }
+            Log.d("CCU", "Set DesiredTemp : "+desiredTemp);
+            CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
+            CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
+        }
     }
 
 

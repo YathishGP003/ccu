@@ -140,7 +140,7 @@ public class CCUHsApi
      * Write to a 'writable' point
      */
     public void writePoint(String id, int level, String who, Double val, int duration) {
-        hsClient.pointWrite(HRef.make(id), level, who, HNum.make(val), HNum.make(duration));
+        hsClient.pointWrite(HRef.copy(id), level, who, HNum.make(val), HNum.make(duration));
     }
     
     /**

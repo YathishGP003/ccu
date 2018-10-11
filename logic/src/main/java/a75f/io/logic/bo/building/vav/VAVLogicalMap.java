@@ -230,6 +230,7 @@ public class VAVLogicalMap
         setDesiredTemp(0);
         setDischargeTemp(0);
         setSupplyAirTemp(0);
+        setDesiredTemp(72.0);
         
     }
     

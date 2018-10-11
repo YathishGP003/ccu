@@ -30,24 +30,24 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-import a75f.io.bo.building.Circuit;
-import a75f.io.bo.building.Floor;
-import a75f.io.bo.building.LightProfile;
-import a75f.io.bo.building.Output;
-import a75f.io.bo.building.Schedule;
-import a75f.io.bo.building.Zone;
-import a75f.io.bo.building.definitions.MockTime;
-import a75f.io.bo.building.definitions.OverrideType;
-import a75f.io.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.Circuit;
+import a75f.io.logic.bo.building.Floor;
+import a75f.io.logic.bo.building.lights.LightProfile;
+import a75f.io.logic.bo.building.Output;
+import a75f.io.logic.bo.building.Schedule;
+import a75f.io.logic.bo.building.Zone;
+import a75f.io.logic.bo.building.definitions.MockTime;
+import a75f.io.logic.bo.building.definitions.OverrideType;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.L;
 
-import static a75f.io.bo.building.definitions.Port.ANALOG_OUT_ONE;
-import static a75f.io.bo.building.definitions.Port.ANALOG_OUT_TWO;
-import static a75f.io.bo.building.definitions.Port.RELAY_ONE;
-import static a75f.io.bo.building.definitions.Port.RELAY_TWO;
-import static a75f.io.bo.building.definitions.ScheduleMode.CircuitSchedule;
-import static a75f.io.bo.building.definitions.ScheduleMode.NamedSchedule;
-import static a75f.io.bo.building.definitions.ScheduleMode.ZoneSchedule;
+import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
+import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_TWO;
+import static a75f.io.logic.bo.building.definitions.Port.RELAY_ONE;
+import static a75f.io.logic.bo.building.definitions.Port.RELAY_TWO;
+import static a75f.io.logic.bo.building.definitions.ScheduleMode.CircuitSchedule;
+import static a75f.io.logic.bo.building.definitions.ScheduleMode.NamedSchedule;
+import static a75f.io.logic.bo.building.definitions.ScheduleMode.ZoneSchedule;
 import static a75f.io.logic.L.ccu;
 
 public class LightingDetailAdapter extends BaseAdapter

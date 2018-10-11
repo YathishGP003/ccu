@@ -25,16 +25,20 @@ import java.util.TimerTask;
 
 import a75f.io.bluetooth.BLEAction;
 import a75f.io.bluetooth.BLEProvisionService;
-import a75f.io.bo.ble.BLERoomName;
-import a75f.io.bo.ble.GattAttributes;
-import a75f.io.bo.ble.GattPin;
-import a75f.io.bo.ble.StructShort;
-import a75f.io.bo.building.NodeType;
-import a75f.io.bo.serial.SerialConsts;
-import a75f.io.bo.util.ByteArrayUtils;
+import a75f.io.device.ble.BLERoomName;
+import a75f.io.device.ble.GattAttributes;
+import a75f.io.device.ble.GattPin;
+import a75f.io.device.ble.StructShort;
+import a75f.io.logic.bo.building.NodeType;
+import a75f.io.device.serial.SerialConsts;
+import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.util.ByteArrayUtils;
 import a75f.io.logic.L;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import a75f.io.renatus.FragmentHMPConfiguration;
+import a75f.io.renatus.FragmentSSEConfiguration;
+import a75f.io.renatus.FragmentVAVConfiguration;
 import a75f.io.renatus.R;
 import a75f.io.renatus.ZONEPROFILE.LightingZoneProfileFragment;
 import butterknife.BindView;
@@ -69,6 +73,7 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
     String mFloorName;
     short  mPairingAddress;
     boolean mPinEntered = false;
+    ProfileType mProfileType;
     BluetoothDevice     mDevice;
     BLEProvisionService mBLEProvisionService;
     final ServiceConnection mServiceConnection = new ServiceConnection()
@@ -110,7 +115,7 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
     
     
     public static FragmentBLEDevicePin getInstance(short pairingAddress, String name,
-                                                   String mFloorName, NodeType nodeType,
+                                                   String mFloorName, NodeType nodeType, ProfileType profileType,
                                                    BluetoothDevice device)
     {
         FragmentBLEDevicePin bleProvisionDialogFragment = new FragmentBLEDevicePin();
@@ -120,6 +125,7 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
         b.putString(ARG_NAME, name);
         b.putString(FragmentCommonBundleArgs.FLOOR_NAME, mFloorName);
         b.putString(FragmentCommonBundleArgs.NODE_TYPE, nodeType.toString());
+        b.putString(FragmentCommonBundleArgs.PROFILE_TYPE, profileType.toString());
         bleProvisionDialogFragment.setArguments(b);
         return bleProvisionDialogFragment;
     }
@@ -135,8 +141,9 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
             mName = getArguments().getString(ARG_NAME);
             mPairingAddress = getArguments().getShort(ARG_PAIRING_ADDR);
             mFloorName = getArguments().getString(FLOOR_NAME);
-            mNodeType =
-                    NodeType.valueOf(getArguments().getString(FragmentCommonBundleArgs.NODE_TYPE));
+            mNodeType = NodeType.valueOf(getArguments().getString(FragmentCommonBundleArgs.NODE_TYPE));
+            mProfileType = ProfileType.valueOf(getArguments().getString(FragmentCommonBundleArgs.PROFILE_TYPE));
+            
         }
         Intent gattServiceIntent = new Intent(getActivity(), BLEProvisionService.class);
         getActivity().bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
@@ -352,8 +359,27 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                      .show();
                 removeDialogFragment(FragmentDeviceScan.ID);
                 removeDialogFragment(FragmentBLEDevicePin.ID);
-                showDialogFragment(LightingZoneProfileFragment
-                                           .newInstance(mPairingAddress, mName, mNodeType, mFloorName), LightingZoneProfileFragment.ID);
+                switch (mProfileType) {
+                    case LIGHT:
+                        showDialogFragment(LightingZoneProfileFragment
+                                                   .newInstance(mPairingAddress, mName, mNodeType, mFloorName), LightingZoneProfileFragment.ID);
+                        break;
+                    case SSE:
+                        showDialogFragment(FragmentSSEConfiguration
+                                                   .newInstance(mPairingAddress, mName, mNodeType, mFloorName), FragmentSSEConfiguration.ID);
+                        break;
+                    case HMP:
+                        showDialogFragment(FragmentHMPConfiguration
+                                                   .newInstance(mPairingAddress, mName, mNodeType, mFloorName), FragmentHMPConfiguration.ID);
+                        break;
+                    case VAV_REHEAT:
+                    case VAV_SERIES_FAN:
+                    case VAV_PARALLEL_FAN:
+                        showDialogFragment(FragmentVAVConfiguration
+                                                   .newInstance(mPairingAddress, mName, mNodeType, mFloorName, mProfileType), FragmentVAVConfiguration.ID);
+                        break;
+                }
+                
             }
         });
     }

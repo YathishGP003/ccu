@@ -36,6 +36,7 @@ android {
         exclude 'com/fasterxml/jackson/core/json/VERSION.txt'
         exclude 'com/fasterxml/jackson/core/Base64Variant'
         exclude 'com/google/api/client/http/AbstractHttpContent.class'
+        exclude 'thirdpartynotice.txt'
 
     }
     signingConfigs {
@@ -52,18 +53,23 @@ android {
 
     }
     sourceSets { main { assets.srcDirs = ['src/main/assets', 'src/androidTest/assets'] } }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {
     compile 'com.android.support:multidex:1.0.1'
     compile project(':logic')
     compile project(':bluetooth')
-    compile project(':bo')
+    compile project(':device')
     compile project(':usbserial')
     compile 'org.greenrobot:eventbus:3.0.0'
     compile 'com.android.support:design:26.1.0'
     compile 'com.android.support:support-vector-drawable:26.1.0'
-    implementation 'com.jakewharton:butterknife:8.7.0'
+    implementation ('com.jakewharton:butterknife:8.7.0')
     compile 'com.android.support:support-v4:26.1.0'
     compile 'com.android.support:recyclerview-v7:26.1.0'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
@@ -71,7 +77,10 @@ dependencies {
     androidTestCompile 'com.android.support:support-annotations:26.1.0'
     androidTestCompile 'com.android.support.test:runner:1.0.1'
     androidTestCompile 'com.android.support.test:rules:1.0.1'
-    annotationProcessor 'com.jakewharton:butterknife-compiler:8.7.0'
+    annotationProcessor('com.jakewharton:butterknife-compiler:8.7.0') {
+            exclude group: 'com.google.guava'
+    }
+
 
     compile('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') {
         transitive = true
@@ -81,4 +90,6 @@ dependencies {
     compile(name: 'relinker-1.2.2', ext: 'aar')
     compile 'com.opencsv:opencsv:4.0'
     compile 'org.jsoup:jsoup:1.10.3'
+    implementation project(':algos')
+
 }

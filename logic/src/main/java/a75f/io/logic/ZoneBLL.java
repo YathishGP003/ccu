@@ -1,7 +1,7 @@
 package a75f.io.logic;
 
-import a75f.io.bo.building.Floor;
-import a75f.io.bo.building.Zone;
+import a75f.io.logic.bo.building.Floor;
+import a75f.io.logic.bo.building.Zone;
 
 import static a75f.io.logic.L.ccu;
 

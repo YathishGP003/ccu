@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <bool name="developer_test">false</bool>
-    <bool name="simulation">true</bool>
+    <bool name="simulation">false</bool>
+    <integer name="heartbeat">60</integer>
+    <bool name="unit_test">false</bool>
 </resources>

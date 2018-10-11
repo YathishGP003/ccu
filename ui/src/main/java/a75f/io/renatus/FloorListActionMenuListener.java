@@ -8,7 +8,7 @@ import android.widget.AbsListView.MultiChoiceModeListener;
 
 import java.util.ArrayList;
 
-import a75f.io.bo.building.Floor;
+import a75f.io.logic.bo.building.Floor;
 import a75f.io.logic.L;
 
 import static a75f.io.logic.L.ccu;
@@ -90,6 +90,7 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 			Floor floorData = selectedFloor.get(nCount);
 			ccu().getFloors().remove(floorData);
 			L.saveCCUState();
+			floorPlanActivity.refreshScreen();
 		}
 	}
 	

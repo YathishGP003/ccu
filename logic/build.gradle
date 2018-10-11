@@ -10,6 +10,7 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
         javaCompileOptions {
             annotationProcessorOptions {
                 includeCompileClasspath true
@@ -31,6 +32,11 @@ android {
         exclude 'com/fasterxml/jackson/core/json/VERSION.txt'
         exclude 'com/fasterxml/jackson/core/Base64Variant'
         exclude 'com/google/api/client/http/AbstractHttpContent.class'
+        exclude "META-INF/MSFTSIG.SF"
+        exclude "META-INF/MSFTSIG.RSA"
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/NOTICE'
+        exclude 'thirdpartynotice.txt'
 
     }
 
@@ -40,16 +46,16 @@ android {
     }
 
     testOptions {
-        //unitTests.returnDefaultValues = true
+        unitTests.returnDefaultValues = true
     }
+
+    useLibrary 'org.apache.http.legacy'
 
 }
 
 dependencies {
-
-    compile fileTree(include: '*.jar', dir: 'libs')
     testCompile 'junit:junit:4.12'
-    compile project(':bo')
+    compile fileTree(include: '*.jar', dir: 'libs')
     compile project(path: ':usbserial')
     compile(name: 'kinvey-android-3.0.8', ext: 'aar')
     compile(name: 'realm-android-library-3.2.1', ext: 'aar')
@@ -57,6 +63,15 @@ dependencies {
     compile 'com.github.pschroen:slack-api-android:c66cc8d997'
     androidTestCompile 'com.android.support.test:runner:1.0.1'
     androidTestCompile 'com.android.support.test:rules:1.0.1'
+    implementation project(':algos')
+    compile('com.microsoft.azure.sdk.iot:iot-device-client:1.5.37') {
+        exclude group: 'com.google.code.gson'
+    }
+    compile 'info.guardianproject.netcipher:netcipher:1.2'
 
-
+    implementation project(':haystack')
+    implementation project(':usbserial')
+    compile 'joda-time:joda-time:2.9.9'
+    compile project(path: ':kinveybo')
+    compile 'org.influxdb:influxdb-java:2.10'
 }

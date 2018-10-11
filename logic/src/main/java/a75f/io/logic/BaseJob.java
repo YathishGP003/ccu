@@ -1,35 +1,33 @@
 package a75f.io.logic;
 
+import android.util.Log;
+
 import java.util.concurrent.TimeUnit;
 
-import static a75f.io.logic.LLog.Logd;
-
 /**
- * Created by Yinten on 9/14/2017.
+ * Created by samjithsadasivan on 9/14/18.
  */
 
-abstract class BaseJob
+public abstract class BaseJob
 {
-    
     protected String mName;
     
     
-    protected void scheduleJob(String name, int interval, int taskSeperation, TimeUnit unit)
+    public void scheduleJob(String name, int interval, int taskSeperation, TimeUnit unit)
     {
         mName = name;
-        Logd("Scheduling: " + name + " interval: " + interval + " task Seperation:  " +
-             taskSeperation + " unit: " + unit.name());
+        Log.i("CCU_LOGIC","Scheduling: " + name + " interval: " + interval + " task Seperation:  " + taskSeperation + " unit: " + unit.name());
         // This task runs every minute.
         Globals.getInstance().getScheduledThreadPool().scheduleAtFixedRate(new Runnable()
         {
             public void run()
             {
-                Logd("Job: " + mName + " executing");
+                Log.i("CCU_LOGIC", "Job: " + mName + " executing");
                 doJob();
             }
         }, taskSeperation, interval, unit);
     }
     
     
-    protected abstract void doJob();
+    public abstract void doJob();
 }

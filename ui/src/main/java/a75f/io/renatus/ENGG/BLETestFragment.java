@@ -17,8 +17,8 @@ import android.widget.Spinner;
 import java.util.Arrays;
 import java.util.List;
 
-import a75f.io.bo.building.NodeType;
-import a75f.io.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.NodeType;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.renatus.BLE.FragmentDeviceScan;
 import a75f.io.renatus.R;
 import butterknife.BindView;

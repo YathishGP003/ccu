@@ -10,7 +10,7 @@ import org.junit.runner.RunWith;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import a75f.io.bo.building.CCUApplication;
+import a75f.io.logic.bo.building.CCUApplication;
 
 /**
  * Base class for functional test cases , runs with SimulationRunner and enforces each test to have config and test input files

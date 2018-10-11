@@ -37,19 +37,21 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import a75f.io.bo.building.Floor;
-import a75f.io.bo.building.LightProfile;
-import a75f.io.bo.building.SingleStageProfile;
-import a75f.io.bo.building.Zone;
-import a75f.io.bo.building.ZoneProfile;
-import a75f.io.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.Floor;
+import a75f.io.logic.bo.building.HmpProfile;
+import a75f.io.logic.bo.building.lights.LightProfile;
+import a75f.io.logic.bo.building.sse.SingleStageProfile;
+import a75f.io.logic.bo.building.vav.VavProfile;
+import a75f.io.logic.bo.building.Zone;
+import a75f.io.logic.bo.building.ZoneProfile;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.kinveybo.AlgoTuningParameters;
 import a75f.io.logic.L;
 import a75f.io.renatus.views.SeekArc;
 import a75f.io.renatus.views.ZoneImageWidget;
 
-import static a75f.io.bo.building.definitions.ScheduleMode.NamedSchedule;
-import static a75f.io.bo.building.definitions.ScheduleMode.ZoneSchedule;
+import static a75f.io.logic.bo.building.definitions.ScheduleMode.NamedSchedule;
+import static a75f.io.logic.bo.building.definitions.ScheduleMode.ZoneSchedule;
 import static a75f.io.logic.L.ccu;
 
 /**
@@ -93,6 +95,10 @@ public class ZonesFragment extends Fragment
 
     private LinearLayout mLightingRow   = null;
     private View         mLcmHeaderView = null;
+    
+    private LinearLayout zoneDetailsRow;
+    private TextView zoneStatusView;
+    
     private DataArrayAdapter<Floor> floorDataAdapter;
     private SeekArc.OnSeekArcChangeListener seekArcChangeListener =
             new SeekArc.OnSeekArcChangeListener()
@@ -402,6 +408,9 @@ public class ZonesFragment extends Fragment
                             roomButtonGrid.addView(mLightingRow, nDetailsLoc);
                             UpdateRoomLightingWidget((LightProfile) w.getProfile(), false);
                             //mLightingRow.startAnimation(in);
+                        } else if (w.getProfile() instanceof  HmpProfile) {
+                            roomButtonGrid.addView(zoneDetailsRow, nDetailsLoc);
+                            updateHmpWidget((HmpProfile) w.getProfile());
                         }
                         mDetailsView = true;
                         nSelectedRoomIndex = index;
@@ -446,6 +455,9 @@ public class ZonesFragment extends Fragment
                                 roomButtonGrid.addView(mLightingRow, nDetailsLoc);
                                 UpdateRoomLightingWidget((LightProfile) w.getProfile(), false);
                                 //mLightingRow.startAnimation(in);
+                            }else if (w.getProfile() instanceof  HmpProfile) {
+                                roomButtonGrid.addView(zoneDetailsRow, nDetailsLoc);
+                                updateHmpWidget((HmpProfile) w.getProfile());
                             }
                             mDetailsView = true;
                             nSelectedRoomIndex = index;
@@ -742,16 +754,38 @@ public class ZonesFragment extends Fragment
                     if (zoneProfile.getProfileType() == ProfileType.LIGHT)
                     {
                         ZoneImageWidget zWidget = new ZoneImageWidget(getActivity()
-                                                                              .getApplicationContext(), z.roomName, z.findProfile(ProfileType.LIGHT), index);
+                                                                              .getApplicationContext(),z.roomName, z.findProfile(ProfileType.LIGHT), index);
                         zWidget.setLayoutParams(new LinearLayout.LayoutParams(room_width, room_height));
+                        zWidget.setZoneImage(R.drawable.light_orange);
                         zWidget.setOnClickChangeListener(zoneWidgetListener);
                         zoneWidgetList.add(zWidget);
+                        viewToAdd = zWidget;
+                    }else if (zoneProfile.getProfileType() == ProfileType.HMP)
+                    {
+                        ZoneImageWidget zWidget = new ZoneImageWidget(getActivity()
+                                                                              .getApplicationContext(), z.roomName, z.findProfile(ProfileType.HMP), index);
+                        zWidget.setLayoutParams(new LinearLayout.LayoutParams(room_width, room_height));
+                        zWidget.setZoneImage(R.drawable.hotwater_mixture_orange);
+                        zWidget.setOnClickChangeListener(zoneWidgetListener);
+                        HmpProfile profile = (HmpProfile) zoneProfile;
+                        zWidget.setZoneTemp(profile.getHwTemperature()+"/"+profile.getSetTemperature());
+                        zoneWidgetList.add(zWidget);
+                        
                         viewToAdd = zWidget;
                     }
                     else if (zoneProfile.getProfileType() == ProfileType.SSE)
                     {
                         SeekArc seekArc =
                                 AddNewArc(z, (SingleStageProfile) zoneProfile, new LinearLayout.LayoutParams(room_width, room_height), index);
+                        seekArcList.add(seekArc);
+                        viewToAdd = seekArc;
+                    }
+                    else if (zoneProfile.getProfileType() == ProfileType.VAV_REHEAT ||
+                             zoneProfile.getProfileType() == ProfileType.VAV_SERIES_FAN ||
+                             zoneProfile.getProfileType() == ProfileType.VAV_PARALLEL_FAN)
+                    {
+                        SeekArc seekArc =
+                                AddNewArc(z, (VavProfile) zoneProfile, new LinearLayout.LayoutParams(room_width, room_height), index);
                         seekArcList.add(seekArc);
                         viewToAdd = seekArc;
                     }
@@ -792,7 +826,8 @@ public class ZonesFragment extends Fragment
         rmSeekArc.setTouchInSide(true);
         rmSeekArc.setTouchOutSide(false);
         rmSeekArc.setCurrentTemp(zoneProfile.getDisplayCurrentTemp());
-        rmSeekArc.setDesireTemp(L.resolveZoneProfileLogicalValue(zoneProfile));
+        //rmSeekArc.setDesireTemp(L.resolveZoneProfileLogicalValue(zoneProfile));
+        rmSeekArc.setDesireTemp(L.getDesiredTemp(zoneProfile));
         rmSeekArc.setZone(zone);
         rmSeekArc.invalidate();
         rmSeekArc.setOnSeekArcChangeListener(seekArcChangeListener);
@@ -800,8 +835,39 @@ public class ZonesFragment extends Fragment
         //rmSeekArc.refreshView();
         return rmSeekArc;
     }
-
-
+    
+    public SeekArc AddNewArc(Zone zone, ZoneProfile zoneProfile,
+                             LinearLayout.LayoutParams lp, int index)
+    {
+        SeekArc rmSeekArc =
+                new SeekArc(getActivity().getApplicationContext(), attributeSet, null);
+        rmSeekArc.setCMDataToSeekArc(zoneProfile, zone.roomName, index);
+        rmSeekArc.setLayoutParams(lp);
+        rmSeekArc.setmPathStartAngle(120);
+        rmSeekArc
+                .setmBuildingLimitStartAngle((int) L.resolveTuningParameter(zone, AlgoTuningParameters.SSETuners.SSE_BUILDING_MIN_TEMP));
+        rmSeekArc
+                .setmBuildingLimitEndAngle((int) L.resolveTuningParameter(zone, AlgoTuningParameters.SSETuners.SSE_BUILDING_MAX_TEMP));
+        rmSeekArc.prepareAngle();
+        rmSeekArc
+                .setLimitStartAngle((int) L.resolveTuningParameter(zone, AlgoTuningParameters.SSETuners.SSE_USER_MIN_TEMP));
+        rmSeekArc
+                .setLimitEndAngle((int) L.resolveTuningParameter(zone, AlgoTuningParameters.SSETuners.SSE_USER_MAX_TEMP));
+        rmSeekArc.setTouchInSide(true);
+        rmSeekArc.setTouchOutSide(false);
+        rmSeekArc.setCurrentTemp(zoneProfile.getDisplayCurrentTemp());
+        //rmSeekArc.setDesireTemp(L.resolveZoneProfileLogicalValue(zoneProfile));
+        rmSeekArc.setDesireTemp(L.getDesiredTemp(zoneProfile));
+        rmSeekArc.setZone(zone);
+        rmSeekArc.invalidate();
+        rmSeekArc.setOnSeekArcChangeListener(seekArcChangeListener);
+        rmSeekArc.setOnClickChangeListener(seekArcClickListener);
+        //rmSeekArc.refreshView();
+        return rmSeekArc;
+    }
+    
+    
+    
     private AttributeSet getSeekbarXmlAttributes()
     {
         AttributeSet as = null;
@@ -842,6 +908,7 @@ public class ZonesFragment extends Fragment
         zoneWidgetList = new ArrayList<>();
         createLighting(inflater);
         createSSE(inflater);
+        createHmp(inflater);
     }
 
 
@@ -850,8 +917,7 @@ public class ZonesFragment extends Fragment
         mLightingRow = (LinearLayout) inflater.inflate(R.layout.zone_detail_list, null);
         mLightsDetailsView = (ListView) mLightingRow.findViewById(R.id.lighting_detail_list);
     }
-
-
+    
     private void createSSE(LayoutInflater inflater)
     {
         mRoomDetailsWidget = (RelativeLayout) inflater.inflate(R.layout.roomdetails_inline, null);
@@ -905,8 +971,16 @@ public class ZonesFragment extends Fragment
         });
         tvVacationFromTo = (TextView) mRoomDetailsWidget.findViewById(R.id.vacationFromTo);
     }
-
-
+    
+    private void createHmp(LayoutInflater inflater)
+    {
+        zoneDetailsRow = (LinearLayout) inflater.inflate(R.layout.zone_details_hmp, null);
+        zoneStatusView = (TextView) zoneDetailsRow.findViewById(R.id.statusMsg);
+    }
+    
+    
+    
+    
     public void UpdateRoomLightingWidget(final LightProfile roomData, Boolean lcmdabfsv)
     {
         mLightsDetailsView.setAdapter(null);
@@ -972,6 +1046,9 @@ public class ZonesFragment extends Fragment
         new LayoutHelper(getActivity()).setListViewParams(mLightsDetailsView, null, 0, 0, expand);
     }
 
+    private void updateHmpWidget(HmpProfile p) {
+        zoneStatusView.setText("Current Hot Water Signal is "+(short)Math.round(p.getHmpValvePosition())+"%" );
+    }
 
     private void showLCMLightScheduleFragment(Floor floor, Zone zone, ZoneProfile zoneProfile)
     {

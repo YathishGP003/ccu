@@ -6,20 +6,20 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.ArrayList;
 
-import a75f.io.bo.building.Circuit;
-import a75f.io.bo.building.Day;
-import a75f.io.bo.building.Output;
-import a75f.io.bo.building.Schedulable;
-import a75f.io.bo.building.Schedule;
-import a75f.io.bo.building.ZoneProfile;
-import a75f.io.bo.building.definitions.MockTime;
-import a75f.io.bo.building.definitions.OverrideType;
+import a75f.io.logic.bo.building.Circuit;
+import a75f.io.logic.bo.building.Day;
+import a75f.io.logic.bo.building.Output;
+import a75f.io.logic.bo.building.Schedulable;
+import a75f.io.logic.bo.building.Schedule;
+import a75f.io.logic.bo.building.ZoneProfile;
+import a75f.io.logic.bo.building.definitions.MockTime;
+import a75f.io.logic.bo.building.definitions.OverrideType;
 
 /**
  * Created by Yinten on 9/10/2017.
  */
 
-class LZoneProfile
+public class LZoneProfile
 {
     private static final String TAG = "ZoneProfile";
     
@@ -203,7 +203,7 @@ class LZoneProfile
         long mockTime = MockTime.getInstance().getMockTime();
         for (int i = 0; i < schedule.getScheduledIntervals().size(); i++)
         {
-            if (schedule.getScheduledIntervals().get(i).contains(mockTime))
+            //if (schedule.getScheduledIntervals().get(i).contains(mockTime))
             {
                 return schedule.getDays().get(i);
             }

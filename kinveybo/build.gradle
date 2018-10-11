@@ -37,7 +37,14 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
-    compile(name: 'kinvey-android-3.0.8', ext: 'aar')
-    compile(name: 'realm-android-library-3.2.1', ext: 'aar')
-    compile(name: 'relinker-1.2.2', ext: 'aar')
+    compile(name: 'kinvey-android-3.0.8', ext: 'aar'){
+        exclude group: 'com.google.code.gson'
+    }
+    compile(name: 'realm-android-library-3.2.1', ext: 'aar'){
+        exclude group: 'com.google.code.gson'
+    }
+    compile(name: 'relinker-1.2.2', ext: 'aar'){
+        exclude group: 'com.google.code.gson'
+    }
+
 }

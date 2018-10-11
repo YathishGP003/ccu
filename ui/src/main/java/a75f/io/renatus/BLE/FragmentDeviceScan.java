@@ -21,9 +21,9 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
-import a75f.io.bo.building.NodeType;
-import a75f.io.bo.building.definitions.ProfileType;
-import a75f.io.bo.serial.SerialConsts;
+import a75f.io.logic.bo.building.NodeType;
+import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.device.serial.SerialConsts;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.R;
 import butterknife.BindView;
@@ -175,7 +175,7 @@ public class FragmentDeviceScan extends BaseDialogFragment
     private void finish(BluetoothDevice device)
     {
         DialogFragment newFragment = FragmentBLEDevicePin
-                                             .getInstance(mPairingAddress, mName, mFloorName, mNodeType, device);
+                                             .getInstance(mPairingAddress, mName, mFloorName, mNodeType, mProfileType, device);
         showDialogFragment(newFragment, FragmentBLEDevicePin.ID);
     }
     

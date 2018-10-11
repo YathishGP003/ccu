@@ -49,10 +49,10 @@
         <item>  0-50A Current Transformer</item>
     </string-array>
     <string-array name="hvac_equip_select">
-        <item>  DX-Unit</item>
-        <item>  Chiller/AHU </item>
-        <item>  Pneumatic VAV </item>
-        <item>  VAV with Reheat </item>
+        <item>  AHU </item>
+        <item>  RTU-IE </item>
+        <item>  Staged RTU </item>
+        <item>  Default (PI Control) </item>
     </string-array>
 
     <string-array name="mode">
@@ -75,6 +75,30 @@
     <string-array name="scheduleLCM">
         <item>   LCM Zone Schedule</item>
         <item>   Named Schedule</item>
+    </string-array>
+
+    <string-array name="reheat_port">
+        <item>   ANALOG 2 OUT</item>
+        <item>   RELAY 1</item>
+    </string-array>
+
+    <string-array name="zone_priority">
+        <item >High</item>
+        <item >Normal</item>
+        <item >Low</item>
+        <item >No Priority</item>
+    </string-array>
+
+    <string-array name="damper_size">
+        <item >4</item>
+        <item >6</item>
+        <item >8</item>
+        <item >10</item>
+        <item >12</item>
+        <item >14</item>
+        <item >16</item>
+        <item >18</item>
+        <item >20</item>
     </string-array>
 
 </resources>

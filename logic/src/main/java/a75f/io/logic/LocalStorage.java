@@ -5,10 +5,7 @@ import android.content.SharedPreferences;
 
 import java.io.IOException;
 
-import a75f.io.bo.building.CCUApplication;
-import a75f.io.bo.json.serializers.JsonSerializer;
-
-import static a75f.io.logic.LLog.Logd;
+import a75f.io.logic.bo.building.CCUApplication;
 
 class LocalStorage
 {
@@ -23,8 +20,8 @@ class LocalStorage
     public static CCUApplication getApplicationSettings()
     {
         String ccuSettings = getCCUSettings(L.app()).getString(VAR_CCU_SETTINGS, null);
-        Logd("==========GET APPLICATION SETTINGS================");
-        Logd(ccuSettings != null ? ccuSettings : "Settings are empty");
+        //Logd("==========GET APPLICATION SETTINGS================");
+        //Logd(ccuSettings != null ? ccuSettings : "Settings are empty");
         if (ccuSettings != null && !ccuSettings.equals(""))
         {
             try
@@ -36,7 +33,8 @@ class LocalStorage
                 e.printStackTrace();
             }
         }
-        return new CCUApplication();
+        CCUApplication ccu = new CCUApplication();
+        return ccu;
     }
     
     
@@ -49,8 +47,8 @@ class LocalStorage
     public static String getApplicationSettingsAsString()
     {
         String ccuSettings = getCCUSettings(L.app()).getString(VAR_CCU_SETTINGS, null);
-        Logd("==========GET APPLICATION SETTINGS================");
-        Logd(ccuSettings != null ? ccuSettings : "Settings are empty");
+        //Logd("==========GET APPLICATION SETTINGS================");
+        //Logd(ccuSettings != null ? ccuSettings : "Settings are empty");
         return ccuSettings;
     }
     
@@ -72,8 +70,8 @@ class LocalStorage
         try
         {
             String jsonString = JsonSerializer.toJson(L.ccu(), true);
-            Logd("==========SET APPLICATION SETTINGS================");
-            Logd(jsonString);
+            //Logd("==========SET APPLICATION SETTINGS================");
+            //Logd(jsonString);
             getCCUSettings(L.app()).edit().putString(VAR_CCU_SETTINGS, jsonString).apply();
         }
         catch (IOException e)

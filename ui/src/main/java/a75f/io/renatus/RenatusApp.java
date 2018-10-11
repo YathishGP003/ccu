@@ -6,7 +6,6 @@ import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 
-import a75f.io.logic.UtilityApplication;
 import io.fabric.sdk.android.Fabric;
 
 /**

@@ -34,11 +34,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import a75f.io.bo.json.serializers.JsonSerializer;
-import a75f.io.bo.serial.CcuToCmOverUsbSmartStatSettingsMessage_t;
-import a75f.io.bo.serial.MessageType;
-import a75f.io.bo.serial.comm.SerialAction;
-import a75f.io.bo.serial.comm.SerialEvent;
+import a75f.io.device.json.serializers.JsonSerializer;
+import a75f.io.device.serial.CcuToCmOverUsbSmartStatSettingsMessage_t;
+import a75f.io.device.serial.MessageType;
+import a75f.io.usbserial.SerialAction;
+import a75f.io.usbserial.SerialEvent;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.R;
 import a75f.io.usbserial.UsbService;

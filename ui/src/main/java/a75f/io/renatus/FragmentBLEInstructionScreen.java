@@ -9,9 +9,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import a75f.io.bo.building.NodeType;
-import a75f.io.bo.building.Zone;
-import a75f.io.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.NodeType;
+import a75f.io.logic.bo.building.Zone;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.L;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
@@ -103,6 +103,34 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
             {
                 FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan
                                                                 .getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.SSE);
+                showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
+            }
+        }
+        else if (mProfileType == ProfileType.HMP)
+        {
+            if (L.isSimulation())
+            {
+                showDialogFragment(FragmentHMPConfiguration
+                                           .newInstance(mNodeAddress, mRoomName, mNodeType, mFloorName), FragmentHMPConfiguration.ID);
+            }
+            else
+            {
+                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan
+                                                                .getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.HMP);
+                showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
+            }
+        }
+        else if (mProfileType == ProfileType.VAV_REHEAT || mProfileType == ProfileType.VAV_SERIES_FAN || mProfileType == ProfileType.VAV_PARALLEL_FAN)
+        {
+            if (L.isSimulation())
+            {
+                showDialogFragment(FragmentVAVConfiguration
+                                           .newInstance(mNodeAddress, mRoomName, mNodeType, mFloorName, mProfileType), FragmentVAVConfiguration.ID);
+            }
+            else
+            {
+                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan
+                                                                .getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, mProfileType);
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
             }
         }

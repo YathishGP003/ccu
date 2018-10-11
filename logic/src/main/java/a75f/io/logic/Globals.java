@@ -7,14 +7,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import a75f.io.bo.building.CCUApplication;
-import a75f.io.bo.building.Day;
-import a75f.io.bo.building.NamedSchedule;
-import a75f.io.bo.building.Schedule;
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.kinveybo.AlgoTuningParameters;
 import a75f.io.kinveybo.DalContext;
-
-import static a75f.io.logic.LLog.Logd;
+import a75f.io.logic.bo.building.CCUApplication;
+import a75f.io.logic.bo.building.Day;
+import a75f.io.logic.bo.building.NamedSchedule;
+import a75f.io.logic.bo.building.Schedule;
 
 /**
  * Created by rmatt isOn 7/19/2017.
@@ -24,21 +23,22 @@ import static a75f.io.logic.LLog.Logd;
 /*
     This is used to keep track of global static associated with application context.
  */
-class Globals
+public class Globals
 {
 
     private static final int      NUMBER_OF_CYCLICAL_TASKS_RENATUS_REQUIRES = 10;
     private static final int      TASK_SEPERATION                           = 3;
     private static final TimeUnit TASK_SERERATION_TIMEUNIT                  = TimeUnit.SECONDS;
     private static Globals globals;
-    HeartBeatJob mHeartBeatJob;
-    MeshUpdateJob mMeshUpdateJob = new MeshUpdateJob();
+    //HeartBeatJob mHeartBeatJob;
+    BuildingProcessJob mProcessJob = new BuildingProcessJob();
     private ScheduledExecutorService taskExecutor;
     private Context                  mApplicationContext;
     private CCUApplication           mCCUApplication;
     private LZoneProfile             mLZoneProfile;
     private boolean isSimulation = false;
     private boolean isDeveloperTest = true;
+    CCUHsApi apiInstance;
 
 
     private Globals()
@@ -112,22 +112,26 @@ class Globals
         taskExecutor = Executors.newScheduledThreadPool(NUMBER_OF_CYCLICAL_TASKS_RENATUS_REQUIRES);
         DalContext.instantiate(this.mApplicationContext);
         populate();
-        mHeartBeatJob = new HeartBeatJob();
+        //mHeartBeatJob = new HeartBeatJob();
         //5 seconds after application initializes start heart beat
-        int HEARTBEAT_INTERVAL = 60;
-        Logd("Scheduling ---- HeartBeat Job");
-        mHeartBeatJob
-                .scheduleJob("Heartbeat Job", HEARTBEAT_INTERVAL, TASK_SEPERATION, TASK_SERERATION_TIMEUNIT);
-        Logd("Scheduling ---- MeshUpdate Job");
-        mMeshUpdateJob.scheduleJob("Mesh Update Job", HEARTBEAT_INTERVAL,
+        int DEFAULT_HEARTBEAT_INTERVAL = 60;
+        //Logd("Scheduling ---- HeartBeat Job");
+        
+        int hearbeatInterval = getApplicationContext().getResources().getInteger(R.integer.heartbeat);
+        if (hearbeatInterval == 0) {
+            hearbeatInterval = DEFAULT_HEARTBEAT_INTERVAL;
+        }
+        
+        //mHeartBeatJob
+        //        .scheduleJob("Heartbeat Job", hearbeatInterval, TASK_SEPERATION, TASK_SERERATION_TIMEUNIT);
+        //Logd("Scheduling ---- MeshUpdate Job");
+        
+        mProcessJob.scheduleJob("Building Process Job", hearbeatInterval,
                 TASK_SEPERATION * 2, TASK_SERERATION_TIMEUNIT);
-        //5 seconds after heart beat initializes start profile scheduler.
-        //Application in simulation mode notes
-        //--Skips BLE
-        //--Adds sleeps between any Serial Activity to work with biskit.
+        
         isSimulation = getApplicationContext().getResources().getBoolean(R.bool.simulation);
-        Logd("Simulation ----- " + isSimulation);
         isDeveloperTest = getApplicationContext().getResources().getBoolean(R.bool.developer_test);
+        apiInstance = new CCUHsApi(this.mApplicationContext);
     }
 
     public DalContext getDalContext()
@@ -201,9 +205,12 @@ class Globals
         return isDeveloperTest;
     }
 
-
     public void setCCU(CCUApplication CCU)
     {
         this.mCCUApplication = CCU;
+    }
+    
+    public void saveTags(){
+        apiInstance.saveTagsData();
     }
 }

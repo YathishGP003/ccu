@@ -3,6 +3,7 @@ package a75f.io.renatus;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,10 +11,10 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
-import a75f.io.bo.building.LightProfile;
-import a75f.io.bo.building.NodeType;
-import a75f.io.bo.building.Zone;
-import a75f.io.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.lights.LightProfile;
+import a75f.io.logic.bo.building.NodeType;
+import a75f.io.logic.bo.building.Zone;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.L;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
@@ -44,6 +45,8 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     RadioGroup  wrmProfilingRadioGrp;
     @BindView(R.id.dabModuleTypeRB)
     RadioButton dabModuleTypeRB;
+    @BindView(R.id.vavModuleTypeRB)
+    RadioButton vavModuleTypeRB;
     @BindView(R.id.lcmModuleTypeRB)
     RadioButton lcmModuleTypeRB;
     @BindView(R.id.sseModuleTypeRB)
@@ -56,6 +59,15 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     RadioButton ccmModuleTypeRB;
     @BindView(R.id.hwpModuleTypeRB)
     RadioButton hwpModuleTypeRB;
+    
+    @BindView(R.id.vavUnitSelector)
+    RadioGroup vavUnitSelector;
+    @BindView(R.id.vavReheat)
+    RadioButton vavReheat;
+    @BindView(R.id.vavSeriesFan)
+    RadioButton vavSeriesFan;
+    @BindView(R.id.vavParallelFan)
+    RadioButton vavParallelFan;
     
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState)
@@ -75,6 +87,11 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     void onSecondButtonClick()
     {
         openBLEPairingInstructions();
+    }
+    
+    @OnClick(R.id.vavModuleTypeRB)
+    void onVavSelected() {
+        vavUnitSelector.setVisibility(View.VISIBLE);
     }
     
     @Override
@@ -101,6 +118,27 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
         {
             showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.SSE, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
         }
+        else if (hwpModuleTypeRB.isChecked())
+        {
+            showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.HMP, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
+        }
+        else if (vavModuleTypeRB.isChecked())
+        {
+            ProfileType profile = null;
+            switch (vavUnitSelector.getCheckedRadioButtonId()) {
+                case R.id.vavReheat:
+                    profile = ProfileType.VAV_REHEAT;
+                    break;
+                case R.id.vavSeriesFan:
+                    profile = ProfileType.VAV_SERIES_FAN;
+                    break;
+                case R.id.vavParallelFan:
+                    profile = ProfileType.VAV_PARALLEL_FAN;
+                    break;
+                    
+            }
+            showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, profile, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
+        }
     }
     
     @Override
@@ -113,6 +151,30 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
             int width = ViewGroup.LayoutParams.MATCH_PARENT;
             int height = ViewGroup.LayoutParams.MATCH_PARENT;
             dialog.getWindow().setLayout(width, height);
+        }
+        setTitle();
+    }
+    
+    private void setTitle() {
+        Dialog dialog = getDialog();
+        
+        if (dialog == null) {
+            return;
+        }
+        dialog.setTitle("Select Module Type");
+        TextView titleView = this.getDialog().findViewById(android.R.id.title);
+        if(titleView != null)
+        {
+            titleView.setGravity(Gravity.CENTER);
+            titleView.setTextColor(getResources().getColor(R.color.progress_color_orange));
+        }
+        int titleDividerId = getContext().getResources()
+                                         .getIdentifier("titleDivider", "id", "android");
+        
+        View titleDivider = dialog.findViewById(titleDividerId);
+        if (titleDivider != null) {
+            titleDivider.setBackgroundColor(getContext().getResources()
+                                                        .getColor(R.color.transparent));
         }
     }
     

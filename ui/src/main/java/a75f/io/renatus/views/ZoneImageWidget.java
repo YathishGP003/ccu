@@ -7,8 +7,8 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import a75f.io.bo.building.LightProfile;
-import a75f.io.bo.building.ZoneProfile;
+import a75f.io.logic.bo.building.lights.LightProfile;
+import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.renatus.R;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -26,8 +26,8 @@ public class ZoneImageWidget extends RelativeLayout
 	@BindView(R.id.zoneName)
 	TextView zoneName;
 
-	@BindView(R.id.zoneRefTemp)
-	TextView zoneRefTemp;
+	@BindView(R.id.zoneTemp)
+	TextView zoneTemp;
 
 	private Context         mContext;
 	private OnClickListener mOnClickListener;
@@ -54,12 +54,18 @@ public class ZoneImageWidget extends RelativeLayout
 		zoneName.setText(mZoneName);
 		if (mProfile instanceof LightProfile)
 		{
-			zoneImage
-					.setImageDrawable(mContext.getResources().getDrawable(R.drawable.light_orange));
+		
 		}
 	}
 
+	public void setZoneImage(int id) {
+		zoneImage.setImageDrawable(getResources().getDrawable(id));
+	}
 
+	public void setZoneTemp(String temp) {
+		zoneTemp.setText(temp);
+		zoneTemp.setVisibility(VISIBLE);
+	}
 	public void setOnClickChangeListener(ZoneImageWidget.OnClickListener l)
 	{
 		mOnClickListener = l;

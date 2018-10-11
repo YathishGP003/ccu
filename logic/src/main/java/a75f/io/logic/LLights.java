@@ -1,25 +1,12 @@
 package a75f.io.logic;
 
-import a75f.io.bo.building.LightProfile;
-import a75f.io.bo.building.Output;
-import a75f.io.bo.building.Zone;
-import a75f.io.bo.building.ZoneProfile;
-import a75f.io.bo.building.definitions.ProfileType;
-import a75f.io.bo.building.definitions.ScheduleMode;
-import a75f.io.bo.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
-import a75f.io.bo.serial.CcuToCmOverUsbSnControlsMessage_t;
-import a75f.io.kinveybo.AlgoTuningParameters;
-
-import static a75f.io.logic.L.ccu;
-import static a75f.io.logic.LZoneProfile.resolveZoneProfileLogicalValue;
-
 /**
  * Created by ryant on 10/10/2017.
  */
 
 public class LLights
 {
-    public static void mapLightCircuits(CcuToCmOverUsbSnControlsMessage_t controlsMessage_t,
+    /*public static void mapLightCircuits(CcuToCmOverUsbSnControlsMessage_t controlsMessage_t,
                                         short nodeAddress, Zone zone, ZoneProfile zp)
     {
         for (Output output : zp.getProfileConfiguration(nodeAddress).getOutputs())
@@ -50,5 +37,5 @@ public class LLights
                 .set((short) (int)L.resolveTuningParameter(zone, AlgoTuningParameters.LightTuners
                                                                              .LIGHT_MIN_LIGHTING_CONTROL_OVERRIDE_IN_MINUTES));
         seedMessage.settings.profileBitmap.lightingControl.set((short) 1);
-    }
+    }*/
 }

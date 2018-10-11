@@ -12,8 +12,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import junit.framework.Assert;
 
 import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -35,10 +33,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
-import a75f.io.bo.building.CCUApplication;
+import a75f.io.logic.bo.building.CCUApplication;
 import a75f.io.logic.L;
 
-import static a75f.io.logic.L.ccu;
 import static java.lang.Thread.sleep;
 
 /**

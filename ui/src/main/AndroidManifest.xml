@@ -61,9 +61,22 @@
         </service>
         <!-- TODO we don't want this and shouldn't need it, we should monitor the USB connection, not kick the application whenever it restarts -->
 
-        <activity
+        <!--<activity
             android:name=".ui.register.OnboardingWizard" android:launchMode="singleTask"
             android:label="OnBoardingWizard"
+            android:alwaysRetainTaskState="true"
+            android:theme="@style/RenatusAppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+
+        </activity>-->
+
+        <activity
+            android:name=".RenatusLandingActivity" android:launchMode="singleTask"
+            android:label="RenatusLandingActivity"
             android:alwaysRetainTaskState="true"
             android:theme="@style/RenatusAppTheme.NoActionBar">
             <intent-filter>

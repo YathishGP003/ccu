@@ -2,6 +2,7 @@ package a75f.io.renatus;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.SwitchCompat;
@@ -23,20 +24,20 @@ import android.widget.TextView;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
-import a75f.io.logic.bo.building.vav.VavParallelFanProfile;
-import a75f.io.logic.bo.building.vav.VavProfile;
-import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 import a75f.io.logic.bo.building.Zone;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Damper;
+import a75f.io.logic.bo.building.vav.VavParallelFanProfile;
+import a75f.io.logic.bo.building.vav.VavProfile;
+import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 import a75f.io.logic.bo.building.vav.VavReheatProfile;
 import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
-import a75f.io.logic.L;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
@@ -362,9 +363,21 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         setButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                setupVavZoneProfile();
+    
+                new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected Void doInBackground( final Void ... params ) {
+                        setupVavZoneProfile();
+                        L.saveCCUState();
             
-                L.saveCCUState();
+                        return null;
+                    }
+        
+                    @Override
+                    protected void onPostExecute( final Void result ) {
+                        // continue what you are doing...
+                    }
+                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
                 getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
                 FragmentVAVConfiguration.this.closeAllBaseDialogFragments();
             }

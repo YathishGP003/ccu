@@ -59,6 +59,7 @@ public class CCUTagsDb extends HServer
     private static final String PREFS_TAGS_DB = "ccu_tags";
     private static final String PREFS_TAGS_MAP = "tagsMap";
     private static final String PREFS_TAGS_WA = "writeArrayMap";
+    private static final String PREFS_ID_MAP = "idMap";
     
     public Map<String,HDict> tagsMap;
     public HashMap<String,WriteArray> writeArrays;
@@ -73,6 +74,9 @@ public class CCUTagsDb extends HServer
     private BoxStore       boxStore;
     private Box<HisItem>   hisBox;
     private static final File TEST_DIRECTORY = new File("objectbox-example/test-db");
+    
+    public Map<String,String> idMap;
+    public String idMapString;
     
     //public String tagsString = null;
     RuntimeTypeAdapterFactory<HVal> hsTypeAdapter =
@@ -101,15 +105,18 @@ public class CCUTagsDb extends HServer
     
     public void init(Context c) {
         appContext = c;
+        
         tagsString = appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).getString(PREFS_TAGS_MAP, null);
         waString = appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).getString(PREFS_TAGS_WA, null);
-    
+        idMapString = appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).getString(PREFS_ID_MAP, null);
+        
         boxStore = MyObjectBox.builder().androidContext(appContext).build();
         hisBox = boxStore.boxFor(HisItem.class);
         
         if (tagsString == null) {
             tagsMap = new HashMap();
             writeArrays = new HashMap();
+            idMap = new HashMap();
             
         } else
         {
@@ -126,6 +133,7 @@ public class CCUTagsDb extends HServer
             {
             }.getType();
             writeArrays = gson.fromJson(waString,waType);
+            idMap = gson.fromJson(idMapString, HashMap.class);
         }
     }
     
@@ -141,11 +149,16 @@ public class CCUTagsDb extends HServer
         }.getType();
         tagsString = gson.toJson(tagsMap,listType);
         appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).edit().putString(PREFS_TAGS_MAP, tagsString).apply();
+        
         Type waType = new TypeToken<Map<String, WriteArray>>()
         {
         }.getType();
         waString = gson.toJson(writeArrays,waType);
         appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).edit().putString(PREFS_TAGS_WA, waString).apply();
+        
+        idMapString = gson.toJson(idMap);
+        appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).edit().putString(PREFS_ID_MAP, idMapString).apply();
+    
     }
     
     //TODO- TEMP for Unit testing
@@ -180,6 +193,8 @@ public class CCUTagsDb extends HServer
                            .debugFlags(DebugFlags.LOG_QUERIES | DebugFlags.LOG_QUERY_PARAMETERS)
                            .build();
         hisBox = boxStore.boxFor(HisItem.class);
+        
+        idMap = gson.fromJson(idMapString, HashMap.class);
     }
     
     public void saveString() {
@@ -197,6 +212,7 @@ public class CCUTagsDb extends HServer
         {
         }.getType();
         waString = gson.toJson(writeArrays,waType);
+        idMapString = gson.toJson(idMap);
     }
     
     public HDict addSite(String dis, String geoCity, String geoState, String timeZone, int area)
@@ -383,8 +399,8 @@ public class CCUTagsDb extends HServer
         String filter = "site";
         if (base != null)
         {
-            if (base.has("site")) filter = "equip and siteRef==" + base.id().toCode();
-            else if (base.has("equip")) filter = "point and equipRef==" + base.id().toCode();
+            if (base.has("site")) filter = "equip and siteRef==\"" + base.id().toCode()+"\"";
+            else if (base.has("equip")) filter = "point and equipRef==\"" + base.id().toCode()+"\"";
             else filter = "navNoChildren";
         }
         

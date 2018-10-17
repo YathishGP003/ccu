@@ -232,6 +232,8 @@ public class VAVLogicalMap
         setSupplyAirTemp(0);
         setDesiredTemp(72.0);
         
+        CCUHsApi.getInstance().sync();
+        
     }
     
     public double getCurrentTemp()

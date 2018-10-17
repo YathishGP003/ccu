@@ -120,5 +120,8 @@ public class HDictBuilder
       throw new UnknownNameException(name);
   }
 
+  public Object remove(String name) {
+    return map.remove(name);
+  }
   private HashMap map;
 }

@@ -235,4 +235,5 @@ public class TestHS
         HisItem i = hayStack.hisRead(datID);
         System.out.println(i.getDate()+"    :::: "+i.getVal());
     }
+    
 }

@@ -546,6 +546,17 @@ public class HClient extends HProj
     HGrid req = HGridBuilder.hisItemsToGrid(meta, items);
     call("hisWrite", req);
   }
+  
+  
+  public HGrid nav(HStr id)
+  {
+    HGridBuilder b = new HGridBuilder();
+    b.addCol("navId");
+    b.addRow(new HVal[] { id });
+  
+    HGrid req = b.toGrid();
+    return call("nav", req);
+  }
 
 //////////////////////////////////////////////////////////////////////////
 // Actions

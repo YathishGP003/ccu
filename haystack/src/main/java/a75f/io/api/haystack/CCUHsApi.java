@@ -5,19 +5,27 @@ import android.util.Log;
 
 import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDict;
+import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
+import org.projecthaystack.HGridBuilder;
 import org.projecthaystack.HHisItem;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 import org.projecthaystack.HRow;
+import org.projecthaystack.HStr;
+import org.projecthaystack.HVal;
 import org.projecthaystack.UnknownRecException;
 import org.projecthaystack.client.HClient;
+import org.projecthaystack.io.HZincWriter;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+
+import a75f.io.api.haystack.sync.HttpUtil;
+import a75f.io.api.haystack.sync.SyncHandler;
 
 /**
  * Created by samjithsadasivan on 9/3/18.
@@ -29,6 +37,8 @@ public class CCUHsApi
     
     public AndroidHSClient hsClient;
     public CCUTagsDb tagsDb;
+    
+    public SyncHandler syncHandler;
     
     public static CCUHsApi getInstance(){
         if (instance == null) {
@@ -45,6 +55,7 @@ public class CCUHsApi
         tagsDb = (CCUTagsDb) hsClient.db();
         tagsDb.init(c);
         instance = this;
+        syncHandler = new SyncHandler(this);
         Log.d("Haystack","Api created");
     }
     
@@ -136,11 +147,33 @@ public class CCUHsApi
         return map;
     }
     
+    public HDict readHDict(String query) {
+        try
+        {
+            HDict dict = hsClient.read(query);
+            return dict;
+        } catch (UnknownRecException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+    public HGrid readHGrid(String query) {
+        try
+        {
+            HGrid grid = hsClient.readAll(query);
+            return grid;
+        } catch (UnknownRecException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
     /**
      * Write to a 'writable' point
      */
     public void writePoint(String id, int level, String who, Double val, int duration) {
-        hsClient.pointWrite(HRef.copy(id), level, who, HNum.make(val), HNum.make(duration));
+        pointWrite(HRef.copy(id), level, who, HNum.make(val), HNum.make(duration,"ms"));
     }
     
     /**
@@ -149,7 +182,7 @@ public class CCUHsApi
      * default user - ""
      */
     public void writePoint(String id, Double val) {
-        hsClient.pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "", HNum.make(val), HNum.make(0));
+        pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "", HNum.make(val), HNum.make(0));
     }
     
     /**
@@ -163,11 +196,26 @@ public class CCUHsApi
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        hsClient.pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "", HNum.make(val), HNum.make(0));
+        pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "", HNum.make(val), HNum.make(0));
     }
     
     public void writeDefaultValById(String id, Double val) {
-        hsClient.pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "", HNum.make(val), HNum.make(0));
+        pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "", HNum.make(val), HNum.make(0));
+    }
+    
+    public void pointWrite(HRef id, int level, String who, HVal val, HNum dur) {
+        hsClient.pointWrite(id,level,who,val,dur);
+        HDictBuilder b = new HDictBuilder()
+                                 .add("id",HRef.copy(getGUID(id.toString())))
+                                 .add("level",level)
+                                 .add("who",who)
+                                 .add("val",val)
+                                 .add("duration",dur);
+        HDict[] dictArr = {b.toDict()};
+        
+        String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "pointWrite"
+                                        , HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+        System.out.println("Response: \n" + response);
     }
     
     /**
@@ -302,5 +350,42 @@ public class CCUHsApi
         
         HisItem item = new HisItem(id, new Date(), val );
         hisWrite(item);
+    }
+    
+    public ArrayList<HashMap> nav(String id) {
+        
+        ArrayList<HashMap> rowList = new ArrayList<>();
+        try
+        {
+            HGrid grid = hsClient.nav(HStr.make(id.replace("@","")));
+            Iterator it = grid.iterator();
+            while (it.hasNext())
+            {
+                HashMap<Object, Object> map = new HashMap<>();
+                HRow r = (HRow) it.next();
+                HRow.RowIterator ri = (HRow.RowIterator) r.iterator();
+                while (ri.hasNext())
+                {
+                    HDict.MapEntry m = (HDict.MapEntry) ri.next();
+                    map.put(m.getKey(), m.getValue());
+                }
+                rowList.add(map);
+            }
+        } catch (UnknownRecException e) {
+            e.printStackTrace();
+        }
+        return rowList;
+    }
+    
+    public void putUIDMap(String luid, String guid){
+        tagsDb.idMap.put(luid, guid);
+    }
+    
+    public String getGUID(String luid){
+        return tagsDb.idMap.get(luid);
+    }
+    
+    public void sync() {
+        syncHandler.doSync();
     }
 }

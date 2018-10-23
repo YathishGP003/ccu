@@ -18,6 +18,7 @@ public class BuildingTuners
     
     private String equipRef;
     private String equipDis;
+    private String siteRef;
     CCUHsApi hayStack;
     
     private static BuildingTuners instance = null;
@@ -36,14 +37,16 @@ public class BuildingTuners
         hayStack = CCUHsApi.getInstance();
         HashMap tuner = CCUHsApi.getInstance().read("equip and tuner");
         if (tuner != null && tuner.size() > 0) {
-            //equipRef = (String)tuner.get("id");
-            //equipDis = (String)tuner.get("dis");
+            equipRef = (String)tuner.get("id");
+            equipDis = (String)tuner.get("dis");
+            HashMap siteMap = hayStack.read(Tags.SITE);
+            siteRef = (String) siteMap.get(Tags.ID);
             Log.d("CCU","Building Tuner equip already present");
             return;
         }
         
         HashMap siteMap = hayStack.read(Tags.SITE);
-        String siteRef = (String) siteMap.get(Tags.ID);
+        siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
         Equip tunerEquip= new Equip.Builder()
                           .setSiteRef(siteRef)
@@ -65,6 +68,7 @@ public class BuildingTuners
     
         Point coolingDb = new Point.Builder()
                                  .setDisplayName(equipDis+"-"+"VAVCoolingDB")
+                                 .setSiteRef(siteRef)
                                  .setEquipRef(equipRef)
                                  .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("cooling").addMarker("deadband")
                                  .setUnit("\u00B0F")
@@ -74,6 +78,7 @@ public class BuildingTuners
     
         Point heatingDb = new Point.Builder()
                                   .setDisplayName(equipDis+"-"+"VAVCoolingDB")
+                                  .setSiteRef(siteRef)
                                   .setEquipRef(equipRef)
                                   .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("heating").addMarker("deadband")
                                   .setUnit("\u00B0F")
@@ -83,6 +88,7 @@ public class BuildingTuners
         
         Point propGain = new Point.Builder()
                                    .setDisplayName(equipDis+"-"+"VAVProportionalGain")
+                                   .setSiteRef(siteRef)
                                    .setEquipRef(equipRef)
                                    .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("pgain")
                                    .setUnit("\u00B0F")
@@ -93,6 +99,7 @@ public class BuildingTuners
     
         Point integralGain = new Point.Builder()
                                  .setDisplayName(equipDis+"-"+"VAVIntegralGain")
+                                 .setSiteRef(siteRef)
                                  .setEquipRef(equipRef)
                                  .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("igain")
                                  .setUnit("\u00B0F")
@@ -102,6 +109,7 @@ public class BuildingTuners
         
         Point propSpread = new Point.Builder()
                                  .setDisplayName(equipDis+"-"+"VAVProportionalSpread")
+                                 .setSiteRef(siteRef)
                                  .setEquipRef(equipRef)
                                  .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("pspread")
                                  .setUnit("\u00B0F")
@@ -111,12 +119,15 @@ public class BuildingTuners
     
         Point integralTimeout = new Point.Builder()
                                      .setDisplayName(equipDis+"-"+"VAVIntegralTimeout")
+                                     .setSiteRef(siteRef)
                                      .setEquipRef(equipRef)
                                      .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("itimeout")
                                      .setUnit("\u00B0F")
                                      .build();
         String iTimeoutId = hayStack.addPoint(integralTimeout);
         hayStack.writePoint(iTimeoutId, TunerDefalutVals.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerDefalutVals.VAV_INTEGRAL_TIMEOUT, 0);
+        
+        CCUHsApi.getInstance().syncEntityTree();
     }
     
 }

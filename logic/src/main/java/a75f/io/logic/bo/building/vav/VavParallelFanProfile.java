@@ -168,6 +168,7 @@ public class VavParallelFanProfile extends VavProfile
             updateTRResponse(node);
             vavDevice.setDamperPos(damper.currentPosition);
             vavDevice.setReheatPos(valve.currentPosition);
+            vavDevice.updateLoopParams();
         }
     }
 }

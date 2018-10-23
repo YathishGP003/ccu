@@ -2,8 +2,10 @@ package a75f.io.haystack.api;
 
 import org.junit.Test;
 import org.projecthaystack.HDict;
+import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HGridBuilder;
+import org.projecthaystack.HRef;
 import org.projecthaystack.io.HZincWriter;
 
 import java.io.BufferedInputStream;
@@ -14,16 +16,19 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 import javax.net.ssl.HttpsURLConnection;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
-import a75f.io.api.haystack.sync.SyncHandler;
+import a75f.io.api.haystack.sync.EntitySyncHandler;
 
 /**
  * Created by samjithsadasivan on 10/11/18.
@@ -140,8 +145,8 @@ public class TestRemoteHsSync
         hayStack.tagsDb.idMap = new HashMap<>();
         int nodeAddr = 7000;
     
-        SyncHandler syncHandler = new SyncHandler(hayStack);
-        System.out.println("syncHandler.isSyncNeeded "+syncHandler.isSyncNeeded());
+        EntitySyncHandler entitySyncHandler = new EntitySyncHandler(hayStack);
+        System.out.println("entitySyncHandler.isSyncNeeded " + entitySyncHandler.isSyncNeeded());
         Site s = new Site.Builder()
                          .setDisplayName("Name")
                          .addMarker("site")
@@ -195,9 +200,9 @@ public class TestRemoteHsSync
         String luid = (String) sMap.remove("id");
         site[0] = HSUtil.mapToHDict(sMap);*/
     
-        System.out.println("syncHandler.isSyncNeeded "+syncHandler.isSyncNeeded());
-        syncHandler.doSync();
-        System.out.println("syncHandler.isSyncNeeded "+syncHandler.isSyncNeeded());
+        System.out.println("entitySyncHandler.isSyncNeeded " + entitySyncHandler.isSyncNeeded());
+        entitySyncHandler.doSync();
+        System.out.println("entitySyncHandler.isSyncNeeded " + entitySyncHandler.isSyncNeeded());
     
         System.out.println(CCUHsApi.getInstance().tagsDb.idMap);
         
@@ -217,8 +222,8 @@ public class TestRemoteHsSync
         hayStack.tagsDb.idMap = new HashMap<>();
         int nodeAddr = 7000;
         
-        SyncHandler syncHandler = new SyncHandler(hayStack);
-        System.out.println("syncHandler.isSyncNeeded "+syncHandler.isSyncNeeded());
+        EntitySyncHandler entitySyncHandler = new EntitySyncHandler(hayStack);
+        System.out.println("entitySyncHandler.isSyncNeeded " + entitySyncHandler.isSyncNeeded());
         Site s = new Site.Builder()
                          .setDisplayName("Name")
                          .addMarker("site")
@@ -272,9 +277,9 @@ public class TestRemoteHsSync
         String luid = (String) sMap.remove("id");
         site[0] = HSUtil.mapToHDict(sMap);*/
         
-        System.out.println("syncHandler.isSyncNeeded "+syncHandler.isSyncNeeded());
-        syncHandler.doSync();
-        System.out.println("syncHandler.isSyncNeeded "+syncHandler.isSyncNeeded());
+        System.out.println("entitySyncHandler.isSyncNeeded " + entitySyncHandler.isSyncNeeded());
+        entitySyncHandler.doSync();
+        System.out.println("entitySyncHandler.isSyncNeeded " + entitySyncHandler.isSyncNeeded());
         
         System.out.println(CCUHsApi.getInstance().tagsDb.idMap);
         
@@ -294,8 +299,8 @@ public class TestRemoteHsSync
         hayStack.tagsDb.idMap = new HashMap<>();
         int nodeAddr = 7000;
     
-        SyncHandler syncHandler = new SyncHandler(hayStack);
-        System.out.println("syncHandler.isSyncNeeded "+syncHandler.isSyncNeeded());
+        EntitySyncHandler entitySyncHandler = new EntitySyncHandler(hayStack);
+        System.out.println("entitySyncHandler.isSyncNeeded " + entitySyncHandler.isSyncNeeded());
         Site s = new Site.Builder()
                          .setDisplayName("Name")
                          .addMarker("site")
@@ -359,11 +364,120 @@ public class TestRemoteHsSync
         
         String tpID = CCUHsApi.getInstance().addPoint(testPoint);
         String tpID1 = CCUHsApi.getInstance().addPoint(testPoint1);
-        syncHandler.sync();
+        entitySyncHandler.sync();
         
         hayStack.writePoint(tpID, 8,"samjith", 75.0, 120);
         hayStack.writePoint(tpID1, 8,"samjith", 76.0, 120);
         
+        
+    }
+    
+    @Test
+    public void testHisSync(){
+        //HHisItem[] items = new HHisItem[2];
+        //HHisItem item1 = HHisItem.make(HDateTime.make(HDate.today(), HTime.MIDNIGHT, HTimeZone.DEFAULT, 0), HNum.make(12.0));
+        //HHisItem item2 = HHisItem.make(HDateTime.make(HDate.today(), HTime.MIDNIGHT, HTimeZone.DEFAULT, 0), HNum.make(22.0));
+        //items[0] = item1;
+        //items[1] = item2;
+        //HDictBuilder b = new HDictBuilder();
+        //b.add("id", HRef.make("5bc7abbc895ee35f509d4d1b"));
+        //HGridBuilder.hisItemsToGrid(b.toDict(), items).dump();
+    
+    
+        CCUHsApi hayStack = new CCUHsApi();
+        hayStack.tagsDb.init();
+        hayStack.tagsDb.tagsMap = new HashMap<>();
+        hayStack.tagsDb.writeArrays = new HashMap<>();
+        hayStack.tagsDb.idMap = new HashMap<>();
+        int nodeAddr = 7000;
+        
+        Site s = new Site.Builder()
+                         .setDisplayName("Name")
+                         .addMarker("site")
+                         .setGeoCity("Burnsville")
+                         .setGeoState("MN")
+                         .setTz("Chicago")
+                         .setArea(1000).build();
+        hayStack.addSite(s);
+    
+        HashMap siteMap = hayStack.read(Tags.SITE);
+        String siteRef = (String) siteMap.get(Tags.ID);
+        String siteDis = (String) siteMap.get("dis");
+    
+        Equip v = new Equip.Builder()
+                          .setSiteRef(siteRef)
+                          .setDisplayName(siteDis+"-VAV-"+nodeAddr)
+                          .setRoomRef("room")
+                          .setFloorRef("floor")
+                          .addMarker("equip")
+                          .addMarker("vav")
+                          .setGroup(String.valueOf(nodeAddr))
+                          .build();
+        String equipRef = hayStack.addEquip(v);
+    
+        Equip v1 = new Equip.Builder()
+                           .setSiteRef(siteRef)
+                           .setDisplayName(siteDis+"-VAV-"+(nodeAddr+1))
+                           .setRoomRef("room1")
+                           .setFloorRef("floor")
+                           .addMarker("equip")
+                           .addMarker("vav")
+                           .setGroup(String.valueOf(nodeAddr+1))
+                           .build();
+        String equipRef1 = hayStack.addEquip(v1);
+    
+        Point testPoint = new Point.Builder()
+                                  .setDisplayName(siteDis+"AHU-"+nodeAddr+"-TestTemp")
+                                  .setEquipRef(equipRef)
+                                  .setSiteRef(siteRef)
+                                  .setRoomRef("room")
+                                  .setFloorRef("floor")
+                                  .addMarker("discharge")
+                                  .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("writable")
+                                  .setTz("Chicago").addMarker("his")
+                                  .setGroup(String.valueOf(nodeAddr))
+                                  .setUnit("\u00B0F")
+                                  .build();
+    
+        Point testPoint1 = new Point.Builder()
+                                   .setDisplayName(siteDis+"AHU-"+nodeAddr+"-TestTemp1")
+                                   .setEquipRef(equipRef)
+                                   .setSiteRef(siteRef)
+                                   .setRoomRef("room")
+                                   .setFloorRef("floor")
+                                   .addMarker("discharge")
+                                   .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("writable")
+                                   .setTz("Chicago").addMarker("his")
+                                   .setGroup(String.valueOf(nodeAddr))
+                                   .setUnit("\u00B0F")
+                                   .build();
+    
+        String deviceRef = new Device.Builder()
+                            .setDisplayName("SN-"+7000)
+                            .addMarker("network")
+                            .setAddr(7000)
+                            .build();
+        
+        String tpID = CCUHsApi.getInstance().addPoint(testPoint);
+        String tpID1 = CCUHsApi.getInstance().addPoint(testPoint1);
+        
+        hayStack.entitySyncHandler.doSync();
+    
+        ArrayList<HisItem> hislist = new ArrayList<>();
+        Date now = new Date();
+    
+        hislist.add(new HisItem(tpID, now, 75.0));
+        hislist.add(new HisItem(tpID, new Date(now.getTime() + 300000), 73.0));
+    
+        hayStack.hisWrite(hislist);
+        
+        hayStack.hisSyncHandler.doSync();
+        
+        ArrayList<HisItem> hisItemsNew = (ArrayList<HisItem>) CCUHsApi.getInstance().tagsDb.getAllHisItems(HRef.copy(tpID));
+    
+        for (HisItem i : hisItemsNew) {
+            i.dump();
+        }
         
     }
     
@@ -446,5 +560,35 @@ public class TestRemoteHsSync
             urlConnection.disconnect();
         }
         return result.toString();
+    }
+    
+    @Test
+    public void testCode(){
+    
+        CCUHsApi hayStack = new CCUHsApi();
+        hayStack.tagsDb.init();
+        hayStack.tagsDb.tagsMap = new HashMap<>();
+        hayStack.tagsDb.writeArrays = new HashMap<>();
+        hayStack.tagsDb.idMap = new HashMap<>();
+    
+        Site s = new Site.Builder()
+                         .setDisplayName("Name")
+                         .addMarker("site")
+                         .setGeoCity("Burnsville")
+                         .setGeoState("MN")
+                         .setTz("Chicago")
+                         .setArea(1000).build();
+        hayStack.addSite(s);
+    
+        HashMap siteMap = hayStack.read(Tags.SITE);
+        String siteRef = (String) siteMap.get(Tags.ID);
+        
+        HDict b = new HDictBuilder().add("id","1").add("siteRef", HRef.make(siteRef.substring(1))).toDict();
+        
+        System.out.println(b.getRef("siteRef"));
+        
+        
+        
+        
     }
 }

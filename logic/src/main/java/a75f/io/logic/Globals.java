@@ -115,18 +115,8 @@ public class Globals
         //mHeartBeatJob = new HeartBeatJob();
         //5 seconds after application initializes start heart beat
         int DEFAULT_HEARTBEAT_INTERVAL = 60;
-        //Logd("Scheduling ---- HeartBeat Job");
         
-        int hearbeatInterval = getApplicationContext().getResources().getInteger(R.integer.heartbeat);
-        if (hearbeatInterval == 0) {
-            hearbeatInterval = DEFAULT_HEARTBEAT_INTERVAL;
-        }
-        
-        //mHeartBeatJob
-        //        .scheduleJob("Heartbeat Job", hearbeatInterval, TASK_SEPERATION, TASK_SERERATION_TIMEUNIT);
-        //Logd("Scheduling ---- MeshUpdate Job");
-        
-        mProcessJob.scheduleJob("Building Process Job", hearbeatInterval,
+        mProcessJob.scheduleJob("Building Process Job", DEFAULT_HEARTBEAT_INTERVAL,
                 TASK_SEPERATION * 2, TASK_SERERATION_TIMEUNIT);
         
         isSimulation = getApplicationContext().getResources().getBoolean(R.bool.simulation);

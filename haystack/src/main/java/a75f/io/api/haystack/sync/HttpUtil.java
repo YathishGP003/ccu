@@ -8,6 +8,8 @@ import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import info.guardianproject.netcipher.NetCipher;
+
 /**
  * Created by samjithsadasivan on 10/17/18.
  */
@@ -23,7 +25,8 @@ public class HttpUtil
         try {
             //Create connection
             url = new URL(targetURL);
-            connection = (HttpsURLConnection)url.openConnection();
+            //connection = (HttpsURLConnection)url.openConnection();
+            connection = NetCipher.getHttpsURLConnection(url);//TODO - Hack for SSLException
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Content-Type",
                     "text/zinc");

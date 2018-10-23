@@ -20,12 +20,12 @@ import a75f.io.api.haystack.HSUtil;
  * Created by samjithsadasivan on 10/15/18.
  */
 
-public class SyncHandler
+public class EntitySyncHandler
 {
     
     CCUHsApi hayStack;
     
-    public SyncHandler(CCUHsApi api) {
+    public EntitySyncHandler(CCUHsApi api) {
         hayStack = api;
     }
     
@@ -66,6 +66,7 @@ public class SyncHandler
         {
             CCUHsApi.getInstance().putUIDMap(siteLUID, siteGUID);
             doSyncEquips(siteLUID);
+            doSyncDevices(siteLUID);
         }
     }
     
@@ -149,7 +150,83 @@ public class SyncHandler
         }
     }
     
+    private void doSyncDevices(String siteLUID) {
+        //ArrayList<HashMap> devices = hayStack.readAll("device and siteRef == \""+siteLUID+"\"");
+        ArrayList<HashMap> devices = hayStack.readAll("device");
+        ArrayList<String> deviceLUIDList = new ArrayList();
+        ArrayList<HDict> entities = new ArrayList<>();
+        for (Map m: devices)
+        {
+            String luid = m.remove("id").toString();
+            if (hayStack.getGUID(luid) == null) {
+                deviceLUIDList.add(luid);
+                //m.put("siteRef", hayStack.getGUID(siteLUID));
+                entities.add(HSUtil.mapToHDict(m));
+            }
+        }
     
+        HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
+        String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
+    
+        HZincReader zReader = new HZincReader(response);
+        Iterator it = zReader.readGrid().iterator();
+        String equipGUID = "";
+        int index = 0;
+        System.out.println("Response: \n" + response);
+    
+        while (it.hasNext())
+        {
+            HRow row = (HRow) it.next();
+            equipGUID = row.get("id").toString();
+            if (equipGUID != "")
+            {
+                CCUHsApi.getInstance().putUIDMap(deviceLUIDList.get(index++), equipGUID); //TODO- Check ordering
+            }
+        }
+    
+        System.out.println("Synced devices: "+hayStack.tagsDb.idMap);
+    
+        doSyncPhyPoints(siteLUID, deviceLUIDList);
+    }
+    
+    private void doSyncPhyPoints(String siteLUID, ArrayList<String> deviceLUIDList) {
+        
+        for (String deviceLUID : deviceLUIDList)
+        {
+            ArrayList<HashMap> points = hayStack.readAll("point and physical and deviceRef == \"" + deviceLUID + "\"");
+            if (points.size() == 0) {
+                continue;
+            }
+            ArrayList<String> pointLUIDList = new ArrayList();
+            ArrayList<HDict> entities = new ArrayList<>();
+            for (Map m : points)
+            {
+                String luid = m.remove("id").toString();
+                if (hayStack.getGUID(luid) == null)
+                {
+                    pointLUIDList.add(luid);
+                    //m.put("siteRef", hayStack.getGUID(siteLUID));
+                    m.put("deviceRef", hayStack.getGUID(deviceLUID));
+                    entities.add(HSUtil.mapToHDict(m));
+                }
+                System.out.println(m);
+            }
+            HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
+            String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
+            HZincReader zReader = new HZincReader(response);
+            Iterator it = zReader.readGrid().iterator();
+            String guid;
+            int index = 0;
+            System.out.println("Response: \n" + response);
+            while (it.hasNext())
+            {
+                HRow row = (HRow) it.next();
+                guid = row.get("id").toString();
+                CCUHsApi.getInstance().putUIDMap(pointLUIDList.get(index++), guid); //TODO- Check ordering
+            }
+            System.out.println("Synced Phy Points: "+hayStack.tagsDb.idMap);
+        }
+    }
     
     public boolean isSyncNeeded() {
         ArrayList<HashMap> sites = hayStack.readAll("site");
@@ -161,6 +238,12 @@ public class SyncHandler
         ArrayList<HashMap> equips = hayStack.readAll("equip");
         for (Map q: equips) {
             if (hayStack.getGUID(q.get("id").toString()) == null) {
+                return true;
+            }
+        }
+        ArrayList<HashMap> devices = hayStack.readAll("device");
+        for (Map d: devices) {
+            if (hayStack.getGUID(d.get("id").toString()) == null) {
                 return true;
             }
         }

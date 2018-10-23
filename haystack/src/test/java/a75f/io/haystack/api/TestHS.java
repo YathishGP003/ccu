@@ -175,6 +175,7 @@ public class TestHS
         hayStack.tagsDb.init();
         hayStack.tagsDb.tagsMap = new HashMap<>();
         hayStack.tagsDb.writeArrays = new HashMap<>();
+        hayStack.tagsDb.idMap = new HashMap<>();
         int nodeAddr = 7000;
     
         Site s = new Site.Builder()
@@ -226,14 +227,18 @@ public class TestHS
     
         hayStack.hisWrite(hislist);
     
-        ArrayList res = hayStack.hisRead(datID,"today");
+        ArrayList<HisItem> res = hayStack.hisRead(datID,"today");
     
-        System.out.println("$$$$$$$$$ "+res);
+        for (HisItem h : res) {
+            h.dump();
+        }
         
         hayStack.hisWrite(new HisItem(datID, new Date(now.getTime() - 600000), 70.0));
     
         HisItem i = hayStack.hisRead(datID);
         System.out.println(i.getDate()+"    :::: "+i.getVal());
+        
+        i.dump();
     }
     
 }

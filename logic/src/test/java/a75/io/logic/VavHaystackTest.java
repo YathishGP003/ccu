@@ -22,6 +22,7 @@ public class VavHaystackTest
         api.tagsDb.init();
         api.tagsDb.tagsMap = new HashMap<>();
         api.tagsDb.writeArrays = new HashMap<>();
+        api.tagsDb.idMap = new HashMap<>();
         VAVLogicalMap m = new VAVLogicalMap(ProfileType.VAV_REHEAT, 7000);
         m.createHaystackPoints();
         ArrayList points = CCUHsApi.getInstance().readAll("point and group == \"7000\"");
@@ -61,6 +62,8 @@ public class VavHaystackTest
         System.out.println(api.tagsDb.writeArrays);
     
         VAVLogicalMap m1 = new VAVLogicalMap(ProfileType.VAV_REHEAT, 7000);
+        
+        m1.updateLoopParams();
     
         System.out.println("getRoomTemp "+m1.getCurrentTemp());
         System.out.println("getDamperPos "+m1.getDamperPos());

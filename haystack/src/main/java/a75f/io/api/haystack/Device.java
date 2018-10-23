@@ -12,6 +12,7 @@ public class Device
     private ArrayList<String> markers;
     private String equipName;
     private String addr;
+    private String siteRef;
     public String getAddr()
     {
         return addr;
@@ -28,6 +29,9 @@ public class Device
     {
         return equipName;
     }
+    public String getSiteRef() {
+        return siteRef;
+    }
     private Device(){
     
     }
@@ -37,6 +41,7 @@ public class Device
         private ArrayList<String> markers = new ArrayList<>();
         private String equipName;
         private String addr;
+        private String siteRef;
     
         public Builder setAddr(int addr)
         {
@@ -64,12 +69,19 @@ public class Device
             this.equipName = equipName;
             return this;
         }
+    
+        public Builder setSiteRef(String siteRef)
+        {
+            this.siteRef = siteRef;
+            return this;
+        }
         
         public String build(){
             Device d = new Device();
             d.displayName = this.displayName;
             d.markers = this.markers;
             d.addr = this.addr;
+            d.siteRef = this.siteRef;
             return CCUHsApi.getInstance().addDevice(d);
         }
     }

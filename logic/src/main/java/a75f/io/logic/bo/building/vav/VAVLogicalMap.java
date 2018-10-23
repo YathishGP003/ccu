@@ -207,10 +207,105 @@ public class VAVLogicalMap
                                     .setTz(tz)
                                     .build();
         CCUHsApi.getInstance().addPoint(desiredTemp);
-        
+    
+        Point heatingLoopOp = new Point.Builder()
+                                    .setDisplayName(siteDis+"VAV-"+nodeAddr+"-heatingLoopOp")
+                                    .setEquipRef(equipRef)
+                                    .setSiteRef(siteRef)
+                                    .setRoomRef(room)
+                                    .setFloorRef(floor)
+                                    .addMarker("heating").addMarker("loop").addMarker("sp").addMarker("his")
+                                    .setGroup(String.valueOf(nodeAddr))
+                                    .setUnit("\u00B0F")
+                                    .setTz(tz)
+                                    .build();
+        CCUHsApi.getInstance().addPoint(heatingLoopOp);
+    
+        Point coolingLoopOp = new Point.Builder()
+                                      .setDisplayName(siteDis+"VAV-"+nodeAddr+"-coolingLoopOp")
+                                      .setEquipRef(equipRef)
+                                      .setSiteRef(siteRef)
+                                      .setRoomRef(room)
+                                      .setFloorRef(floor)
+                                      .addMarker("cooling").addMarker("loop").addMarker("sp").addMarker("his")
+                                      .setGroup(String.valueOf(nodeAddr))
+                                      .setUnit("\u00B0F")
+                                      .setTz(tz)
+                                      .build();
+        CCUHsApi.getInstance().addPoint(coolingLoopOp);
+    
+        Point dischargeSp = new Point.Builder()
+                                      .setDisplayName(siteDis+"VAV-"+nodeAddr+"-dischargeSp")
+                                      .setEquipRef(equipRef)
+                                      .setSiteRef(siteRef)
+                                      .setRoomRef(room)
+                                      .setFloorRef(floor)
+                                      .addMarker("discharge").addMarker("air").addMarker("temp")
+                                      .addMarker("sp").addMarker("his")
+                                      .setGroup(String.valueOf(nodeAddr))
+                                      .setUnit("\u00B0F")
+                                      .setTz(tz)
+                                      .build();
+        CCUHsApi.getInstance().addPoint(dischargeSp);
+    
+        Point satRequestPercentage = new Point.Builder()
+                                    .setDisplayName(siteDis+"VAV-"+nodeAddr+"-satRequestPercentage")
+                                    .setEquipRef(equipRef)
+                                    .setSiteRef(siteRef)
+                                    .setRoomRef(room)
+                                    .setFloorRef(floor)
+                                    .addMarker("request").addMarker("hour").addMarker("cumulative")
+                                    .addMarker("tr").addMarker("supply").addMarker("air").addMarker("temp").addMarker("his")
+                                    .setGroup(String.valueOf(nodeAddr))
+                                    .setUnit("\u00B0F")
+                                    .setTz(tz)
+                                    .build();
+        CCUHsApi.getInstance().addPoint(satRequestPercentage);
+    
+        Point co2RequestPercentage = new Point.Builder()
+                                             .setDisplayName(siteDis+"VAV-"+nodeAddr+"-co2RequestPercentage")
+                                             .setEquipRef(equipRef)
+                                             .setSiteRef(siteRef)
+                                             .setRoomRef(room)
+                                             .setFloorRef(floor)
+                                             .addMarker("request").addMarker("hour").addMarker("cumulative")
+                                             .addMarker("tr").addMarker("co2").addMarker("temp").addMarker("his")
+                                             .setGroup(String.valueOf(nodeAddr))
+                                             .setUnit("\u00B0F")
+                                             .setTz(tz)
+                                             .build();
+        CCUHsApi.getInstance().addPoint(co2RequestPercentage);
+    
+        Point hwstRequestPercentage = new Point.Builder()
+                                             .setDisplayName(siteDis+"VAV-"+nodeAddr+"-hwstRequestPercentage")
+                                             .setEquipRef(equipRef)
+                                             .setSiteRef(siteRef)
+                                             .setRoomRef(room)
+                                             .setFloorRef(floor)
+                                             .addMarker("request").addMarker("hour").addMarker("cumulative")
+                                             .addMarker("tr").addMarker("hwst").addMarker("his")
+                                             .setGroup(String.valueOf(nodeAddr))
+                                             .setUnit("\u00B0F")
+                                             .setTz(tz)
+                                             .build();
+        CCUHsApi.getInstance().addPoint(hwstRequestPercentage);
+    
+        Point pressureRequestPercentage = new Point.Builder()
+                                             .setDisplayName(siteDis+"VAV-"+nodeAddr+"-pressureRequestPercentage")
+                                             .setEquipRef(equipRef)
+                                             .setSiteRef(siteRef)
+                                             .setRoomRef(room)
+                                             .setFloorRef(floor)
+                                             .addMarker("request").addMarker("hour").addMarker("cumulative")
+                                             .addMarker("tr").addMarker("pressure").addMarker("his")
+                                             .setGroup(String.valueOf(nodeAddr))
+                                             .setUnit("\u00B0F")
+                                             .setTz(tz)
+                                             .build();
+        CCUHsApi.getInstance().addPoint(pressureRequestPercentage);
         
         //Create Physical points and map
-        SmartNode device = new SmartNode(nodeAddr);
+        SmartNode device = new SmartNode(nodeAddr, siteRef);
         device.th1In.setPointRef(datID);
         CCUHsApi.getInstance().addPoint(device.th1In);
         device.th2In.setPointRef(eatID);
@@ -232,7 +327,7 @@ public class VAVLogicalMap
         setSupplyAirTemp(0);
         setDesiredTemp(72.0);
         
-        CCUHsApi.getInstance().sync();
+        CCUHsApi.getInstance().syncEntityTree();
         
     }
     
@@ -363,4 +458,26 @@ public class VAVLogicalMap
         this.staticPressure = staticPressure;
     }
     
+    public void updateLoopParams() {
+    
+        CCUHsApi.getInstance().writeHisValByQuery("point and heating and loop and sp and his and group == \""+nodeAddr+"\"", heatingLoop.getLoopOutput());
+    
+    
+        CCUHsApi.getInstance().writeHisValByQuery("point and cooling and loop and sp and his and group == \""+nodeAddr+"\"", coolingLoop.getLoopOutput());
+    
+        CCUHsApi.getInstance().writeHisValByQuery("point and discharge and air and temp and sp and his and group == \""+nodeAddr+"\"", dischargeSp);
+    
+    
+        CCUHsApi.getInstance().writeHisValByQuery("point and request and hour and cumulative and tr and " +
+                                                  "supply and air and temp and his and group == \""+nodeAddr+"\"", satResetRequest.cumulativeRequestHoursPercent);
+    
+        CCUHsApi.getInstance().writeHisValByQuery("point and request and hour and cumulative and tr and " +
+                                                  "co2 and his and group == \""+nodeAddr+"\"", co2ResetRequest.cumulativeRequestHoursPercent);
+        CCUHsApi.getInstance().writeHisValByQuery("point and request and hour and cumulative and tr and " +
+                                                  "hwst and his and group == \""+nodeAddr+"\"", hwstResetRequest.cumulativeRequestHoursPercent);
+        CCUHsApi.getInstance().writeHisValByQuery("point and request and hour and cumulative and tr and " +
+                                                  "pressure and his and group == \""+nodeAddr+"\"", spResetRequest.cumulativeRequestHoursPercent);
+    
+    
+    }
 }

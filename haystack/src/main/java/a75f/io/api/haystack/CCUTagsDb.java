@@ -307,6 +307,7 @@ public class CCUTagsDb extends HServer
                                  .add("point",    HMarker.VAL)
                                  .add("physical",    HMarker.VAL)
                                  .add("deviceRef", p.getDeviceRef())
+                                 .add("siteRef",p.getSiteRef())
                                  .add("pointRef",p.getPointRef())
                                  .add("port",p.getPort())
                                  .add("type",p.getType())
@@ -328,7 +329,8 @@ public class CCUTagsDb extends HServer
                                  .add("dis",      d.getDisplayName())
                                  .add("device",    HMarker.VAL)
                                  .add("his",      HMarker.VAL)
-                                 .add("addr",      d.getAddr());
+                                 .add("addr",      d.getAddr())
+                                 .add("siteRef",  d.getSiteRef());
     
         for (String m : d.getMarkers()) {
             b.add(m);
@@ -513,6 +515,7 @@ public class CCUTagsDb extends HServer
            hisItem.setDate(new Date(item.ts.millis()));
            hisItem.setRec(rec.get("id").toString());
            hisItem.setVal(Double.parseDouble(item.val.toString()));
+           hisItem.setSyncStatus(false);
            hisBox.put(hisItem);
        }
     }
@@ -525,5 +528,36 @@ public class CCUTagsDb extends HServer
     {
         System.out.println("-- invokeAction \"" + rec.dis() + "." + action + "\" " + args);
         return HGrid.EMPTY;
+    }
+    
+    public List<HisItem> getUnSyncedHisItems(HRef id) {
+        
+        HDict entity = readById(id);
+        
+        QueryBuilder<HisItem> hisQuery = hisBox.query();
+        hisQuery.equal(HisItem_.rec, entity.get("id").toString())
+                .equal(HisItem_.syncStatus,false)
+                //.greater(HisItem_.date,range.start.millis())
+                //.less(HisItem_.date,range.end.millis())
+                .order(HisItem_.date);
+        
+        return hisQuery.build().find();
+    }
+    
+    public void setHisItemSyncStatus(ArrayList<HisItem> hisItems) {
+        for (HisItem item: hisItems) {
+            hisBox.put(item);
+        }
+    }
+    
+    public List<HisItem> getAllHisItems(HRef id) {
+        
+        HDict entity = readById(id);
+        
+        QueryBuilder<HisItem> hisQuery = hisBox.query();
+        hisQuery.equal(HisItem_.rec, entity.get("id").toString())
+                .order(HisItem_.date);
+        
+        return hisQuery.build().find();
     }
 }

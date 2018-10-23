@@ -24,7 +24,7 @@ public class BuildingProcessJob extends BaseJob
     
     @Override
     public void doJob() {
-        Log.d("CCU","do BuildingProcessJob");
+        Log.d("CCU","BuildingProcessJob ->");
     
         tsData = new HashMap();
     
@@ -46,11 +46,16 @@ public class BuildingProcessJob extends BaseJob
                 }
             }
         }
+        
         uploadTimeSeriesData();
-    
+        Log.d("CCU","<- BuildingProcessJob");
     }
     
     private void uploadTimeSeriesData() {
+    
+        Log.d("CCU"," Sync Haystack Data ");
+        CCUHsApi.getInstance().syncEntityTree();
+        CCUHsApi.getInstance().syncHisData();
     
         ArrayList<HashMap> logPoints = CCUHsApi.getInstance().readAll("point and logical");
     

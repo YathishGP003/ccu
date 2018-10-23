@@ -24,8 +24,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import a75f.io.api.haystack.sync.EntitySyncHandler;
+import a75f.io.api.haystack.sync.HisSyncHandler;
 import a75f.io.api.haystack.sync.HttpUtil;
-import a75f.io.api.haystack.sync.SyncHandler;
 
 /**
  * Created by samjithsadasivan on 9/3/18.
@@ -38,7 +39,8 @@ public class CCUHsApi
     public AndroidHSClient hsClient;
     public CCUTagsDb tagsDb;
     
-    public SyncHandler syncHandler;
+    public EntitySyncHandler entitySyncHandler;
+    public HisSyncHandler    hisSyncHandler;
     
     public static CCUHsApi getInstance(){
         if (instance == null) {
@@ -55,7 +57,8 @@ public class CCUHsApi
         tagsDb = (CCUTagsDb) hsClient.db();
         tagsDb.init(c);
         instance = this;
-        syncHandler = new SyncHandler(this);
+        entitySyncHandler = new EntitySyncHandler(this);
+        hisSyncHandler = new HisSyncHandler(this);
         Log.d("Haystack","Api created");
     }
     
@@ -68,6 +71,8 @@ public class CCUHsApi
         tagsDb = (CCUTagsDb) hsClient.db();
         tagsDb.setTagsDbMap(new HashMap());
         instance = this;
+        entitySyncHandler = new EntitySyncHandler(this);
+        hisSyncHandler = new HisSyncHandler(this);
     }
     
     public HClient getHSClient(){
@@ -205,17 +210,15 @@ public class CCUHsApi
     
     public void pointWrite(HRef id, int level, String who, HVal val, HNum dur) {
         hsClient.pointWrite(id,level,who,val,dur);
-        HDictBuilder b = new HDictBuilder()
-                                 .add("id",HRef.copy(getGUID(id.toString())))
-                                 .add("level",level)
-                                 .add("who",who)
-                                 .add("val",val)
-                                 .add("duration",dur);
-        HDict[] dictArr = {b.toDict()};
         
-        String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "pointWrite"
-                                        , HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
-        System.out.println("Response: \n" + response);
+        String guid = getGUID(id.toString());
+        if (guid != null)
+        {
+            HDictBuilder b = new HDictBuilder().add("id", HRef.copy(guid)).add("level", level).add("who", who).add("val", val).add("duration", dur);
+            HDict[] dictArr = {b.toDict()};
+            String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+            System.out.println("Response: \n" + response);
+        }
     }
     
     /**
@@ -385,7 +388,11 @@ public class CCUHsApi
         return tagsDb.idMap.get(luid);
     }
     
-    public void sync() {
-        syncHandler.doSync();
+    public void syncEntityTree() {
+        entitySyncHandler.sync();
+    }
+    
+    public void syncHisData() {
+        hisSyncHandler.doSync();
     }
 }

@@ -13,7 +13,7 @@ public class Floor
     public int             mFloorId;
     public String          mFloorName;
     public String          mKinveyWebId;
-    public ArrayList<Zone> mRoomList;
+    public ArrayList<Zone> mZoneList;
     
     
     public Floor()
@@ -26,7 +26,7 @@ public class Floor
         mFloorId = floorId;
         mKinveyWebId = webId;
         mFloorName = floor;
-        mRoomList = new ArrayList<Zone>();
+        mZoneList = new ArrayList<Zone>();
     }
     
     

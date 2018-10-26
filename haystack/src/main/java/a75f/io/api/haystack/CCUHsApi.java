@@ -380,6 +380,68 @@ public class CCUHsApi
         return rowList;
     }
     
+    public void deleteEntity(String id) {
+        Log.d("CCU", "deleteEntity "+id);
+        tagsDb.tagsMap.remove(id.replace("@",""));
+        if (tagsDb.idMap.get(id) != null)
+        {
+            System.out.println(id);
+            tagsDb.removeIdMap.put(id, tagsDb.idMap.remove(id));
+        }
+    }
+    
+    public void deleteWritableArray(String id) {
+        tagsDb.writeArrays.remove(id.replace("@",""));
+    }
+    
+    public void deleteEntityTree(String id) {
+        
+        Log.d("CCU", "deleteEntityTree "+id);
+        
+        HashMap entity = CCUHsApi.getInstance().read("id == "+id);
+        if (entity.get("site") != null) {
+            ArrayList<HashMap> equips = readAll("equip and siteRef == \""+id+"\"");
+            for (HashMap equip : equips) {
+                deleteEntityTree(equip.get("id").toString());
+            }
+    
+            ArrayList<HashMap> devices = readAll("device and siteRef == \""+id+"\"");
+            for (HashMap device : devices) {
+                deleteEntityTree(device.get("id").toString());
+            }
+            deleteEntity(id);
+            
+        } else if (entity.get("equip") != null) {
+            ArrayList<HashMap> points = readAll("point and equipRef == \""+id+"\"");
+            for (HashMap point : points) {
+                if (point.get("writable") != null)
+                {
+                    deleteWritableArray(point.get("id").toString());
+                }
+                deleteEntity(point.get("id").toString());
+            }
+            deleteEntity(id);
+        } else if (entity.get("device") != null)
+        {
+            ArrayList<HashMap> points = readAll("point and deviceRef == \"" + id + "\"");
+            for (HashMap point : points)
+            {
+                if (point.get("writable") != null)
+                {
+                    deleteWritableArray(point.get("id").toString());
+                }
+                deleteEntity(point.get("id").toString());
+            }
+            deleteEntity(id);
+        } else if (entity.get("point") != null) {
+            if (entity.get("writable") != null)
+            {
+                deleteWritableArray(entity.get("id").toString());
+            }
+            deleteEntity(entity.get("id").toString());
+        }
+    }
+    
     public void putUIDMap(String luid, String guid){
         tagsDb.idMap.put(luid, guid);
     }

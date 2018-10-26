@@ -16,6 +16,7 @@ import info.guardianproject.netcipher.NetCipher;
 
 public class HttpUtil
 {
+    
     public static final String HAYSTACK_URL = "https://renatus-haystack.azurewebsites.net/";
     
     public static String executePost(String targetURL, String urlParameters)
@@ -25,9 +26,9 @@ public class HttpUtil
         try {
             //Create connection
             url = new URL(targetURL);
-            //connection = (HttpsURLConnection)url.openConnection();
+            connection = (HttpsURLConnection)url.openConnection();
             connection = NetCipher.getHttpsURLConnection(url);//TODO - Hack for SSLException
-            connection.setRequestMethod("POST");
+            //connection.setRequestMethod("POST");
             connection.setRequestProperty("Content-Type",
                     "text/zinc");
             
@@ -57,7 +58,7 @@ public class HttpUtil
                 response.append('\n');
             }
             rd.close();
-            return response.toString();
+            return connection.getResponseCode() == 200 ? response.toString() : null;
             
         } catch (Exception e) {
             

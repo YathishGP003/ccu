@@ -743,7 +743,7 @@ public class ZonesFragment extends Fragment
         //arrayRooms.clear();
         for (Floor floor : floorList)
         {
-            ArrayList<Zone> zoneList = floor.mRoomList;
+            ArrayList<Zone> zoneList = floor.mZoneList;
             View viewToAdd = null;
             int index = 0;
             //TODO - refactor
@@ -1061,7 +1061,7 @@ public class ZonesFragment extends Fragment
     {
         for (Floor f : ccu().getFloors())
         {
-            for (Zone z : f.mRoomList)
+            for (Zone z : f.mZoneList)
             {
                 if (z.findProfile(ProfileType.LIGHT).equals(zoneProfile))
                 {
@@ -1077,7 +1077,7 @@ public class ZonesFragment extends Fragment
     {
         for (Floor f : ccu().getFloors())
         {
-            for (Zone z : f.mRoomList)
+            for (Zone z : f.mZoneList)
             {
                 if (z.findProfile(ProfileType.LIGHT).equals(zoneProfile))
                 {

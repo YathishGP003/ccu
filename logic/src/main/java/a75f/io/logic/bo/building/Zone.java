@@ -101,6 +101,7 @@ public class Zone
             {
                 zp.removeProfileConfiguration(selectedModule);
             }
+            zp.removeHaystackEntities(selectedModule);
         }
     }
     

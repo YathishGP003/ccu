@@ -100,7 +100,7 @@ public class FloorPlanFragment extends Fragment
 	private Zone getSelectedZone()
 	{
 		
-		return getSelectedFloor().mRoomList.get(mRoomListAdapter.getSelectedPostion());
+		return getSelectedFloor().mZoneList.get(mRoomListAdapter.getSelectedPostion());
 	}
 	
 	
@@ -191,6 +191,10 @@ public class FloorPlanFragment extends Fragment
 			{
 				mRoomListAdapter.clear();
 			}
+			if (mModuleListAdapter != null)
+			{
+				mModuleListAdapter.clear();
+			}
 			disableRoomModule();
 		}
 	}
@@ -200,7 +204,7 @@ public class FloorPlanFragment extends Fragment
 	{
 		mFloorListAdapter.setSelectedItem(position);
 		Floor curSelectedFloor = ccu().getFloors().get(position);
-		updateRooms(curSelectedFloor.mRoomList);
+		updateRooms(curSelectedFloor.mZoneList);
 	}
 	
 	
@@ -226,10 +230,10 @@ public class FloorPlanFragment extends Fragment
 		{
 			if (mModuleListAdapter != null)
 			{
-				mModuleListAdapter = new DataArrayAdapter<Short>(this.getActivity(), R
+				/*mModuleListAdapter = new DataArrayAdapter<Short>(this.getActivity(), R
 						                                                                     .layout.listviewitem, new Short[]{});
-				moduleListView.setAdapter(mModuleListAdapter);
-				 
+				moduleListView.setAdapter(mModuleListAdapter);*/
+				mModuleListAdapter.clear();
 				
 			}
 			disableModuButton();
@@ -241,7 +245,7 @@ public class FloorPlanFragment extends Fragment
 	{
 		mRoomListAdapter.setSelectedItem(position);
 		Floor floor = ccu().getFloors().get(mFloorListAdapter.getSelectedPostion());
-		Zone selectedZone = floor.mRoomList.get(mRoomListAdapter.getSelectedPostion());
+		Zone selectedZone = floor.mZoneList.get(mRoomListAdapter.getSelectedPostion());
 		updateModules(selectedZone);
 	}
 	
@@ -381,7 +385,7 @@ public class FloorPlanFragment extends Fragment
 			Toast.makeText(getActivity().getApplicationContext(),
 					"Room " + addRoomEdit.getText() + " added", Toast.LENGTH_SHORT).show();
 			ArrayList<Zone> mRoomList =
-					L.ccu().getFloors().get(mFloorListAdapter.getSelectedPostion()).mRoomList;
+					L.ccu().getFloors().get(mFloorListAdapter.getSelectedPostion()).mZoneList;
 			mRoomList.add(new Zone(addRoomEdit.getText().toString()));
 			updateRooms(mRoomList);
 			selectRoom(mRoomList.size() - 1);
@@ -401,7 +405,7 @@ public class FloorPlanFragment extends Fragment
 		
 		short meshAddress =L.generateSmartNodeAddress();
 		Floor floor = ccu().getFloors().get(mFloorListAdapter.getSelectedPostion());
-		Zone room = floor.mRoomList.get(mRoomListAdapter.getSelectedPostion());
+		Zone room = floor.mZoneList.get(mRoomListAdapter.getSelectedPostion());
 		
 		/* Checks to see if emulated and doesn't popup BLE dialogs */
 
@@ -453,7 +457,7 @@ public class FloorPlanFragment extends Fragment
 	private void selectModule(int position)
 	{
 		Floor floor = ccu().getFloors().get(mFloorListAdapter.getSelectedPostion());
-		Zone zone = floor.mRoomList.get(mRoomListAdapter.getSelectedPostion());
+		Zone zone = floor.mZoneList.get(mRoomListAdapter.getSelectedPostion());
 		Short nodeAddr = mModuleListAdapter.getItem(position);
 		
 		

@@ -209,7 +209,7 @@ public class CCUApplication
     
     public String getFloor(short addr) {
         for (Floor f : mfloors) {
-            for (Zone z : f.mRoomList) {
+            for (Zone z : f.mZoneList) {
                 for (ZoneProfile zp : z.mZoneProfiles) {
                     zp.getNodeAddresses().contains(addr);
                     return f.mFloorName;
@@ -221,7 +221,7 @@ public class CCUApplication
     
     public String getRoom(short addr) {
         for (Floor f : mfloors) {
-            for (Zone z : f.mRoomList) {
+            for (Zone z : f.mZoneList) {
                 for (ZoneProfile zp : z.mZoneProfiles) {
                     zp.getNodeAddresses().contains(addr);
                     return z.roomName;

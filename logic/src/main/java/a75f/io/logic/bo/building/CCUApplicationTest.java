@@ -22,7 +22,7 @@ public class CCUApplicationTest
         ccuApplication.setTitle("Light Test");
         Floor floor = new Floor(1, "webid", "Floor1");
         Zone zone = new Zone("75FRoom1");
-        floor.mRoomList.add(zone);
+        floor.mZoneList.add(zone);
         LightProfile p1 = new LightProfile();
         zone.mZoneProfiles.add(p1);
         

@@ -8,8 +8,8 @@ import android.widget.AbsListView.MultiChoiceModeListener;
 
 import java.util.ArrayList;
 
-import a75f.io.logic.bo.building.Zone;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.Zone;
 
 class RoomListActionMenuListener implements MultiChoiceModeListener
 {
@@ -91,7 +91,12 @@ class RoomListActionMenuListener implements MultiChoiceModeListener
 	{
 		for (int nCount = 0; nCount < selectedRoom.size(); nCount++)
 		{
-			L.ccu().getFloors().get(0).mRoomList.remove(nCount);
+			Zone sZone = L.ccu().getFloors().get(0).mZoneList.remove(nCount);
+			for (Short node : sZone.getNodes())
+			{
+				sZone.removeNodeAndClearAssociations(node);
+			}
+			
 			L.saveCCUState();
 			floorPlanActivity.refreshScreen();
 		}
@@ -100,7 +105,7 @@ class RoomListActionMenuListener implements MultiChoiceModeListener
 	
 	private void renameSelectedRoom()
 	{
-		L.ccu().getFloors().get(0).mRoomList.remove(selectedRoom.get(0));
+		L.ccu().getFloors().get(0).mZoneList.remove(selectedRoom.get(0));
 		L.saveCCUState();
 		floorPlanActivity.refreshScreen();
 	}

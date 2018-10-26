@@ -35,6 +35,8 @@ public class HisSyncHandler
     }
     
     public synchronized void doSync() {
+        
+        Log.d("CCU", "doHisSync ->");
         ArrayList<HashMap> points = hayStack.readAll("point and his");
         if (points.size() == 0) {
             return;
@@ -87,6 +89,7 @@ public class HisSyncHandler
                 }
             }
             hayStack.tagsDb.setHisItemSyncStatus(hisItems);
+            Log.d("CCU","<- doHisSync");
         }
     }
 }

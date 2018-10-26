@@ -78,7 +78,7 @@ public class L
         int amountOfNodes = 0;
         for (Floor floors : L.ccu().getFloors())
         {
-            for (Zone zone : floors.mRoomList)
+            for (Zone zone : floors.mZoneList)
             {
                 for (ZoneProfile zp : zone.mZoneProfiles)
                 {

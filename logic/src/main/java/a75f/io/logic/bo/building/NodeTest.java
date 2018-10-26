@@ -51,7 +51,7 @@ public class NodeTest
         ccuApplication.setTitle("Test");
         Floor floor = new Floor(1, "webid", "Floor1");
         Zone z = new Zone("75FRoom1");
-        floor.mRoomList.add(z);
+        floor.mZoneList.add(z);
         LightProfile p1 = new LightProfile();
         z.mZoneProfiles.add(p1);
 

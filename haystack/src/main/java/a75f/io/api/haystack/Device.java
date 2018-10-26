@@ -10,7 +10,7 @@ public class Device
 {
     private String            displayName;
     private ArrayList<String> markers;
-    private String equipName;
+    private String equipRef;
     private String addr;
     private String siteRef;
     public String getAddr()
@@ -25,9 +25,9 @@ public class Device
     {
         return markers;
     }
-    public String getEquipName()
+    public String getEquipRef()
     {
-        return equipName;
+        return equipRef;
     }
     public String getSiteRef() {
         return siteRef;
@@ -39,7 +39,7 @@ public class Device
     public static class Builder{
         private String            displayName;
         private ArrayList<String> markers = new ArrayList<>();
-        private String equipName;
+        private String equipRef;
         private String addr;
         private String siteRef;
     
@@ -64,9 +64,9 @@ public class Device
             this.markers.add(m);
             return this;
         }
-        public Builder setEquipName(String eq)
+        public Builder setEquipRef(String eq)
         {
-            this.equipName = equipName;
+            this.equipRef = equipRef;
             return this;
         }
     
@@ -82,6 +82,7 @@ public class Device
             d.markers = this.markers;
             d.addr = this.addr;
             d.siteRef = this.siteRef;
+            d.equipRef = this.equipRef;
             return CCUHsApi.getInstance().addDevice(d);
         }
     }

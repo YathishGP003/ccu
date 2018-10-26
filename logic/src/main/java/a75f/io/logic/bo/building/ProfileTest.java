@@ -25,7 +25,7 @@ public class ProfileTest
 		Floor floor = new Floor(1, "webid", "Floor1");
 		Zone zone = new Zone("DefaultZone");
 		LightProfileConfiguration lightProfileConfiguration = new LightProfileConfiguration();
-		floor.mRoomList.add(zone);
+		floor.mZoneList.add(zone);
 		SingleStageProfile profile = new SingleStageProfile();
 		zone.mZoneProfiles.add(profile);
 		zone.findProfile(ProfileType.SSE);
@@ -91,7 +91,7 @@ public class ProfileTest
 
 			//CCUApplication deCcuApp = (CCUApplication) JsonSerializer.fromJson(ccu ,CCUApplication.class);
 			Assert.assertEquals(1, ccuApplication.getFloors().size());
-			Assert.assertEquals("DefaultZone", ccuApplication.getFloors().get(0).mRoomList.get(0).roomName .toString() );
+			Assert.assertEquals("DefaultZone", ccuApplication.getFloors().get(0).mZoneList.get(0).roomName .toString() );
 			/*Assert.assertEquals(3, ccuApplication.floors.get(0).mRoomList.get(0).zoneProfiles.size());
 			Assert.assertEquals(1, ccuApplication.floors.get(0).mRoomList.get(0).zoneProfiles.get(0).smartNodeOutputs.size());
 			Assert.assertEquals(1, ccuApplication.floors.get(0).mRoomList.get(0).zoneProfiles.get(0).smartNodeInputs.size());

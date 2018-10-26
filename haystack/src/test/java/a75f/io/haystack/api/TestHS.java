@@ -241,4 +241,89 @@ public class TestHS
         i.dump();
     }
     
+    @Test
+    public void testDeleteEntityTree() {
+        CCUHsApi hayStack = new CCUHsApi();
+        hayStack.tagsDb.init();
+        hayStack.tagsDb.tagsMap = new HashMap<>();
+        hayStack.tagsDb.writeArrays = new HashMap<>();
+        hayStack.tagsDb.idMap = new HashMap<>();
+        hayStack.tagsDb.removeIdMap = new HashMap<>();
+        int nodeAddr = 7000;
+    
+        Site s = new Site.Builder()
+                         .setDisplayName("75F")
+                         .addMarker("site")
+                         .setGeoCity("Burnsville")
+                         .setGeoState("MN")
+                         .setTz("Chicago")
+                         .setArea(1000).build();
+        hayStack.addSite(s);
+    
+        HashMap siteMap = hayStack.read(Tags.SITE);
+        String siteRef = (String) siteMap.get(Tags.ID);
+        String siteDis = (String) siteMap.get("dis");
+    
+        Equip v = new Equip.Builder()
+                          .setSiteRef(siteRef)
+                          .setDisplayName(siteDis+"-VAV-"+nodeAddr)
+                          .setRoomRef("room")
+                          .setFloorRef("floor")
+                          .addMarker("equip")
+                          .addMarker("vav")
+                          .setGroup("7000")
+                          .setGroup(String.valueOf(nodeAddr))
+                          .build();
+        String equipRef = hayStack.addEquip(v);
+    
+        Point testPoint = new Point.Builder()
+                                  .setDisplayName(siteDis+"AHU-"+nodeAddr+"-TestTemp")
+                                  .setEquipRef(equipRef)
+                                  .setSiteRef(siteRef)
+                                  .setRoomRef("room")
+                                  .setFloorRef("floor")
+                                  .addMarker("discharge")
+                                  .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("writable")
+                                  .setGroup(String.valueOf(nodeAddr))
+                                  .setTz("Chicago")
+                                  .setUnit("\u00B0F")
+                                  .build();
+    
+        String datID = CCUHsApi.getInstance().addPoint(testPoint);
+    
+        Point testPoint1 = new Point.Builder()
+                                  .setDisplayName(siteDis+"AHU-"+nodeAddr+"-TestTemp1")
+                                  .setEquipRef(equipRef)
+                                  .setSiteRef(siteRef)
+                                  .setRoomRef("room")
+                                  .setFloorRef("floor")
+                                  .addMarker("discharge")
+                                  .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("writable")
+                                  .setGroup(String.valueOf(nodeAddr))
+                                  .setTz("Chicago")
+                                  .setUnit("\u00B0F")
+                                  .build();
+    
+        String tpID1 = CCUHsApi.getInstance().addPoint(testPoint1);
+        
+        
+        hayStack.writeDefaultValById(datID, 10.1);
+        
+        hayStack.syncEntityTree();
+        
+        System.out.println(hayStack.tagsDb.tagsMap);
+        System.out.println("IDMap: " +hayStack.tagsDb.idMap);
+        System.out.println("removeIdMap: "+hayStack.tagsDb.removeIdMap);
+        
+        HashMap equip = hayStack.read("equip and group == \""+7000+"\"");
+        if (equip != null)
+        {
+            hayStack.deleteEntityTree(equip.get("id").toString());
+        }
+        System.out.println("IDMap: " +hayStack.tagsDb.idMap);
+        System.out.println("removeIDMap: "+ hayStack.tagsDb.removeIdMap);
+        hayStack.entitySyncHandler.doSyncRemoveIds();
+        System.out.println("removeIDMap: "+ hayStack.tagsDb.removeIdMap);
+    }
+    
 }

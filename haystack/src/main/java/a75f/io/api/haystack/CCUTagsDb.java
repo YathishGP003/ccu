@@ -60,6 +60,7 @@ public class CCUTagsDb extends HServer
     private static final String PREFS_TAGS_MAP = "tagsMap";
     private static final String PREFS_TAGS_WA = "writeArrayMap";
     private static final String PREFS_ID_MAP = "idMap";
+    private static final String PREFS_REMOVE_ID_MAP = "removeIdMap";
     
     public Map<String,HDict> tagsMap;
     public HashMap<String,WriteArray> writeArrays;
@@ -77,6 +78,9 @@ public class CCUTagsDb extends HServer
     
     public Map<String,String> idMap;
     public String idMapString;
+    
+    public Map<String,String> removeIdMap;
+    public String removeIdMapString;
     
     //public String tagsString = null;
     RuntimeTypeAdapterFactory<HVal> hsTypeAdapter =
@@ -109,6 +113,7 @@ public class CCUTagsDb extends HServer
         tagsString = appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).getString(PREFS_TAGS_MAP, null);
         waString = appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).getString(PREFS_TAGS_WA, null);
         idMapString = appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).getString(PREFS_ID_MAP, null);
+        removeIdMapString = appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).getString(PREFS_REMOVE_ID_MAP, null);
         
         boxStore = MyObjectBox.builder().androidContext(appContext).build();
         hisBox = boxStore.boxFor(HisItem.class);
@@ -117,6 +122,7 @@ public class CCUTagsDb extends HServer
             tagsMap = new HashMap();
             writeArrays = new HashMap();
             idMap = new HashMap();
+            removeIdMap = new HashMap();
             
         } else
         {
@@ -134,6 +140,7 @@ public class CCUTagsDb extends HServer
             }.getType();
             writeArrays = gson.fromJson(waString,waType);
             idMap = gson.fromJson(idMapString, HashMap.class);
+            removeIdMap = gson.fromJson(removeIdMapString, HashMap.class);
         }
     }
     
@@ -158,6 +165,9 @@ public class CCUTagsDb extends HServer
         
         idMapString = gson.toJson(idMap);
         appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).edit().putString(PREFS_ID_MAP, idMapString).apply();
+    
+        removeIdMapString = gson.toJson(removeIdMap);
+        appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).edit().putString(PREFS_REMOVE_ID_MAP, removeIdMapString).apply();
     
     }
     
@@ -195,6 +205,7 @@ public class CCUTagsDb extends HServer
         hisBox = boxStore.boxFor(HisItem.class);
         
         idMap = gson.fromJson(idMapString, HashMap.class);
+        removeIdMap = gson.fromJson(removeIdMapString, HashMap.class);
     }
     
     public void saveString() {
@@ -213,6 +224,7 @@ public class CCUTagsDb extends HServer
         }.getType();
         waString = gson.toJson(writeArrays,waType);
         idMapString = gson.toJson(idMap);
+        removeIdMapString = gson.toJson(removeIdMap);
     }
     
     public HDict addSite(String dis, String geoCity, String geoState, String timeZone, int area)

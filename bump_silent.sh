@@ -22,7 +22,7 @@ INPUT_STRING=$SUGGESTED_VERSION
 echo "Will set new version to be $INPUT_STRING"
 echo $INPUT_STRING > VERSION
 echo "Version $INPUT_STRING:" > tmpfile
-echo "http://updates.75fahrenheit.com/CCUV2_SN_dev_$V_MAJOR.$V_MINOR.apk" > tmpfile
+echo "http://updates.75fahrenheit.com/RENATUS_CCU_dev_$V_MAJOR.$V_MINOR.apk" > tmpfile
 git log --pretty=format:" - %s" "v$BASE_STRING"...HEAD >> tmpfile
 echo "" >> tmpfile
 echo "" >> tmpfile
@@ -34,12 +34,12 @@ echo "VERSION_CODE_MINOR=$V_MINOR" >> gradle.properties
 echo "VERSION_CODE_MAJOR=$V_MAJOR" >> gradle.properties
 echo "VERSION_CODE_PATCH=$V_PATCH" >> gradle.properties
 echo "org.gradle.jvmargs=-Xmx2560M" >> gradle.properties
-echo "applicationName=CCUV2_SN" >> gradle.properties
+echo "applicationName=RENATUS_CCU" >> gradle.properties
 git add gradle.properties
 git add VERSION
 git add CHANGES
 git commit -m "Version bump to $INPUT_STRING"
-git push http://usdevrepos:mDRg-9kqCpmuypoxR1GZ@gitlab.com/75f/android/ccu-v3.git master
+git push http://usdevrepos:mDRg-9kqCpmuypoxR1GZ@gitlab.com/75f/android/renatus.git master
 
 git tag -a -m "Tagging version $INPUT_STRING" "v$INPUT_STRING"
-git push http://usdevrepos:mDRg-9kqCpmuypoxR1GZ@gitlab.com/75f/android/ccu-v3.git --tags
+git push http://usdevrepos:mDRg-9kqCpmuypoxR1GZ@gitlab.com/75f/android/renatus.git --tags

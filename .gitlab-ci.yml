@@ -1,0 +1,63 @@
+before_script:
+  - whoami
+  - sudo chmod +x ./add_version_to_task.sh
+  - sudo chmod +x ./bulk_add_version_to_task.sh
+  - sudo chmod +x ./create_version.sh
+  - sudo chmod +x ./bump_silent.sh
+  - export ANDROID_HOME=~/android-sdk-linux
+  - export PATH=$PATH:~/android-sdk-linux/platform-tools
+  - sudo chmod +x ./gradlew
+  - eval $(ssh-agent -s)
+  - mkdir -p ~/.ssh
+  - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+
+
+stages:
+  - build
+  - deploy
+  - release
+
+build:
+  stage: build
+  script:
+    - echo "Testing checking CI local"
+    - ./gradlew assembleDevRelease
+    - echo "Testing checking CI local"
+  except:
+    - tags
+    - schedules
+
+
+deploy:
+    stage: deploy
+    script:
+     - echo "Deploying from tag"
+
+     - ./gradlew assembleDevRelease
+     - ./gradlew assembleProdRelease
+     - echo "Uploading dev & prod releases to SCP server"
+     - sshpass -p '65e7cd01' scp -rv  app/build/outputs/apk/dev/release/* dsingh@updates.75fahrenheit.com:/home/dsingh/webapps/updates
+     - sshpass -p '65e7cd01' scp -rv  app/build/outputs/apk/prod/release/* dsingh@updates.75fahrenheit.com:/home/dsingh/webapps/updates
+     - echo "Adding version to Jira in unreleased state"
+     - ./create_version.sh
+     - echo "Done creating version"
+     - echo "Adding Version to tasks in this build, transitioning the checkins to ready to test, setting the version to released."
+     - ./bulk_add_version_to_task.sh
+
+    only:
+     - tags
+    except:
+     - schedules
+
+
+
+
+release:on-schedule:
+  stage: release
+  script:
+    - echo "Bump silent"
+    - ./bump_silent.sh
+  only:
+    - schedules
+    - manual
+

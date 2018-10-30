@@ -5,6 +5,9 @@ repositories {
     maven { url 'https://maven.fabric.io/public' }
 }
 
+import java.util.regex.Matcher
+import java.util.regex.Pattern
+
 
 android {
     compileSdkVersion Integer.parseInt(project.ANDROID_BUILD_SDK_VERSION)
@@ -12,8 +15,8 @@ android {
         applicationId "a75f.io.renatus"
         minSdkVersion Integer.parseInt(project.ANDROID_BUILD_MIN_SDK_VERSION)
         targetSdkVersion Integer.parseInt(project.ANDROID_BUILD_TARGET_SDK_VERSION)
-        versionCode 153
-        versionName "1.0"
+        versionCode getVersionCodeTimestamp()
+        versionName getVersionNameIncremented()
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
@@ -23,12 +26,21 @@ android {
             }
         }
     }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            ext.betaDistributionGroupAliases = "nightly-1"
+            ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
+        }
+
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
     packagingOptions {
         exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/LICENSE'
@@ -39,14 +51,23 @@ android {
         exclude 'thirdpartynotice.txt'
 
     }
+
     signingConfigs {
         debug {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
-            storeFile file('debug.keystore')
+            storeFile file("debug.keystore")
+            storePassword 'android'
+        }
+        release {
+
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+            storeFile file("debug.keystore")
             storePassword 'android'
         }
     }
+
     dexOptions {
     }
     productFlavors {
@@ -93,3 +114,47 @@ dependencies {
     implementation project(':algos')
 
 }
+
+def getVersionCodeTimestamp() {
+    def currentDate = new Date()
+    def formattedDate = currentDate.format('yyMMddHHmm')
+    def code = formattedDate.toInteger()
+    return code
+}
+
+def getVersionNameIncremented() {
+    return applicationName + "_" + getCurrentFlavor() + "_" + VERSION_CODE_MAJOR + "." + VERSION_CODE_MINOR + "." + VERSION_CODE_PATCH
+}
+
+android.applicationVariants.all { variant ->
+    variant.outputs.all {
+        if (variant.buildType.name == "release") {
+            outputFileName = getVersionNameIncremented() + ".apk"
+        } else if (variant.buildType.name == "debug") {
+            outputFileName = "app-debug.apk"
+        }
+    }
+}
+
+def getCurrentFlavor() {
+    Gradle gradle = getGradle()
+    String tskReqStr = gradle.getStartParameter().getTaskRequests().toString()
+
+    Pattern pattern;
+
+    if (tskReqStr.contains("assemble"))
+        pattern = Pattern.compile("assemble(\\w+)(Release|Debug)")
+    else
+        pattern = Pattern.compile("generate(\\w+)(Release|Debug)")
+
+    Matcher matcher = pattern.matcher(tskReqStr)
+
+    if (matcher.find())
+        return matcher.group(1).toLowerCase()
+    else {
+        println "NO MATCH FOUND"
+        return "";
+    }
+}
+
+

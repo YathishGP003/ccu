@@ -224,7 +224,7 @@ public class CCUTagsDb extends HServer
         }.getType();
         waString = gson.toJson(writeArrays,waType);
         idMapString = gson.toJson(idMap);
-        removeIdMapString = gson.toJson(removeIdMap);
+        removeIdMapString = gson.toJson(idMap);
     }
     
     public HDict addSite(String dis, String geoCity, String geoState, String timeZone, int area)

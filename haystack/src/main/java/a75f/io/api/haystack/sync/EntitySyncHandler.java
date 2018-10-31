@@ -40,6 +40,7 @@ public class EntitySyncHandler
         }
         
         if (hayStack.tagsDb.removeIdMap.size() > 0) {
+            System.out.println("RemoveIDMap : "+hayStack.tagsDb.removeIdMap);
             doSyncRemoveIds();
         }
     
@@ -80,8 +81,7 @@ public class EntitySyncHandler
             doSyncEquips(siteLUID);
             doSyncDevices(siteLUID);
         }
-    
-        doSyncRemoveIds();
+        
         System.out.println("<- doSyncSite");
     }
     

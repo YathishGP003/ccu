@@ -389,6 +389,7 @@ public class TestRemoteHsSync
         hayStack.tagsDb.tagsMap = new HashMap<>();
         hayStack.tagsDb.writeArrays = new HashMap<>();
         hayStack.tagsDb.idMap = new HashMap<>();
+        hayStack.tagsDb.removeIdMap = new HashMap<>();
         int nodeAddr = 7000;
         
         Site s = new Site.Builder()

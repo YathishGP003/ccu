@@ -48,4 +48,5 @@ dependencies {
     compile 'com.fasterxml.jackson.core:jackson-databind:2.7.3'
 
     compile 'info.guardianproject.netcipher:netcipher:1.2'
+    compile 'org.influxdb:influxdb-java:2.14'
 }

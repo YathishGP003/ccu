@@ -48,7 +48,6 @@ public class BuildingProcessJob extends BaseJob
         }
     
         CCUHsApi.getInstance().syncEntityTree();
-        CCUHsApi.getInstance().syncHisData();
         
         uploadTimeSeriesData();
         Log.d("CCU","<- BuildingProcessJob");
@@ -57,6 +56,8 @@ public class BuildingProcessJob extends BaseJob
     private void uploadTimeSeriesData() {
     
         Log.d("CCU","uploadTimeSeriesData -> ");
+    
+        CCUHsApi.getInstance().syncHisData();
     
         ArrayList<HashMap> logPoints = CCUHsApi.getInstance().readAll("point and logical");
     

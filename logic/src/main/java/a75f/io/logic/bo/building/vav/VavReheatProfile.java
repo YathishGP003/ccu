@@ -178,7 +178,7 @@ public class VavReheatProfile extends VavProfile
     
             vavDevice.setDamperPos(damper.currentPosition);
             vavDevice.setReheatPos(valve.currentPosition);
-            
+            vavDevice.updateLoopParams();
         }
     }
 }

@@ -78,4 +78,7 @@ public class HisItem
     {
         this.syncStatus = syncStatus;
     }
+    public void dump(){
+        System.out.println("id: "+id+" rec: "+rec+" date: "+date+" val: "+val+" syncStatus: "+syncStatus);
+    }
 }

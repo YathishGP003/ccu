@@ -10,6 +10,7 @@ import java.util.ArrayList;
 
 import a75f.io.logic.bo.building.Floor;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.Zone;
 
 import static a75f.io.logic.L.ccu;
 
@@ -88,6 +89,14 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 		for (int nCount = 0; nCount < selectedFloor.size(); nCount++)
 		{
 			Floor floorData = selectedFloor.get(nCount);
+			
+			for (Zone sZone: floorData.mZoneList)
+			{
+				for (Short node : sZone.getNodes())
+				{
+					sZone.removeNodeAndClearAssociations(node);
+				}
+			}
 			ccu().getFloors().remove(floorData);
 			L.saveCCUState();
 			floorPlanActivity.refreshScreen();

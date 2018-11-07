@@ -13,6 +13,7 @@ import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.CountDownTimer;
 import android.support.annotation.ColorInt;
 import android.support.v4.content.ContextCompat;
@@ -899,9 +900,21 @@ public class SeekArc extends View implements RoomDataInterface
             if (zoneProfile != null)
             {
                 curTemp = Double.toString(zoneProfile.getDisplayCurrentTemp());
-                if (mDesireTemp != 0)
+                if (mDesireTemp != 0 && mDesireTemp != L.getDesiredTemp(zoneProfile))
                 {
-                    L.setDesiredTemp(mDesireTemp, zoneProfile); //TODO - Optimize
+                    new AsyncTask<Void, Void, Void>() {
+                        @Override
+                        protected Void doInBackground( final Void ... params ) {
+                            L.setDesiredTemp(mDesireTemp, zoneProfile); //TODO - Optimize
+                            return null;
+                        }
+        
+                        @Override
+                        protected void onPostExecute( final Void result ) {
+                            // continue what you are doing...
+                        }
+                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+                    
                     Log.d("CCU_TEMP", " mDesireTemp " + mDesireTemp);
                 }
             }

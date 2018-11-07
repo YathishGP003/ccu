@@ -18,7 +18,7 @@ class ZoneBLL
 		{
 			if (mFloorName.equalsIgnoreCase(floor.mFloorName))
 			{
-				for (Zone zone : floor.mRoomList)
+				for (Zone zone : floor.mZoneList)
 				{
 					if (zone.roomName.equalsIgnoreCase(mRoomName))
 					{

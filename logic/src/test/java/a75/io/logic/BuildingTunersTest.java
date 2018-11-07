@@ -67,7 +67,7 @@ public class BuildingTunersTest
         BuildingTuners tuners = BuildingTuners.getInstance();
         tuners.addBuildingTunerEquip();
         
-        tuners.addVavTunerPoints();
+        tuners.addVavTuners();
         VavTunerUtil.dump();
         
         VavTunerUtil.setCoolingDeadband(2.0);

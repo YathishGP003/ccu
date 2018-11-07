@@ -73,7 +73,7 @@ public class Pulse
 		return temp/10.0;
 	}
 	public static Double getThermistorConversion(Double val) {
-		return val/10.0;
+		return val/100.0;
 	}
 	
 	public static Double getAnalogConversion(Double val) {

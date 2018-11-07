@@ -35,7 +35,7 @@ public class LSmartNode
         int amountOfNodes = 0;
         for (Floor floors : L.ccu().getFloors())
         {
-            for (Zone zone : floors.mRoomList)
+            for (Zone zone : floors.mZoneList)
             {
                 for (ZoneProfile zp : zone.mZoneProfiles)
                 {
@@ -87,7 +87,7 @@ public class LSmartNode
         HashMap<Short, CcuToCmOverUsbSnControlsMessage_t> controlMessagesHash = new HashMap<>();
         for (ZoneProfile zp : zone.mZoneProfiles)
         {
-            zp.updateZonePoints();
+            //zp.updateZonePoints();
             for (short node : zp.getNodeAddresses())
             {
                 CcuToCmOverUsbSnControlsMessage_t controlsMessage_t;
@@ -162,6 +162,7 @@ public class LSmartNode
                     break;*/
             }
         }
+        seedMessage.settings.profileBitmap.lightingControl.set((short) 1);
         return seedMessage;
     }
     

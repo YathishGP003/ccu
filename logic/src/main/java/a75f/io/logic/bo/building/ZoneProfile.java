@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.UUID;
 
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.RoomDataInterface;
 
@@ -81,6 +82,20 @@ public abstract class ZoneProfile extends Schedulable
     public void removeProfileConfiguration(Short selectedModule)
     {
         this.mProfileConfiguration.remove(selectedModule);
+    }
+    
+    public void removeHaystackEntities(Short node) {
+        CCUHsApi hsApi = CCUHsApi.getInstance();
+        HashMap equip = hsApi.read("equip and group == \""+node+"\"");
+        if (equip.get("id") != null)
+        {
+            hsApi.deleteEntityTree(equip.get("id").toString());
+        }
+        HashMap device = hsApi.read("device and addr == \""+node+"\"");
+        if (device.get("id") != null)
+        {
+            hsApi.deleteEntityTree(device.get("id").toString());
+        }
     }
     
     

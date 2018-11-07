@@ -23,11 +23,11 @@ public class Point
     }
     public String getRoomRef()
     {
-        return roomRef;
+        return "@"+roomRef;
     }
     public String getFloorRef()
     {
-        return floorRef;
+        return "@"+floorRef;
     }
     public String getDisplayName()
     {

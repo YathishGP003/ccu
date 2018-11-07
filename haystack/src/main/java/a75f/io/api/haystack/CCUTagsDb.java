@@ -59,6 +59,8 @@ public class CCUTagsDb extends HServer
     private static final String PREFS_TAGS_DB = "ccu_tags";
     private static final String PREFS_TAGS_MAP = "tagsMap";
     private static final String PREFS_TAGS_WA = "writeArrayMap";
+    private static final String PREFS_ID_MAP = "idMap";
+    private static final String PREFS_REMOVE_ID_MAP = "removeIdMap";
     
     public Map<String,HDict> tagsMap;
     public HashMap<String,WriteArray> writeArrays;
@@ -73,6 +75,12 @@ public class CCUTagsDb extends HServer
     private BoxStore       boxStore;
     private Box<HisItem>   hisBox;
     private static final File TEST_DIRECTORY = new File("objectbox-example/test-db");
+    
+    public Map<String,String> idMap;
+    public String idMapString;
+    
+    public Map<String,String> removeIdMap;
+    public String removeIdMapString;
     
     //public String tagsString = null;
     RuntimeTypeAdapterFactory<HVal> hsTypeAdapter =
@@ -101,15 +109,20 @@ public class CCUTagsDb extends HServer
     
     public void init(Context c) {
         appContext = c;
+        
         tagsString = appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).getString(PREFS_TAGS_MAP, null);
         waString = appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).getString(PREFS_TAGS_WA, null);
-    
+        idMapString = appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).getString(PREFS_ID_MAP, null);
+        removeIdMapString = appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).getString(PREFS_REMOVE_ID_MAP, null);
+        
         boxStore = MyObjectBox.builder().androidContext(appContext).build();
         hisBox = boxStore.boxFor(HisItem.class);
         
         if (tagsString == null) {
             tagsMap = new HashMap();
             writeArrays = new HashMap();
+            idMap = new HashMap();
+            removeIdMap = new HashMap();
             
         } else
         {
@@ -126,6 +139,8 @@ public class CCUTagsDb extends HServer
             {
             }.getType();
             writeArrays = gson.fromJson(waString,waType);
+            idMap = gson.fromJson(idMapString, HashMap.class);
+            removeIdMap = gson.fromJson(removeIdMapString, HashMap.class);
         }
     }
     
@@ -141,11 +156,19 @@ public class CCUTagsDb extends HServer
         }.getType();
         tagsString = gson.toJson(tagsMap,listType);
         appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).edit().putString(PREFS_TAGS_MAP, tagsString).apply();
+        
         Type waType = new TypeToken<Map<String, WriteArray>>()
         {
         }.getType();
         waString = gson.toJson(writeArrays,waType);
         appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).edit().putString(PREFS_TAGS_WA, waString).apply();
+        
+        idMapString = gson.toJson(idMap);
+        appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).edit().putString(PREFS_ID_MAP, idMapString).apply();
+    
+        removeIdMapString = gson.toJson(removeIdMap);
+        appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).edit().putString(PREFS_REMOVE_ID_MAP, removeIdMapString).apply();
+    
     }
     
     //TODO- TEMP for Unit testing
@@ -180,6 +203,9 @@ public class CCUTagsDb extends HServer
                            .debugFlags(DebugFlags.LOG_QUERIES | DebugFlags.LOG_QUERY_PARAMETERS)
                            .build();
         hisBox = boxStore.boxFor(HisItem.class);
+        
+        idMap = gson.fromJson(idMapString, HashMap.class);
+        removeIdMap = gson.fromJson(removeIdMapString, HashMap.class);
     }
     
     public void saveString() {
@@ -197,6 +223,8 @@ public class CCUTagsDb extends HServer
         {
         }.getType();
         waString = gson.toJson(writeArrays,waType);
+        idMapString = gson.toJson(idMap);
+        removeIdMapString = gson.toJson(idMap);
     }
     
     public HDict addSite(String dis, String geoCity, String geoState, String timeZone, int area)
@@ -291,6 +319,7 @@ public class CCUTagsDb extends HServer
                                  .add("point",    HMarker.VAL)
                                  .add("physical",    HMarker.VAL)
                                  .add("deviceRef", p.getDeviceRef())
+                                 .add("siteRef",p.getSiteRef())
                                  .add("pointRef",p.getPointRef())
                                  .add("port",p.getPort())
                                  .add("type",p.getType())
@@ -312,7 +341,8 @@ public class CCUTagsDb extends HServer
                                  .add("dis",      d.getDisplayName())
                                  .add("device",    HMarker.VAL)
                                  .add("his",      HMarker.VAL)
-                                 .add("addr",      d.getAddr());
+                                 .add("addr",      d.getAddr())
+                                 .add("siteRef",  d.getSiteRef());
     
         for (String m : d.getMarkers()) {
             b.add(m);
@@ -383,8 +413,8 @@ public class CCUTagsDb extends HServer
         String filter = "site";
         if (base != null)
         {
-            if (base.has("site")) filter = "equip and siteRef==" + base.id().toCode();
-            else if (base.has("equip")) filter = "point and equipRef==" + base.id().toCode();
+            if (base.has("site")) filter = "equip and siteRef==\"" + base.id().toCode()+"\"";
+            else if (base.has("equip")) filter = "point and equipRef==\"" + base.id().toCode()+"\"";
             else filter = "navNoChildren";
         }
         
@@ -497,6 +527,7 @@ public class CCUTagsDb extends HServer
            hisItem.setDate(new Date(item.ts.millis()));
            hisItem.setRec(rec.get("id").toString());
            hisItem.setVal(Double.parseDouble(item.val.toString()));
+           hisItem.setSyncStatus(false);
            hisBox.put(hisItem);
        }
     }
@@ -509,5 +540,36 @@ public class CCUTagsDb extends HServer
     {
         System.out.println("-- invokeAction \"" + rec.dis() + "." + action + "\" " + args);
         return HGrid.EMPTY;
+    }
+    
+    public List<HisItem> getUnSyncedHisItems(HRef id) {
+        
+        HDict entity = readById(id);
+        
+        QueryBuilder<HisItem> hisQuery = hisBox.query();
+        hisQuery.equal(HisItem_.rec, entity.get("id").toString())
+                .equal(HisItem_.syncStatus,false)
+                //.greater(HisItem_.date,range.start.millis())
+                //.less(HisItem_.date,range.end.millis())
+                .order(HisItem_.date);
+        
+        return hisQuery.build().find();
+    }
+    
+    public void setHisItemSyncStatus(ArrayList<HisItem> hisItems) {
+        for (HisItem item: hisItems) {
+            hisBox.put(item);
+        }
+    }
+    
+    public List<HisItem> getAllHisItems(HRef id) {
+        
+        HDict entity = readById(id);
+        
+        QueryBuilder<HisItem> hisQuery = hisBox.query();
+        hisQuery.equal(HisItem_.rec, entity.get("id").toString())
+                .order(HisItem_.date);
+        
+        return hisQuery.build().find();
     }
 }

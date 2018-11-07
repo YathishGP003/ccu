@@ -170,7 +170,5 @@ public class VavTunerUtil
         System.out.println("VAVIntegralGain : "+getIntegralGain());
         System.out.println("VAVProportionalSpread : "+getProportionalSpread());
         System.out.println("VAVIntegralTimeout : "+getIntegralTimeout());
-        
-    
     }
 }

@@ -37,7 +37,7 @@ public class MeshNetwork extends DeviceNetwork
         {
             for (Floor floor : L.ccu().getFloors())
             {
-                for (Zone zone : floor.mRoomList)
+                for (Zone zone : floor.mZoneList)
                 {
                     DLog.Logw("=============Zone: " + zone.roomName + " ==================");
                     DLog.Logw("=================NOW SENDING SEEDS=====================");

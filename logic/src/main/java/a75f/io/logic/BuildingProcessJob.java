@@ -24,13 +24,13 @@ public class BuildingProcessJob extends BaseJob
     
     @Override
     public void doJob() {
-        Log.d("CCU","do BuildingProcessJob");
+        Log.d("CCU","BuildingProcessJob ->");
     
         tsData = new HashMap();
     
         for(Floor floor : L.ccu().getFloors())
         {
-            for(Zone zone : floor.mRoomList)
+            for(Zone zone : floor.mZoneList)
             {
                 //zone.updatePoints();
                 for (ZoneProfile zp : zone.mZoneProfiles)
@@ -46,11 +46,18 @@ public class BuildingProcessJob extends BaseJob
                 }
             }
         }
-        uploadTimeSeriesData();
     
+        CCUHsApi.getInstance().syncEntityTree();
+        
+        uploadTimeSeriesData();
+        Log.d("CCU","<- BuildingProcessJob");
     }
     
     private void uploadTimeSeriesData() {
+    
+        Log.d("CCU","uploadTimeSeriesData -> ");
+    
+        CCUHsApi.getInstance().syncHisData();
     
         ArrayList<HashMap> logPoints = CCUHsApi.getInstance().readAll("point and logical");
     
@@ -79,6 +86,7 @@ public class BuildingProcessJob extends BaseJob
         
         Log.d("CCU"," Write Influx "+tsData);
         InfluxDbUtil.writeData(url, "RENATUS_TEST", tsData, System.currentTimeMillis());
+        Log.d("CCU","<- uploadTimeSeriesData ");
         
     }
 }

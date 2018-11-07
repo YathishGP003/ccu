@@ -16,9 +16,14 @@ public class RawPoint
     private String type;
     private String unit;
     private String tz;
+    private String siteRef;
     public void setPointRef(String pointRef)
     {
         this.pointRef = pointRef;
+    }
+    public String getSiteRef()
+    {
+        return siteRef;
     }
     public String getDisplayName()
     {
@@ -55,6 +60,7 @@ public class RawPoint
     public static class Builder{
         private String            displayName;
         private ArrayList<String> markers = new ArrayList<>();
+        private String siteRef;
         private String deviceRef;
         private String pointRef;
         private String port;
@@ -74,6 +80,11 @@ public class RawPoint
         public Builder setDeviceRef(String deviceRef)
         {
             this.deviceRef = deviceRef;
+            return this;
+        }
+        public Builder setSiteRef(String siteRef)
+        {
+            this.siteRef = siteRef;
             return this;
         }
         public Builder setPointRef(String pointRef)
@@ -117,6 +128,7 @@ public class RawPoint
             p.type = this.type;
             p.unit = this.unit;
             p.tz = this.tz;
+            p.siteRef = this.siteRef;
             //CCUHsApi.getInstance().addRawPoint(p);
             return p;
         }

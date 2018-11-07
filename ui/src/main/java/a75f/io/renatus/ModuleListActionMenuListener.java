@@ -94,7 +94,7 @@ class ModuleListActionMenuListener implements MultiChoiceModeListener
 	{
 		for(Short selectedModule : seletedModules)
 		{
-			ccu().getFloors().get(floorPlanActivity.mFloorListAdapter.getSelectedPostion()).mRoomList
+			ccu().getFloors().get(floorPlanActivity.mFloorListAdapter.getSelectedPostion()).mZoneList
 					.get(floorPlanActivity.mRoomListAdapter.getSelectedPostion())
 					.removeNodeAndClearAssociations(selectedModule);
 		}

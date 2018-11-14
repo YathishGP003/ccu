@@ -1,5 +1,7 @@
 package a75f.io.api.haystack.sync;
 
+import android.util.Log;
+
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -20,26 +22,32 @@ import info.guardianproject.netcipher.NetCipher;
 
 public class HttpUtil
 {
-    
-    public static final String HAYSTACK_URL = "https://renatus-haystack.azurewebsites.net/";
+    private static final String TAG = HttpUtil.class.getSimpleName();
+
+    public static final String HAYSTACK_URL = "https://renatusv2.azurewebsites.net/";
 
     public static final String CLIENT_ID = "d7682439-ac41-408b-bf72-b89a98490bdf";
     public static final String TENANT_ID = "941d8a61-4be2-4622-8ace-ed8ee5696d99";
     public static final String CLIENT_SECRET = "f=}J/$ZRvF^0D}06%L[P]Rm@w)8gNbnCgm.47;vn8r#";
-
+    public static String clientToken = "";
     //JsonParser parser = new JsonParser();
     //JsonElement jsonTree = parser.parse(tokenJson);
     //JsonObject asJsonObject = jsonTree.getAsJsonObject();
     //String token = asJsonObject.get("access_token").getAsString();
     public static String executePost(String targetURL, String urlParameters)
     {
+        if(clientToken.equalsIgnoreCase(""))
+        {
+            clientToken = parseToken(authorizeToken(CLIENT_ID, "", CLIENT_SECRET, TENANT_ID));
+            System.out.println("Client Token: " + clientToken);
+        }
         URL url;
         HttpsURLConnection connection = null;
         try {
             //Create connection
             url = new URL(targetURL);
-            //connection = (HttpsURLConnection)url.openConnection();
-            connection = NetCipher.getHttpsURLConnection(url);//TODO - Hack for SSLException
+            connection = (HttpsURLConnection)url.openConnection();
+            //connection = NetCipher.getHttpsURLConnection(url);//TODO - Hack for SSLException
             //connection.setRequestMethod("POST");
             connection.setRequestProperty("Content-Type",
                     "text/zinc");
@@ -49,7 +57,7 @@ public class HttpUtil
             connection.setRequestProperty("Content-Length", "" +
                                                             Integer.toString(urlParameters.getBytes("UTF-8").length));
             connection.setRequestProperty("Content-Language", "en-US");
-            
+            connection.setRequestProperty("Authorization", "Bearer " + clientToken);
             connection.setUseCaches (false);
             connection.setDoInput(true);
             connection.setDoOutput(true);
@@ -70,6 +78,13 @@ public class HttpUtil
                 response.append('\n');
             }
             rd.close();
+            if(connection.getResponseCode() == 401)
+            {
+                clientToken = parseToken(authorizeToken(CLIENT_ID, "", CLIENT_SECRET, TENANT_ID));
+                System.out.println("Client Token: " + clientToken);
+                executePost(targetURL, urlParameters);
+            }
+
             return connection.getResponseCode() == 200 ? response.toString() : null;
             
         } catch (Exception e) {
@@ -118,8 +133,8 @@ public class HttpUtil
 
             //Create connection
             url = new URL("https://login.microsoftonline.com/" + tenantId + "/oauth2/v2.0/token");
-
-            connection = NetCipher.getHttpsURLConnection(url);//TODO - Hack for SSLException
+            connection = (HttpsURLConnection)url.openConnection();
+            //connection = NetCipher.getHttpsURLConnection(url);//TODO - Hack for SSLException
             //connection.setRequestMethod("POST");
             connection.setRequestProperty("Content-Type",
                     contentType);

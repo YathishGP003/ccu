@@ -35,6 +35,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
 
+import a75f.io.api.haystack.sync.HttpUtil;
+
 /**
  * HClient manages a logical connection to a HTTP REST haystack server.
  *
@@ -42,12 +44,8 @@ import java.util.HashMap;
  */
 public class HClient extends HProj
 {
-  
-  
-  //TODO- TEMP
   public HClient()
   {
-    uri = null;
   }
 
 //////////////////////////////////////////////////////////////////////////
@@ -92,7 +90,7 @@ public class HClient extends HProj
 
   /** Base URI for connection such as "http://host/api/demo/".
       This string always ends with slash. */
-  public final String uri;
+  public String uri;
 
   /** Timeout in milliseconds for opening the HTTP socket */
   public int connectTimeout = 60 * 1000;
@@ -606,6 +604,14 @@ public class HClient extends HProj
   {
     try
     {
+      if(HttpUtil.clientToken.equalsIgnoreCase(""))
+      {
+        HttpUtil.clientToken = HttpUtil.parseToken(HttpUtil.authorizeToken(HttpUtil.CLIENT_ID,
+                "",
+                HttpUtil.CLIENT_SECRET,
+                HttpUtil.TENANT_ID));
+        System.out.println("Client Token: " + HttpUtil.clientToken);
+      }
       // setup the POST request
       URL url = new URL(uriStr);
       HttpURLConnection c = openHttpConnection(url, "POST");
@@ -616,6 +622,7 @@ public class HClient extends HProj
         c.setDoInput(true);
         c.setRequestProperty("Connection", "Close");
         c.setRequestProperty("Content-Type", mimeType == null ? "text/plain; charset=utf-8": mimeType);
+        c.setRequestProperty("Authorization", "Bearer " + HttpUtil.clientToken);
         c.connect();
 
         // post expression
@@ -624,7 +631,16 @@ public class HClient extends HProj
         cout.close();
 
         // check for successful request
-        if (c.getResponseCode() != 200)
+        if(c.getResponseCode() == 401)
+        {
+          HttpUtil.clientToken = HttpUtil.parseToken(HttpUtil.authorizeToken(HttpUtil.CLIENT_ID,
+                  "",
+                  HttpUtil.CLIENT_SECRET,
+                  HttpUtil.TENANT_ID));
+          System.out.println("Client Token: " + HttpUtil.clientToken);
+          postString(uriStr, req, mimeType);
+        }
+        else if (c.getResponseCode() != 200)
           throw new CallHttpException(c.getResponseCode(), c.getResponseMessage());
 
         // read response into string

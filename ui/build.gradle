@@ -112,6 +112,7 @@ dependencies {
     compile 'com.opencsv:opencsv:4.0'
     compile 'org.jsoup:jsoup:1.10.3'
     implementation project(':algos')
+    compile project(path: ':haystack')
 
 }
 

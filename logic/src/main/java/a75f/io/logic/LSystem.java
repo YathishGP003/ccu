@@ -2,11 +2,6 @@ package a75f.io.logic;
 
 import android.util.Log;
 
-import com.microsoft.azure.sdk.iot.device.DeviceClient;
-import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
-import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
-import com.microsoft.azure.sdk.iot.device.Message;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -129,59 +124,59 @@ public class LSystem
     }
     
     
-    public static void SendTSDataToAzure() throws URISyntaxException, IOException
-    {
-        // Comment/uncomment from lines below to use HTTPS or MQTT protocol
-        // IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
-        IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
-        
-        DeviceClient client = new DeviceClient(connString, protocol);
-        
-        try
-        {
-            client.open();
-        } catch (Exception e2)
-        {
-            Log.d("VAV","Exception while opening IoTHub connection: " + e2.toString());
-        }
-    
-    
-        if (L.ccu().systemProfile.trSystem instanceof VavTRSystem)
-        {
-            Log.d("VAV"," Send TS Data : "+msgStr);
-            try
-            {
-                Message msg = new Message(msgStr.toString());
-                //msg.setProperty("temperatureAlert", temperature > 28 ? "true" : "false");
-                msg.setMessageId(java.util.UUID.randomUUID().toString());
-                System.out.println(msgStr);
-                EventCallback eventCallback = new EventCallback();
-                client.sendEventAsync(msg, eventCallback, msgCntr);
-            }
-            catch (Exception e)
-            {
-               Log.d("VAV","Exception while sending event: " + e.getMessage());
-            }
-            
-        }
-        try
-        {
-            Thread.sleep(2000);
-        } catch (InterruptedException e)
-        {
-            e.printStackTrace();
-        }
-        client.closeNow();
-    }
-    
-    static class EventCallback implements IotHubEventCallback
-    {
-        public void execute(IotHubStatusCode status, Object context)
-        {
-            Integer i = (Integer) context;
-            Log.d("VAV","IoT Hub responded to message " + i.toString()
-                               + " with status " + status.name());
-        }
-    }
+//    public static void SendTSDataToAzure() throws URISyntaxException, IOException
+//    {
+//        // Comment/uncomment from lines below to use HTTPS or MQTT protocol
+//        // IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
+//        IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
+//
+//        DeviceClient client = new DeviceClient(connString, protocol);
+//
+//        try
+//        {
+//            client.open();
+//        } catch (Exception e2)
+//        {
+//            Log.d("VAV","Exception while opening IoTHub connection: " + e2.toString());
+//        }
+//
+//
+//        if (L.ccu().systemProfile.trSystem instanceof VavTRSystem)
+//        {
+//            Log.d("VAV"," Send TS Data : "+msgStr);
+//            try
+//            {
+//                Message msg = new Message(msgStr.toString());
+//                //msg.setProperty("temperatureAlert", temperature > 28 ? "true" : "false");
+//                msg.setMessageId(java.util.UUID.randomUUID().toString());
+//                System.out.println(msgStr);
+//                EventCallback eventCallback = new EventCallback();
+//                client.sendEventAsync(msg, eventCallback, msgCntr);
+//            }
+//            catch (Exception e)
+//            {
+//               Log.d("VAV","Exception while sending event: " + e.getMessage());
+//            }
+//
+//        }
+//        try
+//        {
+//            Thread.sleep(2000);
+//        } catch (InterruptedException e)
+//        {
+//            e.printStackTrace();
+//        }
+//        client.closeNow();
+//    }
+//
+//    static class EventCallback implements IotHubEventCallback
+//    {
+//        public void execute(IotHubStatusCode status, Object context)
+//        {
+//            Integer i = (Integer) context;
+//            Log.d("VAV","IoT Hub responded to message " + i.toString()
+//                               + " with status " + status.name());
+//        }
+//    }
     
 }

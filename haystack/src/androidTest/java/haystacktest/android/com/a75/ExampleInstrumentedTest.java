@@ -42,9 +42,13 @@ public class ExampleInstrumentedTest
 
         String scope = "";
 
-
         String tokenJson = HttpUtil.authorizeToken(HttpUtil.CLIENT_ID, scope, HttpUtil.CLIENT_SECRET, HttpUtil.TENANT_ID);
         System.out.println("Token : " + tokenJson);
+    }
+
+    @Test
+    public void addSite()
+    {
 
 
     }

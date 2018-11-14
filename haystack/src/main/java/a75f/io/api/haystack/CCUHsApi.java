@@ -56,7 +56,7 @@ public class CCUHsApi
         tagsDb = (CCUTagsDb) hsClient.db();
         tagsDb.init(c);
         instance = this;
-        entitySyncHandler = new EntitySyncHandler(this);
+        entitySyncHandler = new EntitySyncHandler();
         hisSyncHandler = new HisSyncHandler(this);
         Log.d("Haystack","Api created");
     }
@@ -70,7 +70,7 @@ public class CCUHsApi
         tagsDb = (CCUTagsDb) hsClient.db();
         tagsDb.setTagsDbMap(new HashMap());
         instance = this;
-        entitySyncHandler = new EntitySyncHandler(this);
+        entitySyncHandler = new EntitySyncHandler();
         hisSyncHandler = new HisSyncHandler(this);
     }
     

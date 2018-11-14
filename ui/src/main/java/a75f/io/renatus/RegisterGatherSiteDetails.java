@@ -66,7 +66,10 @@ public class RegisterGatherSiteDetails extends Activity {
     }
 
     private void next() {
-        Intent i = new Intent(RegisterGatherSiteDetails.this, CCUSettings.class);
+        Intent i = new Intent(RegisterGatherSiteDetails.this,
+                RenatusLandingActivity.class);
+
+
         startActivity(i);
     }
 
@@ -86,6 +89,8 @@ public class RegisterGatherSiteDetails extends Activity {
             String localSiteId = CCUHsApi.getInstance().addSite(s75f);
             Log.i(TAG, "LocalSiteID: " + localSiteId);
             CCUHsApi.getInstance().log();
+
+            CCUHsApi.getInstance().syncEntityTree();
             return localSiteId;
         } else {
             Log.i(TAG, "Site ID already exists");

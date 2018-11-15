@@ -142,8 +142,10 @@ public class HttpUtil
             connection.setRequestProperty("Content-Type",
                     contentType);
 
-            String urlParameters = "client_id=" + client_id + "&scope=" + SCOPE +
-                    "&client_secret=" + client_secret + "&grant_type=client_credentials";
+            String urlParameters = "grant_type=client_credentials&client_id=d7682439-ac41-408b-bf72-b89a98490bdf&client_secret=8tHwP3ykcKabD%2BJ8tDrhex7HmVtrzF3zfXt56cF6h7c%3D&scope=234afeb7-497b-45a3-aa76-db2a549f17d4%2F.default";
+
+                   // "client_id=" + client_id + "&scope=" + SCOPE +
+                    //"&client_secret=" + client_secret + "&grant_type=client_credentials";
 
             System.out.println(url.toString());
             System.out.println(urlParameters);

@@ -140,7 +140,7 @@ public class TestRemoteHsSync
         hayStack.tagsDb.idMap = new HashMap<>();
         int nodeAddr = 7000;
 
-        EntitySyncHandler entitySyncHandler = new EntitySyncHandler(hayStack);
+        EntitySyncHandler entitySyncHandler = new EntitySyncHandler();
         System.out.println("entitySyncHandler.isSyncNeeded " + entitySyncHandler.isSyncNeeded());
         Site s = new Site.Builder()
                          .setDisplayName("Name")
@@ -217,7 +217,7 @@ public class TestRemoteHsSync
         hayStack.tagsDb.idMap = new HashMap<>();
         int nodeAddr = 7000;
         
-        EntitySyncHandler entitySyncHandler = new EntitySyncHandler(hayStack);
+        EntitySyncHandler entitySyncHandler = new EntitySyncHandler();
         System.out.println("entitySyncHandler.isSyncNeeded " +
                 entitySyncHandler.isSyncNeeded());
         Site s = new Site.Builder()
@@ -295,7 +295,7 @@ public class TestRemoteHsSync
         hayStack.tagsDb.idMap = new HashMap<>();
         int nodeAddr = 7000;
     
-        EntitySyncHandler entitySyncHandler = new EntitySyncHandler(hayStack);
+        EntitySyncHandler entitySyncHandler = new EntitySyncHandler();
         System.out.println("entitySyncHandler.isSyncNeeded " + entitySyncHandler.isSyncNeeded());
         Site s = new Site.Builder()
                          .setDisplayName("Name")

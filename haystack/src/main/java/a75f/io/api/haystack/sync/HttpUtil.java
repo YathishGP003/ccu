@@ -28,7 +28,10 @@ public class HttpUtil
 
     public static final String CLIENT_ID = "d7682439-ac41-408b-bf72-b89a98490bdf";
     public static final String TENANT_ID = "941d8a61-4be2-4622-8ace-ed8ee5696d99";
-    public static final String CLIENT_SECRET = "f=}J/$ZRvF^0D}06%L[P]Rm@w)8gNbnCgm.47;vn8r#";
+    public static final String CLIENT_SECRET = "8tHwP3ykcKabD+J8tDrhex7HmVtrzF3zfXt56cF6h7c=";
+    public static final String SCOPE = "234afeb7-497b-45a3-aa76-db2a549f17d4%2F.default";
+
+
     public static String clientToken = "";
     //JsonParser parser = new JsonParser();
     //JsonElement jsonTree = parser.parse(tokenJson);
@@ -57,7 +60,7 @@ public class HttpUtil
             connection.setRequestProperty("Content-Length", "" +
                                                             Integer.toString(urlParameters.getBytes("UTF-8").length));
             connection.setRequestProperty("Content-Language", "en-US");
-            connection.setRequestProperty("Authorization", "Bearer " + clientToken);
+            connection.setRequestProperty("Authorization", " Bearer " + clientToken);
             connection.setUseCaches (false);
             connection.setDoInput(true);
             connection.setDoOutput(true);
@@ -139,8 +142,8 @@ public class HttpUtil
             connection.setRequestProperty("Content-Type",
                     contentType);
 
-            String urlParameters = "client_id=" + client_id + "&scope=" + "https%3A%2F%2Fgraph.microsoft.com%2F.default&" +
-                    "client_secret=" + client_secret + "&grant_type=client_credentials";
+            String urlParameters = "client_id=" + client_id + "&scope=" + SCOPE +
+                    "&client_secret=" + client_secret + "&grant_type=client_credentials";
 
             System.out.println(url.toString());
             System.out.println(urlParameters);

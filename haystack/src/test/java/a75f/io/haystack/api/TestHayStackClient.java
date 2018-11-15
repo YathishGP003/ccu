@@ -48,7 +48,25 @@ public class TestHayStackClient
         //hayStackClient.readAll(filter);
         
         System.out.println(HZincWriter.gridToString(resGrid));*/
-        
-        
+
+
+    }
+
+    @Test
+    public void testAuth(){
+
+        String response = HttpUtil.executePost("https://renatusv2.azurewebsites.net/about", "");
+        System.out.println("Response: " + response);
+        /*AndroidHSClient hayStackClient = new AndroidHSClient();
+
+        String cmd = "about";//formats,ops
+        HGrid resGrid = hayStackClient.call(cmd, null);
+
+        //String filter = ""; // read,nav
+        //hayStackClient.readAll(filter);
+
+        System.out.println(HZincWriter.gridToString(resGrid));*/
+
+
     }
 }

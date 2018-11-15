@@ -25,8 +25,7 @@ import a75f.io.device.mesh.LSerial;
 import a75f.io.logic.Globals;
 import a75f.io.usbserial.SerialEvent;
 import a75f.io.usbserial.UsbService;
-import allbegray.slack.rtm.SlackRealTimeMessagingClient;
-import allbegray.slack.webapi.SlackWebApiClient;
+
 
 /**
  * Created by rmatt isOn 7/19/2017.
@@ -62,8 +61,7 @@ public abstract class UtilityApplication extends Application
             }
         }
     };
-    SlackWebApiClient            mWebApiClient;
-    SlackRealTimeMessagingClient mRtmClient;
+
     String                       mBotId;
     Random rand = new Random();
     private UsbService               usbService;

@@ -28,16 +28,15 @@ android {
     }
 }
 dependencies {
-    compile fileTree(include: '*.jar', dir: '../libs')
-    compile 'joda-time:joda-time:2.9.9'
+    implementation fileTree(include: '*.jar', dir: '../libs')
+    implementation 'joda-time:joda-time:2.9.9'
     // Optional -- UI testing with UI Automator
-    compile 'com.fasterxml.jackson.core:jackson-core:2.7.3'
-    compile 'com.fasterxml.jackson.core:jackson-annotations:2.7.3'
-    compile 'com.fasterxml.jackson.core:jackson-databind:2.7.3'
-    compile project(path: ':kinveybo')
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.8.6'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.8.6'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.8.6'
     implementation project(':algos')
     testCompile 'junit:junit:4.12'
-    compile project(path: ':usbserial')
+    implementation project(path: ':usbserial')
     implementation project(':haystack')
     implementation project(':logic')
 }

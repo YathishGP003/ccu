@@ -3,17 +3,10 @@ package a75f.io.logic;
 import android.content.Context;
 import android.util.Log;
 
-import com.google.api.client.json.jackson2.JacksonFactory;
-
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.kinveybo.AlgoTuningParameters;
-import a75f.io.kinveybo.CCUUser;
-import a75f.io.kinveybo.DalContext;
 import a75f.io.logic.bo.building.CCUApplication;
 import a75f.io.logic.bo.building.Floor;
 import a75f.io.logic.bo.building.Node;
@@ -22,11 +15,9 @@ import a75f.io.logic.bo.building.Schedulable;
 import a75f.io.logic.bo.building.Schedule;
 import a75f.io.logic.bo.building.Zone;
 import a75f.io.logic.bo.building.ZoneProfile;
-import a75f.io.logic.bo.building.definitions.OverrideType;
 import a75f.io.logic.bo.building.definitions.ScheduleMode;
 import a75f.io.logic.bo.building.lights.LightProfile;
 
-import static a75f.io.logic.JsonSerializer.fromJson;
 import static a75f.io.logic.LZoneProfile.isNamedSchedule;
 
 /**
@@ -207,44 +198,6 @@ public class L
     }
 
 
-    public static void setupTestUserIfNeeded()
-    {
-        if (isDeveloperTesting())
-        {
-            JacksonFactory jacksonFactory = new JacksonFactory();
-            InputStream inputStream = null;
-            try
-            {
-                inputStream =
-                        Globals.getInstance().getApplicationContext().getAssets().open("User.json");
-                CCUUser user = fromJson(inputStream, CCUUser.class);
-                ccu().setUser(user);
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-        }
-        else if (isSimulation())
-        {
-            //TODO: this should be in the simulation file.
-            JacksonFactory jacksonFactory = new JacksonFactory();
-            InputStream inputStream = null;
-            try
-            {
-                inputStream =
-                        Globals.getInstance().getApplicationContext().getAssets().open("User.json");
-                CCUUser user = fromJson(inputStream, CCUUser.class);
-                ccu().setUser(user);
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-        }
-    }
-
-
     public static boolean isDeveloperTesting()
     {
         return Globals.getInstance().isDeveloperTesting();
@@ -261,10 +214,10 @@ public class L
 
     public static void forceOverride(Zone zone, ZoneProfile zoneProfile, float desireTemp)
     {
-        zoneProfile.setOverride(System.currentTimeMillis() +
+        /*zoneProfile.setOverride(System.currentTimeMillis() +
                                 (int) resolveTuningParameter(zone, AlgoTuningParameters.SSETuners.SSE_FORCED_OCCU_TIME) *
                                 60 * 1000, OverrideType.RELEASE_TIME, (short) Math.round(
-                desireTemp * 2));
+                desireTemp * 2));*/
     }
 
 
@@ -276,7 +229,7 @@ public class L
         }
         else
         {
-            return ccu().getDefaultCCUTuners().get(key);
+            return null;//TODO - ccu().getDefaultCCUTuners().get(key);
         }
     }
 
@@ -284,31 +237,6 @@ public class L
     public static boolean isOccupied(Zone zone, ZoneProfile zoneProfile)
     {
         return false;
-    }
-
-
-    public static AlgoTuningParameters getDefaultTuners()
-    {
-
-        Log.e("Tuners", "Get default tuners");
-        AlgoTuningParameters algoTuningParameters = null;
-        try
-        {
-            InputStream inputStream = Globals.getInstance().getApplicationContext().getAssets()
-                                             .open("DefaultTuningParameters_v100.json");
-            algoTuningParameters = fromJson(inputStream, AlgoTuningParameters.class);
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-        return algoTuningParameters;
-    }
-
-
-    public static DalContext getKinveyClient()
-    {
-        return Globals.getInstance().getDalContext();
     }
 
 

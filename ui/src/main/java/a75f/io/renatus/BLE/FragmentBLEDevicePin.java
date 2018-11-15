@@ -23,8 +23,8 @@ import org.javolution.annotations.Nullable;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import a75f.io.bluetooth.BLEAction;
-import a75f.io.bluetooth.BLEProvisionService;
+import a75f.io.renatus.bluetooth.BLEAction;
+import a75f.io.renatus.bluetooth.BLEProvisionService;
 import a75f.io.device.ble.BLERoomName;
 import a75f.io.device.ble.GattAttributes;
 import a75f.io.device.ble.GattPin;

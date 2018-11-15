@@ -54,7 +54,7 @@
         android:supportsRtl="true"
         android:theme="@style/RenatusAppTheme">
 
-        <service android:name="a75f.io.bluetooth.BLEProvisionService"/>
+        <service android:name=".bluetooth.BLEProvisionService"/>
         <service
             android:name="a75f.io.usbserial.UsbService"
             android:enabled="true">
@@ -77,11 +77,6 @@
         <activity
             android:name=".SplashActivity" android:launchMode="singleTask"
             android:theme="@style/RenatusAppTheme.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
         </activity>
 
         <activity

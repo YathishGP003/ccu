@@ -5,8 +5,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import a75f.io.kinveybo.AlgoTuningParameters;
-import a75f.io.kinveybo.CCUUser;
 import a75f.io.logic.bo.building.system.SystemProfile;
 import a75f.io.logic.bo.building.system.VavAnalogRtu;
 
@@ -56,15 +54,13 @@ public class CCUApplication
         Named Schedules
      */
     private HashMap<String, NamedSchedule> mLCMNamedSchedules = new HashMap<>();
-
-    private AlgoTuningParameters mDefaultCCUTuners;
+    
     
     public SystemProfile systemProfile = new VavAnalogRtu();//TODO- TEMP
     
     public  ControlMote      controlMote   = new ControlMote();
     private String           mTitle        = "";
     private ArrayList<Floor> mfloors       = new ArrayList<Floor>();
-    private CCUUser mUser;
     private short           mSmartNodeAddressBand;
 
     public short getSmartNodeAddressBand()
@@ -147,17 +143,6 @@ public class CCUApplication
         this.mTitle = title;
     }
 
-    public AlgoTuningParameters getDefaultCCUTuners()
-    {
-        return mDefaultCCUTuners;
-    }
-
-
-    public void setDefaultCCUTuners(AlgoTuningParameters defaultCCUTuners)
-    {
-        this.mDefaultCCUTuners = defaultCCUTuners;
-    }
-
     //These will be provided as tuners when I get around ot it.
     public ArrayList<Schedule> getDefaultLightSchedule()
     {
@@ -193,18 +178,6 @@ public class CCUApplication
     public void setLCMNamedSchedules(HashMap<String, NamedSchedule> namedSchedules)
     {
         this.mLCMNamedSchedules = namedSchedules;
-    }
-
-
-    public CCUUser getUser()
-    {
-        return mUser;
-    }
-
-
-    public void setUser(CCUUser user)
-    {
-        this.mUser = mUser;
     }
     
     public String getFloor(short addr) {

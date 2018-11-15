@@ -24,8 +24,6 @@ import java.util.concurrent.TimeUnit;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Site;
-import a75f.io.kinveybo.AlgoTuningParameters;
-import a75f.io.kinveybo.DalContext;
 import a75f.io.logic.bo.building.CCUApplication;
 import a75f.io.logic.bo.building.Day;
 import a75f.io.logic.bo.building.NamedSchedule;
@@ -129,7 +127,6 @@ public class Globals
     public void initilize()
     {
         taskExecutor = Executors.newScheduledThreadPool(NUMBER_OF_CYCLICAL_TASKS_RENATUS_REQUIRES);
-        DalContext.instantiate(this.mApplicationContext);
         populate();
         //mHeartBeatJob = new HeartBeatJob();
         //5 seconds after application initializes start heart beat
@@ -159,25 +156,12 @@ public class Globals
         }
     }
 
-    public DalContext getDalContext()
-    {
-        return DalContext.getInstance();
-    }
-
-
     private void populate()
     {
         //TODO: get this from kinvey.
         //This seems like overkill, but it has to follow the meta to support the unit test
         // framework.
-
-
-        if(ccu().getDefaultCCUTuners() == null)
-        {
-            AlgoTuningParameters algoTuningParameters = new AlgoTuningParameters();
-            ccu().setDefaultCCUTuners(L.getDefaultTuners());
-        }
-
+        
         //TODO test method
         if(ccu().getLCMNamedSchedules().size() == 0)
         {

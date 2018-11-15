@@ -22,6 +22,7 @@ import info.guardianproject.netcipher.NetCipher;
 
 public class HttpUtil
 {
+
     private static final String TAG = HttpUtil.class.getSimpleName();
 
     public static final String HAYSTACK_URL = "https://renatusv2.azurewebsites.net/";

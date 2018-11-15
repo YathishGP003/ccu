@@ -100,28 +100,29 @@ public class EntitySyncHandler
                 entities.add(HSUtil.mapToHDict(m));
             }
         }
-    
-        HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
-        String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
-        System.out.println("Response: \n" + response);
-        if (response == null) {
-            return;
-        }
-        HZincReader zReader = new HZincReader(response);
-        Iterator it = zReader.readGrid().iterator();
-        String equipGUID = "";
-        int index = 0;
-        
-        while (it.hasNext())
+        if (equipLUIDList.size() > 0)
         {
-            HRow row = (HRow) it.next();
-            equipGUID = row.get("id").toString();
-            if (equipGUID != "")
+            HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
+            String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
+            System.out.println("Response: \n" + response);
+            if (response == null)
             {
-                CCUHsApi.getInstance().putUIDMap(equipLUIDList.get(index++), equipGUID);
+                return;
+            }
+            HZincReader zReader = new HZincReader(response);
+            Iterator it = zReader.readGrid().iterator();
+            String equipGUID = "";
+            int index = 0;
+            while (it.hasNext())
+            {
+                HRow row = (HRow) it.next();
+                equipGUID = row.get("id").toString();
+                if (equipGUID != "")
+                {
+                    CCUHsApi.getInstance().putUIDMap(equipLUIDList.get(index++), equipGUID);
+                }
             }
         }
-    
         System.out.println("Synced Equips: "+CCUHsApi.getInstance().tagsDb.idMap);
         doSyncPoints(siteLUID, equipLUIDList);
         
@@ -129,10 +130,14 @@ public class EntitySyncHandler
     }
     
     private void doSyncPoints(String siteLUID, ArrayList<String> equipLUIDList) {
-        
-        for (String equipLUID : equipLUIDList)
+    
+        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and siteRef == \""+siteLUID+"\"");
+        for (Map q: equips)
         {
+            String equipLUID = q.remove("id").toString();
+    
             ArrayList<HashMap> points = CCUHsApi.getInstance().readAll("point and equipRef == \"" + equipLUID + "\"");
+
             if (points.size() == 0) {
                 continue;
             }
@@ -150,24 +155,27 @@ public class EntitySyncHandler
                 }
                 System.out.println(m);
             }
-            HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
-            String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
-            System.out.println("Response: \n" + response);
-            if (response == null) {
-                return;
-            }
-            HZincReader zReader = new HZincReader(response);
-            Iterator it = zReader.readGrid().iterator();
-            String guid;
-            int index = 0;
             
-            while (it.hasNext())
+            if (pointLUIDList.size() > 0)
             {
-                HRow row = (HRow) it.next();
-                guid = row.get("id").toString();
-                CCUHsApi.getInstance().putUIDMap(pointLUIDList.get(index++), guid);
+                HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
+                String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
+                System.out.println("Response: \n" + response);
+                if (response == null)
+                {
+                    return;
+                }
+                HZincReader zReader = new HZincReader(response);
+                Iterator it = zReader.readGrid().iterator();
+                int index = 0;
+                while (it.hasNext())
+                {
+                    HRow row = (HRow) it.next();
+                    String guid = row.get("id").toString();
+                    CCUHsApi.getInstance().putUIDMap(pointLUIDList.get(index++), guid);
+                }
+                System.out.println("Synced Points: "+CCUHsApi.getInstance().tagsDb.idMap);
             }
-            System.out.println("Synced Points: "+CCUHsApi.getInstance().tagsDb.idMap);
         }
     }
     
@@ -236,21 +244,25 @@ public class EntitySyncHandler
                 }
                 System.out.println(m);
             }
-            HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
-            String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
-            System.out.println("Response: \n" + response);
-            if (response == null) {
-                return;
-            }
-            HZincReader zReader = new HZincReader(response);
-            Iterator it = zReader.readGrid().iterator();
-            String guid;
-            int index = 0;
-            while (it.hasNext())
+            if (pointLUIDList.size() > 0)
             {
-                HRow row = (HRow) it.next();
-                guid = row.get("id").toString();
-                CCUHsApi.getInstance().putUIDMap(pointLUIDList.get(index++), guid);
+                HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
+                String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
+                System.out.println("Response: \n" + response);
+                if (response == null)
+                {
+                    return;
+                }
+                HZincReader zReader = new HZincReader(response);
+                Iterator it = zReader.readGrid().iterator();
+                String guid;
+                int index = 0;
+                while (it.hasNext())
+                {
+                    HRow row = (HRow) it.next();
+                    guid = row.get("id").toString();
+                    CCUHsApi.getInstance().putUIDMap(pointLUIDList.get(index++), guid);
+                }
             }
             System.out.println("Synced Phy Points: "+CCUHsApi.getInstance().tagsDb.idMap);
         }

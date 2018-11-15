@@ -85,6 +85,9 @@ public class InfluxDbUtil
     
     public static String writeData(String targetURL, String measurement, HashMap<String,String> data,long msTimeStamp)
     {
+        if (data.size() == 0) {
+            return "";
+        }
         StringBuilder dataSb = null;
     
         for (Map.Entry<String, String> param : data.entrySet()) {

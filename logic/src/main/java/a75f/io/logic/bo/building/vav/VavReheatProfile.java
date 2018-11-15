@@ -13,9 +13,9 @@ import a75f.io.logic.bo.building.hvac.Valve;
 import a75f.io.logic.bo.building.hvac.VavUnit;
 import a75f.io.logic.tuners.VavTunerUtil;
 
-import static a75f.io.logic.bo.building.vav.VavProfile.ZoneState.COOLING;
-import static a75f.io.logic.bo.building.vav.VavProfile.ZoneState.DEADBAND;
-import static a75f.io.logic.bo.building.vav.VavProfile.ZoneState.HEATING;
+import static a75f.io.logic.bo.building.ZoneState.COOLING;
+import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
+import static a75f.io.logic.bo.building.ZoneState.HEATING;
 
 /**
  * Created by samjithsadasivan on 8/23/18.
@@ -23,7 +23,7 @@ import static a75f.io.logic.bo.building.vav.VavProfile.ZoneState.HEATING;
 
 public class VavReheatProfile extends VavProfile
 {
-    
+    public boolean satCompensationEnabled = false;
     @JsonIgnore
     @Override
     public ProfileType getProfileType()
@@ -53,12 +53,15 @@ public class VavReheatProfile extends VavProfile
                 Log.d(TAG,"Invalid Temp , skip controls update for "+node+" roomTemp : "+vavDeviceMap.get(node).getCurrentTemp());
                 continue;
             }
+            Log.d("VAV", "updateZonePoints CP1 ");
             VAVLogicalMap vavDevice = vavDeviceMap.get(node);
             ControlLoop coolingLoop = vavDevice.getCoolingLoop();
             ControlLoop heatingLoop = vavDevice.getHeatingLoop();
             CO2Loop co2Loop = vavDeviceMap.get(node).getCo2Loop();
             VavUnit vavUnit = vavDevice.getVavUnit();
             GenericPIController valveController = vavDevice.getValveController();
+    
+            Log.d("VAV", "updateZonePoints CP2 ");
             
             double roomTemp = vavDevice.getCurrentTemp();
             double dischargeTemp = vavDevice.getDischargeTemp();
@@ -66,8 +69,8 @@ public class VavReheatProfile extends VavProfile
             double co2 = vavDeviceMap.get(node).getCO2();
             double dischargeSp = vavDevice.getDischargeSp();
             setTemp = vavDevice.getDesiredTemp();
-            
-            
+    
+            Log.d("VAV", "updateZonePoints CP3 ");
             Damper damper = vavUnit.vavDamper;
             Valve valve = vavUnit.reheatValve;
             int loopOp;//New value of loopOp
@@ -144,6 +147,8 @@ public class VavReheatProfile extends VavProfile
             }
             
             setDamperLimits(node, damper);
+    
+            Log.d("VAV", "updateZonePoints CP4 ");
             
             //CO2 loop output from 0-50% modulates damper min position.
             if (/*mode == OCCUPIED && */co2Loop.getLoopOutput(co2) <= 50)
@@ -164,14 +169,24 @@ public class VavReheatProfile extends VavProfile
             //modulated to maintain a supply air temperature no lower than 50°F.
             if (state != HEATING && supplyAirTemp < REHEAT_THRESHOLD_TEMP/* && mode != UNOCCUPIED*/)
             {
+                satCompensationEnabled = true;
                 valveController.updateControlVariable(REHEAT_THRESHOLD_TEMP, supplyAirTemp);
                 valve.currentPosition = (int) (valveController.getControlVariable() * 100 / valveController.getMaxAllowedError());
-                Log.d(TAG, "SAT below threshold => valve :  " + valve.currentPosition);
+                Log.d(TAG, "SAT below threshold "+supplyAirTemp+" => valve :  " + valve.currentPosition);
+            } else if (satCompensationEnabled) {
+                satCompensationEnabled = false;
+                valveController.reset();
             }
             
             //Normalize
             damper.normalize();
             valve.normalize();
+            
+            Log.d("VAV","CoolingLoop - roomTemp :"+roomTemp+" setTemp: "+setTemp);
+            coolingLoop.dump();
+            Log.d("VAV","HeatingLoop - roomTemp :"+roomTemp+" setTemp: "+setTemp);
+            heatingLoop.dump();
+            
     
             Log.d(TAG, "STATE :"+state+" ,loopOp: " + loopOp + " ,damper:" + damper.currentPosition+", valve:"+valve.currentPosition);
             updateTRResponse(node);
@@ -179,6 +194,8 @@ public class VavReheatProfile extends VavProfile
             vavDevice.setDamperPos(damper.currentPosition);
             vavDevice.setReheatPos(valve.currentPosition);
             vavDevice.updateLoopParams();
+    
+            Log.d("VAV", "updateZonePoints CP5 ");
         }
     }
 }

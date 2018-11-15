@@ -7,4 +7,6 @@ package a75f.io.device;
 public abstract class DeviceNetwork
 {
     public abstract void sendMessage();
+    
+    public abstract void sendSystemControl();
 }

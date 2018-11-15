@@ -5,11 +5,14 @@ import android.util.Log;
 import a75f.io.device.DeviceNetwork;
 import a75f.io.device.json.serializers.JsonSerializer;
 import a75f.io.device.serial.AddressedStruct;
+import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
+import a75f.io.device.serial.MessageType;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Floor;
 import a75f.io.logic.bo.building.Zone;
+import a75f.io.logic.bo.building.system.VavAnalogRtu;
 
 import static a75f.io.device.DeviceConstants.TAG;
 import static a75f.io.device.mesh.MeshUtil.sendStruct;
@@ -22,7 +25,7 @@ public class MeshNetwork extends DeviceNetwork
 {
     @Override
     public void sendMessage() {
-        Log.d(TAG, "MeshNetwork SendMessage");
+        Log.d(TAG, "MeshNetwork SendNodeMessage");
     
         if (!LSerial.getInstance().isConnected()) {
             Log.d(TAG,"Device not connected !!");
@@ -72,5 +75,36 @@ public class MeshNetwork extends DeviceNetwork
         {
             e.printStackTrace();
         }
+    }
+    
+    public void sendSystemControl() {
+        Log.d(TAG, "MeshNetwork SendSystemControl");
+        L.ccu().systemProfile.doSystemControl();
+    
+        CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
+        if (L.ccu().systemProfile instanceof VavAnalogRtu) {
+            VavAnalogRtu p = (VavAnalogRtu) L.ccu().systemProfile;
+            
+            msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
+            if (p.analog1Enabled)
+            {
+                msg.analog0.set((short) (10 * p.getAnalog1Out()));
+            }
+            if (p.analog2Enabled)
+            {
+                msg.analog1.set((short) (10 * p.getAnalog2Out()));
+            }
+            if (p.analog3Enabled)
+            {
+                msg.analog2.set((short) (10 * p.getAnalog3Out()));
+            }
+            if (p.analog4Enabled)
+            {
+                msg.analog3.set((short) (10 * p.getAnalog4Out()));
+            }
+        }
+        DLog.LogdStructAsJson(msg);
+        MeshUtil.sendStructToCM(msg);
+        
     }
 }

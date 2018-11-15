@@ -8,6 +8,8 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Site;
+import a75f.io.logic.tuners.SystemTunerUtil;
+import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.VavTunerUtil;
 import a75f.io.logic.tuners.BuildingTuners;
 
@@ -67,19 +69,47 @@ public class BuildingTunersTest
         BuildingTuners tuners = BuildingTuners.getInstance();
         tuners.addBuildingTunerEquip();
         
-        tuners.addVavTuners();
+        tuners.addDefaultVavTuners();
         VavTunerUtil.dump();
         
-        VavTunerUtil.setCoolingDeadband(2.0);
-        VavTunerUtil.setHeatingDeadband(2.0);
-        VavTunerUtil.setProportionalGain(1);
-        VavTunerUtil.setIntegralGain(1);
-        VavTunerUtil.setProportionalSpread(10);
-        VavTunerUtil.setIntegralTimeout(60);
+        VavTunerUtil.setCoolingDeadband(2.0, TunerConstants.VAV_BUILDING_VAL_LEVEL);
+        VavTunerUtil.setHeatingDeadband(2.0, TunerConstants.VAV_BUILDING_VAL_LEVEL);
+        VavTunerUtil.setProportionalGain(1, TunerConstants.VAV_BUILDING_VAL_LEVEL);
+        VavTunerUtil.setIntegralGain(1, TunerConstants.VAV_BUILDING_VAL_LEVEL);
+        VavTunerUtil.setProportionalSpread(10, TunerConstants.VAV_BUILDING_VAL_LEVEL);
+        VavTunerUtil.setIntegralTimeout(60, TunerConstants.VAV_BUILDING_VAL_LEVEL);
         
         VavTunerUtil.dump();
         
         
+    }
+    
+    @Test
+    public void testSystemTuners() {
+        CCUHsApi api = new CCUHsApi();
+        api.tagsDb.init();
+        api.tagsDb.tagsMap = new HashMap<>();
+        api.tagsDb.writeArrays = new HashMap<>();
+        api.tagsDb.removeIdMap = new HashMap<>();
+        api.tagsDb.idMap = new HashMap<>();
+    
+        Site s75f = new Site.Builder()
+                            .setDisplayName("75F")
+                            .addMarker("site")
+                            .setGeoCity("Burnsville")
+                            .setGeoState("MN")
+                            .setTz("Chicago")
+                            .setArea(10000).build();
+        api.addSite(s75f);
+    
+    
+        BuildingTuners.getInstance();
+        
+        SystemTunerUtil.setAnalog("analog1","max", 14, 10);
+        System.out.println(SystemTunerUtil.getAnalog("analog1","max"));
+    
+        SystemTunerUtil.setAnalog("analog1","max", 15, 8);
+        System.out.println(SystemTunerUtil.getAnalog("analog1","max"));
     }
     
     

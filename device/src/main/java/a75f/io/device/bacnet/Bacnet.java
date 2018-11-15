@@ -11,4 +11,8 @@ public class Bacnet extends DeviceNetwork
     public void sendMessage(){
     
     }
+    
+    public void sendSystemControl() {
+    
+    }
 }

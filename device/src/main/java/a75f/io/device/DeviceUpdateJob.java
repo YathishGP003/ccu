@@ -1,5 +1,7 @@
 package a75f.io.device;
 
+import android.util.Log;
+
 import a75f.io.device.mesh.MeshNetwork;
 
 /**
@@ -17,6 +19,9 @@ public class DeviceUpdateJob extends BaseJob
     
     public void doJob()
     {
+        Log.d("CCU", "DeviceUpdateJob ->");
         deviceNw.sendMessage();
+        deviceNw.sendSystemControl();
+        Log.d("CCU", "<-DeviceUpdateJob ");
     }
 }

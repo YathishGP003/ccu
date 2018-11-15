@@ -13,9 +13,9 @@ import a75f.io.logic.bo.building.hvac.ParallelFanVavUnit;
 import a75f.io.logic.bo.building.hvac.Valve;
 import a75f.io.logic.tuners.VavTunerUtil;
 
-import static a75f.io.logic.bo.building.vav.VavProfile.ZoneState.COOLING;
-import static a75f.io.logic.bo.building.vav.VavProfile.ZoneState.DEADBAND;
-import static a75f.io.logic.bo.building.vav.VavProfile.ZoneState.HEATING;
+import static a75f.io.logic.bo.building.ZoneState.COOLING;
+import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
+import static a75f.io.logic.bo.building.ZoneState.HEATING;
 
 /**
  * Created by samjithsadasivan on 8/23/18.

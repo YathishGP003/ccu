@@ -8,14 +8,31 @@ import a75.io.algos.vav.VavTRSystem;
 
 
 /**
- * RP1455 Compliant AHU control System Profile
+ * RP1455 Compliant AHU_RP1455 control System Profile
  */
-public class AHU extends SystemProfile
+public class AHU_RP1455 extends SystemProfile
 {
     private static final int CO2_MAX = 1000;
     private static final int CO2_MIN = 400;
-    public AHU() {
+    public AHU_RP1455() {
         trSystem =  new VavTRSystem();
+    }
+    
+    
+    public  int getSystemSAT() {
+        return ((VavTRSystem)trSystem).getCurrentSAT();
+    }
+    
+    public  int getSystemCO2() {
+        return ((VavTRSystem)trSystem).getCurrentCO2();
+    }
+    
+    public  int getSystemOADamper() {
+        return (((VavTRSystem)trSystem).getCurrentCO2() - CO2_MIN) * 100 / (CO2_MAX - CO2_MIN);
+    }
+    
+    public int getStaticPressure() {
+        return (int)((VavTRSystem)trSystem).getCurrentSp();
     }
     
     /*@JsonIgnore

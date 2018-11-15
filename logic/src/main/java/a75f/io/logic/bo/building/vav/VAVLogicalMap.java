@@ -12,14 +12,17 @@ import a75.io.algos.tr.TrimResponseRequest;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
-import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.Output;
+import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.ParallelFanVavUnit;
 import a75f.io.logic.bo.building.hvac.SeriesFanVavUnit;
 import a75f.io.logic.bo.building.hvac.VavUnit;
 import a75f.io.logic.bo.haystack.device.SmartNode;
+import a75f.io.logic.tuners.BuildingTuners;
+import a75f.io.logic.tuners.TunerConstants;
 
 /**
  * Created by samjithsadasivan on 6/21/18.
@@ -86,26 +89,11 @@ public class VAVLogicalMap
         //createHaystackPoints();
     }
     
-    public void createHaystackPoints() {
-    
-        //Add site point if not done already.
-        HashMap site = CCUHsApi.getInstance().read("site");
+    public void createHaystackPoints(VavProfileConfiguration config) {
         
-        //TODO - Unit test
         String floor = L.ccu().getFloor((short)nodeAddr);
         String room = L.ccu().getRoom((short)nodeAddr);
         
-        if (site.size() == 0) {
-            //TODO - demo
-            Site s75f = new Site.Builder()
-                                .setDisplayName("75F")
-                                .addMarker("site")
-                                .setGeoCity("Burnsville")
-                                .setGeoState("MN")
-                                .setTz("Chicago")
-                                .setArea(10000).build();
-            CCUHsApi.getInstance().addSite(s75f);
-        }
         String tz = "Chicago";
         //Create Logical points
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
@@ -121,9 +109,11 @@ public class VAVLogicalMap
                           .setGroup(String.valueOf(nodeAddr))
                           .build();
         String equipRef = CCUHsApi.getInstance().addEquip(v);
+        
+        BuildingTuners.getInstance().addEquipVavTuners(siteDis+"-VAV-"+nodeAddr, equipRef, TunerConstants.VAV_DEFAULT_VAL_LEVEL);
     
         Point datPoint = new Point.Builder()
-                                .setDisplayName(siteDis+"VAV-"+nodeAddr+"-DischargeAirTemp")
+                                .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-DischargeAirTemp")
                                 .setEquipRef(equipRef)
                                 .setSiteRef(siteRef)
                                 .setRoomRef(room)
@@ -138,7 +128,7 @@ public class VAVLogicalMap
         String datID = CCUHsApi.getInstance().addPoint(datPoint);
     
         Point eatPoint = new Point.Builder()
-                                .setDisplayName(siteDis+"VAV-"+nodeAddr+"-EnteringAirTemp")
+                                .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-EnteringAirTemp")
                                 .setEquipRef(equipRef)
                                 .setSiteRef(siteRef)
                                 .setRoomRef(room)
@@ -152,7 +142,7 @@ public class VAVLogicalMap
         String eatID = CCUHsApi.getInstance().addPoint(eatPoint);
     
         Point damperPos = new Point.Builder()
-                                .setDisplayName(siteDis+"VAV-"+nodeAddr+"-DamperPos")
+                                .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-DamperPos")
                                 .setEquipRef(equipRef)
                                 .setSiteRef(siteRef)
                                 .setRoomRef(room)
@@ -167,7 +157,7 @@ public class VAVLogicalMap
         String dpID = CCUHsApi.getInstance().addPoint(damperPos);
     
         Point reheatPos = new Point.Builder()
-                                  .setDisplayName(siteDis+"VAV-"+nodeAddr+"-ReheatPos")
+                                  .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-ReheatPos")
                                   .setEquipRef(equipRef)
                                   .setSiteRef(siteRef)
                                   .setRoomRef(room)
@@ -181,7 +171,7 @@ public class VAVLogicalMap
         String rhID = CCUHsApi.getInstance().addPoint(reheatPos);
     
         Point currentTemp = new Point.Builder()
-                                  .setDisplayName(siteDis+"VAV-"+nodeAddr+"-currentTemp")
+                                  .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-currentTemp")
                                   .setEquipRef(equipRef)
                                   .setSiteRef(siteRef)
                                   .setRoomRef(room)
@@ -195,7 +185,7 @@ public class VAVLogicalMap
         String ctID = CCUHsApi.getInstance().addPoint(currentTemp);
     
         Point desiredTemp = new Point.Builder()
-                                    .setDisplayName(siteDis+"VAV-"+nodeAddr+"-desiredTemp")
+                                    .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-desiredTemp")
                                     .setEquipRef(equipRef)
                                     .setSiteRef(siteRef)
                                     .setRoomRef(room)
@@ -209,7 +199,7 @@ public class VAVLogicalMap
         CCUHsApi.getInstance().addPoint(desiredTemp);
     
         Point heatingLoopOp = new Point.Builder()
-                                    .setDisplayName(siteDis+"VAV-"+nodeAddr+"-heatingLoopOp")
+                                    .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-heatingLoopOp")
                                     .setEquipRef(equipRef)
                                     .setSiteRef(siteRef)
                                     .setRoomRef(room)
@@ -222,7 +212,7 @@ public class VAVLogicalMap
         CCUHsApi.getInstance().addPoint(heatingLoopOp);
     
         Point coolingLoopOp = new Point.Builder()
-                                      .setDisplayName(siteDis+"VAV-"+nodeAddr+"-coolingLoopOp")
+                                      .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-coolingLoopOp")
                                       .setEquipRef(equipRef)
                                       .setSiteRef(siteRef)
                                       .setRoomRef(room)
@@ -235,7 +225,7 @@ public class VAVLogicalMap
         CCUHsApi.getInstance().addPoint(coolingLoopOp);
     
         Point dischargeSp = new Point.Builder()
-                                      .setDisplayName(siteDis+"VAV-"+nodeAddr+"-dischargeSp")
+                                      .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-dischargeSp")
                                       .setEquipRef(equipRef)
                                       .setSiteRef(siteRef)
                                       .setRoomRef(room)
@@ -249,7 +239,7 @@ public class VAVLogicalMap
         CCUHsApi.getInstance().addPoint(dischargeSp);
     
         Point satRequestPercentage = new Point.Builder()
-                                    .setDisplayName(siteDis+"VAV-"+nodeAddr+"-satRequestPercentage")
+                                    .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-satRequestPercentage")
                                     .setEquipRef(equipRef)
                                     .setSiteRef(siteRef)
                                     .setRoomRef(room)
@@ -263,7 +253,7 @@ public class VAVLogicalMap
         CCUHsApi.getInstance().addPoint(satRequestPercentage);
     
         Point co2RequestPercentage = new Point.Builder()
-                                             .setDisplayName(siteDis+"VAV-"+nodeAddr+"-co2RequestPercentage")
+                                             .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-co2RequestPercentage")
                                              .setEquipRef(equipRef)
                                              .setSiteRef(siteRef)
                                              .setRoomRef(room)
@@ -277,7 +267,7 @@ public class VAVLogicalMap
         CCUHsApi.getInstance().addPoint(co2RequestPercentage);
     
         Point hwstRequestPercentage = new Point.Builder()
-                                             .setDisplayName(siteDis+"VAV-"+nodeAddr+"-hwstRequestPercentage")
+                                             .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-hwstRequestPercentage")
                                              .setEquipRef(equipRef)
                                              .setSiteRef(siteRef)
                                              .setRoomRef(room)
@@ -291,7 +281,7 @@ public class VAVLogicalMap
         CCUHsApi.getInstance().addPoint(hwstRequestPercentage);
     
         Point pressureRequestPercentage = new Point.Builder()
-                                             .setDisplayName(siteDis+"VAV-"+nodeAddr+"-pressureRequestPercentage")
+                                             .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-pressureRequestPercentage")
                                              .setEquipRef(equipRef)
                                              .setSiteRef(siteRef)
                                              .setRoomRef(room)
@@ -307,18 +297,26 @@ public class VAVLogicalMap
         //Create Physical points and map
         SmartNode device = new SmartNode(nodeAddr, siteRef);
         device.th1In.setPointRef(datID);
-        CCUHsApi.getInstance().addPoint(device.th1In);
         device.th2In.setPointRef(eatID);
-        CCUHsApi.getInstance().addPoint(device.th2In);
         device.analog1Out.setPointRef(dpID);
-        CCUHsApi.getInstance().addPoint(device.analog1Out);
         device.analog2Out.setPointRef(rhID);
-        CCUHsApi.getInstance().addPoint(device.analog2Out);
         device.currentTemp.setPointRef(ctID);
+        for (Output op : config.getOutputs()) {
+            if (op.getPort() == Port.ANALOG_OUT_ONE) {
+                device.analog1Out.setType(op.getAnalogActuatorType());
+            } else if (op.getPort() == Port.ANALOG_OUT_TWO) {
+                device.analog2Out.setType(op.getAnalogActuatorType());
+            }
+        }
+        CCUHsApi.getInstance().addPoint(device.th1In);
+        CCUHsApi.getInstance().addPoint(device.th2In);
+        CCUHsApi.getInstance().addPoint(device.analog1Out);
+        CCUHsApi.getInstance().addPoint(device.analog2Out);
         CCUHsApi.getInstance().addPoint(device.currentTemp);
+        
         Log.d("VAV", CCUHsApi.getInstance().tagsDb.getDbMap().toString());
     
-        //Create write array for points, otherwise a read before write will throw exception
+        //Initialize write array for points, otherwise a read before write will throw exception
         setCurrentTemp(0);
         setDamperPos(0);
         setReheatPos(0);
@@ -329,6 +327,21 @@ public class VAVLogicalMap
         
         CCUHsApi.getInstance().syncEntityTree();
         
+    }
+    
+    public void deleteHaystackPoints() {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap equip = hayStack.read("equip and vav and group == \""+nodeAddr+"\"");
+        if (equip != null)
+        {
+            hayStack.deleteEntityTree(equip.get("id").toString());
+        }
+        
+        HashMap device = hayStack.read("device and addr == \""+nodeAddr+"\"");
+        if (device != null)
+        {
+            hayStack.deleteEntityTree(device.get("id").toString());
+        }
     }
     
     public double getCurrentTemp()

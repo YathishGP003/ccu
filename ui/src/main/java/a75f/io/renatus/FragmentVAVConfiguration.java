@@ -241,6 +241,17 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
             }
         });
     
+        if (mProfileConfig != null) {
+            for (Output op : mProfileConfig.getOutputs()) {
+                if (op.getPort() == Port.ANALOG_OUT_ONE) {
+                    damperActuator.setSelection(analogoutActuatorAdapter.getPosition(op.getAnalogActuatorType()));
+                } else if (op.getPort() == Port.ANALOG_OUT_TWO) {
+                    reheatActuator.setSelection(analogoutActuatorAdapter.getPosition(op.getAnalogActuatorType()));
+                }
+            }
+        }
+        
+    
         damper1layout  = (LinearLayout)view.findViewById(R.id.damper1layout);
         damperType = (Spinner) view.findViewById(R.id.damperType);
         ArrayAdapter<Damper.Parameters> damperTypeAdapter = new ArrayAdapter<Damper.Parameters>(getActivity(), R.layout.spinner_dropdown_item, mDampers);
@@ -412,16 +423,23 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         vavConfig.getOutputs().add(analogTwo);
         vavConfig.getOutputs().add(relayOne);
         
-        mVavProfile.getProfileConfiguration().put(mSmartNodeAddress, vavConfig);
+       
         
         if (mZone.findProfile(mProfileType) == null)
             mZone.mZoneProfiles.add(mVavProfile);
     
-        mVavProfile.addLogicalMapAndPoints(mSmartNodeAddress);
-        BuildingTuners.getInstance().addVavTuners();
+        if (mVavProfile.getProfileConfiguration(mSmartNodeAddress) == null) {
+            mVavProfile.getProfileConfiguration().put(mSmartNodeAddress, vavConfig);
+            mVavProfile.addLogicalMapAndPoints(mSmartNodeAddress, vavConfig);
+            BuildingTuners.getInstance().addDefaultVavTuners();
+        } else
+        {
+            mVavProfile.getProfileConfiguration().put(mSmartNodeAddress, vavConfig);
+            mVavProfile.updateLogicalMapAndPoints(mSmartNodeAddress, vavConfig);
+        }
+        
         L.saveCCUState();
         Log.d("VAVConfig", "Set Config: ");
-    
     }
     
     private void setNumberPickerDividerColor(NumberPicker pk) {

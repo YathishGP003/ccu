@@ -11,6 +11,8 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.RoomDataInterface;
 
+import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
+
 /**
  * Created by Yinten isOn 8/15/2017.
  */
@@ -23,6 +25,9 @@ public abstract class ZoneProfile extends Schedulable
     protected UUID uuid = UUID.randomUUID();
     @JsonIgnore
     protected boolean mIsCircuitTest = false;
+    
+    @JsonIgnore
+    public ZoneState    state    = DEADBAND;
     
     public ZoneProfile()
     {
@@ -117,6 +122,24 @@ public abstract class ZoneProfile extends Schedulable
     @JsonIgnore
     public HashMap<String, Double> getTSData() {
         return null;
+    }
+    
+    @JsonIgnore
+    public int getPriority() {
+        int priority = 0;
+        for (short nodeAddress : mProfileConfiguration.keySet())
+        {
+            if (mProfileConfiguration.get(nodeAddress).getPriority() > priority) {
+                priority = mProfileConfiguration.get(nodeAddress).getPriority();
+            }
+        
+        }
+        return priority;
+    }
+    
+    @JsonIgnore
+    public double getAverageZoneTemp() {
+        return 72; //TODO- TEMP
     }
     
 }

@@ -5,7 +5,7 @@
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/grey_select</item>
         <item name="colorPrimaryDark">@color/grey_select</item>
-        <item name="colorAccent">@color/white</item>
+        <item name="colorAccent">@color/accent</item>
     </style>
 
     <style name="RenatusAppTheme.NoActionBar">

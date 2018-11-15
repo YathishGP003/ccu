@@ -12,9 +12,9 @@ import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.building.hvac.SeriesFanVavUnit;
 import a75f.io.logic.bo.building.hvac.Valve;
 
-import static a75f.io.logic.bo.building.vav.VavProfile.ZoneState.COOLING;
-import static a75f.io.logic.bo.building.vav.VavProfile.ZoneState.DEADBAND;
-import static a75f.io.logic.bo.building.vav.VavProfile.ZoneState.HEATING;
+import static a75f.io.logic.bo.building.ZoneState.COOLING;
+import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
+import static a75f.io.logic.bo.building.ZoneState.HEATING;
 
 /**
  * Created by samjithsadasivan on 8/23/18.

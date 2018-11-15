@@ -11,6 +11,7 @@ import a75.io.algos.tr.TrimResponseRequest;
 import a75.io.algos.vav.VavTRSystem;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
+import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Damper;
@@ -19,9 +20,9 @@ import a75f.io.logic.bo.building.hvac.SeriesFanVavUnit;
 import a75f.io.logic.bo.building.hvac.Valve;
 import a75f.io.logic.bo.building.hvac.VavUnit;
 
-import static a75f.io.logic.bo.building.vav.VavProfile.ZonePriority.LOW;
-import static a75f.io.logic.bo.building.vav.VavProfile.ZoneState.COOLING;
-import static a75f.io.logic.bo.building.vav.VavProfile.ZoneState.HEATING;
+import static a75f.io.logic.bo.building.ZonePriority.LOW;
+import static a75f.io.logic.bo.building.ZoneState.COOLING;
+import static a75f.io.logic.bo.building.ZoneState.HEATING;
 
 /**
  *
@@ -39,23 +40,6 @@ public abstract class VavProfile extends ZoneProfile
     double  setTemp = 72.0; //TODO
     int deadBand = 1;
     
-    
-    enum ZoneState {
-        COOLING,
-        HEATING,
-        DEADBAND
-    }
-    
-    enum ZonePriority {
-        NO(0), LOW(1), MEDIUM(2), HIGH(3);
-        
-        int multiplier;
-        ZonePriority(int m) {
-            multiplier = m;
-        }
-    }
-
-    ZoneState state = COOLING;
     ZonePriority priority = LOW;
     
     HashMap<Short, VAVLogicalMap> vavDeviceMap;
@@ -133,14 +117,28 @@ public abstract class VavProfile extends ZoneProfile
         deviceMap.hwstResetRequest.setImportanceMultiplier(getZonePriority());
     }
     
-    public void addLogicalMapAndPoints(short addr) {
+    public void addLogicalMapAndPoints(short addr, VavProfileConfiguration config) {
         VAVLogicalMap deviceMap = new VAVLogicalMap(getProfileType(), addr);
-        deviceMap.createHaystackPoints();
+        deviceMap.createHaystackPoints(config);
         vavDeviceMap.put(addr, deviceMap);
         deviceMap.satResetRequest.setImportanceMultiplier(getZonePriority());
         deviceMap.co2ResetRequest.setImportanceMultiplier(getZonePriority());
         deviceMap.spResetRequest.setImportanceMultiplier(getZonePriority());
         deviceMap.hwstResetRequest.setImportanceMultiplier(getZonePriority());
+    }
+    
+    public void updateLogicalMapAndPoints(short addr, VavProfileConfiguration config) {
+        VAVLogicalMap deviceMap = vavDeviceMap.get(addr);
+        deviceMap.deleteHaystackPoints();
+        vavDeviceMap.remove(addr);
+        
+        VAVLogicalMap newDeviceMap = new VAVLogicalMap(getProfileType(), addr);
+        newDeviceMap.createHaystackPoints(config);
+        vavDeviceMap.put(addr, newDeviceMap);
+        newDeviceMap.satResetRequest.setImportanceMultiplier(getZonePriority());
+        newDeviceMap.co2ResetRequest.setImportanceMultiplier(getZonePriority());
+        newDeviceMap.spResetRequest.setImportanceMultiplier(getZonePriority());
+        newDeviceMap.hwstResetRequest.setImportanceMultiplier(getZonePriority());
     }
     
     @JsonIgnore
@@ -322,6 +320,7 @@ public abstract class VavProfile extends ZoneProfile
     
     
     @JsonIgnore
+    @Override
     public double getAverageZoneTemp()
     {
         double tempTotal = 0;
@@ -384,9 +383,9 @@ public abstract class VavProfile extends ZoneProfile
             if (vavDeviceMap.get(nodeAddress) ==  null) {
                 continue;
             }
-            VavProfileConfiguration config = (VavProfileConfiguration) mProfileConfiguration.get(nodeAddress);
-            if (config.getPriority() > priority) {
-                priority = config.getPriority();
+            
+            if (mProfileConfiguration.get(nodeAddress).getPriority() > priority) {
+                priority = mProfileConfiguration.get(nodeAddress).getPriority();
             }
             
         }

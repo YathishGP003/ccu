@@ -1,0 +1,582 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical" >
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:overScrollMode="never">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+
+            <TableLayout
+                android:id="@+id/ahu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="30dp"
+                android:layout_marginLeft="50dp"
+                android:layout_marginRight="50dp"
+                android:layout_marginTop="14dp"
+                android:stretchColumns="0"
+                android:visibility="visible">
+
+                <TableRow
+                    android:id="@+id/ahuHeader"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="2dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Equipment List"
+                        android:textSize="@dimen/text_medium_xlarge"
+                        android:visibility="invisible"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="   Selector List  item touch  "
+                        android:textSize="@dimen/text_medium_xlarge"
+                        android:visibility="invisible"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="Test Signal"
+                        android:textSize="@dimen/text_medium_xlarge"
+                        android:visibility="visible"/>
+
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/ahuAnalog1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp">
+
+                    <CheckBox
+                        android:id="@+id/ahuAnalog1Cb"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:background="@drawable/selector_button"
+                        android:paddingRight="14dp"
+                        android:text=" Cooling  SAT (Analog 1)"
+                        android:textSize="@dimen/text_small_xlarge"/>
+
+                    <!--<Spinner
+                    android:id="@+id/ahuAnalog1Type"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"/>-->
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="   Selector List  item touch  "
+                        android:textSize="@dimen/text_medium_xlarge"
+                        android:visibility="invisible"/>
+
+                    <Spinner
+                        android:id="@+id/ahuAnalog1Test"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"/>
+
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/ahuAnalog2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp"
+                    android:layout_marginTop="15dp">
+
+                    <CheckBox
+                        android:id="@+id/ahuAnalog2Cb"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:background="@drawable/selector_button"
+                        android:paddingRight="14dp"
+                        android:text=" Heating SAT (Analog 2)"
+                        android:textSize="@dimen/text_small_xlarge"/>
+
+                    <!-- <Spinner
+                    android:id="@+id/ahuAnalog3Type"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"/>-->
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="   Selector List  item touch  "
+                        android:textSize="@dimen/text_medium_xlarge"
+                        android:visibility="invisible"/>
+-->
+                    <Spinner
+                        android:id="@+id/ahuAnalog2Test"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"/>
+
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/ahuAnalog3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp"
+                    android:layout_marginTop="15dp">
+
+                    <CheckBox
+                        android:id="@+id/ahuAnalog3Cb"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:background="@drawable/selector_button"
+                        android:paddingRight="14dp"
+                        android:text="  CO2 (Analog 3)"
+                        android:textSize="@dimen/text_small_xlarge"/>
+
+                    <!--<Spinner
+                    android:id="@+id/ahuAnalog2Type"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical|center" />-->
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="   Selector List  item touch  "
+                        android:textSize="@dimen/text_medium_xlarge"
+                        android:visibility="invisible"/>
+
+                    <Spinner
+                        android:id="@+id/ahuAnalog3Test"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"/>
+
+                </TableRow>
+
+
+                <TableRow
+                    android:id="@+id/ahuAnalog4"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp"
+                    android:layout_marginTop="15dp">
+
+                    <CheckBox
+                        android:id="@+id/ahuAnalog4Cb"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:background="@drawable/selector_button"
+                        android:paddingRight="14dp"
+                        android:text="  Static Pressure (Analog 4)"
+                        android:textSize="@dimen/text_small_xlarge"/>
+
+                    <!--<Spinner
+                    android:id="@+id/ahuAnalog2Type"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical|center" />-->
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="   Selector List  item touch  "
+                        android:textSize="@dimen/text_medium_xlarge"
+                        android:visibility="invisible"/>
+
+                    <Spinner
+                        android:id="@+id/ahuAnalog4Test"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"/>
+
+                </TableRow>
+
+                <TableLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:stretchColumns="0">
+
+                    <TableRow
+                        android:id="@+id/ahuRow"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginBottom="14dp"
+                        android:layout_marginTop="14dp">
+
+                        <ImageView
+                            android:layout_width="fill_parent"
+                            android:layout_height="1dp"
+                            android:src="@color/progress_gray_dark"/>
+                    </TableRow>
+                </TableLayout>
+
+                <GridLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="14dp"
+                    android:layout_marginTop="14dp"
+                    android:columnCount="4">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_column="0"
+                        android:layout_gravity="left"
+                        android:layout_marginBottom="14dp"
+                        android:layout_marginTop="14dp"
+                        android:layout_row="0"
+                        android:text=" Cooling SAT Min (°F)"
+                        android:textColor="@color/black"
+                        android:textSize="@dimen/text_small_xlarge"/>
+
+                    <Spinner
+                        android:id="@+id/coolingSatMin"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="left"
+                        android:layout_marginBottom="14dp"
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginTop="14dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:layout_marginBottom="14dp"
+                        android:layout_marginLeft="14dp"
+                        android:layout_marginTop="14dp"
+                        android:text=" Cooling SAT Max (°F)"
+                        android:textColor="@color/black"
+                        android:textSize="@dimen/text_small_xlarge"
+                        />
+
+                    <Spinner
+                        android:id="@+id/coolingSatMax"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_column="3"
+                        android:layout_marginBottom="14dp"
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginTop="14dp"
+                        />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_column="0"
+                        android:layout_gravity="left"
+                        android:layout_marginBottom="14dp"
+                        android:layout_marginTop="14dp"
+                        android:layout_row="1"
+                        android:text=" Heating SAT Min (°F)"
+                        android:textColor="@color/black"
+                        android:textSize="@dimen/text_small_xlarge"/>
+
+                    <Spinner
+                        android:id="@+id/heatingSatMin"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="left"
+                        android:layout_marginBottom="14dp"
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginTop="14dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:layout_marginBottom="14dp"
+                        android:layout_marginLeft="14dp"
+                        android:layout_marginTop="14dp"
+                        android:text=" Heating SAT Max (°F)"
+                        android:textColor="@color/black"
+                        android:textSize="@dimen/text_small_xlarge"
+                        />
+
+                    <Spinner
+                        android:id="@+id/heatingSatMax"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_column="3"
+                        android:layout_marginBottom="14dp"
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginTop="14dp"
+                        />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_column="0"
+                        android:layout_gravity="left"
+                        android:layout_marginBottom="14dp"
+                        android:layout_marginTop="14dp"
+                        android:layout_row="2"
+                        android:text=" CO2 Min (ppm)"
+                        android:textColor="@color/black"
+                        android:textSize="@dimen/text_small_xlarge"/>
+
+                    <Spinner
+                        android:id="@+id/co2Min"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="left"
+                        android:layout_marginBottom="14dp"
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginTop="14dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:layout_marginBottom="14dp"
+                        android:layout_marginLeft="14dp"
+                        android:layout_marginTop="14dp"
+                        android:text=" CO2 Max (ppm)"
+                        android:textColor="@color/black"
+                        android:textSize="@dimen/text_small_xlarge"
+                        />
+
+                    <Spinner
+                        android:id="@+id/co2Max"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_column="3"
+                        android:layout_marginBottom="14dp"
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginTop="14dp"
+                        />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_column="0"
+                        android:layout_gravity="left"
+                        android:layout_marginBottom="14dp"
+                        android:layout_marginTop="14dp"
+                        android:layout_row="3"
+                        android:text=" Static Pressure Min (in)"
+                        android:textColor="@color/black"
+                        android:textSize="@dimen/text_small_xlarge"/>
+
+                    <Spinner
+                        android:id="@+id/spMin"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="left"
+                        android:layout_marginBottom="14dp"
+
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginTop="14dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:layout_marginBottom="14dp"
+                        android:layout_marginLeft="40dp"
+                        android:layout_marginTop="14dp"
+                        android:text="Static Pressure Max (in)"
+                        android:textColor="@color/black"
+                        android:textSize="@dimen/text_small_xlarge"/>
+
+                    <Spinner
+                        android:id="@+id/spMax"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:layout_marginBottom="14dp"
+                        android:layout_marginTop="14dp"/>
+                </GridLayout>
+
+                <GridLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="14dp"
+                    android:layout_marginTop="14dp"
+                    android:columnCount="4">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_column="0"
+                        android:layout_gravity="left"
+                        android:layout_marginBottom="14dp"
+                        android:layout_marginTop="14dp"
+                        android:layout_row="0"
+                        android:text="Analog1 Min"
+                        android:textColor="@color/black"
+                        android:textSize="@dimen/text_small_xlarge"/>
+
+                    <Spinner
+                        android:id="@+id/ahuAnalog1Min"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="left"
+                        android:layout_marginBottom="14dp"
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginTop="14dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:layout_marginBottom="14dp"
+                        android:layout_marginLeft="14dp"
+                        android:layout_marginTop="14dp"
+                        android:text="Analog1 Max"
+                        android:textColor="@color/black"
+                        android:textSize="@dimen/text_small_xlarge"
+                        />
+
+                    <Spinner
+                        android:id="@+id/ahuAnalog1Max"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_column="3"
+                        android:layout_marginBottom="14dp"
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginTop="14dp"
+                        />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_column="0"
+                        android:layout_gravity="left"
+                        android:layout_marginBottom="14dp"
+                        android:layout_marginTop="14dp"
+                        android:layout_row="1"
+                        android:text="Analog2 Min"
+                        android:textColor="@color/black"
+                        android:textSize="@dimen/text_small_xlarge"/>
+
+                    <Spinner
+                        android:id="@+id/ahuAnalog2Min"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="left"
+                        android:layout_marginBottom="14dp"
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginTop="14dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:layout_marginBottom="14dp"
+                        android:layout_marginLeft="14dp"
+                        android:layout_marginTop="14dp"
+                        android:text="Analog2 Max"
+                        android:textColor="@color/black"
+                        android:textSize="@dimen/text_small_xlarge"/>
+
+                    <Spinner
+                        android:id="@+id/ahuAnalog2Max"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:layout_marginBottom="14dp"
+                        android:layout_marginTop="14dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_column="0"
+                        android:layout_gravity="left"
+                        android:layout_marginBottom="14dp"
+                        android:layout_marginTop="14dp"
+                        android:layout_row="2"
+                        android:text="Analog3 Min"
+                        android:textColor="@color/black"
+                        android:textSize="@dimen/text_small_xlarge"/>
+
+                    <Spinner
+                        android:id="@+id/ahuAnalog3Min"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="left"
+                        android:layout_marginBottom="14dp"
+
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginTop="14dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:layout_marginBottom="14dp"
+                        android:layout_marginLeft="40dp"
+                        android:layout_marginTop="14dp"
+                        android:text="Analog3 Max"
+                        android:textColor="@color/black"
+                        android:textSize="@dimen/text_small_xlarge"/>
+
+                    <Spinner
+                        android:id="@+id/ahuAnalog3Max"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:layout_marginBottom="14dp"
+                        android:layout_marginTop="14dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_column="0"
+                        android:layout_gravity="left"
+                        android:layout_marginBottom="14dp"
+                        android:layout_marginTop="14dp"
+                        android:layout_row="3"
+                        android:text="Analog4 Min"
+                        android:textColor="@color/black"
+                        android:textSize="@dimen/text_small_xlarge"/>
+
+                    <Spinner
+                        android:id="@+id/ahuAnalog4Min"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="left"
+                        android:layout_marginBottom="14dp"
+
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginTop="14dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:layout_marginBottom="14dp"
+                        android:layout_marginLeft="40dp"
+                        android:layout_marginTop="14dp"
+                        android:text="Analog4 Max"
+                        android:textColor="@color/black"
+                        android:textSize="@dimen/text_small_xlarge"/>
+
+                    <Spinner
+                        android:id="@+id/ahuAnalog4Max"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:layout_marginBottom="14dp"
+                        android:layout_marginTop="14dp"/>
+                </GridLayout>
+            </TableLayout>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

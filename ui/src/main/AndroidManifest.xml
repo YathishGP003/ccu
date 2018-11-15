@@ -75,6 +75,16 @@
         </activity>-->
 
         <activity
+            android:name=".SplashActivity" android:launchMode="singleTask"
+            android:theme="@style/RenatusAppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
+        <activity
             android:name=".RenatusLandingActivity" android:launchMode="singleTask"
             android:label="RenatusLandingActivity"
             android:alwaysRetainTaskState="true"
@@ -92,23 +102,22 @@
             android:theme="@style/RenatusAppTheme.NoActionBar">
         </activity>
 
-
         <activity
-            android:name=".SplashActivity" android:launchMode="singleTask"
+            android:name=".RegisterGatherSiteDetails"
             android:theme="@style/RenatusAppTheme.NoActionBar">
         </activity>
 
 
+        <activity
+            android:name=".RegisterGatherDetails"
+            android:theme="@style/RenatusAppTheme.NoActionBar">
+        </activity>
 
-        <!--<receiver-->
-            <!--android:name="a75f.io.logic.GCMReceiver"-->
-            <!--android:permission="com.google.android.c2dm.permission.SEND">-->
-            <!--<intent-filter>-->
-                <!--<action android:name="com.google.android.c2dm.intent.RECEIVE"/>-->
-                <!--<category android:name="com.myPackage"/>-->
-            <!--</intent-filter>-->
-        <!--</receiver>-->
-        <!--<service android:name="a75f.io.logic.GCMService"/>-->
+        <activity android:name=".CCUSettings"
+            android:theme="@style/RenatusAppTheme.NoActionBar">
+
+        </activity>
+
 
         <meta-data
             android:name="io.fabric.ApiKey"

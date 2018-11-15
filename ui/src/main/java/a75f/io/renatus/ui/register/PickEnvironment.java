@@ -34,8 +34,6 @@ public class PickEnvironment extends WizardStep implements View.OnClickListener 
         nextButton.setEnabled(false);
         nextButton.setVisibility(Button.GONE);
 
-        // Clear all saved user preferences
-        Prefs.clear();
 
         final String[] environments = getActivity().getResources().getStringArray(R.array.environment_items);
 

@@ -3,6 +3,12 @@ package a75.io.logic;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.junit.Test;
+import org.projecthaystack.HDict;
+import org.projecthaystack.HDictBuilder;
+import org.projecthaystack.HGrid;
+import org.projecthaystack.HGridBuilder;
+import org.projecthaystack.client.HClient;
+import org.projecthaystack.server.HStdOps;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -15,6 +21,7 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
+import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 
@@ -25,21 +32,28 @@ import a75f.io.logic.bo.haystack.device.SmartNode;
  */
 public class TestHayStack
 {
+
     @Test
-    public void testHaystckAPI(){
+    public void testHaystackAPI(){
+
+        HClient hClient = new HClient(HttpUtil.HAYSTACK_URL, "testhaystack", "testpassword");
+
+        HDict hDict = new HDictBuilder().add("filter", "point").toDict();
+        HGrid hGrid = hClient.call(HStdOps.read.name(), HGridBuilder.dictToGrid(hDict));
+        hGrid.dump();
+
         /*AndroidHSClient hayStackClient = new AndroidHSClient();
-        
+
         String cmd = "about";//formats,ops
         HGrid resGrid = hayStackClient.call(cmd, null);
-    
+
         //String filter = ""; // read,nav
         //hayStackClient.readAll(filter);
-        
+
         System.out.println(HZincWriter.gridToString(resGrid));*/
-        
-        
+
+
     }
-    
     @Test
     public void testHayStack()
     {
@@ -83,8 +97,8 @@ public class TestHayStack
                                 .setSiteRef("75F")
                                 .addMarker("zone")
                                 .addMarker("air").addMarker("temp").addMarker("desired").addMarker("sp")
-                                .setUnit("\u00B0F")
-                                .build();
+                                .setUnit("\u00B0F").build();
+
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
         SmartNode node = new SmartNode(7000, siteRef);

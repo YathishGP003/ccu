@@ -55,7 +55,7 @@ public class Globals
     private LZoneProfile             mLZoneProfile;
     private boolean isSimulation = false;
     private boolean isDeveloperTest = true;
-    CCUHsApi apiInstance;
+
     PubNub pubnub;
     boolean pubnubSubscribed = false;
 
@@ -140,9 +140,9 @@ public class Globals
         
         isSimulation = getApplicationContext().getResources().getBoolean(R.bool.simulation);
         isDeveloperTest = getApplicationContext().getResources().getBoolean(R.bool.developer_test);
-        apiInstance = new CCUHsApi(this.mApplicationContext);
-    
-    
+
+        
+        new CCUHsApi(this.mApplicationContext);
         //TODO - Test => Should be moved to registration module
         HashMap site = CCUHsApi.getInstance().read("site");
         if (site.size() == 0) {
@@ -236,7 +236,7 @@ public class Globals
     }
     
     public void saveTags(){
-        apiInstance.saveTagsData();
+        CCUHsApi.getInstance().saveTagsData();
     }
     
     public void registerSiteToPubNub(final String siteId) {

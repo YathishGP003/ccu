@@ -25,22 +25,23 @@ import a75f.io.api.haystack.HSUtil;
 
 public class EntitySyncHandler
 {
+    private static final String TAG = EntitySyncHandler.class.getSimpleName();
+    //CCUHsApi hayStack;
     
-    CCUHsApi hayStack;
-    
-    public EntitySyncHandler(CCUHsApi api) {
-        hayStack = api;
+    public EntitySyncHandler() {
+
     }
     
     public synchronized void sync() {
-        
+
+        Log.i(TAG, "isSyncNeeded: " + isSyncNeeded());
         if (isSyncNeeded())
         {
             doSyncSite();
         }
         
-        if (hayStack.tagsDb.removeIdMap.size() > 0) {
-            System.out.println("RemoveIDMap : "+hayStack.tagsDb.removeIdMap);
+        if (CCUHsApi.getInstance().tagsDb.removeIdMap.size() > 0) {
+            System.out.println("RemoveIDMap : "+CCUHsApi.getInstance().tagsDb.removeIdMap);
             doSyncRemoveIds();
         }
     
@@ -52,10 +53,10 @@ public class EntitySyncHandler
     
     private void doSyncSite() {
         System.out.println("doSyncSite ->");
-        HDict sDict =  hayStack.readHDict("site");
+        HDict sDict =  CCUHsApi.getInstance().readHDict("site");
         HDictBuilder b = new HDictBuilder().add(sDict);
         String siteLUID = b.remove("id").toString();
-        String siteGUID = hayStack.getGUID(siteLUID);
+        String siteGUID = CCUHsApi.getInstance().getGUID(siteLUID);
         if (siteGUID == null)
         {
             ArrayList<HDict> entities = new ArrayList<>();
@@ -77,7 +78,7 @@ public class EntitySyncHandler
     
         if (siteGUID != null && siteGUID != "")
         {
-            hayStack.putUIDMap(siteLUID, siteGUID);
+            CCUHsApi.getInstance().putUIDMap(siteLUID, siteGUID);
             doSyncEquips(siteLUID);
             doSyncDevices(siteLUID);
         }
@@ -87,15 +88,15 @@ public class EntitySyncHandler
     
     private void doSyncEquips(String siteLUID) {
         
-        ArrayList<HashMap> equips = hayStack.readAll("equip and siteRef == \""+siteLUID+"\"");
+        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and siteRef == \""+siteLUID+"\"");
         ArrayList<String> equipLUIDList = new ArrayList();
         ArrayList<HDict> entities = new ArrayList<>();
         for (Map m: equips)
         {
             String luid = m.remove("id").toString();
-            if (hayStack.getGUID(luid) == null) {
+            if (CCUHsApi.getInstance().getGUID(luid) == null) {
                 equipLUIDList.add(luid);
-                m.put("siteRef", HRef.copy(hayStack.getGUID(siteLUID)));
+                m.put("siteRef", HRef.copy(CCUHsApi.getInstance().getGUID(siteLUID)));
                 entities.add(HSUtil.mapToHDict(m));
             }
         }
@@ -118,11 +119,11 @@ public class EntitySyncHandler
                 equipGUID = row.get("id").toString();
                 if (equipGUID != "")
                 {
-                    hayStack.putUIDMap(equipLUIDList.get(index++), equipGUID);
+                    CCUHsApi.getInstance().putUIDMap(equipLUIDList.get(index++), equipGUID);
                 }
             }
         }
-        System.out.println("Synced Equips: "+hayStack.tagsDb.idMap);
+        System.out.println("Synced Equips: "+CCUHsApi.getInstance().tagsDb.idMap);
         doSyncPoints(siteLUID, equipLUIDList);
         
         
@@ -130,12 +131,13 @@ public class EntitySyncHandler
     
     private void doSyncPoints(String siteLUID, ArrayList<String> equipLUIDList) {
     
-        ArrayList<HashMap> equips = hayStack.readAll("equip and siteRef == \""+siteLUID+"\"");
+        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and siteRef == \""+siteLUID+"\"");
         for (Map q: equips)
         {
             String equipLUID = q.remove("id").toString();
     
-            ArrayList<HashMap> points = hayStack.readAll("point and equipRef == \"" + equipLUID + "\"");
+            ArrayList<HashMap> points = CCUHsApi.getInstance().readAll("point and equipRef == \"" + equipLUID + "\"");
+
             if (points.size() == 0) {
                 continue;
             }
@@ -144,11 +146,11 @@ public class EntitySyncHandler
             for (Map m : points)
             {
                 String luid = m.remove("id").toString();
-                if (hayStack.getGUID(luid) == null)
+                if (CCUHsApi.getInstance().getGUID(luid) == null)
                 {
                     pointLUIDList.add(luid);
-                    m.put("siteRef", HRef.copy(hayStack.getGUID(siteLUID)));
-                    m.put("equipRef", HRef.copy(hayStack.getGUID(equipLUID)));
+                    m.put("siteRef", HRef.copy(CCUHsApi.getInstance().getGUID(siteLUID)));
+                    m.put("equipRef", HRef.copy(CCUHsApi.getInstance().getGUID(equipLUID)));
                     entities.add(HSUtil.mapToHDict(m));
                 }
                 System.out.println(m);
@@ -170,25 +172,24 @@ public class EntitySyncHandler
                 {
                     HRow row = (HRow) it.next();
                     String guid = row.get("id").toString();
-                    hayStack.putUIDMap(pointLUIDList.get(index++), guid);
+                    CCUHsApi.getInstance().putUIDMap(pointLUIDList.get(index++), guid);
                 }
-                System.out.println("Synced Points: "+hayStack.tagsDb.idMap);
+                System.out.println("Synced Points: "+CCUHsApi.getInstance().tagsDb.idMap);
             }
-            
         }
     }
     
     private void doSyncDevices(String siteLUID) {
         //ArrayList<HashMap> devices = hayStack.readAll("device and siteRef == \""+siteLUID+"\"");
-        ArrayList<HashMap> devices = hayStack.readAll("device");
+        ArrayList<HashMap> devices = CCUHsApi.getInstance().readAll("device");
         ArrayList<String> deviceLUIDList = new ArrayList();
         ArrayList<HDict> entities = new ArrayList<>();
         for (Map m: devices)
         {
             String luid = m.remove("id").toString();
-            if (hayStack.getGUID(luid) == null) {
+            if (CCUHsApi.getInstance().getGUID(luid) == null) {
                 deviceLUIDList.add(luid);
-                m.put("siteRef", HRef.copy(hayStack.getGUID(siteLUID)));
+                m.put("siteRef", HRef.copy(CCUHsApi.getInstance().getGUID(siteLUID)));
                 entities.add(HSUtil.mapToHDict(m));
             }
         }
@@ -212,10 +213,10 @@ public class EntitySyncHandler
                 equipGUID = row.get("id").toString();
                 if (equipGUID != "")
                 {
-                    hayStack.putUIDMap(deviceLUIDList.get(index++), equipGUID);
+                    CCUHsApi.getInstance().putUIDMap(deviceLUIDList.get(index++), equipGUID);
                 }
             }
-            System.out.println("Synced devices: " + hayStack.tagsDb.idMap);
+            System.out.println("Synced devices: " + CCUHsApi.getInstance().tagsDb.idMap);
             doSyncPhyPoints(siteLUID, deviceLUIDList);
         }
     }
@@ -224,7 +225,7 @@ public class EntitySyncHandler
         
         for (String deviceLUID : deviceLUIDList)
         {
-            ArrayList<HashMap> points = hayStack.readAll("point and physical and deviceRef == \"" + deviceLUID + "\"");
+            ArrayList<HashMap> points = CCUHsApi.getInstance().readAll("point and physical and deviceRef == \"" + deviceLUID + "\"");
             if (points.size() == 0) {
                 continue;
             }
@@ -233,12 +234,12 @@ public class EntitySyncHandler
             for (Map m : points)
             {
                 String luid = m.remove("id").toString();
-                if (hayStack.getGUID(luid) == null
-                         && hayStack.getGUID(deviceLUID) != null)
+                if (CCUHsApi.getInstance().getGUID(luid) == null
+                         && CCUHsApi.getInstance().getGUID(deviceLUID) != null)
                 {
                     pointLUIDList.add(luid);
-                    m.put("siteRef", HRef.copy(hayStack.getGUID(siteLUID)));
-                    m.put("deviceRef", HRef.copy(hayStack.getGUID(deviceLUID)));
+                    m.put("siteRef", HRef.copy(CCUHsApi.getInstance().getGUID(siteLUID)));
+                    m.put("deviceRef", HRef.copy(CCUHsApi.getInstance().getGUID(deviceLUID)));
                     entities.add(HSUtil.mapToHDict(m));
                 }
                 System.out.println(m);
@@ -260,10 +261,10 @@ public class EntitySyncHandler
                 {
                     HRow row = (HRow) it.next();
                     guid = row.get("id").toString();
-                    hayStack.putUIDMap(pointLUIDList.get(index++), guid);
+                    CCUHsApi.getInstance().putUIDMap(pointLUIDList.get(index++), guid);
                 }
             }
-            System.out.println("Synced Phy Points: "+hayStack.tagsDb.idMap);
+            System.out.println("Synced Phy Points: "+CCUHsApi.getInstance().tagsDb.idMap);
         }
     }
     
@@ -271,7 +272,7 @@ public class EntitySyncHandler
     {
         ArrayList<HDict> entities = new ArrayList<>();
         
-        for (String removeId : hayStack.tagsDb.removeIdMap.values())
+        for (String removeId : CCUHsApi.getInstance().tagsDb.removeIdMap.values())
         {
             HDictBuilder b = new HDictBuilder();
             b.add("removeId", removeId.replace("@",""));
@@ -283,36 +284,37 @@ public class EntitySyncHandler
         String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "removeEntity", HZincWriter.gridToString(grid));
         if (response != null)
         {
-            hayStack.tagsDb.removeIdMap.clear();
+            CCUHsApi.getInstance().tagsDb.removeIdMap.clear();
         }
         System.out.println("Response: \n" + response);
     }
     
     public boolean isSyncNeeded() {
-        ArrayList<HashMap> sites = hayStack.readAll("site");
+        ArrayList<HashMap> sites = CCUHsApi.getInstance().readAll("site");
+
         for (Map s: sites) {
-            if (hayStack.getGUID(s.get("id").toString()) == null) {
+            if (CCUHsApi.getInstance().getGUID(s.get("id").toString()) == null) {
                 Log.d("CCU","Entity sync required :Site not synced :"+ s.get("id"));
                 return true;
             }
         }
-        ArrayList<HashMap> equips = hayStack.readAll("equip");
+        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip");
         for (Map q: equips) {
-            if (hayStack.getGUID(q.get("id").toString()) == null) {
+            if (CCUHsApi.getInstance().getGUID(q.get("id").toString()) == null) {
                 Log.d("CCU","Entity sync required :Euip not synced :"+ q.get("id"));
                 return true;
             }
         }
-        ArrayList<HashMap> devices = hayStack.readAll("device");
+        ArrayList<HashMap> devices = CCUHsApi.getInstance().readAll("device");
         for (Map d: devices) {
-            if (hayStack.getGUID(d.get("id").toString()) == null) {
+            if (CCUHsApi.getInstance().getGUID(d.get("id").toString()) == null) {
                 Log.d("CCU","Entity sync required :device not synced :"+ d.get("id"));
                 return true;
             }
         }
-        ArrayList<HashMap> points = hayStack.readAll("point");
+        ArrayList<HashMap> points = CCUHsApi.getInstance().readAll("point");
         for (Map p: points) {
-            if (hayStack.getGUID(p.get("id").toString()) == null) {
+            if (CCUHsApi.getInstance().getGUID(p.get("id").toString()) == null) {
                 Log.d("CCU","Entity sync required :Point not synced :"+ p.get("id"));
                 return true;
             }

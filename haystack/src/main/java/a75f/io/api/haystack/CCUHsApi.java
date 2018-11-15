@@ -31,7 +31,6 @@ import a75f.io.api.haystack.sync.HttpUtil;
 /**
  * Created by samjithsadasivan on 9/3/18.
  */
-
 public class CCUHsApi
 {
     private static CCUHsApi instance;
@@ -57,7 +56,7 @@ public class CCUHsApi
         tagsDb = (CCUTagsDb) hsClient.db();
         tagsDb.init(c);
         instance = this;
-        entitySyncHandler = new EntitySyncHandler(this);
+        entitySyncHandler = new EntitySyncHandler();
         hisSyncHandler = new HisSyncHandler(this);
         Log.d("Haystack","Api created");
     }
@@ -71,7 +70,7 @@ public class CCUHsApi
         tagsDb = (CCUTagsDb) hsClient.db();
         tagsDb.setTagsDbMap(new HashMap());
         instance = this;
-        entitySyncHandler = new EntitySyncHandler(this);
+        entitySyncHandler = new EntitySyncHandler();
         hisSyncHandler = new HisSyncHandler(this);
     }
     
@@ -83,8 +82,8 @@ public class CCUHsApi
         tagsDb.saveTags();
     }
     
-    public void addSite(Site s) {
-        tagsDb.addSite(s);
+    public String addSite(Site s) {
+        return tagsDb.addSite(s);
     }
     
     public String addEquip(Equip q){
@@ -139,7 +138,7 @@ public class CCUHsApi
         HashMap<Object, Object> map = new HashMap<>();
         try
         {
-            HDict dict = hsClient.read(query);
+            HDict dict = hsClient.read(query, true);
             Iterator it = dict.iterator();
             while (it.hasNext())
             {
@@ -457,5 +456,10 @@ public class CCUHsApi
     
     public void syncHisData() {
         hisSyncHandler.doSync();
+    }
+
+
+    public void log() {
+        tagsDb.printMap();
     }
 }

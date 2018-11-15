@@ -18,6 +18,8 @@ public class AndroidHSClient extends HClient
     CCUTagsDb db = new CCUTagsDb();
     
     protected AndroidHSClient(){
+        super();
+        uri = null;
     }
     
     @Override

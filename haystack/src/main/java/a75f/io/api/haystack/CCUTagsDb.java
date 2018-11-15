@@ -404,15 +404,6 @@ public class CCUTagsDb extends HServer
         return (HDict)tagsMap.get(id.val);
     }
 
-    public void printMap() {
-            Iterator it = tagsMap.entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry pair = (Map.Entry)it.next();
-                System.out.println(pair.getKey() + " = " + pair.getValue());
-                it.remove(); // avoids a ConcurrentModificationException
-            }
-    }
-
     protected Iterator iterator() { return tagsMap.values().iterator();}
     
     //////////////////////////////////////////////////////////////////////////

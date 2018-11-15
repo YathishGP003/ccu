@@ -12,17 +12,21 @@ import java.util.Map;
 
 public class HSUtil
 {
-    public static HDict mapToHDict(Map<String,Object> m){
+    public static HDict mapToHDict(Map<String, Object> m)
+    {
         HDictBuilder b = new HDictBuilder();
-        for (Map.Entry<String,Object> entry : m.entrySet())
+        for (Map.Entry<String, Object> entry : m.entrySet())
         {
-            if (entry.getValue() instanceof  HVal)
+            if (entry.getValue() instanceof HVal)
             {
                 b.add(entry.getKey(), (HVal) entry.getValue());
-            } else {
+            }
+            else
+            {
                 b.add(entry.getKey(), (String) entry.getValue());
             }
         }
         return b.toDict();
     }
+    
 }

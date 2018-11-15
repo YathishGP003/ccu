@@ -8,6 +8,7 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.vav.VAVLogicalMap;
+import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 
 /**
  * Created by samjithsadasivan on 9/12/18.
@@ -24,7 +25,7 @@ public class VavHaystackTest
         api.tagsDb.writeArrays = new HashMap<>();
         api.tagsDb.idMap = new HashMap<>();
         VAVLogicalMap m = new VAVLogicalMap(ProfileType.VAV_REHEAT, 7000);
-        m.createHaystackPoints();
+        m.createHaystackPoints(new VavProfileConfiguration());
         ArrayList points = CCUHsApi.getInstance().readAll("point and group == \"7000\"");
         /*for (Object a : points) {
             System.out.println(a);

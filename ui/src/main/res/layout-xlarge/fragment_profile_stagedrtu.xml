@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical" >
+    <ScrollView
+        android:layout_width="match_parent"
+        android:overScrollMode="never"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TableLayout
+                android:id="@+id/vavStagedRtu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="50dp"
+                android:layout_marginRight="50dp"
+                android:layout_marginTop="14dp"
+                android:layout_marginBottom="30dp"
+                android:stretchColumns="0"
+                android:visibility="visible">
+
+                <TableRow
+                    android:id="@+id/genericRTUHeader"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="2dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Equipment List"
+                        android:textSize="@dimen/text_medium_xlarge"
+                        android:visibility="invisible" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="   Selector List  item touch  "
+                        android:textSize="@dimen/text_medium_xlarge"
+                        android:visibility="invisible" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:text="Test Signal"
+                        android:textSize="@dimen/text_medium_xlarge"
+                        android:visibility="visible"/>
+
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/tableRow1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:layout_marginBottom="14dp" >
+
+                    <CheckBox
+                        android:id="@+id/coolingStage1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingRight="14dp"
+                        android:textSize="@dimen/text_small_xlarge"
+                        android:layout_gravity="center_vertical"
+                        android:text="   Cooling Stage 1 (Relay 1)" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textSize="@dimen/text_large_xlarge" />
+
+                    <ToggleButton
+                        android:id="@+id/coolingStage1Test"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:background="@drawable/selector"
+                        android:text="" />
+
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/tableRow2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:layout_marginBottom="14dp" >
+
+                    <CheckBox
+                        android:id="@+id/coolingStage2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingRight="14dp"
+                        android:textSize="@dimen/text_small_xlarge"
+                        android:layout_gravity="center_vertical"
+                        android:text="   Cooling Stage 2 (Relay 2)" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textSize="@dimen/text_large_xlarge" />
+                    <ToggleButton
+                        android:id="@+id/coolingStage2Test"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:background="@drawable/selector"
+                        android:text="" />
+
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/tableRow3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:layout_marginBottom="14dp" >
+
+                    <CheckBox
+                        android:id="@+id/coolingStage3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingRight="14dp"
+                        android:textSize="@dimen/text_small_xlarge"
+                        android:layout_gravity="center_vertical"
+                        android:text="   Cooling Stage 3 (Relay 3)" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textSize="@dimen/text_large_xlarge" />
+                    <ToggleButton
+                        android:id="@+id/coolingStage3Test"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:background="@drawable/selector"
+                        android:text="" />
+
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/tableRow4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:layout_marginBottom="14dp" >
+
+                    <CheckBox
+                        android:id="@+id/coolingStage4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingRight="14dp"
+                        android:textSize="@dimen/text_small_xlarge"
+                        android:layout_gravity="center_vertical"
+                        android:text="   Cooling Stage 4 (Relay 4)" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textSize="@dimen/text_large_xlarge" />
+                    <ToggleButton
+                        android:id="@+id/coolingStage4Test"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:background="@drawable/selector"
+                        android:text="" />
+
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/tableRow5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:layout_marginBottom="14dp" >
+
+                    <CheckBox
+                        android:id="@+id/coolingStage5"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingRight="14dp"
+                        android:textSize="@dimen/text_small_xlarge"
+                        android:layout_gravity="center_vertical"
+                        android:text="   Cooling Stage 5 (Relay 5)" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textSize="@dimen/text_large_xlarge" />
+                    <ToggleButton
+                        android:id="@+id/coolingStage5Test"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:background="@drawable/selector"
+                        android:text="" />
+
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/tableRow6"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:layout_marginBottom="14dp" >
+
+                    <CheckBox
+                        android:id="@+id/fanStage1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingRight="14dp"
+                        android:textSize="@dimen/text_small_xlarge"
+                        android:layout_gravity="center_vertical"
+                        android:text="   Fan Stage 1 (Relay 6)" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textSize="@dimen/text_large_xlarge" />
+                    <ToggleButton
+                        android:id="@+id/fanStage1Test"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:background="@drawable/selector"
+                        android:text="" />
+
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/tableRow7"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="14dp"
+                    android:layout_marginBottom="14dp" >
+
+                    <CheckBox
+                        android:id="@+id/fanStage2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingRight="14dp"
+                        android:textSize="@dimen/text_small_xlarge"
+                        android:layout_gravity="center_vertical"
+                        android:text="   Fan Stage 2 (Relay 7)" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textSize="@dimen/text_large_xlarge" />
+                    <ToggleButton
+                        android:id="@+id/fanStage2Test"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:background="@drawable/selector"
+                        android:text="" />
+
+                </TableRow>
+
+            </TableLayout>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

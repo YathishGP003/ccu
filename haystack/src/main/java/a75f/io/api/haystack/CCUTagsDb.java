@@ -294,8 +294,8 @@ public class CCUTagsDb extends HServer
                                  .add("id",       HRef.make(UUID.randomUUID().toString()))
                                  .add("dis",      p.getDisplayName())
                                  .add("point",    HMarker.VAL)
-                                 .add("siteRef",  p.getSiteRef()/*eq.get("siteRef")*/)
-                                 .add("equipRef", p.getEquipRef()/*eq.get("id")*/)
+                                 .add("siteRef",  p.getSiteRef())
+                                 .add("equipRef", p.getEquipRef())
                                  .add("roomRef",  p.getRoomRef())
                                  .add("floorRef", p.getFloorRef())
                                  .add("group",p.getGroup())
@@ -342,7 +342,8 @@ public class CCUTagsDb extends HServer
                                  .add("device",    HMarker.VAL)
                                  .add("his",      HMarker.VAL)
                                  .add("addr",      d.getAddr())
-                                 .add("siteRef",  d.getSiteRef());
+                                 .add("siteRef",  d.getSiteRef())
+                                 .add("equipRef", d.getEquipRef());
     
         for (String m : d.getMarkers()) {
             b.add(m);
@@ -505,8 +506,10 @@ public class CCUTagsDb extends HServer
                 .greater(HisItem_.date,range.start.millis())
                 .less(HisItem_.date,range.end.millis())
                 .order(HisItem_.date);
-        
+    
+        System.out.println("->run ObjectBox Query");
         List<HisItem> hisList =hisQuery.build().find();
+        System.out.println("<-run ObjectBox Query hisList size "+hisList.size());
     
         boolean isBool = ((HStr)entity.get("kind")).val.equals("Bool");
         ArrayList acc = new ArrayList();

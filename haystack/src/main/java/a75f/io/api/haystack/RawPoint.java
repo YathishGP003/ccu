@@ -21,6 +21,9 @@ public class RawPoint
     {
         this.pointRef = pointRef;
     }
+    public void setType(String type) {
+        this.type = type;
+    }
     public String getSiteRef()
     {
         return siteRef;

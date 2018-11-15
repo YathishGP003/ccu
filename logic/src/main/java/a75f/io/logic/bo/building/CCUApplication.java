@@ -7,8 +7,8 @@ import java.util.HashMap;
 
 import a75f.io.kinveybo.AlgoTuningParameters;
 import a75f.io.kinveybo.CCUUser;
-import a75f.io.logic.bo.building.system.AHU;
 import a75f.io.logic.bo.building.system.SystemProfile;
+import a75f.io.logic.bo.building.system.VavAnalogRtu;
 
 /**
  * Created by Yinten isOn 8/15/2017.
@@ -59,7 +59,7 @@ public class CCUApplication
 
     private AlgoTuningParameters mDefaultCCUTuners;
     
-    public SystemProfile systemProfile = new AHU();//TODO- TEMP
+    public SystemProfile systemProfile = new VavAnalogRtu();//TODO- TEMP
     
     public  ControlMote      controlMote   = new ControlMote();
     private String           mTitle        = "";

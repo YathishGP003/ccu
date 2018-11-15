@@ -215,27 +215,45 @@ public class TestHS
                                   .setUnit("\u00B0F")
                                   .build();
     
-        String datID = CCUHsApi.getInstance().addPoint(testPoint);
+        String id1 = CCUHsApi.getInstance().addPoint(testPoint);
+    
+        Point testPoint1 = new Point.Builder()
+                                  .setDisplayName(siteDis+"AHU-"+nodeAddr+"-TestTemp1")
+                                  .setEquipRef(equipRef)
+                                  .setSiteRef(siteRef)
+                                  .setRoomRef("room")
+                                  .setFloorRef("floor")
+                                  .addMarker("discharge")
+                                  .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("his")
+                                  .setGroup(String.valueOf(nodeAddr))
+                                  .setTz("Chicago")
+                                  .setUnit("\u00B0F")
+                                  .build();
+    
+        String id2 = CCUHsApi.getInstance().addPoint(testPoint1);
         
-        ArrayList<HisItem> hislist = new ArrayList<>();
+        ArrayList<HisItem> hislist1 = new ArrayList<>();
+        ArrayList<HisItem> hislist2 = new ArrayList<>();
         
         
         Date now = new Date();
         
-        hislist.add(new HisItem(datID, now, 75.0));
-        hislist.add(new HisItem(datID, new Date(now.getTime() + 300000), 73.0));
+        hislist1.add(new HisItem(id1, now, 75.0));
+        hislist2.add(new HisItem(id2, now, 76.0));
+        hislist1.add(new HisItem(id1, new Date(now.getTime() + 300000), 73.0));
     
-        hayStack.hisWrite(hislist);
+        hayStack.hisWrite(hislist1);
+        hayStack.hisWrite(hislist2);
     
-        ArrayList<HisItem> res = hayStack.hisRead(datID,"today");
+        ArrayList<HisItem> res = hayStack.hisRead(id1,"today");
     
-        for (HisItem h : res) {
-            h.dump();
-        }
+        //for (HisItem h : res) {
+        //    h.dump();
+        //}
         
-        hayStack.hisWrite(new HisItem(datID, new Date(now.getTime() - 600000), 70.0));
+        //hayStack.hisWrite(new HisItem(id1, new Date(now.getTime() - 600000), 70.0));
     
-        HisItem i = hayStack.hisRead(datID);
+        HisItem i = hayStack.hisRead(id1);
         System.out.println(i.getDate()+"    :::: "+i.getVal());
         
         i.dump();

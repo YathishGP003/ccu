@@ -126,4 +126,9 @@ public class GenericPIController
         cumulativeError = 0;
         controlVariable = 0;
     }
+    
+    public void dump() {
+        System.out.println("PI-LOOP error: "+error+" limitedErr: "+limitedError+" proportionalErr: "+proportionalError+
+                                    "integralErr: "+integralError+" cumulativeErr: "+cumulativeError+" CV: "+controlVariable);
+    }
 }

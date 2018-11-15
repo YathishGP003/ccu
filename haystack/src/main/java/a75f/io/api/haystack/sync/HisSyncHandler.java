@@ -56,6 +56,8 @@ public class HisSyncHandler
             HisItem sItem = hisItems.get(hisItems.size()-1);//TODO - Writing just the last val for now
             tsData.put(m.get("dis").toString(), String.valueOf(sItem.getVal()));
             
+            
+            //TODO - Influxdb java lib does not compile on SDK-19. Using POST method until it is sorted out.
             /*HDict point = hayStack.hsClient.readById(HRef.copy(pointID));
             System.out.println(point);
             boolean isBool = ((HStr) point.get("kind")).val.equals("Bool");
@@ -124,16 +126,12 @@ public class HisSyncHandler
             }
             hayStack.tagsDb.setHisItemSyncStatus(hisItems);
         }
-        String url = new InfluxDbUtil.URLBuilder().setProtocol(InfluxDbUtil.HTTP)
-                                                  .setHost("renatus-influxiprvgkeeqfgys.centralus.cloudapp.azure.com")
-                                                  .setPort(8086)
-                                                  .setOp(InfluxDbUtil.WRITE)
-                                                  .setDatabse("haystack")
-                                                  .setUser("75f@75f.io")
-                                                  .setPassword("7575")
-                                                  .buildUrl();
-    
-        InfluxDbUtil.writeData(url, "00RENATUS_CCU" , tsData, System.currentTimeMillis());
+        
+        if (tsData.size() > 0)
+        {
+            String url = new InfluxDbUtil.URLBuilder().setProtocol(InfluxDbUtil.HTTP).setHost("renatus-influxiprvgkeeqfgys.centralus.cloudapp.azure.com").setPort(8086).setOp(InfluxDbUtil.WRITE).setDatabse("haystack").setUser("75f@75f.io").setPassword("7575").buildUrl();
+            InfluxDbUtil.writeData(url, "01RENATUS_CCU", tsData, System.currentTimeMillis());
+        }
         
         Log.d("CCU","<- doHisSync");
     }

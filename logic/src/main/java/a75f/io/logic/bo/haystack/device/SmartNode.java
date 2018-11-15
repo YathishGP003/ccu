@@ -43,7 +43,7 @@ public class SmartNode
                                 .setDeviceRef(deviceRef)
                                 .setSiteRef(siteRef)
                                 .setPort(Port.ANALOG_IN_ONE.toString())
-                                .setType("2-10v")
+                                .setType("0-10v")
                                 .addMarker("input").addMarker("his")
                                 .setTz("Chicago")
                                 .build();
@@ -54,7 +54,7 @@ public class SmartNode
                             .setDeviceRef(deviceRef)
                             .setSiteRef(siteRef)
                             .setPort(Port.ANALOG_IN_TWO.toString())
-                            .setType("2-10v")
+                            .setType("0-10v")
                             .addMarker("input").addMarker("his")
                             .setTz("Chicago")
                             .build();
@@ -82,7 +82,7 @@ public class SmartNode
                             .setDeviceRef(deviceRef)
                             .setSiteRef(siteRef)
                             .setPort(Port.ANALOG_OUT_ONE.toString())
-                            .setType("2-10v")
+                            .setType("0-10v")
                             .addMarker("output").addMarker("his")
                             .setTz("Chicago")
                             .build();
@@ -92,7 +92,7 @@ public class SmartNode
                              .setDeviceRef(deviceRef)
                              .setSiteRef(siteRef)
                              .setPort(Port.ANALOG_OUT_TWO.toString())
-                             .setType("2-10v")
+                             .setType("0-10v")
                              .addMarker("output").addMarker("his")
                              .setTz("Chicago")
                              .build();

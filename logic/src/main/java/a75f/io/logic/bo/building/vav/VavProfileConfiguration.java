@@ -9,20 +9,11 @@ import a75f.io.logic.bo.building.BaseProfileConfiguration;
 public class VavProfileConfiguration extends BaseProfileConfiguration
 {
     
-    int priority;
     int minDamperCooling;
     int maxDamperCooling;
     int minDamperHeating;
     int maxDamperHeating;
     
-    public int getPriority()
-    {
-        return priority;
-    }
-    public void setPriority(int priority)
-    {
-        this.priority = priority;
-    }
     public int getMinDamperCooling()
     {
         return minDamperCooling;

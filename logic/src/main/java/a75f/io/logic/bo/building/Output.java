@@ -1,5 +1,6 @@
 package a75f.io.logic.bo.building;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
@@ -54,6 +55,12 @@ public class Output extends Circuit
                 break;
         }
         return (short) 0;
+    }
+    
+    @JsonIgnore
+    public String getAnalogActuatorType()
+    {
+        return mOutputAnalogActuatorType.displayName;
     }
     
     

@@ -1,19 +1,36 @@
 package a75f.io.logic;
 
 import android.content.Context;
+import android.util.Log;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.pubnub.api.PNConfiguration;
+import com.pubnub.api.PubNub;
+import com.pubnub.api.callbacks.PNCallback;
+import com.pubnub.api.callbacks.SubscribeCallback;
+import com.pubnub.api.enums.PNStatusCategory;
+import com.pubnub.api.models.consumer.PNPublishResult;
+import com.pubnub.api.models.consumer.PNStatus;
+import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
+import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Site;
 import a75f.io.kinveybo.AlgoTuningParameters;
 import a75f.io.kinveybo.DalContext;
 import a75f.io.logic.bo.building.CCUApplication;
 import a75f.io.logic.bo.building.Day;
 import a75f.io.logic.bo.building.NamedSchedule;
 import a75f.io.logic.bo.building.Schedule;
+import a75f.io.logic.tuners.BuildingTuners;
 
 /**
  * Created by rmatt isOn 7/19/2017.
@@ -27,7 +44,7 @@ public class Globals
 {
 
     private static final int      NUMBER_OF_CYCLICAL_TASKS_RENATUS_REQUIRES = 10;
-    private static final int      TASK_SEPERATION                           = 3;
+    private static final int      TASK_SEPERATION                           = 15;
     private static final TimeUnit TASK_SERERATION_TIMEUNIT                  = TimeUnit.SECONDS;
     private static Globals globals;
     //HeartBeatJob mHeartBeatJob;
@@ -39,6 +56,8 @@ public class Globals
     private boolean isSimulation = false;
     private boolean isDeveloperTest = true;
     CCUHsApi apiInstance;
+    PubNub pubnub;
+    boolean pubnubSubscribed = false;
 
 
     private Globals()
@@ -114,7 +133,7 @@ public class Globals
         populate();
         //mHeartBeatJob = new HeartBeatJob();
         //5 seconds after application initializes start heart beat
-        int DEFAULT_HEARTBEAT_INTERVAL = 60;
+        int DEFAULT_HEARTBEAT_INTERVAL = 30;
         
         mProcessJob.scheduleJob("Building Process Job", DEFAULT_HEARTBEAT_INTERVAL,
                 TASK_SEPERATION * 2, TASK_SERERATION_TIMEUNIT);
@@ -122,6 +141,22 @@ public class Globals
         isSimulation = getApplicationContext().getResources().getBoolean(R.bool.simulation);
         isDeveloperTest = getApplicationContext().getResources().getBoolean(R.bool.developer_test);
         apiInstance = new CCUHsApi(this.mApplicationContext);
+    
+    
+        //TODO - Test => Should be moved to registration module
+        HashMap site = CCUHsApi.getInstance().read("site");
+        if (site.size() == 0) {
+            //TODO - demo
+            Site s75f = new Site.Builder()
+                                .setDisplayName("75F")
+                                .addMarker("site")
+                                .setGeoCity("Burnsville")
+                                .setGeoState("MN")
+                                .setTz("Chicago")
+                                .setArea(10000).build();
+            CCUHsApi.getInstance().addSite(s75f);
+            BuildingTuners.getInstance();//To init Building tuner
+        }
     }
 
     public DalContext getDalContext()
@@ -203,4 +238,113 @@ public class Globals
     public void saveTags(){
         apiInstance.saveTagsData();
     }
+    
+    public void registerSiteToPubNub(final String siteId) {
+        PNConfiguration pnConfiguration = new PNConfiguration();
+        pnConfiguration.setSubscribeKey("sub-c-dea182aa-e109-11e8-a36a-3a3b171d1021");
+        pnConfiguration.setPublishKey("pub-c-2e374aa8-7e94-47e3-b51d-7d8e1b73aa14");
+        pnConfiguration.setSecure(false);
+        
+        pubnub = new PubNub(pnConfiguration);
+    
+        //HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
+        //final String channelName = (String) siteMap.get(Tags.ID);
+        
+        // create message payload using Gson
+        final JsonObject messageJsonObject = new JsonObject();
+        messageJsonObject.addProperty("msg", "hello");
+    
+        System.out.println("CCU Message to send: " + messageJsonObject.toString());
+    
+        pubnub.addListener(new SubscribeCallback() {
+            @Override
+            public void status(PubNub pubnub, PNStatus status) {
+            
+            
+                if (status.getCategory() == PNStatusCategory.PNUnexpectedDisconnectCategory) {
+                    // This event happens when radio / connectivity is lost
+                }
+            
+                else if (status.getCategory() == PNStatusCategory.PNConnectedCategory) {
+                
+                    // Connect event. You can do stuff like publish, and know you'll get it.
+                    // Or just use the connected event to confirm you are subscribed for
+                    // UI / internal notifications, etc
+                
+                    if (status.getCategory() == PNStatusCategory.PNConnectedCategory){
+                        Log.d("CCU", "PNConnectedCategory publish");
+                        pubnub.publish().channel(siteId).message(messageJsonObject).async(new PNCallback<PNPublishResult>() {
+                            @Override
+                            public void onResponse(PNPublishResult result, PNStatus status) {
+                                // Check whether request successfully completed or not.
+                                if (!status.isError()) {
+                                
+                                    // Message successfully published to specified channel.
+                                }
+                                // Request processing failed.
+                                else {
+                                
+                                    // Handle message publish error. Check 'category' property to find out possible issue
+                                    // because of which request did fail.
+                                    //
+                                    // Request can be resent using: [status retry];
+                                }
+                            }
+                        });
+                    }
+                }
+                else if (status.getCategory() == PNStatusCategory.PNReconnectedCategory) {
+                
+                    // Happens as part of our regular operation. This event happens when
+                    // radio / connectivity is lost, then regained.
+                }
+                else if (status.getCategory() == PNStatusCategory.PNDecryptionErrorCategory) {
+                
+                    // Handle messsage decryption error. Probably client configured to
+                    // encrypt messages and on live data feed it received plain text.
+                }
+            }
+        
+            @Override
+            public void message(PubNub pubnub, PNMessageResult message) {
+                // Handle new message stored in message.message
+                if (message.getChannel() != null) {
+                    // Message has been received on channel group stored in
+                    // message.getChannel()
+                }
+                else {
+                    // Message has been received on channel stored in
+                    // message.getSubscription()
+                }
+            
+                JsonElement receivedMessageObject = message.getMessage();
+                System.out.println("CCU PubNub Received message content: " + receivedMessageObject.toString());
+                // extract desired parts of the payload, using Gson
+                String msg = message.getMessage().getAsJsonObject().get("msg").getAsString();
+                System.out.println("CCU PubNub msg content: " + msg);
+
+
+            /*
+                log the following items with your favorite logger
+                    - message.getMessage()
+                    - message.getSubscription()
+                    - message.getTimetoken()
+            */
+            }
+        
+            @Override
+            public void presence(PubNub pubnub, PNPresenceEventResult presence) {
+            
+            }
+        });
+    
+        pubnub.subscribe().channels(Arrays.asList(siteId)).execute();
+        pubnubSubscribed = true;
+    }
+    
+    public boolean isPubnubSubscribed()
+    {
+        return pubnubSubscribed;
+    }
+    
 }

@@ -17,7 +17,7 @@ import info.guardianproject.netcipher.NetCipher;
 public class HttpUtil
 {
     
-    public static final String HAYSTACK_URL = "https://renatus-haystack.azurewebsites.net/";
+    public static final String HAYSTACK_URL = "https://renatusv2.azurewebsites.net/";
     
     public static String executePost(String targetURL, String urlParameters)
     {

@@ -5,8 +5,6 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 
-import static a75f.io.logic.tuners.TunerDefalutVals.VAV_DEFAULT_VAL_LEVEL;
-
 /**
  * Created by samjithsadasivan on 10/8/18.
  */
@@ -20,13 +18,19 @@ public class VavTunerUtil
         ArrayList values = hayStack.readPoint(cdb.get("id").toString());
         if (values != null && values.size() > 0)
         {
-            HashMap valMap = ((HashMap) values.get(VAV_DEFAULT_VAL_LEVEL-1));
-            return Double.parseDouble(valMap.get("val").toString());
+            for (int l = 1; l <= values.size() ; l++ ) {
+                HashMap valMap = ((HashMap) values.get(l-1));
+                if (valMap.get("val") != null) {
+                    return Double.parseDouble(valMap.get("val").toString());
+                }
+            }
+            //HashMap valMap = ((HashMap) values.get(VAV_DEFAULT_VAL_LEVEL-1));
+            //return Double.parseDouble(valMap.get("val").toString());
         }
         return 0;
     }
     
-    public static void setCoolingDeadband(double dbVal) {
+    public static void setCoolingDeadband(double dbVal, int level) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap cdb = hayStack.read("point and tuner and vav and deadband and cooling");
     
@@ -34,7 +38,7 @@ public class VavTunerUtil
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        hayStack.writePoint(id, TunerDefalutVals.VAV_DEFAULT_VAL_LEVEL, "ccu", dbVal, 0);
+        hayStack.writePoint(id, level, "ccu", dbVal, 0);
     
     }
     
@@ -45,13 +49,19 @@ public class VavTunerUtil
         ArrayList values = hayStack.readPoint(cdb.get("id").toString());
         if (values != null && values.size() > 0)
         {
-            HashMap valMap = ((HashMap) values.get(VAV_DEFAULT_VAL_LEVEL-1));
-            return Double.parseDouble(valMap.get("val").toString());
+            for (int l = 1; l <= values.size() ; l++ ) {
+                HashMap valMap = ((HashMap) values.get(l-1));
+                if (valMap.get("val") != null) {
+                    return Double.parseDouble(valMap.get("val").toString());
+                }
+            }
+            //HashMap valMap = ((HashMap) values.get(VAV_DEFAULT_VAL_LEVEL-1));
+            //return Double.parseDouble(valMap.get("val").toString());
         }
         return 0;
     }
     
-    public static void setHeatingDeadband(double dbVal) {
+    public static void setHeatingDeadband(double dbVal, int level) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap cdb = hayStack.read("point and tuner and vav and deadband and heating");
         
@@ -59,7 +69,7 @@ public class VavTunerUtil
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        hayStack.writePoint(id, TunerDefalutVals.VAV_DEFAULT_VAL_LEVEL, "ccu", dbVal, 0);
+        hayStack.writePoint(id, level, "ccu", dbVal, 0);
         
     }
     
@@ -70,13 +80,19 @@ public class VavTunerUtil
         ArrayList values = hayStack.readPoint(cdb.get("id").toString());
         if (values != null && values.size() > 0)
         {
-            HashMap valMap = ((HashMap) values.get(VAV_DEFAULT_VAL_LEVEL-1));
-            return Double.parseDouble(valMap.get("val").toString());
+            for (int l = 1; l <= values.size() ; l++ ) {
+                HashMap valMap = ((HashMap) values.get(l-1));
+                if (valMap.get("val") != null) {
+                    return Double.parseDouble(valMap.get("val").toString());
+                }
+            }
+            //HashMap valMap = ((HashMap) values.get(VAV_DEFAULT_VAL_LEVEL-1));
+            //return Double.parseDouble(valMap.get("val").toString());
         }
         return 0;
     }
     
-    public static void setProportionalGain(double dbVal) {
+    public static void setProportionalGain(double pgVal, int level) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap cdb = hayStack.read("point and tuner and vav and pgain");
         
@@ -84,7 +100,7 @@ public class VavTunerUtil
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        hayStack.writePoint(id, TunerDefalutVals.VAV_DEFAULT_VAL_LEVEL, "ccu", dbVal, 0);
+        hayStack.writePoint(id, level, "ccu", pgVal, 0);
         
     }
     
@@ -95,13 +111,19 @@ public class VavTunerUtil
         ArrayList values = hayStack.readPoint(cdb.get("id").toString());
         if (values != null && values.size() > 0)
         {
-            HashMap valMap = ((HashMap) values.get(VAV_DEFAULT_VAL_LEVEL-1));
-            return Double.parseDouble(valMap.get("val").toString());
+            for (int l = 1; l <= values.size() ; l++ ) {
+                HashMap valMap = ((HashMap) values.get(l-1));
+                if (valMap.get("val") != null) {
+                    return Double.parseDouble(valMap.get("val").toString());
+                }
+            }
+            //HashMap valMap = ((HashMap) values.get(VAV_DEFAULT_VAL_LEVEL-1));
+            //return Double.parseDouble(valMap.get("val").toString());
         }
         return 0;
     }
     
-    public static void setIntegralGain(double dbVal) {
+    public static void setIntegralGain(double igVal, int level) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap cdb = hayStack.read("point and tuner and vav and igain");
         
@@ -109,7 +131,7 @@ public class VavTunerUtil
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        hayStack.writePoint(id, TunerDefalutVals.VAV_DEFAULT_VAL_LEVEL, "ccu", dbVal, 0);
+        hayStack.writePoint(id, level, "ccu", igVal, 0);
         
     }
     
@@ -120,13 +142,19 @@ public class VavTunerUtil
         ArrayList values = hayStack.readPoint(cdb.get("id").toString());
         if (values != null && values.size() > 0)
         {
-            HashMap valMap = ((HashMap) values.get(VAV_DEFAULT_VAL_LEVEL-1));
-            return Double.parseDouble(valMap.get("val").toString());
+            for (int l = 1; l <= values.size() ; l++ ) {
+                HashMap valMap = ((HashMap) values.get(l-1));
+                if (valMap.get("val") != null) {
+                    return Double.parseDouble(valMap.get("val").toString());
+                }
+            }
+            //HashMap valMap = ((HashMap) values.get(VAV_DEFAULT_VAL_LEVEL-1));
+            //return Double.parseDouble(valMap.get("val").toString());
         }
         return 0;
     }
     
-    public static void setProportionalSpread(double dbVal) {
+    public static void setProportionalSpread(double psVal, int level) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap cdb = hayStack.read("point and tuner and vav and pspread");
         
@@ -134,7 +162,7 @@ public class VavTunerUtil
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        hayStack.writePoint(id, TunerDefalutVals.VAV_DEFAULT_VAL_LEVEL, "ccu", dbVal, 0);
+        hayStack.writePoint(id, level, "ccu", psVal, 0);
         
     }
     
@@ -145,13 +173,19 @@ public class VavTunerUtil
         ArrayList values = hayStack.readPoint(cdb.get("id").toString());
         if (values != null && values.size() > 0)
         {
-            HashMap valMap = ((HashMap) values.get(VAV_DEFAULT_VAL_LEVEL-1));
-            return Double.parseDouble(valMap.get("val").toString());
+            for (int l = 1; l <= values.size() ; l++ ) {
+                HashMap valMap = ((HashMap) values.get(l-1));
+                if (valMap.get("val") != null) {
+                    return Double.parseDouble(valMap.get("val").toString());
+                }
+            }
+            //HashMap valMap = ((HashMap) values.get(VAV_DEFAULT_VAL_LEVEL-1));
+            //return Double.parseDouble(valMap.get("val").toString());
         }
         return 0;
     }
     
-    public static void setIntegralTimeout(double dbVal) {
+    public static void setIntegralTimeout(double itVal, int level) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap cdb = hayStack.read("point and tuner and vav and itimeout");
         
@@ -159,7 +193,7 @@ public class VavTunerUtil
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        hayStack.writePoint(id, TunerDefalutVals.VAV_DEFAULT_VAL_LEVEL, "ccu", dbVal, 0);
+        hayStack.writePoint(id, level, "ccu", itVal, 0);
         
     }
     

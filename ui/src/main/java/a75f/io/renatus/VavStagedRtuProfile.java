@@ -1,0 +1,37 @@
+package a75f.io.renatus;
+
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
+import butterknife.ButterKnife;
+
+/**
+ * Created by samjithsadasivan on 11/6/18.
+ */
+
+public class VavStagedRtuProfile extends Fragment
+{
+    public static VavStagedRtuProfile newInstance()
+    {
+        return new VavStagedRtuProfile();
+    }
+    
+    
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState)
+    {
+        View rootView = inflater.inflate(R.layout.fragment_profile_stagedrtu, container, false);
+        ButterKnife.bind(this, rootView);
+        return rootView;
+    }
+    
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
+    {
+    }
+}

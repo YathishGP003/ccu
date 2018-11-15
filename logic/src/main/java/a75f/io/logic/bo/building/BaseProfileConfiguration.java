@@ -18,7 +18,7 @@ public class BaseProfileConfiguration
     protected NodeType mNodeType;
     protected ArrayList<Input>  mInputs  = new ArrayList<>();
     protected ArrayList<Output> mOutputs = new ArrayList<>();
-    
+    protected int priority;
     
     public ArrayList<Input> getInputs()
     {
@@ -58,6 +58,15 @@ public class BaseProfileConfiguration
     public void setNodeAddress(short nodeAddress)
     {
         this.mNodeAddress = nodeAddress;
+    }
+    
+    public int getPriority()
+    {
+        return priority;
+    }
+    public void setPriority(int priority)
+    {
+        this.priority = priority;
     }
     
     @JsonIgnore

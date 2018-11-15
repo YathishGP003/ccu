@@ -332,7 +332,6 @@ public class CCUHsApi
         hsClient.hisWrite(HRef.copy(id), new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()),HNum.make(val))});
     }
     public Double readHisValByQuery(String query) {
-        
         ArrayList points = readAll(query);
         String id = ((HashMap)points.get(0)).get("id").toString();
         if (id == null || id == "") {
@@ -340,7 +339,9 @@ public class CCUHsApi
         }
         
         HisItem item = hisRead(id);
+        
         return item == null ? 0 : item.getVal();
+        
     }
     
     public void writeHisValByQuery(String query, Double val) {

@@ -49,10 +49,11 @@
         <item>  0-50A Current Transformer</item>
     </string-array>
     <string-array name="hvac_equip_select">
-        <item>  AHU </item>
-        <item>  RTU-IE </item>
-        <item>  Staged RTU </item>
-        <item>  Default (PI Control) </item>
+        <item>  DAB Staged RTU </item>
+        <item>  VAV Analog RTU </item>
+        <item>  VAV IE RTU </item>
+        <item>  VAV Staged RTU </item>
+        <item>  VAV Bacnet RTU </item>
     </string-array>
 
     <string-array name="mode">

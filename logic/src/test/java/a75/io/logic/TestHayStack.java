@@ -50,11 +50,11 @@ public class TestHayStack
                          .setGeoState("MN")
                          .setTz("Chicago")
                          .setArea(1000).build();
-        CCUHsApi.getInstance().addSite(s);
+        
         
         Equip a = new Equip.Builder()
                         .setSiteRef("75F")
-                        .setDisplayName("AHU-1")
+                        .setDisplayName("AHU_RP1455-1")
                         .addMarker("equip")
                         .addMarker("ahu")
                         .build();
@@ -85,7 +85,9 @@ public class TestHayStack
                                 .addMarker("air").addMarker("temp").addMarker("desired").addMarker("sp")
                                 .setUnit("\u00B0F")
                                 .build();
-        SmartNode node = new SmartNode(7000);
+        HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
+        String siteRef = (String) siteMap.get(Tags.ID);
+        SmartNode node = new SmartNode(7000, siteRef);
         
         String dtRef = CCUHsApi.getInstance().addPoint(dtPoint);
         CCUHsApi.getInstance().addPoint(dPoint);
@@ -204,7 +206,7 @@ public class TestHayStack
     
     
         //Create Physical points and map
-        SmartNode device = new SmartNode(nodeAddr);
+        SmartNode device = new SmartNode(nodeAddr, siteRef);
         device.th1In.setPointRef(datID);
         CCUHsApi.getInstance().addPoint(device.th1In);
         device.th2In.setPointRef(eatID);
@@ -387,7 +389,7 @@ public class TestHayStack
         String equipRef = hayStack.addEquip(v);
         
         Point testPoint = new Point.Builder()
-                                  .setDisplayName(siteDis+"AHU-"+nodeAddr+"-TestTemp")
+                                  .setDisplayName(siteDis+"AHU_RP1455-"+nodeAddr+"-TestTemp")
                                   .setEquipRef(equipRef)
                                   .setSiteRef(siteRef)
                                   .setRoomRef("room")

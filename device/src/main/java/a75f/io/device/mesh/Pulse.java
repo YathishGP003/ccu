@@ -30,8 +30,8 @@ public class Pulse
 			for(HashMap phyPoint : phyPoints) {
 				HashMap logPoint = hayStack.read("point and id=="+phyPoint.get("pointRef"));
 				double val;
-				Log.d(TAG,"phyPoint : "+phyPoint);
-				Log.d(TAG,"logPoint : "+logPoint);
+				//Log.d(TAG,"phyPoint : "+phyPoint);
+				//Log.d(TAG,"logPoint : "+logPoint);
 				switch (phyPoint.get("port").toString()){
 					case "RTH":
 						val = smartNodeRegularUpdateMessage_t.update.roomTemperature.get();

@@ -38,8 +38,6 @@ public class TestRemoteHsSync
 {
     @Test
     public void testRemoteHaystack() {
-    
-    
         CCUHsApi api = new CCUHsApi();
         api.tagsDb.tagsMap = new HashMap<>();
         api.tagsDb.writeArrays = new HashMap<>();
@@ -51,11 +49,8 @@ public class TestRemoteHsSync
                          .setTz("Chicago")
                          .setArea(1000).build();
         CCUHsApi.getInstance().addSite(s);
-        
-        
-        
-        
-        String urlString = "http://renatus-haystack.azurewebsites.net/";
+
+        String urlString = "https://renatusv2.azurewebsites.net/";
         
         //String response = getResult(urlString+"about");
         //System.out.println(response);
@@ -144,8 +139,8 @@ public class TestRemoteHsSync
         hayStack.tagsDb.writeArrays = new HashMap<>();
         hayStack.tagsDb.idMap = new HashMap<>();
         int nodeAddr = 7000;
-    
-        EntitySyncHandler entitySyncHandler = new EntitySyncHandler(hayStack);
+
+        EntitySyncHandler entitySyncHandler = new EntitySyncHandler();
         System.out.println("entitySyncHandler.isSyncNeeded " + entitySyncHandler.isSyncNeeded());
         Site s = new Site.Builder()
                          .setDisplayName("Name")
@@ -222,8 +217,9 @@ public class TestRemoteHsSync
         hayStack.tagsDb.idMap = new HashMap<>();
         int nodeAddr = 7000;
         
-        EntitySyncHandler entitySyncHandler = new EntitySyncHandler(hayStack);
-        System.out.println("entitySyncHandler.isSyncNeeded " + entitySyncHandler.isSyncNeeded());
+        EntitySyncHandler entitySyncHandler = new EntitySyncHandler();
+        System.out.println("entitySyncHandler.isSyncNeeded " +
+                entitySyncHandler.isSyncNeeded());
         Site s = new Site.Builder()
                          .setDisplayName("Name")
                          .addMarker("site")
@@ -299,7 +295,7 @@ public class TestRemoteHsSync
         hayStack.tagsDb.idMap = new HashMap<>();
         int nodeAddr = 7000;
     
-        EntitySyncHandler entitySyncHandler = new EntitySyncHandler(hayStack);
+        EntitySyncHandler entitySyncHandler = new EntitySyncHandler();
         System.out.println("entitySyncHandler.isSyncNeeded " + entitySyncHandler.isSyncNeeded());
         Site s = new Site.Builder()
                          .setDisplayName("Name")
@@ -587,9 +583,5 @@ public class TestRemoteHsSync
         HDict b = new HDictBuilder().add("id","1").add("siteRef", HRef.make(siteRef.substring(1))).toDict();
         
         System.out.println(b.getRef("siteRef"));
-        
-        
-        
-        
     }
 }

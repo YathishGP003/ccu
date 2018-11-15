@@ -6,12 +6,5 @@ package a75f.io.renatus.util;
 
 public class Prefs {
 
-    /***
-     * Clear out realm database and Kinvey user.
-     */
-    public static void clear()
-    {
-
-    }
 
 }

@@ -1,11 +1,13 @@
 package a75f.io.api.haystack;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Created by samjithsadasivan on 9/4/18.
  */
-
 public class Site
 {
     private String            displayName;
@@ -13,8 +15,9 @@ public class Site
     private String geoCity;
     private String geoState;
     private String geoAddress;
+    private String geoZip;
     private String tz;
-    private int area;
+    private double area;
     public String getDisplayName()
     {
         return displayName;
@@ -39,7 +42,7 @@ public class Site
     {
         return tz;
     }
-    public int getArea()
+    public double getArea()
     {
         return area;
     }
@@ -54,8 +57,18 @@ public class Site
         private String geoCity;
         private String geoState;
         private String geoAddress;
+        private String geoZipCode;
         private String tz;
-        private int area;
+        private String id;
+
+        private double area;
+
+
+        public Builder setGeoZip(String siteZip) {
+            this.geoZipCode = siteZip;
+            return this;
+        }
+
         public Builder setDisplayName(String displayName)
         {
             this.displayName = displayName;
@@ -107,14 +120,46 @@ public class Site
             s.geoState = this.geoState;
             s.area = this.area;
             s.tz = this.tz;
-            //CCUHsApi.getInstance().addSite(s);
+            s.geoZip = this.geoZipCode;
             return s;
         }
+
+        public Builder setHashMap(HashMap site)
+        {
+            Iterator it = site.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry pair = (Map.Entry)it.next();
+                System.out.println(pair.getKey() + " = " + pair.getValue());
+                if(pair.getKey().equals("id"))
+                {
+                    this.id = (String)pair.getValue();
+                }
+                else if(pair.getKey().equals("dis"))
+                {
+                    this.displayName = (String)pair.getValue();
+                }
+                else if(pair.getKey().equals("geoCity"))
+                {
+                    this.geoCity = (String)pair.getValue();
+                }
+                else if(pair.getKey().equals("geoState"))
+                {
+                    this.geoState = (String)pair.getValue();
+                }
+                else if(pair.getKey().equals("geoZipCode"))
+                {
+                    this.geoZipCode = (String)pair.getValue();
+                }
+                else if(pair.getKey().equals("area"))
+                {
+                    this.area = (Double)pair.getValue();
+                }
+
+                it.remove();
+            }
+
+            return this;
+        }
+
     }
-    
-    /*private void createSite() {
-        CCUHsApi.getInstance().addSite(displayName, geoCity, geoState, tz, area);
-    }*/
-
-
 }

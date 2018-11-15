@@ -64,11 +64,8 @@ dependencies {
     androidTestCompile 'com.android.support.test:runner:1.0.1'
     androidTestCompile 'com.android.support.test:rules:1.0.1'
     implementation project(':algos')
-    compile('com.microsoft.azure.sdk.iot:iot-device-client:1.5.37') {
-        exclude group: 'com.google.code.gson'
-    }
-    compile 'info.guardianproject.netcipher:netcipher:1.2'
 
+    compile 'info.guardianproject.netcipher:netcipher:1.2'
     implementation project(':haystack')
     implementation project(':usbserial')
     compile 'joda-time:joda-time:2.9.9'

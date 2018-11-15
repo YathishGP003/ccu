@@ -48,6 +48,12 @@ public class Device
             this.addr = String.valueOf(addr);
             return this;
         }
+
+        public Builder setAddr(String addr)
+        {
+            this.addr = addr;
+            return this;
+        }
         
         public Builder setDisplayName(String displayName)
         {

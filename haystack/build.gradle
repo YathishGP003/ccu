@@ -41,7 +41,7 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     compile 'javax.servlet:servlet-api:2.5'
-    implementation 'com.google.code.gson:gson:2.8.0'
+    api 'com.google.code.gson:gson:2.8.0'
 
     compile 'com.fasterxml.jackson.core:jackson-core:2.7.3'
     compile 'com.fasterxml.jackson.core:jackson-annotations:2.7.3'

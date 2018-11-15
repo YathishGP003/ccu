@@ -36,7 +36,7 @@ public class OnboardingWizard extends WizardActivity {
 		flow = builder.addStep(WelcomeScreen.class).addStep(ExampleSamjith.class).create();                  //to create the wizard flow.
 
 		// Make sure no previous user data is saved.
-		Prefs.clear();
+		//Prefs.clear();
 
 		//Call the super method using the newly created flow
 		super.onSetup(flow);

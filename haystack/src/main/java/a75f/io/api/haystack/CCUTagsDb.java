@@ -248,7 +248,7 @@ public class CCUTagsDb extends HServer
     }
     
     
-    public void addSite(Site s)
+    public String addSite(Site s)
     {
         HDictBuilder site = new HDictBuilder()
                              .add("id", HRef.make(UUID.randomUUID().toString()))
@@ -266,6 +266,12 @@ public class CCUTagsDb extends HServer
         
         HRef id = (HRef)site.get("id");
         tagsMap.put(id.toVal(), site.toDict());
+        return id.toVal();
+    }
+
+    public void log()
+    {
+
     }
     
     public String addEquip(Equip q)
@@ -396,7 +402,16 @@ public class CCUTagsDb extends HServer
     protected HDict onReadById(HRef id) {
         return (HDict)tagsMap.get(id.val);
     }
-    
+
+    public void printMap() {
+            Iterator it = tagsMap.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry pair = (Map.Entry)it.next();
+                System.out.println(pair.getKey() + " = " + pair.getValue());
+                it.remove(); // avoids a ConcurrentModificationException
+            }
+    }
+
     protected Iterator iterator() { return tagsMap.values().iterator();}
     
     //////////////////////////////////////////////////////////////////////////

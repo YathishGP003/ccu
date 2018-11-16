@@ -13,7 +13,6 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Site;
-import a75f.io.renatus.util.Prefs;
 
 public class RegisterGatherSiteDetails extends Activity {
 

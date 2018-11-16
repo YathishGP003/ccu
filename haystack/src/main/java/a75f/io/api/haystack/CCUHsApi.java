@@ -58,7 +58,6 @@ public class CCUHsApi
         instance = this;
         entitySyncHandler = new EntitySyncHandler();
         hisSyncHandler = new HisSyncHandler(this);
-        Log.d("Haystack","Api created");
     }
     
     //TODO - Temp for Unit test
@@ -460,6 +459,6 @@ public class CCUHsApi
 
 
     public void log() {
-        tagsDb.printMap();
+        System.out.println(tagsDb);
     }
 }

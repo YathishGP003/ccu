@@ -1,7 +1,5 @@
 package a75f.io.api.haystack.sync;
 
-import android.util.Log;
-
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -137,8 +135,8 @@ public class HttpUtil
 
             //Create connection
             url = new URL("https://login.microsoftonline.com/" + tenantId + "/oauth2/v2.0/token");
-            connection = (HttpsURLConnection)url.openConnection();
-            //connection = NetCipher.getHttpsURLConnection(url);//TODO - Hack for SSLException
+            //connection = (HttpsURLConnection)url.openConnection();
+            connection = NetCipher.getHttpsURLConnection(url);//TODO - Hack for SSLException
             //connection.setRequestMethod("POST");
             connection.setRequestProperty("Content-Type",
                     contentType);

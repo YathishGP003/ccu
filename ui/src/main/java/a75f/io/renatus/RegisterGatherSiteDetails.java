@@ -13,6 +13,7 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Site;
+import a75f.io.logic.tuners.BuildingTuners;
 
 public class RegisterGatherSiteDetails extends Activity {
 
@@ -75,28 +76,25 @@ public class RegisterGatherSiteDetails extends Activity {
     /* This site never existed we are creating a new orphaned site. */
     public String saveSite(String siteName, String siteCity, String siteZip) {
         HashMap site = CCUHsApi.getInstance().read("site");
-        if (site.size() == 0) {
-            Site s75f = new Site.Builder()
-                    .setDisplayName(siteName)
-                    .addMarker("site")
-                    .addMarker("orphan")
-                    .setGeoCity(siteCity)
-                    .setGeoState("MN")
-                    .setTz("Chicago")
-                    .setGeoZip(siteZip)
-                    .setArea(10000).build();
-            String localSiteId = CCUHsApi.getInstance().addSite(s75f);
-            Log.i(TAG, "LocalSiteID: " + localSiteId);
-            CCUHsApi.getInstance().log();
 
-            CCUHsApi.getInstance().syncEntityTree();
-            return localSiteId;
-        } else {
-            Log.i(TAG, "Site ID already exists");
-            CCUHsApi.getInstance().log();
-            return (String) site.get("id");
-        }
+        Site s75f = new Site.Builder()
+                .setDisplayName(siteName)
+                .addMarker("site")
+                .addMarker("orphan")
+                .setGeoCity(siteCity)
+                .setGeoState("MN")
+                .setTz("Chicago")
+                .setGeoZip(siteZip)
+                .setArea(10000).build();
+        String localSiteId = CCUHsApi.getInstance().addSite(s75f);
+
+        Log.i(TAG, "LocalSiteID: " + localSiteId);
+        CCUHsApi.getInstance().log();
+        BuildingTuners.getInstance();//To init Building tuner
+        CCUHsApi.getInstance().syncEntityTree();
+        return localSiteId;
     }
+
 
     public void loadExistingSite(String siteId) {
 

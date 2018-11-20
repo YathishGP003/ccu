@@ -105,11 +105,11 @@ public class BuildingTunersTest
     
         BuildingTuners.getInstance();
         
-        SystemTunerUtil.setAnalog("analog1","max", 14, 10);
-        System.out.println(SystemTunerUtil.getAnalog("analog1","max"));
+        SystemTunerUtil.setTuner("analog1","max", 14, 10);
+        System.out.println(SystemTunerUtil.getTuner("analog1","max"));
     
-        SystemTunerUtil.setAnalog("analog1","max", 15, 8);
-        System.out.println(SystemTunerUtil.getAnalog("analog1","max"));
+        SystemTunerUtil.setTuner("analog1","max", 15, 8);
+        System.out.println(SystemTunerUtil.getTuner("analog1","max"));
     }
     
     

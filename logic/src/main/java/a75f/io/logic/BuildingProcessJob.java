@@ -8,9 +8,11 @@ import java.util.Map;
 
 import a75.io.algos.vav.VavTRSystem;
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.HisItem;
 import a75f.io.logic.bo.building.Floor;
 import a75f.io.logic.bo.building.Zone;
 import a75f.io.logic.bo.building.ZoneProfile;
+import a75f.io.logic.bo.building.system.DxCIController;
 
 import static a75f.io.logic.L.ccu;
 
@@ -38,12 +40,12 @@ public class BuildingProcessJob extends BaseJob
                 {
                     Log.d("VAV"," updatePoints "+zp.getNodeAddresses());
                     zp.updateZonePoints();
-                    HashMap<String, Double> tsdata = zp.getTSData();
+                    /*HashMap<String, Double> tsdata = zp.getTSData();
                     if (tsdata != null) {
                         for (Map.Entry<String, Double> entry : tsdata.entrySet()) {
                             tsData.put(entry.getKey(),String.valueOf(entry.getValue()));
                         }
-                    }
+                    }*/
                 }
             }
         }
@@ -65,18 +67,23 @@ public class BuildingProcessJob extends BaseJob
             public void run()
             {
                 super.run();
-                uploadTimeSeriesData();
+                CCUHsApi.getInstance().syncHisData();
+                L.ccu().systemProfile.doSystemControl();
+                
+                if (Globals.getInstance().getApplicationContext().getResources().getBoolean(R.bool.write_ts))
+                {
+                    uploadTimeSeriesData();
+                }
                 
             }
         }.start();
         Log.d("CCU","<- BuildingProcessJob");
     }
     
+    //TODO - TEST
     private void uploadTimeSeriesData() {
     
         Log.d("CCU","uploadTimeSeriesDataJob -> ");
-    
-        CCUHsApi.getInstance().syncHisData();
         
         if (L.ccu().systemProfile.trSystem instanceof VavTRSystem)
         {
@@ -89,11 +96,14 @@ public class BuildingProcessJob extends BaseJob
         
         if (L.ccu().systemProfile != null)
         {
-            tsData.put("Analog1OutSignal", String.valueOf(10 * L.ccu().systemProfile.analog1OutSignal));
-            tsData.put("Analog2OutSignal", String.valueOf(10 * L.ccu().systemProfile.analog2OutSignal));
-            tsData.put("Analog3OutSignal", String.valueOf(10 * L.ccu().systemProfile.analog3OutSignal));
-            tsData.put("Analog4OutSignal", String.valueOf(10 * L.ccu().systemProfile.analog4OutSignal));
+            tsData.put("Analog1OutSignal", String.valueOf(L.ccu().systemProfile.getAnalog1Out()));
+            tsData.put("Analog2OutSignal", String.valueOf(L.ccu().systemProfile.getAnalog2Out()));
+            tsData.put("Analog3OutSignal", String.valueOf(L.ccu().systemProfile.getAnalog3Out()));
+            tsData.put("Analog4OutSignal", String.valueOf(L.ccu().systemProfile.getAnalog4Out()));
         }
+    
+        tsData.put("dxCI_CO_MA",String.valueOf(DxCIController.getInstance().dxCI_CO_MA));
+        tsData.put("dxCI_WA",String.valueOf(DxCIController.getInstance().dxCI_WA));
         
         ArrayList<HashMap> points = CCUHsApi.getInstance().readAll("point and writable");
         for (Map m : points)
@@ -106,8 +116,18 @@ public class BuildingProcessJob extends BaseJob
                 }
             }
         }
-        
-        String url = new a75f.io.api.haystack.sync.InfluxDbUtil.URLBuilder().setProtocol(a75f.io.api.haystack.sync.InfluxDbUtil.HTTP)
+    
+        ArrayList<HashMap> hisPoints = CCUHsApi.getInstance().readAll("point and his");
+        for (Map m : hisPoints)
+        {
+            String pointID = m.get("id").toString();
+            if (CCUHsApi.getInstance().getGUID(pointID) != null)
+            {
+                HisItem sItem = CCUHsApi.getInstance().curRead(pointID);
+                tsData.put(m.get("dis").toString(), String.valueOf(sItem.getVal()));
+            }
+        }
+        /*String url = new a75f.io.api.haystack.sync.InfluxDbUtil.URLBuilder().setProtocol(a75f.io.api.haystack.sync.InfluxDbUtil.HTTP)
                                                                             .setHost("renatus-influxiprvgkeeqfgys.centralus.cloudapp.azure.com")
                                                                             .setPort(8086)
                                                                             .setOp(a75f.io.api.haystack.sync.InfluxDbUtil.WRITE)
@@ -116,9 +136,9 @@ public class BuildingProcessJob extends BaseJob
                                                                             .setPassword("7575")
                                                                             .buildUrl();
     
-        a75f.io.api.haystack.sync.InfluxDbUtil.writeData(url, "01RENATUS_CCU" , tsData, System.currentTimeMillis());
+        a75f.io.api.haystack.sync.InfluxDbUtil.writeData(url, "03RENATUS_CCU" , tsData, System.currentTimeMillis());*/
     
-        /*String url = new InfluxDbUtil.URLBuilder().setProtocol(InfluxDbUtil.HTTPS)
+        String url = new InfluxDbUtil.URLBuilder().setProtocol(InfluxDbUtil.HTTPS)
                                                   .setHost("influx-a75f.aivencloud.com")
                                                   .setPort(27304)
                                                   .setOp(InfluxDbUtil.WRITE)
@@ -127,8 +147,7 @@ public class BuildingProcessJob extends BaseJob
                                                   .setPassword("mhur2n42y4l58xlx")
                                                   .buildUrl();
         
-        Log.d("CCU"," Write Influx "+tsData);
-        InfluxDbUtil.writeData(url, "RENATUS_TEST", tsData, System.currentTimeMillis());*/
+        InfluxDbUtil.writeData(url, "RENATUS_DEMO", tsData, System.currentTimeMillis());
         Log.d("CCU","<- uploadTimeSeriesDataJob ");
         
     }

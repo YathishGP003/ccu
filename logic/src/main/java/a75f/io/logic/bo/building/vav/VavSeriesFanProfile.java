@@ -173,6 +173,11 @@ public class VavSeriesFanProfile extends VavProfile
                 fanReady = false;
             }
     
+            Log.d("VAV","CoolingLoop "+node +"roomTemp :"+roomTemp+" setTemp: "+setTemp);
+            coolingLoop.dump();
+            Log.d("VAV","HeatingLoop "+node +"roomTemp :"+roomTemp+" setTemp: "+setTemp);
+            heatingLoop.dump();
+            
             Log.d(TAG, "STATE :"+state+" ,loopOp: " + loopOp + " ,damper:" + damper.currentPosition
                                                         +", valve:"+valve.currentPosition+" fanStart: "+vavUnit.fanStart);
             updateTRResponse(node);

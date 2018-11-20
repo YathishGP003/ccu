@@ -24,25 +24,12 @@ import a75f.io.logic.bo.building.Schedule;
 public class SystemProfile
 {
     @JsonIgnore
-    public int analog1OutSignal;
-    @JsonIgnore
-    public int analog2OutSignal;
-    @JsonIgnore
-    public int analog3OutSignal;
-    @JsonIgnore
-    public int analog4OutSignal;
-    
-    @JsonIgnore
     public Schedule schedule = new Schedule();
     
     @JsonIgnore
     public TRSystem trSystem;
     
     public void doSystemControl() {
-        if (trSystem != null) {
-            trSystem.processResetResponse();
-        }
-        DxCIController.getInstance().runDxCIAlgo();
     }
     @JsonIgnore
     public  int getSystemSAT() {
@@ -65,9 +52,28 @@ public class SystemProfile
         return "";
     }
     
+    @JsonIgnore
+    public int getAnalog1Out() {
+        return 0;
+    }
+    
+    @JsonIgnore
+    public int getAnalog2Out() {
+        return 0;
+    }
+    
+    @JsonIgnore
+    public int getAnalog3Out() {
+        return 0;
+    }
+    
+    @JsonIgnore
+    public int getAnalog4Out() {
+        return 0;
+    }
+    
     /*@JsonIgnore
     public Struct getSystemControlMsg() {
         return null;
     }*/
-    
 }

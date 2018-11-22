@@ -23,6 +23,7 @@ import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.logic.bo.building.definitions.Port;
+import a75f.io.logic.bo.building.system.SystemEquip;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 
 /**
@@ -430,7 +431,31 @@ public class TestHayStack
                                        .build();
         analog1Out.setPointRef(datID);
         
+    }
+    
+    @Test
+    public void testSystemEquip(){
+    
+        CCUHsApi hayStack = new CCUHsApi();
+        hayStack.tagsDb.init();
+        hayStack.tagsDb.tagsMap = new HashMap<>();
+        hayStack.tagsDb.writeArrays = new HashMap<>();
+        hayStack.tagsDb.idMap = new HashMap<>();
+        hayStack.tagsDb.removeIdMap = new HashMap<>();
         
-        
+        HashMap site = hayStack.read("site");
+        if (site.size() == 0) {
+            Site s75f = new Site.Builder()
+                                .setDisplayName("75F")
+                                .addMarker("site")
+                                .setGeoCity("Burnsville")
+                                .setGeoState("MN")
+                                .setTz("Chicago")
+                                .setArea(20000).build();
+            hayStack.addSite(s75f);
+        }
+        SystemEquip q = new SystemEquip();
+        q.dump();
+        System.out.println(hayStack.tagsDb.tagsMap);
     }
 }

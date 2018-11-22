@@ -19,6 +19,8 @@ public class VavAnalogRtu extends SystemProfile
     private static final int CO2_MAX = 1000;
     private static final int CO2_MIN = 400;
     
+    private static final int ANALOG_SCALE = 10;
+    
     public boolean analog1Enabled = false;
     public boolean analog2Enabled = false;
     public boolean analog3Enabled = false;
@@ -50,42 +52,87 @@ public class VavAnalogRtu extends SystemProfile
     
     @JsonIgnore
     public int getAnalog1Out() {
-        int analogMin = (int)SystemTunerUtil.getTuner("analog1", "min");
-        int analogMax = (int)SystemTunerUtil.getTuner("analog1", "max");
-        Log.d("CCU", "analogMin: "+analogMin+" analogMax: "+analogMax+" SAT: "+getSystemSAT());
-        analog1OutSignal = analogMin + (analogMax - analogMin) * (65 - getSystemSAT())/10;
-        return analog1OutSignal;
+        return (int)SystemEquip.getInstance().getAnalogOut("analog1");
     }
     
     @JsonIgnore
     public int getAnalog2Out() {
-        int analogMin = (int)SystemTunerUtil.getTuner("analog2", "min");
-        int analogMax = (int)SystemTunerUtil.getTuner("analog2", "max");
-        
-        analog2OutSignal = analogMin + (analogMax - analogMin) * (DxCIController.getInstance().getHeatingSignal())/100;
-        return analog2OutSignal;
+        return (int)SystemEquip.getInstance().getAnalogOut("analog2");
     }
     
     @JsonIgnore
     public int getAnalog3Out() {
-        int analogMin = (int)SystemTunerUtil.getTuner("analog3", "min");
-        int analogMax = (int)SystemTunerUtil.getTuner("analog3", "max");
-    
-        analog3OutSignal = analogMin + (analogMax - analogMin) * (getSystemCO2() - 800)/200;
-        return analog3OutSignal;
+        return (int)SystemEquip.getInstance().getAnalogOut("analog3");
     }
     
     @JsonIgnore
     public int getAnalog4Out() {
-        int analogMin = (int)SystemTunerUtil.getTuner("analog4", "min");
-        int analogMax = (int)SystemTunerUtil.getTuner("analog4", "max");
-        
-        analog4OutSignal  = analogMin + (analogMax - analogMin) * (10 * getStaticPressure() - 1)/15;
-        return analog4OutSignal;
+        return (int)SystemEquip.getInstance().getAnalogOut("analog4");
     }
     
     @JsonIgnore
     public String getProfileName() {
         return "VAV Analog RTU";
+    }
+    
+    @Override
+    public void doSystemControl() {
+        if (trSystem != null) {
+            trSystem.processResetResponse();
+        }
+        DxCIController.getInstance().runDxCIAlgo();
+        updateSystemPoints();
+    }
+    
+    private void updateSystemPoints() {
+    
+        SystemEquip.getInstance().putSat(getSystemSAT());
+        SystemEquip.getInstance().putCo2(getSystemCO2());
+        SystemEquip.getInstance().putSp(getStaticPressure());
+        SystemEquip.getInstance().putHwst(0);
+        
+        double analogMin = SystemTunerUtil.getTuner("analog1", "min");
+        double analogMax = SystemTunerUtil.getTuner("analog1", "max");
+        Log.d("CCU", "analogMin: "+analogMin+" analogMax: "+analogMax+" SAT: "+getSystemSAT());
+        int signal;
+        if (analogMax > analogMin)
+        {
+            signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (SystemConstants.COOLING_SAT_CONFIG_MAX - getSystemSAT()) / 10));
+        } else {
+            signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (SystemConstants.COOLING_SAT_CONFIG_MAX - getSystemSAT()) / 10));
+        }
+        SystemEquip.getInstance().putAnalogOut("analog1", signal);
+    
+        analogMin = SystemTunerUtil.getTuner("analog2", "min");
+        analogMax = SystemTunerUtil.getTuner("analog2", "max");
+    
+        if (analogMax > analogMin)
+        {
+            signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (DxCIController.getInstance().getHeatingSignal()) / 100));
+        } else {
+            signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (DxCIController.getInstance().getHeatingSignal()) / 100));
+        }
+        SystemEquip.getInstance().putAnalogOut("analog2", signal);
+    
+        analogMin = (int)SystemTunerUtil.getTuner("analog3", "min");
+        analogMax = (int)SystemTunerUtil.getTuner("analog3", "max");
+        if (analogMax > analogMin)
+        {
+            signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (getSystemCO2() - SystemConstants.CO2_CONFIG_MIN) / 200));
+        } else {
+            signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (getSystemCO2() - SystemConstants.CO2_CONFIG_MIN) / 200));
+        }
+        SystemEquip.getInstance().putAnalogOut("analog3", signal);
+    
+        analogMin = SystemTunerUtil.getTuner("analog4", "min");
+        analogMax = SystemTunerUtil.getTuner("analog4", "max");
+    
+        if (analogMax > analogMin)
+        {
+            signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (getStaticPressure() - SystemConstants.SP_CONFIG_MIN) / 15.0));
+        } else {
+            signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (getStaticPressure() - SystemConstants.SP_CONFIG_MIN) / 15.0));
+        }
+        SystemEquip.getInstance().putAnalogOut("analog4", signal);
     }
 }

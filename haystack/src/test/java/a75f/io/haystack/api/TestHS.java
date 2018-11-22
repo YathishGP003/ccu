@@ -242,6 +242,9 @@ public class TestHS
         hislist2.add(new HisItem(id2, now, 76.0));
         hislist1.add(new HisItem(id1, new Date(now.getTime() + 300000), 73.0));
     
+    
+        hislist1.add(new HisItem(id1, new Date(now.getTime() + 300001), 100.0));
+    
         hayStack.hisWrite(hislist1);
         hayStack.hisWrite(hislist2);
     
@@ -253,8 +256,8 @@ public class TestHS
         
         //hayStack.hisWrite(new HisItem(id1, new Date(now.getTime() - 600000), 70.0));
     
-        HisItem i = hayStack.hisRead(id1);
-        System.out.println(i.getDate()+"    :::: "+i.getVal());
+        HisItem i = hayStack.curRead(id1);
+        System.out.println("###########"+i.getDate()+" : "+i.getVal());
         
         i.dump();
     }

@@ -84,7 +84,6 @@ public class DxCIController
         
         double dxCiMASum = 0;
         for (double val : dxCIMABuffer) {
-            Log.d("CCU", "runDxCIAlgo-> dxCIMABuffer: "+val);
             dxCiMASum += val;
         }
         
@@ -138,7 +137,17 @@ public class DxCIController
     }
     
     public int getCoolingSignal() {
+        if (dxState != COOLING) {
+            return 0;
+        }
         return coolingSignal;
+    }
+    
+    public int getHeatingSignal() {
+        if (dxState != HEATING) {
+            return 0;
+        }
+        return heatingSignal;
     }
     
     public boolean isAllZonesHeating() {
@@ -147,6 +156,7 @@ public class DxCIController
             for(Zone z: f.mZoneList) {
                 for (ZoneProfile p: z.mZoneProfiles) {
                     if (p.state != ZoneState.HEATING) {
+                        Log.d("dx"," Zone "+z.roomName+" is not in Heating");
                         return false;
                     }
                 }
@@ -162,6 +172,7 @@ public class DxCIController
             for(Zone z: f.mZoneList) {
                 for (ZoneProfile p: z.mZoneProfiles) {
                     if (p.state != ZoneState.COOLING) {
+                        Log.d("dx"," Zone "+z.roomName+" is not in Cooling");
                         return false;
                     }
                 }
@@ -171,8 +182,8 @@ public class DxCIController
         return true;
     }
     
-    public int getHeatingSignal() {
-        return heatingSignal;
+    public String getDxState() {
+        return dxState.name();
     }
     
 }

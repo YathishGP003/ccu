@@ -268,6 +268,26 @@ public class CCUTagsDb extends HServer
         tagsMap.put(id.toVal(), site.toDict());
         return id.toVal();
     }
+    
+    public void updateSite(Site s, String i)
+    {
+        HDictBuilder site = new HDictBuilder()
+                                    .add("id", i)
+                                    .add("dis", s.getDisplayName())
+                                    .add("site", HMarker.VAL)
+                                    .add("geoCity", s.getGeoCity())
+                                    .add("geoState", s.getGeoState())
+                                    .add("geoAddr", "" + s.getGeoCity() + "," + s.getGeoState())
+                                    .add("tz", s.getTz())
+                                    .add("area", HNum.make(s.getArea(), "ft\u00B2"));
+        
+        for (String m : s.getMarkers()) {
+            site.add(m);
+        }
+        
+        HRef id = (HRef)site.get("id");
+        tagsMap.put(id.toVal(), site.toDict());
+    }
 
     public void log()
     {
@@ -287,6 +307,20 @@ public class CCUTagsDb extends HServer
         HRef id = (HRef)equip.get("id");
         tagsMap.put(id.toVal(), equip.toDict());
         return id.toCode();
+    }
+    
+    public void updateEquip(Equip q, String i)
+    {
+        HDictBuilder equip = new HDictBuilder()
+                                     .add("id",      i)
+                                     .add("dis",     q.getDisplayName())
+                                     .add("siteRef", q.getSiteRef()/*site.get("id")*/)
+                                     .add("group",q.getGroup());
+        for (String m : q.getMarkers()) {
+            equip.add(m);
+        }
+        HRef id = (HRef)equip.get("id");
+        tagsMap.put(id.toVal(), equip.toDict());
     }
     
     
@@ -317,6 +351,28 @@ public class CCUTagsDb extends HServer
         return id.toCode();
     }
     
+    public void updatePoint(Point p, String i)
+    {
+        HDictBuilder b = new HDictBuilder()
+                                 .add("id",       i)
+                                 .add("dis",      p.getDisplayName())
+                                 .add("point",    HMarker.VAL)
+                                 .add("siteRef",  p.getSiteRef())
+                                 .add("equipRef", p.getEquipRef())
+                                 .add("roomRef",  p.getRoomRef())
+                                 .add("floorRef", p.getFloorRef())
+                                 .add("group",p.getGroup())
+                                 .add("kind",     p.getUnit() == null ? "Bool" : "Number")
+                                 .add("tz",       p.getTz());
+        if (p.getUnit() != null) b.add("unit", p.getUnit());
+        
+        for (String m : p.getMarkers()) {
+            b.add(m);
+        }
+        HRef id = (HRef)b.get("id");
+        tagsMap.put(id.toVal(), b.toDict());
+    }
+    
     public String addPoint(RawPoint p)
     {
         HDictBuilder b = new HDictBuilder()
@@ -340,6 +396,28 @@ public class CCUTagsDb extends HServer
         return id.toCode();
     }
     
+    public void updatePoint(RawPoint p, String i)
+    {
+        HDictBuilder b = new HDictBuilder()
+                                 .add("id",       i)
+                                 .add("dis",      p.getDisplayName())
+                                 .add("point",    HMarker.VAL)
+                                 .add("physical",    HMarker.VAL)
+                                 .add("deviceRef", p.getDeviceRef())
+                                 .add("siteRef",p.getSiteRef())
+                                 .add("pointRef",p.getPointRef())
+                                 .add("port",p.getPort())
+                                 .add("type",p.getType())
+                                 .add("kind",     p.getUnit() == null ? "Bool" : "Number")
+                                 .add("tz",       p.getTz());
+        
+        for (String m : p.getMarkers()) {
+            b.add(m);
+        }
+        HRef id = (HRef)b.get("id");
+        tagsMap.put(id.toVal(), b.toDict());
+    }
+    
     public String addDevice(Device d)
     {
         HDictBuilder b = new HDictBuilder()
@@ -357,6 +435,24 @@ public class CCUTagsDb extends HServer
         HRef id = (HRef)b.get("id");
         tagsMap.put(id.toVal(), b.toDict());
         return id.toCode();
+    }
+    
+    public void updateDevice(Device d, String i)
+    {
+        HDictBuilder b = new HDictBuilder()
+                                 .add("id",       i)
+                                 .add("dis",      d.getDisplayName())
+                                 .add("device",    HMarker.VAL)
+                                 .add("his",      HMarker.VAL)
+                                 .add("addr",      d.getAddr())
+                                 .add("siteRef",  d.getSiteRef())
+                                 .add("equipRef", d.getEquipRef());
+        
+        for (String m : d.getMarkers()) {
+            b.add(m);
+        }
+        HRef id = (HRef)b.get("id");
+        tagsMap.put(id.toVal(), b.toDict());
     }
     
     
@@ -512,11 +608,9 @@ public class CCUTagsDb extends HServer
                 .greater(HisItem_.date,range.start.millis())
                 .less(HisItem_.date,range.end.millis())
                 .order(HisItem_.date);
-    
-        System.out.println("->run ObjectBox Query");
+        
         List<HisItem> hisList =hisQuery.build().find();
-        System.out.println("<-run ObjectBox Query hisList size "+hisList.size());
-    
+        
         boolean isBool = ((HStr)entity.get("kind")).val.equals("Bool");
         ArrayList acc = new ArrayList();
         for (HisItem item : hisList) {
@@ -526,6 +620,23 @@ public class CCUTagsDb extends HServer
                 acc.add(hsItem);
             }
         }
+        return (HHisItem[])acc.toArray(new HHisItem[acc.size()]);
+    }
+    
+    public HHisItem[] onHisRead(HDict entity)
+    {
+        QueryBuilder<HisItem> hisQuery = hisBox.query();
+        hisQuery.equal(HisItem_.rec, entity.get("id").toString())
+                .order(HisItem_.date,QueryBuilder.DESCENDING);
+        
+        HisItem item =hisQuery.build().findFirst();
+        
+        boolean isBool = ((HStr)entity.get("kind")).val.equals("Bool");
+        ArrayList acc = new ArrayList();
+       
+        HVal val = isBool ? HBool.make(item.val > 0) : HNum.make(item.val);
+        HDict hsItem = HHisItem.make(HDateTime.make(item.getDate().getTime()), val);
+        acc.add(hsItem);
         return (HHisItem[])acc.toArray(new HHisItem[acc.size()]);
     }
     

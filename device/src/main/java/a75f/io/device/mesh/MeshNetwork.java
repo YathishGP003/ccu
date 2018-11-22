@@ -88,19 +88,19 @@ public class MeshNetwork extends DeviceNetwork
             msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
             if (p.analog1Enabled)
             {
-                msg.analog0.set((short) (10 * p.getAnalog1Out()));
+                msg.analog0.set((short) p.getAnalog1Out());
             }
             if (p.analog2Enabled)
             {
-                msg.analog1.set((short) (10 * p.getAnalog2Out()));
+                msg.analog1.set((short) p.getAnalog2Out());
             }
             if (p.analog3Enabled)
             {
-                msg.analog2.set((short) (10 * p.getAnalog3Out()));
+                msg.analog2.set((short) p.getAnalog3Out());
             }
             if (p.analog4Enabled)
             {
-                msg.analog3.set((short) (10 * p.getAnalog4Out()));
+                msg.analog3.set((short) p.getAnalog4Out());
             }
         }
         DLog.LogdStructAsJson(msg);

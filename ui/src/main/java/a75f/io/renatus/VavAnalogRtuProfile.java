@@ -16,7 +16,11 @@ import android.widget.TableLayout;
 
 import java.util.ArrayList;
 
+import a75f.io.device.mesh.MeshUtil;
+import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
+import a75f.io.device.serial.MessageType;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.system.SystemConstants;
 import a75f.io.logic.bo.building.system.VavAnalogRtu;
 import a75f.io.logic.tuners.SystemTunerUtil;
 import a75f.io.logic.tuners.TunerConstants;
@@ -100,21 +104,21 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 	private void setupTempLimitSelectors() {
   
 		ArrayList<Double> coolingSatArray = new ArrayList<>();
-		for (double pos = 55; pos <= 65; pos++){
+		for (double pos = SystemConstants.COOLING_SAT_CONFIG_MIN; pos <= SystemConstants.COOLING_SAT_CONFIG_MAX; pos++){
 			coolingSatArray.add(pos);
 		}
 		
 		ArrayList<Double> heatingSatArray = new ArrayList<>();
-		for (double pos = 75; pos <= 100; pos++){
+		for (double pos = SystemConstants.HEATING_SAT_CONFIG_MIN; pos <= SystemConstants.HEATING_SAT_CONFIG_MAX; pos++){
 			heatingSatArray.add(pos);
 		}
 		
 		ArrayList<Double> co2Array = new ArrayList<>();
-		for (double pos = 800; pos <= 1000; pos+=10){
+		for (double pos = SystemConstants.CO2_CONFIG_MIN; pos <= SystemConstants.CO2_CONFIG_MAX; pos+=10){
 			co2Array.add(pos);
 		}
 		ArrayList<Double> spArray = new ArrayList<>();
-		for (double pos = 0.5; pos <= 1.5; pos +=0.1){
+		for (double pos = SystemConstants.SP_CONFIG_MIN; pos <= SystemConstants.SP_CONFIG_MAX; pos +=0.1){
 			spArray.add(Math.round(pos * 100D) / 100D);
 		}
 		
@@ -144,33 +148,34 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 		spMaxAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		
 		
+		double val = 0;
 		coolingSatMin.setAdapter(coolingSatMinAdapter);
 		coolingSatMin.setSelection(coolingSatMinAdapter.getPosition(SystemTunerUtil.getTuner(
 											"coolingSat", "min", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL)));
 		coolingSatMax.setAdapter(coolingSatMaxAdapter);
-		coolingSatMax.setSelection(coolingSatMaxAdapter.getPosition(SystemTunerUtil.getTuner(
-											"coolingSat", "max", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL)));
+		val = SystemTunerUtil.getTuner("coolingSat", "max", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL);
+		coolingSatMax.setSelection(val != 0? coolingSatMaxAdapter.getPosition(val) : coolingSatArray.size()-1);
 		
 		heatingSatMin.setAdapter(heatingSatMinAdapter);
 		heatingSatMin.setSelection(heatingSatMinAdapter.getPosition(SystemTunerUtil.getTuner(
 											"heatingSat", "min", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL)));
 		heatingSatMax.setAdapter(heatingSatMaxAdapter);
-		heatingSatMax.setSelection(heatingSatMaxAdapter.getPosition(SystemTunerUtil.getTuner(
-											"heatingSat", "max", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL)));
+		val  = SystemTunerUtil.getTuner("heatingSat", "max", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL);
+		heatingSatMax.setSelection(val != 0?  heatingSatMaxAdapter.getPosition( val): heatingSatArray.size()-1);
 		
 		co2Min.setAdapter(co2MinAdapter);
 		co2Min.setSelection(co2MinAdapter.getPosition(SystemTunerUtil.getTuner(
 				"co2Target", "min", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL)));
 		co2Max.setAdapter(co2MaxAdapter);
-		co2Max.setSelection(co2MaxAdapter.getPosition(SystemTunerUtil.getTuner(
-				"co2Target", "max", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL)));
+		val = SystemTunerUtil.getTuner("co2Target", "max", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL);
+		co2Max.setSelection(val != 0 ?co2MaxAdapter.getPosition(val ) : co2Array.size()-1);
 		
 		spMin.setAdapter(spMinAdapter);
 		spMin.setSelection(spMinAdapter.getPosition(SystemTunerUtil.getTuner(
 				"spTarget", "min", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL)));
 		spMax.setAdapter(spMaxAdapter);
-		spMax.setSelection(spMaxAdapter.getPosition(SystemTunerUtil.getTuner(
-				"spTarget", "max", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL)));
+		val = SystemTunerUtil.getTuner("spTarget", "max", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL);
+		spMax.setSelection(val != 0? spMaxAdapter.getPosition(val) : spArray.size()-1);
 		
 		coolingSatMin.setOnItemSelectedListener(this);
 		coolingSatMax.setOnItemSelectedListener(this);
@@ -191,36 +196,37 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 		ArrayAdapter<Integer> analogAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, analogArray);
 		analogAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		
+		double analogVal = 0;
 		analog1Min.setAdapter(analogAdapter);
 		analog1Min.setSelection(analogAdapter.getPosition((int)SystemTunerUtil.getTuner(
 													"analog1", "min", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL)));
 		analog1Max.setAdapter(analogAdapter);
-		analog1Max.setSelection(analogAdapter.getPosition((int)SystemTunerUtil.getTuner(
-													"analog1", "max", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL)));
+		analogVal = SystemTunerUtil.getTuner("analog1", "max", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL);
+		analog1Max.setSelection(analogVal != 0 ? analogAdapter.getPosition((int)analogVal) : analogArray.size() -1);
 		
 		analog2Min.setAdapter(analogAdapter);
 		analog2Min.setSelection(analogAdapter.getPosition((int)SystemTunerUtil.getTuner(
 													"analog2", "min", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL)));
 		
 		analog2Max.setAdapter(analogAdapter);
-		analog2Max.setSelection(analogAdapter.getPosition((int)SystemTunerUtil.getTuner(
-													"analog2", "max", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL)));
+		analogVal = SystemTunerUtil.getTuner("analog2", "max", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL);
+		analog2Max.setSelection(analogVal != 0 ? analogAdapter.getPosition((int)analogVal) : analogArray.size() -1);
 		
 		analog3Min.setAdapter(analogAdapter);
 		analog3Min.setSelection(analogAdapter.getPosition((int)SystemTunerUtil.getTuner(
 													"analog3", "min", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL)));
 		
 		analog3Max.setAdapter(analogAdapter);
-		analog3Max.setSelection(analogAdapter.getPosition((int)SystemTunerUtil.getTuner(
-													"analog3", "max", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL)));
+		analogVal = SystemTunerUtil.getTuner("analog3", "max", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL);
+		analog3Max.setSelection(analogVal != 0 ? analogAdapter.getPosition((int)analogVal) : analogArray.size() -1);
 		
 		analog4Min.setAdapter(analogAdapter);
 		analog4Min.setSelection(analogAdapter.getPosition((int)SystemTunerUtil.getTuner(
 				"analog4", "min", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL)));
 		
 		analog4Max.setAdapter(analogAdapter);
-		analog4Max.setSelection(analogAdapter.getPosition((int)SystemTunerUtil.getTuner(
-				"analog4", "max", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL)));
+		analogVal = SystemTunerUtil.getTuner("analog4", "max", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL);
+		analog4Max.setSelection(analogVal != 0 ? analogAdapter.getPosition((int)analogVal) : analogArray.size() -1);
 		
 		
 		/*String[] analogTypes = {"0-10V"};
@@ -277,6 +283,10 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 		analog3Max.setOnItemSelectedListener(this);
 		analog4Min.setOnItemSelectedListener(this);
 		analog4Max.setOnItemSelectedListener(this);
+		ahuAnalog1Test.setOnItemSelectedListener(this);
+		ahuAnalog2Test.setOnItemSelectedListener(this);
+		ahuAnalog3Test.setOnItemSelectedListener(this);
+		ahuAnalog4Test.setOnItemSelectedListener(this);
 	}
 	
 	@Override
@@ -344,7 +354,7 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 				setTunerBackground("analog2", "max", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL, val);
 				break;
 			case R.id.ahuAnalog3Min:
-				setTunerBackground("analog3", "min", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL, arg2);
+				setTunerBackground("analog3", "min", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL, val);
 				break;
 			case R.id.ahuAnalog3Max:
 				setTunerBackground("analog3", "max", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL, val);
@@ -354,6 +364,18 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 				break;
 			case R.id.ahuAnalog4Max:
 				setTunerBackground("analog4", "max", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL, val);
+				break;
+			case R.id.ahuAnalog1Test:
+				sendAnalog1OutTestSignal(val);
+				break;
+			case R.id.ahuAnalog2Test:
+				sendAnalog2OutTestSignal(val);
+				break;
+			case R.id.ahuAnalog3Test:
+				sendAnalog3OutTestSignal(val);
+				break;
+			case R.id.ahuAnalog4Test:
+				sendAnalog4OutTestSignal(val);
 				break;
 		}
 	}
@@ -380,4 +402,75 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 		
 	}
 	
+	public void sendAnalog1OutTestSignal(double val) {
+		double analogMin = SystemTunerUtil.getTuner("analog1", "min");
+		double analogMax = SystemTunerUtil.getTuner("analog1", "max");
+		
+		CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
+		msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
+		
+		short signal;
+		if (analogMax > analogMin)
+		{
+			signal = (short) (10 * (analogMin + (analogMax - analogMin) * (SystemConstants.COOLING_SAT_CONFIG_MAX - val) / 10));
+		} else {
+			signal = (short) (10 * (analogMin - (analogMin - analogMax) * (SystemConstants.COOLING_SAT_CONFIG_MAX - val) / 10));
+		}
+		msg.analog0.set(signal);
+		MeshUtil.sendStructToCM(msg);
+	}
+	
+	public void sendAnalog2OutTestSignal(double val) {
+		double analogMin = SystemTunerUtil.getTuner("analog2", "min");
+		double analogMax = SystemTunerUtil.getTuner("analog2", "max");
+		
+		CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
+		msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
+		
+		short signal;
+		if (analogMax > analogMin)
+		{
+			signal = (short) (10 * (analogMin + (analogMax - analogMin) * val / 100));
+		} else {
+			signal = (short) (10 * (analogMin - (analogMin - analogMax) * val / 100));
+		}
+		msg.analog1.set(signal);
+		MeshUtil.sendStructToCM(msg);
+	}
+	
+	public void sendAnalog3OutTestSignal(double val) {
+		double analogMin = SystemTunerUtil.getTuner("analog3", "min");
+		double analogMax = SystemTunerUtil.getTuner("analog3", "max");
+		
+		CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
+		msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
+		
+		short signal;
+		if (analogMax > analogMin)
+		{
+			signal = (short) (10 * (analogMin + (analogMax - analogMin) * (val - SystemConstants.CO2_CONFIG_MIN) / 200));
+		} else {
+			signal = (short) (10 * (analogMin - (analogMin - analogMax) * (val - SystemConstants.CO2_CONFIG_MIN) / 200));
+		}
+		msg.analog2.set(signal);
+		MeshUtil.sendStructToCM(msg);
+	}
+	
+	public void sendAnalog4OutTestSignal(double val) {
+		double analogMin = SystemTunerUtil.getTuner("analog4", "min");
+		double analogMax = SystemTunerUtil.getTuner("analog4", "max");
+		
+		CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
+		msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
+		
+		short signal;
+		if (analogMax > analogMin)
+		{
+			signal = (short) (10 * (analogMin + (analogMax - analogMin) * (val - SystemConstants.SP_CONFIG_MIN) / 15.0));
+		} else {
+			signal = (short) (10 * (analogMin - (analogMin - analogMax) * (val - SystemConstants.SP_CONFIG_MIN) / 15.0));
+		}
+		msg.analog3.set(signal);
+		MeshUtil.sendStructToCM(msg);
+	}
 }

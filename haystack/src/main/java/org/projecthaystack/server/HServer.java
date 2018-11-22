@@ -325,6 +325,19 @@ public abstract class HServer extends HProj
     if (rec.has("tz")) tz = HTimeZone.make(rec.getStr("tz"), false);
     if (tz == null)
       throw new UnknownNameException("Rec missing or invalid 'tz' tag: " + rec.dis());
+    
+    if (range instanceof String && range.equals("current")) {
+      HHisItem[] items = onHisRead(rec);
+  
+      // build and return result grid
+      HDict meta = new HDictBuilder()
+                           .add("id", id)
+                           .add("hisStart", 0)
+                           .add("hisEnd",0)
+                           .toDict();
+      return HGridBuilder.hisItemsToGrid(meta, items);
+  
+    }
 
     // check or parse date range
     HDateTimeRange r = null;
@@ -372,6 +385,8 @@ public abstract class HServer extends HProj
    * of start and inclusive of end time.
    */
   protected abstract HHisItem[] onHisRead(HDict rec, HDateTimeRange range);
+  
+  protected abstract HHisItem[] onHisRead(HDict rec);
 
   /**
    * Write a set of history time-series data to the given point record.

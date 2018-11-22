@@ -224,9 +224,10 @@ public class Globals
     }
     
     public void registerSiteToPubNub(final String siteId) {
+        Log.d("CCU","registerSiteToPubNub "+siteId);
         PNConfiguration pnConfiguration = new PNConfiguration();
-        pnConfiguration.setSubscribeKey("sub-c-dea182aa-e109-11e8-a36a-3a3b171d1021");
-        pnConfiguration.setPublishKey("pub-c-2e374aa8-7e94-47e3-b51d-7d8e1b73aa14");
+        pnConfiguration.setSubscribeKey("sub-c-6a55a31c-d30e-11e8-b41d-e643bd6bdd68");
+        pnConfiguration.setPublishKey("pub-c-6873a2c5-ec27-4604-a235-38a3f4eed9a6");
         pnConfiguration.setSecure(false);
         
         pubnub = new PubNub(pnConfiguration);

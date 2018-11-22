@@ -292,7 +292,6 @@ public class CCUHsApi
         ArrayList<HisItem> hisList = new ArrayList<>();
         Iterator it = resGrid.iterator();
         while(it.hasNext()) {
-            HisItem item = new HisItem();
             HRow r = (HRow)it.next();
             HDateTime date = (HDateTime) r.get("ts");
             HNum val = (HNum) r.get("val");
@@ -301,13 +300,14 @@ public class CCUHsApi
         return hisList;
     }
     
+    
     /**
      * Reads most recent value for a his point
      * @param id
      * @return
      */
-    public HisItem hisRead(String id) {
-        HGrid resGrid = hsClient.hisRead(HRef.copy(id),"today");
+    public HisItem curRead(String id) {
+        HGrid resGrid = hsClient.hisRead(HRef.copy(id),"current");
         if (resGrid.numRows() == 0) {
             return null;
         }
@@ -318,17 +318,9 @@ public class CCUHsApi
     }
     
     public Double readHisValById(String id) {
-        HGrid resGrid = hsClient.hisRead(HRef.copy(id),"today");//TODO
-        if (resGrid.numRows() == 0) {
-            return 0.0;
-        }
-        HRow r = resGrid.row(resGrid.numRows()-1);
-        return Double.parseDouble(r.get("val").toString());
+        return curRead(id).val;
     }
     
-    public void writeHisValById(String id, Double val) {
-        hsClient.hisWrite(HRef.copy(id), new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()),HNum.make(val))});
-    }
     public Double readHisValByQuery(String query) {
         ArrayList points = readAll(query);
         String id = ((HashMap)points.get(0)).get("id").toString();
@@ -336,10 +328,14 @@ public class CCUHsApi
             return null;
         }
         
-        HisItem item = hisRead(id);
+        HisItem item = curRead(id);
         
         return item == null ? 0 : item.getVal();
         
+    }
+    
+    public void writeHisValById(String id, Double val) {
+        hsClient.hisWrite(HRef.copy(id), new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()),HNum.make(val))});
     }
     
     public void writeHisValByQuery(String query, Double val) {

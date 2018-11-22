@@ -53,7 +53,6 @@ public class VavReheatProfile extends VavProfile
                 Log.d(TAG,"Invalid Temp , skip controls update for "+node+" roomTemp : "+vavDeviceMap.get(node).getCurrentTemp());
                 continue;
             }
-            Log.d("VAV", "updateZonePoints CP1 ");
             VAVLogicalMap vavDevice = vavDeviceMap.get(node);
             ControlLoop coolingLoop = vavDevice.getCoolingLoop();
             ControlLoop heatingLoop = vavDevice.getHeatingLoop();
@@ -61,16 +60,13 @@ public class VavReheatProfile extends VavProfile
             VavUnit vavUnit = vavDevice.getVavUnit();
             GenericPIController valveController = vavDevice.getValveController();
     
-            Log.d("VAV", "updateZonePoints CP2 ");
-            
             double roomTemp = vavDevice.getCurrentTemp();
             double dischargeTemp = vavDevice.getDischargeTemp();
             double supplyAirTemp = vavDevice.getSupplyAirTemp();
             double co2 = vavDeviceMap.get(node).getCO2();
             double dischargeSp = vavDevice.getDischargeSp();
             setTemp = vavDevice.getDesiredTemp();
-    
-            Log.d("VAV", "updateZonePoints CP3 ");
+            
             Damper damper = vavUnit.vavDamper;
             Valve valve = vavUnit.reheatValve;
             int loopOp;//New value of loopOp
@@ -147,8 +143,6 @@ public class VavReheatProfile extends VavProfile
             }
             
             setDamperLimits(node, damper);
-    
-            Log.d("VAV", "updateZonePoints CP4 ");
             
             //CO2 loop output from 0-50% modulates damper min position.
             if (/*mode == OCCUPIED && */co2Loop.getLoopOutput(co2) <= 50)
@@ -182,9 +176,9 @@ public class VavReheatProfile extends VavProfile
             damper.normalize();
             valve.normalize();
             
-            Log.d("VAV","CoolingLoop - roomTemp :"+roomTemp+" setTemp: "+setTemp);
+            Log.d("VAV","CoolingLoop "+node +"roomTemp :"+roomTemp+" setTemp: "+setTemp);
             coolingLoop.dump();
-            Log.d("VAV","HeatingLoop - roomTemp :"+roomTemp+" setTemp: "+setTemp);
+            Log.d("VAV","HeatingLoop "+node +"roomTemp :"+roomTemp+" setTemp: "+setTemp);
             heatingLoop.dump();
             
     
@@ -194,8 +188,7 @@ public class VavReheatProfile extends VavProfile
             vavDevice.setDamperPos(damper.currentPosition);
             vavDevice.setReheatPos(valve.currentPosition);
             vavDevice.updateLoopParams();
-    
-            Log.d("VAV", "updateZonePoints CP5 ");
+            
         }
     }
 }

@@ -94,7 +94,7 @@ public class VAVLogicalMap
         String floor = L.ccu().getFloor((short)nodeAddr);
         String room = L.ccu().getRoom((short)nodeAddr);
         
-        String tz = "Chicago";
+        String tz = "Chicago";//TODO
         //Create Logical points
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);

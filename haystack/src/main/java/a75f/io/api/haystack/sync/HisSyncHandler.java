@@ -2,8 +2,18 @@ package a75f.io.api.haystack.sync;
 
 import android.util.Log;
 
+import org.projecthaystack.HBool;
+import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDict;
+import org.projecthaystack.HDictBuilder;
+import org.projecthaystack.HGrid;
+import org.projecthaystack.HGridBuilder;
+import org.projecthaystack.HHisItem;
+import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
+import org.projecthaystack.HStr;
+import org.projecthaystack.HVal;
+import org.projecthaystack.io.HZincWriter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,8 +43,11 @@ public class HisSyncHandler
             return;
         }
     
-        tsData = new HashMap<>();
-        
+        //tsData = new HashMap<>();
+        /*BatchPoints.Builder batchPointsBuilder = BatchPoints
+                                                         .database(TS.getInstance().getTimeSeriesDBName());*/
+    
+    
         for (Map m : points)
         {
             //TODO- send all points in single call?
@@ -53,12 +66,12 @@ public class HisSyncHandler
     
             
             
-            HisItem sItem = hisItems.get(hisItems.size()-1);//TODO - Writing just the last val for now
-            tsData.put(m.get("dis").toString(), String.valueOf(sItem.getVal()));
+            //HisItem sItem = hisItems.get(hisItems.size()-1);//TODO - Writing just the last val for now
+            //tsData.put(m.get("dis").toString(), String.valueOf(sItem.getVal()));
             
             
             //TODO - Influxdb java lib does not compile on SDK-19. Using POST method until it is sorted out.
-            /*HDict point = hayStack.hsClient.readById(HRef.copy(pointID));
+            HDict point = hayStack.hsClient.readById(HRef.copy(pointID));
             System.out.println(point);
             boolean isBool = ((HStr) point.get("kind")).val.equals("Bool");
             ArrayList acc = new ArrayList();
@@ -70,13 +83,8 @@ public class HisSyncHandler
             }
             
             HHisItem[] hHisItems = (HHisItem[]) acc.toArray(new HHisItem[acc.size()]);
-    
-    
-    
-            BatchPoints.Builder batchPointsBuilder = BatchPoints
-                                                             .database(TS.getInstance().getTimeSeriesDBName());
-    
-            for (HHisItem hItem : hHisItems) {
+            
+            /*for (HHisItem hItem : hHisItems) {
                 org.influxdb.dto.Point.Builder measurement = org.influxdb.dto.Point.measurement(hayStack.getGUID(pointID).replace("@",""));
                 measurement.time(hItem.ts.millis(), TimeUnit.MILLISECONDS);
                 measurement.addField("TZ", hItem.ts.tz.name);
@@ -95,14 +103,13 @@ public class HisSyncHandler
                     }
                 }
         
+                System.out.println("Write influx point "+measurement.toString());
                 batchPointsBuilder.point(measurement.build());
-            }
+            }*/
     
-            TS.getInstance().getTS().write(batchPointsBuilder.build());*/
             
             
-            
-            /*HDictBuilder b = new HDictBuilder();
+            HDictBuilder b = new HDictBuilder();
             b.add("id", HRef.copy(CCUHsApi.getInstance().getGUID(pointID)));
             HGrid itemGrid = HGridBuilder.hisItemsToGrid(b.toDict(), hHisItems);
             itemGrid.dump();
@@ -113,25 +120,27 @@ public class HisSyncHandler
             String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "hisWrite", HZincWriter.gridToString(itemGrid));
             System.out.println("Response :\n"+response);
             //TODO- success ?
-            if (response.contains("empty")) {
+            if (response != null && response.contains("empty")) {
                 for (HisItem item: hisItems)
                 {
                     item.setSyncStatus(true);
                 }
-            }*/
+            }
     
-            for (HisItem item: hisItems)
+           /* for (HisItem item: hisItems)
             {
                 item.setSyncStatus(true);
-            }
+            }*/
             hayStack.tagsDb.setHisItemSyncStatus(hisItems);
         }
+    
+        //TS.getInstance().getTS().write(batchPointsBuilder.build());
         
-        if (tsData.size() > 0)
+        /*if (tsData.size() > 0)
         {
             String url = new InfluxDbUtil.URLBuilder().setProtocol(InfluxDbUtil.HTTP).setHost("renatus-influxiprvgkeeqfgys.centralus.cloudapp.azure.com").setPort(8086).setOp(InfluxDbUtil.WRITE).setDatabse("haystack").setUser("75f@75f.io").setPassword("7575").buildUrl();
-            InfluxDbUtil.writeData(url, "01RENATUS_CCU", tsData, System.currentTimeMillis());
-        }
+            InfluxDbUtil.writeData(url, "03RENATUS_CCU", tsData, System.currentTimeMillis());
+        }*/
         
         Log.d("CCU","<- doHisSync");
     }

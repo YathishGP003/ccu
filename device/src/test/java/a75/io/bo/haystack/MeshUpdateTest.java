@@ -13,6 +13,7 @@ import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.vav.VAVLogicalMap;
+import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 
 /**
  * Created by samjithsadasivan on 9/19/18.
@@ -27,7 +28,7 @@ public class MeshUpdateTest
         api.tagsDb.tagsMap = new HashMap<>();
         api.tagsDb.writeArrays = new HashMap<>();
         VAVLogicalMap m = new VAVLogicalMap(ProfileType.VAV_REHEAT, 7000);
-        m.createHaystackPoints();
+        m.createHaystackPoints(new VavProfileConfiguration());
         ArrayList points = CCUHsApi.getInstance().readAll("point");
         for (Object a : points) {
             System.out.println(a);
@@ -57,7 +58,7 @@ public class MeshUpdateTest
         hayStack.tagsDb.tagsMap = new HashMap<>();
         hayStack.tagsDb.writeArrays = new HashMap<>();
         VAVLogicalMap m = new VAVLogicalMap(ProfileType.VAV_REHEAT, 7000);
-        m.createHaystackPoints();
+        m.createHaystackPoints(new VavProfileConfiguration());
         short node = 7000;
         HashMap device = hayStack.read("device and addr == \""+node+"\"");
     

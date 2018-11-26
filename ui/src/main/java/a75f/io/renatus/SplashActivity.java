@@ -6,8 +6,11 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-public class SplashActivity extends Activity
-{
+import java.util.HashMap;
+
+import a75f.io.api.haystack.CCUHsApi;
+
+public class SplashActivity extends Activity {
     public static final String TAG = SplashActivity.class.getSimpleName();
 
     @Override
@@ -17,18 +20,30 @@ public class SplashActivity extends Activity
 
         Log.i(TAG, "Splash");
         Log.i(TAG, "Waiting 5 seconds and navigating to the registered screen");
-        new Thread()
-        {
-            public void run()
-            {
+        new Thread() {
+            public void run() {
                 try {
                     Thread.sleep(5000);
                     SplashActivity.this.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            HashMap site = CCUHsApi.getInstance().read("site");
 
-                            Intent i = new Intent(SplashActivity.this, RegisterGatherDetails.class);
-                            startActivity(i);
+
+                            if (site.size() == 0) {
+                                System.out.println("No Site Synced navigate to Register");
+                                Intent i = new Intent(SplashActivity.this, RegisterGatherDetails.class);
+                                startActivity(i);
+                                finish();
+                            }
+                            else
+                            {
+                                Intent i = new Intent(SplashActivity.this, RenatusLandingActivity.class);
+                                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(i);
+                                finish();
+                            }
+
                         }
                     });
 

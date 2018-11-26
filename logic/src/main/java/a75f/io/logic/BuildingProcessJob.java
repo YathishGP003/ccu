@@ -29,6 +29,12 @@ public class BuildingProcessJob extends BaseJob
     public void doJob() {
         Log.d("CCU","BuildingProcessJob ->");
     
+        HashMap site = CCUHsApi.getInstance().read("site");
+        if (site == null || site.size() == 0) {
+            Log.d("CCU","No Site Registered ! <-BuildingProcessJob ");
+            return;
+        }
+    
         tsData = new HashMap();
     
         for(Floor floor : L.ccu().getFloors())
@@ -53,7 +59,6 @@ public class BuildingProcessJob extends BaseJob
         if (!Globals.getInstance().isPubnubSubscribed())
         {
             CCUHsApi.getInstance().syncEntityTree();
-            HashMap site = CCUHsApi.getInstance().read("site");
             String siteLUID = site.get("id").toString();
             String siteGUID = CCUHsApi.getInstance().getGUID(siteLUID);
             if (siteGUID != null && siteGUID != "") {

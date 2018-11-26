@@ -102,7 +102,7 @@ public class TestHayStack
 
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
-        SmartNode node = new SmartNode(7000, siteRef);
+        SmartNode node = new SmartNode(7000, siteRef, null, null);
         
         String dtRef = CCUHsApi.getInstance().addPoint(dtPoint);
         CCUHsApi.getInstance().addPoint(dPoint);
@@ -221,7 +221,7 @@ public class TestHayStack
     
     
         //Create Physical points and map
-        SmartNode device = new SmartNode(nodeAddr, siteRef);
+        SmartNode device = new SmartNode(nodeAddr, siteRef, null, null);
         device.th1In.setPointRef(datID);
         CCUHsApi.getInstance().addPoint(device.th1In);
         device.th2In.setPointRef(eatID);
@@ -454,8 +454,47 @@ public class TestHayStack
                                 .setArea(20000).build();
             hayStack.addSite(s75f);
         }
-        SystemEquip q = new SystemEquip();
+        SystemEquip q = SystemEquip.getInstance();
         q.dump();
         System.out.println(hayStack.tagsDb.tagsMap);
+    }
+    
+    @Test
+    public void testUpdateEntity()
+    {
+        CCUHsApi hayStack = new CCUHsApi();
+        hayStack.tagsDb.init();
+        hayStack.tagsDb.tagsMap = new HashMap<>();
+        hayStack.tagsDb.writeArrays = new HashMap<>();
+        hayStack.tagsDb.idMap = new HashMap<>();
+        hayStack.tagsDb.removeIdMap = new HashMap<>();
+        hayStack.tagsDb.updateIdMap = new HashMap<>();
+        int nodeAddr = 7000;
+        
+        Site s = new Site.Builder()
+                         .setDisplayName("75F")
+                         .addMarker("site")
+                         .setGeoCity("Burnsville")
+                         .setGeoState("MN")
+                         .setTz("Chicago")
+                         .setArea(1000).build();
+        hayStack.addSite(s);
+        
+        HashMap siteMap = hayStack.read(Tags.SITE);
+        String siteRef = (String) siteMap.get(Tags.ID);
+        String siteDis = (String) siteMap.get("dis");
+        
+        SmartNode device = new SmartNode(nodeAddr, siteRef, null,null);
+        device.analog1Out.setType("0-10v");
+        hayStack.addPoint(device.analog1Out);
+        System.out.print(hayStack.tagsDb.tagsMap);
+        CCUHsApi.getInstance().syncEntityTree();
+        System.out.print(hayStack.tagsDb.idMap);
+        System.out.print(hayStack.tagsDb.updateIdMap);
+        SmartNode.updatePhysicalPoint(nodeAddr, Port.ANALOG_OUT_ONE.toString(), "2-10v");
+        System.out.print(hayStack.tagsDb.updateIdMap);
+        CCUHsApi.getInstance().syncEntityTree();
+        System.out.print(hayStack.tagsDb.updateIdMap);
+        System.out.print(hayStack.tagsDb.tagsMap);
     }
 }

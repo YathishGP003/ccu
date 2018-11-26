@@ -101,6 +101,45 @@ public class CCUHsApi
         return tagsDb.addDevice(d);
     }
     
+    public String addFloor(Floor f) {
+        return tagsDb.addFloor(f);
+    }
+    
+    public String addZone(Zone z) {
+        return tagsDb.addZone(z);
+    }
+    
+    public void updateSite(Site s, String id) {
+        tagsDb.updateSite(s, id);
+        tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
+    }
+    
+    public void updateEquip(Equip q, String id) {
+        tagsDb.updateEquip(q, id);
+        tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
+    }
+    
+    public void updatePoint(Point p, String id) {
+        tagsDb.updatePoint(p, id);
+        tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
+    }
+    
+    public void updatePoint(RawPoint r, String id) {
+        tagsDb.updatePoint(r, id);
+        Log.d("CCU", "updatePhysicalPoint "+id);
+        tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
+    }
+    
+    public void updateFloor(Floor r, String id) {
+        tagsDb.updateFloor(r, id);
+        tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
+    }
+    
+    public void updateZone(Zone z, String id) {
+        tagsDb.updateZone(z, id);
+        tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
+    }
+    
     /**
      * Helper method that converts HGrid to an Array of Hashmap of String.
      */
@@ -148,6 +187,34 @@ public class CCUHsApi
             e.printStackTrace();
         }
         return map;
+    }
+    
+    public HashMap readMapById(String id) {
+        
+        HashMap<Object, Object> map = new HashMap<>();
+        try
+        {
+            HDict dict = hsClient.readById(HRef.copy(id));
+            Iterator it = dict.iterator();
+            while (it.hasNext())
+            {
+                Map.Entry entry = (Map.Entry) it.next();
+                map.put(entry.getKey().toString(), entry.getValue().toString());
+            }
+        } catch (UnknownRecException e) {
+            e.printStackTrace();
+        }
+        return map;
+    }
+    
+    public HDict readHDictById(String id) {
+        try
+        {
+            return hsClient.readById(HRef.copy(id));
+        } catch (UnknownRecException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
     
     public HDict readHDict(String query) {

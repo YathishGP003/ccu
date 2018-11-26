@@ -19,7 +19,6 @@ public class Pulse
 {
 	public static void regularSNUpdate(CmToCcuOverUsbSnRegularUpdateMessage_t smartNodeRegularUpdateMessage_t)
 	{
-		Log.d(TAG,"regularSmartNodeUpdate");
 		short nodeAddr = (short)smartNodeRegularUpdateMessage_t.update.smartNodeAddress.get();
 		CCUHsApi hayStack = CCUHsApi.getInstance();
 		HashMap device = hayStack.read("device and addr == \""+nodeAddr+"\"");

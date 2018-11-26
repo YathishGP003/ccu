@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.RoomDataInterface;
 
@@ -20,15 +21,21 @@ public class Zone
     private HashMap<String, Object> mTuningParameters = new HashMap<>();
     @JsonIgnore
     private RoomDataInterface mRoomDataInterface;
+    public String          mZoneRef;
     
-    public Zone()
+    private Zone()
     {
     }
     
     //Also known as zone name.
-    public Zone(String roomName)
+    public Zone(String zoneName, Floor f)
     {
-        this.roomName = roomName;
+        this.roomName = zoneName;
+        a75f.io.api.haystack.Zone hsZone = new a75f.io.api.haystack.Zone.Builder()
+                                                     .setDisplayName(zoneName)
+                                                     .setFloorRef(f.mFloorRef)
+                                                     .build();
+        mZoneRef = CCUHsApi.getInstance().addZone(hsZone);
     }
     
     @JsonIgnore

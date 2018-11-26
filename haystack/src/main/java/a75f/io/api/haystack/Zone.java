@@ -25,19 +25,22 @@ public class Zone
     }
     public static class Builder {
         private String            displayName;
-        private ArrayList<String> markers;
+        private ArrayList<String> markers = new ArrayList<>();;
         private String            floorRef;
-        public void setDisplayName(String displayName)
+        public Builder setDisplayName(String displayName)
         {
             this.displayName = displayName;
+            return this;
         }
-        public void setMarkers(ArrayList<String> markers)
+        public Builder setMarkers(ArrayList<String> markers)
         {
             this.markers = markers;
+            return this;
         }
-        public void setFloorRef(String floorRef)
+        public Builder setFloorRef(String floorRef)
         {
             this.floorRef = floorRef;
+            return this;
         }
         
         public Zone build() {

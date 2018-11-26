@@ -110,6 +110,9 @@ public class BuildingTunersTest
     
         SystemTunerUtil.setTuner("analog1","max", 15, 8);
         System.out.println(SystemTunerUtil.getTuner("analog1","max"));
+        
+        double val = SystemTunerUtil.getTuner("heatingSat", "max", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL);
+        System.out.println(val != 0);
     }
     
     

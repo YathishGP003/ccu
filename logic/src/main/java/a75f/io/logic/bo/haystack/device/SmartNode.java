@@ -1,8 +1,11 @@
 package a75f.io.logic.bo.haystack.device;
 
-import a75f.io.logic.bo.building.definitions.Port;
+import java.util.HashMap;
+
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.RawPoint;
+import a75f.io.logic.bo.building.definitions.Port;
 
 /**
  * Created by samjithsadasivan on 9/5/18.
@@ -25,12 +28,14 @@ public class SmartNode
     public String deviceRef;
     public String siteRef;
     
-    public SmartNode(int address, String site) {
+    public SmartNode(int address, String site, String floorRef, String zoneRef) {
         deviceRef = new Device.Builder()
                 .setDisplayName("SN-"+address)
                 .addMarker("network")
                 .setAddr(address)
                 .setSiteRef(site)
+                .setFloorRef(floorRef)
+                .setZoneRef(zoneRef)
                 .build();
         smartNodeAddress = address;
         siteRef = site;
@@ -125,6 +130,30 @@ public class SmartNode
                          .setPort(Port.RTH.toString())
                          .setTz("Chicago")
                          .build();
+    }
+    
+    public static void updatePhysicalPoint(int addr, String port, String type) {
+    
+        HashMap device = CCUHsApi.getInstance().read("device and addr == \""+addr+"\"");
+        if (device == null)
+        {
+            return ;
+        }
+        
+        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
+        if (!point.get("type").equals(type))
+        {
+            RawPoint analog1Out = new RawPoint.Builder()
+                                          .setDisplayName(point.get("dis").toString())
+                                          .setDeviceRef(point.get("deviceRef").toString())
+                                          .setSiteRef(point.get("siteRef").toString())
+                                          .setPort(port)
+                                          .setType(type)
+                                          .addMarker("output").addMarker("his")
+                                          .setTz("Chicago")
+                                          .build();
+            CCUHsApi.getInstance().updatePoint(analog1Out,point.get("id").toString());
+        }
     }
 
 }

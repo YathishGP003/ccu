@@ -24,7 +24,7 @@ public class LocalStorageUtilTest
 	{
 		CCUApplication orgCcu = new CCUApplication();
 		orgCcu.getFloors().add(new Floor(0, null, "FirstFloor"));
-		orgCcu.getFloors().get(0).mZoneList.add(new Zone("FirstRoom"));
+		orgCcu.getFloors().get(0).mZoneList.add(new Zone("FirstRoom", null));
 		UUID analog15kUUID = UUID.randomUUID();
 		short smartNodeAddress = 5000;
 		LightProfileConfiguration lightProfileConfiguration = new LightProfileConfiguration();

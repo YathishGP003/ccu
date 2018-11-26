@@ -129,16 +129,12 @@ public abstract class VavProfile extends ZoneProfile
     
     public void updateLogicalMapAndPoints(short addr, VavProfileConfiguration config) {
         VAVLogicalMap deviceMap = vavDeviceMap.get(addr);
-        deviceMap.deleteHaystackPoints();
-        vavDeviceMap.remove(addr);
-        
-        VAVLogicalMap newDeviceMap = new VAVLogicalMap(getProfileType(), addr);
-        newDeviceMap.createHaystackPoints(config);
-        vavDeviceMap.put(addr, newDeviceMap);
-        newDeviceMap.satResetRequest.setImportanceMultiplier(getZonePriority());
-        newDeviceMap.co2ResetRequest.setImportanceMultiplier(getZonePriority());
-        newDeviceMap.spResetRequest.setImportanceMultiplier(getZonePriority());
-        newDeviceMap.hwstResetRequest.setImportanceMultiplier(getZonePriority());
+        deviceMap.updateHaystackPoints(config);
+    
+        deviceMap.satResetRequest.setImportanceMultiplier(getZonePriority());
+        deviceMap.co2ResetRequest.setImportanceMultiplier(getZonePriority());
+        deviceMap.spResetRequest.setImportanceMultiplier(getZonePriority());
+        deviceMap.hwstResetRequest.setImportanceMultiplier(getZonePriority());
     }
     
     @JsonIgnore

@@ -244,7 +244,7 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
     
     private void setUpTestTriggers()
     {
-        final Zone testZone = new Zone();
+        final Zone testZone = new Zone(null,null);
         final TestProfile testLightProfile = new TestProfile();
         testZone.mZoneProfiles.add(testLightProfile);
         testLightProfile.setCircuitTest(true);

@@ -133,21 +133,21 @@ public class SystemEquip
                                    .setTz(tz)
                                    .build();
         hayStack.addPoint(analog4Out);
-        putSat(0);
-        putCo2(0);
-        putSp(0);
-        putHwst(0);
-        putAnalogOut("analog1",0);
-        putAnalogOut("analog2",0);
-        putAnalogOut("analog3",0);
-        putAnalogOut("analog4",0);
+        setSat(0);
+        setCo2(0);
+        setSp(0);
+        setHwst(0);
+        setAnalogOut("analog1",0);
+        setAnalogOut("analog2",0);
+        setAnalogOut("analog3",0);
+        setAnalogOut("analog4",0);
     }
     
     public double getSat()
     {
         return hayStack.readHisValByQuery("point and tr and sat and his and system");
     }
-    public void putSat(double supplyAirTemp)
+    public void setSat(double supplyAirTemp)
     {
         hayStack.writeHisValByQuery("point and tr and sat and his and system", supplyAirTemp);
     }
@@ -156,7 +156,7 @@ public class SystemEquip
     {
         return hayStack.readHisValByQuery("point and tr and co2 and his and system");
     }
-    public void putCo2(double co2)
+    public void setCo2(double co2)
     {
         hayStack.writeHisValByQuery("point and tr and co2 and his and system", co2);
     }
@@ -165,7 +165,7 @@ public class SystemEquip
     {
         return hayStack.readHisValByQuery("point and tr and sp and his and system");
     }
-    public void putSp(double sp)
+    public void setSp(double sp)
     {
         hayStack.writeHisValByQuery("point and tr and sp and his and system", sp);
     }
@@ -174,7 +174,7 @@ public class SystemEquip
     {
         return hayStack.readHisValByQuery("point and tr and hwst and his and system");
     }
-    public void putHwst(double hwst)
+    public void setHwst(double hwst)
     {
         hayStack.writeHisValByQuery("point and tr and hwst and his and system", hwst);
     }
@@ -183,7 +183,7 @@ public class SystemEquip
     {
         return hayStack.readHisValByQuery("point and his and system and out and "+analog);
     }
-    public void putAnalogOut(String analog, double val)
+    public void setAnalogOut(String analog, double val)
     {
         hayStack.writeHisValByQuery("point and his and system and out and "+analog, val);
     }

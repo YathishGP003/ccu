@@ -41,11 +41,9 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation 'javax.servlet:servlet-api:2.5'
     api 'com.google.code.gson:gson:2.8.2'
-
     api 'com.fasterxml.jackson.core:jackson-core:2.8.6'
     api 'com.fasterxml.jackson.core:jackson-annotations:2.8.6'
     api 'com.fasterxml.jackson.core:jackson-databind:2.8.6'
-
     compile 'info.guardianproject.netcipher:netcipher:1.2'
-    compile 'org.influxdb:influxdb-java:2.14'
+    compile 'org.influxdb:influxdb-java:2.5'
 }

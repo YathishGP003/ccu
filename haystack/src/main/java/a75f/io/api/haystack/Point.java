@@ -1,6 +1,7 @@
 package a75f.io.api.haystack;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * Created by samjithsadasivan on 9/4/18.
@@ -131,6 +132,13 @@ public class Point
             p.group = this.group;
             p.unit = this.unit;
             //CCUHsApi.getInstance().addPoint(p);
+            return p;
+        }
+        
+        public Point build(Map m) {
+            Point p = new Point();
+            
+            
             return p;
         }
     }

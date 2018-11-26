@@ -27,7 +27,6 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.StringTokenizer;
 
 
@@ -280,7 +279,13 @@ public class TestDatabase extends HServer
     }
     return (HHisItem[])acc.toArray(new HHisItem[acc.size()]);
   }
-
+  
+  public HHisItem[] onHisRead(HDict entity)
+  {
+    return null;
+  }
+  
+  
   public void onHisWrite(HDict rec, HHisItem[] items)
   {
     throw new RuntimeException("Unsupported");

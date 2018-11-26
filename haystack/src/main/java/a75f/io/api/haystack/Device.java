@@ -11,8 +11,12 @@ public class Device
     private String            displayName;
     private ArrayList<String> markers;
     private String equipRef;
-    private String addr;
     private String siteRef;
+    private String zoneRef;
+    private String floorRef;
+    private String addr;
+    
+    
     public String getAddr()
     {
         return addr;
@@ -32,6 +36,14 @@ public class Device
     public String getSiteRef() {
         return siteRef;
     }
+    public String getZoneRef()
+    {
+        return zoneRef;
+    }
+    public String getFloorRef()
+    {
+        return floorRef;
+    }
     private Device(){
     
     }
@@ -42,7 +54,18 @@ public class Device
         private String equipRef;
         private String addr;
         private String siteRef;
-    
+        private String zoneRef;
+        private String floorRef;
+        public Builder setZoneRef(String zoneRef)
+        {
+            this.zoneRef = zoneRef;
+            return this;
+        }
+        public Builder setFloorRef(String floorRef)
+        {
+            this.floorRef = floorRef;
+            return this;
+        }
         public Builder setAddr(int addr)
         {
             this.addr = String.valueOf(addr);
@@ -89,6 +112,8 @@ public class Device
             d.addr = this.addr;
             d.siteRef = this.siteRef;
             d.equipRef = this.equipRef;
+            d.zoneRef = this.zoneRef;
+            d.floorRef = this.floorRef;
             return CCUHsApi.getInstance().addDevice(d);
         }
     }

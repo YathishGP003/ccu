@@ -23,7 +23,7 @@ public class ProfileTest
 
 		ccuApplication.setTitle("Test");
 		Floor floor = new Floor(1, "webid", "Floor1");
-		Zone zone = new Zone("DefaultZone");
+		Zone zone = new Zone("DefaultZone", floor);
 		LightProfileConfiguration lightProfileConfiguration = new LightProfileConfiguration();
 		floor.mZoneList.add(zone);
 		SingleStageProfile profile = new SingleStageProfile();

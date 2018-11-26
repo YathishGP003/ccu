@@ -180,24 +180,24 @@ public class CCUApplication
         this.mLCMNamedSchedules = namedSchedules;
     }
     
-    public String getFloor(short addr) {
+    public String getFloorRef(short addr) {
         for (Floor f : mfloors) {
             for (Zone z : f.mZoneList) {
                 for (ZoneProfile zp : z.mZoneProfiles) {
                     zp.getNodeAddresses().contains(addr);
-                    return f.mFloorName;
+                    return f.mFloorRef;
                 }
             }
         }
         return "";
      }
     
-    public String getRoom(short addr) {
+    public String getZoneRef(short addr) {
         for (Floor f : mfloors) {
             for (Zone z : f.mZoneList) {
                 for (ZoneProfile zp : z.mZoneProfiles) {
                     zp.getNodeAddresses().contains(addr);
-                    return z.roomName;
+                    return z.mZoneRef;
                 }
             }
         }

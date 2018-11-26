@@ -200,7 +200,7 @@ public class FragmentSSEConfiguration extends BaseDialogFragment implements Comp
     
     private void setUpTestTriggers()
     {
-        final Zone testZone = new Zone();
+        final Zone testZone = new Zone(null, null);
         final TestProfile testSingleStage = new TestProfile();
         testZone.mZoneProfiles.add(testSingleStage);
         

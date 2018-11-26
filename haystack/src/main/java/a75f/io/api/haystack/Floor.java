@@ -11,37 +11,39 @@ public class Floor
     private String            displayName;
     private ArrayList<String> markers;
     private String            siteRef;
-    public void setDisplayName(String displayName)
+    public String getDisplayName()
     {
-        this.displayName = displayName;
+        return displayName;
     }
-    public void setMarkers(ArrayList<String> markers)
+    public ArrayList<String> getMarkers()
     {
-        this.markers = markers;
+        return markers;
     }
-    public void setSiteRef(String siteRef)
+    public String getSiteRef()
     {
-        this.siteRef = siteRef;
+        return siteRef;
     }
-    
     public static class Builder{
         private String            displayName;
-        private ArrayList<String> markers;
+        private ArrayList<String> markers = new ArrayList<>();;
         private String            siteRef;
-        public void setDisplayName(String displayName)
+        public Builder setDisplayName(String displayName)
         {
             this.displayName = displayName;
+            return this;
         }
-        public void setMarkers(ArrayList<String> markers)
+        public Builder setMarkers(ArrayList<String> markers)
         {
             this.markers = markers;
+            return this;
         }
-        public void setSiteRef(String siteRef)
+        public Builder setSiteRef(String siteRef)
         {
             this.siteRef = siteRef;
+            return this;
         }
         
-        public Floor Builder(){
+        public Floor build(){
             Floor f = new Floor();
             f.displayName = this.displayName;
             f.siteRef = this.siteRef;

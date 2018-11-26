@@ -91,8 +91,8 @@ public class VAVLogicalMap
     
     public void createHaystackPoints(VavProfileConfiguration config) {
         
-        String floor = L.ccu().getFloor((short)nodeAddr);
-        String room = L.ccu().getRoom((short)nodeAddr);
+        String floor = L.ccu().getFloorRef((short)nodeAddr);
+        String room = L.ccu().getZoneRef((short)nodeAddr);
         
         String tz = "Chicago";//TODO
         //Create Logical points
@@ -295,7 +295,7 @@ public class VAVLogicalMap
         CCUHsApi.getInstance().addPoint(pressureRequestPercentage);
         
         //Create Physical points and map
-        SmartNode device = new SmartNode(nodeAddr, siteRef);
+        SmartNode device = new SmartNode(nodeAddr, siteRef, floor, room);
         device.th1In.setPointRef(datID);
         device.th2In.setPointRef(eatID);
         device.analog1Out.setPointRef(dpID);
@@ -320,13 +320,22 @@ public class VAVLogicalMap
         setCurrentTemp(0);
         setDamperPos(0);
         setReheatPos(0);
-        setDesiredTemp(0);
         setDischargeTemp(0);
         setSupplyAirTemp(0);
         setDesiredTemp(72.0);
         
         CCUHsApi.getInstance().syncEntityTree();
         
+    }
+    
+    public void updateHaystackPoints(VavProfileConfiguration config) {
+        for (Output op : config.getOutputs()) {
+            if (op.getPort() == Port.ANALOG_OUT_ONE) {
+                SmartNode.updatePhysicalPoint(nodeAddr, Port.ANALOG_OUT_ONE.toString(), op.getAnalogActuatorType());
+            } else if (op.getPort() == Port.ANALOG_OUT_TWO) {
+                SmartNode.updatePhysicalPoint(nodeAddr, Port.ANALOG_OUT_TWO.toString(), op.getAnalogActuatorType());
+            }
+        }
     }
     
     public void deleteHaystackPoints() {

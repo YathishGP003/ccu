@@ -27,8 +27,6 @@ import a75f.io.api.haystack.Tags;
 
 public class TestHS
 {
-    
-    
     @Test
     public void testSerialization(){
         CCUHsApi api = new CCUHsApi();
@@ -346,5 +344,4 @@ public class TestHS
         hayStack.entitySyncHandler.doSyncRemoveIds();
         System.out.println("removeIDMap: "+ hayStack.tagsDb.removeIdMap);
     }
-    
 }

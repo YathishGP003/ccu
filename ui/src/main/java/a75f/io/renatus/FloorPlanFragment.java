@@ -384,9 +384,9 @@ public class FloorPlanFragment extends Fragment
 		{
 			Toast.makeText(getActivity().getApplicationContext(),
 					"Room " + addRoomEdit.getText() + " added", Toast.LENGTH_SHORT).show();
-			ArrayList<Zone> mRoomList =
-					L.ccu().getFloors().get(mFloorListAdapter.getSelectedPostion()).mZoneList;
-			mRoomList.add(new Zone(addRoomEdit.getText().toString()));
+			Floor f = L.ccu().getFloors().get(mFloorListAdapter.getSelectedPostion());
+			ArrayList<Zone> mRoomList =f.mZoneList;
+			mRoomList.add(new Zone(addRoomEdit.getText().toString(), f));
 			updateRooms(mRoomList);
 			selectRoom(mRoomList.size() - 1);
 			InputMethodManager mgr = (InputMethodManager) getActivity()

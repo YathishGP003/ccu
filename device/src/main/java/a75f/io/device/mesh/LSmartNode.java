@@ -110,7 +110,7 @@ public class LSmartNode
                     ArrayList<HashMap> physicalOpPoints= hayStack.readAll("point and physical and output and deviceRef == \""+device.get("id")+"\"");
                     
                     for (HashMap opPoint : physicalOpPoints) {
-                        HashMap logicalOpPoint = hayStack.read("point and id=="+opPoint.get("pointRef"));
+                        HashMap logicalOpPoint = hayStack.read("point and id == "+opPoint.get("pointRef"));
                         double logicalVal = hayStack.readHisValById(logicalOpPoint.get("id").toString());
                         
                         String port = opPoint.get("port").toString();

@@ -45,6 +45,11 @@ public class EntitySyncHandler
             doSyncRemoveIds();
         }
     
+        if (CCUHsApi.getInstance().tagsDb.updateIdMap.size() > 0) {
+            System.out.println("UpdateIDMap : "+CCUHsApi.getInstance().tagsDb.updateIdMap);
+            doSyncUpdateEntities();
+        }
+    
     }
     
     public synchronized void doSync() {
@@ -287,6 +292,27 @@ public class EntitySyncHandler
             CCUHsApi.getInstance().tagsDb.removeIdMap.clear();
         }
         System.out.println("Response: \n" + response);
+    }
+    
+    public void doSyncUpdateEntities() {
+        ArrayList<HDict> entities = new ArrayList<>();
+        for (String luid : CCUHsApi.getInstance().tagsDb.updateIdMap.keySet()) {
+            HashMap entity = CCUHsApi.getInstance().readMapById(luid);
+            entity.put("id", HRef.copy(CCUHsApi.getInstance().getGUID(luid)));
+            entities.add(HSUtil.mapToHDict(entity));
+        }
+    
+        if (entities.size() > 0)
+        {
+            HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
+            String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
+            System.out.println("Response: \n" + response);
+            if (response != null)
+            {
+                System.out.println("Updated Entities: "+CCUHsApi.getInstance().tagsDb.updateIdMap);
+                CCUHsApi.getInstance().tagsDb.updateIdMap.clear();
+            }
+        }
     }
     
     public boolean isSyncNeeded() {

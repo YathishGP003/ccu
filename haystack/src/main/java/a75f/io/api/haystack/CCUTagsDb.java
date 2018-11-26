@@ -706,7 +706,7 @@ public class CCUTagsDb extends HServer
         hisQuery.equal(HisItem_.rec, entity.get("id").toString())
                 .order(HisItem_.date,QueryBuilder.DESCENDING);
         
-        HisItem item =hisQuery.build().findFirst();
+        HisItem item = hisQuery.build().findFirst();
         
         boolean isBool = ((HStr)entity.get("kind")).val.equals("Bool");
         ArrayList acc = new ArrayList();

@@ -23,8 +23,6 @@ public class RenatusApp extends UtilityApplication
 	{
 		super.onCreate();
 		Fabric.with(this, new Crashlytics());
-
-		Log.i(TAG, "RENATUS APP INITIATED");
 	}
 
 

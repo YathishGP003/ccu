@@ -105,6 +105,7 @@ public class HttpUtil
 
     public static String parseToken(String jsonResponse)
     {
+        System.out.println("JsonResponse: " + jsonResponse);
         JsonParser parser = new JsonParser();
         JsonElement jsonTree = parser.parse(jsonResponse);
 

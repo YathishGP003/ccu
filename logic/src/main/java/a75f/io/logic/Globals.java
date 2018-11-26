@@ -141,19 +141,19 @@ public class Globals
         
         new CCUHsApi(this.mApplicationContext);
         //TODO - Test => Should be moved to registration module
-        HashMap site = CCUHsApi.getInstance().read("site");
-        if (site.size() == 0) {
-            //TODO - demo
-            Site s75f = new Site.Builder()
-                                .setDisplayName("75F")
-                                .addMarker("site")
-                                .setGeoCity("Burnsville")
-                                .setGeoState("MN")
-                                .setTz("Chicago")
-                                .setArea(10000).build();
-            CCUHsApi.getInstance().addSite(s75f);
-            BuildingTuners.getInstance();//To init Building tuner
-        }
+//        HashMap site = CCUHsApi.getInstance().read("site");
+//        if (site.size() == 0) {
+//            //TODO - demo
+//            Site s75f = new Site.Builder()
+//                                .setDisplayName("75F")
+//                                .addMarker("site")
+//                                .setGeoCity("Burnsville")
+//                                .setGeoState("MN")
+//                                .setTz("Chicago")
+//                                .setArea(10000).build();
+//            CCUHsApi.getInstance().addSite(s75f);
+//            BuildingTuners.getInstance();//To init Building tuner
+//        }
     }
 
     private void populate()

@@ -53,10 +53,27 @@ public class RegisterGatherSiteDetails extends Activity {
                 String siteName = mSiteName.getText().toString();
                 String siteCity = mSiteCity.getText().toString();
                 String siteZip = mSiteZip.getText().toString();
-                saveSite(siteName, siteCity, siteZip);
-                saveCCU(mInstallerEmail, mCCUName);
 
-                next();
+                new Thread()
+                {
+                    @Override
+                    public void run()
+                    {
+                        super.run();
+
+                        saveSite(siteName, siteCity, siteZip);
+                        saveCCU(mInstallerEmail, mCCUName);
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+
+                                next();
+                            }
+                        });
+                    }
+                }.start();
+
             }
         });
     }

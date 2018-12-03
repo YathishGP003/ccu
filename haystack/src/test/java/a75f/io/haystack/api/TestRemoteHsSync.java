@@ -92,7 +92,7 @@ public class TestRemoteHsSync
         Equip v = new Equip.Builder()
                           .setSiteRef(siteRef)
                           .setDisplayName(siteDis+"-VAV-"+nodeAddr)
-                          .setRoomRef("room")
+                          .setZoneRef("room")
                           .setFloorRef("floor")
                           .addMarker("equip")
                           .addMarker("vav")
@@ -104,7 +104,7 @@ public class TestRemoteHsSync
                                   .setDisplayName(siteDis+"AHU-"+nodeAddr+"-TestTemp")
                                   .setEquipRef(equipRef)
                                   .setSiteRef(siteRef)
-                                  .setRoomRef("room")
+                                  .setZoneRef("room")
                                   .setFloorRef("floor")
                                   .addMarker("discharge")
                                   .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("writable")
@@ -159,7 +159,7 @@ public class TestRemoteHsSync
         Equip v = new Equip.Builder()
                           .setSiteRef(siteRef)
                           .setDisplayName(siteDis+"-VAV-"+nodeAddr)
-                          .setRoomRef("room")
+                          .setZoneRef("room")
                           .setFloorRef("floor")
                           .addMarker("equip")
                           .addMarker("vav")
@@ -170,7 +170,7 @@ public class TestRemoteHsSync
         Equip v1 = new Equip.Builder()
                           .setSiteRef(siteRef)
                           .setDisplayName(siteDis+"-VAV-"+(nodeAddr+1))
-                          .setRoomRef("room1")
+                          .setZoneRef("room1")
                           .setFloorRef("floor")
                           .addMarker("equip")
                           .addMarker("vav")
@@ -182,7 +182,7 @@ public class TestRemoteHsSync
                                   .setDisplayName(siteDis+"AHU-"+nodeAddr+"-TestTemp")
                                   .setEquipRef(equipRef)
                                   .setSiteRef(siteRef)
-                                  .setRoomRef("room")
+                                  .setZoneRef("room")
                                   .setFloorRef("floor")
                                   .addMarker("discharge")
                                   .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("writable")
@@ -237,7 +237,7 @@ public class TestRemoteHsSync
         Equip v = new Equip.Builder()
                           .setSiteRef(siteRef)
                           .setDisplayName(siteDis+"-VAV-"+nodeAddr)
-                          .setRoomRef("room")
+                          .setZoneRef("room")
                           .setFloorRef("floor")
                           .addMarker("equip")
                           .addMarker("vav")
@@ -248,7 +248,7 @@ public class TestRemoteHsSync
         Equip v1 = new Equip.Builder()
                            .setSiteRef(siteRef)
                            .setDisplayName(siteDis+"-VAV-"+(nodeAddr+1))
-                           .setRoomRef("room1")
+                           .setZoneRef("room1")
                            .setFloorRef("floor")
                            .addMarker("equip")
                            .addMarker("vav")
@@ -260,7 +260,7 @@ public class TestRemoteHsSync
                                   .setDisplayName(siteDis+"AHU-"+nodeAddr+"-TestTemp")
                                   .setEquipRef(equipRef)
                                   .setSiteRef(siteRef)
-                                  .setRoomRef("room")
+                                  .setZoneRef("room")
                                   .setFloorRef("floor")
                                   .addMarker("discharge")
                                   .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("writable")
@@ -294,6 +294,8 @@ public class TestRemoteHsSync
         hayStack.tagsDb.tagsMap = new HashMap<>();
         hayStack.tagsDb.writeArrays = new HashMap<>();
         hayStack.tagsDb.idMap = new HashMap<>();
+        hayStack.tagsDb.removeIdMap = new HashMap<>();
+        hayStack.tagsDb.updateIdMap = new HashMap<>();
         int nodeAddr = 7000;
     
         EntitySyncHandler entitySyncHandler = new EntitySyncHandler();
@@ -314,8 +316,8 @@ public class TestRemoteHsSync
         Equip v = new Equip.Builder()
                           .setSiteRef(siteRef)
                           .setDisplayName(siteDis+"-VAV-"+nodeAddr)
-                          .setRoomRef("room")
-                          .setFloorRef("floor")
+                          .setZoneRef("SYSTEM")
+                          .setFloorRef("SYSTEM")
                           .addMarker("equip")
                           .addMarker("vav")
                           .setGroup(String.valueOf(nodeAddr))
@@ -325,8 +327,8 @@ public class TestRemoteHsSync
         Equip v1 = new Equip.Builder()
                            .setSiteRef(siteRef)
                            .setDisplayName(siteDis+"-VAV-"+(nodeAddr+1))
-                           .setRoomRef("room1")
-                           .setFloorRef("floor")
+                           .setZoneRef("SYSTEM")
+                           .setFloorRef("SYSTEM")
                            .addMarker("equip")
                            .addMarker("vav")
                            .setGroup(String.valueOf(nodeAddr+1))
@@ -337,8 +339,8 @@ public class TestRemoteHsSync
                                   .setDisplayName(siteDis+"AHU-"+nodeAddr+"-TestTemp")
                                   .setEquipRef(equipRef)
                                   .setSiteRef(siteRef)
-                                  .setRoomRef("room")
-                                  .setFloorRef("floor")
+                                  .setZoneRef("SYSTEM")
+                                  .setFloorRef("SYSTEM")
                                   .addMarker("discharge")
                                   .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("writable")
                                   .setTz("Chicago")
@@ -350,8 +352,8 @@ public class TestRemoteHsSync
                                   .setDisplayName(siteDis+"AHU-"+nodeAddr+"-TestTemp1")
                                   .setEquipRef(equipRef)
                                   .setSiteRef(siteRef)
-                                  .setRoomRef("room")
-                                  .setFloorRef("floor")
+                                  .setZoneRef("SYSTEM")
+                                  .setFloorRef("SYSTEM")
                                   .addMarker("discharge")
                                   .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("writable")
                                   .setTz("Chicago")
@@ -371,16 +373,7 @@ public class TestRemoteHsSync
     
     @Test
     public void testHisSync(){
-        //HHisItem[] items = new HHisItem[2];
-        //HHisItem item1 = HHisItem.make(HDateTime.make(HDate.today(), HTime.MIDNIGHT, HTimeZone.DEFAULT, 0), HNum.make(12.0));
-        //HHisItem item2 = HHisItem.make(HDateTime.make(HDate.today(), HTime.MIDNIGHT, HTimeZone.DEFAULT, 0), HNum.make(22.0));
-        //items[0] = item1;
-        //items[1] = item2;
-        //HDictBuilder b = new HDictBuilder();
-        //b.add("id", HRef.make("5bc7abbc895ee35f509d4d1b"));
-        //HGridBuilder.hisItemsToGrid(b.toDict(), items).dump();
-    
-    
+        
         CCUHsApi hayStack = new CCUHsApi();
         hayStack.tagsDb.init();
         hayStack.tagsDb.tagsMap = new HashMap<>();
@@ -405,7 +398,7 @@ public class TestRemoteHsSync
         Equip v = new Equip.Builder()
                           .setSiteRef(siteRef)
                           .setDisplayName(siteDis+"-VAV-"+nodeAddr)
-                          .setRoomRef("room")
+                          .setZoneRef("room")
                           .setFloorRef("floor")
                           .addMarker("equip")
                           .addMarker("vav")
@@ -416,7 +409,7 @@ public class TestRemoteHsSync
         Equip v1 = new Equip.Builder()
                            .setSiteRef(siteRef)
                            .setDisplayName(siteDis+"-VAV-"+(nodeAddr+1))
-                           .setRoomRef("room1")
+                           .setZoneRef("room1")
                            .setFloorRef("floor")
                            .addMarker("equip")
                            .addMarker("vav")
@@ -428,7 +421,7 @@ public class TestRemoteHsSync
                                   .setDisplayName(siteDis+"AHU-"+nodeAddr+"-TestTemp")
                                   .setEquipRef(equipRef)
                                   .setSiteRef(siteRef)
-                                  .setRoomRef("room")
+                                  .setZoneRef("room")
                                   .setFloorRef("floor")
                                   .addMarker("discharge")
                                   .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("writable")
@@ -441,7 +434,7 @@ public class TestRemoteHsSync
                                    .setDisplayName(siteDis+"AHU-"+nodeAddr+"-TestTemp1")
                                    .setEquipRef(equipRef)
                                    .setSiteRef(siteRef)
-                                   .setRoomRef("room")
+                                   .setZoneRef("room")
                                    .setFloorRef("floor")
                                    .addMarker("discharge")
                                    .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("writable")

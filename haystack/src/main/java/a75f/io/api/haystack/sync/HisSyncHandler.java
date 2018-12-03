@@ -17,7 +17,9 @@ import org.projecthaystack.io.HZincWriter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HisItem;
@@ -38,16 +40,20 @@ public class HisSyncHandler
     public synchronized void doSync() {
         
         Log.d("CCU", "doHisSync ->");
+        sendHisToHaystack();
+        //sendHisToInflux();
+        //sendHisToInfluxBatched();
+        Log.d("CCU","<- doHisSync");
+    }
+    
+    /**
+     * His data is uploaded to haystack server , which then writes to influx.
+     */
+    private void sendHisToHaystack() {
         ArrayList<HashMap> points = hayStack.readAll("point and his");
         if (points.size() == 0) {
             return;
         }
-    
-        //tsData = new HashMap<>();
-        /*BatchPoints.Builder batchPointsBuilder = BatchPoints
-                                                         .database(TS.getInstance().getTimeSeriesDBName());*/
-    
-    
         for (Map m : points)
         {
             //TODO- send all points in single call?
@@ -57,20 +63,13 @@ public class HisSyncHandler
                 HDict point = hayStack.hsClient.readById(HRef.copy(pointID));
                 System.out.println(point);
                 continue;
-                
+            
             }
             ArrayList<HisItem> hisItems = (ArrayList<HisItem>) CCUHsApi.getInstance().tagsDb.getUnSyncedHisItems(HRef.copy(pointID));
             if (hisItems.size() == 0) {
                 continue;
             }
-    
-            
-            
-            //HisItem sItem = hisItems.get(hisItems.size()-1);//TODO - Writing just the last val for now
-            //tsData.put(m.get("dis").toString(), String.valueOf(sItem.getVal()));
-            
-            
-            //TODO - Influxdb java lib does not compile on SDK-19. Using POST method until it is sorted out.
+        
             HDict point = hayStack.hsClient.readById(HRef.copy(pointID));
             System.out.println(point);
             boolean isBool = ((HStr) point.get("kind")).val.equals("Bool");
@@ -81,34 +80,8 @@ public class HisSyncHandler
                 HDict hsItem = HHisItem.make(HDateTime.make(item.getDate().getTime()), val);
                 acc.add(hsItem);
             }
-            
-            HHisItem[] hHisItems = (HHisItem[]) acc.toArray(new HHisItem[acc.size()]);
-            
-            /*for (HHisItem hItem : hHisItems) {
-                org.influxdb.dto.Point.Builder measurement = org.influxdb.dto.Point.measurement(hayStack.getGUID(pointID).replace("@",""));
-                measurement.time(hItem.ts.millis(), TimeUnit.MILLISECONDS);
-                measurement.addField("TZ", hItem.ts.tz.name);
-                Iterator iterator = hItem.iterator();
-                while (iterator.hasNext()) {
-                    Map.Entry entry = (Map.Entry) iterator.next();
-                    String key = entry.getKey().toString();
-                    if (!entry.getKey().toString().equals("ts")) {
-                        HVal hVal = (HVal) entry.getValue();
-                        if (hVal instanceof HNum) {
-                            double curVal = ((HNum) hVal).val;
-                            measurement.addField(key, curVal);
-                        } else {
-                            measurement.addField(key, hVal.toString());
-                        }
-                    }
-                }
         
-                System.out.println("Write influx point "+measurement.toString());
-                batchPointsBuilder.point(measurement.build());
-            }*/
-    
-            
-            
+            HHisItem[] hHisItems = (HHisItem[]) acc.toArray(new HHisItem[acc.size()]);
             HDictBuilder b = new HDictBuilder();
             b.add("id", HRef.copy(CCUHsApi.getInstance().getGUID(pointID)));
             HGrid itemGrid = HGridBuilder.hisItemsToGrid(b.toDict(), hHisItems);
@@ -119,29 +92,147 @@ public class HisSyncHandler
             }
             String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "hisWrite", HZincWriter.gridToString(itemGrid));
             System.out.println("Response :\n"+response);
-            //TODO- success ?
-            if (response != null && response.contains("empty")) {
+            if (response != null) {
                 for (HisItem item: hisItems)
                 {
                     item.setSyncStatus(true);
                 }
+                hayStack.tagsDb.setHisItemSyncStatus(hisItems);
+            }
+            
+        }
+        
+    }
+    
+    /**
+    * Single measurement is created for an equip with current time as time stamp.
+    * Most recent unsynced value is sent for each point.
+    * All the local history entries marked 'synced' once the data is wrote to influx.
+    * */
+    private void sendHisToInflux() {
+        
+        ArrayList<HashMap> equips = hayStack.readAll("equip");
+        for (HashMap equip : equips) {
+            ArrayList<HashMap> points = hayStack.readAll("point and his equipRef == \""+equip.get("id")+"\"");
+            if (CCUHsApi.getInstance().getGUID(equip.get("id").toString()) == null) {
+                continue;
             }
     
-           /* for (HisItem item: hisItems)
+            HashMap tsData = new HashMap<>();
+        
+            for (Map m : points)
             {
-                item.setSyncStatus(true);
-            }*/
-            hayStack.tagsDb.setHisItemSyncStatus(hisItems);
-        }
+                String pointID = m.get("id").toString();
+                if (CCUHsApi.getInstance().getGUID(pointID) == null) {
+                    Log.d("CCU","Skip hisSync; point does not have GUID "+pointID);
+                    HDict point = hayStack.hsClient.readById(HRef.copy(pointID));
+                    System.out.println(point);
+                    continue;
+        
+                }
+                ArrayList<HisItem> hisItems = (ArrayList<HisItem>) CCUHsApi.getInstance().tagsDb.getUnSyncedHisItems(HRef.copy(pointID));
+                if (hisItems.size() == 0) {
+                    continue;
+                }
     
-        //TS.getInstance().getTS().write(batchPointsBuilder.build());
+                HisItem sItem = hisItems.get(hisItems.size()-1);//TODO - Writing just the recent his val?
+                tsData.put(m.get("dis").toString(), String.valueOf(sItem.getVal()));
+    
+                for (HisItem item: hisItems)
+                {
+                    item.setSyncStatus(true);
+                }
+                hayStack.tagsDb.setHisItemSyncStatus(hisItems);
+            
+            }
+            
+            if (tsData.size() > 0)
+            {
+                String url = new InfluxDbUtil.URLBuilder().setProtocol(InfluxDbUtil.HTTP).setHost("renatus-influxiprvgkeeqfgys.centralus.cloudapp.azure.com").setPort(8086).setOp(InfluxDbUtil.WRITE).setDatabse("haystack").setUser("75f@75f.io").setPassword("7575").buildUrl();
+                InfluxDbUtil.writeData(url, CCUHsApi.getInstance().getGUID(equip.get("id").toString())
+                                                , tsData, System.currentTimeMillis());
+            }
         
-        /*if (tsData.size() > 0)
-        {
-            String url = new InfluxDbUtil.URLBuilder().setProtocol(InfluxDbUtil.HTTP).setHost("renatus-influxiprvgkeeqfgys.centralus.cloudapp.azure.com").setPort(8086).setOp(InfluxDbUtil.WRITE).setDatabse("haystack").setUser("75f@75f.io").setPassword("7575").buildUrl();
-            InfluxDbUtil.writeData(url, "03RENATUS_CCU", tsData, System.currentTimeMillis());
-        }*/
+        }
+    }
+    
+    /**
+     * Batched write to influx.
+     */
+    //TODO - WIP , Cannot be used as Influxdb java lib does not load on SDK-19
+    private void sendHisToInfluxBatched() {
+        ArrayList<HashMap> equips = hayStack.readAll("equip");
+        HashMap tsData = new HashMap<>();
+        /*BatchPoints.Builder batchPointsBuilder = BatchPoints
+                                                         .database(TS.getInstance().getTimeSeriesDBName());*/
         
-        Log.d("CCU","<- doHisSync");
+        for (HashMap equip : equips) {
+            ArrayList<HashMap> points = hayStack.readAll("point and his equipRef == \""+equip.get("id")+"\"");
+            if (CCUHsApi.getInstance().getGUID(equip.get("id").toString()) == null) {
+                continue;
+            }
+            org.influxdb.dto.Point.Builder measurement = org.influxdb.dto.Point.measurement(CCUHsApi.getInstance()
+                                        .getGUID(equip.get("id").toString()).replace("@",""));
+        
+            for (Map m : points)
+            {
+                String pointID = m.get("id").toString();
+                if (CCUHsApi.getInstance().getGUID(pointID) == null) {
+                    Log.d("CCU"," Point does not have GUID "+pointID);
+                    HDict point = hayStack.hsClient.readById(HRef.copy(pointID));
+                    System.out.println(point);
+                    continue;
+                
+                }
+                ArrayList<HisItem> hisItems = (ArrayList<HisItem>) CCUHsApi.getInstance().tagsDb.getUnSyncedHisItems(HRef.copy(pointID));
+                if (hisItems.size() == 0) {
+                    continue;
+                }
+    
+                HDict point = hayStack.hsClient.readById(HRef.copy(pointID));
+                System.out.println(point);
+                boolean isBool = ((HStr) point.get("kind")).val.equals("Bool");
+                ArrayList acc = new ArrayList();
+                for (HisItem item : hisItems)
+                {
+                    HVal val = isBool ? HBool.make(item.getVal() > 0) : HNum.make(item.getVal());
+                    HDict hsItem = HHisItem.make(HDateTime.make(item.getDate().getTime()), val);
+                    acc.add(hsItem);
+                }
+    
+                HHisItem[] hHisItems = (HHisItem[]) acc.toArray(new HHisItem[acc.size()]);
+            
+                for (HHisItem hItem : hHisItems) {
+                    
+                    measurement.time(hItem.ts.millis(), TimeUnit.MILLISECONDS);
+                    measurement.addField("TZ", hItem.ts.tz.name);
+                    Iterator iterator = hItem.iterator();
+                    while (iterator.hasNext()) {
+                        Map.Entry entry = (Map.Entry) iterator.next();
+                        String key = entry.getKey().toString();
+                        if (!entry.getKey().toString().equals("ts")) {
+                            HVal hVal = (HVal) entry.getValue();
+                            if (hVal instanceof HNum) {
+                                double curVal = ((HNum) hVal).val;
+                                measurement.addField(key, curVal);
+                            } else {
+                                measurement.addField(key, hVal.toString());
+                            }
+                        }
+                    }
+            
+                    System.out.println("Write influx point "+measurement.toString());
+                    //batchPointsBuilder.point(measurement.build());
+                }
+                for (HisItem item: hisItems)
+                {
+                    item.setSyncStatus(true);
+                }
+                hayStack.tagsDb.setHisItemSyncStatus(hisItems);
+            
+            }
+            //TS.getInstance().getTS().write(batchPointsBuilder.build());
+        
+        }
     }
 }

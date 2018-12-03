@@ -186,37 +186,41 @@ public class CCUTagsDb extends HServer
         return tagsMap;
     }
     
-    public void setTagsDbMap(Map map) {
-        tagsMap = map;
+    public void setTagsDbMap() {
+        tagsMap = new HashMap<>();
     }
     
     public void init(){
-        Gson gson = new GsonBuilder()
-                            .registerTypeAdapterFactory(hsTypeAdapter)
-                            .setPrettyPrinting()
-                            .disableHtmlEscaping()
-                            .create();
-        Type listType = new TypeToken<Map<String, MapImpl<String,HVal>>>()
-        {
-        }.getType();
-        tagsMap = gson.fromJson(tagsString, listType);
-        Type waType = new TypeToken<HashMap<String, WriteArray>>()
-        {
-        }.getType();
-        writeArrays = gson.fromJson(waString,waType);
     
-        BoxStore.deleteAllFiles(TEST_DIRECTORY);
-        boxStore = MyObjectBox.builder()
-                           // add directory flag to change where ObjectBox puts its database files
-                           .directory(TEST_DIRECTORY)
-                           // optional: add debug flags for more detailed ObjectBox log output
-                           .debugFlags(DebugFlags.LOG_QUERIES | DebugFlags.LOG_QUERY_PARAMETERS)
-                           .build();
-        hisBox = boxStore.boxFor(HisItem.class);
+        if (tagsString == null) {
+            tagsMap = new HashMap();
+            writeArrays = new HashMap();
+            idMap = new HashMap();
+            removeIdMap = new HashMap();
+            updateIdMap = new HashMap();
         
-        idMap = gson.fromJson(idMapString, HashMap.class);
-        removeIdMap = gson.fromJson(removeIdMapString, HashMap.class);
-        updateIdMap = gson.fromJson(updateIdMapString, HashMap.class);
+        } else
+        {
+            Gson gson = new GsonBuilder().registerTypeAdapterFactory(hsTypeAdapter).setPrettyPrinting().disableHtmlEscaping().create();
+            Type listType = new TypeToken<Map<String, MapImpl<String, HVal>>>()
+            {
+            }.getType();
+            tagsMap = gson.fromJson(tagsString, listType);
+            Type waType = new TypeToken<HashMap<String, WriteArray>>()
+            {
+            }.getType();
+            writeArrays = gson.fromJson(waString, waType);
+            BoxStore.deleteAllFiles(TEST_DIRECTORY);
+            boxStore = MyObjectBox.builder()
+                                  // add directory flag to change where ObjectBox puts its database files
+                                  .directory(TEST_DIRECTORY)
+                                  // optional: add debug flags for more detailed ObjectBox log output
+                                  .debugFlags(DebugFlags.LOG_QUERIES | DebugFlags.LOG_QUERY_PARAMETERS).build();
+            hisBox = boxStore.boxFor(HisItem.class);
+            idMap = gson.fromJson(idMapString, HashMap.class);
+            removeIdMap = gson.fromJson(removeIdMapString, HashMap.class);
+            updateIdMap = gson.fromJson(updateIdMapString, HashMap.class);
+        }
     }
     
     public void saveString() {
@@ -311,7 +315,10 @@ public class CCUTagsDb extends HServer
         HDictBuilder equip = new HDictBuilder()
                                      .add("id",      HRef.make(UUID.randomUUID().toString()))
                                      .add("dis",     q.getDisplayName())
-                                     .add("siteRef", q.getSiteRef()/*site.get("id")*/)
+                                     .add("equip",     HMarker.VAL)
+                                     .add("siteRef", q.getSiteRef())
+                                     .add("zoneRef",  q.getRoomRef() != null ? q.getRoomRef() : "SYSTEM")
+                                     .add("floorRef", q.getFloorRef() != null ? q.getFloorRef() : "SYSTEM")
                                      .add("group",q.getGroup());
         for (String m : q.getMarkers()) {
             equip.add(m);
@@ -326,7 +333,10 @@ public class CCUTagsDb extends HServer
         HDictBuilder equip = new HDictBuilder()
                                      .add("id",      HRef.copy(i))
                                      .add("dis",     q.getDisplayName())
-                                     .add("siteRef", q.getSiteRef()/*site.get("id")*/)
+                                     .add("equip",     HMarker.VAL)
+                                     .add("siteRef", q.getSiteRef())
+                                     .add("zoneRef",  q.getRoomRef())
+                                     .add("floorRef", q.getFloorRef())
                                      .add("group",q.getGroup());
         for (String m : q.getMarkers()) {
             equip.add(m);
@@ -348,8 +358,8 @@ public class CCUTagsDb extends HServer
                                  .add("point",    HMarker.VAL)
                                  .add("siteRef",  p.getSiteRef())
                                  .add("equipRef", p.getEquipRef())
-                                 .add("roomRef",  p.getRoomRef())
-                                 .add("floorRef", p.getFloorRef())
+                                 .add("zoneRef",  p.getZoneRef() != null ? p.getZoneRef() : "SYSTEM")
+                                 .add("floorRef", p.getFloorRef() != null ? p.getFloorRef() : "SYSTEM")
                                  .add("group",p.getGroup())
                                  .add("kind",     p.getUnit() == null ? "Bool" : "Number")
                                  .add("tz",       p.getTz());
@@ -371,7 +381,7 @@ public class CCUTagsDb extends HServer
                                  .add("point",    HMarker.VAL)
                                  .add("siteRef",  p.getSiteRef())
                                  .add("equipRef", p.getEquipRef())
-                                 .add("roomRef",  p.getRoomRef())
+                                 .add("zoneRef",  p.getZoneRef())
                                  .add("floorRef", p.getFloorRef())
                                  .add("group",p.getGroup())
                                  .add("kind",     p.getUnit() == null ? "Bool" : "Number")
@@ -507,7 +517,7 @@ public class CCUTagsDb extends HServer
         HDictBuilder b = new HDictBuilder()
                                  .add("id",       HRef.make(UUID.randomUUID().toString()))
                                  .add("dis",      z.getDisplayName())
-                                 .add("zone",    HMarker.VAL)
+                                 .add("room",    HMarker.VAL)
                                  .add("floorRef",  z.getFloorRef());
         
         for (String m : z.getMarkers()) {
@@ -523,7 +533,7 @@ public class CCUTagsDb extends HServer
         HDictBuilder b = new HDictBuilder()
                                  .add("id",       HRef.copy(i))
                                  .add("dis",      z.getDisplayName())
-                                 .add("zone",    HMarker.VAL)
+                                 .add("room",    HMarker.VAL)
                                  .add("floorRef",  z.getFloorRef());
         
         for (String m : z.getMarkers()) {

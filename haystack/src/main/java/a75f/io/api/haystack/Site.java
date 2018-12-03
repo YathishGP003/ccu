@@ -38,6 +38,10 @@ public class Site
     {
         return geoAddress;
     }
+    public String getGeoZip()
+    {
+        return geoZip;
+    }
     public String getTz()
     {
         return tz;

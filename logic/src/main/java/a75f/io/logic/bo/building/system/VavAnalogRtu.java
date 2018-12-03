@@ -94,23 +94,36 @@ public class VavAnalogRtu extends SystemProfile
         double analogMin = SystemTunerUtil.getTuner("analog1", "min");
         double analogMax = SystemTunerUtil.getTuner("analog1", "max");
         Log.d("CCU", "analogMin: "+analogMin+" analogMax: "+analogMax+" SAT: "+getSystemSAT());
-        int signal;
-        if (analogMax > analogMin)
+        int signal = 0;
+        if (DxCIController.getInstance().getDxCIRtuState() == DxCIController.State.COOLING)
         {
-            signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (SystemConstants.COOLING_SAT_CONFIG_MAX - getSystemSAT()) / 10));
-        } else {
-            signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (SystemConstants.COOLING_SAT_CONFIG_MAX - getSystemSAT()) / 10));
+            if (analogMax > analogMin)
+            {
+                signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (SystemConstants.COOLING_SAT_CONFIG_MAX - getSystemSAT()) / 10));
+            }
+            else
+            {
+                signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (SystemConstants.COOLING_SAT_CONFIG_MAX - getSystemSAT()) / 10));
+            }
+            
         }
         SystemEquip.getInstance().setAnalogOut("analog1", signal);
     
         analogMin = SystemTunerUtil.getTuner("analog2", "min");
         analogMax = SystemTunerUtil.getTuner("analog2", "max");
     
-        if (analogMax > analogMin)
+        if (DxCIController.getInstance().getDxCIRtuState() == DxCIController.State.HEATING)
         {
-            signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (DxCIController.getInstance().getHeatingSignal()) / 100));
+            if (analogMax > analogMin)
+            {
+                signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (DxCIController.getInstance().getHeatingSignal()) / 100));
+            }
+            else
+            {
+                signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (DxCIController.getInstance().getHeatingSignal()) / 100));
+            }
         } else {
-            signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (DxCIController.getInstance().getHeatingSignal()) / 100));
+            signal = 0;
         }
         SystemEquip.getInstance().setAnalogOut("analog2", signal);
     

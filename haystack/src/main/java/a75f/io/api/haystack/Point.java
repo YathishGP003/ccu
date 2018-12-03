@@ -15,20 +15,20 @@ public class Point
     private String equipRef;
     private String unit;
     private String tz;
-    private String roomRef;
+    private String zoneRef;
     private String floorRef;
     private String group;
     public String getGroup()
     {
         return group;
     }
-    public String getRoomRef()
+    public String getZoneRef()
     {
-        return "@"+roomRef;
+        return zoneRef;
     }
     public String getFloorRef()
     {
-        return "@"+floorRef;
+        return floorRef;
     }
     public String getDisplayName()
     {
@@ -65,7 +65,7 @@ public class Point
         private String equipRef;
         private String unit = "F";
         private String tz;
-        private String roomRef;
+        private String zoneRef;
         private String floorRef;
         private String group;
         public Builder setGroup(String group)
@@ -73,9 +73,9 @@ public class Point
             this.group = group;
             return this;
         }
-        public Builder setRoomRef(String roomRef)
+        public Builder setZoneRef(String zoneRef)
         {
-            this.roomRef = roomRef;
+            this.zoneRef = zoneRef;
             return this;
         }
         public Builder setFloorRef(String floorRef)
@@ -127,7 +127,7 @@ public class Point
             p.equipRef = this.equipRef;
             p.unit = this.unit;
             p.tz = this.tz;
-            p.roomRef = this.roomRef;
+            p.zoneRef = this.zoneRef;
             p.floorRef = this.floorRef;
             p.group = this.group;
             p.unit = this.unit;

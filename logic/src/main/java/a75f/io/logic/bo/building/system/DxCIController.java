@@ -37,7 +37,7 @@ public class DxCIController
     
     int ciDesired;
     
-    enum State {NA, COOLING, HEATING};
+    public enum State {NA, COOLING, HEATING};
     State dxState = NA;
     
     private DxCIController()
@@ -182,8 +182,8 @@ public class DxCIController
         return true;
     }
     
-    public String getDxState() {
-        return dxState.name();
+    public State getDxCIRtuState() {
+        return dxState;
     }
     
 }

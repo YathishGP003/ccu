@@ -44,7 +44,7 @@ public class BuildingTuners
             Log.d("CCU","Building Tuner equip already present");
             return;
         }
-        
+        System.out.println("Build Tuner Equip does not exist. Create Now");
         HashMap siteMap = hayStack.read(Tags.SITE);
         siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
@@ -248,9 +248,10 @@ public class BuildingTuners
         
         HashMap tuner = CCUHsApi.getInstance().read("point and tuner and default and vav");
         if (tuner != null && tuner.size() > 0) {
-            Log.d("CCU","Default Vav Tuner points already exist");
+            Log.d("CCU","Default VAV Tuner points already exist");
             return;
         }
+        System.out.println("Default VAV Tuner  does not exist. Create Now");
         
         Point coolingDb = new Point.Builder()
                                   .setDisplayName(equipDis+"-"+"VAVCoolingDB")

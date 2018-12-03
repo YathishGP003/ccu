@@ -38,6 +38,7 @@ public class HttpUtil
     //String token = asJsonObject.get("access_token").getAsString();
     public static String executePost(String targetURL, String urlParameters)
     {
+        
         if(clientToken.equalsIgnoreCase(""))
         {
             clientToken = parseToken(authorizeToken(CLIENT_ID, "", CLIENT_SECRET, TENANT_ID));

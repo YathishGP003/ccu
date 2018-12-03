@@ -395,7 +395,7 @@ public class TestHayStack
         Equip v = new Equip.Builder()
                           .setSiteRef(siteRef)
                           .setDisplayName(siteDis+"-VAV-"+nodeAddr)
-                          .setRoomRef("room")
+                          .setZoneRef("room")
                           .setFloorRef("floor")
                           .addMarker("equip")
                           .addMarker("vav")
@@ -407,7 +407,7 @@ public class TestHayStack
                                   .setDisplayName(siteDis+"AHU_RP1455-"+nodeAddr+"-TestTemp")
                                   .setEquipRef(equipRef)
                                   .setSiteRef(siteRef)
-                                  .setRoomRef("room")
+                                  .setZoneRef("room")
                                   .setFloorRef("floor")
                                   .addMarker("discharge")
                                   .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("writable")
@@ -488,12 +488,12 @@ public class TestHayStack
         device.analog1Out.setType("0-10v");
         hayStack.addPoint(device.analog1Out);
         System.out.print(hayStack.tagsDb.tagsMap);
-        CCUHsApi.getInstance().syncEntityTree();
+        hayStack.syncEntityTree();
         System.out.print(hayStack.tagsDb.idMap);
         System.out.print(hayStack.tagsDb.updateIdMap);
         SmartNode.updatePhysicalPoint(nodeAddr, Port.ANALOG_OUT_ONE.toString(), "2-10v");
         System.out.print(hayStack.tagsDb.updateIdMap);
-        CCUHsApi.getInstance().syncEntityTree();
+        hayStack.entitySyncHandler.doSyncUpdateEntities();
         System.out.print(hayStack.tagsDb.updateIdMap);
         System.out.print(hayStack.tagsDb.tagsMap);
     }

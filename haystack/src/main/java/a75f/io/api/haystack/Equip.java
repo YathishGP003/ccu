@@ -50,7 +50,7 @@ public class Equip
             this.group = group;
             return this;
         }
-        public Builder setRoomRef(String roomRef)
+        public Builder setZoneRef(String roomRef)
         {
             this.roomRef = roomRef;
             return this;

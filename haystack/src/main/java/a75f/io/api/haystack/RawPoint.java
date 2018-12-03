@@ -17,6 +17,8 @@ public class RawPoint
     private String unit;
     private String tz;
     private String siteRef;
+    private String zoneRef;
+    private String floorRef;
     public void setPointRef(String pointRef)
     {
         this.pointRef = pointRef;
@@ -60,6 +62,14 @@ public class RawPoint
     {
         return tz;
     }
+    public String getZoneRef()
+    {
+        return zoneRef;
+    }
+    public String getFloorRef()
+    {
+        return floorRef;
+    }
     public static class Builder{
         private String            displayName;
         private ArrayList<String> markers = new ArrayList<>();
@@ -70,6 +80,8 @@ public class RawPoint
         private String type;
         private String unit = "F";
         private String tz;
+        private String zoneRef;
+        private String floorRef;
         public Builder setDisplayName(String displayName)
         {
             this.displayName = displayName;
@@ -120,6 +132,16 @@ public class RawPoint
             this.tz = tz;
             return this;
         }
+        public Builder setZoneRef(String zoneRef)
+        {
+            this.zoneRef = zoneRef;
+            return this;
+        }
+        public Builder setFloorRef(String floorRef)
+        {
+            this.floorRef = floorRef;
+            return this;
+        }
         
         public RawPoint build(){
             RawPoint p = new RawPoint();
@@ -132,6 +154,8 @@ public class RawPoint
             p.unit = this.unit;
             p.tz = this.tz;
             p.siteRef = this.siteRef;
+            p.zoneRef = this.zoneRef;
+            p.floorRef = this.floorRef;
             //CCUHsApi.getInstance().addRawPoint(p);
             return p;
         }

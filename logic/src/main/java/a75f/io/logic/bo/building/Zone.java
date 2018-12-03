@@ -23,7 +23,7 @@ public class Zone
     private RoomDataInterface mRoomDataInterface;
     public String          mZoneRef;
     
-    private Zone()
+    public Zone()
     {
     }
     

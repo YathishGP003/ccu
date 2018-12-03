@@ -13,6 +13,7 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Site;
+import a75f.io.logic.L;
 import a75f.io.logic.tuners.BuildingTuners;
 
 public class RegisterGatherSiteDetails extends Activity {
@@ -104,10 +105,13 @@ public class RegisterGatherSiteDetails extends Activity {
                 .setGeoZip(siteZip)
                 .setArea(10000).build();
         String localSiteId = CCUHsApi.getInstance().addSite(s75f);
+        L.ccu().defaultSite = new a75f.io.logic.bo.building.Site(s75f);
 
         Log.i(TAG, "LocalSiteID: " + localSiteId);
         CCUHsApi.getInstance().log();
         BuildingTuners.getInstance();//To init Building tuner
+        L.saveCCUState();
+        System.out.println(CCUHsApi.getInstance().tagsDb.tagsString);
         CCUHsApi.getInstance().syncEntityTree();
         return localSiteId;
     }

@@ -8,6 +8,7 @@ import android.widget.AbsListView.MultiChoiceModeListener;
 
 import java.util.ArrayList;
 
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.bo.building.Floor;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Zone;
@@ -97,6 +98,7 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 					sZone.removeNodeAndClearAssociations(node);
 				}
 			}
+			CCUHsApi.getInstance().deleteEntityTree(floorData.mFloorRef);
 			ccu().getFloors().remove(floorData);
 			L.saveCCUState();
 			floorPlanActivity.refreshScreen();

@@ -33,6 +33,7 @@ import a75f.io.api.haystack.sync.HttpUtil;
  */
 public class CCUHsApi
 {
+    public static boolean DEBUG_CCUHS = true;
     private static CCUHsApi instance;
     
     public AndroidHSClient hsClient;
@@ -67,7 +68,7 @@ public class CCUHsApi
         }
         hsClient = new AndroidHSClient();
         tagsDb = (CCUTagsDb) hsClient.db();
-        tagsDb.setTagsDbMap(new HashMap());
+        tagsDb.init();
         instance = this;
         entitySyncHandler = new EntitySyncHandler();
         hisSyncHandler = new HisSyncHandler(this);
@@ -462,6 +463,12 @@ public class CCUHsApi
         
         HashMap entity = CCUHsApi.getInstance().read("id == "+id);
         if (entity.get("site") != null) {
+    
+            ArrayList<HashMap> floors = readAll("floor");
+            for (HashMap floor : floors) {
+                deleteEntityTree(floor.get("id").toString());
+            }
+            
             ArrayList<HashMap> equips = readAll("equip and siteRef == \""+id+"\"");
             for (HashMap equip : equips) {
                 deleteEntityTree(equip.get("id").toString());
@@ -473,7 +480,14 @@ public class CCUHsApi
             }
             deleteEntity(id);
             
-        } else if (entity.get("equip") != null) {
+        } else if (entity.get("floor") != null) {
+            ArrayList<HashMap> rooms = readAll("room and floorRef == \""+id+"\"");
+            for (HashMap room : rooms) {
+                deleteEntity(room.get("id").toString());
+            }
+            deleteEntity(entity.get("id").toString());
+            
+        }else if (entity.get("equip") != null) {
             ArrayList<HashMap> points = readAll("point and equipRef == \""+id+"\"");
             for (HashMap point : points) {
                 if (point.get("writable") != null)

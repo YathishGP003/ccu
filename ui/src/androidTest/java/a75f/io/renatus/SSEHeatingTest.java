@@ -152,7 +152,7 @@ public class SSEHeatingTest extends BaseSimulationTest
     public void customizeTestData(CCUApplication app) {
         DateTime sStart = new DateTime(System.currentTimeMillis(), DateTimeZone.getDefault());
         DateTime sEnd = new DateTime(System.currentTimeMillis() + 30*60000, DateTimeZone.getDefault());
-        ArrayList<Schedule> schedules     = app.getFloors().get(0).mRoomList.get(0).mZoneProfiles.get(0).getSchedules();
+        ArrayList<Schedule> schedules     = app.getFloors().get(0).mZoneList.get(0).mZoneProfiles.get(0).getSchedules();
         Day testDay = schedules.get(0).getDays().get(sStart.getDayOfWeek() - 1);
         testDay.setSthh(sStart.getHourOfDay());
         testDay.setEthh(sEnd.getHourOfDay());

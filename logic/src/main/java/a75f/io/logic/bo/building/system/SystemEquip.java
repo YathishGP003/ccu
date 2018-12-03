@@ -34,6 +34,7 @@ public class SystemEquip
         if (tuner != null && tuner.size() > 0) {
             return;
         }
+        System.out.println("System Equip does not exist. Create Now");
         HashMap siteMap = hayStack.read(Tags.SITE);
         siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
@@ -50,9 +51,10 @@ public class SystemEquip
     }
     
     public void addSystemPoints(){
-        String tz = "Chicago";
+        
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
+        String tz = siteMap.get("tz").toString();
     
         Point sat = new Point.Builder()
                                    .setDisplayName(equipDis+"-"+"SAT")

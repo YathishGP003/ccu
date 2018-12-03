@@ -1,7 +1,5 @@
 package a75f.io.renatus;
 
-import android.util.Log;
-
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.After;
@@ -14,7 +12,6 @@ import java.util.List;
 import a75f.io.logic.bo.building.CCUApplication;
 import a75f.io.logic.bo.building.Day;
 import a75f.io.logic.bo.building.Schedule;
-import a75f.io.kinveybo.AlgoTuningParameters;
 import a75f.io.renatus.framework.BaseSimulationTest;
 import a75f.io.renatus.framework.SamplingProfile;
 import a75f.io.renatus.framework.SimulationParams;
@@ -24,7 +21,6 @@ import a75f.io.renatus.framework.SimulationTestInfo;
 import a75f.io.renatus.framework.SmartNodeParams;
 import a75f.io.renatus.framework.TestResult;
 
-import static a75f.io.logic.L.ccu;
 import static a75f.io.renatus.framework.GraphColumns.Analog1_Out;
 import static a75f.io.renatus.framework.GraphColumns.Analog2_Out;
 import static a75f.io.renatus.framework.GraphColumns.Relay1_Out;
@@ -180,11 +176,7 @@ public class SSEDeadbandTest extends BaseSimulationTest
             testDay.setEtmm(sEnd.getMinuteOfHour());
             testDay.setVal((short)70);
         }
-
-        AlgoTuningParameters algoMap = ccu().getDefaultCCUTuners();
-        Log.i(TAG, "Putting " + AlgoTuningParameters.SSETuners.SSE_COOLING_DEADBAND + " : " +
-                   testDeadBandVal);
-        algoMap.put(AlgoTuningParameters.SSETuners.SSE_COOLING_DEADBAND, testDeadBandVal);
+        
     }
 
     @Override

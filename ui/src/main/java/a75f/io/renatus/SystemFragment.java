@@ -76,7 +76,7 @@ public class SystemFragment extends Fragment
 		});
 		
 		stageStatusNow = view.findViewById(R.id.stageStatusNow);
-		stageStatusNow.setText(DxCIController.getInstance().getDxState());
+		stageStatusNow.setText(DxCIController.getInstance().getDxCIRtuState().name());
 	}
 	
 	

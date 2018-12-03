@@ -5,6 +5,7 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.RawPoint;
+import a75f.io.api.haystack.Tags;
 import a75f.io.logic.bo.building.definitions.Port;
 
 /**
@@ -27,30 +28,40 @@ public class SmartNode
     
     public String deviceRef;
     public String siteRef;
+    public String floorRef;
+    public String zoneRef;
     
-    public SmartNode(int address, String site, String floorRef, String zoneRef) {
+    
+    public SmartNode(int address, String site, String floor, String zone) {
         deviceRef = new Device.Builder()
                 .setDisplayName("SN-"+address)
                 .addMarker("network")
                 .setAddr(address)
                 .setSiteRef(site)
-                .setFloorRef(floorRef)
-                .setZoneRef(zoneRef)
+                .setFloorRef(floor)
+                .setZoneRef(zone)
                 .build();
         smartNodeAddress = address;
         siteRef = site;
+        floorRef = floor;
+        zoneRef = zone;
         createPoints();
     }
     
     private void createPoints() {
+        HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
+        String tz = siteMap.get("tz").toString();
+        
         analog1In = new RawPoint.Builder()
                                 .setDisplayName("Analog1In-"+smartNodeAddress)
                                 .setDeviceRef(deviceRef)
                                 .setSiteRef(siteRef)
                                 .setPort(Port.ANALOG_IN_ONE.toString())
                                 .setType("0-10v")
+                                .setZoneRef(zoneRef)
+                                .setFloorRef(floorRef)
                                 .addMarker("input").addMarker("his")
-                                .setTz("Chicago")
+                                .setTz(tz)
                                 .build();
     
         
@@ -60,8 +71,10 @@ public class SmartNode
                             .setSiteRef(siteRef)
                             .setPort(Port.ANALOG_IN_TWO.toString())
                             .setType("0-10v")
+                            .setZoneRef(zoneRef)
+                            .setFloorRef(floorRef)
                             .addMarker("input").addMarker("his")
-                            .setTz("Chicago")
+                            .setTz(tz)
                             .build();
     
         th1In = new RawPoint.Builder()
@@ -69,8 +82,10 @@ public class SmartNode
                             .setDeviceRef(deviceRef)
                             .setSiteRef(siteRef)
                             .setPort(Port.TH1_IN.toString())
+                            .setZoneRef(zoneRef)
+                            .setFloorRef(floorRef)
                             .addMarker("input").addMarker("his")
-                            .setTz("Chicago")
+                            .setTz(tz)
                             .build();
     
         th2In = new RawPoint.Builder()
@@ -78,8 +93,10 @@ public class SmartNode
                         .setDeviceRef(deviceRef)
                         .setSiteRef(siteRef)
                         .setPort(Port.TH2_IN.toString())
+                        .setZoneRef(zoneRef)
+                        .setFloorRef(floorRef)
                         .addMarker("input").addMarker("his")
-                        .setTz("Chicago")
+                        .setTz(tz)
                         .build();
     
         analog1Out = new RawPoint.Builder()
@@ -88,8 +105,10 @@ public class SmartNode
                             .setSiteRef(siteRef)
                             .setPort(Port.ANALOG_OUT_ONE.toString())
                             .setType("0-10v")
+                            .setZoneRef(zoneRef)
+                            .setFloorRef(floorRef)
                             .addMarker("output").addMarker("his")
-                            .setTz("Chicago")
+                            .setTz(tz)
                             .build();
     
         analog2Out = new RawPoint.Builder()
@@ -98,37 +117,45 @@ public class SmartNode
                              .setSiteRef(siteRef)
                              .setPort(Port.ANALOG_OUT_TWO.toString())
                              .setType("0-10v")
+                             .setZoneRef(zoneRef)
+                             .setFloorRef(floorRef)
                              .addMarker("output").addMarker("his")
-                             .setTz("Chicago")
+                             .setTz(tz)
                              .build();
     
         relay1 = new RawPoint.Builder()
                              .setDisplayName("relay1-"+smartNodeAddress)
                              .setDeviceRef(deviceRef)
                              .setSiteRef(siteRef)
+                             .setZoneRef(zoneRef)
+                             .setFloorRef(floorRef)
                              .setPort(Port.RELAY_ONE.toString())
                              .setType("NO")
                              .addMarker("output").addMarker("his")
-                             .setTz("Chicago")
+                             .setTz(tz)
                              .build();
     
         relay2 = new RawPoint.Builder()
                          .setDisplayName("relay2-"+smartNodeAddress)
                          .setDeviceRef(deviceRef)
                          .setSiteRef(siteRef)
+                         .setZoneRef(zoneRef)
+                         .setFloorRef(floorRef)
                          .setPort(Port.RELAY_TWO.toString())
                          .setType("NO")
                          .addMarker("output").addMarker("his")
-                         .setTz("Chicago")
+                         .setTz(tz)
                          .build();
     
         currentTemp = new RawPoint.Builder()
                          .setDisplayName("currentTemp-"+smartNodeAddress)
                          .setDeviceRef(deviceRef)
                          .setSiteRef(siteRef)
+                         .setZoneRef(zoneRef)
+                         .setFloorRef(floorRef)
                          .addMarker("input").addMarker("his")
                          .setPort(Port.RTH.toString())
-                         .setTz("Chicago")
+                         .setTz(tz)
                          .build();
     }
     
@@ -143,6 +170,7 @@ public class SmartNode
         HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
         if (!point.get("type").equals(type))
         {
+            HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
             RawPoint analog1Out = new RawPoint.Builder()
                                           .setDisplayName(point.get("dis").toString())
                                           .setDeviceRef(point.get("deviceRef").toString())
@@ -150,7 +178,7 @@ public class SmartNode
                                           .setPort(port)
                                           .setType(type)
                                           .addMarker("output").addMarker("his")
-                                          .setTz("Chicago")
+                                          .setTz(siteMap.get("tz").toString())
                                           .build();
             CCUHsApi.getInstance().updatePoint(analog1Out,point.get("id").toString());
         }

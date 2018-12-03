@@ -1,5 +1,6 @@
 package a75f.io.logic.bo.building;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.util.ArrayList;
@@ -58,10 +59,13 @@ public class CCUApplication
     
     public SystemProfile systemProfile = new VavAnalogRtu();//TODO- TEMP
     
+    public Site defaultSite = null;
+    
     public  ControlMote      controlMote   = new ControlMote();
     private String           mTitle        = "";
     private ArrayList<Floor> mfloors       = new ArrayList<Floor>();
     private short           mSmartNodeAddressBand;
+    
 
     public short getSmartNodeAddressBand()
     {
@@ -143,13 +147,14 @@ public class CCUApplication
         this.mTitle = title;
     }
 
+    @JsonIgnore
     //These will be provided as tuners when I get around ot it.
     public ArrayList<Schedule> getDefaultLightSchedule()
     {
         return mDefaultLightSchedule;
     }
 
-
+    @JsonIgnore
     public void setDefaultLightSchedule(ArrayList<Schedule> defaultLightSchedule)
     {
         this.mDefaultLightSchedule = defaultLightSchedule;
@@ -157,29 +162,33 @@ public class CCUApplication
 
 
     //These will be provided as tuners when I get around to it.
+    @JsonIgnore
     public ArrayList<Schedule> getDefaultTemperatureSchedule()
     {
         return mDefaultTemperatureSchedule;
     }
-
-
+    
+    @JsonIgnore
     public void setDefaultTemperatureSchedule(ArrayList<Schedule> defaultTemperatureSchedule)
     {
         this.mDefaultTemperatureSchedule = defaultTemperatureSchedule;
     }
-
-
+    
+    
+    @JsonIgnore
     public HashMap<String, NamedSchedule> getLCMNamedSchedules()
     {
         return mLCMNamedSchedules;
     }
-
-
+    
+    
+    @JsonIgnore
     public void setLCMNamedSchedules(HashMap<String, NamedSchedule> namedSchedules)
     {
         this.mLCMNamedSchedules = namedSchedules;
     }
     
+    @JsonIgnore
     public String getFloorRef(short addr) {
         for (Floor f : mfloors) {
             for (Zone z : f.mZoneList) {
@@ -192,6 +201,7 @@ public class CCUApplication
         return "";
      }
     
+    @JsonIgnore
     public String getZoneRef(short addr) {
         for (Floor f : mfloors) {
             for (Zone z : f.mZoneList) {

@@ -23,7 +23,8 @@ import static a75f.io.logic.bo.building.ZoneState.HEATING;
 
 public class VavReheatProfile extends VavProfile
 {
-    public boolean satCompensationEnabled = false;
+  
+    private boolean satCompensationEnabled = false;
     @JsonIgnore
     @Override
     public ProfileType getProfileType()

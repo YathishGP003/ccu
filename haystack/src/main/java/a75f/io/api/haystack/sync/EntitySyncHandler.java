@@ -52,10 +52,6 @@ public class EntitySyncHandler
     
     }
     
-    public synchronized void doSync() {
-        doSyncSite();
-    }
-    
     private void doSyncSite() {
         System.out.println("doSyncSite ->");
         HDict sDict =  CCUHsApi.getInstance().readHDict("site");
@@ -84,6 +80,10 @@ public class EntitySyncHandler
         if (siteGUID != null && siteGUID != "")
         {
             CCUHsApi.getInstance().putUIDMap(siteLUID, siteGUID);
+            if (!doSyncFloors(siteLUID)) {
+                //Abort Sync as equips and points need valid floorRef and zoneRef
+                return;
+            }
             doSyncEquips(siteLUID);
             doSyncDevices(siteLUID);
         }
@@ -91,17 +91,118 @@ public class EntitySyncHandler
         System.out.println("<- doSyncSite");
     }
     
-    private void doSyncEquips(String siteLUID) {
+    private boolean doSyncFloors(String siteLUID) {
+        System.out.println("doSyncFloors ->");
+        ArrayList<HashMap> floors = CCUHsApi.getInstance().readAll("floor");
+        ArrayList<String> floorLUIDList = new ArrayList();
         
+        ArrayList<HDict> entities = new ArrayList<>();
+        for (Map m: floors)
+        {
+            System.out.println(m);
+            String luid = m.remove("id").toString();
+            if (CCUHsApi.getInstance().getGUID(luid) == null) {
+                floorLUIDList.add(luid);
+                m.put("siteRef", HRef.copy(CCUHsApi.getInstance().getGUID(siteLUID)));
+                entities.add(HSUtil.mapToHDict(m));
+            }
+        }
+    
+        if (floorLUIDList.size() > 0)
+        {
+            HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
+            String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
+            System.out.println("Response: \n" + response);
+            if (response == null)
+            {
+                System.out.println("Aborting Floor Sync");
+                return false;
+            }
+            HZincReader zReader = new HZincReader(response);
+            Iterator it = zReader.readGrid().iterator();
+            int index = 0;
+            while (it.hasNext())
+            {
+                HRow row = (HRow) it.next();
+                String floorGUID = row.get("id").toString();
+                if (floorGUID != "")
+                {
+                    CCUHsApi.getInstance().putUIDMap(floorLUIDList.get(index++), floorGUID);
+                }
+            }
+        }
+        return doSyncZones(siteLUID);
+        
+    }
+    
+    private boolean doSyncZones(String siteLUID) {
+        System.out.println("doSyncZones ->");
+        ArrayList<HashMap> floors = CCUHsApi.getInstance().readAll("floor");
+        ArrayList<String> zoneLUIDList = new ArrayList();
+        ArrayList<HDict> entities = new ArrayList<>();
+        for (Map f: floors)
+        {
+            ArrayList<HashMap> zones = CCUHsApi.getInstance().readAll("room and floorRef == \""+f.get("id")+"\"");
+            for (Map m : zones)
+            {
+                System.out.println(m);
+                String luid = m.remove("id").toString();
+                if (CCUHsApi.getInstance().getGUID(luid) == null)
+                {
+                    zoneLUIDList.add(luid);
+                    m.put("siteRef", HRef.copy(CCUHsApi.getInstance().getGUID(siteLUID)));
+                    m.put("floorRef", HRef.copy(CCUHsApi.getInstance().getGUID(m.get("floorRef").toString())));
+                    entities.add(HSUtil.mapToHDict(m));
+                }
+            }
+        }
+    
+        if (zoneLUIDList.size() > 0)
+        {
+            HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
+            String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
+            System.out.println("Response: \n" + response);
+            if (response == null)
+            {
+                System.out.println("Aborting Zone Sync");
+                return false;
+            }
+            HZincReader zReader = new HZincReader(response);
+            Iterator it = zReader.readGrid().iterator();
+            int index = 0;
+            while (it.hasNext())
+            {
+                HRow row = (HRow) it.next();
+                String zoneGUID = row.get("id").toString();
+                if (zoneGUID != "")
+                {
+                    CCUHsApi.getInstance().putUIDMap(zoneLUIDList.get(index++), zoneGUID);
+                }
+            }
+        }
+        return true;
+    }
+    
+    private void doSyncEquips(String siteLUID) {
+        System.out.println("doSyncEquips ->");
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and siteRef == \""+siteLUID+"\"");
         ArrayList<String> equipLUIDList = new ArrayList();
         ArrayList<HDict> entities = new ArrayList<>();
         for (Map m: equips)
         {
+            System.out.println(m);
             String luid = m.remove("id").toString();
             if (CCUHsApi.getInstance().getGUID(luid) == null) {
                 equipLUIDList.add(luid);
                 m.put("siteRef", HRef.copy(CCUHsApi.getInstance().getGUID(siteLUID)));
+                if (m.get("floorRef") != null && !m.get("floorRef").toString().equals("SYSTEM"))
+                {
+                    m.put("floorRef", HRef.copy(CCUHsApi.getInstance().getGUID(m.get("floorRef").toString())));
+                }
+                if (m.get("zoneRef") != null && !m.get("zoneRef").toString().equals("SYSTEM") )
+                {
+                    m.put("zoneRef", HRef.copy(CCUHsApi.getInstance().getGUID(m.get("zoneRef").toString())));
+                }
                 entities.add(HSUtil.mapToHDict(m));
             }
         }
@@ -128,17 +229,15 @@ public class EntitySyncHandler
                 }
             }
         }
-        System.out.println("Synced Equips: "+CCUHsApi.getInstance().tagsDb.idMap);
-        doSyncPoints(siteLUID, equipLUIDList);
-        
-        
+        doSyncPoints(siteLUID);
     }
     
-    private void doSyncPoints(String siteLUID, ArrayList<String> equipLUIDList) {
-    
+    private void doSyncPoints(String siteLUID) {
+        System.out.println("doSyncPoints ->");
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and siteRef == \""+siteLUID+"\"");
         for (Map q: equips)
         {
+            
             String equipLUID = q.remove("id").toString();
     
             ArrayList<HashMap> points = CCUHsApi.getInstance().readAll("point and equipRef == \"" + equipLUID + "\"");
@@ -150,15 +249,23 @@ public class EntitySyncHandler
             ArrayList<HDict> entities = new ArrayList<>();
             for (Map m : points)
             {
+                //System.out.println(m);
                 String luid = m.remove("id").toString();
                 if (CCUHsApi.getInstance().getGUID(luid) == null)
                 {
                     pointLUIDList.add(luid);
                     m.put("siteRef", HRef.copy(CCUHsApi.getInstance().getGUID(siteLUID)));
                     m.put("equipRef", HRef.copy(CCUHsApi.getInstance().getGUID(equipLUID)));
+                    if (m.get("floorRef") != null && !m.get("floorRef").toString().equals("SYSTEM"))
+                    {
+                        m.put("floorRef", HRef.copy(CCUHsApi.getInstance().getGUID(m.get("floorRef").toString())));
+                    }
+                    if (m.get("zoneRef") != null && !m.get("zoneRef").toString().equals("SYSTEM"))
+                    {
+                        m.put("zoneRef", HRef.copy(CCUHsApi.getInstance().getGUID(m.get("zoneRef").toString())));
+                    }
                     entities.add(HSUtil.mapToHDict(m));
                 }
-                System.out.println(m);
             }
             
             if (pointLUIDList.size() > 0)
@@ -179,22 +286,30 @@ public class EntitySyncHandler
                     String guid = row.get("id").toString();
                     CCUHsApi.getInstance().putUIDMap(pointLUIDList.get(index++), guid);
                 }
-                System.out.println("Synced Points: "+CCUHsApi.getInstance().tagsDb.idMap);
             }
         }
     }
     
     private void doSyncDevices(String siteLUID) {
-        //ArrayList<HashMap> devices = hayStack.readAll("device and siteRef == \""+siteLUID+"\"");
+        System.out.println("doSyncDevices ->");
         ArrayList<HashMap> devices = CCUHsApi.getInstance().readAll("device");
         ArrayList<String> deviceLUIDList = new ArrayList();
         ArrayList<HDict> entities = new ArrayList<>();
         for (Map m: devices)
         {
+            System.out.println(m);
             String luid = m.remove("id").toString();
             if (CCUHsApi.getInstance().getGUID(luid) == null) {
                 deviceLUIDList.add(luid);
                 m.put("siteRef", HRef.copy(CCUHsApi.getInstance().getGUID(siteLUID)));
+                if (m.get("floorRef") != null && !m.get("floorRef").toString().equals("SYSTEM"))
+                {
+                    m.put("floorRef", HRef.copy(CCUHsApi.getInstance().getGUID(m.get("floorRef").toString())));
+                }
+                if (m.get("zoneRef") != null && !m.get("zoneRef").toString().equals("SYSTEM"))
+                {
+                    m.put("zoneRef", HRef.copy(CCUHsApi.getInstance().getGUID(m.get("zoneRef").toString())));
+                }
                 entities.add(HSUtil.mapToHDict(m));
             }
         }
@@ -221,13 +336,12 @@ public class EntitySyncHandler
                     CCUHsApi.getInstance().putUIDMap(deviceLUIDList.get(index++), equipGUID);
                 }
             }
-            System.out.println("Synced devices: " + CCUHsApi.getInstance().tagsDb.idMap);
             doSyncPhyPoints(siteLUID, deviceLUIDList);
         }
     }
     
     private void doSyncPhyPoints(String siteLUID, ArrayList<String> deviceLUIDList) {
-        
+        System.out.println("doSyncPhyPoints ->");
         for (String deviceLUID : deviceLUIDList)
         {
             ArrayList<HashMap> points = CCUHsApi.getInstance().readAll("point and physical and deviceRef == \"" + deviceLUID + "\"");
@@ -238,6 +352,7 @@ public class EntitySyncHandler
             ArrayList<HDict> entities = new ArrayList<>();
             for (Map m : points)
             {
+                //System.out.println(m);
                 String luid = m.remove("id").toString();
                 if (CCUHsApi.getInstance().getGUID(luid) == null
                          && CCUHsApi.getInstance().getGUID(deviceLUID) != null)
@@ -245,9 +360,13 @@ public class EntitySyncHandler
                     pointLUIDList.add(luid);
                     m.put("siteRef", HRef.copy(CCUHsApi.getInstance().getGUID(siteLUID)));
                     m.put("deviceRef", HRef.copy(CCUHsApi.getInstance().getGUID(deviceLUID)));
+                    
+                    if (m.get("pointRef") != null)
+                    {
+                        m.put("pointRef", HRef.copy(CCUHsApi.getInstance().getGUID(m.get("pointRef").toString())));
+                    }
                     entities.add(HSUtil.mapToHDict(m));
                 }
-                System.out.println(m);
             }
             if (pointLUIDList.size() > 0)
             {
@@ -269,12 +388,12 @@ public class EntitySyncHandler
                     CCUHsApi.getInstance().putUIDMap(pointLUIDList.get(index++), guid);
                 }
             }
-            System.out.println("Synced Phy Points: "+CCUHsApi.getInstance().tagsDb.idMap);
         }
     }
     
     public void doSyncRemoveIds()
     {
+        System.out.println("doSyncRemoveIds->");
         ArrayList<HDict> entities = new ArrayList<>();
         
         for (String removeId : CCUHsApi.getInstance().tagsDb.removeIdMap.values())
@@ -294,11 +413,39 @@ public class EntitySyncHandler
         System.out.println("Response: \n" + response);
     }
     
+    /**
+     * Update request should be sent with GUID as part of the entity.
+     */
     public void doSyncUpdateEntities() {
+        System.out.println("doSyncUpdateEntities->");
         ArrayList<HDict> entities = new ArrayList<>();
         for (String luid : CCUHsApi.getInstance().tagsDb.updateIdMap.keySet()) {
             HashMap entity = CCUHsApi.getInstance().readMapById(luid);
             entity.put("id", HRef.copy(CCUHsApi.getInstance().getGUID(luid)));
+            if (entity.get("siteRef") != null)
+            {
+                entity.put("siteRef", HRef.copy(CCUHsApi.getInstance().getGUID(entity.get("siteRef").toString())));
+            }
+            if (entity.get("equipRef") != null)
+            {
+                entity.put("equipRef", HRef.copy(CCUHsApi.getInstance().getGUID(entity.get("equipRef").toString())));
+            }
+            if (entity.get("deviceRef") != null)
+            {
+                entity.put("deviceRef", HRef.copy(CCUHsApi.getInstance().getGUID(entity.get("deviceRef").toString())));
+            }
+            if (entity.get("pointRef") != null)
+            {
+                entity.put("pointRef", HRef.copy(CCUHsApi.getInstance().getGUID(entity.get("pointRef").toString())));
+            }
+            if (entity.get("floorRef") != null)
+            {
+                entity.put("floorRef", HRef.copy(CCUHsApi.getInstance().getGUID(entity.get("floorRef").toString())));
+            }
+            if (entity.get("zoneRef") != null)
+            {
+                entity.put("zoneRef", HRef.copy(CCUHsApi.getInstance().getGUID(entity.get("zoneRef").toString())));
+            }
             entities.add(HSUtil.mapToHDict(entity));
         }
     
@@ -324,10 +471,27 @@ public class EntitySyncHandler
                 return true;
             }
         }
+    
+        ArrayList<HashMap> floors = CCUHsApi.getInstance().readAll("floor");
+        for (Map f: floors) {
+            if (CCUHsApi.getInstance().getGUID(f.get("id").toString()) == null) {
+                Log.d("CCU","Entity sync required :Floor not synced :"+ f.get("id"));
+                return true;
+            }
+        }
+    
+        ArrayList<HashMap> zones = CCUHsApi.getInstance().readAll("zone");
+        for (Map z: zones) {
+            if (CCUHsApi.getInstance().getGUID(z.get("id").toString()) == null) {
+                Log.d("CCU","Entity sync required :Zone not synced :"+ z.get("id"));
+                return true;
+            }
+        }
+        
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip");
         for (Map q: equips) {
             if (CCUHsApi.getInstance().getGUID(q.get("id").toString()) == null) {
-                Log.d("CCU","Entity sync required :Euip not synced :"+ q.get("id"));
+                Log.d("CCU","Entity sync required :Equip not synced :"+ q.get("id"));
                 return true;
             }
         }

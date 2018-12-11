@@ -39,7 +39,6 @@ public class RegisterGatherSiteDetails extends Activity {
 
         setContentView(R.layout.activity_register_gather_site_details);
 
-
         mSiteName = (EditText) findViewById(R.id.site_name_et);
         mSiteCity = (EditText) findViewById(R.id.site_city_et);
         mSiteZip = (EditText) findViewById(R.id.site_zip_et);

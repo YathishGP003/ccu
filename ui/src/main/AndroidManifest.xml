@@ -86,6 +86,7 @@
 
         <activity
             android:name=".RegisterGatherSiteDetails"
+
             android:theme="@style/RenatusAppTheme.NoActionBar">
         </activity>
 

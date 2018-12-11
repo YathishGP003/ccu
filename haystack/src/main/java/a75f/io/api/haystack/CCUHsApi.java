@@ -17,6 +17,7 @@ import org.projecthaystack.HVal;
 import org.projecthaystack.UnknownRecException;
 import org.projecthaystack.client.HClient;
 import org.projecthaystack.io.HZincWriter;
+import org.projecthaystack.server.HStdOps;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -173,7 +174,7 @@ public class CCUHsApi
      * Read the first matching record
      */
     public HashMap read(String query) {
-        
+        System.out.println("Read Query: " + query);
         HashMap<Object, Object> map = new HashMap<>();
         try
         {
@@ -532,6 +533,41 @@ public class CCUHsApi
     
     public void syncHisData() {
         hisSyncHandler.doSync();
+    }
+
+    public void syncExistingSite(String siteId)
+    {
+        tagsDb.addHGrid(getRemoteSite(siteId));
+        tagsDb.addHGrid(getRemoteSiteDetails(siteId));
+        tagsDb.log();
+    }
+
+    public HGrid getRemoteSiteDetails(String siteId)
+    {
+        /* Sync a site*/
+        HClient hClient = new HClient(HttpUtil.HAYSTACK_URL, HayStackConstants.USER, HayStackConstants.PASS);
+        HDict navIdDict = new HDictBuilder().add("navId", HRef.make(siteId)).toDict();
+        HGrid hGrid = HGridBuilder.dictToGrid(navIdDict);
+
+        HGrid sync = hClient.call("sync", hGrid);
+
+        sync.dump();
+
+        return sync;
+    }
+
+    public HGrid getRemoteSite(String siteId)
+    {
+        /* Sync a site*/
+        HClient hClient = new HClient(HttpUtil.HAYSTACK_URL, HayStackConstants.USER, HayStackConstants.PASS);
+        HDict navIdDict = new HDictBuilder().add(HayStackConstants.ID, HRef.make(siteId)).toDict();
+        HGrid hGrid = HGridBuilder.dictToGrid(navIdDict);
+
+        HGrid sync = hClient.call(HStdOps.read.name(), hGrid);
+
+        sync.dump();
+
+        return sync;
     }
 
 

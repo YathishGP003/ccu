@@ -35,7 +35,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
 
+import javax.net.ssl.HttpsURLConnection;
+
 import a75f.io.api.haystack.sync.HttpUtil;
+import info.guardianproject.netcipher.NetCipher;
 
 /**
  * HClient manages a logical connection to a HTTP REST haystack server.
@@ -81,7 +84,7 @@ public class HClient extends HProj
     if (user.length() == 0) throw new IllegalArgumentException("user cannot be empty string");
 
     this.uri  = uri;
-    this.auth = new AuthClientContext(uri + "about", user, pass);
+    //this.auth = new AuthClientContext(uri + "about", user, pass);
   }
 
 //////////////////////////////////////////////////////////////////////////
@@ -148,9 +151,9 @@ public class HClient extends HProj
    */
   public HClient open()
   {
-    auth.connectTimeout = this.connectTimeout;
-    auth.readTimeout    = this.readTimeout;
-    auth.open();
+    //auth.connectTimeout = this.connectTimeout;
+    //auth.readTimeout    = this.readTimeout;
+    //auth.open();
     return this;
   }
 
@@ -595,6 +598,9 @@ public class HClient extends HProj
     return new HZincReader(resStr).readGrid();
   }
 
+
+
+
   private String postString(String uriStr, String req)
   {
     return postString(uriStr, req, null);
@@ -614,8 +620,8 @@ public class HClient extends HProj
       }
       // setup the POST request
       URL url = new URL(uriStr);
-      HttpURLConnection c = openHttpConnection(url, "POST");
-      c = auth.prepare(c);
+      HttpsURLConnection c = openHttpsConnection(url, "POST");
+      //c = auth.prepare(c);
       try
       {
         c.setDoOutput(true);
@@ -662,16 +668,19 @@ public class HClient extends HProj
 // Utils
 ////////////////////////////////////////////////////////////////
 
-  private HttpURLConnection openHttpConnection(URL url, String method)
+  private HttpsURLConnection openHttpsConnection(URL url, String method)
     throws IOException
   {
-    return openHttpConnection(url, method, this.connectTimeout, this.readTimeout);
+    return openHttpsConnection(url, method, this.connectTimeout, this.readTimeout);
   }
 
-  public static HttpURLConnection openHttpConnection(URL url, String method, int connectTimeout, int readTimeout)
+  public static HttpsURLConnection openHttpsConnection(URL url, String method, int connectTimeout, int readTimeout)
     throws IOException
   {
-    HttpURLConnection c = (HttpURLConnection)url.openConnection();
+
+    //connection = (HttpsURLConnection)url.openConnection();
+
+    HttpsURLConnection c = NetCipher.getHttpsURLConnection(url);//TODO - Hack for SSLException
     c.setRequestMethod(method);
     c.setInstanceFollowRedirects(false);
     c.setConnectTimeout(connectTimeout);

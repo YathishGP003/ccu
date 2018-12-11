@@ -222,6 +222,8 @@ public class CCUTagsDb extends HServer
             updateIdMap = gson.fromJson(updateIdMapString, HashMap.class);
         }
     }
+
+
     
     public void saveString() {
         Gson gson = new GsonBuilder()
@@ -241,6 +243,20 @@ public class CCUTagsDb extends HServer
         idMapString = gson.toJson(idMap);
         removeIdMapString = gson.toJson(removeIdMap);
         removeIdMapString = gson.toJson(updateIdMap);
+    }
+
+
+
+
+    public void addHGrid(HGrid hGrid)
+    {
+        for(int i = 0; i < hGrid.numRows(); i++)
+        {
+            HRef ref = hGrid.row(i).getRef("id");
+            System.out.println("Ref: " + ref.val);
+
+            tagsMap.put(ref.val, new HDictBuilder().add(hGrid.row(i)).toDict());
+        }
     }
     
     public HDict addSite(String dis, String geoCity, String geoState, String timeZone, int area)
@@ -307,8 +323,14 @@ public class CCUTagsDb extends HServer
 
     public void log()
     {
-
+        int i = 0;
+        for (Iterator it = iterator(); it.hasNext();) {
+            i++;
+            HDict rec = (HDict) it.next();
+            System.out.println("Rec " + i + ":" + rec.toString());
+        }
     }
+
     
     public String addEquip(Equip q)
     {

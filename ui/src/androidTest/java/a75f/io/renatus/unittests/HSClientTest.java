@@ -1,11 +1,8 @@
-package haystacktest.android.com.a75;
+package a75f.io.renatus.unittests;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
-import android.util.Log;
-
-import junit.framework.Assert;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,15 +11,13 @@ import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HGridBuilder;
 import org.projecthaystack.HRef;
+import org.projecthaystack.HStr;
 import org.projecthaystack.client.HClient;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.Site;
+import a75f.io.api.haystack.CCUTagsDb;
 import a75f.io.api.haystack.sync.HttpUtil;
+import a75f.io.logic.Globals;
 
 import static org.junit.Assert.assertEquals;
 
@@ -32,14 +27,20 @@ import static org.junit.Assert.assertEquals;
  * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
  */
 @RunWith(AndroidJUnit4.class)
-public class SiteTest
+public class HSClientTest
 {
+
+    Context appContext;
+
+
     @Test
     public void useAppContext() throws Exception
     {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
         assertEquals("haystacktest.android.com.a75.test", appContext.getPackageName());
+        Globals.getInstance().initilize();
+
     }
 
 
@@ -50,58 +51,42 @@ public class SiteTest
 
         String scope = "";
 
-
         String tokenJson = HttpUtil.authorizeToken(HttpUtil.CLIENT_ID, scope, HttpUtil.CLIENT_SECRET, HttpUtil.TENANT_ID);
         System.out.println("Token : " + tokenJson);
     }
 
-
-    /**
-     * Create a site
-     * and query that the site exists locally.
-     */
     @Test
     public void addSite()
     {
-        new CCUHsApi(InstrumentationRegistry.getTargetContext());
-
-        Site s75f = new Site.Builder()
-                .setDisplayName("siteName")
-                .addMarker("site")
-                .addMarker("orphan")
-                .setGeoCity("siteCity")
-                .setGeoState("MN")
-                .setTz("Chicago")
-                .setGeoZip("56701")
-                .setArea(10000).build();
-        String localSiteId = CCUHsApi.getInstance().addSite(s75f);
-        HashMap site = CCUHsApi.getInstance().read("site");
-        logSite(site);
-        Assert.assertNotNull(site);
+        String navId = "5be9af1c02743900e9e762f8";
+        loadExistingSite(navId);
     }
 
 
-    @Test
-    public void addCCU()
-    {
-        
+    public void loadExistingSite(String siteId) {
 
-    }
 
-    private void logSite(HashMap site) {
-        Log.i("Test", "Test");
-        Iterator it = site.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry)it.next();
-            Log.i("Test", pair.getKey() + " = " + pair.getValue());
-            it.remove(); // avoids a ConcurrentModificationException
-        }
+        //String siteIdAzure = "123";  //Azure ID
+        HGrid hGrid = CCUHsApi.getInstance().hsClient.nav(HStr.make(siteId));
+
+        /* Call this seperately. */
+        /* Traverse the tree, create from the hashmap site */
+        /* Add each mapping a local UUID */
+
+        hGrid.dump();
+        //Get this site from azure.
+        //Site azureSite = CCUHsApi.getInstance().getSiteFromAzure();
+
+        //Pre-Populate these fields
+        //Set it as an orphan site and orphan ccu
+
     }
 
     @Test
     public void testGettingSite()
     {
 
+        /* Sync a site*/
         HClient hClient = new HClient(HttpUtil.HAYSTACK_URL, "ryan", "ryan");
         HDict navIdDict = new HDictBuilder().add("navId", HRef.make("5be9af1c02743900e9e762f8")).toDict();
         HGrid hGrid = HGridBuilder.dictToGrid(navIdDict);
@@ -109,7 +94,29 @@ public class SiteTest
         HGrid sync = hClient.call("sync", hGrid);
 
         sync.dump();
+    }
+
+    @Test
+    public void testGettingSiteDetails()
+    {
+        HClient hClient = new HClient(HttpUtil.HAYSTACK_URL, "ryan", "ryan");
+        HDict navIdDict = new HDictBuilder().add("id", HRef.make("5be9af1c02743900e9e762f8")).toDict();
+        HGrid hGrid = HGridBuilder.dictToGrid(navIdDict);
+
+        HGrid readSite = hClient.call("read", hGrid);
+        readSite.dump();
 
     }
+
+
+    @Test
+    public void testReverseSyncingSite()
+    {
+        CCUHsApi.getInstance().syncExistingSite("5c101ea60e8e3d00eed0b6bb");
+        CCUHsApi.getInstance().tagsDb.log();
+        CCUHsApi.getInstance().saveTagsData();
+
+    }
+
 
 }

@@ -25,9 +25,11 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import a75f.io.logic.L;
+import a75f.io.logic.LZoneProfile;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.Zone;
+import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
@@ -82,6 +84,9 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
     ArrayAdapter<String> relayActuatorAdapter;
     int damperActuatorSelection;
     int reheatActuatorSelection;
+    
+    String floorRef;
+    String zoneRef;
     
     public FragmentVAVConfiguration()
     {
@@ -150,10 +155,10 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
     {
         View view = inflater.inflate(R.layout.fragment_vav_config, container, false);
         mSmartNodeAddress = getArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR);
-        String mRoomName = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
-        String mFloorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
+        zoneRef = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
+        floorRef = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
         mNodeType = NodeType.valueOf(getArguments().getString(FragmentCommonBundleArgs.NODE_TYPE));
-        mZone = L.findZoneByName(mFloorName, mRoomName);
+        //mZone = L.findZoneByName(mFloorName, mRoomName);
         mProfileType = ProfileType.values()[getArguments().getInt(FragmentCommonBundleArgs.PROFILE_TYPE)];
         ButterKnife.bind(this, view);
         return view;
@@ -170,11 +175,13 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         reheatActuator = (Spinner)view.findViewById(R.id.vavReheatActuator);
         setButton = (Button) view.findViewById(R.id.setBtn);
     
-        mVavProfile = (VavProfile) mZone.findProfile(mProfileType);
+        mVavProfile = (VavProfile) LZoneProfile.getProfile(mSmartNodeAddress);
     
         if (mVavProfile != null) {
+            Log.d("VAVConfig", "Get Config: ");
             mProfileConfig = (VavProfileConfiguration) mVavProfile.getProfileConfiguration(mSmartNodeAddress);
         } else {
+            Log.d("VAVConfig", "Create Profile: ");
             switch (mProfileType) {
                 case VAV_REHEAT:
                     mVavProfile = new VavReheatProfile();
@@ -349,7 +356,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         zonePriority.setAdapter(zonePriorityAdapter);
         if (mProfileConfig != null)
         {
-            zonePriority.setSelection(mProfileConfig.getPriority());
+            zonePriority.setSelection(mProfileConfig.getPriority().ordinal());
         } else {
             zonePriority.setSelection(1);//LOW
         }
@@ -363,12 +370,11 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         LinearLayout zonePriorityLayout = (LinearLayout) view.findViewById(R.id.zonePriorityLayout);
         //zonePriorityLayout.setVisibility((SystemSettingsData.getTier().ordinal() <= CCU_TIER.EXPERT.ordinal()) ? View.VISIBLE : View.GONE);
     
-        if (mVavProfile.getProfileConfiguration(mSmartNodeAddress) != null) {
-            VavProfileConfiguration config = (VavProfileConfiguration) mVavProfile.getProfileConfiguration(mSmartNodeAddress);
-            minCoolingDamperPos.setValue(config.getMinDamperCooling());
-            maxCoolingDamperPos.setValue(config.getMaxDamperCooliing());
-            minHeatingDamperPos.setValue(config.getMinDamperHeating());
-            maxHeatingDamperPos.setValue(config.getMaxDamperHeating());
+        if (mProfileConfig != null) {
+            minCoolingDamperPos.setValue(mProfileConfig.getMinDamperCooling());
+            maxCoolingDamperPos.setValue(mProfileConfig.getMaxDamperCooliing());
+            minHeatingDamperPos.setValue(mProfileConfig.getMinDamperHeating());
+            maxHeatingDamperPos.setValue(mProfileConfig.getMaxDamperHeating());
         }
     
         setButton.setOnClickListener(new View.OnClickListener(){
@@ -414,7 +420,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         VavProfileConfiguration vavConfig = new VavProfileConfiguration();
         vavConfig.setNodeType(mNodeType);
         vavConfig.setNodeAddress(mSmartNodeAddress);
-        vavConfig.setPriority(zonePriority.getSelectedItemPosition());
+        vavConfig.setPriority(ZonePriority.values()[zonePriority.getSelectedItemPosition()]);
         vavConfig.setMinDamperCooling(minCoolingDamperPos.getValue());
         vavConfig.setMaxDamperCooliing(maxCoolingDamperPos.getValue());
         vavConfig.setMinDamperHeating(minHeatingDamperPos.getValue());
@@ -425,20 +431,18 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         
        
         
-        if (mZone.findProfile(mProfileType) == null)
-            mZone.mZoneProfiles.add(mVavProfile);
-    
+        //if (mZone.findProfile(mProfileType) == null)
+        //    mZone.mZoneProfiles.add(mVavProfile);
         if (mVavProfile.getProfileConfiguration(mSmartNodeAddress) == null) {
             mVavProfile.getProfileConfiguration().put(mSmartNodeAddress, vavConfig);
-            mVavProfile.addLogicalMapAndPoints(mSmartNodeAddress, vavConfig);
+            mVavProfile.addLogicalMapAndPoints(mSmartNodeAddress, vavConfig, floorRef, zoneRef);
             BuildingTuners.getInstance().addDefaultVavTuners();
         } else
         {
             mVavProfile.getProfileConfiguration().put(mSmartNodeAddress, vavConfig);
             mVavProfile.updateLogicalMapAndPoints(mSmartNodeAddress, vavConfig);
         }
-        
-        L.saveCCUState();
+        L.ccu().zoneProfiles.add(mVavProfile);
         Log.d("VAVConfig", "Set Config: ");
     }
     

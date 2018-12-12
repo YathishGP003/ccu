@@ -393,7 +393,7 @@ public class LightingDetailAdapter extends BaseAdapter
                 snOutput.setScheduleMode(ZoneSchedule);
                 snOutput.setSchedules(new ArrayList<Schedule>());
                 snOutput.setNamedSchedule("");
-                L.saveCCUState();
+                //L.saveCCUState();
             }
             else if (pos == 1 && snOutput.getScheduleMode() != CircuitSchedule) // circuit schedule
             {
@@ -446,7 +446,7 @@ public class LightingDetailAdapter extends BaseAdapter
                    public void onClick(DialogInterface dialog, int which)
                    {
                        circuit.setNamedSchedule(strings.get(which));
-                       L.saveCCUState();
+                       //L.saveCCUState();
                    }
                });
         builder.create().show();

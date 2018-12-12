@@ -25,7 +25,7 @@ public class VavHaystackTest
         api.tagsDb.writeArrays = new HashMap<>();
         api.tagsDb.idMap = new HashMap<>();
         VAVLogicalMap m = new VAVLogicalMap(ProfileType.VAV_REHEAT, 7000);
-        m.createHaystackPoints(new VavProfileConfiguration());
+        m.createHaystackPoints(new VavProfileConfiguration(), null, null);
         ArrayList points = CCUHsApi.getInstance().readAll("point and group == \"7000\"");
         /*for (Object a : points) {
             System.out.println(a);

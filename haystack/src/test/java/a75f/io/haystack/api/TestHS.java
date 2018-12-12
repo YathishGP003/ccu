@@ -16,10 +16,13 @@ import java.util.Map;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.Floor;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
+import a75f.io.api.haystack.Zone;
 
 /**
  * Created by samjithsadasivan on 9/17/18.
@@ -105,9 +108,6 @@ public class TestHS
     @Test
     public void testHisReadWrite(){
         CCUHsApi hayStack = new CCUHsApi();
-        hayStack.tagsDb.init();
-        hayStack.tagsDb.tagsMap = new HashMap<>();
-        hayStack.tagsDb.writeArrays = new HashMap<>();
         int nodeAddr = 7000;
         
         Site s = new Site.Builder()
@@ -170,10 +170,6 @@ public class TestHS
     @Test
     public void testHisRWApi() {
         CCUHsApi hayStack = new CCUHsApi();
-        hayStack.tagsDb.init();
-        hayStack.tagsDb.tagsMap = new HashMap<>();
-        hayStack.tagsDb.writeArrays = new HashMap<>();
-        hayStack.tagsDb.idMap = new HashMap<>();
         int nodeAddr = 7000;
     
         Site s = new Site.Builder()
@@ -343,5 +339,96 @@ public class TestHS
         System.out.println("removeIDMap: "+ hayStack.tagsDb.removeIdMap);
         hayStack.entitySyncHandler.doSyncRemoveIds();
         System.out.println("removeIDMap: "+ hayStack.tagsDb.removeIdMap);
+    }
+    
+    @Test
+    public void testFloorPlan() {
+    
+        CCUHsApi hayStack = new CCUHsApi();
+        hayStack.tagsDb.init();
+        
+        int nodeAddr = 7000;
+    
+        Site s = new Site.Builder()
+                         .setDisplayName("75F")
+                         .addMarker("site")
+                         .setGeoCity("Burnsville")
+                         .setGeoState("MN")
+                         .setTz("Chicago")
+                         .setArea(1000).build();
+        hayStack.addSite(s);
+        
+        HashMap siteMap = hayStack.read(Tags.SITE);
+        String siteRef = (String) siteMap.get(Tags.ID);
+        String siteDis = (String) siteMap.get("dis");
+    
+        Floor f = new Floor.Builder()
+                          .setDisplayName("Floor1")
+                          .setSiteRef(siteRef)
+                          .build();
+        
+        String floorRef = hayStack.addFloor(f);
+        
+        Zone z = new Zone.Builder()
+                        .setDisplayName("Zone1")
+                        .setFloorRef(floorRef)
+                        .setSiteRef(siteRef)
+                        .build();
+        String zoneRef = hayStack.addZone(z);
+    
+    
+        Equip v = new Equip.Builder()
+                          .setSiteRef(siteRef)
+                          .setDisplayName(siteDis+"-VAV-"+nodeAddr)
+                          .setZoneRef(zoneRef)
+                          .setFloorRef(floorRef)
+                          .addMarker("equip")
+                          .addMarker("vav")
+                          .setGroup("7000")
+                          .setProfile("VAV_ANALOG_RTU")
+                          .setGroup(String.valueOf(nodeAddr))
+                          .build();
+        String equipRef = hayStack.addEquip(v);
+    
+        Point testPoint = new Point.Builder()
+                                  .setDisplayName(siteDis+"AHU-"+nodeAddr+"-TestTemp")
+                                  .setEquipRef(equipRef)
+                                  .setSiteRef(siteRef)
+                                  .setZoneRef(zoneRef)
+                                  .setFloorRef(floorRef)
+                                  .addMarker("discharge")
+                                  .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("writable")
+                                  .setGroup(String.valueOf(nodeAddr))
+                                  .setTz("Chicago")
+                                  .setUnit("\u00B0F")
+                                  .build();
+    
+        String datID = CCUHsApi.getInstance().addPoint(testPoint);
+    
+        Point testPoint1 = new Point.Builder()
+                                   .setDisplayName(siteDis+"AHU-"+nodeAddr+"-TestTemp1")
+                                   .setEquipRef(equipRef)
+                                   .setSiteRef(siteRef)
+                                   .setZoneRef(zoneRef)
+                                   .setFloorRef(floorRef)
+                                   .addMarker("discharge")
+                                   .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("writable")
+                                   .setGroup(String.valueOf(nodeAddr))
+                                   .setTz("Chicago")
+                                   .setUnit("\u00B0F")
+                                   .build();
+    
+        String tpID1 = CCUHsApi.getInstance().addPoint(testPoint1);
+        
+        for (Floor ff : HSUtil.getFloors()) {
+            System.out.println( "Floor : "+ ff.getDisplayName());
+            for (Zone zz : HSUtil.getZones(ff.getId())) {
+                System.out.println("Zone : "+zz.getDisplayName());
+                for (Equip ee : HSUtil.getEquips(zz.getId())) {
+                    System.out.println("Equip : "+ee.getDisplayName());
+                    System.out.println("Equip profile : "+ee.getProfile());
+                }
+            }
+        }
     }
 }

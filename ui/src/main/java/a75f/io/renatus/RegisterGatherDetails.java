@@ -48,6 +48,7 @@ public class RegisterGatherDetails extends Activity {
                 Intent i = new Intent(RegisterGatherDetails.this,
                         RegisterGatherSiteDetails.class);
                 startActivity(i);
+                finish();
             }
         });
 

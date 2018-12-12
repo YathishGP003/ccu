@@ -33,14 +33,16 @@ public class SmartNode
     
     
     public SmartNode(int address, String site, String floor, String zone) {
-        deviceRef = new Device.Builder()
+        Device d = new Device.Builder()
                 .setDisplayName("SN-"+address)
                 .addMarker("network")
+                .addMarker("node")
                 .setAddr(address)
                 .setSiteRef(site)
                 .setFloorRef(floor)
                 .setZoneRef(zone)
                 .build();
+        deviceRef = CCUHsApi.getInstance().addDevice(d);
         smartNodeAddress = address;
         siteRef = site;
         floorRef = floor;
@@ -182,6 +184,22 @@ public class SmartNode
                                           .build();
             CCUHsApi.getInstance().updatePoint(analog1Out,point.get("id").toString());
         }
+    }
+    
+    public static RawPoint getPhysicalPoint(int addr, String port) {
+        
+        HashMap device = CCUHsApi.getInstance().read("device and addr == \""+addr+"\"");
+        if (device == null)
+        {
+            return null;
+        }
+        
+        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
+        if (point != null && point.size() > 0)
+        {
+            return new RawPoint.Builder().setHashMap(point).build();
+        }
+        return null;
     }
 
 }

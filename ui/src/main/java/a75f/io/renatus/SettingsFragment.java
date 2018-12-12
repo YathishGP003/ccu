@@ -91,4 +91,8 @@ public class SettingsFragment extends Fragment
 			}
 		});
 	}
+	
+	private void updateSystemProfileType() {
+		
+	}
 }

@@ -14,7 +14,6 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Site;
 import a75f.io.logic.L;
-import a75f.io.logic.tuners.BuildingTuners;
 
 public class RegisterGatherSiteDetails extends Activity {
 
@@ -75,8 +74,9 @@ public class RegisterGatherSiteDetails extends Activity {
 
     private void next() {
         Intent i = new Intent(RegisterGatherSiteDetails.this,
-                RegisterGatherCCUDetails.class);
+        RegisterGatherCCUDetails.class);
         startActivity(i);
+        finish();
     }
 
     /* This site never existed we are creating a new orphaned site. */
@@ -97,8 +97,6 @@ public class RegisterGatherSiteDetails extends Activity {
 
         Log.i(TAG, "LocalSiteID: " + localSiteId);
         CCUHsApi.getInstance().log();
-
-
         return localSiteId;
     }
 

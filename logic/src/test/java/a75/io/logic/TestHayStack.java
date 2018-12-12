@@ -24,6 +24,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.system.SystemEquip;
+import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 
 /**
@@ -417,11 +418,12 @@ public class TestHayStack
         
         String datID = CCUHsApi.getInstance().addPoint(testPoint);
         
-        String deviceRef = new Device.Builder()
+        Device d = new Device.Builder()
                                    .setDisplayName("SN-"+nodeAddr)
                                    .addMarker("network")
                                    .setAddr(nodeAddr)
                                    .build();
+        String deviceRef = CCUHsApi.getInstance().addDevice(d);
         RawPoint analog1Out  = new RawPoint.Builder()
                                        .setDisplayName("Analog1Out-"+nodeAddr)
                                        .setDeviceRef(deviceRef)
@@ -496,5 +498,31 @@ public class TestHayStack
         hayStack.entitySyncHandler.doSyncUpdateEntities();
         System.out.print(hayStack.tagsDb.updateIdMap);
         System.out.print(hayStack.tagsDb.tagsMap);
+    }
+    
+    @Test
+    public void testCMDevice() {
+        CCUHsApi hayStack = new CCUHsApi();
+        hayStack.tagsDb.tagsMap = new HashMap<>();
+        hayStack.tagsDb.writeArrays = new HashMap<>();
+        hayStack.tagsDb.idMap = new HashMap<>();
+        hayStack.tagsDb.removeIdMap = new HashMap<>();
+        hayStack.tagsDb.updateIdMap = new HashMap<>();
+        
+        int nodeAddr = 7000;
+    
+        Site s = new Site.Builder()
+                         .setDisplayName("75F")
+                         .addMarker("site")
+                         .setGeoCity("Burnsville")
+                         .setGeoState("MN")
+                         .setTz("Chicago")
+                         .setArea(1000).build();
+        String siteRef = hayStack.addSite(s);
+        
+        //hayStack.tagsDb.saveString();
+        //hayStack.tagsDb.init();
+        ControlMote cm = new ControlMote(siteRef);
+        System.out.println(hayStack.tagsDb.tagsMap);
     }
 }

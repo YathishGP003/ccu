@@ -18,7 +18,7 @@ public class BaseProfileConfiguration
     protected NodeType mNodeType;
     protected ArrayList<Input>  mInputs  = new ArrayList<>();
     protected ArrayList<Output> mOutputs = new ArrayList<>();
-    protected int priority;
+    protected ZonePriority priority;
     
     public ArrayList<Input> getInputs()
     {
@@ -60,11 +60,11 @@ public class BaseProfileConfiguration
         this.mNodeAddress = nodeAddress;
     }
     
-    public int getPriority()
+    public ZonePriority getPriority()
     {
         return priority;
     }
-    public void setPriority(int priority)
+    public void setPriority(ZonePriority priority)
     {
         this.priority = priority;
     }

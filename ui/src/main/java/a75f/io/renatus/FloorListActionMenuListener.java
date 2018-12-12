@@ -1,5 +1,6 @@
 package a75f.io.renatus;
 
+import android.os.AsyncTask;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -9,17 +10,17 @@ import android.widget.AbsListView.MultiChoiceModeListener;
 import java.util.ArrayList;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.logic.bo.building.Floor;
+import a75f.io.api.haystack.Device;
+import a75f.io.api.haystack.Floor;
+import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Zone;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.Zone;
-
-import static a75f.io.logic.L.ccu;
 
 public class FloorListActionMenuListener implements MultiChoiceModeListener
 {
 	
 	final private FloorPlanFragment floorPlanActivity;
-	private Menu mMenu = null;
+	private Menu             mMenu         = null;
 	private ArrayList<Floor> selectedFloor = new ArrayList<Floor>();
 	
 	
@@ -89,20 +90,31 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 	{
 		for (int nCount = 0; nCount < selectedFloor.size(); nCount++)
 		{
-			Floor floorData = selectedFloor.get(nCount);
+			Floor floor = selectedFloor.get(nCount);
 			
-			for (Zone sZone: floorData.mZoneList)
+			for (Zone sZone: HSUtil.getZones(floor.getId()))
 			{
-				for (Short node : sZone.getNodes())
-				{
-					sZone.removeNodeAndClearAssociations(node);
+				for (Device d : HSUtil.getDevices(sZone.getId())) {
+					L.removeHSDeviceEntities(Short.parseShort(d.getAddr()));
 				}
+				CCUHsApi.getInstance().deleteEntity(sZone.getId());
 			}
-			CCUHsApi.getInstance().deleteEntityTree(floorData.mFloorRef);
-			ccu().getFloors().remove(floorData);
-			L.saveCCUState();
+			CCUHsApi.getInstance().deleteEntityTree(floor.getId());
 			floorPlanActivity.refreshScreen();
 		}
+		new AsyncTask<Void, Void, Void>() {
+			@Override
+			protected Void doInBackground( final Void ... params ) {
+				CCUHsApi.getInstance().syncEntityTree();
+				L.saveCCUState();
+				return null;
+			}
+			
+			@Override
+			protected void onPostExecute( final Void result ) {
+				// continue what you are doing...
+			}
+		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
 	}
 	
 	
@@ -116,7 +128,7 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 	@Override
 	public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked)
 	{
-		Floor floorData = (Floor) ccu().getFloors().get(position);
+		Floor floorData = floorPlanActivity.mFloorListAdapter.getItem(position);
 		if (floorData == null)
 		{
 			return;

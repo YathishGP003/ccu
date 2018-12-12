@@ -6,6 +6,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logic.bo.haystack.device.ControlMote;
 
 /**
  * Created by samjithsadasivan on 11/19/18.
@@ -17,6 +18,7 @@ public class SystemEquip
     private String equipDis;
     private String siteRef;
     CCUHsApi hayStack;
+    String tz;
     
     private static SystemEquip instance = new SystemEquip();//TODO- revisit
     private SystemEquip() {
@@ -30,32 +32,37 @@ public class SystemEquip
     
     
     public void initSystemEquip() {
-        HashMap tuner = hayStack.read("equip and system");
-        if (tuner != null && tuner.size() > 0) {
+        HashMap equip = hayStack.read("equip and system");
+        if (equip != null && equip.size() > 0) {
+            equipRef = equip.get("id").toString();
+            equipDis = equip.get("dis").toString();
+            siteRef = equip.get("siteRef").toString();
+            HashMap siteMap = hayStack.read(Tags.SITE);
+            tz = siteMap.get("tz").toString();
             return;
         }
         System.out.println("System Equip does not exist. Create Now");
         HashMap siteMap = hayStack.read(Tags.SITE);
         siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
-        Equip tunerEquip= new Equip.Builder()
+        Equip systemEquip= new Equip.Builder()
                                   .setSiteRef(siteRef)
                                   .setDisplayName(siteDis+"-SystemEquip")
                                   .addMarker("equip")
                                   .addMarker("system")
                                   .build();
-        equipRef = hayStack.addEquip(tunerEquip);
+        equipRef = hayStack.addEquip(systemEquip);
         equipDis = siteDis+"-SystemEquip";
-        
+        tz = siteMap.get("tz").toString();
         addSystemPoints();
+        new ControlMote(siteRef);
+    }
+    
+    public String getEquipRef() {
+        return equipRef;
     }
     
     public void addSystemPoints(){
-        
-        HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
-        String siteRef = (String) siteMap.get(Tags.ID);
-        String tz = siteMap.get("tz").toString();
-    
         Point sat = new Point.Builder()
                                    .setDisplayName(equipDis+"-"+"SAT")
                                    .setSiteRef(siteRef)
@@ -95,55 +102,105 @@ public class SystemEquip
                            .setTz(tz)
                            .build();
         hayStack.addPoint(hwst);
-    
-        Point analog1Out = new Point.Builder()
-                                   .setDisplayName(equipDis+"-"+"Analog1Out")
-                                   .setSiteRef(siteRef)
-                                   .setEquipRef(equipRef)
-                                   .addMarker("analog1").addMarker("his").addMarker("system").addMarker("out")
-                                   .setUnit("\u00B0V")
-                                   .setTz(tz)
-                                   .build();
-        hayStack.addPoint(analog1Out);
-    
-        Point analog2Out = new Point.Builder()
-                                   .setDisplayName(equipDis+"-"+"Analog2Out")
-                                   .setSiteRef(siteRef)
-                                   .setEquipRef(equipRef)
-                                   .addMarker("analog2").addMarker("his").addMarker("system").addMarker("out")
-                                   .setUnit("\u00B0V")
-                                   .setTz(tz)
-                                   .build();
-        hayStack.addPoint(analog2Out);
-    
-        Point analog3Out = new Point.Builder()
-                                   .setDisplayName(equipDis+"-"+"Analog3Out")
-                                   .setSiteRef(siteRef)
-                                   .setEquipRef(equipRef)
-                                   .addMarker("analog3").addMarker("his").addMarker("system").addMarker("out")
-                                   .setUnit("\u00B0V")
-                                   .setTz(tz)
-                                   .build();
-        hayStack.addPoint(analog3Out);
-    
-        Point analog4Out = new Point.Builder()
-                                   .setDisplayName(equipDis+"-"+"Analog4Out")
-                                   .setSiteRef(siteRef)
-                                   .setEquipRef(equipRef)
-                                   .addMarker("analog4").addMarker("his").addMarker("system").addMarker("out")
-                                   .setUnit("\u00B0V")
-                                   .setTz(tz)
-                                   .build();
-        hayStack.addPoint(analog4Out);
+        
+        addRelaySelectionPoint("relay1");
+        addRelaySelectionPoint("relay2");
+        addRelaySelectionPoint("relay3");
+        addRelaySelectionPoint("relay4");
+        addRelaySelectionPoint("relay5");
+        addRelaySelectionPoint("relay6");
+        addRelaySelectionPoint("relay7");
+        addRelaySelectionPoint("relay8");
+        
+        setRelaySelection("relay1",0);
+        setRelaySelection("relay2",0);
+        setRelaySelection("relay3",0);
+        setRelaySelection("relay4",0);
+        setRelaySelection("relay5",0);
+        setRelaySelection("relay6",0);
+        setRelaySelection("relay7",0);
+        setRelaySelection("relay8",0);
+        
+        addAnalogOutSelectionPoint("analog1");
+        addAnalogOutSelectionPoint("analog2");
+        addAnalogOutSelectionPoint("analog3");
+        addAnalogOutSelectionPoint("analog4");
+        
+        setAnalogOutSelection("analog1", 0);
+        setAnalogOutSelection("analog2", 0);
+        setAnalogOutSelection("analog3", 0);
+        setAnalogOutSelection("analog4", 0);
+        
         setSat(0);
         setCo2(0);
         setSp(0);
         setHwst(0);
-        setAnalogOut("analog1",0);
-        setAnalogOut("analog2",0);
-        setAnalogOut("analog3",0);
-        setAnalogOut("analog4",0);
     }
+    
+    
+    private void addAnalogOutSelectionPoint(String analog) {
+        Point p = new Point.Builder()
+                          .setDisplayName(equipDis+"-"+analog+"Out")
+                          .setSiteRef(siteRef)
+                          .setEquipRef(equipRef)
+                          .addMarker(analog).addMarker("writable").addMarker("system").addMarker("selection").addMarker("out")
+                          .setUnit("\u00B0V")
+                          .setTz(tz)
+                          .build();
+        hayStack.addPoint(p);
+    }
+    
+    public double getAnalogOutSelection(String analog)
+    {
+        return hayStack.readDefaultVal("point and system and selection and "+analog);
+    }
+    public void setAnalogOutSelection(String analog, double val)
+    {
+        hayStack.writeDefaultVal("point and system and selection and "+analog, val);
+    }
+    
+    private void addRelaySelectionPoint(String relay){
+        Point p = new Point.Builder()
+                            .setDisplayName(equipDis+"-"+relay+"Selection")
+                            .setSiteRef(siteRef)
+                            .setEquipRef(equipRef)
+                            .setUnit("\u00B0")
+                            .addMarker(relay).addMarker("writable").addMarker("system").addMarker("selection")
+                            .setTz(tz)
+                            .build();
+        hayStack.addPoint(p);
+    }
+    
+    public double getRelaySelection(String relay)
+    {
+        return hayStack.readDefaultVal("point and system and selection and "+relay);
+    }
+    public void setRelaySelection(String relay, double val)
+    {
+        hayStack.writeDefaultVal("point and system and selection and "+relay, val);
+    }
+    
+    private void addRelayStatePoint(String relay){
+        Point p = new Point.Builder()
+                          .setDisplayName(equipDis+"-"+relay+"Selection")
+                          .setSiteRef(siteRef)
+                          .setEquipRef(equipRef)
+                          .setUnit("\u00B0V")
+                          .addMarker(relay).addMarker("writable").addMarker("system").addMarker("state")
+                          .setTz(tz)
+                          .build();
+        hayStack.addPoint(p);
+    }
+    
+    public double getRelayState(String relay)
+    {
+        return hayStack.readDefaultVal("point and system and state and "+relay);
+    }
+    public void setRelayState(String relay, double val)
+    {
+        hayStack.writeDefaultVal("point and system and state and "+relay, val);
+    }
+    
     
     public double getSat()
     {
@@ -181,24 +238,24 @@ public class SystemEquip
         hayStack.writeHisValByQuery("point and tr and hwst and his and system", hwst);
     }
     
-    public double getAnalogOut(String analog)
+    /*public double getAnalogOut(String analog)
     {
         return hayStack.readHisValByQuery("point and his and system and out and "+analog);
     }
     public void setAnalogOut(String analog, double val)
     {
         hayStack.writeHisValByQuery("point and his and system and out and "+analog, val);
-    }
+    }*/
     
     public void dump() {
         System.out.println(getSat());
         System.out.println(getCo2());
         System.out.println(getSp());
         System.out.println(getHwst());
-        System.out.println(getAnalogOut("analog1"));
+        /*System.out.println(getAnalogOut("analog1"));
         System.out.println(getAnalogOut("analog2"));
         System.out.println(getAnalogOut("analog3"));
-        System.out.println(getAnalogOut("analog4"));
+        System.out.println(getAnalogOut("analog4"));*/
     }
     
 }

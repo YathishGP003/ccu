@@ -58,6 +58,7 @@ public class CCUApplication
     
     
     public SystemProfile systemProfile = new VavAnalogRtu();//TODO- TEMP
+    public ArrayList<ZoneProfile> zoneProfiles = new ArrayList<>();
     
     public Site defaultSite = null;
     
@@ -67,6 +68,7 @@ public class CCUApplication
     private short           mSmartNodeAddressBand;
     
 
+    
     public short getSmartNodeAddressBand()
     {
         return mSmartNodeAddressBand;

@@ -1,5 +1,6 @@
 package a75f.io.renatus;
 
+import android.os.AsyncTask;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -9,8 +10,11 @@ import android.widget.AbsListView.MultiChoiceModeListener;
 import java.util.ArrayList;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Device;
+import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Zone;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.Zone;
+
 
 class RoomListActionMenuListener implements MultiChoiceModeListener
 {
@@ -92,21 +96,32 @@ class RoomListActionMenuListener implements MultiChoiceModeListener
 	{
 		for (int nCount = 0; nCount < selectedRoom.size(); nCount++)
 		{
-			Zone sZone = L.ccu().getFloors().get(0).mZoneList.remove(nCount);
-			for (Short node : sZone.getNodes())
-			{
-				sZone.removeNodeAndClearAssociations(node);
+			Zone sZone = selectedRoom.get(nCount);
+			for (Device d : HSUtil.getDevices(sZone.getId())) {
+				L.removeHSDeviceEntities(Short.parseShort(d.getAddr()));
 			}
-			CCUHsApi.getInstance().deleteEntity(sZone.mZoneRef);
-			L.saveCCUState();
+			CCUHsApi.getInstance().deleteEntity(sZone.getId());
 			floorPlanActivity.refreshScreen();
 		}
+		new AsyncTask<Void, Void, Void>() {
+			@Override
+			protected Void doInBackground( final Void ... params ) {
+				CCUHsApi.getInstance().syncEntityTree();
+				L.saveCCUState();
+				return null;
+			}
+			
+			@Override
+			protected void onPostExecute( final Void result ) {
+				// continue what you are doing...
+			}
+		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
 	}
 	
 	
 	private void renameSelectedRoom()
 	{
-		L.ccu().getFloors().get(0).mZoneList.remove(selectedRoom.get(0));
+		//L.ccu().getFloors().get(0).mZoneList.remove(selectedRoom.get(0));
 		L.saveCCUState();
 		floorPlanActivity.refreshScreen();
 	}
@@ -156,7 +171,7 @@ class RoomListActionMenuListener implements MultiChoiceModeListener
 				mMenu.findItem(R.id.renameSelection).setVisible(false);
 				break;
 		}
-		//mMenu.findItem(R.id.restartSelection).setVisible(((checkedCount > 0) && (CCULicensing.getHandle().UseDevMode() /*SystemSettingsData.getTier() == CCU_TIER.DEV*/)));
+		//mMenu.findItem(R.id.restartSelection).setVisible(((checkedCount > 0) && (CCULicensing.getHandle().UseDevMode() *//*SystemSettingsData.getTier() == CCU_TIER.DEV*//*)));
 		floorPlanActivity.mRoomListAdapter.notifyDataSetChanged();
 	}
 }

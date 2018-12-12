@@ -59,6 +59,23 @@
         <item>  VAV Bacnet RTU </item>
     </string-array>
 
+    <string-array name="hvac_stage_selector">
+        <item>  Cooling Stage 1 </item>
+        <item>  Cooling Stage 2 </item>
+        <item>  Cooling Stage 3 </item>
+        <item>  Cooling Stage 4 </item>
+        <item>  Cooling Stage 5 </item>
+        <item>  Heating Stage 1 </item>
+        <item>  Heating Stage 2 </item>
+        <item>  Heating Stage 3 </item>
+        <item>  Heating Stage 4 </item>
+        <item>  Heating Stage 5 </item>
+        <item>  Fan Stage 1 </item>
+        <item>  Fan Stage 2 </item>
+
+
+    </string-array>
+
     <string-array name="mode">
         <item>Smart</item>
         <item>Manual</item>

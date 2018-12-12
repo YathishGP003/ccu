@@ -12,4 +12,10 @@ public enum OutputRelayActuatorType
 	OutputRelayActuatorType(String str) {
 		displayName = str;
 	}
+	
+	public static OutputRelayActuatorType getEnum(String value) {
+		for(OutputRelayActuatorType v : values())
+			if(v.displayName.equalsIgnoreCase(value)) return v;
+		throw new IllegalArgumentException();
+	}
 }

@@ -1,5 +1,6 @@
 package a75f.io.renatus;
 
+import android.os.AsyncTask;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -9,9 +10,8 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.L;
-
-import static a75f.io.logic.L.ccu;
 
 class ModuleListActionMenuListener implements MultiChoiceModeListener
 {
@@ -94,18 +94,30 @@ class ModuleListActionMenuListener implements MultiChoiceModeListener
 	{
 		for(Short selectedModule : seletedModules)
 		{
-			ccu().getFloors().get(floorPlanActivity.mFloorListAdapter.getSelectedPostion()).mZoneList
-					.get(floorPlanActivity.mRoomListAdapter.getSelectedPostion())
-					.removeNodeAndClearAssociations(selectedModule);
+			L.removeHSDeviceEntities(selectedModule);
 		}
-        L.saveCCUState();
+		
+		new AsyncTask<Void, Void, Void>() {
+			@Override
+			protected Void doInBackground( final Void ... params ) {
+				CCUHsApi.getInstance().syncEntityTree();
+				L.saveCCUState();
+				return null;
+			}
+			
+			@Override
+			protected void onPostExecute( final Void result ) {
+				// continue what you are doing...
+			}
+		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+		
     }
 	
 	
 	@Override
 	public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked)
 	{
-		Short smartNodeID = floorPlanActivity.mModuleListAdapter.getItem(position);
+		Short smartNodeID = Short.parseShort(floorPlanActivity.mModuleListAdapter.getItem(position));
 		if (checked)
 		{
 			seletedModules.add(smartNodeID);

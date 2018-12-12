@@ -21,6 +21,7 @@ import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.SystemConstants;
+import a75f.io.logic.bo.building.system.SystemEquip;
 import a75f.io.logic.bo.building.system.VavAnalogRtu;
 import a75f.io.logic.tuners.SystemTunerUtil;
 import a75f.io.logic.tuners.TunerConstants;
@@ -89,11 +90,11 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 	    }
 		setupTempLimitSelectors();
 		setupAnalogLimitSelectors();
-	    VavAnalogRtu p = (VavAnalogRtu) L.ccu().systemProfile;
-	    ahuAnalog1Cb.setChecked(p.analog1Enabled);
-	    ahuAnalog2Cb.setChecked(p.analog2Enabled);
-	    ahuAnalog3Cb.setChecked(p.analog3Enabled);
-	    ahuAnalog4Cb.setChecked(p.analog4Enabled);
+	    
+	    ahuAnalog1Cb.setChecked(SystemEquip.getInstance().getAnalogOutSelection("analog1") > 0);
+	    ahuAnalog2Cb.setChecked(SystemEquip.getInstance().getAnalogOutSelection("analog2") > 0);
+	    ahuAnalog3Cb.setChecked(SystemEquip.getInstance().getAnalogOutSelection("analog3") > 0);
+	    ahuAnalog4Cb.setChecked(SystemEquip.getInstance().getAnalogOutSelection("analog4") > 0);
 	    
 	    ahuAnalog1Cb.setOnCheckedChangeListener(this);
 	    ahuAnalog2Cb.setOnCheckedChangeListener(this);
@@ -292,20 +293,19 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 	@Override
 	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
 	{
-		VavAnalogRtu p = (VavAnalogRtu) L.ccu().systemProfile;
 		switch (buttonView.getId())
 		{
 			case R.id.ahuAnalog1Cb:
-				p.analog1Enabled = ahuAnalog1Cb.isChecked();
+				setSelectionBackground("analog1", isChecked);
 				break;
 			case R.id.ahuAnalog2Cb:
-				p.analog2Enabled = ahuAnalog2Cb.isChecked();
+				setSelectionBackground("analog2", isChecked);
 				break;
 			case R.id.ahuAnalog3Cb:
-				p.analog3Enabled = ahuAnalog3Cb.isChecked();
+				setSelectionBackground("analog3", isChecked);
 				break;
 			case R.id.ahuAnalog4Cb:
-				p.analog4Enabled = ahuAnalog4Cb.isChecked();
+				setSelectionBackground("analog4", isChecked);
 				break;
 		}
 	}
@@ -385,6 +385,22 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 			@Override
 			protected Void doInBackground( final Void ... params ) {
 				SystemTunerUtil.setTuner(analog, type, level, val);
+				
+				return null;
+			}
+			
+			@Override
+			protected void onPostExecute( final Void result ) {
+				// continue what you are doing...
+			}
+		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+	}
+	
+	private void setSelectionBackground(String analog, boolean selected) {
+		new AsyncTask<Void, Void, Void>() {
+			@Override
+			protected Void doInBackground( final Void ... params ) {
+				SystemEquip.getInstance().setAnalogOutSelection(analog, selected ? 1: 0);
 				
 				return null;
 			}

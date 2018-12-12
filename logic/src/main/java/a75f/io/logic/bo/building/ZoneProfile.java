@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.UUID;
 
-import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.RoomDataInterface;
 
@@ -89,20 +89,6 @@ public abstract class ZoneProfile extends Schedulable
         this.mProfileConfiguration.remove(selectedModule);
     }
     
-    public void removeHaystackEntities(Short node) {
-        CCUHsApi hsApi = CCUHsApi.getInstance();
-        HashMap equip = hsApi.read("equip and group == \""+node+"\"");
-        if (equip.get("id") != null)
-        {
-            hsApi.deleteEntityTree(equip.get("id").toString());
-        }
-        HashMap device = hsApi.read("device and addr == \""+node+"\"");
-        if (device.get("id") != null)
-        {
-            hsApi.deleteEntityTree(device.get("id").toString());
-        }
-    }
-    
     
     public void refreshRoomDataInterface() {
         if (mInterface != null)
@@ -125,16 +111,8 @@ public abstract class ZoneProfile extends Schedulable
     }
     
     @JsonIgnore
-    public int getPriority() {
-        int priority = 0;
-        for (short nodeAddress : mProfileConfiguration.keySet())
-        {
-            if (mProfileConfiguration.get(nodeAddress).getPriority() > priority) {
-                priority = mProfileConfiguration.get(nodeAddress).getPriority();
-            }
-        
-        }
-        return priority;
+    public ZonePriority getPriority() {
+        return ZonePriority.LOW;
     }
     
     @JsonIgnore
@@ -142,4 +120,19 @@ public abstract class ZoneProfile extends Schedulable
         return 72; //TODO- TEMP
     }
     
+    @JsonIgnore
+    public double getCurrentTemp() {
+        return 0;
+    }
+    
+    @JsonIgnore
+    public Equip getEquip() {
+        return null;
+    }
+    
+    @JsonIgnore
+    public ZoneState getState() {
+        return state;
+    }
 }
+

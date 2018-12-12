@@ -13,4 +13,10 @@ public enum OutputAnalogActuatorType
 	OutputAnalogActuatorType(String str) {
 		displayName = str;
 	}
+	
+	public static OutputAnalogActuatorType getEnum(String value) {
+		for(OutputAnalogActuatorType v : values())
+			if(v.displayName.equalsIgnoreCase(value)) return v;
+		throw new IllegalArgumentException();
+	}
 }

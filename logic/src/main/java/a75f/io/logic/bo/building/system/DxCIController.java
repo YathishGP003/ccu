@@ -2,16 +2,20 @@ package a75f.io.logic.bo.building.system;
 
 import android.util.Log;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.EvictingQueue;
 
 import a75.io.algos.ControlLoop;
+import a75f.io.api.haystack.Floor;
+import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Zone;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.Floor;
-import a75f.io.logic.bo.building.Zone;
+import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.tuners.SystemTunerUtil;
 
+import static a75f.io.logic.bo.building.ZonePriority.NO;
 import static a75f.io.logic.bo.building.system.DxCIController.State.COOLING;
 import static a75f.io.logic.bo.building.system.DxCIController.State.HEATING;
 import static a75f.io.logic.bo.building.system.DxCIController.State.NA;
@@ -60,14 +64,14 @@ public class DxCIController
         ciDesired = (int)SystemTunerUtil.getDesiredCI();
         Log.d("CCU", "runDxCIAlgo-> ciDesired: "+ciDesired);
         
-        for (Floor f: L.ccu().getFloors())
+        for (Floor f: HSUtil.getFloors())
         {
-            for(Zone z: f.mZoneList) {
-                if (z.getZoneCurrentTemp() == 0) {
+            for(Zone z: HSUtil.getZones(f.getId())) {
+                if (getZoneCurrentTemp(z.getId()) == 0) {
                     continue;
                 }
-                double zone_dxCI = z.getZoneCurrentTemp() - z.getZoneDesiredTemp();
-                double zone_dp = z.getDynamicPriority(ciDesired);
+                double zone_dxCI = getZoneCurrentTemp(z.getId()) - getZoneDesiredTemp();
+                double zone_dp = getDynamicPriority(ciDesired, z.getId());
     
                 dxCISumCO += zone_dxCI * zone_dp;
                 prioritySum += zone_dp;
@@ -105,17 +109,17 @@ public class DxCIController
         
         double dxCISum = 0;
         
-        for (Floor f: L.ccu().getFloors())
+        for (Floor f: HSUtil.getFloors())
         {
-            for(Zone z: f.mZoneList) {
-                if (z.getZoneCurrentTemp() == 0) {
+            for(Zone z: HSUtil.getZones(f.getId())) {
+                if (getZoneCurrentTemp(z.getId()) == 0) {
                     continue;
                 }
-                double zone_dxCI = z.getZoneCurrentTemp() - z.getZoneTempTarget();
-                double zone_dp = z.getDynamicPriority(ciDesired);
+                double zone_dxCI = getZoneCurrentTemp(z.getId()) - getZoneTempTarget();
+                double zone_dp = getDynamicPriority(ciDesired, z.getId());
             
                 dxCISum += zone_dxCI * zone_dp;
-                Log.d("CCU", "WA zone_dxCI: "+zone_dxCI+" zone_dp: "+zone_dp+" dxCISum: "+dxCISum);
+                Log.d("CCU", "WA zone_dxCI: "+zone_dxCI+" zone_dp: "+zone_dp+" dxCISum: "+dxCISum+" dxState: "+dxState);
             }
         }
         
@@ -151,35 +155,75 @@ public class DxCIController
     }
     
     public boolean isAllZonesHeating() {
-        for (Floor f: L.ccu().getFloors())
+        for (ZoneProfile p: L.ccu().zoneProfiles)
         {
-            for(Zone z: f.mZoneList) {
-                for (ZoneProfile p: z.mZoneProfiles) {
-                    if (p.state != ZoneState.HEATING) {
-                        Log.d("dx"," Zone "+z.roomName+" is not in Heating");
-                        return false;
-                    }
-                }
+            System.out.println(" Zone State " +p.state);
+            if (p.state != ZoneState.HEATING) {
+                Log.d("dx"," Equip "+p.getProfileType()+" is not in Heating");
+                return false;
             }
-        
         }
         return true;
     }
     
     public boolean isAllZonesCooling() {
-        for (Floor f: L.ccu().getFloors())
+        for (ZoneProfile p: L.ccu().zoneProfiles)
         {
-            for(Zone z: f.mZoneList) {
-                for (ZoneProfile p: z.mZoneProfiles) {
-                    if (p.state != ZoneState.COOLING) {
-                        Log.d("dx"," Zone "+z.roomName+" is not in Cooling");
-                        return false;
-                    }
-                }
+            if (p.state != ZoneState.COOLING) {
+                Log.d("dx"," Equip "+p.getProfileType()+" is not in Cooling");
+                return false;
             }
-            
         }
         return true;
+    }
+    
+    public double getZoneCurrentTemp(String zoneRef) {
+        double tempSum = 0;
+        int tempCount = 0;
+        for (ZoneProfile p : L.ccu().zoneProfiles)
+        {
+            if (p.getEquip().getZoneRef().equals(zoneRef) && p.getCurrentTemp() > 0) {
+                tempSum += p.getCurrentTemp();
+                tempCount++;
+            }
+        }
+        return tempCount > 0 ? tempSum/tempCount : 0;
+    }
+    
+    public int getZonePriority(String zoneRef) {
+        ZonePriority priority = NO;
+        for (ZoneProfile p : L.ccu().zoneProfiles)
+        {
+            if (p.getEquip().getZoneRef().equals(zoneRef) && p.getPriority().ordinal() > priority.ordinal()) {
+                priority = p.getPriority();
+            }
+        }
+        return priority.multiplier;
+    }
+    
+    @JsonIgnore
+    public double getZoneDesiredTemp()
+    {
+        return 72;//TODO - TEMP
+    }
+    
+    @JsonIgnore
+    public double getZoneTempTarget() //Humidity compensated
+    {
+        return getZoneDesiredTemp();//TODO - TEMP
+    }
+    
+    @JsonIgnore
+    public double getDynamicPriority(int ciTarget, String zoneRef) {
+        
+        if (getZoneCurrentTemp(zoneRef) == 0) {
+            return getZonePriority(zoneRef);
+        }
+        /* Dynamic priority is generated by multiplying zone priority by 1.3 for every multiple of comfort slider value away
+           from desired. The idea is that occupants in a zone that is further away from the desired are exponentially more
+           likely to feel uncomfortable
+         */
+        return Math.pow(1.3 , (Math.abs(getZoneCurrentTemp(zoneRef) - getZoneDesiredTemp())/ciTarget));
     }
     
     public State getDxCIRtuState() {

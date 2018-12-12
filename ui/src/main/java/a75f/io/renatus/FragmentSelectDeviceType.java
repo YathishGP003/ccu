@@ -11,10 +11,9 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
-import a75f.io.logic.bo.building.lights.LightProfile;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.logic.bo.building.Zone;
-import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.L;
+import a75f.io.logic.bo.building.lights.LightProfile;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import butterknife.BindView;
@@ -66,8 +65,7 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
-        //defaultTextView.setText(mRoomName + " - " + "Select device type to pair");
-        defaultTextView.setText(mRoomName);
+        defaultTextView.setText(HSUtil.getDis(mRoomName));
     }
     
     
@@ -89,8 +87,8 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
         mNodeAddress = getArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR);
         mRoomName = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
         mFloorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
-        mZone = L.findZoneByName(mFloorName, mRoomName);
-        mLightProfile = (LightProfile) mZone.findProfile(ProfileType.LIGHT);
+        //mZone = L.findZoneByName(mFloorName, mRoomName);
+        //mLightProfile = (LightProfile) mZone.findProfile(ProfileType.LIGHT);
         
         return view;
     }

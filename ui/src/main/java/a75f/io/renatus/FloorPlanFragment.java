@@ -22,13 +22,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 
-import a75f.io.logic.bo.building.BaseProfileConfiguration;
-import a75f.io.logic.bo.building.Floor;
-import a75f.io.logic.bo.building.Zone;
-import a75f.io.logic.bo.building.ZoneProfile;
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.Floor;
+import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Tags;
+import a75f.io.api.haystack.Zone;
 import a75f.io.logic.L;
+import a75f.io.logic.LZoneProfile;
+import a75f.io.logic.bo.building.ZoneProfile;
+import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -48,7 +53,7 @@ public class FloorPlanFragment extends Fragment
 			"a75f.io.renatus.BLE_PAIRING_COMPLETED";
 	public DataArrayAdapter<Floor> mFloorListAdapter;
 	public DataArrayAdapter<Zone>  mRoomListAdapter;
-	public DataArrayAdapter<Short> mModuleListAdapter;
+	public DataArrayAdapter<String>                      mModuleListAdapter;
 	
 	@BindView(R.id.addFloorBtn)
 	TextView addFloorBtn;
@@ -99,14 +104,13 @@ public class FloorPlanFragment extends Fragment
 	
 	private Zone getSelectedZone()
 	{
-		
-		return getSelectedFloor().mZoneList.get(mRoomListAdapter.getSelectedPostion());
+		return HSUtil.getZones(getSelectedFloor().getId()).get(mRoomListAdapter.getSelectedPostion());
 	}
 	
 	
 	private Floor getSelectedFloor()
 	{
-		return ccu().getFloors().get(mFloorListAdapter.getSelectedPostion());
+		return HSUtil.getFloors().get(mFloorListAdapter.getSelectedPostion());
 	}
 	
 	
@@ -177,7 +181,7 @@ public class FloorPlanFragment extends Fragment
 	private void updateFloors()
 	{
 		mFloorListAdapter =
-				new DataArrayAdapter<Floor>(this.getActivity(), R.layout.listviewitem, ccu().getFloors());
+				new DataArrayAdapter<>(this.getActivity(), R.layout.listviewitem, HSUtil.getFloors());
 		floorListView.setAdapter(mFloorListAdapter);
 		enableFloorButton();
 		if (mFloorListAdapter.getCount() > 0)
@@ -203,8 +207,8 @@ public class FloorPlanFragment extends Fragment
 	private void selectFloor(int position)
 	{
 		mFloorListAdapter.setSelectedItem(position);
-		Floor curSelectedFloor = ccu().getFloors().get(position);
-		updateRooms(curSelectedFloor.mZoneList);
+		updateRooms(HSUtil.getZones(getSelectedFloor().getId()));
+		
 	}
 	
 	
@@ -244,9 +248,10 @@ public class FloorPlanFragment extends Fragment
 	private void selectRoom(int position)
 	{
 		mRoomListAdapter.setSelectedItem(position);
-		Floor floor = ccu().getFloors().get(mFloorListAdapter.getSelectedPostion());
-		Zone selectedZone = floor.mZoneList.get(mRoomListAdapter.getSelectedPostion());
-		updateModules(selectedZone);
+		//ArrayList<Floor> floors = CCUHsApi.getInstance().getFloors();
+		//Floor floor = floors.get(mFloorListAdapter.getSelectedPostion());
+		//Zone selectedZone = CCUHsApi.getInstance().getZones(floor.getId()).get(mRoomListAdapter.getSelectedPostion());
+		updateModules(getSelectedZone());
 	}
 	
 	
@@ -265,18 +270,18 @@ public class FloorPlanFragment extends Fragment
 	private void updateModules(Zone zone)
 	{
 		mModuleListAdapter =
-				new DataArrayAdapter<>(getActivity(), R.layout.listviewitem, createIntegerList(
-						zone.getNodes()));
+				new DataArrayAdapter<>(getActivity(), R.layout.listviewitem, createAddressList(
+						HSUtil.getEquips(zone.getId())));
 		moduleListView.setAdapter(mModuleListAdapter);
 	}
 	
-	private ArrayList<Short> createIntegerList(HashSet<Short> nodes)
+	private ArrayList<String> createAddressList(ArrayList<Equip> equips)
 	{
-		ArrayList<Short> arrayList = new ArrayList<>();
+		ArrayList<String> arrayList = new ArrayList<>();
 		 
-		for(Short address : nodes)
+		for(Equip e : equips)
 		{
-			arrayList.add(address);
+			arrayList.add(e.getGroup());
 			
 		}
 		return arrayList;
@@ -322,11 +327,18 @@ public class FloorPlanFragment extends Fragment
 	{
 		if (actionId == EditorInfo.IME_ACTION_DONE)
 		{
-			int fID = ccu().getFloors().size();
-			ccu().getFloors().add(new Floor(fID, "", addFloorEdit.getText().toString()));
+			//int fID = ccu().getFloors().size();
+			//ccu().getFloors().add(new Floor(fID, "", addFloorEdit.getText().toString()));
+			
+			HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
+			Floor hsFloor = new Floor.Builder()
+                                     .setDisplayName(addFloorEdit.getText().toString())
+                                     .setSiteRef(siteMap.get("id").toString())
+                                     .build();
+			CCUHsApi.getInstance().addFloor(hsFloor);
 			updateFloors();
-			selectFloor(fID);
-			//CCUKinveyInterface.updateFloor(FloorData.getFloorData().get(nID), false);
+			selectFloor(HSUtil.getFloors().size()-1);
+			
 			InputMethodManager mgr = (InputMethodManager) getActivity()
 					                                              .getSystemService(Context.INPUT_METHOD_SERVICE);
 			mgr.hideSoftInputFromWindow(addFloorEdit.getWindowToken(), 0);
@@ -384,9 +396,23 @@ public class FloorPlanFragment extends Fragment
 		{
 			Toast.makeText(getActivity().getApplicationContext(),
 					"Room " + addRoomEdit.getText() + " added", Toast.LENGTH_SHORT).show();
-			Floor f = L.ccu().getFloors().get(mFloorListAdapter.getSelectedPostion());
-			ArrayList<Zone> mRoomList =f.mZoneList;
-			mRoomList.add(new Zone(addRoomEdit.getText().toString(), f));
+			//Floor f = L.ccu().getFloors().get(mFloorListAdapter.getSelectedPostion());
+			//ArrayList<Zone> mRoomList =f.mZoneList;
+			//mRoomList.add(new Zone(addRoomEdit.getText().toString(), f));
+			
+			ArrayList<Floor> floors = HSUtil.getFloors();
+			Floor floor = floors.get(mFloorListAdapter.getSelectedPostion());
+			
+			
+			
+			HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
+			Zone hsZone = new Zone.Builder()
+                                   .setDisplayName(addRoomEdit.getText().toString())
+                                   .setFloorRef(floor.getId())
+                                   .setSiteRef(siteMap.get("id").toString())
+                                   .build();
+			CCUHsApi.getInstance().addZone(hsZone);
+			ArrayList<Zone> mRoomList = HSUtil.getZones(floor.getId());
 			updateRooms(mRoomList);
 			selectRoom(mRoomList.size() - 1);
 			InputMethodManager mgr = (InputMethodManager) getActivity()
@@ -403,14 +429,12 @@ public class FloorPlanFragment extends Fragment
 		//TODO - TEMP
 		ccu().setSmartNodeAddressBand((short)7000);
 		
-		short meshAddress =L.generateSmartNodeAddress();
-		Floor floor = ccu().getFloors().get(mFloorListAdapter.getSelectedPostion());
-		Zone room = floor.mZoneList.get(mRoomListAdapter.getSelectedPostion());
+		short meshAddress = L.generateSmartNodeAddress();
 		
 		/* Checks to see if emulated and doesn't popup BLE dialogs */
 
 		//This should be moved to pair button for select device type screen.
-		showDialogFragment(FragmentSelectDeviceType.newInstance(meshAddress, room.roomName, floor.mFloorName), FragmentSelectDeviceType.ID);
+		showDialogFragment(FragmentSelectDeviceType.newInstance(meshAddress, getSelectedZone().getId(), getSelectedFloor().getId()), FragmentSelectDeviceType.ID);
 		/*
 		*/
 	}
@@ -456,47 +480,28 @@ public class FloorPlanFragment extends Fragment
 	
 	private void selectModule(int position)
 	{
-		Floor floor = ccu().getFloors().get(mFloorListAdapter.getSelectedPostion());
-		Zone zone = floor.mZoneList.get(mRoomListAdapter.getSelectedPostion());
-		Short nodeAddr = mModuleListAdapter.getItem(position);
+		Floor floor = getSelectedFloor();
+		Zone zone = getSelectedZone();
+		String nodeAddr = mModuleListAdapter.getItem(position);
 		
+		ZoneProfile profile = LZoneProfile.getProfile(Short.parseShort(nodeAddr));
 		
-//		DO NOTHING
-//		showDialogFragment(LightingZoneProfileFragment
-//				                   .newInstance((Short)createIntegerList(zone.getNodes()).get(position),
-//										   zone.roomName, mfloor.mFloorName),
-//				LightingZoneProfileFragment.ID);
-		
-		ZoneProfile profile = getProfile(zone, nodeAddr);
-		BaseProfileConfiguration config = profile.getProfileConfiguration().get(nodeAddr);
 		switch (profile.getProfileType()) {
-			case HMP:
+			/*case HMP:
 				showDialogFragment(FragmentHMPConfiguration
 						                   .newInstance(nodeAddr,getSelectedZone().roomName, config.getNodeType(), getSelectedFloor().mFloorName), FragmentHMPConfiguration.ID);
-				break;
+				break;*/
 			case VAV_REHEAT:
 			case VAV_SERIES_FAN:
 			case VAV_PARALLEL_FAN:
+				System.out.println(" floor "+floor.getDisplayName()+" zone "+zone.getDisplayName()+" node :"+nodeAddr);
+				VavProfileConfiguration config = (VavProfileConfiguration)profile.getProfileConfiguration(Short.parseShort(nodeAddr));
+				System.out.println("Config "+config +" profile "+profile.getProfileType());
 				showDialogFragment(FragmentVAVConfiguration
-						                   .newInstance(nodeAddr,getSelectedZone().roomName, config.getNodeType(), getSelectedFloor().mFloorName, profile.getProfileType()), FragmentVAVConfiguration.ID);
+						                   .newInstance(Short.parseShort(nodeAddr),zone.getDisplayName(), config.getNodeType(), floor.getDisplayName(), profile.getProfileType()), FragmentVAVConfiguration.ID);
 			
 		}
 		
 		
-	}
-	
-	
-	//TODO - Revisit
-	private ZoneProfile getProfile(Zone zone ,Short addr) {
-		
-		for (ZoneProfile zp : zone.mZoneProfiles) {
-			
-			BaseProfileConfiguration profConfig = zp.getProfileConfiguration().get(addr);
-			if (profConfig != null) {
-				return zp;
-			}
-			
-		}
-		return null;
 	}
 }

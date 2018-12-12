@@ -17,18 +17,23 @@ import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.Site;
+import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.Floor;
+import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Zone;
 import a75f.io.logic.bo.building.CCUApplication;
 import a75f.io.logic.bo.building.Day;
 import a75f.io.logic.bo.building.NamedSchedule;
 import a75f.io.logic.bo.building.Schedule;
-import a75f.io.logic.tuners.BuildingTuners;
+import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.vav.VavParallelFanProfile;
+import a75f.io.logic.bo.building.vav.VavReheatProfile;
+import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
 
 /**
  * Created by rmatt isOn 7/19/2017.
@@ -154,6 +159,8 @@ public class Globals
 //            CCUHsApi.getInstance().addSite(s75f);
 //            BuildingTuners.getInstance();//To init Building tuner
 //        }
+    
+        addProfilesForEquips();
     }
 
     private void populate()
@@ -330,6 +337,36 @@ public class Globals
     public boolean isPubnubSubscribed()
     {
         return pubnubSubscribed;
+    }
+    
+    public void addProfilesForEquips() {
+        for (Floor f: HSUtil.getFloors()) {
+            Log.d("CCUHS",f.getDisplayName());
+            for (Zone z: HSUtil.getZones(f.getId())) {
+                Log.d("CCUHS",z.getDisplayName());
+                for (Equip eq : HSUtil.getEquips(z.getId())) {
+                    Log.d("CCUHS",eq.getDisplayName());
+                    switch (ProfileType.valueOf(eq.getProfile())) {
+                        case VAV_REHEAT:
+                            VavReheatProfile vr = new VavReheatProfile();
+                            vr.addLogicalMap(Short.valueOf(eq.getGroup()));
+                            L.ccu().zoneProfiles.add(vr);
+                            break;
+                        case VAV_SERIES_FAN:
+                            VavSeriesFanProfile vsf = new VavSeriesFanProfile();
+                            vsf.addLogicalMap(Short.valueOf(eq.getGroup()));
+                            L.ccu().zoneProfiles.add(vsf);
+                            break;
+                        case VAV_PARALLEL_FAN:
+                            VavParallelFanProfile vpf = new VavParallelFanProfile();
+                            vpf.addLogicalMap(Short.valueOf(eq.getGroup()));
+                            L.ccu().zoneProfiles.add(vpf);
+                            break;
+                    }
+                }
+            }
+            
+        }
     }
     
 }

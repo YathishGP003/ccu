@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import a75.io.algos.CO2Loop;
 import a75.io.algos.ControlLoop;
 import a75.io.algos.GenericPIController;
+import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.building.hvac.ParallelFanVavUnit;
@@ -43,7 +44,7 @@ public class VavParallelFanProfile extends VavProfile
             mInterface.refreshView();
         }
     
-        for (short node : getNodeAddresses())
+        for (short node : vavDeviceMap.keySet())
         {
             if (vavDeviceMap.get(node) == null) {
                 addLogicalMap(node);
@@ -175,5 +176,10 @@ public class VavParallelFanProfile extends VavProfile
             vavDevice.setReheatPos(valve.currentPosition);
             vavDevice.updateLoopParams();
         }
+    }
+    
+    @Override
+    public ZoneState getState() {
+        return state;
     }
 }

@@ -53,39 +53,38 @@ import io.objectbox.query.QueryBuilder;
  * Created by samjithsadasivan on 8/31/18.
  */
 
-public class CCUTagsDb extends HServer
-{
-    
+public class CCUTagsDb extends HServer {
+
     private static final String PREFS_TAGS_DB = "ccu_tags";
     private static final String PREFS_TAGS_MAP = "tagsMap";
     private static final String PREFS_TAGS_WA = "writeArrayMap";
     private static final String PREFS_ID_MAP = "idMap";
     private static final String PREFS_REMOVE_ID_MAP = "removeIdMap";
     private static final String PREFS_UPDATE_ID_MAP = "updateIdMap";
-    
-    public Map<String,HDict> tagsMap;
-    public HashMap<String,WriteArray> writeArrays;
-    
+
+    public Map<String, HDict> tagsMap;
+    public HashMap<String, WriteArray> writeArrays;
+
     public boolean unitTestMode = false;
-    
+
     private Context appContext = null;
-    
+
     public String tagsString;
     public String waString;
-    
-    private BoxStore       boxStore;
-    private Box<HisItem>   hisBox;
+
+    private BoxStore boxStore;
+    private Box<HisItem> hisBox;
     private static final File TEST_DIRECTORY = new File("objectbox-example/test-db");
-    
-    public Map<String,String> idMap;
+
+    public Map<String, String> idMap;
     public String idMapString;
-    
-    public Map<String,String> removeIdMap;
+
+    public Map<String, String> removeIdMap;
     public String removeIdMapString;
-    
-    public Map<String,String> updateIdMap;
+
+    public Map<String, String> updateIdMap;
     public String updateIdMapString;
-    
+
     //public String tagsString = null;
     RuntimeTypeAdapterFactory<HVal> hsTypeAdapter =
             RuntimeTypeAdapterFactory
@@ -106,92 +105,87 @@ public class CCUTagsDb extends HServer
                     .registerSubtype(HTime.class)
                     .registerSubtype(HUri.class)
                     .registerSubtype(MapImpl.class);
-    
+
     public CCUTagsDb() {
-    
+
     }
-    
+
     public void init(Context c) {
         appContext = c;
-        
+
         tagsString = appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).getString(PREFS_TAGS_MAP, null);
         waString = appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).getString(PREFS_TAGS_WA, null);
         idMapString = appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).getString(PREFS_ID_MAP, null);
         removeIdMapString = appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).getString(PREFS_REMOVE_ID_MAP, null);
         updateIdMapString = appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).getString(PREFS_UPDATE_ID_MAP, null);
-        
+
         boxStore = MyObjectBox.builder().androidContext(appContext).build();
         hisBox = boxStore.boxFor(HisItem.class);
-        
+
         if (tagsString == null) {
             tagsMap = new HashMap();
             writeArrays = new HashMap();
             idMap = new HashMap();
             removeIdMap = new HashMap();
             updateIdMap = new HashMap();
-            
-        } else
-        {
+
+        } else {
             Gson gson = new GsonBuilder()
-                                .registerTypeAdapterFactory(hsTypeAdapter)
-                                .setPrettyPrinting()
-                                .disableHtmlEscaping()
-                                .create();
-            Type listType = new TypeToken<Map<String, MapImpl<String,HVal>>>()
-            {
+                    .registerTypeAdapterFactory(hsTypeAdapter)
+                    .setPrettyPrinting()
+                    .disableHtmlEscaping()
+                    .create();
+            Type listType = new TypeToken<Map<String, MapImpl<String, HVal>>>() {
             }.getType();
             tagsMap = gson.fromJson(tagsString, listType);
-            Type waType = new TypeToken<HashMap<String, WriteArray>>()
-            {
+            Type waType = new TypeToken<HashMap<String, WriteArray>>() {
             }.getType();
-            writeArrays = gson.fromJson(waString,waType);
+            writeArrays = gson.fromJson(waString, waType);
             idMap = gson.fromJson(idMapString, HashMap.class);
             removeIdMap = gson.fromJson(removeIdMapString, HashMap.class);
             updateIdMap = gson.fromJson(updateIdMapString, HashMap.class);
         }
     }
-    
+
     public void saveTags() {
-    
+
         Gson gson = new GsonBuilder()
-                            .registerTypeAdapterFactory(hsTypeAdapter)
-                            .setPrettyPrinting()
-                            .disableHtmlEscaping()
-                            .create();
-        Type listType = new TypeToken<Map<String, MapImpl<String,HVal>>>()
-        {
+                .registerTypeAdapterFactory(hsTypeAdapter)
+                .setPrettyPrinting()
+                .disableHtmlEscaping()
+                .create();
+        Type listType = new TypeToken<Map<String, MapImpl<String, HVal>>>() {
         }.getType();
-        tagsString = gson.toJson(tagsMap,listType);
+        tagsString = gson.toJson(tagsMap, listType);
         appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).edit().putString(PREFS_TAGS_MAP, tagsString).apply();
-        
-        Type waType = new TypeToken<Map<String, WriteArray>>()
-        {
+
+        Type waType = new TypeToken<Map<String, WriteArray>>() {
         }.getType();
-        waString = gson.toJson(writeArrays,waType);
+        waString = gson.toJson(writeArrays, waType);
         appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).edit().putString(PREFS_TAGS_WA, waString).apply();
-        
+
         idMapString = gson.toJson(idMap);
         appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).edit().putString(PREFS_ID_MAP, idMapString).apply();
-    
+
         removeIdMapString = gson.toJson(removeIdMap);
         appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).edit().putString(PREFS_REMOVE_ID_MAP, removeIdMapString).apply();
-    
+
         updateIdMapString = gson.toJson(updateIdMap);
         appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).edit().putString(PREFS_UPDATE_ID_MAP, updateIdMapString).apply();
-    
+
     }
-    
+
     //TODO- TEMP for Unit testing
     public Map getDbMap() {
         return tagsMap;
     }
-    
+
     public void setTagsDbMap() {
         tagsMap = new HashMap<>();
     }
-    
-    public void init(){
-    
+
+    public void init() {
+
         if (tagsString == null) {
             tagsMap = new HashMap();
             writeArrays = new HashMap();
@@ -201,12 +195,10 @@ public class CCUTagsDb extends HServer
         } else
         {
             Gson gson = new GsonBuilder().registerTypeAdapterFactory(hsTypeAdapter).setPrettyPrinting().disableHtmlEscaping().create();
-            Type listType = new TypeToken<Map<String, MapImpl<String, HVal>>>()
-            {
+            Type listType = new TypeToken<Map<String, MapImpl<String, HVal>>>() {
             }.getType();
             tagsMap = gson.fromJson(tagsString, listType);
-            Type waType = new TypeToken<HashMap<String, WriteArray>>()
-            {
+            Type waType = new TypeToken<HashMap<String, WriteArray>>() {
             }.getType();
             writeArrays = gson.fromJson(waString, waType);
             idMap = gson.fromJson(idMapString, HashMap.class);
@@ -222,96 +214,106 @@ public class CCUTagsDb extends HServer
                               .debugFlags(DebugFlags.LOG_QUERIES | DebugFlags.LOG_QUERY_PARAMETERS).build();
         hisBox = boxStore.boxFor(HisItem.class);
     }
-    
+
+
     public void saveString() {
         Gson gson = new GsonBuilder()
-                            .registerTypeAdapterFactory(hsTypeAdapter)
-                            .setPrettyPrinting()
-                            .disableHtmlEscaping()
-                            .create();
-        Type listType = new TypeToken<Map<String, MapImpl<String,HVal>>>()
-        {
+                .registerTypeAdapterFactory(hsTypeAdapter)
+                .setPrettyPrinting()
+                .disableHtmlEscaping()
+                .create();
+        Type listType = new TypeToken<Map<String, MapImpl<String, HVal>>>() {
         }.getType();
-        tagsString = gson.toJson(tagsMap,listType);
-    
-        Type waType = new TypeToken<Map<String, WriteArray>>()
-        {
+        tagsString = gson.toJson(tagsMap, listType);
+
+        Type waType = new TypeToken<Map<String, WriteArray>>() {
         }.getType();
-        waString = gson.toJson(writeArrays,waType);
+        waString = gson.toJson(writeArrays, waType);
         idMapString = gson.toJson(idMap);
         removeIdMapString = gson.toJson(removeIdMap);
         removeIdMapString = gson.toJson(updateIdMap);
     }
-    
-    public HDict addSite(String dis, String geoCity, String geoState, String timeZone, int area)
-    {
+
+
+    public void addHGrid(HGrid hGrid) {
+        for (int i = 0; i < hGrid.numRows(); i++) {
+            HRef ref = hGrid.row(i).getRef("id");
+            System.out.println("Ref: " + ref.val);
+
+            tagsMap.put(ref.val, new HDictBuilder().add(hGrid.row(i)).toDict());
+        }
+    }
+
+    public HDict addSite(String dis, String geoCity, String geoState, String timeZone, int area) {
         HDict site = new HDictBuilder()
-                             .add("id",       HRef.make(dis))
-                             .add("dis",      dis)
-                             .add("site",     HMarker.VAL)
-                             .add("geoCity",  geoCity)
-                             .add("geoState", geoState)
-                             .add("geoAddr",  "" +geoCity + "," + geoState)
-                             .add("tz",       timeZone)
-                             .add("area",     HNum.make(area, "ft\u00B2"))
-                             .toDict();
+                .add("id", HRef.make(dis))
+                .add("dis", dis)
+                .add("site", HMarker.VAL)
+                .add("geoCity", geoCity)
+                .add("geoState", geoState)
+                .add("geoAddr", "" + geoCity + "," + geoState)
+                .add("tz", timeZone)
+                .add("area", HNum.make(area, "ft\u00B2"))
+                .toDict();
         tagsMap.put(dis, site);
         return site;
     }
-    
+
     public HDict getSite(String ref) {
         return (HDict) tagsMap.get(ref);
     }
-    
-    
-    public String addSite(Site s)
-    {
+
+
+    public String addSite(Site s) {
         HDictBuilder site = new HDictBuilder()
-                             .add("id", HRef.make(UUID.randomUUID().toString()))
-                             .add("dis", s.getDisplayName())
-                             .add("site", HMarker.VAL)
-                             .add("geoCity", s.getGeoCity())
-                             .add("geoState", s.getGeoState())
-                             .add("geoAddr", "" + s.getGeoCity() + "," + s.getGeoState())
-                             .add("tz", s.getTz())
-                             .add("area", HNum.make(s.getArea(), "ft\u00B2"));
-        
+                .add("id", HRef.make(UUID.randomUUID().toString()))
+                .add("dis", s.getDisplayName())
+                .add("site", HMarker.VAL)
+                .add("geoCity", s.getGeoCity())
+                .add("geoState", s.getGeoState())
+                .add("geoAddr", "" + s.getGeoCity() + "," + s.getGeoState())
+                .add("tz", s.getTz())
+                .add("area", HNum.make(s.getArea(), "ft\u00B2"));
+
         for (String m : s.getMarkers()) {
             site.add(m);
         }
-        
-        HRef id = (HRef)site.get("id");
+
+        HRef id = (HRef) site.get("id");
         tagsMap.put(id.toVal(), site.toDict());
         return id.toVal();
     }
-    
-    public void updateSite(Site s, String i)
-    {
+
+    public void updateSite(Site s, String i) {
         HDictBuilder site = new HDictBuilder()
-                                    .add("id", HRef.copy(i))
-                                    .add("dis", s.getDisplayName())
-                                    .add("site", HMarker.VAL)
-                                    .add("geoCity", s.getGeoCity())
-                                    .add("geoState", s.getGeoState())
-                                    .add("geoAddr", "" + s.getGeoCity() + "," + s.getGeoState())
-                                    .add("tz", s.getTz())
-                                    .add("area", HNum.make(s.getArea(), "ft\u00B2"));
-        
+                .add("id", HRef.copy(i))
+                .add("dis", s.getDisplayName())
+                .add("site", HMarker.VAL)
+                .add("geoCity", s.getGeoCity())
+                .add("geoState", s.getGeoState())
+                .add("geoAddr", "" + s.getGeoCity() + "," + s.getGeoState())
+                .add("tz", s.getTz())
+                .add("area", HNum.make(s.getArea(), "ft\u00B2"));
+
         for (String m : s.getMarkers()) {
             site.add(m);
         }
-        
-        HRef id = (HRef)site.get("id");
+
+        HRef id = (HRef) site.get("id");
         tagsMap.put(id.toVal(), site.toDict());
     }
 
-    public void log()
-    {
-
+    public void log() {
+        int i = 0;
+        for (Iterator it = iterator(); it.hasNext(); ) {
+            i++;
+            HDict rec = (HDict) it.next();
+            System.out.println("Rec " + i + ":" + rec.toString());
+        }
     }
-    
-    public String addEquip(Equip q)
-    {
+
+
+    public String addEquip(Equip q) {
         HDictBuilder equip = new HDictBuilder()
                                      .add("id",      HRef.make(UUID.randomUUID().toString()))
                                      .add("dis",     q.getDisplayName())
@@ -325,13 +327,12 @@ public class CCUTagsDb extends HServer
         for (String m : q.getMarkers()) {
             equip.add(m);
         }
-        HRef id = (HRef)equip.get("id");
+        HRef id = (HRef) equip.get("id");
         tagsMap.put(id.toVal(), equip.toDict());
         return id.toCode();
     }
-    
-    public void updateEquip(Equip q, String i)
-    {
+
+    public void updateEquip(Equip q, String i) {
         HDictBuilder equip = new HDictBuilder()
                                      .add("id",      HRef.copy(i))
                                      .add("dis",     q.getDisplayName())
@@ -345,216 +346,205 @@ public class CCUTagsDb extends HServer
         for (String m : q.getMarkers()) {
             equip.add(m);
         }
-        HRef id = (HRef)equip.get("id");
+        HRef id = (HRef) equip.get("id");
         tagsMap.put(id.toVal(), equip.toDict());
     }
-    
-    
+
+
     public HDict getEquip(String dis) {
         return (HDict) tagsMap.get(dis);
     }
-    
-    public String addPoint(Point p)
-    {
+
+    public String addPoint(Point p) {
         HDictBuilder b = new HDictBuilder()
-                                 .add("id",       HRef.make(UUID.randomUUID().toString()))
-                                 .add("dis",      p.getDisplayName())
-                                 .add("point",    HMarker.VAL)
-                                 .add("siteRef",  p.getSiteRef())
-                                 .add("equipRef", p.getEquipRef())
-                                 .add("zoneRef",  p.getZoneRef() != null ? p.getZoneRef() : "SYSTEM")
-                                 .add("floorRef", p.getFloorRef() != null ? p.getFloorRef() : "SYSTEM")
-                                 .add("group",p.getGroup())
-                                 .add("kind",     p.getUnit() == null ? "Bool" : "Number")
-                                 .add("tz",       p.getTz());
+                .add("id", HRef.make(UUID.randomUUID().toString()))
+                .add("dis", p.getDisplayName())
+                .add("point", HMarker.VAL)
+                .add("siteRef", p.getSiteRef())
+                .add("equipRef", p.getEquipRef())
+                .add("zoneRef", p.getZoneRef() != null ? p.getZoneRef() : "SYSTEM")
+                .add("floorRef", p.getFloorRef() != null ? p.getFloorRef() : "SYSTEM")
+                .add("group", p.getGroup())
+                .add("kind", p.getUnit() == null ? "Bool" : "Number")
+                .add("tz", p.getTz());
         if (p.getUnit() != null) b.add("unit", p.getUnit());
-        
+
         for (String m : p.getMarkers()) {
             b.add(m);
         }
-        HRef id = (HRef)b.get("id");
+        HRef id = (HRef) b.get("id");
         tagsMap.put(id.toVal(), b.toDict());
         return id.toCode();
     }
-    
-    public void updatePoint(Point p, String i)
-    {
+
+    public void updatePoint(Point p, String i) {
         HDictBuilder b = new HDictBuilder()
-                                 .add("id",       HRef.copy(i))
-                                 .add("dis",      p.getDisplayName())
-                                 .add("point",    HMarker.VAL)
-                                 .add("siteRef",  p.getSiteRef())
-                                 .add("equipRef", p.getEquipRef())
-                                 .add("zoneRef",  p.getZoneRef())
-                                 .add("floorRef", p.getFloorRef())
-                                 .add("group",p.getGroup())
-                                 .add("kind",     p.getUnit() == null ? "Bool" : "Number")
-                                 .add("tz",       p.getTz());
+                .add("id", HRef.copy(i))
+                .add("dis", p.getDisplayName())
+                .add("point", HMarker.VAL)
+                .add("siteRef", p.getSiteRef())
+                .add("equipRef", p.getEquipRef())
+                .add("zoneRef", p.getZoneRef())
+                .add("floorRef", p.getFloorRef())
+                .add("group", p.getGroup())
+                .add("kind", p.getUnit() == null ? "Bool" : "Number")
+                .add("tz", p.getTz());
         if (p.getUnit() != null) b.add("unit", p.getUnit());
-        
+
         for (String m : p.getMarkers()) {
             b.add(m);
         }
-        HRef id = (HRef)b.get("id");
+        HRef id = (HRef) b.get("id");
         tagsMap.put(id.toVal(), b.toDict());
     }
-    
-    public String addPoint(RawPoint p)
-    {
+
+    public String addPoint(RawPoint p) {
         HDictBuilder b = new HDictBuilder()
-                                 .add("id",       HRef.make(UUID.randomUUID().toString()))
-                                 .add("dis",      p.getDisplayName())
-                                 .add("point",    HMarker.VAL)
-                                 .add("physical",    HMarker.VAL)
-                                 .add("deviceRef", p.getDeviceRef())
-                                 .add("siteRef",p.getSiteRef())
-                                 .add("pointRef",p.getPointRef())
-                                 .add("port",p.getPort())
-                                 .add("type",p.getType())
-                                 .add("kind",     p.getUnit() == null ? "Bool" : "Number")
-                                 .add("tz",       p.getTz());
-        
+                .add("id", HRef.make(UUID.randomUUID().toString()))
+                .add("dis", p.getDisplayName())
+                .add("point", HMarker.VAL)
+                .add("physical", HMarker.VAL)
+                .add("deviceRef", p.getDeviceRef())
+                .add("siteRef", p.getSiteRef())
+                .add("pointRef", p.getPointRef())
+                .add("port", p.getPort())
+                .add("type", p.getType())
+                .add("kind", p.getUnit() == null ? "Bool" : "Number")
+                .add("tz", p.getTz());
+
         for (String m : p.getMarkers()) {
             b.add(m);
         }
-        HRef id = (HRef)b.get("id");
+        HRef id = (HRef) b.get("id");
         tagsMap.put(id.toVal(), b.toDict());
         return id.toCode();
     }
-    
-    public void updatePoint(RawPoint p, String i)
-    {
+
+    public void updatePoint(RawPoint p, String i) {
         HDictBuilder b = new HDictBuilder()
-                                 .add("id",       HRef.copy(i))
-                                 .add("dis",      p.getDisplayName())
-                                 .add("point",    HMarker.VAL)
-                                 .add("physical",    HMarker.VAL)
-                                 .add("deviceRef", p.getDeviceRef())
-                                 .add("siteRef",p.getSiteRef())
-                                 .add("pointRef",p.getPointRef())
-                                 .add("port",p.getPort())
-                                 .add("type",p.getType())
-                                 .add("kind",     p.getUnit() == null ? "Bool" : "Number")
-                                 .add("tz",       p.getTz());
-        
+                .add("id", HRef.copy(i))
+                .add("dis", p.getDisplayName())
+                .add("point", HMarker.VAL)
+                .add("physical", HMarker.VAL)
+                .add("deviceRef", p.getDeviceRef())
+                .add("siteRef", p.getSiteRef())
+                .add("pointRef", p.getPointRef())
+                .add("port", p.getPort())
+                .add("type", p.getType())
+                .add("kind", p.getUnit() == null ? "Bool" : "Number")
+                .add("tz", p.getTz());
+
         for (String m : p.getMarkers()) {
             b.add(m);
         }
-        HRef id = (HRef)b.get("id");
+        HRef id = (HRef) b.get("id");
         tagsMap.put(id.toVal(), b.toDict());
     }
-    
-    public String addDevice(Device d)
-    {
+
+    public String addDevice(Device d) {
         HDictBuilder b = new HDictBuilder()
-                                 .add("id",       HRef.make(UUID.randomUUID().toString()))
-                                 .add("dis",      d.getDisplayName())
-                                 .add("device",    HMarker.VAL)
-                                 .add("his",      HMarker.VAL)
-                                 .add("addr",      d.getAddr())
-                                 .add("siteRef",  d.getSiteRef())
-                                 .add("equipRef", d.getEquipRef())
-                                 .add("zoneRef", d.getZoneRef())
-                                 .add("floorRef", d.getFloorRef());
-    
+                .add("id", HRef.make(UUID.randomUUID().toString()))
+                .add("dis", d.getDisplayName())
+                .add("device", HMarker.VAL)
+                .add("his", HMarker.VAL)
+                .add("addr", d.getAddr())
+                .add("siteRef", d.getSiteRef())
+                .add("equipRef", d.getEquipRef())
+                .add("zoneRef", d.getZoneRef())
+                .add("floorRef", d.getFloorRef());
+
         for (String m : d.getMarkers()) {
             b.add(m);
         }
-        HRef id = (HRef)b.get("id");
+        HRef id = (HRef) b.get("id");
         tagsMap.put(id.toVal(), b.toDict());
         return id.toCode();
     }
-    
-    public void updateDevice(Device d, String i)
-    {
+
+    public void updateDevice(Device d, String i) {
         HDictBuilder b = new HDictBuilder()
-                                 .add("id",       HRef.copy(i))
-                                 .add("dis",      d.getDisplayName())
-                                 .add("device",    HMarker.VAL)
-                                 .add("his",      HMarker.VAL)
-                                 .add("addr",      d.getAddr())
-                                 .add("siteRef",  d.getSiteRef())
-                                 .add("equipRef", d.getEquipRef())
-                                 .add("zoneRef", d.getZoneRef())
-                                 .add("floorRef", d.getFloorRef());
-        
+                .add("id", HRef.copy(i))
+                .add("dis", d.getDisplayName())
+                .add("device", HMarker.VAL)
+                .add("his", HMarker.VAL)
+                .add("addr", d.getAddr())
+                .add("siteRef", d.getSiteRef())
+                .add("equipRef", d.getEquipRef())
+                .add("zoneRef", d.getZoneRef())
+                .add("floorRef", d.getFloorRef());
+
         for (String m : d.getMarkers()) {
             b.add(m);
         }
-        HRef id = (HRef)b.get("id");
+        HRef id = (HRef) b.get("id");
         tagsMap.put(id.toVal(), b.toDict());
     }
-    
-    public String addFloor(Floor f)
-    {
+
+    public String addFloor(Floor f) {
         HDictBuilder b = new HDictBuilder()
-                                 .add("id",       HRef.make(UUID.randomUUID().toString()))
-                                 .add("dis",      f.getDisplayName())
-                                 .add("floor",    HMarker.VAL)
-                                 .add("siteRef",  f.getSiteRef());
-        
+                .add("id", HRef.make(UUID.randomUUID().toString()))
+                .add("dis", f.getDisplayName())
+                .add("floor", HMarker.VAL)
+                .add("siteRef", f.getSiteRef());
+
         for (String m : f.getMarkers()) {
             b.add(m);
         }
-        HRef id = (HRef)b.get("id");
+        HRef id = (HRef) b.get("id");
         tagsMap.put(id.toVal(), b.toDict());
         return id.toCode();
     }
-    
-    public void updateFloor(Floor f, String i)
-    {
+
+    public void updateFloor(Floor f, String i) {
         HDictBuilder b = new HDictBuilder()
-                                 .add("id",       HRef.copy(i))
-                                 .add("dis",      f.getDisplayName())
-                                 .add("floor",    HMarker.VAL)
-                                 .add("siteRef",  f.getSiteRef());
-        
+                .add("id", HRef.copy(i))
+                .add("dis", f.getDisplayName())
+                .add("floor", HMarker.VAL)
+                .add("siteRef", f.getSiteRef());
+
         for (String m : f.getMarkers()) {
             b.add(m);
         }
-        HRef id = (HRef)b.get("id");
+        HRef id = (HRef) b.get("id");
         tagsMap.put(id.toVal(), b.toDict());
     }
-    
-    public String addZone(Zone z)
-    {
+
+    public String addZone(Zone z) {
         HDictBuilder b = new HDictBuilder()
-                                 .add("id",       HRef.make(UUID.randomUUID().toString()))
-                                 .add("dis",      z.getDisplayName())
-                                 .add("room",    HMarker.VAL)
-                                 .add("floorRef",  z.getFloorRef());
-        
+                .add("id", HRef.make(UUID.randomUUID().toString()))
+                .add("dis", z.getDisplayName())
+                .add("room", HMarker.VAL)
+                .add("floorRef", z.getFloorRef());
+
         for (String m : z.getMarkers()) {
             b.add(m);
         }
-        HRef id = (HRef)b.get("id");
+        HRef id = (HRef) b.get("id");
         tagsMap.put(id.toVal(), b.toDict());
         return id.toCode();
     }
-    
-    public void updateZone(Zone z,String i)
-    {
+
+    public void updateZone(Zone z, String i) {
         HDictBuilder b = new HDictBuilder()
-                                 .add("id",       HRef.copy(i))
-                                 .add("dis",      z.getDisplayName())
-                                 .add("room",    HMarker.VAL)
-                                 .add("floorRef",  z.getFloorRef());
-        
+                .add("id", HRef.copy(i))
+                .add("dis", z.getDisplayName())
+                .add("room", HMarker.VAL)
+                .add("floorRef", z.getFloorRef());
+
         for (String m : z.getMarkers()) {
             b.add(m);
         }
-        HRef id = (HRef)b.get("id");
+        HRef id = (HRef) b.get("id");
         tagsMap.put(id.toVal(), b.toDict());
     }
-    
-    
+
+
     //////////////////////////////////////////////////////////////////////////
     // Ops
     //////////////////////////////////////////////////////////////////////////
-    
-    public HOp[] ops()
-    {
-        return new HOp[] {
+
+    public HOp[] ops() {
+        return new HOp[]{
                 HStdOps.about,
                 HStdOps.ops,
                 HStdOps.formats,
@@ -566,143 +556,161 @@ public class CCUTagsDb extends HServer
                 HStdOps.invokeAction,
         };
     }
-    
-    public HDict onAbout() { return about; }
-    private final HDict about = new HDictBuilder()
-                                        .add("serverName",  hostName())
-                                        .add("vendorName", "Haystack Java Toolkit")
-                                        .add("vendorUri", HUri.make("http://project-haystack.org/"))
-                                        .add("productName", "Haystack Java Toolkit")
-                                        .add("productVersion", "2.0.0")
-                                        .add("productUri", HUri.make("http://project-haystack.org/"))
-                                        .toDict();
-    
-    private static String hostName()
-    {
-        try { return InetAddress.getLocalHost().getHostName(); }
-        catch (Exception e) { return "Unknown"; }
+
+    public HDict onAbout() {
+        return about;
     }
-    
+
+    private final HDict about = new HDictBuilder()
+            .add("serverName", hostName())
+            .add("vendorName", "Haystack Java Toolkit")
+            .add("vendorUri", HUri.make("http://project-haystack.org/"))
+            .add("productName", "Haystack Java Toolkit")
+            .add("productVersion", "2.0.0")
+            .add("productUri", HUri.make("http://project-haystack.org/"))
+            .toDict();
+
+    private static String hostName() {
+        try {
+            return InetAddress.getLocalHost().getHostName();
+        } catch (Exception e) {
+            return "Unknown";
+        }
+    }
+
     //////////////////////////////////////////////////////////////////////////
     // Reads
     //////////////////////////////////////////////////////////////////////////
-    
+
     protected HDict onReadById(HRef id) {
-        return (HDict)tagsMap.get(id.val);
+        return (HDict) tagsMap.get(id.val);
     }
 
-    protected Iterator iterator() { return tagsMap.values().iterator();}
-    
+    protected Iterator iterator() {
+        return tagsMap.values().iterator();
+    }
+
     //////////////////////////////////////////////////////////////////////////
     // Navigation
     //////////////////////////////////////////////////////////////////////////
-    
-    protected HGrid onNav(String navId)
-    {
+
+    protected HGrid onNav(String navId) {
         // test database navId is record id
         HDict base = null;
         if (navId != null) base = readById(HRef.make(navId));
-        
+
         // map base record to site, equip, or point
         String filter = "site";
-        if (base != null)
-        {
-            if (base.has("site")) filter = "equip and siteRef==\"" + base.id().toCode()+"\"";
-            else if (base.has("equip")) filter = "point and equipRef==\"" + base.id().toCode()+"\"";
+        if (base != null) {
+            if (base.has("site")) filter = "equip and siteRef==\"" + base.id().toCode() + "\"";
+            else if (base.has("equip"))
+                filter = "point and equipRef==\"" + base.id().toCode() + "\"";
             else filter = "navNoChildren";
         }
-        
+
         // read children of base record
         HGrid grid = readAll(filter);
-        
+
         // add navId column to results
         HDict[] rows = new HDict[grid.numRows()];
         Iterator it = grid.iterator();
-        for (int i=0; it.hasNext(); ) rows[i++] = (HDict)it.next();
-        for (int i=0; i<rows.length; ++i)
+        for (int i = 0; it.hasNext(); ) rows[i++] = (HDict) it.next();
+        for (int i = 0; i < rows.length; ++i)
             rows[i] = new HDictBuilder().add(rows[i]).add("navId", rows[i].id().val).toDict();
         return HGridBuilder.dictsToGrid(rows);
     }
-    
-    protected HDict onNavReadByUri(HUri uri)
-    {
+
+    protected HDict onNavReadByUri(HUri uri) {
         return null;
     }
-    
+
     //////////////////////////////////////////////////////////////////////////
     // Watches
     //////////////////////////////////////////////////////////////////////////
-    
-    protected HWatch onWatchOpen(String dis, HNum lease)
-    {
+
+    protected HWatch onWatchOpen(String dis, HNum lease) {
         throw new UnsupportedOperationException();
     }
-    
-    protected HWatch[] onWatches()
-    {
+
+    protected HWatch[] onWatches() {
         throw new UnsupportedOperationException();
     }
-    
-    protected HWatch onWatch(String id)
-    {
+
+    protected HWatch onWatch(String id) {
         throw new UnsupportedOperationException();
     }
-    
+
     //////////////////////////////////////////////////////////////////////////
     // Point Write
     //////////////////////////////////////////////////////////////////////////
-    
-    protected HGrid onPointWriteArray(HDict rec)
-    {
-        CCUTagsDb.WriteArray array = (CCUTagsDb.WriteArray)writeArrays.get(rec.id().toVal());
+
+    protected HGrid onPointWriteArray(HDict rec) {
+        CCUTagsDb.WriteArray array = (CCUTagsDb.WriteArray) writeArrays.get(rec.id().toVal());
         if (array == null) array = new CCUTagsDb.WriteArray();
-        
+
         HGridBuilder b = new HGridBuilder();
         b.addCol("level");
         b.addCol("levelDis");
         b.addCol("val");
         b.addCol("who");
-        
-        for (int i=0; i<17; ++i)
-            b.addRow(new HVal[] {
-                    HNum.make(i+1),
+
+        for (int i = 0; i < 17; ++i)
+            b.addRow(new HVal[]{
+                    HNum.make(i + 1),
                     HStr.make("" + (i + 1)),
                     array.val[i],
                     HStr.make(array.who[i]),
             });
         return b.toGrid();
     }
-    
-    protected void onPointWrite(HDict rec, int level, HVal val, String who, HNum dur, HDict opts)
-    {
+
+    protected void onPointWrite(HDict rec, int level, HVal val, String who, HNum dur, HDict opts) {
         System.out.println("onPointWrite: " + rec.dis() + "  " + val + " @ " + level + " [" + who + "]");
-        CCUTagsDb.WriteArray array = (CCUTagsDb.WriteArray)writeArrays.get(rec.id());
+        CCUTagsDb.WriteArray array = (CCUTagsDb.WriteArray) writeArrays.get(rec.id());
         if (array == null) writeArrays.put(rec.id().toVal(), array = new CCUTagsDb.WriteArray());
-        array.val[level-1] = val;
-        array.who[level-1] = who;
+        array.val[level - 1] = val;
+        array.who[level - 1] = who;
     }
-    
-    static class WriteArray
-    {
+
+    public HDict getConfig() {
+        if (!tagsMap.containsKey("config")) {
+            HDict hDict = new HDictBuilder().add("nosync").add("localconfig").toDict();
+            tagsMap.put("config", hDict);
+        }
+
+        return tagsMap.get("config");
+    }
+
+    public HDict updateConfig(String propertyName, HVal hVal) {
+        HDict config = getConfig();
+        HDict hDict = new HDictBuilder().add(config).add(propertyName, hVal).toDict();
+        tagsMap.put("config", hDict);
+        return hDict;
+    }
+
+    public void addHDict(String localId, HDict hDict) {
+        tagsMap.put(localId, hDict);
+    }
+
+    static class WriteArray {
         final HVal[] val = new HVal[17];
         final String[] who = new String[17];
     }
-    
+
     //////////////////////////////////////////////////////////////////////////
     // History
     //////////////////////////////////////////////////////////////////////////
-    
-    public HHisItem[] onHisRead(HDict entity, HDateTimeRange range)
-    {
+
+    public HHisItem[] onHisRead(HDict entity, HDateTimeRange range) {
         QueryBuilder<HisItem> hisQuery = hisBox.query();
         hisQuery.equal(HisItem_.rec, entity.get("id").toString())
-                .greater(HisItem_.date,range.start.millis())
-                .less(HisItem_.date,range.end.millis())
+                .greater(HisItem_.date, range.start.millis())
+                .less(HisItem_.date, range.end.millis())
                 .order(HisItem_.date);
-        
-        List<HisItem> hisList =hisQuery.build().find();
-        
-        boolean isBool = ((HStr)entity.get("kind")).val.equals("Bool");
+
+        List<HisItem> hisList = hisQuery.build().find();
+
+        boolean isBool = ((HStr) entity.get("kind")).val.equals("Bool");
         ArrayList acc = new ArrayList();
         for (HisItem item : hisList) {
             HVal val = isBool ? HBool.make(item.val > 0) : HNum.make(item.val);
@@ -711,76 +719,73 @@ public class CCUTagsDb extends HServer
                 acc.add(hsItem);
             }
         }
-        return (HHisItem[])acc.toArray(new HHisItem[acc.size()]);
+        return (HHisItem[]) acc.toArray(new HHisItem[acc.size()]);
     }
-    
-    public HHisItem[] onHisRead(HDict entity)
-    {
+
+    public HHisItem[] onHisRead(HDict entity) {
         QueryBuilder<HisItem> hisQuery = hisBox.query();
         hisQuery.equal(HisItem_.rec, entity.get("id").toString())
-                .order(HisItem_.date,QueryBuilder.DESCENDING);
-        
+                .order(HisItem_.date, QueryBuilder.DESCENDING);
+
         HisItem item = hisQuery.build().findFirst();
-        
-        boolean isBool = ((HStr)entity.get("kind")).val.equals("Bool");
+
+        boolean isBool = ((HStr) entity.get("kind")).val.equals("Bool");
         ArrayList acc = new ArrayList();
-       
+
         HVal val = isBool ? HBool.make(item.val > 0) : HNum.make(item.val);
         HDict hsItem = HHisItem.make(HDateTime.make(item.getDate().getTime()), val);
         acc.add(hsItem);
-        return (HHisItem[])acc.toArray(new HHisItem[acc.size()]);
+        return (HHisItem[]) acc.toArray(new HHisItem[acc.size()]);
     }
-    
-    public void onHisWrite(HDict rec, HHisItem[] items)
-    {
-       for (HHisItem item: items) {
-           HisItem hisItem = new HisItem();
-           hisItem.setDate(new Date(item.ts.millis()));
-           hisItem.setRec(rec.get("id").toString());
-           hisItem.setVal(Double.parseDouble(item.val.toString()));
-           hisItem.setSyncStatus(false);
-           hisBox.put(hisItem);
-       }
+
+    public void onHisWrite(HDict rec, HHisItem[] items) {
+        for (HHisItem item : items) {
+            HisItem hisItem = new HisItem();
+            hisItem.setDate(new Date(item.ts.millis()));
+            hisItem.setRec(rec.get("id").toString());
+            hisItem.setVal(Double.parseDouble(item.val.toString()));
+            hisItem.setSyncStatus(false);
+            hisBox.put(hisItem);
+        }
     }
-    
+
     //////////////////////////////////////////////////////////////////////////
     // Actions
     //////////////////////////////////////////////////////////////////////////
-    
-    public HGrid onInvokeAction(HDict rec, String action, HDict args)
-    {
+
+    public HGrid onInvokeAction(HDict rec, String action, HDict args) {
         System.out.println("-- invokeAction \"" + rec.dis() + "." + action + "\" " + args);
         return HGrid.EMPTY;
     }
-    
+
     public List<HisItem> getUnSyncedHisItems(HRef id) {
-        
+
         HDict entity = readById(id);
-        
+
         QueryBuilder<HisItem> hisQuery = hisBox.query();
         hisQuery.equal(HisItem_.rec, entity.get("id").toString())
-                .equal(HisItem_.syncStatus,false)
+                .equal(HisItem_.syncStatus, false)
                 //.greater(HisItem_.date,range.start.millis())
                 //.less(HisItem_.date,range.end.millis())
                 .order(HisItem_.date);
-        
+
         return hisQuery.build().find();
     }
-    
+
     public void setHisItemSyncStatus(ArrayList<HisItem> hisItems) {
-        for (HisItem item: hisItems) {
+        for (HisItem item : hisItems) {
             hisBox.put(item);
         }
     }
-    
+
     public List<HisItem> getAllHisItems(HRef id) {
-        
+
         HDict entity = readById(id);
-        
+
         QueryBuilder<HisItem> hisQuery = hisBox.query();
         hisQuery.equal(HisItem_.rec, entity.get("id").toString())
                 .order(HisItem_.date);
-        
+
         return hisQuery.build().find();
     }
 }

@@ -131,6 +131,7 @@ class FormatsOp extends HOp
 
 class ReadOp extends HOp
 {
+
   public String name() { return "read"; }
   public String summary() { return "Read entity records in database"; }
   public HGrid onService(HServer db, HGrid req) throws Exception
@@ -167,6 +168,8 @@ class ReadOp extends HOp
 
 class NavOp extends HOp
 {
+
+  public static final String PARAMETER_NAVID = "navId";
   public String name() { return "nav"; }
   public String summary() { return "Navigate record tree"; }
   public HGrid onService(HServer db, HGrid req) throws Exception

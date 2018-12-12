@@ -6,6 +6,7 @@ import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HGridBuilder;
 import org.projecthaystack.HRef;
+import org.projecthaystack.client.HClient;
 import org.projecthaystack.io.HZincWriter;
 
 import java.io.BufferedInputStream;
@@ -28,6 +29,7 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.sync.EntitySyncHandler;
+import a75f.io.api.haystack.sync.HttpUtil;
 
 /**
  * Created by samjithsadasivan on 10/11/18.
@@ -576,5 +578,19 @@ public class TestRemoteHsSync
         HDict b = new HDictBuilder().add("id","1").add("siteRef", HRef.make(siteRef.substring(1))).toDict();
         
         System.out.println(b.getRef("siteRef"));
+    }
+
+    @Test
+    public void testGettingSite()
+    {
+
+        HClient hClient = new HClient(HttpUtil.HAYSTACK_URL, "ryan", "ryan");
+        HDict navIdDict = new HDictBuilder().add("navId", HRef.make("5be9af1c02743900e9e762f8")).toDict();
+        HGrid hGrid = HGridBuilder.dictToGrid(navIdDict);
+
+        HGrid sync = hClient.call("sync", hGrid);
+
+        sync.dump();
+
     }
 }

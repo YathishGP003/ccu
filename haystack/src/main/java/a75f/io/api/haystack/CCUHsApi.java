@@ -17,12 +17,14 @@ import org.projecthaystack.HVal;
 import org.projecthaystack.UnknownRecException;
 import org.projecthaystack.client.HClient;
 import org.projecthaystack.io.HZincWriter;
+import org.projecthaystack.server.HStdOps;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.UUID;
 
 import a75f.io.api.haystack.sync.EntitySyncHandler;
 import a75f.io.api.haystack.sync.HisSyncHandler;
@@ -31,24 +33,23 @@ import a75f.io.api.haystack.sync.HttpUtil;
 /**
  * Created by samjithsadasivan on 9/3/18.
  */
-public class CCUHsApi
-{
+public class CCUHsApi {
     public static boolean DEBUG_CCUHS = true;
     private static CCUHsApi instance;
-    
+
     public AndroidHSClient hsClient;
     public CCUTagsDb tagsDb;
-    
+
     public EntitySyncHandler entitySyncHandler;
-    public HisSyncHandler    hisSyncHandler;
-    
-    public static CCUHsApi getInstance(){
+    public HisSyncHandler hisSyncHandler;
+
+    public static CCUHsApi getInstance() {
         if (instance == null) {
             throw new IllegalStateException("Hay stack api is not initialized");
         }
         return instance;
     }
-    
+
     public CCUHsApi(Context c) {
         if (instance != null) {
             throw new IllegalStateException("Api instance already created , use getInstance()");
@@ -60,7 +61,7 @@ public class CCUHsApi
         entitySyncHandler = new EntitySyncHandler();
         hisSyncHandler = new HisSyncHandler(this);
     }
-    
+
     //TODO - Temp for Unit test
     public CCUHsApi() {
         if (instance != null) {
@@ -73,91 +74,88 @@ public class CCUHsApi
         entitySyncHandler = new EntitySyncHandler();
         hisSyncHandler = new HisSyncHandler(this);
     }
-    
-    public HClient getHSClient(){
+
+    public HClient getHSClient() {
         return hsClient;
     }
-    
+
     public void saveTagsData() {
         tagsDb.saveTags();
     }
-    
+
     public String addSite(Site s) {
         return tagsDb.addSite(s);
     }
-    
-    public String addEquip(Equip q){
+
+    public String addEquip(Equip q) {
         return tagsDb.addEquip(q);
     }
-    
+
     public String addPoint(Point p) {
         return tagsDb.addPoint(p);
     }
-    
+
     public String addPoint(RawPoint p) {
         return tagsDb.addPoint(p);
     }
-    
+
     public String addDevice(Device d) {
         return tagsDb.addDevice(d);
     }
-    
+
     public String addFloor(Floor f) {
         return tagsDb.addFloor(f);
     }
-    
+
     public String addZone(Zone z) {
         return tagsDb.addZone(z);
     }
-    
+
     public void updateSite(Site s, String id) {
         tagsDb.updateSite(s, id);
         tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
     }
-    
+
     public void updateEquip(Equip q, String id) {
         tagsDb.updateEquip(q, id);
         tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
     }
-    
+
     public void updatePoint(Point p, String id) {
         tagsDb.updatePoint(p, id);
         tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
     }
-    
+
     public void updatePoint(RawPoint r, String id) {
         tagsDb.updatePoint(r, id);
-        Log.d("CCU", "updatePhysicalPoint "+id);
+        Log.d("CCU", "updatePhysicalPoint " + id);
         tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
     }
-    
+
     public void updateFloor(Floor r, String id) {
         tagsDb.updateFloor(r, id);
         tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
     }
-    
+
     public void updateZone(Zone z, String id) {
         tagsDb.updateZone(z, id);
         tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
     }
-    
+
     /**
      * Helper method that converts HGrid to an Array of Hashmap of String.
      */
     public ArrayList<HashMap> readAll(String query) {
-        
+
         ArrayList<HashMap> rowList = new ArrayList<>();
-        try
-        {
+        try {
             HGrid grid = hsClient.readAll(query);
             Iterator it = grid.iterator();
-            while (it.hasNext())
-            {
+            while (it.hasNext()) {
                 HashMap<Object, Object> map = new HashMap<>();
                 HRow r = (HRow) it.next();
                 HRow.RowIterator ri = (HRow.RowIterator) r.iterator();
-                while (ri.hasNext())
-                {
+                while (ri.hasNext()) {
                     HDict.MapEntry m = (HDict.MapEntry) ri.next();
                     map.put(m.getKey(), m.getValue());
                 }
@@ -168,19 +166,17 @@ public class CCUHsApi
         }
         return rowList;
     }
-    
+
     /**
      * Read the first matching record
      */
     public HashMap read(String query) {
-        
+        System.out.println("Read Query: " + query);
         HashMap<Object, Object> map = new HashMap<>();
-        try
-        {
+        try {
             HDict dict = hsClient.read(query, true);
             Iterator it = dict.iterator();
-            while (it.hasNext())
-            {
+            while (it.hasNext()) {
                 Map.Entry entry = (Map.Entry) it.next();
                 map.put(entry.getKey().toString(), entry.getValue().toString());
             }
@@ -189,16 +185,14 @@ public class CCUHsApi
         }
         return map;
     }
-    
+
     public HashMap readMapById(String id) {
-        
+
         HashMap<Object, Object> map = new HashMap<>();
-        try
-        {
+        try {
             HDict dict = hsClient.readById(HRef.copy(id));
             Iterator it = dict.iterator();
-            while (it.hasNext())
-            {
+            while (it.hasNext()) {
                 Map.Entry entry = (Map.Entry) it.next();
                 map.put(entry.getKey().toString(), entry.getValue().toString());
             }
@@ -207,20 +201,18 @@ public class CCUHsApi
         }
         return map;
     }
-    
+
     public HDict readHDictById(String id) {
-        try
-        {
+        try {
             return hsClient.readById(HRef.copy(id));
         } catch (UnknownRecException e) {
             e.printStackTrace();
         }
         return null;
     }
-    
+
     public HDict readHDict(String query) {
-        try
-        {
+        try {
             HDict dict = hsClient.read(query);
             return dict;
         } catch (UnknownRecException e) {
@@ -228,10 +220,9 @@ public class CCUHsApi
         }
         return null;
     }
-    
+
     public HGrid readHGrid(String query) {
-        try
-        {
+        try {
             HGrid grid = hsClient.readAll(query);
             return grid;
         } catch (UnknownRecException e) {
@@ -239,14 +230,14 @@ public class CCUHsApi
         }
         return null;
     }
-    
+
     /**
      * Write to a 'writable' point
      */
     public void writePoint(String id, int level, String who, Double val, int duration) {
-        pointWrite(HRef.copy(id), level, who, HNum.make(val), HNum.make(duration,"ms"));
+        pointWrite(HRef.copy(id), level, who, HNum.make(val), HNum.make(duration, "ms"));
     }
-    
+
     /**
      * Write to a 'writable' point
      * with default level  - 9
@@ -255,7 +246,7 @@ public class CCUHsApi
     public void writePoint(String id, Double val) {
         pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "", HNum.make(val), HNum.make(0));
     }
-    
+
     /**
      * Write to the first 'writable' point fetched using query
      * at default level  - 9
@@ -263,20 +254,20 @@ public class CCUHsApi
      */
     public void writeDefaultVal(String query, Double val) {
         ArrayList points = readAll(query);
-        String id = ((HashMap)points.get(0)).get("id").toString();
+        String id = ((HashMap) points.get(0)).get("id").toString();
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
         pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "", HNum.make(val), HNum.make(0));
     }
-    
+
     public void writeDefaultValById(String id, Double val) {
         pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "", HNum.make(val), HNum.make(0));
     }
-    
+
     public void pointWrite(HRef id, int level, String who, HVal val, HNum dur) {
-        hsClient.pointWrite(id,level,who,val,dur);
-        
+        hsClient.pointWrite(id, level, who, val, dur);
+
         String guid = getGUID(id.toString());
         if (guid != null)
         {
@@ -286,22 +277,21 @@ public class CCUHsApi
             System.out.println("Response: \n" + response);
         }
     }
-    
+
     /**
      * Write to a 'writable' point
      * with default level  - 9
      * default user - ""
      */
     public Double readDefaultVal(String query) {
-    
+
         ArrayList points = readAll(query);
-        String id = ((HashMap)points.get(0)).get("id").toString();
+        String id = ((HashMap) points.get(0)).get("id").toString();
         if (id == null || id == "") {
             return null;
         }
         ArrayList values = CCUHsApi.getInstance().readPoint(id);
-        if (values != null && values.size() > 0)
-        {
+        if (values != null && values.size() > 0) {
             HashMap valMap = ((HashMap) values.get(HayStackConstants.DEFAULT_POINT_LEVEL - 1));
             System.out.println(valMap);
             return Double.parseDouble(valMap.get("val").toString());
@@ -309,21 +299,21 @@ public class CCUHsApi
             return null;
         }
     }
-    
+
     public Double readDefaultValById(String id) {
         ArrayList values = CCUHsApi.getInstance().readPoint(id);
-        if (values != null && values.size() > 0)
-        {
+        if (values != null && values.size() > 0) {
             HashMap valMap = ((HashMap) values.get(HayStackConstants.DEFAULT_POINT_LEVEL - 1));
             return Double.parseDouble(valMap.get("val").toString());
         } else {
             return null;
         }
     }
-    
-    
+
+
     /**
      * Returns an arrayList of point vals hashmaps for all levels in write array.
+     *
      * @param id
      * @return
      */
@@ -331,47 +321,49 @@ public class CCUHsApi
         HGrid pArr = hsClient.pointWriteArray(HRef.copy(id));
         ArrayList<HashMap> rowList = new ArrayList<>();
         Iterator it = pArr.iterator();
-        while(it.hasNext()) {
+        while (it.hasNext()) {
             HashMap<Object, Object> map = new HashMap<>();
-            HRow r = (HRow)it.next();
+            HRow r = (HRow) it.next();
             HRow.RowIterator ri = (HRow.RowIterator) r.iterator();
             while (ri.hasNext()) {
-                HDict.MapEntry m = (HDict.MapEntry)ri.next();
+                HDict.MapEntry m = (HDict.MapEntry) ri.next();
                 map.put(m.getKey(), m.getValue());
             }
             rowList.add(map);
         }
         return rowList;
     }
-    
+
     public void hisWrite(ArrayList<HisItem> hisList) {
         HHisItem[] array = new HHisItem[hisList.size()];
-        for (int itr = 0; itr< array.length; itr++) {
+        for (int itr = 0; itr < array.length; itr++) {
             HisItem item = hisList.get(itr);
-            array[itr] = HHisItem.make(HDateTime.make(item.date.getTime()),HNum.make(item.getVal()));
+            array[itr] = HHisItem.make(HDateTime.make(item.date.getTime()), HNum.make(item.getVal()));
         }
         hsClient.hisWrite(HRef.copy(hisList.get(0).getRec()), array);
     }
+
     public void hisWrite(HisItem item) {
-        hsClient.hisWrite(HRef.copy(item.getRec()), new HHisItem[]{HHisItem.make(HDateTime.make(item.date.getTime()),HNum.make(item.val))});
+        hsClient.hisWrite(HRef.copy(item.getRec()), new HHisItem[]{HHisItem.make(HDateTime.make(item.date.getTime()), HNum.make(item.val))});
     }
-    
+
     public ArrayList<HisItem> hisRead(String id, Object range) {
-        HGrid resGrid = hsClient.hisRead(HRef.copy(id),range);
+        HGrid resGrid = hsClient.hisRead(HRef.copy(id), range);
         ArrayList<HisItem> hisList = new ArrayList<>();
         Iterator it = resGrid.iterator();
-        while(it.hasNext()) {
-            HRow r = (HRow)it.next();
+        while (it.hasNext()) {
+            HRow r = (HRow) it.next();
             HDateTime date = (HDateTime) r.get("ts");
             HNum val = (HNum) r.get("val");
-            hisList.add(new HisItem("",new Date(date.millis()),Double.parseDouble(val.toString())));
+            hisList.add(new HisItem("", new Date(date.millis()), Double.parseDouble(val.toString())));
         }
         return hisList;
     }
-    
-    
+
+
     /**
      * Reads most recent value for a his point
+     *
      * @param id
      * @return
      */
@@ -380,59 +372,56 @@ public class CCUHsApi
         if (resGrid != null && resGrid.numRows() == 0) {
             return null;
         }
-        HRow r = resGrid.row(resGrid.numRows()-1);
+        HRow r = resGrid.row(resGrid.numRows() - 1);
         HDateTime date = (HDateTime) r.get("ts");
         HNum val = (HNum) r.get("val");
-        return new HisItem("",new Date(date.millis()),Double.parseDouble(val.toString()));
+        return new HisItem("", new Date(date.millis()), Double.parseDouble(val.toString()));
     }
-    
+
     public Double readHisValById(String id) {
         return curRead(id).val;
     }
-    
+
     public Double readHisValByQuery(String query) {
         ArrayList points = readAll(query);
-        String id = ((HashMap)points.get(0)).get("id").toString();
+        String id = ((HashMap) points.get(0)).get("id").toString();
         if (id == null || id == "") {
             return null;
         }
-        
+
         HisItem item = curRead(id);
-        
+
         return item == null ? 0 : item.getVal();
-        
+
     }
-    
+
     public void writeHisValById(String id, Double val) {
-        hsClient.hisWrite(HRef.copy(id), new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()),HNum.make(val))});
+        hsClient.hisWrite(HRef.copy(id), new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), HNum.make(val))});
     }
-    
+
     public void writeHisValByQuery(String query, Double val) {
-        
+
         ArrayList points = readAll(query);
-        String id = ((HashMap)points.get(0)).get("id").toString();
+        String id = ((HashMap) points.get(0)).get("id").toString();
         if (id == null || id == "") {
             return;
         }
-        
-        HisItem item = new HisItem(id, new Date(), val );
+
+        HisItem item = new HisItem(id, new Date(), val);
         hisWrite(item);
     }
-    
+
     public ArrayList<HashMap> nav(String id) {
-        
+
         ArrayList<HashMap> rowList = new ArrayList<>();
-        try
-        {
-            HGrid grid = hsClient.nav(HStr.make(id.replace("@","")));
+        try {
+            HGrid grid = hsClient.nav(HStr.make(id.replace("@", "")));
             Iterator it = grid.iterator();
-            while (it.hasNext())
-            {
+            while (it.hasNext()) {
                 HashMap<Object, Object> map = new HashMap<>();
                 HRow r = (HRow) it.next();
                 HRow.RowIterator ri = (HRow.RowIterator) r.iterator();
-                while (ri.hasNext())
-                {
+                while (ri.hasNext()) {
                     HDict.MapEntry m = (HDict.MapEntry) ri.next();
                     map.put(m.getKey(), m.getValue());
                 }
@@ -443,100 +432,172 @@ public class CCUHsApi
         }
         return rowList;
     }
-    
+
     public void deleteEntity(String id) {
-        Log.d("CCU", "deleteEntity "+id);
-        tagsDb.tagsMap.remove(id.replace("@",""));
-        if (tagsDb.idMap.get(id) != null)
-        {
+        Log.d("CCU", "deleteEntity " + id);
+        tagsDb.tagsMap.remove(id.replace("@", ""));
+        if (tagsDb.idMap.get(id) != null) {
             System.out.println(id);
             tagsDb.removeIdMap.put(id, tagsDb.idMap.remove(id));
         }
     }
-    
+
     public void deleteWritableArray(String id) {
-        tagsDb.writeArrays.remove(id.replace("@",""));
+        tagsDb.writeArrays.remove(id.replace("@", ""));
     }
-    
+
     public void deleteEntityTree(String id) {
-        
-        Log.d("CCU", "deleteEntityTree "+id);
-        
-        HashMap entity = CCUHsApi.getInstance().read("id == "+id);
+
+        Log.d("CCU", "deleteEntityTree " + id);
+
+        HashMap entity = CCUHsApi.getInstance().read("id == " + id);
         if (entity.get("site") != null) {
-    
+
             ArrayList<HashMap> floors = readAll("floor");
             for (HashMap floor : floors) {
                 deleteEntityTree(floor.get("id").toString());
             }
-            
-            ArrayList<HashMap> equips = readAll("equip and siteRef == \""+id+"\"");
+
+            ArrayList<HashMap> equips = readAll("equip and siteRef == \"" + id + "\"");
             for (HashMap equip : equips) {
                 deleteEntityTree(equip.get("id").toString());
             }
-    
-            ArrayList<HashMap> devices = readAll("device and siteRef == \""+id+"\"");
+
+            ArrayList<HashMap> devices = readAll("device and siteRef == \"" + id + "\"");
             for (HashMap device : devices) {
                 deleteEntityTree(device.get("id").toString());
             }
             deleteEntity(id);
-            
+
         } else if (entity.get("floor") != null) {
-            ArrayList<HashMap> rooms = readAll("room and floorRef == \""+id+"\"");
+            ArrayList<HashMap> rooms = readAll("room and floorRef == \"" + id + "\"");
             for (HashMap room : rooms) {
                 deleteEntity(room.get("id").toString());
             }
             deleteEntity(entity.get("id").toString());
-            
-        }else if (entity.get("equip") != null) {
-            ArrayList<HashMap> points = readAll("point and equipRef == \""+id+"\"");
+
+        } else if (entity.get("equip") != null) {
+            ArrayList<HashMap> points = readAll("point and equipRef == \"" + id + "\"");
             for (HashMap point : points) {
-                if (point.get("writable") != null)
-                {
+                if (point.get("writable") != null) {
                     deleteWritableArray(point.get("id").toString());
                 }
                 deleteEntity(point.get("id").toString());
             }
             deleteEntity(id);
-        } else if (entity.get("device") != null)
-        {
+        } else if (entity.get("device") != null) {
             ArrayList<HashMap> points = readAll("point and deviceRef == \"" + id + "\"");
-            for (HashMap point : points)
-            {
-                if (point.get("writable") != null)
-                {
+            for (HashMap point : points) {
+                if (point.get("writable") != null) {
                     deleteWritableArray(point.get("id").toString());
                 }
                 deleteEntity(point.get("id").toString());
             }
             deleteEntity(id);
         } else if (entity.get("point") != null) {
-            if (entity.get("writable") != null)
-            {
+            if (entity.get("writable") != null) {
                 deleteWritableArray(entity.get("id").toString());
             }
             deleteEntity(entity.get("id").toString());
         }
     }
-    
-    public void putUIDMap(String luid, String guid){
+
+    public void putUIDMap(String luid, String guid) {
         tagsDb.idMap.put(luid, guid);
     }
-    
-    public String getGUID(String luid){
+
+    public String getGUID(String luid) {
         return tagsDb.idMap.get(luid);
     }
-    
+
     public void syncEntityTree() {
         entitySyncHandler.sync();
     }
-    
+
     public void syncHisData() {
         hisSyncHandler.doSync();
+    }
+
+    public boolean syncExistingSite(String siteId) {
+        HGrid remoteSite = getRemoteSite(siteId);
+
+
+        if (remoteSite == null || remoteSite.isEmpty() || remoteSite.isErr()) {
+            return false;
+        }
+
+        HGrid remoteSiteDetails = getRemoteSiteDetails(siteId);
+
+
+        tagsDb.addHGrid(remoteSite);
+        tagsDb.addHGrid(remoteSiteDetails);
+        tagsDb.log();
+
+        return true;
+    }
+
+    public HGrid getRemoteSiteDetails(String siteId) {
+        /* Sync a site*/
+        HClient hClient = new HClient(HttpUtil.HAYSTACK_URL, HayStackConstants.USER, HayStackConstants.PASS);
+        HDict navIdDict = new HDictBuilder().add("navId", HRef.make(siteId)).toDict();
+        HGrid hGrid = HGridBuilder.dictToGrid(navIdDict);
+
+        HGrid sync = hClient.call("sync", hGrid);
+
+        sync.dump();
+
+        return sync;
+    }
+
+    public HGrid getRemoteSite(String siteId) {
+        /* Sync a site*/
+        HClient hClient = new HClient(HttpUtil.HAYSTACK_URL, HayStackConstants.USER, HayStackConstants.PASS);
+        HDict navIdDict = new HDictBuilder().add(HayStackConstants.ID, HRef.make(siteId)).toDict();
+        HGrid hGrid = HGridBuilder.dictToGrid(navIdDict);
+
+        HGrid sync = hClient.call(HStdOps.read.name(), hGrid);
+
+        sync.dump();
+
+        return sync;
     }
 
 
     public void log() {
         System.out.println(tagsDb);
+    }
+
+    public void addExistingSite(HGrid site) {
+        tagsDb.addHGrid(site);
+    }
+
+    public HGrid getCCUs() {
+        HDict hDict = new HDictBuilder().add("filter", "ccu").toDict();
+        HGrid ccus = getHSClient().call("read", HGridBuilder.dictToGrid(hDict));
+        return ccus;
+    }
+
+    public void addOrUpdateConfigProperty(String thisCCU, HRef id) {
+        tagsDb.updateConfig("currentCCU", id);
+    }
+
+    public String createCCU(String ccuName, String installerEmail) {
+        HDictBuilder hDictBuilder = new HDictBuilder();
+        System.out.println("Site Ref: " + getSiteId());
+        String localId = UUID.randomUUID().toString();
+        hDictBuilder.add("id", HRef.make(localId));
+        hDictBuilder.add("ccu");
+        hDictBuilder.add("dis", HStr.make(ccuName));
+        hDictBuilder.add("installer", HStr.make(installerEmail));
+        hDictBuilder.add("siteRef", getSiteId());
+        hDictBuilder.add("device");
+        tagsDb.addHDict(localId, hDictBuilder.toDict());
+        return localId;
+    }
+
+    public HRef getSiteId() {
+        HDict hDict = new HDictBuilder().add("filter", "site").toDict();
+        HGrid site = getHSClient().call("read", HGridBuilder.dictToGrid(hDict));
+        return site.row(0).getRef("id");
     }
 }

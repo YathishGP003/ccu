@@ -27,7 +27,7 @@ public class BuildingProcessJob extends BaseJob
     public void doJob() {
         Log.d("CCU","BuildingProcessJob ->");
     
-        HashMap site = CCUHsApi.getInstance().read("site");
+        HashMap site = CCUHsApi.getInstance().read("ccu");
         if (site == null || site.size() == 0) {
             Log.d("CCU","No Site Registered ! <-BuildingProcessJob ");
             return;

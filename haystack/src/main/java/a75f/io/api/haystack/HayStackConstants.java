@@ -10,4 +10,5 @@ public class HayStackConstants
     public static final String PASS = "Password";
     public static final String USER = "User";
     public static final String ID = "id";
+    public static final String CUR_CCU = "CurCCU";
 }

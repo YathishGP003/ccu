@@ -25,6 +25,9 @@
     <string name="ble_no_devices_found_warning">No devices found.  (Please have smart node in advertisement mode and be within range)</string>
     <string name="scan_dialog_title">Scanning for 75F devices</string>
     <string name="unable_to_bluetooth">Unable to initialize bluetooth!</string>
+    <string name="ok">ok</string>
+    <string name="cancel">cancel</string>
+    <string name="pick_ccu">Pick CCU</string>
 
 
     <string-array name="sse_action_type">

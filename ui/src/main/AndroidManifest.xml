@@ -96,6 +96,11 @@
             android:theme="@style/RenatusAppTheme.NoActionBar">
         </activity>
 
+        <activity
+            android:name=".RegisterGatherCCUDetails"
+            android:theme="@style/RenatusAppTheme.NoActionBar">
+        </activity>
+
         <activity android:name=".CCUSettings"
             android:theme="@style/RenatusAppTheme.NoActionBar">
 

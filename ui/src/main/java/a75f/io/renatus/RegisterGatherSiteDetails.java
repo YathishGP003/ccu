@@ -26,8 +26,6 @@ public class RegisterGatherSiteDetails extends Activity {
     EditText mSiteName;
     EditText mSiteCity;
     EditText mSiteZip;
-    EditText mCCUName;
-    EditText mInstallerEmail;
 
     private static final String TAG = RegisterGatherSiteDetails.class.getSimpleName();
 
@@ -42,8 +40,7 @@ public class RegisterGatherSiteDetails extends Activity {
         mSiteName = (EditText) findViewById(R.id.site_name_et);
         mSiteCity = (EditText) findViewById(R.id.site_city_et);
         mSiteZip = (EditText) findViewById(R.id.site_zip_et);
-        mInstallerEmail = (EditText) findViewById(R.id.installer_email_et);
-        mCCUName = (EditText) findViewById(R.id.ccu_name_et);
+
 
         mNext = (Button) findViewById(R.id.next_button);
 
@@ -54,15 +51,12 @@ public class RegisterGatherSiteDetails extends Activity {
                 String siteCity = mSiteCity.getText().toString();
                 String siteZip = mSiteZip.getText().toString();
 
-                new Thread()
-                {
+                new Thread() {
                     @Override
-                    public void run()
-                    {
+                    public void run() {
                         super.run();
 
                         saveSite(siteName, siteCity, siteZip);
-                        saveCCU(mInstallerEmail, mCCUName);
 
                         runOnUiThread(new Runnable() {
                             @Override
@@ -78,15 +72,10 @@ public class RegisterGatherSiteDetails extends Activity {
         });
     }
 
-    private void saveCCU(EditText mInstallerEmail, EditText mCCUName) {
-
-    }
 
     private void next() {
         Intent i = new Intent(RegisterGatherSiteDetails.this,
-                RenatusLandingActivity.class);
-
-
+                RegisterGatherCCUDetails.class);
         startActivity(i);
     }
 
@@ -108,24 +97,10 @@ public class RegisterGatherSiteDetails extends Activity {
 
         Log.i(TAG, "LocalSiteID: " + localSiteId);
         CCUHsApi.getInstance().log();
-        BuildingTuners.getInstance();//To init Building tuner
-        L.saveCCUState();
-        System.out.println(CCUHsApi.getInstance().tagsDb.tagsString);
-        CCUHsApi.getInstance().syncEntityTree();
+
+
         return localSiteId;
     }
 
-
-    public void loadExistingSite(String siteId) {
-
-
-        String siteIdAzure = "123";  //Azure ID
-        //Get this site from azure.
-        //Site azureSite = CCUHsApi.getInstance().getSiteFromAzure();
-
-        //Pre-Populate these fields
-        //Set it as an orphan site and orphan ccu
-
-    }
 
 }

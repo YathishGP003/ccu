@@ -86,12 +86,18 @@
 
         <activity
             android:name=".RegisterGatherSiteDetails"
+
             android:theme="@style/RenatusAppTheme.NoActionBar">
         </activity>
 
 
         <activity
             android:name=".RegisterGatherDetails"
+            android:theme="@style/RenatusAppTheme.NoActionBar">
+        </activity>
+
+        <activity
+            android:name=".RegisterGatherCCUDetails"
             android:theme="@style/RenatusAppTheme.NoActionBar">
         </activity>
 

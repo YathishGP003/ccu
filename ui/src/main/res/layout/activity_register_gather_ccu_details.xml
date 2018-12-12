@@ -1,18 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_gravity="center_horizontal"
-    android:orientation="vertical"
-    android:padding="20dp">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-
-
-    <EditText
-        android:id="@+id/site_id_edittext"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Enter a site ID or select next" />
     <ProgressBar
         android:id="@+id/progressbar"
         style="?android:attr/progressBarStyleHorizontal"
@@ -23,27 +14,41 @@
         android:backgroundTint="@color/white"
         android:layout_gravity="bottom"
         android:indeterminateTint="#1a09d6"
-        android:visibility="invisible"
         android:layout_marginTop="-7dp"/>
 
-
-
-    <Button
-        android:id="@+id/use_existing_site_button"
+    <EditText
+        android:id="@+id/ccu_name_et"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Use existing Site ID" />
+        android:text="CCU Name" />
+
+
+    <EditText
+        android:id="@+id/installer_email_et"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Installer Email" />
+
+    <Button
+        android:id="@+id/create_new"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Create New" />
 
     <TextView
-        android:id="@+id/or_text"
+        android:id="@+id/or_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:text="or" />
+        android:text="OR"
+        android:visibility="gone" />
 
     <Button
-        android:id="@+id/no_site_button"
+        android:id="@+id/use_existing_ccu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Enter a new site" />
+        android:text="Use Existing CCU"
+        android:visibility="gone" />
+
+
 </LinearLayout>

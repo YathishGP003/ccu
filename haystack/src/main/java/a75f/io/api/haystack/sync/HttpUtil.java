@@ -137,8 +137,8 @@ public class HttpUtil
 
             //Create connection
             url = new URL("https://login.microsoftonline.com/" + tenantId + "/oauth2/v2.0/token");
-            //connection = (HttpsURLConnection)url.openConnection();
-            connection = NetCipher.getHttpsURLConnection(url);//TODO - Hack for SSLException
+            connection = (HttpsURLConnection)url.openConnection();
+            //connection = NetCipher.getHttpsURLConnection(url);//TODO - Hack for SSLException
             //connection.setRequestMethod("POST");
             connection.setRequestProperty("Content-Type",
                     contentType);

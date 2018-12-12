@@ -21,7 +21,9 @@ import org.projecthaystack.io.*;
  */
 public abstract class HOp
 {
-  /** Programatic name of the operation. */
+
+
+    /** Programatic name of the operation. */
   public abstract String name();
 
   /** Short one line summary of what the operation does. */

@@ -5,10 +5,13 @@ import android.util.Log;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.HashMap;
+import java.util.Set;
 
 import a75.io.algos.tr.TrimResetListener;
 import a75.io.algos.tr.TrimResponseRequest;
 import a75.io.algos.vav.VavTRSystem;
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.ZonePriority;
@@ -20,7 +23,7 @@ import a75f.io.logic.bo.building.hvac.SeriesFanVavUnit;
 import a75f.io.logic.bo.building.hvac.Valve;
 import a75f.io.logic.bo.building.hvac.VavUnit;
 
-import static a75f.io.logic.bo.building.ZonePriority.LOW;
+import static a75f.io.logic.bo.building.ZonePriority.NO;
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
 
@@ -40,9 +43,7 @@ public abstract class VavProfile extends ZoneProfile
     double  setTemp = 72.0; //TODO
     int deadBand = 1;
     
-    ZonePriority priority = LOW;
-    
-    HashMap<Short, VAVLogicalMap> vavDeviceMap;
+    public HashMap<Short, VAVLogicalMap> vavDeviceMap;
     SatResetListener satResetListener;
     CO2ResetListener co2ResetListener;
     SpResetListener spResetListener;
@@ -77,65 +78,47 @@ public abstract class VavProfile extends ZoneProfile
         trSystem.updateHwstRequest(getHwstRequests(node));
     }
     
-    /*@Override
-    public void mapRegularUpdate(CmToCcuOverUsbSnRegularUpdateMessage_t regularUpdateMessage)
-    {
-        
-        double roomTemp = (float) regularUpdateMessage.update.roomTemperature.get() / 10.0f;
-        double dischargeTemp = (float) regularUpdateMessage.update.airflow1Temperature.get() / 10.0f;
-        double supplyAirTemp = (float) regularUpdateMessage.update.airflow2Temperature.get() / 10.0f;
-        double co2 = (float) regularUpdateMessage.update.externalAnalogVoltageInput1.get();
-        double sp =  (float) regularUpdateMessage.update.externalAnalogVoltageInput2.get();//TODO
-    
-        short nodeAddr = (short)regularUpdateMessage.update.smartNodeAddress.get();
-        Log.d(TAG," RegularUpdate : rT :"+roomTemp+" dT :"+dischargeTemp+" sT :"+supplyAirTemp+" CO2: "+co2+" SN:"+nodeAddr);
-        
-        VAVLogicalMap currentDevice = vavDeviceMap.get(nodeAddr);
-        if (currentDevice == null) {
-            //When node is not added while constructing profile.
-            addLogicalMap(nodeAddr);
-            currentDevice = vavDeviceMap.get(nodeAddr);
-        }
-        currentDevice.setRoomTemp(roomTemp);
-        currentDevice.setDischargeTemp(dischargeTemp);
-        currentDevice.setSupplyAirTemp(supplyAirTemp);
-        currentDevice.setCO2(co2);
-        currentDevice.setStaticPressure(sp);
-        
-        if(mInterface != null)
-        {
-            mInterface.refreshView();
-        }
-    }*/
-    
+    /**
+     * Only creates a run time instance of logical map to run the PI/TR logical loops.
+     * @param addr
+     */
     public void addLogicalMap(short addr) {
         VAVLogicalMap deviceMap = new VAVLogicalMap(getProfileType(), addr);
         vavDeviceMap.put(addr, deviceMap);
-        deviceMap.satResetRequest.setImportanceMultiplier(getZonePriority());
-        deviceMap.co2ResetRequest.setImportanceMultiplier(getZonePriority());
-        deviceMap.spResetRequest.setImportanceMultiplier(getZonePriority());
-        deviceMap.hwstResetRequest.setImportanceMultiplier(getZonePriority());
+        deviceMap.satResetRequest.setImportanceMultiplier(getPriority().multiplier);
+        deviceMap.co2ResetRequest.setImportanceMultiplier(getPriority().multiplier);
+        deviceMap.spResetRequest.setImportanceMultiplier(getPriority().multiplier);
+        deviceMap.hwstResetRequest.setImportanceMultiplier(getPriority().multiplier);
     }
     
-    public void addLogicalMapAndPoints(short addr, VavProfileConfiguration config) {
+    /**
+     * When the profile is created first time , either via UI or from existing tagsMap
+     * this method has to be called on the profile instance.
+     * @param addr
+     * @param config
+     * @param floorRef
+     * @param zoneRef
+     */
+    public void addLogicalMapAndPoints(short addr, VavProfileConfiguration config, String floorRef, String zoneRef) {
         VAVLogicalMap deviceMap = new VAVLogicalMap(getProfileType(), addr);
-        deviceMap.createHaystackPoints(config);
+        deviceMap.createHaystackPoints(config, floorRef, zoneRef );
         vavDeviceMap.put(addr, deviceMap);
-        deviceMap.satResetRequest.setImportanceMultiplier(getZonePriority());
-        deviceMap.co2ResetRequest.setImportanceMultiplier(getZonePriority());
-        deviceMap.spResetRequest.setImportanceMultiplier(getZonePriority());
-        deviceMap.hwstResetRequest.setImportanceMultiplier(getZonePriority());
+        deviceMap.satResetRequest.setImportanceMultiplier(getPriority().multiplier);
+        deviceMap.co2ResetRequest.setImportanceMultiplier(getPriority().multiplier);
+        deviceMap.spResetRequest.setImportanceMultiplier(getPriority().multiplier);
+        deviceMap.hwstResetRequest.setImportanceMultiplier(getPriority().multiplier);
     }
     
     public void updateLogicalMapAndPoints(short addr, VavProfileConfiguration config) {
         VAVLogicalMap deviceMap = vavDeviceMap.get(addr);
         deviceMap.updateHaystackPoints(config);
     
-        deviceMap.satResetRequest.setImportanceMultiplier(getZonePriority());
-        deviceMap.co2ResetRequest.setImportanceMultiplier(getZonePriority());
-        deviceMap.spResetRequest.setImportanceMultiplier(getZonePriority());
-        deviceMap.hwstResetRequest.setImportanceMultiplier(getZonePriority());
+        deviceMap.satResetRequest.setImportanceMultiplier(getPriority().multiplier);
+        deviceMap.co2ResetRequest.setImportanceMultiplier(getPriority().multiplier);
+        deviceMap.spResetRequest.setImportanceMultiplier(getPriority().multiplier);
+        deviceMap.hwstResetRequest.setImportanceMultiplier(getPriority().multiplier);
     }
+    
     
     @JsonIgnore
     @Override
@@ -144,16 +127,15 @@ public abstract class VavProfile extends ZoneProfile
     }
     
     protected void setDamperLimits(short node, Damper d) {
-        
-        VavProfileConfiguration config = (VavProfileConfiguration) getProfileConfiguration(node);
+        VAVLogicalMap deviceMap = vavDeviceMap.get(node);
         switch (state) {
             case COOLING:
-                d.minPosition = config.getMinDamperCooling();
-                d.maxPosition = config.getMaxDamperCooliing();
+                d.minPosition = (int)deviceMap.getDamperLimit("cooling", "min");
+                d.maxPosition = (int)deviceMap.getDamperLimit("cooling", "max");;
                 break;
             case HEATING:
-                d.minPosition = config.getMinDamperHeating();
-                d.maxPosition = config.getMaxDamperHeating();
+                d.minPosition = (int)deviceMap.getDamperLimit("heating", "min");;
+                d.maxPosition = (int)deviceMap.getDamperLimit("heating", "max");;
                 break;
             case DEADBAND:
                 //TODO - ?
@@ -170,7 +152,7 @@ public abstract class VavProfile extends ZoneProfile
     @Override
     public BaseProfileConfiguration getProfileConfiguration(short address)
     {
-        return mProfileConfiguration.get(address);
+        return vavDeviceMap.get(address) != null ? vavDeviceMap.get(address).getProfileConfiguration() : null;
     }
     
     @JsonIgnore
@@ -293,11 +275,6 @@ public abstract class VavProfile extends ZoneProfile
     }
     
     @JsonIgnore
-    public int getImportanceMultiplier() {
-        return priority.multiplier;
-    }
-    
-    @JsonIgnore
     public void handleSystemReset() {
         Log.d("VAV","handleSystemReset");
     }
@@ -335,6 +312,11 @@ public abstract class VavProfile extends ZoneProfile
         return nodeCount == 0 ? 0 : tempTotal/nodeCount;
     }
     
+    @JsonIgnore
+    public Set<Short> getNodeAddresses()
+    {
+        return vavDeviceMap.keySet();
+    }
     
     @Override
     public HashMap<String, Double> getTSData() {
@@ -371,22 +353,42 @@ public abstract class VavProfile extends ZoneProfile
     }
     
     @JsonIgnore
-    public int getZonePriority()
+    @Override
+    public ZonePriority getPriority()
     {
-        int priority = 0;
-        for (short nodeAddress : mProfileConfiguration.keySet())
+        ZonePriority priority = NO;
+        for (short nodeAddress : vavDeviceMap.keySet())
         {
-            if (vavDeviceMap.get(nodeAddress) ==  null) {
-                continue;
+            HashMap equip = CCUHsApi.getInstance().read("equip and group == \""+nodeAddress+"\"");
+            if (ZonePriority.valueOf(equip.get("priority").toString()).ordinal() > priority.ordinal()) {
+                priority = ZonePriority.valueOf(equip.get("priority").toString());
             }
-            
-            if (mProfileConfiguration.get(nodeAddress).getPriority() > priority) {
-                priority = mProfileConfiguration.get(nodeAddress).getPriority();
-            }
-            
         }
         return priority;
     }
+    
+    @JsonIgnore
+    @Override
+    public double getCurrentTemp() {
+        for (short nodeAddress : vavDeviceMap.keySet())
+        {
+            return vavDeviceMap.get(nodeAddress).getCurrentTemp();
+        }
+        return 0;
+    }
+    
+    @JsonIgnore
+    @Override
+    public Equip getEquip()
+    {
+        for (short nodeAddress : vavDeviceMap.keySet())
+        {
+            HashMap equip = CCUHsApi.getInstance().read("equip and group == \""+nodeAddress+"\"");
+            return new Equip.Builder().setHashMap(equip).build();
+        }
+        return null;
+    }
+    
     
     @JsonIgnore
     public int getMinDamperCooling()

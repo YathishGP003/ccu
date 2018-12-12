@@ -280,7 +280,7 @@ public class CCUHsApi
         String guid = getGUID(id.toString());
         if (guid != null)
         {
-            HDictBuilder b = new HDictBuilder().add("id", HRef.copy(guid)).add("level", level).add("who", who).add("val", val).add("duration", dur);
+            HDictBuilder b = new HDictBuilder().add("id", HRef.copy(guid)).add("level", level).add("who", who).add("val", val)/*.add("duration", dur)*/;
             HDict[] dictArr = {b.toDict()};
             String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
             System.out.println("Response: \n" + response);
@@ -303,6 +303,7 @@ public class CCUHsApi
         if (values != null && values.size() > 0)
         {
             HashMap valMap = ((HashMap) values.get(HayStackConstants.DEFAULT_POINT_LEVEL - 1));
+            System.out.println(valMap);
             return Double.parseDouble(valMap.get("val").toString());
         } else {
             return null;
@@ -376,7 +377,7 @@ public class CCUHsApi
      */
     public HisItem curRead(String id) {
         HGrid resGrid = hsClient.hisRead(HRef.copy(id),"current");
-        if (resGrid.numRows() == 0) {
+        if (resGrid != null && resGrid.numRows() == 0) {
             return null;
         }
         HRow r = resGrid.row(resGrid.numRows()-1);

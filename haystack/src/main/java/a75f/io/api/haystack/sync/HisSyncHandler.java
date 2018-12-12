@@ -113,7 +113,7 @@ public class HisSyncHandler
         
         ArrayList<HashMap> equips = hayStack.readAll("equip");
         for (HashMap equip : equips) {
-            ArrayList<HashMap> points = hayStack.readAll("point and his equipRef == \""+equip.get("id")+"\"");
+            ArrayList<HashMap> points = hayStack.readAll("point and his and equipRef == \""+equip.get("id")+"\"");
             if (CCUHsApi.getInstance().getGUID(equip.get("id").toString()) == null) {
                 continue;
             }

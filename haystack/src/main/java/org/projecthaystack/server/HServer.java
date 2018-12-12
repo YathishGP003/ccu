@@ -412,8 +412,8 @@ public abstract class HServer extends HProj
 
     // check tz of items
     if (items.length == 0) return;
-    for (int i=0; i<items.length; ++i)
-      if (!items[i].ts.tz.equals(tz)) throw new RuntimeException("item.tz != rec.tz: " + items[i].ts.tz + " != " + tz);
+    //for (int i=0; i<items.length; ++i)
+    //  if (!items[i].ts.tz.equals(tz)) throw new RuntimeException("item.tz != rec.tz: " + items[i].ts.tz + " != " + tz);
 
     // route to subclass
     onHisWrite(rec, items);

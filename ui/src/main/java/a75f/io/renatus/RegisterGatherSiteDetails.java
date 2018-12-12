@@ -86,9 +86,8 @@ public class RegisterGatherSiteDetails extends Activity {
     private void next() {
         Intent i = new Intent(RegisterGatherSiteDetails.this,
                 RenatusLandingActivity.class);
-
-
         startActivity(i);
+        finish();
     }
 
     /* This site never existed we are creating a new orphaned site. */
@@ -111,7 +110,7 @@ public class RegisterGatherSiteDetails extends Activity {
         CCUHsApi.getInstance().log();
         BuildingTuners.getInstance();//To init Building tuner
         L.saveCCUState();
-        System.out.println(CCUHsApi.getInstance().tagsDb.tagsString);
+        System.out.println(CCUHsApi.getInstance().tagsDb.tagsMap);
         CCUHsApi.getInstance().syncEntityTree();
         return localSiteId;
     }

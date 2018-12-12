@@ -22,7 +22,6 @@ import java.util.HashMap;
 import javax.net.ssl.HttpsURLConnection;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.Point;
@@ -197,7 +196,7 @@ public class TestRemoteHsSync
         site[0] = HSUtil.mapToHDict(sMap);*/
     
         System.out.println("entitySyncHandler.isSyncNeeded " + entitySyncHandler.isSyncNeeded());
-        entitySyncHandler.doSync();
+        entitySyncHandler.sync();
         System.out.println("entitySyncHandler.isSyncNeeded " + entitySyncHandler.isSyncNeeded());
     
         System.out.println(CCUHsApi.getInstance().tagsDb.idMap);
@@ -275,7 +274,7 @@ public class TestRemoteHsSync
         site[0] = HSUtil.mapToHDict(sMap);*/
         
         System.out.println("entitySyncHandler.isSyncNeeded " + entitySyncHandler.isSyncNeeded());
-        entitySyncHandler.doSync();
+        entitySyncHandler.sync();
         System.out.println("entitySyncHandler.isSyncNeeded " + entitySyncHandler.isSyncNeeded());
         
         System.out.println(CCUHsApi.getInstance().tagsDb.idMap);
@@ -443,16 +442,16 @@ public class TestRemoteHsSync
                                    .setUnit("\u00B0F")
                                    .build();
     
-        String deviceRef = new Device.Builder()
+        /*String deviceRef = new Device.Builder()
                             .setDisplayName("SN-"+7000)
                             .addMarker("network")
                             .setAddr(7000)
-                            .build();
+                            .build();*/
         
         String tpID = CCUHsApi.getInstance().addPoint(testPoint);
         String tpID1 = CCUHsApi.getInstance().addPoint(testPoint1);
         
-        hayStack.entitySyncHandler.doSync();
+        hayStack.entitySyncHandler.sync();
     
         ArrayList<HisItem> hislist = new ArrayList<>();
         Date now = new Date();

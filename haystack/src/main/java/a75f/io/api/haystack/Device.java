@@ -1,6 +1,9 @@
 package a75f.io.api.haystack;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Created by samjithsadasivan on 9/5/18.
@@ -15,7 +18,7 @@ public class Device
     private String zoneRef;
     private String floorRef;
     private String addr;
-    
+    private String id;
     
     public String getAddr()
     {
@@ -44,6 +47,10 @@ public class Device
     {
         return floorRef;
     }
+    public String getId()
+    {
+        return id;
+    }
     private Device(){
     
     }
@@ -56,6 +63,10 @@ public class Device
         private String siteRef;
         private String zoneRef;
         private String floorRef;
+        private String id;
+        public String toString() {
+            return displayName;
+        }
         public Builder setZoneRef(String zoneRef)
         {
             this.zoneRef = zoneRef;
@@ -105,7 +116,7 @@ public class Device
             return this;
         }
         
-        public String build(){
+        public Device build(){
             Device d = new Device();
             d.displayName = this.displayName;
             d.markers = this.markers;
@@ -114,15 +125,48 @@ public class Device
             d.equipRef = this.equipRef;
             d.zoneRef = this.zoneRef;
             d.floorRef = this.floorRef;
-            return CCUHsApi.getInstance().addDevice(d);
+            d.id = this.id;
+            return d;
+        }
+    
+        public Builder setHashMap(HashMap site)
+        {
+            Iterator it = site.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry pair = (Map.Entry)it.next();
+                System.out.println(pair.getKey() + " = " + pair.getValue());
+                if(pair.getKey().equals("id"))
+                {
+                    this.id = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("dis"))
+                {
+                    this.displayName = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("marker"))
+                {
+                    this.markers.add(pair.getValue().toString());
+                }
+                else if(pair.getKey().equals("siteRef"))
+                {
+                    this.siteRef = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("floorRef"))
+                {
+                    this.floorRef = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("zoneRef"))
+                {
+                    this.zoneRef = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("addr"))
+                {
+                    this.addr = pair.getValue().toString();
+                }
+                it.remove();
+            }
+        
+            return this;
         }
     }
-    
-    /*private void createDevice() {
-        StringBuilder marker = new StringBuilder();
-        for (String m : markers) {
-            marker.append(m+" ");
-        }
-        CCUHsApi.getInstance().addDevice(displayName, markers.toString().trim());
-    }*/
 }

@@ -1,6 +1,9 @@
 package a75f.io.api.haystack;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Created by samjithsadasivan on 9/4/18.
@@ -11,16 +14,31 @@ public class Equip
     private String            displayName;
     private ArrayList<String> markers;
     private String            siteRef;
-    private String roomRef;
+    private String zoneRef;
     private String floorRef;
     private String group;
+    public String getProfile()
+    {
+        return profile;
+    }
+    private String profile;
+    public String getPriority()
+    {
+        return priority;
+    }
+    private String priority;
+    private String id;
+    public String getId()
+    {
+        return id;
+    }
     public String getGroup()
     {
         return group;
     }
-    public String getRoomRef()
+    public String getZoneRef()
     {
-        return roomRef;
+        return zoneRef;
     }
     public String getFloorRef()
     {
@@ -38,21 +56,37 @@ public class Equip
     {
         return siteRef;
     }
+    public String toString() {
+        return displayName;
+    }
     public static class Builder{
         private String            displayName;
         private ArrayList<String> markers = new ArrayList<>();
         private String            siteRef;
-        private String roomRef;
+        private String zoneRef;
         private String floorRef;
         private String group;
+        public Builder setPriority(String priority)
+        {
+            this.priority = priority;
+            return this;
+        }
+        private String priority;
+        private String id;
+        public Builder setProfile(String profile)
+        {
+            this.profile = profile;
+            return this;
+        }
+        private String profile;
         public Builder setGroup(String group)
         {
             this.group = group;
             return this;
         }
-        public Builder setZoneRef(String roomRef)
+        public Builder setZoneRef(String zoneRef)
         {
-            this.roomRef = roomRef;
+            this.zoneRef = zoneRef;
             return this;
         }
         public Builder setFloorRef(String floorRef)
@@ -85,20 +119,60 @@ public class Equip
             q.displayName = this.displayName;
             q.markers = this.markers;
             q.siteRef = this.siteRef;
-            q.roomRef = this.roomRef;
+            q.zoneRef = this.zoneRef;
             q.floorRef = this.floorRef;
             q.group = this.group;
-            //CCUHsApi.getInstance().addEquip(q);
+            q.profile = this.profile;
+            q.priority = this.priority;
+            q.id = this.id;
             return q;
         }
-    }
-    
-    /*private void createEquip() {
-        StringBuilder marker = new StringBuilder();
-        for (String m : markers) {
-            marker.append(m+" ");
+        
+        public Builder setHashMap(HashMap site)
+        {
+            Iterator it = site.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry pair = (Map.Entry)it.next();
+                System.out.println(pair.getKey() + " = " + pair.getValue());
+                if(pair.getKey().equals("id"))
+                {
+                    this.id = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("dis"))
+                {
+                    this.displayName = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("marker"))
+                {
+                    this.markers.add(pair.getValue().toString());
+                }
+                else if(pair.getKey().equals("siteRef"))
+                {
+                    this.siteRef = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("floorRef"))
+                {
+                    this.floorRef = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("zoneRef"))
+                {
+                    this.zoneRef = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("profile"))
+                {
+                    this.profile  = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("group"))
+                {
+                    this.group = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("priority"))
+                {
+                    this.priority = pair.getValue().toString();
+                }
+                it.remove();
+            }
+            return this;
         }
-        CCUHsApi.getInstance().addEquip(siteRef, displayName, marker.toString().trim());
-    }*/
-
+    }
 }

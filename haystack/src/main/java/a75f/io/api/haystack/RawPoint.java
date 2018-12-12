@@ -1,6 +1,9 @@
 package a75f.io.api.haystack;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Created by samjithsadasivan on 9/6/18.
@@ -19,6 +22,11 @@ public class RawPoint
     private String siteRef;
     private String zoneRef;
     private String floorRef;
+    private String id;
+    public String getId()
+    {
+        return id;
+    }
     public void setPointRef(String pointRef)
     {
         this.pointRef = pointRef;
@@ -70,6 +78,9 @@ public class RawPoint
     {
         return floorRef;
     }
+    public String toString() {
+        return displayName;
+    }
     public static class Builder{
         private String            displayName;
         private ArrayList<String> markers = new ArrayList<>();
@@ -82,6 +93,7 @@ public class RawPoint
         private String tz;
         private String zoneRef;
         private String floorRef;
+        private String id;
         public Builder setDisplayName(String displayName)
         {
             this.displayName = displayName;
@@ -156,8 +168,69 @@ public class RawPoint
             p.siteRef = this.siteRef;
             p.zoneRef = this.zoneRef;
             p.floorRef = this.floorRef;
+            p.id = this.id;
             //CCUHsApi.getInstance().addRawPoint(p);
             return p;
+        }
+    
+        public Builder setHashMap(HashMap site)
+        {
+            Iterator it = site.entrySet().iterator();
+            while (it.hasNext())
+            {
+                Map.Entry pair = (Map.Entry) it.next();
+                System.out.println(pair.getKey() + " = " + pair.getValue());
+                if (pair.getKey().equals("id"))
+                {
+                    this.id = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("dis"))
+                {
+                    this.displayName = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("marker"))
+                {
+                    this.markers.add(pair.getValue().toString());
+                }
+                else if (pair.getKey().equals("siteRef"))
+                {
+                    this.siteRef = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("floorRef"))
+                {
+                    this.floorRef = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("zoneRef"))
+                {
+                    this.zoneRef = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("deviceRef"))
+                {
+                    this.deviceRef = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("pointRef"))
+                {
+                    this.pointRef = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("port"))
+                {
+                    this.port = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("type"))
+                {
+                    this.type = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("unit"))
+                {
+                    this.unit = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("tz"))
+                {
+                    this.tz = pair.getValue().toString();
+                }
+                it.remove();
+            }
+            return this;
         }
     }
     

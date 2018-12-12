@@ -5,17 +5,18 @@ import org.javolution.io.Struct;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Device;
+import a75f.io.api.haystack.Floor;
+import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Zone;
 import a75f.io.device.serial.AddressedStruct;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.Floor;
 import a75f.io.logic.bo.building.Output;
-import a75f.io.logic.bo.building.Zone;
 import a75f.io.logic.bo.building.ZoneProfile;
 
 /**
@@ -27,25 +28,6 @@ public class LSmartNode
     
     private static final short  TODO = 0;
     private static final String TAG  = "LSmartNode";
-    
-    
-    public static short nextSmartNodeAddress()
-    {
-        short currentBand = L.ccu().getSmartNodeAddressBand();
-        int amountOfNodes = 0;
-        for (Floor floors : L.ccu().getFloors())
-        {
-            for (Zone zone : floors.mZoneList)
-            {
-                for (ZoneProfile zp : zone.mZoneProfiles)
-                {
-                    amountOfNodes += zp.getNodeAddresses().size();
-                }
-            }
-        }
-        return (short) (currentBand + amountOfNodes);
-    }
-    
     
     public static AddressedStruct[] getExtraMessages(Floor floor, Zone zone)
     {
@@ -67,13 +49,11 @@ public class LSmartNode
     
     public static ArrayList<CcuToCmOverUsbDatabaseSeedSnMessage_t> getSeedMessages(Zone zone)
     {
-        //This needs to pair using module tuners as well..
-        HashSet<Short> addresses = zone.getNodes();
         ArrayList<CcuToCmOverUsbDatabaseSeedSnMessage_t> seedMessages = new ArrayList<>();
         int i = 0;
-        for (Short address : addresses)
+        for (Device d : HSUtil.getDevices(zone.getId()))
         {
-            seedMessages.add(getSeedMessage(zone, address));
+            seedMessages.add(getSeedMessage(zone, Short.parseShort(d.getAddr())));
             i++;
         }
         return seedMessages;
@@ -85,7 +65,7 @@ public class LSmartNode
     public static Collection<CcuToCmOverUsbSnControlsMessage_t> getControlMessages(Zone zone)
     {
         HashMap<Short, CcuToCmOverUsbSnControlsMessage_t> controlMessagesHash = new HashMap<>();
-        for (ZoneProfile zp : zone.mZoneProfiles)
+        for (ZoneProfile zp : L.ccu().zoneProfiles)
         {
             //zp.updateZonePoints();
             for (short node : zp.getNodeAddresses())
@@ -135,33 +115,10 @@ public class LSmartNode
         CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage =
                 new CcuToCmOverUsbDatabaseSeedSnMessage_t();
         seedMessage.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN);
-        seedMessage.settings.roomName.set(zone.roomName);
+        seedMessage.settings.roomName.set(zone.getDisplayName());
         seedMessage.smartNodeAddress.set(address);
         seedMessage.putEncrptionKey(L.getEncryptionKey());
-        for (ZoneProfile zp : zone.mZoneProfiles)
-        {
-            switch (zp.getProfileType())
-            {
-                /*case ProfileType.LIGHT:
-                    Log.i(TAG, "Mapping Light Profile Seed messages");
-                    LLights.mapLightProfileSeed(zone, seedMessage);
-                    break;
-                case ProfileType.SSE:
-                    Log.i(TAG, "Mapping SSE Profile Seed messages");
-                    LSSE.mapSSESeed(zone, seedMessage);
-                    break;
-                case ProfileType.VAV_REHEAT:
-                case ProfileType.VAV_SERIES_FAN:
-                case ProfileType.VAV_PARALLEL_FAN:
-                    Log.i(TAG, "Mapping VAV Profile Seed messages");
-                    LVAV.mapVAVSeed(zone, seedMessage);
-                    break;
-                case ProfileType.TEST:
-                    Log.i(TAG, "Mapping TEST Profile Seed messages");
-                    LTest.mapTestProfileSeed(zone, seedMessage);
-                    break;*/
-            }
-        }
+        //TODO-TEST
         seedMessage.settings.profileBitmap.lightingControl.set((short) 1);
         return seedMessage;
     }

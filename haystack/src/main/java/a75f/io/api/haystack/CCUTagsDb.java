@@ -198,7 +198,6 @@ public class CCUTagsDb extends HServer
             idMap = new HashMap();
             removeIdMap = new HashMap();
             updateIdMap = new HashMap();
-        
         } else
         {
             Gson gson = new GsonBuilder().registerTypeAdapterFactory(hsTypeAdapter).setPrettyPrinting().disableHtmlEscaping().create();
@@ -210,17 +209,18 @@ public class CCUTagsDb extends HServer
             {
             }.getType();
             writeArrays = gson.fromJson(waString, waType);
-            BoxStore.deleteAllFiles(TEST_DIRECTORY);
-            boxStore = MyObjectBox.builder()
-                                  // add directory flag to change where ObjectBox puts its database files
-                                  .directory(TEST_DIRECTORY)
-                                  // optional: add debug flags for more detailed ObjectBox log output
-                                  .debugFlags(DebugFlags.LOG_QUERIES | DebugFlags.LOG_QUERY_PARAMETERS).build();
-            hisBox = boxStore.boxFor(HisItem.class);
             idMap = gson.fromJson(idMapString, HashMap.class);
             removeIdMap = gson.fromJson(removeIdMapString, HashMap.class);
             updateIdMap = gson.fromJson(updateIdMapString, HashMap.class);
         }
+    
+        BoxStore.deleteAllFiles(TEST_DIRECTORY);
+        boxStore = MyObjectBox.builder()
+                              // add directory flag to change where ObjectBox puts its database files
+                              .directory(TEST_DIRECTORY)
+                              // optional: add debug flags for more detailed ObjectBox log output
+                              .debugFlags(DebugFlags.LOG_QUERIES | DebugFlags.LOG_QUERY_PARAMETERS).build();
+        hisBox = boxStore.boxFor(HisItem.class);
     }
     
     public void saveString() {
@@ -317,8 +317,10 @@ public class CCUTagsDb extends HServer
                                      .add("dis",     q.getDisplayName())
                                      .add("equip",     HMarker.VAL)
                                      .add("siteRef", q.getSiteRef())
-                                     .add("zoneRef",  q.getRoomRef() != null ? q.getRoomRef() : "SYSTEM")
+                                     .add("zoneRef",  q.getZoneRef() != null ? q.getZoneRef() : "SYSTEM")
                                      .add("floorRef", q.getFloorRef() != null ? q.getFloorRef() : "SYSTEM")
+                                     .add("profile", q.getProfile())
+                                     .add("priority", q.getPriority())
                                      .add("group",q.getGroup());
         for (String m : q.getMarkers()) {
             equip.add(m);
@@ -335,8 +337,10 @@ public class CCUTagsDb extends HServer
                                      .add("dis",     q.getDisplayName())
                                      .add("equip",     HMarker.VAL)
                                      .add("siteRef", q.getSiteRef())
-                                     .add("zoneRef",  q.getRoomRef())
+                                     .add("zoneRef",  q.getZoneRef())
                                      .add("floorRef", q.getFloorRef())
+                                     .add("profile", q.getProfile())
+                                     .add("priority", q.getPriority())
                                      .add("group",q.getGroup());
         for (String m : q.getMarkers()) {
             equip.add(m);

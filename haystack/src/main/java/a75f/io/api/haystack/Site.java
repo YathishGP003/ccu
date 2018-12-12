@@ -18,6 +18,11 @@ public class Site
     private String geoZip;
     private String tz;
     private double area;
+    private String id;
+    public String getId()
+    {
+        return id;
+    }
     public String getDisplayName()
     {
         return displayName;
@@ -49,6 +54,9 @@ public class Site
     public double getArea()
     {
         return area;
+    }
+    public String toString() {
+        return displayName;
     }
     private Site() {
     
@@ -125,6 +133,7 @@ public class Site
             s.area = this.area;
             s.tz = this.tz;
             s.geoZip = this.geoZipCode;
+            s.id = this.id;
             return s;
         }
 
@@ -136,27 +145,31 @@ public class Site
                 System.out.println(pair.getKey() + " = " + pair.getValue());
                 if(pair.getKey().equals("id"))
                 {
-                    this.id = (String)pair.getValue();
+                    this.id = pair.getValue().toString();
                 }
                 else if(pair.getKey().equals("dis"))
                 {
-                    this.displayName = (String)pair.getValue();
+                    this.displayName = pair.getValue().toString();
                 }
                 else if(pair.getKey().equals("geoCity"))
                 {
-                    this.geoCity = (String)pair.getValue();
+                    this.geoCity = pair.getValue().toString();
                 }
                 else if(pair.getKey().equals("geoState"))
                 {
-                    this.geoState = (String)pair.getValue();
+                    this.geoState = pair.getValue().toString();
                 }
                 else if(pair.getKey().equals("geoZipCode"))
                 {
-                    this.geoZipCode = (String)pair.getValue();
+                    this.geoZipCode = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("tz"))
+                {
+                    this.tz = pair.getValue().toString();
                 }
                 else if(pair.getKey().equals("area"))
                 {
-                    this.area = (Double)pair.getValue();
+                    this.area = Double.parseDouble(pair.getValue().toString().replaceAll("[^0-9]", ""));
                 }
 
                 it.remove();

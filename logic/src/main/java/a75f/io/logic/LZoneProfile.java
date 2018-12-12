@@ -210,4 +210,15 @@ public class LZoneProfile
         }
         return null;
     }
+    
+    public static ZoneProfile getProfile(short addr) {
+        for(ZoneProfile p : L.ccu().zoneProfiles) {
+            for (Short node : p.getNodeAddresses()) {
+                if (node == addr) {
+                    return p;
+                }
+            }
+        }
+        return null;
+    }
 }

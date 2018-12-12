@@ -1,6 +1,8 @@
 package a75f.io.api.haystack;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -18,6 +20,11 @@ public class Point
     private String zoneRef;
     private String floorRef;
     private String group;
+    private String id;
+    public String getId()
+    {
+        return id;
+    }
     public String getGroup()
     {
         return group;
@@ -54,7 +61,9 @@ public class Point
     {
         return tz;
     }
-    
+    public String toString() {
+        return displayName;
+    }
     private Point(){
     }
     
@@ -63,11 +72,12 @@ public class Point
         private ArrayList<String> markers = new ArrayList<>();
         private String siteRef;
         private String equipRef;
-        private String unit = "F";
+        private String unit;
         private String tz;
         private String zoneRef;
         private String floorRef;
         private String group;
+        private String id;
         public Builder setGroup(String group)
         {
             this.group = group;
@@ -130,24 +140,61 @@ public class Point
             p.zoneRef = this.zoneRef;
             p.floorRef = this.floorRef;
             p.group = this.group;
-            p.unit = this.unit;
+            p.id = this.id;
             //CCUHsApi.getInstance().addPoint(p);
             return p;
         }
-        
-        public Point build(Map m) {
-            Point p = new Point();
-            
-            
-            return p;
+    
+        public Builder setHashMap(HashMap site)
+        {
+            Iterator it = site.entrySet().iterator();
+            while (it.hasNext())
+            {
+                Map.Entry pair = (Map.Entry) it.next();
+                System.out.println(pair.getKey() + " = " + pair.getValue());
+                if (pair.getKey().equals("id"))
+                {
+                    this.id = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("dis"))
+                {
+                    this.displayName = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("marker"))
+                {
+                    this.markers.add(pair.getValue().toString());
+                }
+                else if (pair.getKey().equals("siteRef"))
+                {
+                    this.siteRef = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("floorRef"))
+                {
+                    this.floorRef = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("zoneRef"))
+                {
+                    this.zoneRef = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("equipRef"))
+                {
+                    this.equipRef = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("group"))
+                {
+                    this.group = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("unit"))
+                {
+                    this.unit = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("tz"))
+                {
+                    this.tz = pair.getValue().toString();
+                }
+                it.remove();
+            }
+            return this;
         }
     }
-    
-    /*private void createPoint() {
-        StringBuilder marker = new StringBuilder();
-        for (String m : markers) {
-            marker.append(m+" ");
-        }
-        CCUHsApi.getInstance().addPoint(equipRef, displayName, unit, marker.toString().trim(), tz);
-    }*/
 }

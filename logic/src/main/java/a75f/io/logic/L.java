@@ -8,17 +8,13 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.bo.building.CCUApplication;
-import a75f.io.logic.bo.building.Floor;
 import a75f.io.logic.bo.building.Node;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.Schedulable;
 import a75f.io.logic.bo.building.Schedule;
 import a75f.io.logic.bo.building.Zone;
 import a75f.io.logic.bo.building.ZoneProfile;
-import a75f.io.logic.bo.building.definitions.ScheduleMode;
 import a75f.io.logic.bo.building.lights.LightProfile;
-
-import static a75f.io.logic.LZoneProfile.isNamedSchedule;
 
 /**
  * Created by Yinten isOn 9/4/2017.
@@ -66,18 +62,8 @@ public class L
     public static short generateSmartNodeAddress()
     {
         short currentBand = L.ccu().getSmartNodeAddressBand();
-        int amountOfNodes = 0;
-        for (Floor floors : L.ccu().getFloors())
-        {
-            for (Zone zone : floors.mZoneList)
-            {
-                for (ZoneProfile zp : zone.mZoneProfiles)
-                {
-                    amountOfNodes += zp.getNodeAddresses().size();
-                }
-            }
-        }
-        return (short) (currentBand + amountOfNodes);
+        ArrayList<HashMap> nodes = CCUHsApi.getInstance().readAll("device and node");
+        return (short) (currentBand + nodes.size() - 1);
     }
     
     public static Zone findZoneByName(String mFloorName, String mRoomName)
@@ -101,7 +87,7 @@ public class L
 
     public static void saveCCUState()
     {
-        LocalStorage.setApplicationSettings();
+        //LocalStorage.setApplicationSettings();
         sync();
         Globals.getInstance().saveTags();
     }
@@ -172,7 +158,7 @@ public class L
 
     public static ArrayList<Schedule> resolveSchedules(Schedulable schedulable)
     {
-        if (isNamedSchedule(schedulable))
+        /*if (isNamedSchedule(schedulable))
         {
             return ccu().getLCMNamedSchedules().get(schedulable.getNamedSchedule()).getSchedule();
         }
@@ -183,7 +169,7 @@ public class L
         else if(schedulable.getScheduleMode() == ScheduleMode.SystemSchedule)
         {
             return ccu().getDefaultTemperatureSchedule();
-        }
+        }*/
         return null;
     }
 
@@ -272,5 +258,19 @@ public class L
      */
     public static void setServerEnvironment(String serverEnvironment) {
         //L.serverEnvironment = serverEnvironment;
+    }
+    
+    public static void removeHSDeviceEntities(Short node) {
+        CCUHsApi hsApi = CCUHsApi.getInstance();
+        HashMap equip = hsApi.read("equip and group == \""+node+"\"");
+        if (equip.get("id") != null)
+        {
+            hsApi.deleteEntityTree(equip.get("id").toString());
+        }
+        HashMap device = hsApi.read("device and addr == \""+node+"\"");
+        if (device.get("id") != null)
+        {
+            hsApi.deleteEntityTree(device.get("id").toString());
+        }
     }
 }

@@ -2,6 +2,9 @@ package a75f.io.device.mesh;
 
 import android.util.Log;
 
+import a75f.io.api.haystack.Floor;
+import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Zone;
 import a75f.io.device.DeviceNetwork;
 import a75f.io.device.json.serializers.JsonSerializer;
 import a75f.io.device.serial.AddressedStruct;
@@ -10,9 +13,7 @@ import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.Floor;
-import a75f.io.logic.bo.building.Zone;
-import a75f.io.logic.bo.building.system.VavAnalogRtu;
+import a75f.io.logic.bo.haystack.device.ControlMote;
 
 import static a75f.io.device.DeviceConstants.TAG;
 import static a75f.io.device.mesh.MeshUtil.sendStruct;
@@ -38,11 +39,11 @@ public class MeshNetwork extends DeviceNetwork
         
         try
         {
-            for (Floor floor : L.ccu().getFloors())
+            for (Floor floor : HSUtil.getFloors())
             {
-                for (Zone zone : floor.mZoneList)
+                for (Zone zone : HSUtil.getZones(floor.getId()))
                 {
-                    DLog.Logw("=============Zone: " + zone.roomName + " ==================");
+                    DLog.Logw("=============Zone: " + zone.getDisplayName() + " ==================");
                     DLog.Logw("=================NOW SENDING SEEDS=====================");
                     for (CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage : LSmartNode.getSeedMessages(zone))
                     {
@@ -82,27 +83,20 @@ public class MeshNetwork extends DeviceNetwork
         L.ccu().systemProfile.doSystemControl();
     
         CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
-        if (L.ccu().systemProfile instanceof VavAnalogRtu) {
-            VavAnalogRtu p = (VavAnalogRtu) L.ccu().systemProfile;
-            
-            msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
-            if (p.analog1Enabled)
-            {
-                msg.analog0.set((short) p.getAnalog1Out());
-            }
-            if (p.analog2Enabled)
-            {
-                msg.analog1.set((short) p.getAnalog2Out());
-            }
-            if (p.analog3Enabled)
-            {
-                msg.analog2.set((short) p.getAnalog3Out());
-            }
-            if (p.analog4Enabled)
-            {
-                msg.analog3.set((short) p.getAnalog4Out());
+        msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
+        msg.analog0.set((short) ControlMote.getAnalogOut("analog1"));
+        msg.analog1.set((short) ControlMote.getAnalogOut("analog2"));
+        msg.analog2.set((short) ControlMote.getAnalogOut("analog3"));
+        msg.analog3.set((short) ControlMote.getAnalogOut("analog4"));
+        int relayBitmap = 0;
+    
+        for (int i = 1; i <=7 ;i++)
+        {
+            if (ControlMote.getRelayState("relay"+i) > 0) {
+                relayBitmap |= 1 << (i-1);
             }
         }
+        msg.relayBitmap.set((short)relayBitmap);
         DLog.LogdStructAsJson(msg);
         MeshUtil.sendStructToCM(msg);
         

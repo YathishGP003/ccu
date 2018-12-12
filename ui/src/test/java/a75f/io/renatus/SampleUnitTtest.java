@@ -146,7 +146,7 @@ Process finished with exit code 0
 					for (Short node : p.getNodeAddresses()) {
 						switch(p.getProfileType()) {
 							case VAV_REHEAT:
-								((VavReheatProfile)p).addLogicalMapAndPoints(node, p.getProfileConfiguration(node));
+								((VavReheatProfile)p).addLogicalMapAndPoints(node, p.getProfileConfiguration(node), null, null);
 								BuildingTuners.getInstance().addDefaultVavTuners();
 								break;
 							

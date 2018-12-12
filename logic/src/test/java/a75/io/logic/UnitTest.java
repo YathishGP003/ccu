@@ -44,7 +44,6 @@ import a75f.io.logic.InfluxDbUtil;
 
 public class UnitTest
 {
-    @Test
     public void testNewInfluxLib() {
         
         HashMap<String, String> msgStr = new HashMap<>();
@@ -73,7 +72,6 @@ public class UnitTest
     
     }
     
-    @Test
     public void testTime() {
     
         String url = "https://api.solcast.com.au/radiation/estimated_actuals?latitude=%f&longitude=%f&api_key=pEtltUsfJmkjVUFTwr9PuLmfh10KLkHO&format=json";
@@ -99,7 +97,6 @@ public class UnitTest
         
     }
     
-    @Test
     public void solcastTest() {
     
         final String SOLCAST_API_URL = "https://api.solcast.com.au/radiation/estimated_actuals?latitude=%f&longitude=%f&api_key=pEtltUsfJmkjVUFTwr9PuLmfh10KLkHO&format=json";
@@ -149,7 +146,6 @@ public class UnitTest
         System.out.println(requestHours);
     }
     
-    @Test
     public void daikinIETest(){
     
         String urlString = "http://10.1.10.21:8080/BN/MT3/AV/DATClgSetpoint/Present_Value?access-token=123456789";
@@ -231,9 +227,7 @@ public class UnitTest
         
     
     
-}
-
-    @Test
+    }
     public void testSetInfluxRetentionPolicy()
     {
         InfluxDB influxDB = InfluxDBFactory.connect("https://influx-a75f.aivencloud.com:27304", "avnadmin", "mhur2n42y4l58xlx");

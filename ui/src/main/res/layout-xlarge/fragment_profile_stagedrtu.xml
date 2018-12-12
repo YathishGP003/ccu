@@ -2,7 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:orientation="vertical" >
+              xmlns:tools="http://schemas.android.com/tools"
+              android:orientation="vertical">
     <ScrollView
         android:layout_width="match_parent"
         android:overScrollMode="never"
@@ -44,6 +45,7 @@
                         android:textSize="@dimen/text_medium_xlarge"
                         android:visibility="invisible" />
 
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -62,22 +64,24 @@
                     android:layout_marginBottom="14dp" >
 
                     <CheckBox
-                        android:id="@+id/coolingStage1"
+                        android:id="@+id/relay1Cb"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:paddingRight="14dp"
                         android:textSize="@dimen/text_small_xlarge"
                         android:layout_gravity="center_vertical"
-                        android:text="   Cooling Stage 1 (Relay 1)" />
+                        android:text=" Relay 1" />
 
-                    <TextView
+                    <Spinner
+                        android:id="@+id/relay1Spinner"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text=""
-                        android:textSize="@dimen/text_large_xlarge" />
+                        android:layout_gravity="left"
+                        android:entries="@array/hvac_stage_selector"
+                        tools:listitem="@layout/spinner_dropdown_item"/>
 
                     <ToggleButton
-                        android:id="@+id/coolingStage1Test"
+                        android:id="@+id/relay1Test"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
@@ -94,21 +98,23 @@
                     android:layout_marginBottom="14dp" >
 
                     <CheckBox
-                        android:id="@+id/coolingStage2"
+                        android:id="@+id/relay2Cb"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:paddingRight="14dp"
                         android:textSize="@dimen/text_small_xlarge"
                         android:layout_gravity="center_vertical"
-                        android:text="   Cooling Stage 2 (Relay 2)" />
+                        android:text=" Relay 2" />
 
-                    <TextView
+                    <Spinner
+                        android:id="@+id/relay2Spinner"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text=""
-                        android:textSize="@dimen/text_large_xlarge" />
+                        android:layout_gravity="left"
+                        android:entries="@array/hvac_stage_selector"
+                        tools:listitem="@layout/spinner_dropdown_item"/>
                     <ToggleButton
-                        android:id="@+id/coolingStage2Test"
+                        android:id="@+id/relay2Test"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
@@ -125,21 +131,23 @@
                     android:layout_marginBottom="14dp" >
 
                     <CheckBox
-                        android:id="@+id/coolingStage3"
+                        android:id="@+id/relay3Cb"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:paddingRight="14dp"
                         android:textSize="@dimen/text_small_xlarge"
                         android:layout_gravity="center_vertical"
-                        android:text="   Cooling Stage 3 (Relay 3)" />
+                        android:text=" Relay 3" />
 
-                    <TextView
+                    <Spinner
+                        android:id="@+id/relay3Spinner"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text=""
-                        android:textSize="@dimen/text_large_xlarge" />
+                        android:layout_gravity="left"
+                        android:entries="@array/hvac_stage_selector"
+                        tools:listitem="@layout/spinner_dropdown_item"/>
                     <ToggleButton
-                        android:id="@+id/coolingStage3Test"
+                        android:id="@+id/relay3Test"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
@@ -156,21 +164,23 @@
                     android:layout_marginBottom="14dp" >
 
                     <CheckBox
-                        android:id="@+id/coolingStage4"
+                        android:id="@+id/relay4Cb"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:paddingRight="14dp"
                         android:textSize="@dimen/text_small_xlarge"
                         android:layout_gravity="center_vertical"
-                        android:text="   Cooling Stage 4 (Relay 4)" />
+                        android:text=" Relay 4" />
 
-                    <TextView
+                    <Spinner
+                        android:id="@+id/relay4Spinner"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text=""
-                        android:textSize="@dimen/text_large_xlarge" />
+                        android:layout_gravity="left"
+                        android:entries="@array/hvac_stage_selector"
+                        tools:listitem="@layout/spinner_dropdown_item"/>
                     <ToggleButton
-                        android:id="@+id/coolingStage4Test"
+                        android:id="@+id/relay4Test"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
@@ -187,21 +197,23 @@
                     android:layout_marginBottom="14dp" >
 
                     <CheckBox
-                        android:id="@+id/coolingStage5"
+                        android:id="@+id/relay5Cb"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:paddingRight="14dp"
                         android:textSize="@dimen/text_small_xlarge"
                         android:layout_gravity="center_vertical"
-                        android:text="   Cooling Stage 5 (Relay 5)" />
+                        android:text=" Relay 5" />
 
-                    <TextView
+                    <Spinner
+                        android:id="@+id/relay5Spinner"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text=""
-                        android:textSize="@dimen/text_large_xlarge" />
+                        android:layout_gravity="left"
+                        android:entries="@array/hvac_stage_selector"
+                        tools:listitem="@layout/spinner_dropdown_item"/>
                     <ToggleButton
-                        android:id="@+id/coolingStage5Test"
+                        android:id="@+id/relay5Test"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
@@ -218,21 +230,23 @@
                     android:layout_marginBottom="14dp" >
 
                     <CheckBox
-                        android:id="@+id/fanStage1"
+                        android:id="@+id/relay6Cb"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:paddingRight="14dp"
                         android:textSize="@dimen/text_small_xlarge"
                         android:layout_gravity="center_vertical"
-                        android:text="   Fan Stage 1 (Relay 6)" />
+                        android:text=" Relay 6" />
 
-                    <TextView
+                    <Spinner
+                        android:id="@+id/relay6Spinner"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text=""
-                        android:textSize="@dimen/text_large_xlarge" />
+                        android:layout_gravity="left"
+                        android:entries="@array/hvac_stage_selector"
+                        tools:listitem="@layout/spinner_dropdown_item"/>
                     <ToggleButton
-                        android:id="@+id/fanStage1Test"
+                        android:id="@+id/relay6Test"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
@@ -249,26 +263,115 @@
                     android:layout_marginBottom="14dp" >
 
                     <CheckBox
-                        android:id="@+id/fanStage2"
+                        android:id="@+id/relay7Cb"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:paddingRight="14dp"
                         android:textSize="@dimen/text_small_xlarge"
                         android:layout_gravity="center_vertical"
-                        android:text="   Fan Stage 2 (Relay 7)" />
+                        android:text=" Relay 7" />
+
+                    <Spinner
+                        android:id="@+id/relay7Spinner"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="left"
+                        android:entries="@array/hvac_stage_selector"
+                        tools:listitem="@layout/spinner_dropdown_item"/>
+                    <ToggleButton
+                        android:id="@+id/relay7Test"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:background="@drawable/selector"
+                        android:text="" />
+
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/tableRow8"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="14dp"
+                    android:layout_marginBottom="14dp" >
+
+                    <CheckBox
+                        android:id="@+id/analog1Cb"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingRight="14dp"
+                        android:textSize="@dimen/text_small_xlarge"
+                        android:layout_gravity="center_vertical"
+                        android:text=" Analog 1 (Cooling)" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text=""
                         android:textSize="@dimen/text_large_xlarge" />
-                    <ToggleButton
-                        android:id="@+id/fanStage2Test"
+                    <Spinner
+                        android:id="@+id/analog1Test"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:background="@drawable/selector"
-                        android:text="" />
+                        android:layout_gravity="right"/>
+
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/tableRow9"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="14dp"
+                    android:layout_marginBottom="14dp" >
+
+                    <CheckBox
+                        android:id="@+id/analog2Cb"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingRight="14dp"
+                        android:textSize="@dimen/text_small_xlarge"
+                        android:layout_gravity="center_vertical"
+                        android:text=" Analog 2 (Fan)" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textSize="@dimen/text_large_xlarge" />
+                    <Spinner
+                        android:id="@+id/analog2Test"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"/>
+
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/tableRow10"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="14dp"
+                    android:layout_marginBottom="14dp" >
+
+                    <CheckBox
+                        android:id="@+id/analog3Cb"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingRight="14dp"
+                        android:textSize="@dimen/text_small_xlarge"
+                        android:layout_gravity="center_vertical"
+                        android:text=" Analog 3 (Heating)" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textSize="@dimen/text_large_xlarge" />
+                    <Spinner
+                        android:id="@+id/analog3Test"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"/>
 
                 </TableRow>
 

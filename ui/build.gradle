@@ -25,7 +25,21 @@ android {
                 includeCompileClasspath true
             }
         }
+               missingDimensionStrategy 'dev', 'prod'
+        signingConfig signingConfigs.debug
+
     }
+    
+     flavorDimensions "mode"
+    productFlavors {
+                dev {
+                    signingConfig signingConfigs.release
+                }
+                prod {
+                    signingConfig signingConfigs.release
+                }
+    }
+
 
     buildTypes {
         release {
@@ -150,5 +164,4 @@ def getCurrentFlavor() {
         return "";
     }
 }
-
 

@@ -11,6 +11,22 @@ import java.util.regex.Pattern
 
 android {
     compileSdkVersion Integer.parseInt(project.ANDROID_BUILD_SDK_VERSION)
+    
+    signingConfigs {
+        debug {
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+            storeFile file("debug.keystore")
+            storePassword 'android'
+        }
+        release {
+
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+            storeFile file("debug.keystore")
+            storePassword 'android'
+        }
+    }
     defaultConfig {
         applicationId "a75f.io.renatus"
         minSdkVersion Integer.parseInt(project.ANDROID_BUILD_MIN_SDK_VERSION)
@@ -66,21 +82,7 @@ android {
 
     }
 
-    signingConfigs {
-        debug {
-            keyAlias 'androiddebugkey'
-            keyPassword 'android'
-            storeFile file("debug.keystore")
-            storePassword 'android'
-        }
-        release {
-
-            keyAlias 'androiddebugkey'
-            keyPassword 'android'
-            storeFile file("debug.keystore")
-            storePassword 'android'
-        }
-    }
+    
 
     dexOptions {
     }

@@ -17,6 +17,7 @@ import android.widget.Toast;
 import org.projecthaystack.HGrid;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.logic.Globals;
 
 public class RegisterGatherDetails extends Activity {
 
@@ -28,7 +29,7 @@ public class RegisterGatherDetails extends Activity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_register_gather_details);
-
+        Globals.getInstance().setSiteAlreadyCreated(false);
         EditText siteIdEditText = (EditText) findViewById(R.id.site_id_edittext);
         Button noSiteButton = (Button) findViewById(R.id.no_site_button);
         mProgressDialog = (ProgressBar) findViewById(R.id.progressbar);
@@ -157,6 +158,7 @@ public class RegisterGatherDetails extends Activity {
             protected Boolean doInBackground(String... strings) {
                 String siteId = strings[0];
                 boolean retVal = CCUHsApi.getInstance().syncExistingSite(siteId);
+                Globals.getInstance().setSiteAlreadyCreated(true);
                 return retVal;
             }
 

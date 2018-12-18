@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
@@ -28,6 +29,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.SettingPoint;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.tuners.BuildingTuners;
 
@@ -51,6 +53,8 @@ public class RegisterGatherCCUDetails extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register_gather_ccu_details);
+
+
         mInstallerEmailET = findViewById(R.id.installer_email_et);
         mOrTextView = findViewById(R.id.or_textview);
         mUseExistingCCUButton = findViewById(R.id.use_existing_ccu);
@@ -147,7 +151,7 @@ public class RegisterGatherCCUDetails extends Activity {
             }
         };
 
-        loadCCUGrids.execute();
+        loadCCUGrids.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     private void showCCUButton() {
@@ -186,7 +190,12 @@ public class RegisterGatherCCUDetails extends Activity {
 
             @Override
             protected Void doInBackground(Void... voids) {
-                BuildingTuners.getInstance();
+
+                if(!Globals.getInstance().siteAlreadyCreated()) {
+                    BuildingTuners.getInstance();
+                    DefaultSchedules.generateDefaultSchedule();
+                    DefaultSchedules.generateDefaultVacation();
+                }
                 L.saveCCUState();
                 CCUHsApi.getInstance().log();
                 CCUHsApi.getInstance().syncEntityTree();
@@ -209,10 +218,7 @@ public class RegisterGatherCCUDetails extends Activity {
             }
         };
 
-        saveState.execute();
-
-
-
+        saveState.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
     }
 

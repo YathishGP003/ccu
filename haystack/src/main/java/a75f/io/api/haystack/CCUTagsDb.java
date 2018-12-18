@@ -105,7 +105,8 @@ public class CCUTagsDb extends HServer {
                     .registerSubtype(HStr.class)
                     .registerSubtype(HTime.class)
                     .registerSubtype(HUri.class)
-                    .registerSubtype(MapImpl.class);
+                    .registerSubtype(MapImpl.class)
+                    .registerSubtype(HDateTime.class);
 
     public CCUTagsDb() {
 

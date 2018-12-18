@@ -625,4 +625,8 @@ public class CCUHsApi {
         HGrid site = getHSClient().call("read", HGridBuilder.dictToGrid(hDict));
         return site.row(0).getRef("id");
     }
+
+    public void addSchedule(String localId, HDict defaultSchedule) {
+        tagsDb.addHDict(localId, defaultSchedule);
+    }
 }

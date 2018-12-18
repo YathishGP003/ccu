@@ -63,9 +63,10 @@ public class MeshNetwork extends DeviceNetwork
                     DLog.Logw("=================NOW SENDING EXTRA MESSAGES LIKE SCHEDULES====================");
                     for (AddressedStruct extraMessage : LSmartNode.getExtraMessages(floor, zone))
                     {
+                        Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
                         if (sendStruct(extraMessage.getAddress(), extraMessage.getStruct()))
                         {
-                            Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
+                            //Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
                         }
                     }
                 }
@@ -80,6 +81,9 @@ public class MeshNetwork extends DeviceNetwork
     
     public void sendSystemControl() {
         Log.d(TAG, "MeshNetwork SendSystemControl");
+        if (L.ccu().systemProfile == null) {
+            Log.d(TAG, "MeshNetwork SendSystemControl : Abort , No system profile");
+        }
         L.ccu().systemProfile.doSystemControl();
     
         CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();

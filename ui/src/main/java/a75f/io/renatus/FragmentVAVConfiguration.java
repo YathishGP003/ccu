@@ -25,7 +25,6 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import a75f.io.logic.L;
-import a75f.io.logic.LZoneProfile;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.Zone;
@@ -64,6 +63,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
     Spinner      damperType;
     Spinner      damper2Type;
     Spinner      damperActuator;
+    Spinner      reheatPort;
     Spinner      reheatActuator;
     LinearLayout reheatOptionLayout;
     Button       setButton;
@@ -81,8 +81,12 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
     
     private ArrayList<Damper.Parameters> mDampers = new ArrayList<Damper.Parameters>();
     ArrayAdapter<String> analogoutActuatorAdapter;
+    ArrayAdapter<String> damperActuatorAdapter;
     ArrayAdapter<String> relayActuatorAdapter;
+    ArrayAdapter<String> reheatPortAdapter;
+    
     int damperActuatorSelection;
+    Port reheatPortSelection;
     int reheatActuatorSelection;
     
     String floorRef;
@@ -167,15 +171,13 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
     {
-        //fsvDabReheatMode = (CheckBox)view.findViewById(R.id.fsvDabReheatOption);
-        //fsvDabReheatMode.setOnCheckedChangeListener(this);
         reheatOptionLayout = (LinearLayout)view.findViewById(R.id.dabReheatOptions);
-        //reheatPort = (Spinner)view.findViewById(R.id.dabReheatSpinner);
         damperActuator = (Spinner) view.findViewById(R.id.vavDamperActuator);
+        reheatPort = view.findViewById(R.id.vavReheatPort);
         reheatActuator = (Spinner)view.findViewById(R.id.vavReheatActuator);
         setButton = (Button) view.findViewById(R.id.setBtn);
     
-        mVavProfile = (VavProfile) LZoneProfile.getProfile(mSmartNodeAddress);
+        mVavProfile = (VavProfile) L.getProfile(mSmartNodeAddress);
     
         if (mVavProfile != null) {
             Log.d("VAVConfig", "Get Config: ");
@@ -198,19 +200,23 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
     
     
         fillDamperDetails();
-    
-        /* ArrayAdapter<CharSequence> relay1Adapter = ArrayAdapter.createFromResource(getActivity(),
-                R.array.reheat_port, R.layout.spinner_dropdown_item);
-        relay1Adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        reheatPort.setAdapter(relay1Adapter);
-        reheatPort.setOnItemSelectedListener(this);
-        */
+        
         ArrayList<String> analogTypes = new ArrayList<>();
         for (OutputAnalogActuatorType actuator : OutputAnalogActuatorType.values()) {
             analogTypes.add(actuator.displayName);
         }
         analogoutActuatorAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, analogTypes);
         analogoutActuatorAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+    
+        ArrayList<String> damperAnalogTpes = new ArrayList<>();
+        for (OutputAnalogActuatorType actuator : OutputAnalogActuatorType.values()) {
+            if (actuator != OutputAnalogActuatorType.Pulse)
+            {
+                damperAnalogTpes.add(actuator.displayName);
+            }
+        }
+        damperActuatorAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, damperAnalogTpes);
+        damperActuatorAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
     
         ArrayList<String> relays = new ArrayList<>();
         for (OutputRelayActuatorType actuator : OutputRelayActuatorType.values()) {
@@ -221,7 +227,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
     
     
         //reheatPort.setSelection(0);//TODO
-        damperActuator.setAdapter(analogoutActuatorAdapter);
+        damperActuator.setAdapter(damperActuatorAdapter);
         damperActuator.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -233,8 +239,42 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
             
             }
         });
+    
+    
+        ArrayList<String> reheatPorts = new ArrayList<>();
+        reheatPorts.add("Relay 1");
+        reheatPorts.add("Relay 1 and 2");
+        reheatPorts.add("Analog 2 Out");
+        reheatPortAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, reheatPorts);
+        reheatPortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        reheatPort.setAdapter(reheatPortAdapter);
         
         reheatActuator.setAdapter(analogoutActuatorAdapter);
+    
+        if (mProfileConfig != null) {
+            for (Output op : mProfileConfig.getOutputs()) {
+                Log.d("VAVConfig", " Config Outputs: "+op.getPort());
+                if (op.getPort() == Port.ANALOG_OUT_ONE) {
+                    damperActuator.setSelection(damperActuatorAdapter.getPosition(op.getAnalogActuatorType()), false);
+                } else if (op.getPort() == Port.ANALOG_OUT_TWO) {
+                    reheatPortSelection = Port.ANALOG_OUT_TWO;
+                    reheatPort.setSelection(2, false);
+                    reheatActuator.setAdapter(analogoutActuatorAdapter);
+                    reheatActuatorSelection = analogoutActuatorAdapter.getPosition(op.getAnalogActuatorType());
+                    reheatActuator.setSelection(reheatActuatorSelection, false);
+                } else if (op.getPort() == Port.RELAY_ONE) {
+                    reheatPortSelection = Port.RELAY_ONE;
+                    reheatPort.setSelection(0, false);
+                    reheatActuator.setAdapter(relayActuatorAdapter);
+                    reheatActuator.setSelection(relayActuatorAdapter.getPosition(op.getRelayActuatorType()), false);
+                } else if (op.getPort() == Port.RELAY_TWO) {
+                    reheatPortSelection = Port.RELAY_TWO;
+                    reheatPort.setSelection(1, false);
+                    reheatActuator.setAdapter(relayActuatorAdapter);
+                    reheatActuator.setSelection(relayActuatorAdapter.getPosition(op.getRelayActuatorType()), false);
+                }
+            }
+        }
     
         reheatActuator.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -247,17 +287,32 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
             
             }
         });
-    
-        if (mProfileConfig != null) {
-            for (Output op : mProfileConfig.getOutputs()) {
-                if (op.getPort() == Port.ANALOG_OUT_ONE) {
-                    damperActuator.setSelection(analogoutActuatorAdapter.getPosition(op.getAnalogActuatorType()));
-                } else if (op.getPort() == Port.ANALOG_OUT_TWO) {
-                    reheatActuator.setSelection(analogoutActuatorAdapter.getPosition(op.getAnalogActuatorType()));
+        
+        reheatPort.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                switch (position) {
+                    case 0:
+                        reheatPortSelection = Port.RELAY_ONE;
+                        reheatActuator.setAdapter(relayActuatorAdapter);
+                        break;
+                    case 1:
+                        reheatPortSelection = Port.RELAY_TWO;
+                        reheatActuator.setAdapter(relayActuatorAdapter);
+                        break;
+                    case 2:
+                        reheatPortSelection = Port.ANALOG_OUT_TWO;
+                        reheatActuator.setAdapter(analogoutActuatorAdapter);
+                        break;
                 }
             }
-        }
         
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            
+            }
+        });
+    
     
         damper1layout  = (LinearLayout)view.findViewById(R.id.damper1layout);
         damperType = (Spinner) view.findViewById(R.id.damperType);
@@ -354,13 +409,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
                 R.array.zone_priority, R.layout.spinner_dropdown_item);
         zonePriorityAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         zonePriority.setAdapter(zonePriorityAdapter);
-        if (mProfileConfig != null)
-        {
-            zonePriority.setSelection(mProfileConfig.getPriority().ordinal());
-        } else {
-            zonePriority.setSelection(1);//LOW
-        }
-    
+       
         final SwitchCompat useOccupancyDetection = (SwitchCompat) view.findViewById(R.id.useOccupancyDetection);
         //useOccupancyDetection.setChecked(mFSVData.getUseOccupancyDetection());
     
@@ -375,6 +424,10 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
             maxCoolingDamperPos.setValue(mProfileConfig.getMaxDamperCooliing());
             minHeatingDamperPos.setValue(mProfileConfig.getMinDamperHeating());
             maxHeatingDamperPos.setValue(mProfileConfig.getMaxDamperHeating());
+            zonePriority.setSelection(mProfileConfig.getPriority().ordinal());
+        } else {
+            reheatPort.setSelection(2, false);
+            zonePriority.setSelection(1);//LOW
         }
     
         setButton.setOnClickListener(new View.OnClickListener(){
@@ -403,19 +456,6 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
     }
     
     private void setupVavZoneProfile() {
-        Output analogOne = new Output();
-        analogOne.setAddress(mSmartNodeAddress);
-        analogOne.setPort(Port.ANALOG_OUT_ONE);
-        analogOne.mOutputAnalogActuatorType = OutputAnalogActuatorType.values()[damperActuatorSelection];
-        Output analogTwo = new Output();
-        analogTwo.setAddress(mSmartNodeAddress);
-        analogTwo.setPort(Port.ANALOG_OUT_TWO);
-        analogTwo.mOutputAnalogActuatorType = OutputAnalogActuatorType.values()[reheatActuatorSelection];
-    
-        Output relayOne = new Output();
-        relayOne.setAddress(mSmartNodeAddress);
-        relayOne.setPort(Port.RELAY_ONE);
-        relayOne.mOutputRelayActuatorType = OutputRelayActuatorType.values()[0];//TODO
         
         VavProfileConfiguration vavConfig = new VavProfileConfiguration();
         vavConfig.setNodeType(mNodeType);
@@ -425,15 +465,37 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         vavConfig.setMaxDamperCooliing(maxCoolingDamperPos.getValue());
         vavConfig.setMinDamperHeating(minHeatingDamperPos.getValue());
         vavConfig.setMaxDamperHeating(maxHeatingDamperPos.getValue());
-        vavConfig.getOutputs().add(analogOne);
-        vavConfig.getOutputs().add(analogTwo);
-        vavConfig.getOutputs().add(relayOne);
-        
-       
-        
-        //if (mZone.findProfile(mProfileType) == null)
-        //    mZone.mZoneProfiles.add(mVavProfile);
-        if (mVavProfile.getProfileConfiguration(mSmartNodeAddress) == null) {
+    
+        Output analog1Op = new Output();
+        analog1Op.setAddress(mSmartNodeAddress);
+        analog1Op.setPort(Port.ANALOG_OUT_ONE);
+        analog1Op.mOutputAnalogActuatorType = OutputAnalogActuatorType.values()[damperActuatorSelection];
+        vavConfig.getOutputs().add(analog1Op);
+    
+        switch (reheatPortSelection) {
+            case ANALOG_OUT_TWO:
+                Output analog2Op = new Output();
+                analog2Op.setAddress(mSmartNodeAddress);
+                analog2Op.setPort(Port.ANALOG_OUT_TWO);
+                analog2Op.mOutputAnalogActuatorType = OutputAnalogActuatorType.values()[reheatActuatorSelection];
+                vavConfig.getOutputs().add(analog2Op);
+                break;
+            case RELAY_TWO:
+                Output relay2Op = new Output();
+                relay2Op.setAddress(mSmartNodeAddress);
+                relay2Op.setPort(Port.RELAY_TWO);
+                relay2Op.mOutputRelayActuatorType = OutputRelayActuatorType.values()[reheatActuatorSelection];
+                vavConfig.getOutputs().add(relay2Op);
+            case RELAY_ONE:
+                Output relay1Op = new Output();
+                relay1Op.setAddress(mSmartNodeAddress);
+                relay1Op.setPort(Port.RELAY_ONE);
+                relay1Op.mOutputRelayActuatorType = OutputRelayActuatorType.values()[reheatActuatorSelection];
+                vavConfig.getOutputs().add(relay1Op);
+                break;
+                
+        }
+        if (mProfileConfig == null) {
             mVavProfile.getProfileConfiguration().put(mSmartNodeAddress, vavConfig);
             mVavProfile.addLogicalMapAndPoints(mSmartNodeAddress, vavConfig, floorRef, zoneRef);
             BuildingTuners.getInstance().addDefaultVavTuners();

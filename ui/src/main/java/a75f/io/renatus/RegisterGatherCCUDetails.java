@@ -7,35 +7,45 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HRef;
-import org.projecthaystack.io.HaystackToken;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HayStackConstants;
+import a75f.io.api.haystack.SettingPoint;
+import a75f.io.api.haystack.Tags;
 import a75f.io.logic.L;
 import a75f.io.logic.tuners.BuildingTuners;
+
+import static a75f.io.logic.L.ccu;
 
 public class RegisterGatherCCUDetails extends Activity {
 
 
     ProgressBar mProgressDialog;
-    TextView mOrTextView;
-    Button mUseExistingCCUButton;
-    EditText mCCUNameET;
-    EditText mInstallerEmailET;
-    Button mCreateNewCCU;
-    HGrid mCCUS;
-    String mSiteId;
+    TextView    mOrTextView;
+    Button      mUseExistingCCUButton;
+    EditText    mCCUNameET;
+    EditText    mInstallerEmailET;
+    Spinner     mAddressBandSpinner;
+    Button      mCreateNewCCU;
+    HGrid       mCCUS;
+    String      mSiteId;
+    String addressBandSelected = "1000";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -44,9 +54,40 @@ public class RegisterGatherCCUDetails extends Activity {
         mInstallerEmailET = findViewById(R.id.installer_email_et);
         mOrTextView = findViewById(R.id.or_textview);
         mUseExistingCCUButton = findViewById(R.id.use_existing_ccu);
+        mAddressBandSpinner = findViewById(R.id.addressBandSpinner);
         mProgressDialog = findViewById(R.id.progressbar);
         mCCUNameET = findViewById(R.id.ccu_name_et);
         mCreateNewCCU = findViewById(R.id.create_new);
+    
+        ArrayList<String> addressBand = new ArrayList<>();
+        addressBand.add("Select SmartNode Address Band");
+        for (int addr = 1000; addr <= 10000; addr+=1000)
+        {
+            addressBand.add(String.valueOf(addr));
+        }
+        ArrayAdapter<String> analogAdapter = new ArrayAdapter<String>(this, R.layout.spinner_dropdown_item, addressBand);
+        analogAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        
+        mAddressBandSpinner.setAdapter(analogAdapter);
+        ccu().setSmartNodeAddressBand((short)1000);
+        mAddressBandSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+        {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l)
+            {
+                Log.d("CCU","AddressBandSelected : "+mAddressBandSpinner.getSelectedItem());
+                if (i > 0)
+                {
+                    addressBandSelected = mAddressBandSpinner.getSelectedItem().toString();
+                    L.ccu().setSmartNodeAddressBand(Short.parseShort(addressBandSelected));
+                }
+                
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView)
+            {
+            }
+        });
 
         mCreateNewCCU.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -55,6 +96,19 @@ public class RegisterGatherCCUDetails extends Activity {
                 String ccuName = mCCUNameET.getText().toString();
                 String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail);
                 CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
+    
+    
+                HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
+                String tz = siteMap.get("tz").toString();
+    
+                //TODO
+                SettingPoint snBand = new SettingPoint.Builder()
+                                                        .setDeviceRef(localId)
+                                                        .setDisplayName(ccuName+"-smartNodeBand")
+                                                        .addMarker("snband").addMarker("sp").setVal(addressBandSelected).build();
+                CCUHsApi.getInstance().addPoint(snBand);
+                                    
+                
                 next();
             }
         });

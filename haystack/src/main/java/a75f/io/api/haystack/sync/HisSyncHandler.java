@@ -40,8 +40,8 @@ public class HisSyncHandler
     public synchronized void doSync() {
         
         Log.d("CCU", "doHisSync ->");
-        sendHisToHaystack();
-        //sendHisToInflux();
+        //sendHisToHaystack();
+        sendHisToInflux();
         //sendHisToInfluxBatched();
         Log.d("CCU","<- doHisSync");
     }
@@ -136,7 +136,7 @@ public class HisSyncHandler
                 }
     
                 HisItem sItem = hisItems.get(hisItems.size()-1);//TODO - Writing just the recent his val?
-                tsData.put(m.get("dis").toString(), String.valueOf(sItem.getVal()));
+                tsData.put( CCUHsApi.getInstance().getGUID(m.get("id").toString()).toString().replace("@",""), String.valueOf(sItem.getVal()));
     
                 for (HisItem item: hisItems)
                 {
@@ -149,7 +149,7 @@ public class HisSyncHandler
             if (tsData.size() > 0)
             {
                 String url = new InfluxDbUtil.URLBuilder().setProtocol(InfluxDbUtil.HTTP).setHost("renatus-influxiprvgkeeqfgys.centralus.cloudapp.azure.com").setPort(8086).setOp(InfluxDbUtil.WRITE).setDatabse("haystack").setUser("75f@75f.io").setPassword("7575").buildUrl();
-                InfluxDbUtil.writeData(url, CCUHsApi.getInstance().getGUID(equip.get("id").toString())
+                InfluxDbUtil.writeData(url, CCUHsApi.getInstance().getGUID(equip.get("id").toString()).toString().replace("@","")
                                                 , tsData, System.currentTimeMillis());
             }
         

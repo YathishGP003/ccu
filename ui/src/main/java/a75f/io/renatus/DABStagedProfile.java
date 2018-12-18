@@ -7,6 +7,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import a75f.io.logic.L;
+import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.system.DabStagedRtu;
+import a75f.io.logic.bo.building.system.SystemEquip;
+import a75f.io.logic.bo.building.system.VavStagedRtu;
 import butterknife.ButterKnife;
 
 /**
@@ -33,5 +38,11 @@ public class DABStagedProfile extends Fragment
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
     {
+    
+        if (!(L.ccu().systemProfile instanceof VavStagedRtu))
+        {
+            L.ccu().systemProfile = new DabStagedRtu();
+            SystemEquip.getInstance().updateSystemProfile(ProfileType.SYSTEM_DAB_STAGED_RTU);
+        }
     }
 }

@@ -28,7 +28,7 @@ public class MeshUpdateTest
         api.tagsDb.tagsMap = new HashMap<>();
         api.tagsDb.writeArrays = new HashMap<>();
         VAVLogicalMap m = new VAVLogicalMap(ProfileType.VAV_REHEAT, 7000);
-        m.createHaystackPoints(new VavProfileConfiguration());
+        m.createHaystackPoints(new VavProfileConfiguration(), null, null);
         ArrayList points = CCUHsApi.getInstance().readAll("point");
         for (Object a : points) {
             System.out.println(a);
@@ -58,7 +58,7 @@ public class MeshUpdateTest
         hayStack.tagsDb.tagsMap = new HashMap<>();
         hayStack.tagsDb.writeArrays = new HashMap<>();
         VAVLogicalMap m = new VAVLogicalMap(ProfileType.VAV_REHEAT, 7000);
-        m.createHaystackPoints(new VavProfileConfiguration());
+        m.createHaystackPoints(new VavProfileConfiguration(), null, null);
         short node = 7000;
         HashMap device = hayStack.read("device and addr == \""+node+"\"");
     

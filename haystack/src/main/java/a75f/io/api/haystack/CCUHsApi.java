@@ -79,7 +79,7 @@ public class CCUHsApi {
         return hsClient;
     }
 
-    public void saveTagsData() {
+    public synchronized void saveTagsData() {
         tagsDb.saveTags();
     }
 
@@ -98,6 +98,10 @@ public class CCUHsApi {
     public String addPoint(RawPoint p) {
         return tagsDb.addPoint(p);
     }
+    
+    public String addPoint(SettingPoint p) {
+        return tagsDb.addPoint(p);
+    }
 
     public String addDevice(Device d) {
         return tagsDb.addDevice(d);
@@ -113,33 +117,50 @@ public class CCUHsApi {
 
     public void updateSite(Site s, String id) {
         tagsDb.updateSite(s, id);
-        tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
+        if (tagsDb.idMap.get(id) != null)
+        {
+            tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
+        }
     }
 
     public void updateEquip(Equip q, String id) {
         tagsDb.updateEquip(q, id);
-        tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
+        if (tagsDb.idMap.get(id) != null)
+        {
+            tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
+        }
     }
 
     public void updatePoint(Point p, String id) {
         tagsDb.updatePoint(p, id);
-        tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
+        if (tagsDb.idMap.get(id) != null)
+        {
+            tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
+        }
     }
 
     public void updatePoint(RawPoint r, String id) {
         tagsDb.updatePoint(r, id);
-        Log.d("CCU", "updatePhysicalPoint " + id);
-        tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
+        if (tagsDb.idMap.get(id) != null)
+        {
+            tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
+        }
     }
 
     public void updateFloor(Floor r, String id) {
         tagsDb.updateFloor(r, id);
-        tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
+        if (tagsDb.idMap.get(id) != null)
+        {
+            tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
+        }
     }
 
     public void updateZone(Zone z, String id) {
         tagsDb.updateZone(z, id);
-        tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
+        if (tagsDb.idMap.get(id) != null)
+        {
+            tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
+        }
     }
 
     /**
@@ -150,16 +171,21 @@ public class CCUHsApi {
         ArrayList<HashMap> rowList = new ArrayList<>();
         try {
             HGrid grid = hsClient.readAll(query);
-            Iterator it = grid.iterator();
-            while (it.hasNext()) {
-                HashMap<Object, Object> map = new HashMap<>();
-                HRow r = (HRow) it.next();
-                HRow.RowIterator ri = (HRow.RowIterator) r.iterator();
-                while (ri.hasNext()) {
-                    HDict.MapEntry m = (HDict.MapEntry) ri.next();
-                    map.put(m.getKey(), m.getValue());
+            if (grid != null)
+            {
+                Iterator it = grid.iterator();
+                while (it.hasNext())
+                {
+                    HashMap<Object, Object> map = new HashMap<>();
+                    HRow r = (HRow) it.next();
+                    HRow.RowIterator ri = (HRow.RowIterator) r.iterator();
+                    while (ri.hasNext())
+                    {
+                        HDict.MapEntry m = (HDict.MapEntry) ri.next();
+                        map.put(m.getKey(), m.getValue());
+                    }
+                    rowList.add(map);
                 }
-                rowList.add(map);
             }
         } catch (UnknownRecException e) {
             e.printStackTrace();
@@ -384,7 +410,7 @@ public class CCUHsApi {
 
     public Double readHisValByQuery(String query) {
         ArrayList points = readAll(query);
-        String id = ((HashMap) points.get(0)).get("id").toString();
+        String id = points.size() == 0 ? null : ((HashMap) points.get(0)).get("id").toString();
         if (id == null || id == "") {
             return null;
         }
@@ -395,14 +421,14 @@ public class CCUHsApi {
 
     }
 
-    public void writeHisValById(String id, Double val) {
+    public synchronized void writeHisValById(String id, Double val) {
         hsClient.hisWrite(HRef.copy(id), new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), HNum.make(val))});
     }
 
-    public void writeHisValByQuery(String query, Double val) {
+    public synchronized void writeHisValByQuery(String query, Double val) {
 
         ArrayList points = readAll(query);
-        String id = ((HashMap) points.get(0)).get("id").toString();
+        String id = points.size() == 0 ? null : ((HashMap) points.get(0)).get("id").toString();
         if (id == null || id == "") {
             return;
         }
@@ -437,7 +463,6 @@ public class CCUHsApi {
         Log.d("CCU", "deleteEntity " + id);
         tagsDb.tagsMap.remove(id.replace("@", ""));
         if (tagsDb.idMap.get(id) != null) {
-            System.out.println(id);
             tagsDb.removeIdMap.put(id, tagsDb.idMap.remove(id));
         }
     }

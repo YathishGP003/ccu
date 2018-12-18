@@ -20,7 +20,9 @@ public class Point
     private String zoneRef;
     private String floorRef;
     private String group;
+    private String kind;
     private String id;
+    
     public String getId()
     {
         return id;
@@ -61,6 +63,10 @@ public class Point
     {
         return tz;
     }
+    public String getKind()
+    {
+        return kind;
+    }
     public String toString() {
         return displayName;
     }
@@ -77,6 +83,12 @@ public class Point
         private String zoneRef;
         private String floorRef;
         private String group;
+        public Builder setKind(String kind)
+        {
+            this.kind = kind;
+            return this;
+        }
+        private String kind;
         private String id;
         public Builder setGroup(String group)
         {
@@ -141,6 +153,7 @@ public class Point
             p.floorRef = this.floorRef;
             p.group = this.group;
             p.id = this.id;
+            p.kind = this.kind;
             //CCUHsApi.getInstance().addPoint(p);
             return p;
         }
@@ -151,7 +164,7 @@ public class Point
             while (it.hasNext())
             {
                 Map.Entry pair = (Map.Entry) it.next();
-                System.out.println(pair.getKey() + " = " + pair.getValue());
+                //System.out.println(pair.getKey() + " = " + pair.getValue());
                 if (pair.getKey().equals("id"))
                 {
                     this.id = pair.getValue().toString();
@@ -160,9 +173,9 @@ public class Point
                 {
                     this.displayName = pair.getValue().toString();
                 }
-                else if (pair.getKey().equals("marker"))
+                else if(pair.getValue().equals("marker")/*pair.getKey().equals("marker")*/) //TODO
                 {
-                    this.markers.add(pair.getValue().toString());
+                    this.markers.add(pair.getKey().toString()/*pair.getValue().toString()*/);
                 }
                 else if (pair.getKey().equals("siteRef"))
                 {
@@ -187,6 +200,10 @@ public class Point
                 else if (pair.getKey().equals("unit"))
                 {
                     this.unit = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("kind"))
+                {
+                    this.kind = pair.getValue().toString();
                 }
                 else if (pair.getKey().equals("tz"))
                 {

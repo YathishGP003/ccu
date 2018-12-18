@@ -142,7 +142,7 @@ public class Site
             Iterator it = site.entrySet().iterator();
             while (it.hasNext()) {
                 Map.Entry pair = (Map.Entry)it.next();
-                System.out.println(pair.getKey() + " = " + pair.getValue());
+                //System.out.println(pair.getKey() + " = " + pair.getValue());
                 if(pair.getKey().equals("id"))
                 {
                     this.id = pair.getValue().toString();

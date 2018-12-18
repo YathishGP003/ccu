@@ -28,6 +28,11 @@ public class Equip
     }
     private String priority;
     private String id;
+    public String getTz()
+    {
+        return tz;
+    }
+    private String tz;
     public String getId()
     {
         return id;
@@ -66,6 +71,12 @@ public class Equip
         private String zoneRef;
         private String floorRef;
         private String group;
+        public Builder setTz(String tz)
+        {
+            this.tz = tz;
+            return this;
+        }
+        private String tz;
         public Builder setPriority(String priority)
         {
             this.priority = priority;
@@ -125,15 +136,17 @@ public class Equip
             q.profile = this.profile;
             q.priority = this.priority;
             q.id = this.id;
+            q.tz = this.tz;
             return q;
         }
         
         public Builder setHashMap(HashMap site)
         {
+            
             Iterator it = site.entrySet().iterator();
             while (it.hasNext()) {
                 Map.Entry pair = (Map.Entry)it.next();
-                System.out.println(pair.getKey() + " = " + pair.getValue());
+                //System.out.println(pair.getKey() + " = " + pair.getValue());
                 if(pair.getKey().equals("id"))
                 {
                     this.id = pair.getValue().toString();
@@ -142,9 +155,9 @@ public class Equip
                 {
                     this.displayName = pair.getValue().toString();
                 }
-                else if(pair.getKey().equals("marker"))
+                else if(pair.getValue().equals("marker")/*pair.getKey().equals("marker")*/) //TODO
                 {
-                    this.markers.add(pair.getValue().toString());
+                    this.markers.add(pair.getKey().toString()/*pair.getValue().toString()*/);
                 }
                 else if(pair.getKey().equals("siteRef"))
                 {
@@ -169,6 +182,10 @@ public class Equip
                 else if(pair.getKey().equals("priority"))
                 {
                     this.priority = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("tz"))
+                {
+                    this.tz = pair.getValue().toString();
                 }
                 it.remove();
             }

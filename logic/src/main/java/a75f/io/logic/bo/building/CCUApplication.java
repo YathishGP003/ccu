@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.logic.bo.building.system.SystemProfile;
-import a75f.io.logic.bo.building.system.VavAnalogRtu;
 
 /**
  * Created by Yinten isOn 8/15/2017.
@@ -57,7 +56,7 @@ public class CCUApplication
     private HashMap<String, NamedSchedule> mLCMNamedSchedules = new HashMap<>();
     
     
-    public SystemProfile systemProfile = new VavAnalogRtu();//TODO- TEMP
+    public SystemProfile systemProfile = null;
     public ArrayList<ZoneProfile> zoneProfiles = new ArrayList<>();
     
     public Site defaultSite = null;

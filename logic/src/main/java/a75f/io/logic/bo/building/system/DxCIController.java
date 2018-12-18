@@ -24,6 +24,10 @@ import static a75f.io.logic.bo.building.system.DxCIController.State.NA;
  * Created by samjithsadasivan on 11/9/18.
  */
 
+/**
+ * DxController applies Weighted average and Moving average filters on temperature diffs.
+ * MA value is used to determine AHU change over. WA determines the heating signal.
+ */
 public class DxCIController
 {
     
@@ -95,12 +99,12 @@ public class DxCIController
         // means that we need heating on average in the building
         dxCI_CO_MA = dxCiMASum/dxCIMABuffer.size();
         
-        if (isAllZonesCooling() || dxCI_CO_MA > ciDesired * 1 /*MULTIPLIER to be a tuner*/) {
+        if (isAllZonesCooling() || dxCI_CO_MA >= ciDesired * 1 /*MULTIPLIER to be a tuner*/) {
             if (dxState != COOLING) {
                 dxState = COOLING;
                 piController.reset();
             }
-        } else if (isAllZonesHeating() || dxCI_CO_MA < -1 * ciDesired * 1 /*MULTIPLIER*/) {
+        } else if (isAllZonesHeating() || dxCI_CO_MA <= -1 * ciDesired * 1 /*MULTIPLIER*/) {
             if (dxState != HEATING) {
                 dxState = HEATING;
                 piController.reset();
@@ -158,7 +162,7 @@ public class DxCIController
         for (ZoneProfile p: L.ccu().zoneProfiles)
         {
             System.out.println(" Zone State " +p.state);
-            if (p.state != ZoneState.HEATING) {
+            if (p.getState() != ZoneState.HEATING) {
                 Log.d("dx"," Equip "+p.getProfileType()+" is not in Heating");
                 return false;
             }
@@ -169,7 +173,7 @@ public class DxCIController
     public boolean isAllZonesCooling() {
         for (ZoneProfile p: L.ccu().zoneProfiles)
         {
-            if (p.state != ZoneState.COOLING) {
+            if (p.getState() != ZoneState.COOLING) {
                 Log.d("dx"," Equip "+p.getProfileType()+" is not in Cooling");
                 return false;
             }

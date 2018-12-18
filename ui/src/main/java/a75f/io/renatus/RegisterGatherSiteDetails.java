@@ -14,6 +14,9 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Site;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.system.SystemEquip;
+import a75f.io.logic.bo.building.system.VavAnalogRtu;
+import a75f.io.logic.tuners.BuildingTuners;
 
 public class RegisterGatherSiteDetails extends Activity {
 
@@ -94,9 +97,11 @@ public class RegisterGatherSiteDetails extends Activity {
                 .setArea(10000).build();
         String localSiteId = CCUHsApi.getInstance().addSite(s75f);
         L.ccu().defaultSite = new a75f.io.logic.bo.building.Site(s75f);
-
+        BuildingTuners.getInstance();
+        SystemEquip.getInstance();
         Log.i(TAG, "LocalSiteID: " + localSiteId);
         CCUHsApi.getInstance().log();
+        L.ccu().systemProfile = new VavAnalogRtu();
         return localSiteId;
     }
 

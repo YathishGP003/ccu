@@ -1,6 +1,7 @@
 package a75f.io.api.haystack;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -323,6 +324,7 @@ public class CCUTagsDb extends HServer {
                                      .add("floorRef", q.getFloorRef() != null ? q.getFloorRef() : "SYSTEM")
                                      .add("profile", q.getProfile())
                                      .add("priority", q.getPriority())
+                                     .add("tz",q.getTz())
                                      .add("group",q.getGroup());
         for (String m : q.getMarkers()) {
             equip.add(m);
@@ -342,8 +344,10 @@ public class CCUTagsDb extends HServer {
                                      .add("floorRef", q.getFloorRef())
                                      .add("profile", q.getProfile())
                                      .add("priority", q.getPriority())
+                                     .add("tz",q.getTz())
                                      .add("group",q.getGroup());
         for (String m : q.getMarkers()) {
+            Log.d("CCU"," Add marker "+m);
             equip.add(m);
         }
         HRef id = (HRef) equip.get("id");
@@ -365,7 +369,7 @@ public class CCUTagsDb extends HServer {
                 .add("zoneRef", p.getZoneRef() != null ? p.getZoneRef() : "SYSTEM")
                 .add("floorRef", p.getFloorRef() != null ? p.getFloorRef() : "SYSTEM")
                 .add("group", p.getGroup())
-                .add("kind", p.getUnit() == null ? "Bool" : "Number")
+                .add("kind", p.getKind() == null ? "Number" : p.getKind())
                 .add("tz", p.getTz());
         if (p.getUnit() != null) b.add("unit", p.getUnit());
 
@@ -387,7 +391,7 @@ public class CCUTagsDb extends HServer {
                 .add("zoneRef", p.getZoneRef())
                 .add("floorRef", p.getFloorRef())
                 .add("group", p.getGroup())
-                .add("kind", p.getUnit() == null ? "Bool" : "Number")
+                .add("kind", p.getKind() == null ? "Number" : p.getKind())
                 .add("tz", p.getTz());
         if (p.getUnit() != null) b.add("unit", p.getUnit());
 
@@ -409,9 +413,11 @@ public class CCUTagsDb extends HServer {
                 .add("pointRef", p.getPointRef())
                 .add("port", p.getPort())
                 .add("type", p.getType())
-                .add("kind", p.getUnit() == null ? "Bool" : "Number")
+                .add("kind", p.getKind() == null ? "Number" : p.getKind())
+                .add("enabled",p.getEnabled() ? "true":"false")
                 .add("tz", p.getTz());
-
+        if (p.getUnit() != null) b.add("unit", p.getUnit());
+        
         for (String m : p.getMarkers()) {
             b.add(m);
         }
@@ -431,16 +437,38 @@ public class CCUTagsDb extends HServer {
                 .add("pointRef", p.getPointRef())
                 .add("port", p.getPort())
                 .add("type", p.getType())
-                .add("kind", p.getUnit() == null ? "Bool" : "Number")
+                .add("kind", p.getKind() == null ? "Number" : p.getKind())
+                .add("enabled",p.getEnabled() ? "true":"false")
                 .add("tz", p.getTz());
-
+        if (p.getUnit() != null) b.add("unit", p.getUnit());
         for (String m : p.getMarkers()) {
             b.add(m);
         }
         HRef id = (HRef) b.get("id");
         tagsMap.put(id.toVal(), b.toDict());
     }
-
+    
+    public String addPoint(SettingPoint p) {
+        HDictBuilder b = new HDictBuilder()
+                                 .add("id", HRef.make(UUID.randomUUID().toString()))
+                                 .add("dis", p.getDisplayName())
+                                 .add("point", HMarker.VAL)
+                                 .add("physical", HMarker.VAL)
+                                 .add("deviceRef", p.getDeviceRef())
+                                 .add("siteRef", p.getSiteRef())
+                                 .add("val", p.getVal())
+                                 .add("kind", p.getKind() == null ? "Number" : p.getKind());
+                
+        if (p.getUnit() != null) b.add("unit", p.getUnit());
+        
+        for (String m : p.getMarkers()) {
+            b.add(m);
+        }
+        HRef id = (HRef) b.get("id");
+        tagsMap.put(id.toVal(), b.toDict());
+        return id.toCode();
+    }
+    
     public String addDevice(Device d) {
         HDictBuilder b = new HDictBuilder()
                 .add("id", HRef.make(UUID.randomUUID().toString()))

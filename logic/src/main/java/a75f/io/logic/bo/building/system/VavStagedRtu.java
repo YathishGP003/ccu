@@ -46,11 +46,11 @@ public class VavStagedRtu extends SystemProfile
         {
             if (analogMax > analogMin)
             {
-                coolingSignal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (SystemConstants.COOLING_SAT_CONFIG_MAX - getSystemSAT()) / 10));
+                coolingSignal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (SystemConstants.COOLING_SAT_CONFIG_MAX - getSystemSAT()) / 100));
             }
             else
             {
-                coolingSignal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (SystemConstants.COOLING_SAT_CONFIG_MAX - getSystemSAT()) / 10));
+                coolingSignal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (SystemConstants.COOLING_SAT_CONFIG_MAX - getSystemSAT()) / 100));
             }
             
         }
@@ -80,6 +80,12 @@ public class VavStagedRtu extends SystemProfile
         {
             ControlMote.setAnalogOut("analog2", heatingSignal);
         }
+    
+        if (systemEquip.getAnalogOutSelection("analog3") > 0) {
+            if (heatingSignal > 0 || coolingSignal > 0) {
+                ControlMote.setAnalogOut("analog3", 100);
+            }
+        }
         
         int coolingStages = getCoolingStages();
         int heatingStages = getHeatingStages();
@@ -89,11 +95,12 @@ public class VavStagedRtu extends SystemProfile
         Log.d("CCU", "coolingStages: "+coolingStages + " heatingStages: "+heatingStages+" fanStages: "+fanStages);
         for (int i = 1; i <=7 ;i++)
         {
-            switch (Stage.values()[(int)systemEquip.getRelaySelection("relay"+i)])
+            switch (Stage.values()[(int)systemEquip.getRelaySelection("relay"+i)-1])
             {
                 case COOLING_1:
-                    if (coolingStages > 0 && coolingSignal >= 100/coolingStages) {
+                    if (coolingStages > 0 && coolingSignal > 0) {
                         ControlMote.setRelayState("relay"+i, 1);
+                        Log.d("CCU", "COOLING_1 setRelay "+i);
                     } else {
                         ControlMote.setRelayState("relay"+i, 0);
                     }
@@ -101,62 +108,71 @@ public class VavStagedRtu extends SystemProfile
                 case COOLING_2:
                     if (coolingStages > 0 && coolingSignal >= 100/coolingStages) {
                         ControlMote.setRelayState("relay"+i, 1);
+                        Log.d("CCU", "COOLING_2 setRelay "+i);
                     } else {
                         ControlMote.setRelayState("relay"+i, 0);
                     }
                     break;
                 case COOLING_3:
-                    if (coolingStages > 0 && coolingSignal >= 100/coolingStages) {
+                    if (coolingStages > 0 && coolingSignal >= 100 * 2/coolingStages) {
                         ControlMote.setRelayState("relay"+i, 1);
+                        Log.d("CCU", "COOLING_3 setRelay "+i);
                     } else {
                         ControlMote.setRelayState("relay"+i, 0);
                     }
                     break;
                 case COOLING_4:
-                    if (coolingStages > 0 && coolingSignal >= 100/coolingStages) {
+                    if (coolingStages > 0 && coolingSignal >= 100 * 3/coolingStages) {
                         ControlMote.setRelayState("relay"+i, 1);
+                        Log.d("CCU", "COOLING_4 setRelay "+i);
                     } else {
                         ControlMote.setRelayState("relay"+i, 0);
                     }
                     break;
                 case COOLING_5:
-                    if (coolingStages > 0 && coolingSignal >= 100/coolingStages) {
+                    if (coolingStages > 0 && coolingSignal >= 100 * 4/coolingStages) {
                         ControlMote.setRelayState("relay"+i, 1);
+                        Log.d("CCU", "COOLING_5 setRelay "+i);
                     } else {
                         ControlMote.setRelayState("relay"+i, 0);
                     }
                     break;
                 case HEATING_1:
-                    if (heatingStages > 0 && heatingSignal >= 100/heatingSignal) {
+                    if (heatingStages > 0 && heatingSignal > 0) {
                         ControlMote.setRelayState("relay"+i, 1);
+                        Log.d("CCU", "HEATING_1 setRelay "+i);
                     } else {
                         ControlMote.setRelayState("relay"+i, 0);
                     }
                     break;
                 case HEATING_2:
-                    if (heatingStages > 0 && heatingSignal >= 100/heatingSignal) {
+                    if (heatingStages > 0 && heatingSignal >= 100/heatingStages) {
                         ControlMote.setRelayState("relay"+i, 1);
+                        Log.d("CCU", "HEATING_2 setRelay "+i);
                     } else {
                         ControlMote.setRelayState("relay"+i, 0);
                     }
                     break;
                 case HEATING_3:
-                    if (heatingStages > 0 && heatingSignal >= 100/heatingSignal) {
+                    if (heatingStages > 0 && heatingSignal >= 100 * 2/heatingStages) {
                         ControlMote.setRelayState("relay"+i, 1);
+                        Log.d("CCU", "HEATING_3 setRelay "+i);
                     } else {
                         ControlMote.setRelayState("relay"+i, 0);
                     }
                     break;
                 case HEATING_4:
-                    if (heatingStages > 0 && heatingSignal >= 100/heatingSignal) {
+                    if (heatingStages > 0 && heatingSignal >= 100 * 3/heatingStages) {
                         ControlMote.setRelayState("relay"+i, 1);
+                        Log.d("CCU", "HEATING_4 setRelay "+i);
                     } else {
                         ControlMote.setRelayState("relay"+i, 0);
                     }
                     break;
                 case HEATING_5:
-                    if (heatingStages > 0 && heatingSignal >= 100/heatingSignal) {
+                    if (heatingStages > 0 && heatingSignal >= 100 * 4/heatingStages) {
                         ControlMote.setRelayState("relay"+i, 1);
+                        Log.d("CCU", " HEATING_5 setRelay "+i);
                     } else {
                         ControlMote.setRelayState("relay"+i, 0);
                     }
@@ -164,6 +180,7 @@ public class VavStagedRtu extends SystemProfile
                 case FAN_1:
                     if (fanStages > 0 && (heatingSignal > 0 || coolingSignal > 0)) {
                         ControlMote.setRelayState("relay"+i, 1);
+                        Log.d("CCU", " FAN_1 setRelay "+i);
                     } else {
                         ControlMote.setRelayState("relay"+i, 0);
                     }
@@ -171,6 +188,7 @@ public class VavStagedRtu extends SystemProfile
                 case FAN_2:
                     if (fanStages > 0 && (heatingSignal > 50 || coolingSignal > 50)) {
                         ControlMote.setRelayState("relay"+i, 1);
+                        Log.d("CCU", "FAN_2 setRelay "+i);
                     } else {
                         ControlMote.setRelayState("relay"+i, 0);
                     }
@@ -200,12 +218,13 @@ public class VavStagedRtu extends SystemProfile
         for (int i = 1; i < 8; i++)
         {
             int val = (int) SystemEquip.getInstance().getRelaySelection("relay" + i);
-            if (val >= Stage.HEATING_1.getValue() && val > stage)
+            System.out.println("relay"+i+" : val "+val+" Stage.HEATING_1.getValue() "+Stage.HEATING_1.getValue());
+            if (val >= Stage.HEATING_1.getValue() && val <= Stage.HEATING_5.getValue() && val > stage)
             {
                 stage = val;
             }
         }
-        return stage;
+        return stage != 0 ? stage - Stage.HEATING_1.ordinal() : stage ;
     }
     
     public int getFanStages()
@@ -214,11 +233,12 @@ public class VavStagedRtu extends SystemProfile
         for (int i = 1; i < 8; i++)
         {
             int val = (int) SystemEquip.getInstance().getRelaySelection("relay" + i);
+            System.out.print("relay"+i+" : val "+val);
             if (val >= Stage.FAN_1.getValue() && val > stage)
             {
                 stage = val;
             }
         }
-        return stage;
+        return stage != 0 ? stage - Stage.FAN_1.ordinal() : stage ;
     }
 }

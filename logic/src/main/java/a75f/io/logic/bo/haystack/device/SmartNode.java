@@ -1,11 +1,15 @@
 package a75f.io.logic.bo.haystack.device;
 
+import android.util.Log;
+
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
+import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 
 /**
@@ -59,10 +63,10 @@ public class SmartNode
                                 .setDeviceRef(deviceRef)
                                 .setSiteRef(siteRef)
                                 .setPort(Port.ANALOG_IN_ONE.toString())
-                                .setType("0-10v")
+                                .setType(OutputAnalogActuatorType.ZeroToTenV.displayName)
                                 .setZoneRef(zoneRef)
                                 .setFloorRef(floorRef)
-                                .addMarker("input").addMarker("his")
+                                .addMarker("sensor").addMarker("his")
                                 .setTz(tz)
                                 .build();
     
@@ -72,10 +76,10 @@ public class SmartNode
                             .setDeviceRef(deviceRef)
                             .setSiteRef(siteRef)
                             .setPort(Port.ANALOG_IN_TWO.toString())
-                            .setType("0-10v")
+                            .setType(OutputAnalogActuatorType.ZeroToTenV.displayName)
                             .setZoneRef(zoneRef)
                             .setFloorRef(floorRef)
-                            .addMarker("input").addMarker("his")
+                            .addMarker("sensor").addMarker("his")
                             .setTz(tz)
                             .build();
     
@@ -86,7 +90,7 @@ public class SmartNode
                             .setPort(Port.TH1_IN.toString())
                             .setZoneRef(zoneRef)
                             .setFloorRef(floorRef)
-                            .addMarker("input").addMarker("his")
+                            .addMarker("sensor").addMarker("his")
                             .setTz(tz)
                             .build();
     
@@ -97,7 +101,7 @@ public class SmartNode
                         .setPort(Port.TH2_IN.toString())
                         .setZoneRef(zoneRef)
                         .setFloorRef(floorRef)
-                        .addMarker("input").addMarker("his")
+                        .addMarker("sensor").addMarker("his")
                         .setTz(tz)
                         .build();
     
@@ -106,10 +110,10 @@ public class SmartNode
                             .setDeviceRef(deviceRef)
                             .setSiteRef(siteRef)
                             .setPort(Port.ANALOG_OUT_ONE.toString())
-                            .setType("0-10v")
+                            .setType(OutputAnalogActuatorType.ZeroToTenV.displayName)
                             .setZoneRef(zoneRef)
                             .setFloorRef(floorRef)
-                            .addMarker("output").addMarker("his")
+                            .addMarker("cmd").addMarker("his")
                             .setTz(tz)
                             .build();
     
@@ -118,10 +122,10 @@ public class SmartNode
                              .setDeviceRef(deviceRef)
                              .setSiteRef(siteRef)
                              .setPort(Port.ANALOG_OUT_TWO.toString())
-                             .setType("0-10v")
+                             .setType(OutputAnalogActuatorType.ZeroToTenV.displayName)
                              .setZoneRef(zoneRef)
                              .setFloorRef(floorRef)
-                             .addMarker("output").addMarker("his")
+                             .addMarker("cmd").addMarker("his")
                              .setTz(tz)
                              .build();
     
@@ -132,8 +136,8 @@ public class SmartNode
                              .setZoneRef(zoneRef)
                              .setFloorRef(floorRef)
                              .setPort(Port.RELAY_ONE.toString())
-                             .setType("NO")
-                             .addMarker("output").addMarker("his")
+                             .setType(OutputRelayActuatorType.NormallyOpen.displayName)
+                             .addMarker("cmd").addMarker("his")
                              .setTz(tz)
                              .build();
     
@@ -144,8 +148,8 @@ public class SmartNode
                          .setZoneRef(zoneRef)
                          .setFloorRef(floorRef)
                          .setPort(Port.RELAY_TWO.toString())
-                         .setType("NO")
-                         .addMarker("output").addMarker("his")
+                         .setType(OutputRelayActuatorType.NormallyOpen.displayName)
+                         .addMarker("cmd").addMarker("his")
                          .setTz(tz)
                          .build();
     
@@ -155,13 +159,26 @@ public class SmartNode
                          .setSiteRef(siteRef)
                          .setZoneRef(zoneRef)
                          .setFloorRef(floorRef)
-                         .addMarker("input").addMarker("his")
+                         .addMarker("sensor").addMarker("his")
                          .setPort(Port.RTH.toString())
                          .setTz(tz)
                          .build();
     }
     
+    public void addPointsToDb() {
+        CCUHsApi.getInstance().addPoint(analog1In);
+        CCUHsApi.getInstance().addPoint(analog2In);
+        CCUHsApi.getInstance().addPoint(th1In);
+        CCUHsApi.getInstance().addPoint(th2In);
+        CCUHsApi.getInstance().addPoint(analog1Out);
+        CCUHsApi.getInstance().addPoint(analog2Out);
+        CCUHsApi.getInstance().addPoint(relay1);
+        CCUHsApi.getInstance().addPoint(relay2);
+        CCUHsApi.getInstance().addPoint(currentTemp);
+    }
+    
     public static void updatePhysicalPoint(int addr, String port, String type) {
+        Log.d("CCU"," Update Physical point "+port+" "+type);
     
         HashMap device = CCUHsApi.getInstance().read("device and addr == \""+addr+"\"");
         if (device == null)
@@ -172,17 +189,27 @@ public class SmartNode
         HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
         if (!point.get("type").equals(type))
         {
-            HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
-            RawPoint analog1Out = new RawPoint.Builder()
-                                          .setDisplayName(point.get("dis").toString())
-                                          .setDeviceRef(point.get("deviceRef").toString())
-                                          .setSiteRef(point.get("siteRef").toString())
-                                          .setPort(port)
-                                          .setType(type)
-                                          .addMarker("output").addMarker("his")
-                                          .setTz(siteMap.get("tz").toString())
-                                          .build();
-            CCUHsApi.getInstance().updatePoint(analog1Out,point.get("id").toString());
+            RawPoint p = new RawPoint.Builder().setHashMap(point).build();
+            p.setType(type);
+            CCUHsApi.getInstance().updatePoint(p,p.getId());
+        }
+    }
+    
+    public static void setPointEnabled(int addr, String port, boolean enabled) {
+        Log.d("CCU"," Enabled Physical point "+port+" "+enabled);
+        
+        HashMap device = CCUHsApi.getInstance().read("device and addr == \""+addr+"\"");
+        if (device == null)
+        {
+            return ;
+        }
+        
+        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
+        if (point != null && point.size() > 0)
+        {
+            RawPoint p = new RawPoint.Builder().setHashMap(point).build();
+            p.setEnabled(enabled);
+            CCUHsApi.getInstance().updatePoint(p,p.getId());
         }
     }
     

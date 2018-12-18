@@ -178,9 +178,9 @@ public class VavReheatProfile extends VavProfile
             damper.normalize();
             valve.normalize();
             
-            Log.d("VAV","CoolingLoop "+node +"roomTemp :"+roomTemp+" setTemp: "+setTemp);
+            Log.d("VAV","CoolingLoop "+node +" roomTemp :"+roomTemp+" setTemp: "+setTemp);
             coolingLoop.dump();
-            Log.d("VAV","HeatingLoop "+node +"roomTemp :"+roomTemp+" setTemp: "+setTemp);
+            Log.d("VAV","HeatingLoop "+node +" roomTemp :"+roomTemp+" setTemp: "+setTemp);
             heatingLoop.dump();
             
     

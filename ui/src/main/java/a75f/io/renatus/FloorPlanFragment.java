@@ -31,7 +31,6 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logic.L;
-import a75f.io.logic.LZoneProfile;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 import butterknife.BindView;
@@ -40,8 +39,6 @@ import butterknife.OnClick;
 import butterknife.OnEditorAction;
 import butterknife.OnFocusChange;
 import butterknife.OnItemClick;
-
-import static a75f.io.logic.L.ccu;
 
 /**
  * Created by samjithsadasivan isOn 8/7/17.
@@ -426,9 +423,6 @@ public class FloorPlanFragment extends Fragment
 	@OnClick(R.id.pairModuleBtn)
 	public void startPairing()
 	{
-		//TODO - TEMP
-		ccu().setSmartNodeAddressBand((short)7000);
-		
 		short meshAddress = L.generateSmartNodeAddress();
 		
 		/* Checks to see if emulated and doesn't popup BLE dialogs */
@@ -484,7 +478,7 @@ public class FloorPlanFragment extends Fragment
 		Zone zone = getSelectedZone();
 		String nodeAddr = mModuleListAdapter.getItem(position);
 		
-		ZoneProfile profile = LZoneProfile.getProfile(Short.parseShort(nodeAddr));
+		ZoneProfile profile = L.getProfile(Short.parseShort(nodeAddr));
 		
 		switch (profile.getProfileType()) {
 			/*case HMP:

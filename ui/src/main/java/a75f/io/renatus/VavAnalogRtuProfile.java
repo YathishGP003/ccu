@@ -20,6 +20,7 @@ import a75f.io.device.mesh.MeshUtil;
 import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemConstants;
 import a75f.io.logic.bo.building.system.SystemEquip;
 import a75f.io.logic.bo.building.system.VavAnalogRtu;
@@ -87,6 +88,16 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
     {
 	    if (!(L.ccu().systemProfile instanceof VavAnalogRtu)) {
 		    L.ccu().systemProfile = new VavAnalogRtu();
+		    new AsyncTask<Void, Void, Void>() {
+			    @Override
+			    protected Void doInBackground( final Void ... params ) {
+				    SystemEquip.getInstance().updateSystemProfile(ProfileType.SYSTEM_VAV_ANALOG_RTU);
+				    return null;
+			    }
+			    @Override
+			    protected void onPostExecute( final Void result ) {
+			    }
+		    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
 	    }
 		setupTempLimitSelectors();
 		setupAnalogLimitSelectors();

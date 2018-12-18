@@ -365,6 +365,14 @@ public class EntitySyncHandler
                     {
                         m.put("pointRef", HRef.copy(CCUHsApi.getInstance().getGUID(m.get("pointRef").toString())));
                     }
+                    if (m.get("floorRef") != null && !m.get("floorRef").toString().equals("SYSTEM"))
+                    {
+                        m.put("floorRef", HRef.copy(CCUHsApi.getInstance().getGUID(m.get("floorRef").toString())));
+                    }
+                    if (m.get("zoneRef") != null && !m.get("zoneRef").toString().equals("SYSTEM"))
+                    {
+                        m.put("zoneRef", HRef.copy(CCUHsApi.getInstance().getGUID(m.get("zoneRef").toString())));
+                    }
                     entities.add(HSUtil.mapToHDict(m));
                 }
             }
@@ -420,29 +428,32 @@ public class EntitySyncHandler
         System.out.println("doSyncUpdateEntities->");
         ArrayList<HDict> entities = new ArrayList<>();
         for (String luid : CCUHsApi.getInstance().tagsDb.updateIdMap.keySet()) {
+            if (CCUHsApi.getInstance().getGUID(luid) == null) {
+                continue;
+            }
             HashMap entity = CCUHsApi.getInstance().readMapById(luid);
             entity.put("id", HRef.copy(CCUHsApi.getInstance().getGUID(luid)));
-            if (entity.get("siteRef") != null)
+            if (entity.get("siteRef") != null && CCUHsApi.getInstance().getGUID(entity.get("siteRef").toString()) != null)
             {
                 entity.put("siteRef", HRef.copy(CCUHsApi.getInstance().getGUID(entity.get("siteRef").toString())));
             }
-            if (entity.get("equipRef") != null)
+            if (entity.get("equipRef") != null && CCUHsApi.getInstance().getGUID(entity.get("equipRef").toString()) != null)
             {
                 entity.put("equipRef", HRef.copy(CCUHsApi.getInstance().getGUID(entity.get("equipRef").toString())));
             }
-            if (entity.get("deviceRef") != null)
+            if (entity.get("deviceRef") != null && CCUHsApi.getInstance().getGUID(entity.get("deviceRef").toString()) != null)
             {
                 entity.put("deviceRef", HRef.copy(CCUHsApi.getInstance().getGUID(entity.get("deviceRef").toString())));
             }
-            if (entity.get("pointRef") != null)
+            if (entity.get("pointRef") != null && CCUHsApi.getInstance().getGUID(entity.get("pointRef").toString()) != null)
             {
                 entity.put("pointRef", HRef.copy(CCUHsApi.getInstance().getGUID(entity.get("pointRef").toString())));
             }
-            if (entity.get("floorRef") != null)
+            if (entity.get("floorRef") != null && CCUHsApi.getInstance().getGUID(entity.get("floorRef").toString()) != null)
             {
                 entity.put("floorRef", HRef.copy(CCUHsApi.getInstance().getGUID(entity.get("floorRef").toString())));
             }
-            if (entity.get("zoneRef") != null)
+            if (entity.get("zoneRef") != null && CCUHsApi.getInstance().getGUID(entity.get("zoneRef").toString()) != null)
             {
                 entity.put("zoneRef", HRef.copy(CCUHsApi.getInstance().getGUID(entity.get("zoneRef").toString())));
             }

@@ -10,6 +10,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.serial.AddressedStruct;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
@@ -25,6 +26,14 @@ import a75f.io.logic.bo.building.ZoneProfile;
 
 public class LSmartNode
 {
+    public static final String ANALOG_OUT_ONE = "ANALOG_OUT_ONE";
+    public static final String ANALOG_OUT_TWO = "ANALOG_OUT_TWO";
+    public static final String ANALOG_IN_ONE = "ANALOG_IN_ONE";
+    public static final String ANALOG_IN_TWO = "ANALOG_IN_TWO";
+    
+    public static final String RELAY_ONE ="RELAY_ONE";
+    public static final String RELAY_TWO ="RELAY_TWO";
+    public static final String PULSE ="Pulse";
     
     private static final short  TODO = 0;
     private static final String TAG  = "LSmartNode";
@@ -85,23 +94,30 @@ public class LSmartNode
     
                 CCUHsApi hayStack = CCUHsApi.getInstance();
                 HashMap device = hayStack.read("device and addr == \""+node+"\"");
+                
                 if (device != null && device.size() > 0)
                 {
-                    ArrayList<HashMap> physicalOpPoints= hayStack.readAll("point and physical and output and deviceRef == \""+device.get("id")+"\"");
+                    ArrayList<HashMap> physicalOpPoints= hayStack.readAll("point and physical and cmd and deviceRef == \""+device.get("id")+"\"");
                     
-                    for (HashMap opPoint : physicalOpPoints) {
-                        HashMap logicalOpPoint = hayStack.read("point and id == "+opPoint.get("pointRef"));
-                        double logicalVal = hayStack.readHisValById(logicalOpPoint.get("id").toString());
-                        
-                        String port = opPoint.get("port").toString();
-    
-                        short mappedVal = (isAnalog(port) ? mapAnalogOut(opPoint.get("type").toString(), (short)logicalVal)
-                                                        : mapDigitalOut(opPoint.get("type").toString(), logicalVal > 0));
-                        hayStack.writeHisValById(opPoint.get("id").toString(), (double)mappedVal);
-    
-                        LSmartNode.getSmartNodePort(controlsMessage_t, port)
-                                  .set(mappedVal);
-                        
+                    for (HashMap opPoint : physicalOpPoints)
+                    {
+                        if (opPoint.get("enabled").toString().equals("true"))
+                        {
+                            RawPoint p = new RawPoint.Builder().setHashMap(opPoint).build();
+                            HashMap logicalOpPoint = hayStack.read("point and id == " + p.getPointRef());
+                            double logicalVal = hayStack.readHisValById(logicalOpPoint.get("id").toString());
+                            
+                            //TODO - Assuming Relay1 & Relay 2 are enabled for staged out put.
+                            short mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) : mapDigitalOut(p.getType(),
+                                            p.getPort().equals(RELAY_TWO) ? logicalVal > 50 : logicalVal > 0));
+                            hayStack.writeHisValById(p.getId(), (double) mappedVal);
+                            
+                            if (isAnalog(p.getPort()) && p.getType().equals(PULSE) && logicalVal > 0) {
+                                mappedVal |= 0x80;
+                            }
+                            LSmartNode.getSmartNodePort(controlsMessage_t, p.getPort()).set(mappedVal);
+                            
+                        }
                     }
                 }
             }
@@ -136,10 +152,10 @@ public class LSmartNode
     
     public static boolean isAnalog(String port) {
         switch (port) {
-            case "ANALOG_OUT_ONE":
-            case "ANALOG_OUT_TWO":
-            case "ANALOG_IN_ONE":
-            case "ANALOG_IN_TWO":
+            case ANALOG_OUT_ONE:
+            case ANALOG_OUT_TWO:
+            case ANALOG_IN_ONE:
+            case ANALOG_IN_TWO:
                 return true;
         }
         return false;
@@ -149,6 +165,7 @@ public class LSmartNode
         switch (type)
         {
             case "0-10v":
+            case "Pulse":
                 return val;
             case "10-0v":
                 return (short) (100 - val);
@@ -165,10 +182,10 @@ public class LSmartNode
         
         switch (type)
         {
-            case "NC":
+            case "Relay N/O":
                 return (short) (val ? 0 : 1);
             ///Defaults to normally open
-            case "NO":
+            case "Relay N/C":
                 return (short) (val ? 1 : 0);
         }
         
@@ -186,13 +203,13 @@ public class LSmartNode
     {
         switch (port)
         {
-            case "ANALOG_OUT_ONE":
+            case ANALOG_OUT_ONE:
                 return controlsMessage_t.controls.analogOut1;
-            case "ANALOG_OUT_TWO":
+            case ANALOG_OUT_TWO:
                 return controlsMessage_t.controls.analogOut2;
-            case "RELAY_ONE":
+            case RELAY_ONE:
                 return controlsMessage_t.controls.digitalOut1;
-            case "RELAY_TWO":
+            case RELAY_TWO:
                 return controlsMessage_t.controls.digitalOut2;
             default:
                 return null;

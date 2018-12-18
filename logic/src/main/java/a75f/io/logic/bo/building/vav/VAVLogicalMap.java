@@ -18,6 +18,7 @@ import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
+import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.ParallelFanVavUnit;
@@ -33,7 +34,7 @@ import a75f.io.logic.tuners.TunerConstants;
 
 /**
  * A Profile logical Map represents the logical side of a haystack Equip entity.
- * It acts as a container of profiles PI controllers and TR Request objects and it interfaces profile with the haystack.
+ * It acts as a container of profile's PI controllers and TR Request objects and it interfaces profile with the haystack.
  * Current design requires only one equip/map per profile, but map/list of LogicalMap
  * per profile is maintained to support any requirement of adding multiple equips/devices per profile.
  */
@@ -117,7 +118,8 @@ public class VAVLogicalMap
                           .setFloorRef(floor)
                           .setProfile(profileType.name())
                           .setPriority(config.getPriority().name())
-                          .addMarker("equip").addMarker("vav").addMarker("zone")
+                          .addMarker("equip").addMarker("vav").addMarker("zone").addMarker("equipHis")
+                          .setTz(tz)
                           .setGroup(String.valueOf(nodeAddr))
                           .build();
         String equipRef = CCUHsApi.getInstance().addEquip(v);
@@ -131,7 +133,7 @@ public class VAVLogicalMap
                                 .setZoneRef(room)
                                 .setFloorRef(floor)
                                 .addMarker("discharge")
-                                .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("his").addMarker("logical").addMarker("zone")
+                                .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("his").addMarker("logical").addMarker("zone").addMarker("equipHis")
                                 .setGroup(String.valueOf(nodeAddr))
                                 .setUnit("\u00B0F")
                                 .setTz(tz)
@@ -146,7 +148,7 @@ public class VAVLogicalMap
                                 .setZoneRef(room)
                                 .setFloorRef(floor)
                                 .addMarker("entering")
-                                .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("his").addMarker("logical").addMarker("zone")
+                                .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("his").addMarker("logical").addMarker("zone").addMarker("equipHis")
                                 .setGroup(String.valueOf(nodeAddr))
                                 .setUnit("\u00B0F")
                                 .setTz(tz)
@@ -159,7 +161,7 @@ public class VAVLogicalMap
                                 .setSiteRef(siteRef)
                                 .setZoneRef(room)
                                 .setFloorRef(floor)
-                                .addMarker("damper").addMarker("cmd").addMarker("his").addMarker("logical").addMarker("zone")
+                                .addMarker("damper").addMarker("cmd").addMarker("his").addMarker("logical").addMarker("zone").addMarker("equipHis")
                                 .setGroup(String.valueOf(nodeAddr))
                                 .setUnit("\u00B0F")
                                 .setTz(tz)
@@ -174,7 +176,7 @@ public class VAVLogicalMap
                                   .setZoneRef(room)
                                   .setFloorRef(floor)
                                   .addMarker("reheat")
-                                  .addMarker("water").addMarker("valve").addMarker("cmd").addMarker("his").addMarker("logical").addMarker("zone")
+                                  .addMarker("water").addMarker("valve").addMarker("cmd").addMarker("his").addMarker("logical").addMarker("zone").addMarker("equipHis")
                                   .setGroup(String.valueOf(nodeAddr))
                                   .setUnit("\u00B0F")
                                   .setTz(tz)
@@ -188,7 +190,7 @@ public class VAVLogicalMap
                                   .setZoneRef(room)
                                   .setFloorRef(floor)
                                   .addMarker("zone")
-                                  .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical")
+                                  .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                                   .setGroup(String.valueOf(nodeAddr))
                                   .setUnit("\u00B0F")
                                   .setTz(tz)
@@ -202,7 +204,7 @@ public class VAVLogicalMap
                                     .setZoneRef(room)
                                     .setFloorRef(floor)
                                     .addMarker("zone").addMarker("air").addMarker("temp").addMarker("desired")
-                                    .addMarker("sp").addMarker("writable").addMarker("his")
+                                    .addMarker("sp").addMarker("writable").addMarker("his").addMarker("equipHis")
                                     .setGroup(String.valueOf(nodeAddr))
                                     .setUnit("\u00B0F")
                                     .setTz(tz)
@@ -215,7 +217,7 @@ public class VAVLogicalMap
                                     .setSiteRef(siteRef)
                                     .setZoneRef(room)
                                     .setFloorRef(floor)
-                                    .addMarker("heating").addMarker("loop").addMarker("sp").addMarker("his").addMarker("zone")
+                                    .addMarker("heating").addMarker("loop").addMarker("sp").addMarker("his").addMarker("zone").addMarker("equipHis")
                                     .setGroup(String.valueOf(nodeAddr))
                                     .setUnit("\u00B0F")
                                     .setTz(tz)
@@ -228,7 +230,7 @@ public class VAVLogicalMap
                                       .setSiteRef(siteRef)
                                       .setZoneRef(room)
                                       .setFloorRef(floor)
-                                      .addMarker("cooling").addMarker("loop").addMarker("sp").addMarker("his").addMarker("zone")
+                                      .addMarker("cooling").addMarker("loop").addMarker("sp").addMarker("his").addMarker("zone").addMarker("equipHis")
                                       .setGroup(String.valueOf(nodeAddr))
                                       .setUnit("\u00B0F")
                                       .setTz(tz)
@@ -241,7 +243,7 @@ public class VAVLogicalMap
                                       .setSiteRef(siteRef)
                                       .setZoneRef(room)
                                       .setFloorRef(floor)
-                                      .addMarker("discharge").addMarker("air").addMarker("temp").addMarker("zone")
+                                      .addMarker("discharge").addMarker("air").addMarker("temp").addMarker("zone").addMarker("equipHis")
                                       .addMarker("sp").addMarker("his")
                                       .setGroup(String.valueOf(nodeAddr))
                                       .setUnit("\u00B0F")
@@ -256,7 +258,7 @@ public class VAVLogicalMap
                                     .setZoneRef(room)
                                     .setFloorRef(floor)
                                     .addMarker("request").addMarker("hour").addMarker("cumulative")
-                                    .addMarker("tr").addMarker("supply").addMarker("air").addMarker("temp").addMarker("his").addMarker("zone")
+                                    .addMarker("tr").addMarker("supply").addMarker("air").addMarker("temp").addMarker("his").addMarker("zone").addMarker("equipHis")
                                     .setGroup(String.valueOf(nodeAddr))
                                     .setUnit("\u00B0F")
                                     .setTz(tz)
@@ -270,7 +272,7 @@ public class VAVLogicalMap
                                              .setZoneRef(room)
                                              .setFloorRef(floor)
                                              .addMarker("request").addMarker("hour").addMarker("cumulative")
-                                             .addMarker("tr").addMarker("co2").addMarker("temp").addMarker("his").addMarker("zone")
+                                             .addMarker("tr").addMarker("co2").addMarker("temp").addMarker("his").addMarker("zone").addMarker("equipHis")
                                              .setGroup(String.valueOf(nodeAddr))
                                              .setUnit("\u00B0F")
                                              .setTz(tz)
@@ -284,7 +286,7 @@ public class VAVLogicalMap
                                              .setZoneRef(room)
                                              .setFloorRef(floor)
                                              .addMarker("request").addMarker("hour").addMarker("cumulative")
-                                             .addMarker("tr").addMarker("hwst").addMarker("his").addMarker("zone")
+                                             .addMarker("tr").addMarker("hwst").addMarker("his").addMarker("zone").addMarker("equipHis")
                                              .setGroup(String.valueOf(nodeAddr))
                                              .setUnit("\u00B0F")
                                              .setTz(tz)
@@ -298,7 +300,7 @@ public class VAVLogicalMap
                                              .setZoneRef(room)
                                              .setFloorRef(floor)
                                              .addMarker("request").addMarker("hour").addMarker("cumulative")
-                                             .addMarker("tr").addMarker("pressure").addMarker("his").addMarker("zone")
+                                             .addMarker("tr").addMarker("pressure").addMarker("his").addMarker("zone").addMarker("equipHis")
                                              .setGroup(String.valueOf(nodeAddr))
                                              .setUnit("\u00B0F")
                                              .setTz(tz)
@@ -368,22 +370,39 @@ public class VAVLogicalMap
         //Create Physical points and map
         SmartNode device = new SmartNode(nodeAddr, siteRef, floor, room);
         device.th1In.setPointRef(datID);
+        device.th1In.setEnabled(true);
         device.th2In.setPointRef(eatID);
+        device.th2In.setEnabled(true);
         device.analog1Out.setPointRef(dpID);
+        //device.analog1Out.setEnabled(true);
         device.analog2Out.setPointRef(rhID);
+        device.relay1.setPointRef(rhID);
+        device.relay2.setPointRef(rhID);
+        //device.analog2Out.setEnabled(true);
         device.currentTemp.setPointRef(ctID);
+        device.currentTemp.setEnabled(true);
         for (Output op : config.getOutputs()) {
-            if (op.getPort() == Port.ANALOG_OUT_ONE) {
-                device.analog1Out.setType(op.getAnalogActuatorType());
-            } else if (op.getPort() == Port.ANALOG_OUT_TWO) {
-                device.analog2Out.setType(op.getAnalogActuatorType());
+            switch (op.getPort()) {
+                case ANALOG_OUT_ONE:
+                    device.analog1Out.setType(op.getAnalogActuatorType());
+                    break;
+                case ANALOG_OUT_TWO:
+                    device.analog2Out.setType(op.getAnalogActuatorType());
+                    break;
+                case RELAY_ONE:
+                    device.relay1.setType(op.getRelayActuatorType());
+                    break;
+                case RELAY_TWO:
+                    device.relay2.setType(op.getRelayActuatorType());
+                    break;
             }
         }
-        CCUHsApi.getInstance().addPoint(device.th1In);
-        CCUHsApi.getInstance().addPoint(device.th2In);
-        CCUHsApi.getInstance().addPoint(device.analog1Out);
-        CCUHsApi.getInstance().addPoint(device.analog2Out);
-        CCUHsApi.getInstance().addPoint(device.currentTemp);
+        device.analog1Out.setEnabled(config.isOpConfigured(Port.ANALOG_OUT_ONE));
+        device.analog2Out.setEnabled(config.isOpConfigured(Port.ANALOG_OUT_TWO));
+        device.relay1.setEnabled(config.isOpConfigured(Port.RELAY_ONE));
+        device.relay2.setEnabled(config.isOpConfigured(Port.RELAY_TWO));
+        
+        device.addPointsToDb();
         
         Log.d("VAV", CCUHsApi.getInstance().tagsDb.getDbMap().toString());
     
@@ -401,12 +420,22 @@ public class VAVLogicalMap
     
     public void updateHaystackPoints(VavProfileConfiguration config) {
         for (Output op : config.getOutputs()) {
-            if (op.getPort() == Port.ANALOG_OUT_ONE) {
-                SmartNode.updatePhysicalPoint(nodeAddr, Port.ANALOG_OUT_ONE.toString(), op.getAnalogActuatorType());
-            } else if (op.getPort() == Port.ANALOG_OUT_TWO) {
-                SmartNode.updatePhysicalPoint(nodeAddr, Port.ANALOG_OUT_TWO.toString(), op.getAnalogActuatorType());
+            switch (op.getPort()) {
+                case ANALOG_OUT_ONE:
+                case ANALOG_OUT_TWO:
+                    Log.d("CCU"," Update analog"+op.getPort()+" type "+op.getAnalogActuatorType());
+                    SmartNode.updatePhysicalPoint(nodeAddr, op.getPort().toString(), op.getAnalogActuatorType());
+                    break;
+                case RELAY_ONE:
+                case RELAY_TWO:
+                    SmartNode.updatePhysicalPoint(nodeAddr, op.getPort().toString(), op.getRelayActuatorType());
+                    break;
             }
         }
+        
+        SmartNode.setPointEnabled(nodeAddr, Port.ANALOG_OUT_TWO.name(), config.isOpConfigured(Port.ANALOG_OUT_TWO) );
+        SmartNode.setPointEnabled(nodeAddr, Port.RELAY_ONE.name(), config.isOpConfigured(Port.RELAY_ONE) );
+        SmartNode.setPointEnabled(nodeAddr, Port.RELAY_TWO.name(), config.isOpConfigured(Port.RELAY_TWO) );
     }
     
     public void deleteHaystackPoints() {
@@ -435,7 +464,7 @@ public class VAVLogicalMap
         config.setPriority(ZonePriority.LOW);
         
         RawPoint a1 = SmartNode.getPhysicalPoint(nodeAddr, Port.ANALOG_OUT_ONE.toString());
-        if (a1 != null) {
+        if (a1 != null && a1.getEnabled()) {
             Output analogOne = new Output();
             analogOne.setAddress((short)nodeAddr);
             analogOne.setPort(Port.ANALOG_OUT_ONE);
@@ -444,21 +473,32 @@ public class VAVLogicalMap
         }
     
         RawPoint a2 = SmartNode.getPhysicalPoint(nodeAddr, Port.ANALOG_OUT_TWO.toString());
-        if (a2 != null) {
+        if (a2 != null  && a2.getEnabled()) {
             Output analogTwo = new Output();
             analogTwo.setAddress((short)nodeAddr);
             analogTwo.setPort(Port.ANALOG_OUT_TWO);
+            Log.d("CCU"," Get analog out 2 type "+a2.getType());
             analogTwo.mOutputAnalogActuatorType = OutputAnalogActuatorType.getEnum(a2.getType());
             config.getOutputs().add(analogTwo);
         }
     
-        /*RawPoint a3 = SmartNode.getPhysicalPoint(nodeAddr, Port.RELAY_ONE.toString());
-        if (a3 != null) {
-            Output relayOne = new Output();
-            relayOne.setAddress((short)nodeAddr);
-            relayOne.setPort(Port.RELAY_ONE);
-            relayOne.mOutputRelayActuatorType = OutputRelayActuatorType.getEnum(a2.getType());
-        }*/
+        RawPoint r1 = SmartNode.getPhysicalPoint(nodeAddr, Port.RELAY_ONE.toString());
+        if (r1 != null && r1.getEnabled()) {
+            Output relay1 = new Output();
+            relay1.setAddress((short)nodeAddr);
+            relay1.setPort(Port.RELAY_ONE);
+            relay1.mOutputRelayActuatorType = OutputRelayActuatorType.getEnum(r1.getType());
+            config.getOutputs().add(relay1);
+        }
+    
+        RawPoint r2 = SmartNode.getPhysicalPoint(nodeAddr, Port.RELAY_TWO.toString());
+        if (r2 != null && r2.getEnabled()) {
+            Output relay2 = new Output();
+            relay2.setAddress((short)nodeAddr);
+            relay2.setPort(Port.RELAY_TWO);
+            relay2.mOutputRelayActuatorType = OutputRelayActuatorType.getEnum(r2.getType());
+            config.getOutputs().add(relay2);
+        }
         return config;
     }
     

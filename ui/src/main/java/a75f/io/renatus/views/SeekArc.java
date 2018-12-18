@@ -26,8 +26,8 @@ import android.view.View;
 
 import java.text.DecimalFormat;
 
+import a75f.io.api.haystack.Zone;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.Zone;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.RoomDataInterface;
 import a75f.io.renatus.R;
@@ -197,8 +197,8 @@ public class SeekArc extends View implements RoomDataInterface
     private int mOutsideLimitDiffRight;
     private boolean showCCUDial = false;
     //private SingleStageProfile mSSEProfile;
-    private  ZoneProfile zoneProfile;
-    private Zone               mZone;
+    private ZoneProfile zoneProfile;
+    private Zone        mZone;
 
 
     public SeekArc(Context context)

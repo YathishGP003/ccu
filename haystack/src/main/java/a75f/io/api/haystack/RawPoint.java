@@ -22,7 +22,17 @@ public class RawPoint
     private String siteRef;
     private String zoneRef;
     private String floorRef;
-    private String id;
+    private String kind;
+    public boolean getEnabled()
+    {
+        return enabled;
+    }
+    public void setEnabled(boolean enabled)
+    {
+        this.enabled = enabled;
+    }
+    private boolean enabled;
+    private String  id;
     public String getId()
     {
         return id;
@@ -78,6 +88,10 @@ public class RawPoint
     {
         return floorRef;
     }
+    public String getKind()
+    {
+        return kind;
+    }
     public String toString() {
         return displayName;
     }
@@ -93,7 +107,20 @@ public class RawPoint
         private String tz;
         private String zoneRef;
         private String floorRef;
-        private String id;
+        private String kind;
+        public Builder setEnabled(boolean enabled)
+        {
+            this.enabled = enabled;
+            return this;
+        }
+        private boolean enabled;
+        private String  id;
+    
+        public Builder setKind(String kind)
+        {
+            this.kind = kind;
+            return this;
+        }
         public Builder setDisplayName(String displayName)
         {
             this.displayName = displayName;
@@ -168,7 +195,9 @@ public class RawPoint
             p.siteRef = this.siteRef;
             p.zoneRef = this.zoneRef;
             p.floorRef = this.floorRef;
+            p.kind = this.kind;
             p.id = this.id;
+            p.enabled = this.enabled;
             //CCUHsApi.getInstance().addRawPoint(p);
             return p;
         }
@@ -179,7 +208,7 @@ public class RawPoint
             while (it.hasNext())
             {
                 Map.Entry pair = (Map.Entry) it.next();
-                System.out.println(pair.getKey() + " = " + pair.getValue());
+                //System.out.println(pair.getKey() + " = " + pair.getValue());
                 if (pair.getKey().equals("id"))
                 {
                     this.id = pair.getValue().toString();
@@ -188,9 +217,9 @@ public class RawPoint
                 {
                     this.displayName = pair.getValue().toString();
                 }
-                else if (pair.getKey().equals("marker"))
+                else if(pair.getValue().equals("marker")/*pair.getKey().equals("marker")*/) //TODO
                 {
-                    this.markers.add(pair.getValue().toString());
+                    this.markers.add(pair.getKey().toString()/*pair.getValue().toString()*/);
                 }
                 else if (pair.getKey().equals("siteRef"))
                 {
@@ -223,6 +252,14 @@ public class RawPoint
                 else if (pair.getKey().equals("unit"))
                 {
                     this.unit = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("kind"))
+                {
+                    this.kind = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("enabled"))
+                {
+                    this.enabled = Boolean.parseBoolean(pair.getValue().toString());
                 }
                 else if (pair.getKey().equals("tz"))
                 {

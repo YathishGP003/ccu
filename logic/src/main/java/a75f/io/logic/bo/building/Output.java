@@ -63,6 +63,12 @@ public class Output extends Circuit
         return mOutputAnalogActuatorType.displayName;
     }
     
+    @JsonIgnore
+    public String getRelayActuatorType()
+    {
+        return mOutputRelayActuatorType.displayName;
+    }
+    
     
     protected static short scaleAnalog(short analog, int scale)
     {

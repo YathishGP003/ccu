@@ -1,11 +1,15 @@
 package a75f.io.logic.bo.building.system;
 
+import android.util.Log;
+
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logic.L;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 
 /**
@@ -48,14 +52,18 @@ public class SystemEquip
         Equip systemEquip= new Equip.Builder()
                                   .setSiteRef(siteRef)
                                   .setDisplayName(siteDis+"-SystemEquip")
+                                  .setProfile(ProfileType.SYSTEM_VAV_ANALOG_RTU.name())
                                   .addMarker("equip")
                                   .addMarker("system")
+                                  .setTz(siteMap.get("tz").toString())
                                   .build();
         equipRef = hayStack.addEquip(systemEquip);
         equipDis = siteDis+"-SystemEquip";
         tz = siteMap.get("tz").toString();
         addSystemPoints();
         new ControlMote(siteRef);
+        L.saveCCUState();
+        CCUHsApi.getInstance().syncEntityTree();
     }
     
     public String getEquipRef() {
@@ -67,7 +75,7 @@ public class SystemEquip
                                    .setDisplayName(equipDis+"-"+"SAT")
                                    .setSiteRef(siteRef)
                                    .setEquipRef(equipRef)
-                                   .addMarker("tr").addMarker("sat").addMarker("his").addMarker("system")
+                                   .addMarker("tr").addMarker("sat").addMarker("his").addMarker("system").addMarker("equipHis")
                                    .setUnit("\u00B0F")
                                    .setTz(tz)
                                    .build();
@@ -77,7 +85,7 @@ public class SystemEquip
                             .setDisplayName(equipDis+"-"+"CO2")
                             .setSiteRef(siteRef)
                             .setEquipRef(equipRef)
-                            .addMarker("tr").addMarker("co2").addMarker("his").addMarker("system")
+                            .addMarker("tr").addMarker("co2").addMarker("his").addMarker("system").addMarker("equipHis")
                             .setUnit("\u00B0ppm")
                             .setTz(tz)
                             .build();
@@ -87,7 +95,7 @@ public class SystemEquip
                             .setDisplayName(equipDis+"-"+"SP")
                             .setSiteRef(siteRef)
                             .setEquipRef(equipRef)
-                            .addMarker("tr").addMarker("sp").addMarker("his").addMarker("system")
+                            .addMarker("tr").addMarker("sp").addMarker("his").addMarker("system").addMarker("equipHis")
                             .setUnit("\u00B0in")
                             .setTz(tz)
                             .build();
@@ -97,7 +105,7 @@ public class SystemEquip
                            .setDisplayName(equipDis+"-"+"HWST")
                            .setSiteRef(siteRef)
                            .setEquipRef(equipRef)
-                           .addMarker("tr").addMarker("hwst").addMarker("his").addMarker("system")
+                           .addMarker("tr").addMarker("hwst").addMarker("his").addMarker("system").addMarker("equipHis")
                            .setUnit("\u00B0F")
                            .setTz(tz)
                            .build();
@@ -137,6 +145,13 @@ public class SystemEquip
         setHwst(0);
     }
     
+    public void updateSystemProfile(ProfileType profile) {
+        Log.d("CCU", " Update Profile type for " + SystemEquip.getInstance().getEquipRef() + " :" + profile.name());
+        Equip q = new Equip.Builder().setHashMap(CCUHsApi.getInstance().readMapById(equipRef)).setProfile(profile.name()).build();
+        CCUHsApi.getInstance().updateEquip(q, equipRef);
+        L.saveCCUState();
+        CCUHsApi.getInstance().syncEntityTree();
+    }
     
     private void addAnalogOutSelectionPoint(String analog) {
         Point p = new Point.Builder()

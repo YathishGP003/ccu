@@ -69,7 +69,7 @@ public class Floor
             Iterator it = site.entrySet().iterator();
             while (it.hasNext()) {
                 Map.Entry pair = (Map.Entry)it.next();
-                System.out.println(pair.getKey() + " = " + pair.getValue());
+                //System.out.println(pair.getKey() + " = " + pair.getValue());
                 if(pair.getKey().equals("id"))
                 {
                     this.id = pair.getValue().toString();
@@ -78,9 +78,9 @@ public class Floor
                 {
                     this.displayName = pair.getValue().toString();
                 }
-                else if(pair.getKey().equals("marker"))
+                else if(pair.getValue().equals("marker")/*pair.getKey().equals("marker")*/) //TODO
                 {
-                    this.markers.add(pair.getValue().toString());
+                    this.markers.add(pair.getKey().toString()/*pair.getValue().toString()*/);
                 }
                 else if(pair.getKey().equals("siteRef"))
                 {

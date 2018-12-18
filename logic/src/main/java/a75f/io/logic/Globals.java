@@ -17,6 +17,7 @@ import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -25,12 +26,18 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logic.bo.building.CCUApplication;
 import a75f.io.logic.bo.building.Day;
 import a75f.io.logic.bo.building.NamedSchedule;
 import a75f.io.logic.bo.building.Schedule;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.system.DabStagedRtu;
+import a75f.io.logic.bo.building.system.VavAnalogRtu;
+import a75f.io.logic.bo.building.system.VavBacnetRtu;
+import a75f.io.logic.bo.building.system.VavIERtu;
+import a75f.io.logic.bo.building.system.VavStagedRtu;
 import a75f.io.logic.bo.building.vav.VavParallelFanProfile;
 import a75f.io.logic.bo.building.vav.VavReheatProfile;
 import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
@@ -161,6 +168,18 @@ public class Globals
 //        }
     
         addProfilesForEquips();
+        /*new Thread()
+        {
+            @Override
+            public void run()
+            {
+                SystemEquip.getInstance();
+            }
+        }.start();*/
+        
+        String addrBand = getSmartNodeBand();
+        L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
+        
     }
 
     private void populate()
@@ -340,12 +359,14 @@ public class Globals
     }
     
     public void addProfilesForEquips() {
+        HashMap site = CCUHsApi.getInstance().read(Tags.SITE);
+        if (site == null || site.size() == 0) {
+            Log.d("CCUHS","Site does not exist. Profiles not loaded");
+            return;
+        }
         for (Floor f: HSUtil.getFloors()) {
-            Log.d("CCUHS",f.getDisplayName());
             for (Zone z: HSUtil.getZones(f.getId())) {
-                Log.d("CCUHS",z.getDisplayName());
                 for (Equip eq : HSUtil.getEquips(z.getId())) {
-                    Log.d("CCUHS",eq.getDisplayName());
                     switch (ProfileType.valueOf(eq.getProfile())) {
                         case VAV_REHEAT:
                             VavReheatProfile vr = new VavReheatProfile();
@@ -367,6 +388,44 @@ public class Globals
             }
             
         }
+    
+        HashMap equip = CCUHsApi.getInstance().read("equip and system");
+        if (equip != null && equip.size() > 0)
+        {
+            Equip eq = new Equip.Builder().setHashMap(equip).build();
+            Log.d("CCUHS","System profile "+eq.getProfile());
+            switch (ProfileType.valueOf(eq.getProfile()))
+            {
+                case SYSTEM_VAV_ANALOG_RTU:
+                    L.ccu().systemProfile = new VavAnalogRtu();
+                    break;
+                case SYSTEM_VAV_STAGED_RTU:
+                    L.ccu().systemProfile = new VavStagedRtu();
+                    break;
+                case SYSTEM_DAB_STAGED_RTU:
+                    L.ccu().systemProfile = new DabStagedRtu();
+                    break;
+                case SYSTEM_VAV_IE_RTU:
+                    L.ccu().systemProfile = new VavIERtu();
+                    break;
+                case SYSTEM_VAV_BACNET_RTU:
+                    L.ccu().systemProfile = new VavBacnetRtu();
+                    break;
+                default:
+                    L.ccu().systemProfile = new VavAnalogRtu();
+            }
+        } else {
+            Log.d("CCUHS","System Equip does not exist.Create VavAnalogRtu System Profile");
+            L.ccu().systemProfile = new VavAnalogRtu();
+        }
+    }
+    
+    public String getSmartNodeBand() {
+        HashMap band = CCUHsApi.getInstance().read("point and snband");
+        if (band != null && band.size() > 0) {
+            return band.get("val").toString();
+        }
+        return null;
     }
     
 }

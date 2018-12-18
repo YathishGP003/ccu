@@ -272,5 +272,27 @@ public class L
         {
             hsApi.deleteEntityTree(device.get("id").toString());
         }
+        removeProfile(node);
+    }
+    
+    public static ZoneProfile getProfile(short addr) {
+        for(ZoneProfile p : L.ccu().zoneProfiles) {
+            for (Short node : p.getNodeAddresses()) {
+                if (node == addr) {
+                    return p;
+                }
+            }
+        }
+        return null;
+    }
+    
+    public static void removeProfile(short addr) {
+        for(ZoneProfile p : L.ccu().zoneProfiles) {
+            for (Short node : p.getNodeAddresses()) {
+                if (node == addr) {
+                    L.ccu().zoneProfiles.remove(p);
+                }
+            }
+        }
     }
 }

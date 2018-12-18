@@ -35,6 +35,15 @@ public class BaseProfileConfiguration
         return mOutputs;
     }
     
+    public boolean isOpConfigured(Port port) {
+        for (Output op : mOutputs) {
+            if (op.getPort() == port) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
     public void setOutputs(ArrayList<Output> outputs)
     {
         this.mOutputs = outputs;

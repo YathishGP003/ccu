@@ -46,10 +46,7 @@ public class SettingsFragment extends Fragment
 	{
 		ArrayAdapter<CharSequence> hvacEquipSelectorAdapter = ArrayAdapter.createFromResource(this.getActivity(), R.array.hvac_equip_select, R.layout.spinner_dropdown_item);
 		hvacEquipSelectorAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-		int pos = hvacEquipSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName());
-		
 		spHvacEquipType.setAdapter(hvacEquipSelectorAdapter);
-		spHvacEquipType.setSelection(pos >= 0 ? pos : 0);
 		spHvacEquipType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
 		{
 			@Override
@@ -58,30 +55,23 @@ public class SettingsFragment extends Fragment
 				switch (i)
 				{
 					case 0:
-						//L.ccu().systemProfile = new DabStagedRtu();
 						getActivity().getSupportFragmentManager().beginTransaction()
 						             .replace(R.id.profileContainer, new DABStagedProfile()).commit();
-						
 						break;
 					case 1:
-						//L.ccu().systemProfile = new VavAnalogRtu();
 						getActivity().getSupportFragmentManager().beginTransaction()
 						             .replace(R.id.profileContainer, new VavAnalogRtuProfile()).commit();
-						
 						break;
 					case 2:
-						//L.ccu().systemProfile = new VavIERtu();
 						getActivity().getSupportFragmentManager().beginTransaction()
 						             .replace(R.id.profileContainer, new VavIERtuProfile()).commit();
 						break;
 					case 3:
-						//L.ccu().systemProfile = new VavStagedRtu();
 						getActivity().getSupportFragmentManager().beginTransaction()
 						             .replace(R.id.profileContainer, new VavStagedRtuProfile()).commit();
 						break;
 					case 4:
 						//L.ccu().systemProfile = new VavBacnetRtu();
-						
 						break;
 				}
 			}
@@ -90,9 +80,7 @@ public class SettingsFragment extends Fragment
 			{
 			}
 		});
-	}
-	
-	private void updateSystemProfileType() {
-		
+		spHvacEquipType.setSelection(L.ccu().systemProfile != null ?
+				            hvacEquipSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 1 );
 	}
 }

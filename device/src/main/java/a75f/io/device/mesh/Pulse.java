@@ -24,13 +24,14 @@ public class Pulse
 		HashMap device = hayStack.read("device and addr == \""+nodeAddr+"\"");
 		if (device != null && device.size() > 0)
 		{
-			ArrayList<HashMap> phyPoints = hayStack.readAll("point and physical and input and deviceRef == \"" + device.get("id") + "\"");
+			ArrayList<HashMap> phyPoints = hayStack.readAll("point and physical and sensor and deviceRef == \"" + device.get("id") + "\"");
 			
 			for(HashMap phyPoint : phyPoints) {
+				if (phyPoint.get("pointRef") == null || phyPoint.get("pointRef") == "") {
+					continue;
+				}
 				HashMap logPoint = hayStack.read("point and id=="+phyPoint.get("pointRef"));
 				double val;
-				//Log.d(TAG,"phyPoint : "+phyPoint);
-				//Log.d(TAG,"logPoint : "+logPoint);
 				switch (phyPoint.get("port").toString()){
 					case "RTH":
 						val = smartNodeRegularUpdateMessage_t.update.roomTemperature.get();
@@ -53,14 +54,14 @@ public class Pulse
 					case "TH1_IN":
 						val = smartNodeRegularUpdateMessage_t.update.externalThermistorInput1.get();
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-						hayStack.writeHisValById(logPoint.get("id").toString(), getThermistorConversion(val));
-						Log.d(TAG,"regularSmartNodeUpdate : Thermistor1 "+val);
+						hayStack.writeHisValById(logPoint.get("id").toString(), ThermistorUtil.getThermisterValueToTemp(val));
+						Log.d(TAG,"regularSmartNodeUpdate : Thermistor1 "+ThermistorUtil.getThermisterValueToTemp(val));
 						break;
 					case "TH2_IN":
 						val = smartNodeRegularUpdateMessage_t.update.externalThermistorInput2.get();
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-						hayStack.writeHisValById(logPoint.get("id").toString(), getThermistorConversion(val));
-						Log.d(TAG,"regularSmartNodeUpdate : Thermistor2 "+val);
+						hayStack.writeHisValById(logPoint.get("id").toString(), ThermistorUtil.getThermisterValueToTemp(val));
+						Log.d(TAG,"regularSmartNodeUpdate : Thermistor2 "+ThermistorUtil.getThermisterValueToTemp(val));
 						break;
 				}
 			}

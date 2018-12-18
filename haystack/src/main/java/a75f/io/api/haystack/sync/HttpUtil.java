@@ -38,11 +38,18 @@ public class HttpUtil
     //String token = asJsonObject.get("access_token").getAsString();
     public static String executePost(String targetURL, String urlParameters)
     {
-        
-        if(clientToken.equalsIgnoreCase(""))
+        synchronized (HttpUtil.class)
         {
-            clientToken = parseToken(authorizeToken(CLIENT_ID, "", CLIENT_SECRET, TENANT_ID));
-            System.out.println("Client Token: " + clientToken);
+            if (clientToken.equalsIgnoreCase(""))
+            {
+                String jsonToken = authorizeToken(CLIENT_ID, "", CLIENT_SECRET, TENANT_ID);
+                if (jsonToken == null)
+                {
+                    return null;
+                }
+                clientToken = parseToken(jsonToken);
+                System.out.println("Client Token: " + clientToken);
+            }
         }
         URL url;
         HttpsURLConnection connection = null;
@@ -128,7 +135,7 @@ public class HttpUtil
     // "expires_in":3600,
     // "ext_expires_in":0,
     // "access_token":"eyJ0eXAiOiJKV1QiLCJub25jZSI6IkFRQUJBQUFBQUFDNXVuYTBFVUZnVElGOEVsYXh0V2pUaFJIZTZZSVA2eWYzZmtldTJIYndJRUl5TGR2SHBBb1FJWEg1R3JVS2dQZHhFNHFleXI0WXRwcjlrVVRnc2FrN2dUOG9YcFVsSlpDZS1nLTFqaEphOFNBQSIsImFsZyI6IlJTMjU2IiwieDV0Ijoid1VMbVlmc3FkUXVXdFZfLWh4VnRESkpaTTRRIiwia2lkIjoid1VMbVlmc3FkUXVXdFZfLWh4VnRESkpaTTRRIn0.eyJhdWQiOiJodHRwczovL2dyYXBoLm1pY3Jvc29mdC5jb20iLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC85NDFkOGE2MS00YmUyLTQ2MjItOGFjZS1lZDhlZTU2OTZkOTkvIiwiaWF0IjoxNTQxNzgzODQ1LCJuYmYiOjE1NDE3ODM4NDUsImV4cCI6MTU0MTc4Nzc0NSwiYWlvIjoiNDJSZ1lKakhYODMrU25JeGY4NVQ0MVhoU2pHTkFBPT0iLCJhcHBfZGlzcGxheW5hbWUiOiJSZW5hdHVzQW5kcm9pZCIsImFwcGlkIjoiZDc2ODI0MzktYWM0MS00MDhiLWJmNzItYjg5YTk4NDkwYmRmIiwiYXBwaWRhY3IiOiIxIiwiaWRwIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvOTQxZDhhNjEtNGJlMi00NjIyLThhY2UtZWQ4ZWU1Njk2ZDk5LyIsIm9pZCI6IjU3MDNiMjA2LTM1OTMtNDE5Ny05N2RiLTAyOWZlNjA4ODY3YSIsInN1YiI6IjU3MDNiMjA2LTM1OTMtNDE5Ny05N2RiLTAyOWZlNjA4ODY3YSIsInRpZCI6Ijk0MWQ4YTYxLTRiZTItNDYyMi04YWNlLWVkOGVlNTY5NmQ5OSIsInV0aSI6InpHR0VQSXJoN0UtemNWZ3p1eWtpQUEiLCJ2ZXIiOiIxLjAiLCJ4bXNfdGNkdCI6MTU0MTUyNjk0M30.P2UBFqovARX0K-XccwmA1SzBmAfUhTfxjNWDXjvh9XS6M8uiBFMSZ1CkZxW818mOcQPEQiY61GTMhbAN6KAL3dY3iTs0EJHkR42MgY_PTUSuVi80fyNReXrZnbG18Fl_Oy1TSSYdMIZotVafQNO3tYkNMFPPXJhe_bNpdFpYFukxoZleQ_Vg3Zg0XFS6CzNdAO1gLU01c2kEDvgkbqafBZgC55NH2KojwKcGXu0ZmqbzkP9RxGv2iZPaRCUZRM0WqIfD3zLqQRtT98MqJOd0Wkxa6j5OZIwMD9qb3mAMQBjKsXZ2LxthPwtnClW9iQ3JcSJV6Y2_5Dy8jqDiJhG1UA"}
-    public static synchronized String authorizeToken(String client_id, String scope, String client_secret, String tenantId)
+    public static String authorizeToken(String client_id, String scope, String client_secret, String tenantId)
     {
         String contentType = "application/x-www-form-urlencoded";
         URL url;

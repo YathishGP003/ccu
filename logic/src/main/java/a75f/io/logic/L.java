@@ -287,12 +287,18 @@ public class L
     }
     
     public static void removeProfile(short addr) {
+        ZoneProfile deleteProfile = null;
         for(ZoneProfile p : L.ccu().zoneProfiles) {
             for (Short node : p.getNodeAddresses()) {
                 if (node == addr) {
-                    L.ccu().zoneProfiles.remove(p);
+                    deleteProfile = p;
+                    break;
                 }
             }
+        }
+        if (deleteProfile != null)
+        {
+            L.ccu().zoneProfiles.remove(deleteProfile);
         }
     }
 }

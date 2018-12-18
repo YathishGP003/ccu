@@ -107,8 +107,6 @@ public class RegisterGatherCCUDetails extends Activity {
                                                         .setDisplayName(ccuName+"-smartNodeBand")
                                                         .addMarker("snband").addMarker("sp").setVal(addressBandSelected).build();
                 CCUHsApi.getInstance().addPoint(snBand);
-                                    
-                
                 next();
             }
         });
@@ -127,8 +125,6 @@ public class RegisterGatherCCUDetails extends Activity {
             @Override
             protected HGrid doInBackground(Void... voids) {
                 CCUHsApi.getInstance().getSiteId();
-
-
                 return CCUHsApi.getInstance().getCCUs();
             }
 
@@ -142,8 +138,6 @@ public class RegisterGatherCCUDetails extends Activity {
                     mCCUS = hGrid;
                     showCCUButton();
                 }
-
-
             }
         };
 

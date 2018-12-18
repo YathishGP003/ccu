@@ -1,2 +1,2 @@
-include ':ui', ':logic', ':device', ':usbserial', ':alerts', ':algos', ':haystack'
+include ':app', ':logic', ':device', ':usbserial', ':alerts', ':algos', ':haystack'
 

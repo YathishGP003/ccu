@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.InstanceCreator;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
 
@@ -43,6 +44,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.UUID;
 
 import io.objectbox.Box;
@@ -86,9 +88,15 @@ public class CCUTagsDb extends HServer {
     public Map<String, String> updateIdMap;
     public String updateIdMapString;
 
+    private class TimeZoneInstanceCreator implements InstanceCreator<TimeZone> {
+        public TimeZone createInstance(Type type) {
+            return TimeZone.getDefault();
+        }
+    }
+
     //public String tagsString = null;
     RuntimeTypeAdapterFactory<HVal> hsTypeAdapter =
-            RuntimeTypeAdapterFactory
+            RuntimeTypeAdapterFactory.of(TimeZone.class)
                     .of(HVal.class)
                     .registerSubtype(HBin.class)
                     .registerSubtype(HBool.class)
@@ -133,7 +141,7 @@ public class CCUTagsDb extends HServer {
 
         } else {
             Gson gson = new GsonBuilder()
-                    .registerTypeAdapterFactory(hsTypeAdapter)
+                    .registerTypeAdapterFactory(hsTypeAdapter).registerTypeAdapter(TimeZone.class, new TimeZoneInstanceCreator())
                     .setPrettyPrinting()
                     .disableHtmlEscaping()
                     .create();
@@ -148,6 +156,9 @@ public class CCUTagsDb extends HServer {
             updateIdMap = gson.fromJson(updateIdMapString, HashMap.class);
         }
     }
+
+
+
 
     public void saveTags() {
 

@@ -153,6 +153,7 @@ public class DefaultSchedules {
                 .add("siteRef", siteId)
                 .toDict();
 
+
         CCUHsApi.getInstance().addSchedule(localId, defaultSchedule);
 
     }

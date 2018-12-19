@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ScrollView;
 
+import a75f.io.logger.CcuLog;
 import a75f.io.renatus.R;
 
 /**

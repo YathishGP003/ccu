@@ -114,7 +114,8 @@ public class Globals
 
     public boolean isSimulation()
     {
-        return isSimulation;
+        return getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                                        .getBoolean("biskit_mode", false);
     }
 
 
@@ -147,36 +148,14 @@ public class Globals
         
         mProcessJob.scheduleJob("Building Process Job", DEFAULT_HEARTBEAT_INTERVAL,
                 TASK_SEPERATION * 2, TASK_SERERATION_TIMEUNIT);
-        
-        isSimulation = getApplicationContext().getResources().getBoolean(R.bool.simulation);
+    
+        isSimulation = getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                                                    .getBoolean("biskit_mode", false);
         isDeveloperTest = getApplicationContext().getResources().getBoolean(R.bool.developer_test);
 
         
         new CCUHsApi(this.mApplicationContext);
-        //TODO - Test => Should be moved to registration module
-//        HashMap site = CCUHsApi.getInstance().read("site");
-//        if (site.size() == 0) {
-//            //TODO - demo
-//            Site s75f = new Site.Builder()
-//                                .setDisplayName("75F")
-//                                .addMarker("site")
-//                                .setGeoCity("Burnsville")
-//                                .setGeoState("MN")
-//                                .setTz("Chicago")
-//                                .setArea(10000).build();
-//            CCUHsApi.getInstance().addSite(s75f);
-//            BuildingTuners.getInstance();//To init Building tuner
-//        }
-    
         addProfilesForEquips();
-        /*new Thread()
-        {
-            @Override
-            public void run()
-            {
-                SystemEquip.getInstance();
-            }
-        }.start();*/
         
         String addrBand = getSmartNodeBand();
         L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));

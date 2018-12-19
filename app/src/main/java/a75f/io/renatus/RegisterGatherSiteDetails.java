@@ -18,7 +18,6 @@ import java.util.TimeZone;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Site;
-import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.SystemEquip;
 import a75f.io.logic.bo.building.system.VavAnalogRtu;
@@ -59,6 +58,7 @@ public class RegisterGatherSiteDetails extends Activity {
         mNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                mNext.setEnabled(false);
                 String siteName = mSiteName.getText().toString();
                 String siteCity = mSiteCity.getText().toString();
                 String siteZip = mSiteZip.getText().toString();

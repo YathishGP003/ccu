@@ -29,6 +29,8 @@ import a75f.io.logic.tuners.TunerConstants;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static android.view.View.GONE;
+
 /**
  * Created by samjithsadasivan on 11/6/18.
  */
@@ -197,6 +199,9 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 		co2Max.setOnItemSelectedListener(this);
 		spMin.setOnItemSelectedListener(this);
 		spMax.setOnItemSelectedListener(this);
+		//TODO-
+		heatingSatMin.setVisibility(GONE);
+		heatingSatMax.setVisibility(GONE);
 	}
 	
 	private void setupAnalogLimitSelectors() {

@@ -8,8 +8,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class DabStagedRtu extends SystemProfile
 {
-    
-    
     @JsonIgnore
     public String getProfileName() {
         return "DAB Staged RTU";

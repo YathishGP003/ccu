@@ -12,6 +12,7 @@ import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import a75f.io.logger.CcuLog;
 import info.guardianproject.netcipher.NetCipher;
 
 /**
@@ -61,9 +62,11 @@ public class HttpUtil
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Content-Type",
                     "text/zinc");
-            
-            System.out.println(targetURL);
-            System.out.println(urlParameters);
+    
+            CcuLog.i("CCU",url.toString());
+            CcuLog.i("CCU",urlParameters);
+            //System.out.println(targetURL);
+            //System.out.println(urlParameters);
             connection.setRequestProperty("Content-Length", "" +
                                                             Integer.toString(urlParameters.getBytes("UTF-8").length));
             connection.setRequestProperty("Content-Language", "en-US");

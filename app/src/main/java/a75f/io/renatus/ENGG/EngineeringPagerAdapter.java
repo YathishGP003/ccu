@@ -25,7 +25,7 @@ public class EngineeringPagerAdapter extends FragmentStatePagerAdapter
 		switch (position)
 		{
 			case 0:
-				fragment = SerialMessageFragment.newInstance();
+				fragment = DevSettings.newInstance();
 				break;
 			case 1:
 				fragment = LogFragment.newInstance();
@@ -34,6 +34,9 @@ public class EngineeringPagerAdapter extends FragmentStatePagerAdapter
 				fragment = FieldTestFragment.newInstance();
 				break;
 			case 3:
+				fragment = SerialMessageFragment.newInstance();
+				break;
+			case 4:
 				fragment = BLETestFragment.newInstance();
 				break;
 		}
@@ -43,20 +46,23 @@ public class EngineeringPagerAdapter extends FragmentStatePagerAdapter
 	@Override
 	public int getCount() {
 		// Show 2 total pages.
-		return 4;
+		return 5;
 	}
 	
 	@Override
 	public CharSequence getPageTitle(int position) {
 		switch (position) {
 			case 0:
-				return "Serial Messages";
+				return "Dev Settings";
 			case 1:
 				return "CcuLog View";
 			case 2:
 				return "Field Test";
 			case 3:
+				return "Serial Messages";
+			case 4:
 				return "BLE Test";
+				
 		}
 		return null;
 	}

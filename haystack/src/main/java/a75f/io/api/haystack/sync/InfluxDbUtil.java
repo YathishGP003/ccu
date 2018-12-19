@@ -9,6 +9,8 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import a75f.io.logger.CcuLog;
+
 /**
  * Created by samjithsadasivan on 7/19/18.
  */
@@ -102,8 +104,8 @@ public class InfluxDbUtil
         dataSb.append(" "+msTimeStamp);
         
         String urlParams = dataSb.toString();
-        System.out.println(targetURL);
-        System.out.println(urlParams);
+        CcuLog.i("CCU",targetURL);
+        CcuLog.i("CCU",urlParams);
         URL url;
         HttpURLConnection connection = null;
         try {

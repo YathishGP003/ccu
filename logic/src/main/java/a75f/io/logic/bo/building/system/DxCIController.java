@@ -161,7 +161,6 @@ public class DxCIController
     public boolean isAllZonesHeating() {
         for (ZoneProfile p: L.ccu().zoneProfiles)
         {
-            System.out.println(" Zone State " +p.state);
             if (p.getState() != ZoneState.HEATING) {
                 Log.d("dx"," Equip "+p.getProfileType()+" is not in Heating");
                 return false;
@@ -173,6 +172,7 @@ public class DxCIController
     public boolean isAllZonesCooling() {
         for (ZoneProfile p: L.ccu().zoneProfiles)
         {
+            System.out.println(" Zone State " +p.state);
             if (p.getState() != ZoneState.COOLING) {
                 Log.d("dx"," Equip "+p.getProfileType()+" is not in Cooling");
                 return false;

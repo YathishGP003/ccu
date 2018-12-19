@@ -27,26 +27,19 @@ public class BuildingProcessJob extends BaseJob
     public void doJob() {
         Log.d("CCU","BuildingProcessJob ->");
     
-        HashMap site = CCUHsApi.getInstance().read("ccu");
-        if (site == null || site.size() == 0) {
+        HashMap site = CCUHsApi.getInstance().read("site");
+        if (site.size() == 0) {
             Log.d("CCU","No Site Registered ! <-BuildingProcessJob ");
             return;
         }
     
-        tsData = new HashMap();
+        HashMap ccu = CCUHsApi.getInstance().read("ccu");
+        if (ccu.size() == 0) {
+            Log.d("CCU","No CCU Registered ! <-BuildingProcessJob ");
+            return;
+        }
     
-        /*for(Floor floor : L.ccu().getFloors())
-        {
-            for(Zone zone : floor.mZoneList)
-            {
-                for (ZoneProfile zp : zone.mZoneProfiles)
-                {
-                    Log.d("VAV"," updatePoints "+zp.getNodeAddresses());
-                    zp.updateZonePoints();
-            }
-        }*/
-        
-        Log.d("CCU", "L.ccu().zoneProfiles -> "+L.ccu().zoneProfiles.size());
+        tsData = new HashMap();
         
         for (ZoneProfile profile : L.ccu().zoneProfiles) {
             Log.d("CCU", "updateZonePoints -> "+profile.getProfileType());

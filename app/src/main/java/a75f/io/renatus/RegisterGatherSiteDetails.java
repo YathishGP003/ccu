@@ -1,15 +1,20 @@
 package a75f.io.renatus;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 
 import java.util.HashMap;
+import java.util.TimeZone;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Site;
@@ -26,9 +31,11 @@ public class RegisterGatherSiteDetails extends Activity {
        only when a user comes online and finishes registration
        does this database sync with the backend.
      */
-    EditText mSiteName;
-    EditText mSiteCity;
-    EditText mSiteZip;
+    EditText             mSiteName;
+    EditText             mSiteCity;
+    EditText             mSiteZip;
+    Spinner              mTimeZoneSelector;
+    ArrayAdapter<String> timeZoneAdapter;
 
     private static final String TAG = RegisterGatherSiteDetails.class.getSimpleName();
 
@@ -46,7 +53,9 @@ public class RegisterGatherSiteDetails extends Activity {
 
 
         mNext = (Button) findViewById(R.id.next_button);
+        mTimeZoneSelector = findViewById(R.id.timeZoneSelector);
 
+        populateAndUpdateTimeZone();
         mNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -74,7 +83,22 @@ public class RegisterGatherSiteDetails extends Activity {
             }
         });
     }
-
+    
+    private void populateAndUpdateTimeZone()
+    {
+        timeZoneAdapter= new ArrayAdapter <String> (this, android.R.layout.simple_spinner_item );
+        timeZoneAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        String[] tzIds = TimeZone.getAvailableIDs();
+        
+        for(int i = 0; i < tzIds.length; i++) {
+            timeZoneAdapter.add(tzIds[i]);
+        }
+        
+        mTimeZoneSelector = findViewById(R.id.timeZoneSelector);
+        mTimeZoneSelector.setAdapter(timeZoneAdapter);
+        
+        mTimeZoneSelector.setSelection(timeZoneAdapter.getPosition(TimeZone.getDefault().getID()));
+    }
 
     private void next() {
         Intent i = new Intent(RegisterGatherSiteDetails.this,
@@ -86,23 +110,28 @@ public class RegisterGatherSiteDetails extends Activity {
     /* This site never existed we are creating a new orphaned site. */
     public String saveSite(String siteName, String siteCity, String siteZip) {
         HashMap site = CCUHsApi.getInstance().read("site");
-
+    
+        String tzID = mTimeZoneSelector.getSelectedItem().toString();
+        AlarmManager am = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        am.setTimeZone(tzID);
+        
+        
         Site s75f = new Site.Builder()
                 .setDisplayName(siteName)
                 .addMarker("site")
                 .addMarker("orphan")
                 .setGeoCity(siteCity)
                 .setGeoState("MN")
-                .setTz("Chicago")
+                .setTz(tzID.substring(tzID.lastIndexOf("/") + 1))//Haystack requires tz area string.
                 .setGeoZip(siteZip)
                 .setArea(10000).build();
         String localSiteId = CCUHsApi.getInstance().addSite(s75f);
-        L.ccu().defaultSite = new a75f.io.logic.bo.building.Site(s75f);
         BuildingTuners.getInstance();
         SystemEquip.getInstance();
         Log.i(TAG, "LocalSiteID: " + localSiteId);
         CCUHsApi.getInstance().log();
         L.ccu().systemProfile = new VavAnalogRtu();
+        CCUHsApi.getInstance().saveTagsData();
         return localSiteId;
     }
 

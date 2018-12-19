@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -110,12 +111,13 @@ public class TestHS
         CCUHsApi hayStack = new CCUHsApi();
         int nodeAddr = 7000;
         
+        String tz = TimeZone.getDefault().getID().substring(TimeZone.getDefault().getID().lastIndexOf("/") + 1);
         Site s = new Site.Builder()
-                         .setDisplayName("Name")
+                         .setDisplayName("Test")
                          .addMarker("site")
                          .setGeoCity("Burnsville")
                          .setGeoState("MN")
-                         .setTz("Chicago")
+                         .setTz(tz)
                          .setArea(1000).build();
         hayStack.addSite(s);
     
@@ -143,7 +145,7 @@ public class TestHS
                                   .addMarker("discharge")
                                   .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("his")
                                   .setGroup(String.valueOf(nodeAddr))
-                                  .setTz("Chicago")
+                                  .setTz(tz)
                                   .setUnit("\u00B0F")
                                   .build();
     

@@ -82,9 +82,13 @@ public class EntitySyncHandler
             CCUHsApi.getInstance().putUIDMap(siteLUID, siteGUID);
             if (!doSyncFloors(siteLUID)) {
                 //Abort Sync as equips and points need valid floorRef and zoneRef
+                Log.d("CCU"," Floor Sync failed : abort");
                 return;
             }
-            doSyncEquips(siteLUID);
+            if (!doSyncEquips(siteLUID)) {
+                Log.d("CCU"," Equip Sync failed : abort");
+                return;
+            }
             doSyncDevices(siteLUID);
             doSyncSchedules(siteLUID);
 
@@ -230,7 +234,7 @@ public class EntitySyncHandler
         return true;
     }
     
-    private void doSyncEquips(String siteLUID) {
+    private boolean doSyncEquips(String siteLUID) {
         System.out.println("doSyncEquips ->");
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and siteRef == \""+siteLUID+"\"");
         ArrayList<String> equipLUIDList = new ArrayList();
@@ -260,7 +264,7 @@ public class EntitySyncHandler
             System.out.println("Response: \n" + response);
             if (response == null)
             {
-                return;
+                return false;
             }
             HZincReader zReader = new HZincReader(response);
             Iterator it = zReader.readGrid().iterator();
@@ -276,10 +280,10 @@ public class EntitySyncHandler
                 }
             }
         }
-        doSyncPoints(siteLUID);
+        return doSyncPoints(siteLUID);
     }
     
-    private void doSyncPoints(String siteLUID) {
+    private boolean doSyncPoints(String siteLUID) {
         System.out.println("doSyncPoints ->");
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and siteRef == \""+siteLUID+"\"");
         for (Map q: equips)
@@ -322,7 +326,7 @@ public class EntitySyncHandler
                 System.out.println("Response: \n" + response);
                 if (response == null)
                 {
-                    return;
+                    return false;
                 }
                 HZincReader zReader = new HZincReader(response);
                 Iterator it = zReader.readGrid().iterator();
@@ -335,6 +339,7 @@ public class EntitySyncHandler
                 }
             }
         }
+        return true;
     }
     
     private void doSyncDevices(String siteLUID) {

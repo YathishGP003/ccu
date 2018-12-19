@@ -28,11 +28,16 @@ public class SplashActivity extends Activity {
                         @Override
                         public void run() {
                             HashMap site = CCUHsApi.getInstance().read("site");
-
+                            HashMap ccu = CCUHsApi.getInstance().read("ccu");
 
                             if (site.size() == 0) {
                                 System.out.println("No Site Synced navigate to Register");
                                 Intent i = new Intent(SplashActivity.this, RegisterGatherDetails.class);
+                                startActivity(i);
+                                finish();
+                            } else if (ccu.size() == 0) {
+                                System.out.println("No CCU Synced navigate to Create");
+                                Intent i = new Intent(SplashActivity.this, RegisterGatherCCUDetails.class);
                                 startActivity(i);
                                 finish();
                             }

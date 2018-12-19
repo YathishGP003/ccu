@@ -184,7 +184,7 @@ public class VavReheatProfile extends VavProfile
             heatingLoop.dump();
             
     
-            Log.d(TAG, "STATE :"+state+" ,loopOp: " + loopOp + " ,damper:" + damper.currentPosition+", valve:"+valve.currentPosition);
+            Log.d(TAG, "STATE :"+state+" ZoneState : "+getState()+" ,loopOp: " + loopOp + " ,damper:" + damper.currentPosition+", valve:"+valve.currentPosition);
             updateTRResponse(node);
     
             vavDevice.setDamperPos(damper.currentPosition);

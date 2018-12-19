@@ -86,11 +86,15 @@ public class EntitySyncHandler
             }
             doSyncEquips(siteLUID);
             doSyncDevices(siteLUID);
+            doSyncSchedules(siteLUID);
+
         }
         
         System.out.println("<- doSyncSite");
     }
-    
+
+
+
     private boolean doSyncFloors(String siteLUID) {
         System.out.println("doSyncFloors ->");
         ArrayList<HashMap> floors = CCUHsApi.getInstance().readAll("floor");
@@ -180,6 +184,49 @@ public class EntitySyncHandler
                 }
             }
         }
+        return true;
+    }
+
+    private boolean doSyncSchedules(String siteLUID) {
+        ArrayList<HashMap> schedules = CCUHsApi.getInstance().readAll("schedule");
+
+        ArrayList<String> scheduleLUIDList = new ArrayList<String>();
+        ArrayList<HDict> entities = new ArrayList<>();
+        for (Map m: schedules)
+        {
+            System.out.println("Schedule sync: " + m);
+            String luid = m.remove("id").toString();
+            if (CCUHsApi.getInstance().getGUID(luid) == null) {
+                scheduleLUIDList.add(luid);
+                m.put("siteRef", HRef.copy(CCUHsApi.getInstance().getGUID(siteLUID)));
+                entities.add(HSUtil.mapToHDict(m));
+            }
+        }
+
+        if (scheduleLUIDList.size() > 0)
+        {
+            HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
+            String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
+            System.out.println("Response: \n" + response);
+            if (response == null)
+            {
+                System.out.println("Aborting Floor Sync");
+                return false;
+            }
+            HZincReader zReader = new HZincReader(response);
+            Iterator it = zReader.readGrid().iterator();
+            int index = 0;
+            while (it.hasNext())
+            {
+                HRow row = (HRow) it.next();
+                String floorGUID = row.get("id").toString();
+                if (floorGUID != "")
+                {
+                    CCUHsApi.getInstance().putUIDMap(scheduleLUIDList.get(index++), floorGUID);
+                }
+            }
+        }
+
         return true;
     }
     
@@ -456,6 +503,10 @@ public class EntitySyncHandler
             if (entity.get("zoneRef") != null && CCUHsApi.getInstance().getGUID(entity.get("zoneRef").toString()) != null)
             {
                 entity.put("zoneRef", HRef.copy(CCUHsApi.getInstance().getGUID(entity.get("zoneRef").toString())));
+            }
+            if (entity.get("scheduleRef") != null && CCUHsApi.getInstance().getGUID(entity.get("scheduleRef").toString()) != null)
+            {
+                entity.put("scheduleRef", HRef.copy(CCUHsApi.getInstance().getGUID(entity.get("scheduleRef").toString())));
             }
             entities.add(HSUtil.mapToHDict(entity));
         }

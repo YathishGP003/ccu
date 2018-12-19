@@ -68,6 +68,7 @@ public class Globals
 
     PubNub pubnub;
     boolean pubnubSubscribed = false;
+    private boolean _siteAlreadyCreated;
 
 
     private Globals()
@@ -427,5 +428,12 @@ public class Globals
         }
         return null;
     }
-    
+
+    public boolean siteAlreadyCreated() {
+        return _siteAlreadyCreated;
+    }
+
+    public void setSiteAlreadyCreated(boolean siteAlreadyCreated) {
+        _siteAlreadyCreated = siteAlreadyCreated;
+    }
 }

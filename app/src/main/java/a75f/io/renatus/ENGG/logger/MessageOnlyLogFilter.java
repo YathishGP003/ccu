@@ -4,6 +4,9 @@ package a75f.io.renatus.ENGG.logger;
  * Created by samjithsadasivan isOn 8/17/17.
  */
 
+import a75f.io.logger.CcuLog;
+import a75f.io.logger.LogNode;
+
 /**
  * Simple {@link LogNode} filter, removes everything except the message.
  * Useful for situations like isOn-screen log output where you don't want a lot of metadata displayed,

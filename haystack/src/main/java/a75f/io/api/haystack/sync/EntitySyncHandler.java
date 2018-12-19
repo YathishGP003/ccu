@@ -18,6 +18,7 @@ import java.util.Map;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.logger.CcuLog;
 
 /**
  * Created by samjithsadasivan on 10/15/18.
@@ -41,19 +42,19 @@ public class EntitySyncHandler
         }
         
         if (CCUHsApi.getInstance().tagsDb.removeIdMap.size() > 0) {
-            System.out.println("RemoveIDMap : "+CCUHsApi.getInstance().tagsDb.removeIdMap);
+            CcuLog.i("CCU", "RemoveIDMap : "+CCUHsApi.getInstance().tagsDb.removeIdMap);
             doSyncRemoveIds();
         }
     
         if (CCUHsApi.getInstance().tagsDb.updateIdMap.size() > 0) {
-            System.out.println("UpdateIDMap : "+CCUHsApi.getInstance().tagsDb.updateIdMap);
+            CcuLog.i("CCU", "UpdateIDMap : "+CCUHsApi.getInstance().tagsDb.updateIdMap);
             doSyncUpdateEntities();
         }
     
     }
     
     private void doSyncSite() {
-        System.out.println("doSyncSite ->");
+        CcuLog.i("CCU", "doSyncSite ->");
         HDict sDict =  CCUHsApi.getInstance().readHDict("site");
         HDictBuilder b = new HDictBuilder().add(sDict);
         String siteLUID = b.remove("id").toString();
@@ -64,7 +65,7 @@ public class EntitySyncHandler
             entities.add(b.toDict());
             HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
             String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
-            System.out.println("Response: \n" + response);
+            CcuLog.i("CCU", "Response : "+response);
             if (response == null) {
                 return;
             }
@@ -82,11 +83,11 @@ public class EntitySyncHandler
             CCUHsApi.getInstance().putUIDMap(siteLUID, siteGUID);
             if (!doSyncFloors(siteLUID)) {
                 //Abort Sync as equips and points need valid floorRef and zoneRef
-                Log.d("CCU"," Floor Sync failed : abort");
+                CcuLog.i("CCU", "Floor Sync failed : abort ");
                 return;
             }
             if (!doSyncEquips(siteLUID)) {
-                Log.d("CCU"," Equip Sync failed : abort");
+                CcuLog.i("CCU", "Floor Sync failed : abort ");
                 return;
             }
             doSyncDevices(siteLUID);
@@ -94,20 +95,20 @@ public class EntitySyncHandler
 
         }
         
-        System.out.println("<- doSyncSite");
+        CcuLog.i("CCU", "<- doSyncSite");
     }
 
 
 
     private boolean doSyncFloors(String siteLUID) {
-        System.out.println("doSyncFloors ->");
+        CcuLog.i("CCU", "doSyncFloors ->");
         ArrayList<HashMap> floors = CCUHsApi.getInstance().readAll("floor");
         ArrayList<String> floorLUIDList = new ArrayList();
         
         ArrayList<HDict> entities = new ArrayList<>();
         for (Map m: floors)
         {
-            System.out.println(m);
+            CcuLog.i("CCU", m.toString());
             String luid = m.remove("id").toString();
             if (CCUHsApi.getInstance().getGUID(luid) == null) {
                 floorLUIDList.add(luid);
@@ -120,10 +121,10 @@ public class EntitySyncHandler
         {
             HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
             String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
-            System.out.println("Response: \n" + response);
+            CcuLog.i("CCU", "Response: \n" + response);
             if (response == null)
             {
-                System.out.println("Aborting Floor Sync");
+                CcuLog.i("CCU", "Aborting Floor Sync");
                 return false;
             }
             HZincReader zReader = new HZincReader(response);
@@ -144,7 +145,7 @@ public class EntitySyncHandler
     }
     
     private boolean doSyncZones(String siteLUID) {
-        System.out.println("doSyncZones ->");
+        CcuLog.i("CCU", "doSyncZones ->");
         ArrayList<HashMap> floors = CCUHsApi.getInstance().readAll("floor");
         ArrayList<String> zoneLUIDList = new ArrayList();
         ArrayList<HDict> entities = new ArrayList<>();
@@ -153,7 +154,7 @@ public class EntitySyncHandler
             ArrayList<HashMap> zones = CCUHsApi.getInstance().readAll("room and floorRef == \""+f.get("id")+"\"");
             for (Map m : zones)
             {
-                System.out.println(m);
+                CcuLog.i("CCU", m.toString());
                 String luid = m.remove("id").toString();
                 if (CCUHsApi.getInstance().getGUID(luid) == null)
                 {
@@ -169,10 +170,10 @@ public class EntitySyncHandler
         {
             HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
             String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
-            System.out.println("Response: \n" + response);
+            CcuLog.i("CCU", "Response: \n" + response);
             if (response == null)
             {
-                System.out.println("Aborting Zone Sync");
+                CcuLog.i("CCU", "Aborting Zone Sync");
                 return false;
             }
             HZincReader zReader = new HZincReader(response);
@@ -198,7 +199,7 @@ public class EntitySyncHandler
         ArrayList<HDict> entities = new ArrayList<>();
         for (Map m: schedules)
         {
-            System.out.println("Schedule sync: " + m);
+            CcuLog.i("CCU", "Schedule sync: " + m);
             String luid = m.remove("id").toString();
             if (CCUHsApi.getInstance().getGUID(luid) == null) {
                 scheduleLUIDList.add(luid);
@@ -211,10 +212,10 @@ public class EntitySyncHandler
         {
             HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
             String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
-            System.out.println("Response: \n" + response);
+            CcuLog.i("CCU", "Response: \n" + response);
             if (response == null)
             {
-                System.out.println("Aborting Floor Sync");
+                CcuLog.i("CCU", "Aborting Floor Sync");
                 return false;
             }
             HZincReader zReader = new HZincReader(response);
@@ -235,13 +236,13 @@ public class EntitySyncHandler
     }
     
     private boolean doSyncEquips(String siteLUID) {
-        System.out.println("doSyncEquips ->");
+        CcuLog.i("CCU", "doSyncEquips ->");
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and siteRef == \""+siteLUID+"\"");
         ArrayList<String> equipLUIDList = new ArrayList();
         ArrayList<HDict> entities = new ArrayList<>();
         for (Map m: equips)
         {
-            System.out.println(m);
+            CcuLog.i("CCU", m.toString());
             String luid = m.remove("id").toString();
             if (CCUHsApi.getInstance().getGUID(luid) == null) {
                 equipLUIDList.add(luid);
@@ -261,7 +262,7 @@ public class EntitySyncHandler
         {
             HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
             String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
-            System.out.println("Response: \n" + response);
+            CcuLog.i("CCU", "Response: \n" + response);
             if (response == null)
             {
                 return false;
@@ -284,7 +285,7 @@ public class EntitySyncHandler
     }
     
     private boolean doSyncPoints(String siteLUID) {
-        System.out.println("doSyncPoints ->");
+        CcuLog.i("CCU", "doSyncPoints ->");
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and siteRef == \""+siteLUID+"\"");
         for (Map q: equips)
         {
@@ -300,7 +301,7 @@ public class EntitySyncHandler
             ArrayList<HDict> entities = new ArrayList<>();
             for (Map m : points)
             {
-                //System.out.println(m);
+                //CcuLog.i("CCU", m);
                 String luid = m.remove("id").toString();
                 if (CCUHsApi.getInstance().getGUID(luid) == null)
                 {
@@ -323,7 +324,7 @@ public class EntitySyncHandler
             {
                 HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
                 String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
-                System.out.println("Response: \n" + response);
+                CcuLog.i("CCU", "Response: \n" + response);
                 if (response == null)
                 {
                     return false;
@@ -343,13 +344,13 @@ public class EntitySyncHandler
     }
     
     private void doSyncDevices(String siteLUID) {
-        System.out.println("doSyncDevices ->");
+        CcuLog.i("CCU", "doSyncDevices ->");
         ArrayList<HashMap> devices = CCUHsApi.getInstance().readAll("device");
         ArrayList<String> deviceLUIDList = new ArrayList();
         ArrayList<HDict> entities = new ArrayList<>();
         for (Map m: devices)
         {
-            System.out.println(m);
+            CcuLog.i("CCU", m.toString());
             String luid = m.remove("id").toString();
             if (CCUHsApi.getInstance().getGUID(luid) == null) {
                 deviceLUIDList.add(luid);
@@ -370,7 +371,7 @@ public class EntitySyncHandler
         {
             HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
             String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
-            System.out.println("Response: \n" + response);
+            CcuLog.i("CCU", "Response: \n" + response);
             if (response == null) {
                 return;
             }
@@ -393,7 +394,7 @@ public class EntitySyncHandler
     }
     
     private void doSyncPhyPoints(String siteLUID, ArrayList<String> deviceLUIDList) {
-        System.out.println("doSyncPhyPoints ->");
+        CcuLog.i("CCU", "doSyncPhyPoints ->");
         for (String deviceLUID : deviceLUIDList)
         {
             ArrayList<HashMap> points = CCUHsApi.getInstance().readAll("point and physical and deviceRef == \"" + deviceLUID + "\"");
@@ -404,7 +405,7 @@ public class EntitySyncHandler
             ArrayList<HDict> entities = new ArrayList<>();
             for (Map m : points)
             {
-                //System.out.println(m);
+                //CcuLog.i("CCU", m);
                 String luid = m.remove("id").toString();
                 if (CCUHsApi.getInstance().getGUID(luid) == null
                          && CCUHsApi.getInstance().getGUID(deviceLUID) != null)
@@ -432,7 +433,7 @@ public class EntitySyncHandler
             {
                 HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
                 String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
-                System.out.println("Response: \n" + response);
+                CcuLog.i("CCU", "Response: \n" + response);
                 if (response == null)
                 {
                     return;
@@ -453,7 +454,7 @@ public class EntitySyncHandler
     
     public void doSyncRemoveIds()
     {
-        System.out.println("doSyncRemoveIds->");
+        CcuLog.i("CCU", "doSyncRemoveIds->");
         ArrayList<HDict> entities = new ArrayList<>();
         
         for (String removeId : CCUHsApi.getInstance().tagsDb.removeIdMap.values())
@@ -470,14 +471,14 @@ public class EntitySyncHandler
         {
             CCUHsApi.getInstance().tagsDb.removeIdMap.clear();
         }
-        System.out.println("Response: \n" + response);
+        CcuLog.i("CCU", "Response: \n" + response);
     }
     
     /**
      * Update request should be sent with GUID as part of the entity.
      */
     public void doSyncUpdateEntities() {
-        System.out.println("doSyncUpdateEntities->");
+        CcuLog.i("CCU", "doSyncUpdateEntities->");
         ArrayList<HDict> entities = new ArrayList<>();
         for (String luid : CCUHsApi.getInstance().tagsDb.updateIdMap.keySet()) {
             if (CCUHsApi.getInstance().getGUID(luid) == null) {
@@ -520,10 +521,10 @@ public class EntitySyncHandler
         {
             HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
             String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
-            System.out.println("Response: \n" + response);
+            CcuLog.i("CCU", "Response: \n" + response);
             if (response != null)
             {
-                System.out.println("Updated Entities: "+CCUHsApi.getInstance().tagsDb.updateIdMap);
+                CcuLog.i("CCU", "Updated Entities: "+CCUHsApi.getInstance().tagsDb.updateIdMap);
                 CCUHsApi.getInstance().tagsDb.updateIdMap.clear();
             }
         }

@@ -83,6 +83,7 @@ public class MeshNetwork extends DeviceNetwork
         Log.d(TAG, "MeshNetwork SendSystemControl");
         if (L.ccu().systemProfile == null) {
             Log.d(TAG, "MeshNetwork SendSystemControl : Abort , No system profile");
+            return;
         }
         L.ccu().systemProfile.doSystemControl();
     

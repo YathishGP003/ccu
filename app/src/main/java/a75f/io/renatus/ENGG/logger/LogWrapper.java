@@ -6,11 +6,14 @@ package a75f.io.renatus.ENGG.logger;
 
 import android.util.Log;
 
+import a75f.io.logger.LogNode;
+
 /**
  * Helper class which wraps Android's native CcuLog utility in the Logger interface.  This way
  * normal DDMS output can be one of the many targets receiving and outputting logs simultaneously.
  */
-public class LogWrapper implements LogNode {
+public class LogWrapper implements LogNode
+{
 	
 	// For piping:  The next node to receive CcuLog data after this one has done its work.
 	private LogNode mNext;

@@ -69,7 +69,7 @@
                         android:paddingRight="14dp"
                         android:textSize="@dimen/text_small_xlarge"
                         android:layout_gravity="center_vertical"
-                        android:text=" Cooling  SAT (Analog 1)" />
+                        android:text=" Cooling (Analog 1)" />
 
                     <!--<Spinner
                     android:id="@+id/ahuAnalog1Type"
@@ -105,7 +105,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:paddingRight="14dp"
-                        android:text=" Heating SAT (Analog 2)"
+                        android:text=" Heating (Analog 2)"
                         android:textSize="@dimen/text_small_xlarge"/>
 
                     <!-- <Spinner
@@ -283,6 +283,7 @@
                         android:layout_row="1"
                         android:text=" Heating SAT Min (°F)"
                         android:textColor="@color/black"
+                        android:visibility="gone"
                         android:textSize="@dimen/text_small_xlarge"/>
 
                     <Spinner
@@ -303,6 +304,7 @@
                         android:layout_marginTop="14dp"
                         android:text=" Heating SAT Max (°F)"
                         android:textColor="@color/black"
+                        android:visibility="gone"
                         android:textSize="@dimen/text_small_xlarge"
                         />
 

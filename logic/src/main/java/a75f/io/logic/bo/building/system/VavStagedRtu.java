@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import a75.io.algos.vav.VavTRSystem;
 import a75f.io.logic.bo.building.hvac.Stage;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.tuners.SystemTunerUtil;
@@ -18,6 +19,10 @@ public class VavStagedRtu extends SystemProfile
     private static final int CO2_MIN = 400;
     
     private static final int ANALOG_SCALE = 10;
+    
+    public VavStagedRtu() {
+        trSystem =  new VavTRSystem();
+    }
     
     @JsonIgnore
     public String getProfileName()

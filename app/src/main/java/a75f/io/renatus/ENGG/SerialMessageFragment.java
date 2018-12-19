@@ -49,7 +49,7 @@ import a75f.io.device.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.usbserial.SerialAction;
 import a75f.io.usbserial.SerialEvent;
-import a75f.io.renatus.ENGG.logger.CcuLog;
+import a75f.io.logger.CcuLog;
 import a75f.io.renatus.R;
 import a75f.io.usbserial.UsbService;
 import butterknife.BindView;

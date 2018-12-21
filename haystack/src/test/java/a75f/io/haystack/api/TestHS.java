@@ -34,8 +34,6 @@ public class TestHS
     @Test
     public void testSerialization(){
         CCUHsApi api = new CCUHsApi();
-        api.tagsDb.tagsMap = new HashMap<>();
-        api.tagsDb.writeArrays = new HashMap<>();
         Site s = new Site.Builder()
                          .setDisplayName("Name")
                          .addMarker("site")
@@ -58,7 +56,7 @@ public class TestHS
         System.out.println(m1);
         api.tagsDb.saveString();
         System.out.println(api.tagsDb.tagsString);
-        api.tagsDb.init();
+        //api.tagsDb.init();
         System.out.println(api.tagsDb.tagsMap);
         /*Map m2 = api.tagsDb.tagsMap;
         Iterator i1 = m1.values().iterator();
@@ -261,11 +259,6 @@ public class TestHS
     @Test
     public void testDeleteEntityTree() {
         CCUHsApi hayStack = new CCUHsApi();
-        hayStack.tagsDb.init();
-        hayStack.tagsDb.tagsMap = new HashMap<>();
-        hayStack.tagsDb.writeArrays = new HashMap<>();
-        hayStack.tagsDb.idMap = new HashMap<>();
-        hayStack.tagsDb.removeIdMap = new HashMap<>();
         int nodeAddr = 7000;
     
         Site s = new Site.Builder()

@@ -404,7 +404,7 @@ public class VAVLogicalMap
         
         device.addPointsToDb();
         
-        Log.d("VAV", CCUHsApi.getInstance().tagsDb.getDbMap().toString());
+        //Log.d("VAV", CCUHsApi.getInstance().tagsDb.getDbMap().toString());
     
         //Initialize write array for points, otherwise a read before write will throw exception
         setCurrentTemp(0);
@@ -413,8 +413,15 @@ public class VAVLogicalMap
         setDischargeTemp(0);
         setSupplyAirTemp(0);
         setDesiredTemp(72.0);
+    
+        new Thread() {
+            @Override
+            public void run() {
+                super.run();
+                CCUHsApi.getInstance().syncEntityTree();
+            }
+        }.start();
         
-        CCUHsApi.getInstance().syncEntityTree();
         
     }
     

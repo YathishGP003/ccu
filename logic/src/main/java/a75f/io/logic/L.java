@@ -73,7 +73,6 @@ public class L
         {
             for (HashMap node : nodes)
             {
-                Log.d("CCU","Node :"+node);
                 if (node.get("addr").toString().equals(String.valueOf(nextAddr))) {
                     nextAddr++;
                     addrUsed = true;
@@ -304,6 +303,7 @@ public class L
                 }
             }
         }
+        Log.d("CCU","Profile Not found for "+addr);
         return null;
     }
     

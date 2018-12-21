@@ -1,6 +1,7 @@
 package a75f.io.renatus;
 
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -435,6 +436,17 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
             public void onClick(View v) {
     
                 new AsyncTask<Void, Void, Void>() {
+    
+                    ProgressDialog progressDlg = new ProgressDialog(getActivity());
+    
+                    @Override
+                    protected void onPreExecute() {
+                        setButton.setEnabled(false);
+                        progressDlg.setMessage("Saving VAV Configuration");
+                        progressDlg.show();
+                        super.onPreExecute();
+                    }
+    
                     @Override
                     protected Void doInBackground( final Void ... params ) {
                         setupVavZoneProfile();
@@ -445,11 +457,12 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         
                     @Override
                     protected void onPostExecute( final Void result ) {
-                        // continue what you are doing...
+                        progressDlg.dismiss();
+                        getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
+                        FragmentVAVConfiguration.this.closeAllBaseDialogFragments();
                     }
                 }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
-                getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
-                FragmentVAVConfiguration.this.closeAllBaseDialogFragments();
+                
             }
         });
     
@@ -495,17 +508,16 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
                 break;
                 
         }
+        mVavProfile.getProfileConfiguration().put(mSmartNodeAddress, vavConfig);
         if (mProfileConfig == null) {
-            mVavProfile.getProfileConfiguration().put(mSmartNodeAddress, vavConfig);
             mVavProfile.addLogicalMapAndPoints(mSmartNodeAddress, vavConfig, floorRef, zoneRef);
             BuildingTuners.getInstance().addDefaultVavTuners();
         } else
         {
-            mVavProfile.getProfileConfiguration().put(mSmartNodeAddress, vavConfig);
             mVavProfile.updateLogicalMapAndPoints(mSmartNodeAddress, vavConfig);
         }
         L.ccu().zoneProfiles.add(mVavProfile);
-        Log.d("VAVConfig", "Set Config: ");
+        Log.d("VAVConfig", "Set Config: Profiles - "+L.ccu().zoneProfiles.size());
     }
     
     private void setNumberPickerDividerColor(NumberPicker pk) {

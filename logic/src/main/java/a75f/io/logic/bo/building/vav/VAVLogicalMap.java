@@ -413,8 +413,15 @@ public class VAVLogicalMap
         setDischargeTemp(0);
         setSupplyAirTemp(0);
         setDesiredTemp(72.0);
+    
+        new Thread() {
+            @Override
+            public void run() {
+                super.run();
+                CCUHsApi.getInstance().syncEntityTree();
+            }
+        }.start();
         
-        CCUHsApi.getInstance().syncEntityTree();
         
     }
     

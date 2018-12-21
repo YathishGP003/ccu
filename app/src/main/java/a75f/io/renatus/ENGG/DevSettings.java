@@ -59,7 +59,7 @@ public class DevSettings extends Fragment
          super.onViewCreated(view, savedInstanceState);
          biskitModeBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
          {
-                                                                         @Override
+            @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b)
                  {
                      Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
@@ -119,7 +119,7 @@ public class DevSettings extends Fragment
     {
         try
         {
-            Process process = Runtime.getRuntime().exec("logcat -d");
+            Process process = Runtime.getRuntime().exec("logcat -v threadtime -d");
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             StringBuilder log = new StringBuilder();
             String line;

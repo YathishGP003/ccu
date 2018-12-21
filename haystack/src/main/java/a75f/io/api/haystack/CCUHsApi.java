@@ -460,7 +460,7 @@ public class CCUHsApi {
     }
 
     public void deleteEntity(String id) {
-        Log.d("CCU", "deleteEntity " + id);
+        Log.d("CCU", "deleteEntity " +CCUHsApi.getInstance().readMapById(id).toString());
         tagsDb.tagsMap.remove(id.replace("@", ""));
         if (tagsDb.idMap.get(id) != null) {
             tagsDb.removeIdMap.put(id, tagsDb.idMap.remove(id));

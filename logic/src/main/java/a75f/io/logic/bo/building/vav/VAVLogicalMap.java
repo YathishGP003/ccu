@@ -404,7 +404,7 @@ public class VAVLogicalMap
         
         device.addPointsToDb();
         
-        Log.d("VAV", CCUHsApi.getInstance().tagsDb.getDbMap().toString());
+        //Log.d("VAV", CCUHsApi.getInstance().tagsDb.getDbMap().toString());
     
         //Initialize write array for points, otherwise a read before write will throw exception
         setCurrentTemp(0);

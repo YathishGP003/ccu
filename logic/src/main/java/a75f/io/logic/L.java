@@ -63,7 +63,28 @@ public class L
     {
         short currentBand = L.ccu().getSmartNodeAddressBand();
         ArrayList<HashMap> nodes = CCUHsApi.getInstance().readAll("device and node");
-        return (short) (currentBand + nodes.size() - 1);
+        if (nodes.size() == 0) {
+            return currentBand;
+        }
+    
+        boolean addrUsed = true;
+        short nextAddr = currentBand;
+        while (addrUsed)
+        {
+            for (HashMap node : nodes)
+            {
+                Log.d("CCU","Node :"+node);
+                if (node.get("addr").toString().equals(String.valueOf(nextAddr))) {
+                    nextAddr++;
+                    addrUsed = true;
+                    break;
+                } else {
+                    addrUsed = false;
+                }
+            }
+        }
+        
+        return nextAddr;
     }
     
     public static Zone findZoneByName(String mFloorName, String mRoomName)

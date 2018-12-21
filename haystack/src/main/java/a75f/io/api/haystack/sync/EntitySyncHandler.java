@@ -87,7 +87,7 @@ public class EntitySyncHandler
                 return;
             }
             if (!doSyncEquips(siteLUID)) {
-                CcuLog.i("CCU", "Floor Sync failed : abort ");
+                CcuLog.i("CCU", "Equip Sync failed : abort ");
                 return;
             }
             doSyncDevices(siteLUID);
@@ -199,7 +199,6 @@ public class EntitySyncHandler
         ArrayList<HDict> entities = new ArrayList<>();
         for (Map m: schedules)
         {
-            CcuLog.i("CCU", "Schedule sync: " + m);
             String luid = m.remove("id").toString();
             if (CCUHsApi.getInstance().getGUID(luid) == null) {
                 scheduleLUIDList.add(luid);

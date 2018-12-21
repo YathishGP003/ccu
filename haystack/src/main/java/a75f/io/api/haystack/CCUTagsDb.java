@@ -40,12 +40,12 @@ import java.lang.reflect.Type;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
@@ -65,8 +65,8 @@ public class CCUTagsDb extends HServer {
     private static final String PREFS_REMOVE_ID_MAP = "removeIdMap";
     private static final String PREFS_UPDATE_ID_MAP = "updateIdMap";
 
-    public Map<String, HDict> tagsMap;
-    public HashMap<String, WriteArray> writeArrays;
+    public ConcurrentHashMap<String, HDict> tagsMap;
+    public ConcurrentHashMap<String, WriteArray>      writeArrays;
 
     public boolean unitTestMode = false;
 
@@ -79,13 +79,13 @@ public class CCUTagsDb extends HServer {
     private Box<HisItem> hisBox;
     private static final File TEST_DIRECTORY = new File("objectbox-example/test-db");
 
-    public Map<String, String> idMap;
+    public ConcurrentHashMap<String, String> idMap;
     public String idMapString;
 
-    public Map<String, String> removeIdMap;
+    public ConcurrentHashMap<String, String> removeIdMap;
     public String removeIdMapString;
 
-    public Map<String, String> updateIdMap;
+    public ConcurrentHashMap<String, String> updateIdMap;
     public String updateIdMapString;
 
     private class TimeZoneInstanceCreator implements InstanceCreator<TimeZone> {
@@ -133,11 +133,11 @@ public class CCUTagsDb extends HServer {
         hisBox = boxStore.boxFor(HisItem.class);
 
         if (tagsString == null) {
-            tagsMap = new HashMap();
-            writeArrays = new HashMap();
-            idMap = new HashMap();
-            removeIdMap = new HashMap();
-            updateIdMap = new HashMap();
+            tagsMap = new ConcurrentHashMap<>();
+            writeArrays = new ConcurrentHashMap();
+            idMap = new ConcurrentHashMap();
+            removeIdMap = new ConcurrentHashMap();
+            updateIdMap = new ConcurrentHashMap();
 
         } else {
             Gson gson = new GsonBuilder()
@@ -145,15 +145,15 @@ public class CCUTagsDb extends HServer {
                     .setPrettyPrinting()
                     .disableHtmlEscaping()
                     .create();
-            Type listType = new TypeToken<Map<String, MapImpl<String, HVal>>>() {
+            Type listType = new TypeToken<ConcurrentHashMap<String, MapImpl<String, HVal>>>() {
             }.getType();
             tagsMap = gson.fromJson(tagsString, listType);
-            Type waType = new TypeToken<HashMap<String, WriteArray>>() {
+            Type waType = new TypeToken<ConcurrentHashMap<String, WriteArray>>() {
             }.getType();
             writeArrays = gson.fromJson(waString, waType);
-            idMap = gson.fromJson(idMapString, HashMap.class);
-            removeIdMap = gson.fromJson(removeIdMapString, HashMap.class);
-            updateIdMap = gson.fromJson(updateIdMapString, HashMap.class);
+            idMap = gson.fromJson(idMapString, ConcurrentHashMap.class);
+            removeIdMap = gson.fromJson(removeIdMapString, ConcurrentHashMap.class);
+            updateIdMap = gson.fromJson(updateIdMapString, ConcurrentHashMap.class);
         }
     }
 
@@ -194,29 +194,29 @@ public class CCUTagsDb extends HServer {
     }
 
     public void setTagsDbMap() {
-        tagsMap = new HashMap<>();
+        tagsMap = new ConcurrentHashMap<>();
     }
 
     public void init() {
 
         if (tagsString == null) {
-            tagsMap = new HashMap();
-            writeArrays = new HashMap();
-            idMap = new HashMap();
-            removeIdMap = new HashMap();
-            updateIdMap = new HashMap();
+            tagsMap = new ConcurrentHashMap();
+            writeArrays = new ConcurrentHashMap();
+            idMap = new ConcurrentHashMap();
+            removeIdMap = new ConcurrentHashMap();
+            updateIdMap = new ConcurrentHashMap();
         } else
         {
             Gson gson = new GsonBuilder().registerTypeAdapterFactory(hsTypeAdapter).setPrettyPrinting().disableHtmlEscaping().create();
-            Type listType = new TypeToken<Map<String, MapImpl<String, HVal>>>() {
+            Type listType = new TypeToken<ConcurrentHashMap<String, MapImpl<String, HVal>>>() {
             }.getType();
             tagsMap = gson.fromJson(tagsString, listType);
-            Type waType = new TypeToken<HashMap<String, WriteArray>>() {
+            Type waType = new TypeToken<ConcurrentHashMap<String, WriteArray>>() {
             }.getType();
             writeArrays = gson.fromJson(waString, waType);
-            idMap = gson.fromJson(idMapString, HashMap.class);
-            removeIdMap = gson.fromJson(removeIdMapString, HashMap.class);
-            updateIdMap = gson.fromJson(updateIdMapString, HashMap.class);
+            idMap = gson.fromJson(idMapString, ConcurrentHashMap.class);
+            removeIdMap = gson.fromJson(removeIdMapString, ConcurrentHashMap.class);
+            updateIdMap = gson.fromJson(updateIdMapString, ConcurrentHashMap.class);
         }
     
         BoxStore.deleteAllFiles(TEST_DIRECTORY);
@@ -717,7 +717,6 @@ public class CCUTagsDb extends HServer {
             HDict hDict = new HDictBuilder().add("nosync").add("localconfig").toDict();
             tagsMap.put("config", hDict);
         }
-
         return tagsMap.get("config");
     }
 

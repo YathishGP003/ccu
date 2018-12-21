@@ -40,8 +40,6 @@ public class TestRemoteHsSync
     @Test
     public void testRemoteHaystack() {
         CCUHsApi api = new CCUHsApi();
-        api.tagsDb.tagsMap = new HashMap<>();
-        api.tagsDb.writeArrays = new HashMap<>();
         Site s = new Site.Builder()
                          .setDisplayName("Name")
                          .addMarker("site")
@@ -73,8 +71,6 @@ public class TestRemoteHsSync
     public void testNav() {
         
         CCUHsApi hayStack = new CCUHsApi();
-        hayStack.tagsDb.tagsMap = new HashMap<>();
-        hayStack.tagsDb.writeArrays = new HashMap<>();
         int nodeAddr = 7000;
         
         Site s = new Site.Builder()
@@ -136,10 +132,6 @@ public class TestRemoteHsSync
     @Test
     public void testTagSync() {
         CCUHsApi hayStack = new CCUHsApi();
-        hayStack.tagsDb.tagsMap = new HashMap<>();
-        hayStack.tagsDb.writeArrays = new HashMap<>();
-        hayStack.tagsDb.idMap = new HashMap<>();
-        hayStack.tagsDb.removeIdMap = new HashMap<>();
         int nodeAddr = 7000;
 
         EntitySyncHandler entitySyncHandler = new EntitySyncHandler();
@@ -214,9 +206,6 @@ public class TestRemoteHsSync
     @Test
     public void testTagRemoteNav() {
         CCUHsApi hayStack = new CCUHsApi();
-        hayStack.tagsDb.tagsMap = new HashMap<>();
-        hayStack.tagsDb.writeArrays = new HashMap<>();
-        hayStack.tagsDb.idMap = new HashMap<>();
         int nodeAddr = 7000;
         
         EntitySyncHandler entitySyncHandler = new EntitySyncHandler();
@@ -292,11 +281,6 @@ public class TestRemoteHsSync
     @Test
     public void testWritePoint() {
         CCUHsApi hayStack = new CCUHsApi();
-        hayStack.tagsDb.tagsMap = new HashMap<>();
-        hayStack.tagsDb.writeArrays = new HashMap<>();
-        hayStack.tagsDb.idMap = new HashMap<>();
-        hayStack.tagsDb.removeIdMap = new HashMap<>();
-        hayStack.tagsDb.updateIdMap = new HashMap<>();
         int nodeAddr = 7000;
     
         EntitySyncHandler entitySyncHandler = new EntitySyncHandler();
@@ -376,11 +360,6 @@ public class TestRemoteHsSync
     public void testHisSync(){
         
         CCUHsApi hayStack = new CCUHsApi();
-        hayStack.tagsDb.init();
-        hayStack.tagsDb.tagsMap = new HashMap<>();
-        hayStack.tagsDb.writeArrays = new HashMap<>();
-        hayStack.tagsDb.idMap = new HashMap<>();
-        hayStack.tagsDb.removeIdMap = new HashMap<>();
         int nodeAddr = 7000;
         
         Site s = new Site.Builder()
@@ -558,10 +537,6 @@ public class TestRemoteHsSync
     public void testCode(){
     
         CCUHsApi hayStack = new CCUHsApi();
-        hayStack.tagsDb.init();
-        hayStack.tagsDb.tagsMap = new HashMap<>();
-        hayStack.tagsDb.writeArrays = new HashMap<>();
-        hayStack.tagsDb.idMap = new HashMap<>();
     
         Site s = new Site.Builder()
                          .setDisplayName("Name")

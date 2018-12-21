@@ -29,8 +29,8 @@ public class ControlMote
         
         Device d = new Device.Builder()
                            .setDisplayName("CM-device")
+                           .addMarker("network")
                            .addMarker("cm")
-                           .addMarker("node")
                            .setSiteRef(site.getId())
                            .build();
         deviceRef = CCUHsApi.getInstance().addDevice(d);

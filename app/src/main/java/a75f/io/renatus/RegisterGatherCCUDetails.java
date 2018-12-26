@@ -29,6 +29,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.SettingPoint;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.tuners.BuildingTuners;

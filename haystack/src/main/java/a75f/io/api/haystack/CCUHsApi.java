@@ -201,11 +201,7 @@ public class CCUHsApi {
         HashMap<Object, Object> map = new HashMap<>();
         try {
             HDict dict = hsClient.read(query, true);
-            Iterator it = dict.iterator();
-            while (it.hasNext()) {
-                Map.Entry entry = (Map.Entry) it.next();
-                map.put(entry.getKey().toString(), entry.getValue().toString());
-            }
+
         } catch (UnknownRecException e) {
             e.printStackTrace();
         }

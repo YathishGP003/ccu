@@ -4,6 +4,8 @@ import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
+import junit.framework.Assert;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.projecthaystack.HDict;
@@ -16,7 +18,9 @@ import org.projecthaystack.client.HClient;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.CCUTagsDb;
+import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.sync.HttpUtil;
+import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 
 import static org.junit.Assert.assertEquals;
@@ -116,6 +120,20 @@ public class HSClientTest
         CCUHsApi.getInstance().tagsDb.log();
         CCUHsApi.getInstance().saveTagsData();
 
+    }
+
+
+    @Test
+    public void testAddDefaultScheduleToBusinessObject()
+    {
+
+        String testDis = "Default Site Schedule";
+        String localId = DefaultSchedules.generateDefaultSchedule();
+        System.out.println("Dict To String: " + localId);
+
+        Schedule build = new Schedule.Builder().setHashMap(CCUHsApi.getInstance().readHDictById(localId)).build();
+
+        Assert.assertEquals("Default Site Schedule", build.getDis());
     }
 
 

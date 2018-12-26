@@ -1,15 +1,30 @@
 package a75f.io.api.haystack;
 
 import org.projecthaystack.HDict;
+import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HList;
+import org.projecthaystack.HNum;
+import org.projecthaystack.HRef;
 import org.projecthaystack.HVal;
 
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.UUID;
+
+
+/***
+ * Supports Schedule to HDict
+ * HDict to Schedule
+ *
+ * Raw creation requires id field is set to  String localId = UUID.randomUUID().toString();
+ *
+ * TODO: support all curVal types
+ * TODO: return values queried anything that has this scheduleRef should be able to query it and have the results returned if it is in schedule.
+ *
+ */
+
 
 public class Schedule {
 
@@ -26,16 +41,23 @@ public class Schedule {
                 {sunrise:T day:3 val:80 sunset:T}]},
                 {heating
                     days:
-                    [{ethh:16 sthh:13 day:0.0 val:68},{ethh:16 sthh:9 day:1.0 etmm:12 val:80 stmm:0.0},{sunrise:T day:1.0 val:80 sunset:T},{sunrise:F day:3 val:80 sunset:F},{sunrise:T day:3 val:80 sunset:T}]}]}*/
+                    [{ethh:16 sthh:13 day:0.0 val:68},
+                    {ethh:16 sthh:9 day:1.0 etmm:12 val:80 stmm:0.0},
+                    {sunrise:T day:1.0 val:80 sunset:T},{sunrise:F day:3 val:80 sunset:F},{sunrise:T day:3 val:80 sunset:T}]}]}*/
 
     private String mId;
-
     private boolean mIsVacation;
     private String mDis;
     private HashSet<String> mMarkers;
     private String mKind;
     private String mUnit;
     private ArrayList<Days> mDays = new ArrayList<Days>();
+
+    public String getmSiteId() {
+        return mSiteId;
+    }
+
+    private String mSiteId;
 
     public String getTZ() {
         return mTZ;
@@ -81,6 +103,7 @@ public class Schedule {
         private String mUnit;
         private ArrayList<Days> mDays = new ArrayList<Days>();
         private String mTZ;
+        private String mSiteId;
 
         public Schedule.Builder setId(String id) {
             this.mId = id;
@@ -136,11 +159,14 @@ public class Schedule {
             s.mDis = this.mDis;
             s.mMarkers = this.mMarkers;
             s.mKind = this.mKind;
+            s.mSiteId =  this.mSiteId;
             s.mUnit = this.mUnit;
             s.mDays = this.mDays;
             s.mTZ = this.mTZ;
             return s;
         }
+
+
 
 
         public Schedule.Builder setHDict(HDict schedule) {
@@ -163,15 +189,15 @@ public class Schedule {
                     this.mTZ = pair.getValue().toString();
                 } else if (pair.getKey().equals("days")) {
                     this.mDays = Days.parse((HList) pair.getValue());
-                } else {
+                } else if(pair.getKey().equals("siteRef")) {
+                    this.mSiteId = schedule.getRef("siteRef").val;
+                }
+                else {
                     this.mMarkers.add(pair.getKey().toString());
                 }
             }
-
             return this;
         }
-
-
     }
 
 
@@ -277,12 +303,49 @@ public class Schedule {
             days.mEthh = hDict.getInt("stmm");
             days.mSunrise = hDict.has("sunrise");
             days.mSunset = hDict.has("sunset");
-            days.mVal = hDict.getDouble("val");
+            days.mVal = hDict.getDouble("curVal");
 
             return days;
         }
+    }
 
+    private HDict getScheduleHDict()
+    {
+        HRef siteId = CCUHsApi.getInstance().getSiteId();
+        HDict[] days = new HDict[getDays().size()];
 
+        for(int i = 0; i < getDays().size(); i++)
+        {
+            Days day = mDays.get(i);
+            HDictBuilder hDictDay = new HDictBuilder()
+                    .add(day.isCooling ? "cooling" : "heating")
+                    .add("day", HNum.make(day.mDay))
+                    .add("sthh", HNum.make(day.mStmm))
+                    .add("stmm", HNum.make(day.mStmm))
+                    .add("ethh", HNum.make(day.mEthh))
+                    .add("etmm", HNum.make(day.mEtmm))
+                    .add("curVal", HNum.make(day.mVal)); //need boolean & string support
+            if(day.mSunset) hDictDay.add("sunset", day.mSunset);
+            if(day.mSunrise) hDictDay.add("sunrise", day.mSunrise);
+
+            days[i] = hDictDay.toDict();
+        }
+
+        HList hList = HList.make(days);
+        HDictBuilder defaultSchedule = new HDictBuilder()
+                .add("id", getId())
+                .add("unit", getUnit())
+                .add("kind", getKind())
+                .add("dis", "Default Site Schedule")
+                .add("days", hList)
+                .add("siteRef", HRef.make(mSiteId));
+
+        for(String marker : getMarkers())
+        {
+            defaultSchedule.add(marker);
+        }
+
+        return defaultSchedule.toDict();
     }
 
 

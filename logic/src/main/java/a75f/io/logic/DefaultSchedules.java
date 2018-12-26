@@ -103,7 +103,7 @@ public class DefaultSchedules {
                 .add("stmm", HNum.make(30))
                 .add("ethh", HNum.make(17))
                 .add("etmm", HNum.make(30))
-                .add("val", HNum.make(temp)).toDict();
+                .add("curVal", HNum.make(temp)).toDict();
 
         return hDictDay;
     }

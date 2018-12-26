@@ -123,18 +123,18 @@ public class HSClientTest
     }
 
 
-    @Test
-    public void testAddDefaultScheduleToBusinessObject()
-    {
-
-        String testDis = "Default Site Schedule";
-        String localId = DefaultSchedules.generateDefaultSchedule();
-        System.out.println("Dict To String: " + localId);
-
-        Schedule build = new Schedule.Builder().setHashMap(CCUHsApi.getInstance().readHDictById(localId)).build();
-
-        Assert.assertEquals("Default Site Schedule", build.getDis());
-    }
+//    @Test
+//    public void testAddDefaultScheduleToBusinessObject()
+//    {
+//
+//        String testDis = "Default Site Schedule";
+//        String localId = DefaultSchedules.generateDefaultSchedule();
+//        System.out.println("Dict To String: " + localId);
+//
+//        Schedule build = new Schedule.Builder().setHashMap(CCUHsApi.getInstance().readHDictById(localId)).build();
+//
+//        Assert.assertEquals("Default Site Schedule", build.getDis());
+//    }
 
 
 }

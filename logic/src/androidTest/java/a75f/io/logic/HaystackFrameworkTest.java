@@ -59,10 +59,14 @@ public class HaystackFrameworkTest {
         String testDis = "Default Site Schedule";
         String localId = DefaultSchedules.generateDefaultSchedule();
         System.out.println("Dict To String: " + localId);
-
-        Schedule build = new Schedule.Builder().setHDict(CCUHsApi.getInstance().readHDictById(localId)).build();
+        HDict scheduleDict = CCUHsApi.getInstance().readHDictById(localId);
+        Schedule build = new Schedule.Builder().setHDict(scheduleDict).build();
+        System.out.println("Schedule Zinc: " + scheduleDict.toZinc());
+        HDict postHDict = build.getScheduleHDict();
+        System.out.println("Schedule Zinc! " + postHDict.toZinc());
 
         Assert.assertEquals("Default Site Schedule", build.getDis());
+        Assert.assertTrue(postHDict.equals(scheduleDict));
     }
 
     private void addSite() {

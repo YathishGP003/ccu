@@ -300,7 +300,7 @@ public class Schedule {
             days.mEthh = hDict.getInt("ethh");
             days.mEtmm = hDict.getInt("etmm");
             days.mSthh = hDict.getInt("sthh");
-            days.mEthh = hDict.getInt("stmm");
+            days.mStmm = hDict.getInt("stmm");
             days.mSunrise = hDict.has("sunrise");
             days.mSunset = hDict.has("sunset");
             days.mVal = hDict.getDouble("curVal");
@@ -309,9 +309,8 @@ public class Schedule {
         }
     }
 
-    private HDict getScheduleHDict()
+    public HDict getScheduleHDict()
     {
-        HRef siteId = CCUHsApi.getInstance().getSiteId();
         HDict[] days = new HDict[getDays().size()];
 
         for(int i = 0; i < getDays().size(); i++)
@@ -320,7 +319,7 @@ public class Schedule {
             HDictBuilder hDictDay = new HDictBuilder()
                     .add(day.isCooling ? "cooling" : "heating")
                     .add("day", HNum.make(day.mDay))
-                    .add("sthh", HNum.make(day.mStmm))
+                    .add("sthh", HNum.make(day.mSthh))
                     .add("stmm", HNum.make(day.mStmm))
                     .add("ethh", HNum.make(day.mEthh))
                     .add("etmm", HNum.make(day.mEtmm))

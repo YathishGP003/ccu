@@ -5,7 +5,9 @@ import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HGridBuilder;
+import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
+import org.projecthaystack.HRow;
 import org.projecthaystack.client.HClient;
 import org.projecthaystack.io.HZincWriter;
 
@@ -19,15 +21,24 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import javax.net.ssl.HttpsURLConnection;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.Floor;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.RawPoint;
+import a75f.io.api.haystack.SettingPoint;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
+import a75f.io.api.haystack.Zone;
+import a75f.io.api.haystack.sync.EntityParser;
+import a75f.io.api.haystack.sync.EntityPullHandler;
 import a75f.io.api.haystack.sync.EntitySyncHandler;
 import a75f.io.api.haystack.sync.HttpUtil;
 
@@ -559,13 +570,105 @@ public class TestRemoteHsSync
     public void testGettingSite()
     {
 
+        CCUHsApi api = new CCUHsApi();
         HClient hClient = new HClient(HttpUtil.HAYSTACK_URL, "ryan", "ryan");
-        HDict navIdDict = new HDictBuilder().add("navId", HRef.make("5be9af1c02743900e9e762f8")).toDict();
+        HDict navIdDict = new HDictBuilder().add("navId", HRef.make("5c23ec0624aa9a00f4dff47d")).toDict();
         HGrid hGrid = HGridBuilder.dictToGrid(navIdDict);
-
         HGrid sync = hClient.call("sync", hGrid);
-
+    
+        HDict siteId = new HDictBuilder().add("id",HRef.make("5c23ec0624aa9a00f4dff47d")).toDict();
+        HGrid site = hClient.call("read",HGridBuilder.dictToGrid(siteId));
+        site.dump();
         sync.dump();
-
-    }
+        
+        EntityParser s = new EntityParser(site);
+        System.out.println("SITE ----->");
+        System.out.println(s.getSite().getDisplayName());
+        
+        EntityParser p = new EntityParser(sync);
+    
+        System.out.println("FLOORS ----->");
+        for (Floor q : p.getFloors()) {
+            System.out.println(q.getDisplayName());
+        }
+    
+        System.out.println("ZONES ----->");
+        for (Zone q : p.getZones()) {
+            System.out.println(q.getDisplayName()+" zoneRef :"+q.getId());
+        }
+        
+        System.out.println("EQUIPS ----->");
+        for (Equip q : p.getEquips()) {
+            System.out.println(q.getDisplayName()+" zoneRef :"+q.getZoneRef());
+        }
+        System.out.println("POINTS ---->");
+        for (Point p1 : p.getPoints()) {
+            System.out.println(p1.getDisplayName());
+        }
+    
+        System.out.println("PHY POINTS ---->");
+        for (RawPoint p1 : p.getPhyPoints()) {
+            System.out.println(p1.getDisplayName());
+        }
+    
+        System.out.println("SETTINGS POINTS ---->");
+        for (SettingPoint p1 : p.getSettingPoints()) {
+            System.out.println(p1.getDisplayName());
+        }
+    
+        System.out.println("DEVICES ---->");
+        for (Device p1 : p.getDevices()) {
+            System.out.println(p1.getDisplayName());
+        }
+        EntityPullHandler h = new EntityPullHandler();
+        h.doPullSite(site);
+        
+        h.doPullFloorTree(api.read("site").get("id").toString(), sync);
+        
+        System.out.println(api.tagsDb.tagsMap);
+    
+    
+        System.out.println("FLOORS ----->");
+        for (Floor q : HSUtil.getFloors())
+        {
+            System.out.println(q.getDisplayName());
+            System.out.println("ZONES ----->");
+            for (Zone z : HSUtil.getZones(q.getId()))
+            {
+                System.out.println(z.getDisplayName() + " zoneRef :" + z.getId());
+                System.out.println("EQUIPS ----->");
+                for (Equip e : HSUtil.getEquips(z.getId()))
+                {
+                    System.out.println(e.getDisplayName() + " equipRef :" + e.getId());
+                }
+            }
+        }
+        ArrayList<HashMap> writablePoints = CCUHsApi.getInstance().readAll("point and writable");
+        for (HashMap m : writablePoints) {
+            HDict pid = new HDictBuilder().add("id",HRef.copy(api.getGUID(m.get("id").toString()))).toDict();
+            HGrid wa = hClient.call("pointWrite",HGridBuilder.dictToGrid(pid));
+            wa.dump();
+    
+            ArrayList<HashMap> valList = new ArrayList<>();
+            Iterator it = wa.iterator();
+            while (it.hasNext()) {
+                HashMap<Object, Object> map = new HashMap<>();
+                HRow r = (HRow) it.next();
+                HRow.RowIterator ri = (HRow.RowIterator) r.iterator();
+                while (ri.hasNext()) {
+                    HDict.MapEntry e = (HDict.MapEntry) ri.next();
+                    map.put(e.getKey(), e.getValue());
+                }
+                valList.add(map);
+            }
+            
+            for(HashMap v : valList)
+            {
+                CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(m.get("id").toString()),
+                        Integer.parseInt(v.get("level").toString()), v.get("who").toString(),
+                        HNum.make(Double.parseDouble(v.get("val").toString())),HNum.make(0));
+            }
+            
+        }
+        }
 }

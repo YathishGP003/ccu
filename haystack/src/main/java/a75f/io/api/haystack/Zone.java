@@ -9,13 +9,21 @@ import java.util.Map;
  * Created by samjithsadasivan on 11/19/18.
  */
 
-public class Zone
+public class Zone extends Entity
 {
     private String            displayName;
     private ArrayList<String> markers;
-    private String            floorRef;
+    private String floorRef;
     private String siteRef;
     private String id;
+    public void setFloorRef(String floorRef)
+    {
+        this.floorRef = floorRef;
+    }
+    public void setSiteRef(String siteRef)
+    {
+        this.siteRef = siteRef;
+    }
     public String getId()
     {
         return id;

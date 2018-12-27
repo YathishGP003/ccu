@@ -9,11 +9,11 @@ import java.util.Map;
  * Created by samjithsadasivan on 9/4/18.
  */
 
-public class Equip
+public class Equip extends Entity
 {
     private String            displayName;
     private ArrayList<String> markers;
-    private String            siteRef;
+    private String siteRef;
     private String zoneRef;
     private String floorRef;
     private String group;
@@ -33,6 +33,18 @@ public class Equip
         return tz;
     }
     private String tz;
+    public void setSiteRef(String siteRef)
+    {
+        this.siteRef = siteRef;
+    }
+    public void setZoneRef(String zoneRef)
+    {
+        this.zoneRef = zoneRef;
+    }
+    public void setFloorRef(String floorRef)
+    {
+        this.floorRef = floorRef;
+    }
     public String getId()
     {
         return id;
@@ -155,7 +167,7 @@ public class Equip
                 {
                     this.displayName = pair.getValue().toString();
                 }
-                else if(pair.getValue().equals("marker")/*pair.getKey().equals("marker")*/) //TODO
+                else if(pair.getValue().toString().equals("marker")/*pair.getKey().equals("marker")*/) //TODO
                 {
                     this.markers.add(pair.getKey().toString()/*pair.getValue().toString()*/);
                 }

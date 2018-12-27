@@ -9,10 +9,26 @@ import java.util.Map;
  * Created by samjithsadasivan on 9/5/18.
  */
 
-public class Device
+public class Device extends Entity
 {
     private String            displayName;
     private ArrayList<String> markers;
+    public void setEquipRef(String equipRef)
+    {
+        this.equipRef = equipRef;
+    }
+    public void setSiteRef(String siteRef)
+    {
+        this.siteRef = siteRef;
+    }
+    public void setZoneRef(String zoneRef)
+    {
+        this.zoneRef = zoneRef;
+    }
+    public void setFloorRef(String floorRef)
+    {
+        this.floorRef = floorRef;
+    }
     private String equipRef;
     private String siteRef;
     private String zoneRef;
@@ -143,7 +159,7 @@ public class Device
                 {
                     this.displayName = pair.getValue().toString();
                 }
-                else if(pair.getValue().equals("marker")/*pair.getKey().equals("marker")*/) //TODO
+                else if(pair.getValue().toString().equals("marker")/*pair.getKey().equals("marker")*/) //TODO
                 {
                     this.markers.add(pair.getKey().toString()/*pair.getValue().toString()*/);
                 }

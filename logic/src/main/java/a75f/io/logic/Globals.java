@@ -64,7 +64,7 @@ public class Globals
     private CCUApplication           mCCUApplication;
     private LZoneProfile             mLZoneProfile;
     private boolean isSimulation = false;
-    private boolean isDeveloperTest = true;
+    private boolean testHarness = true;
 
     PubNub pubnub;
     boolean pubnubSubscribed = false;
@@ -151,10 +151,11 @@ public class Globals
     
         isSimulation = getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                                                     .getBoolean("biskit_mode", false);
-        isDeveloperTest = getApplicationContext().getResources().getBoolean(R.bool.developer_test);
+        testHarness = getApplicationContext().getResources().getBoolean(R.bool.test_harness);
 
         
         new CCUHsApi(this.mApplicationContext);
+        CCUHsApi.getInstance().testHarnessEnabled = testHarness;
         addProfilesForEquips();
         
         String addrBand = getSmartNodeBand();
@@ -215,9 +216,9 @@ public class Globals
     }
 
 
-    public boolean isDeveloperTesting()
+    public boolean testHarness()
     {
-        return isDeveloperTest;
+        return testHarness;
     }
 
     public void setCCU(CCUApplication CCU)
@@ -347,6 +348,7 @@ public class Globals
         for (Floor f: HSUtil.getFloors()) {
             for (Zone z: HSUtil.getZones(f.getId())) {
                 for (Equip eq : HSUtil.getEquips(z.getId())) {
+                    Log.d("CCUHS"," Equip "+eq.getDisplayName()+" profile : "+eq.getProfile());
                     switch (ProfileType.valueOf(eq.getProfile())) {
                         case VAV_REHEAT:
                             VavReheatProfile vr = new VavReheatProfile();
@@ -373,7 +375,7 @@ public class Globals
         if (equip != null && equip.size() > 0)
         {
             Equip eq = new Equip.Builder().setHashMap(equip).build();
-            Log.d("CCUHS","System profile "+eq.getProfile());
+            Log.d("CCUHS","SystemEquip "+eq.getDisplayName()+" System profile "+eq.getProfile());
             switch (ProfileType.valueOf(eq.getProfile()))
             {
                 case SYSTEM_VAV_ANALOG_RTU:

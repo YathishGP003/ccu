@@ -9,7 +9,7 @@ import java.util.Map;
  * Created by samjithsadasivan on 9/4/18.
  */
 
-public class Point
+public class Point extends Entity
 {
     private String displayName;
     private ArrayList<String> markers;
@@ -22,6 +22,23 @@ public class Point
     private String group;
     private String kind;
     private String id;
+    
+    public void setSiteRef(String siteRef)
+    {
+        this.siteRef = siteRef;
+    }
+    public void setEquipRef(String equipRef)
+    {
+        this.equipRef = equipRef;
+    }
+    public void setZoneRef(String zoneRef)
+    {
+        this.zoneRef = zoneRef;
+    }
+    public void setFloorRef(String floorRef)
+    {
+        this.floorRef = floorRef;
+    }
     
     public String getId()
     {
@@ -173,7 +190,7 @@ public class Point
                 {
                     this.displayName = pair.getValue().toString();
                 }
-                else if(pair.getValue().equals("marker")/*pair.getKey().equals("marker")*/) //TODO
+                else if(pair.getValue().toString().equals("marker")/*pair.getKey().equals("marker")*/) //TODO
                 {
                     this.markers.add(pair.getKey().toString()/*pair.getValue().toString()*/);
                 }

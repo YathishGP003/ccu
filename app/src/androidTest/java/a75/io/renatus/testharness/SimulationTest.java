@@ -22,9 +22,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 
-import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.SystemProperties;
 import a75f.io.renatus.RenatusLandingActivity;
 import a75f.io.renatus.SplashActivity;
@@ -72,17 +70,18 @@ public class SimulationTest
     public void trialRun() {
         
         CCUStateParser parser = new CCUStateParser();
-        parser.parseAndInjectState(mContext, TestConfig.state);
+        parser.pullHayStackDb("5c23ec0624aa9a00f4dff47d");
         Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setClassName(mContext,RenatusLandingActivity.class.getName());
         mContext.startActivity(intent);
         threadSleep(120);
-        HashMap site = CCUHsApi.getInstance().read("site");
+        
+        /*HashMap site = CCUHsApi.getInstance().read("site");
         CCUHsApi.getInstance().deleteEntityTree(site.get("id").toString());
-        parser.parseAndInjectState(mContext, TestConfig.state1);
+        parser.createHayStackDb(TestConfig.sGrid);
         mContext.startActivity(intent);
-        threadSleep(120);
+        threadSleep(120);*/
 
     }
     

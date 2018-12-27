@@ -1,7 +1,9 @@
 package a75f.io.api.haystack;
 
 import java.util.ArrayList;
-
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 /**
  * Created by samjithsadasivan on 12/17/18.
  */
@@ -9,12 +11,20 @@ import java.util.ArrayList;
 /**
  *  A Setting point with value saved as one of the tags.
  */
-public class SettingPoint
+public class SettingPoint extends Entity
 {
     private String            displayName;
     private ArrayList<String> markers;
-    private String            deviceRef;
-    private String            siteRef;
+    public void setDeviceRef(String deviceRef)
+    {
+        this.deviceRef = deviceRef;
+    }
+    public void setSiteRef(String siteRef)
+    {
+        this.siteRef = siteRef;
+    }
+    private String deviceRef;
+    private String siteRef;
     private String kind;
     private String id;
     private String unit;
@@ -119,6 +129,50 @@ public class SettingPoint
             p.kind = this.kind;
             p.val = this.val;
             return p;
+        }
+    
+        public Builder setHashMap(HashMap site)
+        {
+            Iterator it = site.entrySet().iterator();
+            while (it.hasNext())
+            {
+                Map.Entry pair = (Map.Entry) it.next();
+                //System.out.println(pair.getKey() + " = " + pair.getValue());
+                if (pair.getKey().equals("id"))
+                {
+                    this.id = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("dis"))
+                {
+                    this.displayName = pair.getValue().toString();
+                }
+                else if(pair.getValue().toString().equals("marker")/*pair.getKey().equals("marker")*/) //TODO
+                {
+                    this.markers.add(pair.getKey().toString()/*pair.getValue().toString()*/);
+                }
+                else if (pair.getKey().equals("siteRef"))
+                {
+                    this.siteRef = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("deviceRef"))
+                {
+                    this.deviceRef = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("unit"))
+                {
+                    this.unit = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("kind"))
+                {
+                    this.kind = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("val"))
+                {
+                    this.val = pair.getValue().toString();
+                }
+                it.remove();
+            }
+            return this;
         }
     }
     

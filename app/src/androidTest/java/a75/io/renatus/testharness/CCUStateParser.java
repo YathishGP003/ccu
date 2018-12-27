@@ -2,12 +2,27 @@ package a75.io.renatus.testharness;
 
 import android.content.Context;
 
+import org.projecthaystack.HDict;
+import org.projecthaystack.HDictBuilder;
+import org.projecthaystack.HGrid;
+import org.projecthaystack.HGridBuilder;
+import org.projecthaystack.HNum;
+import org.projecthaystack.HRef;
+import org.projecthaystack.HRow;
+import org.projecthaystack.client.HClient;
+
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Site;
+import a75f.io.api.haystack.sync.EntityPullHandler;
+import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.device.json.serializers.JsonSerializer;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.CCUApplication;
 import a75f.io.logic.bo.building.Floor;
@@ -97,6 +112,52 @@ public class CCUStateParser
         
     }
     
+    public void pullHayStackDb(String siteId) {
+        
+        HClient hClient = new HClient(HttpUtil.HAYSTACK_URL, "ryan", "ryan");
+        HDict siteDict = new HDictBuilder().add("id", HRef.make(siteId)).toDict();
+        HGrid siteGrid = hClient.call("read", HGridBuilder.dictToGrid(siteDict));
+    
+        EntityPullHandler h = new EntityPullHandler();
+        h.doPullSite(siteGrid);
+        /*HGridFormat format = HGridFormat.find("text/plain", true);
+        h.doPullFloorTree(CCUHsApi.getInstance().read("site").get("id").toString(),
+                format.makeReader(new ByteArrayInputStream(siteData.getBytes(StandardCharsets.UTF_8))).readGrid());*/
+        h.doPullFloorTree(CCUHsApi.getInstance().read("site").get("id").toString(),
+                        CCUHsApi.getInstance().getRemoteSiteDetails(siteId));
+    
+        System.out.println(CCUHsApi.getInstance().tagsDb.tagsMap);
+        
+        CCUHsApi.getInstance().saveTagsData();
+        Globals.getInstance().addProfilesForEquips();
+        ArrayList<HashMap> writablePoints = CCUHsApi.getInstance().readAll("point and writable");
+        for (HashMap m : writablePoints) {
+            HDict pid = new HDictBuilder().add("id",HRef.copy(CCUHsApi.getInstance().getGUID(m.get("id").toString()))).toDict();
+            HGrid wa = hClient.call("pointWrite",HGridBuilder.dictToGrid(pid));
+            wa.dump();
+        
+            ArrayList<HashMap> valList = new ArrayList<>();
+            Iterator it = wa.iterator();
+            while (it.hasNext()) {
+                HashMap<Object, Object> map = new HashMap<>();
+                HRow r = (HRow) it.next();
+                HRow.RowIterator ri = (HRow.RowIterator) r.iterator();
+                while (ri.hasNext()) {
+                    HDict.MapEntry e = (HDict.MapEntry) ri.next();
+                    map.put(e.getKey(), e.getValue());
+                }
+                valList.add(map);
+            }
+        
+            for(HashMap v : valList)
+            {
+                CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(m.get("id").toString()),
+                        Integer.parseInt(v.get("level").toString()), v.get("who").toString(),
+                        HNum.make(Double.parseDouble(v.get("val").toString())),HNum.make(0));
+            }
+        
+        }
+    }
     
     public CCUApplication parseState(String stateJson){
         try

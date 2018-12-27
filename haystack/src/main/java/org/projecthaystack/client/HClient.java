@@ -31,14 +31,12 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
 
 import javax.net.ssl.HttpsURLConnection;
 
 import a75f.io.api.haystack.sync.HttpUtil;
-import info.guardianproject.netcipher.NetCipher;
 
 /**
  * HClient manages a logical connection to a HTTP REST haystack server.
@@ -680,7 +678,7 @@ public class HClient extends HProj
 
     //connection = (HttpsURLConnection)url.openConnection();
 
-    HttpsURLConnection c = NetCipher.getHttpsURLConnection(url);//TODO - Hack for SSLException
+    HttpsURLConnection c = (HttpsURLConnection)url.openConnection();//NetCipher.getHttpsURLConnection(url);//TODO - Hack for SSLException
     c.setRequestMethod(method);
     c.setInstanceFollowRedirects(false);
     c.setConnectTimeout(connectTimeout);

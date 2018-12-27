@@ -376,8 +376,6 @@ public class TestHayStack
     @Test
     public void testValTypes() {
         CCUHsApi hayStack = new CCUHsApi();
-        hayStack.tagsDb.tagsMap = new HashMap<>();
-        hayStack.tagsDb.writeArrays = new HashMap<>();
         int nodeAddr = 7000;
         
         Site s = new Site.Builder()
@@ -439,11 +437,6 @@ public class TestHayStack
     public void testSystemEquip(){
     
         CCUHsApi hayStack = new CCUHsApi();
-        hayStack.tagsDb.init();
-        hayStack.tagsDb.tagsMap = new HashMap<>();
-        hayStack.tagsDb.writeArrays = new HashMap<>();
-        hayStack.tagsDb.idMap = new HashMap<>();
-        hayStack.tagsDb.removeIdMap = new HashMap<>();
         
         HashMap site = hayStack.read("site");
         if (site.size() == 0) {
@@ -465,12 +458,7 @@ public class TestHayStack
     public void testUpdateEntity()
     {
         CCUHsApi hayStack = new CCUHsApi();
-        hayStack.tagsDb.init();
-        hayStack.tagsDb.tagsMap = new HashMap<>();
-        hayStack.tagsDb.writeArrays = new HashMap<>();
-        hayStack.tagsDb.idMap = new HashMap<>();
-        hayStack.tagsDb.removeIdMap = new HashMap<>();
-        hayStack.tagsDb.updateIdMap = new HashMap<>();
+        
         int nodeAddr = 7000;
         
         Site s = new Site.Builder()
@@ -503,11 +491,6 @@ public class TestHayStack
     @Test
     public void testCMDevice() {
         CCUHsApi hayStack = new CCUHsApi();
-        hayStack.tagsDb.tagsMap = new HashMap<>();
-        hayStack.tagsDb.writeArrays = new HashMap<>();
-        hayStack.tagsDb.idMap = new HashMap<>();
-        hayStack.tagsDb.removeIdMap = new HashMap<>();
-        hayStack.tagsDb.updateIdMap = new HashMap<>();
         
         int nodeAddr = 7000;
     

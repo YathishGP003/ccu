@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * Created by samjithsadasivan on 9/4/18.
  */
-public class Site
+public class Site extends Entity
 {
     private String            displayName;
     private ArrayList<String> markers;

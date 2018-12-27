@@ -1,9 +1,6 @@
 package a75f.io.api.haystack;
 
-import java.util.ArrayList;
-import java.util.Date;
-
-public class Schedule
+public class Schedule extends Entity
 {
 
     /*{stdt:2018-12-18T10:13:55.185-06:00 Chicago

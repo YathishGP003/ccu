@@ -42,6 +42,8 @@ public class CCUHsApi {
 
     public EntitySyncHandler entitySyncHandler;
     public HisSyncHandler hisSyncHandler;
+    
+    public boolean testHarnessEnabled = false;
 
     public static CCUHsApi getInstance() {
         if (instance == null) {
@@ -316,7 +318,7 @@ public class CCUHsApi {
         if (values != null && values.size() > 0) {
             HashMap valMap = ((HashMap) values.get(HayStackConstants.DEFAULT_POINT_LEVEL - 1));
             System.out.println(valMap);
-            return Double.parseDouble(valMap.get("val").toString());
+            return valMap.get("val") == null ? 0 : Double.parseDouble(valMap.get("val").toString());
         } else {
             return null;
         }
@@ -326,7 +328,7 @@ public class CCUHsApi {
         ArrayList values = CCUHsApi.getInstance().readPoint(id);
         if (values != null && values.size() > 0) {
             HashMap valMap = ((HashMap) values.get(HayStackConstants.DEFAULT_POINT_LEVEL - 1));
-            return Double.parseDouble(valMap.get("val").toString());
+            return valMap.get("val") == null ? 0 : Double.parseDouble(valMap.get("val").toString());
         } else {
             return null;
         }
@@ -532,7 +534,12 @@ public class CCUHsApi {
     }
 
     public void syncEntityTree() {
-        entitySyncHandler.sync();
+        if (!testHarnessEnabled)
+        {
+            entitySyncHandler.sync();
+        } else {
+            Log.d("CCU"," Test Harness Enabled , Skip Entity Sync");
+        }
     }
 
     public void syncHisData() {

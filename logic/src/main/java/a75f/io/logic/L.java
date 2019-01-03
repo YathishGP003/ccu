@@ -204,9 +204,9 @@ public class L
     }
 
 
-    public static boolean isDeveloperTesting()
+    public static boolean isTestHarness()
     {
-        return Globals.getInstance().isDeveloperTesting();
+        return Globals.getInstance().testHarness();
     }
 
 
@@ -296,7 +296,9 @@ public class L
     }
     
     public static ZoneProfile getProfile(short addr) {
+        Log.d("CCU","Profiles "+L.ccu().zoneProfiles.size());
         for(ZoneProfile p : L.ccu().zoneProfiles) {
+            Log.d("CCU","Profile "+p.getProfileType());
             for (Short node : p.getNodeAddresses()) {
                 if (node == addr) {
                     return p;

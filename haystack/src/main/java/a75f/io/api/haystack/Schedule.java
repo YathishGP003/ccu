@@ -27,40 +27,8 @@ import java.util.UUID;
  */
 
 
-public class Schedule {
-
-
-    /**
-     * This method will see if any of the values are currently scheduled and return them.
-     * <p>
-     * The processing time of this method should be checked.
-     * Need to test multiple value, multiple day, multiple object types
-     *
-     * @return List of Days, if multiple values are picked they are returned, for example heating, cooling, auto.
-     */
-    public ArrayList<Days> getScheduledValue() {
-
-
-        long time = System.currentTimeMillis();
-
-
-        ArrayList<Days> days = new ArrayList<Days>();
-        Days day = new Days();
-
-        DateTime now = DateTime.now();
-
-        System.out.println("getHourOfDay: " + now.getHourOfDay() + "getMinuteOfHour: " + now.getMinuteOfHour() + "getDayOfWeek: " + (now.getDayOfWeek() - 1));
-        int hourOfDay = now.getHourOfDay();
-        int minuteOfHour = now.getMinuteOfHour();
-        int dayOfWeek = now.getDayOfWeek();
-
-        day.check(dayOfWeek, hourOfDay, minuteOfHour);
-
-
-
-
-        return days;
-    }
+public class Schedule extends Entity
+{
 
     /*{stdt:2018-12-18T10:13:55.185-06:00 Chicago
         dis:"Simple Schedule" etdt:2018-12-18T10:13:55.185-06:00 Chicago

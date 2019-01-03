@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
@@ -104,11 +103,9 @@ public class RegisterGatherCCUDetails extends Activity {
     
     
                 HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
-                String tz = siteMap.get("tz").toString();
-    
-                //TODO
                 SettingPoint snBand = new SettingPoint.Builder()
                                                         .setDeviceRef(localId)
+                                                        .setSiteRef(siteMap.get("id").toString())
                                                         .setDisplayName(ccuName+"-smartNodeBand")
                                                         .addMarker("snband").addMarker("sp").setVal(addressBandSelected).build();
                 CCUHsApi.getInstance().addPoint(snBand);

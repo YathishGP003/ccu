@@ -9,12 +9,16 @@ import java.util.Map;
  * Created by samjithsadasivan on 11/19/18.
  */
 
-public class Floor
+public class Floor extends Entity
 {
     private String            displayName;
     private ArrayList<String> markers;
-    private String            siteRef;
+    private String siteRef;
     private String id;
+    public void setSiteRef(String siteRef)
+    {
+        this.siteRef = siteRef;
+    }
     public String getId()
     {
         return id;
@@ -78,7 +82,7 @@ public class Floor
                 {
                     this.displayName = pair.getValue().toString();
                 }
-                else if(pair.getValue().equals("marker")/*pair.getKey().equals("marker")*/) //TODO
+                else if(pair.getValue().toString().equals("marker")/*pair.getKey().equals("marker")*/) //TODO
                 {
                     this.markers.add(pair.getKey().toString()/*pair.getValue().toString()*/);
                 }

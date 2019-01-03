@@ -26,8 +26,6 @@ import a75f.io.logic.bo.building.hvac.SeriesFanVavUnit;
 import a75f.io.logic.bo.building.hvac.VavUnit;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.tuners.BuildingTuners;
-import a75f.io.logic.tuners.TunerConstants;
-
 /**
  * Created by samjithsadasivan on 6/21/18.
  */
@@ -111,9 +109,10 @@ public class VAVLogicalMap
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
         String tz = siteMap.get("tz").toString();
+        String equipDis = siteDis+"-VAV-"+nodeAddr;
         Equip v = new Equip.Builder()
                           .setSiteRef(siteRef)
-                          .setDisplayName(siteDis+"-VAV-"+nodeAddr)
+                          .setDisplayName(equipDis)
                           .setZoneRef(room)
                           .setFloorRef(floor)
                           .setProfile(profileType.name())
@@ -124,7 +123,7 @@ public class VAVLogicalMap
                           .build();
         String equipRef = CCUHsApi.getInstance().addEquip(v);
         
-        BuildingTuners.getInstance().addEquipVavTuners(siteDis+"-VAV-"+nodeAddr, equipRef, TunerConstants.VAV_DEFAULT_VAL_LEVEL);
+        BuildingTuners.getInstance().addEquipVavTuners(siteDis+"-VAV-"+nodeAddr, equipRef, config);
     
         Point datPoint = new Point.Builder()
                                 .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-DischargeAirTemp")
@@ -308,64 +307,57 @@ public class VAVLogicalMap
         CCUHsApi.getInstance().addPoint(pressureRequestPercentage);
     
         Point damperMinCooling = new Point.Builder()
-                                      .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-damperMinCooling")
-                                      .setEquipRef(equipRef)
-                                      .setSiteRef(siteRef)
-                                      .setZoneRef(room)
-                                      .setFloorRef(floor)
-                                      .addMarker("damper").addMarker("min").addMarker("cooling").addMarker("pos")
-                                      .addMarker("sp").addMarker("writable").addMarker("zone")
-                                      .setGroup(String.valueOf(nodeAddr))
-                                      .setUnit("\u00B0F")
-                                      .setTz(tz)
-                                      .build();
+                                         .setDisplayName(equipDis+"-MinCoolingDamperPos")
+                                         .setEquipRef(equipRef)
+                                         .setSiteRef(siteRef)
+                                         .addMarker("config").addMarker("vav").addMarker("damper").addMarker("min").addMarker("cooling").addMarker("pos")
+                                         .addMarker("sp").addMarker("writable").addMarker("zone")
+                                         .setUnit("\u00B0")
+                                         .setGroup(String.valueOf(nodeAddr))
+                                         .setTz(tz)
+                                         .build();
         String damperMinCoolingId = CCUHsApi.getInstance().addPoint(damperMinCooling);
         CCUHsApi.getInstance().writeDefaultValById(damperMinCoolingId, (double)config.getMinDamperCooling());
     
         Point damperMaxCooling = new Point.Builder()
-                                         .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-damperMaxCooling")
+                                         .setDisplayName(equipDis+"-MaxCoolingDamperPos")
                                          .setEquipRef(equipRef)
                                          .setSiteRef(siteRef)
-                                         .setZoneRef(room)
-                                         .setFloorRef(floor)
-                                         .addMarker("damper").addMarker("max").addMarker("cooling").addMarker("pos")
+                                         .addMarker("config").addMarker("vav").addMarker("damper").addMarker("max").addMarker("cooling").addMarker("pos")
                                          .addMarker("sp").addMarker("writable").addMarker("zone")
+                                         .setUnit("\u00B0")
                                          .setGroup(String.valueOf(nodeAddr))
-                                         .setUnit("\u00B0F")
                                          .setTz(tz)
                                          .build();
         String damperMaxCoolingId = CCUHsApi.getInstance().addPoint(damperMaxCooling);
         CCUHsApi.getInstance().writeDefaultValById(damperMaxCoolingId, (double)config.getMaxDamperCooliing());
+        
     
         Point damperMinHeating = new Point.Builder()
-                                         .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-damperMinHeating")
+                                         .setDisplayName(equipDis+"-MinHeatingDamperPos")
                                          .setEquipRef(equipRef)
                                          .setSiteRef(siteRef)
-                                         .setZoneRef(room)
-                                         .setFloorRef(floor)
-                                         .addMarker("damper").addMarker("min").addMarker("heating").addMarker("pos")
+                                         .addMarker("config").addMarker("vav").addMarker("damper").addMarker("min").addMarker("heating").addMarker("pos")
                                          .addMarker("sp").addMarker("writable").addMarker("zone")
+                                         .setUnit("\u00B0")
                                          .setGroup(String.valueOf(nodeAddr))
-                                         .setUnit("\u00B0F")
                                          .setTz(tz)
                                          .build();
         String damperMinHeatingId = CCUHsApi.getInstance().addPoint(damperMinHeating);
         CCUHsApi.getInstance().writeDefaultValById(damperMinHeatingId, (double)config.getMinDamperHeating());
     
         Point damperMaxHeating = new Point.Builder()
-                                         .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-damperMaxHeating")
+                                         .setDisplayName(equipDis+"-MaxHeatingDamperPos")
                                          .setEquipRef(equipRef)
                                          .setSiteRef(siteRef)
-                                         .setZoneRef(room)
-                                         .setFloorRef(floor)
-                                         .addMarker("damper").addMarker("max").addMarker("heating").addMarker("pos")
+                                         .addMarker("config").addMarker("vav").addMarker("damper").addMarker("max").addMarker("heating").addMarker("pos")
                                          .addMarker("sp").addMarker("writable").addMarker("zone")
+                                         .setUnit("\u00B0")
                                          .setGroup(String.valueOf(nodeAddr))
-                                         .setUnit("\u00B0F")
                                          .setTz(tz)
                                          .build();
         String damperMaxHeatingId = CCUHsApi.getInstance().addPoint(damperMaxHeating);
-        CCUHsApi.getInstance().writeDefaultValById(damperMaxHeatingId, (double)config.getMaxDamperHeating());
+        CCUHsApi.getInstance().writeDefaultValById(damperMaxHeatingId, (double) config.getMaxDamperHeating());
         
         //Create Physical points and map
         SmartNode device = new SmartNode(nodeAddr, siteRef, floor, room);
@@ -443,6 +435,11 @@ public class VAVLogicalMap
         SmartNode.setPointEnabled(nodeAddr, Port.ANALOG_OUT_TWO.name(), config.isOpConfigured(Port.ANALOG_OUT_TWO) );
         SmartNode.setPointEnabled(nodeAddr, Port.RELAY_ONE.name(), config.isOpConfigured(Port.RELAY_ONE) );
         SmartNode.setPointEnabled(nodeAddr, Port.RELAY_TWO.name(), config.isOpConfigured(Port.RELAY_TWO) );
+        
+        setDamperLimit("cooling","min",config.getMinDamperCooling());
+        setDamperLimit("cooling","max",config.getMaxDamperCooliing());
+        setDamperLimit("heating","min",config.getMinDamperHeating());
+        setDamperLimit("heating","max",config.getMaxDamperHeating());
     }
     
     public void deleteHaystackPoints() {
@@ -544,7 +541,13 @@ public class VAVLogicalMap
     
     public double getDamperLimit(String coolHeat, String minMax)
     {
-        ArrayList points = CCUHsApi.getInstance().readAll("point and damper and pos and "+coolHeat+" and "+minMax+" and group == \""+nodeAddr+"\"");
+        Log.d("CCU"," getDamperLimit "+coolHeat+" minMax");
+        ArrayList points = CCUHsApi.getInstance().readAll("point and config and damper and pos and "+coolHeat+" and "+minMax+" and group == \""+nodeAddr+"\"");
+        if (points.size() == 0) {
+            Log.d("CCU"," getDamperLimit 0");
+            return 0;
+        }
+        
         String id = ((HashMap)points.get(0)).get("id").toString();
         if (id == null || id == "") {
             throw new IllegalArgumentException();

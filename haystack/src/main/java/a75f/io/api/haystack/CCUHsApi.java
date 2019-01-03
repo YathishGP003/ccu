@@ -169,7 +169,7 @@ public class CCUHsApi {
      * Helper method that converts HGrid to an Array of Hashmap of String.
      */
     public ArrayList<HashMap> readAll(String query) {
-
+        System.out.println("Read Query: " + query);
         ArrayList<HashMap> rowList = new ArrayList<>();
         try {
             HGrid grid = hsClient.readAll(query);
@@ -203,7 +203,11 @@ public class CCUHsApi {
         HashMap<Object, Object> map = new HashMap<>();
         try {
             HDict dict = hsClient.read(query, true);
-
+            Iterator it = dict.iterator();
+            while (it.hasNext()) {
+                Map.Entry entry = (Map.Entry) it.next();
+                map.put(entry.getKey().toString(), entry.getValue().toString());
+            }
         } catch (UnknownRecException e) {
             e.printStackTrace();
         }

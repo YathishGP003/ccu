@@ -3,7 +3,6 @@ package a75.io.logic;
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -20,10 +19,6 @@ public class VavHaystackTest
     @Test
     public void testVavReheatLogicalMap() {
         CCUHsApi api = new CCUHsApi();
-        api.tagsDb.init();
-        api.tagsDb.tagsMap = new HashMap<>();
-        api.tagsDb.writeArrays = new HashMap<>();
-        api.tagsDb.idMap = new HashMap<>();
         VAVLogicalMap m = new VAVLogicalMap(ProfileType.VAV_REHEAT, 7000);
         m.createHaystackPoints(new VavProfileConfiguration(), null, null);
         ArrayList points = CCUHsApi.getInstance().readAll("point and group == \"7000\"");

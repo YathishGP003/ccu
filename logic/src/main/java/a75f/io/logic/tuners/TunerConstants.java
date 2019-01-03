@@ -34,6 +34,10 @@ public class TunerConstants
     public static final double VAV_INTEGRAL_GAIN = 0.5;
     public static final double VAV_PROPORTIONAL_SPREAD = 20;
     public static final double VAV_INTEGRAL_TIMEOUT = 15;
+    public static final double MIN_COOLING_DAMPER = 40;
+    public static final double MAX_COOLING_DAMPER = 80;
+    public static final double MIN_HEATING_DAMPER = 40;
+    public static final double MAX_HEATING_DAMPER = 80;
     
     public static final int VAV_DEFAULT_VAL_LEVEL = 17;
     public static final int VAV_BUILDING_VAL_LEVEL = 16;

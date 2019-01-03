@@ -510,8 +510,8 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         }
         mVavProfile.getProfileConfiguration().put(mSmartNodeAddress, vavConfig);
         if (mProfileConfig == null) {
-            mVavProfile.addLogicalMapAndPoints(mSmartNodeAddress, vavConfig, floorRef, zoneRef);
             BuildingTuners.getInstance().addDefaultVavTuners();
+            mVavProfile.addLogicalMapAndPoints(mSmartNodeAddress, vavConfig, floorRef, zoneRef);
         } else
         {
             mVavProfile.updateLogicalMapAndPoints(mSmartNodeAddress, vavConfig);

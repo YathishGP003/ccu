@@ -16,7 +16,6 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Site;
-import a75f.io.api.haystack.Tags;
 
 @RunWith(AndroidJUnit4.class)
 public class HaystackFrameworkTest {
@@ -68,7 +67,7 @@ public class HaystackFrameworkTest {
         Assert.assertEquals("Default Site Schedule", build.getDis());
         Assert.assertTrue(postHDict.equals(scheduleDict));
 
-        build.getScheduledValue();
+        //build.getScheduledValue();
     }
 
     private void addSite() {

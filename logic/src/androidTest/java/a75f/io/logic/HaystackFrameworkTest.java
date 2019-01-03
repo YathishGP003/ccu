@@ -67,6 +67,8 @@ public class HaystackFrameworkTest {
 
         Assert.assertEquals("Default Site Schedule", build.getDis());
         Assert.assertTrue(postHDict.equals(scheduleDict));
+
+        build.getScheduledValue();
     }
 
     private void addSite() {

@@ -1,5 +1,6 @@
 package a75f.io.api.haystack;
 
+import org.joda.time.DateTime;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HList;
@@ -27,6 +28,39 @@ import java.util.UUID;
 
 
 public class Schedule {
+
+
+    /**
+     * This method will see if any of the values are currently scheduled and return them.
+     * <p>
+     * The processing time of this method should be checked.
+     * Need to test multiple value, multiple day, multiple object types
+     *
+     * @return List of Days, if multiple values are picked they are returned, for example heating, cooling, auto.
+     */
+    public ArrayList<Days> getScheduledValue() {
+
+
+        long time = System.currentTimeMillis();
+
+
+        ArrayList<Days> days = new ArrayList<Days>();
+        Days day = new Days();
+
+        DateTime now = DateTime.now();
+
+        System.out.println("getHourOfDay: " + now.getHourOfDay() + "getMinuteOfHour: " + now.getMinuteOfHour() + "getDayOfWeek: " + (now.getDayOfWeek() - 1));
+        int hourOfDay = now.getHourOfDay();
+        int minuteOfHour = now.getMinuteOfHour();
+        int dayOfWeek = now.getDayOfWeek();
+
+        day.check(dayOfWeek, hourOfDay, minuteOfHour);
+
+
+
+
+        return days;
+    }
 
     /*{stdt:2018-12-18T10:13:55.185-06:00 Chicago
         dis:"Simple Schedule" etdt:2018-12-18T10:13:55.185-06:00 Chicago
@@ -159,14 +193,12 @@ public class Schedule {
             s.mDis = this.mDis;
             s.mMarkers = this.mMarkers;
             s.mKind = this.mKind;
-            s.mSiteId =  this.mSiteId;
+            s.mSiteId = this.mSiteId;
             s.mUnit = this.mUnit;
             s.mDays = this.mDays;
             s.mTZ = this.mTZ;
             return s;
         }
-
-
 
 
         public Schedule.Builder setHDict(HDict schedule) {
@@ -183,16 +215,15 @@ public class Schedule {
                     this.mIsVacation = true;
                 } else if (pair.getKey().equals("kind")) {
                     this.mKind = pair.getValue().toString();
-                } else if (pair.getKey().equals("mUnit")) {
+                } else if (pair.getKey().equals("unit")) {
                     this.mUnit = pair.getValue().toString();
                 } else if (pair.getKey().equals("tz")) {
                     this.mTZ = pair.getValue().toString();
                 } else if (pair.getKey().equals("days")) {
                     this.mDays = Days.parse((HList) pair.getValue());
-                } else if(pair.getKey().equals("siteRef")) {
+                } else if (pair.getKey().equals("siteRef")) {
                     this.mSiteId = schedule.getRef("siteRef").val;
-                }
-                else {
+                } else {
                     this.mMarkers.add(pair.getKey().toString());
                 }
             }
@@ -307,14 +338,17 @@ public class Schedule {
 
             return days;
         }
+
+        public void check(int dayOfWeek, int hourOfDay, int minuteOfHour) {
+
+
+        }
     }
 
-    public HDict getScheduleHDict()
-    {
+    public HDict getScheduleHDict() {
         HDict[] days = new HDict[getDays().size()];
 
-        for(int i = 0; i < getDays().size(); i++)
-        {
+        for (int i = 0; i < getDays().size(); i++) {
             Days day = mDays.get(i);
             HDictBuilder hDictDay = new HDictBuilder()
                     .add(day.isCooling ? "cooling" : "heating")
@@ -324,8 +358,8 @@ public class Schedule {
                     .add("ethh", HNum.make(day.mEthh))
                     .add("etmm", HNum.make(day.mEtmm))
                     .add("curVal", HNum.make(day.mVal)); //need boolean & string support
-            if(day.mSunset) hDictDay.add("sunset", day.mSunset);
-            if(day.mSunrise) hDictDay.add("sunrise", day.mSunrise);
+            if (day.mSunset) hDictDay.add("sunset", day.mSunset);
+            if (day.mSunrise) hDictDay.add("sunrise", day.mSunrise);
 
             days[i] = hDictDay.toDict();
         }
@@ -339,8 +373,7 @@ public class Schedule {
                 .add("days", hList)
                 .add("siteRef", HRef.make(mSiteId));
 
-        for(String marker : getMarkers())
-        {
+        for (String marker : getMarkers()) {
             defaultSchedule.add(marker);
         }
 

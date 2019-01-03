@@ -22,10 +22,6 @@ public class VavAnalogRtu extends SystemProfile
     
     private static final int ANALOG_SCALE = 10;
     
-    public boolean analog1Enabled = false;
-    public boolean analog2Enabled = false;
-    public boolean analog3Enabled = false;
-    public boolean analog4Enabled = false;
     public VavAnalogRtu() {
         trSystem =  new VavTRSystem();
     }

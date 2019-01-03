@@ -169,7 +169,7 @@ public class CCUHsApi {
      * Helper method that converts HGrid to an Array of Hashmap of String.
      */
     public ArrayList<HashMap> readAll(String query) {
-
+        System.out.println("Read Query: " + query);
         ArrayList<HashMap> rowList = new ArrayList<>();
         try {
             HGrid grid = hsClient.readAll(query);

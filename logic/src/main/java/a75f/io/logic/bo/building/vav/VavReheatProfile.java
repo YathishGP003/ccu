@@ -7,6 +7,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import a75.io.algos.CO2Loop;
 import a75.io.algos.ControlLoop;
 import a75.io.algos.GenericPIController;
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Damper;
@@ -71,11 +73,13 @@ public class VavReheatProfile extends VavProfile
             
             Damper damper = vavUnit.vavDamper;
             Valve valve = vavUnit.reheatValve;
+    
+            Equip vavEquip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + node + "\"")).build();
             int loopOp;//New value of loopOp
             //TODO
             //If supply air temperature from air handler is greater than room temperature, Cooling shall be
             //locked out.
-            if (roomTemp > (setTemp + VavTunerUtil.getCoolingDeadband()))
+            if (roomTemp > (setTemp + VavTunerUtil.getCoolingDeadband(vavEquip.getId())))
             {
                 //Zone is in Cooling
                 if (state != COOLING)
@@ -88,7 +92,7 @@ public class VavReheatProfile extends VavProfile
                 int coolingOp = (int) coolingLoop.getLoopOutput(roomTemp, setTemp+deadBand);
                 loopOp = coolingOp;
             }
-            else if (roomTemp < (setTemp - VavTunerUtil.getHeatingDeadband()))
+            else if (roomTemp < (setTemp - VavTunerUtil.getHeatingDeadband(vavEquip.getId())))
             {
                 //Zone is in heating
                 if (state != HEATING)

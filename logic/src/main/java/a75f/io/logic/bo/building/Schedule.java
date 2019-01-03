@@ -115,9 +115,9 @@ public class Schedule
         {
             try
             {
-            /*
+             /*
               * Sorts the specified array into ascending numerical order.
-			 */
+			  */
                 //Add the scheduled intervals.
                 for (Day day : days)
                 {
@@ -143,8 +143,6 @@ public class Schedule
             }
         }
     }
-    //
-
 
     /*****************
      *ONLY USED FOR CIRCUITS BELOW

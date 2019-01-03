@@ -46,4 +46,6 @@ dependencies {
     api 'com.fasterxml.jackson.core:jackson-databind:2.8.6'
     compile 'info.guardianproject.netcipher:netcipher:1.2'
     compile 'org.influxdb:influxdb-java:2.5'
+
+    api 'joda-time:joda-time:2.9.9'
 }

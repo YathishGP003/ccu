@@ -59,8 +59,8 @@ dependencies {
     compile 'info.guardianproject.netcipher:netcipher:1.2'
     implementation project(':haystack')
     implementation project(':usbserial')
-    compile 'joda-time:joda-time:2.9.9'
-    compile 'org.influxdb:influxdb-java:2.10'
+//compile 'joda-time:joda-time:2.9.9'
+//    compile 'org.influxdb:influxdb-java:2.10'
     implementation 'com.pubnub:pubnub-gson:4.20.0'
     api 'com.google.guava:guava:26.0-android'
 

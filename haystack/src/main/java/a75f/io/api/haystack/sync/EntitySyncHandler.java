@@ -71,7 +71,7 @@ public class EntitySyncHandler
         for (String removeId : CCUHsApi.getInstance().tagsDb.removeIdMap.values())
         {
             HDictBuilder b = new HDictBuilder();
-            b.add("removeId", removeId.replace("@",""));
+            b.add("id", HRef.make(removeId.replace("@","")));
             entities.add(b.toDict());
         }
         

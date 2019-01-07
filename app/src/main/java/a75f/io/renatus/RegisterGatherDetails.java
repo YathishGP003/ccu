@@ -1,7 +1,6 @@
 package a75f.io.renatus;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -37,6 +36,11 @@ public class RegisterGatherDetails extends Activity {
         mUseExistingSiteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                
+                if (siteIdEditText.getText().toString().trim().length() != 24) {//TODO-TEMP
+                    Toast.makeText(getApplicationContext(), "Invalid site ID",Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 loadExistingSite(siteIdEditText.getText().toString());
             }
         });
@@ -69,7 +73,7 @@ public class RegisterGatherDetails extends Activity {
 
 
     public void loadExistingSite(String siteId) {
-
+        
 
         //TODO: harden for null string.
         AsyncTask<String, Void, HGrid> getHSClientTask = new AsyncTask<String, Void, HGrid>() {

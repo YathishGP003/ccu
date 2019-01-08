@@ -48,6 +48,7 @@ public class DefaultSchedules {
                 .add("id", localId)
                 .add("unit", "\\u00B0F")
                 .add("kind", "Number")
+                .add("system")
                 .add("temp")
                 .add("schedule")
                 .add("dis", "Default Site Schedule")

@@ -18,7 +18,7 @@ public class ThermistorUtil
             104,105.8,107.6,109.4,111.2,113,114.8,116.6,118.4,120.2,122,123.8,125.6,127.4,129.2,131,132.8,134.6,136.4,138.2,140,149,158,167,
             176,185,194,203,212,221,230,239,248,257,266,275,284,293,302,311};
     
-    public static double getThermisterValueToTemp(double rawValue) {
+    public static double getThermistorValueToTemp(double rawValue) {
         int leftIndex = 0;
         int rightIndex = resistance.length - 1;
         if (rawValue >= resistance[leftIndex])

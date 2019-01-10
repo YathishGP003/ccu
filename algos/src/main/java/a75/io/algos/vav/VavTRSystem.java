@@ -8,6 +8,7 @@ import a75.io.algos.tr.SystemTrimResponseBuilder;
 import a75.io.algos.tr.TRSystem;
 import a75.io.algos.tr.TrimResponseProcessor;
 import a75.io.algos.tr.TrimResponseRequest;
+import a75f.io.api.haystack.CCUHsApi;
 
 /**
  * Created by samjithsadasivan on 8/13/18.
@@ -41,8 +42,11 @@ public class VavTRSystem extends TRSystem
     
     private void buildSATTRSystem()
     {
-        satTRResponse = new SystemTrimResponseBuilder().setSP0(60).setSPmin(55).setSPmax(65).setTd(2)//TODO- TEST
-                                                       .setT(2).setI(2).setSPtrim(0.2).setSPres(-0.3).setSPresmax(-1.0).buildTRSystem();
+        satTRResponse = new SystemTrimResponseBuilder().setSP0(getSatTRTunerVal("spinit")).setSPmin(getSatTRTunerVal("spmin"))
+                                                       .setSPmax(getSatTRTunerVal("spmax")).setTd((int)getSatTRTunerVal("timeDelay"))//TODO- TEST
+                                                       .setT((int)getSatTRTunerVal("timeInterval")).setI((int)getSatTRTunerVal("ignoreRequest"))
+                                                       .setSPtrim(getSatTRTunerVal("sptrim")).setSPres(getSatTRTunerVal("spres"))
+                                                       .setSPresmax(getSatTRTunerVal("spresmax")).buildTRSystem();
         satTRProcessor = new TrimResponseProcessor(satTRResponse);
     }
     
@@ -61,8 +65,11 @@ public class VavTRSystem extends TRSystem
      *
      * */
     private void buildCO2TRSystem() {
-        co2TRResponse = new SystemTrimResponseBuilder().setSP0(800).setSPmin(800).setSPmax(1000).setTd(2)//TODO-TEST
-                                                       .setT(2).setI(2).setSPtrim(20).setSPres(-10).setSPresmax(-30).buildTRSystem();
+        co2TRResponse = new SystemTrimResponseBuilder().setSP0(getCO2TRTunerVal("spinit")).setSPmin(getCO2TRTunerVal("spmin"))
+                                                       .setSPmax(getCO2TRTunerVal("spmax")).setTd((int)getCO2TRTunerVal("timeDelay"))//TODO-TEST
+                                                       .setT((int)getCO2TRTunerVal("timeInterval")).setI((int)getCO2TRTunerVal("ignoreRequest"))
+                                                       .setSPtrim(getCO2TRTunerVal("sptrim")).setSPres(-getCO2TRTunerVal("spres"))
+                                                       .setSPresmax(-getCO2TRTunerVal("spresmax")).buildTRSystem();
         co2TRProcessor = new TrimResponseProcessor(co2TRResponse);
     }
     
@@ -80,8 +87,11 @@ public class VavTRSystem extends TRSystem
      * SPres-max    +0.10 inches
      * */
     private void buildSpTRSystem() {
-        spTRResponse = new SystemTrimResponseBuilder().setSP0(0.5).setSPmin(0.1).setSPmax(1.5).setTd(2)//TODO-TEST
-                                                      .setT(2).setI(2).setSPtrim(-0.02).setSPres(0.05).setSPresmax(0.10).buildTRSystem();
+        spTRResponse = new SystemTrimResponseBuilder().setSP0(getSpTRTunerVal("spinit")).setSPmin(getSpTRTunerVal("spmin"))
+                                                      .setSPmax(getSpTRTunerVal("spmax")).setTd((int)getSpTRTunerVal("timeDelay"))//TODO-TEST
+                                                      .setT((int)getSpTRTunerVal("timeInterval")).setI((int)getSpTRTunerVal("ignoreRequest"))
+                                                      .setSPtrim(getSpTRTunerVal("sptrim")).setSPres(getSpTRTunerVal("spres"))
+                                                      .setSPresmax(getSpTRTunerVal("spresmax")).buildTRSystem();
         spTRProcessor = new TrimResponseProcessor(spTRResponse);
     }
     
@@ -161,4 +171,15 @@ public class VavTRSystem extends TRSystem
         return (double) hwstTRProcessor.getSetPoint();
     }
     
+    private double getSatTRTunerVal(String trParam) {
+        return CCUHsApi.getInstance().readDefaultVal("point and system and tuner and tr and sat and " + trParam);
+    }
+    
+    private double getSpTRTunerVal(String trParam) {
+        return CCUHsApi.getInstance().readDefaultVal("point and system and tuner and tr and staticPressure and "+trParam);
+    }
+    
+    private double getCO2TRTunerVal(String trParam) {
+        return CCUHsApi.getInstance().readDefaultVal("point and system and tuner and tr and co2 and "+trParam);
+    }
 }

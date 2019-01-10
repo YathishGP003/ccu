@@ -9,29 +9,27 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.system.vav.VavIERtu;
+import a75f.io.logic.bo.building.system.DefaultSystem;
 import butterknife.ButterKnife;
 
 /**
- * Created by samjithsadasivan on 11/6/18.
+ * Created by samjithsadasivan on 1/9/19.
  */
 
-public class VavIERtuProfile extends Fragment
+public class DefaultSystemProfile extends Fragment
 {
-    
-    
-    
-    public static VavAnalogRtuProfile newInstance()
+    public static DefaultSystemProfile newInstance()
     {
-        return new VavAnalogRtuProfile();
+        return new DefaultSystemProfile();
     }
     
+    DefaultSystem systemProfile = null;
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState)
     {
-        View rootView = inflater.inflate(R.layout.fragment_profile_rtuie, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_profile_default, container, false);
         ButterKnife.bind(this, rootView);
         return rootView;
     }
@@ -39,13 +37,20 @@ public class VavIERtuProfile extends Fragment
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
     {
-        if (!(L.ccu().systemProfile instanceof VavIERtu))
-        {
-            L.ccu().systemProfile = new VavIERtu();
+    
+        if (L.ccu().systemProfile instanceof DefaultSystem) {
+        } else {
+        
             new AsyncTask<Void, Void, Void>() {
                 @Override
                 protected Void doInBackground( final Void ... params ) {
-                    //SystemEquip.getInstance().updateSystemProfile(ProfileType.SYSTEM_VAV_IE_RTU);
+                    if (systemProfile != null) {
+                        systemProfile.deleteSystemEquip();
+                    }
+                    systemProfile = new DefaultSystem();
+                    systemProfile.addSystemEquip();
+                    L.ccu().systemProfile = systemProfile;
+                    
                     return null;
                 }
                 @Override

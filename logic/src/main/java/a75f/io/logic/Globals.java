@@ -33,11 +33,12 @@ import a75f.io.logic.bo.building.Day;
 import a75f.io.logic.bo.building.NamedSchedule;
 import a75f.io.logic.bo.building.Schedule;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.system.DabStagedRtu;
-import a75f.io.logic.bo.building.system.VavAnalogRtu;
-import a75f.io.logic.bo.building.system.VavBacnetRtu;
-import a75f.io.logic.bo.building.system.VavIERtu;
-import a75f.io.logic.bo.building.system.VavStagedRtu;
+import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
+import a75f.io.logic.bo.building.system.DefaultSystem;
+import a75f.io.logic.bo.building.system.vav.VavAnalogRtu;
+import a75f.io.logic.bo.building.system.vav.VavBacnetRtu;
+import a75f.io.logic.bo.building.system.vav.VavIERtu;
+import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
 import a75f.io.logic.bo.building.vav.VavParallelFanProfile;
 import a75f.io.logic.bo.building.vav.VavReheatProfile;
 import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
@@ -379,26 +380,35 @@ public class Globals
             switch (ProfileType.valueOf(eq.getProfile()))
             {
                 case SYSTEM_VAV_ANALOG_RTU:
-                    L.ccu().systemProfile = new VavAnalogRtu();
+                    VavAnalogRtu analogRtuProfile = new VavAnalogRtu();
+                    analogRtuProfile.initTRSystem();
+                    L.ccu().systemProfile = analogRtuProfile;
+                    
                     break;
                 case SYSTEM_VAV_STAGED_RTU:
-                    L.ccu().systemProfile = new VavStagedRtu();
+                    VavStagedRtu stagedRtuProfile = new VavStagedRtu();
+                    stagedRtuProfile.initTRSystem();
+                    L.ccu().systemProfile = stagedRtuProfile;
+                    break;
+                case SYSTEM_VAV_IE_RTU:
+                    VavIERtu ieRtuProfile = new VavIERtu();
+                    ieRtuProfile.initTRSystem();
+                    L.ccu().systemProfile = ieRtuProfile;
+                    break;
+                case SYSTEM_VAV_BACNET_RTU:
+                    VavBacnetRtu bacnetRtu = new VavBacnetRtu();
+                    //bacnetRtu.initTRSystem();
+                    L.ccu().systemProfile = bacnetRtu;
                     break;
                 case SYSTEM_DAB_STAGED_RTU:
                     L.ccu().systemProfile = new DabStagedRtu();
                     break;
-                case SYSTEM_VAV_IE_RTU:
-                    L.ccu().systemProfile = new VavIERtu();
-                    break;
-                case SYSTEM_VAV_BACNET_RTU:
-                    L.ccu().systemProfile = new VavBacnetRtu();
-                    break;
                 default:
-                    L.ccu().systemProfile = new VavAnalogRtu();
+                    L.ccu().systemProfile = new DefaultSystem();
             }
         } else {
-            Log.d("CCUHS","System Equip does not exist.Create VavAnalogRtu System Profile");
-            L.ccu().systemProfile = new VavAnalogRtu();
+            Log.d("CCUHS","System Equip does not exist.Create Default System Profile");
+            L.ccu().systemProfile = new DefaultSystem();
         }
     }
     

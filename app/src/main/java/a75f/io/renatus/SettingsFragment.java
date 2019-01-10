@@ -56,21 +56,26 @@ public class SettingsFragment extends Fragment
 				{
 					case 0:
 						getActivity().getSupportFragmentManager().beginTransaction()
-						             .replace(R.id.profileContainer, new DABStagedProfile()).commit();
+						             .replace(R.id.profileContainer, new DefaultSystemProfile()).commit();
 						break;
+						
 					case 1:
 						getActivity().getSupportFragmentManager().beginTransaction()
-						             .replace(R.id.profileContainer, new VavAnalogRtuProfile()).commit();
+						             .replace(R.id.profileContainer, new DABStagedProfile()).commit();
 						break;
 					case 2:
 						getActivity().getSupportFragmentManager().beginTransaction()
-						             .replace(R.id.profileContainer, new VavIERtuProfile()).commit();
+						             .replace(R.id.profileContainer, new VavAnalogRtuProfile()).commit();
 						break;
 					case 3:
 						getActivity().getSupportFragmentManager().beginTransaction()
-						             .replace(R.id.profileContainer, new VavStagedRtuProfile()).commit();
+						             .replace(R.id.profileContainer, new VavIERtuProfile()).commit();
 						break;
 					case 4:
+						getActivity().getSupportFragmentManager().beginTransaction()
+						             .replace(R.id.profileContainer, new VavStagedRtuProfile()).commit();
+						break;
+					case 5:
 						//L.ccu().systemProfile = new VavBacnetRtu();
 						break;
 				}
@@ -81,6 +86,6 @@ public class SettingsFragment extends Fragment
 			}
 		});
 		spHvacEquipType.setSelection(L.ccu().systemProfile != null ?
-				            hvacEquipSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 1 );
+				            hvacEquipSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0 );
 	}
 }

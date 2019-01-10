@@ -65,7 +65,7 @@ public class BuildingTuners
         equipRef = hayStack.addEquip(tunerEquip);
         equipDis = siteDis+"-BuildingTuner";
         tz = siteMap.get("tz").toString();
-        addDefaultSystemTuners();
+        //addDefaultSystemTuners();
         
     }
     
@@ -150,17 +150,7 @@ public class BuildingTuners
                                    .build();
         String analog4MaxId = hayStack.addPoint(analog4Max);
         hayStack.writePoint(analog4MaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.SYSTEM_ANALOG4_MAX, 0);
-    
-        Point desiredCI = new Point.Builder()
-                                   .setDisplayName(equipDis+"-"+"DesiredCI")
-                                   .setSiteRef(siteRef)
-                                   .setEquipRef(equipRef)
-                                   .addMarker("tuner").addMarker("writable").addMarker("system").addMarker("ci").addMarker("desired")
-                                   .setUnit("\u00B0F")
-                                   .build();
-        String desiredCIId = hayStack.addPoint(desiredCI);
-        hayStack.writePoint(desiredCIId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.SYSTEM_DEFAULT_CI, 0);
-    
+        
         Point coolingSatMin = new Point.Builder()
                                    .setDisplayName(equipDis+"-"+"coolingSatMin")
                                    .setSiteRef(siteRef)

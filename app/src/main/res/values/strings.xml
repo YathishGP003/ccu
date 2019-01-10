@@ -52,6 +52,7 @@
         <item>  0-50A Current Transformer</item>
     </string-array>
     <string-array name="hvac_equip_select">
+        <item>  Default </item>
         <item>  DAB Staged RTU </item>
         <item>  VAV Analog RTU </item>
         <item>  VAV IE RTU </item>

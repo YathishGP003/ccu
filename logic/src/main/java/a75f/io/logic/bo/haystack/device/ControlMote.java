@@ -93,7 +93,7 @@ public class ControlMote
     
     private void addRelayStatePoint(String relay){
         RawPoint p = new RawPoint.Builder()
-                             .setDisplayName(site.getDisplayName()+"-"+relay+"Selection")
+                             .setDisplayName(site.getDisplayName()+"-"+relay+"State")
                              .setDeviceRef(deviceRef)
                              .setSiteRef(site.getId())
                              .addMarker(relay).addMarker("writable").addMarker("system").addMarker("state").addMarker("out")

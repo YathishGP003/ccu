@@ -54,14 +54,14 @@ public class Pulse
 					case "TH1_IN":
 						val = smartNodeRegularUpdateMessage_t.update.externalThermistorInput1.get();
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-						hayStack.writeHisValById(logPoint.get("id").toString(), ThermistorUtil.getThermisterValueToTemp(val));
-						Log.d(TAG,"regularSmartNodeUpdate : Thermistor1 "+ThermistorUtil.getThermisterValueToTemp(val));
+						hayStack.writeHisValById(logPoint.get("id").toString(), ThermistorUtil.getThermistorValueToTemp(val));
+						Log.d(TAG,"regularSmartNodeUpdate : Thermistor1 "+ThermistorUtil.getThermistorValueToTemp(val));
 						break;
 					case "TH2_IN":
 						val = smartNodeRegularUpdateMessage_t.update.externalThermistorInput2.get();
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-						hayStack.writeHisValById(logPoint.get("id").toString(), ThermistorUtil.getThermisterValueToTemp(val));
-						Log.d(TAG,"regularSmartNodeUpdate : Thermistor2 "+ThermistorUtil.getThermisterValueToTemp(val));
+						hayStack.writeHisValById(logPoint.get("id").toString(), ThermistorUtil.getThermistorValueToTemp(val));
+						Log.d(TAG,"regularSmartNodeUpdate : Thermistor2 "+ThermistorUtil.getThermistorValueToTemp(val));
 						break;
 				}
 			}

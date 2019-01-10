@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.SeekBar;
 
-import a75f.io.logic.bo.building.system.DxCIController;
+import a75f.io.logic.bo.building.system.vav.VavSystemController;
 import a75f.io.logic.tuners.SystemTunerUtil;
 import a75f.io.logic.tuners.TunerConstants;
 
@@ -76,7 +76,7 @@ public class SystemFragment extends Fragment
 		});
 		
 		stageStatusNow = view.findViewById(R.id.stageStatusNow);
-		stageStatusNow.setText(DxCIController.getInstance().getDxCIRtuState().name());
+		stageStatusNow.setText(VavSystemController.getInstance().getSystemState().name());
 	}
 	
 	

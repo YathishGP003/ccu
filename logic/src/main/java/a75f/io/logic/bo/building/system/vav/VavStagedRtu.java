@@ -1,11 +1,15 @@
-package a75f.io.logic.bo.building.system;
+package a75f.io.logic.bo.building.system.vav;
 
 import android.util.Log;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.HashMap;
 
 import a75.io.algos.vav.VavTRSystem;
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
+import a75f.io.logic.bo.building.system.SystemConstants;
+import a75f.io.logic.bo.building.system.SystemEquip;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.tuners.SystemTunerUtil;
 
@@ -13,18 +17,17 @@ import a75f.io.logic.tuners.SystemTunerUtil;
  * Created by samjithsadasivan on 8/14/18.
  */
 
-public class VavStagedRtu extends SystemProfile
+public class VavStagedRtu extends VavSystemProfile
 {
     private static final int CO2_MAX = 1000;
     private static final int CO2_MIN = 400;
     
     private static final int ANALOG_SCALE = 10;
     
-    public VavStagedRtu() {
+    public void initTRSystem() {
         trSystem =  new VavTRSystem();
     }
     
-    @JsonIgnore
     public String getProfileName()
     {
         return "VAV Staged RTU";
@@ -35,11 +38,11 @@ public class VavStagedRtu extends SystemProfile
         if (trSystem != null) {
             trSystem.processResetResponse();
         }
-        DxCIController.getInstance().runDxCIAlgo();
+        VavSystemController.getInstance().runVavSystemControlAlgo();
         updateSystemPoints();
     }
     
-    private void updateSystemPoints() {
+    private synchronized void updateSystemPoints() {
         
         SystemEquip systemEquip = SystemEquip.getInstance();
         
@@ -47,7 +50,7 @@ public class VavStagedRtu extends SystemProfile
         double analogMax = SystemTunerUtil.getTuner("analog1", "max");
         
         int coolingSignal = 0;
-        if (DxCIController.getInstance().getDxCIRtuState() == DxCIController.State.COOLING)
+        if (VavSystemController.getInstance().getSystemState() == VavSystemController.State.COOLING)
         {
             if (analogMax > analogMin)
             {
@@ -68,15 +71,15 @@ public class VavStagedRtu extends SystemProfile
         analogMax = SystemTunerUtil.getTuner("analog2", "max");
         
         int heatingSignal = 0;
-        if (DxCIController.getInstance().getDxCIRtuState() == DxCIController.State.HEATING)
+        if (VavSystemController.getInstance().getSystemState() == VavSystemController.State.HEATING)
         {
             if (analogMax > analogMin)
             {
-                heatingSignal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (DxCIController.getInstance().getHeatingSignal()) / 100));
+                heatingSignal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (VavSystemController.getInstance().getHeatingSignal()) / 100));
             }
             else
             {
-                heatingSignal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (DxCIController.getInstance().getHeatingSignal()) / 100));
+                heatingSignal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (VavSystemController.getInstance().getHeatingSignal()) / 100));
             }
         } else {
             heatingSignal = 0;
@@ -245,5 +248,19 @@ public class VavStagedRtu extends SystemProfile
             }
         }
         return stage != 0 ? stage - Stage.FAN_1.ordinal() : stage ;
+    }
+    
+    
+    @Override
+    public void addSystemEquip() {
+    
+    }
+    
+    @Override
+    public synchronized void deleteSystemEquip() {
+        HashMap equip = CCUHsApi.getInstance().read("equip and system");
+        if (equip.get("profile").equals(ProfileType.SYSTEM_VAV_STAGED_RTU.name())) {
+            CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
+        }
     }
 }

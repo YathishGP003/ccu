@@ -1,0 +1,505 @@
+package a75f.io.logic.bo.building.system.vav;
+
+/**
+ * Created by samjithsadasivan on 8/14/18.
+ */
+
+import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import a75.io.algos.vav.VavTRSystem;
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.Tags;
+import a75f.io.logic.L;
+import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.system.SystemConstants;
+import a75f.io.logic.bo.building.system.SystemProfile;
+import a75f.io.logic.bo.building.system.SystemState;
+import a75f.io.logic.bo.haystack.device.ControlMote;
+import a75f.io.logic.tuners.TunerConstants;
+import a75f.io.logic.tuners.VavTRTuners;
+
+/**
+ * Default System handles PI controlled op
+ */
+public class VavAnalogRtu extends VavSystemProfile
+{
+    private static final int CO2_MAX = 1000;
+    private static final int CO2_MIN = 400;
+    
+    private static final int ANALOG_SCALE = 10;
+    
+    public void initTRSystem() {
+        trSystem =  new VavTRSystem();
+    }
+    
+    public  int getSystemSAT() {
+        return ((VavTRSystem)trSystem).getCurrentSAT();
+    }
+    
+    public  int getSystemCO2() {
+        return ((VavTRSystem)trSystem).getCurrentCO2();
+    }
+    
+    public  int getSystemOADamper() {
+        return (((VavTRSystem)trSystem).getCurrentCO2() - CO2_MIN) * 100 / (CO2_MAX - CO2_MIN);
+    }
+    
+    public int getStaticPressure() {
+        return (int)((VavTRSystem)trSystem).getCurrentSp();
+    }
+    
+    public int getAnalog1Out() {
+        return (int)ControlMote.getAnalogOut("analog1");
+    }
+    
+    public int getAnalog2Out() {
+        return (int)ControlMote.getAnalogOut("analog2");
+    }
+    
+    public int getAnalog3Out() {
+        return (int)ControlMote.getAnalogOut("analog3");
+    }
+    
+    public int getAnalog4Out() {
+        return (int)ControlMote.getAnalogOut("analog4");
+    }
+    
+    public String getProfileName() {
+        return "VAV Analog RTU";
+    }
+    
+    @Override
+    public void doSystemControl() {
+        if (trSystem != null) {
+            trSystem.processResetResponse();
+        }
+        VavSystemController.getInstance().runVavSystemControlAlgo();
+        updateSystemPoints();
+    }
+    
+    private synchronized void updateSystemPoints() {
+    
+        /*SystemEquip systemEquip = SystemEquip.getInstance();
+        systemEquip.setSat(getSystemSAT());
+        systemEquip.setCo2(getSystemCO2());
+        systemEquip.setSp(getStaticPressure());
+        systemEquip.setHwst(0);*/
+        
+        
+        double analogMin = getConfigVal("analog1 and cooling and sat and min");
+        double analogMax = getConfigVal("analog1 and cooling and sat and max");
+        Log.d("CCU", "analogMin: "+analogMin+" analogMax: "+analogMax+" SAT: "+getSystemSAT());
+        
+        int signal = 0;
+        if (VavSystemController.getInstance().getSystemState() == VavSystemController.State.COOLING)
+        {
+            if (analogMax > analogMin)
+            {
+                signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (SystemConstants.COOLING_SAT_CONFIG_MAX - getSystemSAT()) / 10));
+            }
+            else
+            {
+                signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (SystemConstants.COOLING_SAT_CONFIG_MAX - getSystemSAT()) / 10));
+            }
+            
+        }
+        setCmdSignal("cooling",signal);
+        if (getConfigVal("analog1 and output and enabled") > 0)
+        {
+            ControlMote.setAnalogOut("analog1", signal);
+        }
+    
+        analogMin = getConfigVal("analog2 and staticPressure and min");
+        analogMax = getConfigVal("analog2 and staticPressure and max");
+    
+        if (analogMax > analogMin)
+        {
+            signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (getStaticPressure() - SystemConstants.SP_CONFIG_MIN) / 15.0));
+        } else {
+            signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (getStaticPressure() - SystemConstants.SP_CONFIG_MIN) / 15.0));
+        }
+        setCmdSignal("staticPressure", signal);
+        if (getConfigVal("analog2 and output and enabled") > 0)
+        {
+            ControlMote.setAnalogOut("analog2", signal);
+        }
+        
+        analogMin = getConfigVal("analog3 and heating and min");
+        analogMax = getConfigVal("analog3 and heating and max");
+    
+        if (VavSystemController.getInstance().getSystemState() == VavSystemController.State.HEATING)
+        {
+            if (analogMax > analogMin)
+            {
+                signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (VavSystemController.getInstance().getHeatingSignal()) / 100));
+            }
+            else
+            {
+                signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (VavSystemController.getInstance().getHeatingSignal()) / 100));
+            }
+        } else {
+            signal = 0;
+        }
+        setCmdSignal("heating", signal);
+        if (getConfigVal("analog3 and output and enabled") > 0)
+        {
+            ControlMote.setAnalogOut("analog3", signal);
+        }
+    
+        analogMin = getConfigVal("analog4 and co2 and min");;
+        analogMax = getConfigVal("analog4 and co2 and max");;
+        if (analogMax > analogMin)
+        {
+            signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (getSystemCO2() - SystemConstants.CO2_CONFIG_MIN) / 200));
+        } else {
+            signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (getSystemCO2() - SystemConstants.CO2_CONFIG_MIN) / 200));
+        }
+        setCmdSignal("co2",signal);
+        if (getConfigVal("analog4 and output and enabled") > 0)
+        {
+            ControlMote.setAnalogOut("analog4", signal);
+        }
+        
+    }
+    
+    public void addSystemEquip() {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap equip = hayStack.read("equip and system");
+        if (equip != null && equip.size() > 0) {
+            if (!equip.get("profile").equals(ProfileType.SYSTEM_VAV_ANALOG_RTU.name())) {
+                hayStack.deleteEntityTree(equip.get("id").toString());
+            } else {
+                return;
+            }
+        }
+        System.out.println("System Equip does not exist. Create Now");
+        HashMap siteMap = hayStack.read(Tags.SITE);
+        String siteRef = (String) siteMap.get(Tags.ID);
+        String siteDis = (String) siteMap.get("dis");
+        Equip systemEquip= new Equip.Builder()
+                                   .setSiteRef(siteRef)
+                                   .setDisplayName(siteDis+"-SystemEquip")
+                                   .setProfile(ProfileType.SYSTEM_VAV_ANALOG_RTU.name())
+                                   .addMarker("equip")
+                                   .addMarker("system")
+                                   .setTz(siteMap.get("tz").toString())
+                                   .build();
+        String equipRef = hayStack.addEquip(systemEquip);
+        addUserIntentPoints(equipRef);
+        addCmdPoints(equipRef);
+        addConfigPoints(equipRef);
+        addTunerPoints(equipRef);
+        new ControlMote(siteRef);
+        initTRSystem();
+        L.saveCCUState();
+        CCUHsApi.getInstance().syncEntityTree();
+        
+        
+    }
+    
+    @Override
+    public synchronized void deleteSystemEquip() {
+        HashMap equip = CCUHsApi.getInstance().read("equip and system");
+        if (equip.get("profile").equals(ProfileType.SYSTEM_VAV_ANALOG_RTU.name())) {
+            CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
+        }
+    }
+    
+    private void addCmdPoints(String equipref) {
+        HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
+        String equipDis = siteMap.get("dis").toString()+"-SystemEquip";
+        String siteRef = siteMap.get("id").toString();
+        String tz = siteMap.get("tz").toString();
+        Point coolingSignal = new Point.Builder()
+                            .setDisplayName(equipDis+"-"+"CoolingSignal")
+                            .setSiteRef(siteRef)
+                            .setEquipRef(equipref)
+                            .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("his")
+                            .setUnit("%")
+                            .setTz(tz)
+                            .build();
+        CCUHsApi.getInstance().addPoint(coolingSignal);
+    
+        Point heatingSignal = new Point.Builder()
+                                      .setDisplayName(equipDis+"-"+"HeatingSignal")
+                                      .setSiteRef(siteRef)
+                                      .setEquipRef(equipref)
+                                      .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("his")
+                                      .setTz(tz)
+                                      .build();
+        CCUHsApi.getInstance().addPoint(heatingSignal);
+    
+        Point fanSignal = new Point.Builder()
+                                      .setDisplayName(equipDis+"-"+"FanSignal")
+                                      .setSiteRef(siteRef)
+                                      .setEquipRef(equipref)
+                                      .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("his")
+                                      .setTz(tz)
+                                      .build();
+        CCUHsApi.getInstance().addPoint(fanSignal);
+    
+        Point co2Signal = new Point.Builder()
+                                  .setDisplayName(equipDis+"-"+"CO2Signal")
+                                  .setSiteRef(siteRef)
+                                  .setEquipRef(equipref)
+                                  .addMarker("system").addMarker("cmd").addMarker("co2").addMarker("his")
+                                  .setTz(tz)
+                                  .build();
+        CCUHsApi.getInstance().addPoint(co2Signal);
+        Point occupancySignal = new Point.Builder()
+                                  .setDisplayName(equipDis+"-"+"OccupancySignal")
+                                  .setSiteRef(siteRef)
+                                  .setEquipRef(equipref)
+                                  .addMarker("system").addMarker("cmd").addMarker("occupancy").addMarker("his")
+                                  .setTz(tz)
+                                  .build();
+        CCUHsApi.getInstance().addPoint(occupancySignal);
+        Point humidifierSignal = new Point.Builder()
+                                  .setDisplayName(equipDis+"-"+"HumidifierSignal")
+                                  .setSiteRef(siteRef)
+                                  .setEquipRef(equipref)
+                                  .addMarker("system").addMarker("cmd").addMarker("co2").addMarker("his")
+                                  .setTz(tz)
+                                  .build();
+        CCUHsApi.getInstance().addPoint(humidifierSignal);
+    
+    
+        /*Point sat = new Point.Builder()
+                            .setDisplayName(equipDis+"-"+"SAT")
+                            .setSiteRef(siteRef)
+                            .setEquipRef(equipref)
+                            .addMarker("tr").addMarker("sat").addMarker("his").addMarker("system").addMarker("equipHis")
+                            .setUnit("\u00B0F")
+                            .setTz(tz)
+                            .build();
+        CCUHsApi.getInstance().addPoint(sat);
+    
+        Point co2 = new Point.Builder()
+                            .setDisplayName(equipDis+"-"+"CO2")
+                            .setSiteRef(siteRef)
+                            .setEquipRef(equipref)
+                            .addMarker("tr").addMarker("co2").addMarker("his").addMarker("system").addMarker("equipHis")
+                            .setUnit("\u00B0ppm")
+                            .setTz(tz)
+                            .build();
+        CCUHsApi.getInstance().addPoint(co2);
+    
+        Point sp = new Point.Builder()
+                           .setDisplayName(equipDis+"-"+"SP")
+                           .setSiteRef(siteRef)
+                           .setEquipRef(equipref)
+                           .addMarker("tr").addMarker("sp").addMarker("his").addMarker("system").addMarker("equipHis")
+                           .setUnit("\u00B0in")
+                           .setTz(tz)
+                           .build();
+        CCUHsApi.getInstance().addPoint(sp);*/
+        
+    }
+    
+    public double getCmdSignal(String cmd) {
+        return CCUHsApi.getInstance().readHisValByQuery("point and system and cmd and "+cmd);
+    }
+    public void setCmdSignal(String cmd, double val) {
+        CCUHsApi.getInstance().writeHisValByQuery("point and system and cmd and "+cmd, val);
+    }
+    
+    private void addConfigPoints(String equipref) {
+        HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
+        String equipDis = siteMap.get("dis").toString()+"-SystemEquip";
+        String siteRef = siteMap.get("id").toString();
+        String tz = siteMap.get("tz").toString();
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        Point analog1OutputEnabled = new Point.Builder()
+                                      .setDisplayName(equipDis+"-"+"analog1OutputEnabled")
+                                      .setSiteRef(siteRef)
+                                      .setEquipRef(equipref)
+                                      .addMarker("system").addMarker("config").addMarker("analog1")
+                                      .addMarker("output").addMarker("enabled").addMarker("writable")
+                                      .setTz(tz)
+                                      .build();
+        String analog1OutputEnabledId = hayStack.addPoint(analog1OutputEnabled);
+        hayStack.writeDefaultValById(analog1OutputEnabledId, 0.0 );
+    
+        Point analog2OutputEnabled = new Point.Builder()
+                                             .setDisplayName(equipDis+"-"+"analog2OutputEnabled")
+                                             .setSiteRef(siteRef)
+                                             .setEquipRef(equipref)
+                                             .addMarker("system").addMarker("config").addMarker("analog2")
+                                             .addMarker("output").addMarker("enabled").addMarker("writable")
+                                             .setTz(tz)
+                                             .build();
+        String analog2OutputEnabledId = hayStack.addPoint(analog2OutputEnabled);
+        hayStack.writeDefaultValById(analog2OutputEnabledId, 0.0 );
+    
+        Point analog3OutputEnabled = new Point.Builder()
+                                             .setDisplayName(equipDis+"-"+"analog3OutputEnabled")
+                                             .setSiteRef(siteRef)
+                                             .setEquipRef(equipref)
+                                             .addMarker("system").addMarker("config").addMarker("analog3")
+                                             .addMarker("output").addMarker("enabled").addMarker("writable")
+                                             .setTz(tz)
+                                             .build();
+        String analog3OutputEnabledId = hayStack.addPoint(analog3OutputEnabled);
+        hayStack.writeDefaultValById(analog3OutputEnabledId, 0.0 );
+    
+        Point analog4OutputEnabled = new Point.Builder()
+                                             .setDisplayName(equipDis+"-"+"analog4OutputEnabled")
+                                             .setSiteRef(siteRef)
+                                             .setEquipRef(equipref)
+                                             .addMarker("system").addMarker("config").addMarker("analog4")
+                                             .addMarker("output").addMarker("enabled").addMarker("writable")
+                                             .setTz(tz)
+                                             .build();
+        String analog4OutputEnabledId = hayStack.addPoint(analog4OutputEnabled);
+        hayStack.writeDefaultValById(analog4OutputEnabledId, 0.0 );
+    
+        Point analog1AtMinCoolingSat = new Point.Builder()
+                                             .setDisplayName(equipDis+"-"+"analog1AtMinCoolingSat")
+                                             .setSiteRef(siteRef)
+                                             .setEquipRef(equipref)
+                                             .addMarker("system").addMarker("config").addMarker("analog1")
+                                             .addMarker("min").addMarker("cooling").addMarker("sat").addMarker("writable")
+                                             .setUnit("V")
+                                             .setTz(tz)
+                                             .build();
+        String analog1AtMinCoolingSatId = hayStack.addPoint(analog1AtMinCoolingSat);
+        hayStack.writeDefaultValById(analog1AtMinCoolingSatId, 0.0 );
+    
+        Point analog1AtMaxCoolingSat = new Point.Builder()
+                                               .setDisplayName(equipDis+"-"+"analog1AtMaxCoolingSat")
+                                               .setSiteRef(siteRef)
+                                               .setEquipRef(equipref)
+                                               .addMarker("system").addMarker("config").addMarker("analog1")
+                                               .addMarker("max").addMarker("cooling").addMarker("sat").addMarker("writable")
+                                               .setUnit("V")
+                                               .setTz(tz)
+                                               .build();
+        String analog1AtMaxCoolingSatId = hayStack.addPoint(analog1AtMaxCoolingSat);
+        hayStack.writeDefaultValById(analog1AtMaxCoolingSatId, 10.0 );
+    
+        Point analog2AtMinStaticPressure = new Point.Builder()
+                                               .setDisplayName(equipDis+"-"+"analog2AtMinStaticPressure")
+                                               .setSiteRef(siteRef)
+                                               .setEquipRef(equipref)
+                                               .addMarker("system").addMarker("config").addMarker("analog2")
+                                               .addMarker("min").addMarker("staticPressure").addMarker("writable")
+                                               .setUnit("V")
+                                               .setTz(tz)
+                                               .build();
+        String analog2AtMinStaticPressureId = hayStack.addPoint(analog2AtMinStaticPressure);
+        hayStack.writeDefaultValById(analog2AtMinStaticPressureId, 0.0 );
+    
+        Point analog2AtMaxStaticPressure = new Point.Builder()
+                                               .setDisplayName(equipDis+"-"+"analog2AtMaxStaticPressure")
+                                               .setSiteRef(siteRef)
+                                               .setEquipRef(equipref)
+                                               .addMarker("system").addMarker("config").addMarker("analog2")
+                                               .addMarker("max").addMarker("staticPressure").addMarker("writable")
+                                               .setUnit("V")
+                                               .setTz(tz)
+                                               .build();
+        String analog2AtMaxStaticPressureId = hayStack.addPoint(analog2AtMaxStaticPressure);
+        hayStack.writeDefaultValById(analog2AtMaxStaticPressureId, 10.0 );
+    
+        Point analog3AtMinHeating = new Point.Builder()
+                                                   .setDisplayName(equipDis+"-"+"analog3AtMinHeating")
+                                                   .setSiteRef(siteRef)
+                                                   .setEquipRef(equipref)
+                                                   .addMarker("system").addMarker("config").addMarker("analog3")
+                                                   .addMarker("min").addMarker("heating").addMarker("writable")
+                                                   .setUnit("V")
+                                                   .setTz(tz)
+                                                   .build();
+        String analog3AtMinHeatingId = hayStack.addPoint(analog3AtMinHeating);
+        hayStack.writeDefaultValById(analog3AtMinHeatingId, 0.0 );
+    
+        Point analog3AtMaxHeating = new Point.Builder()
+                                                   .setDisplayName(equipDis+"-"+"analog3AtMaxHeating")
+                                                   .setSiteRef(siteRef)
+                                                   .setEquipRef(equipref)
+                                                   .addMarker("system").addMarker("config").addMarker("analog3")
+                                                   .addMarker("max").addMarker("heating").addMarker("writable")
+                                                   .setUnit("V")
+                                                   .setTz(tz)
+                                                   .build();
+        String analog3AtMaxHeatingId = hayStack.addPoint(analog3AtMaxHeating);
+        hayStack.writeDefaultValById(analog3AtMaxHeatingId, 10.0 );
+    
+        Point analog4AtMinCO2 = new Point.Builder()
+                                                   .setDisplayName(equipDis+"-"+"analog4AtMinCO2")
+                                                   .setSiteRef(siteRef)
+                                                   .setEquipRef(equipref)
+                                                   .addMarker("system").addMarker("config").addMarker("analog4")
+                                                   .addMarker("min").addMarker("co2").addMarker("writable")
+                                                   .setUnit("V")
+                                                   .setTz(tz)
+                                                   .build();
+        String analog4AtMinCO2Id = hayStack.addPoint(analog4AtMinCO2);
+        hayStack.writeDefaultValById(analog4AtMinCO2Id, 0.0 );
+    
+        Point analog4AtMaxCO2 = new Point.Builder()
+                                                   .setDisplayName(equipDis+"-"+"analog4AtMaxCO2")
+                                                   .setSiteRef(siteRef)
+                                                   .setEquipRef(equipref)
+                                                   .addMarker("system").addMarker("config").addMarker("analog4")
+                                                   .addMarker("max").addMarker("co2").addMarker("writable")
+                                                   .setUnit("V")
+                                                   .setTz(tz)
+                                                   .build();
+        String analog4AtMaxCO2Id = hayStack.addPoint(analog4AtMaxCO2);
+        hayStack.writeDefaultValById(analog4AtMaxCO2Id, 10.0 );
+    
+    }
+    
+    public double getConfigVal(String tags) {
+        return CCUHsApi.getInstance().readDefaultVal("point and system and config and "+tags);
+    }
+    public void setConfigVal(String tags, double val) {
+        CCUHsApi.getInstance().writeDefaultVal("point and system and config and "+tags, val);
+    }
+    
+    public double getConfigVal(String tags, int level) {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap cdb = hayStack.read("point and system and config and "+tags);
+    
+        ArrayList values = hayStack.readPoint(cdb.get("id").toString());
+        if (values != null && values.size() > 0)
+        {
+            HashMap valMap = ((HashMap) values.get(level-1));
+            if (valMap.get("val") != null) {
+                return Double.parseDouble(valMap.get("val").toString());
+            }
+        }
+        return 0;
+    }
+    
+    public void setConfigVal(String tags, int level, double val) {
+    
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap cdb = hayStack.read("point and system and config and "+tags);
+    
+        String id = cdb.get("id").toString();
+        if (id == null || id == "") {
+            throw new IllegalArgumentException();
+        }
+        hayStack.writePoint(id, level, "ccu", val, 0);
+    }
+    
+    public double getConfigEnabled(String config) {
+        return CCUHsApi.getInstance().readDefaultVal("point and system and config and output and enabled and "+config);
+    }
+    public void setConfigEnabled(String config, double val) {
+        CCUHsApi.getInstance().writeDefaultVal("point and system and config and output and enabled and "+config, val);
+    }
+    
+    private void addTunerPoints(String equipref) {
+        VavTRTuners.addSatTRTunerPoints(equipref);
+        VavTRTuners.addStaticPressureTRTunerPoints(equipref);
+        VavTRTuners.addCO2TRTunerPoints(equipref);
+    }
+}

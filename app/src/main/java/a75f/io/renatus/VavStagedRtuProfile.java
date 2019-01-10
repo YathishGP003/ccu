@@ -14,10 +14,9 @@ import android.widget.CompoundButton;
 import android.widget.Spinner;
 
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
 import a75f.io.logic.bo.building.system.SystemEquip;
-import a75f.io.logic.bo.building.system.VavStagedRtu;
+import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -68,12 +67,15 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
     {
         if (!(L.ccu().systemProfile instanceof VavStagedRtu))
         {
+            if (L.ccu().systemProfile != null) {
+                L.ccu().systemProfile.deleteSystemEquip();
+            }
             L.ccu().systemProfile = new VavStagedRtu();
     
             new AsyncTask<Void, Void, Void>() {
                 @Override
                 protected Void doInBackground( final Void ... params ) {
-                    SystemEquip.getInstance().updateSystemProfile(ProfileType.SYSTEM_VAV_STAGED_RTU);
+                    //SystemEquip.getInstance().updateSystemProfile(ProfileType.SYSTEM_VAV_STAGED_RTU);
                     return null;
                 }
                 @Override

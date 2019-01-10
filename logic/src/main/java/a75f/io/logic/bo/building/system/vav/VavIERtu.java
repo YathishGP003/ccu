@@ -1,22 +1,24 @@
-package a75f.io.logic.bo.building.system;
+package a75f.io.logic.bo.building.system.vav;
 
 /**
  * Created by samjithsadasivan on 8/14/18.
  */
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.HashMap;
 
 import a75.io.algos.vav.VavTRSystem;
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 
 /**
  * System profile to handle AHU via IE gateways.
  *
  */
-public class VavIERtu extends SystemProfile
+public class VavIERtu extends VavSystemProfile
 {
     private static final int CO2_MAX = 1000;
     private static final int CO2_MIN = 400;
-    public VavIERtu() {
+    public void initTRSystem() {
         trSystem =  new VavTRSystem();
     }
     
@@ -37,8 +39,25 @@ public class VavIERtu extends SystemProfile
         return (int)((VavTRSystem)trSystem).getCurrentSp();
     }
     
-    @JsonIgnore
     public String getProfileName() {
         return "VAV IE RTU";
+    }
+    
+    @Override
+    public void doSystemControl() {
+    
+    }
+    
+    @Override
+    public void addSystemEquip() {
+    
+    }
+    
+    @Override
+    public void deleteSystemEquip() {
+        HashMap equip = CCUHsApi.getInstance().read("equip and system");
+        if (equip.get("profile").equals(ProfileType.SYSTEM_VAV_IE_RTU.name())) {
+            CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
+        }
     }
 }

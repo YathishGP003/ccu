@@ -458,8 +458,8 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
                     @Override
                     protected void onPostExecute( final Void result ) {
                         progressDlg.dismiss();
-                        getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
                         FragmentVAVConfiguration.this.closeAllBaseDialogFragments();
+                        getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
                     }
                 }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
                 

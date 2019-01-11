@@ -46,13 +46,13 @@ public class BuildingTuners
         }
         System.out.println("Build Tuner Equip does not exist. Create Now");
         HashMap siteMap = hayStack.read(Tags.SITE);
+        System.out.println("Site :"+siteMap);
         siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
         Equip tunerEquip= new Equip.Builder()
                           .setSiteRef(siteRef)
                           .setDisplayName(siteDis+"-BuildingTuner")
-                          .addMarker("equip")
-                          .addMarker("tuner")
+                          .addMarker("equip").addMarker("tuner").addMarker("equipHis")
                           .setTz(siteMap.get("tz").toString())
                           .build();
         equipRef = hayStack.addEquip(tunerEquip);

@@ -30,10 +30,12 @@ import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.Zone;
 import a75f.io.logic.bo.building.ZonePriority;
+import a75f.io.logic.bo.building.definitions.DamperType;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.definitions.ReheatType;
 import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.building.vav.VavParallelFanProfile;
 import a75f.io.logic.bo.building.vav.VavProfile;
@@ -44,6 +46,9 @@ import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import butterknife.ButterKnife;
+
+import static a75f.io.logic.bo.building.definitions.ReheatType.OneStage;
+import static a75f.io.logic.bo.building.definitions.ReheatType.TwoStage;
 
 /**
  * Created by samjithsadasivan on 6/5/18.
@@ -62,10 +67,11 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
     LinearLayout damper1layout;
     LinearLayout damper2layout;
     Spinner      damperType;
-    Spinner      damper2Type;
-    Spinner      damperActuator;
-    Spinner      reheatPort;
-    Spinner      reheatActuator;
+    //Spinner      damper2Type;
+    //Spinner      damperActuator;
+    //Spinner      reheatPort;
+    //Spinner      reheatActuator;
+    Spinner reheatType;
     LinearLayout reheatOptionLayout;
     Button       setButton;
     Spinner      zonePriority;
@@ -81,14 +87,17 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
     private VavProfileConfiguration mProfileConfig;
     
     private ArrayList<Damper.Parameters> mDampers = new ArrayList<Damper.Parameters>();
-    ArrayAdapter<String> analogoutActuatorAdapter;
-    ArrayAdapter<String> damperActuatorAdapter;
-    ArrayAdapter<String> relayActuatorAdapter;
-    ArrayAdapter<String> reheatPortAdapter;
+    ArrayAdapter<String> damperTypesAdapter;
+    ArrayAdapter<String> reheatTypesAdapter;
     
-    int damperActuatorSelection;
-    Port reheatPortSelection;
-    int reheatActuatorSelection;
+    //ArrayAdapter<String> damperActuatorAdapter;
+    //ArrayAdapter<String> relayActuatorAdapter;
+    //ArrayAdapter<String> reheatPortAdapter;
+    
+    DamperType damperTypeSelected;
+    //int damperActuatorSelection;
+    ReheatType reheatTypeSelected;
+    //int reheatActuatorSelection;
     
     String floorRef;
     String zoneRef;
@@ -173,9 +182,11 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
     {
         reheatOptionLayout = (LinearLayout)view.findViewById(R.id.dabReheatOptions);
-        damperActuator = (Spinner) view.findViewById(R.id.vavDamperActuator);
-        reheatPort = view.findViewById(R.id.vavReheatPort);
-        reheatActuator = (Spinner)view.findViewById(R.id.vavReheatActuator);
+        
+        reheatType = view.findViewById(R.id.vavReheatType);
+        //damperActuator = (Spinner) view.findViewById(R.id.vavDamperActuator);
+        //reheatPort = view.findViewById(R.id.vavReheatPort);
+        //reheatActuator = (Spinner)view.findViewById(R.id.vavReheatActuator);
         setButton = (Button) view.findViewById(R.id.setBtn);
     
         mVavProfile = (VavProfile) L.getProfile(mSmartNodeAddress);
@@ -198,114 +209,57 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
             }
             
         }
-    
-    
-        fillDamperDetails();
         
-        ArrayList<String> analogTypes = new ArrayList<>();
-        for (OutputAnalogActuatorType actuator : OutputAnalogActuatorType.values()) {
-            analogTypes.add(actuator.displayName);
+        //fillDamperDetails();
+    
+        damperType = view.findViewById(R.id.damperType);
+    
+        ArrayList<String> damperTypes = new ArrayList<>();
+        for (DamperType damper : DamperType.values()) {
+            damperTypes.add(damper.displayName);
         }
-        analogoutActuatorAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, analogTypes);
-        analogoutActuatorAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-    
-        ArrayList<String> damperAnalogTpes = new ArrayList<>();
-        for (OutputAnalogActuatorType actuator : OutputAnalogActuatorType.values()) {
-            if (actuator != OutputAnalogActuatorType.Pulse)
-            {
-                damperAnalogTpes.add(actuator.displayName);
-            }
-        }
-        damperActuatorAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, damperAnalogTpes);
-        damperActuatorAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-    
-        ArrayList<String> relays = new ArrayList<>();
-        for (OutputRelayActuatorType actuator : OutputRelayActuatorType.values()) {
-            relays.add(actuator.displayName);
-        }
-        relayActuatorAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, relays);
-        relayActuatorAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-    
-    
-        //reheatPort.setSelection(0);//TODO
-        damperActuator.setAdapter(damperActuatorAdapter);
-        damperActuator.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                damperActuatorSelection = position;
-            }
+        damperTypesAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, damperTypes);
+        damperTypesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        damperType.setAdapter(damperTypesAdapter);
         
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            
-            }
-        });
-    
-    
-        ArrayList<String> reheatPorts = new ArrayList<>();
-        reheatPorts.add("Relay 1");
-        reheatPorts.add("Relay 1 and 2");
-        reheatPorts.add("Analog 2 Out");
-        reheatPortAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, reheatPorts);
-        reheatPortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        reheatPort.setAdapter(reheatPortAdapter);
+        ArrayList<String> reheatTypes = new ArrayList<>();
+        for (ReheatType actuator : ReheatType.values()) {
+            reheatTypes.add(actuator.displayName);
+        }
+        reheatTypesAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, reheatTypes);
+        reheatTypesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         
-        reheatActuator.setAdapter(analogoutActuatorAdapter);
+        reheatType.setAdapter(reheatTypesAdapter);
     
         if (mProfileConfig != null) {
             for (Output op : mProfileConfig.getOutputs()) {
                 Log.d("VAVConfig", " Config Outputs: "+op.getPort());
                 if (op.getPort() == Port.ANALOG_OUT_ONE) {
-                    damperActuator.setSelection(damperActuatorAdapter.getPosition(op.getAnalogActuatorType()), false);
+                    damperType.setSelection(damperTypesAdapter.getPosition(op.getAnalogActuatorType()), false);
+                    damperTypeSelected = DamperType.getEnum(op.getAnalogActuatorType());
                 } else if (op.getPort() == Port.ANALOG_OUT_TWO) {
-                    reheatPortSelection = Port.ANALOG_OUT_TWO;
-                    reheatPort.setSelection(2, false);
-                    reheatActuator.setAdapter(analogoutActuatorAdapter);
-                    reheatActuatorSelection = analogoutActuatorAdapter.getPosition(op.getAnalogActuatorType());
-                    reheatActuator.setSelection(reheatActuatorSelection, false);
+                    reheatTypeSelected = ReheatType.getEnum(op.getAnalogActuatorType());
+                    reheatType.setSelection(2, false);
+                    reheatType.setAdapter(reheatTypesAdapter);
+                    reheatType.setSelection(reheatTypesAdapter.getPosition(op.getAnalogActuatorType()), false);
                 } else if (op.getPort() == Port.RELAY_ONE) {
-                    reheatPortSelection = Port.RELAY_ONE;
-                    reheatPort.setSelection(0, false);
-                    reheatActuator.setAdapter(relayActuatorAdapter);
-                    reheatActuator.setSelection(relayActuatorAdapter.getPosition(op.getRelayActuatorType()), false);
+                    reheatTypeSelected = OneStage;
+                    reheatType.setSelection(0, false);
+                    reheatType.setAdapter(reheatTypesAdapter);
+                    reheatType.setSelection(reheatTypesAdapter.getPosition(op.getRelayActuatorType()), false);
                 } else if (op.getPort() == Port.RELAY_TWO) {
-                    reheatPortSelection = Port.RELAY_TWO;
-                    reheatPort.setSelection(1, false);
-                    reheatActuator.setAdapter(relayActuatorAdapter);
-                    reheatActuator.setSelection(relayActuatorAdapter.getPosition(op.getRelayActuatorType()), false);
+                    reheatTypeSelected = TwoStage;
+                    reheatType.setSelection(1, false);
+                    reheatType.setAdapter(reheatTypesAdapter);
+                    reheatType.setSelection(reheatTypesAdapter.getPosition(op.getRelayActuatorType()), false);
                 }
             }
         }
     
-        reheatActuator.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        damperType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                reheatActuatorSelection = position;
-            }
-        
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            
-            }
-        });
-        
-        reheatPort.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                switch (position) {
-                    case 0:
-                        reheatPortSelection = Port.RELAY_ONE;
-                        reheatActuator.setAdapter(relayActuatorAdapter);
-                        break;
-                    case 1:
-                        reheatPortSelection = Port.RELAY_TWO;
-                        reheatActuator.setAdapter(relayActuatorAdapter);
-                        break;
-                    case 2:
-                        reheatPortSelection = Port.ANALOG_OUT_TWO;
-                        reheatActuator.setAdapter(analogoutActuatorAdapter);
-                        break;
-                }
+                damperTypeSelected = DamperType.values()[position];
             }
         
             @Override
@@ -314,13 +268,20 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
             }
         });
     
-    
+        reheatType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                reheatTypeSelected = ReheatType.values()[position];
+            }
+        
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            
+            }
+        });
+        
         damper1layout  = (LinearLayout)view.findViewById(R.id.damper1layout);
-        damperType = (Spinner) view.findViewById(R.id.damperType);
-        ArrayAdapter<Damper.Parameters> damperTypeAdapter = new ArrayAdapter<Damper.Parameters>(getActivity(), R.layout.spinner_dropdown_item, mDampers);
-        damperTypeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        damperType.setAdapter(damperTypeAdapter);
-        damperType.setOnItemSelectedListener(this);
+        
         //damperType.setSelection(mFSVData.getDamperType());
         //if(mFSVData.getDamperType() != 4)
             damper1layout.setVisibility(View.VISIBLE);
@@ -427,7 +388,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
             maxHeatingDamperPos.setValue(mProfileConfig.getMaxDamperHeating());
             zonePriority.setSelection(mProfileConfig.getPriority().ordinal());
         } else {
-            reheatPort.setSelection(2, false);
+            reheatType.setSelection(2, false);
             zonePriority.setSelection(1);//LOW
         }
     
@@ -482,28 +443,32 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         Output analog1Op = new Output();
         analog1Op.setAddress(mSmartNodeAddress);
         analog1Op.setPort(Port.ANALOG_OUT_ONE);
-        analog1Op.mOutputAnalogActuatorType = OutputAnalogActuatorType.values()[damperActuatorSelection];
+        analog1Op.mOutputAnalogActuatorType = OutputAnalogActuatorType.getEnum(damperTypeSelected.displayName);
         vavConfig.getOutputs().add(analog1Op);
     
-        switch (reheatPortSelection) {
-            case ANALOG_OUT_TWO:
+        switch (reheatTypeSelected) {
+            case ZeroToTenV:
+            case TwoToTenV:
+            case TenToZeroV:
+            case TenToTwov:
+            case Pulse:
                 Output analog2Op = new Output();
                 analog2Op.setAddress(mSmartNodeAddress);
                 analog2Op.setPort(Port.ANALOG_OUT_TWO);
-                analog2Op.mOutputAnalogActuatorType = OutputAnalogActuatorType.values()[reheatActuatorSelection];
+                analog2Op.mOutputAnalogActuatorType = OutputAnalogActuatorType.getEnum(reheatTypeSelected.displayName);
                 vavConfig.getOutputs().add(analog2Op);
                 break;
-            case RELAY_TWO:
+            case OneStage:
                 Output relay2Op = new Output();
                 relay2Op.setAddress(mSmartNodeAddress);
                 relay2Op.setPort(Port.RELAY_TWO);
-                relay2Op.mOutputRelayActuatorType = OutputRelayActuatorType.values()[reheatActuatorSelection];
+                relay2Op.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyClose;
                 vavConfig.getOutputs().add(relay2Op);
-            case RELAY_ONE:
+            case TwoStage:
                 Output relay1Op = new Output();
                 relay1Op.setAddress(mSmartNodeAddress);
                 relay1Op.setPort(Port.RELAY_ONE);
-                relay1Op.mOutputRelayActuatorType = OutputRelayActuatorType.values()[reheatActuatorSelection];
+                relay1Op.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyClose;;
                 vavConfig.getOutputs().add(relay1Op);
                 break;
                 
@@ -555,14 +520,14 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
                     damper1layout.setVisibility(View.VISIBLE);
                 damper1layout.invalidate();
                 break;
-            case R.id.damperType2:
+            /*case R.id.damperType2:
                 damper2Type.setSelection(position);
                 if(position == 4)
                     damper2layout.setVisibility(View.INVISIBLE);
                 else
                     damper2layout.setVisibility(View.VISIBLE);
                 damper2layout.invalidate();
-                break;
+                break;*/
         }
     }
     
@@ -583,100 +548,27 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         }
     }
     
-    //TODO - TEMP
-    public void fillDamperDetails() {
-        //SharedPreferences damperSettings = CCUApp.getAppContext().getSharedPreferences(SHARED_PREF_FILE, 0);
-        int nNumOfDampers = 5;// damperSettings.getInt(NO_OF_DAMPERS, 0);
     
-        if (nNumOfDampers == 0 || nNumOfDampers == 5) {
-        
-            mDampers.add(Damper.TYPE.MAT_RADIAL1.ordinal(), new Damper.Parameters(Damper.TYPE.MAT_RADIAL1.ordinal(),
-                                                                                        Damper.TYPE.MAT_RADIAL1.toString(),
-                                                                                        Damper.TYPE.MAT_RADIAL1.getDefaultMotorRPM(),
-                                                                                        Damper.TYPE.MAT_RADIAL1.getDefaultOperatingCurrent(),
-                                                                                        Damper.TYPE.MAT_RADIAL1.getDefaultStallCurrent(),
-                                                                                        Damper.TYPE.MAT_RADIAL1.getDefaultForwardBacklash(),
-                                                                                        Damper.TYPE.MAT_RADIAL1.getDefaultReverseBacklash()));
-            mDampers.add(Damper.TYPE.MAT_RADIAL2.ordinal(), new Damper.Parameters(Damper.TYPE.MAT_RADIAL2.ordinal(),
-                                                                                        Damper.TYPE.MAT_RADIAL2.toString(),
-                                                                                        Damper.TYPE.MAT_RADIAL2.getDefaultMotorRPM(),
-                                                                                        Damper.TYPE.MAT_RADIAL2.getDefaultOperatingCurrent(),
-                                                                                        Damper.TYPE.MAT_RADIAL2.getDefaultStallCurrent(),
-                                                                                        Damper.TYPE.MAT_RADIAL2.getDefaultForwardBacklash(),
-                                                                                        Damper.TYPE.MAT_RADIAL2.getDefaultReverseBacklash()));
-            mDampers.add(Damper.TYPE.GENERIC_0To10V.ordinal(), new Damper.Parameters(Damper.TYPE.GENERIC_0To10V.ordinal(),
-                                                                                           Damper.TYPE.GENERIC_0To10V.toString(),
-                                                                                           0, 0, 0, 0, 0));
-            mDampers.add(Damper.TYPE.GENERIC_2TO10V.ordinal(), new Damper.Parameters(Damper.TYPE.GENERIC_2TO10V.ordinal(),
-                                                                                           Damper.TYPE.GENERIC_2TO10V.toString(),
-                                                                                           0, 0, 0, 0, 0));
-            mDampers.add(Damper.TYPE.NOT_INSTALLED.ordinal(), new Damper.Parameters(Damper.TYPE.NOT_INSTALLED.ordinal(),
-                                                                                          Damper.TYPE.NOT_INSTALLED.toString(),
-                                                                                          0, 0, 0, 0, 0));
-            mDampers.add(Damper.TYPE.GENERIC_10To0V.ordinal(), new Damper.Parameters(Damper.TYPE.GENERIC_10To0V.ordinal(),
-                                                                                           Damper.TYPE.GENERIC_10To0V.toString(),
-                                                                                           0, 0, 0, 0, 0));
-            mDampers.add(Damper.TYPE.GENERIC_10To2V.ordinal(), new Damper.Parameters(Damper.TYPE.GENERIC_10To2V.ordinal(),
-                                                                                           Damper.TYPE.GENERIC_10To2V.toString(),
-                                                                                           0, 0, 0, 0, 0));
-            //save();
-        }
-        else {
-           /* for (int nCount = 0; nCount < nNumOfDampers; nCount++) {
-                int nDamperType = damperSettings.getInt("damper_type"+ String.valueOf(nCount), -1);
-                String sName = damperSettings.getString("damper_name" + String.valueOf(nCount), "");
-                if (sName.compareToIgnoreCase(DAMPER_TYPE.values()[nCount].toString()) != 0)
-                    sName = DAMPER_TYPE.values()[nCount].toString();
-                int nMotorRPM = damperSettings.getInt("motor_rpm" + String.valueOf(nCount), 0);
-                int nOperatingCurrent = damperSettings.getInt("operating_current" + String.valueOf(nCount), 0);
-                int nStallCurrent = damperSettings.getInt("stall_current" + String.valueOf(nCount), 0);
-                int nForwardBacklash = damperSettings.getInt("forward_backlash" + String.valueOf(nCount), 0);
-                int nReverseBacklash = damperSettings.getInt("reverse_backlash" + String.valueOf(nCount), 0);
-                if (nDamperType != -1)
-                    mDampers.add(nDamperType, new DamperParameters(nDamperType, sName, nMotorRPM, nOperatingCurrent, nStallCurrent, nForwardBacklash, nReverseBacklash));
-            }*/
-            if(nNumOfDampers == 5){
-                mDampers.add(Damper.TYPE.GENERIC_10To0V.ordinal(), new Damper.Parameters(Damper.TYPE.GENERIC_10To0V.ordinal(),
-                                                                                               Damper.TYPE.GENERIC_10To0V.toString(),
-                                                                                               0, 0, 0, 0, 0));
-                mDampers.add(Damper.TYPE.GENERIC_10To2V.ordinal(), new Damper.Parameters(Damper.TYPE.GENERIC_10To2V.ordinal(),
-                                                                                               Damper.TYPE.GENERIC_10To2V.toString(),
-                                                                                               0, 0, 0, 0, 0));
-                //save();
-            }else if(nNumOfDampers == 6){
-                mDampers.clear();
-                mDampers.add(Damper.TYPE.MAT_RADIAL1.ordinal(), new Damper.Parameters(Damper.TYPE.MAT_RADIAL1.ordinal(),
-                                                                                            Damper.TYPE.MAT_RADIAL1.toString(),
-                                                                                            Damper.TYPE.MAT_RADIAL1.getDefaultMotorRPM(),
-                                                                                            Damper.TYPE.MAT_RADIAL1.getDefaultOperatingCurrent(),
-                                                                                            Damper.TYPE.MAT_RADIAL1.getDefaultStallCurrent(),
-                                                                                            Damper.TYPE.MAT_RADIAL1.getDefaultForwardBacklash(),
-                                                                                            Damper.TYPE.MAT_RADIAL1.getDefaultReverseBacklash()));
-                mDampers.add(Damper.TYPE.MAT_RADIAL2.ordinal(), new Damper.Parameters(Damper.TYPE.MAT_RADIAL2.ordinal(),
-                                                                                            Damper.TYPE.MAT_RADIAL2.toString(),
-                                                                                            Damper.TYPE.MAT_RADIAL2.getDefaultMotorRPM(),
-                                                                                            Damper.TYPE.MAT_RADIAL2.getDefaultOperatingCurrent(),
-                                                                                            Damper.TYPE.MAT_RADIAL2.getDefaultStallCurrent(),
-                                                                                            Damper.TYPE.MAT_RADIAL2.getDefaultForwardBacklash(),
-                                                                                            Damper.TYPE.MAT_RADIAL2.getDefaultReverseBacklash()));
-                mDampers.add(Damper.TYPE.GENERIC_0To10V.ordinal(), new Damper.Parameters(Damper.TYPE.GENERIC_0To10V.ordinal(),
-                                                                                               Damper.TYPE.GENERIC_0To10V.toString(),
-                                                                                               0, 0, 0, 0, 0));
-                mDampers.add(Damper.TYPE.GENERIC_2TO10V.ordinal(), new Damper.Parameters(Damper.TYPE.GENERIC_2TO10V.ordinal(),
-                                                                                               Damper.TYPE.GENERIC_2TO10V.toString(),
-                                                                                               0, 0, 0, 0, 0));
-                mDampers.add(Damper.TYPE.NOT_INSTALLED.ordinal(), new Damper.Parameters(Damper.TYPE.NOT_INSTALLED.ordinal(),
-                                                                                              Damper.TYPE.NOT_INSTALLED.toString(),
-                                                                                              0, 0, 0, 0, 0));
-                mDampers.add(Damper.TYPE.GENERIC_10To0V.ordinal(), new Damper.Parameters(Damper.TYPE.GENERIC_10To0V.ordinal(),
-                                                                                               Damper.TYPE.GENERIC_10To0V.toString(),
-                                                                                               0, 0, 0, 0, 0));
-                mDampers.add(Damper.TYPE.GENERIC_10To2V.ordinal(), new Damper.Parameters(Damper.TYPE.GENERIC_10To2V.ordinal(),
-                                                                                               Damper.TYPE.GENERIC_10To2V.toString(),
-                                                                                               0, 0, 0, 0, 0));
-                //save();
-            }
-        }
+    public void fillDamperDetails() {
+        mDampers.add(Damper.TYPE.GENERIC_0To10V.ordinal(), new Damper.Parameters(Damper.TYPE.GENERIC_0To10V.ordinal(),
+                                                                                        Damper.TYPE.GENERIC_0To10V.toString(),
+                                                                                        0, 0, 0, 0, 0));
+        mDampers.add(Damper.TYPE.GENERIC_2TO10V.ordinal(), new Damper.Parameters(Damper.TYPE.GENERIC_2TO10V.ordinal(),
+                                                                                        Damper.TYPE.GENERIC_2TO10V.toString(),
+                                                                                        0, 0, 0, 0, 0));
+        mDampers.add(Damper.TYPE.GENERIC_10To0V.ordinal(), new Damper.Parameters(Damper.TYPE.GENERIC_10To0V.ordinal(),
+                                                                                        Damper.TYPE.GENERIC_10To0V.toString(),
+                                                                                        0, 0, 0, 0, 0));
+        mDampers.add(Damper.TYPE.GENERIC_10To2V.ordinal(), new Damper.Parameters(Damper.TYPE.GENERIC_10To2V.ordinal(),
+                                                                                        Damper.TYPE.GENERIC_10To2V.toString(),
+                                                                                        0, 0, 0, 0, 0));
+        mDampers.add(Damper.TYPE.MAT_RADIAL1.ordinal(), new Damper.Parameters(Damper.TYPE.MAT_RADIAL1.ordinal(),
+                                                                                     Damper.TYPE.MAT_RADIAL1.toString(),
+                                                                                     Damper.TYPE.MAT_RADIAL1.getDefaultMotorRPM(),
+                                                                                     Damper.TYPE.MAT_RADIAL1.getDefaultOperatingCurrent(),
+                                                                                     Damper.TYPE.MAT_RADIAL1.getDefaultStallCurrent(),
+                                                                                     Damper.TYPE.MAT_RADIAL1.getDefaultForwardBacklash(),
+                                                                                     Damper.TYPE.MAT_RADIAL1.getDefaultReverseBacklash()));
     }
     
     

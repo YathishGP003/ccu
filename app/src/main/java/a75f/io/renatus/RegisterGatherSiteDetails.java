@@ -126,9 +126,9 @@ public class RegisterGatherSiteDetails extends Activity {
                 .setGeoZip(siteZip)
                 .setArea(10000).build();
         String localSiteId = CCUHsApi.getInstance().addSite(s75f);
+        Log.i(TAG, "LocalSiteID: " + localSiteId + " tz " + s75f.getTz());
         BuildingTuners.getInstance();
         SystemEquip.getInstance();
-        Log.i(TAG, "LocalSiteID: " + localSiteId);
         CCUHsApi.getInstance().log();
         L.ccu().systemProfile = new VavAnalogRtu();
         CCUHsApi.getInstance().saveTagsData();

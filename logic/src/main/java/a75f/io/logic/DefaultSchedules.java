@@ -151,4 +151,44 @@ public class DefaultSchedules {
         CCUHsApi.getInstance().addSchedule(localId, defaultSchedule);
 
     }
+
+    public static void generateDefaultSchedule(String id, String zoneId) {
+
+        HRef siteId = CCUHsApi.getInstance().getSiteId();
+        HRef zoneIdRef = HRef.make(zoneId);
+        HDict[] days = new HDict[10];
+
+        days[0] = getDefaultForDay(true, DAYS.MONDAY.ordinal(), DEFAULT_COOLING_TEMP);
+        days[1] = getDefaultForDay(true, DAYS.TUESDAY.ordinal(), DEFAULT_COOLING_TEMP);
+        days[2] = getDefaultForDay(true, DAYS.WEDNESDAY.ordinal(), DEFAULT_COOLING_TEMP);
+        days[3] = getDefaultForDay(true, DAYS.THURSDAY.ordinal(), DEFAULT_COOLING_TEMP);
+        days[4] = getDefaultForDay(true, DAYS.FRIDAY.ordinal(), DEFAULT_COOLING_TEMP);
+
+
+        days[5] = getDefaultForDay(false, DAYS.MONDAY.ordinal(), DEFAULT_HEATING_TEMP);
+        days[6] = getDefaultForDay(false, DAYS.TUESDAY.ordinal(), DEFAULT_HEATING_TEMP);
+        days[7] = getDefaultForDay(false, DAYS.WEDNESDAY.ordinal(), DEFAULT_HEATING_TEMP);
+        days[8] = getDefaultForDay(false, DAYS.THURSDAY.ordinal(), DEFAULT_HEATING_TEMP);
+        days[9] = getDefaultForDay(false, DAYS.FRIDAY.ordinal(), DEFAULT_HEATING_TEMP);
+
+        HList hList = HList.make(days);
+
+        String localId = UUID.randomUUID().toString();
+        HDict defaultSchedule = new HDictBuilder()
+                .add("id", localId)
+                .add("unit", "\\u00B0F")
+                .add("kind", "Number")
+                .add("system")
+                .add("temp")
+                .add("schedule")
+                .add("dis", "Default Site Schedule")
+                .add("days", hList)
+                .add("siteRef", siteId)
+                .add("zoneRef", zoneIdRef)
+                .toDict();
+
+        CCUHsApi.getInstance().addSchedule(localId, defaultSchedule);
+
+
+    }
 }

@@ -30,6 +30,7 @@ import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
+import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
@@ -408,7 +409,9 @@ public class FloorPlanFragment extends Fragment
                                    .setFloorRef(floor.getId())
                                    .setSiteRef(siteMap.get("id").toString())
                                    .build();
-			CCUHsApi.getInstance().addZone(hsZone);
+			String zoneId = CCUHsApi.getInstance().addZone(hsZone);
+			DefaultSchedules.generateDefaultSchedule(siteMap.get("id").toString(), zoneId);
+
 			ArrayList<Zone> mRoomList = HSUtil.getZones(floor.getId());
 			updateRooms(mRoomList);
 			selectRoom(mRoomList.size() - 1);

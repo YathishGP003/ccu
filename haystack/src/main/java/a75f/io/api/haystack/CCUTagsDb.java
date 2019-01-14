@@ -580,7 +580,7 @@ public class CCUTagsDb extends HServer {
         }
         HRef id = (HRef) b.get("id");
         tagsMap.put(id.toVal(), b.toDict());
-        return id.toCode();
+        return id.val;
     }
 
     public void updateZone(Zone z, String i) {

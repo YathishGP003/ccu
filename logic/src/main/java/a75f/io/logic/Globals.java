@@ -41,6 +41,10 @@ import a75f.io.logic.bo.building.system.VavStagedRtu;
 import a75f.io.logic.bo.building.vav.VavParallelFanProfile;
 import a75f.io.logic.bo.building.vav.VavReheatProfile;
 import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
+import a75f.io.logic.jobs.BuildingProcessJob;
+import a75f.io.logic.jobs.PrintProcessJob;
+import a75f.io.logic.jobs.PrintProcessJobTwo;
+import a75f.io.logic.jobs.ScheduleProcessJob;
 
 /**
  * Created by rmatt isOn 7/19/2017.
@@ -50,19 +54,23 @@ import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
 /*
     This is used to keep track of global static associated with application context.
  */
-public class Globals
-{
+public class Globals {
 
-    private static final int      NUMBER_OF_CYCLICAL_TASKS_RENATUS_REQUIRES = 10;
-    private static final int      TASK_SEPERATION                           = 15;
-    private static final TimeUnit TASK_SERERATION_TIMEUNIT                  = TimeUnit.SECONDS;
+    private static final int NUMBER_OF_CYCLICAL_TASKS_RENATUS_REQUIRES = 10;
+    private static final int TASK_SEPERATION = 15;
+    private static final TimeUnit TASK_SERERATION_TIMEUNIT = TimeUnit.SECONDS;
     private static Globals globals;
     //HeartBeatJob mHeartBeatJob;
     BuildingProcessJob mProcessJob = new BuildingProcessJob();
+    ScheduleProcessJob mScheduleProcessJob = new ScheduleProcessJob();
+
+    PrintProcessJob mPrintProcessJob = new PrintProcessJob();
+    PrintProcessJobTwo mPrintProcessJobTwo = new PrintProcessJobTwo();
+
     private ScheduledExecutorService taskExecutor;
-    private Context                  mApplicationContext;
-    private CCUApplication           mCCUApplication;
-    private LZoneProfile             mLZoneProfile;
+    private Context mApplicationContext;
+    private CCUApplication mCCUApplication;
+    private LZoneProfile mLZoneProfile;
     private boolean isSimulation = false;
     private boolean testHarness = true;
 
@@ -71,107 +79,98 @@ public class Globals
     private boolean _siteAlreadyCreated;
 
 
-    private Globals()
-    {
+    private Globals() {
     }
 
 
-    public ScheduledExecutorService getScheduledThreadPool()
-    {
+    public ScheduledExecutorService getScheduledThreadPool() {
         return getInstance().taskExecutor;
     }
 
 
-    public static Globals getInstance()
-    {
-        if (globals == null)
-        {
+    public static Globals getInstance() {
+        if (globals == null) {
             globals = new Globals();
         }
         return globals;
     }
 
 
-    public CCUApplication ccu()
-    {
-        if (getInstance().mCCUApplication == null)
-        {
+    public CCUApplication ccu() {
+        if (getInstance().mCCUApplication == null) {
             getInstance().mCCUApplication = LocalStorage.getApplicationSettings();
         }
         return getInstance().mCCUApplication;
     }
 
 
-    public LZoneProfile getLZoneProfile()
-    {
-        if (getInstance().mLZoneProfile == null)
-        {
+    public LZoneProfile getLZoneProfile() {
+        if (getInstance().mLZoneProfile == null) {
             getInstance().mLZoneProfile = new LZoneProfile();
         }
         return getInstance().mLZoneProfile;
     }
 
 
-    public boolean isSimulation()
-    {
+    public boolean isSimulation() {
         return getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
-                                        .getBoolean("biskit_mode", false);
+                .getBoolean("biskit_mode", false);
     }
 
 
-
-
-
-    public Context getApplicationContext()
-    {
+    public Context getApplicationContext() {
         return mApplicationContext;
     }
 
 
-    public void setApplicationContext(Context mApplicationContext)
-    {
-        if (this.mApplicationContext == null)
-        {
+    public void setApplicationContext(Context mApplicationContext) {
+        if (this.mApplicationContext == null) {
             this.mApplicationContext = mApplicationContext;
             initilize();
         }
     }
 
 
-    public void initilize()
-    {
+    public void initilize() {
         taskExecutor = Executors.newScheduledThreadPool(NUMBER_OF_CYCLICAL_TASKS_RENATUS_REQUIRES);
         populate();
         //mHeartBeatJob = new HeartBeatJob();
         //5 seconds after application initializes start heart beat
         int DEFAULT_HEARTBEAT_INTERVAL = 30;
-        
+
+
+
+        mScheduleProcessJob.scheduleJob("Schedule Process Job", DEFAULT_HEARTBEAT_INTERVAL - 10,
+                TASK_SEPERATION, TASK_SERERATION_TIMEUNIT);
+
+
         mProcessJob.scheduleJob("Building Process Job", DEFAULT_HEARTBEAT_INTERVAL,
                 TASK_SEPERATION * 2, TASK_SERERATION_TIMEUNIT);
-    
+
+        mPrintProcessJob.scheduleJob("Print Process Job 1", 30, 10, TASK_SERERATION_TIMEUNIT);
+        mPrintProcessJobTwo.scheduleJob("Print Process Job 2", 5, 10, TASK_SERERATION_TIMEUNIT);
+
         isSimulation = getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
-                                                    .getBoolean("biskit_mode", false);
+                .getBoolean("biskit_mode", false);
         testHarness = getApplicationContext().getResources().getBoolean(R.bool.test_harness);
 
-        
+
         new CCUHsApi(this.mApplicationContext);
         CCUHsApi.getInstance().testHarnessEnabled = testHarness;
         addProfilesForEquips();
-        
+
         String addrBand = getSmartNodeBand();
         L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
-        
+
     }
 
-    private void populate()
-    {
+    private void populate() {
         //TODO: get this from kinvey.
         //This seems like overkill, but it has to follow the meta to support the unit test
         // framework.
-        
+
         //TODO test method
-        if(ccu().getLCMNamedSchedules().size() == 0)
-        {
+        if (ccu().getLCMNamedSchedules().size() == 0) {
             //Mock schedule M-F, 8AM - 5:30PM turn isOn lights to value 100.
             //Mock schedule M-F, 8AM - 5:30PM turn isOn lights to value 100.
 
@@ -192,13 +191,11 @@ public class Globals
         }
     }
 
-    private ArrayList<Schedule> getSchedules(int val)
-    {
+    private ArrayList<Schedule> getSchedules(int val) {
         Schedule schedule = new Schedule();
         int[] ints = {0, 1, 2, 3, 4};
         ArrayList<Day> intsaslist = new ArrayList<Day>();
-        for(int i : ints)
-        { //as
+        for (int i : ints) { //as
             Day day = new Day();
             day.setDay(i);
             day.setSthh(8);
@@ -216,66 +213,62 @@ public class Globals
     }
 
 
-    public boolean testHarness()
-    {
+    public boolean testHarness() {
         return testHarness;
     }
 
-    public void setCCU(CCUApplication CCU)
-    {
+    public void setCCU(CCUApplication CCU) {
         this.mCCUApplication = CCU;
     }
-    
-    public void saveTags(){
+
+    public void saveTags() {
         CCUHsApi.getInstance().saveTagsData();
     }
-    
+
     public void registerSiteToPubNub(final String siteId) {
-        Log.d("CCU","registerSiteToPubNub "+siteId);
+        Log.d("CCU", "registerSiteToPubNub " + siteId);
         PNConfiguration pnConfiguration = new PNConfiguration();
         pnConfiguration.setSubscribeKey("sub-c-6a55a31c-d30e-11e8-b41d-e643bd6bdd68");
         pnConfiguration.setPublishKey("pub-c-6873a2c5-ec27-4604-a235-38a3f4eed9a6");
         pnConfiguration.setSecure(false);
-        
+
         pubnub = new PubNub(pnConfiguration);
-    
+
         //HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         //final String channelName = (String) siteMap.get(Tags.ID);
-        
+
         // create message payload using Gson
         final JsonObject messageJsonObject = new JsonObject();
         messageJsonObject.addProperty("msg", "hello");
-    
+
         System.out.println("CCU Message to send: " + messageJsonObject.toString());
-    
+
         pubnub.addListener(new SubscribeCallback() {
             @Override
             public void status(PubNub pubnub, PNStatus status) {
-            
-            
+
+
                 if (status.getCategory() == PNStatusCategory.PNUnexpectedDisconnectCategory) {
                     // This event happens when radio / connectivity is lost
-                }
-            
-                else if (status.getCategory() == PNStatusCategory.PNConnectedCategory) {
-                
+                } else if (status.getCategory() == PNStatusCategory.PNConnectedCategory) {
+
                     // Connect event. You can do stuff like publish, and know you'll get it.
                     // Or just use the connected event to confirm you are subscribed for
                     // UI / internal notifications, etc
-                
-                    if (status.getCategory() == PNStatusCategory.PNConnectedCategory){
+
+                    if (status.getCategory() == PNStatusCategory.PNConnectedCategory) {
                         Log.d("CCU", "PNConnectedCategory publish");
                         pubnub.publish().channel(siteId).message(messageJsonObject).async(new PNCallback<PNPublishResult>() {
                             @Override
                             public void onResponse(PNPublishResult result, PNStatus status) {
                                 // Check whether request successfully completed or not.
                                 if (!status.isError()) {
-                                
+
                                     // Message successfully published to specified channel.
                                 }
                                 // Request processing failed.
                                 else {
-                                
+
                                     // Handle message publish error. Check 'category' property to find out possible issue
                                     // because of which request did fail.
                                     //
@@ -284,31 +277,28 @@ public class Globals
                             }
                         });
                     }
-                }
-                else if (status.getCategory() == PNStatusCategory.PNReconnectedCategory) {
-                
+                } else if (status.getCategory() == PNStatusCategory.PNReconnectedCategory) {
+
                     // Happens as part of our regular operation. This event happens when
                     // radio / connectivity is lost, then regained.
-                }
-                else if (status.getCategory() == PNStatusCategory.PNDecryptionErrorCategory) {
-                
+                } else if (status.getCategory() == PNStatusCategory.PNDecryptionErrorCategory) {
+
                     // Handle messsage decryption error. Probably client configured to
                     // encrypt messages and on live data feed it received plain text.
                 }
             }
-        
+
             @Override
             public void message(PubNub pubnub, PNMessageResult message) {
                 // Handle new message stored in message.message
                 if (message.getChannel() != null) {
                     // Message has been received on channel group stored in
                     // message.getChannel()
-                }
-                else {
+                } else {
                     // Message has been received on channel stored in
                     // message.getSubscription()
                 }
-            
+
                 JsonElement receivedMessageObject = message.getMessage();
                 System.out.println("CCU PubNub Received message content: " + receivedMessageObject.toString());
                 // extract desired parts of the payload, using Gson
@@ -323,32 +313,31 @@ public class Globals
                     - message.getTimetoken()
             */
             }
-        
+
             @Override
             public void presence(PubNub pubnub, PNPresenceEventResult presence) {
-            
+
             }
         });
-    
+
         pubnub.subscribe().channels(Arrays.asList(siteId)).execute();
         pubnubSubscribed = true;
     }
-    
-    public boolean isPubnubSubscribed()
-    {
+
+    public boolean isPubnubSubscribed() {
         return pubnubSubscribed;
     }
-    
+
     public void addProfilesForEquips() {
         HashMap site = CCUHsApi.getInstance().read(Tags.SITE);
         if (site == null || site.size() == 0) {
-            Log.d("CCUHS","Site does not exist. Profiles not loaded");
+            Log.d("CCUHS", "Site does not exist. Profiles not loaded");
             return;
         }
-        for (Floor f: HSUtil.getFloors()) {
-            for (Zone z: HSUtil.getZones(f.getId())) {
+        for (Floor f : HSUtil.getFloors()) {
+            for (Zone z : HSUtil.getZones(f.getId())) {
                 for (Equip eq : HSUtil.getEquips(z.getId())) {
-                    Log.d("CCUHS"," Equip "+eq.getDisplayName()+" profile : "+eq.getProfile());
+                    Log.d("CCUHS", " Equip " + eq.getDisplayName() + " profile : " + eq.getProfile());
                     switch (ProfileType.valueOf(eq.getProfile())) {
                         case VAV_REHEAT:
                             VavReheatProfile vr = new VavReheatProfile();
@@ -368,16 +357,14 @@ public class Globals
                     }
                 }
             }
-            
+
         }
-    
+
         HashMap equip = CCUHsApi.getInstance().read("equip and system");
-        if (equip != null && equip.size() > 0)
-        {
+        if (equip != null && equip.size() > 0) {
             Equip eq = new Equip.Builder().setHashMap(equip).build();
-            Log.d("CCUHS","SystemEquip "+eq.getDisplayName()+" System profile "+eq.getProfile());
-            switch (ProfileType.valueOf(eq.getProfile()))
-            {
+            Log.d("CCUHS", "SystemEquip " + eq.getDisplayName() + " System profile " + eq.getProfile());
+            switch (ProfileType.valueOf(eq.getProfile())) {
                 case SYSTEM_VAV_ANALOG_RTU:
                     L.ccu().systemProfile = new VavAnalogRtu();
                     break;
@@ -397,11 +384,11 @@ public class Globals
                     L.ccu().systemProfile = new VavAnalogRtu();
             }
         } else {
-            Log.d("CCUHS","System Equip does not exist.Create VavAnalogRtu System Profile");
+            Log.d("CCUHS", "System Equip does not exist.Create VavAnalogRtu System Profile");
             L.ccu().systemProfile = new VavAnalogRtu();
         }
     }
-    
+
     public String getSmartNodeBand() {
         HashMap band = CCUHsApi.getInstance().read("point and snband");
         if (band != null && band.size() > 0) {

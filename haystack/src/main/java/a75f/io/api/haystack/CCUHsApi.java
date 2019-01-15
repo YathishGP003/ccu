@@ -646,7 +646,7 @@ public class CCUHsApi {
 
     public Schedule getSystemSchedule()
     {
-        Schedule schedule = new Schedule.Builder().setHDict(tagsDb.read("schedule and system")).build();
+        Schedule schedule = new Schedule.Builder().setHDict(tagsDb.read("schedule")).build();
         return schedule;
     }
 
@@ -658,5 +658,10 @@ public class CCUHsApi {
             System.out.println("Update tagsDb: " + tagsDb.idMap.get(schedule.getId()));
             tagsDb.updateIdMap.put(schedule.getId(), tagsDb.idMap.get(schedule.getId()));
         }
+    }
+
+    public Schedule getScheduleById(String scheduleRef) {
+        HDict hDict = tagsDb.readById(HRef.make(scheduleRef));
+        return new Schedule.Builder().setHDict(hDict).build();
     }
 }

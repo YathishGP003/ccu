@@ -15,6 +15,7 @@ public class Zone extends Entity
     private ArrayList<String> markers;
     private String floorRef;
     private String siteRef;
+    private String scheduleRef;
     private String id;
     public void setFloorRef(String floorRef)
     {
@@ -47,12 +48,15 @@ public class Zone extends Entity
     {
         return siteRef;
     }
+    public String getScheduleRef() { return scheduleRef; }
+
     public static class Builder {
         private String            displayName;
         private ArrayList<String> markers = new ArrayList<>();;
         private String            floorRef;
         private String siteRef;
         private String id;
+        private String scheduleRef;
         public Builder setDisplayName(String displayName)
         {
             this.displayName = displayName;
@@ -80,6 +84,7 @@ public class Zone extends Entity
             z.floorRef = this.floorRef;
             z.markers = this.markers;
             z.siteRef = this.siteRef;
+            z.scheduleRef = this.scheduleRef;
             z.id = this.id;
             return z;
         }
@@ -109,6 +114,10 @@ public class Zone extends Entity
                 else if(pair.getKey().equals("siteRef"))
                 {
                     this.siteRef = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("scheduleRef"))
+                {
+                    this.scheduleRef = pair.getValue().toString();
                 }
                 it.remove();
             }

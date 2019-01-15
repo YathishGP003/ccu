@@ -1,4 +1,4 @@
-package a75f.io.logic;
+package a75f.io.logic.jobs;
 
 import android.util.Log;
 
@@ -9,6 +9,9 @@ import java.util.Map;
 import a75.io.algos.vav.VavTRSystem;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HisItem;
+import a75f.io.logic.BaseJob;
+import a75f.io.logic.Globals;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.system.DxCIController;
 

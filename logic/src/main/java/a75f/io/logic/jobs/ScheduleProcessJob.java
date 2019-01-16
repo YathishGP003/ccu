@@ -22,7 +22,7 @@ public class ScheduleProcessJob extends BaseJob {
         Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule();
         Log.d("CCU","ScheduleProcessJob -> 1");
 
-        Log.i(TAG, "System Schedule != null " + (systemSchedule != null));
+       // Log.i(TAG, "System Schedule != null " + (systemSchedule != null));
 
 
         Log.d("CCU","ScheduleProcessJob -> 2");
@@ -46,7 +46,7 @@ public class ScheduleProcessJob extends BaseJob {
                 } else {
                     Log.e(TAG, "Schedule is Null, use system Schedule!");
                     Log.d("CCU","ScheduleProcessJob -> 6");
-                    writePointsForEquip(equip, systemSchedule);
+                   // writePointsForEquip(equip, systemSchedule);
                 }
             }
             else

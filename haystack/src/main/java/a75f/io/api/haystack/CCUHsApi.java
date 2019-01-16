@@ -664,4 +664,11 @@ public class CCUHsApi {
         HDict hDict = tagsDb.readById(HRef.make(scheduleRef));
         return new Schedule.Builder().setHDict(hDict).build();
     }
+
+    public void loadTagsData(Context c) {
+
+        tagsDb.init(c);
+
+
+    }
 }

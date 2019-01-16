@@ -152,9 +152,16 @@ public class DefaultSchedules {
 
     }
 
-    public static void generateDefaultSchedule(String id, String zoneId) {
 
+    public static void generateDefaultSchedule(String id, String zoneId)
+    {
         HRef siteId = CCUHsApi.getInstance().getSiteId();
+        generateDefaultSchedule(siteId, id, zoneId);
+    }
+
+    public static void generateDefaultSchedule(HRef siteId, String id, String zoneId) {
+
+
         HRef zoneIdRef = HRef.make(zoneId);
         HDict[] days = new HDict[10];
 

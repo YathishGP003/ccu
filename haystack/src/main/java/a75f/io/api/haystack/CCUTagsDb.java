@@ -129,6 +129,10 @@ public class CCUTagsDb extends HServer {
         removeIdMapString = appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).getString(PREFS_REMOVE_ID_MAP, null);
         updateIdMapString = appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).getString(PREFS_UPDATE_ID_MAP, null);
 
+        if(boxStore != null && !boxStore.isClosed())
+        {
+            boxStore.close();
+        }
         boxStore = MyObjectBox.builder().androidContext(appContext).build();
         hisBox = boxStore.boxFor(HisItem.class);
 

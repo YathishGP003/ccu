@@ -103,6 +103,17 @@ public class HaystackFrameworkTest {
 
 
 
+        CCUHsApi.getInstance().saveTagsData();
+        CCUHsApi.getInstance().loadTagsData(InstrumentationRegistry.getContext());
+
+
+        System.out.println("Dict To String: " + localId);
+        HDict scheduleDictz = CCUHsApi.getInstance().readHDictById(localId);
+        Schedule buildz = new Schedule.Builder().setHDict(scheduleDictz).build();
+        System.out.println("Schedule Zinc: " + scheduleDictz.toZinc());
+        HDict postHDictz = build.getScheduleHDict();
+        System.out.println("Schedule Zinc! " + postHDictz.toZinc());
+
         //Schedule siteSchedule = CCUHsApi.getInstance().getSiteSchedule();
         //Assert.assertTrue(postHDict.equals(siteSchedule));
 

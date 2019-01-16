@@ -6,9 +6,13 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import org.projecthaystack.HRef;
+
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Schedule;
+import a75f.io.logic.DefaultSchedules;
 
 public class SplashActivity extends Activity {
     public static final String TAG = SplashActivity.class.getSimpleName();
@@ -57,5 +61,9 @@ public class SplashActivity extends Activity {
                 }
             }
         }.start();
+
+
+
+        //DefaultSchedules.generateDefaultSchedule()
     }
 }

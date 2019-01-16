@@ -7,7 +7,6 @@ import java.util.HashMap;
 
 import a75.io.algos.CO2Loop;
 import a75.io.algos.ControlLoop;
-import a75.io.algos.GenericPIController;
 import a75.io.algos.tr.TrimResponseRequest;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -60,7 +59,7 @@ public class VAVLogicalMap
     ControlLoop         coolingLoop;
     ControlLoop         heatingLoop;
     CO2Loop             co2Loop;
-    GenericPIController valveController;// Use GenericPI as we need unmodulated op.
+    //GenericPIController valveController;// Use GenericPI as we need unmodulated op.
     
     public TrimResponseRequest satResetRequest;
     public TrimResponseRequest co2ResetRequest;
@@ -75,11 +74,11 @@ public class VAVLogicalMap
         coolingLoop = new ControlLoop();
         heatingLoop = new ControlLoop();
         co2Loop = new CO2Loop();
-        valveController = new GenericPIController();
+        /*valveController = new GenericPIController();
         valveController.setIntegralMaxTimeout(integralMaxTimeout);
         valveController.setMaxAllowedError(proportionalSpread);
         valveController.setProportionalGain(proportionalGain);
-        valveController.setIntegralGain(integralGain);
+        valveController.setIntegralGain(integralGain);*/
         
         satResetRequest = new TrimResponseRequest();
         co2ResetRequest = new TrimResponseRequest();
@@ -127,11 +126,11 @@ public class VAVLogicalMap
         heatingLoop.setIntegralMaxTimeout(integralMaxTimeout);
         heatingLoop.reset();
     
-        valveController.setProportionalGain(proportionalGain);
+        /*valveController.setProportionalGain(proportionalGain);
         valveController.setIntegralGain(integralGain);
         valveController.setMaxAllowedError(proportionalSpread);
         valveController.setIntegralMaxTimeout(integralMaxTimeout);
-        valveController.reset();
+        valveController.reset();*/
         
     }
     public void createHaystackPoints(VavProfileConfiguration config, String floor, String room) {
@@ -830,14 +829,14 @@ public class VAVLogicalMap
     {
         return heatingLoop;
     }
-    public GenericPIController getValveController()
+    /*public GenericPIController getValveController()
     {
         return valveController;
     }
     public void setValveController(GenericPIController valveController)
     {
         this.valveController = valveController;
-    }
+    }*/
     public CO2Loop getCo2Loop()
     {
         return co2Loop;

@@ -288,7 +288,7 @@ public class BuildingTuners
                                         .addMarker("valve").addMarker("start").addMarker("damper")
                                         .build();
         String valveStartDamperId = hayStack.addPoint(valveStartDamper);
-        HashMap valveStartDamperPoint = hayStack.read("point and tuner and valve and start and damper");
+        HashMap valveStartDamperPoint = hayStack.read("point and tuner and default and vav and valve and start and damper");
         ArrayList<HashMap> valveStartDamperArr = hayStack.readPoint(valveStartDamperPoint.get("id").toString());
         for (HashMap valMap : valveStartDamperArr) {
             if (valMap.get("val") != null)

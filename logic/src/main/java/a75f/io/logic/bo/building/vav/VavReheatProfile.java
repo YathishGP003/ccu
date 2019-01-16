@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import a75.io.algos.CO2Loop;
 import a75.io.algos.ControlLoop;
-import a75.io.algos.GenericPIController;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.logic.bo.building.ZoneState;
@@ -14,6 +13,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.building.hvac.Valve;
 import a75f.io.logic.bo.building.hvac.VavUnit;
+import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.tuners.VavTunerUtil;
 
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
@@ -62,7 +62,7 @@ public class VavReheatProfile extends VavProfile
             ControlLoop heatingLoop = vavDevice.getHeatingLoop();
             CO2Loop co2Loop = vavDeviceMap.get(node).getCo2Loop();
             VavUnit vavUnit = vavDevice.getVavUnit();
-            GenericPIController valveController = vavDevice.getValveController();
+            //GenericPIController valveController = vavDevice.getValveController();
     
             double roomTemp = vavDevice.getCurrentTemp();
             double dischargeTemp = vavDevice.getDischargeTemp();
@@ -75,7 +75,7 @@ public class VavReheatProfile extends VavProfile
             Valve valve = vavUnit.reheatValve;
     
             Equip vavEquip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + node + "\"")).build();
-            int loopOp;//New value of loopOp
+            int loopOp = 0;//New value of loopOp
             //TODO
             //If supply air temperature from air handler is greater than room temperature, Cooling shall be
             //locked out.
@@ -85,7 +85,8 @@ public class VavReheatProfile extends VavProfile
                 if (state != COOLING)
                 {
                     state = COOLING;
-                    valveController.reset();
+                    //valveController.reset();
+                    valve.currentPosition = 0;
                     coolingLoop.setEnabled();
                     heatingLoop.setDisabled();
                 }
@@ -103,8 +104,7 @@ public class VavReheatProfile extends VavProfile
                 }
                 
                 int heatingLoopOp = (int) heatingLoop.getLoopOutput(setTemp-deadBand, roomTemp);
-                
-                if (heatingLoopOp <= 50)
+                /*if (heatingLoopOp <= 50)
                 {
                     //Control reheat valve when heating loop is <=50
                     double datMax = (roomTemp + HEATING_LOOP_OFFSET) > MAX_DISCHARGE_TEMP ? MAX_DISCHARGE_TEMP : (roomTemp + HEATING_LOOP_OFFSET);
@@ -127,15 +127,17 @@ public class VavReheatProfile extends VavProfile
                     valveController.updateControlVariable(dischargeSp, dischargeTemp);
                     valve.currentPosition = (int) (valveController.getControlVariable() * 100 / valveController.getMaxAllowedError());
                     loopOp = heatingLoopOp;
-                }
+                }*/
                 
+                loopOp = heatingLoopOp;
             }
             else
             {
                 //Zone is in deadband
                 if (state != DEADBAND) {
                     state = DEADBAND;
-                    valveController.reset();
+                    //valveController.reset();
+                    valve.currentPosition = 0;
                     heatingLoop.setDisabled();
                     coolingLoop.setDisabled();
                     
@@ -143,10 +145,10 @@ public class VavReheatProfile extends VavProfile
                 loopOp = 0;
             }
             
-            if (valveController.getControlVariable() == 0)
+            /*if (valveController.getControlVariable() == 0)
             {
                 valve.currentPosition = 0;
-            }
+            }*/
             
             setDamperLimits(node, damper);
             
@@ -167,7 +169,7 @@ public class VavReheatProfile extends VavProfile
             }
             //In any Mode except Unoccupied, the hot water valve shall be
             //modulated to maintain a supply air temperature no lower than 50°F.
-            if (state != HEATING && supplyAirTemp < REHEAT_THRESHOLD_TEMP/* && mode != UNOCCUPIED*/)
+            /*if (state != HEATING && supplyAirTemp < REHEAT_THRESHOLD_TEMP*//* && mode != UNOCCUPIED*//*)
             {
                 satCompensationEnabled = true;
                 valveController.updateControlVariable(REHEAT_THRESHOLD_TEMP, supplyAirTemp);
@@ -176,11 +178,28 @@ public class VavReheatProfile extends VavProfile
             } else if (satCompensationEnabled) {
                 satCompensationEnabled = false;
                 valveController.reset();
-            }
+            }*/
             
             //Normalize
             damper.normalize();
-            valve.normalize();
+    
+            //REHEAT control that does not follow RP-1455.
+            if (state == HEATING)
+            {
+                double valveStartDamperPercent = TunerUtil.readTunerValByQuery("vav and valve and start and damper and equipRef == \""+vavEquip.getId()+"\"");
+                double maxHeatingPos = vavDevice.getDamperLimit("heating", "max");
+                double minHeatingPos = vavDevice.getDamperLimit("heating", "min");
+                double valveStart = minHeatingPos + (maxHeatingPos - minHeatingPos) * valveStartDamperPercent / 100;
+                Log.d("VAV"," valveStartDamperPercent "+valveStartDamperPercent+" valveStart "+valveStart );
+                if (loopOp > valveStart)
+                {
+                    valve.currentPosition = (int) ((damper.currentPosition - valveStart) * 100 / (maxHeatingPos - valveStart));
+                }
+                else
+                {
+                    valve.currentPosition = 0;
+                }
+            }
             
             Log.d("VAV","CoolingLoop "+node +" roomTemp :"+roomTemp+" setTemp: "+setTemp);
             coolingLoop.dump();

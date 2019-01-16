@@ -9,6 +9,7 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.json.serializers.JsonSerializer;
 import a75f.io.device.mesh.LSmartNode;
+import a75f.io.device.mesh.ThermistorUtil;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -25,8 +26,6 @@ public class MeshUpdateTest
     @Test
     public void testMeshUpdate() {
         CCUHsApi api = new CCUHsApi();
-        api.tagsDb.tagsMap = new HashMap<>();
-        api.tagsDb.writeArrays = new HashMap<>();
         VAVLogicalMap m = new VAVLogicalMap(ProfileType.VAV_REHEAT, 7000);
         m.createHaystackPoints(new VavProfileConfiguration(), null, null);
         ArrayList points = CCUHsApi.getInstance().readAll("point");
@@ -55,8 +54,6 @@ public class MeshUpdateTest
     @Test
     public void testControlMessage(){
         CCUHsApi hayStack = new CCUHsApi();
-        hayStack.tagsDb.tagsMap = new HashMap<>();
-        hayStack.tagsDb.writeArrays = new HashMap<>();
         VAVLogicalMap m = new VAVLogicalMap(ProfileType.VAV_REHEAT, 7000);
         m.createHaystackPoints(new VavProfileConfiguration(), null, null);
         short node = 7000;
@@ -100,5 +97,10 @@ public class MeshUpdateTest
                 
             }
         }
+    }
+    
+    @Test
+    public void testThermistor() {
+        System.out.println(ThermistorUtil.getThermistorValueToTemp(14000));
     }
 }

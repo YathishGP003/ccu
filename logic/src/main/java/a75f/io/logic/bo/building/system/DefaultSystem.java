@@ -23,6 +23,9 @@ public class DefaultSystem extends SystemProfile
         return "Default";
     }
     
+    public DefaultSystem() {
+      addSystemEquip();
+    }
     @Override
     public void doSystemControl() {
     

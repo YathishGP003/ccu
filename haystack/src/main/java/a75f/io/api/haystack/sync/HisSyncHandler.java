@@ -154,6 +154,51 @@ public class HisSyncHandler
             }
         
         }
+    
+    
+        ArrayList<HashMap> devices = hayStack.readAll("device");
+        for (HashMap device : devices) {
+            ArrayList<HashMap> points = hayStack.readAll("point and his and deviceRef == \""+device.get("id")+"\"");
+            if (CCUHsApi.getInstance().getGUID(device.get("id").toString()) == null) {
+                continue;
+            }
+        
+            HashMap tsData = new HashMap<>();
+        
+            for (Map m : points)
+            {
+                String pointID = m.get("id").toString();
+                if (CCUHsApi.getInstance().getGUID(pointID) == null) {
+                    Log.d("CCU","Skip hisSync; point does not have GUID "+pointID);
+                    HDict point = hayStack.hsClient.readById(HRef.copy(pointID));
+                    System.out.println(point);
+                    continue;
+                
+                }
+                ArrayList<HisItem> hisItems = (ArrayList<HisItem>) CCUHsApi.getInstance().tagsDb.getUnSyncedHisItems(HRef.copy(pointID));
+                if (hisItems.size() == 0) {
+                    continue;
+                }
+            
+                HisItem sItem = hisItems.get(hisItems.size()-1);//TODO - Writing just the recent his val?
+                tsData.put( CCUHsApi.getInstance().getGUID(m.get("id").toString()).toString().replace("@",""), String.valueOf(sItem.getVal()));
+            
+                for (HisItem item: hisItems)
+                {
+                    item.setSyncStatus(true);
+                }
+                hayStack.tagsDb.setHisItemSyncStatus(hisItems);
+            
+            }
+        
+            if (tsData.size() > 0)
+            {
+                String url = new InfluxDbUtil.URLBuilder().setProtocol(InfluxDbUtil.HTTP).setHost("renatus-influxiprvgkeeqfgys.centralus.cloudapp.azure.com").setPort(8086).setOp(InfluxDbUtil.WRITE).setDatabse("haystack").setUser("75f@75f.io").setPassword("7575").buildUrl();
+                InfluxDbUtil.writeData(url, CCUHsApi.getInstance().getGUID(device.get("id").toString()).toString().replace("@","")
+                        , tsData, System.currentTimeMillis());
+            }
+        
+        }
     }
     
     /**

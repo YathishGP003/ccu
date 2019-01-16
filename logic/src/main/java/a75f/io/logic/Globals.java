@@ -409,6 +409,7 @@ public class Globals
         } else {
             Log.d("CCUHS","System Equip does not exist.Create Default System Profile");
             L.ccu().systemProfile = new DefaultSystem();
+            
         }
     }
     

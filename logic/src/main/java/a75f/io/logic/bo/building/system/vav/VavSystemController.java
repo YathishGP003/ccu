@@ -5,7 +5,11 @@ import android.util.Log;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.EvictingQueue;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import a75.io.algos.ControlLoop;
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
@@ -13,6 +17,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
+import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.ZonePriority.NO;
 import static a75f.io.logic.bo.building.system.vav.VavSystemController.State.COOLING;
@@ -90,7 +95,7 @@ public class VavSystemController
                 }
                 
                 double zoneCurTemp = getZoneCurrentTemp(z.getId());
-                double zoneTargetTemp = getZoneTempTarget();
+                double zoneTargetTemp = getZoneTempTarget(z.getId());
                 
                 double zoneCoolingLoad = zoneTargetTemp >= zoneCurTemp ? 0 : zoneCurTemp -zoneTargetTemp - 1/* Cool DB*/ ;
                 double zoneHeatingLoad = zoneTargetTemp <= zoneCurTemp ? 0 : zoneTargetTemp - zoneCurTemp - 1 /*Heat DB*/;
@@ -106,22 +111,20 @@ public class VavSystemController
                 weightedAverageHeatingOnlyLoadSum += zoneHeatingLoad * zoneDynamicPriority;
                 weightedAverageLoadSum =+ (zoneCoolingLoad * zoneDynamicPriority) - (zoneHeatingLoad * zoneDynamicPriority);
                 
-                
-                double zone_dxCI = getZoneCurrentTemp(z.getId()) - getZoneDesiredTemp();
-                
                 prioritySum += zoneDynamicPriority;
                 Log.d("CCU", z.getDisplayName()+" zoneDynamicPriority: "+zoneDynamicPriority+" zoneCoolingLoad: "+zoneCoolingLoad+" zoneHeatingLoad: "+zoneHeatingLoad);
+                Log.d("CCU", z.getDisplayName()+" weightedAverageCoolingOnlyLoadSum:"+weightedAverageCoolingOnlyLoadSum+" weightedAverageHeatingOnlyLoadSum "+weightedAverageHeatingOnlyLoadSum);
             }
         
         }
     
         if (prioritySum == 0) {
-            Log.d("CCU", "No valid temperature, Skip DxCiAlgo");
+            Log.d("CCU", "No valid temperature, Skip VavSystemControlAlgo");
             return;
         }
         
-        weightedAverageCoolingOnlyLoad = weightedAverageCoolingOnlyLoad / prioritySum;
-        weightedAverageHeatingOnlyLoad = weightedAverageHeatingOnlyLoad / prioritySum;
+        weightedAverageCoolingOnlyLoad = weightedAverageCoolingOnlyLoadSum / prioritySum;
+        weightedAverageHeatingOnlyLoad = weightedAverageHeatingOnlyLoadSum / prioritySum;
         weightedAverageLoad = weightedAverageLoadSum / prioritySum;
         
         comfortIndex = (int)(totalCoolingLoad + totalHeatingLoad) /zoneCount;
@@ -172,6 +175,11 @@ public class VavSystemController
         piController.dump();
         Log.d("CCU", "weightedAverageCoolingOnlyLoadMA: "+weightedAverageCoolingOnlyLoadMA+" weightedAverageHeatingOnlyLoadMA: "
                                                     +weightedAverageHeatingOnlyLoadMA +" systemState: "+systemState+" coolingSignal: "+coolingSignal+" heatingSignal: "+heatingSignal);
+    
+        normalizeAirflow();
+        adjustDamperForCumulativeTarget();
+        setDamperLimits();
+    
     }
     
     public int getCoolingSignal() {
@@ -230,15 +238,28 @@ public class VavSystemController
     }
     
     @JsonIgnore
-    public double getZoneDesiredTemp()
+    public double getZoneDesiredTemp(String zoneRef)
     {
-        return 72;//TODO - TEMP
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap cdb = hayStack.read("point and air and temp and desired and zoneRef == \""+zoneRef+"\"");
+    
+        ArrayList values = hayStack.readPoint(cdb.get("id").toString());
+        if (values != null && values.size() > 0)
+        {
+            for (int l = 1; l <= values.size() ; l++ ) {
+                HashMap valMap = ((HashMap) values.get(l-1));
+                if (valMap.get("val") != null) {
+                    return Double.parseDouble(valMap.get("val").toString());
+                }
+            }
+        }
+        return 72;
     }
     
     @JsonIgnore
-    public double getZoneTempTarget() //Humidity compensated
+    public double getZoneTempTarget(String zoneRef) //Humidity compensated
     {
-        return getZoneDesiredTemp();//TODO - TEMP
+        return getZoneDesiredTemp(zoneRef);//TODO - TEMP
     }
     
     @JsonIgnore
@@ -260,4 +281,106 @@ public class VavSystemController
         return systemState;
     }
     
+    /*
+    * Of all the zones, find the zone with the largest damperPosition. If this is not 100, then proportionally
+    * increase damper positions in all zones such that this chosen one  has 100% damper opening.  Eg. if there are
+    * calculated damper positions of 40, 70, 80, 90. Then we increase each by 11% to get rounded values of
+    * 44, 78,89, 100% after normalizing.
+    * */
+    public void normalizeAirflow() {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        ArrayList<HashMap> vavEquips = hayStack.readAll("equip and vav and zone");
+        double maxDamperPos = 0;
+        for (HashMap m : vavEquips) {
+            HashMap damper = hayStack.read("point and damper and cmd and equipRef == \""+m.get("id").toString()+"\"");
+            double damperPos = hayStack.readHisValById(damper.get("id").toString());
+            if ( damperPos >= maxDamperPos) {
+                maxDamperPos = damperPos;
+            }
+        }
+        
+        if (maxDamperPos == 0) {
+            Log.d("CCU"," Abort normalizeAirflow : maxDamperPos = "+maxDamperPos);
+        }
+        
+        double targetPercent = (100 - maxDamperPos) * 100/ maxDamperPos ;
+    
+        for (HashMap m : vavEquips) {
+            HashMap damper = hayStack.read("point and damper and base and cmd and equipRef == \""+m.get("id").toString()+"\"");
+        
+            double damperPos = hayStack.readHisValById(damper.get("id").toString());
+            int normalizedDamperPos = (int) (damperPos + damperPos * targetPercent/100);
+            HashMap normalizedDamper = hayStack.read("point and damper and normalized and cmd and equipRef == \""+m.get("id").toString()+"\"");
+            hayStack.writeHisValById(normalizedDamper.get("id").toString(), (double)normalizedDamperPos);
+        }
+        
+        
+    }
+    /*
+     * Take weighted damper opening (where weightedDamperOpening = (zone1_damper_opening*zone1_damper_size +
+     * zone2_damper_opening*zone2_damper_size +..)/(zone1_damper_size + zone2_damper_size + .. )
+     * If weighted damper opening is < targetCumulativeDamper  increase the dampers proportionally(each damper
+     * by 1% of its value) till it is at least targetCumulativeDamper
+     **/
+    public void adjustDamperForCumulativeTarget() {
+        
+        double cumulativeDamperTarget = TunerUtil.readTunerValByQuery("target and cumulative and damper");
+        double weightedDamperOpening = getWeightedDamperOpening();
+        Log.d("CCU","weightedDamperOpening : "+weightedDamperOpening +" cumulativeDamperTarget : "+cumulativeDamperTarget);
+    
+        while(weightedDamperOpening > 0 && weightedDamperOpening < cumulativeDamperTarget) {
+            adjustDamperOpening(1);
+            weightedDamperOpening = getWeightedDamperOpening();
+            Log.d("CCU","weightedDamperOpening : "+weightedDamperOpening +" cumulativeDamperTarget : "+cumulativeDamperTarget);
+        }
+    }
+    
+    public double getWeightedDamperOpening() {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        ArrayList<HashMap> vavEquips = hayStack.readAll("equip and vav and zone");
+        int damperSizeSum = 0;
+        int weightedDamperOpeningSum = 0;
+        for (HashMap m : vavEquips) {
+            HashMap damperPos = hayStack.read("point and damper and normalized and cmd and equipRef == \""+m.get("id").toString()+"\"");
+            HashMap damperSize = hayStack.read("point and config and damper and size and equipRef == \""+m.get("id").toString()+"\"");
+        
+            double damperPosVal = hayStack.readHisValById(damperPos.get("id").toString());
+            double damperSizeVal = hayStack.readDefaultValById(damperSize.get("id").toString());
+            weightedDamperOpeningSum += damperPosVal * damperSizeVal;
+            damperSizeSum += damperSizeVal;
+        }
+        return damperSizeSum == 0 ? 0 : weightedDamperOpeningSum / damperSizeSum;
+    }
+    
+    public void adjustDamperOpening(int percent) {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        ArrayList<HashMap> vavEquips = hayStack.readAll("equip and vav and zone");
+        for (HashMap m : vavEquips) {
+            HashMap damperPos = hayStack.read("point and damper and normalized and cmd and equipRef == \""+m.get("id").toString()+"\"");
+            double damperPosVal = hayStack.readHisValById(damperPos.get("id").toString());
+            double adjustedDamperPos = damperPosVal + (damperPosVal * percent) /100.0;
+            hayStack.writeHisValById(damperPos.get("id").toString() , adjustedDamperPos);
+        }
+    }
+    
+    public void setDamperLimits() {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        ArrayList<HashMap> vavEquips = hayStack.readAll("equip and vav and zone");
+        for (HashMap m : vavEquips) {
+            HashMap damperPos = hayStack.read("point and damper and normalized and cmd and equipRef == \""+m.get("id").toString()+"\"");
+            double limitedDamperPos = hayStack.readHisValById(damperPos.get("id").toString());
+            double minLimit = 0, maxLimit = 0;
+            if (getSystemState() == COOLING) {
+                minLimit = hayStack.readDefaultVal("point and zone and config and vav and min and damper and cooling");
+                maxLimit = hayStack.readDefaultVal("point and zone and config and vav and max and damper and cooling");
+            } else {
+                minLimit = hayStack.readDefaultVal("point and zone and config and vav and min and damper and heating");
+                maxLimit = hayStack.readDefaultVal("point and zone and config and vav and max and damper and heating");
+            }
+            Log.d("CCU"," minLimit "+minLimit+" maxLimit "+maxLimit);
+            limitedDamperPos = Math.min(limitedDamperPos, maxLimit);
+            limitedDamperPos = Math.max(limitedDamperPos, minLimit);
+            hayStack.writeHisValById(damperPos.get("id").toString() , limitedDamperPos);
+        }
+    }
 }

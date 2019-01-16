@@ -48,7 +48,6 @@ public class DefaultSystemProfile extends Fragment
                         systemProfile.deleteSystemEquip();
                     }
                     systemProfile = new DefaultSystem();
-                    systemProfile.addSystemEquip();
                     L.ccu().systemProfile = systemProfile;
                     
                     return null;

@@ -1,9 +1,13 @@
 package a75f.io.logic.bo.building.system.vav;
 
+import org.projecthaystack.HNum;
+import org.projecthaystack.HRef;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logic.bo.building.system.SystemProfile;
@@ -16,6 +20,29 @@ import a75f.io.logic.tuners.TunerConstants;
 
 public abstract class VavSystemProfile extends SystemProfile
 {
+    
+    public void addVavSystemTuners(String equipref) {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap siteMap = hayStack.read(Tags.SITE);
+        String siteRef = (String) siteMap.get(Tags.ID);
+        Point targetCumulativeDamper = new Point.Builder()
+                                               .setDisplayName(HSUtil.getDis(equipref)+ "-" + "targetCumulativeDamper")
+                                               .setSiteRef(siteRef)
+                                               .setEquipRef(equipref)
+                                               .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
+                                               .addMarker("target").addMarker("cumulative").addMarker("damper")
+                                               .build();
+        String targetCumulativeDamperId = hayStack.addPoint(targetCumulativeDamper);
+        HashMap targetCumulativeDamperP = hayStack.read("point and tuner and default and vav and target and cumulative and damper");
+        ArrayList<HashMap> targetCumulativeDamperArr = hayStack.readPoint(targetCumulativeDamperP.get("id").toString());
+        for (HashMap valMap : targetCumulativeDamperArr) {
+            if (valMap.get("val") != null)
+            {
+                hayStack.getHSClient().pointWrite(HRef.copy(targetCumulativeDamperId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+    }
+    
     protected void addUserIntentPoints(String equipref) {
         
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
@@ -63,7 +90,7 @@ public abstract class VavSystemProfile extends SystemProfile
     public void setUserInputVal(String tags, int level, double val) {
         
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and system and config and "+tags);
+        HashMap cdb = hayStack.read("point and system and userInput and "+tags);
         
         String id = cdb.get("id").toString();
         if (id == null || id == "") {

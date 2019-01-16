@@ -35,8 +35,8 @@ public class VavIERtu extends VavSystemProfile
         return (((VavTRSystem)trSystem).getCurrentCO2() - CO2_MIN) * 100 / (CO2_MAX - CO2_MIN);
     }
     
-    public int getStaticPressure() {
-        return (int)((VavTRSystem)trSystem).getCurrentSp();
+    public double getStaticPressure() {
+        return ((VavTRSystem)trSystem).getCurrentSp();
     }
     
     public String getProfileName() {

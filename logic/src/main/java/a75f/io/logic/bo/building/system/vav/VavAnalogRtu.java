@@ -17,10 +17,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemConstants;
-import a75f.io.logic.bo.building.system.SystemProfile;
-import a75f.io.logic.bo.building.system.SystemState;
 import a75f.io.logic.bo.haystack.device.ControlMote;
-import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.VavTRTuners;
 
 /**
@@ -32,6 +29,10 @@ public class VavAnalogRtu extends VavSystemProfile
     private static final int CO2_MIN = 400;
     
     private static final int ANALOG_SCALE = 10;
+    
+    public VavAnalogRtu() {
+        addSystemEquip();
+    }
     
     public void initTRSystem() {
         trSystem =  new VavTRSystem();
@@ -49,8 +50,8 @@ public class VavAnalogRtu extends VavSystemProfile
         return (((VavTRSystem)trSystem).getCurrentCO2() - CO2_MIN) * 100 / (CO2_MAX - CO2_MIN);
     }
     
-    public int getStaticPressure() {
-        return (int)((VavTRSystem)trSystem).getCurrentSp();
+    public double getStaticPressure() {
+        return ((VavTRSystem)trSystem).getCurrentSp();
     }
     
     public int getAnalog1Out() {
@@ -116,13 +117,31 @@ public class VavAnalogRtu extends VavSystemProfile
     
         analogMin = getConfigVal("analog2 and staticPressure and min");
         analogMax = getConfigVal("analog2 and staticPressure and max");
-    
-        if (analogMax > analogMin)
+        Log.d("CCU", "analogMin: "+analogMin+" analogMax: "+analogMax+" SP: "+getStaticPressure()+" System: "+VavSystemController.getInstance().getSystemState());
+        
+        if (true/*VavSystemController.getInstance().getSystemState() == VavSystemController.State.COOLING*/)
         {
-            signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (getStaticPressure() - SystemConstants.SP_CONFIG_MIN) / 15.0));
+            if (analogMax > analogMin)
+            {
+                signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (getStaticPressure() - SystemConstants.SP_CONFIG_MIN) / 1.5));
+            }
+            else
+            {
+                signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (getStaticPressure() - SystemConstants.SP_CONFIG_MIN) / 1.5));
+            }
+        } else if (VavSystemController.getInstance().getSystemState() == VavSystemController.State.HEATING) {
+            if (analogMax > analogMin)
+            {
+                signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * VavSystemController.getInstance().getHeatingSignal() / 100));
+            }
+            else
+            {
+                signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * VavSystemController.getInstance().getHeatingSignal() / 100));
+            }
         } else {
-            signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (getStaticPressure() - SystemConstants.SP_CONFIG_MIN) / 15.0));
+            signal = 0;
         }
+        
         setCmdSignal("staticPressure", signal);
         if (getConfigVal("analog2 and output and enabled") > 0)
         {
@@ -132,6 +151,7 @@ public class VavAnalogRtu extends VavSystemProfile
         analogMin = getConfigVal("analog3 and heating and min");
         analogMax = getConfigVal("analog3 and heating and max");
     
+        Log.d("CCU", "analogMin: "+analogMin+" analogMax: "+analogMax+" Heating : "+VavSystemController.getInstance().getHeatingSignal());
         if (VavSystemController.getInstance().getSystemState() == VavSystemController.State.HEATING)
         {
             if (analogMax > analogMin)
@@ -151,8 +171,9 @@ public class VavAnalogRtu extends VavSystemProfile
             ControlMote.setAnalogOut("analog3", signal);
         }
     
-        analogMin = getConfigVal("analog4 and co2 and min");;
-        analogMax = getConfigVal("analog4 and co2 and max");;
+        analogMin = getConfigVal("analog4 and co2 and min");
+        analogMax = getConfigVal("analog4 and co2 and max");
+        Log.d("CCU", "analogMin: "+analogMin+" analogMax: "+analogMax+" CO2: "+getSystemCO2());
         if (analogMax > analogMin)
         {
             signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (getSystemCO2() - SystemConstants.CO2_CONFIG_MIN) / 200));
@@ -194,6 +215,7 @@ public class VavAnalogRtu extends VavSystemProfile
         addCmdPoints(equipRef);
         addConfigPoints(equipRef);
         addTunerPoints(equipRef);
+        addVavSystemTuners(equipRef);
         new ControlMote(siteRef);
         initTRSystem();
         L.saveCCUState();
@@ -457,8 +479,23 @@ public class VavAnalogRtu extends VavSystemProfile
     }
     
     public double getConfigVal(String tags) {
-        return CCUHsApi.getInstance().readDefaultVal("point and system and config and "+tags);
+        
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap cdb = hayStack.read("point and system and config and "+tags);
+    
+        ArrayList values = hayStack.readPoint(cdb.get("id").toString());
+        if (values != null && values.size() > 0)
+        {
+            for (int l = 1; l <= values.size() ; l++ ) {
+                HashMap valMap = ((HashMap) values.get(l-1));
+                if (valMap.get("val") != null) {
+                    return Double.parseDouble(valMap.get("val").toString());
+                }
+            }
+        }
+        return 0;
     }
+    
     public void setConfigVal(String tags, double val) {
         CCUHsApi.getInstance().writeDefaultVal("point and system and config and "+tags, val);
     }

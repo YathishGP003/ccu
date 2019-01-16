@@ -32,8 +32,11 @@ public class TunerConstants
     public static final double VAV_HEATING_DB = 1.0;
     public static final double VAV_PROPORTIONAL_GAIN = 0.5;
     public static final double VAV_INTEGRAL_GAIN = 0.5;
-    public static final double VAV_PROPORTIONAL_SPREAD = 20;
+    public static final double VAV_PROPORTIONAL_SPREAD = 3;
     public static final double VAV_INTEGRAL_TIMEOUT = 15;
+    public static final double TARGET_CUMULATIVE_DAMPER = 70;
+    public static final double VALVE_START_DAMPER = 50;
+    
     public static final double MIN_COOLING_DAMPER = 40;
     public static final double MAX_COOLING_DAMPER = 80;
     public static final double MIN_HEATING_DAMPER = 40;

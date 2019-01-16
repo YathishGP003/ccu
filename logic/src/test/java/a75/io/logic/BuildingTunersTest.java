@@ -78,10 +78,10 @@ public class BuildingTunersTest
         
         //VavTunerUtil.dump(tunerEquipRef);
         VavProfileConfiguration v = new VavProfileConfiguration();
-        v.setMinDamperHeating(0);
-        v.setMaxDamperCooliing(100);
-        v.setMinDamperHeating(0);
-        v.setMinDamperHeating(0);
+        v.minDamperCooling = 0;
+        v.maxDamperCooling = 100;
+        v.minDamperHeating = 0;
+        v.maxDamperHeating = 0;
     
         Equip vavEquip = new Equip.Builder()
                           .setSiteRef(siteRef)

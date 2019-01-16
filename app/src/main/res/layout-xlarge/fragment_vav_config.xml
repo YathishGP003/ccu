@@ -195,6 +195,7 @@
                 android:paddingLeft="40dp"
                 android:paddingRight="0dp"
                 android:layout_marginLeft="50dp"
+                android:visibility="gone"
                 android:layout_gravity="center_vertical"
                 android:text="Ignore Set Temperature Change"
                 android:textSize="@dimen/text_medium_xlarge" />
@@ -203,30 +204,45 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
+
             <LinearLayout
                 android:id="@+id/useOccupancyLayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:orientation="vertical"
+                android:orientation="horizontal"
                 android:paddingLeft="20dp"
-                android:visibility="gone"
                 android:paddingRight="0dp"
                 android:paddingTop="20dp" >
 
                 <android.support.v7.widget.SwitchCompat
-                    android:id="@+id/useOccupancyDetection"
+                    android:id="@+id/enableOccupancyControl"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Use Occupancy Detection"
+                    android:text="Enable Occupancy Control"
                     android:textSize="@dimen/text_medium_xlarge" />
 
-                <TextView
-                    android:id="@+id/textView1"
+                <Space
+                    android:layout_width="30dp"
+                    android:layout_height="match_parent" />
+
+                <android.support.v7.widget.SwitchCompat
+                    android:id="@+id/enableCO2Control"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="[Works only if occupancy sensing module is installed]"
-                    android:textSize="@dimen/text_small_xlarge"/>
+                    android:text="Enable CO2 Control"
+                    android:textSize="@dimen/text_medium_xlarge" />
+
+                <Space
+                    android:layout_width="30dp"
+                    android:layout_height="match_parent" />
+
+                <android.support.v7.widget.SwitchCompat
+                    android:id="@+id/enableIAQControl"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Enable IAQ Control"
+                    android:textSize="@dimen/text_medium_xlarge" />
             </LinearLayout>
         </LinearLayout>
 

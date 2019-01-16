@@ -39,8 +39,7 @@ public class SmartNode
     public SmartNode(int address, String site, String floor, String zone) {
         Device d = new Device.Builder()
                 .setDisplayName("SN-"+address)
-                .addMarker("network")
-                .addMarker("node")
+                .addMarker("network").addMarker("node").addMarker("smartnode").addMarker("equipHis")
                 .setAddr(address)
                 .setSiteRef(site)
                 .setFloorRef(floor)

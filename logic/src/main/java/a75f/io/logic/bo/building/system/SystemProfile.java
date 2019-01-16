@@ -31,7 +31,7 @@ public abstract class SystemProfile
         return 0;
     }
     
-    public int getStaticPressure() {
+    public double getStaticPressure() {
         return 0;
     }
     

@@ -1,5 +1,6 @@
 package a75f.io.device;
 
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import a75f.io.device.mesh.DLog;
@@ -13,15 +14,14 @@ abstract class BaseJob
 {
     
     protected String mName;
-    
-    
+    public ScheduledFuture<?> scheduledFuture = null;
     public void scheduleJob(String name, int interval, int taskSeperation, TimeUnit unit)
     {
         mName = name;
         DLog.Logd("Device Scheduling: " + name + " interval: " + interval + " task Seperation:  " +
                   taskSeperation + " unit: " + unit.name());
         // This task runs every minute.
-        Globals.getInstance().getScheduledThreadPool().scheduleAtFixedRate(new Runnable()
+        scheduledFuture = Globals.getInstance().getScheduledThreadPool().scheduleAtFixedRate(new Runnable()
         {
             public void run()
             {

@@ -33,6 +33,10 @@ public class VavStagedRtu extends VavSystemProfile
         return "VAV Staged RTU";
     }
     
+    public VavStagedRtu() {
+        addSystemEquip();
+    }
+    
     @Override
     public void doSystemControl() {
         if (trSystem != null) {

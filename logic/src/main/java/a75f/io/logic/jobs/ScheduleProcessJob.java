@@ -17,18 +17,20 @@ public class ScheduleProcessJob extends BaseJob {
 
     @Override
     public void doJob() {
-        Log.i(TAG, "Write Schedule VALUES");
 
-        Log.d("CCU","ScheduleProcessJob ->");
 
         Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule();
-
+        Log.d("CCU","ScheduleProcessJob -> 1");
 
         Log.i(TAG, "System Schedule != null " + (systemSchedule != null));
 
+
+        Log.d("CCU","ScheduleProcessJob -> 2");
         //Read all equips
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip");
 
+
+        Log.d("CCU","ScheduleProcessJob -> 3");
         for(HashMap hs : equips)
         {
             Equip equip = new Equip.Builder().setHashMap(hs).build();
@@ -36,12 +38,14 @@ public class ScheduleProcessJob extends BaseJob {
 
 
             if(equip != null) {
+                Log.d("CCU","ScheduleProcessJob -> 4");
                 Schedule equipSchedule = getScheduleForEquip(equip);
-
+                Log.d("CCU","ScheduleProcessJob -> 5");
                 if (equipSchedule != null) {
                     writePointsForEquip(equip, equipSchedule);
                 } else {
                     Log.e(TAG, "Schedule is Null, use system Schedule!");
+                    Log.d("CCU","ScheduleProcessJob -> 6");
                     writePointsForEquip(equip, systemSchedule);
                 }
             }
@@ -51,9 +55,18 @@ public class ScheduleProcessJob extends BaseJob {
             }
         }
 
-
+        Log.d("CCU","ScheduleProcessJob -> 7");
 
         Log.d("CCU","< - END ScheduleProcessJob");
+
+
+
+        Log.i(TAG, "Write Schedule VALUES");
+
+        Log.d("CCU","ScheduleProcessJob ->");
+
+
+
 
 
 

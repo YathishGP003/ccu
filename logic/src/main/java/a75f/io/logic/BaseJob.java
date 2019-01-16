@@ -20,10 +20,22 @@ public abstract class BaseJob
         // This task runs every minute.
         Globals.getInstance().getScheduledThreadPool().scheduleAtFixedRate(new Runnable()
         {
+
+            @Override
             public void run()
             {
-                Log.i("CCU_LOGIC", "Job: " + mName + " executing");
-                doJob();
+                new Thread()
+                {
+                    @Override
+                    public void run()
+                    {
+                        super.run();
+                        Log.i("CCU_LOGIC", "Job: " + mName + " executing");
+                        doJob();
+                        Log.i("CCU_LOGIC", "Job: " + mName + " finishing");
+                    }
+                }.start();
+
             }
         }, taskSeperation, interval, unit);
     }

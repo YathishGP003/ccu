@@ -56,7 +56,7 @@ import a75f.io.logic.jobs.ScheduleProcessJob;
  */
 public class Globals {
 
-    private static final int NUMBER_OF_CYCLICAL_TASKS_RENATUS_REQUIRES = 10;
+    private static final int NUMBER_OF_CYCLICAL_TASKS_RENATUS_REQUIRES = 50;
     private static final int TASK_SEPERATION = 15;
     private static final TimeUnit TASK_SERERATION_TIMEUNIT = TimeUnit.SECONDS;
     private static Globals globals;

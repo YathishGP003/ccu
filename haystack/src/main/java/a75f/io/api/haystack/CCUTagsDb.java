@@ -31,6 +31,8 @@ import org.projecthaystack.HUri;
 import org.projecthaystack.HVal;
 import org.projecthaystack.HWatch;
 import org.projecthaystack.MapImpl;
+import org.projecthaystack.io.HZincReader;
+import org.projecthaystack.io.HZincWriter;
 import org.projecthaystack.server.HOp;
 import org.projecthaystack.server.HServer;
 import org.projecthaystack.server.HStdOps;
@@ -151,7 +153,10 @@ public class CCUTagsDb extends HServer {
                     .create();
             Type listType = new TypeToken<ConcurrentHashMap<String, MapImpl<String, HVal>>>() {
             }.getType();
-            tagsMap = gson.fromJson(tagsString, listType);
+
+
+            tagsMap = new ConcurrentHashMap<String, HDict>();
+            loadGrid(tagsString);
             Type waType = new TypeToken<ConcurrentHashMap<String, WriteArray>>() {
             }.getType();
             writeArrays = gson.fromJson(waString, waType);
@@ -161,7 +166,20 @@ public class CCUTagsDb extends HServer {
         }
     }
 
+    private void loadGrid(String tagsString) {
 
+        HZincReader hZincReader = new HZincReader(tagsString);
+        HGrid hGrid = hZincReader.readGrid();
+        hGrid.dump();
+
+        for(int i = 0; i < hGrid.numRows(); i++)
+        {
+            HRow val = hGrid.row(i);
+            String key = val.get("id").toString();
+            tagsMap.put(key, val);
+        }
+
+    }
 
 
     public void saveTags() {
@@ -173,7 +191,9 @@ public class CCUTagsDb extends HServer {
                 .create();
         Type listType = new TypeToken<Map<String, MapImpl<String, HVal>>>() {
         }.getType();
-        tagsString = gson.toJson(tagsMap, listType);
+
+
+        tagsString = HZincWriter.gridToString(getGridTagsMap());
         appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).edit().putString(PREFS_TAGS_MAP, tagsString).apply();
 
         Type waType = new TypeToken<Map<String, WriteArray>>() {
@@ -191,6 +211,14 @@ public class CCUTagsDb extends HServer {
         appContext.getSharedPreferences(PREFS_TAGS_DB, Context.MODE_PRIVATE).edit().putString(PREFS_UPDATE_ID_MAP, updateIdMapString).apply();
 
     }
+
+    private HGrid getGridTagsMap() {
+        HDict[] hDicts = tagsMap.values().toArray(new HDict[tagsMap.size()]);
+        HGrid hGrid = HGridBuilder.dictsToGrid(hDicts);
+        return hGrid;
+    }
+
+
 
     //TODO- TEMP for Unit testing
     public Map getDbMap() {
@@ -241,7 +269,7 @@ public class CCUTagsDb extends HServer {
                 .create();
         Type listType = new TypeToken<Map<String, MapImpl<String, HVal>>>() {
         }.getType();
-        tagsString = gson.toJson(tagsMap, listType);
+        tagsString = HZincWriter.gridToString(getGridTagsMap());;
 
         Type waType = new TypeToken<Map<String, WriteArray>>() {
         }.getType();

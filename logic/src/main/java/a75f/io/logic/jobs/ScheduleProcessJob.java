@@ -20,6 +20,11 @@ public class ScheduleProcessJob extends BaseJob {
 
 
         Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule();
+
+        /* The systemSchedule isn't initiated yet, so schedules shouldn't be ran*/
+
+        if(systemSchedule == null)
+            return;
         Log.d("CCU","ScheduleProcessJob -> 1");
 
        // Log.i(TAG, "System Schedule != null " + (systemSchedule != null));

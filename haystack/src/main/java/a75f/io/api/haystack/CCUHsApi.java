@@ -646,7 +646,13 @@ public class CCUHsApi {
 
     public Schedule getSystemSchedule()
     {
-        Schedule schedule = new Schedule.Builder().setHDict(tagsDb.read("schedule")).build();
+
+        Schedule schedule = null;
+        HDict scheduleHDict = tagsDb.read("schedule", false);
+        if(scheduleHDict != null) {
+            schedule = new Schedule.Builder().setHDict(tagsDb.read("schedule")).build();
+        }
+
         return schedule;
     }
 

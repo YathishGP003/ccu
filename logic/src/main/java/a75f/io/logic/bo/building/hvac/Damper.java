@@ -9,7 +9,7 @@ public class Damper implements Control
     public int minPosition;
     public int maxPosition;
     public int currentPosition;
-    public int co2CompensatedMinPos;
+    public int iaqCompensatedMinPos;
     
     public int overriddenVal;
     
@@ -17,10 +17,10 @@ public class Damper implements Control
         minPosition = 40;
         maxPosition = 80;
         currentPosition = minPosition; // Required for accurate initial error in control loops
-        co2CompensatedMinPos = minPosition;
+        iaqCompensatedMinPos = minPosition;
     }
     
-    public void normalize() {
+    public void applyLimits() {
         currentPosition = Math.min(currentPosition, maxPosition);
         currentPosition = Math.max(currentPosition, minPosition);
     }

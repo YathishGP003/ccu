@@ -7,6 +7,7 @@ import java.util.HashMap;
 
 import a75.io.algos.CO2Loop;
 import a75.io.algos.ControlLoop;
+import a75.io.algos.VOCLoop;
 import a75.io.algos.tr.TrimResponseRequest;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -27,6 +28,8 @@ import a75f.io.logic.bo.building.hvac.SeriesFanVavUnit;
 import a75f.io.logic.bo.building.hvac.VavUnit;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.tuners.BuildingTuners;
+import a75f.io.logic.tuners.TunerConstants;
+import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.tuners.VavTunerUtil;
 /**
  * Created by samjithsadasivan on 6/21/18.
@@ -59,6 +62,8 @@ public class VAVLogicalMap
     ControlLoop         coolingLoop;
     ControlLoop         heatingLoop;
     CO2Loop             co2Loop;
+    VOCLoop             vocLoop;
+    double voc;
     //GenericPIController valveController;// Use GenericPI as we need unmodulated op.
     
     public TrimResponseRequest satResetRequest;
@@ -69,11 +74,17 @@ public class VAVLogicalMap
     int nodeAddr;
     ProfileType profileType;
     
+    double co2Target = TunerConstants.ZONE_CO2_TARGET;
+    double co2Threshold = TunerConstants.ZONE_CO2_THRESHOLD;
+    double vocTarget = TunerConstants.ZONE_VOC_TARGET;
+    double vocThreshold = TunerConstants.ZONE_VOC_THRESHOLD;
+    
     public VAVLogicalMap(ProfileType T, int node) {
         
         coolingLoop = new ControlLoop();
         heatingLoop = new ControlLoop();
         co2Loop = new CO2Loop();
+        vocLoop = new VOCLoop();
         /*valveController = new GenericPIController();
         valveController.setIntegralMaxTimeout(integralMaxTimeout);
         valveController.setMaxAllowedError(proportionalSpread);
@@ -112,6 +123,11 @@ public class VAVLogicalMap
             integralGain = VavTunerUtil.getIntegralGain(equipId);
             proportionalSpread = (int) VavTunerUtil.getProportionalSpread(equipId);
             integralMaxTimeout = (int) VavTunerUtil.getIntegralTimeout(equipId);
+            
+            co2Target = (int) TunerUtil.readTunerValByQuery("zone and vav and co2 and target and equipRef == \""+equipId+"\"");
+            co2Threshold = (int) TunerUtil.readTunerValByQuery("zone and vav and co2 and threshold and equipRef == \""+equipId+"\"");
+            vocTarget = (int) TunerUtil.readTunerValByQuery("zone and vav and voc and target and equipRef == \""+equipId+"\"");
+            vocThreshold = (int) TunerUtil.readTunerValByQuery("zone and vav and voc and threshold and equipRef == \""+equipId+"\"");
         }
     
         coolingLoop.setProportionalGain(proportionalGain);
@@ -125,6 +141,11 @@ public class VAVLogicalMap
         heatingLoop.setProportionalSpread(proportionalSpread);
         heatingLoop.setIntegralMaxTimeout(integralMaxTimeout);
         heatingLoop.reset();
+    
+        co2Loop.setCo2Target(co2Target);
+        co2Loop.setCo2Threshold(co2Threshold);
+        vocLoop.setVOCTarget(vocTarget);
+        vocLoop.setVOCThreshold(vocThreshold);
     
         /*valveController.setProportionalGain(proportionalGain);
         valveController.setIntegralGain(integralGain);
@@ -523,7 +544,7 @@ public class VAVLogicalMap
         CCUHsApi.getInstance().writeDefaultValById(temperatureOffsetId, (double)config.temperaturOffset);
         
         Point damperMinCooling = new Point.Builder()
-                                         .setDisplayName(equipDis+"-MinCoolingDamperPos")
+                                         .setDisplayName(equipDis+"-minCoolingDamperPos")
                                          .setEquipRef(equipRef)
                                          .setSiteRef(siteRef)
                                          .addMarker("config").addMarker("vav").addMarker("damper").addMarker("min").addMarker("cooling").addMarker("pos")
@@ -535,7 +556,7 @@ public class VAVLogicalMap
         CCUHsApi.getInstance().writeDefaultValById(damperMinCoolingId, (double)config.minDamperCooling);
     
         Point damperMaxCooling = new Point.Builder()
-                                         .setDisplayName(equipDis+"-MaxCoolingDamperPos")
+                                         .setDisplayName(equipDis+"-maxCoolingDamperPos")
                                          .setEquipRef(equipRef)
                                          .setSiteRef(siteRef)
                                          .addMarker("config").addMarker("vav").addMarker("damper").addMarker("max").addMarker("cooling").addMarker("pos")
@@ -548,7 +569,7 @@ public class VAVLogicalMap
     
     
         Point damperMinHeating = new Point.Builder()
-                                         .setDisplayName(equipDis+"-MinHeatingDamperPos")
+                                         .setDisplayName(equipDis+"-minHeatingDamperPos")
                                          .setEquipRef(equipRef)
                                          .setSiteRef(siteRef)
                                          .addMarker("config").addMarker("vav").addMarker("damper").addMarker("min").addMarker("heating").addMarker("pos")
@@ -560,7 +581,7 @@ public class VAVLogicalMap
         CCUHsApi.getInstance().writeDefaultValById(damperMinHeatingId, (double)config.minDamperHeating);
     
         Point damperMaxHeating = new Point.Builder()
-                                         .setDisplayName(equipDis+"-MaxHeatingDamperPos")
+                                         .setDisplayName(equipDis+"-maxHeatingDamperPos")
                                          .setEquipRef(equipRef)
                                          .setSiteRef(siteRef)
                                          .addMarker("config").addMarker("vav").addMarker("damper").addMarker("max").addMarker("heating").addMarker("pos")
@@ -805,6 +826,10 @@ public class VAVLogicalMap
     {
         return co2;
     }
+    public double getVOC()
+    {
+        return voc;
+    }
     public void setCO2(double co2)
     {
         this.co2 = co2;
@@ -840,6 +865,10 @@ public class VAVLogicalMap
     public CO2Loop getCo2Loop()
     {
         return co2Loop;
+    }
+    public VOCLoop getVOCLoop()
+    {
+        return vocLoop;
     }
     public double getStaticPressure()
     {

@@ -41,6 +41,23 @@ public abstract class VavSystemProfile extends SystemProfile
                 hayStack.getHSClient().pointWrite(HRef.copy(targetCumulativeDamperId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
+    
+        Point analogFanSpeedMultiplier = new Point.Builder()
+                                               .setDisplayName(HSUtil.getDis(equipref)+ "-" + "analogFanSpeedMultiplier")
+                                               .setSiteRef(siteRef)
+                                               .setEquipRef(equipref)
+                                               .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
+                                               .addMarker("analog").addMarker("fan").addMarker("speed").addMarker("multiplier")
+                                               .build();
+        String analogFanSpeedMultiplierId = hayStack.addPoint(analogFanSpeedMultiplier);
+        HashMap analogFanSpeedMultiplierP = hayStack.read("point and tuner and default and vav and analog and fan and speed and multiplier");
+        ArrayList<HashMap> analogFanSpeedMultiplierArr = hayStack.readPoint(analogFanSpeedMultiplierP.get("id").toString());
+        for (HashMap valMap : analogFanSpeedMultiplierArr) {
+            if (valMap.get("val") != null)
+            {
+                hayStack.getHSClient().pointWrite(HRef.copy(analogFanSpeedMultiplierId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
     }
     
     protected void addUserIntentPoints(String equipref) {

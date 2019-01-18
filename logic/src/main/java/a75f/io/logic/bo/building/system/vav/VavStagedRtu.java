@@ -1,17 +1,12 @@
 package a75f.io.logic.bo.building.system.vav;
 
-import android.util.Log;
-
 import java.util.HashMap;
 
 import a75.io.algos.vav.VavTRSystem;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
-import a75f.io.logic.bo.building.system.SystemConstants;
 import a75f.io.logic.bo.building.system.SystemEquip;
-import a75f.io.logic.bo.haystack.device.ControlMote;
-import a75f.io.logic.tuners.SystemTunerUtil;
 
 /**
  * Created by samjithsadasivan on 8/14/18.
@@ -48,7 +43,7 @@ public class VavStagedRtu extends VavSystemProfile
     
     private synchronized void updateSystemPoints() {
         
-        SystemEquip systemEquip = SystemEquip.getInstance();
+        /*SystemEquip systemEquip = SystemEquip.getInstance();
         
         double analogMin = SystemTunerUtil.getTuner("analog1", "min");
         double analogMax = SystemTunerUtil.getTuner("analog1", "max");
@@ -206,7 +201,7 @@ public class VavStagedRtu extends VavSystemProfile
                     }
                     break;
             }
-        }
+        }*/
         
     }
     

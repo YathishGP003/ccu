@@ -219,7 +219,7 @@ public abstract class VavProfile extends ZoneProfile
         }
         
         Damper d = vavDeviceMap.get(node).getVavUnit().vavDamper;
-        int damperLoopOp = (d.currentPosition - d.co2CompensatedMinPos) * 100/ (d.maxPosition - d.co2CompensatedMinPos);
+        int damperLoopOp = (d.currentPosition - d.iaqCompensatedMinPos) * 100/ (d.maxPosition - d.iaqCompensatedMinPos);
         
         TrimResponseRequest spResetRequest = vavDeviceMap.get(node).spResetRequest;
         if (damperLoopOp > 95) {

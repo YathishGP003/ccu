@@ -77,9 +77,33 @@ public class BuildingTuners
             return;
         }
         System.out.println("Default VAV Tuner  does not exist. Create Now");
+    
+        Point zonePrioritySpread = new Point.Builder()
+                                  .setDisplayName(equipDis+"-"+"zonePrioritySpread")
+                                  .setSiteRef(siteRef)
+                                  .setEquipRef(equipRef)
+                                  .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his")
+                                  .addMarker("zone").addMarker("priority").addMarker("spread")
+                                  .setTz(tz)
+                                  .build();
+        String zonePrioritySpreadId = hayStack.addPoint(zonePrioritySpread);
+        hayStack.writePoint(zonePrioritySpreadId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_PRIORITY_SPREAD, 0);
+        hayStack.writeHisValById(zonePrioritySpreadId, TunerConstants.ZONE_PRIORITY_SPREAD);
+    
+        Point zonePriorityMultiplier = new Point.Builder()
+                                           .setDisplayName(equipDis+"-"+"zonePriorityMultiplier")
+                                           .setSiteRef(siteRef)
+                                           .setEquipRef(equipRef)
+                                           .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his")
+                                           .addMarker("zone").addMarker("priority").addMarker("multiplier")
+                                           .setTz(tz)
+                                           .build();
+        String zonePriorityMultiplierId = hayStack.addPoint(zonePriorityMultiplier);
+        hayStack.writePoint(zonePriorityMultiplierId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_PRIORITY_MULTIPLIER, 0);
+        hayStack.writeHisValById(zonePriorityMultiplierId, TunerConstants.ZONE_PRIORITY_MULTIPLIER);
         
         Point coolingDb = new Point.Builder()
-                                  .setDisplayName(equipDis+"-"+"VAVCoolingDB")
+                                  .setDisplayName(equipDis+"-"+"coolingDeadband")
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipRef)
                                   .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his").addMarker("cooling").addMarker("deadband")
@@ -89,19 +113,43 @@ public class BuildingTuners
         String coolingDbId = hayStack.addPoint(coolingDb);
         hayStack.writePoint(coolingDbId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_COOLING_DB, 0);
         hayStack.writeHisValById(coolingDbId, TunerConstants.VAV_COOLING_DB);
+    
+        Point coolingDbMultiplier = new Point.Builder()
+                                  .setDisplayName(equipDis+"-"+"coolingDeadbandMultiplier")
+                                  .setSiteRef(siteRef)
+                                  .setEquipRef(equipRef)
+                                  .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his").addMarker("cooling").addMarker("deadband").addMarker("multiplier")
+                                  .setUnit("\u00B0F")
+                                  .setTz(tz)
+                                  .build();
+        String coolingDbMultiplierId = hayStack.addPoint(coolingDbMultiplier);
+        hayStack.writePoint(coolingDbMultiplierId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_COOLING_DB_MULTPLIER, 0);
+        hayStack.writeHisValById(coolingDbMultiplierId, TunerConstants.VAV_COOLING_DB_MULTPLIER);
+        
         Point heatingDb = new Point.Builder()
-                                  .setDisplayName(equipDis+"-"+"VAVHeatingDB")
+                                  .setDisplayName(equipDis+"-"+"heatingDeadband")
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipRef)
                                   .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his").addMarker("heating").addMarker("deadband")
-                                  .setUnit("\u00B0F")
                                   .setTz(tz)
                                   .build();
         String heatingDbId = hayStack.addPoint(heatingDb);
         hayStack.writePoint(heatingDbId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_HEATING_DB, 0);
         hayStack.writeHisValById(heatingDbId, TunerConstants.VAV_HEATING_DB);
+    
+        Point heatingDbMultiplier = new Point.Builder()
+                                  .setDisplayName(equipDis+"-"+"heatingDeadbandMultiplier")
+                                  .setSiteRef(siteRef)
+                                  .setEquipRef(equipRef)
+                                  .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his").addMarker("heating").addMarker("deadband").addMarker("multiplier")
+                                  .setTz(tz)
+                                  .build();
+        String heatingDbMultiplierId = hayStack.addPoint(heatingDbMultiplier);
+        hayStack.writePoint(heatingDbMultiplierId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_HEATING_DB_MULTIPLIER, 0);
+        hayStack.writeHisValById(heatingDbMultiplierId, TunerConstants.VAV_HEATING_DB_MULTIPLIER);
+        
         Point propGain = new Point.Builder()
-                                 .setDisplayName(equipDis+"-"+"VAVProportionalGain")
+                                 .setDisplayName(equipDis+"-"+"proportionalKFactor ")
                                  .setSiteRef(siteRef)
                                  .setEquipRef(equipRef)
                                  .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his").addMarker("pgain")
@@ -112,7 +160,7 @@ public class BuildingTuners
         hayStack.writeHisValById(pgainId, TunerConstants.VAV_PROPORTIONAL_GAIN);
         
         Point integralGain = new Point.Builder()
-                                     .setDisplayName(equipDis+"-"+"VAVIntegralGain")
+                                     .setDisplayName(equipDis+"-"+"integralKFactor ")
                                      .setSiteRef(siteRef)
                                      .setEquipRef(equipRef)
                                      .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his").addMarker("igain")
@@ -123,7 +171,7 @@ public class BuildingTuners
         hayStack.writeHisValById(igainId, TunerConstants.VAV_INTEGRAL_GAIN);
         
         Point propSpread = new Point.Builder()
-                                   .setDisplayName(equipDis+"-"+"VAVProportionalSpread")
+                                   .setDisplayName(equipDis+"-"+"temperatureProportionalRange ")
                                    .setSiteRef(siteRef)
                                    .setEquipRef(equipRef)
                                    .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his").addMarker("pspread")
@@ -134,7 +182,7 @@ public class BuildingTuners
         hayStack.writeHisValById(pSpreadId, TunerConstants.VAV_PROPORTIONAL_SPREAD);
         
         Point integralTimeout = new Point.Builder()
-                                        .setDisplayName(equipDis+"-"+"VAVIntegralTimeout")
+                                        .setDisplayName(equipDis+"-"+"temperatureIntegralTime ")
                                         .setSiteRef(siteRef)
                                         .setEquipRef(equipRef)
                                         .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his").addMarker("itimeout")
@@ -145,7 +193,7 @@ public class BuildingTuners
         hayStack.writeHisValById(iTimeoutId, TunerConstants.VAV_INTEGRAL_TIMEOUT);
     
         Point valveStartDamper  = new Point.Builder()
-                                        .setDisplayName(equipDis+"-"+"vavleActuationStartDamperPosDuringSysHeating")
+                                        .setDisplayName(equipDis+"-"+"valveActuationStartDamperPosDuringSysHeating")
                                         .setSiteRef(siteRef)
                                         .setEquipRef(equipRef)
                                         .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his")
@@ -155,6 +203,54 @@ public class BuildingTuners
         String valveStartDamperId = hayStack.addPoint(valveStartDamper);
         hayStack.writePoint(valveStartDamperId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VALVE_START_DAMPER, 0);
         hayStack.writeHisValById(valveStartDamperId, TunerConstants.VALVE_START_DAMPER);
+    
+        Point zoneCO2Target  = new Point.Builder()
+                                          .setDisplayName(equipDis+"-"+"zoneCO2Target")
+                                          .setSiteRef(siteRef)
+                                          .setEquipRef(equipRef)
+                                          .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his")
+                                          .addMarker("zone").addMarker("co2").addMarker("target")
+                                          .setTz(tz)
+                                          .build();
+        String zoneCO2TargetId = hayStack.addPoint(zoneCO2Target);
+        hayStack.writePoint(zoneCO2TargetId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_CO2_TARGET, 0);
+        hayStack.writeHisValById(zoneCO2TargetId, TunerConstants.ZONE_CO2_TARGET);
+    
+        Point zoneCO2Threshold  = new Point.Builder()
+                                       .setDisplayName(equipDis+"-"+"zoneCO2Threshold")
+                                       .setSiteRef(siteRef)
+                                       .setEquipRef(equipRef)
+                                       .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his")
+                                       .addMarker("zone").addMarker("co2").addMarker("threshold")
+                                       .setTz(tz)
+                                       .build();
+        String zoneCO2ThresholdId = hayStack.addPoint(zoneCO2Threshold);
+        hayStack.writePoint(zoneCO2ThresholdId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_CO2_THRESHOLD, 0);
+        hayStack.writeHisValById(zoneCO2ThresholdId, TunerConstants.ZONE_CO2_THRESHOLD);
+    
+        Point zoneVOCTarget  = new Point.Builder()
+                                       .setDisplayName(equipDis+"-"+"zoneVOCTarget")
+                                       .setSiteRef(siteRef)
+                                       .setEquipRef(equipRef)
+                                       .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his")
+                                       .addMarker("zone").addMarker("voc").addMarker("target")
+                                       .setTz(tz)
+                                       .build();
+        String zoneVOCTargetId = hayStack.addPoint(zoneVOCTarget);
+        hayStack.writePoint(zoneVOCTargetId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_VOC_TARGET, 0);
+        hayStack.writeHisValById(zoneVOCTargetId, TunerConstants.ZONE_VOC_TARGET);
+    
+        Point zoneVOCThreshold  = new Point.Builder()
+                                          .setDisplayName(equipDis+"-"+"zoneVOCThreshold")
+                                          .setSiteRef(siteRef)
+                                          .setEquipRef(equipRef)
+                                          .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his")
+                                          .addMarker("zone").addMarker("voc").addMarker("threshold")
+                                          .setTz(tz)
+                                          .build();
+        String zoneVOCThresholdId = hayStack.addPoint(zoneVOCThreshold);
+        hayStack.writePoint(zoneVOCThresholdId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_VOC_THRESHOLD, 0);
+        hayStack.writeHisValById(zoneVOCThresholdId, TunerConstants.ZONE_VOC_THRESHOLD);
     
         addDefaultVavSystemTuners();
         
@@ -173,15 +269,65 @@ public class BuildingTuners
                                                .build();
         String targetCumulativeDamperId = hayStack.addPoint(targetCumulativeDamper);
         hayStack.writePoint(targetCumulativeDamperId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.TARGET_CUMULATIVE_DAMPER, 0);
-        hayStack.writeHisValById(targetCumulativeDamperId, TunerConstants.VAV_INTEGRAL_TIMEOUT);
+        hayStack.writeHisValById(targetCumulativeDamperId, TunerConstants.TARGET_CUMULATIVE_DAMPER);
+    
+        Point analogFanSpeedMultiplier = new Point.Builder()
+                                               .setDisplayName(equipDis+"-"+"analogFanSpeedMultiplier")
+                                               .setSiteRef(siteRef)
+                                               .setEquipRef(equipRef)
+                                               .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his")
+                                               .addMarker("analog").addMarker("fan").addMarker("speed").addMarker("multiplier")
+                                               .setTz(tz)
+                                               .build();
+        String analogFanSpeedMultiplierId = hayStack.addPoint(analogFanSpeedMultiplier);
+        hayStack.writePoint(analogFanSpeedMultiplierId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ANALOG_FANSPEED_MULTIPLIER, 0);
+        hayStack.writeHisValById(analogFanSpeedMultiplierId, TunerConstants.ANALOG_FANSPEED_MULTIPLIER);
+        
         CCUHsApi.getInstance().syncEntityTree();
     }
     
     public void addEquipVavTuners(String equipdis, String equipref, VavProfileConfiguration config) {
     
         Log.d("CCU","addEquipVavTuners for "+equipdis);
+    
+        Point zonePrioritySpread = new Point.Builder()
+                                  .setDisplayName(equipdis+"-"+"zonePrioritySpread")
+                                  .setSiteRef(siteRef)
+                                  .setEquipRef(equipref)
+                                  .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
+                                  .addMarker("zone").addMarker("priority").addMarker("spread")
+                                  .build();
+        String zonePrioritySpreadId = hayStack.addPoint(zonePrioritySpread);
+        HashMap zonePrioritySpreadPoint = hayStack.read("point and tuner and default and vav and zone and priority and spread");
+        ArrayList<HashMap> zonePrioritySpreadPointArr = hayStack.readPoint(zonePrioritySpreadPoint.get("id").toString());
+        for (HashMap valMap : zonePrioritySpreadPointArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.getHSClient().pointWrite(HRef.copy(zonePrioritySpreadId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+    
+        Point zonePriorityMultiplier = new Point.Builder()
+                                           .setDisplayName(equipdis+"-"+"zonePriorityMultiplier")
+                                           .setSiteRef(siteRef)
+                                           .setEquipRef(equipref)
+                                           .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
+                                           .addMarker("zone").addMarker("priority").addMarker("multiplier")
+                                           .build();
+        String zonePriorityMultiplierId = hayStack.addPoint(zonePriorityMultiplier);
+        HashMap zonePriorityMultiplierPoint = hayStack.read("point and tuner and default and vav and zone and priority and multiplier");
+        ArrayList<HashMap> zonePrioritySpreadMultiplierArr = hayStack.readPoint(zonePriorityMultiplierPoint.get("id").toString());
+        for (HashMap valMap : zonePrioritySpreadMultiplierArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.getHSClient().pointWrite(HRef.copy(zonePriorityMultiplierId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        
         Point coolingDb = new Point.Builder()
-                                  .setDisplayName(equipdis+"-"+"VAVCoolingDB")
+                                  .setDisplayName(equipdis+"-"+"coolingDeadband")
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipref)
                                   .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("cooling").addMarker("deadband")
@@ -197,9 +343,27 @@ public class BuildingTuners
                 hayStack.getHSClient().pointWrite(HRef.copy(coolingDbId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
+    
+        Point coolingDbMultiplier = new Point.Builder()
+                                  .setDisplayName(equipdis+"-"+"coolingDeadbandMultiplier")
+                                  .setSiteRef(siteRef)
+                                  .setEquipRef(equipref)
+                                  .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("cooling").addMarker("deadband").addMarker("multiplier")
+                                  .setUnit("\u00B0F")
+                                  .build();
+        String coolingDbMultiplierId = hayStack.addPoint(coolingDbMultiplier);
+        HashMap coolingDbMultiplierPoint = hayStack.read("point and tuner and default and vav and cooling and deadband and multiplier");
+        ArrayList<HashMap> coolingDbMultiplierPointArr = hayStack.readPoint(coolingDbMultiplierPoint.get("id").toString());
+        for (HashMap valMap : coolingDbMultiplierPointArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.getHSClient().pointWrite(HRef.copy(coolingDbMultiplierId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
         
         Point heatingDb = new Point.Builder()
-                                  .setDisplayName(equipdis+"-"+"VAVHeatingDB")
+                                  .setDisplayName(equipdis+"-"+"heatingDeadband")
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipref)
                                   .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("heating").addMarker("deadband")
@@ -214,9 +378,26 @@ public class BuildingTuners
                 hayStack.getHSClient().pointWrite(HRef.copy(heatingDbId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
+    
+        Point heatingDbMultiplier = new Point.Builder()
+                                  .setDisplayName(equipdis+"-"+"heatingDeadbandMultiplier")
+                                  .setSiteRef(siteRef)
+                                  .setEquipRef(equipref)
+                                  .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("heating").addMarker("deadband").addMarker("multiplier")
+                                  .setUnit("\u00B0F")
+                                  .build();
+        String heatingDbMultiplierId = hayStack.addPoint(heatingDbMultiplier);
+        HashMap heatingDbMultiplierPoint = hayStack.read("point and tuner and default and vav and heating and deadband and multiplier");
+        ArrayList<HashMap> heatingDbMultiplierPointArr = hayStack.readPoint(heatingDbMultiplierPoint.get("id").toString());
+        for (HashMap valMap : heatingDbMultiplierPointArr) {
+            if (valMap.get("val") != null)
+            {
+                hayStack.getHSClient().pointWrite(HRef.copy(heatingDbMultiplierId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
         
         Point propGain = new Point.Builder()
-                                 .setDisplayName(equipdis+"-"+"VAVProportionalGain")
+                                 .setDisplayName(equipdis+"-"+"proportionalKFactor")
                                  .setSiteRef(siteRef)
                                  .setEquipRef(equipref)
                                  .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("pgain")
@@ -233,7 +414,7 @@ public class BuildingTuners
         
         
         Point integralGain = new Point.Builder()
-                                     .setDisplayName(equipdis+"-"+"VAVIntegralGain")
+                                     .setDisplayName(equipdis+"-"+"integralKFactor")
                                      .setSiteRef(siteRef)
                                      .setEquipRef(equipref)
                                      .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("igain")
@@ -249,7 +430,7 @@ public class BuildingTuners
         }
         
         Point propSpread = new Point.Builder()
-                                   .setDisplayName(equipdis+"-"+"VAVProportionalSpread")
+                                   .setDisplayName(equipdis+"-"+"temperatureProportionalRange")
                                    .setSiteRef(siteRef)
                                    .setEquipRef(equipref)
                                    .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("pspread")
@@ -265,7 +446,7 @@ public class BuildingTuners
         }
         
         Point integralTimeout = new Point.Builder()
-                                        .setDisplayName(equipdis+"-"+"VAVIntegralTimeout")
+                                        .setDisplayName(equipdis+"-"+"temperatureIntegralTime")
                                         .setSiteRef(siteRef)
                                         .setEquipRef(equipref)
                                         .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("itimeout")
@@ -281,7 +462,7 @@ public class BuildingTuners
         }
     
         Point valveStartDamper = new Point.Builder()
-                                        .setDisplayName(equipdis+"-"+"vavleActuationStartDamperPosDuringSysHeating")
+                                        .setDisplayName(equipdis+"-"+"valveActuationStartDamperPosDuringSysHeating")
                                         .setSiteRef(siteRef)
                                         .setEquipRef(equipref)
                                         .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
@@ -294,6 +475,75 @@ public class BuildingTuners
             if (valMap.get("val") != null)
             {
                 hayStack.getHSClient().pointWrite(HRef.copy(valveStartDamperId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+    
+    
+        Point zoneCO2Target = new Point.Builder()
+                                      .setDisplayName(equipdis+"-"+"zoneCO2Target")
+                                      .setSiteRef(siteRef)
+                                      .setEquipRef(equipref)
+                                      .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
+                                      .addMarker("zone").addMarker("co2").addMarker("target")
+                                      .build();
+        String zoneCO2TargetId = hayStack.addPoint(zoneCO2Target);
+        HashMap zoneCO2TargetPoint = hayStack.read("point and tuner and default and vav and zone and co2 and target");
+        ArrayList<HashMap> zoneCO2TargetPointArr = hayStack.readPoint(zoneCO2TargetPoint.get("id").toString());
+        for (HashMap valMap : zoneCO2TargetPointArr) {
+            if (valMap.get("val") != null)
+            {
+                hayStack.getHSClient().pointWrite(HRef.copy(zoneCO2TargetId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+    
+        Point zoneCO2Threshold = new Point.Builder()
+                                         .setDisplayName(equipdis+"-"+"zoneCO2Threshold")
+                                         .setSiteRef(siteRef)
+                                         .setEquipRef(equipref)
+                                         .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
+                                         .addMarker("zone").addMarker("co2").addMarker("threshold")
+                                         .build();
+        String zoneCO2ThresholdId = hayStack.addPoint(zoneCO2Threshold);
+        HashMap zoneCO2ThresholdPoint = hayStack.read("point and tuner and default and vav and zone and co2 and threshold");
+        ArrayList<HashMap> zoneCO2ThresholdPointArr = hayStack.readPoint(zoneCO2ThresholdPoint.get("id").toString());
+        for (HashMap valMap : zoneCO2ThresholdPointArr) {
+            if (valMap.get("val") != null)
+            {
+                hayStack.getHSClient().pointWrite(HRef.copy(zoneCO2ThresholdId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        
+        Point zoneVOCTarget = new Point.Builder()
+                                         .setDisplayName(equipdis+"-"+"zoneVOCTarget")
+                                         .setSiteRef(siteRef)
+                                         .setEquipRef(equipref)
+                                         .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
+                                         .addMarker("zone").addMarker("voc").addMarker("target")
+                                         .build();
+        String zoneVOCTargetId = hayStack.addPoint(zoneVOCTarget);
+        HashMap zoneVOCTargetPoint = hayStack.read("point and tuner and default and vav and zone and voc and target");
+        ArrayList<HashMap> zoneVOCTargetPointArr = hayStack.readPoint(zoneVOCTargetPoint.get("id").toString());
+        for (HashMap valMap : zoneVOCTargetPointArr) {
+            if (valMap.get("val") != null)
+            {
+                hayStack.getHSClient().pointWrite(HRef.copy(zoneVOCTargetId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+    
+        Point zoneVOCThreshold = new Point.Builder()
+                                        .setDisplayName(equipdis+"-"+"zoneVOCThreshold")
+                                        .setSiteRef(siteRef)
+                                        .setEquipRef(equipref)
+                                        .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
+                                        .addMarker("zone").addMarker("voc").addMarker("threshold")
+                                        .build();
+        String zoneVOCThresholdId = hayStack.addPoint(zoneVOCThreshold);
+        HashMap zoneVOCThresholdPoint = hayStack.read("point and tuner and default and vav and zone and voc and threshold");
+        ArrayList<HashMap> zoneVOCThresholdPointArr = hayStack.readPoint(zoneVOCThresholdPoint.get("id").toString());
+        for (HashMap valMap : zoneVOCThresholdPointArr) {
+            if (valMap.get("val") != null)
+            {
+                hayStack.getHSClient().pointWrite(HRef.copy(zoneVOCThresholdId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
         

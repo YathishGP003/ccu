@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import a75.io.algos.CO2Loop;
 import a75.io.algos.ControlLoop;
+import a75.io.algos.VOCLoop;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.logic.bo.building.ZoneState;
@@ -56,6 +57,7 @@ public class VavSeriesFanProfile extends VavProfile
             ControlLoop coolingLoop = vavDevice.getCoolingLoop();
             ControlLoop heatingLoop = vavDevice.getHeatingLoop();
             CO2Loop co2Loop = vavDeviceMap.get(node).getCo2Loop();
+            VOCLoop vocLoop = vavDeviceMap.get(node).getVOCLoop();
             SeriesFanVavUnit vavUnit = (SeriesFanVavUnit)vavDevice.getVavUnit();
             //GenericPIController valveController = vavDevice.getValveController();
         
@@ -63,6 +65,7 @@ public class VavSeriesFanProfile extends VavProfile
             double dischargeTemp = vavDevice.getDischargeTemp();
             double supplyAirTemp = vavDevice.getSupplyAirTemp();
             double co2 = vavDeviceMap.get(node).getCO2();
+            double voc = vavDeviceMap.get(node).getVOC();
             double dischargeSp = vavDevice.getDischargeSp();
             setTemp = vavDevice.getDesiredTemp();
             Equip vavEquip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + node + "\"")).build();
@@ -138,19 +141,26 @@ public class VavSeriesFanProfile extends VavProfile
                 //CO2 loop output from 0-50% modulates damper min position.
                 if (/*mode == OCCUPIED && */co2Loop.getLoopOutput(co2) <= 50)
                 {
-                    damper.co2CompensatedMinPos = damper.minPosition + (damper.maxPosition - damper.minPosition) * co2Loop.getLoopOutput() / 50;
-                    Log.d("VAV", "CO2LoopOp :" + co2Loop.getLoopOutput() + ", adjusted minposition " + damper.minPosition);
+                    damper.iaqCompensatedMinPos = damper.minPosition + (damper.maxPosition - damper.minPosition) * co2Loop.getLoopOutput() / 50;
+                    Log.d("VAV", "CO2LoopOp :" + co2Loop.getLoopOutput() + ", adjusted minposition " + damper.iaqCompensatedMinPos);
                 }
+    
+                //VOC loop output from 0-50% modulates damper min position.
+                if (/*mode == OCCUPIED && */vocLoop.getLoopOutput(voc) <= 50)
+                {
+                    damper.iaqCompensatedMinPos = damper.minPosition + (damper.maxPosition - damper.minPosition) * vocLoop.getLoopOutput() / 50;
+                    Log.d("VAV", "VOCLoopOp :" + vocLoop.getLoopOutput() + ", adjusted minposition " + damper.iaqCompensatedMinPos);
+                }
+                
                 if (loopOp == 0)
                 {
-                    damper.currentPosition = damper.co2CompensatedMinPos;
+                    damper.currentPosition = damper.iaqCompensatedMinPos;
                 }
                 else
                 {
-                    damper.currentPosition = damper.co2CompensatedMinPos + (damper.maxPosition - damper.co2CompensatedMinPos) * loopOp / 100;
+                    damper.currentPosition = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * loopOp / 100;
                 }
-                //Normalize
-                damper.normalize();
+                damper.applyLimits();
             }
             
             //REHEAT control that does not follow RP-1455.

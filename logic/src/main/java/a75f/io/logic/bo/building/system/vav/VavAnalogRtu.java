@@ -71,7 +71,7 @@ public class VavAnalogRtu extends VavSystemProfile
     }
     
     public String getProfileName() {
-        return "VAV Analog RTU";
+        return "VAV Fully Modulating RTU";
     }
     
     @Override

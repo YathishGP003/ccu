@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import a75.io.algos.CO2Loop;
 import a75.io.algos.ControlLoop;
+import a75.io.algos.VOCLoop;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.logic.bo.building.ZoneState;
@@ -64,9 +65,11 @@ public class VavParallelFanProfile extends VavProfile
             double dischargeTemp = vavDevice.getDischargeTemp();
             double supplyAirTemp = vavDevice.getSupplyAirTemp();
             double co2 = vavDeviceMap.get(node).getCO2();
+            double voc = vavDeviceMap.get(node).getVOC();
             double dischargeSp = vavDevice.getDischargeSp();
             setTemp = vavDevice.getDesiredTemp();
-        
+    
+            VOCLoop vocLoop = vavDeviceMap.get(node).getVOCLoop();
             if (roomTemp == 0) {
                 Log.d(TAG,"Skip PI update for "+node+" roomTemp : "+roomTemp);
                 continue;
@@ -139,17 +142,17 @@ public class VavParallelFanProfile extends VavProfile
                 //When HEATING , maxPosition = maxPosition - parallel fan factor.
                 int parallelFanFactor = 0 ;//TODO - Tuner
                 int maxDamper = damper.maxPosition - parallelFanFactor;
-                damper.co2CompensatedMinPos = damper.minPosition + ( maxDamper - damper.minPosition) * co2Loop.getLoopOutput() / 50;
+                damper.iaqCompensatedMinPos = damper.minPosition + ( maxDamper - damper.minPosition) * co2Loop.getLoopOutput() / 50;
                 Log.d("VAV","CO2LoopOp :"+co2Loop.getLoopOutput()+", adjusted minposition "+damper.minPosition);
             }
         
             if (loopOp == 0)
             {
-                damper.currentPosition = damper.co2CompensatedMinPos;
+                damper.currentPosition = damper.iaqCompensatedMinPos;
             }
             else
             {
-                damper.currentPosition = damper.co2CompensatedMinPos + (damper.maxPosition - damper.co2CompensatedMinPos) * loopOp / 100;
+                damper.currentPosition = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * loopOp / 100;
             }
     
             //REHEAT control that does not follow RP-1455.
@@ -179,9 +182,7 @@ public class VavParallelFanProfile extends VavProfile
             } else {
                 vavUnit.fanStart = false;
             }
-        
-            //Normalize
-            damper.normalize();
+            
     
             Log.d("VAV","CoolingLoop "+node +"roomTemp :"+roomTemp+" setTemp: "+setTemp);
             coolingLoop.dump();

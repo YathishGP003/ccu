@@ -42,4 +42,34 @@ public class TunerUtil
         }
         return "";
     }
+    
+    public static double readSystemUserInputVal(String tags) {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap cdb = hayStack.read("point and system and userInput and "+tags);
+        if (cdb == null || cdb.size() == 0) {
+            return 0;
+        }
+        ArrayList values = hayStack.readPoint(cdb.get("id").toString());
+        if (values != null && values.size() > 0)
+        {
+            for (int l = 1; l <= values.size() ; l++ ) {
+                HashMap valMap = ((HashMap) values.get(l-1));
+                if (valMap.get("val") != null) {
+                    return Double.parseDouble(valMap.get("val").toString());
+                }
+            }
+        }
+        return 0;
+    }
+    
+    public static void writeSystemUserInputVal(String tags, double val) {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap cdb = hayStack.read("point and system and userInput and "+tags);
+    
+        String id = cdb.get("id").toString();
+        if (id == null || id == "") {
+            throw new IllegalArgumentException();
+        }
+        hayStack.writePoint(id, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", val, 0);
+    }
 }

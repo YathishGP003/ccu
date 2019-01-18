@@ -10,6 +10,7 @@ import java.util.HashMap;
 
 import a75.io.algos.ControlLoop;
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
@@ -177,7 +178,7 @@ public class VavSystemController
                                                     +weightedAverageHeatingOnlyLoadMA +" systemState: "+systemState+" coolingSignal: "+coolingSignal+" heatingSignal: "+heatingSignal);
     
         normalizeAirflow();
-        adjustDamperForCumulativeTarget();
+        //adjustDamperForCumulativeTarget();
         setDamperLimits();
     
     }
@@ -272,6 +273,23 @@ public class VavSystemController
     
         double zonePrioritySpread = 2;//TODO - Tuner
         double zonePriorityMultiplier = 1.3; //TODO - Tuner
+    
+        for (ZoneProfile z : L.ccu().zoneProfiles)
+        {
+            Equip q = z.getEquip();
+            if (q.getZoneRef().equals(zoneRef)) {
+                zonePrioritySpread = TunerUtil.readTunerValByQuery("point and tuner and vav and zone and priority and spread and equipRef == \""+q.getId()+"\"");
+            }
+        }
+    
+        for (ZoneProfile z : L.ccu().zoneProfiles)
+        {
+            Equip q = z.getEquip();
+            if (q.getZoneRef().equals(zoneRef)) {
+                zonePriorityMultiplier = TunerUtil.readTunerValByQuery("point and tuner and vav and zone and priority and multiplier and equipRef == \""+q.getId()+"\"");
+            }
+        }
+        
         //zoneDynamicPriority = zoneBasePriority*((zonePriorityMultiplier )^(rounddownTo10(zoneCoolingLoad/zonePrioritySpread))
         
         return p.val * Math.pow(zonePriorityMultiplier, (zoneLoad/zonePrioritySpread) > 10 ? 10 : (zoneLoad/zonePrioritySpread));

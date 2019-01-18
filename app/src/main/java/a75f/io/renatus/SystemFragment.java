@@ -12,8 +12,7 @@ import android.widget.EditText;
 import android.widget.SeekBar;
 
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
-import a75f.io.logic.tuners.SystemTunerUtil;
-import a75f.io.logic.tuners.TunerConstants;
+import a75f.io.logic.tuners.TunerUtil;
 
 /**
  * Created by samjithsadasivan isOn 8/7/17.
@@ -47,7 +46,7 @@ public class SystemFragment extends Fragment
 	public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
 	{
 		sbComfortValue = view.findViewById(R.id.systemComfortValue);
-		sbComfortValue.setProgress(5 - (int)SystemTunerUtil.getDesiredCI());
+		sbComfortValue.setProgress(5 - (int)TunerUtil.readSystemUserInputVal("desired and ci"));
 		sbComfortValue.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 			
 			@Override
@@ -62,7 +61,7 @@ public class SystemFragment extends Fragment
 				new AsyncTask<Void, Void, Void>() {
 					@Override
 					protected Void doInBackground( final Void ... params ) {
-						SystemTunerUtil.setDesiredCI(TunerConstants.SYSTEM_BUILDING_VAL_LEVEL, 5 - seekBar.getProgress());
+						TunerUtil.writeSystemUserInputVal("desired and ci",5 - seekBar.getProgress());
 						
 						return null;
 					}

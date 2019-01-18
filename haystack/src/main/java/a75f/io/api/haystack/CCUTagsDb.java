@@ -66,6 +66,7 @@ public class CCUTagsDb extends HServer {
     private static final String PREFS_ID_MAP = "idMap";
     private static final String PREFS_REMOVE_ID_MAP = "removeIdMap";
     private static final String PREFS_UPDATE_ID_MAP = "updateIdMap";
+    private static final String TAG = "CCUTagsDb";
 
     public ConcurrentHashMap<String, HDict> tagsMap;
     public ConcurrentHashMap<String, WriteArray>      writeArrays;
@@ -175,10 +176,13 @@ public class CCUTagsDb extends HServer {
         for(int i = 0; i < hGrid.numRows(); i++)
         {
             HRow val = hGrid.row(i);
-            String key = val.get("id").toString();
-            tagsMap.put(key, val);
+            Log.i(TAG, "Zinc: " + val.toZinc());
+            if(!val.has("nosync")) {
+                String key = val.get("id").toString().replace("@", "");
+                System.out.println("ID: " + key);
+                tagsMap.put(key, val);
+            }
         }
-
     }
 
 
@@ -612,7 +616,7 @@ public class CCUTagsDb extends HServer {
         }
         HRef id = (HRef) b.get("id");
         tagsMap.put(id.toVal(), b.toDict());
-        return id.val;
+        return id.toCode();
     }
 
     public void updateZone(Zone z, String i) {

@@ -672,9 +672,6 @@ public class CCUHsApi {
     }
 
     public void loadTagsData(Context c) {
-
         tagsDb.init(c);
-
-
     }
 }

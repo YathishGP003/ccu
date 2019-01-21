@@ -152,17 +152,8 @@ public class DefaultSchedules {
 
     }
 
+    public static void generateDefaultSchedule(HRef siteId) {
 
-    public static void generateDefaultSchedule(String id, String zoneId)
-    {
-        HRef siteId = CCUHsApi.getInstance().getSiteId();
-        generateDefaultSchedule(siteId, id, zoneId);
-    }
-
-    public static void generateDefaultSchedule(HRef siteId, String id, String zoneId) {
-
-
-        HRef zoneIdRef = HRef.make(zoneId);
         HDict[] days = new HDict[10];
 
         days[0] = getDefaultForDay(true, DAYS.MONDAY.ordinal(), DEFAULT_COOLING_TEMP);
@@ -191,7 +182,6 @@ public class DefaultSchedules {
                 .add("dis", "Default Site Schedule")
                 .add("days", hList)
                 .add("siteRef", siteId)
-                .add("zoneRef", zoneIdRef)
                 .toDict();
 
         CCUHsApi.getInstance().addSchedule(localId, defaultSchedule);

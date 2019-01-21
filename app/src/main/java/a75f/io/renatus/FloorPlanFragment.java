@@ -404,13 +404,16 @@ public class FloorPlanFragment extends Fragment
 			
 			
 			HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
+			String scheduleID = DefaultSchedules.generateDefaultSchedule();
+
 			Zone hsZone = new Zone.Builder()
                                    .setDisplayName(addRoomEdit.getText().toString())
                                    .setFloorRef(floor.getId())
                                    .setSiteRef(siteMap.get("id").toString())
+									.setScheduleRef(scheduleID)
                                    .build();
 			String zoneId = CCUHsApi.getInstance().addZone(hsZone);
-			DefaultSchedules.generateDefaultSchedule(siteMap.get("id").toString(), zoneId);
+
 
 			ArrayList<Zone> mRoomList = HSUtil.getZones(floor.getId());
 			updateRooms(mRoomList);

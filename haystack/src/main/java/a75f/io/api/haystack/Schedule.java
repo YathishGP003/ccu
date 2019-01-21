@@ -46,13 +46,12 @@ public class Schedule extends Entity
         return DateTime.now().getMinuteOfHour();
     }
 
-
     /* Notes * /
     getCurDay
     getCurHour
     getCurMinute
     */
-    private Double getCurrentValueForMarker(String marker)
+    public Double getCurrentValueForMarker(String marker)
     {
         for(Days day : getDays())
         {

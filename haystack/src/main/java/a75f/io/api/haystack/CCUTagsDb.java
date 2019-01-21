@@ -609,14 +609,15 @@ public class CCUTagsDb extends HServer {
                 .add("id", HRef.make(UUID.randomUUID().toString()))
                 .add("dis", z.getDisplayName())
                 .add("room", HMarker.VAL)
-                .add("floorRef", z.getFloorRef());
+                .add("floorRef", z.getFloorRef())
+                .add("scheduleRef", z.getScheduleRef());
 
         for (String m : z.getMarkers()) {
             b.add(m);
         }
         HRef id = (HRef) b.get("id");
         tagsMap.put(id.toVal(), b.toDict());
-        return id.toCode();
+        return id.val;
     }
 
     public void updateZone(Zone z, String i) {

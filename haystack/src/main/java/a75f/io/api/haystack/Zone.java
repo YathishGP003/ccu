@@ -57,24 +57,33 @@ public class Zone extends Entity
         private String siteRef;
         private String id;
         private String scheduleRef;
+
         public Builder setDisplayName(String displayName)
         {
             this.displayName = displayName;
             return this;
         }
+
         public Builder setMarkers(ArrayList<String> markers)
         {
             this.markers = markers;
             return this;
         }
+
         public Builder setSiteRef(String siteRef)
         {
             this.siteRef = siteRef;
             return this;
         }
+
         public Builder setFloorRef(String floorRef)
         {
             this.floorRef = floorRef;
+            return this;
+        }
+
+        public Builder setScheduleRef(String scheduleID) {
+            this.scheduleRef = scheduleID;
             return this;
         }
         

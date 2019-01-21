@@ -17,6 +17,9 @@ import org.projecthaystack.HGrid;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.Globals;
+import a75f.io.logic.L;
+import a75f.io.logic.bo.building.system.DefaultSystem;
+import a75f.io.logic.tuners.BuildingTuners;
 
 public class RegisterGatherDetails extends Activity {
 
@@ -163,6 +166,8 @@ public class RegisterGatherDetails extends Activity {
                 String siteId = strings[0];
                 boolean retVal = CCUHsApi.getInstance().syncExistingSite(siteId);
                 Globals.getInstance().setSiteAlreadyCreated(true);
+                BuildingTuners.getInstance();
+                L.ccu().systemProfile = new DefaultSystem();
                 return retVal;
             }
 

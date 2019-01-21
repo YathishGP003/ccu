@@ -1,6 +1,8 @@
 package a75f.io.logic.bo.building.vav;
 
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
+import a75f.io.logic.bo.building.definitions.DamperType;
+import a75f.io.logic.bo.building.definitions.ReheatType;
 
 /**
  * Created by samjithsadasivan on 6/27/18.
@@ -9,41 +11,19 @@ import a75f.io.logic.bo.building.BaseProfileConfiguration;
 public class VavProfileConfiguration extends BaseProfileConfiguration
 {
     
-    int minDamperCooling;
-    int maxDamperCooling;
-    int minDamperHeating;
-    int maxDamperHeating;
+    public DamperType damperType;
+    public int damperSize;
+    public String damperShape;
+    public ReheatType reheatType;
     
-    public int getMinDamperCooling()
-    {
-        return minDamperCooling;
-    }
-    public void setMinDamperCooling(int minDamperCooling)
-    {
-        this.minDamperCooling = minDamperCooling;
-    }
-    public int getMaxDamperCooliing()
-    {
-        return maxDamperCooling;
-    }
-    public void setMaxDamperCooliing(int maxDamperCooliing)
-    {
-        this.maxDamperCooling = maxDamperCooliing;
-    }
-    public int getMinDamperHeating()
-    {
-        return minDamperHeating;
-    }
-    public void setMinDamperHeating(int minDamperHeating)
-    {
-        this.minDamperHeating = minDamperHeating;
-    }
-    public int getMaxDamperHeating()
-    {
-        return maxDamperHeating;
-    }
-    public void setMaxDamperHeating(int maxDamperHeating)
-    {
-        this.maxDamperHeating = maxDamperHeating;
-    }
+    public boolean enableOccupancyControl;
+    public boolean enableCO2Control;
+    public boolean enableIAQControl;
+    
+    public int minDamperCooling;
+    public int maxDamperCooling;
+    public int minDamperHeating;
+    public int maxDamperHeating;
+    
+    public int temperaturOffset;
 }

@@ -4,6 +4,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
+import a75f.io.renatus.tuners.TunerFragment;
+
 /**
  * Created by samjithsadasivan isOn 8/7/17.
  */
@@ -31,6 +33,10 @@ public class SettingsPagerAdapter extends FragmentStatePagerAdapter
 				//fragment = USBHomeFragment.getInstance();
 				fragment = SettingsFragment.newInstance();
 				break;
+			case 2:
+				//fragment = USBHomeFragment.getInstance();
+				fragment = TunerFragment.newInstance();
+				break;
 		}
 		return fragment;
 	}
@@ -40,7 +46,7 @@ public class SettingsPagerAdapter extends FragmentStatePagerAdapter
 	public int getCount()
 	{
 		// Show 2 total pages.
-		return 2;
+		return 3;
 	}
 	
 	
@@ -60,6 +66,8 @@ public class SettingsPagerAdapter extends FragmentStatePagerAdapter
 				return "Floor Layout";
 			case 1:
 				return "Settings";
+			case 2:
+				return "Tuners";
 		}
 		return null;
 	}

@@ -6,6 +6,7 @@ package a75f.io.logic.tuners;
 
 public class TunerConstants
 {
+    public static final int TUNER_EQUIP_VAL_LEVEL = 7;
     
     public static final double SYSTEM_ANALOG1_MIN = 0;
     public static final double SYSTEM_ANALOG1_MAX = 10;
@@ -30,10 +31,27 @@ public class TunerConstants
     
     public static final double VAV_COOLING_DB = 1.0;
     public static final double VAV_HEATING_DB = 1.0;
+    public static final double VAV_COOLING_DB_MULTPLIER = 0.5;
+    public static final double VAV_HEATING_DB_MULTIPLIER = 0.5;
     public static final double VAV_PROPORTIONAL_GAIN = 0.5;
     public static final double VAV_INTEGRAL_GAIN = 0.5;
-    public static final double VAV_PROPORTIONAL_SPREAD = 20;
-    public static final double VAV_INTEGRAL_TIMEOUT = 15;
+    public static final double VAV_PROPORTIONAL_SPREAD = 3;
+    public static final double VAV_INTEGRAL_TIMEOUT = 30;
+    public static final double TARGET_CUMULATIVE_DAMPER = 70;
+    public static final double TARGET_MAX_INSIDE_HUMIDITY = 45;
+    public static final double TARGET_MIN_INSIDE_HUMIDITY = 25;
+    public static final double ANALOG_FANSPEED_MULTIPLIER = 1;
+    public static final double HUMIDITY_HYSTERESIS_PERCENT = 5;
+    public static final double VALVE_START_DAMPER = 50;
+    
+    public static final double ZONE_CO2_TARGET = 1000;
+    public static final double ZONE_CO2_THRESHOLD = 800;
+    public static final double ZONE_VOC_TARGET = 500;
+    public static final double ZONE_VOC_THRESHOLD = 400;
+    
+    public static final double ZONE_PRIORITY_SPREAD = 2.0;
+    public static final double ZONE_PRIORITY_MULTIPLIER = 1.3;
+    
     public static final double MIN_COOLING_DAMPER = 40;
     public static final double MAX_COOLING_DAMPER = 80;
     public static final double MIN_HEATING_DAMPER = 40;

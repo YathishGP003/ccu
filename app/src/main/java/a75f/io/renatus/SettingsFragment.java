@@ -21,7 +21,7 @@ import butterknife.ButterKnife;
 public class SettingsFragment extends Fragment
 {
 	@BindView(R.id.hvacEquipSelect)
-	Spinner spHvacEquipType;
+	Spinner spSystemProfile;
 	
 	public SettingsFragment()
 	{
@@ -44,10 +44,10 @@ public class SettingsFragment extends Fragment
 	@Override
 	public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
 	{
-		ArrayAdapter<CharSequence> hvacEquipSelectorAdapter = ArrayAdapter.createFromResource(this.getActivity(), R.array.hvac_equip_select, R.layout.spinner_dropdown_item);
-		hvacEquipSelectorAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-		spHvacEquipType.setAdapter(hvacEquipSelectorAdapter);
-		spHvacEquipType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+		ArrayAdapter<CharSequence> systemProfileSelectorAdapter = ArrayAdapter.createFromResource(this.getActivity(), R.array.system_profile_select, R.layout.spinner_dropdown_item);
+		systemProfileSelectorAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+		spSystemProfile.setAdapter(systemProfileSelectorAdapter);
+		spSystemProfile.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
 		{
 			@Override
 			public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l)
@@ -56,13 +56,14 @@ public class SettingsFragment extends Fragment
 				{
 					case 0:
 						getActivity().getSupportFragmentManager().beginTransaction()
-						             .replace(R.id.profileContainer, new DABStagedProfile()).commit();
+						             .replace(R.id.profileContainer, new DefaultSystemProfile()).commit();
 						break;
+					
 					case 1:
 						getActivity().getSupportFragmentManager().beginTransaction()
 						             .replace(R.id.profileContainer, new VavAnalogRtuProfile()).commit();
 						break;
-					case 2:
+					/*case 2:
 						getActivity().getSupportFragmentManager().beginTransaction()
 						             .replace(R.id.profileContainer, new VavIERtuProfile()).commit();
 						break;
@@ -71,8 +72,12 @@ public class SettingsFragment extends Fragment
 						             .replace(R.id.profileContainer, new VavStagedRtuProfile()).commit();
 						break;
 					case 4:
-						//L.ccu().systemProfile = new VavBacnetRtu();
-						break;
+						L.ccu().systemProfile = new VavBacnetRtu();
+						
+					case 5:
+						getActivity().getSupportFragmentManager().beginTransaction()
+						             .replace(R.id.profileContainer, new DABStagedProfile()).commit();
+						break;*/
 				}
 			}
 			@Override
@@ -80,7 +85,7 @@ public class SettingsFragment extends Fragment
 			{
 			}
 		});
-		spHvacEquipType.setSelection(L.ccu().systemProfile != null ?
-				            hvacEquipSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 1 );
+		spSystemProfile.setSelection(L.ccu().systemProfile != null ?
+				            systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0 );
 	}
 }

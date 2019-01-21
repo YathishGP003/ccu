@@ -1,5 +1,7 @@
 package a75f.io.device.mesh;
 
+import android.util.Log;
+
 import org.javolution.io.Struct;
 
 import java.util.ArrayList;
@@ -33,7 +35,9 @@ public class LSmartNode
     
     public static final String RELAY_ONE ="RELAY_ONE";
     public static final String RELAY_TWO ="RELAY_TWO";
-    public static final String PULSE ="Pulse";
+    public static final String PULSE ="Pulsed Electric";
+    public static final String MAT ="MAT";
+    
     
     private static final short  TODO = 0;
     private static final String TAG  = "LSmartNode";
@@ -115,6 +119,12 @@ public class LSmartNode
                             if (isAnalog(p.getPort()) && p.getType().equals(PULSE) && logicalVal > 0) {
                                 mappedVal |= 0x80;
                             }
+    
+                            if (isAnalog(p.getPort()) && p.getType().equals(MAT) && logicalVal > 0) {
+                                controlsMessage_t.controls.damperPosition.set(mappedVal);
+                                mappedVal = 0;
+                            }
+                            Log.d("CCU"," Set "+p.getPort()+" type "+p.getType()+" logicalVal: "+logicalVal+ " mappedVal "+mappedVal);
                             LSmartNode.getSmartNodePort(controlsMessage_t, p.getPort()).set(mappedVal);
                             
                         }
@@ -165,7 +175,7 @@ public class LSmartNode
         switch (type)
         {
             case "0-10v":
-            case "Pulse":
+            case PULSE:
                 return val;
             case "10-0v":
                 return (short) (100 - val);

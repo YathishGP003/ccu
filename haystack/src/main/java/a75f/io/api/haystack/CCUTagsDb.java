@@ -219,13 +219,16 @@ public class CCUTagsDb extends HServer {
             updateIdMap = gson.fromJson(updateIdMapString, ConcurrentHashMap.class);
         }
     
-        BoxStore.deleteAllFiles(TEST_DIRECTORY);
-        boxStore = MyObjectBox.builder()
-                              // add directory flag to change where ObjectBox puts its database files
-                              .directory(TEST_DIRECTORY)
-                              // optional: add debug flags for more detailed ObjectBox log output
-                              .debugFlags(DebugFlags.LOG_QUERIES | DebugFlags.LOG_QUERY_PARAMETERS).build();
-        hisBox = boxStore.boxFor(HisItem.class);
+        if (boxStore == null)
+        {
+            BoxStore.deleteAllFiles(TEST_DIRECTORY);
+            boxStore = MyObjectBox.builder()
+                                  // add directory flag to change where ObjectBox puts its database files
+                                  .directory(TEST_DIRECTORY)
+                                  // optional: add debug flags for more detailed ObjectBox log output
+                                  .debugFlags(DebugFlags.LOG_QUERIES | DebugFlags.LOG_QUERY_PARAMETERS).build();
+            hisBox = boxStore.boxFor(HisItem.class);
+        }
     }
 
 
@@ -845,5 +848,21 @@ public class CCUTagsDb extends HServer {
                 .order(HisItem_.date);
 
         return hisQuery.build().find();
+    }
+    
+    //Delete all the hisItem except most recent.
+    public void removeHisItems(HRef id) {
+        HDict entity = readById(id);
+    
+        QueryBuilder<HisItem> hisQuery = hisBox.query();
+        hisQuery.equal(HisItem_.rec, entity.get("id").toString())
+                .equal(HisItem_.syncStatus, false)
+                //.greater(HisItem_.date,range.start.millis())
+                //.less(HisItem_.date,range.end.millis())
+                .order(HisItem_.date);
+        
+        List<HisItem>  hisItems = hisQuery.build().find();
+        hisItems.remove(hisItems.size()-1);
+        hisBox.remove(hisItems);
     }
 }

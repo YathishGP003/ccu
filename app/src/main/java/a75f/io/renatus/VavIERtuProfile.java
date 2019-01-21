@@ -9,9 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.system.SystemEquip;
-import a75f.io.logic.bo.building.system.VavIERtu;
+import a75f.io.logic.bo.building.system.vav.VavIERtu;
 import butterknife.ButterKnife;
 
 /**
@@ -47,7 +45,7 @@ public class VavIERtuProfile extends Fragment
             new AsyncTask<Void, Void, Void>() {
                 @Override
                 protected Void doInBackground( final Void ... params ) {
-                    SystemEquip.getInstance().updateSystemProfile(ProfileType.SYSTEM_VAV_IE_RTU);
+                    //SystemEquip.getInstance().updateSystemProfile(ProfileType.SYSTEM_VAV_IE_RTU);
                     return null;
                 }
                 @Override

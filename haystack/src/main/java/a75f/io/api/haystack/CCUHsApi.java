@@ -288,9 +288,22 @@ public class CCUHsApi {
         }
         pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "", HNum.make(val), HNum.make(0));
     }
+    
+    public void writeDefaultVal(String query, String val) {
+        ArrayList points = readAll(query);
+        String id = ((HashMap) points.get(0)).get("id").toString();
+        if (id == null || id == "") {
+            throw new IllegalArgumentException();
+        }
+        pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "", HStr.make(val), HNum.make(0));
+    }
 
     public void writeDefaultValById(String id, Double val) {
         pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "", HNum.make(val), HNum.make(0));
+    }
+    
+    public void writeDefaultValById(String id, String val) {
+        pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "", HStr.make(val), HNum.make(0));
     }
 
     public void pointWrite(HRef id, int level, String who, HVal val, HNum dur) {
@@ -333,6 +346,23 @@ public class CCUHsApi {
         if (values != null && values.size() > 0) {
             HashMap valMap = ((HashMap) values.get(HayStackConstants.DEFAULT_POINT_LEVEL - 1));
             return valMap.get("val") == null ? 0 : Double.parseDouble(valMap.get("val").toString());
+        } else {
+            return null;
+        }
+    }
+    
+    public String readDefaultStrVal(String query) {
+        
+        ArrayList points = readAll(query);
+        String id = ((HashMap) points.get(0)).get("id").toString();
+        if (id == null || id == "") {
+            return null;
+        }
+        ArrayList values = CCUHsApi.getInstance().readPoint(id);
+        if (values != null && values.size() > 0) {
+            HashMap valMap = ((HashMap) values.get(HayStackConstants.DEFAULT_POINT_LEVEL - 1));
+            System.out.println(valMap);
+            return valMap.get("val") == null ? null : valMap.get("val").toString();
         } else {
             return null;
         }
@@ -397,7 +427,7 @@ public class CCUHsApi {
      */
     public HisItem curRead(String id) {
         HGrid resGrid = hsClient.hisRead(HRef.copy(id),"current");
-        if (resGrid != null && resGrid.numRows() == 0) {
+        if (resGrid == null || (resGrid != null && resGrid.isEmpty())) {
             return null;
         }
         HRow r = resGrid.row(resGrid.numRows() - 1);
@@ -407,7 +437,8 @@ public class CCUHsApi {
     }
 
     public Double readHisValById(String id) {
-        return curRead(id).val;
+        HisItem item = curRead(id);
+        return item == null ? 0 : item.getVal();
     }
 
     public Double readHisValByQuery(String query) {
@@ -418,7 +449,6 @@ public class CCUHsApi {
         }
 
         HisItem item = curRead(id);
-
         return item == null ? 0 : item.getVal();
 
     }
@@ -537,13 +567,18 @@ public class CCUHsApi {
         return tagsDb.idMap.get(luid);
     }
 
-    public void syncEntityTree() {
-        if (!testHarnessEnabled)
-        {
-            entitySyncHandler.sync();
-        } else {
-            Log.d("CCU"," Test Harness Enabled , Skip Entity Sync");
-        }
+    public synchronized void syncEntityTree() {
+        new Thread() {
+            @Override
+            public void run() {
+                if (!testHarnessEnabled)
+                {
+                    entitySyncHandler.sync();
+                } else {
+                    Log.d("CCU"," Test Harness Enabled , Skip Entity Sync");
+                }
+            }
+        }.start();
     }
 
     public void syncHisData() {

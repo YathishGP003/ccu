@@ -67,6 +67,11 @@ public class HSUtil
         return new Device.Builder().setHashMap(device).build();
     }
     
+    public static Equip getEquipFromZone(String zoneRef) {
+        HashMap equip = CCUHsApi.getInstance().read("equip and zoneRef == \""+zoneRef+"\"");
+        return new Equip.Builder().setHashMap(equip).build();
+    }
+    
     public static HDict mapToHDict(Map<String, Object> m)
     {
         HDictBuilder b = new HDictBuilder();

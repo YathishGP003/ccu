@@ -10,7 +10,6 @@ import a75.io.algos.vav.VavTRSystem;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HisItem;
 import a75f.io.logic.bo.building.ZoneProfile;
-import a75f.io.logic.bo.building.system.DxCIController;
 
 import static a75f.io.logic.L.ccu;
 
@@ -97,9 +96,6 @@ public class BuildingProcessJob extends BaseJob
             tsData.put("Analog3OutSignal", String.valueOf(L.ccu().systemProfile.getAnalog3Out()));
             tsData.put("Analog4OutSignal", String.valueOf(L.ccu().systemProfile.getAnalog4Out()));
         }
-    
-        tsData.put("dxCI_CO_MA",String.valueOf(DxCIController.getInstance().dxCI_CO_MA));
-        tsData.put("dxCI_WA",String.valueOf(DxCIController.getInstance().dxCI_WA));
         
         ArrayList<HashMap> points = CCUHsApi.getInstance().readAll("point and writable");
         for (Map m : points)

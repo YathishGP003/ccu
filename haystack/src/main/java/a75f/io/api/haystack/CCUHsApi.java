@@ -566,6 +566,15 @@ public class CCUHsApi {
     public String getGUID(String luid) {
         return tagsDb.idMap.get(luid);
     }
+    
+    public String getLUID(String guid) {
+        for (Map.Entry<String, String> entry : tagsDb.idMap.entrySet()) {
+            if (entry.getValue().equals(guid)) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
 
     public synchronized void syncEntityTree() {
         new Thread() {

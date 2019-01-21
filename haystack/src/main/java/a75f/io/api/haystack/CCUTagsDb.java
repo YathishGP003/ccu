@@ -341,6 +341,9 @@ public class CCUTagsDb extends HServer {
                                      .add("priority", q.getPriority())
                                      .add("tz",q.getTz())
                                      .add("group",q.getGroup());
+        if (q.getAhuRef() != null) {
+            equip.add("ahuRef",q.getAhuRef());
+        }
         for (String m : q.getMarkers()) {
             equip.add(m);
         }
@@ -361,6 +364,10 @@ public class CCUTagsDb extends HServer {
                                      .add("priority", q.getPriority())
                                      .add("tz",q.getTz())
                                      .add("group",q.getGroup());
+    
+        if (q.getAhuRef() != null) {
+            equip.add("ahuRef",q.getAhuRef());
+        }
         for (String m : q.getMarkers()) {
             Log.d("CCU"," Add marker "+m);
             equip.add(m);
@@ -856,9 +863,6 @@ public class CCUTagsDb extends HServer {
     
         QueryBuilder<HisItem> hisQuery = hisBox.query();
         hisQuery.equal(HisItem_.rec, entity.get("id").toString())
-                .equal(HisItem_.syncStatus, false)
-                //.greater(HisItem_.date,range.start.millis())
-                //.less(HisItem_.date,range.end.millis())
                 .order(HisItem_.date);
         
         List<HisItem>  hisItems = hisQuery.build().find();

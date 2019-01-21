@@ -165,6 +165,15 @@ public class VAVLogicalMap
         String siteDis = (String) siteMap.get("dis");
         String tz = siteMap.get("tz").toString();
         String equipDis = siteDis+"-VAV-"+nodeAddr;
+        String ahuRef = null;
+        HashMap systemEquip = CCUHsApi.getInstance().read("equip and system");
+        if (systemEquip != null && systemEquip.size() > 0) {
+            ahuRef = systemEquip.get("id").toString();
+        }
+        boolean isElectric = config.reheatType == ReheatType.Pulse ||
+                             config.reheatType == ReheatType.OneStage ||
+                             config.reheatType == ReheatType.TwoStage;
+        
         Equip v = new Equip.Builder()
                           .setSiteRef(siteRef)
                           .setDisplayName(equipDis)
@@ -172,7 +181,9 @@ public class VAVLogicalMap
                           .setFloorRef(floor)
                           .setProfile(profileType.name())
                           .setPriority(config.getPriority().name())
-                          .addMarker("equip").addMarker("vav").addMarker("zone").addMarker("equipHis")
+                          .addMarker("equip").addMarker("vav").addMarker("zone").addMarker("equipHis").addMarker("singleDuct").addMarker("pressureDependent")
+                          .addMarker(isElectric ? "elecReheat" : "hotWaterReheat")
+                          .setAhuRef(ahuRef)
                           .setTz(tz)
                           .setGroup(String.valueOf(nodeAddr))
                           .build();

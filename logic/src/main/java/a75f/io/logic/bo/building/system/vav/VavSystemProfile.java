@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
@@ -140,6 +141,16 @@ public abstract class VavSystemProfile extends SystemProfile
         String enableDehumidifierId = CCUHsApi.getInstance().addPoint(enableDehumidifier);
         CCUHsApi.getInstance().writePoint(enableDehumidifierId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",0.0, 0);
     
+    }
+    
+    public void updateAhuRef(String systemEquipId) {
+        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone");
+    
+        for (HashMap m : equips)
+        {
+            Equip q = new Equip.Builder().setHashMap(m).setAhuRef(systemEquipId).build();
+            CCUHsApi.getInstance().updateEquip(q, q.getId());
+        }
     }
     
     public double getUserIntentVal(String tags) {

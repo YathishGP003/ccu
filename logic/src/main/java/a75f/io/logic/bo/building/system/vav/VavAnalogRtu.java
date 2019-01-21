@@ -218,6 +218,7 @@ public class VavAnalogRtu extends VavSystemProfile
         addConfigPoints(equipRef);
         addTunerPoints(equipRef);
         addVavSystemTuners(equipRef);
+        updateAhuRef(equipRef);
         new ControlMote(siteRef);
         initTRSystem();
         L.saveCCUState();

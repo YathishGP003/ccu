@@ -36,9 +36,12 @@ public class TunerConstants
     public static final double VAV_PROPORTIONAL_GAIN = 0.5;
     public static final double VAV_INTEGRAL_GAIN = 0.5;
     public static final double VAV_PROPORTIONAL_SPREAD = 3;
-    public static final double VAV_INTEGRAL_TIMEOUT = 15;
+    public static final double VAV_INTEGRAL_TIMEOUT = 30;
     public static final double TARGET_CUMULATIVE_DAMPER = 70;
+    public static final double TARGET_MAX_INSIDE_HUMIDITY = 45;
+    public static final double TARGET_MIN_INSIDE_HUMIDITY = 25;
     public static final double ANALOG_FANSPEED_MULTIPLIER = 1;
+    public static final double HUMIDITY_HYSTERESIS_PERCENT = 5;
     public static final double VALVE_START_DAMPER = 50;
     
     public static final double ZONE_CO2_TARGET = 1000;

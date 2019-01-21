@@ -18,9 +18,13 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
+import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.ZonePriority.NO;
+import static a75f.io.logic.bo.building.system.SystemMode.AUTO;
+import static a75f.io.logic.bo.building.system.SystemMode.COOLONLY;
+import static a75f.io.logic.bo.building.system.SystemMode.HEATONLY;
 import static a75f.io.logic.bo.building.system.vav.VavSystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.vav.VavSystemController.State.HEATING;
 import static a75f.io.logic.bo.building.system.vav.VavSystemController.State.OFF;
@@ -83,8 +87,9 @@ public class VavSystemController
         
         double prioritySum = 0;
         VavSystemProfile profile = (VavSystemProfile) L.ccu().systemProfile;
-        ciDesired = (int)profile.getUserInputVal("desired and ci");
-        Log.d("CCU", "runVavSystemControlAlgo -> ciDesired: "+ciDesired);
+        ciDesired = (int)profile.getUserIntentVal("desired and ci");
+        SystemMode systemMode = SystemMode.values()[(int)profile.getUserIntentVal("rtu and mode")];
+        Log.d("CCU", "runVavSystemControlAlgo -> ciDesired: "+ciDesired+" systemMode: "+systemMode);
     
         weightedAverageCoolingOnlyLoadSum = weightedAverageHeatingOnlyLoadSum = weightedAverageLoadSum = 0;
         
@@ -145,18 +150,17 @@ public class VavSystemController
         }
         weightedAverageHeatingOnlyLoadMA = weightedAverageHeatingOnlyLoadMASum/weightedAverageHeatingOnlyLoadMAQueue.size();
     
-        if (weightedAverageCoolingOnlyLoadMA > 0) {
+        if ((systemMode == COOLONLY || systemMode == AUTO) && weightedAverageCoolingOnlyLoadMA > 0) {
             if (systemState != COOLING) {
                 systemState = COOLING;
                 piController.reset();
             }
-        } else if ((weightedAverageCoolingOnlyLoadMA == 0 && weightedAverageHeatingOnlyLoadMA > 0)) {
+        } else if ((systemMode == HEATONLY || systemMode == AUTO) && (weightedAverageCoolingOnlyLoadMA == 0 && weightedAverageHeatingOnlyLoadMA > 0)) {
             if (systemState != HEATING)
             {
                 systemState = HEATING;
                 piController.reset();
             }
-            
         } else {
             systemState = OFF;
         }
@@ -178,7 +182,7 @@ public class VavSystemController
                                                     +weightedAverageHeatingOnlyLoadMA +" systemState: "+systemState+" coolingSignal: "+coolingSignal+" heatingSignal: "+heatingSignal);
     
         normalizeAirflow();
-        //adjustDamperForCumulativeTarget();
+        adjustDamperForCumulativeTarget();
         setDamperLimits();
     
     }
@@ -310,7 +314,7 @@ public class VavSystemController
         ArrayList<HashMap> vavEquips = hayStack.readAll("equip and vav and zone");
         double maxDamperPos = 0;
         for (HashMap m : vavEquips) {
-            HashMap damper = hayStack.read("point and damper and cmd and equipRef == \""+m.get("id").toString()+"\"");
+            HashMap damper = hayStack.read("point and damper and base and cmd and equipRef == \""+m.get("id").toString()+"\"");
             double damperPos = hayStack.readHisValById(damper.get("id").toString());
             if ( damperPos >= maxDamperPos) {
                 maxDamperPos = damperPos;
@@ -322,13 +326,14 @@ public class VavSystemController
         }
         
         double targetPercent = (100 - maxDamperPos) * 100/ maxDamperPos ;
+        
     
         for (HashMap m : vavEquips) {
             HashMap damper = hayStack.read("point and damper and base and cmd and equipRef == \""+m.get("id").toString()+"\"");
-        
             double damperPos = hayStack.readHisValById(damper.get("id").toString());
             int normalizedDamperPos = (int) (damperPos + damperPos * targetPercent/100);
             HashMap normalizedDamper = hayStack.read("point and damper and normalized and cmd and equipRef == \""+m.get("id").toString()+"\"");
+            Log.d("CCU","normalizeAirflow"+" ,damper :"+damperPos+"targetPercent:"+targetPercent+" normalizedDamper:"+normalizedDamperPos);
             hayStack.writeHisValById(normalizedDamper.get("id").toString(), (double)normalizedDamperPos);
         }
         
@@ -347,7 +352,7 @@ public class VavSystemController
         Log.d("CCU","weightedDamperOpening : "+weightedDamperOpening +" cumulativeDamperTarget : "+cumulativeDamperTarget);
     
         while(weightedDamperOpening > 0 && weightedDamperOpening < cumulativeDamperTarget) {
-            adjustDamperOpening(1);
+            adjustDamperOpening(10);
             weightedDamperOpening = getWeightedDamperOpening();
             Log.d("CCU","weightedDamperOpening : "+weightedDamperOpening +" cumulativeDamperTarget : "+cumulativeDamperTarget);
         }

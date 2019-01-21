@@ -43,9 +43,9 @@ public class TunerUtil
         return "";
     }
     
-    public static double readSystemUserInputVal(String tags) {
+    public static double readSystemUserIntentVal(String tags) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and system and userInput and "+tags);
+        HashMap cdb = hayStack.read("point and system and userIntent and "+tags);
         if (cdb == null || cdb.size() == 0) {
             return 0;
         }
@@ -62,10 +62,10 @@ public class TunerUtil
         return 0;
     }
     
-    public static void writeSystemUserInputVal(String tags, double val) {
+    public static void writeSystemUserIntentVal(String tags, double val) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and system and userInput and "+tags);
-    
+        HashMap cdb = hayStack.read("point and system and userIntent and "+tags);
+        
         String id = cdb.get("id").toString();
         if (id == null || id == "") {
             throw new IllegalArgumentException();

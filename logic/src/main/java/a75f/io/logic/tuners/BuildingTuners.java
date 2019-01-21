@@ -282,6 +282,18 @@ public class BuildingTuners
         String analogFanSpeedMultiplierId = hayStack.addPoint(analogFanSpeedMultiplier);
         hayStack.writePoint(analogFanSpeedMultiplierId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ANALOG_FANSPEED_MULTIPLIER, 0);
         hayStack.writeHisValById(analogFanSpeedMultiplierId, TunerConstants.ANALOG_FANSPEED_MULTIPLIER);
+    
+        Point humidityHysteresis = new Point.Builder()
+                                                 .setDisplayName(equipDis+"-"+"humidityHysteresis")
+                                                 .setSiteRef(siteRef)
+                                                 .setEquipRef(equipRef)
+                                                 .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his")
+                                                 .addMarker("humidity").addMarker("hysteresis")
+                                                 .setTz(tz)
+                                                 .build();
+        String humidityHysteresisId = hayStack.addPoint(humidityHysteresis);
+        hayStack.writePoint(humidityHysteresisId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.HUMIDITY_HYSTERESIS_PERCENT, 0);
+        hayStack.writeHisValById(humidityHysteresisId, TunerConstants.HUMIDITY_HYSTERESIS_PERCENT);
         
         CCUHsApi.getInstance().syncEntityTree();
     }

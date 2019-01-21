@@ -23,6 +23,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.SystemConstants;
 import a75f.io.logic.bo.building.system.vav.VavAnalogRtu;
 import a75f.io.logic.tuners.TunerConstants;
+import a75f.io.logic.tuners.TunerUtil;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -197,27 +198,26 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 		analogVal = systemProfile.getConfigVal("co2 and max", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL);
 		analog4Max.setSelection(analogVal != 0 ? analogAdapter.getPosition((int)analogVal) : analogArray.size() -1);
 		
-		ArrayList<Double> testSignalArray = new ArrayList<>();
+		ArrayList<Double> zoroToHundred = new ArrayList<>();
 		for (double val = 0;  val <= 100.0; val++)
 		{
-			testSignalArray.add(val);
+			zoroToHundred.add(val);
 		}
-		ArrayAdapter<Double> coolingSatTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, testSignalArray);
+		ArrayAdapter<Double> coolingSatTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
 		coolingSatTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		ahuAnalog1Test.setAdapter(coolingSatTestAdapter);
 		
-		ArrayAdapter<Double> spTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, testSignalArray);
+		ArrayAdapter<Double> spTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
 		spTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		ahuAnalog2Test.setAdapter(spTestAdapter);
 		
-		ArrayAdapter<Double> heatingSatTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, testSignalArray);
+		ArrayAdapter<Double> heatingSatTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
 		heatingSatTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		ahuAnalog3Test.setAdapter(heatingSatTestAdapter);
 		
-		ArrayAdapter<Double> co2TestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, testSignalArray);
+		ArrayAdapter<Double> co2TestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
 		co2TestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		ahuAnalog4Test.setAdapter(co2TestAdapter);
-		
 		
 		analog1Min.setOnItemSelectedListener(this);
 		analog1Max.setOnItemSelectedListener(this);
@@ -322,6 +322,22 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 			@Override
 			protected Void doInBackground( final Void ... params ) {
 				systemProfile.setConfigEnabled(analog, selected ? 1: 0);
+				return null;
+			}
+			
+			@Override
+			protected void onPostExecute( final Void result ) {
+				// continue what you are doing...
+			}
+		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+	}
+	
+	private void setUserIntentBackground(String query, double val) {
+		
+		new AsyncTask<Void, Void, Void>() {
+			@Override
+			protected Void doInBackground( final Void ... params ) {
+				TunerUtil.writeSystemUserIntentVal(query, val);
 				return null;
 			}
 			

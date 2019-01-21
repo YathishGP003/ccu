@@ -361,7 +361,7 @@
                         android:layout_marginBottom="14dp"
                         android:layout_marginTop="14dp"
                         android:layout_row="3"
-                        android:text="Analog4AtMinCO2"
+                        android:text="Analog4AtMinFreshAir"
                         android:textColor="@color/black"
                         android:textSize="@dimen/text_small_xlarge"/>
 
@@ -382,7 +382,7 @@
                         android:layout_marginBottom="14dp"
                         android:layout_marginLeft="40dp"
                         android:layout_marginTop="14dp"
-                        android:text="Analog4AtMaxCO2"
+                        android:text="Analog4AtMaxFreshAir"
                         android:textColor="@color/black"
                         android:textSize="@dimen/text_small_xlarge"/>
 

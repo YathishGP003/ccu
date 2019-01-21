@@ -18,6 +18,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemConstants;
 import a75f.io.logic.bo.haystack.device.ControlMote;
+import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.tuners.VavTRTuners;
 
 /**
@@ -119,7 +120,7 @@ public class VavAnalogRtu extends VavSystemProfile
         analogMax = getConfigVal("analog2 and staticPressure and max");
         Log.d("CCU", "analogMin: "+analogMin+" analogMax: "+analogMax+" SP: "+getStaticPressure()+" System: "+VavSystemController.getInstance().getSystemState());
         
-        if (true/*VavSystemController.getInstance().getSystemState() == VavSystemController.State.COOLING*/)
+        if (VavSystemController.getInstance().getSystemState() == VavSystemController.State.COOLING)
         {
             if (analogMax > analogMin)
             {
@@ -130,13 +131,14 @@ public class VavAnalogRtu extends VavSystemProfile
                 signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (getStaticPressure() - SystemConstants.SP_CONFIG_MIN) / 1.5));
             }
         } else if (VavSystemController.getInstance().getSystemState() == VavSystemController.State.HEATING) {
+            double analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier");
             if (analogMax > analogMin)
             {
-                signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * VavSystemController.getInstance().getHeatingSignal() / 100));
+                signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * VavSystemController.getInstance().getHeatingSignal() * analogFanSpeedMultiplier/ 100));
             }
             else
             {
-                signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * VavSystemController.getInstance().getHeatingSignal() / 100));
+                signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * VavSystemController.getInstance().getHeatingSignal() * analogFanSpeedMultiplier/ 100));
             }
         } else {
             signal = 0;
@@ -238,17 +240,16 @@ public class VavAnalogRtu extends VavSystemProfile
         String siteRef = siteMap.get("id").toString();
         String tz = siteMap.get("tz").toString();
         Point coolingSignal = new Point.Builder()
-                            .setDisplayName(equipDis+"-"+"CoolingSignal")
+                            .setDisplayName(equipDis+"-"+"coolingSignal")
                             .setSiteRef(siteRef)
                             .setEquipRef(equipref)
                             .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("his")
-                            .setUnit("%")
                             .setTz(tz)
                             .build();
         CCUHsApi.getInstance().addPoint(coolingSignal);
     
         Point heatingSignal = new Point.Builder()
-                                      .setDisplayName(equipDis+"-"+"HeatingSignal")
+                                      .setDisplayName(equipDis+"-"+"heatingSignal")
                                       .setSiteRef(siteRef)
                                       .setEquipRef(equipref)
                                       .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("his")
@@ -257,7 +258,7 @@ public class VavAnalogRtu extends VavSystemProfile
         CCUHsApi.getInstance().addPoint(heatingSignal);
     
         Point fanSignal = new Point.Builder()
-                                      .setDisplayName(equipDis+"-"+"FanSignal")
+                                      .setDisplayName(equipDis+"-"+"fanSignal")
                                       .setSiteRef(siteRef)
                                       .setEquipRef(equipref)
                                       .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("his")
@@ -266,7 +267,7 @@ public class VavAnalogRtu extends VavSystemProfile
         CCUHsApi.getInstance().addPoint(fanSignal);
     
         Point co2Signal = new Point.Builder()
-                                  .setDisplayName(equipDis+"-"+"CO2Signal")
+                                  .setDisplayName(equipDis+"-"+"co2Signal")
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipref)
                                   .addMarker("system").addMarker("cmd").addMarker("co2").addMarker("his")
@@ -274,7 +275,7 @@ public class VavAnalogRtu extends VavSystemProfile
                                   .build();
         CCUHsApi.getInstance().addPoint(co2Signal);
         Point occupancySignal = new Point.Builder()
-                                  .setDisplayName(equipDis+"-"+"OccupancySignal")
+                                  .setDisplayName(equipDis+"-"+"occupancySignal")
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipref)
                                   .addMarker("system").addMarker("cmd").addMarker("occupancy").addMarker("his")
@@ -282,13 +283,22 @@ public class VavAnalogRtu extends VavSystemProfile
                                   .build();
         CCUHsApi.getInstance().addPoint(occupancySignal);
         Point humidifierSignal = new Point.Builder()
-                                  .setDisplayName(equipDis+"-"+"HumidifierSignal")
+                                  .setDisplayName(equipDis+"-"+"humidifierSignal")
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipref)
-                                  .addMarker("system").addMarker("cmd").addMarker("co2").addMarker("his")
+                                  .addMarker("system").addMarker("cmd").addMarker("humidifier").addMarker("his")
                                   .setTz(tz)
                                   .build();
         CCUHsApi.getInstance().addPoint(humidifierSignal);
+    
+        Point dehumidifierSignal = new Point.Builder()
+                                         .setDisplayName(equipDis+"-"+"dehumidifierSignal")
+                                         .setSiteRef(siteRef)
+                                         .setEquipRef(equipref)
+                                         .addMarker("system").addMarker("cmd").addMarker("dehumidifier").addMarker("his")
+                                         .setTz(tz)
+                                         .build();
+        CCUHsApi.getInstance().addPoint(dehumidifierSignal);
     
     
         /*Point sat = new Point.Builder()
@@ -327,6 +337,7 @@ public class VavAnalogRtu extends VavSystemProfile
         return CCUHsApi.getInstance().readHisValByQuery("point and system and cmd and "+cmd);
     }
     public void setCmdSignal(String cmd, double val) {
+        Log.d("CCU"," SetCmdSignal cmd: "+cmd+" signal :"+val);
         CCUHsApi.getInstance().writeHisValByQuery("point and system and cmd and "+cmd, val);
     }
     

@@ -29,6 +29,43 @@ import java.util.UUID;
 
 public class Schedule extends Entity
 {
+    //MON = 0
+    private int getCurDay()
+    {
+        return DateTime.now().getDayOfWeek() - 1;
+    }
+
+    //0-23
+    private int getCurHour()
+    {
+        return DateTime.now().getHourOfDay();
+    }
+
+    private int getCurMin()
+    {
+        return DateTime.now().getMinuteOfHour();
+    }
+
+
+    /* Notes * /
+    getCurDay
+    getCurHour
+    getCurMinute
+     */
+
+    private String getCurrentValueForMarker(String marker)
+    {
+        for(Days day : getDays())
+        {
+            if(day.mDay != getCurDay()) continue;
+
+
+        }
+
+
+
+
+    }
 
     /*{stdt:2018-12-18T10:13:55.185-06:00 Chicago
         dis:"Simple Schedule" etdt:2018-12-18T10:13:55.185-06:00 Chicago
@@ -296,10 +333,10 @@ public class Schedule extends Entity
             days.isCooling = hDict.has("cooling");
             days.isHeating = hDict.has("heating");
             days.mDay = hDict.getInt("day");
-            days.mEthh = hDict.getInt("ethh");
-            days.mEtmm = hDict.getInt("etmm");
-            days.mSthh = hDict.getInt("sthh");
-            days.mStmm = hDict.getInt("stmm");
+            days.mEthh = hDict.has("ethh") ? hDict.getInt("ethh") : -1;
+            days.mEtmm = hDict.has("etmm") ? hDict.getInt("etmm") : -1;
+            days.mSthh = hDict.has("sthh") ? hDict.getInt("sthh") : -1;
+            days.mStmm = hDict.has("stmm") ? hDict.getInt("stmm") : -1;
             days.mSunrise = hDict.has("sunrise");
             days.mSunset = hDict.has("sunset");
             days.mVal = hDict.getDouble("curVal");

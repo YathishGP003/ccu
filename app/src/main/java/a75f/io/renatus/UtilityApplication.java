@@ -108,7 +108,7 @@ public abstract class UtilityApplication extends Application
 //        }.start();
     
         deviceUpdateJob = new DeviceUpdateJob();
-        deviceUpdateJob.scheduleJob("DeviceUpdateJob", 30,
+        deviceUpdateJob.scheduleJob("DeviceUpdateJob", 60,
                 5 * 2, TimeUnit.SECONDS);
     }
 

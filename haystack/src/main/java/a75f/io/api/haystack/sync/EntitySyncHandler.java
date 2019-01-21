@@ -121,6 +121,10 @@ public class EntitySyncHandler
             {
                 entity.put("zoneRef", HRef.copy(CCUHsApi.getInstance().getGUID(entity.get("zoneRef").toString())));
             }
+            if (entity.get("ahuRef") != null && CCUHsApi.getInstance().getGUID(entity.get("ahuRef").toString()) != null)
+            {
+                entity.put("ahuRef", HRef.copy(CCUHsApi.getInstance().getGUID(entity.get("ahuRef").toString())));
+            }
             if (entity.get("scheduleRef") != null && CCUHsApi.getInstance().getGUID(entity.get("scheduleRef").toString()) != null)
             {
                 entity.put("scheduleRef", HRef.copy(CCUHsApi.getInstance().getGUID(entity.get("scheduleRef").toString())));

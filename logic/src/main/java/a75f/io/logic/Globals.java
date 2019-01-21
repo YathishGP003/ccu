@@ -15,6 +15,9 @@ import com.pubnub.api.models.consumer.PNStatus;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 
+import org.projecthaystack.HNum;
+import org.projecthaystack.HRef;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -28,13 +31,14 @@ import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.bo.building.CCUApplication;
 import a75f.io.logic.bo.building.Day;
 import a75f.io.logic.bo.building.NamedSchedule;
 import a75f.io.logic.bo.building.Schedule;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.bo.building.system.DefaultSystem;
+import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.bo.building.system.vav.VavAnalogRtu;
 import a75f.io.logic.bo.building.system.vav.VavBacnetRtu;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
@@ -145,7 +149,7 @@ public class Globals
         populate();
         //mHeartBeatJob = new HeartBeatJob();
         //5 seconds after application initializes start heart beat
-        int DEFAULT_HEARTBEAT_INTERVAL = 30;
+        int DEFAULT_HEARTBEAT_INTERVAL = 60;
         
         mProcessJob.scheduleJob("Building Process Job", DEFAULT_HEARTBEAT_INTERVAL,
                 TASK_SEPERATION * 2, TASK_SERERATION_TIMEUNIT);
@@ -232,7 +236,7 @@ public class Globals
     }
     
     public void registerSiteToPubNub(final String siteId) {
-        Log.d("CCU","registerSiteToPubNub "+siteId);
+        Log.d("CCU","registerSiteToPubNub "+siteId.replace("@",""));
         PNConfiguration pnConfiguration = new PNConfiguration();
         pnConfiguration.setSubscribeKey("sub-c-6a55a31c-d30e-11e8-b41d-e643bd6bdd68");
         pnConfiguration.setPublishKey("pub-c-6873a2c5-ec27-4604-a235-38a3f4eed9a6");
@@ -245,7 +249,7 @@ public class Globals
         
         // create message payload using Gson
         final JsonObject messageJsonObject = new JsonObject();
-        messageJsonObject.addProperty("msg", "hello");
+        messageJsonObject.addProperty("msg", "Configuration");
     
         System.out.println("CCU Message to send: " + messageJsonObject.toString());
     
@@ -266,7 +270,7 @@ public class Globals
                 
                     if (status.getCategory() == PNStatusCategory.PNConnectedCategory){
                         Log.d("CCU", "PNConnectedCategory publish");
-                        pubnub.publish().channel(siteId).message(messageJsonObject).async(new PNCallback<PNPublishResult>() {
+                        pubnub.publish().channel(siteId.replace("@","")).message(messageJsonObject).async(new PNCallback<PNPublishResult>() {
                             @Override
                             public void onResponse(PNPublishResult result, PNStatus status) {
                                 // Check whether request successfully completed or not.
@@ -311,10 +315,23 @@ public class Globals
                 }
             
                 JsonElement receivedMessageObject = message.getMessage();
-                System.out.println("CCU PubNub Received message content: " + receivedMessageObject.toString());
+                CcuLog.d("CCU", "PubNub Received message content: " + receivedMessageObject.toString());
                 // extract desired parts of the payload, using Gson
-                String msg = message.getMessage().getAsJsonObject().get("msg").getAsString();
-                System.out.println("CCU PubNub msg content: " + msg);
+                JsonObject msgObject = message.getMessage().getAsJsonObject();
+                String cmd = msgObject.get("cmd") != null ? msgObject.get("cmd").getAsString(): "";
+                if (cmd.equals("updatePoint"))
+                {
+                    String who = msgObject.get("who").getAsString();
+                    String level = msgObject.get("level").getAsString();
+                    String val = msgObject.get("val").getAsString();
+                    String id = msgObject.get("id").getAsString();
+                    CcuLog.d("CCU", "Update point: cmd: " + cmd + " who: " + who + " level: " + level + " val: " + val + " id: " + id);
+    
+                    CCUHsApi.getInstance().getHSClient()
+                            .pointWrite(HRef.make(CCUHsApi.getInstance().getLUID(id)), (int) Double.parseDouble(val), who, HNum.make(Double.parseDouble(val)), HNum.make(0));
+                }
+                
+                
 
 
             /*
@@ -331,7 +348,7 @@ public class Globals
             }
         });
     
-        pubnub.subscribe().channels(Arrays.asList(siteId)).execute();
+        pubnub.subscribe().channels(Arrays.asList(siteId.replace("@",""))).execute();
         pubnubSubscribed = true;
     }
     

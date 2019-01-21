@@ -81,6 +81,8 @@ public class PointSyncAdapter extends EntitySyncAdapter
                     if (guid != null && guid != "")
                     {
                         CCUHsApi.getInstance().putUIDMap(pointLUIDList.get(index++), guid);
+                    } else {
+                        return false;
                     }
                 }
             }

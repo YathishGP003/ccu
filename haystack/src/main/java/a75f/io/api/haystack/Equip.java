@@ -16,6 +16,15 @@ public class Equip extends Entity
     private String siteRef;
     private String zoneRef;
     private String floorRef;
+    public void setAhuRef(String ahuRef)
+    {
+        this.ahuRef = ahuRef;
+    }
+    public String getAhuRef()
+    {
+        return ahuRef;
+    }
+    private String ahuRef;
     private String group;
     public String getProfile()
     {
@@ -83,6 +92,12 @@ public class Equip extends Entity
         private String zoneRef;
         private String floorRef;
         private String group;
+        public Builder setAhuRef(String ahuRef)
+        {
+            this.ahuRef = ahuRef;
+            return this;
+        }
+        private String ahuRef;
         public Builder setTz(String tz)
         {
             this.tz = tz;
@@ -147,6 +162,7 @@ public class Equip extends Entity
             q.group = this.group;
             q.profile = this.profile;
             q.priority = this.priority;
+            q.ahuRef = this.ahuRef;
             q.id = this.id;
             q.tz = this.tz;
             return q;
@@ -182,6 +198,10 @@ public class Equip extends Entity
                 else if(pair.getKey().equals("zoneRef"))
                 {
                     this.zoneRef = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("ahuRef"))
+                {
+                    this.ahuRef = pair.getValue().toString();
                 }
                 else if(pair.getKey().equals("profile"))
                 {

@@ -4,6 +4,7 @@ package a75f.io.logic.bo.building.system;
  * Created by samjithsadasivan on 1/8/19.
  */
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -54,10 +55,21 @@ public class DefaultSystem extends SystemProfile
                                    .addMarker("system")
                                    .setTz(siteMap.get("tz").toString())
                                    .build();
-        hayStack.addEquip(systemEquip);
+        String equipRef = hayStack.addEquip(systemEquip);
+        updateAhuRef(equipRef);
         new ControlMote(siteRef);
         L.saveCCUState();
         CCUHsApi.getInstance().syncEntityTree();
+    }
+    
+    public void updateAhuRef(String systemEquipId) {
+        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone");
+        
+        for (HashMap m : equips)
+        {
+            Equip q = new Equip.Builder().setHashMap(m).setAhuRef(systemEquipId).build();
+            CCUHsApi.getInstance().updateEquip(q, q.getId());
+        }
     }
     
     @Override

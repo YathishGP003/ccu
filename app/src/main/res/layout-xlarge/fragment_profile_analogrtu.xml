@@ -69,7 +69,7 @@
                         android:paddingRight="14dp"
                         android:textSize="@dimen/text_small_xlarge"
                         android:layout_gravity="center_vertical"
-                        android:text=" Cooling (Analog 1)" />
+                        android:text=" Cooling (Analog-out1) " />
 
                     <!--<Spinner
                     android:id="@+id/ahuAnalog1Type"
@@ -105,7 +105,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:paddingRight="14dp"
-                        android:text="  Static Pressure (Analog 2)"
+                        android:text="  Fan Speed (Analog-out2) "
                         android:textSize="@dimen/text_small_xlarge"/>
 
                     <!--<Spinner
@@ -142,7 +142,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:paddingRight="14dp"
-                        android:text=" Heating (Analog 3)"
+                        android:text=" Heating (Analog-out3)"
                         android:textSize="@dimen/text_small_xlarge"/>
 
                     <!-- <Spinner
@@ -179,7 +179,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:paddingRight="14dp"
-                        android:text="  CO2 (Analog 4)"
+                        android:text="  Outside Air (Analog-out4)"
                         android:textSize="@dimen/text_small_xlarge"/>
 
                     <!--<Spinner
@@ -237,7 +237,7 @@
                         android:layout_marginBottom="14dp"
                         android:layout_marginTop="14dp"
                         android:layout_row="0"
-                        android:text="Analog1AtMinCoolingSAT"
+                        android:text="Analog-out1 at Min Cooling"
                         android:textColor="@color/black"
                         android:textSize="@dimen/text_small_xlarge"/>
 
@@ -257,7 +257,7 @@
                         android:layout_marginBottom="14dp"
                         android:layout_marginLeft="14dp"
                         android:layout_marginTop="14dp"
-                        android:text="Analog1AtMaxCoolingSAT"
+                        android:text="Analog-out1 at Max Cooling"
                         android:textColor="@color/black"
                         android:textSize="@dimen/text_small_xlarge"
                         />
@@ -280,7 +280,7 @@
                         android:layout_marginBottom="14dp"
                         android:layout_marginTop="14dp"
                         android:layout_row="1"
-                        android:text="Analog2AtMinStaticPressure"
+                        android:text="Analog-out2 at Min Static Pressure"
                         android:textColor="@color/black"
                         android:textSize="@dimen/text_small_xlarge"/>
 
@@ -300,7 +300,7 @@
                         android:layout_marginBottom="14dp"
                         android:layout_marginLeft="14dp"
                         android:layout_marginTop="14dp"
-                        android:text="Analog2AtMaxStaticPressure"
+                        android:text="Analog-out2 at Max Static Pressure"
                         android:textColor="@color/black"
                         android:textSize="@dimen/text_small_xlarge"/>
 
@@ -320,7 +320,7 @@
                         android:layout_marginBottom="14dp"
                         android:layout_marginTop="14dp"
                         android:layout_row="2"
-                        android:text="Analog3AtMinHeating"
+                        android:text="Analog-out3 at Min Heating"
                         android:textColor="@color/black"
                         android:textSize="@dimen/text_small_xlarge"/>
 
@@ -341,7 +341,7 @@
                         android:layout_marginBottom="14dp"
                         android:layout_marginLeft="40dp"
                         android:layout_marginTop="14dp"
-                        android:text="Analog3AtMaxHeating"
+                        android:text="Analog-out3 at Max Heating"
                         android:textColor="@color/black"
                         android:textSize="@dimen/text_small_xlarge"/>
 
@@ -361,7 +361,7 @@
                         android:layout_marginBottom="14dp"
                         android:layout_marginTop="14dp"
                         android:layout_row="3"
-                        android:text="Analog4AtMinFreshAir"
+                        android:text="Analog-out4 at Min Fresh Air"
                         android:textColor="@color/black"
                         android:textSize="@dimen/text_small_xlarge"/>
 
@@ -382,7 +382,7 @@
                         android:layout_marginBottom="14dp"
                         android:layout_marginLeft="40dp"
                         android:layout_marginTop="14dp"
-                        android:text="Analog4AtMaxFreshAir"
+                        android:text="Analog-out4 at Max Fresh Air"
                         android:textColor="@color/black"
                         android:textSize="@dimen/text_small_xlarge"/>
 

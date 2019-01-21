@@ -82,10 +82,8 @@ public class TunerFragment extends Fragment
                 
                 String tunerName = expandableListDetail.get(expandableListTitle.get(groupPosition)).get(
                                                 childPosition);
-                Toast.makeText(getActivity(),"Saved "+
-                        expandableListTitle.get(groupPosition) + " -> " + tunerName, Toast.LENGTH_SHORT).show();
-    
-    
+                Toast.makeText(getActivity(), expandableListTitle.get(groupPosition) + " -> " + tunerName, Toast.LENGTH_SHORT).show();
+                
                 final EditText taskEditText = new EditText(getActivity());
                 String tunerVal = String.valueOf(getTuner(tunerMap.get(tunerName)));
                 AlertDialog dialog = new AlertDialog.Builder(getActivity())

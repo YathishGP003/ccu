@@ -1,5 +1,6 @@
 package a75f.io.renatus;
 
+import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -84,6 +85,15 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 	    } else {
 		    
 		    new AsyncTask<Void, Void, Void>() {
+			
+			    ProgressDialog progressDlg = new ProgressDialog(getActivity());
+			    @Override
+			    protected void onPreExecute() {
+				    progressDlg.setMessage("Loading System Profile");
+				    progressDlg.show();
+				    super.onPreExecute();
+			    }
+			    
 			    @Override
 			    protected Void doInBackground( final Void ... params ) {
 			    	if (systemProfile != null) {
@@ -97,6 +107,7 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 			    @Override
 			    protected void onPostExecute( final Void result ) {
 				    setupAnalogLimitSelectors();
+				    progressDlg.dismiss();
 			    }
 		    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
 	    }

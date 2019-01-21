@@ -45,6 +45,8 @@ public class ScheduleProcessJob extends BaseJob {
             if(equip != null) {
                 Log.d("CCU","ScheduleProcessJob -> 4");
                 Schedule equipSchedule = getScheduleForEquip(equip);
+
+                
                 Log.d("CCU","ScheduleProcessJob -> 5");
                 if (equipSchedule != null) {
                     writePointsForEquip(equip, equipSchedule);

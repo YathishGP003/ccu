@@ -51,20 +51,23 @@ public class Schedule extends Entity
     getCurDay
     getCurHour
     getCurMinute
-     */
-
-    private String getCurrentValueForMarker(String marker)
+    */
+    private Double getCurrentValueForMarker(String marker)
     {
         for(Days day : getDays())
         {
+            if(marker.equals("cooling") && !day.isCooling) continue;
+            if(marker.equals("heating") && !day.isHeating) continue;
             if(day.mDay != getCurDay()) continue;
+            if(day.getSthh() != -1 || getCurHour() < day.getSthh()) continue;
+            if(day.getEthh() != -1 || getCurHour() > day.getEthh()) continue;
+            if(day.getStmm() != -1 || getCurHour() < day.getStmm()) continue;
+            if(day.getEtmm() != -1 || getCurHour() > day.getEtmm()) continue;
 
-
+            return day.mVal;
         }
 
-
-
-
+        return null;
     }
 
     /*{stdt:2018-12-18T10:13:55.185-06:00 Chicago
@@ -196,7 +199,6 @@ public class Schedule extends Entity
             s.mMarkers = this.mMarkers;
             s.mIsVacation = this.mIsVacation;
             s.mDis = this.mDis;
-            s.mMarkers = this.mMarkers;
             s.mKind = this.mKind;
             s.mSiteId = this.mSiteId;
             s.mUnit = this.mUnit;
@@ -331,6 +333,7 @@ public class Schedule extends Entity
             Days days = new Days();
 
             days.isCooling = hDict.has("cooling");
+
             days.isHeating = hDict.has("heating");
             days.mDay = hDict.getInt("day");
             days.mEthh = hDict.has("ethh") ? hDict.getInt("ethh") : -1;

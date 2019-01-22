@@ -125,7 +125,8 @@ public class HisSyncHandler
             for (Map m : points)
             {
                 String pointID = m.get("id").toString();
-                if (CCUHsApi.getInstance().getGUID(pointID) == null) {
+                String pointGUID = CCUHsApi.getInstance().getGUID(pointID);
+                if (pointGUID == null) {
                     Log.d("CCU","Skip hisSync; point does not have GUID "+pointID);
                     HDict point = hayStack.hsClient.readById(HRef.copy(pointID));
                     System.out.println(point);
@@ -138,7 +139,7 @@ public class HisSyncHandler
                 }
     
                 HisItem sItem = hisItems.get(hisItems.size()-1);//TODO - Writing just the recent his val?
-                tsData.put( CCUHsApi.getInstance().getGUID(m.get("id").toString()).toString().replace("@",""), String.valueOf(sItem.getVal()));
+                tsData.put( pointGUID.replace("@",""), String.valueOf(sItem.getVal()));
     
                 /*for (HisItem item: hisItems)
                 {

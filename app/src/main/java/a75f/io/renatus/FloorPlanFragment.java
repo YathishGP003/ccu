@@ -347,7 +347,7 @@ public class FloorPlanFragment extends Fragment
                                      .setDisplayName(addFloorEdit.getText().toString())
                                      .setSiteRef(siteMap.get("id").toString())
                                      .build();
-			CCUHsApi.getInstance().addFloor(hsFloor);
+			hsFloor.setId(CCUHsApi.getInstance().addFloor(hsFloor));
 			floorList.add(hsFloor);
 			Collections.sort(floorList, new FloorComparator());
 			updateFloors();
@@ -428,7 +428,7 @@ public class FloorPlanFragment extends Fragment
                                    .setFloorRef(floor.getId())
                                    .setSiteRef(siteMap.get("id").toString())
                                    .build();
-			CCUHsApi.getInstance().addZone(hsZone);
+			hsZone.setId(CCUHsApi.getInstance().addZone(hsZone));
 			roomList.add(hsZone);
 			Collections.sort(roomList, new ZoneComparator());
 			updateRooms(roomList);

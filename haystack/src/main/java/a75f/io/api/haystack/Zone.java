@@ -15,6 +15,10 @@ public class Zone extends Entity
     private ArrayList<String> markers;
     private String floorRef;
     private String siteRef;
+    public void setId(String id)
+    {
+        this.id = id;
+    }
     private String id;
     public void setFloorRef(String floorRef)
     {

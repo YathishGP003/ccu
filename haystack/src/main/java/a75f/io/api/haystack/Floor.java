@@ -14,6 +14,10 @@ public class Floor extends Entity
     private String            displayName;
     private ArrayList<String> markers;
     private String siteRef;
+    public void setId(String id)
+    {
+        this.id = id;
+    }
     private String id;
     public void setSiteRef(String siteRef)
     {

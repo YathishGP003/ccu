@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +23,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -71,6 +74,9 @@ public class FloorPlanFragment extends Fragment
 	@BindView(R.id.moduleList)
 	ListView    moduleListView;
 	Short[] smartNodeAddresses;
+	
+	ArrayList<Floor> floorList = new ArrayList();
+	ArrayList<Zone> roomList = new ArrayList();
 	private final BroadcastReceiver mPairingReceiver = new BroadcastReceiver()
 	{
 		@Override
@@ -101,13 +107,13 @@ public class FloorPlanFragment extends Fragment
 	
 	private Zone getSelectedZone()
 	{
-		return HSUtil.getZones(getSelectedFloor().getId()).get(mRoomListAdapter.getSelectedPostion());
+		return roomList.get(mRoomListAdapter.getSelectedPostion());
 	}
 	
 	
 	private Floor getSelectedFloor()
 	{
-		return HSUtil.getFloors().get(mFloorListAdapter.getSelectedPostion());
+		return floorList.get(mFloorListAdapter.getSelectedPostion());
 	}
 	
 	
@@ -170,15 +176,16 @@ public class FloorPlanFragment extends Fragment
 	
 	public void refreshScreen()
 	{
-		
+		floorList = HSUtil.getFloors();
+		Collections.sort(floorList, new FloorComparator());
 		updateFloors();
 	}
 	
 	
 	private void updateFloors()
 	{
-		mFloorListAdapter =
-				new DataArrayAdapter<>(this.getActivity(), R.layout.listviewitem, HSUtil.getFloors());
+		
+		mFloorListAdapter = new DataArrayAdapter<>(this.getActivity(), R.layout.listviewitem, floorList);
 		floorListView.setAdapter(mFloorListAdapter);
 		enableFloorButton();
 		if (mFloorListAdapter.getCount() > 0)
@@ -204,7 +211,9 @@ public class FloorPlanFragment extends Fragment
 	private void selectFloor(int position)
 	{
 		mFloorListAdapter.setSelectedItem(position);
-		updateRooms(HSUtil.getZones(getSelectedFloor().getId()));
+		roomList = HSUtil.getZones(getSelectedFloor().getId());
+		Collections.sort(roomList, new ZoneComparator());
+		updateRooms(roomList);
 		
 	}
 	
@@ -245,9 +254,6 @@ public class FloorPlanFragment extends Fragment
 	private void selectRoom(int position)
 	{
 		mRoomListAdapter.setSelectedItem(position);
-		//ArrayList<Floor> floors = CCUHsApi.getInstance().getFloors();
-		//Floor floor = floors.get(mFloorListAdapter.getSelectedPostion());
-		//Zone selectedZone = CCUHsApi.getInstance().getZones(floor.getId()).get(mRoomListAdapter.getSelectedPostion());
 		updateModules(getSelectedZone());
 	}
 	
@@ -266,14 +272,17 @@ public class FloorPlanFragment extends Fragment
 	
 	private void updateModules(Zone zone)
 	{
+		Log.d("FloorPlan","Zone Selected "+zone.getDisplayName());
 		mModuleListAdapter =
 				new DataArrayAdapter<>(getActivity(), R.layout.listviewitem, createAddressList(
 						HSUtil.getEquips(zone.getId())));
+		
 		moduleListView.setAdapter(mModuleListAdapter);
 	}
 	
 	private ArrayList<String> createAddressList(ArrayList<Equip> equips)
 	{
+		Collections.sort(equips, new ModuleComparator());
 		ArrayList<String> arrayList = new ArrayList<>();
 		 
 		for(Equip e : equips)
@@ -324,8 +333,14 @@ public class FloorPlanFragment extends Fragment
 	{
 		if (actionId == EditorInfo.IME_ACTION_DONE)
 		{
-			//int fID = ccu().getFloors().size();
-			//ccu().getFloors().add(new Floor(fID, "", addFloorEdit.getText().toString()));
+			for (Floor f : HSUtil.getFloors() )
+			{
+				if (f.getDisplayName().equals(addFloorEdit.getText().toString()))
+					{
+						Toast.makeText(getActivity().getApplicationContext(), "Floor already exists : " + addRoomEdit.getText(), Toast.LENGTH_SHORT).show();
+						return true;
+					}
+			}
 			
 			HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
 			Floor hsFloor = new Floor.Builder()
@@ -333,6 +348,8 @@ public class FloorPlanFragment extends Fragment
                                      .setSiteRef(siteMap.get("id").toString())
                                      .build();
 			CCUHsApi.getInstance().addFloor(hsFloor);
+			floorList.add(hsFloor);
+			Collections.sort(floorList, new FloorComparator());
 			updateFloors();
 			selectFloor(HSUtil.getFloors().size()-1);
 			
@@ -345,7 +362,6 @@ public class FloorPlanFragment extends Fragment
 		}
 		return false;
 	}
-	
 	
 	@OnFocusChange(R.id.addFloorEdit)
 	public void handleFloorFocus(View v, boolean hasFocus)
@@ -391,17 +407,21 @@ public class FloorPlanFragment extends Fragment
 	{
 		if (actionId == EditorInfo.IME_ACTION_DONE)
 		{
+			for (Floor f : HSUtil.getFloors() )
+			{
+				for (Zone z : HSUtil.getZones(f.getId()))
+				{
+					if (z.getDisplayName().equals(addRoomEdit.getText().toString()))
+					{
+						Toast.makeText(getActivity().getApplicationContext(), "Zone already exists : " + addRoomEdit.getText(), Toast.LENGTH_SHORT).show();
+						return true;
+					}
+				}
+			}
+			
 			Toast.makeText(getActivity().getApplicationContext(),
 					"Room " + addRoomEdit.getText() + " added", Toast.LENGTH_SHORT).show();
-			//Floor f = L.ccu().getFloors().get(mFloorListAdapter.getSelectedPostion());
-			//ArrayList<Zone> mRoomList =f.mZoneList;
-			//mRoomList.add(new Zone(addRoomEdit.getText().toString(), f));
-			
-			ArrayList<Floor> floors = HSUtil.getFloors();
-			Floor floor = floors.get(mFloorListAdapter.getSelectedPostion());
-			
-			
-			
+			Floor floor = floorList.get(mFloorListAdapter.getSelectedPostion());
 			HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
 			Zone hsZone = new Zone.Builder()
                                    .setDisplayName(addRoomEdit.getText().toString())
@@ -409,9 +429,10 @@ public class FloorPlanFragment extends Fragment
                                    .setSiteRef(siteMap.get("id").toString())
                                    .build();
 			CCUHsApi.getInstance().addZone(hsZone);
-			ArrayList<Zone> mRoomList = HSUtil.getZones(floor.getId());
-			updateRooms(mRoomList);
-			selectRoom(mRoomList.size() - 1);
+			roomList.add(hsZone);
+			Collections.sort(roomList, new ZoneComparator());
+			updateRooms(roomList);
+			selectRoom(roomList.indexOf(hsZone));
 			InputMethodManager mgr = (InputMethodManager) getActivity()
 					                                              .getSystemService(Context.INPUT_METHOD_SERVICE);
 			mgr.hideSoftInputFromWindow(addRoomEdit.getWindowToken(), 0);
@@ -497,5 +518,28 @@ public class FloorPlanFragment extends Fragment
 		}
 		
 		
+	}
+	
+	class FloorComparator implements Comparator<Floor>
+	{
+		@Override
+		public int compare(Floor a, Floor b) {
+			return a.getDisplayName().compareToIgnoreCase(b.getDisplayName());
+		}
+	}
+	
+	class ZoneComparator implements Comparator<Zone>
+	{
+		@Override
+		public int compare(Zone a, Zone b) {
+			return a.getDisplayName().compareToIgnoreCase(b.getDisplayName());
+		}
+	}
+	class ModuleComparator implements Comparator<Equip>
+	{
+		@Override
+		public int compare(Equip a, Equip b) {
+			return a.getGroup().compareToIgnoreCase(b.getGroup());
+		}
 	}
 }

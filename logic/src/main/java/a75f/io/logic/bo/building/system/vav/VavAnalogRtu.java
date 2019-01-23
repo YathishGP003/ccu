@@ -402,7 +402,7 @@ public class VavAnalogRtu extends VavSystemProfile
                                              .setTz(tz)
                                              .build();
         String analog1AtMinCoolingSatId = hayStack.addPoint(analog1AtMinCoolingSat);
-        hayStack.writeDefaultValById(analog1AtMinCoolingSatId, 0.0 );
+        hayStack.writeDefaultValById(analog1AtMinCoolingSatId, 2.0 );
     
         Point analog1AtMaxCoolingSat = new Point.Builder()
                                                .setDisplayName(equipDis+"-"+"analog1AtMaxCoolingSat")
@@ -426,7 +426,7 @@ public class VavAnalogRtu extends VavSystemProfile
                                                .setTz(tz)
                                                .build();
         String analog2AtMinStaticPressureId = hayStack.addPoint(analog2AtMinStaticPressure);
-        hayStack.writeDefaultValById(analog2AtMinStaticPressureId, 0.0 );
+        hayStack.writeDefaultValById(analog2AtMinStaticPressureId, 2.0 );
     
         Point analog2AtMaxStaticPressure = new Point.Builder()
                                                .setDisplayName(equipDis+"-"+"analog2AtMaxStaticPressure")
@@ -450,7 +450,7 @@ public class VavAnalogRtu extends VavSystemProfile
                                                    .setTz(tz)
                                                    .build();
         String analog3AtMinHeatingId = hayStack.addPoint(analog3AtMinHeating);
-        hayStack.writeDefaultValById(analog3AtMinHeatingId, 0.0 );
+        hayStack.writeDefaultValById(analog3AtMinHeatingId, 2.0 );
     
         Point analog3AtMaxHeating = new Point.Builder()
                                                    .setDisplayName(equipDis+"-"+"analog3AtMaxHeating")
@@ -474,7 +474,7 @@ public class VavAnalogRtu extends VavSystemProfile
                                                    .setTz(tz)
                                                    .build();
         String analog4AtMinCO2Id = hayStack.addPoint(analog4AtMinCO2);
-        hayStack.writeDefaultValById(analog4AtMinCO2Id, 0.0 );
+        hayStack.writeDefaultValById(analog4AtMinCO2Id, 2.0 );
     
         Point analog4AtMaxCO2 = new Point.Builder()
                                                    .setDisplayName(equipDis+"-"+"analog4AtMaxCO2")

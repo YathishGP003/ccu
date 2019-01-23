@@ -29,6 +29,7 @@ public class SmartNode
     public RawPoint relay1;
     public RawPoint relay2;
     public RawPoint currentTemp;
+    public RawPoint humidity;
     
     public String deviceRef;
     public String siteRef;
@@ -159,9 +160,20 @@ public class SmartNode
                          .setZoneRef(zoneRef)
                          .setFloorRef(floorRef)
                          .addMarker("sensor").addMarker("his")
-                         .setPort(Port.RTH.toString())
+                         .setPort(Port.SENSOR_RT.toString())
                          .setTz(tz)
                          .build();
+    
+        humidity = new RawPoint.Builder()
+                              .setDisplayName("humidity-"+smartNodeAddress)
+                              .setDeviceRef(deviceRef)
+                              .setSiteRef(siteRef)
+                              .setZoneRef(zoneRef)
+                              .setFloorRef(floorRef)
+                              .addMarker("sensor").addMarker("his")
+                              .setPort(Port.SENSOR_RH.toString())
+                              .setTz(tz)
+                              .build();
     }
     
     public void addPointsToDb() {

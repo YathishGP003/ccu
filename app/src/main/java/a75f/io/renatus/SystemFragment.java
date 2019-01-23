@@ -10,7 +10,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.SeekBar;
@@ -76,7 +75,9 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		targetMinInsideHumidity = view.findViewById(R.id.targetMinInsideHumidity);
 		
 		cbHumidifier = view.findViewById(R.id.cbHumidification);
+		cbHumidifier.setVisibility(View.INVISIBLE);
 		cbDehumidifier = view.findViewById(R.id.cbDehumidification);
+		cbDehumidifier.setVisibility(View.INVISIBLE);
 		
 		if (L.ccu().systemProfile instanceof DefaultSystem) {
 			systemOff.setEnabled(false);
@@ -179,7 +180,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		targetMinInsideHumidity.setOnItemSelectedListener(this);
 		targetMaxInsideHumidity.setOnItemSelectedListener(this);
 		
-		cbHumidifier.setChecked(TunerUtil.readSystemUserIntentVal("enable and humidifier") > 0);
+		/*cbHumidifier.setChecked(TunerUtil.readSystemUserIntentVal("enable and humidifier") > 0);
 		cbHumidifier.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
 		{
 			@Override
@@ -197,7 +198,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			{
 				setUserIntentBackground("enable and dehumidifier", b == true ? 1 : 0);
 			}
-		});
+		});*/
 	}
 	
 	@Override

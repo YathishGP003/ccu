@@ -66,10 +66,10 @@
                         android:id="@+id/ahuAnalog1Cb"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:paddingRight="14dp"
-                        android:textSize="@dimen/text_small_xlarge"
                         android:layout_gravity="center_vertical"
-                        android:text=" Cooling (Analog-out1) " />
+                        android:paddingRight="14dp"
+                        android:text=" Cooling (Analog-out1) "
+                        android:textSize="@dimen/text_small_xlarge"/>
 
                     <!--<Spinner
                     android:id="@+id/ahuAnalog1Type"
@@ -157,7 +157,8 @@
                         android:text="   Selector List  item touch  "
                         android:textSize="@dimen/text_medium_xlarge"
                         android:visibility="invisible"/>
--->
+                    -->
+
                     <Spinner
                         android:id="@+id/ahuAnalog3Test"
                         android:layout_width="wrap_content"
@@ -197,6 +198,81 @@
 
                     <Spinner
                         android:id="@+id/ahuAnalog4Test"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"/>
+
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/ahuRelay3Cb"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp"
+                    android:layout_marginTop="15dp">
+
+                    <CheckBox
+                        android:id="@+id/relay3Cb"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:paddingRight="14dp"
+                        android:text="  Occupancy Signal (Relay-3)"
+                        android:textSize="@dimen/text_small_xlarge"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="   Selector List  item touch  "
+                        android:textSize="@dimen/text_medium_xlarge"
+                        android:visibility="invisible"/>
+
+                    <ToggleButton
+                        android:id="@+id/relay3Test"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"/>
+
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/ahuRelay7Cb"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp"
+                    android:layout_marginTop="15dp">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+
+                    <CheckBox
+                        android:id="@+id/relay7Cb"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:paddingRight="14dp"
+                        android:text="  Humidifier Signal (Relay-7)"
+                        android:textSize="@dimen/text_small_xlarge"/>
+
+                    <Spinner
+                        android:id="@+id/relay7Spinner"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="left"/>
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="   Selector List  item touch  "
+                        android:textSize="@dimen/text_medium_xlarge"
+                        android:visibility="invisible"/>
+
+                    <ToggleButton
+                        android:id="@+id/relay7Test"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="right"/>

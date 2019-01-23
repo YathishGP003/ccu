@@ -50,6 +50,7 @@ public class VAVLogicalMap
     double integralGain = 0.5;
     
     double      currentTemp;
+    double      humidity;
     double desiredTemp;
     double supplyAirTemp;
     double dischargeTemp;
@@ -273,6 +274,19 @@ public class VAVLogicalMap
                                   .build();
         String ctID = CCUHsApi.getInstance().addPoint(currentTemp);
     
+        Point humidity = new Point.Builder()
+                                    .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-humidity")
+                                    .setEquipRef(equipRef)
+                                    .setSiteRef(siteRef)
+                                    .setZoneRef(room)
+                                    .setFloorRef(floor)
+                                    .addMarker("zone")
+                                    .addMarker("air").addMarker("humidity").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
+                                    .setGroup(String.valueOf(nodeAddr))
+                                    .setTz(tz)
+                                    .build();
+        String humidityId = CCUHsApi.getInstance().addPoint(humidity);
+    
         Point desiredTemp = new Point.Builder()
                                     .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-desiredTemp")
                                     .setEquipRef(equipRef)
@@ -392,6 +406,8 @@ public class VAVLogicalMap
         //device.analog2Out.setEnabled(true);
         device.currentTemp.setPointRef(ctID);
         device.currentTemp.setEnabled(true);
+        device.humidity.setPointRef(humidityId);
+        device.humidity.setEnabled(true);
         for (Output op : config.getOutputs()) {
             switch (op.getPort()) {
                 case ANALOG_OUT_ONE:
@@ -605,19 +621,19 @@ public class VAVLogicalMap
     }
     
     public void setConfigNumVal(String tags,double val) {
-        CCUHsApi.getInstance().writeDefaultVal("point and zone and config and vav and "+tags, val);
+        CCUHsApi.getInstance().writeDefaultVal("point and zone and config and vav and "+tags+" and group == \""+nodeAddr+"\"", val);
     }
     
     public double getConfigNumVal(String tags) {
-        return CCUHsApi.getInstance().readDefaultVal("point and zone and config and vav and "+tags);
+        return CCUHsApi.getInstance().readDefaultVal("point and zone and config and vav and "+tags+" and group == \""+nodeAddr+"\"");
     }
     
     public void setConfigStrVal(String tags,String val) {
-        CCUHsApi.getInstance().writeDefaultVal("point and zone and config and vav and "+tags, val);
+        CCUHsApi.getInstance().writeDefaultVal("point and zone and config and vav and "+tags+" and group == \""+nodeAddr+"\"", val);
     }
     
     public String getConfigStrVal(String tags) {
-        return CCUHsApi.getInstance().readDefaultStrVal("point and zone and config and vav and "+tags);
+        return CCUHsApi.getInstance().readDefaultStrVal("point and zone and config and vav and "+tags+" and group == \""+nodeAddr+"\"");
     }
     
     
@@ -685,7 +701,7 @@ public class VAVLogicalMap
         config.enableCO2Control = getConfigNumVal("enable and co2") > 0 ? true : false ;
         config.enableIAQControl = getConfigNumVal("enable and iaq") > 0 ? true : false ;
         config.setPriority(ZonePriority.values()[(int)getConfigNumVal("priority")]);
-        config.temperaturOffset = (int)getConfigNumVal("temperature and offset");
+        config.temperaturOffset = getConfigNumVal("temperature and offset");
         
         config.setNodeType(NodeType.SMART_NODE);//TODO - revisit
         
@@ -738,6 +754,17 @@ public class VAVLogicalMap
     {
         CCUHsApi.getInstance().writeHisValByQuery("point and air and temp and sensor and current and group == \""+nodeAddr+"\"", roomTemp);
         this.currentTemp = roomTemp;
+    }
+    
+    public double getHumidity()
+    {
+        humidity = CCUHsApi.getInstance().readHisValByQuery("point and air and humidity and sensor and current and group == \""+nodeAddr+"\"");
+        return humidity;
+    }
+    public void setHumidity(double humidity)
+    {
+        CCUHsApi.getInstance().writeHisValByQuery("point and air and humidity and sensor and current and group == \""+nodeAddr+"\"", humidity);
+        this.humidity = humidity;
     }
     
     public double getDesiredTemp()

@@ -59,7 +59,7 @@ public class Globals
 {
 
     private static final int      NUMBER_OF_CYCLICAL_TASKS_RENATUS_REQUIRES = 10;
-    private static final int      TASK_SEPERATION                           = 15;
+    private static final int      TASK_SEPERATION                           = 45;
     private static final TimeUnit TASK_SERERATION_TIMEUNIT                  = TimeUnit.SECONDS;
     private static Globals globals;
     //HeartBeatJob mHeartBeatJob;
@@ -151,8 +151,8 @@ public class Globals
         //5 seconds after application initializes start heart beat
         int DEFAULT_HEARTBEAT_INTERVAL = 60;
         
-        mProcessJob.scheduleJob("Building Process Job", DEFAULT_HEARTBEAT_INTERVAL,
-                TASK_SEPERATION * 2, TASK_SERERATION_TIMEUNIT);
+        mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL,
+                TASK_SEPERATION , TASK_SERERATION_TIMEUNIT);
     
         isSimulation = getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                                                     .getBoolean("biskit_mode", false);

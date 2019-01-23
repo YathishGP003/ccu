@@ -25,5 +25,5 @@ public class VavProfileConfiguration extends BaseProfileConfiguration
     public int minDamperHeating;
     public int maxDamperHeating;
     
-    public int temperaturOffset;
+    public double temperaturOffset;
 }

@@ -188,6 +188,53 @@ public class VavAnalogRtu extends VavSystemProfile
             ControlMote.setAnalogOut("analog4", signal);
         }
         
+        if (getConfigVal("relay3 and output and enabled") > 0)
+        {
+            //TODO - TEMP
+            boolean occupancy = true;
+            double staticPressuremOp = getStaticPressure() - SystemConstants.SP_CONFIG_MIN;
+            signal = (occupancy || staticPressuremOp > 0) ? 1 : 0;
+            setCmdSignal("occupancy",signal * 100);
+            ControlMote.setRelayState("relay3", signal );
+            
+        }
+        //TODO- TEMP
+        if (getConfigVal("relay7 and output and enabled") > 0)
+        {
+            double humidity = 0;
+            double targetMinHumidity = TunerUtil.readSystemUserIntentVal("target and min and inside and humidity");
+            double targetMaxHumidity = TunerUtil.readSystemUserIntentVal("target and max and inside and humidity");
+    
+            boolean humidifier = getConfigVal("humidifier and type") == 0;
+            
+            double humidityHysteresis = TunerUtil.readTunerValByQuery("humidity and hysteresis");
+    
+    
+            if (humidifier) {
+                //Humidification
+                signal = (int)ControlMote.getRelayState("relay7");
+                if (humidity < targetMinHumidity) {
+                    signal = 1;
+                } else if (humidity > (targetMinHumidity + humidityHysteresis)) {
+                    signal = 0;
+                }
+                setCmdSignal("humidifier",signal * 100);
+            } else {
+                //Dehumidification
+                signal = (int)ControlMote.getRelayState("relay7");
+                if (humidity > targetMaxHumidity) {
+                    signal = 1;
+                } else if (humidity < (targetMaxHumidity - humidityHysteresis)) {
+                    signal = 0;
+                }
+                setCmdSignal("dehumidifier",signal * 100);
+            }
+            
+        
+            ControlMote.setRelayState("relay7", signal);
+        
+        }
+        
     }
     
     public void addSystemEquip() {
@@ -392,6 +439,28 @@ public class VavAnalogRtu extends VavSystemProfile
         String analog4OutputEnabledId = hayStack.addPoint(analog4OutputEnabled);
         hayStack.writeDefaultValById(analog4OutputEnabledId, 0.0 );
     
+        Point relay3OutputEnabled = new Point.Builder()
+                                             .setDisplayName(equipDis+"-"+"relay3OutputEnabled")
+                                             .setSiteRef(siteRef)
+                                             .setEquipRef(equipref)
+                                             .addMarker("system").addMarker("config").addMarker("relay3")
+                                             .addMarker("output").addMarker("enabled").addMarker("writable")
+                                             .setTz(tz)
+                                             .build();
+        String relay3OutputEnabledId = hayStack.addPoint(relay3OutputEnabled);
+        hayStack.writeDefaultValById(relay3OutputEnabledId, 0.0 );
+    
+        Point relay7OutputEnabled = new Point.Builder()
+                                            .setDisplayName(equipDis+"-"+"relay7OutputEnabled")
+                                            .setSiteRef(siteRef)
+                                            .setEquipRef(equipref)
+                                            .addMarker("system").addMarker("config").addMarker("relay7")
+                                            .addMarker("output").addMarker("enabled").addMarker("writable")
+                                            .setTz(tz)
+                                            .build();
+        String relay7OutputEnabledId = hayStack.addPoint(relay7OutputEnabled);
+        hayStack.writeDefaultValById(relay7OutputEnabledId, 0.0 );
+    
         Point analog1AtMinCoolingSat = new Point.Builder()
                                              .setDisplayName(equipDis+"-"+"analog1AtMinCoolingSat")
                                              .setSiteRef(siteRef)
@@ -488,10 +557,23 @@ public class VavAnalogRtu extends VavSystemProfile
         String analog4AtMaxCO2Id = hayStack.addPoint(analog4AtMaxCO2);
         hayStack.writeDefaultValById(analog4AtMaxCO2Id, 10.0 );
     
+        Point humidifierType = new Point.Builder()
+                                        .setDisplayName(equipDis+"-"+"humidifierType")
+                                        .setSiteRef(siteRef)
+                                        .setEquipRef(equipref)
+                                        .addMarker("system").addMarker("config").addMarker("relay7")
+                                        .addMarker("humidifier").addMarker("type").addMarker("writable")
+                                        .setUnit("V")
+                                        .setTz(tz)
+                                        .build();
+        String humidifierTypeId = hayStack.addPoint(humidifierType);
+        hayStack.writeDefaultValById(humidifierTypeId, 0.0 );
+    
     }
     
     public double getConfigVal(String tags) {
-        
+    
+        //return CCUHsApi.getInstance().readDefaultVal("point and system and config and "+tags);
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap cdb = hayStack.read("point and system and config and "+tags);
     
@@ -512,7 +594,7 @@ public class VavAnalogRtu extends VavSystemProfile
         CCUHsApi.getInstance().writeDefaultVal("point and system and config and "+tags, val);
     }
     
-    public double getConfigVal(String tags, int level) {
+    /*public double getConfigVal(String tags, int level) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap cdb = hayStack.read("point and system and config and "+tags);
     
@@ -537,7 +619,7 @@ public class VavAnalogRtu extends VavSystemProfile
             throw new IllegalArgumentException();
         }
         hayStack.writePoint(id, level, "ccu", val, 0);
-    }
+    }*/
     
     public double getConfigEnabled(String config) {
         return CCUHsApi.getInstance().readDefaultVal("point and system and config and output and enabled and "+config);

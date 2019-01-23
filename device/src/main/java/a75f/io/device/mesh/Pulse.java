@@ -8,6 +8,9 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
+import a75f.io.device.serial.SmartNodeSensorReading_t;
+import a75f.io.logic.bo.building.SensorType;
+import a75f.io.logic.bo.building.definitions.Port;
 
 import static a75f.io.device.DeviceConstants.TAG;
 
@@ -32,37 +35,45 @@ public class Pulse
 				}
 				HashMap logPoint = hayStack.read("point and id=="+phyPoint.get("pointRef"));
 				double val;
-				switch (phyPoint.get("port").toString()){
-					case "RTH":
+				switch (Port.valueOf(phyPoint.get("port").toString())){
+					case SENSOR_RT:
 						val = smartNodeRegularUpdateMessage_t.update.roomTemperature.get();
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						hayStack.writeHisValById(logPoint.get("id").toString(), getRoomTempConversion(val));
 						Log.d(TAG,"regularSmartNodeUpdate : roomTemp "+getRoomTempConversion(val));
 						break;
-					case "ANALOG_IN_ONE":
+					case ANALOG_IN_ONE:
 						val = smartNodeRegularUpdateMessage_t.update.externalAnalogVoltageInput1.get();
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						hayStack.writeHisValById(logPoint.get("id").toString(), getAnalogConversion(val));
 						Log.d(TAG,"regularSmartNodeUpdate : analog1In "+getAnalogConversion(val));
 						break;
-					case "ANALOG_IN_TWO":
+					case ANALOG_IN_TWO:
 						val = smartNodeRegularUpdateMessage_t.update.externalAnalogVoltageInput1.get();
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						hayStack.writeHisValById(logPoint.get("id").toString(), getAnalogConversion(val));
 						Log.d(TAG,"regularSmartNodeUpdate : analog2In "+getAnalogConversion(val));
 						break;
-					case "TH1_IN":
+					case TH1_IN:
 						val = smartNodeRegularUpdateMessage_t.update.externalThermistorInput1.get();
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						hayStack.writeHisValById(logPoint.get("id").toString(), ThermistorUtil.getThermistorValueToTemp(val * 10 ));
 						Log.d(TAG,"regularSmartNodeUpdate : Thermistor1 "+ThermistorUtil.getThermistorValueToTemp(val * 10 ));
 						break;
-					case "TH2_IN":
+					case TH2_IN:
 						val = smartNodeRegularUpdateMessage_t.update.externalThermistorInput2.get();
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						hayStack.writeHisValById(logPoint.get("id").toString(), ThermistorUtil.getThermistorValueToTemp(val * 10));
 						Log.d(TAG,"regularSmartNodeUpdate : Thermistor2 "+ThermistorUtil.getThermistorValueToTemp(val * 10));
 						break;
+					case SENSOR_RH:
+						SmartNodeSensorReading_t[] sensorReadings = smartNodeRegularUpdateMessage_t.update.sensorReadings;
+						val = sensorReadings[SensorType.HUMIDITY.ordinal()].sensorData.get();
+						
+						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+						hayStack.writeHisValById(logPoint.get("id").toString(), getHumidityConversion(val));
+						Log.d(TAG,"regularSmartNodeUpdate : Humidity "+getHumidityConversion(val));
+					
 				}
 			}
 			
@@ -71,6 +82,9 @@ public class Pulse
 	
 	public static Double getRoomTempConversion(Double temp) {
 		return temp/10.0;
+	}
+	public static Double getHumidityConversion(Double h) {
+		return h/10.0;
 	}
 	public static Double getThermistorConversion(Double val) {
 		return val/100.0;

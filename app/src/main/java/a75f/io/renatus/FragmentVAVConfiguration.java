@@ -257,7 +257,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         temperatureOffset.setDisplayedValues(nums);
         temperatureOffset.setMinValue(0);
         temperatureOffset.setMaxValue(TEMP_OFFSET_LIMIT * 2);
-        //temperatureOffset.setValue(mFSVData.getAttachedDamper().getTemperatureOffset() + TEMP_OFFSET_LIMIT);
+        temperatureOffset.setValue(TEMP_OFFSET_LIMIT);
         temperatureOffset.setWrapSelectorWheel(false);
     
         maxCoolingDamperPos = view.findViewById(R.id.maxDamperPos);
@@ -363,7 +363,8 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
             enableCO2Control.setChecked(mProfileConfig.enableCO2Control);
             enableIAQControl.setChecked(mProfileConfig.enableIAQControl);
             zonePriority.setSelection(mProfileConfig.getPriority().ordinal());
-            temperatureOffset.setValue(mProfileConfig.temperaturOffset);
+            int offsetIndex = (int)mProfileConfig.temperaturOffset+TEMP_OFFSET_LIMIT;
+            temperatureOffset.setValue(offsetIndex);
             minCoolingDamperPos.setValue(mProfileConfig.minDamperCooling);
             maxCoolingDamperPos.setValue(mProfileConfig.maxDamperCooling);
             minHeatingDamperPos.setValue(mProfileConfig.minDamperHeating);
@@ -455,7 +456,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         vavConfig.maxDamperCooling = (maxCoolingDamperPos.getValue());
         vavConfig.minDamperHeating = (minHeatingDamperPos.getValue());
         vavConfig.maxDamperHeating = (maxHeatingDamperPos.getValue());
-        vavConfig.temperaturOffset = temperatureOffset.getValue();
+        vavConfig.temperaturOffset = temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
     
         Output analog1Op = new Output();
         analog1Op.setAddress(mSmartNodeAddress);

@@ -109,7 +109,7 @@ public abstract class UtilityApplication extends Application
     
         deviceUpdateJob = new DeviceUpdateJob();
         deviceUpdateJob.scheduleJob("DeviceUpdateJob", 60,
-                5 * 2, TimeUnit.SECONDS);
+                15, TimeUnit.SECONDS);
     }
 
 

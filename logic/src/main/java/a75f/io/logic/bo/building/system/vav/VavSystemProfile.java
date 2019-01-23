@@ -121,7 +121,7 @@ public abstract class VavSystemProfile extends SystemProfile
         String targetMinInsideHumidtyId = CCUHsApi.getInstance().addPoint(targetMinInsideHumidty);
         CCUHsApi.getInstance().writePoint(targetMinInsideHumidtyId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.TARGET_MIN_INSIDE_HUMIDITY, 0);
     
-        Point enableHumidifier  = new Point.Builder()
+        /*Point enableHumidifier  = new Point.Builder()
                                                 .setDisplayName(equipDis+"-"+"enableHumidifier")
                                                 .setSiteRef(siteRef)
                                                 .setEquipRef(equipref)
@@ -139,7 +139,7 @@ public abstract class VavSystemProfile extends SystemProfile
                                           .addMarker("enable").addMarker("dehumidifier")
                                           .build();
         String enableDehumidifierId = CCUHsApi.getInstance().addPoint(enableDehumidifier);
-        CCUHsApi.getInstance().writePoint(enableDehumidifierId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",0.0, 0);
+        CCUHsApi.getInstance().writePoint(enableDehumidifierId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",0.0, 0);*/
     
     }
     

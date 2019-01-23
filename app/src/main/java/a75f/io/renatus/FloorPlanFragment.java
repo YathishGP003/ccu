@@ -86,7 +86,15 @@ public class FloorPlanFragment extends Fragment
 			{
 				
 				case ACTION_BLE_PAIRING_COMPLETED:
-					updateModules(getSelectedZone());
+					new Thread(new Runnable()
+					{
+						@Override
+						public void run()
+						{
+							updateModules(getSelectedZone());
+						}
+					}).start();
+					
 					getActivity().unregisterReceiver(mPairingReceiver);
 					break;
 			}
@@ -272,12 +280,19 @@ public class FloorPlanFragment extends Fragment
 	
 	private void updateModules(Zone zone)
 	{
-		Log.d("FloorPlan","Zone Selected "+zone.getDisplayName());
+		Log.d("CCU","Zone Selected "+zone.getDisplayName());
 		mModuleListAdapter =
 				new DataArrayAdapter<>(getActivity(), R.layout.listviewitem, createAddressList(
 						HSUtil.getEquips(zone.getId())));
 		
-		moduleListView.setAdapter(mModuleListAdapter);
+		getActivity().runOnUiThread(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				moduleListView.setAdapter(mModuleListAdapter);
+			}
+		});
 	}
 	
 	private ArrayList<String> createAddressList(ArrayList<Equip> equips)

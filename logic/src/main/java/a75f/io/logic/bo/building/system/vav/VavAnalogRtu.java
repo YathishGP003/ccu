@@ -400,7 +400,7 @@ public class VavAnalogRtu extends VavSystemProfile
                                       .setSiteRef(siteRef)
                                       .setEquipRef(equipref)
                                       .addMarker("system").addMarker("config").addMarker("analog1")
-                                      .addMarker("output").addMarker("enabled").addMarker("writable")
+                                      .addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
                                       .setTz(tz)
                                       .build();
         String analog1OutputEnabledId = hayStack.addPoint(analog1OutputEnabled);
@@ -411,7 +411,7 @@ public class VavAnalogRtu extends VavSystemProfile
                                              .setSiteRef(siteRef)
                                              .setEquipRef(equipref)
                                              .addMarker("system").addMarker("config").addMarker("analog2")
-                                             .addMarker("output").addMarker("enabled").addMarker("writable")
+                                             .addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
                                              .setTz(tz)
                                              .build();
         String analog2OutputEnabledId = hayStack.addPoint(analog2OutputEnabled);
@@ -422,7 +422,7 @@ public class VavAnalogRtu extends VavSystemProfile
                                              .setSiteRef(siteRef)
                                              .setEquipRef(equipref)
                                              .addMarker("system").addMarker("config").addMarker("analog3")
-                                             .addMarker("output").addMarker("enabled").addMarker("writable")
+                                             .addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
                                              .setTz(tz)
                                              .build();
         String analog3OutputEnabledId = hayStack.addPoint(analog3OutputEnabled);
@@ -433,7 +433,7 @@ public class VavAnalogRtu extends VavSystemProfile
                                              .setSiteRef(siteRef)
                                              .setEquipRef(equipref)
                                              .addMarker("system").addMarker("config").addMarker("analog4")
-                                             .addMarker("output").addMarker("enabled").addMarker("writable")
+                                             .addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
                                              .setTz(tz)
                                              .build();
         String analog4OutputEnabledId = hayStack.addPoint(analog4OutputEnabled);
@@ -444,7 +444,7 @@ public class VavAnalogRtu extends VavSystemProfile
                                              .setSiteRef(siteRef)
                                              .setEquipRef(equipref)
                                              .addMarker("system").addMarker("config").addMarker("relay3")
-                                             .addMarker("output").addMarker("enabled").addMarker("writable")
+                                             .addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
                                              .setTz(tz)
                                              .build();
         String relay3OutputEnabledId = hayStack.addPoint(relay3OutputEnabled);
@@ -455,7 +455,7 @@ public class VavAnalogRtu extends VavSystemProfile
                                             .setSiteRef(siteRef)
                                             .setEquipRef(equipref)
                                             .addMarker("system").addMarker("config").addMarker("relay7")
-                                            .addMarker("output").addMarker("enabled").addMarker("writable")
+                                            .addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
                                             .setTz(tz)
                                             .build();
         String relay7OutputEnabledId = hayStack.addPoint(relay7OutputEnabled);
@@ -466,7 +466,7 @@ public class VavAnalogRtu extends VavSystemProfile
                                              .setSiteRef(siteRef)
                                              .setEquipRef(equipref)
                                              .addMarker("system").addMarker("config").addMarker("analog1")
-                                             .addMarker("min").addMarker("cooling").addMarker("sat").addMarker("writable")
+                                             .addMarker("min").addMarker("cooling").addMarker("sat").addMarker("writable").addMarker("sp")
                                              .setUnit("V")
                                              .setTz(tz)
                                              .build();
@@ -478,7 +478,7 @@ public class VavAnalogRtu extends VavSystemProfile
                                                .setSiteRef(siteRef)
                                                .setEquipRef(equipref)
                                                .addMarker("system").addMarker("config").addMarker("analog1")
-                                               .addMarker("max").addMarker("cooling").addMarker("sat").addMarker("writable")
+                                               .addMarker("max").addMarker("cooling").addMarker("sat").addMarker("writable").addMarker("sp")
                                                .setUnit("V")
                                                .setTz(tz)
                                                .build();
@@ -490,7 +490,7 @@ public class VavAnalogRtu extends VavSystemProfile
                                                .setSiteRef(siteRef)
                                                .setEquipRef(equipref)
                                                .addMarker("system").addMarker("config").addMarker("analog2")
-                                               .addMarker("min").addMarker("staticPressure").addMarker("writable")
+                                               .addMarker("min").addMarker("staticPressure").addMarker("writable").addMarker("sp")
                                                .setUnit("V")
                                                .setTz(tz)
                                                .build();
@@ -502,7 +502,7 @@ public class VavAnalogRtu extends VavSystemProfile
                                                .setSiteRef(siteRef)
                                                .setEquipRef(equipref)
                                                .addMarker("system").addMarker("config").addMarker("analog2")
-                                               .addMarker("max").addMarker("staticPressure").addMarker("writable")
+                                               .addMarker("max").addMarker("staticPressure").addMarker("writable").addMarker("sp")
                                                .setUnit("V")
                                                .setTz(tz)
                                                .build();
@@ -514,7 +514,7 @@ public class VavAnalogRtu extends VavSystemProfile
                                                    .setSiteRef(siteRef)
                                                    .setEquipRef(equipref)
                                                    .addMarker("system").addMarker("config").addMarker("analog3")
-                                                   .addMarker("min").addMarker("heating").addMarker("writable")
+                                                   .addMarker("min").addMarker("heating").addMarker("writable").addMarker("sp")
                                                    .setUnit("V")
                                                    .setTz(tz)
                                                    .build();
@@ -526,7 +526,7 @@ public class VavAnalogRtu extends VavSystemProfile
                                                    .setSiteRef(siteRef)
                                                    .setEquipRef(equipref)
                                                    .addMarker("system").addMarker("config").addMarker("analog3")
-                                                   .addMarker("max").addMarker("heating").addMarker("writable")
+                                                   .addMarker("max").addMarker("heating").addMarker("writable").addMarker("sp")
                                                    .setUnit("V")
                                                    .setTz(tz)
                                                    .build();
@@ -538,7 +538,7 @@ public class VavAnalogRtu extends VavSystemProfile
                                                    .setSiteRef(siteRef)
                                                    .setEquipRef(equipref)
                                                    .addMarker("system").addMarker("config").addMarker("analog4")
-                                                   .addMarker("min").addMarker("co2").addMarker("writable")
+                                                   .addMarker("min").addMarker("co2").addMarker("writable").addMarker("sp")
                                                    .setUnit("V")
                                                    .setTz(tz)
                                                    .build();
@@ -550,7 +550,7 @@ public class VavAnalogRtu extends VavSystemProfile
                                                    .setSiteRef(siteRef)
                                                    .setEquipRef(equipref)
                                                    .addMarker("system").addMarker("config").addMarker("analog4")
-                                                   .addMarker("max").addMarker("co2").addMarker("writable")
+                                                   .addMarker("max").addMarker("co2").addMarker("writable").addMarker("sp")
                                                    .setUnit("V")
                                                    .setTz(tz)
                                                    .build();
@@ -562,7 +562,7 @@ public class VavAnalogRtu extends VavSystemProfile
                                         .setSiteRef(siteRef)
                                         .setEquipRef(equipref)
                                         .addMarker("system").addMarker("config").addMarker("relay7")
-                                        .addMarker("humidifier").addMarker("type").addMarker("writable")
+                                        .addMarker("humidifier").addMarker("type").addMarker("writable").addMarker("sp")
                                         .setUnit("V")
                                         .setTz(tz)
                                         .build();

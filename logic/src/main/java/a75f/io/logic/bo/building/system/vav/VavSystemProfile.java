@@ -31,7 +31,7 @@ public abstract class VavSystemProfile extends SystemProfile
                                                .setSiteRef(siteRef)
                                                .setEquipRef(equipref)
                                                .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
-                                               .addMarker("target").addMarker("cumulative").addMarker("damper")
+                                               .addMarker("target").addMarker("cumulative").addMarker("damper").addMarker("sp")
                                                .build();
         String targetCumulativeDamperId = hayStack.addPoint(targetCumulativeDamper);
         HashMap targetCumulativeDamperP = hayStack.read("point and tuner and default and vav and target and cumulative and damper");
@@ -48,7 +48,7 @@ public abstract class VavSystemProfile extends SystemProfile
                                                .setSiteRef(siteRef)
                                                .setEquipRef(equipref)
                                                .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
-                                               .addMarker("analog").addMarker("fan").addMarker("speed").addMarker("multiplier")
+                                               .addMarker("analog").addMarker("fan").addMarker("speed").addMarker("multiplier").addMarker("sp")
                                                .build();
         String analogFanSpeedMultiplierId = hayStack.addPoint(analogFanSpeedMultiplier);
         HashMap analogFanSpeedMultiplierP = hayStack.read("point and tuner and default and vav and analog and fan and speed and multiplier");
@@ -65,7 +65,7 @@ public abstract class VavSystemProfile extends SystemProfile
                                                  .setSiteRef(siteRef)
                                                  .setEquipRef(equipref)
                                                  .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
-                                                 .addMarker("humidity").addMarker("hysteresis")
+                                                 .addMarker("humidity").addMarker("hysteresis").addMarker("sp")
                                                  .build();
         String humidityHysteresisId = hayStack.addPoint(humidityHysteresis);
         HashMap humidityHysteresisPoint = hayStack.read("point and tuner and default and vav and humidity and hysteresis");
@@ -89,7 +89,7 @@ public abstract class VavSystemProfile extends SystemProfile
                                   .setDisplayName(equipDis+"-"+"desiredCI")
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipref)
-                                  .addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("ci").addMarker("desired")
+                                  .addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("ci").addMarker("desired").addMarker("sp")
                                   .build();
         String desiredCIId = CCUHsApi.getInstance().addPoint(desiredCI);
         CCUHsApi.getInstance().writePoint(desiredCIId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.SYSTEM_DEFAULT_CI, 0);
@@ -98,7 +98,7 @@ public abstract class VavSystemProfile extends SystemProfile
                                     .setDisplayName(equipDis+"-"+"systemMode")
                                     .setSiteRef(siteRef)
                                     .setEquipRef(equipref)
-                                    .addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("rtu").addMarker("mode")
+                                    .addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("rtu").addMarker("mode").addMarker("sp")
                                     .build();
         String systemStateId = CCUHsApi.getInstance().addPoint(systemState);
         CCUHsApi.getInstance().writePoint(systemStateId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", (double) SystemState.OFF.ordinal(), 0);
@@ -107,7 +107,8 @@ public abstract class VavSystemProfile extends SystemProfile
                                     .setDisplayName(equipDis+"-"+"targetMaxInsideHumidty")
                                     .setSiteRef(siteRef)
                                     .setEquipRef(equipref)
-                                    .addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("target").addMarker("max").addMarker("inside").addMarker("humidity")
+                                    .addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("target").addMarker("max")
+                                    .addMarker("inside").addMarker("humidity").addMarker("sp")
                                     .build();
         String targetMaxInsideHumidtyId = CCUHsApi.getInstance().addPoint(targetMaxInsideHumidty);
         CCUHsApi.getInstance().writePoint(targetMaxInsideHumidtyId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.TARGET_MAX_INSIDE_HUMIDITY, 0);
@@ -116,7 +117,8 @@ public abstract class VavSystemProfile extends SystemProfile
                                                 .setDisplayName(equipDis+"-"+"targetMinInsideHumidty")
                                                 .setSiteRef(siteRef)
                                                 .setEquipRef(equipref)
-                                                .addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("target").addMarker("min").addMarker("inside").addMarker("humidity")
+                                                .addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("target")
+                                                .addMarker("min").addMarker("inside").addMarker("humidity").addMarker("sp")
                                                 .build();
         String targetMinInsideHumidtyId = CCUHsApi.getInstance().addPoint(targetMinInsideHumidty);
         CCUHsApi.getInstance().writePoint(targetMinInsideHumidtyId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.TARGET_MIN_INSIDE_HUMIDITY, 0);

@@ -466,7 +466,7 @@ public class VAVLogicalMap
                                          .setEquipRef(equipRef)
                                          .setSiteRef(siteRef)
                                          .addMarker("config").addMarker("vav").addMarker("writable").addMarker("zone")
-                                         .addMarker("damper").addMarker("type")
+                                         .addMarker("damper").addMarker("type").addMarker("sp")
                                          .setGroup(String.valueOf(nodeAddr))
                                          .setTz(tz)
                                          .build();
@@ -478,7 +478,7 @@ public class VAVLogicalMap
                                    .setEquipRef(equipRef)
                                    .setSiteRef(siteRef)
                                    .addMarker("config").addMarker("vav").addMarker("writable").addMarker("zone")
-                                   .addMarker("damper").addMarker("size")
+                                   .addMarker("damper").addMarker("size").addMarker("sp")
                                    .setUnit("\u00B0")
                                    .setGroup(String.valueOf(nodeAddr))
                                    .setTz(tz)
@@ -491,7 +491,7 @@ public class VAVLogicalMap
                                    .setEquipRef(equipRef)
                                    .setSiteRef(siteRef)
                                    .addMarker("config").addMarker("vav").addMarker("writable").addMarker("zone")
-                                   .addMarker("damper").addMarker("shape")
+                                   .addMarker("damper").addMarker("shape").addMarker("sp")
                                    .setGroup(String.valueOf(nodeAddr))
                                    .setTz(tz)
                                    .build();
@@ -503,7 +503,7 @@ public class VAVLogicalMap
                                    .setEquipRef(equipRef)
                                    .setSiteRef(siteRef)
                                    .addMarker("config").addMarker("vav").addMarker("writable").addMarker("zone")
-                                   .addMarker("reheat").addMarker("type")
+                                   .addMarker("reheat").addMarker("type").addMarker("sp")
                                    .setGroup(String.valueOf(nodeAddr))
                                    .setTz(tz)
                                    .build();
@@ -515,7 +515,7 @@ public class VAVLogicalMap
                                    .setEquipRef(equipRef)
                                    .setSiteRef(siteRef)
                                    .addMarker("config").addMarker("vav").addMarker("writable").addMarker("zone")
-                                   .addMarker("enable").addMarker("occupancy").addMarker("control")
+                                   .addMarker("enable").addMarker("occupancy").addMarker("control").addMarker("sp")
                                    .setGroup(String.valueOf(nodeAddr))
                                    .setTz(tz)
                                    .build();
@@ -527,7 +527,7 @@ public class VAVLogicalMap
                                                .setEquipRef(equipRef)
                                                .setSiteRef(siteRef)
                                                .addMarker("config").addMarker("vav").addMarker("writable").addMarker("zone")
-                                               .addMarker("enable").addMarker("co2").addMarker("control")
+                                               .addMarker("enable").addMarker("co2").addMarker("control").addMarker("sp")
                                                .setGroup(String.valueOf(nodeAddr))
                                                .setTz(tz)
                                                .build();
@@ -539,7 +539,7 @@ public class VAVLogicalMap
                                                .setEquipRef(equipRef)
                                                .setSiteRef(siteRef)
                                                .addMarker("config").addMarker("vav").addMarker("writable").addMarker("zone")
-                                               .addMarker("enable").addMarker("iaq").addMarker("control")
+                                               .addMarker("enable").addMarker("iaq").addMarker("control").addMarker("sp")
                                                .setGroup(String.valueOf(nodeAddr))
                                                .setTz(tz)
                                                .build();
@@ -551,7 +551,7 @@ public class VAVLogicalMap
                                          .setEquipRef(equipRef)
                                          .setSiteRef(siteRef)
                                          .addMarker("config").addMarker("vav").addMarker("writable").addMarker("zone")
-                                         .addMarker("priority")
+                                         .addMarker("priority").addMarker("sp")
                                          .setGroup(String.valueOf(nodeAddr))
                                          .setTz(tz)
                                          .build();
@@ -563,7 +563,7 @@ public class VAVLogicalMap
                                      .setEquipRef(equipRef)
                                      .setSiteRef(siteRef)
                                      .addMarker("config").addMarker("vav").addMarker("writable").addMarker("zone")
-                                     .addMarker("temperature").addMarker("offset")
+                                     .addMarker("temperature").addMarker("offset").addMarker("sp")
                                      .setGroup(String.valueOf(nodeAddr))
                                      .setTz(tz)
                                      .build();

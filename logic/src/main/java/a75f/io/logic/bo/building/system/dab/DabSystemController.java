@@ -14,7 +14,7 @@ import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
 
-import static a75f.io.logic.bo.building.ZonePriority.NO;
+import static a75f.io.logic.bo.building.ZonePriority.NONE;
 import static a75f.io.logic.bo.building.system.dab.DabSystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.dab.DabSystemController.State.HEATING;
 import static a75f.io.logic.bo.building.system.dab.DabSystemController.State.OFF;
@@ -189,7 +189,7 @@ public class DabSystemController
     }
     
     public int getZonePriority(String zoneRef) {
-        ZonePriority priority = NO;
+        ZonePriority priority = NONE;
         for (ZoneProfile p : L.ccu().zoneProfiles)
         {
             if (p.getEquip().getZoneRef().equals(zoneRef) && p.getPriority().ordinal() > priority.ordinal()) {

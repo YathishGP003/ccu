@@ -21,7 +21,7 @@ import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.tuners.TunerUtil;
 
-import static a75f.io.logic.bo.building.ZonePriority.NO;
+import static a75f.io.logic.bo.building.ZonePriority.NONE;
 import static a75f.io.logic.bo.building.system.SystemMode.AUTO;
 import static a75f.io.logic.bo.building.system.SystemMode.COOLONLY;
 import static a75f.io.logic.bo.building.system.SystemMode.HEATONLY;
@@ -232,7 +232,7 @@ public class VavSystemController
     }
     
     public ZonePriority getZonePriority(String zoneRef) {
-        ZonePriority priority = NO;
+        ZonePriority priority = NONE;
         for (ZoneProfile p : L.ccu().zoneProfiles)
         {
             if (p.getEquip().getZoneRef().equals(zoneRef) && p.getPriority().ordinal() > priority.ordinal()) {

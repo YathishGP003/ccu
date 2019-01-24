@@ -6,7 +6,7 @@ package a75f.io.logic.bo.building;
 
 public enum ZonePriority
 {
-    NO(0, 0), LOW(1, 1), MEDIUM(2, 10), HIGH(3, 50);
+    NONE(0, 0), LOW(1, 1), NORMAL(2, 10), HIGH(3, 50);
     
     public int multiplier;
     public int val;

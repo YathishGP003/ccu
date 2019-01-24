@@ -23,7 +23,7 @@ import a75f.io.logic.bo.building.hvac.SeriesFanVavUnit;
 import a75f.io.logic.bo.building.hvac.Valve;
 import a75f.io.logic.bo.building.hvac.VavUnit;
 
-import static a75f.io.logic.bo.building.ZonePriority.NO;
+import static a75f.io.logic.bo.building.ZonePriority.NONE;
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
 
@@ -358,7 +358,7 @@ public abstract class VavProfile extends ZoneProfile
     @Override
     public ZonePriority getPriority()
     {
-        ZonePriority priority = NO;
+        ZonePriority priority = NONE;
         for (short nodeAddress : vavDeviceMap.keySet())
         {
             HashMap equip = CCUHsApi.getInstance().read("equip and group == \""+nodeAddress+"\"");

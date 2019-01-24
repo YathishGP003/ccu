@@ -83,7 +83,7 @@ public class BuildingTuners
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipRef)
                                   .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his")
-                                  .addMarker("zone").addMarker("priority").addMarker("spread")
+                                  .addMarker("zone").addMarker("priority").addMarker("spread").addMarker("sp")
                                   .setTz(tz)
                                   .build();
         String zonePrioritySpreadId = hayStack.addPoint(zonePrioritySpread);
@@ -95,7 +95,7 @@ public class BuildingTuners
                                            .setSiteRef(siteRef)
                                            .setEquipRef(equipRef)
                                            .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his")
-                                           .addMarker("zone").addMarker("priority").addMarker("multiplier")
+                                           .addMarker("zone").addMarker("priority").addMarker("multiplier").addMarker("sp")
                                            .setTz(tz)
                                            .build();
         String zonePriorityMultiplierId = hayStack.addPoint(zonePriorityMultiplier);
@@ -106,7 +106,8 @@ public class BuildingTuners
                                   .setDisplayName(equipDis+"-"+"coolingDeadband")
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipRef)
-                                  .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his").addMarker("cooling").addMarker("deadband")
+                                  .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his")
+                                  .addMarker("cooling").addMarker("deadband").addMarker("sp")
                                   .setUnit("\u00B0F")
                                   .setTz(tz)
                                   .build();
@@ -118,8 +119,8 @@ public class BuildingTuners
                                   .setDisplayName(equipDis+"-"+"coolingDeadbandMultiplier")
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipRef)
-                                  .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his").addMarker("cooling").addMarker("deadband").addMarker("multiplier")
-                                  .setUnit("\u00B0F")
+                                  .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his")
+                                  .addMarker("cooling").addMarker("deadband").addMarker("multiplier").addMarker("sp")
                                   .setTz(tz)
                                   .build();
         String coolingDbMultiplierId = hayStack.addPoint(coolingDbMultiplier);
@@ -130,7 +131,9 @@ public class BuildingTuners
                                   .setDisplayName(equipDis+"-"+"heatingDeadband")
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipRef)
-                                  .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his").addMarker("heating").addMarker("deadband")
+                                  .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his")
+                                  .addMarker("heating").addMarker("deadband").addMarker("sp")
+                                  .setUnit("\u00B0F")
                                   .setTz(tz)
                                   .build();
         String heatingDbId = hayStack.addPoint(heatingDb);
@@ -141,7 +144,8 @@ public class BuildingTuners
                                   .setDisplayName(equipDis+"-"+"heatingDeadbandMultiplier")
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipRef)
-                                  .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his").addMarker("heating").addMarker("deadband").addMarker("multiplier")
+                                  .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his")
+                                  .addMarker("heating").addMarker("deadband").addMarker("multiplier").addMarker("sp")
                                   .setTz(tz)
                                   .build();
         String heatingDbMultiplierId = hayStack.addPoint(heatingDbMultiplier);
@@ -152,7 +156,8 @@ public class BuildingTuners
                                  .setDisplayName(equipDis+"-"+"proportionalKFactor ")
                                  .setSiteRef(siteRef)
                                  .setEquipRef(equipRef)
-                                 .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his").addMarker("pgain")
+                                 .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his")
+                                 .addMarker("pgain").addMarker("sp")
                                  .setTz(tz)
                                  .build();
         String pgainId = hayStack.addPoint(propGain);
@@ -163,7 +168,8 @@ public class BuildingTuners
                                      .setDisplayName(equipDis+"-"+"integralKFactor ")
                                      .setSiteRef(siteRef)
                                      .setEquipRef(equipRef)
-                                     .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his").addMarker("igain")
+                                     .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his")
+                                     .addMarker("igain").addMarker("sp")
                                      .setTz(tz)
                                      .build();
         String igainId = hayStack.addPoint(integralGain);
@@ -174,7 +180,8 @@ public class BuildingTuners
                                    .setDisplayName(equipDis+"-"+"temperatureProportionalRange ")
                                    .setSiteRef(siteRef)
                                    .setEquipRef(equipRef)
-                                   .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his").addMarker("pspread")
+                                   .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his")
+                                   .addMarker("pspread").addMarker("sp")
                                    .setTz(tz)
                                    .build();
         String pSpreadId = hayStack.addPoint(propSpread);
@@ -185,7 +192,8 @@ public class BuildingTuners
                                         .setDisplayName(equipDis+"-"+"temperatureIntegralTime ")
                                         .setSiteRef(siteRef)
                                         .setEquipRef(equipRef)
-                                        .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his").addMarker("itimeout")
+                                        .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his")
+                                        .addMarker("itimeout").addMarker("sp")
                                         .setTz(tz)
                                         .build();
         String iTimeoutId = hayStack.addPoint(integralTimeout);
@@ -197,7 +205,7 @@ public class BuildingTuners
                                         .setSiteRef(siteRef)
                                         .setEquipRef(equipRef)
                                         .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his")
-                                        .addMarker("valve").addMarker("start").addMarker("damper")
+                                        .addMarker("valve").addMarker("start").addMarker("damper").addMarker("sp")
                                         .setTz(tz)
                                         .build();
         String valveStartDamperId = hayStack.addPoint(valveStartDamper);
@@ -209,7 +217,7 @@ public class BuildingTuners
                                           .setSiteRef(siteRef)
                                           .setEquipRef(equipRef)
                                           .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his")
-                                          .addMarker("zone").addMarker("co2").addMarker("target")
+                                          .addMarker("zone").addMarker("co2").addMarker("target").addMarker("sp")
                                           .setTz(tz)
                                           .build();
         String zoneCO2TargetId = hayStack.addPoint(zoneCO2Target);
@@ -221,7 +229,7 @@ public class BuildingTuners
                                        .setSiteRef(siteRef)
                                        .setEquipRef(equipRef)
                                        .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his")
-                                       .addMarker("zone").addMarker("co2").addMarker("threshold")
+                                       .addMarker("zone").addMarker("co2").addMarker("threshold").addMarker("sp")
                                        .setTz(tz)
                                        .build();
         String zoneCO2ThresholdId = hayStack.addPoint(zoneCO2Threshold);
@@ -233,7 +241,7 @@ public class BuildingTuners
                                        .setSiteRef(siteRef)
                                        .setEquipRef(equipRef)
                                        .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his")
-                                       .addMarker("zone").addMarker("voc").addMarker("target")
+                                       .addMarker("zone").addMarker("voc").addMarker("target").addMarker("sp")
                                        .setTz(tz)
                                        .build();
         String zoneVOCTargetId = hayStack.addPoint(zoneVOCTarget);
@@ -245,7 +253,7 @@ public class BuildingTuners
                                           .setSiteRef(siteRef)
                                           .setEquipRef(equipRef)
                                           .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his")
-                                          .addMarker("zone").addMarker("voc").addMarker("threshold")
+                                          .addMarker("zone").addMarker("voc").addMarker("threshold").addMarker("sp")
                                           .setTz(tz)
                                           .build();
         String zoneVOCThresholdId = hayStack.addPoint(zoneVOCThreshold);
@@ -264,7 +272,7 @@ public class BuildingTuners
                                                .setSiteRef(siteRef)
                                                .setEquipRef(equipRef)
                                                .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his")
-                                               .addMarker("target").addMarker("cumulative").addMarker("damper")
+                                               .addMarker("target").addMarker("cumulative").addMarker("damper").addMarker("sp")
                                                .setTz(tz)
                                                .build();
         String targetCumulativeDamperId = hayStack.addPoint(targetCumulativeDamper);
@@ -276,7 +284,7 @@ public class BuildingTuners
                                                .setSiteRef(siteRef)
                                                .setEquipRef(equipRef)
                                                .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his")
-                                               .addMarker("analog").addMarker("fan").addMarker("speed").addMarker("multiplier")
+                                               .addMarker("analog").addMarker("fan").addMarker("speed").addMarker("multiplier").addMarker("sp")
                                                .setTz(tz)
                                                .build();
         String analogFanSpeedMultiplierId = hayStack.addPoint(analogFanSpeedMultiplier);
@@ -288,7 +296,7 @@ public class BuildingTuners
                                                  .setSiteRef(siteRef)
                                                  .setEquipRef(equipRef)
                                                  .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his")
-                                                 .addMarker("humidity").addMarker("hysteresis")
+                                                 .addMarker("humidity").addMarker("hysteresis").addMarker("sp")
                                                  .setTz(tz)
                                                  .build();
         String humidityHysteresisId = hayStack.addPoint(humidityHysteresis);
@@ -307,7 +315,7 @@ public class BuildingTuners
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipref)
                                   .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
-                                  .addMarker("zone").addMarker("priority").addMarker("spread")
+                                  .addMarker("zone").addMarker("priority").addMarker("spread").addMarker("sp")
                                   .build();
         String zonePrioritySpreadId = hayStack.addPoint(zonePrioritySpread);
         HashMap zonePrioritySpreadPoint = hayStack.read("point and tuner and default and vav and zone and priority and spread");
@@ -325,7 +333,7 @@ public class BuildingTuners
                                            .setSiteRef(siteRef)
                                            .setEquipRef(equipref)
                                            .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
-                                           .addMarker("zone").addMarker("priority").addMarker("multiplier")
+                                           .addMarker("zone").addMarker("priority").addMarker("multiplier").addMarker("sp")
                                            .build();
         String zonePriorityMultiplierId = hayStack.addPoint(zonePriorityMultiplier);
         HashMap zonePriorityMultiplierPoint = hayStack.read("point and tuner and default and vav and zone and priority and multiplier");
@@ -342,7 +350,7 @@ public class BuildingTuners
                                   .setDisplayName(equipdis+"-"+"coolingDeadband")
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipref)
-                                  .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("cooling").addMarker("deadband")
+                                  .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("cooling").addMarker("deadband").addMarker("sp")
                                   .setUnit("\u00B0F")
                                   .build();
         String coolingDbId = hayStack.addPoint(coolingDb);
@@ -360,8 +368,7 @@ public class BuildingTuners
                                   .setDisplayName(equipdis+"-"+"coolingDeadbandMultiplier")
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipref)
-                                  .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("cooling").addMarker("deadband").addMarker("multiplier")
-                                  .setUnit("\u00B0F")
+                                  .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("cooling").addMarker("deadband").addMarker("multiplier").addMarker("sp")
                                   .build();
         String coolingDbMultiplierId = hayStack.addPoint(coolingDbMultiplier);
         HashMap coolingDbMultiplierPoint = hayStack.read("point and tuner and default and vav and cooling and deadband and multiplier");
@@ -378,7 +385,7 @@ public class BuildingTuners
                                   .setDisplayName(equipdis+"-"+"heatingDeadband")
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipref)
-                                  .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("heating").addMarker("deadband")
+                                  .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("heating").addMarker("deadband").addMarker("sp")
                                   .setUnit("\u00B0F")
                                   .build();
         String heatingDbId = hayStack.addPoint(heatingDb);
@@ -395,8 +402,7 @@ public class BuildingTuners
                                   .setDisplayName(equipdis+"-"+"heatingDeadbandMultiplier")
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipref)
-                                  .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("heating").addMarker("deadband").addMarker("multiplier")
-                                  .setUnit("\u00B0F")
+                                  .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("heating").addMarker("deadband").addMarker("multiplier").addMarker("sp")
                                   .build();
         String heatingDbMultiplierId = hayStack.addPoint(heatingDbMultiplier);
         HashMap heatingDbMultiplierPoint = hayStack.read("point and tuner and default and vav and heating and deadband and multiplier");
@@ -412,7 +418,7 @@ public class BuildingTuners
                                  .setDisplayName(equipdis+"-"+"proportionalKFactor")
                                  .setSiteRef(siteRef)
                                  .setEquipRef(equipref)
-                                 .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("pgain")
+                                 .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("pgain").addMarker("sp")
                                  .build();
         String pgainId = hayStack.addPoint(propGain);
         HashMap defPgainPoint = hayStack.read("point and tuner and default and vav and pgain");
@@ -429,7 +435,7 @@ public class BuildingTuners
                                      .setDisplayName(equipdis+"-"+"integralKFactor")
                                      .setSiteRef(siteRef)
                                      .setEquipRef(equipref)
-                                     .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("igain")
+                                     .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("igain").addMarker("sp")
                                      .build();
         String igainId = hayStack.addPoint(integralGain);
         HashMap defIgainPoint = hayStack.read("point and tuner and default and vav and igain");
@@ -445,7 +451,7 @@ public class BuildingTuners
                                    .setDisplayName(equipdis+"-"+"temperatureProportionalRange")
                                    .setSiteRef(siteRef)
                                    .setEquipRef(equipref)
-                                   .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("pspread")
+                                   .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("pspread").addMarker("sp")
                                    .build();
         String pSpreadId = hayStack.addPoint(propSpread);
         HashMap defPSpreadPoint = hayStack.read("point and tuner and default and vav and pspread");
@@ -461,7 +467,7 @@ public class BuildingTuners
                                         .setDisplayName(equipdis+"-"+"temperatureIntegralTime")
                                         .setSiteRef(siteRef)
                                         .setEquipRef(equipref)
-                                        .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("itimeout")
+                                        .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("itimeout").addMarker("sp")
                                         .build();
         String iTimeoutId = hayStack.addPoint(integralTimeout);
         HashMap defITPoint = hayStack.read("point and tuner and default and vav and pspread");
@@ -478,7 +484,7 @@ public class BuildingTuners
                                         .setSiteRef(siteRef)
                                         .setEquipRef(equipref)
                                         .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
-                                        .addMarker("valve").addMarker("start").addMarker("damper")
+                                        .addMarker("valve").addMarker("start").addMarker("damper").addMarker("sp")
                                         .build();
         String valveStartDamperId = hayStack.addPoint(valveStartDamper);
         HashMap valveStartDamperPoint = hayStack.read("point and tuner and default and vav and valve and start and damper");
@@ -496,7 +502,7 @@ public class BuildingTuners
                                       .setSiteRef(siteRef)
                                       .setEquipRef(equipref)
                                       .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
-                                      .addMarker("zone").addMarker("co2").addMarker("target")
+                                      .addMarker("zone").addMarker("co2").addMarker("target").addMarker("sp")
                                       .build();
         String zoneCO2TargetId = hayStack.addPoint(zoneCO2Target);
         HashMap zoneCO2TargetPoint = hayStack.read("point and tuner and default and vav and zone and co2 and target");
@@ -513,7 +519,7 @@ public class BuildingTuners
                                          .setSiteRef(siteRef)
                                          .setEquipRef(equipref)
                                          .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
-                                         .addMarker("zone").addMarker("co2").addMarker("threshold")
+                                         .addMarker("zone").addMarker("co2").addMarker("threshold").addMarker("sp")
                                          .build();
         String zoneCO2ThresholdId = hayStack.addPoint(zoneCO2Threshold);
         HashMap zoneCO2ThresholdPoint = hayStack.read("point and tuner and default and vav and zone and co2 and threshold");
@@ -529,7 +535,7 @@ public class BuildingTuners
                                          .setDisplayName(equipdis+"-"+"zoneVOCTarget")
                                          .setSiteRef(siteRef)
                                          .setEquipRef(equipref)
-                                         .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
+                                         .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("sp")
                                          .addMarker("zone").addMarker("voc").addMarker("target")
                                          .build();
         String zoneVOCTargetId = hayStack.addPoint(zoneVOCTarget);
@@ -547,7 +553,7 @@ public class BuildingTuners
                                         .setSiteRef(siteRef)
                                         .setEquipRef(equipref)
                                         .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
-                                        .addMarker("zone").addMarker("voc").addMarker("threshold")
+                                        .addMarker("zone").addMarker("voc").addMarker("threshold").addMarker("sp")
                                         .build();
         String zoneVOCThresholdId = hayStack.addPoint(zoneVOCThreshold);
         HashMap zoneVOCThresholdPoint = hayStack.read("point and tuner and default and vav and zone and voc and threshold");

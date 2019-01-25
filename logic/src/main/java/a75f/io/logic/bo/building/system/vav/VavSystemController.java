@@ -267,6 +267,24 @@ public class VavSystemController
         return getZoneDesiredTemp(zoneRef);//TODO - TEMP
     }
     
+    public double getSystemHumidity() {
+        //Average across zones or from proxy zone.
+        double humiditySum = 0;
+        double humidityZones = 0;
+    
+        for (ZoneProfile z : L.ccu().zoneProfiles)
+        {
+            Equip q = z.getEquip();
+            Double humidityVal = CCUHsApi.getInstance().readHisValByQuery("point and air and humidity and sensor and current and equipRef == \""+q.getId()+"\"");
+    
+            if (humidityVal != null && humidityVal != 0) {
+                humiditySum += humidityVal;
+                humidityZones++;
+            }
+        }
+        return humidityZones == 0 ? 0 : humiditySum/humidityZones;
+    }
+    
     @JsonIgnore
     public double getDynamicPriority(double zoneLoad, String zoneRef) {
         
@@ -333,7 +351,7 @@ public class VavSystemController
             double damperPos = hayStack.readHisValById(damper.get("id").toString());
             int normalizedDamperPos = (int) (damperPos + damperPos * targetPercent/100);
             HashMap normalizedDamper = hayStack.read("point and damper and normalized and cmd and equipRef == \""+m.get("id").toString()+"\"");
-            Log.d("CCU","normalizeAirflow"+" ,damper :"+damperPos+"targetPercent:"+targetPercent+" normalizedDamper:"+normalizedDamperPos);
+            Log.d("CCU","normalizeAirflow"+"Equip: "+m.get("dis")+",damperPos :"+damperPos+"targetPercent:"+targetPercent+" normalizedDamper:"+normalizedDamperPos);
             hayStack.writeHisValById(normalizedDamper.get("id").toString(), (double)normalizedDamperPos);
         }
         

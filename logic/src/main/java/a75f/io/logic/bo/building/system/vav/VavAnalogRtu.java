@@ -85,13 +85,6 @@ public class VavAnalogRtu extends VavSystemProfile
     }
     
     private synchronized void updateSystemPoints() {
-    
-        /*SystemEquip systemEquip = SystemEquip.getInstance();
-        systemEquip.setSat(getSystemSAT());
-        systemEquip.setCo2(getSystemCO2());
-        systemEquip.setSp(getStaticPressure());
-        systemEquip.setHwst(0);*/
-        
         
         double analogMin = getConfigVal("analog1 and cooling and sat and min");
         double analogMax = getConfigVal("analog1 and cooling and sat and max");
@@ -201,7 +194,7 @@ public class VavAnalogRtu extends VavSystemProfile
         //TODO- TEMP
         if (getConfigVal("relay7 and output and enabled") > 0)
         {
-            double humidity = 0;
+            double humidity = VavSystemController.getInstance().getSystemHumidity();
             double targetMinHumidity = TunerUtil.readSystemUserIntentVal("target and min and inside and humidity");
             double targetMaxHumidity = TunerUtil.readSystemUserIntentVal("target and max and inside and humidity");
     
@@ -229,10 +222,7 @@ public class VavAnalogRtu extends VavSystemProfile
                 }
                 setCmdSignal("dehumidifier",signal * 100);
             }
-            
-        
             ControlMote.setRelayState("relay7", signal);
-        
         }
         
     }

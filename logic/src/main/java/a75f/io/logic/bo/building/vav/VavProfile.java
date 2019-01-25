@@ -22,6 +22,7 @@ import a75f.io.logic.bo.building.hvac.ParallelFanVavUnit;
 import a75f.io.logic.bo.building.hvac.SeriesFanVavUnit;
 import a75f.io.logic.bo.building.hvac.Valve;
 import a75f.io.logic.bo.building.hvac.VavUnit;
+import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
 
 import static a75f.io.logic.bo.building.ZonePriority.NONE;
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
@@ -68,14 +69,16 @@ public abstract class VavProfile extends ZoneProfile
     }
     
     public void updateTRResponse(short node) {
-        if (trSystem == null) {
-            initTRSystem();
+        if (L.ccu().systemProfile instanceof VavSystemProfile) {
+            if (trSystem == null) {
+                initTRSystem();
+            }
+            VavTRSystem trSystem = (VavTRSystem) L.ccu().systemProfile.trSystem;
+            trSystem.updateSATRequest(getSATRequest(node));
+            trSystem.updateCO2Request(getCO2Requests(node));
+            trSystem.updateSpRequest(getSpRequests(node));
+            trSystem.updateHwstRequest(getHwstRequests(node));
         }
-        VavTRSystem trSystem = (VavTRSystem) L.ccu().systemProfile.trSystem;
-        trSystem.updateSATRequest(getSATRequest(node));
-        trSystem.updateCO2Request(getCO2Requests(node));
-        trSystem.updateSpRequest(getSpRequests(node));
-        trSystem.updateHwstRequest(getHwstRequests(node));
     }
     
     /**

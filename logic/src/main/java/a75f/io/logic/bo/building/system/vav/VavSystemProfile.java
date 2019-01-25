@@ -39,7 +39,7 @@ public abstract class VavSystemProfile extends SystemProfile
         for (HashMap valMap : targetCumulativeDamperArr) {
             if (valMap.get("val") != null)
             {
-                hayStack.getHSClient().pointWrite(HRef.copy(targetCumulativeDamperId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                hayStack.pointWrite(HRef.copy(targetCumulativeDamperId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
     
@@ -56,7 +56,7 @@ public abstract class VavSystemProfile extends SystemProfile
         for (HashMap valMap : analogFanSpeedMultiplierArr) {
             if (valMap.get("val") != null)
             {
-                hayStack.getHSClient().pointWrite(HRef.copy(analogFanSpeedMultiplierId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                hayStack.pointWrite(HRef.copy(analogFanSpeedMultiplierId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
     
@@ -73,7 +73,7 @@ public abstract class VavSystemProfile extends SystemProfile
         for (HashMap valMap : humidityHysteresisArr) {
             if (valMap.get("val") != null)
             {
-                hayStack.getHSClient().pointWrite(HRef.copy(humidityHysteresisId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                hayStack.pointWrite(HRef.copy(humidityHysteresisId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
     }

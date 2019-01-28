@@ -375,7 +375,6 @@ public class VavAnalogRtu extends VavSystemProfile
         return CCUHsApi.getInstance().readHisValByQuery("point and system and cmd and "+cmd);
     }
     public void setCmdSignal(String cmd, double val) {
-        Log.d("CCU"," SetCmdSignal cmd: "+cmd+" signal :"+val);
         CCUHsApi.getInstance().writeHisValByQuery("point and system and cmd and "+cmd, val);
     }
     

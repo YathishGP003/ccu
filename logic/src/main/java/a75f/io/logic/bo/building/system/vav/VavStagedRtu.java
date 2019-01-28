@@ -4,9 +4,15 @@ import java.util.HashMap;
 
 import a75.io.algos.vav.VavTRSystem;
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.Tags;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
 import a75f.io.logic.bo.building.system.SystemEquip;
+import a75f.io.logic.bo.haystack.device.ControlMote;
+import a75f.io.logic.tuners.VavTRTuners;
 
 /**
  * Created by samjithsadasivan on 8/14/18.
@@ -39,6 +45,44 @@ public class VavStagedRtu extends VavSystemProfile
         }
         VavSystemController.getInstance().runVavSystemControlAlgo();
         updateSystemPoints();
+    }
+    
+    @Override
+    public void addSystemEquip() {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap equip = hayStack.read("equip and system");
+        if (equip != null && equip.size() > 0) {
+            if (!equip.get("profile").equals(ProfileType.SYSTEM_VAV_STAGED_RTU.name())) {
+                hayStack.deleteEntityTree(equip.get("id").toString());
+            } else {
+                return;
+            }
+        }
+        System.out.println("System Equip does not exist. Create Now");
+        HashMap siteMap = hayStack.read(Tags.SITE);
+        String siteRef = (String) siteMap.get(Tags.ID);
+        String siteDis = (String) siteMap.get("dis");
+        Equip systemEquip= new Equip.Builder()
+                                   .setSiteRef(siteRef)
+                                   .setDisplayName(siteDis+"-SystemEquip")
+                                   .setProfile(ProfileType.SYSTEM_VAV_STAGED_RTU.name())
+                                   .addMarker("equip")
+                                   .addMarker("system")
+                                   .setTz(siteMap.get("tz").toString())
+                                   .build();
+        String equipRef = hayStack.addEquip(systemEquip);
+        addUserIntentPoints(equipRef);
+        addCmdPoints(equipRef);
+        addConfigPoints(equipRef);
+        addTunerPoints(equipRef);
+        addVavSystemTuners(equipRef);
+        updateAhuRef(equipRef);
+        new ControlMote(siteRef);
+        initTRSystem();
+        L.saveCCUState();
+        CCUHsApi.getInstance().syncEntityTree();
+        
+        
     }
     
     private synchronized void updateSystemPoints() {
@@ -249,12 +293,6 @@ public class VavStagedRtu extends VavSystemProfile
         return stage != 0 ? stage - Stage.FAN_1.ordinal() : stage ;
     }
     
-    
-    @Override
-    public void addSystemEquip() {
-    
-    }
-    
     @Override
     public synchronized void deleteSystemEquip() {
         HashMap equip = CCUHsApi.getInstance().read("equip and system");
@@ -262,4 +300,106 @@ public class VavStagedRtu extends VavSystemProfile
             CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
         }
     }
+    
+    public void addCmdPoints(String equipref) {
+        HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
+        String equipDis = siteMap.get("dis").toString()+"-SystemEquip";
+        String siteRef = siteMap.get("id").toString();
+        String tz = siteMap.get("tz").toString();
+        addCmdPoint("relay1", equipDis, equipref, siteRef, tz);
+        addCmdPoint("relay2", equipDis, equipref, siteRef, tz);
+        addCmdPoint("relay3", equipDis, equipref, siteRef, tz);
+        addCmdPoint("relay4", equipDis, equipref, siteRef, tz);
+        addCmdPoint("relay5", equipDis, equipref, siteRef, tz);
+        addCmdPoint("relay6", equipDis, equipref, siteRef, tz);
+        addCmdPoint("relay7", equipDis, equipref, siteRef, tz);
+    }
+    
+    private void addCmdPoint(String relay, String equipDis, String siteRef, String equipref, String tz){
+        //Name to be updated
+        Point relay1Op = new Point.Builder()
+                                 .setDisplayName(equipDis+"-"+relay+"Output")
+                                 .setSiteRef(siteRef)
+                                 .setEquipRef(equipref)
+                                 .addMarker("system").addMarker("cmd").addMarker(relay).addMarker("his")
+                                 .setTz(tz)
+                                 .build();
+        CCUHsApi.getInstance().addPoint(relay1Op);
+    }
+    
+    public double getCmdSignal(String cmd) {
+        return CCUHsApi.getInstance().readHisValByQuery("point and system and cmd and "+cmd);
+    }
+    public void setCmdSignal(String cmd, double val) {
+        CCUHsApi.getInstance().writeHisValByQuery("point and system and cmd and "+cmd, val);
+    }
+    
+    public void addConfigPoints(String equipref) {
+        HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
+        String equipDis = siteMap.get("dis").toString()+"-SystemEquip";
+        String siteRef = siteMap.get("id").toString();
+        String tz = siteMap.get("tz").toString();
+        addConfigPointEnabled("relay1", equipDis, equipref, siteRef, tz);
+        addConfigPointEnabled("relay2", equipDis, equipref, siteRef, tz);
+        addConfigPointEnabled("relay3", equipDis, equipref, siteRef, tz);
+        addConfigPointEnabled("relay4", equipDis, equipref, siteRef, tz);
+        addConfigPointEnabled("relay5", equipDis, equipref, siteRef, tz);
+        addConfigPointEnabled("relay6", equipDis, equipref, siteRef, tz);
+        addConfigPointEnabled("relay7", equipDis, equipref, siteRef, tz);
+        addConfigPointAssociation("relay1", equipDis, equipref, siteRef, tz, Stage.COOLING_1);
+        addConfigPointAssociation("relay2", equipDis, equipref, siteRef, tz, Stage.COOLING_2);
+        addConfigPointAssociation("relay3", equipDis, equipref, siteRef, tz, Stage.HEATING_1);
+        addConfigPointAssociation("relay4", equipDis, equipref, siteRef, tz, Stage.HEATING_2);
+        addConfigPointAssociation("relay5", equipDis, equipref, siteRef, tz, Stage.FAN_1);
+        addConfigPointAssociation("relay6", equipDis, equipref, siteRef, tz, Stage.FAN_2);
+        addConfigPointAssociation("relay7", equipDis, equipref, siteRef, tz, Stage.HUMIDIFIER);
+    
+    }
+    
+    private void addConfigPointEnabled(String relay, String equipDis, String siteRef, String equipref, String tz) {
+        Point relayEnabled = new Point.Builder()
+                                            .setDisplayName(equipDis+"-"+"relay3OutputEnabled")
+                                            .setSiteRef(siteRef)
+                                            .setEquipRef(equipref)
+                                            .addMarker("system").addMarker("config").addMarker(relay)
+                                            .addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
+                                            .setTz(tz)
+                                            .build();
+        String relayEnabledId = CCUHsApi.getInstance().addPoint(relayEnabled);
+        CCUHsApi.getInstance().writeDefaultValById(relayEnabledId, 0.0 );
+    }
+    
+    private void addConfigPointAssociation(String relay, String equipDis, String siteRef, String equipref, String tz, Stage init) {
+        Point relayEnabled = new Point.Builder()
+                                     .setDisplayName(equipDis+"-"+"relay3OutputEnabled")
+                                     .setSiteRef(siteRef)
+                                     .setEquipRef(equipref)
+                                     .addMarker("system").addMarker("config").addMarker(relay)
+                                     .addMarker("output").addMarker("association").addMarker("writable").addMarker("sp")
+                                     .setTz(tz)
+                                     .build();
+        String relayEnabledId = CCUHsApi.getInstance().addPoint(relayEnabled);
+        CCUHsApi.getInstance().writeDefaultValById(relayEnabledId, (double)init.ordinal() );
+    }
+    
+    public double getConfigEnabled(String config) {
+        return CCUHsApi.getInstance().readDefaultVal("point and system and config and output and enabled and "+config);
+    }
+    public void setConfigEnabled(String config, double val) {
+        CCUHsApi.getInstance().writeDefaultVal("point and system and config and output and enabled and "+config, val);
+    }
+    
+    public double getConfigAssociation(String config) {
+        return CCUHsApi.getInstance().readDefaultVal("point and system and config and output and association and "+config);
+    }
+    public void setConfigAssociation(String config, double val) {
+        CCUHsApi.getInstance().writeDefaultVal("point and system and config and output and association and "+config, val);
+    }
+    
+    public void addTunerPoints(String equipref) {
+        VavTRTuners.addSatTRTunerPoints(equipref);
+        VavTRTuners.addStaticPressureTRTunerPoints(equipref);
+        VavTRTuners.addCO2TRTunerPoints(equipref);
+    }
+    
 }

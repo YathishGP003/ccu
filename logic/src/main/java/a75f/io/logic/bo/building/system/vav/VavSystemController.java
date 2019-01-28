@@ -293,14 +293,15 @@ public class VavSystemController
             return p.val;
         }
     
-        double zonePrioritySpread = 2;//TODO - Tuner
-        double zonePriorityMultiplier = 1.3; //TODO - Tuner
+        double zonePrioritySpread = 2;
+        double zonePriorityMultiplier = 1.3;
     
         for (ZoneProfile z : L.ccu().zoneProfiles)
         {
             Equip q = z.getEquip();
             if (q.getZoneRef().equals(zoneRef)) {
                 zonePrioritySpread = TunerUtil.readTunerValByQuery("point and tuner and vav and zone and priority and spread and equipRef == \""+q.getId()+"\"");
+                break;
             }
         }
     
@@ -309,6 +310,7 @@ public class VavSystemController
             Equip q = z.getEquip();
             if (q.getZoneRef().equals(zoneRef)) {
                 zonePriorityMultiplier = TunerUtil.readTunerValByQuery("point and tuner and vav and zone and priority and multiplier and equipRef == \""+q.getId()+"\"");
+                break;
             }
         }
         

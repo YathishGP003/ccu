@@ -470,7 +470,7 @@ public class BuildingTuners
                                         .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("itimeout").addMarker("sp")
                                         .build();
         String iTimeoutId = hayStack.addPoint(integralTimeout);
-        HashMap defITPoint = hayStack.read("point and tuner and default and vav and pspread");
+        HashMap defITPoint = hayStack.read("point and tuner and default and vav and itimeout");
         ArrayList<HashMap> iTDefPointArr = hayStack.readPoint(defITPoint.get("id").toString());
         for (HashMap valMap : iTDefPointArr) {
             if (valMap.get("val") != null)

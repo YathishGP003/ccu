@@ -34,6 +34,8 @@ public class HisSyncHandler
     CCUHsApi hayStack;
     HashMap<String, String> tsData;
     
+    public boolean entitySyncRequired = false;
+    
     public HisSyncHandler(CCUHsApi api) {
         hayStack = api;
     }
@@ -44,7 +46,14 @@ public class HisSyncHandler
         //sendHisToHaystack();
         sendHisToInflux();
         //sendHisToInfluxBatched();
+        
+        if (entitySyncRequired) {
+            Log.d("CCU","doHisSync : entitySyncRequired");
+            CCUHsApi.getInstance().syncEntityTree();
+            entitySyncRequired = false;
+        }
         Log.d("CCU","<- doHisSync");
+        
     }
     
     /**
@@ -63,6 +72,7 @@ public class HisSyncHandler
                 Log.d("CCU"," Point does not have GUID "+pointID);
                 HDict point = hayStack.hsClient.readById(HRef.copy(pointID));
                 System.out.println(point);
+                entitySyncRequired = true;
                 continue;
             
             }
@@ -117,6 +127,7 @@ public class HisSyncHandler
             CcuLog.d("CCU"," sendHisToInflux Equip "+equip.get("dis"));
             ArrayList<HashMap> points = hayStack.readAll("point and his and equipRef == \""+equip.get("id")+"\"");
             if (CCUHsApi.getInstance().getGUID(equip.get("id").toString()) == null) {
+                entitySyncRequired = true;
                 continue;
             }
     
@@ -130,6 +141,7 @@ public class HisSyncHandler
                     Log.d("CCU","Skip hisSync; point does not have GUID "+pointID);
                     HDict point = hayStack.hsClient.readById(HRef.copy(pointID));
                     System.out.println(point);
+                    entitySyncRequired = true;
                     continue;
         
                 }
@@ -164,6 +176,7 @@ public class HisSyncHandler
         for (HashMap device : devices) {
             ArrayList<HashMap> points = hayStack.readAll("point and his and deviceRef == \""+device.get("id")+"\"");
             if (CCUHsApi.getInstance().getGUID(device.get("id").toString()) == null) {
+                entitySyncRequired = true;
                 continue;
             }
         
@@ -176,6 +189,7 @@ public class HisSyncHandler
                     Log.d("CCU","Skip hisSync; point does not have GUID "+pointID);
                     HDict point = hayStack.hsClient.readById(HRef.copy(pointID));
                     System.out.println(point);
+                    entitySyncRequired = true;
                     continue;
                 
                 }

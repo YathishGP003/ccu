@@ -77,25 +77,43 @@ public class PointSyncAdapter extends EntitySyncAdapter
                 }
                 HZincReader zReader = new HZincReader(response);
                 Iterator it = zReader.readGrid().iterator();
+                final ArrayList<String> syncedPoints = new ArrayList();
                 int index = 0;
                 while (it.hasNext())
                 {
                     HRow row = (HRow) it.next();
                     String guid = row.get("id").toString();
+                    
                     if (guid != null && guid != "")
                     {
                         String pointLuid = pointLUIDList.get(index++);
-                        if (isWritable(pointLuid)) {
-                            writeValRemote(pointLuid, guid);
-                        }
                         CCUHsApi.getInstance().putUIDMap(pointLuid, guid);
+                        syncedPoints.add(pointLuid);
                     } else {
                         return false;
                     }
                 }
+    
+                new Thread() {
+                    @Override
+                    public void run() {
+                        initWritableRemotePoints(syncedPoints);
+                    }
+                }.start();
+    
             }
         }
         return true;
+    }
+    
+    private void initWritableRemotePoints(ArrayList<String> luidList) {
+        for (String luid: luidList)
+        {
+            if (isWritable(luid))
+            {
+                writeValRemote(luid, CCUHsApi.getInstance().getGUID(luid));
+            }
+        }
     }
     
     private boolean isWritable(String id) {

@@ -67,12 +67,26 @@ public class Pulse
 						Log.d(TAG,"regularSmartNodeUpdate : Thermistor2 "+ThermistorUtil.getThermistorValueToTemp(val * 10));
 						break;
 					case SENSOR_RH:
-						SmartNodeSensorReading_t[] sensorReadings = smartNodeRegularUpdateMessage_t.update.sensorReadings;
-						val = sensorReadings[SensorType.HUMIDITY.ordinal()].sensorData.get();
+						SmartNodeSensorReading_t[] sensorReadingsHumidity = smartNodeRegularUpdateMessage_t.update.sensorReadings;
+						val = sensorReadingsHumidity[SensorType.HUMIDITY.ordinal()].sensorData.get();
 						
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						hayStack.writeHisValById(logPoint.get("id").toString(), getHumidityConversion(val));
 						Log.d(TAG,"regularSmartNodeUpdate : Humidity "+getHumidityConversion(val));
+					
+					case SENSOR_CO2:
+						SmartNodeSensorReading_t[] sensorReadingsCO2 = smartNodeRegularUpdateMessage_t.update.sensorReadings;
+						val = sensorReadingsCO2[SensorType.CO2.ordinal()].sensorData.get();
+						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+						hayStack.writeHisValById(logPoint.get("id").toString(), val);
+						Log.d(TAG,"regularSmartNodeUpdate : CO2 "+val);
+					case SENSOR_VOC:
+						SmartNodeSensorReading_t[] sensorReadingsVOC = smartNodeRegularUpdateMessage_t.update.sensorReadings;
+						val = sensorReadingsVOC[SensorType.VOC.ordinal()].sensorData.get();
+						
+						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+						hayStack.writeHisValById(logPoint.get("id").toString(), val);
+						Log.d(TAG,"regularSmartNodeUpdate : VOC "+val);
 					
 				}
 			}

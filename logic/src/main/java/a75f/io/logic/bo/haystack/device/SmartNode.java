@@ -30,6 +30,8 @@ public class SmartNode
     public RawPoint relay2;
     public RawPoint currentTemp;
     public RawPoint humidity;
+    public RawPoint co2;
+    public RawPoint voc;
     
     public String deviceRef;
     public String siteRef;
@@ -174,6 +176,28 @@ public class SmartNode
                               .setPort(Port.SENSOR_RH.toString())
                               .setTz(tz)
                               .build();
+    
+        co2 = new RawPoint.Builder()
+                           .setDisplayName("co2-"+smartNodeAddress)
+                           .setDeviceRef(deviceRef)
+                           .setSiteRef(siteRef)
+                           .setZoneRef(zoneRef)
+                           .setFloorRef(floorRef)
+                           .addMarker("sensor").addMarker("his")
+                           .setPort(Port.SENSOR_CO2.toString())
+                           .setTz(tz)
+                           .build();
+    
+        voc = new RawPoint.Builder()
+                           .setDisplayName("voc-"+smartNodeAddress)
+                           .setDeviceRef(deviceRef)
+                           .setSiteRef(siteRef)
+                           .setZoneRef(zoneRef)
+                           .setFloorRef(floorRef)
+                           .addMarker("sensor").addMarker("his")
+                           .setPort(Port.SENSOR_VOC.toString())
+                           .setTz(tz)
+                           .build();
     }
     
     public void addPointsToDb() {
@@ -186,6 +210,9 @@ public class SmartNode
         CCUHsApi.getInstance().addPoint(relay1);
         CCUHsApi.getInstance().addPoint(relay2);
         CCUHsApi.getInstance().addPoint(currentTemp);
+        CCUHsApi.getInstance().addPoint(humidity);
+        CCUHsApi.getInstance().addPoint(co2);
+        CCUHsApi.getInstance().addPoint(voc);
     }
     
     public static void updatePhysicalPoint(int addr, String port, String type) {

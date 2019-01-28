@@ -47,7 +47,7 @@ public class ScheduleSyncAdapter extends EntitySyncAdapter
             CcuLog.i("CCU", "Response: \n" + response);
             if (response == null)
             {
-                CcuLog.i("CCU", "Aborting Floor Sync");
+                CcuLog.i("CCU", "Aborting Schedule Sync");
                 return false;
             }
             HZincReader zReader = new HZincReader(response);

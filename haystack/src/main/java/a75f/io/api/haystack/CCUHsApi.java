@@ -576,7 +576,7 @@ public class CCUHsApi {
         return null;
     }
 
-    public synchronized void syncEntityTree() {
+    public void syncEntityTree() {
         new Thread() {
             @Override
             public void run() {

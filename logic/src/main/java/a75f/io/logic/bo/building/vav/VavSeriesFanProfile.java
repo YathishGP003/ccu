@@ -141,7 +141,7 @@ public class VavSeriesFanProfile extends VavProfile
             
             if (!damper.isOverrideActive())
             {
-                setDamperLimits(node, damper);
+                //setDamperLimits(node, damper);
                 //CO2 loop output from 0-50% modulates damper min position.
                 if (/*mode == OCCUPIED && */co2Loop.getLoopOutput(co2) <= 50)
                 {
@@ -164,7 +164,6 @@ public class VavSeriesFanProfile extends VavProfile
                 {
                     damper.currentPosition = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * loopOp / 100;
                 }
-                damper.applyLimits();
             }
             
             //When in the system is in heating, REHEAT control that does not follow RP-1455.

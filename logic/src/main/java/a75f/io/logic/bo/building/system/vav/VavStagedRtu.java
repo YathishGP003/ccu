@@ -34,6 +34,10 @@ public class VavStagedRtu extends VavSystemProfile
     
     private static final int ANALOG_SCALE = 10;
     
+    int heatingStages = 0;
+    int coolingStages = 0;
+    int fanStages = 0;
+    
     public void initTRSystem() {
         trSystem =  new VavTRSystem();
     }
@@ -97,6 +101,7 @@ public class VavStagedRtu extends VavSystemProfile
                                    .setTz(siteMap.get("tz").toString())
                                    .build();
         String equipRef = hayStack.addEquip(systemEquip);
+        addSystemLoopOpPoints(equipRef);
         addUserIntentPoints(equipRef);
         addCmdPoints(equipRef);
         addConfigPoints(equipRef);
@@ -134,17 +139,28 @@ public class VavStagedRtu extends VavSystemProfile
             systemHeatingLoopOp = 0;
         }
     
+        int systemFanLoopOp = 0;
+        double analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier");
+        if (VavSystemController.getInstance().getSystemState() == COOLING)
+        {
+            double spSpMax = VavTRTuners.getStaticPressureTRTunerVal("spmax");
+            double spSpMin = VavTRTuners.getStaticPressureTRTunerVal("spmin");
         
-        int systemFanLoopOp = VavSystemController.getInstance().getSystemState() == COOLING ? systemCoolingLoopOp
-                                      : VavSystemController.getInstance().getSystemState() == HEATING ? systemHeatingLoopOp : 0;
-        systemFanLoopOp *= TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier");
+            Log.d("CCU","spSpMax :"+spSpMax+" spSpMin: "+spSpMin+" SP: "+getStaticPressure());
+            systemFanLoopOp = (int) ((getStaticPressure() - spSpMin)  * 100 / (spSpMax - spSpMin)) ;
+        } else if (VavSystemController.getInstance().getSystemState() == HEATING){
+            systemFanLoopOp = (int) (VavSystemController.getInstance().getHeatingSignal() * analogFanSpeedMultiplier);
+        }
         
-        int coolingStages = getCoolingStages();
-        int heatingStages = getHeatingStages();
-        int fanStages = getFanStages();
+        setSystemLoopOp("cooling", systemCoolingLoopOp);
+        setSystemLoopOp("heating", systemHeatingLoopOp);
+        setSystemLoopOp("fan", systemFanLoopOp);
+        
+        
+        updateStagesSelected();
     
         double relayDeactHysteresis = TunerUtil.readTunerValByQuery("relay and deactivation and hysteresis");
-        Log.d("CCU", "systemCoolingLoopOp: "+systemCoolingLoopOp + " systemHeatingLoopOp: " + systemHeatingLoopOp);
+        Log.d("CCU", "systemCoolingLoopOp: "+systemCoolingLoopOp + " systemHeatingLoopOp: " + systemHeatingLoopOp+" systemFanLoopOp: "+systemFanLoopOp);
         Log.d("CCU", "coolingStages: "+coolingStages + " heatingStages: "+heatingStages+" fanStages: "+fanStages);
         for (int i = 1; i <=7 ;i++)
         {
@@ -317,90 +333,41 @@ public class VavStagedRtu extends VavSystemProfile
         
     }
     
-    public int getCoolingStages()
-    {
-        int stage = 0;
+    public void updateStagesSelected() {
+       
+        coolingStages = 0;
+        heatingStages = 0;
+        fanStages = 0;
+        
         for (int i = 1; i < 8; i++)
         {
             if (getConfigEnabled("relay"+i) > 0)
             {
                 int val = (int)getConfigAssociation("relay"+i);
-                if (val <= Stage.COOLING_5.ordinal() && val > stage)
+                if (val <= Stage.COOLING_5.ordinal() && val >= coolingStages)
                 {
-                    stage = val;
-                    Log.d("CCU"," Cooling stage : "+stage);
+                    coolingStages = val + 1;
+                    Log.d("CCU"," Cooling stage : "+coolingStages);
+                } else if (val >= Stage.HEATING_1.ordinal() && val <= Stage.HEATING_5.ordinal() && val >= heatingStages)
+                {
+                    heatingStages = val + 1;
+                    Log.d("CCU"," Heating stage : "+heatingStages);
+                } else if (val >= Stage.FAN_1.ordinal() && val <= Stage.FAN_5.ordinal() && val >= fanStages)
+                {
+                    fanStages = val + 1;
+                    Log.d("CCU"," Fan stage : "+fanStages);
                 }
             }
         }
-        return stage + 1;
-    }
-    
-    public int getHeatingStages()
-    {
-        int stage = 0;
-        for (int i = 1; i < 8; i++)
-        {
-            if (getConfigEnabled("relay"+i) > 0)
-            {
-                int val = (int)getConfigAssociation("relay"+i);
-                if (val >= Stage.HEATING_1.ordinal() && val <= Stage.HEATING_5.ordinal() && val > stage)
-                {
-                    stage = val;
-                    Log.d("CCU"," Heating stage : "+stage);
-                }
-            }
+        
+        if ((heatingStages > 0)) {
+            heatingStages -= Stage.HEATING_1.ordinal();
         }
-        return stage != 0 ? stage - Stage.HEATING_1.ordinal() + 1 : stage + 1 ;
-    }
-    
-    public int getFanStages()
-    {
-        int stage = 0;
-        for (int i = 1; i < 8; i++)
-        {
-            if (getConfigEnabled("relay"+i) > 0)
-            {
-                int val = (int)getConfigAssociation("relay"+i);
-                if (val >= Stage.FAN_1.ordinal() && val <= Stage.FAN_5.ordinal() && val > stage)
-                {
-                    stage = val;
-                    Log.d("CCU"," Fan stage : "+stage);
-                }
-            }
+        
+        if (fanStages > 0) {
+            fanStages -= Stage.FAN_1.ordinal();
         }
-        return stage != 0 ? stage - Stage.FAN_1.ordinal() + 1 : stage + 1 ;
-    }
-    
-    public int getHumidifierStage()
-    {
-        for (int i = 1; i < 8; i++)
-        {
-            if (getConfigEnabled("relay"+i) > 0)
-            {
-                int val = (int)getConfigAssociation("relay"+i);
-                if (val >= Stage.HUMIDIFIER.ordinal())
-                {
-                    return 1;
-                }
-            }
-        }
-        return 0 ;
-    }
-    
-    public int getHDeumidifierStage()
-    {
-        for (int i = 1; i < 8; i++)
-        {
-            if (getConfigEnabled("relay"+i) > 0)
-            {
-                int val = (int)getConfigAssociation("relay"+i);
-                if (val >= Stage.DEHUMIDIFIER.ordinal())
-                {
-                    return 1;
-                }
-            }
-        }
-        return 0 ;
+        
     }
     
     @Override

@@ -21,6 +21,32 @@ import a75f.io.logic.tuners.TunerConstants;
 
 public abstract class VavSystemProfile extends SystemProfile
 {
+    public void addSystemLoopOpPoints(String equipRef) {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap siteMap = hayStack.read(Tags.SITE);
+        String siteRef = (String) siteMap.get(Tags.ID);
+        String tz = siteMap.get("tz").toString();
+        String equipDis = siteMap.get("dis").toString()+"-SystemEquip";
+        
+        addSystemLoopOpPoint("cooling", siteRef, equipRef, equipDis, tz);
+        addSystemLoopOpPoint("heating", siteRef, equipRef, equipDis, tz);
+        addSystemLoopOpPoint("fan", siteRef, equipRef, equipDis, tz);
+    }
+    
+    private void addSystemLoopOpPoint(String loop, String siteRef, String equipref, String equipDis, String tz){
+        Point relay1Op = new Point.Builder()
+                                 .setDisplayName(equipDis+"-"+loop+"LoopOutput")
+                                 .setSiteRef(siteRef)
+                                 .setEquipRef(equipref)
+                                 .addMarker("system").addMarker(loop).addMarker("loop").addMarker("output").addMarker("his").addMarker("equipHis").addMarker("sp")
+                                 .setTz(tz)
+                                 .build();
+        CCUHsApi.getInstance().addPoint(relay1Op);
+    }
+    
+    public void setSystemLoopOp(String loop, double val) {
+        CCUHsApi.getInstance().writeHisValByQuery("point and system and loop and output and his and "+loop, val);
+    }
     
     public void addVavSystemTuners(String equipref) {
         CCUHsApi hayStack = CCUHsApi.getInstance();

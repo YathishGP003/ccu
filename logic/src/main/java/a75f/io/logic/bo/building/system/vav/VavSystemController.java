@@ -2,7 +2,6 @@ package a75f.io.logic.bo.building.system.vav;
 
 import android.util.Log;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.EvictingQueue;
 
 import java.util.ArrayList;
@@ -18,10 +17,11 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.logic.tuners.VavTunerUtil;
 
-import static a75f.io.logic.bo.building.ZonePriority.NONE;
 import static a75f.io.logic.bo.building.system.SystemMode.AUTO;
 import static a75f.io.logic.bo.building.system.SystemMode.COOLONLY;
 import static a75f.io.logic.bo.building.system.SystemMode.HEATONLY;
@@ -96,30 +96,30 @@ public class VavSystemController
         for (Floor f: HSUtil.getFloors())
         {
             for(Zone z: HSUtil.getZones(f.getId())) {
-                if (getZoneCurrentTemp(z.getId()) == 0) {
-                    continue;
+                
+                for (Equip q : HSUtil.getEquips(z.getId()))
+                {
+                    if (getEquipCurrentTemp(q.getId()) == 0)
+                    {
+                        continue;
+                    }
+                    double zoneCurTemp = getEquipCurrentTemp(q.getId());
+                    double zoneTargetTemp = getEquipTempTarget(q.getId());
+                    double coolingDB = VavTunerUtil.getCoolingDeadband(q.getId());
+                    double heatingDB = VavTunerUtil.getHeatingDeadband(q.getId());
+                    double zoneCoolingLoad = zoneTargetTemp-coolingDB >= zoneCurTemp ? 0 : zoneCurTemp - zoneTargetTemp - coolingDB;
+                    double zoneHeatingLoad = zoneTargetTemp-heatingDB <= zoneCurTemp ? 0 : zoneTargetTemp - zoneCurTemp - heatingDB;
+                    double zoneDynamicPriority = getEquipDynamicPriority(zoneCoolingLoad > 0 ? zoneCoolingLoad : zoneHeatingLoad, q.getId());
+                    totalCoolingLoad += zoneCoolingLoad;
+                    totalHeatingLoad += zoneHeatingLoad;
+                    zoneCount++;
+                    weightedAverageCoolingOnlyLoadSum += zoneCoolingLoad * zoneDynamicPriority;
+                    weightedAverageHeatingOnlyLoadSum += zoneHeatingLoad * zoneDynamicPriority;
+                    weightedAverageLoadSum = +(zoneCoolingLoad * zoneDynamicPriority) - (zoneHeatingLoad * zoneDynamicPriority);
+                    prioritySum += zoneDynamicPriority;
+                    Log.d("CCU", q.getDisplayName() + " zoneDynamicPriority: " + zoneDynamicPriority + " zoneCoolingLoad: " + zoneCoolingLoad + " zoneHeatingLoad: " + zoneHeatingLoad);
+                    Log.d("CCU", q.getDisplayName() + " weightedAverageCoolingOnlyLoadSum:" + weightedAverageCoolingOnlyLoadSum + " weightedAverageHeatingOnlyLoadSum " + weightedAverageHeatingOnlyLoadSum);
                 }
-                
-                double zoneCurTemp = getZoneCurrentTemp(z.getId());
-                double zoneTargetTemp = getZoneTempTarget(z.getId());
-                
-                double zoneCoolingLoad = zoneTargetTemp >= zoneCurTemp ? 0 : zoneCurTemp -zoneTargetTemp - 1/* Cool DB*/ ;
-                double zoneHeatingLoad = zoneTargetTemp <= zoneCurTemp ? 0 : zoneTargetTemp - zoneCurTemp - 1 /*Heat DB*/;
-    
-                double zoneDynamicPriority = getDynamicPriority(zoneCoolingLoad > 0 ? zoneCoolingLoad : zoneHeatingLoad, z.getId());
-                
-                totalCoolingLoad += zoneCoolingLoad;
-                totalHeatingLoad += zoneHeatingLoad;
-                
-                zoneCount++;
-                
-                weightedAverageCoolingOnlyLoadSum += zoneCoolingLoad * zoneDynamicPriority;
-                weightedAverageHeatingOnlyLoadSum += zoneHeatingLoad * zoneDynamicPriority;
-                weightedAverageLoadSum =+ (zoneCoolingLoad * zoneDynamicPriority) - (zoneHeatingLoad * zoneDynamicPriority);
-                
-                prioritySum += zoneDynamicPriority;
-                Log.d("CCU", z.getDisplayName()+" zoneDynamicPriority: "+zoneDynamicPriority+" zoneCoolingLoad: "+zoneCoolingLoad+" zoneHeatingLoad: "+zoneHeatingLoad);
-                Log.d("CCU", z.getDisplayName()+" weightedAverageCoolingOnlyLoadSum:"+weightedAverageCoolingOnlyLoadSum+" weightedAverageHeatingOnlyLoadSum "+weightedAverageHeatingOnlyLoadSum);
             }
         
         }
@@ -231,12 +231,65 @@ public class VavSystemController
         return false;
     }
     
-    public double getZoneCurrentTemp(String zoneRef) {
+    public boolean isVavEquip(Equip q) {
+        if (q.getProfile() == ProfileType.VAV_REHEAT.name() ||
+            q.getProfile() == ProfileType.VAV_SERIES_FAN.name() ||
+            q.getProfile() == ProfileType.VAV_PARALLEL_FAN.name()) {
+            return true;
+        }
+        return false;
+    }
+    
+    public double getEquipCurrentTemp(String equipRef) {
+        return CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \""+equipRef+"\"");
+    }
+    
+    public ZonePriority getEquipPriority(String equipRef) {
+        double priorityVal = CCUHsApi.getInstance().readDefaultVal("point and zone and config and vav and priority and equipRef == \""+equipRef+"\"");
+        return ZonePriority.values()[(int) priorityVal];
+    }
+    
+    public double getEquipDesiredTemp(String equipRef) {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap cdb = hayStack.read("point and air and temp and desired and equipRef == \""+equipRef+"\"");
+    
+        ArrayList values = hayStack.readPoint(cdb.get("id").toString());
+        if (values != null && values.size() > 0)
+        {
+            for (int l = 1; l <= values.size() ; l++ ) {
+                HashMap valMap = ((HashMap) values.get(l-1));
+                if (valMap.get("val") != null) {
+                    return Double.parseDouble(valMap.get("val").toString());
+                }
+            }
+        }
+        return 72;
+    }
+    
+    public double getEquipTempTarget(String zoneRef) //Humidity compensated
+    {
+        return getEquipDesiredTemp(zoneRef);//TODO - TEMP
+    }
+    
+    public double getEquipDynamicPriority(double zoneLoad, String equipRef) {
+        ZonePriority p = getEquipPriority(equipRef);
+        if (getEquipCurrentTemp(equipRef) == 0) {
+            return p.val;
+        }
+    
+        double zonePrioritySpread = TunerUtil.readTunerValByQuery("point and tuner and vav and zone and priority and spread and equipRef == \""+equipRef+"\"");;
+        double zonePriorityMultiplier = TunerUtil.readTunerValByQuery("point and tuner and vav and zone and priority and multiplier and equipRef == \""+equipRef+"\"");;
+        
+        return p.val * Math.pow(zonePriorityMultiplier, (zoneLoad/zonePrioritySpread) > 10 ? 10 : (zoneLoad/zonePrioritySpread));
+    }
+    
+    
+    /*public double getZoneCurrentTemp(String zoneRef) {
         double tempSum = 0;
         int tempCount = 0;
         for (ZoneProfile p : L.ccu().zoneProfiles)
         {
-            if (p.getEquip().getZoneRef().equals(zoneRef) && p.getCurrentTemp() > 0) {
+            if (isVavEquip(p.getEquip()) && p.getEquip().getZoneRef().equals(zoneRef) && p.getCurrentTemp() > 0) {
                 tempSum += p.getCurrentTemp();
                 tempCount++;
             }
@@ -248,14 +301,13 @@ public class VavSystemController
         ZonePriority priority = NONE;
         for (ZoneProfile p : L.ccu().zoneProfiles)
         {
-            if (p.getEquip().getZoneRef().equals(zoneRef) && p.getPriority().ordinal() > priority.ordinal()) {
+            if (isVavEquip(p.getEquip()) && p.getEquip().getZoneRef().equals(zoneRef) && p.getPriority().ordinal() > priority.ordinal()) {
                 priority = p.getPriority();
             }
         }
         return priority;
     }
     
-    @JsonIgnore
     public double getZoneDesiredTemp(String zoneRef)
     {
         CCUHsApi hayStack = CCUHsApi.getInstance();
@@ -274,11 +326,10 @@ public class VavSystemController
         return 72;
     }
     
-    @JsonIgnore
     public double getZoneTempTarget(String zoneRef) //Humidity compensated
     {
         return getZoneDesiredTemp(zoneRef);//TODO - TEMP
-    }
+    }*/
     
     public double getSystemHumidity() {
         //Average across zones or from proxy zone.
@@ -298,8 +349,7 @@ public class VavSystemController
         return humidityZones == 0 ? 0 : humiditySum/humidityZones;
     }
     
-    @JsonIgnore
-    public double getDynamicPriority(double zoneLoad, String zoneRef) {
+    /*public double getDynamicPriority(double zoneLoad, String zoneRef) {
         
         ZonePriority p = getZonePriority(zoneRef);
         if (getZoneCurrentTemp(zoneRef) == 0) {
@@ -330,7 +380,7 @@ public class VavSystemController
         //zoneDynamicPriority = zoneBasePriority*((zonePriorityMultiplier )^(rounddownTo10(zoneCoolingLoad/zonePrioritySpread))
         
         return p.val * Math.pow(zonePriorityMultiplier, (zoneLoad/zonePrioritySpread) > 10 ? 10 : (zoneLoad/zonePrioritySpread));
-    }
+    }*/
     
     public State getSystemState() {
         return systemState;

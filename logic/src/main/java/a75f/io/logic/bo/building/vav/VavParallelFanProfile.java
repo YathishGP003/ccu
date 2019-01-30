@@ -139,7 +139,7 @@ public class VavParallelFanProfile extends VavProfile
                 valve.currentPosition = 0;
             }
         
-            setDamperLimits(node, damper);
+            //setDamperLimits(node, damper);
         
             //CO2 loop output from 0-50% modulates damper min position.
             if (/*mode == OCCUPIED && */co2Loop.getLoopOutput(co2) <= 50)

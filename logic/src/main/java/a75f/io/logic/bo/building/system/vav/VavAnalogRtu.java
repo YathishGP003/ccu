@@ -21,6 +21,9 @@ import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.tuners.VavTRTuners;
 
+import static a75f.io.logic.bo.building.system.vav.VavSystemController.State.COOLING;
+import static a75f.io.logic.bo.building.system.vav.VavSystemController.State.HEATING;
+
 /**
  * Default System handles PI controlled op
  */
@@ -85,86 +88,105 @@ public class VavAnalogRtu extends VavSystemProfile
     }
     
     private synchronized void updateSystemPoints() {
+    
+        int systemCoolingLoopOp;
+        if (VavSystemController.getInstance().getSystemState() == COOLING)
+        {
+            double satSpMax = VavTRTuners.getSatTRTunerVal("spmax");
+            double satSpMin = VavTRTuners.getSatTRTunerVal("spmin");
+        
+            Log.d("CCU","satSpMax :"+satSpMax+" satSpMin: "+satSpMin+" SAT: "+getSystemSAT());
+            systemCoolingLoopOp = (int) ((satSpMax - getSystemSAT())  * 100 / (satSpMax - satSpMin)) ;
+        } else {
+            systemCoolingLoopOp = 0;
+        }
         
         double analogMin = getConfigVal("analog1 and cooling and sat and min");
         double analogMax = getConfigVal("analog1 and cooling and sat and max");
         Log.d("CCU", "analogMin: "+analogMin+" analogMax: "+analogMax+" SAT: "+getSystemSAT());
         
         int signal = 0;
-        if (VavSystemController.getInstance().getSystemState() == VavSystemController.State.COOLING)
+        if (analogMax > analogMin)
         {
-            if (analogMax > analogMin)
-            {
-                signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (SystemConstants.COOLING_SAT_CONFIG_MAX - getSystemSAT()) / 10));
-            }
-            else
-            {
-                signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (SystemConstants.COOLING_SAT_CONFIG_MAX - getSystemSAT()) / 10));
-            }
-            
+            signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (systemCoolingLoopOp/100)));
         }
+        else
+        {
+            signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemCoolingLoopOp/100)));
+        }
+        
+        setSystemLoopOp("cooling", systemCoolingLoopOp);
         setCmdSignal("cooling",signal);
         if (getConfigVal("analog1 and output and enabled") > 0)
         {
             ControlMote.setAnalogOut("analog1", signal);
         }
     
-        analogMin = getConfigVal("analog2 and staticPressure and min");
-        analogMax = getConfigVal("analog2 and staticPressure and max");
-        Log.d("CCU", "analogMin: "+analogMin+" analogMax: "+analogMax+" SP: "+getStaticPressure()+" System: "+VavSystemController.getInstance().getSystemState());
-        
-        if (VavSystemController.getInstance().getSystemState() == VavSystemController.State.COOLING)
-        {
-            if (analogMax > analogMin)
-            {
-                signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (getStaticPressure() - SystemConstants.SP_CONFIG_MIN) / 1.5));
-            }
-            else
-            {
-                signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (getStaticPressure() - SystemConstants.SP_CONFIG_MIN) / 1.5));
-            }
-        } else if (VavSystemController.getInstance().getSystemState() == VavSystemController.State.HEATING) {
-            double analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier");
-            if (analogMax > analogMin)
-            {
-                signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * VavSystemController.getInstance().getHeatingSignal() * analogFanSpeedMultiplier/ 100));
-            }
-            else
-            {
-                signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * VavSystemController.getInstance().getHeatingSignal() * analogFanSpeedMultiplier/ 100));
-            }
-        } else {
-            signal = 0;
-        }
-        
-        setCmdSignal("staticPressure", signal);
-        if (getConfigVal("analog2 and output and enabled") > 0)
-        {
-            ControlMote.setAnalogOut("analog2", signal);
-        }
-        
+        int systemHeatingLoopOp = 0;
+    
         analogMin = getConfigVal("analog3 and heating and min");
         analogMax = getConfigVal("analog3 and heating and max");
     
         Log.d("CCU", "analogMin: "+analogMin+" analogMax: "+analogMax+" Heating : "+VavSystemController.getInstance().getHeatingSignal());
         if (VavSystemController.getInstance().getSystemState() == VavSystemController.State.HEATING)
         {
-            if (analogMax > analogMin)
-            {
-                signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (VavSystemController.getInstance().getHeatingSignal()) / 100));
-            }
-            else
-            {
-                signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (VavSystemController.getInstance().getHeatingSignal()) / 100));
-            }
+            systemHeatingLoopOp = VavSystemController.getInstance().getHeatingSignal();
         } else {
+            systemHeatingLoopOp = 0;
             signal = 0;
         }
+    
+        if (analogMax > analogMin)
+        {
+            signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (systemHeatingLoopOp / 100)));
+        }
+        else
+        {
+            signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemHeatingLoopOp / 100)));
+        }
+        
+        setSystemLoopOp("heating", systemHeatingLoopOp);
         setCmdSignal("heating", signal);
         if (getConfigVal("analog3 and output and enabled") > 0)
         {
             ControlMote.setAnalogOut("analog3", signal);
         }
+    
+    
+        int systemFanLoopOp = 0;
+        double analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier");
+        if (VavSystemController.getInstance().getSystemState() == COOLING)
+        {
+            double spSpMax = VavTRTuners.getStaticPressureTRTunerVal("spmax");
+            double spSpMin = VavTRTuners.getStaticPressureTRTunerVal("spmin");
+        
+            Log.d("CCU","spSpMax :"+spSpMax+" spSpMin: "+spSpMin+" SAT: "+getStaticPressure());
+            systemFanLoopOp = (int) ((getStaticPressure() - spSpMin)  * 100 / (spSpMax - spSpMin)) ;
+        } else if (VavSystemController.getInstance().getSystemState() == HEATING){
+            systemFanLoopOp = (int) (VavSystemController.getInstance().getHeatingSignal() * analogFanSpeedMultiplier);
+        }
+        
+    
+        analogMin = getConfigVal("analog2 and staticPressure and min");
+        analogMax = getConfigVal("analog2 and staticPressure and max");
+        
+        Log.d("CCU", "analogMin: "+analogMin+" analogMax: "+analogMax+" systemFanLoopOp: "+systemFanLoopOp);
+    
+        if (analogMax > analogMin)
+        {
+            signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (systemFanLoopOp/100)));
+        }
+        else
+        {
+            signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemFanLoopOp/100)));
+        }
+        setSystemLoopOp("fan", systemFanLoopOp);
+        setCmdSignal("staticPressure", signal);
+        if (getConfigVal("analog2 and output and enabled") > 0)
+        {
+            ControlMote.setAnalogOut("analog2", signal);
+        }
+        
     
         analogMin = getConfigVal("analog4 and co2 and min");
         analogMax = getConfigVal("analog4 and co2 and max");
@@ -251,6 +273,7 @@ public class VavAnalogRtu extends VavSystemProfile
                                    .setTz(siteMap.get("tz").toString())
                                    .build();
         String equipRef = hayStack.addEquip(systemEquip);
+        addSystemLoopOpPoints(equipRef);
         addUserIntentPoints(equipRef);
         addCmdPoints(equipRef);
         addConfigPoints(equipRef);

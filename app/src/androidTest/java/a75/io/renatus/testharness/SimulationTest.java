@@ -24,6 +24,7 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.SystemProperties;
 import a75f.io.renatus.RenatusLandingActivity;
 import a75f.io.renatus.SplashActivity;
@@ -91,7 +92,7 @@ public class SimulationTest
         
         CCUStateParser parser = new CCUStateParser();
         boolean runTest = true;
-        
+        CCUHsApi.getInstance().testHarnessEnabled = true;
         do {
     
             threadSleep(60);
@@ -131,6 +132,8 @@ public class SimulationTest
             }
             
         } while (runTest);
+    
+        CCUHsApi.getInstance().testHarnessEnabled = false;
     }
     
     private void startTest() {

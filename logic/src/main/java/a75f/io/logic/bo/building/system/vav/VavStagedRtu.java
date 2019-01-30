@@ -47,6 +47,22 @@ public class VavStagedRtu extends VavSystemProfile
         addSystemEquip();
     }
     
+    public  int getSystemSAT() {
+        return ((VavTRSystem)trSystem).getCurrentSAT();
+    }
+    
+    public  int getSystemCO2() {
+        return ((VavTRSystem)trSystem).getCurrentCO2();
+    }
+    
+    public  int getSystemOADamper() {
+        return (((VavTRSystem)trSystem).getCurrentCO2() - CO2_MIN) * 100 / (CO2_MAX - CO2_MIN);
+    }
+    
+    public double getStaticPressure() {
+        return ((VavTRSystem)trSystem).getCurrentSp();
+    }
+    
     @Override
     public void doSystemControl() {
         if (trSystem != null) {
@@ -104,7 +120,8 @@ public class VavStagedRtu extends VavSystemProfile
             double satSpMax = VavTRTuners.getSatTRTunerVal("spmax");
             double satSpMin = VavTRTuners.getSatTRTunerVal("spmin");
     
-            systemCoolingLoopOp = (int) ((satSpMax - getSystemSAT()) / (satSpMax - satSpMin)) * 100;
+            Log.d("CCU","satSpMax :"+satSpMax+" satSpMin: "+satSpMin+" SAT: "+getSystemSAT());
+            systemCoolingLoopOp = (int) ((satSpMax - getSystemSAT())  * 100 / (satSpMax - satSpMin)) ;
         } else {
             systemCoolingLoopOp = 0;
         }
@@ -414,7 +431,7 @@ public class VavStagedRtu extends VavSystemProfile
                                  .setDisplayName(equipDis+"-"+relay+"Output")
                                  .setSiteRef(siteRef)
                                  .setEquipRef(equipref)
-                                 .addMarker("system").addMarker("cmd").addMarker(relay).addMarker("his")
+                                 .addMarker("system").addMarker("cmd").addMarker(relay).addMarker("his").addMarker("equipHis")
                                  .setTz(tz)
                                  .build();
         CCUHsApi.getInstance().addPoint(relay1Op);

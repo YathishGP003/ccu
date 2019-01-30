@@ -43,7 +43,7 @@ public class CCUHsApi {
     public EntitySyncHandler entitySyncHandler;
     public HisSyncHandler hisSyncHandler;
     
-    public boolean testHarnessEnabled = true;
+    public boolean testHarnessEnabled = false;
 
     public static CCUHsApi getInstance() {
         if (instance == null) {
@@ -524,6 +524,10 @@ public class CCUHsApi {
             for (HashMap device : devices) {
                 deleteEntityTree(device.get("id").toString());
             }
+            ArrayList<HashMap> schedules = readAll("schedule and siteRef == \"" + id + "\"");
+            for (HashMap schedule : schedules) {
+                deleteEntity(schedule.get("id").toString());
+            }
             deleteEntity(id);
 
         } else if (entity.get("floor") != null) {
@@ -582,7 +586,10 @@ public class CCUHsApi {
             public void run() {
                 if (!testHarnessEnabled)
                 {
-                    entitySyncHandler.sync();
+                    if (!entitySyncHandler.isSyncProgress())
+                    {
+                        entitySyncHandler.sync();
+                    }
                 } else {
                     Log.d("CCU"," Test Harness Enabled , Skip Entity Sync");
                 }

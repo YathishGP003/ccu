@@ -37,8 +37,10 @@ public class EntitySyncHandler
     
     public boolean syncPending = false;
     
+    public boolean syncProgress = false;//TODO- Revisit
+    
     public synchronized void sync() {
-
+        syncProgress = true;
         Log.i(TAG, "syncPending: " + syncPending);
         if (syncPending || isSyncNeeded())
         {
@@ -60,7 +62,11 @@ public class EntitySyncHandler
             CcuLog.i("CCU", "UpdateIDMap : "+CCUHsApi.getInstance().tagsDb.updateIdMap);
             doSyncUpdateEntities();
         }
+        syncProgress = false;
+    }
     
+    public boolean isSyncProgress() {
+        return syncProgress;
     }
     
     public void doSyncRemoveIds()

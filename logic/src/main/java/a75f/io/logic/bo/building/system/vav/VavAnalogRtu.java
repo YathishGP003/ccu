@@ -247,6 +247,7 @@ public class VavAnalogRtu extends VavSystemProfile
                                    .setProfile(ProfileType.SYSTEM_VAV_ANALOG_RTU.name())
                                    .addMarker("equip")
                                    .addMarker("system")
+                                   .addMarker("equipHis")
                                    .setTz(siteMap.get("tz").toString())
                                    .build();
         String equipRef = hayStack.addEquip(systemEquip);
@@ -281,7 +282,7 @@ public class VavAnalogRtu extends VavSystemProfile
                             .setDisplayName(equipDis+"-"+"coolingSignal")
                             .setSiteRef(siteRef)
                             .setEquipRef(equipref)
-                            .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("his")
+                            .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("his").addMarker("equipHis")
                             .setTz(tz)
                             .build();
         CCUHsApi.getInstance().addPoint(coolingSignal);
@@ -290,7 +291,7 @@ public class VavAnalogRtu extends VavSystemProfile
                                       .setDisplayName(equipDis+"-"+"heatingSignal")
                                       .setSiteRef(siteRef)
                                       .setEquipRef(equipref)
-                                      .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("his")
+                                      .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("his").addMarker("equipHis")
                                       .setTz(tz)
                                       .build();
         CCUHsApi.getInstance().addPoint(heatingSignal);
@@ -299,7 +300,7 @@ public class VavAnalogRtu extends VavSystemProfile
                                       .setDisplayName(equipDis+"-"+"fanSignal")
                                       .setSiteRef(siteRef)
                                       .setEquipRef(equipref)
-                                      .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("his")
+                                      .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("his").addMarker("equipHis")
                                       .setTz(tz)
                                       .build();
         CCUHsApi.getInstance().addPoint(fanSignal);
@@ -308,7 +309,7 @@ public class VavAnalogRtu extends VavSystemProfile
                                   .setDisplayName(equipDis+"-"+"co2Signal")
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipref)
-                                  .addMarker("system").addMarker("cmd").addMarker("co2").addMarker("his")
+                                  .addMarker("system").addMarker("cmd").addMarker("co2").addMarker("his").addMarker("equipHis")
                                   .setTz(tz)
                                   .build();
         CCUHsApi.getInstance().addPoint(co2Signal);
@@ -316,7 +317,7 @@ public class VavAnalogRtu extends VavSystemProfile
                                   .setDisplayName(equipDis+"-"+"occupancySignal")
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipref)
-                                  .addMarker("system").addMarker("cmd").addMarker("occupancy").addMarker("his")
+                                  .addMarker("system").addMarker("cmd").addMarker("occupancy").addMarker("his").addMarker("equipHis")
                                   .setTz(tz)
                                   .build();
         CCUHsApi.getInstance().addPoint(occupancySignal);
@@ -324,7 +325,7 @@ public class VavAnalogRtu extends VavSystemProfile
                                   .setDisplayName(equipDis+"-"+"humidifierSignal")
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipref)
-                                  .addMarker("system").addMarker("cmd").addMarker("humidifier").addMarker("his")
+                                  .addMarker("system").addMarker("cmd").addMarker("humidifier").addMarker("his").addMarker("equipHis")
                                   .setTz(tz)
                                   .build();
         CCUHsApi.getInstance().addPoint(humidifierSignal);
@@ -333,7 +334,7 @@ public class VavAnalogRtu extends VavSystemProfile
                                          .setDisplayName(equipDis+"-"+"dehumidifierSignal")
                                          .setSiteRef(siteRef)
                                          .setEquipRef(equipref)
-                                         .addMarker("system").addMarker("cmd").addMarker("dehumidifier").addMarker("his")
+                                         .addMarker("system").addMarker("cmd").addMarker("dehumidifier").addMarker("his").addMarker("equipHis")
                                          .setTz(tz)
                                          .build();
         CCUHsApi.getInstance().addPoint(dehumidifierSignal);

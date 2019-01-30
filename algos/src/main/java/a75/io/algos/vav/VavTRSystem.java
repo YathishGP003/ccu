@@ -4,6 +4,9 @@ import android.util.Log;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import a75.io.algos.tr.SystemTrimResponseBuilder;
 import a75.io.algos.tr.TRSystem;
 import a75.io.algos.tr.TrimResponseProcessor;
@@ -172,14 +175,53 @@ public class VavTRSystem extends TRSystem
     }
     
     private double getSatTRTunerVal(String trParam) {
-        return CCUHsApi.getInstance().readDefaultVal("point and system and tuner and tr and sat and " + trParam);
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap cdb = hayStack.read("point and system and tuner and tr and sat and " + trParam);
+    
+        ArrayList values = hayStack.readPoint(cdb.get("id").toString());
+        if (values != null && values.size() > 0)
+        {
+            for (int l = 1; l <= values.size() ; l++ ) {
+                HashMap valMap = ((HashMap) values.get(l-1));
+                if (valMap.get("val") != null) {
+                    return Double.parseDouble(valMap.get("val").toString());
+                }
+            }
+        }
+        throw new IllegalStateException("Tuner not initialized");
     }
     
     private double getSpTRTunerVal(String trParam) {
-        return CCUHsApi.getInstance().readDefaultVal("point and system and tuner and tr and staticPressure and "+trParam);
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap cdb = hayStack.read("point and system and tuner and tr and staticPressure and "+trParam);
+    
+        ArrayList values = hayStack.readPoint(cdb.get("id").toString());
+        if (values != null && values.size() > 0)
+        {
+            for (int l = 1; l <= values.size() ; l++ ) {
+                HashMap valMap = ((HashMap) values.get(l-1));
+                if (valMap.get("val") != null) {
+                    return Double.parseDouble(valMap.get("val").toString());
+                }
+            }
+        }
+        throw new IllegalStateException("Tuner not initialized");
     }
     
     private double getCO2TRTunerVal(String trParam) {
-        return CCUHsApi.getInstance().readDefaultVal("point and system and tuner and tr and co2 and "+trParam);
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap cdb = hayStack.read("point and system and tuner and tr and co2 and "+trParam);
+    
+        ArrayList values = hayStack.readPoint(cdb.get("id").toString());
+        if (values != null && values.size() > 0)
+        {
+            for (int l = 1; l <= values.size() ; l++ ) {
+                HashMap valMap = ((HashMap) values.get(l-1));
+                if (valMap.get("val") != null) {
+                    return Double.parseDouble(valMap.get("val").toString());
+                }
+            }
+        }
+        throw new IllegalStateException("Tuner not initialized");
     }
 }

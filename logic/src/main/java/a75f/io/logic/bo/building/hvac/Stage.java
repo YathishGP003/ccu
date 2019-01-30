@@ -8,7 +8,7 @@ public enum Stage
 {
     COOLING_1("Cooling Stage 1"),COOLING_2("Cooling Stage 2"), COOLING_3("Cooling Stage 3"), COOLING_4("Cooling Stage 4"), COOLING_5("Cooling Stage 5"),
     HEATING_1("Heating Stage 1"), HEATING_2("Heating Stage 2"), HEATING_3("Heating Stage 3"), HEATING_4("Heating Stage 4"), HEATING_5("Heating Stage 5"),
-    FAN_1("Fan Stage 1"), FAN_2("Fan Stage 2"),FAN_3("Fan Stage 3"), FAN_4("Fan Stage 4"), FAN_5("Fan Stage 5"),HUMIDIFIER("Humidifier");
+    FAN_1("Fan Stage 1"), FAN_2("Fan Stage 2"),FAN_3("Fan Stage 3"), FAN_4("Fan Stage 4"), FAN_5("Fan Stage 5"),HUMIDIFIER("Humidifier"), DEHUMIDIFIER("De Humidifier");
     
     public String displayName;
     

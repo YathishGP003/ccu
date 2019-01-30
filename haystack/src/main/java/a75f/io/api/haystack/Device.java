@@ -122,7 +122,7 @@ public class Device extends Entity
         }
         public Builder setEquipRef(String eq)
         {
-            this.equipRef = equipRef;
+            this.equipRef = eq;
             return this;
         }
     
@@ -170,6 +170,10 @@ public class Device extends Entity
                 else if(pair.getKey().equals("floorRef"))
                 {
                     this.floorRef = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("equipRef"))
+                {
+                    this.equipRef = pair.getValue().toString();
                 }
                 else if(pair.getKey().equals("zoneRef"))
                 {

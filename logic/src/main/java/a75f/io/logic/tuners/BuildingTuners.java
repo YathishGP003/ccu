@@ -302,6 +302,18 @@ public class BuildingTuners
         String humidityHysteresisId = hayStack.addPoint(humidityHysteresis);
         hayStack.writePoint(humidityHysteresisId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.HUMIDITY_HYSTERESIS_PERCENT, 0);
         hayStack.writeHisValById(humidityHysteresisId, TunerConstants.HUMIDITY_HYSTERESIS_PERCENT);
+    
+        Point relayDeactivationHysteresis = new Point.Builder()
+                                           .setDisplayName(equipDis+"-"+"relayDeactivationHysteresis")
+                                           .setSiteRef(siteRef)
+                                           .setEquipRef(equipRef)
+                                           .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his")
+                                           .addMarker("relay").addMarker("deactivation").addMarker("hysteresis").addMarker("sp")
+                                           .setTz(tz)
+                                           .build();
+        String relayDeactivationHysteresisId = hayStack.addPoint(relayDeactivationHysteresis);
+        hayStack.writePoint(relayDeactivationHysteresisId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.RELAY_DEACTIVATION_HYSTERESIS, 0);
+        hayStack.writeHisValById(relayDeactivationHysteresisId, TunerConstants.RELAY_DEACTIVATION_HYSTERESIS);
         
         CCUHsApi.getInstance().syncEntityTree();
     }

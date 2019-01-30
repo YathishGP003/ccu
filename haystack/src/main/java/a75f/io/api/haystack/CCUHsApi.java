@@ -43,7 +43,7 @@ public class CCUHsApi {
     public EntitySyncHandler entitySyncHandler;
     public HisSyncHandler hisSyncHandler;
     
-    public boolean testHarnessEnabled = false;
+    public boolean testHarnessEnabled = true;
 
     public static CCUHsApi getInstance() {
         if (instance == null) {
@@ -461,9 +461,9 @@ public class CCUHsApi {
 
         ArrayList points = readAll(query);
         String id = points.size() == 0 ? null : ((HashMap) points.get(0)).get("id").toString();
-        if (id == null || id == "") {
+        /*if (id == null || id == "") {
             return;
-        }
+        }*/
 
         HisItem item = new HisItem(id, new Date(), val);
         hisWrite(item);

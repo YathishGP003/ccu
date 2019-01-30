@@ -181,8 +181,21 @@ public class VavSystemController
         Log.d("CCU", "weightedAverageCoolingOnlyLoadMA: "+weightedAverageCoolingOnlyLoadMA+" weightedAverageHeatingOnlyLoadMA: "
                                                     +weightedAverageHeatingOnlyLoadMA +" systemState: "+systemState+" coolingSignal: "+coolingSignal+" heatingSignal: "+heatingSignal);
     
-        normalizeAirflow();
-        adjustDamperForCumulativeTarget();
+        if (systemState == HEATING)
+        {
+            normalizeAirflow();
+            adjustDamperForCumulativeTarget();
+        } else {
+            CCUHsApi hayStack = CCUHsApi.getInstance();
+            ArrayList<HashMap> vavEquips = hayStack.readAll("equip and vav and zone");
+            for (HashMap m : vavEquips) {
+                HashMap damper = hayStack.read("point and damper and base and cmd and equipRef == \""+m.get("id").toString()+"\"");
+                double damperPos = hayStack.readHisValById(damper.get("id").toString());
+                HashMap normalizedDamper = hayStack.read("point and damper and normalized and cmd and equipRef == \""+m.get("id").toString()+"\"");
+                hayStack.writeHisValById(normalizedDamper.get("id").toString(), damperPos);
+            }
+        }
+        
         setDamperLimits();
     
     }
@@ -372,7 +385,7 @@ public class VavSystemController
         Log.d("CCU","weightedDamperOpening : "+weightedDamperOpening +" cumulativeDamperTarget : "+cumulativeDamperTarget);
     
         while(weightedDamperOpening > 0 && weightedDamperOpening < cumulativeDamperTarget) {
-            adjustDamperOpening(10);
+            adjustDamperOpening(1);
             weightedDamperOpening = getWeightedDamperOpening();
             Log.d("CCU","weightedDamperOpening : "+weightedDamperOpening +" cumulativeDamperTarget : "+cumulativeDamperTarget);
         }

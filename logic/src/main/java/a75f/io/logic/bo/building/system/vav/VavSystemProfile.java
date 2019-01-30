@@ -61,7 +61,7 @@ public abstract class VavSystemProfile extends SystemProfile
         }
     
         Point humidityHysteresis = new Point.Builder()
-                                                 .setDisplayName(HSUtil.getDis(equipref)+ "-" + "analogFanSpeedMultiplier")
+                                                 .setDisplayName(HSUtil.getDis(equipref)+ "-" + "humidityHysteresis")
                                                  .setSiteRef(siteRef)
                                                  .setEquipRef(equipref)
                                                  .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
@@ -74,6 +74,23 @@ public abstract class VavSystemProfile extends SystemProfile
             if (valMap.get("val") != null)
             {
                 hayStack.pointWrite(HRef.copy(humidityHysteresisId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+    
+        Point relayDeactivationHysteresis = new Point.Builder()
+                                           .setDisplayName(HSUtil.getDis(equipref)+ "-" + "relayDeactivationHysteresis")
+                                           .setSiteRef(siteRef)
+                                           .setEquipRef(equipref)
+                                           .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
+                                           .addMarker("relay").addMarker("deactivation").addMarker("hysteresis").addMarker("sp")
+                                           .build();
+        String relayDeactivationHysteresisId = hayStack.addPoint(relayDeactivationHysteresis);
+        HashMap relayDeactivationHysteresisPoint = hayStack.read("point and tuner and default and vav and relay and deactivation and hysteresis");
+        ArrayList<HashMap> relayDeactivationHysteresisArr = hayStack.readPoint(relayDeactivationHysteresisPoint.get("id").toString());
+        for (HashMap valMap : relayDeactivationHysteresisArr) {
+            if (valMap.get("val") != null)
+            {
+                hayStack.pointWrite(HRef.copy(relayDeactivationHysteresisId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
     }

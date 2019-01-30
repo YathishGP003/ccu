@@ -1,5 +1,6 @@
 package a75f.io.logic.tuners;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -136,7 +137,20 @@ public class VavTRTuners
     }
     
     public static double getSatTRTunerVal(String trParam) {
-        return CCUHsApi.getInstance().readDefaultVal("point and system and tuner and tr and sat and "+trParam);
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap cdb = hayStack.read("point and system and tuner and tr and sat and "+trParam);
+    
+        ArrayList values = hayStack.readPoint(cdb.get("id").toString());
+        if (values != null && values.size() > 0)
+        {
+            for (int l = 1; l <= values.size() ; l++ ) {
+                HashMap valMap = ((HashMap) values.get(l-1));
+                if (valMap.get("val") != null) {
+                    return Double.parseDouble(valMap.get("val").toString());
+                }
+            }
+        }
+        throw new IllegalStateException("Tuner not initialized :"+trParam);
     }
     public static void setSatTRTunerVal(String trParam, double val) {
         CCUHsApi.getInstance().writeDefaultVal("point and system and tuner and tr and sat and "+trParam, val);
@@ -266,7 +280,21 @@ public class VavTRTuners
     }
     
     public static double getStaticPressureTRTunerVal(String trParam) {
-        return CCUHsApi.getInstance().readDefaultVal("point and system and tuner and tr and staticPressure and "+trParam);
+        
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap cdb = hayStack.read("point and system and tuner and tr and staticPressure and "+trParam);
+    
+        ArrayList values = hayStack.readPoint(cdb.get("id").toString());
+        if (values != null && values.size() > 0)
+        {
+            for (int l = 1; l <= values.size() ; l++ ) {
+                HashMap valMap = ((HashMap) values.get(l-1));
+                if (valMap.get("val") != null) {
+                    return Double.parseDouble(valMap.get("val").toString());
+                }
+            }
+        }
+        throw new IllegalStateException("Tuner not initialized :"+trParam);
     }
     public static void setStaticPressureTRTunerVal(String trParam, double val) {
         CCUHsApi.getInstance().writeDefaultVal("point and system and tuner and tr and staticPressure and "+trParam, val);
@@ -396,7 +424,20 @@ public class VavTRTuners
     }
     
     public static double getCO2TRTunerVal(String trParam) {
-        return CCUHsApi.getInstance().readDefaultVal("point and system and tuner and tr and co2 and "+trParam);
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap cdb = hayStack.read("point and system and tuner and tr and co2 and "+trParam);
+    
+        ArrayList values = hayStack.readPoint(cdb.get("id").toString());
+        if (values != null && values.size() > 0)
+        {
+            for (int l = 1; l <= values.size() ; l++ ) {
+                HashMap valMap = ((HashMap) values.get(l-1));
+                if (valMap.get("val") != null) {
+                    return Double.parseDouble(valMap.get("val").toString());
+                }
+            }
+        }
+        throw new IllegalStateException("Tuner not initialized :"+trParam);
     }
     public static void setCO2TRTunerVal(String trParam, double val) {
         CCUHsApi.getInstance().writeDefaultVal("point and system and tuner and tr and co2 and "+trParam, val);

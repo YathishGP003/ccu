@@ -17,7 +17,6 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZonePriority;
-import a75f.io.logic.bo.building.definitions.DamperType;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
@@ -162,9 +161,9 @@ public class VAVLogicalMap
         if (systemEquip != null && systemEquip.size() > 0) {
             ahuRef = systemEquip.get("id").toString();
         }
-        boolean isElectric = config.reheatType == ReheatType.Pulse ||
-                             config.reheatType == ReheatType.OneStage ||
-                             config.reheatType == ReheatType.TwoStage;
+        boolean isElectric = config.reheatType == ReheatType.Pulse.ordinal() ||
+                             config.reheatType == ReheatType.OneStage.ordinal() ||
+                             config.reheatType == ReheatType.TwoStage.ordinal();
         
         Equip.Builder b = new Equip.Builder()
                           .setSiteRef(siteRef)
@@ -417,7 +416,7 @@ public class VAVLogicalMap
         
         
         //Create Physical points and map
-        SmartNode device = new SmartNode(nodeAddr, siteRef, floor, room);
+        SmartNode device = new SmartNode(nodeAddr, siteRef, floor, room, equipRef);
         device.th1In.setPointRef(datID);
         device.th1In.setEnabled(true);
         device.th2In.setPointRef(eatID);
@@ -492,7 +491,7 @@ public class VAVLogicalMap
                                          .setTz(tz)
                                          .build();
         String damperTypeId = CCUHsApi.getInstance().addPoint(damperType);
-        CCUHsApi.getInstance().writeDefaultValById(damperTypeId, config.damperType.displayName);
+        CCUHsApi.getInstance().writeDefaultValById(damperTypeId, (double)config.damperType);
     
         Point damperSize = new Point.Builder()
                                    .setDisplayName(equipDis+"-damperSize")
@@ -517,7 +516,7 @@ public class VAVLogicalMap
                                    .setTz(tz)
                                    .build();
         String damperShapeId = CCUHsApi.getInstance().addPoint(damperShape);
-        CCUHsApi.getInstance().writeDefaultValById(damperShapeId, config.damperShape);
+        CCUHsApi.getInstance().writeDefaultValById(damperShapeId, (double)config.damperShape);
     
         Point reheatType = new Point.Builder()
                                    .setDisplayName(equipDis+"-reheatType")
@@ -529,7 +528,7 @@ public class VAVLogicalMap
                                    .setTz(tz)
                                    .build();
         String reheatTypeId = CCUHsApi.getInstance().addPoint(reheatType);
-        CCUHsApi.getInstance().writeDefaultValById(reheatTypeId, config.reheatType.displayName);
+        CCUHsApi.getInstance().writeDefaultValById(reheatTypeId, (double)config.reheatType);
     
         Point enableOccupancyControl = new Point.Builder()
                                    .setDisplayName(equipDis+"-enableOccupancyControl")
@@ -677,10 +676,10 @@ public class VAVLogicalMap
         SmartNode.setPointEnabled(nodeAddr, Port.RELAY_ONE.name(), config.isOpConfigured(Port.RELAY_ONE) );
         SmartNode.setPointEnabled(nodeAddr, Port.RELAY_TWO.name(), config.isOpConfigured(Port.RELAY_TWO) );
         
-        setConfigStrVal("damper and type",config.damperType.displayName);
+        setConfigNumVal("damper and type",config.damperType);
         setConfigNumVal("damper and size",config.damperSize);
-        setConfigStrVal("damper and shape",config.damperShape);
-        setConfigStrVal("reheat and type",config.reheatType.displayName);
+        setConfigNumVal("damper and shape",config.damperShape);
+        setConfigNumVal("reheat and type",config.reheatType);
         setConfigNumVal("enable and occupancy",config.enableOccupancyControl == true ? 1.0 : 0);
         setConfigNumVal("enable and co2",config.enableCO2Control == true ? 1.0 : 0);
         setConfigNumVal("enable and iaq",config.enableCO2Control == true ? 1.0 : 0);
@@ -714,10 +713,10 @@ public class VAVLogicalMap
         config.minDamperHeating = ((int)getDamperLimit("heating","min"));
         config.maxDamperHeating = ((int)getDamperLimit("heating","max"));
     
-        config.damperType = DamperType.getEnum(getConfigStrVal("damper and type"));
+        config.damperType = (int)getConfigNumVal("damper and type");
         config.damperSize = (int)getConfigNumVal("damper and size");
-        config.damperShape = getConfigStrVal("damper and shape");
-        config.reheatType = ReheatType.getEnum(getConfigStrVal("reheat and type"));
+        config.damperShape = (int)getConfigNumVal("damper and shape");
+        config.reheatType = (int)getConfigNumVal("reheat and type");
         config.enableOccupancyControl = getConfigNumVal("enable and occupancy") > 0 ? true : false ;
         config.enableCO2Control = getConfigNumVal("enable and co2") > 0 ? true : false ;
         config.enableIAQControl = getConfigNumVal("enable and iaq") > 0 ? true : false ;

@@ -39,13 +39,14 @@ public class SmartNode
     public String zoneRef;
     
     
-    public SmartNode(int address, String site, String floor, String zone) {
+    public SmartNode(int address, String site, String floor, String zone, String equipRef) {
         Device d = new Device.Builder()
                 .setDisplayName("SN-"+address)
                 .addMarker("network").addMarker("node").addMarker("smartnode").addMarker("equipHis")
                 .setAddr(address)
                 .setSiteRef(site)
                 .setFloorRef(floor)
+                .setEquipRef(equipRef)
                 .setZoneRef(zone)
                 .build();
         deviceRef = CCUHsApi.getInstance().addDevice(d);

@@ -7,6 +7,7 @@ import java.util.HashMap;
 
 import a75.io.algos.CO2Loop;
 import a75.io.algos.ControlLoop;
+import a75.io.algos.GenericPIController;
 import a75.io.algos.VOCLoop;
 import a75.io.algos.tr.TrimResponseRequest;
 import a75f.io.api.haystack.CCUHsApi;
@@ -17,7 +18,6 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZonePriority;
-import a75f.io.logic.bo.building.definitions.DamperType;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
@@ -65,7 +65,7 @@ public class VAVLogicalMap
     CO2Loop             co2Loop;
     VOCLoop             vocLoop;
     double voc;
-    //GenericPIController valveController;// Use GenericPI as we need unmodulated op.
+    GenericPIController valveController;// Use GenericPI as we need unmodulated op.
     
     public TrimResponseRequest satResetRequest;
     public TrimResponseRequest co2ResetRequest;
@@ -86,11 +86,11 @@ public class VAVLogicalMap
         heatingLoop = new ControlLoop();
         co2Loop = new CO2Loop();
         vocLoop = new VOCLoop();
-        /*valveController = new GenericPIController();
+        valveController = new GenericPIController();
         valveController.setIntegralMaxTimeout(integralMaxTimeout);
         valveController.setMaxAllowedError(proportionalSpread);
         valveController.setProportionalGain(proportionalGain);
-        valveController.setIntegralGain(integralGain);*/
+        valveController.setIntegralGain(integralGain);
         
         satResetRequest = new TrimResponseRequest();
         co2ResetRequest = new TrimResponseRequest();
@@ -162,9 +162,9 @@ public class VAVLogicalMap
         if (systemEquip != null && systemEquip.size() > 0) {
             ahuRef = systemEquip.get("id").toString();
         }
-        boolean isElectric = config.reheatType == ReheatType.Pulse ||
-                             config.reheatType == ReheatType.OneStage ||
-                             config.reheatType == ReheatType.TwoStage;
+        boolean isElectric = config.reheatType == ReheatType.Pulse.ordinal() ||
+                             config.reheatType == ReheatType.OneStage.ordinal() ||
+                             config.reheatType == ReheatType.TwoStage.ordinal();
         
         Equip.Builder b = new Equip.Builder()
                           .setSiteRef(siteRef)
@@ -197,7 +197,7 @@ public class VAVLogicalMap
                                 .setZoneRef(room)
                                 .setFloorRef(floor)
                                 .addMarker("discharge").addMarker("vav")
-                                .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("his").addMarker("logical").addMarker("zone")
+                                .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("his").addMarker("logical").addMarker("zone").addMarker("equipHis")
                                 .setGroup(String.valueOf(nodeAddr))
                                 .setUnit("\u00B0F")
                                 .setTz(tz)
@@ -212,7 +212,7 @@ public class VAVLogicalMap
                                 .setZoneRef(room)
                                 .setFloorRef(floor)
                                 .addMarker("entering").addMarker("vav")
-                                .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("his").addMarker("logical").addMarker("zone")
+                                .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("his").addMarker("logical").addMarker("zone").addMarker("equipHis")
                                 .setGroup(String.valueOf(nodeAddr))
                                 .setUnit("\u00B0F")
                                 .setTz(tz)
@@ -225,7 +225,7 @@ public class VAVLogicalMap
                                 .setSiteRef(siteRef)
                                 .setZoneRef(room)
                                 .setFloorRef(floor)
-                                .addMarker("damper").addMarker("vav").addMarker("base").addMarker("cmd").addMarker("his").addMarker("logical").addMarker("zone")
+                                .addMarker("damper").addMarker("vav").addMarker("base").addMarker("cmd").addMarker("his").addMarker("logical").addMarker("zone").addMarker("equipHis")
                                 .setGroup(String.valueOf(nodeAddr))
                                 .setTz(tz)
                                 .build();
@@ -237,7 +237,7 @@ public class VAVLogicalMap
                                   .setSiteRef(siteRef)
                                   .setZoneRef(room)
                                   .setFloorRef(floor)
-                                  .addMarker("damper").addMarker("vav").addMarker("normalized").addMarker("cmd").addMarker("his").addMarker("logical").addMarker("zone")
+                                  .addMarker("damper").addMarker("vav").addMarker("normalized").addMarker("cmd").addMarker("his").addMarker("logical").addMarker("zone").addMarker("equipHis")
                                   .setGroup(String.valueOf(nodeAddr))
                                   .setTz(tz)
                                   .build();
@@ -250,7 +250,7 @@ public class VAVLogicalMap
                                   .setZoneRef(room)
                                   .setFloorRef(floor)
                                   .addMarker("reheat").addMarker("vav")
-                                  .addMarker("water").addMarker("valve").addMarker("cmd").addMarker("his").addMarker("logical").addMarker("zone")
+                                  .addMarker("water").addMarker("valve").addMarker("cmd").addMarker("his").addMarker("logical").addMarker("zone").addMarker("equipHis")
                                   .setGroup(String.valueOf(nodeAddr))
                                   .setTz(tz)
                                   .build();
@@ -263,7 +263,7 @@ public class VAVLogicalMap
                                   .setZoneRef(room)
                                   .setFloorRef(floor)
                                   .addMarker("zone").addMarker("vav")
-                                  .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical")
+                                  .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                                   .setGroup(String.valueOf(nodeAddr))
                                   .setUnit("\u00B0F")
                                   .setTz(tz)
@@ -277,7 +277,7 @@ public class VAVLogicalMap
                                     .setZoneRef(room)
                                     .setFloorRef(floor)
                                     .addMarker("zone").addMarker("vav")
-                                    .addMarker("air").addMarker("humidity").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical")
+                                    .addMarker("air").addMarker("humidity").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                                     .setGroup(String.valueOf(nodeAddr))
                                     .setTz(tz)
                                     .build();
@@ -290,7 +290,7 @@ public class VAVLogicalMap
                                  .setZoneRef(room)
                                  .setFloorRef(floor)
                                  .addMarker("zone").addMarker("vav")
-                                 .addMarker("air").addMarker("co2").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical")
+                                 .addMarker("air").addMarker("co2").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                                  .setGroup(String.valueOf(nodeAddr))
                                  .setTz(tz)
                                  .build();
@@ -303,7 +303,7 @@ public class VAVLogicalMap
                                  .setZoneRef(room)
                                  .setFloorRef(floor)
                                  .addMarker("zone").addMarker("vav")
-                                 .addMarker("air").addMarker("voc").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical")
+                                 .addMarker("air").addMarker("voc").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                                  .setGroup(String.valueOf(nodeAddr))
                                  .setTz(tz)
                                  .build();
@@ -316,7 +316,7 @@ public class VAVLogicalMap
                                     .setZoneRef(room)
                                     .setFloorRef(floor)
                                     .addMarker("zone").addMarker("air").addMarker("temp").addMarker("desired").addMarker("vav")
-                                    .addMarker("sp").addMarker("writable").addMarker("his")
+                                    .addMarker("sp").addMarker("writable").addMarker("his").addMarker("equipHis")
                                     .setGroup(String.valueOf(nodeAddr))
                                     .setUnit("\u00B0F")
                                     .setTz(tz)
@@ -329,7 +329,7 @@ public class VAVLogicalMap
                                     .setSiteRef(siteRef)
                                     .setZoneRef(room)
                                     .setFloorRef(floor)
-                                    .addMarker("heating").addMarker("loop").addMarker("sp").addMarker("his").addMarker("vav")
+                                    .addMarker("heating").addMarker("loop").addMarker("sp").addMarker("his").addMarker("vav").addMarker("equipHis")
                                     .addMarker("zone")
                                     .setGroup(String.valueOf(nodeAddr))
                                     .setTz(tz)
@@ -342,7 +342,7 @@ public class VAVLogicalMap
                                       .setSiteRef(siteRef)
                                       .setZoneRef(room)
                                       .setFloorRef(floor)
-                                      .addMarker("cooling").addMarker("loop").addMarker("sp").addMarker("his").addMarker("vav")
+                                      .addMarker("cooling").addMarker("loop").addMarker("sp").addMarker("his").addMarker("vav").addMarker("equipHis")
                                       .addMarker("zone")
                                       .setGroup(String.valueOf(nodeAddr))
                                       .setTz(tz)
@@ -355,7 +355,7 @@ public class VAVLogicalMap
                                       .setSiteRef(siteRef)
                                       .setZoneRef(room)
                                       .setFloorRef(floor)
-                                      .addMarker("discharge").addMarker("air").addMarker("temp").addMarker("zone")
+                                      .addMarker("discharge").addMarker("air").addMarker("temp").addMarker("zone").addMarker("equipHis")
                                       .addMarker("sp").addMarker("his").addMarker("vav")
                                       .setGroup(String.valueOf(nodeAddr))
                                       .setTz(tz)
@@ -369,7 +369,7 @@ public class VAVLogicalMap
                                     .setZoneRef(room)
                                     .setFloorRef(floor)
                                     .addMarker("request").addMarker("hour").addMarker("cumulative").addMarker("vav")
-                                    .addMarker("tr").addMarker("supply").addMarker("air").addMarker("temp").addMarker("his").addMarker("zone")
+                                    .addMarker("tr").addMarker("supply").addMarker("air").addMarker("temp").addMarker("his").addMarker("zone").addMarker("equipHis")
                                     .setGroup(String.valueOf(nodeAddr))
                                     .setTz(tz)
                                     .build();
@@ -382,7 +382,7 @@ public class VAVLogicalMap
                                              .setZoneRef(room)
                                              .setFloorRef(floor)
                                              .addMarker("request").addMarker("hour").addMarker("cumulative").addMarker("vav")
-                                             .addMarker("tr").addMarker("co2").addMarker("temp").addMarker("his").addMarker("zone")
+                                             .addMarker("tr").addMarker("co2").addMarker("temp").addMarker("his").addMarker("zone").addMarker("equipHis")
                                              .setGroup(String.valueOf(nodeAddr))
                                              .setTz(tz)
                                              .build();
@@ -395,7 +395,7 @@ public class VAVLogicalMap
                                              .setZoneRef(room)
                                              .setFloorRef(floor)
                                              .addMarker("request").addMarker("hour").addMarker("cumulative").addMarker("vav")
-                                             .addMarker("tr").addMarker("hwst").addMarker("his").addMarker("zone")
+                                             .addMarker("tr").addMarker("hwst").addMarker("his").addMarker("zone").addMarker("equipHis")
                                              .setGroup(String.valueOf(nodeAddr))
                                              .setTz(tz)
                                              .build();
@@ -408,7 +408,7 @@ public class VAVLogicalMap
                                              .setZoneRef(room)
                                              .setFloorRef(floor)
                                              .addMarker("request").addMarker("hour").addMarker("cumulative").addMarker("vav")
-                                             .addMarker("tr").addMarker("pressure").addMarker("his").addMarker("zone")
+                                             .addMarker("tr").addMarker("pressure").addMarker("his").addMarker("zone").addMarker("equipHis")
                                              .setGroup(String.valueOf(nodeAddr))
                                              .setTz(tz)
                                              .build();
@@ -417,7 +417,7 @@ public class VAVLogicalMap
         
         
         //Create Physical points and map
-        SmartNode device = new SmartNode(nodeAddr, siteRef, floor, room);
+        SmartNode device = new SmartNode(nodeAddr, siteRef, floor, room, equipRef);
         device.th1In.setPointRef(datID);
         device.th1In.setEnabled(true);
         device.th2In.setPointRef(eatID);
@@ -492,7 +492,7 @@ public class VAVLogicalMap
                                          .setTz(tz)
                                          .build();
         String damperTypeId = CCUHsApi.getInstance().addPoint(damperType);
-        CCUHsApi.getInstance().writeDefaultValById(damperTypeId, config.damperType.displayName);
+        CCUHsApi.getInstance().writeDefaultValById(damperTypeId, (double)config.damperType);
     
         Point damperSize = new Point.Builder()
                                    .setDisplayName(equipDis+"-damperSize")
@@ -517,7 +517,7 @@ public class VAVLogicalMap
                                    .setTz(tz)
                                    .build();
         String damperShapeId = CCUHsApi.getInstance().addPoint(damperShape);
-        CCUHsApi.getInstance().writeDefaultValById(damperShapeId, config.damperShape);
+        CCUHsApi.getInstance().writeDefaultValById(damperShapeId, (double)config.damperShape);
     
         Point reheatType = new Point.Builder()
                                    .setDisplayName(equipDis+"-reheatType")
@@ -529,7 +529,7 @@ public class VAVLogicalMap
                                    .setTz(tz)
                                    .build();
         String reheatTypeId = CCUHsApi.getInstance().addPoint(reheatType);
-        CCUHsApi.getInstance().writeDefaultValById(reheatTypeId, config.reheatType.displayName);
+        CCUHsApi.getInstance().writeDefaultValById(reheatTypeId, (double)config.reheatType);
     
         Point enableOccupancyControl = new Point.Builder()
                                    .setDisplayName(equipDis+"-enableOccupancyControl")
@@ -677,10 +677,10 @@ public class VAVLogicalMap
         SmartNode.setPointEnabled(nodeAddr, Port.RELAY_ONE.name(), config.isOpConfigured(Port.RELAY_ONE) );
         SmartNode.setPointEnabled(nodeAddr, Port.RELAY_TWO.name(), config.isOpConfigured(Port.RELAY_TWO) );
         
-        setConfigStrVal("damper and type",config.damperType.displayName);
+        setConfigNumVal("damper and type",config.damperType);
         setConfigNumVal("damper and size",config.damperSize);
-        setConfigStrVal("damper and shape",config.damperShape);
-        setConfigStrVal("reheat and type",config.reheatType.displayName);
+        setConfigNumVal("damper and shape",config.damperShape);
+        setConfigNumVal("reheat and type",config.reheatType);
         setConfigNumVal("enable and occupancy",config.enableOccupancyControl == true ? 1.0 : 0);
         setConfigNumVal("enable and co2",config.enableCO2Control == true ? 1.0 : 0);
         setConfigNumVal("enable and iaq",config.enableCO2Control == true ? 1.0 : 0);
@@ -714,10 +714,10 @@ public class VAVLogicalMap
         config.minDamperHeating = ((int)getDamperLimit("heating","min"));
         config.maxDamperHeating = ((int)getDamperLimit("heating","max"));
     
-        config.damperType = DamperType.getEnum(getConfigStrVal("damper and type"));
+        config.damperType = (int)getConfigNumVal("damper and type");
         config.damperSize = (int)getConfigNumVal("damper and size");
-        config.damperShape = getConfigStrVal("damper and shape");
-        config.reheatType = ReheatType.getEnum(getConfigStrVal("reheat and type"));
+        config.damperShape = (int)getConfigNumVal("damper and shape");
+        config.reheatType = (int)getConfigNumVal("reheat and type");
         config.enableOccupancyControl = getConfigNumVal("enable and occupancy") > 0 ? true : false ;
         config.enableCO2Control = getConfigNumVal("enable and co2") > 0 ? true : false ;
         config.enableIAQControl = getConfigNumVal("enable and iaq") > 0 ? true : false ;
@@ -919,14 +919,14 @@ public class VAVLogicalMap
     {
         return heatingLoop;
     }
-    /*public GenericPIController getValveController()
+    public GenericPIController getValveController()
     {
         return valveController;
     }
     public void setValveController(GenericPIController valveController)
     {
         this.valveController = valveController;
-    }*/
+    }
     public CO2Loop getCo2Loop()
     {
         return co2Loop;

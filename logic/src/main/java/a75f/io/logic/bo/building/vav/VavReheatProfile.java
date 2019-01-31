@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import a75.io.algos.CO2Loop;
 import a75.io.algos.ControlLoop;
+import a75.io.algos.GenericPIController;
 import a75.io.algos.VOCLoop;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -14,6 +15,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.building.hvac.Valve;
 import a75f.io.logic.bo.building.hvac.VavUnit;
+import a75f.io.logic.bo.building.system.vav.VavSystemController;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.tuners.VavTunerUtil;
 
@@ -64,7 +66,7 @@ public class VavReheatProfile extends VavProfile
             CO2Loop co2Loop = vavDeviceMap.get(node).getCo2Loop();
             VOCLoop vocLoop = vavDeviceMap.get(node).getVOCLoop();
             VavUnit vavUnit = vavDevice.getVavUnit();
-            //GenericPIController valveController = vavDevice.getValveController();
+            GenericPIController valveController = vavDevice.getValveController();
     
             double roomTemp = vavDevice.getCurrentTemp();
             double dischargeTemp = vavDevice.getDischargeTemp();
@@ -105,34 +107,38 @@ public class VavReheatProfile extends VavProfile
                     heatingLoop.setEnabled();
                     coolingLoop.setDisabled();
                 }
-                
-                int heatingLoopOp = (int) heatingLoop.getLoopOutput(setTemp-deadBand, roomTemp);
-                /*if (heatingLoopOp <= 50)
+                int heatingLoopOp = (int) heatingLoop.getLoopOutput(setTemp - deadBand, roomTemp);
+                if (VavSystemController.getInstance().getSystemState() == VavSystemController.State.COOLING)
                 {
-                    //Control reheat valve when heating loop is <=50
-                    double datMax = (roomTemp + HEATING_LOOP_OFFSET) > MAX_DISCHARGE_TEMP ? MAX_DISCHARGE_TEMP : (roomTemp + HEATING_LOOP_OFFSET);
-                    dischargeSp = supplyAirTemp + (datMax - supplyAirTemp) * heatingLoopOp/50;
-                    vavDevice.setDischargeSp(dischargeSp);
-                    valveController.updateControlVariable(dischargeSp, dischargeTemp);
-                    valve.currentPosition = (int) (valveController.getControlVariable() * 100 / valveController.getMaxAllowedError());
-                    loopOp = 0;
-                    Log.d(TAG,"dischargeTempSP: "+dischargeSp);
-                }
-                else
-                {
-                    //Control airflow when heating loop is 51-100
-                    //Also update valve control to account for change in dischargeTemp
-                    if (dischargeSp == 0) {
+                    if (heatingLoopOp <= 50)
+                    {
+                        //Control reheat valve when heating loop is <=50
                         double datMax = (roomTemp + HEATING_LOOP_OFFSET) > MAX_DISCHARGE_TEMP ? MAX_DISCHARGE_TEMP : (roomTemp + HEATING_LOOP_OFFSET);
-                        dischargeSp = supplyAirTemp + (datMax - supplyAirTemp) * heatingLoopOp/100;
+                        dischargeSp = supplyAirTemp + (datMax - supplyAirTemp) * heatingLoopOp / 50;
                         vavDevice.setDischargeSp(dischargeSp);
+                        valveController.updateControlVariable(dischargeSp, dischargeTemp);
+                        valve.currentPosition = (int) (valveController.getControlVariable() * 100 / valveController.getMaxAllowedError());
+                        loopOp = 0;
+                        Log.d(TAG, "dischargeTempSP: " + dischargeSp);
                     }
-                    valveController.updateControlVariable(dischargeSp, dischargeTemp);
-                    valve.currentPosition = (int) (valveController.getControlVariable() * 100 / valveController.getMaxAllowedError());
+                    else
+                    {
+                        //Control airflow when heating loop is 51-100
+                        //Also update valve control to account for change in dischargeTemp
+                        if (dischargeSp == 0)
+                        {
+                            double datMax = (roomTemp + HEATING_LOOP_OFFSET) > MAX_DISCHARGE_TEMP ? MAX_DISCHARGE_TEMP : (roomTemp + HEATING_LOOP_OFFSET);
+                            dischargeSp = supplyAirTemp + (datMax - supplyAirTemp) * heatingLoopOp / 100;
+                            vavDevice.setDischargeSp(dischargeSp);
+                        }
+                        valveController.updateControlVariable(dischargeSp, dischargeTemp);
+                        valve.currentPosition = (int) (valveController.getControlVariable() * 100 / valveController.getMaxAllowedError());
+                        loopOp = heatingLoopOp;
+                    }
+                } else
+                {
                     loopOp = heatingLoopOp;
-                }*/
-                
-                loopOp = heatingLoopOp;
+                }
             }
             else
             {
@@ -148,12 +154,12 @@ public class VavReheatProfile extends VavProfile
                 loopOp = 0;
             }
             
-            /*if (valveController.getControlVariable() == 0)
+            if (valveController.getControlVariable() == 0)
             {
                 valve.currentPosition = 0;
-            }*/
+            }
             
-            setDamperLimits(node, damper);
+            //setDamperLimits(node, damper);
             
             //CO2 loop output from 0-50% modulates damper min position.
             if (/*mode == OCCUPIED && */co2Loop.getLoopOutput(co2) <= 50)
@@ -190,15 +196,16 @@ public class VavReheatProfile extends VavProfile
                 valveController.reset();
             }*/
     
-            //REHEAT control that does not follow RP-1455.
-            if (state == HEATING)
+            //REHEAT control during heating does not follow RP1455.
+            if (VavSystemController.getInstance().getSystemState() == VavSystemController.State.HEATING
+                                && state == HEATING)
             {
                 double valveStartDamperPercent = TunerUtil.readTunerValByQuery("vav and valve and start and damper and equipRef == \""+vavEquip.getId()+"\"");
                 double maxHeatingPos = vavDevice.getDamperLimit("heating", "max");
                 double minHeatingPos = vavDevice.getDamperLimit("heating", "min");
                 double valveStart = minHeatingPos + (maxHeatingPos - minHeatingPos) * valveStartDamperPercent / 100;
                 Log.d("VAV"," valveStartDamperPercent "+valveStartDamperPercent+" valveStart "+valveStart );
-                if (loopOp > valveStart)
+                if (damper.currentPosition > valveStart)
                 {
                     valve.currentPosition = (int) ((damper.currentPosition - valveStart) * 100 / (maxHeatingPos - valveStart));
                 }

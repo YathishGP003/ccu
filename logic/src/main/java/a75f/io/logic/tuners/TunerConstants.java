@@ -43,6 +43,7 @@ public class TunerConstants
     public static final double ANALOG_FANSPEED_MULTIPLIER = 1;
     public static final double HUMIDITY_HYSTERESIS_PERCENT = 5;
     public static final double VALVE_START_DAMPER = 50;
+    public static final double RELAY_DEACTIVATION_HYSTERESIS = 10;
     
     public static final double ZONE_CO2_TARGET = 1000;
     public static final double ZONE_CO2_THRESHOLD = 800;

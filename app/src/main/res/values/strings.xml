@@ -54,8 +54,8 @@
     <string-array name="system_profile_select">
         <item>  Default </item>
         <item>  VAV Fully Modulating RTU </item>
-        <!--<item>  VAV IE RTU </item>
         <item>  VAV Staged RTU </item>
+        <!--<item>  VAV IE RTU </item>
         <item>  VAV Bacnet RTU </item>
         <item>  DAB Staged RTU </item>-->
     </string-array>
@@ -73,6 +73,10 @@
         <item>  Heating Stage 5 </item>
         <item>  Fan Stage 1 </item>
         <item>  Fan Stage 2 </item>
+        <item>  Fan Stage 3 </item>
+        <item>  Fan Stage 4 </item>
+        <item>  Fan Stage 5 </item>
+        <item>  Humidifier </item>
 
 
     </string-array>

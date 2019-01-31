@@ -10,6 +10,7 @@ import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 import org.projecthaystack.HRow;
 import org.projecthaystack.client.HClient;
+import org.projecthaystack.io.HZincWriter;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -126,13 +127,12 @@ public class CCUStateParser
         h.doPullFloorTree(CCUHsApi.getInstance().read("site").get("id").toString(),
                         CCUHsApi.getInstance().getRemoteSiteDetails(siteId));
     
-        System.out.println(CCUHsApi.getInstance().tagsDb.tagsMap);
-        
-        CCUHsApi.getInstance().saveTagsData();
-        Globals.getInstance().addProfilesForEquips();
+        //System.out.println(CCUHsApi.getInstance().tagsDb.tagsMap);
+    
         ArrayList<HashMap> writablePoints = CCUHsApi.getInstance().readAll("point and writable");
         for (HashMap m : writablePoints) {
             HDict pid = new HDictBuilder().add("id",HRef.copy(CCUHsApi.getInstance().getGUID(m.get("id").toString()))).toDict();
+            System.out.println("Request: "+HZincWriter.gridToString(HGridBuilder.dictToGrid(pid)));
             HGrid wa = hClient.call("pointWrite",HGridBuilder.dictToGrid(pid));
             wa.dump();
         
@@ -157,6 +157,12 @@ public class CCUStateParser
             }
         
         }
+        
+        //BuildingTuners.getInstance();
+        
+        CCUHsApi.getInstance().saveTagsData();
+        Globals.getInstance().addProfilesForEquips();
+        
     }
     
     public CCUApplication parseState(String stateJson){

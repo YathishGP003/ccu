@@ -46,6 +46,11 @@ public class DeviceSyncAdapter extends EntitySyncAdapter
                 {
                     m.put("zoneRef", HRef.copy(CCUHsApi.getInstance().getGUID(m.get("zoneRef").toString())));
                 }
+                if (m.get("equipRef") != null)
+                {
+                    m.put("equipRef", HRef.copy(CCUHsApi.getInstance().getGUID(m.get("equipRef").toString())));
+                }
+                
                 entities.add(HSUtil.mapToHDict(m));
             }
         }

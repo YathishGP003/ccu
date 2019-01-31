@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import a75.io.algos.CO2Loop;
 import a75.io.algos.ControlLoop;
+import a75.io.algos.GenericPIController;
 import a75.io.algos.VOCLoop;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -14,6 +15,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.building.hvac.SeriesFanVavUnit;
 import a75f.io.logic.bo.building.hvac.Valve;
+import a75f.io.logic.bo.building.system.vav.VavSystemController;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
@@ -59,7 +61,7 @@ public class VavSeriesFanProfile extends VavProfile
             CO2Loop co2Loop = vavDeviceMap.get(node).getCo2Loop();
             VOCLoop vocLoop = vavDeviceMap.get(node).getVOCLoop();
             SeriesFanVavUnit vavUnit = (SeriesFanVavUnit)vavDevice.getVavUnit();
-            //GenericPIController valveController = vavDevice.getValveController();
+            GenericPIController valveController = vavDevice.getValveController();
         
             double roomTemp = vavDevice.getCurrentTemp();
             double dischargeTemp = vavDevice.getDischargeTemp();
@@ -87,7 +89,7 @@ public class VavSeriesFanProfile extends VavProfile
                 if (state != COOLING)
                 {
                     state = COOLING;
-                    //valveController.reset();
+                    valveController.reset();
                     valve.currentPosition = 0;
                     coolingLoop.setEnabled();
                     heatingLoop.setDisabled();
@@ -107,12 +109,14 @@ public class VavSeriesFanProfile extends VavProfile
                 }
             
                 int heatingLoopOp = (int) heatingLoop.getLoopOutput(setTemp-deadBand, roomTemp);
-                /*dischargeSp = supplyAirTemp + (MAX_DISCHARGE_TEMP - supplyAirTemp) * heatingLoopOp/100;
-                vavDevice.setDischargeSp(dischargeSp);
-                valveController.updateControlVariable(dischargeSp, dischargeTemp);
-                valve.currentPosition = (int) (valveController.getControlVariable() * 100 / valveController.getMaxAllowedError());*/
+                if (VavSystemController.getInstance().getSystemState() == VavSystemController.State.COOLING)
+                {
+                    dischargeSp = supplyAirTemp + (MAX_DISCHARGE_TEMP - supplyAirTemp) * heatingLoopOp / 100;
+                    vavDevice.setDischargeSp(dischargeSp);
+                    valveController.updateControlVariable(dischargeSp, dischargeTemp);
+                    valve.currentPosition = (int) (valveController.getControlVariable() * 100 / valveController.getMaxAllowedError());
+                }
                 
-                //REHEAT control that does not follow RP-1455.
                 loopOp = heatingLoopOp;
             }
             else
@@ -130,14 +134,14 @@ public class VavSeriesFanProfile extends VavProfile
                 loopOp = 0;
             }
         
-            /*if (valveController.getControlVariable() == 0)
+            if (valveController.getControlVariable() == 0)
             {
                 valve.currentPosition = 0;
-            }*/
+            }
             
             if (!damper.isOverrideActive())
             {
-                setDamperLimits(node, damper);
+                //setDamperLimits(node, damper);
                 //CO2 loop output from 0-50% modulates damper min position.
                 if (/*mode == OCCUPIED && */co2Loop.getLoopOutput(co2) <= 50)
                 {
@@ -160,11 +164,11 @@ public class VavSeriesFanProfile extends VavProfile
                 {
                     damper.currentPosition = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * loopOp / 100;
                 }
-                damper.applyLimits();
             }
             
-            //REHEAT control that does not follow RP-1455.
-            if (state == HEATING)
+            //When in the system is in heating, REHEAT control that does not follow RP-1455.
+            if (VavSystemController.getInstance().getSystemState() == VavSystemController.State.HEATING
+                                                                                && state == HEATING)
             {
                 double valveStartDamperPercent = TunerUtil.readTunerValByQuery("vav and valve and start and damper and equipRef == \""+vavEquip.getId()+"\"");
                 double maxHeatingPos = vavDevice.getDamperLimit("heating", "max");

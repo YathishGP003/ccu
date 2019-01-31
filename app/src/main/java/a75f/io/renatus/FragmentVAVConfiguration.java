@@ -30,6 +30,7 @@ import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.Zone;
 import a75f.io.logic.bo.building.ZonePriority;
+import a75f.io.logic.bo.building.definitions.DamperShape;
 import a75f.io.logic.bo.building.definitions.DamperType;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
@@ -220,8 +221,12 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         damperSizeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         damperSize.setAdapter(damperSizeAdapter);
         //damperSize.setSelection((mFSVData.getDamperSize()-4)/2);
-        String[] damp_shape_arr = {"Round", "Square", "Rectangular"};
-        ArrayAdapter<String> damperShapeAdapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_dropdown_item, damp_shape_arr);
+        
+        ArrayList<String> damperShapes = new ArrayList<>();
+        for (DamperShape shape : DamperShape.values()) {
+            damperShapes.add(shape.displayName);
+        }
+        ArrayAdapter<String> damperShapeAdapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_dropdown_item, damperShapes);
         damperShapeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         damperShape = view.findViewById(R.id.damperShape);
         damperShape.setAdapter(damperShapeAdapter);
@@ -355,10 +360,10 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         });
         
         if (mProfileConfig != null) {
-            damperType.setSelection(damperTypesAdapter.getPosition(mProfileConfig.damperType.displayName), false);
+            damperType.setSelection(damperTypesAdapter.getPosition(DamperType.values()[mProfileConfig.damperType].displayName), false);
             damperSize.setSelection(damperSizeAdapter.getPosition(String.valueOf(mProfileConfig.damperSize)), false);
-            damperShape.setSelection(damperShapeAdapter.getPosition(mProfileConfig.damperShape), false);
-            reheatType.setSelection(reheatTypesAdapter.getPosition(mProfileConfig.reheatType.displayName), false);
+            damperShape.setSelection(damperShapeAdapter.getPosition(DamperShape.values()[mProfileConfig.damperShape].displayName), false);
+            reheatType.setSelection(reheatTypesAdapter.getPosition(ReheatType.values()[mProfileConfig.reheatType].displayName), false);
             enableOccupancyControl.setChecked(mProfileConfig.enableOccupancyControl);
             enableCO2Control.setChecked(mProfileConfig.enableCO2Control);
             enableIAQControl.setChecked(mProfileConfig.enableIAQControl);
@@ -442,10 +447,10 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
     private void setupVavZoneProfile() {
         
         VavProfileConfiguration vavConfig = new VavProfileConfiguration();
-        vavConfig.damperType = damperTypeSelected;
+        vavConfig.damperType = damperTypeSelected.ordinal();
         vavConfig.damperSize = Integer.parseInt(damperSize.getSelectedItem().toString());
-        vavConfig.damperShape = damperShape.getSelectedItem().toString();
-        vavConfig.reheatType = reheatTypeSelected;
+        vavConfig.damperShape = DamperType.values()[damperShape.getSelectedItemPosition()].ordinal();
+        vavConfig.reheatType = reheatTypeSelected.ordinal();
         vavConfig.setNodeType(mNodeType);
         vavConfig.setNodeAddress(mSmartNodeAddress);
         vavConfig.enableOccupancyControl = enableOccupancyControl.isChecked();

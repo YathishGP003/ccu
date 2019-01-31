@@ -1,8 +1,6 @@
 package a75f.io.logic.bo.building.vav;
 
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
-import a75f.io.logic.bo.building.definitions.DamperType;
-import a75f.io.logic.bo.building.definitions.ReheatType;
 
 /**
  * Created by samjithsadasivan on 6/27/18.
@@ -11,10 +9,10 @@ import a75f.io.logic.bo.building.definitions.ReheatType;
 public class VavProfileConfiguration extends BaseProfileConfiguration
 {
     
-    public DamperType damperType;
+    public int damperType;
     public int damperSize;
-    public String damperShape;
-    public ReheatType reheatType;
+    public int damperShape;
+    public int reheatType;
     
     public boolean enableOccupancyControl;
     public boolean enableCO2Control;

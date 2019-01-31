@@ -21,6 +21,32 @@ import a75f.io.logic.tuners.TunerConstants;
 
 public abstract class VavSystemProfile extends SystemProfile
 {
+    public void addSystemLoopOpPoints(String equipRef) {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap siteMap = hayStack.read(Tags.SITE);
+        String siteRef = (String) siteMap.get(Tags.ID);
+        String tz = siteMap.get("tz").toString();
+        String equipDis = siteMap.get("dis").toString()+"-SystemEquip";
+        
+        addSystemLoopOpPoint("cooling", siteRef, equipRef, equipDis, tz);
+        addSystemLoopOpPoint("heating", siteRef, equipRef, equipDis, tz);
+        addSystemLoopOpPoint("fan", siteRef, equipRef, equipDis, tz);
+    }
+    
+    private void addSystemLoopOpPoint(String loop, String siteRef, String equipref, String equipDis, String tz){
+        Point relay1Op = new Point.Builder()
+                                 .setDisplayName(equipDis+"-"+loop+"LoopOutput")
+                                 .setSiteRef(siteRef)
+                                 .setEquipRef(equipref)
+                                 .addMarker("system").addMarker(loop).addMarker("loop").addMarker("output").addMarker("his").addMarker("equipHis").addMarker("sp")
+                                 .setTz(tz)
+                                 .build();
+        CCUHsApi.getInstance().addPoint(relay1Op);
+    }
+    
+    public void setSystemLoopOp(String loop, double val) {
+        CCUHsApi.getInstance().writeHisValByQuery("point and system and loop and output and his and "+loop, val);
+    }
     
     public void addVavSystemTuners(String equipref) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
@@ -61,7 +87,7 @@ public abstract class VavSystemProfile extends SystemProfile
         }
     
         Point humidityHysteresis = new Point.Builder()
-                                                 .setDisplayName(HSUtil.getDis(equipref)+ "-" + "analogFanSpeedMultiplier")
+                                                 .setDisplayName(HSUtil.getDis(equipref)+ "-" + "humidityHysteresis")
                                                  .setSiteRef(siteRef)
                                                  .setEquipRef(equipref)
                                                  .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
@@ -74,6 +100,23 @@ public abstract class VavSystemProfile extends SystemProfile
             if (valMap.get("val") != null)
             {
                 hayStack.pointWrite(HRef.copy(humidityHysteresisId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+    
+        Point relayDeactivationHysteresis = new Point.Builder()
+                                           .setDisplayName(HSUtil.getDis(equipref)+ "-" + "relayDeactivationHysteresis")
+                                           .setSiteRef(siteRef)
+                                           .setEquipRef(equipref)
+                                           .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
+                                           .addMarker("relay").addMarker("deactivation").addMarker("hysteresis").addMarker("sp")
+                                           .build();
+        String relayDeactivationHysteresisId = hayStack.addPoint(relayDeactivationHysteresis);
+        HashMap relayDeactivationHysteresisPoint = hayStack.read("point and tuner and default and vav and relay and deactivation and hysteresis");
+        ArrayList<HashMap> relayDeactivationHysteresisArr = hayStack.readPoint(relayDeactivationHysteresisPoint.get("id").toString());
+        for (HashMap valMap : relayDeactivationHysteresisArr) {
+            if (valMap.get("val") != null)
+            {
+                hayStack.pointWrite(HRef.copy(relayDeactivationHysteresisId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
     }

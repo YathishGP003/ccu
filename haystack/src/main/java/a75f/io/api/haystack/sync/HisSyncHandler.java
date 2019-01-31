@@ -152,7 +152,6 @@ public class HisSyncHandler
     
                 HisItem sItem = hisItems.get(hisItems.size()-1);//TODO - Writing just the recent his val?
                 tsData.put( pointGUID.replace("@",""), String.valueOf(sItem.getVal()));
-    
                 /*for (HisItem item: hisItems)
                 {
                     item.setSyncStatus(true);

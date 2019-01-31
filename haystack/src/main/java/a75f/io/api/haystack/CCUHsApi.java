@@ -461,9 +461,9 @@ public class CCUHsApi {
 
         ArrayList points = readAll(query);
         String id = points.size() == 0 ? null : ((HashMap) points.get(0)).get("id").toString();
-        if (id == null || id == "") {
+        /*if (id == null || id == "") {
             return;
-        }
+        }*/
 
         HisItem item = new HisItem(id, new Date(), val);
         hisWrite(item);
@@ -524,6 +524,10 @@ public class CCUHsApi {
             for (HashMap device : devices) {
                 deleteEntityTree(device.get("id").toString());
             }
+            ArrayList<HashMap> schedules = readAll("schedule and siteRef == \"" + id + "\"");
+            for (HashMap schedule : schedules) {
+                deleteEntity(schedule.get("id").toString());
+            }
             deleteEntity(id);
 
         } else if (entity.get("floor") != null) {
@@ -582,7 +586,10 @@ public class CCUHsApi {
             public void run() {
                 if (!testHarnessEnabled)
                 {
-                    entitySyncHandler.sync();
+                    if (!entitySyncHandler.isSyncProgress())
+                    {
+                        entitySyncHandler.sync();
+                    }
                 } else {
                     Log.d("CCU"," Test Harness Enabled , Skip Entity Sync");
                 }

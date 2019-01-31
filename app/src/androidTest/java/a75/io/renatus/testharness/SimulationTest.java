@@ -3,6 +3,7 @@ package a75.io.renatus.testharness;
 import android.content.Context;
 import android.content.Intent;
 import android.support.test.InstrumentationRegistry;
+import android.util.Log;
 
 import junit.framework.Assert;
 
@@ -23,6 +24,7 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.SystemProperties;
 import a75f.io.renatus.RenatusLandingActivity;
 import a75f.io.renatus.SplashActivity;
@@ -46,6 +48,7 @@ public class SimulationTest
     long   testTime;
     
     String ccuState;
+    String siteId;
     String biskitState;
     
     private boolean mStartTest = false;
@@ -66,11 +69,10 @@ public class SimulationTest
     public void tearDown() {
     }
     
-    @Test
     public void trialRun() {
         
         CCUStateParser parser = new CCUStateParser();
-        parser.pullHayStackDb("5c23ec0624aa9a00f4dff47d");
+        parser.pullHayStackDb("5c4ff0e824aa9a00f4a99bb4");
         Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setClassName(mContext,RenatusLandingActivity.class.getName());
@@ -85,12 +87,12 @@ public class SimulationTest
 
     }
     
-    
+    @Test
     public void runTest() {
         
         CCUStateParser parser = new CCUStateParser();
         boolean runTest = true;
-        
+        CCUHsApi.getInstance().testHarnessEnabled = true;
         do {
     
             threadSleep(60);
@@ -117,7 +119,8 @@ public class SimulationTest
                     else
                     {
                         System.out.println("Test data : " + ccuState);
-                        parser.parseAndInjectState(mContext, ccuState);
+                        //parser.parseAndInjectState(mContext, ccuState);
+                        parser.pullHayStackDb(siteId);
                         setTime();
                         Intent intent = new Intent(Intent.ACTION_MAIN);
                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -129,6 +132,8 @@ public class SimulationTest
             }
             
         } while (runTest);
+    
+        CCUHsApi.getInstance().testHarnessEnabled = false;
     }
     
     private void startTest() {
@@ -150,7 +155,12 @@ public class SimulationTest
             JSONObject stateJson = new JSONObject(data);
         
             biskitState = stateJson.getString("state");
-            ccuState = stateJson.getString("data");
+            //ccuState = stateJson.getString("data");
+            
+            JSONObject dataJson = stateJson.getJSONObject("data");
+            Log.d("TestHarness"," dataJson "+dataJson);
+            siteId = dataJson.getString("siteId");
+            Log.d("TestHarness"," siteId "+siteId);
             testTime = stateJson.optLong("time");
         
         }catch (JSONException e) {

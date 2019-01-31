@@ -17,6 +17,7 @@ import a75f.io.logic.bo.building.hvac.SeriesFanVavUnit;
 import a75f.io.logic.bo.building.hvac.Valve;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.logic.tuners.VavTunerUtil;
 
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
@@ -83,7 +84,7 @@ public class VavSeriesFanProfile extends VavProfile
             //TODO
             //If supply air temperature from air handler is greater than room temperature, Cooling shall be
             //locked out.
-            if (roomTemp > (setTemp + deadBand))
+            if (roomTemp > (setTemp + VavTunerUtil.getCoolingDeadband(vavEquip.getId())))
             {
                 //Zone is in Cooling
                 if (state != COOLING)
@@ -98,7 +99,7 @@ public class VavSeriesFanProfile extends VavProfile
                 loopOp = coolingOp;
                 
             }
-            else if (roomTemp < (setTemp - deadBand))
+            else if (roomTemp < (setTemp - VavTunerUtil.getHeatingDeadband(vavEquip.getId())))
             {
                 //Zone is in heating
                 if (state != HEATING)

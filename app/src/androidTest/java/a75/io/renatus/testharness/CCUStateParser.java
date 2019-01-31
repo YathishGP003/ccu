@@ -98,7 +98,7 @@ public class CCUStateParser
                             case VAV_SERIES_FAN:
                             case VAV_PARALLEL_FAN:
                                 ((VavProfile)p).addLogicalMapAndPoints(node, p.getProfileConfiguration(node), null, null);
-                                BuildingTuners.getInstance().addDefaultVavTuners();
+                                //BuildingTuners.getInstance().addDefaultVavTuners();
                                 break;
                             
                         }

@@ -64,7 +64,7 @@ public class BuildingTuners
         equipRef = hayStack.addEquip(tunerEquip);
         equipDis = siteDis+"-BuildingTuner";
         tz = siteMap.get("tz").toString();
-        //addDefaultSystemTuners();
+        addDefaultVavTuners();
         
     }
     

@@ -103,7 +103,7 @@ public class TestHayStack
 
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
-        SmartNode node = new SmartNode(7000, siteRef, null, null);
+        SmartNode node = new SmartNode(7000, siteRef, null, null, null);
         
         String dtRef = CCUHsApi.getInstance().addPoint(dtPoint);
         CCUHsApi.getInstance().addPoint(dPoint);
@@ -222,7 +222,7 @@ public class TestHayStack
     
     
         //Create Physical points and map
-        SmartNode device = new SmartNode(nodeAddr, siteRef, null, null);
+        SmartNode device = new SmartNode(nodeAddr, siteRef, null, null, null);
         device.th1In.setPointRef(datID);
         CCUHsApi.getInstance().addPoint(device.th1In);
         device.th2In.setPointRef(eatID);
@@ -474,7 +474,7 @@ public class TestHayStack
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
         
-        SmartNode device = new SmartNode(nodeAddr, siteRef, null,null);
+        SmartNode device = new SmartNode(nodeAddr, siteRef, null,null, null);
         device.analog1Out.setType("0-10v");
         hayStack.addPoint(device.analog1Out);
         System.out.print(hayStack.tagsDb.tagsMap);

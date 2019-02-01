@@ -181,7 +181,7 @@ public class VavAnalogRtu extends VavSystemProfile
             signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemFanLoopOp/100)));
         }
         setSystemLoopOp("fan", systemFanLoopOp);
-        setCmdSignal("staticPressure", signal);
+        setCmdSignal("fan", signal);
         if (getConfigVal("analog2 and output and enabled") > 0)
         {
             ControlMote.setAnalogOut("analog2", signal);

@@ -64,7 +64,7 @@ public class BuildingTuners
         equipRef = hayStack.addEquip(tunerEquip);
         equipDis = siteDis+"-BuildingTuner";
         tz = siteMap.get("tz").toString();
-        //addDefaultSystemTuners();
+        addDefaultVavTuners();
         
     }
     
@@ -315,7 +315,6 @@ public class BuildingTuners
         hayStack.writePoint(relayDeactivationHysteresisId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.RELAY_DEACTIVATION_HYSTERESIS, 0);
         hayStack.writeHisValById(relayDeactivationHysteresisId, TunerConstants.RELAY_DEACTIVATION_HYSTERESIS);
         
-        CCUHsApi.getInstance().syncEntityTree();
     }
     
     public void addEquipVavTuners(String equipdis, String equipref, VavProfileConfiguration config) {
@@ -577,6 +576,5 @@ public class BuildingTuners
             }
         }
         
-        CCUHsApi.getInstance().syncEntityTree();
     }
 }

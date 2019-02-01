@@ -309,19 +309,33 @@ public class VAVLogicalMap
                                  .build();
         String vocId = CCUHsApi.getInstance().addPoint(voc);
     
-        Point desiredTemp = new Point.Builder()
-                                    .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-desiredTemp")
+        Point desiredTempCooling = new Point.Builder()
+                                    .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-desiredTempCooling")
                                     .setEquipRef(equipRef)
                                     .setSiteRef(siteRef)
                                     .setZoneRef(room)
                                     .setFloorRef(floor)
-                                    .addMarker("zone").addMarker("air").addMarker("temp").addMarker("desired").addMarker("vav")
+                                    .addMarker("zone").addMarker("air").addMarker("temp").addMarker("desired").addMarker("vav").addMarker("cooling")
                                     .addMarker("sp").addMarker("writable").addMarker("his").addMarker("equipHis")
                                     .setGroup(String.valueOf(nodeAddr))
                                     .setUnit("\u00B0F")
                                     .setTz(tz)
                                     .build();
-        CCUHsApi.getInstance().addPoint(desiredTemp);
+        CCUHsApi.getInstance().addPoint(desiredTempCooling);
+    
+        Point desiredTempHeating = new Point.Builder()
+                                           .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-desiredTempHeating")
+                                           .setEquipRef(equipRef)
+                                           .setSiteRef(siteRef)
+                                           .setZoneRef(room)
+                                           .setFloorRef(floor)
+                                           .addMarker("zone").addMarker("air").addMarker("temp").addMarker("desired").addMarker("vav").addMarker("heating")
+                                           .addMarker("sp").addMarker("writable").addMarker("his").addMarker("equipHis")
+                                           .setGroup(String.valueOf(nodeAddr))
+                                           .setUnit("\u00B0F")
+                                           .setTz(tz)
+                                           .build();
+        CCUHsApi.getInstance().addPoint(desiredTempHeating);
     
         Point heatingLoopOp = new Point.Builder()
                                     .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-heatingLoopOp")
@@ -467,7 +481,8 @@ public class VAVLogicalMap
         setReheatPos(0);
         setDischargeTemp(0);
         setSupplyAirTemp(0);
-        setDesiredTemp(72.0);
+        setDesiredTempCooling(73.0);
+        setDesiredTempHeating(71.0);
         setHumidity(0);
         setCO2(0);
         setVOC(0);
@@ -806,9 +821,9 @@ public class VAVLogicalMap
         CCUHsApi.getInstance().writeHisValByQuery("point and air and voc and sensor and current and group == \""+nodeAddr+"\"", voc);
     }
     
-    public double getDesiredTemp()
+    public double getDesiredTempCooling()
     {
-        ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and desired and sp and group == \""+nodeAddr+"\"");
+        ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and desired and cooling and sp and group == \""+nodeAddr+"\"");
         String id = ((HashMap)points.get(0)).get("id").toString();
         if (id == null || id == "") {
             throw new IllegalArgumentException();
@@ -816,9 +831,31 @@ public class VAVLogicalMap
         desiredTemp = CCUHsApi.getInstance().readDefaultValById(id);
         return desiredTemp;
     }
-    public void setDesiredTemp(double desiredTemp)
+    public void setDesiredTempCooling(double desiredTemp)
     {
-        ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and desired and sp and group == \""+nodeAddr+"\"");
+        ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and desired and cooling and sp and group == \""+nodeAddr+"\"");
+        String id = ((HashMap)points.get(0)).get("id").toString();
+        if (id == null || id == "") {
+            throw new IllegalArgumentException();
+        }
+        CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
+        CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
+        this.desiredTemp = desiredTemp;
+    }
+    
+    public double getDesiredTempHeating()
+    {
+        ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and desired and heating and sp and group == \""+nodeAddr+"\"");
+        String id = ((HashMap)points.get(0)).get("id").toString();
+        if (id == null || id == "") {
+            throw new IllegalArgumentException();
+        }
+        desiredTemp = CCUHsApi.getInstance().readDefaultValById(id);
+        return desiredTemp;
+    }
+    public void setDesiredTempHeating(double desiredTemp)
+    {
+        ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and desired and heating and sp and group == \""+nodeAddr+"\"");
         String id = ((HashMap)points.get(0)).get("id").toString();
         if (id == null || id == "") {
             throw new IllegalArgumentException();

@@ -16,10 +16,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.ZoneProfile;
-import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Damper;
-import a75f.io.logic.bo.building.hvac.ParallelFanVavUnit;
-import a75f.io.logic.bo.building.hvac.SeriesFanVavUnit;
 import a75f.io.logic.bo.building.hvac.Valve;
 import a75f.io.logic.bo.building.hvac.VavUnit;
 import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
@@ -41,15 +38,15 @@ public abstract class VavProfile extends ZoneProfile
     public static final int HEATING_LOOP_OFFSET = 20;
     public static final int REHEAT_THRESHOLD_TEMP = 50;
     
-    double  setTemp = 72.0; //TODO
-    int deadBand = 1;
-    
     public HashMap<Short, VAVLogicalMap> vavDeviceMap;
     SatResetListener satResetListener;
     CO2ResetListener co2ResetListener;
     SpResetListener spResetListener;
     HwstResetListener hwstResetListener;
     VavTRSystem trSystem = null;
+    
+    double setTempCooling;
+    double setTempHeating;
     
     public VavProfile() {
         vavDeviceMap = new HashMap<>();
@@ -176,10 +173,10 @@ public abstract class VavProfile extends ZoneProfile
             if (vavDeviceMap.get(node).getCoolingLoop().getLoopOutput() > 95) {
                 satResetRequest.currentRequests = 1;
             }
-            if ((roomTemp - setTemp) >= 3) {//TODO - for 2 mins
+            if ((roomTemp - setTempCooling) >= 3) {//TODO - for 2 mins
                 satResetRequest.currentRequests = 2;
             }
-            if ((roomTemp - setTemp) >= 5) {//TODO - for 5 mins
+            if ((roomTemp - setTempCooling) >= 5) {//TODO - for 5 mins
                 satResetRequest.currentRequests = 3;
             }
         } else {
@@ -251,11 +248,11 @@ public abstract class VavProfile extends ZoneProfile
         
         if (state == HEATING)
         {
-            if ((setTemp - sat) > 30)
+            if ((setTempHeating - sat) > 30)
             { // TODO- 5 mins
                 hwstRequest.currentRequests = 3;
             }
-            else if ((setTemp - sat) > 15)
+            else if ((setTempHeating - sat) > 15)
             { //TODO - 5 mins
                 hwstRequest.currentRequests = 2;
             }
@@ -290,12 +287,6 @@ public abstract class VavProfile extends ZoneProfile
         return getAverageZoneTemp();
     }
     
-    @JsonIgnore
-    public double getSetTemp()
-    {
-        return setTemp;
-    }
-    
     
     @JsonIgnore
     @Override
@@ -321,40 +312,6 @@ public abstract class VavProfile extends ZoneProfile
     public Set<Short> getNodeAddresses()
     {
         return vavDeviceMap.keySet();
-    }
-    
-    @Override
-    public HashMap<String, Double> getTSData() {
-        HashMap<String, Double> tsdata = new HashMap<>();
-    
-        for (short node : getNodeAddresses())
-        {
-            if (vavDeviceMap.get(node) ==  null) {
-                continue;
-            }
-            tsdata.put("SAT-requestHours"+node,vavDeviceMap.get(node).satResetRequest.requestHours);
-            tsdata.put("heatingLoopOp"+node,vavDeviceMap.get(node).getHeatingLoop().getLoopOutput());
-            tsdata.put("coolingLoopOp"+node,vavDeviceMap.get(node).getCoolingLoop().getLoopOutput());
-            tsdata.put("dischargeSp"+node,vavDeviceMap.get(node).getDischargeSp());
-            tsdata.put("supplyAirTemp"+node,vavDeviceMap.get(node).getSupplyAirTemp());
-            if (getProfileType() == ProfileType.VAV_SERIES_FAN) {
-                double fanStart = ((SeriesFanVavUnit)vavDeviceMap.get(node).getVavUnit()).fanStart ? 100 : 0;
-                tsdata.put("fanStart"+node, fanStart);
-            } else if (getProfileType() == ProfileType.VAV_PARALLEL_FAN) {
-                double fanStart = ((ParallelFanVavUnit)vavDeviceMap.get(node).getVavUnit()).fanStart ? 100 : 0;
-                tsdata.put("fanStart"+node, fanStart);
-            }
-            tsdata.put("CO2"+node,vavDeviceMap.get(node).getCO2());
-            tsdata.put("co2LoopOp"+node,(double)vavDeviceMap.get(node).getCo2Loop().getLoopOutput());
-            tsdata.put("CO2-requestHours"+node,vavDeviceMap.get(node).co2ResetRequest.requestHours);
-            tsdata.put("SP"+node,vavDeviceMap.get(node).getStaticPressure());
-            tsdata.put("SP-requestHours"+node,vavDeviceMap.get(node).spResetRequest.requestHours);
-            tsdata.put("HWST-requestHours"+node,vavDeviceMap.get(node).hwstResetRequest.requestHours);
-    
-            tsdata.put("setTemp"+node,setTemp);
-        }
-        
-        return tsdata;
     }
     
     @JsonIgnore

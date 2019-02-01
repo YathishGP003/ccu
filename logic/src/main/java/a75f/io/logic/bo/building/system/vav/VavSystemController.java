@@ -19,8 +19,8 @@ import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemMode;
+import a75f.io.logic.bo.util.HSEquipUtil;
 import a75f.io.logic.tuners.TunerUtil;
-import a75f.io.logic.tuners.VavTunerUtil;
 
 import static a75f.io.logic.bo.building.system.SystemMode.AUTO;
 import static a75f.io.logic.bo.building.system.SystemMode.COOLONLY;
@@ -105,10 +105,11 @@ public class VavSystemController
                     }
                     double zoneCurTemp = getEquipCurrentTemp(q.getId());
                     double zoneTargetTemp = getEquipTempTarget(q.getId());
-                    double coolingDB = VavTunerUtil.getCoolingDeadband(q.getId());
-                    double heatingDB = VavTunerUtil.getHeatingDeadband(q.getId());
-                    double zoneCoolingLoad = zoneTargetTemp-coolingDB >= zoneCurTemp ? 0 : zoneCurTemp - zoneTargetTemp - coolingDB;
-                    double zoneHeatingLoad = zoneTargetTemp-heatingDB <= zoneCurTemp ? 0 : zoneTargetTemp - zoneCurTemp - heatingDB;
+                    double desiredTempCooling = HSEquipUtil.getDesiredTempCooling(q.getId());
+                    double desiredTempHeating = HSEquipUtil.getDesiredTempHeating(q.getId());
+                    
+                    double zoneCoolingLoad = zoneCurTemp > desiredTempCooling ? zoneCurTemp - desiredTempCooling : 0;
+                    double zoneHeatingLoad = zoneCurTemp < desiredTempHeating ? desiredTempHeating - zoneCurTemp : 0;
                     double zoneDynamicPriority = getEquipDynamicPriority(zoneCoolingLoad > 0 ? zoneCoolingLoad : zoneHeatingLoad, q.getId());
                     totalCoolingLoad += zoneCoolingLoad;
                     totalHeatingLoad += zoneHeatingLoad;

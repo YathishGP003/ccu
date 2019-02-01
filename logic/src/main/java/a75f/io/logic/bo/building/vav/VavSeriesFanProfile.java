@@ -69,7 +69,8 @@ public class VavSeriesFanProfile extends VavProfile
             double co2 = vavDeviceMap.get(node).getCO2();
             double voc = vavDeviceMap.get(node).getVOC();
             double dischargeSp = vavDevice.getDischargeSp();
-            setTemp = vavDevice.getDesiredTemp();
+            setTempCooling = vavDevice.getDesiredTempCooling();
+            setTempHeating = vavDevice.getDesiredTempHeating();
             Equip vavEquip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + node + "\"")).build();
     
             if (roomTemp == 0) {
@@ -83,7 +84,7 @@ public class VavSeriesFanProfile extends VavProfile
             //TODO
             //If supply air temperature from air handler is greater than room temperature, Cooling shall be
             //locked out.
-            if (roomTemp > (setTemp + deadBand))
+            if (roomTemp > setTempCooling)
             {
                 //Zone is in Cooling
                 if (state != COOLING)
@@ -94,11 +95,11 @@ public class VavSeriesFanProfile extends VavProfile
                     coolingLoop.setEnabled();
                     heatingLoop.setDisabled();
                 }
-                int coolingOp = (int) coolingLoop.getLoopOutput(roomTemp, setTemp+deadBand);
+                int coolingOp = (int) coolingLoop.getLoopOutput(roomTemp, setTempHeating);
                 loopOp = coolingOp;
                 
             }
-            else if (roomTemp < (setTemp - deadBand))
+            else if (roomTemp < setTempHeating)
             {
                 //Zone is in heating
                 if (state != HEATING)
@@ -108,7 +109,7 @@ public class VavSeriesFanProfile extends VavProfile
                     coolingLoop.setDisabled();
                 }
             
-                int heatingLoopOp = (int) heatingLoop.getLoopOutput(setTemp-deadBand, roomTemp);
+                int heatingLoopOp = (int) heatingLoop.getLoopOutput(setTempHeating, roomTemp);
                 if (VavSystemController.getInstance().getSystemState() == VavSystemController.State.COOLING)
                 {
                     dischargeSp = supplyAirTemp + (MAX_DISCHARGE_TEMP - supplyAirTemp) * heatingLoopOp / 100;
@@ -212,9 +213,9 @@ public class VavSeriesFanProfile extends VavProfile
                 fanReady = false;
             }
     
-            Log.d("VAV","CoolingLoop "+node +"roomTemp :"+roomTemp+" setTemp: "+setTemp);
+            Log.d("VAV","CoolingLoop "+node +"roomTemp :"+roomTemp+" setTempCooling: "+setTempCooling);
             coolingLoop.dump();
-            Log.d("VAV","HeatingLoop "+node +"roomTemp :"+roomTemp+" setTemp: "+setTemp);
+            Log.d("VAV","HeatingLoop "+node +"roomTemp :"+roomTemp+" setTempHeating: "+setTempHeating);
             heatingLoop.dump();
             
             Log.d(TAG, "STATE :"+state+" ,loopOp: " + loopOp + " ,damper:" + damper.currentPosition

@@ -43,7 +43,6 @@ import a75f.io.logic.bo.building.vav.VavProfile;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 import a75f.io.logic.bo.building.vav.VavReheatProfile;
 import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
-import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import butterknife.ButterKnife;
@@ -498,7 +497,6 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         }
         mVavProfile.getProfileConfiguration().put(mSmartNodeAddress, vavConfig);
         if (mProfileConfig == null) {
-            BuildingTuners.getInstance().addDefaultVavTuners();
             mVavProfile.addLogicalMapAndPoints(mSmartNodeAddress, vavConfig, floorRef, zoneRef);
         } else
         {

@@ -35,7 +35,7 @@ public class TunerConstants
     public static final double VAV_HEATING_DB_MULTIPLIER = 0.5;
     public static final double VAV_PROPORTIONAL_GAIN = 0.5;
     public static final double VAV_INTEGRAL_GAIN = 0.5;
-    public static final double VAV_PROPORTIONAL_SPREAD = 3;
+    public static final double VAV_PROPORTIONAL_SPREAD = 2;
     public static final double VAV_INTEGRAL_TIMEOUT = 30;
     public static final double TARGET_CUMULATIVE_DAMPER = 70;
     public static final double TARGET_MAX_INSIDE_HUMIDITY = 45;

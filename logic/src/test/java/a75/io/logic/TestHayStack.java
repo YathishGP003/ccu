@@ -23,7 +23,6 @@ import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.logic.bo.building.definitions.Port;
-import a75f.io.logic.bo.building.system.SystemEquip;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 
@@ -433,26 +432,6 @@ public class TestHayStack
         
     }
     
-    @Test
-    public void testSystemEquip(){
-    
-        CCUHsApi hayStack = new CCUHsApi();
-        
-        HashMap site = hayStack.read("site");
-        if (site.size() == 0) {
-            Site s75f = new Site.Builder()
-                                .setDisplayName("75F")
-                                .addMarker("site")
-                                .setGeoCity("Burnsville")
-                                .setGeoState("MN")
-                                .setTz("Chicago")
-                                .setArea(20000).build();
-            hayStack.addSite(s75f);
-        }
-        SystemEquip q = SystemEquip.getInstance();
-        q.dump();
-        System.out.println(hayStack.tagsDb.tagsMap);
-    }
     
     @Test
     public void testUpdateEntity()

@@ -80,6 +80,9 @@ public class VavReheatProfile extends VavProfile
             Valve valve = vavUnit.reheatValve;
     
             Equip vavEquip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + node + "\"")).build();
+            if (vavDevice.getDesiredTemp() == 0) {
+                vavDevice.setDesiredTemp((setTempCooling+setTempHeating)/2);
+            }
             int loopOp = 0;//New value of loopOp
             //TODO
             //If supply air temperature from air handler is greater than room temperature, Cooling shall be

@@ -42,6 +42,12 @@ public class Pulse
 						hayStack.writeHisValById(logPoint.get("id").toString(), getRoomTempConversion(val));
 						Log.d(TAG,"regularSmartNodeUpdate : roomTemp "+getRoomTempConversion(val));
 						break;
+					case DESIRED_TEMP:
+						val = smartNodeRegularUpdateMessage_t.update.setTemperature.get();
+						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+						hayStack.writeHisValById(logPoint.get("id").toString(), getDesredTempConversion(val));
+						Log.d(TAG,"regularSmartNodeUpdate : desiredTemp "+getDesredTempConversion(val));
+						break;
 					case ANALOG_IN_ONE:
 						val = smartNodeRegularUpdateMessage_t.update.externalAnalogVoltageInput1.get();
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
@@ -100,8 +106,8 @@ public class Pulse
 	public static Double getHumidityConversion(Double h) {
 		return h/10.0;
 	}
-	public static Double getThermistorConversion(Double val) {
-		return val/100.0;
+	public static Double getDesredTempConversion(Double val) {
+		return val/2;
 	}
 	
 	public static Double getAnalogConversion(Double val) {

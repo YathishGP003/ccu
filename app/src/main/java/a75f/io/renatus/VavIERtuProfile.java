@@ -45,7 +45,6 @@ public class VavIERtuProfile extends Fragment
             new AsyncTask<Void, Void, Void>() {
                 @Override
                 protected Void doInBackground( final Void ... params ) {
-                    //SystemEquip.getInstance().updateSystemProfile(ProfileType.SYSTEM_VAV_IE_RTU);
                     return null;
                 }
                 @Override

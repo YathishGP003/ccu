@@ -67,13 +67,17 @@ public class VavParallelFanProfile extends VavProfile
             double dischargeSp = vavDevice.getDischargeSp();
             setTempCooling = vavDevice.getDesiredTempCooling();
             setTempHeating = vavDevice.getDesiredTempHeating();
+            Equip vavEquip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + node + "\"")).build();
+            if (vavDevice.getDesiredTemp() == 0) {
+                vavDevice.setDesiredTemp((setTempCooling+setTempHeating)/2);
+            }
     
             VOCLoop vocLoop = vavDeviceMap.get(node).getVOCLoop();
             if (roomTemp == 0) {
                 Log.d(TAG,"Skip PI update for "+node+" roomTemp : "+roomTemp);
                 continue;
             }
-            Equip vavEquip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + node + "\"")).build();
+            
             Damper damper = vavUnit.vavDamper;
             Valve valve = vavUnit.reheatValve;
             int loopOp;//New value of loopOp

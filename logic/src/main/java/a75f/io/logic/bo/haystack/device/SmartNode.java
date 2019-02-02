@@ -32,6 +32,7 @@ public class SmartNode
     public RawPoint humidity;
     public RawPoint co2;
     public RawPoint voc;
+    public RawPoint desiredTemp;
     
     public String deviceRef;
     public String siteRef;
@@ -167,6 +168,17 @@ public class SmartNode
                          .setTz(tz)
                          .build();
     
+        desiredTemp = new RawPoint.Builder()
+                              .setDisplayName("desiredTemp-"+smartNodeAddress)
+                              .setDeviceRef(deviceRef)
+                              .setSiteRef(siteRef)
+                              .setZoneRef(zoneRef)
+                              .setFloorRef(floorRef)
+                              .addMarker("sensor").addMarker("his")
+                              .setPort(Port.DESIRED_TEMP.toString())
+                              .setTz(tz)
+                              .build();
+    
         humidity = new RawPoint.Builder()
                               .setDisplayName("humidity-"+smartNodeAddress)
                               .setDeviceRef(deviceRef)
@@ -214,6 +226,7 @@ public class SmartNode
         CCUHsApi.getInstance().addPoint(humidity);
         CCUHsApi.getInstance().addPoint(co2);
         CCUHsApi.getInstance().addPoint(voc);
+        CCUHsApi.getInstance().addPoint(desiredTemp);
     }
     
     public static void updatePhysicalPoint(int addr, String port, String type) {

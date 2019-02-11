@@ -5,17 +5,12 @@ import org.javolution.io.Struct;
 import java.nio.ByteOrder;
 
 /**
- * Created by samjithsadasivan isOn 8/2/17.
+ * Created by James Liu on 1/12/18.
  */
 
-public class CcuToCmOverUsbFirmwareMetadataMessage_t extends Struct
+public class NoContentMessage_t extends Struct
 {
-	
 	public final Enum8<MessageType> messageType = new Enum8<>(MessageType.values());
-	
-	public final Unsigned16 lwMeshAddress = new Unsigned16();
-	
-	public final FirmwareMetadata_t metadata = inner(new FirmwareMetadata_t());
 	
 	@Override
 	public ByteOrder byteOrder()

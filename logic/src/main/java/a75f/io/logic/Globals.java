@@ -388,18 +388,18 @@ public class Globals {
             switch (ProfileType.valueOf(eq.getProfile())) {
                 case SYSTEM_VAV_ANALOG_RTU:
                     VavAnalogRtu analogRtuProfile = new VavAnalogRtu();
-                    analogRtuProfile.initTRSystem();
+                    analogRtuProfile.addSystemEquip();
                     L.ccu().systemProfile = analogRtuProfile;
                     
                     break;
                 case SYSTEM_VAV_STAGED_RTU:
                     VavStagedRtu stagedRtuProfile = new VavStagedRtu();
-                    stagedRtuProfile.initTRSystem();
+                    stagedRtuProfile.addSystemEquip();
                     L.ccu().systemProfile = stagedRtuProfile;
                     break;
                 case SYSTEM_VAV_IE_RTU:
                     VavIERtu ieRtuProfile = new VavIERtu();
-                    ieRtuProfile.initTRSystem();
+                    ieRtuProfile.addSystemEquip();
                     L.ccu().systemProfile = ieRtuProfile;
                     break;
                 case SYSTEM_VAV_BACNET_RTU:

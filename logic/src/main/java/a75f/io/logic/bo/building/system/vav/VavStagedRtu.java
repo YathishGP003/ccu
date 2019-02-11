@@ -32,8 +32,6 @@ public class VavStagedRtu extends VavSystemProfile
     private static final int CO2_MAX = 1000;
     private static final int CO2_MIN = 400;
     
-    private static final int ANALOG_SCALE = 10;
-    
     int heatingStages = 0;
     int coolingStages = 0;
     int fanStages = 0;
@@ -48,7 +46,6 @@ public class VavStagedRtu extends VavSystemProfile
     }
     
     public VavStagedRtu() {
-        addSystemEquip();
     }
     
     public  int getSystemSAT() {
@@ -84,6 +81,7 @@ public class VavStagedRtu extends VavSystemProfile
             if (!equip.get("profile").equals(ProfileType.SYSTEM_VAV_STAGED_RTU.name())) {
                 hayStack.deleteEntityTree(equip.get("id").toString());
             } else {
+                initTRSystem();
                 return;
             }
         }
@@ -116,10 +114,8 @@ public class VavStagedRtu extends VavSystemProfile
         
     }
     
-    private synchronized void updateSystemPoints() {
+    protected synchronized void updateSystemPoints() {
         
-        
-        int systemCoolingLoopOp;
         if (VavSystemController.getInstance().getSystemState() == COOLING)
         {
             double satSpMax = VavTRTuners.getSatTRTunerVal("spmax");
@@ -138,8 +134,7 @@ public class VavStagedRtu extends VavSystemProfile
         } else {
             systemHeatingLoopOp = 0;
         }
-    
-        int systemFanLoopOp = 0;
+        
         double analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier");
         if (VavSystemController.getInstance().getSystemState() == COOLING)
         {

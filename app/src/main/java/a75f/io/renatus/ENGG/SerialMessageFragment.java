@@ -236,7 +236,7 @@ public class SerialMessageFragment extends Fragment
 					break;
 				case 4:
 					CcuToCmOverUsbSnLightingScheduleMessage_t snLightingMsg = new CcuToCmOverUsbSnLightingScheduleMessage_t();
-					snLightingMsg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_LIGHTING_SCHEDULE);
+					snLightingMsg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DEVICE_LIGHTING_SCHEDULE);
 					msgSend.setText(JsonSerializer.toJson(snLightingMsg, true));
 					break;
 				case 5:
@@ -256,12 +256,12 @@ public class SerialMessageFragment extends Fragment
 					break;
 				case 8:
 					CcuToCmOverUsbCcuHeartbeatMessage_t ccuHbMsg = new CcuToCmOverUsbCcuHeartbeatMessage_t();
-					ccuHbMsg.messageType.set(MessageType.CCU_HEARTBEAT_UPDATE);
+					ccuHbMsg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_CCU_HEARTBEAT);
 					msgSend.setText(JsonSerializer.toJson(ccuHbMsg, true));
 					break;
 				case 9:
 					CcuToCmOverUsbCmRelayActivationMessage_t cmRelayMsg = new CcuToCmOverUsbCmRelayActivationMessage_t();
-					cmRelayMsg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
+					cmRelayMsg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_CM_RELAY_ACTIVATION);
 					msgSend.setText(JsonSerializer.toJson(cmRelayMsg, true));
 					break;
 					
@@ -348,13 +348,13 @@ public class SerialMessageFragment extends Fragment
 			Struct msg = null;
 			
 			switch(messageType) {
-				case CM_REGULAR_UPDATE:
+				case CM_TO_CCU_OVER_USB_CM_REGULAR_UPDATE:
 					msg = new CmToCcuOverUsbCmRegularUpdateMessage_t();
 					break;
-				case CM_ERROR_REPORT:
+				case CM_TO_CCU_OVER_USB_ERROR_REPORT:
 					msg = new CmToCcuOverUsbErrorReportMessage_t();
 					break;
-				case CM_TO_CCU_OVER_USB_SN_REBOOT:
+				case DEVICE_TO_CM_OVER_AIR_DEVICE_REBOOT:
 					// TODO - define struct
 					break;
 				case CM_TO_CCU_OVER_USB_SN_REGULAR_UPDATE:

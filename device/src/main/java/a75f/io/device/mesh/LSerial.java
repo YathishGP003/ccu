@@ -68,7 +68,7 @@ public class LSerial
         {
             byte[] data = event.getBytes();
             MessageType messageType = MessageType.values()[(event.getBytes()[0] & 0xff)];
-            if (messageType == MessageType.CM_REGULAR_UPDATE)
+            if (messageType == MessageType.CM_TO_CCU_OVER_USB_CM_REGULAR_UPDATE)
             {
                 Pulse.regularCMUpdate(fromBytes(data, CmToCcuOverUsbCmRegularUpdateMessage_t.class));
             }

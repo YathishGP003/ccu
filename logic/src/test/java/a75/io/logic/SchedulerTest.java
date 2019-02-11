@@ -13,6 +13,7 @@ import java.util.UUID;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.MockTime;
+import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.bo.building.definitions.DAYS;
@@ -46,25 +47,25 @@ public class SchedulerTest
     public void testCoolingTemperatureInMockTime()
     {
         MockTime.getInstance().setMockTime(true, MOCK_TIME);
-        Double coolingTemp = schedule.getCurrentValueForMarker("cooling");
+        Occupied coolingTemp = schedule.getCurrentValueForMarker("cooling");
         Assert.assertNotNull(coolingTemp);
-        Assert.assertEquals(coolingTemp, 75.0);
+        Assert.assertEquals(coolingTemp.getValue(), 75.0);
     }
 
     @Test
     public void testHeatingTemperatureInMockTime()
     {
         MockTime.getInstance().setMockTime(true, MOCK_TIME);
-        Double coolingTemp = schedule.getCurrentValueForMarker("heating");
+        Occupied coolingTemp = schedule.getCurrentValueForMarker("heating");
         Assert.assertNotNull(coolingTemp);
-        Assert.assertEquals(coolingTemp, 70.0);
+        Assert.assertEquals(coolingTemp.getValue(), 70.0);
     }
 
     @Test
     public void testCoolingTemperatureOutOfMockTime()
     {
         MockTime.getInstance().setMockTime(true, OUT_OF_SCHEDULE_MOCK_TIME);
-        Double coolingTemp = schedule.getCurrentValueForMarker("cooling");
+        Occupied coolingTemp = schedule.getCurrentValueForMarker("cooling");
         Assert.assertNull(coolingTemp);
     }
 
@@ -72,7 +73,7 @@ public class SchedulerTest
     public void testHeatingTemperatureOutOfMockTime()
     {
         MockTime.getInstance().setMockTime(true, OUT_OF_SCHEDULE_MOCK_TIME);
-        Double coolingTemp = schedule.getCurrentValueForMarker("heating");
+        Occupied coolingTemp = schedule.getCurrentValueForMarker("heating");
         Assert.assertNull(coolingTemp);
     }
 

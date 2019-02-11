@@ -29,11 +29,11 @@ public class VAVScheduler {
 
         if(cooling == null)
         {
-            desiredTemp = heating;
+            //desiredTemp = heating;
         }
         else if(heating == null)
         {
-            desiredTemp = cooling;
+            //desiredTemp = cooling;
         }
 
         if(cooling !=null) setDesiredTemp(equip, cooling);
@@ -41,7 +41,7 @@ public class VAVScheduler {
 
     }
 
-    private static void setDesiredTemp(Equip equip, Double cooling) {
+    private static void setDesiredTemp(Equip equip, Occupied cooling) {
 
 
 

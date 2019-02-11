@@ -255,13 +255,16 @@ public class CCUTagsDb extends HServer {
             updateIdMap = gson.fromJson(updateIdMapString, ConcurrentHashMap.class);
         }
     
-        BoxStore.deleteAllFiles(TEST_DIRECTORY);
-        boxStore = MyObjectBox.builder()
-                              // add directory flag to change where ObjectBox puts its database files
-                              .directory(TEST_DIRECTORY)
-                              // optional: add debug flags for more detailed ObjectBox log output
-                              .debugFlags(DebugFlags.LOG_QUERIES | DebugFlags.LOG_QUERY_PARAMETERS).build();
-        hisBox = boxStore.boxFor(HisItem.class);
+        if (boxStore == null)
+        {
+            BoxStore.deleteAllFiles(TEST_DIRECTORY);
+            boxStore = MyObjectBox.builder()
+                                  // add directory flag to change where ObjectBox puts its database files
+                                  .directory(TEST_DIRECTORY)
+                                  // optional: add debug flags for more detailed ObjectBox log output
+                                  .debugFlags(DebugFlags.LOG_QUERIES | DebugFlags.LOG_QUERY_PARAMETERS).build();
+            hisBox = boxStore.boxFor(HisItem.class);
+        }
     }
 
 
@@ -374,6 +377,9 @@ public class CCUTagsDb extends HServer {
                                      .add("priority", q.getPriority())
                                      .add("tz",q.getTz())
                                      .add("group",q.getGroup());
+        if (q.getAhuRef() != null) {
+            equip.add("ahuRef",q.getAhuRef());
+        }
         for (String m : q.getMarkers()) {
             equip.add(m);
         }
@@ -394,6 +400,10 @@ public class CCUTagsDb extends HServer {
                                      .add("priority", q.getPriority())
                                      .add("tz",q.getTz())
                                      .add("group",q.getGroup());
+    
+        if (q.getAhuRef() != null) {
+            equip.add("ahuRef",q.getAhuRef());
+        }
         for (String m : q.getMarkers()) {
             Log.d("CCU"," Add marker "+m);
             equip.add(m);
@@ -609,8 +619,7 @@ public class CCUTagsDb extends HServer {
                 .add("id", HRef.make(UUID.randomUUID().toString()))
                 .add("dis", z.getDisplayName())
                 .add("room", HMarker.VAL)
-                .add("floorRef", z.getFloorRef())
-                .add("scheduleRef", z.getScheduleRef());
+                .add("floorRef", z.getFloorRef());
 
         for (String m : z.getMarkers()) {
             b.add(m);
@@ -882,5 +891,18 @@ public class CCUTagsDb extends HServer {
                 .order(HisItem_.date);
 
         return hisQuery.build().find();
+    }
+    
+    //Delete all the hisItem except most recent.
+    public void removeHisItems(HRef id) {
+        HDict entity = readById(id);
+    
+        QueryBuilder<HisItem> hisQuery = hisBox.query();
+        hisQuery.equal(HisItem_.rec, entity.get("id").toString())
+                .order(HisItem_.date);
+        
+        List<HisItem>  hisItems = hisQuery.build().find();
+        hisItems.remove(hisItems.size()-1);
+        hisBox.remove(hisItems);
     }
 }

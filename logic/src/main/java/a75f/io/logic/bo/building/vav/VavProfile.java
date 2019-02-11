@@ -16,14 +16,12 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.ZoneProfile;
-import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Damper;
-import a75f.io.logic.bo.building.hvac.ParallelFanVavUnit;
-import a75f.io.logic.bo.building.hvac.SeriesFanVavUnit;
 import a75f.io.logic.bo.building.hvac.Valve;
 import a75f.io.logic.bo.building.hvac.VavUnit;
+import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
 
-import static a75f.io.logic.bo.building.ZonePriority.NO;
+import static a75f.io.logic.bo.building.ZonePriority.NONE;
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
 
@@ -40,15 +38,15 @@ public abstract class VavProfile extends ZoneProfile
     public static final int HEATING_LOOP_OFFSET = 20;
     public static final int REHEAT_THRESHOLD_TEMP = 50;
     
-    double  setTemp = 72.0; //TODO
-    int deadBand = 1;
-    
     public HashMap<Short, VAVLogicalMap> vavDeviceMap;
     SatResetListener satResetListener;
     CO2ResetListener co2ResetListener;
     SpResetListener spResetListener;
     HwstResetListener hwstResetListener;
     VavTRSystem trSystem = null;
+    
+    double setTempCooling;
+    double setTempHeating;
     
     public VavProfile() {
         vavDeviceMap = new HashMap<>();
@@ -60,7 +58,7 @@ public abstract class VavProfile extends ZoneProfile
     }
     
     public void initTRSystem() {
-        VavTRSystem trSystem = (VavTRSystem) L.ccu().systemProfile.trSystem;
+        trSystem = (VavTRSystem) L.ccu().systemProfile.trSystem;
         trSystem.getSystemSATTRProcessor().addTRListener(satResetListener);
         trSystem.getSystemCO2TRProcessor().addTRListener(co2ResetListener);
         trSystem.getSystemSpTRProcessor().addTRListener(spResetListener);
@@ -68,14 +66,16 @@ public abstract class VavProfile extends ZoneProfile
     }
     
     public void updateTRResponse(short node) {
-        if (trSystem == null) {
-            initTRSystem();
+        if (L.ccu().systemProfile instanceof VavSystemProfile) {
+            if (trSystem == null) {
+                initTRSystem();
+            }
+            VavTRSystem trSystem = (VavTRSystem) L.ccu().systemProfile.trSystem;
+            trSystem.updateSATRequest(getSATRequest(node));
+            trSystem.updateCO2Request(getCO2Requests(node));
+            trSystem.updateSpRequest(getSpRequests(node));
+            trSystem.updateHwstRequest(getHwstRequests(node));
         }
-        VavTRSystem trSystem = (VavTRSystem) L.ccu().systemProfile.trSystem;
-        trSystem.updateSATRequest(getSATRequest(node));
-        trSystem.updateCO2Request(getCO2Requests(node));
-        trSystem.updateSpRequest(getSpRequests(node));
-        trSystem.updateHwstRequest(getHwstRequests(node));
     }
     
     /**
@@ -89,6 +89,7 @@ public abstract class VavProfile extends ZoneProfile
         deviceMap.co2ResetRequest.setImportanceMultiplier(getPriority().multiplier);
         deviceMap.spResetRequest.setImportanceMultiplier(getPriority().multiplier);
         deviceMap.hwstResetRequest.setImportanceMultiplier(getPriority().multiplier);
+        deviceMap.setPITuners();
     }
     
     /**
@@ -107,6 +108,7 @@ public abstract class VavProfile extends ZoneProfile
         deviceMap.co2ResetRequest.setImportanceMultiplier(getPriority().multiplier);
         deviceMap.spResetRequest.setImportanceMultiplier(getPriority().multiplier);
         deviceMap.hwstResetRequest.setImportanceMultiplier(getPriority().multiplier);
+        deviceMap.setPITuners();
     }
     
     public void updateLogicalMapAndPoints(short addr, VavProfileConfiguration config) {
@@ -171,10 +173,10 @@ public abstract class VavProfile extends ZoneProfile
             if (vavDeviceMap.get(node).getCoolingLoop().getLoopOutput() > 95) {
                 satResetRequest.currentRequests = 1;
             }
-            if ((roomTemp - setTemp) >= 3) {//TODO - for 2 mins
+            if ((roomTemp - setTempCooling) >= 3) {//TODO - for 2 mins
                 satResetRequest.currentRequests = 2;
             }
-            if ((roomTemp - setTemp) >= 5) {//TODO - for 5 mins
+            if ((roomTemp - setTempCooling) >= 5) {//TODO - for 5 mins
                 satResetRequest.currentRequests = 3;
             }
         } else {
@@ -217,7 +219,7 @@ public abstract class VavProfile extends ZoneProfile
         }
         
         Damper d = vavDeviceMap.get(node).getVavUnit().vavDamper;
-        int damperLoopOp = (d.currentPosition - d.co2CompensatedMinPos) * 100/ (d.maxPosition - d.co2CompensatedMinPos);
+        int damperLoopOp = (d.currentPosition - d.iaqCompensatedMinPos) * 100/ (d.maxPosition - d.iaqCompensatedMinPos);
         
         TrimResponseRequest spResetRequest = vavDeviceMap.get(node).spResetRequest;
         if (damperLoopOp > 95) {
@@ -246,11 +248,11 @@ public abstract class VavProfile extends ZoneProfile
         
         if (state == HEATING)
         {
-            if ((setTemp - sat) > 30)
+            if ((setTempHeating - sat) > 30)
             { // TODO- 5 mins
                 hwstRequest.currentRequests = 3;
             }
-            else if ((setTemp - sat) > 15)
+            else if ((setTempHeating - sat) > 15)
             { //TODO - 5 mins
                 hwstRequest.currentRequests = 2;
             }
@@ -285,12 +287,6 @@ public abstract class VavProfile extends ZoneProfile
         return getAverageZoneTemp();
     }
     
-    @JsonIgnore
-    public double getSetTemp()
-    {
-        return setTemp;
-    }
-    
     
     @JsonIgnore
     @Override
@@ -318,45 +314,11 @@ public abstract class VavProfile extends ZoneProfile
         return vavDeviceMap.keySet();
     }
     
-    @Override
-    public HashMap<String, Double> getTSData() {
-        HashMap<String, Double> tsdata = new HashMap<>();
-    
-        for (short node : getNodeAddresses())
-        {
-            if (vavDeviceMap.get(node) ==  null) {
-                continue;
-            }
-            tsdata.put("SAT-requestHours"+node,vavDeviceMap.get(node).satResetRequest.requestHours);
-            tsdata.put("heatingLoopOp"+node,vavDeviceMap.get(node).getHeatingLoop().getLoopOutput());
-            tsdata.put("coolingLoopOp"+node,vavDeviceMap.get(node).getCoolingLoop().getLoopOutput());
-            tsdata.put("dischargeSp"+node,vavDeviceMap.get(node).getDischargeSp());
-            tsdata.put("supplyAirTemp"+node,vavDeviceMap.get(node).getSupplyAirTemp());
-            if (getProfileType() == ProfileType.VAV_SERIES_FAN) {
-                double fanStart = ((SeriesFanVavUnit)vavDeviceMap.get(node).getVavUnit()).fanStart ? 100 : 0;
-                tsdata.put("fanStart"+node, fanStart);
-            } else if (getProfileType() == ProfileType.VAV_PARALLEL_FAN) {
-                double fanStart = ((ParallelFanVavUnit)vavDeviceMap.get(node).getVavUnit()).fanStart ? 100 : 0;
-                tsdata.put("fanStart"+node, fanStart);
-            }
-            tsdata.put("CO2"+node,vavDeviceMap.get(node).getCO2());
-            tsdata.put("co2LoopOp"+node,(double)vavDeviceMap.get(node).getCo2Loop().getLoopOutput());
-            tsdata.put("CO2-requestHours"+node,vavDeviceMap.get(node).co2ResetRequest.requestHours);
-            tsdata.put("SP"+node,vavDeviceMap.get(node).getStaticPressure());
-            tsdata.put("SP-requestHours"+node,vavDeviceMap.get(node).spResetRequest.requestHours);
-            tsdata.put("HWST-requestHours"+node,vavDeviceMap.get(node).hwstResetRequest.requestHours);
-    
-            tsdata.put("setTemp"+node,setTemp);
-        }
-        
-        return tsdata;
-    }
-    
     @JsonIgnore
     @Override
     public ZonePriority getPriority()
     {
-        ZonePriority priority = NO;
+        ZonePriority priority = NONE;
         for (short nodeAddress : vavDeviceMap.keySet())
         {
             HashMap equip = CCUHsApi.getInstance().read("equip and group == \""+nodeAddress+"\"");
@@ -397,8 +359,8 @@ public abstract class VavProfile extends ZoneProfile
         for (short nodeAddress : mProfileConfiguration.keySet())
         {
             VavProfileConfiguration config = (VavProfileConfiguration) mProfileConfiguration.get(nodeAddress);
-            if (damperPos == 0 || config.getMinDamperCooling() > damperPos) {
-                damperPos = config.getMinDamperCooling();
+            if (damperPos == 0 || config.minDamperCooling > damperPos) {
+                damperPos = config.minDamperCooling;
             }
             
         }
@@ -412,8 +374,8 @@ public abstract class VavProfile extends ZoneProfile
         for (short nodeAddress : mProfileConfiguration.keySet())
         {
             VavProfileConfiguration config = (VavProfileConfiguration) mProfileConfiguration.get(nodeAddress);
-            if (damperPos == 0 || config.getMaxDamperCooliing() < damperPos) {
-                damperPos = config.getMaxDamperCooliing();
+            if (damperPos == 0 || config.maxDamperCooling < damperPos) {
+                damperPos = config.maxDamperCooling;
             }
             
         }
@@ -427,8 +389,8 @@ public abstract class VavProfile extends ZoneProfile
         for (short nodeAddress : mProfileConfiguration.keySet())
         {
             VavProfileConfiguration config = (VavProfileConfiguration) mProfileConfiguration.get(nodeAddress);
-            if (damperPos == 0 || config.getMinDamperHeating() > damperPos) {
-                damperPos = config.getMinDamperHeating();
+            if (damperPos == 0 || config.minDamperHeating > damperPos) {
+                damperPos = config.minDamperHeating;
             }
             
         }
@@ -442,8 +404,8 @@ public abstract class VavProfile extends ZoneProfile
         for (short nodeAddress : mProfileConfiguration.keySet())
         {
             VavProfileConfiguration config = (VavProfileConfiguration) mProfileConfiguration.get(nodeAddress);
-            if (damperPos == 0 || (config.getMaxDamperHeating() < damperPos)) {
-                damperPos = config.getMaxDamperHeating();
+            if (damperPos == 0 || (config.maxDamperHeating < damperPos)) {
+                damperPos = config.maxDamperHeating;
             }
             
         }
@@ -509,6 +471,5 @@ public abstract class VavProfile extends ZoneProfile
     public HwstResetListener getHwstResetListener() {
         return hwstResetListener;
     }
-    
     
 }

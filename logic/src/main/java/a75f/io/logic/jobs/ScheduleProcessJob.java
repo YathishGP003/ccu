@@ -87,7 +87,7 @@ public class ScheduleProcessJob extends BaseJob {
 
         if(equip.getZoneRef() != null) {
             Log.i(TAG, "Equip Zone Ref: " + equip.getZoneRef());
-            HashMap zoneHashMap = CCUHsApi.getInstance().readMapById(equip.getZoneRef());
+            HashMap zoneHashMap = CCUHsApi.getInstance().readMapById(equip.getZoneRef().replace("@", ""));
 
             Zone build = new Zone.Builder().setHashMap(zoneHashMap).build();
             if(build.getScheduleRef() != null && !build.getScheduleRef().equals(""))

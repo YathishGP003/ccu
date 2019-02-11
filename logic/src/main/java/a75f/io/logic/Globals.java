@@ -15,6 +15,9 @@ import com.pubnub.api.models.consumer.PNStatus;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 
+import org.projecthaystack.HNum;
+import org.projecthaystack.HRef;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -28,16 +31,18 @@ import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.bo.building.CCUApplication;
 import a75f.io.logic.bo.building.Day;
 import a75f.io.logic.bo.building.NamedSchedule;
 import a75f.io.logic.bo.building.Schedule;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.system.DabStagedRtu;
-import a75f.io.logic.bo.building.system.VavAnalogRtu;
-import a75f.io.logic.bo.building.system.VavBacnetRtu;
-import a75f.io.logic.bo.building.system.VavIERtu;
-import a75f.io.logic.bo.building.system.VavStagedRtu;
+import a75f.io.logic.bo.building.system.DefaultSystem;
+import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
+import a75f.io.logic.bo.building.system.vav.VavAnalogRtu;
+import a75f.io.logic.bo.building.system.vav.VavBacnetRtu;
+import a75f.io.logic.bo.building.system.vav.VavIERtu;
+import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
 import a75f.io.logic.bo.building.vav.VavParallelFanProfile;
 import a75f.io.logic.bo.building.vav.VavReheatProfile;
 import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
@@ -56,9 +61,11 @@ import a75f.io.logic.jobs.ScheduleProcessJob;
  */
 public class Globals {
 
-    private static final int NUMBER_OF_CYCLICAL_TASKS_RENATUS_REQUIRES = 50;
-    private static final int TASK_SEPERATION = 15;
-    private static final TimeUnit TASK_SERERATION_TIMEUNIT = TimeUnit.SECONDS;
+
+    private static final int      NUMBER_OF_CYCLICAL_TASKS_RENATUS_REQUIRES = 10;
+    private static final int      TASK_SEPERATION                           = 45;
+    private static final TimeUnit TASK_SERERATION_TIMEUNIT                  = TimeUnit.SECONDS;
+
     private static Globals globals;
     //HeartBeatJob mHeartBeatJob;
     BuildingProcessJob mProcessJob = new BuildingProcessJob();
@@ -136,19 +143,15 @@ public class Globals {
         populate();
         //mHeartBeatJob = new HeartBeatJob();
         //5 seconds after application initializes start heart beat
-        int DEFAULT_HEARTBEAT_INTERVAL = 30;
 
-
+        int DEFAULT_HEARTBEAT_INTERVAL = 60;
+        
+        mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL,
+                TASK_SEPERATION , TASK_SERERATION_TIMEUNIT);
 
         mScheduleProcessJob.scheduleJob("Schedule Process Job", DEFAULT_HEARTBEAT_INTERVAL - 10,
                 TASK_SEPERATION, TASK_SERERATION_TIMEUNIT);
 
-
-        mProcessJob.scheduleJob("Building Process Job", DEFAULT_HEARTBEAT_INTERVAL,
-                TASK_SEPERATION * 2, TASK_SERERATION_TIMEUNIT);
-
-        mPrintProcessJob.scheduleJob("Print Process Job 1", 30, 10, TASK_SERERATION_TIMEUNIT);
-        mPrintProcessJobTwo.scheduleJob("Print Process Job 2", 5, 10, TASK_SERERATION_TIMEUNIT);
 
         isSimulation = getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                 .getBoolean("biskit_mode", false);
@@ -226,7 +229,9 @@ public class Globals {
     }
 
     public void registerSiteToPubNub(final String siteId) {
-        Log.d("CCU", "registerSiteToPubNub " + siteId);
+
+        Log.d("CCU","registerSiteToPubNub "+siteId.replace("@",""));
+
         PNConfiguration pnConfiguration = new PNConfiguration();
         pnConfiguration.setSubscribeKey("sub-c-6a55a31c-d30e-11e8-b41d-e643bd6bdd68");
         pnConfiguration.setPublishKey("pub-c-6873a2c5-ec27-4604-a235-38a3f4eed9a6");
@@ -239,7 +244,8 @@ public class Globals {
 
         // create message payload using Gson
         final JsonObject messageJsonObject = new JsonObject();
-        messageJsonObject.addProperty("msg", "hello");
+
+        messageJsonObject.addProperty("msg", "Configuration");
 
         System.out.println("CCU Message to send: " + messageJsonObject.toString());
 
@@ -258,7 +264,7 @@ public class Globals {
 
                     if (status.getCategory() == PNStatusCategory.PNConnectedCategory) {
                         Log.d("CCU", "PNConnectedCategory publish");
-                        pubnub.publish().channel(siteId).message(messageJsonObject).async(new PNCallback<PNPublishResult>() {
+                        pubnub.publish().channel(siteId.replace("@","")).message(messageJsonObject).async(new PNCallback<PNPublishResult>() {
                             @Override
                             public void onResponse(PNPublishResult result, PNStatus status) {
                                 // Check whether request successfully completed or not.
@@ -300,10 +306,23 @@ public class Globals {
                 }
 
                 JsonElement receivedMessageObject = message.getMessage();
-                System.out.println("CCU PubNub Received message content: " + receivedMessageObject.toString());
+                CcuLog.d("CCU", "PubNub Received message content: " + receivedMessageObject.toString());
                 // extract desired parts of the payload, using Gson
-                String msg = message.getMessage().getAsJsonObject().get("msg").getAsString();
-                System.out.println("CCU PubNub msg content: " + msg);
+                JsonObject msgObject = message.getMessage().getAsJsonObject();
+                String cmd = msgObject.get("cmd") != null ? msgObject.get("cmd").getAsString(): "";
+                if (cmd.equals("updatePoint"))
+                {
+                    String who = msgObject.get("who").getAsString();
+                    String level = msgObject.get("level").getAsString();
+                    String val = msgObject.get("val").getAsString();
+                    String id = msgObject.get("id").getAsString();
+                    CcuLog.d("CCU", "Update point: cmd: " + cmd + " who: " + who + " level: " + level + " val: " + val + " id: " + id);
+    
+                    CCUHsApi.getInstance().getHSClient()
+                            .pointWrite(HRef.make(CCUHsApi.getInstance().getLUID(id)), (int) Double.parseDouble(val), who, HNum.make(Double.parseDouble(val)), HNum.make(0));
+                }
+                
+                
 
 
             /*
@@ -320,7 +339,9 @@ public class Globals {
             }
         });
 
-        pubnub.subscribe().channels(Arrays.asList(siteId)).execute();
+    
+        pubnub.subscribe().channels(Arrays.asList(siteId.replace("@",""))).execute();
+
         pubnubSubscribed = true;
     }
 
@@ -366,26 +387,36 @@ public class Globals {
             Log.d("CCUHS", "SystemEquip " + eq.getDisplayName() + " System profile " + eq.getProfile());
             switch (ProfileType.valueOf(eq.getProfile())) {
                 case SYSTEM_VAV_ANALOG_RTU:
-                    L.ccu().systemProfile = new VavAnalogRtu();
+                    VavAnalogRtu analogRtuProfile = new VavAnalogRtu();
+                    analogRtuProfile.initTRSystem();
+                    L.ccu().systemProfile = analogRtuProfile;
+                    
                     break;
                 case SYSTEM_VAV_STAGED_RTU:
-                    L.ccu().systemProfile = new VavStagedRtu();
+                    VavStagedRtu stagedRtuProfile = new VavStagedRtu();
+                    stagedRtuProfile.initTRSystem();
+                    L.ccu().systemProfile = stagedRtuProfile;
+                    break;
+                case SYSTEM_VAV_IE_RTU:
+                    VavIERtu ieRtuProfile = new VavIERtu();
+                    ieRtuProfile.initTRSystem();
+                    L.ccu().systemProfile = ieRtuProfile;
+                    break;
+                case SYSTEM_VAV_BACNET_RTU:
+                    VavBacnetRtu bacnetRtu = new VavBacnetRtu();
+                    //bacnetRtu.initTRSystem();
+                    L.ccu().systemProfile = bacnetRtu;
                     break;
                 case SYSTEM_DAB_STAGED_RTU:
                     L.ccu().systemProfile = new DabStagedRtu();
                     break;
-                case SYSTEM_VAV_IE_RTU:
-                    L.ccu().systemProfile = new VavIERtu();
-                    break;
-                case SYSTEM_VAV_BACNET_RTU:
-                    L.ccu().systemProfile = new VavBacnetRtu();
-                    break;
                 default:
-                    L.ccu().systemProfile = new VavAnalogRtu();
+                    L.ccu().systemProfile = new DefaultSystem();
             }
         } else {
             Log.d("CCUHS", "System Equip does not exist.Create VavAnalogRtu System Profile");
             L.ccu().systemProfile = new VavAnalogRtu();
+
         }
     }
 

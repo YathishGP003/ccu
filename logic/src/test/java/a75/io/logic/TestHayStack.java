@@ -23,7 +23,6 @@ import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.logic.bo.building.definitions.Port;
-import a75f.io.logic.bo.building.system.SystemEquip;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 
@@ -103,7 +102,7 @@ public class TestHayStack
 
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
-        SmartNode node = new SmartNode(7000, siteRef, null, null);
+        SmartNode node = new SmartNode(7000, siteRef, null, null, null);
         
         String dtRef = CCUHsApi.getInstance().addPoint(dtPoint);
         CCUHsApi.getInstance().addPoint(dPoint);
@@ -222,7 +221,7 @@ public class TestHayStack
     
     
         //Create Physical points and map
-        SmartNode device = new SmartNode(nodeAddr, siteRef, null, null);
+        SmartNode device = new SmartNode(nodeAddr, siteRef, null, null, null);
         device.th1In.setPointRef(datID);
         CCUHsApi.getInstance().addPoint(device.th1In);
         device.th2In.setPointRef(eatID);
@@ -433,26 +432,6 @@ public class TestHayStack
         
     }
     
-    @Test
-    public void testSystemEquip(){
-    
-        CCUHsApi hayStack = new CCUHsApi();
-        
-        HashMap site = hayStack.read("site");
-        if (site.size() == 0) {
-            Site s75f = new Site.Builder()
-                                .setDisplayName("75F")
-                                .addMarker("site")
-                                .setGeoCity("Burnsville")
-                                .setGeoState("MN")
-                                .setTz("Chicago")
-                                .setArea(20000).build();
-            hayStack.addSite(s75f);
-        }
-        SystemEquip q = SystemEquip.getInstance();
-        q.dump();
-        System.out.println(hayStack.tagsDb.tagsMap);
-    }
     
     @Test
     public void testUpdateEntity()
@@ -474,7 +453,7 @@ public class TestHayStack
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
         
-        SmartNode device = new SmartNode(nodeAddr, siteRef, null,null);
+        SmartNode device = new SmartNode(nodeAddr, siteRef, null,null, null);
         device.analog1Out.setType("0-10v");
         hayStack.addPoint(device.analog1Out);
         System.out.print(hayStack.tagsDb.tagsMap);

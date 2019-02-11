@@ -289,9 +289,22 @@ public class CCUHsApi {
         }
         pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "", HNum.make(val), HNum.make(0));
     }
+    
+    public void writeDefaultVal(String query, String val) {
+        ArrayList points = readAll(query);
+        String id = ((HashMap) points.get(0)).get("id").toString();
+        if (id == null || id == "") {
+            throw new IllegalArgumentException();
+        }
+        pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "", HStr.make(val), HNum.make(0));
+    }
 
     public void writeDefaultValById(String id, Double val) {
         pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "", HNum.make(val), HNum.make(0));
+    }
+    
+    public void writeDefaultValById(String id, String val) {
+        pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "", HStr.make(val), HNum.make(0));
     }
 
     public void pointWrite(HRef id, int level, String who, HVal val, HNum dur) {
@@ -334,6 +347,23 @@ public class CCUHsApi {
         if (values != null && values.size() > 0) {
             HashMap valMap = ((HashMap) values.get(HayStackConstants.DEFAULT_POINT_LEVEL - 1));
             return valMap.get("val") == null ? 0 : Double.parseDouble(valMap.get("val").toString());
+        } else {
+            return null;
+        }
+    }
+    
+    public String readDefaultStrVal(String query) {
+        
+        ArrayList points = readAll(query);
+        String id = ((HashMap) points.get(0)).get("id").toString();
+        if (id == null || id == "") {
+            return null;
+        }
+        ArrayList values = CCUHsApi.getInstance().readPoint(id);
+        if (values != null && values.size() > 0) {
+            HashMap valMap = ((HashMap) values.get(HayStackConstants.DEFAULT_POINT_LEVEL - 1));
+            System.out.println(valMap);
+            return valMap.get("val") == null ? null : valMap.get("val").toString();
         } else {
             return null;
         }
@@ -398,7 +428,7 @@ public class CCUHsApi {
      */
     public HisItem curRead(String id) {
         HGrid resGrid = hsClient.hisRead(HRef.copy(id),"current");
-        if (resGrid != null && resGrid.numRows() == 0) {
+        if (resGrid == null || (resGrid != null && resGrid.isEmpty())) {
             return null;
         }
         HRow r = resGrid.row(resGrid.numRows() - 1);
@@ -408,7 +438,8 @@ public class CCUHsApi {
     }
 
     public Double readHisValById(String id) {
-        return curRead(id).val;
+        HisItem item = curRead(id);
+        return item == null ? 0 : item.getVal();
     }
 
     public Double readHisValByQuery(String query) {
@@ -419,7 +450,6 @@ public class CCUHsApi {
         }
 
         HisItem item = curRead(id);
-
         return item == null ? 0 : item.getVal();
 
     }
@@ -432,9 +462,9 @@ public class CCUHsApi {
 
         ArrayList points = readAll(query);
         String id = points.size() == 0 ? null : ((HashMap) points.get(0)).get("id").toString();
-        if (id == null || id == "") {
+        /*if (id == null || id == "") {
             return;
-        }
+        }*/
 
         HisItem item = new HisItem(id, new Date(), val);
         hisWrite(item);
@@ -495,6 +525,10 @@ public class CCUHsApi {
             for (HashMap device : devices) {
                 deleteEntityTree(device.get("id").toString());
             }
+            ArrayList<HashMap> schedules = readAll("schedule and siteRef == \"" + id + "\"");
+            for (HashMap schedule : schedules) {
+                deleteEntity(schedule.get("id").toString());
+            }
             deleteEntity(id);
 
         } else if (entity.get("floor") != null) {
@@ -537,14 +571,31 @@ public class CCUHsApi {
     public String getGUID(String luid) {
         return tagsDb.idMap.get(luid);
     }
+    
+    public String getLUID(String guid) {
+        for (Map.Entry<String, String> entry : tagsDb.idMap.entrySet()) {
+            if (entry.getValue().equals(guid)) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
 
     public void syncEntityTree() {
-        if (!testHarnessEnabled)
-        {
-            entitySyncHandler.sync();
-        } else {
-            Log.d("CCU"," Test Harness Enabled , Skip Entity Sync");
-        }
+        new Thread() {
+            @Override
+            public void run() {
+                if (!testHarnessEnabled)
+                {
+                    if (!entitySyncHandler.isSyncProgress())
+                    {
+                        entitySyncHandler.sync();
+                    }
+                } else {
+                    Log.d("CCU"," Test Harness Enabled , Skip Entity Sync");
+                }
+            }
+        }.start();
     }
 
     public void syncHisData() {

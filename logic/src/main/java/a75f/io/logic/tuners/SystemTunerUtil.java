@@ -1,10 +1,5 @@
 package a75f.io.logic.tuners;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import a75f.io.api.haystack.CCUHsApi;
-
 /**
  * Created by samjithsadasivan on 11/7/18.
  */
@@ -17,7 +12,7 @@ public class SystemTunerUtil
      * @param minMax
      * @return
      */
-    public static double getTuner(String name, String minMax) {
+    /*public static double getTuner(String name, String minMax) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap cdb = hayStack.read("point and tuner and system and "+name+" and "+minMax);
     
@@ -34,12 +29,12 @@ public class SystemTunerUtil
         return 0;
     }
     
-    /**
+    *//**
      *  Get analog1 val from a specific level
      * @param name
      * @param minMax
      * @return
-     */
+     *//*
     public static double getTuner(String name, String minMax, int level) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap cdb = hayStack.read("point and tuner and system and "+name+" and "+minMax);
@@ -55,13 +50,13 @@ public class SystemTunerUtil
         return 0;
     }
     
-    /**
+    *//**
      *  Set analog val at a specific level
      * @param name
      * @param minMax
      * @param level
      * @param val
-     */
+     *//*
     public static void setTuner(String name, String minMax, int level, double val) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap cdb = hayStack.read("point and tuner and system and "+name+" and "+minMax);
@@ -101,5 +96,5 @@ public class SystemTunerUtil
         }
         hayStack.writePoint(id, level, "ccu", val, 0);
         
-    }
+    }*/
 }

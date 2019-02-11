@@ -1,5 +1,7 @@
 package a75f.io.api.haystack.sync;
 
+import android.util.Log;
+
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HRef;
 import org.projecthaystack.io.HGridFormat;
@@ -92,8 +94,11 @@ public class EntityPullHandler
     
                             //Node devices
                             for (Device d : parser.getDevices()) {
+                                Log.d("CCU"," Parser : device "+d.getDisplayName()
+                                            +" getEquipRef "+d.getEquipRef()+"=="+ q.getId()+" getZoneRef: "+d.getZoneRef()+" "+z.getId());
                                 if (d.getEquipRef() != null && d.getEquipRef().equals(q.getId())
                                         && d.getZoneRef() != null && d.getZoneRef().equals(z.getId())) {
+                                    Log.d("CCU"," Parser : add device "+d.getDisplayName());
                                     d.setSiteRef(siteLuid);
                                     d.setFloorRef(floorLuid);
                                     d.setZoneRef(zoneLuid);
@@ -104,6 +109,7 @@ public class EntityPullHandler
                                     for (RawPoint p : parser.getPhyPoints()) {
                                         if (p.getDeviceRef().equals(d.getId()))
                                         {
+                                            Log.d("CCU"," Parser : add RawPoint "+p.getDisplayName());
                                             p.setSiteRef(siteLuid);
                                             p.setFloorRef(floorLuid);
                                             p.setZoneRef(zoneLuid);

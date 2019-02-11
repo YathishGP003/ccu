@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HisItem;
+import a75f.io.logger.CcuLog;
 
 /**
  * Created by samjithsadasivan on 10/18/18.
@@ -32,6 +33,8 @@ public class HisSyncHandler
 {
     CCUHsApi hayStack;
     HashMap<String, String> tsData;
+    
+    public boolean entitySyncRequired = false;
     
     public HisSyncHandler(CCUHsApi api) {
         hayStack = api;
@@ -43,7 +46,14 @@ public class HisSyncHandler
         //sendHisToHaystack();
         sendHisToInflux();
         //sendHisToInfluxBatched();
+        
+        if (entitySyncRequired) {
+            Log.d("CCU","doHisSync : entitySyncRequired");
+            CCUHsApi.getInstance().syncEntityTree();
+            entitySyncRequired = false;
+        }
         Log.d("CCU","<- doHisSync");
+        
     }
     
     /**
@@ -62,6 +72,7 @@ public class HisSyncHandler
                 Log.d("CCU"," Point does not have GUID "+pointID);
                 HDict point = hayStack.hsClient.readById(HRef.copy(pointID));
                 System.out.println(point);
+                entitySyncRequired = true;
                 continue;
             
             }
@@ -113,11 +124,61 @@ public class HisSyncHandler
         
         ArrayList<HashMap> equips = hayStack.readAll("equip");
         for (HashMap equip : equips) {
+            CcuLog.d("CCU"," sendHisToInflux Equip "+equip.get("dis"));
             ArrayList<HashMap> points = hayStack.readAll("point and his and equipRef == \""+equip.get("id")+"\"");
             if (CCUHsApi.getInstance().getGUID(equip.get("id").toString()) == null) {
+                entitySyncRequired = true;
                 continue;
             }
     
+            HashMap tsData = new HashMap<>();
+        
+            for (Map m : points)
+            {
+                String pointID = m.get("id").toString();
+                String pointGUID = CCUHsApi.getInstance().getGUID(pointID);
+                if (pointGUID == null) {
+                    Log.d("CCU","Skip hisSync; point does not have GUID "+pointID);
+                    HDict point = hayStack.hsClient.readById(HRef.copy(pointID));
+                    System.out.println(point);
+                    entitySyncRequired = true;
+                    continue;
+        
+                }
+                ArrayList<HisItem> hisItems = (ArrayList<HisItem>) hayStack.tagsDb.getUnSyncedHisItems(HRef.copy(pointID));
+                if (hisItems.size() == 0) {
+                    continue;
+                }
+    
+                HisItem sItem = hisItems.get(hisItems.size()-1);//TODO - Writing just the recent his val?
+                tsData.put( pointGUID.replace("@",""), String.valueOf(sItem.getVal()));
+                /*for (HisItem item: hisItems)
+                {
+                    item.setSyncStatus(true);
+                }
+                hayStack.tagsDb.setHisItemSyncStatus(hisItems);*/
+                hayStack.tagsDb.removeHisItems(HRef.copy(pointID));
+            
+            }
+            
+            if (tsData.size() > 0)
+            {
+                String url = new InfluxDbUtil.URLBuilder().setProtocol(InfluxDbUtil.HTTP).setHost("renatus-influxiprvgkeeqfgys.centralus.cloudapp.azure.com").setPort(8086).setOp(InfluxDbUtil.WRITE).setDatabse("haystack").setUser("75f@75f.io").setPassword("7575").buildUrl();
+                InfluxDbUtil.writeData(url, CCUHsApi.getInstance().getGUID(equip.get("id").toString()).toString().replace("@","")
+                                                , tsData, System.currentTimeMillis());
+            }
+        
+        }
+    
+    
+        ArrayList<HashMap> devices = hayStack.readAll("device");
+        for (HashMap device : devices) {
+            ArrayList<HashMap> points = hayStack.readAll("point and his and deviceRef == \""+device.get("id")+"\"");
+            if (CCUHsApi.getInstance().getGUID(device.get("id").toString()) == null) {
+                entitySyncRequired = true;
+                continue;
+            }
+        
             HashMap tsData = new HashMap<>();
         
             for (Map m : points)
@@ -127,30 +188,32 @@ public class HisSyncHandler
                     Log.d("CCU","Skip hisSync; point does not have GUID "+pointID);
                     HDict point = hayStack.hsClient.readById(HRef.copy(pointID));
                     System.out.println(point);
+                    entitySyncRequired = true;
                     continue;
-        
+                
                 }
-                ArrayList<HisItem> hisItems = (ArrayList<HisItem>) CCUHsApi.getInstance().tagsDb.getUnSyncedHisItems(HRef.copy(pointID));
+                ArrayList<HisItem> hisItems = (ArrayList<HisItem>) hayStack.tagsDb.getUnSyncedHisItems(HRef.copy(pointID));
                 if (hisItems.size() == 0) {
                     continue;
                 }
-    
+            
                 HisItem sItem = hisItems.get(hisItems.size()-1);//TODO - Writing just the recent his val?
                 tsData.put( CCUHsApi.getInstance().getGUID(m.get("id").toString()).toString().replace("@",""), String.valueOf(sItem.getVal()));
-    
-                for (HisItem item: hisItems)
+            
+                /*for (HisItem item: hisItems)
                 {
                     item.setSyncStatus(true);
                 }
-                hayStack.tagsDb.setHisItemSyncStatus(hisItems);
+                hayStack.tagsDb.setHisItemSyncStatus(hisItems);*/
+                hayStack.tagsDb.removeHisItems(HRef.copy(pointID));
             
             }
-            
+        
             if (tsData.size() > 0)
             {
                 String url = new InfluxDbUtil.URLBuilder().setProtocol(InfluxDbUtil.HTTP).setHost("renatus-influxiprvgkeeqfgys.centralus.cloudapp.azure.com").setPort(8086).setOp(InfluxDbUtil.WRITE).setDatabse("haystack").setUser("75f@75f.io").setPassword("7575").buildUrl();
-                InfluxDbUtil.writeData(url, CCUHsApi.getInstance().getGUID(equip.get("id").toString()).toString().replace("@","")
-                                                , tsData, System.currentTimeMillis());
+                InfluxDbUtil.writeData(url, CCUHsApi.getInstance().getGUID(device.get("id").toString()).toString().replace("@","")
+                        , tsData, System.currentTimeMillis());
             }
         
         }

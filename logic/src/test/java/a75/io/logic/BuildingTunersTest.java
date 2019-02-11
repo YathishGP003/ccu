@@ -11,7 +11,6 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Site;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 import a75f.io.logic.tuners.BuildingTuners;
-import a75f.io.logic.tuners.SystemTunerUtil;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.VavTunerUtil;
 
@@ -78,10 +77,10 @@ public class BuildingTunersTest
         
         //VavTunerUtil.dump(tunerEquipRef);
         VavProfileConfiguration v = new VavProfileConfiguration();
-        v.setMinDamperHeating(0);
-        v.setMaxDamperCooliing(100);
-        v.setMinDamperHeating(0);
-        v.setMinDamperHeating(0);
+        v.minDamperCooling = 0;
+        v.maxDamperCooling = 100;
+        v.minDamperHeating = 0;
+        v.maxDamperHeating = 0;
     
         Equip vavEquip = new Equip.Builder()
                           .setSiteRef(siteRef)
@@ -104,31 +103,6 @@ public class BuildingTunersTest
         
     }
     
-    @Test
-    public void testSystemTuners() {
-        CCUHsApi api = new CCUHsApi();
-    
-        Site s75f = new Site.Builder()
-                            .setDisplayName("75F")
-                            .addMarker("site")
-                            .setGeoCity("Burnsville")
-                            .setGeoState("MN")
-                            .setTz("Chicago")
-                            .setArea(10000).build();
-        api.addSite(s75f);
-    
-    
-        BuildingTuners.getInstance();
-        
-        SystemTunerUtil.setTuner("analog1","max", 14, 10);
-        System.out.println(SystemTunerUtil.getTuner("analog1","max"));
-    
-        SystemTunerUtil.setTuner("analog1","max", 15, 8);
-        System.out.println(SystemTunerUtil.getTuner("analog1","max"));
-        
-        double val = SystemTunerUtil.getTuner("heatingSat", "max", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL);
-        System.out.println(val != 0);
-    }
     
     
 }

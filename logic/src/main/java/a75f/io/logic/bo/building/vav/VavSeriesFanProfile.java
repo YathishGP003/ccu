@@ -7,11 +7,16 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import a75.io.algos.CO2Loop;
 import a75.io.algos.ControlLoop;
 import a75.io.algos.GenericPIController;
+import a75.io.algos.VOCLoop;
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.building.hvac.SeriesFanVavUnit;
 import a75f.io.logic.bo.building.hvac.Valve;
+import a75f.io.logic.bo.building.system.vav.VavSystemController;
+import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
@@ -54,6 +59,7 @@ public class VavSeriesFanProfile extends VavProfile
             ControlLoop coolingLoop = vavDevice.getCoolingLoop();
             ControlLoop heatingLoop = vavDevice.getHeatingLoop();
             CO2Loop co2Loop = vavDeviceMap.get(node).getCo2Loop();
+            VOCLoop vocLoop = vavDeviceMap.get(node).getVOCLoop();
             SeriesFanVavUnit vavUnit = (SeriesFanVavUnit)vavDevice.getVavUnit();
             GenericPIController valveController = vavDevice.getValveController();
         
@@ -61,9 +67,15 @@ public class VavSeriesFanProfile extends VavProfile
             double dischargeTemp = vavDevice.getDischargeTemp();
             double supplyAirTemp = vavDevice.getSupplyAirTemp();
             double co2 = vavDeviceMap.get(node).getCO2();
+            double voc = vavDeviceMap.get(node).getVOC();
             double dischargeSp = vavDevice.getDischargeSp();
-            setTemp = vavDevice.getDesiredTemp();
-        
+            setTempCooling = vavDevice.getDesiredTempCooling();
+            setTempHeating = vavDevice.getDesiredTempHeating();
+            Equip vavEquip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + node + "\"")).build();
+    
+            if (vavDevice.getDesiredTemp() == 0) {
+                vavDevice.setDesiredTemp((setTempCooling+setTempHeating)/2);
+            }
             if (roomTemp == 0) {
                 Log.d(TAG,"Skip PI update for "+node+" roomTemp : "+roomTemp);
                 continue;
@@ -75,21 +87,22 @@ public class VavSeriesFanProfile extends VavProfile
             //TODO
             //If supply air temperature from air handler is greater than room temperature, Cooling shall be
             //locked out.
-            if (roomTemp > (setTemp + deadBand))
+            if (roomTemp > setTempCooling)
             {
                 //Zone is in Cooling
                 if (state != COOLING)
                 {
                     state = COOLING;
                     valveController.reset();
+                    valve.currentPosition = 0;
                     coolingLoop.setEnabled();
                     heatingLoop.setDisabled();
                 }
-                int coolingOp = (int) coolingLoop.getLoopOutput(roomTemp, setTemp+deadBand);
+                int coolingOp = (int) coolingLoop.getLoopOutput(roomTemp, setTempHeating);
                 loopOp = coolingOp;
                 
             }
-            else if (roomTemp < (setTemp - deadBand))
+            else if (roomTemp < setTempHeating)
             {
                 //Zone is in heating
                 if (state != HEATING)
@@ -99,11 +112,15 @@ public class VavSeriesFanProfile extends VavProfile
                     coolingLoop.setDisabled();
                 }
             
-                int heatingLoopOp = (int) heatingLoop.getLoopOutput(setTemp-deadBand, roomTemp);
-                dischargeSp = supplyAirTemp + (MAX_DISCHARGE_TEMP - supplyAirTemp) * heatingLoopOp/100;
-                vavDevice.setDischargeSp(dischargeSp);
-                valveController.updateControlVariable(dischargeSp, dischargeTemp);
-                valve.currentPosition = (int) (valveController.getControlVariable() * 100 / valveController.getMaxAllowedError());
+                int heatingLoopOp = (int) heatingLoop.getLoopOutput(setTempHeating, roomTemp);
+                if (VavSystemController.getInstance().getSystemState() == VavSystemController.State.COOLING)
+                {
+                    dischargeSp = supplyAirTemp + (MAX_DISCHARGE_TEMP - supplyAirTemp) * heatingLoopOp / 100;
+                    vavDevice.setDischargeSp(dischargeSp);
+                    valveController.updateControlVariable(dischargeSp, dischargeTemp);
+                    valve.currentPosition = (int) (valveController.getControlVariable() * 100 / valveController.getMaxAllowedError());
+                }
+                
                 loopOp = heatingLoopOp;
             }
             else
@@ -112,7 +129,8 @@ public class VavSeriesFanProfile extends VavProfile
                 if (state != DEADBAND)
                 {
                     state = DEADBAND;
-                    valveController.reset();
+                    //valveController.reset();
+                    valve.currentPosition = 0;
                     heatingLoop.setDisabled();
                     coolingLoop.setDisabled();
                 }
@@ -127,25 +145,49 @@ public class VavSeriesFanProfile extends VavProfile
             
             if (!damper.isOverrideActive())
             {
-                setDamperLimits(node, damper);
+                //setDamperLimits(node, damper);
                 //CO2 loop output from 0-50% modulates damper min position.
                 if (/*mode == OCCUPIED && */co2Loop.getLoopOutput(co2) <= 50)
                 {
-                    damper.co2CompensatedMinPos = damper.minPosition + (damper.maxPosition - damper.minPosition) * co2Loop.getLoopOutput() / 50;
-                    Log.d("VAV", "CO2LoopOp :" + co2Loop.getLoopOutput() + ", adjusted minposition " + damper.minPosition);
+                    damper.iaqCompensatedMinPos = damper.minPosition + (damper.maxPosition - damper.minPosition) * co2Loop.getLoopOutput() / 50;
+                    Log.d("VAV", "CO2LoopOp :" + co2Loop.getLoopOutput() + ", adjusted minposition " + damper.iaqCompensatedMinPos);
                 }
+    
+                //VOC loop output from 0-50% modulates damper min position.
+                if (/*mode == OCCUPIED && */vocLoop.getLoopOutput(voc) <= 50)
+                {
+                    damper.iaqCompensatedMinPos = damper.minPosition + (damper.maxPosition - damper.minPosition) * vocLoop.getLoopOutput() / 50;
+                    Log.d("VAV", "VOCLoopOp :" + vocLoop.getLoopOutput() + ", adjusted minposition " + damper.iaqCompensatedMinPos);
+                }
+                
                 if (loopOp == 0)
                 {
-                    damper.currentPosition = damper.co2CompensatedMinPos;
+                    damper.currentPosition = damper.iaqCompensatedMinPos;
                 }
                 else
                 {
-                    damper.currentPosition = damper.co2CompensatedMinPos + (damper.maxPosition - damper.co2CompensatedMinPos) * loopOp / 100;
+                    damper.currentPosition = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * loopOp / 100;
                 }
-                //Normalize
-                damper.normalize();
             }
-            valve.normalize();
+            
+            //When in the system is in heating, REHEAT control that does not follow RP-1455.
+            if (VavSystemController.getInstance().getSystemState() == VavSystemController.State.HEATING
+                                                                                && state == HEATING)
+            {
+                double valveStartDamperPercent = TunerUtil.readTunerValByQuery("vav and valve and start and damper and equipRef == \""+vavEquip.getId()+"\"");
+                double maxHeatingPos = vavDevice.getDamperLimit("heating", "max");
+                double minHeatingPos = vavDevice.getDamperLimit("heating", "min");
+                double valveStart = minHeatingPos + (maxHeatingPos - minHeatingPos) * valveStartDamperPercent / 100;
+                if (damper.currentPosition > valveStart)
+                {
+                    valve.currentPosition = (int) ((damper.currentPosition - valveStart) * 100 / (maxHeatingPos - valveStart));
+                }
+                else
+                {
+                    valve.currentPosition = 0;
+                }
+            }
+            
             
             if (true /* mode == OCCUPIED*/) {
                 //Prior to starting the fan, the damper is first driven fully closed to ensure that the fan is not rotating backwards.
@@ -174,9 +216,9 @@ public class VavSeriesFanProfile extends VavProfile
                 fanReady = false;
             }
     
-            Log.d("VAV","CoolingLoop "+node +"roomTemp :"+roomTemp+" setTemp: "+setTemp);
+            Log.d("VAV","CoolingLoop "+node +"roomTemp :"+roomTemp+" setTempCooling: "+setTempCooling);
             coolingLoop.dump();
-            Log.d("VAV","HeatingLoop "+node +"roomTemp :"+roomTemp+" setTemp: "+setTemp);
+            Log.d("VAV","HeatingLoop "+node +"roomTemp :"+roomTemp+" setTempHeating: "+setTempHeating);
             heatingLoop.dump();
             
             Log.d(TAG, "STATE :"+state+" ,loopOp: " + loopOp + " ,damper:" + damper.currentPosition

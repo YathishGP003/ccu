@@ -1,10 +1,10 @@
 package a75f.io.renatus;
 
+import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,10 +14,8 @@ import android.widget.CompoundButton;
 import android.widget.Spinner;
 
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
-import a75f.io.logic.bo.building.system.SystemEquip;
-import a75f.io.logic.bo.building.system.VavStagedRtu;
+import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -35,9 +33,6 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
     @BindView(R.id.relay5Cb)CheckBox  relay5Cb;
     @BindView(R.id.relay6Cb)CheckBox  relay6Cb;
     @BindView(R.id.relay7Cb)CheckBox  relay7Cb;
-    @BindView(R.id.analog1Cb)CheckBox  analog1Cb;
-    @BindView(R.id.analog2Cb)CheckBox  analog2Cb;
-    @BindView(R.id.analog3Cb)CheckBox  analog3Cb;
     
     @BindView(R.id.relay1Spinner)Spinner relay1Spinner;
     @BindView(R.id.relay2Spinner)Spinner relay2Spinner;
@@ -47,7 +42,7 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
     @BindView(R.id.relay6Spinner)Spinner relay6Spinner;
     @BindView(R.id.relay7Spinner)Spinner relay7Spinner;
     
-    
+    VavStagedRtu systemProfile = null;
     public static VavStagedRtuProfile newInstance()
     {
         return new VavStagedRtuProfile();
@@ -66,39 +61,52 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
     {
-        if (!(L.ccu().systemProfile instanceof VavStagedRtu))
-        {
-            L.ccu().systemProfile = new VavStagedRtu();
+        if (L.ccu().systemProfile instanceof VavStagedRtu) {
+            systemProfile = (VavStagedRtu) L.ccu().systemProfile;
+            relay1Cb.setChecked(systemProfile.getConfigEnabled("relay1") > 0);
+            relay2Cb.setChecked(systemProfile.getConfigEnabled("relay2") > 0);
+            relay3Cb.setChecked(systemProfile.getConfigEnabled("relay3") > 0);
+            relay4Cb.setChecked(systemProfile.getConfigEnabled("relay4") > 0);
+            relay5Cb.setChecked(systemProfile.getConfigEnabled("relay5") > 0);
+            relay6Cb.setChecked(systemProfile.getConfigEnabled("relay6") > 0);
+            relay7Cb.setChecked(systemProfile.getConfigEnabled("relay7") > 0);
     
+            setUpCheckBoxes();
+            setUpSpinners();
+        } else {
+        
             new AsyncTask<Void, Void, Void>() {
+            
+                ProgressDialog progressDlg = new ProgressDialog(getActivity());
+                @Override
+                protected void onPreExecute() {
+                    progressDlg.setMessage("Loading System Profile");
+                    progressDlg.show();
+                    super.onPreExecute();
+                }
+            
                 @Override
                 protected Void doInBackground( final Void ... params ) {
-                    SystemEquip.getInstance().updateSystemProfile(ProfileType.SYSTEM_VAV_STAGED_RTU);
+                    if (systemProfile != null) {
+                        systemProfile.deleteSystemEquip();
+                    }
+                    systemProfile = new VavStagedRtu();
+                    L.ccu().systemProfile = systemProfile;
+                    systemProfile.initTRSystem();
                     return null;
                 }
                 @Override
                 protected void onPostExecute( final Void result ) {
+                    setUpCheckBoxes();
+                    setUpSpinners();
+                    progressDlg.dismiss();
                 }
             }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
         }
-        
-        setUpCheckBoxes();
-        setUpSpinners();
     }
     
     private void setUpCheckBoxes() {
         
-        relay1Cb.setChecked(SystemEquip.getInstance().getRelaySelection("relay1") > 0);
-        relay2Cb.setChecked(SystemEquip.getInstance().getRelaySelection("relay2") > 0);
-        relay3Cb.setChecked(SystemEquip.getInstance().getRelaySelection("relay3") > 0);
-        relay4Cb.setChecked(SystemEquip.getInstance().getRelaySelection("relay4") > 0);
-        relay5Cb.setChecked(SystemEquip.getInstance().getRelaySelection("relay5") > 0);
-        relay6Cb.setChecked(SystemEquip.getInstance().getRelaySelection("relay6") > 0);
-        relay7Cb.setChecked(SystemEquip.getInstance().getRelaySelection("relay7") > 0);
-        analog1Cb.setChecked(SystemEquip.getInstance().getRelaySelection("analog1") > 0);
-        analog2Cb.setChecked(SystemEquip.getInstance().getRelaySelection("analog2") > 0);
-        analog3Cb.setChecked(SystemEquip.getInstance().getRelaySelection("analog3") > 0);
-    
         relay1Cb.setOnCheckedChangeListener(this);
         relay2Cb.setOnCheckedChangeListener(this);
         relay3Cb.setOnCheckedChangeListener(this);
@@ -106,19 +114,17 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
         relay5Cb.setOnCheckedChangeListener(this);
         relay6Cb.setOnCheckedChangeListener(this);
         relay7Cb.setOnCheckedChangeListener(this);
-        analog1Cb.setOnCheckedChangeListener(this);
-        analog2Cb.setOnCheckedChangeListener(this);
-        analog3Cb.setOnCheckedChangeListener(this);
+       
     }
     
     private void setUpSpinners() {
-        relay1Spinner.setSelection(SystemEquip.getInstance().getRelaySelection("relay1") > 0  ? (int)SystemEquip.getInstance().getRelaySelection("relay1")-1 : Stage.COOLING_1.ordinal());
-        relay2Spinner.setSelection(SystemEquip.getInstance().getRelaySelection("relay2") > 0  ? (int)SystemEquip.getInstance().getRelaySelection("relay2")-1 : Stage.COOLING_2.ordinal());
-        relay3Spinner.setSelection(SystemEquip.getInstance().getRelaySelection("relay3") > 0  ? (int)SystemEquip.getInstance().getRelaySelection("relay3")-1 : Stage.COOLING_3.ordinal());
-        relay4Spinner.setSelection(SystemEquip.getInstance().getRelaySelection("relay4") > 0  ? (int)SystemEquip.getInstance().getRelaySelection("relay4")-1 : Stage.HEATING_1.ordinal());
-        relay5Spinner.setSelection(SystemEquip.getInstance().getRelaySelection("relay5") > 0  ? (int)SystemEquip.getInstance().getRelaySelection("relay5")-1 : Stage.HEATING_2.ordinal());
-        relay6Spinner.setSelection(SystemEquip.getInstance().getRelaySelection("relay6") > 0  ? (int)SystemEquip.getInstance().getRelaySelection("relay6")-1 : Stage.HEATING_3.ordinal());
-        relay7Spinner.setSelection(SystemEquip.getInstance().getRelaySelection("relay7") > 0  ? (int)SystemEquip.getInstance().getRelaySelection("relay7")-1 : Stage.FAN_1.ordinal());
+        relay1Spinner.setSelection((int)systemProfile.getConfigAssociation("relay1"));
+        relay2Spinner.setSelection((int)systemProfile.getConfigAssociation("relay2"));
+        relay3Spinner.setSelection((int)systemProfile.getConfigAssociation("relay3"));
+        relay4Spinner.setSelection((int)systemProfile.getConfigAssociation("relay4"));
+        relay5Spinner.setSelection((int)systemProfile.getConfigAssociation("relay5"));
+        relay6Spinner.setSelection((int)systemProfile.getConfigAssociation("relay6"));
+        relay7Spinner.setSelection((int)systemProfile.getConfigAssociation("relay7"));
         
         relay1Spinner.setEnabled(relay1Cb.isChecked());
         relay2Spinner.setEnabled(relay2Cb.isChecked());
@@ -145,40 +151,35 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
         {
             case R.id.relay1Cb:
                 relay1Spinner.setEnabled(relay1Cb.isChecked());
-                setSelectionBackground("relay1", relay1Cb.isChecked() ?relay1Spinner.getSelectedItemPosition()+1 : 0);
+                setConfigEnabledBackground("relay1",relay1Cb.isChecked() ? 1: 0);
+                /*if (relay1Cb.isChecked())
+                {
+                    setConfigAssociationBackground("relay1", relay1Spinner.getSelectedItemPosition());
+                }*/
                 break;
             case R.id.relay2Cb:
                 relay2Spinner.setEnabled(relay2Cb.isChecked());
-                setSelectionBackground("relay2", relay2Cb.isChecked() ?relay2Spinner.getSelectedItemPosition()+1 : 0);
+                setConfigEnabledBackground("relay2",relay2Cb.isChecked() ? 1: 0);
                 break;
             case R.id.relay3Cb:
                 relay3Spinner.setEnabled(relay3Cb.isChecked());
-                setSelectionBackground("relay3", relay3Cb.isChecked() ?relay3Spinner.getSelectedItemPosition()+1 : 0);
+                setConfigEnabledBackground("relay3",relay3Cb.isChecked() ? 1: 0);
                 break;
             case R.id.relay4Cb:
                 relay4Spinner.setEnabled(relay4Cb.isChecked());
-                setSelectionBackground("relay4", relay4Cb.isChecked() ?relay4Spinner.getSelectedItemPosition()+1 : 0);
+                setConfigEnabledBackground("relay4",relay4Cb.isChecked() ? 1: 0);
                 break;
             case R.id.relay5Cb:
                 relay5Spinner.setEnabled(relay5Cb.isChecked());
-                setSelectionBackground("relay5", relay5Cb.isChecked() ?relay5Spinner.getSelectedItemPosition()+1 : 0);
+                setConfigEnabledBackground("relay5",relay5Cb.isChecked() ? 1: 0);
                 break;
             case R.id.relay6Cb:
                 relay6Spinner.setEnabled(relay6Cb.isChecked());
-                setSelectionBackground("relay6", relay6Cb.isChecked() ?relay6Spinner.getSelectedItemPosition()+1 : 0);
+                setConfigEnabledBackground("relay6",relay6Cb.isChecked() ? 1: 0);
                 break;
             case R.id.relay7Cb:
                 relay7Spinner.setEnabled(relay7Cb.isChecked());
-                setSelectionBackground("relay7", relay7Cb.isChecked() ?relay7Spinner.getSelectedItemPosition()+1 : 0);
-                break;
-            case R.id.analog1Cb:
-                setSelectionBackground("analog1", analog1Cb.isChecked() ? 1: 0);
-                break;
-            case R.id.analog2Cb:
-                setSelectionBackground("analog2", analog2Cb.isChecked() ? 1: 0);
-                break;
-            case R.id.analog3Cb:
-                setSelectionBackground("analog3", analog1Cb.isChecked() ? 3: 0);
+                setConfigEnabledBackground("relay7",relay7Cb.isChecked() ? 1: 0);
                 break;
                 
         }
@@ -195,43 +196,43 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
             case R.id.relay1Spinner:
                 if (relay1Cb.isChecked())
                 {
-                    setSelectionBackground("relay1", relay1Spinner.getSelectedItemPosition() + 1);
+                    setConfigAssociationBackground("relay1", relay1Spinner.getSelectedItemPosition());
                 }
                 break;
             case R.id.relay2Spinner:
                 if (relay2Cb.isChecked())
                 {
-                    setSelectionBackground("relay2", relay2Spinner.getSelectedItemPosition() + 1);
+                    setConfigAssociationBackground("relay2", relay2Spinner.getSelectedItemPosition());
                 }
                 break;
             case R.id.relay3Spinner:
                 if (relay3Cb.isChecked())
                 {
-                    setSelectionBackground("relay3", relay3Spinner.getSelectedItemPosition() + 1);
+                    setConfigAssociationBackground("relay3", relay3Spinner.getSelectedItemPosition());
                 }
                 break;
             case R.id.relay4Spinner:
                 if (relay4Cb.isChecked())
                 {
-                    setSelectionBackground("relay4", relay4Spinner.getSelectedItemPosition() + 1);
+                    setConfigAssociationBackground("relay4", relay4Spinner.getSelectedItemPosition());
                 }
                 break;
             case R.id.relay5Spinner:
                 if (relay5Cb.isChecked())
                 {
-                    setSelectionBackground("relay5", relay5Spinner.getSelectedItemPosition() + 1);
+                    setConfigAssociationBackground("relay5", relay5Spinner.getSelectedItemPosition());
                 }
                 break;
             case R.id.relay6Spinner:
                 if (relay6Cb.isChecked())
                 {
-                    setSelectionBackground("relay6", relay6Spinner.getSelectedItemPosition() + 1);
+                    setConfigAssociationBackground("relay6", relay6Spinner.getSelectedItemPosition());
                 }
                 break;
             case R.id.relay7Spinner:
                 if (relay7Cb.isChecked())
                 {
-                    setSelectionBackground("relay7", relay7Spinner.getSelectedItemPosition() + 1);
+                    setConfigAssociationBackground("relay7", relay7Spinner.getSelectedItemPosition());
                 }
                 break;
                 
@@ -244,13 +245,26 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
         
     }
     
-    private void setSelectionBackground(String tuner, double val) {
+    private void setConfigEnabledBackground(String config, double val) {
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground( final Void ... params ) {
-                Log.d("CCU", "Set "+tuner+" val "+val );
-                SystemEquip.getInstance().setRelaySelection(tuner, val);
-                
+                systemProfile.setConfigEnabled(config, val);
+                return null;
+            }
+            
+            @Override
+            protected void onPostExecute( final Void result ) {
+                // continue what you are doing...
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+    }
+    
+    private void setConfigAssociationBackground(String config, double val) {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground( final Void ... params ) {
+                systemProfile.setConfigAssociation(config, val);
                 return null;
             }
             

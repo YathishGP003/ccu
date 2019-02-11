@@ -13,5 +13,5 @@ public class SystemConstants
     public static final double CO2_CONFIG_MAX= 1000;
     public static final double CO2_CONFIG_MIN = 800;
     public static final double SP_CONFIG_MAX= 1.5;
-    public static final double SP_CONFIG_MIN = 0.5;
+    public static final double SP_CONFIG_MIN = 0.1;
 }

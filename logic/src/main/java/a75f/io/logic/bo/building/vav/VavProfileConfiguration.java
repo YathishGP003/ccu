@@ -9,41 +9,19 @@ import a75f.io.logic.bo.building.BaseProfileConfiguration;
 public class VavProfileConfiguration extends BaseProfileConfiguration
 {
     
-    int minDamperCooling;
-    int maxDamperCooling;
-    int minDamperHeating;
-    int maxDamperHeating;
+    public int damperType;
+    public int damperSize;
+    public int damperShape;
+    public int reheatType;
     
-    public int getMinDamperCooling()
-    {
-        return minDamperCooling;
-    }
-    public void setMinDamperCooling(int minDamperCooling)
-    {
-        this.minDamperCooling = minDamperCooling;
-    }
-    public int getMaxDamperCooliing()
-    {
-        return maxDamperCooling;
-    }
-    public void setMaxDamperCooliing(int maxDamperCooliing)
-    {
-        this.maxDamperCooling = maxDamperCooliing;
-    }
-    public int getMinDamperHeating()
-    {
-        return minDamperHeating;
-    }
-    public void setMinDamperHeating(int minDamperHeating)
-    {
-        this.minDamperHeating = minDamperHeating;
-    }
-    public int getMaxDamperHeating()
-    {
-        return maxDamperHeating;
-    }
-    public void setMaxDamperHeating(int maxDamperHeating)
-    {
-        this.maxDamperHeating = maxDamperHeating;
-    }
+    public boolean enableOccupancyControl;
+    public boolean enableCO2Control;
+    public boolean enableIAQControl;
+    
+    public int minDamperCooling;
+    public int maxDamperCooling;
+    public int minDamperHeating;
+    public int maxDamperHeating;
+    
+    public double temperaturOffset;
 }

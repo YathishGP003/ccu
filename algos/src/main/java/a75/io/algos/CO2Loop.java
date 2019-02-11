@@ -11,8 +11,16 @@ package a75.io.algos;
  */
 public class CO2Loop
 {
-    public static final double CO2_RESET_ZERO = 800;
-    public static final double CO2_RESET_MAX = 1000;
+    public void setCo2Threshold(double co2Threshold)
+    {
+        this.co2Threshold = co2Threshold;
+    }
+    public void setCo2Target(double co2Target)
+    {
+        this.co2Target = co2Target;
+    }
+    double co2Threshold = 800;
+    double co2Target = 1000;
     
     public static final double PROPORTIONAL_GAIN = 1;
     public static final int PROPORTIONAL_SPREAD = 200;
@@ -26,11 +34,11 @@ public class CO2Loop
     }
     
     public int getLoopOutput(double co2Lvel) {
-        if (co2Lvel < CO2_RESET_ZERO ) {
+        if (co2Lvel < co2Threshold ) {
             controlLoop.reset();
             return 0;
         } else {
-            controlLoop.updateControlVariable(CO2_RESET_ZERO, co2Lvel);
+            controlLoop.updateControlVariable(co2Target, co2Lvel);
             return controlLoop.getLoopOutput();
         }
     }

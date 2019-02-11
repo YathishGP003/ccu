@@ -72,8 +72,6 @@ public abstract class UtilityApplication extends Application
         {
             usbService = ((UsbService.UsbBinder) arg1).getService();
             LSerial.getInstance().setUSBService(usbService);
-            deviceUpdateJob.scheduleJob("Device Update Job", 30,
-                    5 * 2, TimeUnit.SECONDS);
             
             //TODO: research what cts and dsr changes are.  For now no handler will be used, because I'm uncertain if the information is relevant.
             usbService.setHandler(null);
@@ -108,6 +106,8 @@ public abstract class UtilityApplication extends Application
 //        }.start();
     
         deviceUpdateJob = new DeviceUpdateJob();
+        deviceUpdateJob.scheduleJob("DeviceUpdateJob", 60,
+                15, TimeUnit.SECONDS);
     }
 
 

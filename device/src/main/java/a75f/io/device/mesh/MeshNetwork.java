@@ -13,6 +13,7 @@ import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 
 import static a75f.io.device.DeviceConstants.TAG;
@@ -81,11 +82,20 @@ public class MeshNetwork extends DeviceNetwork
     
     public void sendSystemControl() {
         Log.d(TAG, "MeshNetwork SendSystemControl");
+    
+        if (!LSerial.getInstance().isConnected()) {
+            Log.d(TAG,"Device not connected !!");
+            return;
+        }
+        
         if (L.ccu().systemProfile == null) {
             Log.d(TAG, "MeshNetwork SendSystemControl : Abort , No system profile");
             return;
         }
-        L.ccu().systemProfile.doSystemControl();
+        if (!(L.ccu().systemProfile instanceof DefaultSystem))
+        {
+            L.ccu().systemProfile.doSystemControl();
+        }
     
         CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
         msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
@@ -102,7 +112,7 @@ public class MeshNetwork extends DeviceNetwork
             }
         }
         msg.relayBitmap.set((short)relayBitmap);
-        DLog.LogdStructAsJson(msg);
+        //DLog.LogdStructAsJson(msg);
         MeshUtil.sendStructToCM(msg);
         
     }

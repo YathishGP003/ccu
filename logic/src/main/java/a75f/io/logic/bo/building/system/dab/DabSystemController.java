@@ -1,4 +1,4 @@
-package a75f.io.logic.bo.building.system;
+package a75f.io.logic.bo.building.system.dab;
 
 import android.util.Log;
 
@@ -13,28 +13,22 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
-import a75f.io.logic.tuners.SystemTunerUtil;
 
-import static a75f.io.logic.bo.building.ZonePriority.NO;
-import static a75f.io.logic.bo.building.system.DxCIController.State.COOLING;
-import static a75f.io.logic.bo.building.system.DxCIController.State.HEATING;
-import static a75f.io.logic.bo.building.system.DxCIController.State.NA;
-
-/**
- * Created by samjithsadasivan on 11/9/18.
- */
+import static a75f.io.logic.bo.building.ZonePriority.NONE;
+import static a75f.io.logic.bo.building.system.dab.DabSystemController.State.COOLING;
+import static a75f.io.logic.bo.building.system.dab.DabSystemController.State.HEATING;
+import static a75f.io.logic.bo.building.system.dab.DabSystemController.State.OFF;
 
 /**
- * DxController applies Weighted average and Moving average filters on temperature diffs.
- * MA value is used to determine AHU change over. WA determines the heating signal.
+ * Created by samjithsadasivan on 1/9/19.
  */
-public class DxCIController
+
+public class DabSystemController
 {
-    
     public double dxCI_CO_MA = 0;
     public double dxCI_WA = 0;
     
-    private static DxCIController instance = new DxCIController();
+    private static DabSystemController instance = new DabSystemController();
     
     ControlLoop piController;
     
@@ -45,18 +39,18 @@ public class DxCIController
     
     int ciDesired;
     
-    public enum State {NA, COOLING, HEATING};
-    State dxState = NA;
+    public enum State {OFF, COOLING, HEATING};
+    State dxState = OFF;
     
-    private DxCIController()
+    private DabSystemController()
     {
         piController = new ControlLoop();
         piController.setProportionalSpread(2);
     }
     
-    public static DxCIController getInstance() {
+    public static DabSystemController getInstance() {
         if (instance == null) {
-            instance = new DxCIController();
+            instance = new DabSystemController();
         }
         return instance;
     }
@@ -65,8 +59,8 @@ public class DxCIController
         
         double dxCISumCO = 0;
         double prioritySum = 0;
-        ciDesired = (int)SystemTunerUtil.getDesiredCI();
-        Log.d("CCU", "runDxCIAlgo-> ciDesired: "+ciDesired);
+        ciDesired = 2;//TODO - (int)SystemTunerUtil.getDesiredCI();
+        Log.d("CCU", "runDxCIAlgo-> ciDesired: " + ciDesired);
         
         for (Floor f: HSUtil.getFloors())
         {
@@ -76,12 +70,12 @@ public class DxCIController
                 }
                 double zone_dxCI = getZoneCurrentTemp(z.getId()) - getZoneDesiredTemp();
                 double zone_dp = getDynamicPriority(ciDesired, z.getId());
-    
+                
                 dxCISumCO += zone_dxCI * zone_dp;
                 prioritySum += zone_dp;
                 Log.d("CCU", "MA zone_dxCI: "+zone_dxCI+" zone_dp: "+zone_dp+" dxCISumCO: "+dxCISumCO);
             }
-        
+            
         }
         if (prioritySum == 0) {
             Log.d("CCU", "No valid temperature, Skip DxCiAlgo");
@@ -121,7 +115,7 @@ public class DxCIController
                 }
                 double zone_dxCI = getZoneCurrentTemp(z.getId()) - getZoneTempTarget();
                 double zone_dp = getDynamicPriority(ciDesired, z.getId());
-            
+                
                 dxCISum += zone_dxCI * zone_dp;
                 Log.d("CCU", "WA zone_dxCI: "+zone_dxCI+" zone_dp: "+zone_dp+" dxCISum: "+dxCISum+" dxState: "+dxState);
             }
@@ -195,7 +189,7 @@ public class DxCIController
     }
     
     public int getZonePriority(String zoneRef) {
-        ZonePriority priority = NO;
+        ZonePriority priority = NONE;
         for (ZoneProfile p : L.ccu().zoneProfiles)
         {
             if (p.getEquip().getZoneRef().equals(zoneRef) && p.getPriority().ordinal() > priority.ordinal()) {
@@ -233,5 +227,4 @@ public class DxCIController
     public State getDxCIRtuState() {
         return dxState;
     }
-    
 }

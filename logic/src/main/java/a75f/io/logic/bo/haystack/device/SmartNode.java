@@ -29,6 +29,10 @@ public class SmartNode
     public RawPoint relay1;
     public RawPoint relay2;
     public RawPoint currentTemp;
+    public RawPoint humidity;
+    public RawPoint co2;
+    public RawPoint voc;
+    public RawPoint desiredTemp;
     
     public String deviceRef;
     public String siteRef;
@@ -36,14 +40,14 @@ public class SmartNode
     public String zoneRef;
     
     
-    public SmartNode(int address, String site, String floor, String zone) {
+    public SmartNode(int address, String site, String floor, String zone, String equipRef) {
         Device d = new Device.Builder()
                 .setDisplayName("SN-"+address)
-                .addMarker("network")
-                .addMarker("node")
+                .addMarker("network").addMarker("node").addMarker("smartnode").addMarker("equipHis")
                 .setAddr(address)
                 .setSiteRef(site)
                 .setFloorRef(floor)
+                .setEquipRef(equipRef)
                 .setZoneRef(zone)
                 .build();
         deviceRef = CCUHsApi.getInstance().addDevice(d);
@@ -160,9 +164,53 @@ public class SmartNode
                          .setZoneRef(zoneRef)
                          .setFloorRef(floorRef)
                          .addMarker("sensor").addMarker("his")
-                         .setPort(Port.RTH.toString())
+                         .setPort(Port.SENSOR_RT.toString())
                          .setTz(tz)
                          .build();
+    
+        desiredTemp = new RawPoint.Builder()
+                              .setDisplayName("desiredTemp-"+smartNodeAddress)
+                              .setDeviceRef(deviceRef)
+                              .setSiteRef(siteRef)
+                              .setZoneRef(zoneRef)
+                              .setFloorRef(floorRef)
+                              .addMarker("sensor").addMarker("his")
+                              .setPort(Port.DESIRED_TEMP.toString())
+                              .setTz(tz)
+                              .build();
+    
+        humidity = new RawPoint.Builder()
+                              .setDisplayName("humidity-"+smartNodeAddress)
+                              .setDeviceRef(deviceRef)
+                              .setSiteRef(siteRef)
+                              .setZoneRef(zoneRef)
+                              .setFloorRef(floorRef)
+                              .addMarker("sensor").addMarker("his")
+                              .setPort(Port.SENSOR_RH.toString())
+                              .setTz(tz)
+                              .build();
+    
+        co2 = new RawPoint.Builder()
+                           .setDisplayName("co2-"+smartNodeAddress)
+                           .setDeviceRef(deviceRef)
+                           .setSiteRef(siteRef)
+                           .setZoneRef(zoneRef)
+                           .setFloorRef(floorRef)
+                           .addMarker("sensor").addMarker("his")
+                           .setPort(Port.SENSOR_CO2.toString())
+                           .setTz(tz)
+                           .build();
+    
+        voc = new RawPoint.Builder()
+                           .setDisplayName("voc-"+smartNodeAddress)
+                           .setDeviceRef(deviceRef)
+                           .setSiteRef(siteRef)
+                           .setZoneRef(zoneRef)
+                           .setFloorRef(floorRef)
+                           .addMarker("sensor").addMarker("his")
+                           .setPort(Port.SENSOR_VOC.toString())
+                           .setTz(tz)
+                           .build();
     }
     
     public void addPointsToDb() {
@@ -175,6 +223,10 @@ public class SmartNode
         CCUHsApi.getInstance().addPoint(relay1);
         CCUHsApi.getInstance().addPoint(relay2);
         CCUHsApi.getInstance().addPoint(currentTemp);
+        CCUHsApi.getInstance().addPoint(humidity);
+        CCUHsApi.getInstance().addPoint(co2);
+        CCUHsApi.getInstance().addPoint(voc);
+        CCUHsApi.getInstance().addPoint(desiredTemp);
     }
     
     public static void updatePhysicalPoint(int addr, String port, String type) {

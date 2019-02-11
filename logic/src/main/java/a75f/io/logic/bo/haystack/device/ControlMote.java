@@ -93,10 +93,10 @@ public class ControlMote
     
     private void addRelayStatePoint(String relay){
         RawPoint p = new RawPoint.Builder()
-                             .setDisplayName(site.getDisplayName()+"-"+relay+"Selection")
+                             .setDisplayName(site.getDisplayName()+"-"+relay+"State")
                              .setDeviceRef(deviceRef)
                              .setSiteRef(site.getId())
-                             .addMarker(relay).addMarker("writable").addMarker("system").addMarker("state").addMarker("out")
+                             .addMarker(relay).addMarker("his").addMarker("system").addMarker("state")
                              .setTz(site.getTz())
                              .build();
         CCUHsApi.getInstance().addPoint(p);
@@ -104,11 +104,11 @@ public class ControlMote
     
     public static double getRelayState(String relay)
     {
-        return CCUHsApi.getInstance().readDefaultVal("point and system and state and out and "+relay);
+        return CCUHsApi.getInstance().readHisValByQuery("point and his and system and state and "+relay);
     }
     public static void setRelayState(String relay, double val)
     {
-        CCUHsApi.getInstance().writeDefaultVal("point and system and state and out and "+relay, val);
+        CCUHsApi.getInstance().writeHisValByQuery("point and his and system and state and "+relay, val);
     }
     
 }

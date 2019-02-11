@@ -10,64 +10,6 @@
         android:orientation="vertical" >
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:orientation="horizontal"
-            android:paddingTop="20dp"
-            android:layout_marginLeft="12dp"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="20dp"
-            android:visibility="gone">
-            <CheckBox
-                android:id="@+id/fsvStandAloneModeCB"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="Control HVAC Equipments"
-                android:textSize="@dimen/text_medium_xlarge" />
-            <LinearLayout
-                android:id="@+id/standaloneOptions"
-                android:layout_width="wrap_content"
-                android:layout_height="75dp"
-                android:orientation="horizontal"
-                android:paddingTop="20dp"
-                android:layout_marginLeft="130dp"
-                android:layout_gravity="center"
-                android:visibility="visible"
-                android:layout_marginBottom="5dp">
-                <TextView
-                    android:layout_width="110dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:text="Relay 1"
-                    android:textSize="@dimen/text_medium_xlarge" />
-
-                <Spinner
-                    android:id="@+id/fsvRelay1Spinner"
-                    android:layout_width="180dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:paddingLeft="20dp"
-                    android:paddingRight="20dp" />
-                <TextView
-                    android:layout_width="80dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:text="Relay 2"
-                    android:textSize="@dimen/text_medium_xlarge"
-                    android:layout_marginLeft="30dp" />
-
-                <Spinner
-                    android:id="@+id/fsvRelay2Spinner"
-                    android:layout_width="180dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:paddingLeft="20dp"
-                    android:paddingRight="20dp"
-                    android:layout_marginLeft="5dp" />
-            </LinearLayout>
-        </LinearLayout>
-        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="75dp"
             android:layout_marginLeft="20dp"
@@ -93,8 +35,7 @@
                 android:id="@+id/damper1layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:visibility="invisible">
+                android:orientation="horizontal">
                 <TextView
                     android:id="@+id/textView3"
                     android:layout_width="180dp"
@@ -199,6 +140,29 @@
             </LinearLayout>
         </LinearLayout>
 -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="20dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Reheat Type"
+                android:textSize="@dimen/text_medium_xlarge"
+                android:layout_marginLeft="20dp" />
+
+            <Spinner
+                android:id="@+id/vavReheatType"
+                android:layout_width="180dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:visibility="visible" />
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/zonePriorityLayout"
@@ -231,6 +195,7 @@
                 android:paddingLeft="40dp"
                 android:paddingRight="0dp"
                 android:layout_marginLeft="50dp"
+                android:visibility="gone"
                 android:layout_gravity="center_vertical"
                 android:text="Ignore Set Temperature Change"
                 android:textSize="@dimen/text_medium_xlarge" />
@@ -239,98 +204,46 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
+
             <LinearLayout
                 android:id="@+id/useOccupancyLayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:orientation="vertical"
+                android:orientation="horizontal"
                 android:paddingLeft="20dp"
-                android:visibility="gone"
                 android:paddingRight="0dp"
                 android:paddingTop="20dp" >
 
                 <android.support.v7.widget.SwitchCompat
-                    android:id="@+id/useOccupancyDetection"
+                    android:id="@+id/enableOccupancyControl"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Use Occupancy Detection"
+                    android:text="Enable Occupancy Control"
                     android:textSize="@dimen/text_medium_xlarge" />
 
-                <TextView
-                    android:id="@+id/textView1"
+                <Space
+                    android:layout_width="30dp"
+                    android:layout_height="match_parent" />
+
+                <android.support.v7.widget.SwitchCompat
+                    android:id="@+id/enableCO2Control"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="[Works only if occupancy sensing module is installed]"
-                    android:textSize="@dimen/text_small_xlarge"/>
+                    android:text="Enable CO2 Control"
+                    android:textSize="@dimen/text_medium_xlarge" />
+
+                <Space
+                    android:layout_width="30dp"
+                    android:layout_height="match_parent" />
+
+                <android.support.v7.widget.SwitchCompat
+                    android:id="@+id/enableIAQControl"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Enable IAQ Control"
+                    android:textSize="@dimen/text_medium_xlarge" />
             </LinearLayout>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingTop="20dp"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/vavDamperOption"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="VAV Damper Actuator (Analog1 Out)"
-                android:textSize="@dimen/text_medium_xlarge"
-                android:layout_marginLeft="20dp" />
-
-            <Spinner
-                android:id="@+id/vavDamperActuator"
-                android:layout_width="180dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:paddingLeft="20dp"
-                android:paddingRight="20dp"
-                android:visibility="visible" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingTop="20dp"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="Reheat Port"
-                android:textSize="@dimen/text_medium_xlarge"
-                android:layout_marginLeft="20dp" />
-
-            <Spinner
-                android:id="@+id/vavReheatPort"
-                android:layout_width="180dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:paddingLeft="20dp"
-                android:paddingRight="20dp"
-                android:visibility="visible" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="Reheat Actuator"
-                android:textSize="@dimen/text_medium_xlarge"
-                android:layout_marginLeft="20dp" />
-
-            <Spinner
-                android:id="@+id/vavReheatActuator"
-                android:layout_width="180dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:paddingLeft="20dp"
-                android:paddingRight="20dp"
-                android:visibility="visible" />
-
         </LinearLayout>
 
         <LinearLayout

@@ -132,6 +132,52 @@
         </LinearLayout>
 
         <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="10dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:text="TargetMinInsideHumidity"
+            android:textSize="@dimen/text_medium_xlarge"/>
+
+        <Spinner
+            android:id="@+id/targetMinInsideHumidity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="5dp"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:text="TargetMaxInsideHumidity"
+            android:textSize="@dimen/text_medium_xlarge"/>
+
+        <Spinner
+            android:id="@+id/targetMaxInsideHumidity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_marginLeft="20dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"/>
+        </LinearLayout>
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginRight="16dp"
@@ -139,28 +185,29 @@
             android:orientation="horizontal">
 
             <CheckBox
-                android:id="@+id/systemOvernightHumidityControl"
+                android:id="@+id/cbHumidification"
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
                 android:layout_weight="9"
-                android:text="Use DX for Overnight Dehumidification"
+                android:text="Enable Humidification"
                 android:textSize="@dimen/text_large_xlarge" />
 
             <Spinner
                 android:id="@+id/systemOvernightHumidityTargetValue"
                 android:layout_width="50dp"
                 android:layout_height="wrap_content"
+                android:visibility="gone"
                 android:layout_weight="1" />
 
         </LinearLayout>
 
         <CheckBox
-            android:id="@+id/systemCompensateHumidity"
+            android:id="@+id/cbDehumidification"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:text="Compensate For Humidity"
+            android:text="Enable De-humidification"
             android:textSize="@dimen/text_large_xlarge" />
 
         <CheckBox
@@ -168,6 +215,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
+            android:visibility="gone"
             android:text="Stage 1 Fan Always ON"
             android:textSize="@dimen/text_large_xlarge" />
 

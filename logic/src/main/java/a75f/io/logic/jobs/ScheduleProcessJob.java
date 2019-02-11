@@ -11,7 +11,6 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Schedule;
-import a75f.io.api.haystack.VAVScheduler;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logic.BaseJob;
 
@@ -74,23 +73,12 @@ public class ScheduleProcessJob extends BaseJob {
     }
 
     private void writePointsForEquip(Equip equip, Schedule equipSchedule) {
-        if(equip.getMarkers().contains("VAV"))
+        if(equip.getMarkers().contains("vav"))
         {
             VAVScheduler.processEquip(equip, equipSchedule);
         }
     }
 
-    public void setDesiredTemp(Equip equip, Double desiredTemp)
-    {
-        ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and desired and sp and equipRef == \""+equip.getId()+"\"");
-        String id = ((HashMap)points.get(0)).get("id").toString();
-        if (id == null || id == "") {
-            throw new IllegalArgumentException();
-        }
-
-        CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
-        CCUHsApi.getInstance().pointWrite(HRef.make(id), 9, "Scheduler", desiredTemp == null ? HNum.make(desiredTemp) : null, null);
-    }
 
     /* Check to see if this equips zoneRef has a ScheduleRef, if it does use that or use */
     private Schedule getScheduleForEquip(Equip equip) {

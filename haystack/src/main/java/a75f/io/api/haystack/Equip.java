@@ -1,7 +1,7 @@
 package a75f.io.api.haystack;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -12,7 +12,7 @@ import java.util.Map;
 public class Equip extends Entity
 {
     private String            displayName;
-    private ArrayList<String> markers;
+    private HashSet<String> markers;
     private String siteRef;
     private String zoneRef;
     private String floorRef;
@@ -65,7 +65,7 @@ public class Equip extends Entity
     {
         return displayName;
     }
-    public ArrayList<String> getMarkers()
+    public HashSet<String> getMarkers()
     {
         return markers;
     }
@@ -78,7 +78,7 @@ public class Equip extends Entity
     }
     public static class Builder{
         private String            displayName;
-        private ArrayList<String> markers = new ArrayList<>();
+        private HashSet<String> markers = new HashSet<>();
         private String            siteRef;
         private String zoneRef;
         private String floorRef;
@@ -122,7 +122,7 @@ public class Equip extends Entity
             this.displayName = displayName;
             return this;
         }
-        public Builder setMarkers(ArrayList<String> markers)
+        public Builder setMarkers(HashSet<String> markers)
         {
             this.markers = markers;
             return this;

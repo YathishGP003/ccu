@@ -1,4 +1,4 @@
-package a75f.io.logic.bo.building.definitions;
+package a75f.io.api.haystack;
 /**
  * Created by Yinten isOn 9/8/2017.
  */
@@ -34,6 +34,8 @@ public class MockTime
 	
 	public long getMockTime()
 	{
+
+
 		if (isMockTime())
 		{
 			return mockTime;

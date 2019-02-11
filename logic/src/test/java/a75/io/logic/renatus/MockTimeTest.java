@@ -6,7 +6,7 @@ import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
-import a75f.io.logic.bo.building.definitions.MockTime;
+import a75f.io.api.haystack.MockTime;
 
 /**
  * Created by Yinten isOn 9/8/2017.
@@ -14,11 +14,9 @@ import a75f.io.logic.bo.building.definitions.MockTime;
 
 public class MockTimeTest
 {
-	
-	
 	/*
-		local date
-		08 Sep 2017
+	local date
+	08 Sep 2017
 
 	UTC time
 	20:08:59
@@ -30,15 +28,11 @@ public class MockTimeTest
 
 	1504901339999
 
- 
-
 	local timezone (UTC-5h)
 	Central Daylight
-	 */
+	*/
 	
 	private static final long MOCK_TIME = 1504901339999L;
-	
-	
 	
 	@Before
 	public void setUpMockTime()
@@ -51,13 +45,10 @@ public class MockTimeTest
 	public void getMockTimeTest()
 	{
 		Assert.assertEquals(MockTime.getInstance().getMockTime(), MOCK_TIME);
-		
 		DateTime mockedTime = new DateTime(MockTime.getInstance().getMockTime());
+
 		Assert.assertEquals(15, mockedTime.hourOfDay().get());
 		Assert.assertEquals(8, mockedTime.minuteOfHour().get());
-		
-		
-		
 	}
 	
 	
@@ -66,7 +57,7 @@ public class MockTimeTest
 	{
 		MockTime.getInstance().setMockTime(false, 0);
 		Assert.assertNotSame(MOCK_TIME, MockTime.getInstance().getMockTime());
-		
+
 		//Return test to initial state
 		MockTime.getInstance().setMockTime(true, MOCK_TIME);
 	}

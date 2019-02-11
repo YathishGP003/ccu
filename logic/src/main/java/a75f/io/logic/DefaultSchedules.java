@@ -16,11 +16,11 @@ import a75f.io.logic.bo.building.definitions.DAYS;
 public class DefaultSchedules {
 
 
-    private static final double DEFAULT_COOLING_VACATION_TEMP = 77.0F;
-    private static final double DEFAULT_HEATING_VACATION_TEMP = 65.0F;
+    public static final double DEFAULT_COOLING_VACATION_TEMP = 77.0F;
+    public static final double DEFAULT_HEATING_VACATION_TEMP = 65.0F;
 
-    private static final double DEFAULT_COOLING_TEMP = 75.0F;
-    private static final double DEFAULT_HEATING_TEMP = 70.0F;
+    public static final double DEFAULT_COOLING_TEMP = 75.0F;
+    public static final double DEFAULT_HEATING_TEMP = 70.0F;
 
     public static String generateDefaultSchedule() {
 
@@ -96,12 +96,12 @@ public class DefaultSchedules {
         return defaultSchedule;
     }
 
-    private static HDict getDefaultForDay(boolean cooling, int day, double temp) {
+    public static HDict getDefaultForDay(boolean cooling, int day, double temp) {
         HDict hDictDay = new HDictBuilder()
                 .add(cooling ? "cooling" : "heating")
                 .add("day", HNum.make(day))
                 .add("sthh", HNum.make(8))
-                .add("stmm", HNum.make(30))
+                .add("stmm", HNum.make(0))
                 .add("ethh", HNum.make(17))
                 .add("etmm", HNum.make(30))
                 .add("curVal", HNum.make(temp)).toDict();
@@ -185,7 +185,5 @@ public class DefaultSchedules {
                 .toDict();
 
         CCUHsApi.getInstance().addSchedule(localId, defaultSchedule);
-
-
     }
 }

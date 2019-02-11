@@ -6,13 +6,11 @@ import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HList;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
-import org.projecthaystack.HVal;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.UUID;
 
 
 /***
@@ -27,43 +25,70 @@ import java.util.UUID;
  */
 
 
-public class Schedule extends Entity
-{
-    //MON = 0
-    private int getCurDay()
-    {
-        return DateTime.now().getDayOfWeek() - 1;
+public class Schedule extends Entity {
+
+    private DateTime getTime() {
+        return new DateTime(MockTime.getInstance().getMockTime());
     }
 
-    //0-23
-    private int getCurHour()
-    {
-        return DateTime.now().getHourOfDay();
+    private int getCurDay() {
+        return getTime().getDayOfWeek() - 1;
     }
 
-    private int getCurMin()
-    {
-        return DateTime.now().getMinuteOfHour();
+    private int getCurHour() {
+        return getTime().getHourOfDay();
+    }
+
+    private int getCurMin() {
+        return getTime().getMinuteOfHour();
     }
 
     /* Notes * /
     getCurDay
     getCurHour
     getCurMinute
-    */
-    public Double getCurrentValueForMarker(String marker)
-    {
-        for(Days day : getDays())
-        {
-            if(marker.equals("cooling") && !day.isCooling) continue;
-            if(marker.equals("heating") && !day.isHeating) continue;
-            if(day.mDay != getCurDay()) continue;
-            if(day.getSthh() != -1 || getCurHour() < day.getSthh()) continue;
-            if(day.getEthh() != -1 || getCurHour() > day.getEthh()) continue;
-            if(day.getStmm() != -1 || getCurHour() < day.getStmm()) continue;
-            if(day.getEtmm() != -1 || getCurHour() > day.getEtmm()) continue;
 
-            return day.mVal;
+    Schedules need to be sorted. 
+    */
+    public Occupied getCurrentValueForMarker(String marker) {
+
+        Occupied occupied = new Occupied();
+        for (Days day : getDays()) {
+            if (marker.equals("cooling") && !day.isCooling) continue;
+            if (marker.equals("heating") && !day.isHeating) continue;
+
+            if(day.mDay > getCurDay())
+            {
+                occupied.setValue(day.mVal);
+                occupied.setOccupied(false);
+            }
+            if(getCurDay() == day.mDay)
+            {
+                if(day.getSthh()  > getCurHour())
+                {
+
+                }
+                else if(day.getSthh() == getCurHour())
+                {
+                    if(getCurMin() > day.getEtmm())
+                }
+
+                }
+                else if(getCurHour() == day.)
+            else if(getCur)
+
+            if (day.mDay != getCurDay()) continue;
+            if (day.getSthh() != -1)
+                if (getCurHour() < day.getSthh()) continue;
+            if (day.getEthh() != -1)
+                if (getCurHour() > day.getEthh()) continue;
+            if (day.getStmm() != -1)
+                if (getCurMin() < day.getStmm()) continue;
+            if (day.getEtmm() != -1)
+                if (getCurMin() > day.getEtmm()) continue;
+            occupied.setValue(day.mVal);
+            occupied.setOccupied(true);
+            return occupied;
         }
 
         return null;

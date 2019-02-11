@@ -4,7 +4,6 @@ import android.util.Log;
 
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
-import org.projecthaystack.HVal;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,6 +11,7 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Schedule;
+import a75f.io.api.haystack.VAVScheduler;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logic.BaseJob;
 
@@ -74,13 +74,9 @@ public class ScheduleProcessJob extends BaseJob {
     }
 
     private void writePointsForEquip(Equip equip, Schedule equipSchedule) {
-
-
-        Log.i(TAG, "Equip: " + equip);
-        Log.i(TAG, "Equip Schedule: " + equipSchedule);
-        Double cooling = equipSchedule.getCurrentValueForMarker("heating");
-        if(cooling !=null) {
-            setDesiredTemp(equip, cooling);
+        if(equip.getMarkers().contains("VAV"))
+        {
+            VAVScheduler.processEquip(equip, equipSchedule);
         }
     }
 
@@ -95,8 +91,6 @@ public class ScheduleProcessJob extends BaseJob {
         CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
         CCUHsApi.getInstance().pointWrite(HRef.make(id), 9, "Scheduler", desiredTemp == null ? HNum.make(desiredTemp) : null, null);
     }
-
-
 
     /* Check to see if this equips zoneRef has a ScheduleRef, if it does use that or use */
     private Schedule getScheduleForEquip(Equip equip) {

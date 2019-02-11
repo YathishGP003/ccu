@@ -92,7 +92,7 @@ public class HSClientTest
 
         /* Sync a site*/
         HClient hClient = new HClient(HttpUtil.HAYSTACK_URL, "ryan", "ryan");
-        HDict navIdDict = new HDictBuilder().add("navId", HRef.make("5be9af1c02743900e9e762f8")).toDict();
+        HDict navIdDict = new HDictBuilder().add("navId", HRef.make("5c3503cfadbe1d00f473756f")).toDict();
         HGrid hGrid = HGridBuilder.dictToGrid(navIdDict);
 
         HGrid sync = hClient.call("sync", hGrid);
@@ -104,7 +104,7 @@ public class HSClientTest
     public void testGettingSiteDetails()
     {
         HClient hClient = new HClient(HttpUtil.HAYSTACK_URL, "ryan", "ryan");
-        HDict navIdDict = new HDictBuilder().add("id", HRef.make("5be9af1c02743900e9e762f8")).toDict();
+        HDict navIdDict = new HDictBuilder().add("id", HRef.make("5c3503cfadbe1d00f473756f")).toDict();
         HGrid hGrid = HGridBuilder.dictToGrid(navIdDict);
 
         HGrid readSite = hClient.call("read", hGrid);

@@ -228,6 +228,18 @@ public class UnitTest
     
     
     }
+<<<<<<< HEAD
+
+
+
+//    public void testSetInfluxRetentionPolicy()
+//    {
+//        InfluxDB influxDB = InfluxDBFactory.connect("https://influx-a75f.aivencloud.com:27304", "avnadmin", "mhur2n42y4l58xlx");
+//        String rpName = "RenatusTest";
+//        influxDB.createRetentionPolicy(rpName, "defaultdb", "365d", "30m", 1, true);
+//        influxDB.setRetentionPolicy(rpName);
+//    }
+=======
     public void testSetInfluxRetentionPolicy()
     {
         InfluxDB influxDB = InfluxDBFactory.connect("https://influx-a75f.aivencloud.com:27304", "avnadmin", "mhur2n42y4l58xlx");
@@ -235,6 +247,7 @@ public class UnitTest
         //influxDB.createRetentionPolicy(rpName, "defaultdb", "365d", "30m", 1, true);
         //influxDB.setRetentionPolicy(rpName);
     }
+>>>>>>> master
     
     
     @Test

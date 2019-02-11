@@ -62,10 +62,8 @@ public abstract class UtilityApplication extends Application
         }
     };
 
-    String                       mBotId;
-    Random rand = new Random();
     private UsbService               usbService;
-    private ScheduledExecutorService taskExecutor;
+
     private DeviceUpdateJob          deviceUpdateJob;
     private final ServiceConnection usbConnection = new ServiceConnection()
     {

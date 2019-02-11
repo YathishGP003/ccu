@@ -1,11 +1,15 @@
 package a75f.io.renatus;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -15,14 +19,25 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.SeekBar;
 import android.widget.Spinner;
+import android.widget.Toast;
+
+
+import org.projecthaystack.HDict;
+import org.projecthaystack.HGrid;
+import org.projecthaystack.HGridBuilder;
+import org.projecthaystack.io.HZincReader;
+import org.projecthaystack.io.HZincWriter;
 
 import java.util.ArrayList;
 
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Schedule;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
 import a75f.io.logic.tuners.TunerUtil;
+
 
 /**
  * Created by samjithsadasivan isOn 8/7/17.
@@ -30,14 +45,18 @@ import a75f.io.logic.tuners.TunerUtil;
 
 public class SystemFragment extends Fragment implements AdapterView.OnItemSelectedListener
 {
+	private static final String TAG = "SystemFragment";
+	SeekBar  sbComfortValue;
+	EditText stageStatusNow;
+	Spinner mSysSpinnerSchedule;
+
+
 	
 	
 	RadioButton systemOff;
 	RadioButton systemAuto;
 	RadioButton systemCool;
 	RadioButton systemHeat;
-	SeekBar  sbComfortValue;
-	EditText stageStatusNow;
 	
 	Spinner targetMaxInsideHumidity;
 	Spinner targetMinInsideHumidity;
@@ -66,10 +85,26 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	@Override
 	public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
 	{
+
+		mSysSpinnerSchedule = view.findViewById(R.id.sysSpinnerSchedule);
+
+		mSysSpinnerSchedule.setOnTouchListener(new View.OnTouchListener() {
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				Toast.makeText(SystemFragment.this.getActivity(), "Schedule edit popup", Toast.LENGTH_SHORT).show();
+				if(event.getAction() == MotionEvent.ACTION_DOWN) {
+					showScheduleDialog();
+				}
+
+
+				return true;
+			}
+		});
 		systemOff = view.findViewById(R.id.systemOff);
 		systemAuto = view.findViewById(R.id.systemAuto);
 		systemCool = view.findViewById(R.id.systemManualCool);
 		systemHeat = view.findViewById(R.id.systemManualHeat);
+
 		sbComfortValue = view.findViewById(R.id.systemComfortValue);
 		
 		targetMaxInsideHumidity = view.findViewById(R.id.targetMaxInsideHumidity);
@@ -200,6 +235,64 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			}
 		});*/
 	}
+
+	private void showScheduleDialog() {
+
+		AlertDialog.Builder alert = new AlertDialog.Builder(SystemFragment.this.getActivity());
+
+        Schedule siteSchedule = CCUHsApi.getInstance().getSiteSchedule();
+
+
+
+        HGrid grid = HGridBuilder.dictToGrid(siteSchedule.getScheduleHDict());
+        String systemScheduleGrid = HZincWriter.gridToString(grid);
+
+		final EditText edittext = new EditText(SystemFragment.this.getActivity());
+		alert.setMessage("Edit Schedule");
+		alert.setTitle("Edit Schedule");
+        edittext.setText(systemScheduleGrid);
+
+		alert.setView(edittext);
+
+		alert.setPositiveButton("Yes Option", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int whichButton) {
+
+				Editable editTextValue = edittext.getText();
+				Log.i(TAG, "Edit Text : " + editTextValue.toString());
+				HZincReader reader = new HZincReader(editTextValue.toString());
+                Log.i(TAG, "######Reader Dump######");
+				HGrid hGrid = reader.readGrid();
+
+				HDict hDict = hGrid.row(0);
+				Schedule schedule = new Schedule.Builder().setHDict(hDict).build();
+
+				CCUHsApi.getInstance().updateSchedule(schedule);
+
+				new Thread()
+				{
+					@Override
+					public void run()
+					{
+						CCUHsApi.getInstance().syncEntityTree();
+					}
+				}.start();
+
+
+			}
+
+		});
+
+		alert.setNegativeButton("No Option", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int whichButton) {
+				// what ever you want to do with No option.
+
+			}
+		});
+
+		alert.show();
+
+
+	}
 	
 	@Override
 	public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,
@@ -238,6 +331,6 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			}
 		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
 	}
-	
+
 
 }

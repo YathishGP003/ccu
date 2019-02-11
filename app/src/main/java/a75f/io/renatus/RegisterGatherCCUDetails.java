@@ -126,7 +126,7 @@ public class RegisterGatherCCUDetails extends Activity {
 
             @Override
             protected HGrid doInBackground(Void... voids) {
-                CCUHsApi.getInstance().getSiteId();
+                //CCUHsApi.getInstance().getSiteId();
                 return CCUHsApi.getInstance().getCCUs();
             }
 

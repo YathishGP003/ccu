@@ -34,6 +34,7 @@ import a75f.io.api.haystack.sync.HttpUtil;
  * Created by samjithsadasivan on 9/3/18.
  */
 public class CCUHsApi {
+
     public static boolean DEBUG_CCUHS = true;
     private static CCUHsApi instance;
 
@@ -686,5 +687,42 @@ public class CCUHsApi {
 
     public void addSchedule(String localId, HDict defaultSchedule) {
         tagsDb.addHDict(localId, defaultSchedule);
+    }
+
+    public Schedule getSiteSchedule()
+    {
+        Schedule schedule = new Schedule.Builder().setHDict(tagsDb.read("schedule")).build();
+        return schedule;
+    }
+
+    public Schedule getSystemSchedule()
+    {
+
+        Schedule schedule = null;
+        HDict scheduleHDict = tagsDb.read("schedule", false);
+        if(scheduleHDict != null) {
+            schedule = new Schedule.Builder().setHDict(tagsDb.read("schedule")).build();
+        }
+
+        return schedule;
+    }
+
+
+    public void updateSchedule(Schedule schedule) {
+        addSchedule(schedule.getId(), schedule.getScheduleHDict());
+        if (tagsDb.idMap.get(schedule.getId()) != null)
+        {
+            System.out.println("Update tagsDb: " + tagsDb.idMap.get(schedule.getId()));
+            tagsDb.updateIdMap.put(schedule.getId(), tagsDb.idMap.get(schedule.getId()));
+        }
+    }
+
+    public Schedule getScheduleById(String scheduleRef) {
+        HDict hDict = tagsDb.readById(HRef.make(scheduleRef));
+        return new Schedule.Builder().setHDict(hDict).build();
+    }
+
+    public void loadTagsData(Context c) {
+        tagsDb.init(c);
     }
 }

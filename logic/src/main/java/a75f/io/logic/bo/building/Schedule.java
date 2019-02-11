@@ -10,8 +10,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+import a75f.io.api.haystack.MockTime;
 import a75f.io.logic.bo.building.definitions.DAYS;
-import a75f.io.logic.bo.building.definitions.MockTime;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Schedule

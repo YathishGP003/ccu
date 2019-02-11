@@ -1,18 +1,19 @@
 package a75f.io.api.haystack;
 
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HList;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
-import org.projecthaystack.HVal;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.UUID;
 
 
 /***
@@ -27,8 +28,41 @@ import java.util.UUID;
  */
 
 
-public class Schedule extends Entity
-{
+public class Schedule extends Entity {
+
+    private DateTime getTime() {
+        return new DateTime(MockTime.getInstance().getMockTime());
+    }
+
+    public Occupied getCurrentValueForMarker(String marker)
+    {
+        Occupied occupied = null;
+        ArrayList<Days> daysSorted = getDaysSorted();
+        ArrayList<Interval> scheduledIntervals = getScheduledIntervals(daysSorted);
+
+        for(int i = 0; i < daysSorted.size(); i++)
+        {
+            if(scheduledIntervals.get(i).contains(getTime().getMillis()) || scheduledIntervals.get(i).isAfter(getTime().getMillis()))
+            {
+                if ((marker.equals("cooling") && daysSorted.get(i).isCooling)
+                        || (marker.equals("heating") && daysSorted.get(i).isHeating)) {
+                    occupied = new Occupied();
+                    occupied.setOccupied(scheduledIntervals.get(i).contains(getTime().getMillis()));
+                    occupied.setValue(daysSorted.get(i).mVal);
+                    return occupied;
+                }
+            }
+        }
+
+        if(daysSorted.size() > 0) {
+            occupied = new Occupied();
+            occupied.setOccupied(scheduledIntervals.get(0).contains(getTime().getMillis()));
+            occupied.setValue(daysSorted.get(0).mVal);
+        }
+
+        return occupied;
+    }
+
 
     /*{stdt:2018-12-18T10:13:55.185-06:00 Chicago
         dis:"Simple Schedule" etdt:2018-12-18T10:13:55.185-06:00 Chicago
@@ -95,6 +129,69 @@ public class Schedule extends Entity
         return mDays;
     }
 
+
+    private ArrayList<Interval> getScheduledIntervals(ArrayList<Days> daysSorted)
+    {
+        ArrayList<Interval> intervals = new ArrayList<Interval>();
+
+        for (Days day : daysSorted)
+        {
+            DateTime startDateTime = new DateTime(MockTime.getInstance().getMockTime())
+                    .withHourOfDay(day.getSthh())
+                    .withMinuteOfHour(day.getStmm())
+                    .withDayOfWeek(day.getDay() + 1)
+                    .withSecondOfMinute(0);
+            DateTime endDateTime = new DateTime(MockTime.getInstance().getMockTime())
+                    .withHourOfDay(day.getEthh())
+                    .withMinuteOfHour(day.getEtmm())
+                    .withSecondOfMinute(0).withDayOfWeek(
+                            day.getDay() +
+                                    1);
+            Interval scheduledInterval =
+                    new Interval(startDateTime, endDateTime);
+            intervals.add(scheduledInterval);
+        }
+
+        return intervals;
+    }
+
+    /**
+     * Sorts the days by MM, then by HH, then by DD
+     * @return Sorted list of days
+     */
+    public ArrayList<Days> getDaysSorted() {
+
+        Collections.sort(mDays, new Comparator<Days>()
+        {
+            @Override
+            public int compare(Days o1, Days o2)
+            {
+                return Integer.valueOf(o1.getStmm()).compareTo(Integer.valueOf(o2.getStmm()));
+            }
+        });
+
+        Collections.sort(mDays, new Comparator<Days>()
+        {
+            @Override
+            public int compare(Days o1, Days o2)
+            {
+                return Integer.valueOf(o1.getSthh()).compareTo(Integer.valueOf(o2.getSthh()));
+            }
+        });
+
+        Collections.sort(mDays, new Comparator<Days>()
+        {
+            @Override
+            public int compare(Days o1, Days o2)
+            {
+                return Integer.valueOf(o1.mDay).compareTo(Integer.valueOf(o2.mDay));
+            }
+        });
+
+        return mDays;
+    }
+
+
     public static class Builder {
         private String mId;
 
@@ -159,7 +256,6 @@ public class Schedule extends Entity
             s.mMarkers = this.mMarkers;
             s.mIsVacation = this.mIsVacation;
             s.mDis = this.mDis;
-            s.mMarkers = this.mMarkers;
             s.mKind = this.mKind;
             s.mSiteId = this.mSiteId;
             s.mUnit = this.mUnit;
@@ -294,12 +390,13 @@ public class Schedule extends Entity
             Days days = new Days();
 
             days.isCooling = hDict.has("cooling");
+
             days.isHeating = hDict.has("heating");
             days.mDay = hDict.getInt("day");
-            days.mEthh = hDict.getInt("ethh");
-            days.mEtmm = hDict.getInt("etmm");
-            days.mSthh = hDict.getInt("sthh");
-            days.mStmm = hDict.getInt("stmm");
+            days.mEthh = hDict.has("ethh") ? hDict.getInt("ethh") : -1;
+            days.mEtmm = hDict.has("etmm") ? hDict.getInt("etmm") : -1;
+            days.mSthh = hDict.has("sthh") ? hDict.getInt("sthh") : -1;
+            days.mStmm = hDict.has("stmm") ? hDict.getInt("stmm") : -1;
             days.mSunrise = hDict.has("sunrise");
             days.mSunset = hDict.has("sunset");
             days.mVal = hDict.getDouble("curVal");

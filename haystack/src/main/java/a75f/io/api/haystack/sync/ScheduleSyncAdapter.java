@@ -36,12 +36,18 @@ public class ScheduleSyncAdapter extends EntitySyncAdapter
             if (CCUHsApi.getInstance().getGUID(luid) == null) {
                 scheduleLUIDList.add(luid);
                 m.put("siteRef", HRef.copy(CCUHsApi.getInstance().getGUID(siteLUID)));
+                if (m.get("zoneRef") != null && !m.get("zoneRef").toString().equals("SYSTEM"))
+                {
+                    m.put("zoneRef", HRef.copy(CCUHsApi.getInstance().getGUID(m.get("zoneRef").toString())));
+                }
                 entities.add(HSUtil.mapToHDict(m));
             }
         }
     
         if (scheduleLUIDList.size() > 0)
         {
+
+
             HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
             String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
             CcuLog.i("CCU", "Response: \n" + response);

@@ -6,13 +6,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.ArrayList;
 
+import a75f.io.api.haystack.MockTime;
 import a75f.io.logic.bo.building.Circuit;
 import a75f.io.logic.bo.building.Day;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.Schedulable;
 import a75f.io.logic.bo.building.Schedule;
 import a75f.io.logic.bo.building.ZoneProfile;
-import a75f.io.logic.bo.building.definitions.MockTime;
 import a75f.io.logic.bo.building.definitions.OverrideType;
 
 /**

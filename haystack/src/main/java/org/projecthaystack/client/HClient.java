@@ -8,6 +8,8 @@
 //
 package org.projecthaystack.client;
 
+import android.util.Log;
+
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
@@ -585,6 +587,9 @@ public class HClient extends HProj
    */
   public HGrid call(String op, HGrid req)
   {
+    Log.d("HClient", "Op: " + op);
+    Log.d("HClient", "Req: ");
+    req.dump();
     HGrid res = postGrid(op, req);
     if (res.isErr()) throw new CallErrException(res);
     return res;

@@ -16,11 +16,11 @@ import a75f.io.logic.bo.building.definitions.DAYS;
 public class DefaultSchedules {
 
 
-    private static final double DEFAULT_COOLING_VACATION_TEMP = 77.0F;
-    private static final double DEFAULT_HEATING_VACATION_TEMP = 65.0F;
+    public static final double DEFAULT_COOLING_VACATION_TEMP = 77.0F;
+    public static final double DEFAULT_HEATING_VACATION_TEMP = 65.0F;
 
-    private static final double DEFAULT_COOLING_TEMP = 75.0F;
-    private static final double DEFAULT_HEATING_TEMP = 70.0F;
+    public static final double DEFAULT_COOLING_TEMP = 75.0F;
+    public static final double DEFAULT_HEATING_TEMP = 70.0F;
 
     public static String generateDefaultSchedule() {
 
@@ -48,6 +48,7 @@ public class DefaultSchedules {
                 .add("id", localId)
                 .add("unit", "\\u00B0F")
                 .add("kind", "Number")
+                .add("system")
                 .add("temp")
                 .add("schedule")
                 .add("dis", "Default Site Schedule")
@@ -95,12 +96,12 @@ public class DefaultSchedules {
         return defaultSchedule;
     }
 
-    private static HDict getDefaultForDay(boolean cooling, int day, double temp) {
+    public static HDict getDefaultForDay(boolean cooling, int day, double temp) {
         HDict hDictDay = new HDictBuilder()
                 .add(cooling ? "cooling" : "heating")
                 .add("day", HNum.make(day))
                 .add("sthh", HNum.make(8))
-                .add("stmm", HNum.make(30))
+                .add("stmm", HNum.make(0))
                 .add("ethh", HNum.make(17))
                 .add("etmm", HNum.make(30))
                 .add("curVal", HNum.make(temp)).toDict();
@@ -149,5 +150,40 @@ public class DefaultSchedules {
 
         CCUHsApi.getInstance().addSchedule(localId, defaultSchedule);
 
+    }
+
+    public static void generateDefaultSchedule(HRef siteId) {
+
+        HDict[] days = new HDict[10];
+
+        days[0] = getDefaultForDay(true, DAYS.MONDAY.ordinal(), DEFAULT_COOLING_TEMP);
+        days[1] = getDefaultForDay(true, DAYS.TUESDAY.ordinal(), DEFAULT_COOLING_TEMP);
+        days[2] = getDefaultForDay(true, DAYS.WEDNESDAY.ordinal(), DEFAULT_COOLING_TEMP);
+        days[3] = getDefaultForDay(true, DAYS.THURSDAY.ordinal(), DEFAULT_COOLING_TEMP);
+        days[4] = getDefaultForDay(true, DAYS.FRIDAY.ordinal(), DEFAULT_COOLING_TEMP);
+
+
+        days[5] = getDefaultForDay(false, DAYS.MONDAY.ordinal(), DEFAULT_HEATING_TEMP);
+        days[6] = getDefaultForDay(false, DAYS.TUESDAY.ordinal(), DEFAULT_HEATING_TEMP);
+        days[7] = getDefaultForDay(false, DAYS.WEDNESDAY.ordinal(), DEFAULT_HEATING_TEMP);
+        days[8] = getDefaultForDay(false, DAYS.THURSDAY.ordinal(), DEFAULT_HEATING_TEMP);
+        days[9] = getDefaultForDay(false, DAYS.FRIDAY.ordinal(), DEFAULT_HEATING_TEMP);
+
+        HList hList = HList.make(days);
+
+        String localId = UUID.randomUUID().toString();
+        HDict defaultSchedule = new HDictBuilder()
+                .add("id", localId)
+                .add("unit", "\\u00B0F")
+                .add("kind", "Number")
+                .add("system")
+                .add("temp")
+                .add("schedule")
+                .add("dis", "Default Site Schedule")
+                .add("days", hList)
+                .add("siteRef", siteId)
+                .toDict();
+
+        CCUHsApi.getInstance().addSchedule(localId, defaultSchedule);
     }
 }

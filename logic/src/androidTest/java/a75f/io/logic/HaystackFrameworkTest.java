@@ -10,6 +10,10 @@ import junit.framework.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.projecthaystack.HDict;
+import org.projecthaystack.HGrid;
+import org.projecthaystack.HGridBuilder;
+import org.projecthaystack.io.HZincReader;
+import org.projecthaystack.io.HZincWriter;
 
 import java.util.HashMap;
 
@@ -66,6 +70,52 @@ public class HaystackFrameworkTest {
 
         Assert.assertEquals("Default Site Schedule", build.getDis());
         Assert.assertTrue(postHDict.equals(scheduleDict));
+
+
+        Schedule siteSchedule = CCUHsApi.getInstance().getSiteSchedule();
+
+
+        HGrid grid = HGridBuilder.dictToGrid(siteSchedule.getScheduleHDict());
+        String systemScheduleGrid = HZincWriter.gridToString(grid);
+        System.out.println("Grid: " + systemScheduleGrid);
+
+        HZincReader reader = new HZincReader(systemScheduleGrid);
+        Log.i(TAG, "######Reader Dump######");
+        HGrid hGrid = reader.readGrid();
+
+        HDict hDict = hGrid.row(0);
+        Schedule schedule = new Schedule.Builder().setHDict(hDict).build();
+
+        CCUHsApi.getInstance().updateSchedule(schedule);
+        Schedule siteSchedule2 = CCUHsApi.getInstance().getSiteSchedule();
+
+
+        HGrid grid2 = HGridBuilder.dictToGrid(siteSchedule2.getScheduleHDict());
+        String systemScheduleGrid2 = HZincWriter.gridToString(grid2);
+        System.out.println("Grid: " + systemScheduleGrid2);
+
+        HZincReader reader2 = new HZincReader(systemScheduleGrid2);
+        Log.i(TAG, "######Reader2 Dump######");
+        HGrid hGrid2 = reader2.readGrid();
+
+        HDict hDict2 = hGrid2.row(0);
+        Schedule schedule2 = new Schedule.Builder().setHDict(hDict2).build();
+
+
+
+        CCUHsApi.getInstance().saveTagsData();
+        CCUHsApi.getInstance().loadTagsData(InstrumentationRegistry.getContext());
+
+
+        System.out.println("Dict To String: " + localId);
+        HDict scheduleDictz = CCUHsApi.getInstance().readHDictById(localId);
+        Schedule buildz = new Schedule.Builder().setHDict(scheduleDictz).build();
+        System.out.println("Schedule Zinc: " + scheduleDictz.toZinc());
+        HDict postHDictz = build.getScheduleHDict();
+        System.out.println("Schedule Zinc! " + postHDictz.toZinc());
+
+        //Schedule siteSchedule = CCUHsApi.getInstance().getSiteSchedule();
+        //Assert.assertTrue(postHDict.equals(siteSchedule));
 
         //build.getScheduledValue();
     }

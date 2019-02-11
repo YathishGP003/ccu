@@ -466,7 +466,6 @@ public class FloorPlanFragment extends Fragment
 	public void startPairing()
 	{
 		short meshAddress = L.generateSmartNodeAddress();
-		
 		/* Checks to see if emulated and doesn't popup BLE dialogs */
 
 		//This should be moved to pair button for select device type screen.

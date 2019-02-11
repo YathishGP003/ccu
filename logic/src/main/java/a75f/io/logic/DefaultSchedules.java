@@ -43,7 +43,7 @@ public class DefaultSchedules {
 
         HList hList = HList.make(days);
 
-        String localId = UUID.randomUUID().toString();
+        HRef localId = HRef.make(UUID.randomUUID().toString());
         HDict defaultSchedule = new HDictBuilder()
                 .add("id", localId)
                 .add("unit", "\\u00B0F")
@@ -56,8 +56,8 @@ public class DefaultSchedules {
                 .add("siteRef", siteId)
                 .toDict();
 
-        CCUHsApi.getInstance().addSchedule(localId, defaultSchedule);
-        return localId;
+        CCUHsApi.getInstance().addSchedule(localId.toVal(), defaultSchedule);
+        return localId.toCode();
     }
 
     public static HDict generateDefaultTestSchedule() {
@@ -80,8 +80,8 @@ public class DefaultSchedules {
         days[9] = getDefaultForDay(false, DAYS.FRIDAY.ordinal(), DEFAULT_HEATING_TEMP);
 
         HList hList = HList.make(days);
-
-        String localId = UUID.randomUUID().toString();
+    
+        HRef localId = HRef.make(UUID.randomUUID().toString());
         HDict defaultSchedule = new HDictBuilder()
                 .add("id", localId)
                 .add("unit", "\\u00B0F")
@@ -130,9 +130,9 @@ public class DefaultSchedules {
 
 
         HList hList = HList.make(days);
-
-
-        String localId = UUID.randomUUID().toString();
+    
+    
+        HRef localId = HRef.make(UUID.randomUUID().toString());
         HDict defaultSchedule = new HDictBuilder()
                 .add("id", localId)
                 .add("unit", "\\u00B0F")
@@ -148,7 +148,7 @@ public class DefaultSchedules {
                 .toDict();
 
 
-        CCUHsApi.getInstance().addSchedule(localId, defaultSchedule);
+        CCUHsApi.getInstance().addSchedule(localId.toVal(), defaultSchedule);
 
     }
 
@@ -170,8 +170,8 @@ public class DefaultSchedules {
         days[9] = getDefaultForDay(false, DAYS.FRIDAY.ordinal(), DEFAULT_HEATING_TEMP);
 
         HList hList = HList.make(days);
-
-        String localId = UUID.randomUUID().toString();
+    
+        HRef localId = HRef.make(UUID.randomUUID().toString());
         HDict defaultSchedule = new HDictBuilder()
                 .add("id", localId)
                 .add("unit", "\\u00B0F")
@@ -184,6 +184,6 @@ public class DefaultSchedules {
                 .add("siteRef", siteId)
                 .toDict();
 
-        CCUHsApi.getInstance().addSchedule(localId, defaultSchedule);
+        CCUHsApi.getInstance().addSchedule(localId.toVal(), defaultSchedule);
     }
 }

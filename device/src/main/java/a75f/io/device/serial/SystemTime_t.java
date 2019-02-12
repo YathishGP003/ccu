@@ -8,8 +8,7 @@ import org.javolution.io.Struct;
 
 public class SystemTime_t extends Struct
 {
-
-	public final Enum8<DayOfWeek_t> day = new Enum8<>(DayOfWeek_t.values());
+	public final Unsigned8 day     = new Unsigned8();
 	public final Unsigned8 hours   = new Unsigned8();
 	public final Unsigned8 minutes = new Unsigned8();
 }

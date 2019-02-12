@@ -51,6 +51,4 @@ public class MessageConstants
 	public static final int FIRMWARE_SIGNATURE_LENGTH = 32;
 	
 	public static final int MESH_ENCRYPTION_KEY_LENGTH = 16;
-	
-	public static final int NUM_SS_TYPE_VALUE_SENSOR_READINGS = 6;
 }

@@ -11,10 +11,10 @@ import java.nio.ByteOrder;
 public class CcuToCmOverUsbSmartStatControlsMessage_t extends Struct
 {
 	public final Enum8<MessageType> messageType = new Enum8<>(MessageType.values());
-	public final Unsigned16  address     = new Unsigned16();
-
+	public final Struct.Unsigned16  address     = new Unsigned16();
+	
 	public final SmartStatControls_t controls = inner( new SmartStatControls_t());
-
+	
 	@Override
 	public ByteOrder byteOrder()
 	{

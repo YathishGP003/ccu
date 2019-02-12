@@ -281,7 +281,7 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 			public void onCheckedChanged(CompoundButton compoundButton, boolean b)
 			{
 				CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
-				msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_CM_RELAY_ACTIVATION);
+				msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
 				msg.relayBitmap.set((short)(b?1:0 << 3));
 				MeshUtil.sendStructToCM(msg);
 			}
@@ -292,7 +292,7 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 			public void onCheckedChanged(CompoundButton compoundButton, boolean b)
 			{
 				CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
-				msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_CM_RELAY_ACTIVATION);
+				msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
 				msg.relayBitmap.set((short)(b?1:0<< 7));
 				MeshUtil.sendStructToCM(msg);
 			}
@@ -431,7 +431,7 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 		double analogMax = systemProfile.getConfigVal("cooling and sat and max");
 		
 		CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
-		msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_CM_RELAY_ACTIVATION);
+		msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
 		
 		short signal;
 		if (analogMax > analogMin)
@@ -449,7 +449,7 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 		double analogMax = systemProfile.getConfigVal("staticPressure and max");
 		
 		CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
-		msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_CM_RELAY_ACTIVATION);
+		msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
 		
 		short signal;
 		if (analogMax > analogMin)
@@ -467,7 +467,7 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 		double analogMax = systemProfile.getConfigVal("heating and max");
 		
 		CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
-		msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_CM_RELAY_ACTIVATION);
+		msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
 		
 		short signal;
 		if (analogMax > analogMin)
@@ -485,7 +485,7 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 		double analogMax = systemProfile.getConfigVal("co2 and max");
 		
 		CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
-		msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_CM_RELAY_ACTIVATION);
+		msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
 		
 		short signal;
 		if (analogMax > analogMin)

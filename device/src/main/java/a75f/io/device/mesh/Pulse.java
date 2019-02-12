@@ -8,7 +8,6 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
-import a75f.io.device.serial.SensorReading_t;
 import a75f.io.device.serial.SmartNodeSensorReading_t;
 import a75f.io.logic.bo.building.SensorType;
 import a75f.io.logic.bo.building.definitions.Port;
@@ -74,7 +73,7 @@ public class Pulse
 						Log.d(TAG,"regularSmartNodeUpdate : Thermistor2 "+ThermistorUtil.getThermistorValueToTemp(val * 10));
 						break;
 					case SENSOR_RH:
-						SensorReading_t[] sensorReadingsHumidity = smartNodeRegularUpdateMessage_t.update.sensorReadings;
+						SmartNodeSensorReading_t[] sensorReadingsHumidity = smartNodeRegularUpdateMessage_t.update.sensorReadings;
 						val = sensorReadingsHumidity[SensorType.HUMIDITY.ordinal()].sensorData.get();
 						
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
@@ -82,13 +81,13 @@ public class Pulse
 						Log.d(TAG,"regularSmartNodeUpdate : Humidity "+getHumidityConversion(val));
 					
 					case SENSOR_CO2:
-						SensorReading_t[] sensorReadingsCO2 = smartNodeRegularUpdateMessage_t.update.sensorReadings;
+						SmartNodeSensorReading_t[] sensorReadingsCO2 = smartNodeRegularUpdateMessage_t.update.sensorReadings;
 						val = sensorReadingsCO2[SensorType.CO2.ordinal()].sensorData.get();
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						hayStack.writeHisValById(logPoint.get("id").toString(), val);
 						Log.d(TAG,"regularSmartNodeUpdate : CO2 "+val);
 					case SENSOR_VOC:
-						SensorReading_t[] sensorReadingsVOC = smartNodeRegularUpdateMessage_t.update.sensorReadings;
+						SmartNodeSensorReading_t[] sensorReadingsVOC = smartNodeRegularUpdateMessage_t.update.sensorReadings;
 						val = sensorReadingsVOC[SensorType.VOC.ordinal()].sensorData.get();
 						
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);

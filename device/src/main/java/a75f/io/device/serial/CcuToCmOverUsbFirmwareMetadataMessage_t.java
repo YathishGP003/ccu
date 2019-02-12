@@ -15,7 +15,7 @@ public class CcuToCmOverUsbFirmwareMetadataMessage_t extends Struct
 	
 	public final Unsigned16 lwMeshAddress = new Unsigned16();
 	
-	public final FirmwareMetadata_t metadata = inner(new FirmwareMetadata_t());
+	public final FirmwareMetdata_t metadata = inner(new FirmwareMetdata_t());
 	
 	@Override
 	public ByteOrder byteOrder()

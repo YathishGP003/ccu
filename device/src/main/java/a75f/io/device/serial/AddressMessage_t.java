@@ -10,10 +10,10 @@ import java.nio.ByteOrder;
 
 public class AddressMessage_t extends Struct
 {
-
+	
 	public final Enum8<MessageType> messageType = new Enum8<>(MessageType.values());
-	public final Unsigned16  address     = new Unsigned16();
-
+	public final Struct.Unsigned16  address     = new Unsigned16();
+	
 	@Override
 	public ByteOrder byteOrder()
 	{

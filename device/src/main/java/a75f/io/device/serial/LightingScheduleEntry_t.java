@@ -10,8 +10,6 @@ public class LightingScheduleEntry_t extends Struct
 {
 	
 	public final LightingScheduleDays_t applicableDaysOfTheWeek = inner(new LightingScheduleDays_t());
-
-	public final Bool lightingIntensity = new Bool();
 	
 	public final Unsigned8 startTime = new Unsigned8(); /* 15 minute increments from midnight */
 	

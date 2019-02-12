@@ -8,15 +8,6 @@ import java.nio.ByteOrder;
  * Created by samjithsadasivan isOn 8/1/17.
  */
 
-/*
-typedef struct {
-  ProtocolError_t errorType; ///< The code that identifies the type of error
-  uint16_t errorDetail; ///< For errors involving a device not being in the database, this will contain the device address
-} CmToCcuOverUsbErrorReportMessage_t;
-
-
- */
-
 public class CmToCcuOverUsbErrorReportMessage_t extends Struct
 {
 	

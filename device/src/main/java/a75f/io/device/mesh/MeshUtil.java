@@ -21,7 +21,7 @@ public class MeshUtil
     {
         CcuToCmOverUsbCcuHeartbeatMessage_t heartbeatMessage_t = new CcuToCmOverUsbCcuHeartbeatMessage_t();
         heartbeatMessage_t.interval.set(HEARTBEAT_INTERVAL);
-        heartbeatMessage_t.messageType.set(MessageType.CCU_TO_CM_OVER_USB_CCU_HEARTBEAT);
+        heartbeatMessage_t.messageType.set(MessageType.CCU_HEARTBEAT_UPDATE);
         heartbeatMessage_t.multiplier.set(HEARTBEAT_MULTIPLIER);
         heartbeatMessage_t.temperatureOffset.set((byte) temperatureOffset);
     

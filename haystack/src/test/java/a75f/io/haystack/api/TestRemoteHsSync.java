@@ -359,7 +359,7 @@ public class TestRemoteHsSync
         
         String tpID = CCUHsApi.getInstance().addPoint(testPoint);
         String tpID1 = CCUHsApi.getInstance().addPoint(testPoint1);
-        entitySyncHandler.sync();
+        //entitySyncHandler.sync();
         
         hayStack.writePoint(tpID, 8,"samjith", 75.0, 120);
         hayStack.writePoint(tpID1, 8,"samjith", 76.0, 120);

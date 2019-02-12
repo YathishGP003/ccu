@@ -50,7 +50,7 @@ public class MeshNetwork extends DeviceNetwork
                     {
                         if (sendStruct((short) seedMessage.smartNodeAddress.get(), seedMessage))
                         {
-                            Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
+                            //Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
                         }
                     }
                     DLog.Logw("=================NOW SENDING CONTROLS=====================");
@@ -58,7 +58,7 @@ public class MeshNetwork extends DeviceNetwork
                     {
                         if (sendStruct((short) controlsMessage.smartNodeAddress.get(), controlsMessage))
                         {
-                            Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
+                            //Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
                         }
                     }
                     DLog.Logw("=================NOW SENDING EXTRA MESSAGES LIKE SCHEDULES====================");

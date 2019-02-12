@@ -12,7 +12,6 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Schedule;
-import a75f.io.logic.bo.building.vav.VAVLogicalMap;
 
 public class VAVScheduler {
 
@@ -52,7 +51,7 @@ public class VAVScheduler {
 
         CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
         try {
-            CCUHsApi.getInstance().pointWrite(HRef.make(id.replace("@","")), 9, "Scheduler", desiredTemp == null ? HNum.make(desiredTemp) : null, null);
+            CCUHsApi.getInstance().pointWrite(HRef.make(id.replace("@","")), 9, "Scheduler", desiredTemp != null ? HNum.make(desiredTemp) : HNum.make(0), HNum.make(0, "ms"));
         } catch (Exception e) {
             e.printStackTrace();
         }

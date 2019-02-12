@@ -107,7 +107,7 @@ public class BuildingTuners
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipRef)
                                   .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his")
-                                  .addMarker("cooling").addMarker("deadband").addMarker("sp")
+                                  .addMarker("cooling").addMarker("deadband").addMarker("base").addMarker("sp")
                                   .setUnit("\u00B0F")
                                   .setTz(tz)
                                   .build();
@@ -132,7 +132,7 @@ public class BuildingTuners
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipRef)
                                   .addMarker("tuner").addMarker("default").addMarker("vav").addMarker("writable").addMarker("his")
-                                  .addMarker("heating").addMarker("deadband").addMarker("sp")
+                                  .addMarker("heating").addMarker("deadband").addMarker("base").addMarker("sp")
                                   .setUnit("\u00B0F")
                                   .setTz(tz)
                                   .build();
@@ -361,11 +361,11 @@ public class BuildingTuners
                                   .setDisplayName(equipdis+"-"+"coolingDeadband")
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipref)
-                                  .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("cooling").addMarker("deadband").addMarker("sp")
+                                  .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("cooling").addMarker("deadband").addMarker("base").addMarker("sp")
                                   .setUnit("\u00B0F")
                                   .build();
         String coolingDbId = hayStack.addPoint(coolingDb);
-        HashMap defCdbPoint = hayStack.read("point and tuner and default and vav and cooling and deadband");
+        HashMap defCdbPoint = hayStack.read("point and tuner and default and vav and cooling and deadband and base");
         ArrayList<HashMap> cdbDefPointArr = hayStack.readPoint(defCdbPoint.get("id").toString());
         for (HashMap valMap : cdbDefPointArr) {
             if (valMap.get("val") != null)
@@ -396,11 +396,11 @@ public class BuildingTuners
                                   .setDisplayName(equipdis+"-"+"heatingDeadband")
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipref)
-                                  .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("heating").addMarker("deadband").addMarker("sp")
+                                  .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("heating").addMarker("deadband").addMarker("base").addMarker("sp")
                                   .setUnit("\u00B0F")
                                   .build();
         String heatingDbId = hayStack.addPoint(heatingDb);
-        HashMap defHdbPoint = hayStack.read("point and tuner and default and vav and heating and deadband");
+        HashMap defHdbPoint = hayStack.read("point and tuner and default and vav and heating and deadband and base");
         ArrayList<HashMap> hdbDefPointArr = hayStack.readPoint(defHdbPoint.get("id").toString());
         for (HashMap valMap : hdbDefPointArr) {
             if (valMap.get("val") != null)

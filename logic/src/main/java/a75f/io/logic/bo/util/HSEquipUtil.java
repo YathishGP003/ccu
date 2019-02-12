@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
 
 /**
  * Created by samjithsadasivan on 1/31/19.
@@ -68,6 +69,7 @@ public class HSEquipUtil
         }
         return 0;
     }
+    
     public static void setDesiredTempHeating(String equipRef, double desiredTemp)
     {
         HashMap point = CCUHsApi.getInstance().read("point and air and temp and desired and heating and sp and equipRef == \""+equipRef+"\"");
@@ -76,5 +78,10 @@ public class HSEquipUtil
         }
         CCUHsApi.getInstance().writeDefaultValById(point.get("id").toString(), desiredTemp);
         CCUHsApi.getInstance().writeHisValById(point.get("id").toString(), desiredTemp);
+    }
+    
+    public static Equip getEquip(double group) {
+        HashMap equip = CCUHsApi.getInstance().read("equip and group == \""+group+"\"");
+        return new Equip.Builder().setHashMap(equip).build();
     }
 }

@@ -173,6 +173,7 @@ public class ZoneFragmentTemp extends Fragment
                     for (int l = 1; l <= values.size(); l++)
                     {
                         HashMap valMap = ((HashMap) values.get(l - 1));
+                        System.out.println(valMap);
                         if (valMap.get("val") != null)
                         {
                             return Double.parseDouble(valMap.get("val").toString());

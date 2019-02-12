@@ -313,7 +313,7 @@ public class CCUHsApi {
         String guid = getGUID(id.toString());
         if (guid != null)
         {
-            HDictBuilder b = new HDictBuilder().add("id", HRef.copy(guid)).add("level", level).add("who", who).add("val", val)/*.add("duration", dur)*/;
+            HDictBuilder b = new HDictBuilder().add("id", HRef.copy(guid)).add("level", level).add("who", who).add("val", val).add("duration", dur);
             HDict[] dictArr = {b.toDict()};
             String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
             System.out.println("Response: \n" + response);

@@ -13,7 +13,7 @@ public class VavTunerUtil
 {
     public static double getCoolingDeadband(String equipRef) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and tuner and vav and deadband and cooling and equipRef == \""+equipRef+"\"");
+        HashMap cdb = hayStack.read("point and tuner and vav and deadband and base and cooling and equipRef == \""+equipRef+"\"");
     
         ArrayList values = hayStack.readPoint(cdb.get("id").toString());
         if (values != null && values.size() > 0)
@@ -32,7 +32,7 @@ public class VavTunerUtil
     
     public static void setCoolingDeadband(String equipRef, double dbVal, int level) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and tuner and vav and deadband and cooling and equipRef == \""+equipRef+"\"");
+        HashMap cdb = hayStack.read("point and tuner and vav and deadband and base and cooling and equipRef == \""+equipRef+"\"");
     
         String id = cdb.get("id").toString();
         if (id == null || id == "") {
@@ -44,7 +44,7 @@ public class VavTunerUtil
     
     public static double getHeatingDeadband(String equipRef) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and tuner and vav and deadband and heating and equipRef == \""+equipRef+"\"");
+        HashMap cdb = hayStack.read("point and tuner and vav and deadband and base and heating and equipRef == \""+equipRef+"\"");
     
         ArrayList values = hayStack.readPoint(cdb.get("id").toString());
         if (values != null && values.size() > 0)
@@ -63,7 +63,7 @@ public class VavTunerUtil
     
     public static void setHeatingDeadband(String equipRef, double dbVal, int level) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and tuner and vav and deadband and heating and equipRef == \""+equipRef+"\"");
+        HashMap cdb = hayStack.read("point and tuner and vav and deadband and base and heating and equipRef == \""+equipRef+"\"");
         
         String id = cdb.get("id").toString();
         if (id == null || id == "") {

@@ -39,6 +39,7 @@ import a75f.io.logic.bo.building.Schedule;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
+import a75f.io.logic.bo.building.system.vav.VavAdvancedHybridRtu;
 import a75f.io.logic.bo.building.system.vav.VavAnalogRtu;
 import a75f.io.logic.bo.building.system.vav.VavBacnetRtu;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
@@ -319,7 +320,7 @@ public class Globals {
                     CcuLog.d("CCU", "Update point: cmd: " + cmd + " who: " + who + " level: " + level + " val: " + val + " id: " + id);
     
                     CCUHsApi.getInstance().getHSClient()
-                            .pointWrite(HRef.make(CCUHsApi.getInstance().getLUID(id)), (int) Double.parseDouble(val), who, HNum.make(Double.parseDouble(val)), HNum.make(0));
+                            .pointWrite(HRef.make(CCUHsApi.getInstance().getLUID(id)), (int) Double.parseDouble(level), who, HNum.make(Double.parseDouble(val)), HNum.make(0));
                 }
                 
                 
@@ -388,18 +389,23 @@ public class Globals {
             switch (ProfileType.valueOf(eq.getProfile())) {
                 case SYSTEM_VAV_ANALOG_RTU:
                     VavAnalogRtu analogRtuProfile = new VavAnalogRtu();
-                    analogRtuProfile.initTRSystem();
+                    analogRtuProfile.addSystemEquip();
                     L.ccu().systemProfile = analogRtuProfile;
                     
                     break;
                 case SYSTEM_VAV_STAGED_RTU:
                     VavStagedRtu stagedRtuProfile = new VavStagedRtu();
-                    stagedRtuProfile.initTRSystem();
+                    stagedRtuProfile.addSystemEquip();
                     L.ccu().systemProfile = stagedRtuProfile;
+                    break;
+                case SYSTEM_VAV_HYBRID_RTU:
+                    VavAdvancedHybridRtu hybridRtuProfile = new VavAdvancedHybridRtu();
+                    hybridRtuProfile.addSystemEquip();
+                    L.ccu().systemProfile = hybridRtuProfile;
                     break;
                 case SYSTEM_VAV_IE_RTU:
                     VavIERtu ieRtuProfile = new VavIERtu();
-                    ieRtuProfile.initTRSystem();
+                    ieRtuProfile.addSystemEquip();
                     L.ccu().systemProfile = ieRtuProfile;
                     break;
                 case SYSTEM_VAV_BACNET_RTU:

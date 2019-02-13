@@ -868,8 +868,17 @@ public class VAVLogicalMap
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        desiredTemp = CCUHsApi.getInstance().readDefaultValById(id);
-        return desiredTemp;
+        ArrayList values = CCUHsApi.getInstance().readPoint(id);
+        if (values != null && values.size() > 0)
+        {
+            for (int l = 1; l <= values.size() ; l++ ) {
+                HashMap valMap = ((HashMap) values.get(l-1));
+                if (valMap.get("val") != null) {
+                    return Double.parseDouble(valMap.get("val").toString());
+                }
+            }
+        }
+        return 0;
     }
     public void setDesiredTempCooling(double desiredTemp)
     {
@@ -890,9 +899,19 @@ public class VAVLogicalMap
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        desiredTemp = CCUHsApi.getInstance().readDefaultValById(id);
-        return desiredTemp;
+        ArrayList values = CCUHsApi.getInstance().readPoint(id);
+        if (values != null && values.size() > 0)
+        {
+            for (int l = 1; l <= values.size() ; l++ ) {
+                HashMap valMap = ((HashMap) values.get(l-1));
+                if (valMap.get("val") != null) {
+                    return Double.parseDouble(valMap.get("val").toString());
+                }
+            }
+        }
+        return 0;
     }
+    
     public void setDesiredTempHeating(double desiredTemp)
     {
         ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and desired and heating and sp and group == \""+nodeAddr+"\"");

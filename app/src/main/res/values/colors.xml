@@ -49,4 +49,13 @@
     <color name="buttonTextColor">#666666</color>
     <color name="registerBackground">#DADCD1</color>
     <color name="buttonTextColorFeatured">#FFFFFF</color>
+
+    <color name="black_overlay">#66000000</color>
+
+    <color name="orange_75f">#E24301</color>
+    <color name="min_temp">#E24301</color>
+    <color name="max_temp">#5990B4</color>
+    <color name="bg_temp">#1A000000</color>
+
+
 </resources>

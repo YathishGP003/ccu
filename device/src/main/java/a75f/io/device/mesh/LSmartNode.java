@@ -21,6 +21,8 @@ import a75f.io.device.serial.MessageType;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZoneProfile;
+import a75f.io.logic.bo.building.system.vav.VavSystemController;
+import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
 
 /**
  * Created by Yinten isOn 8/17/2017.
@@ -128,6 +130,11 @@ public class LSmartNode
                             LSmartNode.getSmartNodePort(controlsMessage_t, p.getPort()).set(mappedVal);
                             
                         }
+                    }
+                    controlsMessage_t.controls.setTemperature.set((short) (getDesiredTemp(node) * 2));
+                    if (L.ccu().systemProfile instanceof VavSystemProfile)
+                    {
+                        controlsMessage_t.controls.conditioningMode.set((short) (VavSystemController.getInstance().getSystemState() == VavSystemController.State.HEATING ? 1 : 0));
                     }
                 }
             }
@@ -249,6 +256,16 @@ public class LSmartNode
             desiredTemperature = LZoneProfile.resolveAnyValue(z);
         }
         return desiredTemperature;*/
+    }
+    
+    public static double getDesiredTemp(short node)
+    {
+        ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and desired and average and sp and group == \""+node+"\"");
+        String id = ((HashMap)points.get(0)).get("id").toString();
+        if (id == null || id == "") {
+            throw new IllegalArgumentException();
+        }
+        return CCUHsApi.getInstance().readDefaultValById(id);
     }
     
     /********************************END SEED MESSAGES**************************************/

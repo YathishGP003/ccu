@@ -27,12 +27,19 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
+import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.ARG_NAME;
+import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.ARG_PAIRING_ADDR;
+import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.FLOOR_NAME;
+import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.NODE_TYPE;
+import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.PROFILE_TYPE;
+
 /**
  * Created by Suresh Kumar On 02/05/19.
  */
 
 public class SchedulerFragment extends Fragment implements AdapterView.OnItemSelectedListener,ManualScheduleDialogListener {
 
+	private static final String PARAM_ZONE_ID = "PARAM_ZONE_ID";
 	TextView textViewMonday;
 	TextView textViewTuesday;
 	TextView textViewWednesday;
@@ -51,6 +58,8 @@ public class SchedulerFragment extends Fragment implements AdapterView.OnItemSel
 	ConstraintLayout constraintScheduler;
 	ArrayList<View> viewTimeLines;
 
+	String zoneId; 
+
 	final int ID_DIALOG_SCHEDULE = 01;
 
 	String colorMinTemp = "";
@@ -63,6 +72,17 @@ public class SchedulerFragment extends Fragment implements AdapterView.OnItemSel
 	public static SchedulerFragment newInstance() {
 		return new SchedulerFragment();
 	}
+
+	public static SchedulerFragment newInstance(String zoneId)
+	{
+		SchedulerFragment schedulerFragment = new SchedulerFragment();
+		Bundle args = new Bundle();
+		args.putString(PARAM_ZONE_ID, zoneId);
+		schedulerFragment.setArguments(args);
+		return schedulerFragment;
+	}
+
+
 
 
 	@Override
@@ -222,132 +242,58 @@ public class SchedulerFragment extends Fragment implements AdapterView.OnItemSel
 
 		if(isMonday)
 		{
-			TextView textViewTemp = new TextView(getActivity());
-			textViewTemp.setGravity(Gravity.CENTER);
-			textViewTemp.setText(Html.fromHtml(strminTemp+" "+strmaxTemp));
-			textViewTemp.setBackground(getResources().getDrawable(R.drawable.temperature_background));
-			textViewTemp.setTypeface(typeface);
-			textViewTemp.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 24.0f);
-
-			textViewTemp.setId(View.generateViewId());
-
-            ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(0,40);
-			lp.topToTop = textViewMonday.getId();
-			lp.bottomToBottom = textViewMonday.getId();
-			lp.startToStart = viewTimeLines.get(tempStartTime).getId();
-			lp.endToEnd = viewTimeLines.get(tempEndTime).getId();
-			constraintScheduler.addView(textViewTemp,lp);
+			drawScheduleBlock(strminTemp, strmaxTemp, typeface, tempStartTime, tempEndTime, textViewMonday);
 
 		}
 		if(isTuesday)
 		{
-			TextView textViewTemp = new TextView(getActivity());
-			textViewTemp.setGravity(Gravity.CENTER);
-			textViewTemp.setText(Html.fromHtml(strminTemp+" "+strmaxTemp));
-			textViewTemp.setBackground(getResources().getDrawable(R.drawable.temperature_background));
-			textViewTemp.setTypeface(typeface);
-			textViewTemp.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 24.0f);
-			textViewTemp.setId(View.generateViewId());
-
-            ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(0,40);
-			lp.topToTop = textViewTuesday.getId();
-			lp.bottomToBottom = textViewTuesday.getId();
-			lp.startToStart = viewTimeLines.get(tempStartTime).getId();
-			lp.endToEnd = viewTimeLines.get(tempEndTime).getId();
-			constraintScheduler.addView(textViewTemp,lp);
+			drawScheduleBlock(strminTemp, strmaxTemp, typeface, tempStartTime, tempEndTime, textViewTuesday);
 
 		}
 		if(isWednesday)
 		{
-			TextView textViewTemp = new TextView(getActivity());
-			textViewTemp.setGravity(Gravity.CENTER);
-			textViewTemp.setText(Html.fromHtml(strminTemp+" "+strmaxTemp));
-			textViewTemp.setBackground(getResources().getDrawable(R.drawable.temperature_background));
-			textViewTemp.setTypeface(typeface);
-			textViewTemp.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 24.0f);
-			textViewTemp.setId(View.generateViewId());
-
-            ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(0,40);
-			lp.topToTop = textViewWednesday.getId();
-			lp.bottomToBottom = textViewWednesday.getId();
-			lp.startToStart = viewTimeLines.get(tempStartTime).getId();
-			lp.endToEnd = viewTimeLines.get(tempEndTime).getId();
-			constraintScheduler.addView(textViewTemp,lp);
+			drawScheduleBlock(strminTemp, strmaxTemp, typeface, tempStartTime, tempEndTime, textViewWednesday);
 
 		}
 		if(isThursday)
 		{
-			TextView textViewTemp = new TextView(getActivity());
-			textViewTemp.setGravity(Gravity.CENTER);
-			textViewTemp.setText(Html.fromHtml(strminTemp+" "+strmaxTemp));
-			textViewTemp.setBackground(getResources().getDrawable(R.drawable.temperature_background));
-			textViewTemp.setTypeface(typeface);
-			textViewTemp.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 24.0f);
-			textViewTemp.setId(View.generateViewId());
-
-            ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(0,40);
-			lp.topToTop = textViewThursday.getId();
-			lp.bottomToBottom = textViewThursday.getId();
-			lp.startToStart = viewTimeLines.get(tempStartTime).getId();
-			lp.endToEnd = viewTimeLines.get(tempEndTime).getId();
-			constraintScheduler.addView(textViewTemp,lp);
+			drawScheduleBlock(strminTemp, strmaxTemp, typeface, tempStartTime, tempEndTime, textViewThursday);
 
 		}
 		if(isFriday)
 		{
-			TextView textViewTemp = new TextView(getActivity());
-			textViewTemp.setGravity(Gravity.CENTER);
-			textViewTemp.setText(Html.fromHtml(strminTemp+" "+strmaxTemp));
-			textViewTemp.setBackground(getResources().getDrawable(R.drawable.temperature_background));
-			textViewTemp.setTypeface(typeface);
-			textViewTemp.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 24.0f);
-			textViewTemp.setId(View.generateViewId());
-
-            ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(0,40);
-			lp.topToTop = textViewFriday.getId();
-			lp.bottomToBottom = textViewFriday.getId();
-			lp.startToStart = viewTimeLines.get(tempStartTime).getId();
-			lp.endToEnd = viewTimeLines.get(tempEndTime).getId();
-			constraintScheduler.addView(textViewTemp,lp);
+			drawScheduleBlock(strminTemp, strmaxTemp, typeface, tempStartTime, tempEndTime, textViewFriday);
 
 		}
 		if(isSaturday)
 		{
-			TextView textViewTemp = new TextView(getActivity());
-			textViewTemp.setGravity(Gravity.CENTER);
-			textViewTemp.setText(Html.fromHtml(strminTemp+" "+strmaxTemp));
-			textViewTemp.setBackground(getResources().getDrawable(R.drawable.temperature_background));
-			textViewTemp.setTypeface(typeface);
-			textViewTemp.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 24.0f);
-			textViewTemp.setId(View.generateViewId());
-
-            ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(0,40);
-			lp.topToTop = textViewSaturday.getId();
-			lp.bottomToBottom = textViewSaturday.getId();
-			lp.startToStart = viewTimeLines.get(tempStartTime).getId();
-			lp.endToEnd = viewTimeLines.get(tempEndTime).getId();
-			constraintScheduler.addView(textViewTemp,lp);
+			drawScheduleBlock(strminTemp, strmaxTemp, typeface, tempStartTime, tempEndTime, textViewSaturday);
 
 		}
 		if(isSunday)
 		{
-			TextView textViewTemp = new TextView(getActivity());
-			textViewTemp.setGravity(Gravity.CENTER);
-			textViewTemp.setText(Html.fromHtml(strminTemp+" "+strmaxTemp));
-			textViewTemp.setBackground(getResources().getDrawable(R.drawable.temperature_background));
-			textViewTemp.setTypeface(typeface);
-			textViewTemp.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 24.0f);
-			textViewTemp.setId(View.generateViewId());
 
-            ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(0,40);
-			lp.topToTop = textViewSunday.getId();
-			lp.bottomToBottom = textViewSunday.getId();
-			lp.startToStart = viewTimeLines.get(tempStartTime).getId();
-			lp.endToEnd = viewTimeLines.get(tempEndTime).getId();
-			constraintScheduler.addView(textViewTemp,lp);
+			drawScheduleBlock(strminTemp, strmaxTemp, typeface, tempStartTime, tempEndTime, textViewSunday);
 
 		}
 		return true;
+	}
+
+	private void drawScheduleBlock(String strminTemp, String strmaxTemp, Typeface typeface, int tempStartTime, int tempEndTime, TextView textViewSunday) {
+		TextView textViewTemp = new TextView(getActivity());
+		textViewTemp.setGravity(Gravity.CENTER);
+		textViewTemp.setText(Html.fromHtml(strminTemp + " " + strmaxTemp));
+		textViewTemp.setBackground(getResources().getDrawable(R.drawable.temperature_background));
+		textViewTemp.setTypeface(typeface);
+		textViewTemp.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18.0f);
+		textViewTemp.setId(View.generateViewId());
+		textViewTemp.setSingleLine();
+		ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(0, ConstraintLayout.LayoutParams.WRAP_CONTENT);
+		lp.topToTop = textViewSunday.getId();
+		lp.bottomToBottom = textViewSunday.getId();
+		lp.startToStart = viewTimeLines.get(tempStartTime).getId();
+		lp.endToEnd = viewTimeLines.get(tempEndTime).getId();
+		constraintScheduler.addView(textViewTemp, lp);
 	}
 
 

@@ -21,9 +21,9 @@ import a75f.io.logic.tuners.TunerConstants;
 
 public abstract class VavSystemProfile extends SystemProfile
 {
-    int systemCoolingLoopOp;
-    int systemHeatingLoopOp;
-    int systemFanLoopOp;
+    public double systemCoolingLoopOp;
+    public double systemHeatingLoopOp;
+    public double systemFanLoopOp;
     
     public void addSystemLoopOpPoints(String equipRef) {
         CCUHsApi hayStack = CCUHsApi.getInstance();

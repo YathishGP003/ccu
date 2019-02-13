@@ -129,8 +129,8 @@ public class Pulse
 		HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \""+node+"\"");
 		Equip q = new Equip.Builder().setHashMap(equipMap).build();
 		
-		double cdb = TunerUtil.readTunerValByQuery("deadband and cooling and equipRef == \""+q.getId()+"\"");
-		double hdb = TunerUtil.readTunerValByQuery("deadband and heating and equipRef == \""+q.getId()+"\"");
+		double cdb = TunerUtil.readTunerValByQuery("deadband and base and cooling and equipRef == \""+q.getId()+"\"");
+		double hdb = TunerUtil.readTunerValByQuery("deadband and base and heating and equipRef == \""+q.getId()+"\"");
 		
 		double coolingDesiredTemp = dt + cdb;
 		double heatingDesiredTemp = dt - hdb;
@@ -140,14 +140,14 @@ public class Pulse
 		if (coolingDtPoint == null || coolingDtPoint.size() == 0) {
 			throw new IllegalArgumentException();
 		}
-		CCUHsApi.getInstance().pointWrite(HRef.copy(coolingDtPoint.get("id").toString()), HayStackConstants.DESIREDTEMP_OVERRIDE_LEVEL,"", HNum.make(coolingDesiredTemp), HNum.make(120*60*1000, "ms"));
+		CCUHsApi.getInstance().pointWrite(HRef.copy(coolingDtPoint.get("id").toString()), HayStackConstants.DESIREDTEMP_OVERRIDE_LEVEL,"manual", HNum.make(coolingDesiredTemp), HNum.make(120*60*1000, "ms"));
 		CCUHsApi.getInstance().writeHisValById(coolingDtPoint.get("id").toString(), coolingDesiredTemp);
 		
 		HashMap heatinDtPoint = CCUHsApi.getInstance().read("point and air and temp and desired and heating and sp and equipRef == \""+q.getId()+"\"");
 		if (heatinDtPoint == null || heatinDtPoint.size() == 0) {
 			throw new IllegalArgumentException();
 		}
-		CCUHsApi.getInstance().pointWrite(HRef.copy(heatinDtPoint.get("id").toString()), HayStackConstants.DESIREDTEMP_OVERRIDE_LEVEL,"", HNum.make(heatingDesiredTemp), HNum.make(120*60*1000, "ms"));
+		CCUHsApi.getInstance().pointWrite(HRef.copy(heatinDtPoint.get("id").toString()), HayStackConstants.DESIREDTEMP_OVERRIDE_LEVEL,"manual", HNum.make(heatingDesiredTemp), HNum.make(120*60*1000, "ms"));
 		CCUHsApi.getInstance().writeHisValById(heatinDtPoint.get("id").toString(), coolingDesiredTemp);
 	}
 	

@@ -127,7 +127,6 @@ public class VavStagedRtu extends VavSystemProfile
             systemCoolingLoopOp = 0;
         }
         
-        int systemHeatingLoopOp;
         if (VavSystemController.getInstance().getSystemState() == HEATING)
         {
             systemHeatingLoopOp = VavSystemController.getInstance().getHeatingSignal();

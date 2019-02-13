@@ -55,6 +55,7 @@
         <item>  Default </item>
         <item>  VAV Fully Modulating RTU </item>
         <item>  VAV Staged RTU </item>
+        <item>  VAV Advanced Hybrid RTU </item>
         <!--<item>  VAV IE RTU </item>
         <item>  VAV Bacnet RTU </item>
         <item>  DAB Staged RTU </item>-->

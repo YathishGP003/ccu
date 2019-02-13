@@ -85,11 +85,10 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
     
     public synchronized void updateSystemPoints() {
         super.updateSystemPoints();
-    
-    
-        double analogMin = getConfigVal("analog1 and cooling and sat and min");
-        double analogMax = getConfigVal("analog1 and cooling and sat and max");
-        Log.d("CCU", "analogMin: " + analogMin + " analogMax: " + analogMax + " SAT: " + getSystemSAT());
+        
+        double analogMin = getConfigVal("analog1 and cooling and min");
+        double analogMax = getConfigVal("analog1 and cooling and max");
+        Log.d("CCU", "analogMin: " + analogMin + " analogMax: " + analogMax + " systemCoolingLoopOp: " + systemCoolingLoopOp);
     
         int signal = 0;
         if (analogMax > analogMin)
@@ -132,7 +131,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         analogMin = getConfigVal("analog3 and heating and min");
         analogMax = getConfigVal("analog3 and heating and max");
     
-        Log.d("CCU", "analogMin: "+analogMin+" analogMax: "+analogMax+" Heating : "+VavSystemController.getInstance().getHeatingSignal());
+        Log.d("CCU", "analogMin: "+analogMin+" analogMax: "+analogMax+" systemHeatingLoopOp : "+systemHeatingLoopOp);
         if (analogMax > analogMin)
         {
             signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (systemHeatingLoopOp / 100)));
@@ -165,12 +164,14 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
             analogMax = getConfigVal("analog4 and heating and max");
             if (analogMax > analogMin)
             {
-                signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * systemCoolingLoopOp/100));
+                signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * systemHeatingLoopOp/100));
             } else {
-                signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * systemCoolingLoopOp/100));
+                signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * systemHeatingLoopOp/100));
             }
+        } else {
+            signal = 0;
         }
-        Log.d("CCU", "analogMin: "+analogMin+" analogMax: "+analogMax+" Composite: "+signal*10);
+        Log.d("CCU", "analogMin: "+analogMin+" analogMax: "+analogMax+" Composite: "+signal);
         
         setCmdSignal("composite",signal);
         if (getConfigVal("analog4 and output and enabled") > 0)

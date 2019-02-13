@@ -51,7 +51,7 @@ public class VAVScheduler {
 
         CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
         try {
-            CCUHsApi.getInstance().pointWrite(HRef.make(id.replace("@","")), 9, "Scheduler", desiredTemp != null ? HNum.make(desiredTemp) : HNum.make(0), HNum.make(0, "ms"));
+            CCUHsApi.getInstance().pointWrite(HRef.make(id.replace("@","")), 9, "Scheduler", desiredTemp != null ? HNum.make(desiredTemp) : HNum.make(0), HNum.make(0));
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -79,6 +79,7 @@ public class VavReheatProfile extends VavProfile
             
             Damper damper = vavUnit.vavDamper;
             Valve valve = vavUnit.reheatValve;
+            setDamperLimits(node, damper);
     
             Equip vavEquip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + node + "\"")).build();
             
@@ -167,8 +168,6 @@ public class VavReheatProfile extends VavProfile
             {
                 valve.currentPosition = 0;
             }
-            
-            //setDamperLimits(node, damper);
             
             //CO2 loop output from 0-50% modulates damper min position.
             if (/*mode == OCCUPIED && */co2Loop.getLoopOutput(co2) <= 50)

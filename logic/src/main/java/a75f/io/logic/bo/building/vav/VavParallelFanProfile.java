@@ -78,6 +78,7 @@ public class VavParallelFanProfile extends VavProfile
             
             Damper damper = vavUnit.vavDamper;
             Valve valve = vavUnit.reheatValve;
+            setDamperLimits(node, damper);
             int loopOp;//New value of loopOp
             //TODO
             //If supply air temperature from air handler is greater than room temperature, Cooling shall be
@@ -137,9 +138,7 @@ public class VavParallelFanProfile extends VavProfile
             {
                 valve.currentPosition = 0;
             }
-        
-            //setDamperLimits(node, damper);
-        
+            
             //CO2 loop output from 0-50% modulates damper min position.
             if (/*mode == OCCUPIED && */co2Loop.getLoopOutput(co2) <= 50)
             {

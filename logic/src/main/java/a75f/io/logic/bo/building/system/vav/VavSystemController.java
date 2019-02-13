@@ -478,11 +478,11 @@ public class VavSystemController
             double limitedDamperPos = hayStack.readHisValById(damperPos.get("id").toString());
             double minLimit = 0, maxLimit = 0;
             if (getSystemState() == COOLING) {
-                minLimit = hayStack.readDefaultVal("point and zone and config and vav and min and damper and cooling");
-                maxLimit = hayStack.readDefaultVal("point and zone and config and vav and max and damper and cooling");
+                minLimit = hayStack.readDefaultVal("point and zone and config and vav and min and damper and cooling and equipRef == \""+m.get("id").toString()+"\"");
+                maxLimit = hayStack.readDefaultVal("point and zone and config and vav and max and damper and cooling and equipRef == \""+m.get("id").toString()+"\"");
             } else {
-                minLimit = hayStack.readDefaultVal("point and zone and config and vav and min and damper and heating");
-                maxLimit = hayStack.readDefaultVal("point and zone and config and vav and max and damper and heating");
+                minLimit = hayStack.readDefaultVal("point and zone and config and vav and min and damper and heating and equipRef == \""+m.get("id").toString()+"\"");
+                maxLimit = hayStack.readDefaultVal("point and zone and config and vav and max and damper and heating and equipRef == \""+m.get("id").toString()+"\"");
             }
             Log.d("CCU","setDamperLimits : Equip "+m.get("dis")+" minLimit "+minLimit+" maxLimit "+maxLimit);
             limitedDamperPos = Math.min(limitedDamperPos, maxLimit);

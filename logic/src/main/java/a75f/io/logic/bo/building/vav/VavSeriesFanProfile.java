@@ -71,11 +71,9 @@ public class VavSeriesFanProfile extends VavProfile
             double dischargeSp = vavDevice.getDischargeSp();
             setTempCooling = vavDevice.getDesiredTempCooling();
             setTempHeating = vavDevice.getDesiredTempHeating();
+            vavDevice.setDesiredTemp((setTempCooling+setTempHeating)/2);
             Equip vavEquip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + node + "\"")).build();
     
-            if (vavDevice.getDesiredTemp() == 0) {
-                vavDevice.setDesiredTemp((setTempCooling+setTempHeating)/2);
-            }
             if (roomTemp == 0) {
                 Log.d(TAG,"Skip PI update for "+node+" roomTemp : "+roomTemp);
                 continue;
@@ -83,6 +81,7 @@ public class VavSeriesFanProfile extends VavProfile
             
             Damper damper = vavUnit.vavDamper;
             Valve valve = vavUnit.reheatValve;
+            setDamperLimits(node, damper);
             int loopOp;//New value of loopOp
             //TODO
             //If supply air temperature from air handler is greater than room temperature, Cooling shall be
@@ -145,7 +144,6 @@ public class VavSeriesFanProfile extends VavProfile
             
             if (!damper.isOverrideActive())
             {
-                //setDamperLimits(node, damper);
                 //CO2 loop output from 0-50% modulates damper min position.
                 if (/*mode == OCCUPIED && */co2Loop.getLoopOutput(co2) <= 50)
                 {

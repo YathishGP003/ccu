@@ -110,6 +110,9 @@ public class VAVLogicalMap
                 break;
         }
         nodeAddr = node;
+        
+        vavUnit.vavDamper.minPosition = (int)getDamperLimit("cooling", "min");
+        vavUnit.vavDamper.maxPosition = (int)getDamperLimit("cooling", "max");
         //createHaystackPoints();
     }
     

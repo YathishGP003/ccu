@@ -75,14 +75,14 @@ public class VavReheatProfile extends VavProfile
             double dischargeSp = vavDevice.getDischargeSp();
             setTempCooling = vavDevice.getDesiredTempCooling();
             setTempHeating = vavDevice.getDesiredTempHeating();
+            vavDevice.setDesiredTemp((setTempCooling+setTempHeating)/2);
             
             Damper damper = vavUnit.vavDamper;
             Valve valve = vavUnit.reheatValve;
+            setDamperLimits(node, damper);
     
             Equip vavEquip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + node + "\"")).build();
-            if (vavDevice.getDesiredTemp() == 0) {
-                vavDevice.setDesiredTemp((setTempCooling+setTempHeating)/2);
-            }
+            
             int loopOp = 0;//New value of loopOp
             //TODO
             //If supply air temperature from air handler is greater than room temperature, Cooling shall be
@@ -168,8 +168,6 @@ public class VavReheatProfile extends VavProfile
             {
                 valve.currentPosition = 0;
             }
-            
-            //setDamperLimits(node, damper);
             
             //CO2 loop output from 0-50% modulates damper min position.
             if (/*mode == OCCUPIED && */co2Loop.getLoopOutput(co2) <= 50)

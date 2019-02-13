@@ -361,9 +361,53 @@ public class TestRemoteHsSync
         String tpID1 = CCUHsApi.getInstance().addPoint(testPoint1);
         //entitySyncHandler.sync();
         
-        hayStack.writePoint(tpID, 8,"samjith", 75.0, 120);
-        hayStack.writePoint(tpID1, 8,"samjith", 76.0, 120);
+        hayStack.getHSClient().pointWrite(HRef.copy(tpID), 8,"samjith", HNum.make(72.0), HNum.make(120000, "ms"));
+        //hayStack.getHSClient().pointWrite(HRef.copy(tpID), 1,"samjith", HNum.make(75.0), HNum.make(0));
+        //hayStack.getHSClient().pointWrite(HRef.copy(tpID1), 8,"samjith", HNum.make(76.0), HNum.make(120000, "ms"));
+    
+        ArrayList values1 = CCUHsApi.getInstance().readPoint(tpID);
+        if (values1 != null && values1.size() > 0)
+        {
+            for (int l = 1; l <= values1.size(); l++)
+            {
+                HashMap valMap = ((HashMap) values1.get(l - 1));
+                System.out.println("TP: "+valMap);
+            }
+        }
+    
+        /*values1 = CCUHsApi.getInstance().readPoint(tpID1);
+        if (values1 != null && values1.size() > 0)
+        {
+            for (int l = 1; l <= values1.size(); l++)
+            {
+                HashMap valMap = ((HashMap) values1.get(l - 1));
+                System.out.println("TP1: "+valMap);
+            }
+        }*/
+    
+        hayStack.getHSClient().pointWrite(HRef.copy(tpID), 9,"samjith", HNum.make(70.0), HNum.make(0));
         
+        System.out.println("WWWWWWWWWWWWWWWWWWWWWWWWWW");
+    
+        values1 = CCUHsApi.getInstance().readPoint(tpID);
+        if (values1 != null && values1.size() > 0)
+        {
+            for (int l = 1; l <= values1.size(); l++)
+            {
+                HashMap valMap = ((HashMap) values1.get(l - 1));
+                System.out.println("TP: "+valMap);
+            }
+        }
+    
+        /*values1 = CCUHsApi.getInstance().readPoint(tpID1);
+        if (values1 != null && values1.size() > 0)
+        {
+            for (int l = 1; l <= values1.size(); l++)
+            {
+                HashMap valMap = ((HashMap) values1.get(l - 1));
+                System.out.println("TP1: "+valMap);
+            }
+        }*/
         
     }
     
@@ -547,7 +591,7 @@ public class TestRemoteHsSync
     @Test
     public void testCode(){
     
-        CCUHsApi hayStack = new CCUHsApi();
+        /*CCUHsApi hayStack = new CCUHsApi();
     
         Site s = new Site.Builder()
                          .setDisplayName("Name")
@@ -563,7 +607,11 @@ public class TestRemoteHsSync
         
         HDict b = new HDictBuilder().add("id","1").add("siteRef", HRef.make(siteRef.substring(1))).toDict();
         
-        System.out.println(b.getRef("siteRef"));
+        System.out.println(b.getRef("siteRef"));*/
+        
+        double x = 5 - (5-2) * 76/100.0;
+        
+        System.out.println(x);
     }
 
     @Test

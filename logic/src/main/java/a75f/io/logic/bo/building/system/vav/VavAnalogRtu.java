@@ -35,7 +35,6 @@ public class VavAnalogRtu extends VavSystemProfile
     private static final int ANALOG_SCALE = 10;
     
     public VavAnalogRtu() {
-        addSystemEquip();
     }
     
     public void initTRSystem() {
@@ -88,8 +87,7 @@ public class VavAnalogRtu extends VavSystemProfile
     }
     
     private synchronized void updateSystemPoints() {
-    
-        int systemCoolingLoopOp;
+        
         if (VavSystemController.getInstance().getSystemState() == COOLING)
         {
             double satSpMax = VavTRTuners.getSatTRTunerVal("spmax");
@@ -121,8 +119,7 @@ public class VavAnalogRtu extends VavSystemProfile
         {
             ControlMote.setAnalogOut("analog1", signal);
         }
-    
-        int systemHeatingLoopOp = 0;
+        
     
         analogMin = getConfigVal("analog3 and heating and min");
         analogMax = getConfigVal("analog3 and heating and max");
@@ -133,7 +130,6 @@ public class VavAnalogRtu extends VavSystemProfile
             systemHeatingLoopOp = VavSystemController.getInstance().getHeatingSignal();
         } else {
             systemHeatingLoopOp = 0;
-            signal = 0;
         }
     
         if (analogMax > analogMin)
@@ -151,9 +147,7 @@ public class VavAnalogRtu extends VavSystemProfile
         {
             ControlMote.setAnalogOut("analog3", signal);
         }
-    
-    
-        int systemFanLoopOp = 0;
+        
         double analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier");
         if (VavSystemController.getInstance().getSystemState() == COOLING)
         {
@@ -256,6 +250,7 @@ public class VavAnalogRtu extends VavSystemProfile
             if (!equip.get("profile").equals(ProfileType.SYSTEM_VAV_ANALOG_RTU.name())) {
                 hayStack.deleteEntityTree(equip.get("id").toString());
             } else {
+                initTRSystem();
                 return;
             }
         }
@@ -398,6 +393,7 @@ public class VavAnalogRtu extends VavSystemProfile
     public double getCmdSignal(String cmd) {
         return CCUHsApi.getInstance().readHisValByQuery("point and system and cmd and "+cmd);
     }
+    
     public void setCmdSignal(String cmd, double val) {
         CCUHsApi.getInstance().writeHisValByQuery("point and system and cmd and "+cmd, val);
     }

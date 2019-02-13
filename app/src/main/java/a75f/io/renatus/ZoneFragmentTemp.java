@@ -17,6 +17,9 @@ import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
 
+import org.projecthaystack.HNum;
+import org.projecthaystack.HRef;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -204,7 +207,7 @@ public class ZoneFragmentTemp extends Fragment
                 {
                     if (marker.equals("writable"))
                     {
-                        CCUHsApi.getInstance().writePoint(id, TunerConstants.VAV_BUILDING_VAL_LEVEL, "ccu", val, 0);
+                        CCUHsApi.getInstance().pointWrite(HRef.copy(id), TunerConstants.MANUAL_OVERRIDE_VAL_LEVEL, "manual", HNum.make(val) , HNum.make(2 * 60 * 60 * 1000, "ms"));
                     }
                 }
     

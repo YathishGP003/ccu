@@ -125,7 +125,7 @@ public class VavTRSystem extends TRSystem
         co2TRProcessor.processResetResponse();
         spTRProcessor.processResetResponse();
         hwstTRProcessor.processResetResponse();
-        Log.d("VAV ", "SAT : " + satTRProcessor.getSetPoint() + ", CO2 : " +
+        Log.d("VAV ", "processResetResponse SAT : " + satTRProcessor.getSetPoint() + ", CO2 : " +
                       co2TRProcessor.getSetPoint()+", SP : "+spTRProcessor.getSetPoint()+" HWST : "+spTRProcessor.getSetPoint());
     }
     

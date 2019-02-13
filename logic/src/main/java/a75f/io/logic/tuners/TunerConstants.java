@@ -60,4 +60,5 @@ public class TunerConstants
     
     public static final int VAV_DEFAULT_VAL_LEVEL = 17;
     public static final int VAV_BUILDING_VAL_LEVEL = 16;
+    public static final int MANUAL_OVERRIDE_VAL_LEVEL = 8;
 }

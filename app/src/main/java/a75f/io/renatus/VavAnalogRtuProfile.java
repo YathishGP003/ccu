@@ -111,8 +111,8 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 			    		systemProfile.deleteSystemEquip();
 				    }
 				    systemProfile = new VavAnalogRtu();
+				    systemProfile.addSystemEquip();
 				    L.ccu().systemProfile = systemProfile;
-				    systemProfile.initTRSystem();
 				    return null;
 			    }
 			    @Override

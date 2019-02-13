@@ -34,6 +34,9 @@ public class StatusPagerAdapter extends FragmentStatePagerAdapter
 				fragment = SystemFragment.newInstance();
 				break;
 			case 3:
+				fragment = SchedulerFragment.newInstance();
+				break;
+			case 4:
 				fragment = AlertsFragment.newInstance();
 				break;
 		}
@@ -68,6 +71,8 @@ public class StatusPagerAdapter extends FragmentStatePagerAdapter
 			case 2:
 				return "System";
 			case 3:
+				return "Building";
+			case 4:
 				return "Alerts";
 		}
 		return null;

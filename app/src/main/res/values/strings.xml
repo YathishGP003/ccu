@@ -130,4 +130,8 @@
         <item >22</item>
     </string-array>
 
+    <string name="title_activity_system_scheduler">System Scheduler</string>
+
+    <string name="icon_plus">&#xf067;</string>
+
 </resources>

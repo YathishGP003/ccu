@@ -35,9 +35,9 @@ public class HSUtil
         return zoneList;
     }
     
-    public static ArrayList<Equip> getEquips(String zoneRef) {
+    public static ArrayList<Equip> getEquips(String roomRef) {
         
-        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zoneRef == \""+zoneRef+"\"");
+        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and roomRef == \""+roomRef+"\"");
         ArrayList<Equip> equipList = new ArrayList<>();
         for (HashMap m : equips)
         {
@@ -46,9 +46,9 @@ public class HSUtil
         return equipList;
     }
     
-    public static ArrayList<Device> getDevices(String zoneRef) {
+    public static ArrayList<Device> getDevices(String roomRef) {
         
-        ArrayList<HashMap> devices = CCUHsApi.getInstance().readAll("device and zoneRef == \""+zoneRef+"\"");
+        ArrayList<HashMap> devices = CCUHsApi.getInstance().readAll("device and roomRef == \""+roomRef+"\"");
         ArrayList<Device> deviceList = new ArrayList<>();
         for (HashMap m : devices)
         {
@@ -67,8 +67,8 @@ public class HSUtil
         return new Device.Builder().setHashMap(device).build();
     }
     
-    public static Equip getEquipFromZone(String zoneRef) {
-        HashMap equip = CCUHsApi.getInstance().read("equip and zoneRef == \""+zoneRef+"\"");
+    public static Equip getEquipFromZone(String roomRef) {
+        HashMap equip = CCUHsApi.getInstance().read("equip and roomRef == \""+roomRef+"\"");
         return new Equip.Builder().setHashMap(equip).build();
     }
     

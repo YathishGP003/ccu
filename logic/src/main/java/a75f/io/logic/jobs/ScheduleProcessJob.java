@@ -2,9 +2,6 @@ package a75f.io.logic.jobs;
 
 import android.util.Log;
 
-import org.projecthaystack.HNum;
-import org.projecthaystack.HRef;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -85,9 +82,9 @@ public class ScheduleProcessJob extends BaseJob {
 
 
 
-        if(equip.getZoneRef() != null) {
-            Log.i(TAG, "Equip Zone Ref: " + equip.getZoneRef());
-            HashMap zoneHashMap = CCUHsApi.getInstance().readMapById(equip.getZoneRef().replace("@", ""));
+        if(equip.getRoomRef() != null) {
+            Log.i(TAG, "Equip Zone Ref: " + equip.getRoomRef());
+            HashMap zoneHashMap = CCUHsApi.getInstance().readMapById(equip.getRoomRef().replace("@", ""));
 
             Zone build = new Zone.Builder().setHashMap(zoneHashMap).build();
             if(build.getScheduleRef() != null && !build.getScheduleRef().equals(""))

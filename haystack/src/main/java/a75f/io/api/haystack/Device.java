@@ -21,9 +21,9 @@ public class Device extends Entity
     {
         this.siteRef = siteRef;
     }
-    public void setZoneRef(String zoneRef)
+    public void setRoomRef(String roomRef)
     {
-        this.zoneRef = zoneRef;
+        this.roomRef = roomRef;
     }
     public void setFloorRef(String floorRef)
     {
@@ -31,7 +31,7 @@ public class Device extends Entity
     }
     private String equipRef;
     private String siteRef;
-    private String zoneRef;
+    private String roomRef;
     private String floorRef;
     private String addr;
     private String id;
@@ -55,9 +55,9 @@ public class Device extends Entity
     public String getSiteRef() {
         return siteRef;
     }
-    public String getZoneRef()
+    public String getRoomRef()
     {
-        return zoneRef;
+        return roomRef;
     }
     public String getFloorRef()
     {
@@ -77,15 +77,15 @@ public class Device extends Entity
         private String equipRef;
         private String addr;
         private String siteRef;
-        private String zoneRef;
+        private String roomRef;
         private String floorRef;
         private String id;
         public String toString() {
             return displayName;
         }
-        public Builder setZoneRef(String zoneRef)
+        public Builder setRoomRef(String roomRef)
         {
-            this.zoneRef = zoneRef;
+            this.roomRef = roomRef;
             return this;
         }
         public Builder setFloorRef(String floorRef)
@@ -139,7 +139,7 @@ public class Device extends Entity
             d.addr = this.addr;
             d.siteRef = this.siteRef;
             d.equipRef = this.equipRef;
-            d.zoneRef = this.zoneRef;
+            d.roomRef = this.roomRef;
             d.floorRef = this.floorRef;
             d.id = this.id;
             return d;
@@ -175,9 +175,9 @@ public class Device extends Entity
                 {
                     this.equipRef = pair.getValue().toString();
                 }
-                else if(pair.getKey().equals("zoneRef"))
+                else if(pair.getKey().equals("roomRef"))
                 {
-                    this.zoneRef = pair.getValue().toString();
+                    this.roomRef = pair.getValue().toString();
                 }
                 else if(pair.getKey().equals("addr"))
                 {

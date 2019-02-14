@@ -180,7 +180,7 @@ public class DabSystemController
         int tempCount = 0;
         for (ZoneProfile p : L.ccu().zoneProfiles)
         {
-            if (p.getEquip().getZoneRef().equals(zoneRef) && p.getCurrentTemp() > 0) {
+            if (p.getEquip().getRoomRef().equals(zoneRef) && p.getCurrentTemp() > 0) {
                 tempSum += p.getCurrentTemp();
                 tempCount++;
             }
@@ -192,7 +192,7 @@ public class DabSystemController
         ZonePriority priority = NONE;
         for (ZoneProfile p : L.ccu().zoneProfiles)
         {
-            if (p.getEquip().getZoneRef().equals(zoneRef) && p.getPriority().ordinal() > priority.ordinal()) {
+            if (p.getEquip().getRoomRef().equals(zoneRef) && p.getPriority().ordinal() > priority.ordinal()) {
                 priority = p.getPriority();
             }
         }

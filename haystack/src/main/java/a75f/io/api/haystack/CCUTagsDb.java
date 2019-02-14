@@ -371,7 +371,7 @@ public class CCUTagsDb extends HServer {
                                      .add("dis",     q.getDisplayName())
                                      .add("equip",     HMarker.VAL)
                                      .add("siteRef", q.getSiteRef())
-                                     .add("zoneRef",  q.getZoneRef() != null ? q.getZoneRef() : "SYSTEM")
+                                     .add("roomRef",  q.getRoomRef() != null ? q.getRoomRef() : "SYSTEM")
                                      .add("floorRef", q.getFloorRef() != null ? q.getFloorRef() : "SYSTEM")
                                      .add("profile", q.getProfile())
                                      .add("priority", q.getPriority())
@@ -394,7 +394,7 @@ public class CCUTagsDb extends HServer {
                                      .add("dis",     q.getDisplayName())
                                      .add("equip",     HMarker.VAL)
                                      .add("siteRef", q.getSiteRef())
-                                     .add("zoneRef",  q.getZoneRef())
+                                     .add("roomRef",  q.getRoomRef())
                                      .add("floorRef", q.getFloorRef())
                                      .add("profile", q.getProfile())
                                      .add("priority", q.getPriority())
@@ -424,7 +424,7 @@ public class CCUTagsDb extends HServer {
                 .add("point", HMarker.VAL)
                 .add("siteRef", p.getSiteRef())
                 .add("equipRef", p.getEquipRef())
-                .add("zoneRef", p.getZoneRef() != null ? p.getZoneRef() : "SYSTEM")
+                .add("roomRef", p.getRoomRef() != null ? p.getRoomRef() : "SYSTEM")
                 .add("floorRef", p.getFloorRef() != null ? p.getFloorRef() : "SYSTEM")
                 .add("group", p.getGroup())
                 .add("kind", p.getKind() == null ? "Number" : p.getKind())
@@ -446,7 +446,7 @@ public class CCUTagsDb extends HServer {
                 .add("point", HMarker.VAL)
                 .add("siteRef", p.getSiteRef())
                 .add("equipRef", p.getEquipRef())
-                .add("zoneRef", p.getZoneRef())
+                .add("roomRef", p.getRoomRef())
                 .add("floorRef", p.getFloorRef())
                 .add("group", p.getGroup())
                 .add("kind", p.getKind() == null ? "Number" : p.getKind())
@@ -555,7 +555,7 @@ public class CCUTagsDb extends HServer {
                 .add("addr", d.getAddr())
                 .add("siteRef", d.getSiteRef())
                 .add("equipRef", d.getEquipRef())
-                .add("zoneRef", d.getZoneRef())
+                .add("roomRef", d.getRoomRef())
                 .add("floorRef", d.getFloorRef());
 
         for (String m : d.getMarkers()) {
@@ -575,7 +575,7 @@ public class CCUTagsDb extends HServer {
                 .add("addr", d.getAddr())
                 .add("siteRef", d.getSiteRef())
                 .add("equipRef", d.getEquipRef())
-                .add("zoneRef", d.getZoneRef())
+                .add("roomRef", d.getRoomRef())
                 .add("floorRef", d.getFloorRef());
 
         for (String m : d.getMarkers()) {

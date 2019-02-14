@@ -100,9 +100,9 @@ public abstract class VavProfile extends ZoneProfile
      * @param floorRef
      * @param zoneRef
      */
-    public void addLogicalMapAndPoints(short addr, VavProfileConfiguration config, String floorRef, String zoneRef) {
+    public void addLogicalMapAndPoints(short addr, VavProfileConfiguration config, String floorRef, String roomRef) {
         VAVLogicalMap deviceMap = new VAVLogicalMap(getProfileType(), addr);
-        deviceMap.createHaystackPoints(config, floorRef, zoneRef );
+        deviceMap.createHaystackPoints(config, floorRef, roomRef );
         vavDeviceMap.put(addr, deviceMap);
         deviceMap.satResetRequest.setImportanceMultiplier(getPriority().multiplier);
         deviceMap.co2ResetRequest.setImportanceMultiplier(getPriority().multiplier);

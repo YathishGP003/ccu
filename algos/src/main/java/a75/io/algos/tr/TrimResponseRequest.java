@@ -50,7 +50,7 @@ public class TrimResponseRequest
     public void handleRequestUpdate() {
     
         ++minuteCounter;
-        Log.d("VAV","Request params : minuteCounter: "+minuteCounter+" currentRequests "+currentRequests);
+        Log.d("CCU_SYSTEM","Request params : minuteCounter: "+minuteCounter+" currentRequests "+currentRequests);
         
         if (minuteCounter % requestIntervalMins == 0) {
             requestHours = requestHours + (currentRequests * requestIntervalMins/60);

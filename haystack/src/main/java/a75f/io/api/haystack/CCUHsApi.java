@@ -1,7 +1,6 @@
 package a75f.io.api.haystack;
 
 import android.content.Context;
-import android.util.Log;
 
 import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDict;
@@ -29,6 +28,7 @@ import java.util.UUID;
 import a75f.io.api.haystack.sync.EntitySyncHandler;
 import a75f.io.api.haystack.sync.HisSyncHandler;
 import a75f.io.api.haystack.sync.HttpUtil;
+import a75f.io.logger.CcuLog;
 
 /**
  * Created by samjithsadasivan on 9/3/18.
@@ -170,7 +170,7 @@ public class CCUHsApi {
      * Helper method that converts HGrid to an Array of Hashmap of String.
      */
     public ArrayList<HashMap> readAll(String query) {
-        System.out.println("Read Query: " + query);
+        CcuLog.d("CCU_HS", "Read Query: " + query);
         ArrayList<HashMap> rowList = new ArrayList<>();
         try {
             HGrid grid = hsClient.readAll(query);
@@ -200,7 +200,7 @@ public class CCUHsApi {
      * Read the first matching record
      */
     public HashMap read(String query) {
-        System.out.println("Read Query: " + query);
+        CcuLog.d("CCU_HS","Read Query: " + query);
         HashMap<Object, Object> map = new HashMap<>();
         try {
             HDict dict = hsClient.read(query, true);
@@ -319,7 +319,7 @@ public class CCUHsApi {
             }
             HDict[] dictArr = {b.toDict()};
             String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
-            System.out.println("Response: \n" + response);
+            CcuLog.d("CCU_HS","Response: \n" + response);
         }
     }
 
@@ -338,7 +338,7 @@ public class CCUHsApi {
         ArrayList values = CCUHsApi.getInstance().readPoint(id);
         if (values != null && values.size() > 0) {
             HashMap valMap = ((HashMap) values.get(HayStackConstants.DEFAULT_POINT_LEVEL - 1));
-            System.out.println(valMap);
+            CcuLog.d("CCU_HS",""+valMap);
             return valMap.get("val") == null ? 0 : Double.parseDouble(valMap.get("val").toString());
         } else {
             return null;
@@ -365,7 +365,7 @@ public class CCUHsApi {
         ArrayList values = CCUHsApi.getInstance().readPoint(id);
         if (values != null && values.size() > 0) {
             HashMap valMap = ((HashMap) values.get(HayStackConstants.DEFAULT_POINT_LEVEL - 1));
-            System.out.println(valMap);
+            CcuLog.d("CCU_HS",""+valMap);
             return valMap.get("val") == null ? null : valMap.get("val").toString();
         } else {
             return null;
@@ -496,7 +496,7 @@ public class CCUHsApi {
     }
 
     public void deleteEntity(String id) {
-        Log.d("CCU", "deleteEntity " +CCUHsApi.getInstance().readMapById(id).toString());
+        CcuLog.d("CCU_HS", "deleteEntity " +CCUHsApi.getInstance().readMapById(id).toString());
         tagsDb.tagsMap.remove(id.replace("@", ""));
         if (tagsDb.idMap.get(id) != null) {
             tagsDb.removeIdMap.put(id, tagsDb.idMap.remove(id));
@@ -508,8 +508,8 @@ public class CCUHsApi {
     }
 
     public void deleteEntityTree(String id) {
-
-        Log.d("CCU", "deleteEntityTree " + id);
+    
+        CcuLog.d("CCU_HS", "deleteEntityTree " + id);
 
         HashMap entity = CCUHsApi.getInstance().read("id == " + id);
         if (entity.get("site") != null) {
@@ -595,7 +595,7 @@ public class CCUHsApi {
                         entitySyncHandler.sync();
                     }
                 } else {
-                    Log.d("CCU"," Test Harness Enabled , Skip Entity Sync");
+                    CcuLog.d("CCU_HS"," Test Harness Enabled , Skip Entity Sync");
                 }
             }
         }.start();
@@ -651,7 +651,7 @@ public class CCUHsApi {
 
 
     public void log() {
-        System.out.println(tagsDb);
+        CcuLog.d("CCU_HS",""+tagsDb);
     }
 
     public void addExistingSite(HGrid site) {
@@ -670,7 +670,7 @@ public class CCUHsApi {
 
     public String createCCU(String ccuName, String installerEmail) {
         HDictBuilder hDictBuilder = new HDictBuilder();
-        System.out.println("Site Ref: " + getSiteId());
+        CcuLog.d("CCU_HS","Site Ref: " + getSiteId());
         String localId = UUID.randomUUID().toString();
         hDictBuilder.add("id", HRef.make(localId));
         hDictBuilder.add("ccu");
@@ -715,7 +715,7 @@ public class CCUHsApi {
         addSchedule(schedule.getId(), schedule.getScheduleHDict());
         if (tagsDb.idMap.get(schedule.getId()) != null)
         {
-            System.out.println("Update tagsDb: " + tagsDb.idMap.get(schedule.getId()));
+            CcuLog.d("CCU_HS","Update tagsDb: " + tagsDb.idMap.get(schedule.getId()));
             tagsDb.updateIdMap.put(schedule.getId(), tagsDb.idMap.get(schedule.getId()));
         }
     }

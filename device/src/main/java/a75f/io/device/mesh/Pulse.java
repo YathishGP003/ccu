@@ -1,7 +1,5 @@
 package a75f.io.device.mesh;
 
-import android.util.Log;
-
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 
@@ -14,11 +12,11 @@ import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.device.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 import a75f.io.device.serial.SmartNodeSensorReading_t;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.SensorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.tuners.TunerUtil;
-
-import static a75f.io.device.DeviceConstants.TAG;
 
 /**
  * Created by Yinten on 9/15/2017.
@@ -46,7 +44,7 @@ public class Pulse
 						val = smartNodeRegularUpdateMessage_t.update.roomTemperature.get();
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						hayStack.writeHisValById(logPoint.get("id").toString(), getRoomTempConversion(val));
-						Log.d(TAG,"regularSmartNodeUpdate : roomTemp "+getRoomTempConversion(val));
+						CcuLog.d(L.TAG_CCU_DEVICE, "regularSmartNodeUpdate : roomTemp " + getRoomTempConversion(val));
 						break;
 					case DESIRED_TEMP:
 						val = smartNodeRegularUpdateMessage_t.update.setTemperature.get();
@@ -57,31 +55,31 @@ public class Pulse
 							hayStack.writeHisValById(logPoint.get("id").toString(), desiredTemp);
 							updateDesiredTemp(nodeAddr, desiredTemp);
 						}
-						Log.d(TAG,"regularSmartNodeUpdate : desiredTemp "+desiredTemp);
+						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : desiredTemp "+desiredTemp);
 						break;
 					case ANALOG_IN_ONE:
 						val = smartNodeRegularUpdateMessage_t.update.externalAnalogVoltageInput1.get();
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						hayStack.writeHisValById(logPoint.get("id").toString(), getAnalogConversion(val));
-						Log.d(TAG,"regularSmartNodeUpdate : analog1In "+getAnalogConversion(val));
+						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : analog1In "+getAnalogConversion(val));
 						break;
 					case ANALOG_IN_TWO:
 						val = smartNodeRegularUpdateMessage_t.update.externalAnalogVoltageInput1.get();
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						hayStack.writeHisValById(logPoint.get("id").toString(), getAnalogConversion(val));
-						Log.d(TAG,"regularSmartNodeUpdate : analog2In "+getAnalogConversion(val));
+						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : analog2In "+getAnalogConversion(val));
 						break;
 					case TH1_IN:
 						val = smartNodeRegularUpdateMessage_t.update.externalThermistorInput1.get();
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						hayStack.writeHisValById(logPoint.get("id").toString(), ThermistorUtil.getThermistorValueToTemp(val * 10 ));
-						Log.d(TAG,"regularSmartNodeUpdate : Thermistor1 "+ThermistorUtil.getThermistorValueToTemp(val * 10 ));
+						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : Thermistor1 "+ThermistorUtil.getThermistorValueToTemp(val * 10 ));
 						break;
 					case TH2_IN:
 						val = smartNodeRegularUpdateMessage_t.update.externalThermistorInput2.get();
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						hayStack.writeHisValById(logPoint.get("id").toString(), ThermistorUtil.getThermistorValueToTemp(val * 10));
-						Log.d(TAG,"regularSmartNodeUpdate : Thermistor2 "+ThermistorUtil.getThermistorValueToTemp(val * 10));
+						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : Thermistor2 "+ThermistorUtil.getThermistorValueToTemp(val * 10));
 						break;
 					case SENSOR_RH:
 						SmartNodeSensorReading_t[] sensorReadingsHumidity = smartNodeRegularUpdateMessage_t.update.sensorReadings;
@@ -89,21 +87,21 @@ public class Pulse
 						
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						hayStack.writeHisValById(logPoint.get("id").toString(), getHumidityConversion(val));
-						Log.d(TAG,"regularSmartNodeUpdate : Humidity "+getHumidityConversion(val));
+						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : Humidity "+getHumidityConversion(val));
 					
 					case SENSOR_CO2:
 						SmartNodeSensorReading_t[] sensorReadingsCO2 = smartNodeRegularUpdateMessage_t.update.sensorReadings;
 						val = sensorReadingsCO2[SensorType.CO2.ordinal()].sensorData.get();
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						hayStack.writeHisValById(logPoint.get("id").toString(), val);
-						Log.d(TAG,"regularSmartNodeUpdate : CO2 "+val);
+						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : CO2 "+val);
 					case SENSOR_VOC:
 						SmartNodeSensorReading_t[] sensorReadingsVOC = smartNodeRegularUpdateMessage_t.update.sensorReadings;
 						val = sensorReadingsVOC[SensorType.VOC.ordinal()].sensorData.get();
 						
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						hayStack.writeHisValById(logPoint.get("id").toString(), val);
-						Log.d(TAG,"regularSmartNodeUpdate : VOC "+val);
+						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : VOC "+val);
 					
 				}
 			}
@@ -153,6 +151,6 @@ public class Pulse
 	
 	public static void regularCMUpdate(CmToCcuOverUsbCmRegularUpdateMessage_t cmRegularUpdateMessage_t)
 	{
-		DLog.Logd("Regualar cm update pulse" + DLog.objectNullString((cmRegularUpdateMessage_t)));
+		CcuLog.d(L.TAG_CCU_DEVICE,"Regualar cm update pulse" + DLog.objectNullString((cmRegularUpdateMessage_t)));
 	}
 }

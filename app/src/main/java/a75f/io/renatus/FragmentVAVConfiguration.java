@@ -25,6 +25,7 @@ import android.widget.TextView;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
@@ -189,10 +190,10 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         mVavProfile = (VavProfile) L.getProfile(mSmartNodeAddress);
     
         if (mVavProfile != null) {
-            Log.d("VAVConfig", "Get Config: ");
+            CcuLog.d(L.TAG_CCU_UI,  "Get VavConfig: ");
             mProfileConfig = (VavProfileConfiguration) mVavProfile.getProfileConfiguration(mSmartNodeAddress);
         } else {
-            Log.d("VAVConfig", "Create Profile: ");
+            CcuLog.d(L.TAG_CCU_UI, "Create Vav Profile: ");
             switch (mProfileType) {
                 case VAV_REHEAT:
                     mVavProfile = new VavReheatProfile();
@@ -503,7 +504,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
             mVavProfile.updateLogicalMapAndPoints(mSmartNodeAddress, vavConfig);
         }
         L.ccu().zoneProfiles.add(mVavProfile);
-        Log.d("VAVConfig", "Set Config: Profiles - "+L.ccu().zoneProfiles.size());
+        CcuLog.d(L.TAG_CCU_UI, "Set Vav Config: Profiles - "+L.ccu().zoneProfiles.size());
     }
     
     private void setNumberPickerDividerColor(NumberPicker pk) {

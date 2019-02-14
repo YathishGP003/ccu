@@ -1,8 +1,8 @@
 package a75f.io.logic;
 
-import android.util.Log;
-
 import java.util.concurrent.TimeUnit;
+
+import a75f.io.logger.CcuLog;
 
 /**
  * Created by samjithsadasivan on 9/14/18.
@@ -16,7 +16,7 @@ public abstract class BaseJob
     public void scheduleJob(String name, int interval, int taskSeperation, TimeUnit unit)
     {
         mName = name;
-        Log.i("CCU_LOGIC","Scheduling: " + name + " interval: " + interval + " task Seperation:  " + taskSeperation + " unit: " + unit.name());
+        CcuLog.i(L.TAG_CCU_JOB, "Scheduling: " + name + " interval: " + interval + " task Seperation:  " + taskSeperation + " unit: " + unit.name());
         // This task runs every minute.
         Globals.getInstance().getScheduledThreadPool().scheduleAtFixedRate(new Runnable()
         {
@@ -30,9 +30,9 @@ public abstract class BaseJob
                     public void run()
                     {
                         super.run();
-                        Log.i("CCU_LOGIC", "Job: " + mName + " executing");
+                        CcuLog.i(L.TAG_CCU_JOB, "Job: " + mName + " executing");
                         doJob();
-                        Log.i("CCU_LOGIC", "Job: " + mName + " finishing");
+                        CcuLog.i(L.TAG_CCU_JOB, "Job: " + mName + " finishing");
                     }
                 }.start();
 

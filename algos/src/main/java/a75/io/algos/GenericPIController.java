@@ -1,5 +1,7 @@
 package a75.io.algos;
 
+import a75f.io.logger.CcuLog;
+
 /**
  * Created by samjithsadasivan on 5/1/18.
  */
@@ -128,7 +130,7 @@ public class GenericPIController
     }
     
     public void dump() {
-        System.out.println("PI-LOOP error: "+error+" limitedErr: "+limitedError+" proportionalErr: "+proportionalError+
-                                    "integralErr: "+integralError+" cumulativeErr: "+cumulativeError+" CV: "+controlVariable);
+        CcuLog.d("CCU_ZONE","PI-LOOP error: " + error + " limitedErr: " + limitedError + " proportionalErr: " + proportionalError +
+        "integralErr: " + integralError + " cumulativeErr: " + cumulativeError + " CV: " + controlVariable);
     }
 }

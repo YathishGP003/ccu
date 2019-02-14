@@ -98,7 +98,7 @@ public abstract class VavProfile extends ZoneProfile
      * @param addr
      * @param config
      * @param floorRef
-     * @param zoneRef
+     * @param roomRef
      */
     public void addLogicalMapAndPoints(short addr, VavProfileConfiguration config, String floorRef, String roomRef) {
         VAVLogicalMap deviceMap = new VAVLogicalMap(getProfileType(), addr);

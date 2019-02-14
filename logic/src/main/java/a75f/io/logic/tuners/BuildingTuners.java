@@ -12,6 +12,8 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 
 /**
@@ -48,10 +50,10 @@ public class BuildingTuners
             HashMap siteMap = hayStack.read(Tags.SITE);
             siteRef = siteMap.get(Tags.ID).toString();
             tz = siteMap.get("tz").toString();
-            Log.d("CCU","Building Tuner equip already present");
+            CcuLog.d(L.TAG_CCU_SYSTEM,"BuildingTuner equip already present");
             return;
         }
-        System.out.println("Build Tuner Equip does not exist. Create Now");
+        CcuLog.d(L.TAG_CCU_SYSTEM,"BuildingTuner Equip does not exist. Create Now");
         HashMap siteMap = hayStack.read(Tags.SITE);
         siteRef = siteMap.get(Tags.ID).toString();
         String siteDis = siteMap.get("dis").toString();
@@ -73,10 +75,10 @@ public class BuildingTuners
         
         HashMap tuner = CCUHsApi.getInstance().read("point and tuner and default and vav");
         if (tuner != null && tuner.size() > 0) {
-            Log.d("CCU","Default VAV Tuner points already exist");
+            CcuLog.d(L.TAG_CCU_SYSTEM,"Default VAV Tuner points already exist");
             return;
         }
-        System.out.println("Default VAV Tuner  does not exist. Create Now");
+        CcuLog.d(L.TAG_CCU_SYSTEM,"Default VAV Tuner  does not exist. Create Now");
     
         Point zonePrioritySpread = new Point.Builder()
                                   .setDisplayName(equipDis+"-"+"zonePrioritySpread")

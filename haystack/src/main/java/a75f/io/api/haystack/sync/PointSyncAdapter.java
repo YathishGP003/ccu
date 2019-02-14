@@ -142,7 +142,7 @@ public class PointSyncAdapter extends EntitySyncAdapter
                 }
                 catch (NumberFormatException e)
                 {
-                    System.out.println("Writable Val is not Double "+valMap.get("val").toString());
+                    CcuLog.d("CCU_HS", "Writable Val is not Double " + valMap.get("val").toString());
                 }
                 
                 HDictBuilder b = new HDictBuilder()
@@ -152,7 +152,7 @@ public class PointSyncAdapter extends EntitySyncAdapter
                                          .add("val", isDouble? HNum.make(val) : HStr.make(valMap.get("val").toString()));
                 HDict[] dictArr = {b.toDict()};
                 String r = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
-                System.out.println("Response: \n" + r);
+                CcuLog.d("CCU_HS","Response: \n" + r);
             }
         }
     

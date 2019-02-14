@@ -4,7 +4,6 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +16,8 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.HmpProfile;
 import a75f.io.logic.bo.building.NodeType;
@@ -25,7 +26,6 @@ import a75f.io.logic.bo.building.Zone;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.L;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import butterknife.BindView;
@@ -275,8 +275,8 @@ public class FragmentHMPConfiguration extends BaseDialogFragment
         if (mZone.findProfile(ProfileType.HMP) == null)
             mZone.mZoneProfiles.add(mHmpProfile);
         
-        Log.d(TAG, "Set Temp : "+Integer.parseInt(setpointSpinner.getSelectedItem().toString())+
-                        ", Actuator : "+OutputAnalogActuatorType.values()[selection]);
+        CcuLog.d(L.TAG_CCU_UI, "Set Temp : " + Integer.parseInt(setpointSpinner.getSelectedItem().toString()) +
+                ", Actuator : " + OutputAnalogActuatorType.values()[selection]);
         
     }
 }

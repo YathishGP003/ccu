@@ -1,7 +1,5 @@
 package a75f.io.logic.bo.building.system.vav;
 
-import android.util.Log;
-
 import java.util.HashMap;
 
 import a75.io.algos.vav.VavTRSystem;
@@ -9,6 +7,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
@@ -85,7 +84,7 @@ public class VavStagedRtu extends VavSystemProfile
                 return;
             }
         }
-        System.out.println("System Equip does not exist. Create Now");
+        CcuLog.d(L.TAG_CCU_SYSTEM,"System Equip does not exist. Create Now");
         HashMap siteMap = hayStack.read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
@@ -93,8 +92,7 @@ public class VavStagedRtu extends VavSystemProfile
                                    .setSiteRef(siteRef)
                                    .setDisplayName(siteDis+"-SystemEquip")
                                    .setProfile(ProfileType.SYSTEM_VAV_STAGED_RTU.name())
-                                   .addMarker("equip")
-                                   .addMarker("system")
+                                   .addMarker("equip").addMarker("system").addMarker("vav")
                                    .addMarker("equipHis")
                                    .setTz(siteMap.get("tz").toString())
                                    .build();
@@ -121,7 +119,7 @@ public class VavStagedRtu extends VavSystemProfile
             double satSpMax = VavTRTuners.getSatTRTunerVal("spmax");
             double satSpMin = VavTRTuners.getSatTRTunerVal("spmin");
     
-            Log.d("CCU","satSpMax :"+satSpMax+" satSpMin: "+satSpMin+" SAT: "+getSystemSAT());
+            CcuLog.d(L.TAG_CCU_SYSTEM,"satSpMax :"+satSpMax+" satSpMin: "+satSpMin+" SAT: "+getSystemSAT());
             systemCoolingLoopOp = (int) ((satSpMax - getSystemSAT())  * 100 / (satSpMax - satSpMin)) ;
         } else {
             systemCoolingLoopOp = 0;
@@ -139,8 +137,8 @@ public class VavStagedRtu extends VavSystemProfile
         {
             double spSpMax = VavTRTuners.getStaticPressureTRTunerVal("spmax");
             double spSpMin = VavTRTuners.getStaticPressureTRTunerVal("spmin");
-        
-            Log.d("CCU","spSpMax :"+spSpMax+" spSpMin: "+spSpMin+" SP: "+getStaticPressure());
+    
+            CcuLog.d(L.TAG_CCU_SYSTEM,"spSpMax :"+spSpMax+" spSpMin: "+spSpMin+" SP: "+getStaticPressure());
             systemFanLoopOp = (int) ((getStaticPressure() - spSpMin)  * 100 / (spSpMax - spSpMin)) ;
         } else if (VavSystemController.getInstance().getSystemState() == HEATING){
             systemFanLoopOp = (int) (VavSystemController.getInstance().getHeatingSignal() * analogFanSpeedMultiplier);
@@ -154,8 +152,8 @@ public class VavStagedRtu extends VavSystemProfile
         updateStagesSelected();
     
         double relayDeactHysteresis = TunerUtil.readTunerValByQuery("relay and deactivation and hysteresis");
-        Log.d("CCU", "systemCoolingLoopOp: "+systemCoolingLoopOp + " systemHeatingLoopOp: " + systemHeatingLoopOp+" systemFanLoopOp: "+systemFanLoopOp);
-        Log.d("CCU", "coolingStages: "+coolingStages + " heatingStages: "+heatingStages+" fanStages: "+fanStages);
+        CcuLog.d(L.TAG_CCU_SYSTEM, "systemCoolingLoopOp: "+systemCoolingLoopOp + " systemHeatingLoopOp: " + systemHeatingLoopOp+" systemFanLoopOp: "+systemFanLoopOp);
+        CcuLog.d(L.TAG_CCU_SYSTEM, "coolingStages: "+coolingStages + " heatingStages: "+heatingStages+" fanStages: "+fanStages);
         for (int i = 1; i <=7 ;i++)
         {
             double relayState = 0;
@@ -322,7 +320,7 @@ public class VavStagedRtu extends VavSystemProfile
             }
             setCmdSignal("relay"+i, relayState);
             ControlMote.setRelayState("relay"+i, relayState);
-            Log.d("CCU", stage+ " Set Relay"+i+", threshold: "+stageThreshold+", state : "+relayState);
+            CcuLog.d(L.TAG_CCU_SYSTEM, stage+ " Set Relay"+i+", threshold: "+stageThreshold+", state : "+relayState);
         }
         
     }
@@ -341,15 +339,15 @@ public class VavStagedRtu extends VavSystemProfile
                 if (val <= Stage.COOLING_5.ordinal() && val >= coolingStages)
                 {
                     coolingStages = val + 1;
-                    Log.d("CCU"," Cooling stage : "+coolingStages);
+                    CcuLog.d(L.TAG_CCU_SYSTEM," Cooling stage : "+coolingStages);
                 } else if (val >= Stage.HEATING_1.ordinal() && val <= Stage.HEATING_5.ordinal() && val >= heatingStages)
                 {
                     heatingStages = val + 1;
-                    Log.d("CCU"," Heating stage : "+heatingStages);
+                    CcuLog.d(L.TAG_CCU_SYSTEM," Heating stage : "+heatingStages);
                 } else if (val >= Stage.FAN_1.ordinal() && val <= Stage.FAN_5.ordinal() && val >= fanStages)
                 {
                     fanStages = val + 1;
-                    Log.d("CCU"," Fan stage : "+fanStages);
+                    CcuLog.d(L.TAG_CCU_SYSTEM," Fan stage : "+fanStages);
                 }
             }
         }

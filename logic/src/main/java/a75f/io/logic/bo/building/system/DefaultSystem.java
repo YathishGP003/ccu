@@ -10,6 +10,7 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.haystack.device.ControlMote;
@@ -43,7 +44,7 @@ public class DefaultSystem extends SystemProfile
                 return;
             }
         }
-        System.out.println("Add Default System Equip");
+        CcuLog.d(L.TAG_CCU_SYSTEM,"Add Default System Equip");
         HashMap siteMap = hayStack.read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
@@ -51,8 +52,8 @@ public class DefaultSystem extends SystemProfile
                                    .setSiteRef(siteRef)
                                    .setDisplayName(siteDis+"-SystemEquip")
                                    .setProfile(ProfileType.SYSTEM_DEFAULT.name())
-                                   .addMarker("equip")
-                                   .addMarker("system")
+                                   .addMarker("equip").addMarker("system").addMarker("default")
+                                   
                                    .addMarker("equipHis")
                                    .setTz(siteMap.get("tz").toString())
                                    .build();

@@ -4,7 +4,9 @@ import org.javolution.io.Struct;
 
 import a75f.io.device.serial.CcuToCmOverUsbCcuHeartbeatMessage_t;
 import a75f.io.device.serial.MessageType;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
+import a75f.io.logic.L;
 
 import static a75f.io.device.DeviceConstants.HEARTBEAT_INTERVAL;
 import static a75f.io.device.DeviceConstants.HEARTBEAT_MULTIPLIER;
@@ -70,7 +72,7 @@ public class MeshUtil
     
     public static void tSleep(int sleepTime)
     {
-        DLog.Logd("sleeping: " + sleepTime);
+        CcuLog.d(L.TAG_CCU_DEVICE, "sleeping: " + sleepTime);
         try
         {
             Thread.sleep(sleepTime);

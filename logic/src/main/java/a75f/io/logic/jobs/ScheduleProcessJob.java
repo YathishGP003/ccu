@@ -1,7 +1,5 @@
 package a75f.io.logic.jobs;
 
-import android.util.Log;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -9,7 +7,9 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Zone;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.BaseJob;
+import a75f.io.logic.L;
 
 public class ScheduleProcessJob extends BaseJob {
 
@@ -25,48 +25,31 @@ public class ScheduleProcessJob extends BaseJob {
 
         if(systemSchedule == null)
             return;
-        Log.d("CCU","ScheduleProcessJob -> 1");
-
-       // Log.i(TAG, "System Schedule != null " + (systemSchedule != null));
-
-
-        Log.d("CCU","ScheduleProcessJob -> 2");
+        CcuLog.d(L.TAG_CCU_JOB,"ScheduleProcessJob");
         //Read all equips
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip");
-
-
-        Log.d("CCU","ScheduleProcessJob -> 3");
         for(HashMap hs : equips)
         {
             Equip equip = new Equip.Builder().setHashMap(hs).build();
-            Log.i(TAG, "Equip Dis: " + equip.toString());
+            CcuLog.d(L.TAG_CCU_JOB, "Equip Dis: " + equip.toString());
 
 
             if(equip != null) {
-                Log.d("CCU","ScheduleProcessJob -> 4");
+               
                 Schedule equipSchedule = getScheduleForEquip(equip);
-
-
-                Log.d("CCU","ScheduleProcessJob -> 5");
                 if (equipSchedule != null) {
                     writePointsForEquip(equip, equipSchedule);
                 } else {
-                    Log.e(TAG, "Schedule is Null, use system Schedule!");
-                    Log.d("CCU","ScheduleProcessJob -> 6");
+                    CcuLog.d(L.TAG_CCU_JOB, "Schedule is Null, use system Schedule!");
                     writePointsForEquip(equip, systemSchedule);
                 }
             }
             else
             {
-                Log.e(TAG, "Equip is Null!");
+                CcuLog.d(L.TAG_CCU_JOB, "Equip is Null!");
             }
         }
-
-        Log.d("CCU","ScheduleProcessJob -> 7");
-
-        Log.d("CCU","< - END ScheduleProcessJob");
-        Log.i(TAG, "Write Schedule VALUES");
-        Log.d("CCU","ScheduleProcessJob ->");
+        CcuLog.d(L.TAG_CCU_JOB,"<- ScheduleProcessJob");
     }
 
     private void writePointsForEquip(Equip equip, Schedule equipSchedule) {
@@ -83,7 +66,7 @@ public class ScheduleProcessJob extends BaseJob {
 
 
         if(equip.getRoomRef() != null) {
-            Log.i(TAG, "Equip Zone Ref: " + equip.getRoomRef());
+            CcuLog.d(L.TAG_CCU_SCHEDULER, "Equip Zone Ref: " + equip.getRoomRef());
             HashMap zoneHashMap = CCUHsApi.getInstance().readMapById(equip.getRoomRef().replace("@", ""));
 
             Zone build = new Zone.Builder().setHashMap(zoneHashMap).build();
@@ -92,7 +75,7 @@ public class ScheduleProcessJob extends BaseJob {
                 Schedule schedule = CCUHsApi.getInstance().getScheduleById(build.getScheduleRef());
 
                 if(schedule != null) {
-                    Log.i(TAG, "Schedule: "+ schedule.toString());
+                    CcuLog.d(L.TAG_CCU_SCHEDULER, "Schedule: "+ schedule.toString());
 
                     return schedule;
                 }

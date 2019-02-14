@@ -39,6 +39,7 @@ import java.util.HashMap;
 import javax.net.ssl.HttpsURLConnection;
 
 import a75f.io.api.haystack.sync.HttpUtil;
+import a75f.io.logger.CcuLog;
 import info.guardianproject.netcipher.NetCipher;
 
 /**
@@ -587,8 +588,8 @@ public class HClient extends HProj
    */
   public HGrid call(String op, HGrid req)
   {
-    Log.d("HClient", "Op: " + op);
-    Log.d("HClient", "Req: ");
+    CcuLog.d("CCU_HS", "HClient Op: " + op);
+    CcuLog.d("CCU_HS", "HClient Req: ");
     req.dump();
     HGrid res = postGrid(op, req);
     if (res.isErr()) throw new CallErrException(res);
@@ -620,7 +621,7 @@ public class HClient extends HProj
                 "",
                 HttpUtil.CLIENT_SECRET,
                 HttpUtil.TENANT_ID));
-        System.out.println("Client Token: " + HttpUtil.clientToken);
+        Log.i("CCU_HS","Client Token: " + HttpUtil.clientToken);
       }
       // setup the POST request
       URL url = new URL(uriStr);
@@ -647,7 +648,7 @@ public class HClient extends HProj
                   "",
                   HttpUtil.CLIENT_SECRET,
                   HttpUtil.TENANT_ID));
-          System.out.println("Client Token: " + HttpUtil.clientToken);
+          CcuLog.d("CCU_HS","Client Token: " + HttpUtil.clientToken);
           postString(uriStr, req, mimeType);
         }
         else if (c.getResponseCode() != 200)
@@ -764,7 +765,7 @@ public class HClient extends HProj
   public static void main(String[] args) throws Exception
   {
     if (args.length != 3) {
-        System.out.println("usage: HClient <uri> <user> <pass>");
+      CcuLog.d("CCU_HS","usage: HClient <uri> <user> <pass>");
         System.exit(0);
     }
 

@@ -15,6 +15,8 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZonePriority;
@@ -699,7 +701,7 @@ public class VAVLogicalMap
             switch (op.getPort()) {
                 case ANALOG_OUT_ONE:
                 case ANALOG_OUT_TWO:
-                    Log.d("CCU"," Update analog"+op.getPort()+" type "+op.getAnalogActuatorType());
+                    CcuLog.d(L.TAG_CCU_ZONE," Update analog" + op.getPort() + " type " + op.getAnalogActuatorType());
                     SmartNode.updatePhysicalPoint(nodeAddr, op.getPort().toString(), op.getAnalogActuatorType());
                     break;
                 case RELAY_ONE:

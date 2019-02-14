@@ -49,6 +49,7 @@ import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import a75f.io.logger.CcuLog;
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
 import io.objectbox.DebugFlags;
@@ -179,7 +180,7 @@ public class CCUTagsDb extends HServer {
             Log.i(TAG, "Zinc: " + val.toZinc());
             if(!val.has("nosync")) {
                 String key = val.get("id").toString().replace("@", "");
-                System.out.println("ID: " + key);
+                CcuLog.d("CCU_HS", "ID: " + key);
                 tagsMap.put(key, val);
             }
         }
@@ -290,7 +291,7 @@ public class CCUTagsDb extends HServer {
     public void addHGrid(HGrid hGrid) {
         for (int i = 0; i < hGrid.numRows(); i++) {
             HRef ref = hGrid.row(i).getRef("id");
-            System.out.println("Ref: " + ref.val);
+            CcuLog.d("CCU_HS","Ref: " + ref.val);
 
             tagsMap.put(ref.val, new HDictBuilder().add(hGrid.row(i)).toDict());
         }
@@ -360,7 +361,7 @@ public class CCUTagsDb extends HServer {
         for (Iterator it = iterator(); it.hasNext(); ) {
             i++;
             HDict rec = (HDict) it.next();
-            System.out.println("Rec " + i + ":" + rec.toString());
+            CcuLog.d("CCU_HS","Rec " + i + ":" + rec.toString());
         }
     }
 
@@ -405,7 +406,6 @@ public class CCUTagsDb extends HServer {
             equip.add("ahuRef",q.getAhuRef());
         }
         for (String m : q.getMarkers()) {
-            Log.d("CCU"," Add marker "+m);
             equip.add(m);
         }
         HRef id = (HRef) equip.get("id");
@@ -770,7 +770,7 @@ public class CCUTagsDb extends HServer {
     }
 
     protected void onPointWrite(HDict rec, int level, HVal val, String who, HNum dur, HDict opts) {
-        System.out.println("onPointWrite: " + rec.dis() + "  " + val + " @ " + level + " [" + who + "]");
+        CcuLog.d("CCU_HS","onPointWrite: " + rec.dis() + "  " + val + " @ " + level + " [" + who + "]");
         CCUTagsDb.WriteArray array = (CCUTagsDb.WriteArray) writeArrays.get(rec.id().toVal());
         if (array == null) writeArrays.put(rec.id().toVal(), array = new CCUTagsDb.WriteArray());
         array.val[level - 1] = val;
@@ -858,7 +858,7 @@ public class CCUTagsDb extends HServer {
     //////////////////////////////////////////////////////////////////////////
 
     public HGrid onInvokeAction(HDict rec, String action, HDict args) {
-        System.out.println("-- invokeAction \"" + rec.dis() + "." + action + "\" " + args);
+        CcuLog.d("CCU_HS","-- invokeAction \"" + rec.dis() + "." + action + "\" " + args);
         return HGrid.EMPTY;
     }
 

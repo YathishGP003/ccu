@@ -1,7 +1,5 @@
 package a75f.io.logic.bo.building.system.vav;
 
-import android.util.Log;
-
 import com.google.common.collect.EvictingQueue;
 
 import java.util.ArrayList;
@@ -13,6 +11,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.ZoneProfile;
@@ -89,7 +88,7 @@ public class VavSystemController
         VavSystemProfile profile = (VavSystemProfile) L.ccu().systemProfile;
         ciDesired = (int)profile.getUserIntentVal("desired and ci");
         SystemMode systemMode = SystemMode.values()[(int)profile.getUserIntentVal("rtu and mode")];
-        Log.d("CCU", "runVavSystemControlAlgo -> ciDesired: "+ciDesired+" systemMode: "+systemMode);
+        CcuLog.d(L.TAG_CCU_SYSTEM, "runVavSystemControlAlgo -> ciDesired: " + ciDesired + " systemMode: " + systemMode);
     
         weightedAverageCoolingOnlyLoadSum = weightedAverageHeatingOnlyLoadSum = weightedAverageLoadSum = 0;
         
@@ -118,15 +117,15 @@ public class VavSystemController
                     weightedAverageHeatingOnlyLoadSum += zoneHeatingLoad * zoneDynamicPriority;
                     weightedAverageLoadSum = +(zoneCoolingLoad * zoneDynamicPriority) - (zoneHeatingLoad * zoneDynamicPriority);
                     prioritySum += zoneDynamicPriority;
-                    Log.d("CCU", q.getDisplayName() + " zoneDynamicPriority: " + zoneDynamicPriority + " zoneCoolingLoad: " + zoneCoolingLoad + " zoneHeatingLoad: " + zoneHeatingLoad);
-                    Log.d("CCU", q.getDisplayName() + " weightedAverageCoolingOnlyLoadSum:" + weightedAverageCoolingOnlyLoadSum + " weightedAverageHeatingOnlyLoadSum " + weightedAverageHeatingOnlyLoadSum);
+                    CcuLog.d(L.TAG_CCU_SYSTEM, q.getDisplayName() + " zoneDynamicPriority: " + zoneDynamicPriority + " zoneCoolingLoad: " + zoneCoolingLoad + " zoneHeatingLoad: " + zoneHeatingLoad);
+                    CcuLog.d(L.TAG_CCU_SYSTEM, q.getDisplayName() + " weightedAverageCoolingOnlyLoadSum:" + weightedAverageCoolingOnlyLoadSum + " weightedAverageHeatingOnlyLoadSum " + weightedAverageHeatingOnlyLoadSum);
                 }
             }
         
         }
     
         if (prioritySum == 0) {
-            Log.d("CCU", "No valid temperature, Skip VavSystemControlAlgo");
+            CcuLog.d(L.TAG_CCU_SYSTEM, "No valid temperature, Skip VavSystemControlAlgo");
             return;
         }
         
@@ -179,7 +178,7 @@ public class VavSystemController
             heatingSignal = 0;
         }
         piController.dump();
-        Log.d("CCU", "weightedAverageCoolingOnlyLoadMA: "+weightedAverageCoolingOnlyLoadMA+" weightedAverageHeatingOnlyLoadMA: "
+        CcuLog.d(L.TAG_CCU_SYSTEM, "weightedAverageCoolingOnlyLoadMA: "+weightedAverageCoolingOnlyLoadMA+" weightedAverageHeatingOnlyLoadMA: "
                                                     +weightedAverageHeatingOnlyLoadMA +" systemState: "+systemState+" coolingSignal: "+coolingSignal+" heatingSignal: "+heatingSignal);
     
         if (systemState == HEATING)
@@ -213,7 +212,7 @@ public class VavSystemController
         for (ZoneProfile p: L.ccu().zoneProfiles)
         {
             if (p.getState() != ZoneState.HEATING) {
-                Log.d("dx"," Equip "+p.getProfileType()+" is not in Heating");
+                CcuLog.d(L.TAG_CCU_SYSTEM," Equip "+p.getProfileType()+" is not in Heating");
                 return false;
             }
         }
@@ -225,7 +224,7 @@ public class VavSystemController
         {
             System.out.println(" Zone State " +p.state);
             if (p.getState() == ZoneState.COOLING) {
-                Log.d("dx"," Equip "+p.getProfileType()+" is in Cooling");
+                CcuLog.d(L.TAG_CCU_SYSTEM," Equip "+p.getProfileType()+" is in Cooling");
                 return true;
             }
         }
@@ -406,7 +405,7 @@ public class VavSystemController
         }
         
         if (maxDamperPos == 0) {
-            Log.d("CCU"," Abort normalizeAirflow : maxDamperPos = "+maxDamperPos);
+            CcuLog.d(L.TAG_CCU_SYSTEM," Abort normalizeAirflow : maxDamperPos = "+maxDamperPos);
         }
         
         double targetPercent = (100 - maxDamperPos) * 100/ maxDamperPos ;
@@ -417,7 +416,7 @@ public class VavSystemController
             double damperPos = hayStack.readHisValById(damper.get("id").toString());
             int normalizedDamperPos = (int) (damperPos + damperPos * targetPercent/100);
             HashMap normalizedDamper = hayStack.read("point and damper and normalized and cmd and equipRef == \""+m.get("id").toString()+"\"");
-            Log.d("CCU","normalizeAirflow"+"Equip: "+m.get("dis")+",damperPos :"+damperPos+"targetPercent:"+targetPercent+" normalizedDamper:"+normalizedDamperPos);
+            CcuLog.d(L.TAG_CCU_SYSTEM,"normalizeAirflow"+"Equip: "+m.get("dis")+",damperPos :"+damperPos+"targetPercent:"+targetPercent+" normalizedDamper:"+normalizedDamperPos);
             hayStack.writeHisValById(normalizedDamper.get("id").toString(), (double)normalizedDamperPos);
         }
         
@@ -433,12 +432,12 @@ public class VavSystemController
         
         double cumulativeDamperTarget = TunerUtil.readTunerValByQuery("target and cumulative and damper");
         double weightedDamperOpening = getWeightedDamperOpening();
-        Log.d("CCU","weightedDamperOpening : "+weightedDamperOpening +" cumulativeDamperTarget : "+cumulativeDamperTarget);
+        CcuLog.d(L.TAG_CCU_SYSTEM,"weightedDamperOpening : "+weightedDamperOpening +" cumulativeDamperTarget : "+cumulativeDamperTarget);
     
         while(weightedDamperOpening > 0 && weightedDamperOpening < cumulativeDamperTarget) {
             adjustDamperOpening(1);
             weightedDamperOpening = getWeightedDamperOpening();
-            Log.d("CCU","weightedDamperOpening : "+weightedDamperOpening +" cumulativeDamperTarget : "+cumulativeDamperTarget);
+            CcuLog.d(L.TAG_CCU_SYSTEM,"weightedDamperOpening : "+weightedDamperOpening +" cumulativeDamperTarget : "+cumulativeDamperTarget);
         }
     }
     
@@ -484,7 +483,7 @@ public class VavSystemController
                 minLimit = hayStack.readDefaultVal("point and zone and config and vav and min and damper and heating and equipRef == \""+m.get("id").toString()+"\"");
                 maxLimit = hayStack.readDefaultVal("point and zone and config and vav and max and damper and heating and equipRef == \""+m.get("id").toString()+"\"");
             }
-            Log.d("CCU","setDamperLimits : Equip "+m.get("dis")+" minLimit "+minLimit+" maxLimit "+maxLimit);
+            CcuLog.d(L.TAG_CCU_SYSTEM,"setDamperLimits : Equip "+m.get("dis")+" minLimit "+minLimit+" maxLimit "+maxLimit);
             limitedDamperPos = Math.min(limitedDamperPos, maxLimit);
             limitedDamperPos = Math.max(limitedDamperPos, minLimit);
             hayStack.writeHisValById(damperPos.get("id").toString() , limitedDamperPos);

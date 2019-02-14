@@ -12,6 +12,7 @@ import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.device.serial.MessageType;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.haystack.device.ControlMote;
@@ -27,10 +28,10 @@ public class MeshNetwork extends DeviceNetwork
 {
     @Override
     public void sendMessage() {
-        Log.d(TAG, "MeshNetwork SendNodeMessage");
+        CcuLog.d(L.TAG_CCU_DEVICE, "MeshNetwork SendNodeMessage");
     
         if (!LSerial.getInstance().isConnected()) {
-            Log.d(TAG,"Device not connected !!");
+            CcuLog.d(L.TAG_CCU_DEVICE,"Device not connected !!");
             return;
         }
         
@@ -44,8 +45,8 @@ public class MeshNetwork extends DeviceNetwork
             {
                 for (Zone zone : HSUtil.getZones(floor.getId()))
                 {
-                    DLog.Logw("=============Zone: " + zone.getDisplayName() + " ==================");
-                    DLog.Logw("=================NOW SENDING SEEDS=====================");
+                    CcuLog.d(L.TAG_CCU_DEVICE,"=============Zone: " + zone.getDisplayName() + " ==================");
+                    CcuLog.d(L.TAG_CCU_DEVICE,"=================NOW SENDING SEEDS=====================");
                     for (CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage : LSmartNode.getSeedMessages(zone))
                     {
                         if (sendStruct((short) seedMessage.smartNodeAddress.get(), seedMessage))
@@ -53,7 +54,7 @@ public class MeshNetwork extends DeviceNetwork
                             //Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
                         }
                     }
-                    DLog.Logw("=================NOW SENDING CONTROLS=====================");
+                    CcuLog.d(L.TAG_CCU_DEVICE,"=================NOW SENDING CONTROLS=====================");
                     for (CcuToCmOverUsbSnControlsMessage_t controlsMessage : LSmartNode.getControlMessages(zone))
                     {
                         if (sendStruct((short) controlsMessage.smartNodeAddress.get(), controlsMessage))
@@ -61,7 +62,7 @@ public class MeshNetwork extends DeviceNetwork
                             //Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
                         }
                     }
-                    DLog.Logw("=================NOW SENDING EXTRA MESSAGES LIKE SCHEDULES====================");
+                    CcuLog.d(L.TAG_CCU_DEVICE,"=================NOW SENDING EXTRA MESSAGES LIKE SCHEDULES====================");
                     for (AddressedStruct extraMessage : LSmartNode.getExtraMessages(floor, zone))
                     {
                         Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
@@ -81,15 +82,15 @@ public class MeshNetwork extends DeviceNetwork
     }
     
     public void sendSystemControl() {
-        Log.d(TAG, "MeshNetwork SendSystemControl");
+        CcuLog.d(L.TAG_CCU_DEVICE, "MeshNetwork SendSystemControl");
     
         if (!LSerial.getInstance().isConnected()) {
-            Log.d(TAG,"Device not connected !!");
+            CcuLog.d(L.TAG_CCU_DEVICE,"Device not connected !!");
             return;
         }
         
         if (L.ccu().systemProfile == null) {
-            Log.d(TAG, "MeshNetwork SendSystemControl : Abort , No system profile");
+            CcuLog.d(L.TAG_CCU_DEVICE, "MeshNetwork SendSystemControl : Abort , No system profile");
             return;
         }
         if (!(L.ccu().systemProfile instanceof DefaultSystem))

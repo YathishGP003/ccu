@@ -8,6 +8,7 @@ import java.io.IOException;
 
 import a75f.io.device.json.serializers.JsonSerializer;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 /**
  * Created by Yinten isOn 8/21/2017.
  */
@@ -40,7 +41,7 @@ public class DLog
 				e.printStackTrace();
 			}
 			//Log.d(UPDATED_STRUCT, structString);
-		CcuLog.d(UPDATED_STRUCT, structString);
+		CcuLog.d(L.TAG_CCU_SERIAL, structString);
 		//}
 	}
 	
@@ -56,7 +57,7 @@ public class DLog
 	//	if (BuildConfig.DEBUG)
 		//{
 			//Log.d(TAG, message);
-		CcuLog.d(TAG, message);
+		CcuLog.d(L.TAG_CCU_SERIAL, message);
 		
 		//}
 	}
@@ -67,7 +68,7 @@ public class DLog
 	//	if (BuildConfig.DEBUG)
 	//	{
 			//Log.d(SERIAL_TAG, message);
-		CcuLog.d(SERIAL_TAG, message);
+		CcuLog.d(L.TAG_CCU_SERIAL, message);
 		//}
 	}
 	
@@ -80,6 +81,6 @@ public class DLog
 	public static void Logw(String message)
 	{
 		//Log.w(TAG, message);
-		CcuLog.d(SERIAL_TAG, message);
+		CcuLog.d(L.TAG_CCU_SERIAL, message);
 	}
 }

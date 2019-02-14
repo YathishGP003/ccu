@@ -2,6 +2,7 @@ package a75f.io.api.haystack;
 
 import java.util.Date;
 
+import a75f.io.logger.CcuLog;
 import io.objectbox.annotation.Entity;
 import io.objectbox.annotation.Id;
 
@@ -79,6 +80,6 @@ public class HisItem
         this.syncStatus = syncStatus;
     }
     public void dump(){
-        System.out.println("id: "+id+" rec: "+rec+" date: "+date+" val: "+val+" syncStatus: "+syncStatus);
+        CcuLog.d("CCU_HS", "id: " + id + " rec: " + rec + " date: " + date + " val: " + val + " syncStatus: " + syncStatus);
     }
 }

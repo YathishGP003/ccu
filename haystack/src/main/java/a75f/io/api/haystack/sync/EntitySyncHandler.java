@@ -159,7 +159,7 @@ public class EntitySyncHandler
 
         for (Map s: sites) {
             if (CCUHsApi.getInstance().getGUID(s.get("id").toString()) == null) {
-                Log.d("CCU","Entity sync required :Site not synced :"+ s.get("id"));
+                CcuLog.d("CCU_HS","Entity sync required :Site not synced :"+ s.get("id"));
                 syncPending = true;
                 return true;
             }
@@ -168,7 +168,7 @@ public class EntitySyncHandler
         ArrayList<HashMap> floors = CCUHsApi.getInstance().readAll("floor");
         for (Map f: floors) {
             if (CCUHsApi.getInstance().getGUID(f.get("id").toString()) == null) {
-                Log.d("CCU","Entity sync required :Floor not synced :"+ f.get("id"));
+                CcuLog.d("CCU_HS","Entity sync required :Floor not synced :"+ f.get("id"));
                 syncPending = true;
                 return true;
             }
@@ -177,7 +177,7 @@ public class EntitySyncHandler
         ArrayList<HashMap> zones = CCUHsApi.getInstance().readAll("zone");
         for (Map z: zones) {
             if (CCUHsApi.getInstance().getGUID(z.get("id").toString()) == null) {
-                Log.d("CCU","Entity sync required :Zone not synced :"+ z.get("id"));
+                CcuLog.d("CCU_HS","Entity sync required :Zone not synced :"+ z.get("id"));
                 syncPending = true;
                 return true;
             }
@@ -186,7 +186,7 @@ public class EntitySyncHandler
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip");
         for (Map q: equips) {
             if (CCUHsApi.getInstance().getGUID(q.get("id").toString()) == null) {
-                Log.d("CCU","Entity sync required :Equip not synced :"+ q.get("id"));
+                CcuLog.d("CCU_HS","Entity sync required :Equip not synced :"+ q.get("id"));
                 syncPending = true;
                 return true;
             }
@@ -194,7 +194,7 @@ public class EntitySyncHandler
         ArrayList<HashMap> devices = CCUHsApi.getInstance().readAll("device");
         for (Map d: devices) {
             if (CCUHsApi.getInstance().getGUID(d.get("id").toString()) == null) {
-                Log.d("CCU","Entity sync required :device not synced :"+ d.get("id"));
+                CcuLog.d("CCU_HS","Entity sync required :device not synced :"+ d.get("id"));
                 syncPending = true;
                 return true;
             }
@@ -202,7 +202,7 @@ public class EntitySyncHandler
         ArrayList<HashMap> points = CCUHsApi.getInstance().readAll("point");
         for (Map p: points) {
             if (CCUHsApi.getInstance().getGUID(p.get("id").toString()) == null) {
-                Log.d("CCU","Entity sync required :Point not synced :"+ p.get("id"));
+                CcuLog.d("CCU_HS","Entity sync required :Point not synced :"+ p.get("id"));
                 syncPending = true;
                 return true;
             }

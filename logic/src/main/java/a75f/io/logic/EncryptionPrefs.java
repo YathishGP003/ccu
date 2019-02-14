@@ -54,7 +54,7 @@ class EncryptionPrefs {
     public static void logEncryptionKey() {
         byte[] encryptionKey = getEncryptionKey();
         String encryptionKeyAsString = Base64.encodeToString(encryptionKey, Base64.DEFAULT);
-        Log.i(TAG, "Encryption Key As String: " + encryptionKeyAsString);
+        Log.i(L.TAG_CCU, "Encryption Key As String: " + encryptionKeyAsString);
     }
 
     public static byte[] getBLELinkKey()

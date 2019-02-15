@@ -217,26 +217,30 @@ public class VavAnalogRtu extends VavSystemProfile
             
             double humidityHysteresis = TunerUtil.readTunerValByQuery("humidity and hysteresis");
     
-    
             if (humidifier) {
                 //Humidification
-                signal = (int)ControlMote.getRelayState("relay7");
+                //signal = (int)ControlMote.getRelayState("relay7");
                 if (humidity < targetMinHumidity) {
                     signal = 1;
                 } else if (humidity > (targetMinHumidity + humidityHysteresis)) {
                     signal = 0;
                 }
                 setCmdSignal("humidifier",signal * 100);
+                setCmdSignal("dehumidifier",0);
             } else {
                 //Dehumidification
-                signal = (int)ControlMote.getRelayState("relay7");
+                //signal = (int)ControlMote.getRelayState("relay7");
                 if (humidity > targetMaxHumidity) {
                     signal = 1;
                 } else if (humidity < (targetMaxHumidity - humidityHysteresis)) {
                     signal = 0;
                 }
                 setCmdSignal("dehumidifier",signal * 100);
+                setCmdSignal("humidifier",0);
             }
+            CcuLog.d(L.TAG_CCU_SYSTEM,"humidity :"+humidity+" targetMinHumidity: "+targetMinHumidity+" humidityHysteresis: "+humidityHysteresis+
+                                      " targetMaxHumidity: "+targetMaxHumidity+" signal: "+signal*100);
+    
             ControlMote.setRelayState("relay7", signal);
         }
         

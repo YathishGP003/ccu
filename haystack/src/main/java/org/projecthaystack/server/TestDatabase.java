@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 
+import a75f.io.logger.CcuLog;
 
 /**
  * TestDatabase provides a simple implementation of
@@ -242,7 +243,7 @@ public class TestDatabase extends HServer
 
   protected void onPointWrite(HDict rec, int level, HVal val, String who, HNum dur, HDict opts)
   {
-    System.out.println("onPointWrite: " + rec.dis() + "  " + val + " @ " + level + " [" + who + "]");
+    CcuLog.d("CCU_HS", "onPointWrite: " + rec.dis() + "  " + val + " @ " + level + " [" + who + "]");
     WriteArray array = (WriteArray)writeArrays.get(rec.id());
     if (array == null) writeArrays.put(rec.id(), array = new WriteArray());
     array.val[level-1] = val;

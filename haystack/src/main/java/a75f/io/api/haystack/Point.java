@@ -17,7 +17,7 @@ public class Point extends Entity
     private String equipRef;
     private String unit;
     private String tz;
-    private String zoneRef;
+    private String roomRef;
     private String floorRef;
     private String group;
     private String kind;
@@ -31,9 +31,9 @@ public class Point extends Entity
     {
         this.equipRef = equipRef;
     }
-    public void setZoneRef(String zoneRef)
+    public void setRoomRef(String roomRef)
     {
-        this.zoneRef = zoneRef;
+        this.roomRef = roomRef;
     }
     public void setFloorRef(String floorRef)
     {
@@ -48,9 +48,9 @@ public class Point extends Entity
     {
         return group;
     }
-    public String getZoneRef()
+    public String getRoomRef()
     {
-        return zoneRef;
+        return roomRef;
     }
     public String getFloorRef()
     {
@@ -97,7 +97,7 @@ public class Point extends Entity
         private String equipRef;
         private String unit;
         private String tz;
-        private String zoneRef;
+        private String roomRef;
         private String floorRef;
         private String group;
         public Builder setKind(String kind)
@@ -112,9 +112,9 @@ public class Point extends Entity
             this.group = group;
             return this;
         }
-        public Builder setZoneRef(String zoneRef)
+        public Builder setRoomRef(String roomRef)
         {
-            this.zoneRef = zoneRef;
+            this.roomRef = roomRef;
             return this;
         }
         public Builder setFloorRef(String floorRef)
@@ -166,7 +166,7 @@ public class Point extends Entity
             p.equipRef = this.equipRef;
             p.unit = this.unit;
             p.tz = this.tz;
-            p.zoneRef = this.zoneRef;
+            p.roomRef = this.roomRef;
             p.floorRef = this.floorRef;
             p.group = this.group;
             p.id = this.id;
@@ -202,9 +202,9 @@ public class Point extends Entity
                 {
                     this.floorRef = pair.getValue().toString();
                 }
-                else if (pair.getKey().equals("zoneRef"))
+                else if (pair.getKey().equals("roomRef"))
                 {
-                    this.zoneRef = pair.getValue().toString();
+                    this.roomRef = pair.getValue().toString();
                 }
                 else if (pair.getKey().equals("equipRef"))
                 {

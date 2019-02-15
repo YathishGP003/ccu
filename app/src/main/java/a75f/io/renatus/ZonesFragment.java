@@ -849,7 +849,7 @@ public class ZonesFragment extends Fragment
                      zoneProfile.getProfileType() == ProfileType.VAV_SERIES_FAN ||
                      zoneProfile.getProfileType() == ProfileType.VAV_PARALLEL_FAN)
             {
-                HashMap zoneMap = CCUHsApi.getInstance().read("equip and zoneRef == \"" + zoneProfile.getEquip().getZoneRef() + "\"");
+                HashMap zoneMap = CCUHsApi.getInstance().read("equip and roomRef == \"" + zoneProfile.getEquip().getRoomRef() + "\"");
                 Zone z = new Zone.Builder().setHashMap(zoneMap).build();
                 SeekArc seekArc =
                         AddNewArc(z, (VavProfile) zoneProfile, new LinearLayout.LayoutParams(room_width, room_height), index);

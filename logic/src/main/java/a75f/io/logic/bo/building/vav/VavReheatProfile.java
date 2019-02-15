@@ -1,7 +1,5 @@
 package a75f.io.logic.bo.building.vav;
 
-import android.util.Log;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import a75.io.algos.CO2Loop;
@@ -10,6 +8,8 @@ import a75.io.algos.GenericPIController;
 import a75.io.algos.VOCLoop;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Damper;
@@ -52,11 +52,11 @@ public class VavReheatProfile extends VavProfile
         {
             if (vavDeviceMap.get(node) == null) {
                 addLogicalMap(node);
-                Log.d(TAG, " Logical Map added for node " + node);
+                CcuLog.d(L.TAG_CCU_ZONE, " Logical Map added for node " + node);
                 continue;
             }
             if (vavDeviceMap.get(node).getCurrentTemp() == 0) {
-                Log.d(TAG,"Invalid Temp , skip controls update for "+node+" roomTemp : "+vavDeviceMap.get(node).getCurrentTemp());
+                CcuLog.d(L.TAG_CCU_ZONE,"Invalid Temp , skip controls update for "+node+" roomTemp : "+vavDeviceMap.get(node).getCurrentTemp());
                 continue;
             }
             VAVLogicalMap vavDevice = vavDeviceMap.get(node);
@@ -122,7 +122,7 @@ public class VavReheatProfile extends VavProfile
                         valveController.updateControlVariable(dischargeSp, dischargeTemp);
                         valve.currentPosition = (int) (valveController.getControlVariable() * 100 / valveController.getMaxAllowedError());
                         loopOp = 0;
-                        Log.d(TAG, "dischargeTempSP: " + dischargeSp);
+                        CcuLog.d(L.TAG_CCU_ZONE, "dischargeTempSP: " + dischargeSp);
                     }
                     else
                     {
@@ -137,11 +137,11 @@ public class VavReheatProfile extends VavProfile
                         valveController.updateControlVariable(dischargeSp, dischargeTemp);
                         valve.currentPosition = (int) (valveController.getControlVariable() * 100 / valveController.getMaxAllowedError());
                         loopOp = heatingLoopOp;
-                        
-                        
-                        Log.d("VAV","Invalid air temp :  supplyAirTemp: "+supplyAirTemp+" dischargeTemp: "+dischargeTemp);
+    
+    
+                        CcuLog.d(L.TAG_CCU_ZONE,"Invalid air temp :  supplyAirTemp: "+supplyAirTemp+" dischargeTemp: "+dischargeTemp);
                         if (valve.currentPosition < 0) {
-                            Log.d("CCU"," Invalid valve opening: "+valve.currentPosition);
+                            CcuLog.d(L.TAG_CCU_ZONE," Invalid valve opening: "+valve.currentPosition);
                             valve.currentPosition = 0;
                         }
                     }
@@ -173,14 +173,14 @@ public class VavReheatProfile extends VavProfile
             if (/*mode == OCCUPIED && */co2Loop.getLoopOutput(co2) <= 50)
             {
                 damper.iaqCompensatedMinPos = damper.minPosition + (damper.maxPosition - damper.minPosition) * co2Loop.getLoopOutput() / 50;
-                Log.d("VAV","CO2LoopOp :"+co2Loop.getLoopOutput()+", adjusted minposition "+damper.minPosition);
+                CcuLog.d(L.TAG_CCU_ZONE,"CO2LoopOp :"+co2Loop.getLoopOutput()+", adjusted minposition "+damper.minPosition);
             }
     
             //VOC loop output from 0-50% modulates damper min position.
             if (/*mode == OCCUPIED && */vocLoop.getLoopOutput(voc) <= 50)
             {
                 damper.iaqCompensatedMinPos = damper.minPosition + (damper.maxPosition - damper.minPosition) * vocLoop.getLoopOutput() / 50;
-                Log.d("VAV","VOCLoopOp :"+vocLoop.getLoopOutput()+", adjusted minposition "+damper.minPosition);
+                CcuLog.d(L.TAG_CCU_ZONE,"VOCLoopOp :"+vocLoop.getLoopOutput()+", adjusted minposition "+damper.minPosition);
             }
             
             if (loopOp == 0)
@@ -212,7 +212,7 @@ public class VavReheatProfile extends VavProfile
                 double maxHeatingPos = vavDevice.getDamperLimit("heating", "max");
                 double minHeatingPos = vavDevice.getDamperLimit("heating", "min");
                 double valveStart = minHeatingPos + (maxHeatingPos - minHeatingPos) * valveStartDamperPercent / 100;
-                Log.d("VAV"," valveStartDamperPercent "+valveStartDamperPercent+" valveStart "+valveStart );
+                CcuLog.d(L.TAG_CCU_ZONE," valveStartDamperPercent "+valveStartDamperPercent+" valveStart "+valveStart );
                 if (damper.currentPosition > valveStart)
                 {
                     valve.currentPosition = (int) ((damper.currentPosition - valveStart) * 100 / (maxHeatingPos - valveStart));
@@ -222,14 +222,14 @@ public class VavReheatProfile extends VavProfile
                     valve.currentPosition = 0;
                 }
             }
-            
-            Log.d("VAV","CoolingLoop "+node +" roomTemp :"+roomTemp+" setTempCooling: "+setTempCooling);
-            coolingLoop.dump();
-            Log.d("VAV","HeatingLoop "+node +" roomTemp :"+roomTemp+" setTempHeating: "+setTempHeating);
-            heatingLoop.dump();
-            
     
-            Log.d(TAG, "STATE :"+state+" ZoneState : "+getState()+" ,loopOp: " + loopOp + " ,damper:" + damper.currentPosition+", valve:"+valve.currentPosition);
+            CcuLog.d(L.TAG_CCU_ZONE,"CoolingLoop "+node +" roomTemp :"+roomTemp+" setTempCooling: "+setTempCooling);
+            coolingLoop.dump();
+            CcuLog.d(L.TAG_CCU_ZONE,"HeatingLoop "+node +" roomTemp :"+roomTemp+" setTempHeating: "+setTempHeating);
+            heatingLoop.dump();
+    
+    
+            CcuLog.d(L.TAG_CCU_ZONE, "STATE :"+state+" ZoneState : "+getState()+" ,loopOp: " + loopOp + " ,damper:" + damper.currentPosition+", valve:"+valve.currentPosition);
             updateTRResponse(node);
     
             vavDevice.setDamperPos(damper.currentPosition);

@@ -102,8 +102,8 @@ public class InfluxDbUtil
         dataSb.append(" "+msTimeStamp);
         
         String urlParams = dataSb.toString();
-        System.out.println(targetURL);
-        System.out.println(urlParams);
+        System.out.println("CCU: "+targetURL);
+        System.out.println("CCU: "+urlParams);
         URL url;
         HttpsURLConnection connection = null;
         try {

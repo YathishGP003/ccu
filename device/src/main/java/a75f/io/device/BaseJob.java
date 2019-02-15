@@ -4,7 +4,9 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import a75f.io.device.mesh.DLog;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
+import a75f.io.logic.L;
 
 /**
  * Created by Yinten on 9/14/2017.
@@ -18,8 +20,8 @@ abstract class BaseJob
     public void scheduleJob(String name, int interval, int taskSeperation, TimeUnit unit)
     {
         mName = name;
-        DLog.Logd("Device Scheduling: " + name + " interval: " + interval + " task Seperation:  " +
-                  taskSeperation + " unit: " + unit.name());
+        CcuLog.d(L.TAG_CCU_DEVICE, "Device Scheduling: " + name + " interval: " + interval + " task Seperation:  " +
+                    taskSeperation + " unit: " + unit.name());
         // This task runs every minute.
         scheduledFuture = Globals.getInstance().getScheduledThreadPool().scheduleAtFixedRate(new Runnable()
         {

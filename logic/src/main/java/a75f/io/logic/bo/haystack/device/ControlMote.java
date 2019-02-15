@@ -1,7 +1,5 @@
 package a75f.io.logic.bo.haystack.device;
 
-import android.util.Log;
-
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -9,6 +7,8 @@ import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 
 /**
  * Created by samjithsadasivan on 12/6/18.
@@ -22,7 +22,7 @@ public class ControlMote
         
         HashMap device = CCUHsApi.getInstance().read("device and cm");
         if (device != null && device.size() > 0) {
-            Log.d("CCU"," CM device exists");
+            CcuLog.d(L.TAG_CCU_DEVICE," CM device exists");
             return;
         }
         site = new Site.Builder().setHashMap(CCUHsApi.getInstance().read(Tags.SITE)).build();

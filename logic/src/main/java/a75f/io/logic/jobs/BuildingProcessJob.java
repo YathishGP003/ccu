@@ -9,6 +9,7 @@ import java.util.Map;
 import a75.io.algos.vav.VavTRSystem;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HisItem;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.BaseJob;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -27,24 +28,24 @@ public class BuildingProcessJob extends BaseJob
     
     @Override
     public void doJob() {
-        Log.d("CCU","BuildingProcessJob ->");
+        CcuLog.d(L.TAG_CCU_JOB,"BuildingProcessJob ->");
     
         HashMap site = CCUHsApi.getInstance().read("site");
         if (site.size() == 0) {
-            Log.d("CCU","No Site Registered ! <-BuildingProcessJob ");
+            CcuLog.d(L.TAG_CCU_JOB,"No Site Registered ! <-BuildingProcessJob ");
             return;
         }
     
         HashMap ccu = CCUHsApi.getInstance().read("ccu");
         if (ccu.size() == 0) {
-            Log.d("CCU","No CCU Registered ! <-BuildingProcessJob ");
+            CcuLog.d(L.TAG_CCU_JOB,"No CCU Registered ! <-BuildingProcessJob ");
             return;
         }
     
         tsData = new HashMap();
         
         for (ZoneProfile profile : L.ccu().zoneProfiles) {
-            Log.d("CCU", "updateZonePoints -> "+profile.getProfileType());
+            CcuLog.d(L.TAG_CCU_JOB, "updateZonePoints -> "+profile.getProfileType());
             profile.updateZonePoints();
         }
     
@@ -75,7 +76,7 @@ public class BuildingProcessJob extends BaseJob
                 
             }
         }.start();
-        Log.d("CCU","<- BuildingProcessJob");
+        CcuLog.d(L.TAG_CCU_JOB,"<- BuildingProcessJob");
     }
     
     //TODO - TEST

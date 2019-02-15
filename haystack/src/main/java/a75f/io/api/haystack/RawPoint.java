@@ -21,9 +21,9 @@ public class RawPoint extends Entity
     {
         this.siteRef = siteRef;
     }
-    public void setZoneRef(String zoneRef)
+    public void setRoomRef(String roomRef)
     {
-        this.zoneRef = zoneRef;
+        this.roomRef = roomRef;
     }
     public void setFloorRef(String floorRef)
     {
@@ -36,7 +36,7 @@ public class RawPoint extends Entity
     private String unit;
     private String tz;
     private String siteRef;
-    private String zoneRef;
+    private String roomRef;
     private String floorRef;
     private String kind;
     public boolean getEnabled()
@@ -96,9 +96,9 @@ public class RawPoint extends Entity
     {
         return tz;
     }
-    public String getZoneRef()
+    public String getRoomRef()
     {
-        return zoneRef;
+        return roomRef;
     }
     public String getFloorRef()
     {
@@ -121,7 +121,7 @@ public class RawPoint extends Entity
         private String type;
         private String unit = "F";
         private String tz;
-        private String zoneRef;
+        private String roomRef;
         private String floorRef;
         private String kind;
         public Builder setEnabled(boolean enabled)
@@ -187,9 +187,9 @@ public class RawPoint extends Entity
             this.tz = tz;
             return this;
         }
-        public Builder setZoneRef(String zoneRef)
+        public Builder setRoomRef(String roomRef)
         {
-            this.zoneRef = zoneRef;
+            this.roomRef = roomRef;
             return this;
         }
         public Builder setFloorRef(String floorRef)
@@ -209,7 +209,7 @@ public class RawPoint extends Entity
             p.unit = this.unit;
             p.tz = this.tz;
             p.siteRef = this.siteRef;
-            p.zoneRef = this.zoneRef;
+            p.roomRef = this.roomRef;
             p.floorRef = this.floorRef;
             p.kind = this.kind;
             p.id = this.id;
@@ -245,9 +245,9 @@ public class RawPoint extends Entity
                 {
                     this.floorRef = pair.getValue().toString();
                 }
-                else if (pair.getKey().equals("zoneRef"))
+                else if (pair.getKey().equals("roomRef"))
                 {
-                    this.zoneRef = pair.getValue().toString();
+                    this.roomRef = pair.getValue().toString();
                 }
                 else if (pair.getKey().equals("deviceRef"))
                 {

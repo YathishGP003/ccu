@@ -1,7 +1,5 @@
 package a75f.io.logic.bo.building.system.vav;
 
-import android.util.Log;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -9,6 +7,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.haystack.device.ControlMote;
@@ -42,7 +41,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
                 return;
             }
         }
-        System.out.println("System Equip does not exist. Create Now");
+        CcuLog.d(L.TAG_CCU_SYSTEM,"System Equip does not exist. Create Now");
         HashMap siteMap = hayStack.read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
@@ -50,8 +49,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
                                    .setSiteRef(siteRef)
                                    .setDisplayName(siteDis+"-SystemEquip")
                                    .setProfile(ProfileType.SYSTEM_VAV_HYBRID_RTU.name())
-                                   .addMarker("equip")
-                                   .addMarker("system")
+                                   .addMarker("equip").addMarker("system").addMarker("vav")
                                    .addMarker("equipHis")
                                    .setTz(siteMap.get("tz").toString())
                                    .build();
@@ -88,7 +86,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         
         double analogMin = getConfigVal("analog1 and cooling and min");
         double analogMax = getConfigVal("analog1 and cooling and max");
-        Log.d("CCU", "analogMin: " + analogMin + " analogMax: " + analogMax + " systemCoolingLoopOp: " + systemCoolingLoopOp);
+        CcuLog.d(L.TAG_CCU_SYSTEM, "analogMin: " + analogMin + " analogMax: " + analogMax + " systemCoolingLoopOp: " + systemCoolingLoopOp);
     
         int signal = 0;
         if (analogMax > analogMin)
@@ -110,7 +108,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         analogMin = getConfigVal("analog2 and fan and min");
         analogMax = getConfigVal("analog2 and fan and max");
     
-        Log.d("CCU", "analogMin: "+analogMin+" analogMax: "+analogMax+" systemFanLoopOp: "+systemFanLoopOp);
+        CcuLog.d(L.TAG_CCU_SYSTEM, "analogMin: "+analogMin+" analogMax: "+analogMax+" systemFanLoopOp: "+systemFanLoopOp);
     
         if (analogMax > analogMin)
         {
@@ -131,7 +129,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         analogMin = getConfigVal("analog3 and heating and min");
         analogMax = getConfigVal("analog3 and heating and max");
     
-        Log.d("CCU", "analogMin: "+analogMin+" analogMax: "+analogMax+" systemHeatingLoopOp : "+systemHeatingLoopOp);
+        CcuLog.d(L.TAG_CCU_SYSTEM, "analogMin: "+analogMin+" analogMax: "+analogMax+" systemHeatingLoopOp : "+systemHeatingLoopOp);
         if (analogMax > analogMin)
         {
             signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (systemHeatingLoopOp / 100)));
@@ -171,7 +169,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         } else {
             signal = 0;
         }
-        Log.d("CCU", "analogMin: "+analogMin+" analogMax: "+analogMax+" Composite: "+signal);
+        CcuLog.d(L.TAG_CCU_SYSTEM, "analogMin: "+analogMin+" analogMax: "+analogMax+" Composite: "+signal);
         
         setCmdSignal("composite",signal);
         if (getConfigVal("analog4 and output and enabled") > 0)

@@ -7,10 +7,10 @@
 //
 package org.projecthaystack;
 
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
+import android.util.Log;
+
 import java.util.HashMap;
+import java.util.TimeZone;
 
 /**
  * HTimeZone handles the mapping between Haystack timezone
@@ -203,7 +203,7 @@ public final class HTimeZone
       if (defName != null)
       {
         def = HTimeZone.make(defName, false);
-        if (def == null) System.out.println("WARN: invalid haystack.tz system property: " + defName);
+        if (def == null) Log.w("CCU_HS", "WARN: invalid haystack.tz system property: " + defName);
       }
 
       // if we still don't have a default, try to use Java's

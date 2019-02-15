@@ -14,10 +14,8 @@ import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 
-import static a75f.io.device.DeviceConstants.TAG;
 import static a75f.io.device.mesh.MeshUtil.sendStruct;
 
 /**
@@ -93,11 +91,7 @@ public class MeshNetwork extends DeviceNetwork
             CcuLog.d(L.TAG_CCU_DEVICE, "MeshNetwork SendSystemControl : Abort , No system profile");
             return;
         }
-        if (!(L.ccu().systemProfile instanceof DefaultSystem))
-        {
-            L.ccu().systemProfile.doSystemControl();
-        }
-    
+        
         CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
         msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
         msg.analog0.set((short) ControlMote.getAnalogOut("analog1"));

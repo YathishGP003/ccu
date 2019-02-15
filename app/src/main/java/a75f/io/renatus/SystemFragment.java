@@ -267,17 +267,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				Schedule schedule = new Schedule.Builder().setHDict(hDict).build();
 
 				CCUHsApi.getInstance().updateSchedule(schedule);
-
-				new Thread()
-				{
-					@Override
-					public void run()
-					{
-						CCUHsApi.getInstance().syncEntityTree();
-					}
-				}.start();
-
-
+				CCUHsApi.getInstance().syncEntityTree();
 			}
 
 		});
@@ -302,10 +292,10 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		switch (arg0.getId())
 		{
 			case R.id.targetMaxInsideHumidity:
-				setUserIntentBackground("target and min and inside and humidity", val);
+				setUserIntentBackground("target and max and inside and humidity", val);
 				break;
 			case R.id.targetMinInsideHumidity:
-				setUserIntentBackground("target and max and inside and humidity", val);
+				setUserIntentBackground("target and min and inside and humidity", val);
 				break;
 		}
 	}

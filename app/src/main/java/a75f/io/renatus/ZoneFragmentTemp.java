@@ -27,6 +27,8 @@ import java.util.Map;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Point;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.logic.tuners.TunerConstants;
 
 /**
@@ -207,6 +209,7 @@ public class ZoneFragmentTemp extends Fragment
                 {
                     if (marker.equals("writable"))
                     {
+                        CcuLog.d(L.TAG_CCU_UI, "Set Writbale Val "+p.getDisplayName()+": " +val);
                         CCUHsApi.getInstance().pointWrite(HRef.copy(id), TunerConstants.MANUAL_OVERRIDE_VAL_LEVEL, "manual", HNum.make(val) , HNum.make(2 * 60 * 60 * 1000, "ms"));
                     }
                 }
@@ -215,6 +218,7 @@ public class ZoneFragmentTemp extends Fragment
                 {
                     if (marker.equals("his"))
                     {
+                        CcuLog.d(L.TAG_CCU_UI, "Set His Val "+id+": " +val);
                         hayStack.writeHisValById(id, val);
                     }
                 }

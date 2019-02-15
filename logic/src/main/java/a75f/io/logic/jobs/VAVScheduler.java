@@ -48,11 +48,25 @@ public class VAVScheduler {
             return; //Equip might have been deleted.
         }
         String id = ((HashMap) points.get(0)).get("id").toString();
-        CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
         try {
             CCUHsApi.getInstance().pointWrite(HRef.make(id.replace("@","")), 9, "Scheduler", desiredTemp != null ? HNum.make(desiredTemp) : HNum.make(0), HNum.make(0));
         } catch (Exception e) {
             e.printStackTrace();
         }
+        CCUHsApi.getInstance().writeHisValById(id, getPriorityVal(id));
+    }
+    
+    public static double getPriorityVal(String id) {
+        ArrayList values = CCUHsApi.getInstance().readPoint(id);
+        if (values != null && values.size() > 0)
+        {
+            for (int l = 1; l <= values.size() ; l++ ) {
+                HashMap valMap = ((HashMap) values.get(l-1));
+                if (valMap.get("val") != null) {
+                    return Double.parseDouble(valMap.get("val").toString());
+                }
+            }
+        }
+        return 0;
     }
 }

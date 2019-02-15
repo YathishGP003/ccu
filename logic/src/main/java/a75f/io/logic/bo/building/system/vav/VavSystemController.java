@@ -339,9 +339,9 @@ public class VavSystemController
         for (ZoneProfile z : L.ccu().zoneProfiles)
         {
             Equip q = z.getEquip();
-            Double humidityVal = CCUHsApi.getInstance().readHisValByQuery("point and air and humidity and sensor and current and equipRef == \""+q.getId()+"\"");
+            double humidityVal = CCUHsApi.getInstance().readHisValByQuery("point and air and humidity and sensor and current and equipRef == \""+q.getId()+"\"");
     
-            if (humidityVal != null && humidityVal != 0) {
+            if (humidityVal != 0) {
                 humiditySum += humidityVal;
                 humidityZones++;
             }

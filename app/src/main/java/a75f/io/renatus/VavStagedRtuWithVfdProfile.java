@@ -13,9 +13,13 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.Spinner;
+import android.widget.ToggleButton;
 
 import java.util.ArrayList;
 
+import a75f.io.device.mesh.MeshUtil;
+import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
+import a75f.io.device.serial.MessageType;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtuWithVfd;
 import butterknife.BindView;
@@ -58,6 +62,14 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
     @BindView(R.id.analog2HeatStage3) Spinner analog2HeatStage3;
     @BindView(R.id.analog2HeatStage4) Spinner analog2HeatStage4;
     @BindView(R.id.analog2HeatStage5) Spinner analog2HeatStage5;
+    
+    @BindView(R.id.relay1Test) ToggleButton relay1Test;
+    @BindView(R.id.relay2Test) ToggleButton relay2Test;
+    @BindView(R.id.relay3Test) ToggleButton relay3Test;
+    @BindView(R.id.relay4Test) ToggleButton relay4Test;
+    @BindView(R.id.relay5Test) ToggleButton relay5Test;
+    @BindView(R.id.relay6Test) ToggleButton relay6Test;
+    @BindView(R.id.relay7Test) ToggleButton relay7Test;
     
     
     VavStagedRtuWithVfd systemProfile = null;
@@ -133,6 +145,14 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         relay6Cb.setOnCheckedChangeListener(this);
         relay7Cb.setOnCheckedChangeListener(this);
         analog2Cb.setOnCheckedChangeListener(this);
+        
+        relay1Test.setOnCheckedChangeListener(this);
+        relay2Test.setOnCheckedChangeListener(this);
+        relay3Test.setOnCheckedChangeListener(this);
+        relay4Test.setOnCheckedChangeListener(this);
+        relay5Test.setOnCheckedChangeListener(this);
+        relay6Test.setOnCheckedChangeListener(this);
+        relay7Test.setOnCheckedChangeListener(this);
     }
     
     private void setUpSpinners() {
@@ -197,8 +217,8 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         analog2HeatStage4.setSelection((int)systemProfile.getConfigVal("analog2 and heating and stage4"));
         analog2HeatStage5.setAdapter(analogAdapter);
         analog2HeatStage5.setSelection((int)systemProfile.getConfigVal("analog2 and heating and stage5"));
-    
-        analog2TestSpinner.setEnabled(analog2Cb.isChecked());
+        
+        analog2TestSpinner.setOnItemSelectedListener(this);
         updateAnalogOptions();
     }
     
@@ -256,7 +276,28 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
             case R.id.analog2Cb:
                 setConfigEnabledBackground("analog2",analog2Cb.isChecked() ? 1: 0);
                 break;
-            
+            case R.id.relay1Test:
+                sendRelayActivationTestSignal((short) (relay1Test.isChecked() ? 1: 0));
+                break;
+            case R.id.relay2Test:
+                sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 1 : 0));
+                break;
+            case R.id.relay3Test:
+                sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 2 : 0));
+                break;
+            case R.id.relay4Test:
+                sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 3 : 0));
+                break;
+            case R.id.relay5Test:
+                sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 4 : 0));
+                break;
+            case R.id.relay6Test:
+                sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 5 : 0));
+                break;
+            case R.id.relay7Test:
+                sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 6 : 0));
+                break;
+                
         }
         updateAnalogOptions();
     }
@@ -316,6 +357,9 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
                     setConfigAssociationBackground("relay7", relay7Spinner.getSelectedItemPosition());
                     updateAnalogOptions();
                 }
+                break;
+            case R.id.analog2TestSpinner:
+                sendAnalog2OutTestSignal(Double.parseDouble(arg0.getSelectedItem().toString()));
                 break;
             case R.id.analog2Economizer:
                 setConfigBackground("analog2 and economizer", Double.parseDouble(arg0.getSelectedItem().toString()));
@@ -406,5 +450,19 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
                 // continue what you are doing...
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+    }
+    
+    public void sendRelayActivationTestSignal(short val) {
+        CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
+        msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
+        msg.relayBitmap.set(val);
+        MeshUtil.sendStructToCM(msg);
+    }
+    
+    public void sendAnalog2OutTestSignal(double val) {
+        CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
+        msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
+        msg.analog2.set((short)(val * 10));
+        MeshUtil.sendStructToCM(msg);
     }
 }

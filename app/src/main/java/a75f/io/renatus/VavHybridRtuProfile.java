@@ -13,9 +13,13 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.Spinner;
+import android.widget.ToggleButton;
 
 import java.util.ArrayList;
 
+import a75f.io.device.mesh.MeshUtil;
+import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
+import a75f.io.device.serial.MessageType;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedHybridRtu;
 import a75f.io.logic.tuners.TunerConstants;
@@ -80,6 +84,14 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
     @BindView(R.id.ahuAnalog4MaxCooling) Spinner analog4MaxCooling;
     @BindView(R.id.ahuAnalog4MinHeating) Spinner analog4MinHeating;
     @BindView(R.id.ahuAnalog4MaxHeating) Spinner analog4MaxHeating;
+    
+    @BindView(R.id.relay1Test)ToggleButton relay1Test;
+    @BindView(R.id.relay2Test)ToggleButton relay2Test;
+    @BindView(R.id.relay3Test)ToggleButton relay3Test;
+    @BindView(R.id.relay4Test)ToggleButton relay4Test;
+    @BindView(R.id.relay5Test)ToggleButton relay5Test;
+    @BindView(R.id.relay6Test)ToggleButton relay6Test;
+    @BindView(R.id.relay7Test)ToggleButton relay7Test;
     
     
     VavAdvancedHybridRtu systemProfile = null;
@@ -194,6 +206,15 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
         relay5Spinner.setOnItemSelectedListener(this);
         relay6Spinner.setOnItemSelectedListener(this);
         relay7Spinner.setOnItemSelectedListener(this);
+    
+        relay1Test.setOnCheckedChangeListener(this);
+        relay2Test.setOnCheckedChangeListener(this);
+        relay3Test.setOnCheckedChangeListener(this);
+        relay4Test.setOnCheckedChangeListener(this);
+        relay5Test.setOnCheckedChangeListener(this);
+        relay6Test.setOnCheckedChangeListener(this);
+        relay7Test.setOnCheckedChangeListener(this);
+        
         setupAnalogSpinners();
     }
     
@@ -315,6 +336,27 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
             case R.id.ahuAnalog4Cb:
                 setConfigEnabledBackground("analog4", isChecked ? 1 : 0);
                 break;
+            case R.id.relay1Test:
+                sendRelayActivationTestSignal((short) (relay1Test.isChecked() ? 1: 0));
+                break;
+            case R.id.relay2Test:
+                sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 1 : 0));
+                break;
+            case R.id.relay3Test:
+                sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 2 : 0));
+                break;
+            case R.id.relay4Test:
+                sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 3 : 0));
+                break;
+            case R.id.relay5Test:
+                sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 4 : 0));
+                break;
+            case R.id.relay6Test:
+                sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 5 : 0));
+                break;
+            case R.id.relay7Test:
+                sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 6 : 0));
+                break;
         }
     }
     
@@ -398,16 +440,16 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
                 setConfigBackground("analog4 and heating and max", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL, Double.parseDouble(arg0.getSelectedItem().toString()));
                 break;
             case R.id.ahuAnalog1Test:
-                //sendAnalog1OutTestSignal(val);
+                sendAnalog1OutTestSignal(Double.parseDouble(arg0.getSelectedItem().toString()));
                 break;
             case R.id.ahuAnalog2Test:
-                //sendAnalog2OutTestSignal(val);
+                sendAnalog2OutTestSignal(Double.parseDouble(arg0.getSelectedItem().toString()));
                 break;
             case R.id.ahuAnalog3Test:
-                //sendAnalog3OutTestSignal(val);
+                sendAnalog3OutTestSignal(Double.parseDouble(arg0.getSelectedItem().toString()));
                 break;
             case R.id.ahuAnalog4Test:
-                //sendAnalog4OutTestSignal(val);
+                sendAnalog4OutTestSignal(Double.parseDouble(arg0.getSelectedItem().toString()));
                 break;
         }
     }
@@ -470,5 +512,75 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
     }
+    
+    public void sendRelayActivationTestSignal(short val) {
+        CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
+        msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
+        msg.relayBitmap.set(val);
+        MeshUtil.sendStructToCM(msg);
+    }
+    
+    public void sendAnalog1OutTestSignal(double val) {
+        double analogMin = systemProfile.getConfigVal("analog1 and cooling and min");
+        double analogMax = systemProfile.getConfigVal("analog1 and cooling and max");
+        
+        CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
+        msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
+        
+        short signal;
+        if (analogMax > analogMin)
+        {
+            signal = (short) (10 * (analogMin + (analogMax - analogMin) * val/100));
+        } else {
+            signal = (short) (10 * (analogMin - (analogMin - analogMax) * val/100));
+        }
+        msg.analog0.set(signal);
+        MeshUtil.sendStructToCM(msg);
+    }
+    
+    public void sendAnalog2OutTestSignal(double val) {
+        double analogMin = systemProfile.getConfigVal("analog2 and fan and min");
+        double analogMax = systemProfile.getConfigVal("analog2 and fan and max");
+        
+        CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
+        msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
+        
+        short signal;
+        if (analogMax > analogMin)
+        {
+            signal = (short) (10 * (analogMin + (analogMax - analogMin) * val/100));
+        } else {
+            signal = (short) (10 * (analogMin - (analogMin - analogMax) * val/100));
+        }
+        msg.analog1.set(signal);
+        MeshUtil.sendStructToCM(msg);
+    }
+    
+    public void sendAnalog3OutTestSignal(double val) {
+        double analogMin = systemProfile.getConfigVal("analog3 and heating and min");
+        double analogMax = systemProfile.getConfigVal("analog3 and heating and max");
+        
+        CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
+        msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
+        
+        short signal;
+        if (analogMax > analogMin)
+        {
+            signal = (short) (10 * (analogMin + (analogMax - analogMin) * val/100));
+        } else {
+            signal = (short) (10 * (analogMin - (analogMin - analogMax) * val/100));
+        }
+        msg.analog2.set(signal);
+        MeshUtil.sendStructToCM(msg);
+    }
+    
+    public void sendAnalog4OutTestSignal(double val) {
+        
+        CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
+        msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
+        msg.analog3.set((short) val);
+        MeshUtil.sendStructToCM(msg);
+    }
+    
 }
 

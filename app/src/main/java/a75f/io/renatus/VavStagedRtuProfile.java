@@ -12,7 +12,11 @@ import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.Spinner;
+import android.widget.ToggleButton;
 
+import a75f.io.device.mesh.MeshUtil;
+import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
+import a75f.io.device.serial.MessageType;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.hvac.Stage;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
@@ -41,6 +45,14 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
     @BindView(R.id.relay5Spinner)Spinner relay5Spinner;
     @BindView(R.id.relay6Spinner)Spinner relay6Spinner;
     @BindView(R.id.relay7Spinner)Spinner relay7Spinner;
+    
+    @BindView(R.id.relay1Test)ToggleButton relay1Test;
+    @BindView(R.id.relay2Test)ToggleButton relay2Test;
+    @BindView(R.id.relay3Test)ToggleButton relay3Test;
+    @BindView(R.id.relay4Test)ToggleButton relay4Test;
+    @BindView(R.id.relay5Test)ToggleButton relay5Test;
+    @BindView(R.id.relay6Test)ToggleButton relay6Test;
+    @BindView(R.id.relay7Test)ToggleButton relay7Test;
     
     VavStagedRtu systemProfile = null;
     public static VavStagedRtuProfile newInstance()
@@ -141,6 +153,15 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
         relay5Spinner.setOnItemSelectedListener(this);
         relay6Spinner.setOnItemSelectedListener(this);
         relay7Spinner.setOnItemSelectedListener(this);
+    
+        relay1Test.setOnCheckedChangeListener(this);
+        relay2Test.setOnCheckedChangeListener(this);
+        relay3Test.setOnCheckedChangeListener(this);
+        relay4Test.setOnCheckedChangeListener(this);
+        relay5Test.setOnCheckedChangeListener(this);
+        relay6Test.setOnCheckedChangeListener(this);
+        relay7Test.setOnCheckedChangeListener(this);
+        
     }
     
     
@@ -180,6 +201,28 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
             case R.id.relay7Cb:
                 relay7Spinner.setEnabled(relay7Cb.isChecked());
                 setConfigEnabledBackground("relay7",relay7Cb.isChecked() ? 1: 0);
+                break;
+    
+            case R.id.relay1Test:
+                sendRelayActivationTestSignal((short) (relay1Test.isChecked() ? 1: 0));
+                break;
+            case R.id.relay2Test:
+                sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 1 : 0));
+                break;
+            case R.id.relay3Test:
+                sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 2 : 0));
+                break;
+            case R.id.relay4Test:
+                sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 3 : 0));
+                break;
+            case R.id.relay5Test:
+                sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 4 : 0));
+                break;
+            case R.id.relay6Test:
+                sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 5 : 0));
+                break;
+            case R.id.relay7Test:
+                sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 6 : 0));
                 break;
                 
         }
@@ -273,5 +316,12 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
                 // continue what you are doing...
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+    }
+    
+    public void sendRelayActivationTestSignal(short val) {
+        CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
+        msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
+        msg.relayBitmap.set(val);
+        MeshUtil.sendStructToCM(msg);
     }
 }

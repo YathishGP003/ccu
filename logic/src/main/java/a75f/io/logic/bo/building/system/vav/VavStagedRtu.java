@@ -315,6 +315,9 @@ public class VavStagedRtu extends VavSystemProfile
                                 relayState = 0;
                             }
                         }
+                        CcuLog.d(L.TAG_CCU_SYSTEM,"humidity :"+humidity+" targetMinHumidity: "+targetMinHumidity+" humidityHysteresis: "+humidityHysteresis+
+                                                  " targetMaxHumidity: "+targetMaxHumidity);
+    
                         break;
                 }
             }

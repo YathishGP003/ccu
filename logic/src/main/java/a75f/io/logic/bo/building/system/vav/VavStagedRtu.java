@@ -31,9 +31,9 @@ public class VavStagedRtu extends VavSystemProfile
     private static final int CO2_MAX = 1000;
     private static final int CO2_MIN = 400;
     
-    int heatingStages = 0;
-    int coolingStages = 0;
-    int fanStages = 0;
+    public int heatingStages = 0;
+    public int coolingStages = 0;
+    public int fanStages = 0;
     
     public void initTRSystem() {
         trSystem =  new VavTRSystem();

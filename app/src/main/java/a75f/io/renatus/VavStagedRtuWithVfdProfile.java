@@ -21,6 +21,7 @@ import a75f.io.device.mesh.MeshUtil;
 import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.hvac.Stage;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtuWithVfd;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -119,6 +120,7 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
                 protected Void doInBackground( final Void ... params ) {
                     if (systemProfile != null) {
                         systemProfile.deleteSystemEquip();
+                        L.ccu().systemProfile = null;
                     }
                     systemProfile = new VavStagedRtuWithVfd();
                     systemProfile.addSystemEquip();
@@ -227,17 +229,17 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         boolean analogEnabled = analog2Cb.isChecked();
         analog2Economizer.setEnabled(false);
         analog2Recirculate.setEnabled(false);
-        analog2CoolStage1.setEnabled(analogEnabled && systemProfile.coolingStages == 1);
-        analog2CoolStage2.setEnabled(analogEnabled && systemProfile.coolingStages == 2);
-        analog2CoolStage3.setEnabled(analogEnabled && systemProfile.coolingStages == 3);
-        analog2CoolStage4.setEnabled(analogEnabled && systemProfile.coolingStages == 4);
-        analog2CoolStage5.setEnabled(analogEnabled && systemProfile.coolingStages == 5);
+        analog2CoolStage1.setEnabled(analogEnabled && systemProfile.isStageEnabled(Stage.COOLING_1));
+        analog2CoolStage2.setEnabled(analogEnabled && systemProfile.isStageEnabled(Stage.COOLING_2));
+        analog2CoolStage3.setEnabled(analogEnabled && systemProfile.isStageEnabled(Stage.COOLING_3));
+        analog2CoolStage4.setEnabled(analogEnabled && systemProfile.isStageEnabled(Stage.COOLING_4));
+        analog2CoolStage5.setEnabled(analogEnabled && systemProfile.isStageEnabled(Stage.COOLING_5));
     
-        analog2HeatStage1.setEnabled(analogEnabled && systemProfile.heatingStages == 1);
-        analog2HeatStage2.setEnabled(analogEnabled && systemProfile.heatingStages == 2);
-        analog2HeatStage3.setEnabled(analogEnabled && systemProfile.heatingStages == 3);
-        analog2HeatStage4.setEnabled(analogEnabled && systemProfile.heatingStages == 4);
-        analog2HeatStage5.setEnabled(analogEnabled && systemProfile.heatingStages == 5);
+        analog2HeatStage1.setEnabled(analogEnabled && systemProfile.isStageEnabled(Stage.HEATING_1));
+        analog2HeatStage2.setEnabled(analogEnabled && systemProfile.isStageEnabled(Stage.HEATING_2));
+        analog2HeatStage3.setEnabled(analogEnabled && systemProfile.isStageEnabled(Stage.HEATING_3));
+        analog2HeatStage4.setEnabled(analogEnabled && systemProfile.isStageEnabled(Stage.HEATING_4));
+        analog2HeatStage5.setEnabled(analogEnabled && systemProfile.isStageEnabled(Stage.HEATING_5));
     }
     
     @Override

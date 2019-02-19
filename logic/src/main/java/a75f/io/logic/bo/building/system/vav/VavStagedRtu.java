@@ -35,6 +35,10 @@ public class VavStagedRtu extends VavSystemProfile
     public int coolingStages = 0;
     public int fanStages = 0;
     
+    public int heatingStage ;
+    public int currentCoolingStage = 0;
+    public int currentFanStage = 0;
+    
     public void initTRSystem() {
         trSystem =  new VavTRSystem();
     }
@@ -363,6 +367,20 @@ public class VavStagedRtu extends VavSystemProfile
             fanStages -= Stage.FAN_1.ordinal();
         }
         
+    }
+    
+    public boolean isStageEnabled(Stage s) {
+        for (int i = 1; i < 8; i++)
+        {
+            if (getConfigEnabled("relay" + i) > 0)
+            {
+                int val = (int) getConfigAssociation("relay" + i);
+                if (val == s.ordinal())  {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
     
     @Override

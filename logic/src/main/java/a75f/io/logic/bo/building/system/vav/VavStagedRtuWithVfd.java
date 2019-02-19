@@ -10,6 +10,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.hvac.Stage;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 
 import static a75f.io.logic.bo.building.system.vav.VavSystemController.State.COOLING;
@@ -86,13 +87,32 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
         super.updateSystemPoints();
         double signal = 0;
         if (VavSystemController.getInstance().getSystemState() == COOLING) {
-            signal = getConfigVal("analog2 and cooling and stage"+coolingStages);
-        } else if (VavSystemController.getInstance().getSystemState() == HEATING) {
-            signal = getConfigVal("analog2 and heating and stage"+heatingStages);
-        }
-        ControlMote.setAnalogOut("analog2", signal);
     
-        CcuLog.d(L.TAG_CCU_SYSTEM, " analog2 Signal : "+signal);
+            for (int i = 1; i < 8; i++)
+            {
+                if (getConfigEnabled("relay" + i) > 0 && getCmdSignal("relay" + i) > 0)
+                {
+                    int val = (int) getConfigAssociation("relay" + i);
+                    if ( val <= Stage.COOLING_5.ordinal())  {
+                        signal = getConfigVal("analog2 and cooling and stage"+(val+1));
+                    }
+                }
+            }
+            
+        } else if (VavSystemController.getInstance().getSystemState() == HEATING) {
+            for (int i = 1; i < 8; i++)
+            {
+                if (getConfigEnabled("relay" + i) > 0 && getCmdSignal("relay" + i) > 0)
+                {
+                    int val = (int) getConfigAssociation("relay" + i);
+                    if ( val >= Stage.HEATING_1.ordinal() && val <= Stage.HEATING_5.ordinal())  {
+                        signal = getConfigVal("analog2 and heating and stage"+(val - Stage.HEATING_1.ordinal() + 1));
+                    }
+                }
+            }
+        }
+        ControlMote.setAnalogOut("analog2", 10 * signal);
+        CcuLog.d(L.TAG_CCU_SYSTEM, " analog2 Signal : "+10 * signal);
     
     }
     

@@ -150,6 +150,7 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
                     if (systemProfile != null)
                     {
                         systemProfile.deleteSystemEquip();
+                        L.ccu().systemProfile = null;
                     }
                     systemProfile = new VavAdvancedHybridRtu();
                     systemProfile.addSystemEquip();

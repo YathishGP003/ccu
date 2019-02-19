@@ -101,6 +101,7 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
                 protected Void doInBackground( final Void ... params ) {
                     if (systemProfile != null) {
                         systemProfile.deleteSystemEquip();
+                        L.ccu().systemProfile = null;
                     }
                     systemProfile = new VavStagedRtu();
                     systemProfile.addSystemEquip();

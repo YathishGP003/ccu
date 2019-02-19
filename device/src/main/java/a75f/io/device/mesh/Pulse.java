@@ -38,7 +38,7 @@ public class Pulse
 					continue;
 				}
 				HashMap logPoint = hayStack.read("point and id=="+phyPoint.get("pointRef"));
-				double val;
+				double val = 0;
 				switch (Port.valueOf(phyPoint.get("port").toString())){
 					case SENSOR_RT:
 						val = smartNodeRegularUpdateMessage_t.update.roomTemperature.get();
@@ -83,22 +83,36 @@ public class Pulse
 						break;
 					case SENSOR_RH:
 						SmartNodeSensorReading_t[] sensorReadingsHumidity = smartNodeRegularUpdateMessage_t.update.sensorReadings;
-						val = sensorReadingsHumidity[SensorType.HUMIDITY.ordinal()].sensorData.get();
+						for (SmartNodeSensorReading_t r : sensorReadingsHumidity) {
+							if (r.sensorType.get() == SensorType.HUMIDITY.ordinal()) {
+								val = r.sensorData.get();
+								break;
+							}
+						}
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						hayStack.writeHisValById(logPoint.get("id").toString(), getHumidityConversion(val));
 						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : Humidity "+getHumidityConversion(val));
 						break;
 					case SENSOR_CO2:
 						SmartNodeSensorReading_t[] sensorReadingsCO2 = smartNodeRegularUpdateMessage_t.update.sensorReadings;
-						val = sensorReadingsCO2[SensorType.CO2.ordinal()].sensorData.get();
+						for (SmartNodeSensorReading_t r : sensorReadingsCO2) {
+							if (r.sensorType.get() == SensorType.CO2.ordinal()) {
+								val = r.sensorData.get();
+								break;
+							}
+						}
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						hayStack.writeHisValById(logPoint.get("id").toString(), val);
 						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : CO2 "+val);
 						break;
 					case SENSOR_VOC:
 						SmartNodeSensorReading_t[] sensorReadingsVOC = smartNodeRegularUpdateMessage_t.update.sensorReadings;
-						val = sensorReadingsVOC[SensorType.VOC.ordinal()].sensorData.get();
-						
+						for (SmartNodeSensorReading_t r : sensorReadingsVOC) {
+							if (r.sensorType.get() == SensorType.VOC.ordinal()) {
+								val = r.sensorData.get();
+								break;
+							}
+						}
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						hayStack.writeHisValById(logPoint.get("id").toString(), val);
 						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : VOC "+val);

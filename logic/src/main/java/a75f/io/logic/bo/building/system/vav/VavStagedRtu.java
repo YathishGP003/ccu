@@ -31,9 +31,13 @@ public class VavStagedRtu extends VavSystemProfile
     private static final int CO2_MAX = 1000;
     private static final int CO2_MIN = 400;
     
-    int heatingStages = 0;
-    int coolingStages = 0;
-    int fanStages = 0;
+    public int heatingStages = 0;
+    public int coolingStages = 0;
+    public int fanStages = 0;
+    
+    public int heatingStage ;
+    public int currentCoolingStage = 0;
+    public int currentFanStage = 0;
     
     public void initTRSystem() {
         trSystem =  new VavTRSystem();
@@ -315,6 +319,9 @@ public class VavStagedRtu extends VavSystemProfile
                                 relayState = 0;
                             }
                         }
+                        CcuLog.d(L.TAG_CCU_SYSTEM,"humidity :"+humidity+" targetMinHumidity: "+targetMinHumidity+" humidityHysteresis: "+humidityHysteresis+
+                                                  " targetMaxHumidity: "+targetMaxHumidity);
+    
                         break;
                 }
             }
@@ -360,6 +367,20 @@ public class VavStagedRtu extends VavSystemProfile
             fanStages -= Stage.FAN_1.ordinal();
         }
         
+    }
+    
+    public boolean isStageEnabled(Stage s) {
+        for (int i = 1; i < 8; i++)
+        {
+            if (getConfigEnabled("relay" + i) > 0)
+            {
+                int val = (int) getConfigAssociation("relay" + i);
+                if (val == s.ordinal())  {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
     
     @Override

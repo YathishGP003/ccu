@@ -43,6 +43,7 @@ import a75f.io.logic.bo.building.system.vav.VavAnalogRtu;
 import a75f.io.logic.bo.building.system.vav.VavBacnetRtu;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
+import a75f.io.logic.bo.building.system.vav.VavStagedRtuWithVfd;
 import a75f.io.logic.bo.building.vav.VavParallelFanProfile;
 import a75f.io.logic.bo.building.vav.VavReheatProfile;
 import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
@@ -396,6 +397,11 @@ public class Globals {
                     VavStagedRtu stagedRtuProfile = new VavStagedRtu();
                     stagedRtuProfile.addSystemEquip();
                     L.ccu().systemProfile = stagedRtuProfile;
+                    break;
+                case SYSTEM_VAV_STAGED_VFD_RTU:
+                    VavStagedRtuWithVfd stagedVfdRtuProfile = new VavStagedRtuWithVfd();
+                    stagedVfdRtuProfile.addSystemEquip();
+                    L.ccu().systemProfile = stagedVfdRtuProfile;
                     break;
                 case SYSTEM_VAV_HYBRID_RTU:
                     VavAdvancedHybridRtu hybridRtuProfile = new VavAdvancedHybridRtu();

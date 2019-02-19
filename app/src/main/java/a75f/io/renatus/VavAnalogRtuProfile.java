@@ -109,6 +109,7 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 			    protected Void doInBackground( final Void ... params ) {
 			    	if (systemProfile != null) {
 			    		systemProfile.deleteSystemEquip();
+					    L.ccu().systemProfile = null; //Makes sure that System Algos dont run until new profile is ready.
 				    }
 				    systemProfile = new VavAnalogRtu();
 				    systemProfile.addSystemEquip();

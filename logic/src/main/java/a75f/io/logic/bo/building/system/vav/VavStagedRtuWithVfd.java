@@ -82,6 +82,16 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
         updateSystemPoints();
     }
     
+    @Override
+    public boolean isCoolingAvailable() {
+        return (coolingStages > 0 );
+    }
+    
+    @Override
+    public boolean isHeatingAvailable() {
+        return (heatingStages > 0);
+    }
+    
     public synchronized void updateSystemPoints()
     {
         super.updateSystemPoints();

@@ -35,9 +35,6 @@ public class VavStagedRtu extends VavSystemProfile
     public int coolingStages = 0;
     public int fanStages = 0;
     
-    public int heatingStage ;
-    public int currentCoolingStage = 0;
-    public int currentFanStage = 0;
     
     public void initTRSystem() {
         trSystem =  new VavTRSystem();
@@ -114,6 +111,16 @@ public class VavStagedRtu extends VavSystemProfile
         CCUHsApi.getInstance().syncEntityTree();
         
         
+    }
+    
+    @Override
+    public boolean isCoolingAvailable() {
+        return (coolingStages > 0);
+    }
+    
+    @Override
+    public boolean isHeatingAvailable() {
+        return (heatingStages > 0);
     }
     
     protected synchronized void updateSystemPoints() {
@@ -346,15 +353,15 @@ public class VavStagedRtu extends VavSystemProfile
                 if (val <= Stage.COOLING_5.ordinal() && val >= coolingStages)
                 {
                     coolingStages = val + 1;
-                    CcuLog.d(L.TAG_CCU_SYSTEM," Cooling stage : "+coolingStages);
+                    //CcuLog.d(L.TAG_CCU_SYSTEM," Cooling stage : "+coolingStages);
                 } else if (val >= Stage.HEATING_1.ordinal() && val <= Stage.HEATING_5.ordinal() && val >= heatingStages)
                 {
                     heatingStages = val + 1;
-                    CcuLog.d(L.TAG_CCU_SYSTEM," Heating stage : "+heatingStages);
+                    //CcuLog.d(L.TAG_CCU_SYSTEM," Heating stage : "+heatingStages);
                 } else if (val >= Stage.FAN_1.ordinal() && val <= Stage.FAN_5.ordinal() && val >= fanStages)
                 {
                     fanStages = val + 1;
-                    CcuLog.d(L.TAG_CCU_SYSTEM," Fan stage : "+fanStages);
+                    //CcuLog.d(L.TAG_CCU_SYSTEM," Fan stage : "+fanStages);
                 }
             }
         }

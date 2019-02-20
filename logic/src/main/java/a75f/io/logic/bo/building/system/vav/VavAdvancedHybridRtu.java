@@ -81,6 +81,16 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         updateSystemPoints();
     }
     
+    @Override
+    public boolean isCoolingAvailable() {
+        return (coolingStages > 0 || getConfigVal("analog1 and output and enabled") > 0);
+    }
+    
+    @Override
+    public boolean isHeatingAvailable() {
+        return (heatingStages > 0 || getConfigVal("analog3 and output and enabled") > 0);
+    }
+    
     public synchronized void updateSystemPoints() {
         super.updateSystemPoints();
         

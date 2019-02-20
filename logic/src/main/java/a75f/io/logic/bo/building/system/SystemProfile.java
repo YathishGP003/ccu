@@ -19,6 +19,10 @@ public abstract class SystemProfile
     
     public abstract void deleteSystemEquip();
     
+    public abstract boolean isCoolingAvailable();
+    
+    public abstract boolean isHeatingAvailable();
+    
     public  int getSystemSAT() {
         return 0;
     }

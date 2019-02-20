@@ -54,6 +54,16 @@ public class VavIERtu extends VavSystemProfile
     }
     
     @Override
+    public boolean isCoolingAvailable() {
+        return false;
+    }
+    
+    @Override
+    public boolean isHeatingAvailable() {
+        return false;
+    }
+    
+    @Override
     public void deleteSystemEquip() {
         HashMap equip = CCUHsApi.getInstance().read("equip and system");
         if (equip.get("profile").equals(ProfileType.SYSTEM_VAV_IE_RTU.name())) {

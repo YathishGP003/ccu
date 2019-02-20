@@ -15,9 +15,12 @@ import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.tuners.VavTRTuners;
 
+import static a75f.io.logic.bo.building.hvac.Stage.COOLING_1;
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_2;
+import static a75f.io.logic.bo.building.hvac.Stage.FAN_1;
 import static a75f.io.logic.bo.building.hvac.Stage.FAN_2;
 import static a75f.io.logic.bo.building.hvac.Stage.HEATING_1;
+import static a75f.io.logic.bo.building.hvac.Stage.HEATING_2;
 import static a75f.io.logic.bo.building.hvac.Stage.HUMIDIFIER;
 import static a75f.io.logic.bo.building.system.vav.VavSystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.vav.VavSystemController.State.HEATING;
@@ -403,19 +406,19 @@ public class VavStagedRtu extends VavSystemProfile
         String equipDis = siteMap.get("dis").toString()+"-SystemEquip";
         String siteRef = siteMap.get("id").toString();
         String tz = siteMap.get("tz").toString();
-        addCmdPoint("relay1", equipDis, siteRef, equipref, tz);
-        addCmdPoint("relay2", equipDis, siteRef, equipref, tz);
-        addCmdPoint("relay3", equipDis, siteRef, equipref, tz);
-        addCmdPoint("relay4", equipDis, siteRef, equipref, tz);
-        addCmdPoint("relay5", equipDis, siteRef, equipref, tz);
-        addCmdPoint("relay6", equipDis, siteRef, equipref, tz);
-        addCmdPoint("relay7", equipDis, siteRef, equipref, tz);
+        addCmdPoint(COOLING_1.displayName,"relay1", equipDis, siteRef, equipref, tz);
+        addCmdPoint(COOLING_2.displayName,"relay2", equipDis, siteRef, equipref, tz);
+        addCmdPoint(HEATING_1.displayName,"relay3", equipDis, siteRef, equipref, tz);
+        addCmdPoint(HEATING_2.displayName,"relay4", equipDis, siteRef, equipref, tz);
+        addCmdPoint(FAN_1.displayName,"relay5", equipDis, siteRef, equipref, tz);
+        addCmdPoint(FAN_2.displayName,"relay6", equipDis, siteRef, equipref, tz);
+        addCmdPoint(HUMIDIFIER.displayName,"relay7", equipDis, siteRef, equipref, tz);
     }
     
-    private void addCmdPoint(String relay, String equipDis, String siteRef, String equipref, String tz){
+    private void addCmdPoint(String name, String relay, String equipDis, String siteRef, String equipref, String tz){
         //Name to be updated
         Point relay1Op = new Point.Builder()
-                                 .setDisplayName(equipDis+"-"+relay+"Output")
+                                 .setDisplayName(equipDis+"-"+name)
                                  .setSiteRef(siteRef)
                                  .setEquipRef(equipref)
                                  .addMarker("system").addMarker("cmd").addMarker(relay).addMarker("his").addMarker("equipHis")
@@ -446,7 +449,7 @@ public class VavStagedRtu extends VavSystemProfile
         addConfigPointAssociation("relay1", equipDis, siteRef, equipref, tz, Stage.COOLING_1);
         addConfigPointAssociation("relay2", equipDis, siteRef, equipref, tz, COOLING_2);
         addConfigPointAssociation("relay3", equipDis, siteRef, equipref, tz, Stage.HEATING_1);
-        addConfigPointAssociation("relay4", equipDis, siteRef, equipref, tz, Stage.HEATING_2);
+        addConfigPointAssociation("relay4", equipDis, siteRef, equipref, tz, HEATING_2);
         addConfigPointAssociation("relay5", equipDis, siteRef, equipref, tz, Stage.FAN_1);
         addConfigPointAssociation("relay6", equipDis, siteRef, equipref, tz, FAN_2);
         addConfigPointAssociation("relay7", equipDis, siteRef, equipref, tz, Stage.HUMIDIFIER);
@@ -455,7 +458,7 @@ public class VavStagedRtu extends VavSystemProfile
     
     private void addConfigPointEnabled(String relay, String equipDis, String siteRef, String equipref, String tz) {
         Point relayEnabled = new Point.Builder()
-                                            .setDisplayName(equipDis+"-"+"relay3OutputEnabled")
+                                            .setDisplayName(equipDis+"-"+relay+"OutputEnabled")
                                             .setSiteRef(siteRef)
                                             .setEquipRef(equipref)
                                             .addMarker("system").addMarker("config").addMarker(relay)
@@ -468,7 +471,7 @@ public class VavStagedRtu extends VavSystemProfile
     
     private void addConfigPointAssociation(String relay, String equipDis, String siteRef, String equipref, String tz, Stage init) {
         Point relayEnabled = new Point.Builder()
-                                     .setDisplayName(equipDis+"-"+"relay3OutputEnabled")
+                                     .setDisplayName(equipDis+"-"+relay+"OutputAssociation")
                                      .setSiteRef(siteRef)
                                      .setEquipRef(equipref)
                                      .addMarker("system").addMarker("config").addMarker(relay)
@@ -490,7 +493,16 @@ public class VavStagedRtu extends VavSystemProfile
         return CCUHsApi.getInstance().readDefaultVal("point and system and config and output and association and "+config);
     }
     public void setConfigAssociation(String config, double val) {
+        HashMap cmd = CCUHsApi.getInstance().read("point and system and cmd and "+config);
+        Stage updatedStage = Stage.values()[(int)val];
+        HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
+        String equipDis = siteMap.get("dis").toString()+"-SystemEquip";
+        Point cmdPoint = new Point.Builder().setHashMap(cmd).setDisplayName(equipDis+"-"+updatedStage.displayName).build();
+        CcuLog.d(L.TAG_CCU_SYSTEM, "updateDisplaName for Point "+cmdPoint.getDisplayName());
+        CCUHsApi.getInstance().updatePoint(cmdPoint, cmdPoint.getId());
+        CCUHsApi.getInstance().syncEntityTree();
         CCUHsApi.getInstance().writeDefaultVal("point and system and config and output and association and "+config, val);
+        
     }
     
     public void addTunerPoints(String equipref) {

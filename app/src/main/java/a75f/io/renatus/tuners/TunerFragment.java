@@ -134,6 +134,13 @@ public class TunerFragment extends Fragment
                 tunerList.add(t.get("dis").toString());
                 tunerMap.put(t.get("dis").toString(), t.get("id").toString());
             }
+            
+            ArrayList<HashMap> userIntents = CCUHsApi.getInstance().readAll("userIntent and equipRef == \""+m.get("id")+"\"");
+            
+            for (Map t : userIntents) {
+                tunerList.add(t.get("dis").toString());
+                tunerMap.put(t.get("dis").toString(), t.get("id").toString());
+            }
             expandableListDetail.put(m.get("dis").toString(), tunerList);
         }
     }
@@ -157,6 +164,7 @@ public class TunerFragment extends Fragment
             @Override
             protected Void doInBackground( final Void ... params ) {
                 CCUHsApi.getInstance().writePoint(id, TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", val, 0);
+                CCUHsApi.getInstance().writeHisValById(id, val);
                 return null;
             }
         

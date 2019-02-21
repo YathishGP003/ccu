@@ -64,6 +64,16 @@ public class DefaultSystem extends SystemProfile
         CCUHsApi.getInstance().syncEntityTree();
     }
     
+    @Override
+    public boolean isCoolingAvailable() {
+        return false;
+    }
+    
+    @Override
+    public boolean isHeatingAvailable() {
+        return false;
+    }
+    
     public void updateAhuRef(String systemEquipId) {
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone");
         

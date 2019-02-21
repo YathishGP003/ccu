@@ -85,6 +85,16 @@ public class VavAnalogRtu extends VavSystemProfile
         updateSystemPoints();
     }
     
+    @Override
+    public boolean isCoolingAvailable() {
+        return (getConfigVal("analog1 and output and enabled") > 0);
+    }
+    
+    @Override
+    public boolean isHeatingAvailable() {
+        return (getConfigVal("analog3 and output and enabled") > 0);
+    }
+    
     private synchronized void updateSystemPoints() {
         
         if (VavSystemController.getInstance().getSystemState() == COOLING)

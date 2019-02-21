@@ -11,18 +11,22 @@ import java.util.Map;
 
 public class Point extends Entity
 {
-    private String displayName;
+    private String            displayName;
     private ArrayList<String> markers;
-    private String siteRef;
-    private String equipRef;
-    private String unit;
-    private String tz;
-    private String roomRef;
-    private String floorRef;
-    private String group;
-    private String kind;
-    private String id;
+    private String            siteRef;
+    private String            equipRef;
+    private String            unit;
+    private String            tz;
+    private String            roomRef;
+    private String            floorRef;
+    private String            group;
+    private String            kind;
+    private String            id;
     
+    public void setDisplayName(String displayName)
+    {
+        this.displayName = displayName;
+    }
     public void setSiteRef(String siteRef)
     {
         this.siteRef = siteRef;

@@ -26,6 +26,16 @@ public class DabStagedRtu extends SystemProfile
     }
     
     @Override
+    public boolean isCoolingAvailable() {
+        return false;
+    }
+    
+    @Override
+    public boolean isHeatingAvailable() {
+        return false;
+    }
+    
+    @Override
     public synchronized void deleteSystemEquip() {
     }
 }

@@ -20,7 +20,7 @@ abstract class BaseJob
     public void scheduleJob(String name, int interval, int taskSeperation, TimeUnit unit)
     {
         mName = name;
-        CcuLog.d(L.TAG_CCU_DEVICE, "Device Scheduling: " + name + " interval: " + interval + " task Seperation:  " +
+        CcuLog.d(L.TAG_CCU_JOB, "Device Scheduling: " + name + " interval: " + interval + " task Seperation:  " +
                     taskSeperation + " unit: " + unit.name());
         // This task runs every minute.
         scheduledFuture = Globals.getInstance().getScheduledThreadPool().scheduleAtFixedRate(new Runnable()

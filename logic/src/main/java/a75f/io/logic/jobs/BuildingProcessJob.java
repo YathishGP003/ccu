@@ -59,6 +59,9 @@ public class BuildingProcessJob extends BaseJob
             }
         }
     
+        L.ccu().systemProfile.doSystemControl();
+        L.saveCCUState();
+    
         new Thread()
         {
             @Override
@@ -66,9 +69,6 @@ public class BuildingProcessJob extends BaseJob
             {
                 super.run();
                 CCUHsApi.getInstance().syncHisData();
-                L.ccu().systemProfile.doSystemControl();
-                L.saveCCUState();
-                
                 /*if (Globals.getInstance().getApplicationContext().getResources().getBoolean(R.bool.write_ts))
                 {
                     uploadTimeSeriesData();

@@ -1,7 +1,5 @@
 package a75f.io.api.haystack.sync;
 
-import android.util.Log;
-
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HRef;
 import org.projecthaystack.io.HGridFormat;
@@ -21,6 +19,7 @@ import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.SettingPoint;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Zone;
+import a75f.io.logger.CcuLog;
 
 /**
  * Created by samjithsadasivan on 12/21/18.
@@ -74,10 +73,10 @@ public class EntityPullHandler
                     hsApi.putUIDMap(zoneLuid, z.getId());
                     //Equips
                     for (Equip q : parser.getEquips()) {
-                        if (q.getZoneRef().equals(z.getId())) {
+                        if (q.getRoomRef().equals(z.getId())) {
                             q.setSiteRef(siteLuid);
                             q.setFloorRef(floorLuid);
-                            q.setZoneRef(zoneLuid);
+                            q.setRoomRef(zoneLuid);
                             String equipLuid = hsApi.addEquip(q);
                             hsApi.putUIDMap(equipLuid, q.getId());
                             //Points
@@ -86,7 +85,7 @@ public class EntityPullHandler
                                 {
                                     p.setSiteRef(siteLuid);
                                     p.setFloorRef(floorLuid);
-                                    p.setZoneRef(zoneLuid);
+                                    p.setRoomRef(zoneLuid);
                                     p.setEquipRef(equipLuid);
                                     hsApi.putUIDMap(hsApi.addPoint(p), p.getId());
                                 }
@@ -94,14 +93,14 @@ public class EntityPullHandler
     
                             //Node devices
                             for (Device d : parser.getDevices()) {
-                                Log.d("CCU"," Parser : device "+d.getDisplayName()
-                                            +" getEquipRef "+d.getEquipRef()+"=="+ q.getId()+" getZoneRef: "+d.getZoneRef()+" "+z.getId());
+                                CcuLog.d("CCU_HS", " Parser : device " + d.getDisplayName()
+                                                + " getEquipRef " + d.getEquipRef() + "==" + q.getId() + " getRoomRef: " + d.getRoomRef() + " " + z.getId());
                                 if (d.getEquipRef() != null && d.getEquipRef().equals(q.getId())
-                                        && d.getZoneRef() != null && d.getZoneRef().equals(z.getId())) {
-                                    Log.d("CCU"," Parser : add device "+d.getDisplayName());
+                                        && d.getRoomRef() != null && d.getRoomRef().equals(z.getId())) {
+                                    CcuLog.d("CCU_HS"," Parser : add device "+d.getDisplayName());
                                     d.setSiteRef(siteLuid);
                                     d.setFloorRef(floorLuid);
-                                    d.setZoneRef(zoneLuid);
+                                    d.setRoomRef(zoneLuid);
                                     d.setEquipRef(equipLuid);
                                     String deviceLuid = hsApi.addDevice(d);
                                     hsApi.putUIDMap(deviceLuid, d.getId());
@@ -109,10 +108,10 @@ public class EntityPullHandler
                                     for (RawPoint p : parser.getPhyPoints()) {
                                         if (p.getDeviceRef().equals(d.getId()))
                                         {
-                                            Log.d("CCU"," Parser : add RawPoint "+p.getDisplayName());
+                                            CcuLog.d("CCU_HS"," Parser : add RawPoint "+p.getDisplayName());
                                             p.setSiteRef(siteLuid);
                                             p.setFloorRef(floorLuid);
-                                            p.setZoneRef(zoneLuid);
+                                            p.setRoomRef(zoneLuid);
                                             p.setDeviceRef(deviceLuid);
                                             p.setPointRef(getLuid(p.getDeviceRef()));
                                             hsApi.putUIDMap(hsApi.addPoint(p), p.getId());
@@ -120,10 +119,10 @@ public class EntityPullHandler
                                     }
                                 }
                             }
-                        } else if (q.getZoneRef().equals("@SYSTEM")) {
+                        } else if (q.getRoomRef().equals("@SYSTEM")) {
                             q.setSiteRef(siteLuid);
                             q.setFloorRef("@SYSTEM");
-                            q.setZoneRef("@SYSTEM");
+                            q.setRoomRef("@SYSTEM");
                             String equipLuid = hsApi.addEquip(q);
                             hsApi.putUIDMap(equipLuid, q.getId());
                             //Points
@@ -132,7 +131,7 @@ public class EntityPullHandler
                                 {
                                     p.setSiteRef(siteLuid);
                                     p.setFloorRef("@SYSTEM");
-                                    p.setZoneRef("@SYSTEM");
+                                    p.setRoomRef("@SYSTEM");
                                     p.setEquipRef(equipLuid);
                                     hsApi.putUIDMap(hsApi.addPoint(p), p.getId());
                                 }

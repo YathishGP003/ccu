@@ -14,7 +14,7 @@ public class Equip extends Entity
     private String            displayName;
     private HashSet<String> markers;
     private String siteRef;
-    private String zoneRef;
+    private String roomRef;
     private String floorRef;
     public void setAhuRef(String ahuRef)
     {
@@ -46,9 +46,9 @@ public class Equip extends Entity
     {
         this.siteRef = siteRef;
     }
-    public void setZoneRef(String zoneRef)
+    public void setRoomRef(String roomRef)
     {
-        this.zoneRef = zoneRef;
+        this.roomRef = roomRef;
     }
     public void setFloorRef(String floorRef)
     {
@@ -62,9 +62,9 @@ public class Equip extends Entity
     {
         return group;
     }
-    public String getZoneRef()
+    public String getRoomRef()
     {
-        return zoneRef;
+        return roomRef;
     }
     public String getFloorRef()
     {
@@ -89,7 +89,7 @@ public class Equip extends Entity
         private String            displayName;
         private HashSet<String> markers = new HashSet<>();
         private String            siteRef;
-        private String zoneRef;
+        private String roomRef;
         private String floorRef;
         private String group;
         public Builder setAhuRef(String ahuRef)
@@ -122,9 +122,9 @@ public class Equip extends Entity
             this.group = group;
             return this;
         }
-        public Builder setZoneRef(String zoneRef)
+        public Builder setRoomRef(String roomRef)
         {
-            this.zoneRef = zoneRef;
+            this.roomRef = roomRef;
             return this;
         }
         public Builder setFloorRef(String floorRef)
@@ -157,7 +157,7 @@ public class Equip extends Entity
             q.displayName = this.displayName;
             q.markers = this.markers;
             q.siteRef = this.siteRef;
-            q.zoneRef = this.zoneRef;
+            q.roomRef = this.roomRef;
             q.floorRef = this.floorRef;
             q.group = this.group;
             q.profile = this.profile;
@@ -195,9 +195,9 @@ public class Equip extends Entity
                 {
                     this.floorRef = pair.getValue().toString();
                 }
-                else if(pair.getKey().equals("zoneRef"))
+                else if(pair.getKey().equals("roomRef"))
                 {
-                    this.zoneRef = pair.getValue().toString();
+                    this.roomRef = pair.getValue().toString();
                 }
                 else if(pair.getKey().equals("ahuRef"))
                 {

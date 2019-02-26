@@ -94,10 +94,9 @@ public class FloorPlanFragment extends Fragment
 						public void run()
 						{
 							updateModules(getSelectedZone());
+							getActivity().unregisterReceiver(mPairingReceiver);
 						}
 					}).start();
-					
-					getActivity().unregisterReceiver(mPairingReceiver);
 					break;
 			}
 		}

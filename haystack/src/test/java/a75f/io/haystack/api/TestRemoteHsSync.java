@@ -100,7 +100,7 @@ public class TestRemoteHsSync
         Equip v = new Equip.Builder()
                           .setSiteRef(siteRef)
                           .setDisplayName(siteDis+"-VAV-"+nodeAddr)
-                          .setZoneRef("room")
+                          .setRoomRef("room")
                           .setFloorRef("floor")
                           .addMarker("equip")
                           .addMarker("vav")
@@ -112,7 +112,7 @@ public class TestRemoteHsSync
                                   .setDisplayName(siteDis+"AHU-"+nodeAddr+"-TestTemp")
                                   .setEquipRef(equipRef)
                                   .setSiteRef(siteRef)
-                                  .setZoneRef("room")
+                                  .setRoomRef("room")
                                   .setFloorRef("floor")
                                   .addMarker("discharge")
                                   .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("writable")
@@ -163,7 +163,7 @@ public class TestRemoteHsSync
         Equip v = new Equip.Builder()
                           .setSiteRef(siteRef)
                           .setDisplayName(siteDis+"-VAV-"+nodeAddr)
-                          .setZoneRef("room")
+                          .setRoomRef("room")
                           .setFloorRef("floor")
                           .addMarker("equip")
                           .addMarker("vav")
@@ -174,7 +174,7 @@ public class TestRemoteHsSync
         Equip v1 = new Equip.Builder()
                           .setSiteRef(siteRef)
                           .setDisplayName(siteDis+"-VAV-"+(nodeAddr+1))
-                          .setZoneRef("room1")
+                          .setRoomRef("room1")
                           .setFloorRef("floor")
                           .addMarker("equip")
                           .addMarker("vav")
@@ -186,7 +186,7 @@ public class TestRemoteHsSync
                                   .setDisplayName(siteDis+"AHU-"+nodeAddr+"-TestTemp")
                                   .setEquipRef(equipRef)
                                   .setSiteRef(siteRef)
-                                  .setZoneRef("room")
+                                  .setRoomRef("room")
                                   .setFloorRef("floor")
                                   .addMarker("discharge")
                                   .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("writable")
@@ -238,7 +238,7 @@ public class TestRemoteHsSync
         Equip v = new Equip.Builder()
                           .setSiteRef(siteRef)
                           .setDisplayName(siteDis+"-VAV-"+nodeAddr)
-                          .setZoneRef("room")
+                          .setRoomRef("room")
                           .setFloorRef("floor")
                           .addMarker("equip")
                           .addMarker("vav")
@@ -249,7 +249,7 @@ public class TestRemoteHsSync
         Equip v1 = new Equip.Builder()
                            .setSiteRef(siteRef)
                            .setDisplayName(siteDis+"-VAV-"+(nodeAddr+1))
-                           .setZoneRef("room1")
+                           .setRoomRef("room1")
                            .setFloorRef("floor")
                            .addMarker("equip")
                            .addMarker("vav")
@@ -261,7 +261,7 @@ public class TestRemoteHsSync
                                   .setDisplayName(siteDis+"AHU-"+nodeAddr+"-TestTemp")
                                   .setEquipRef(equipRef)
                                   .setSiteRef(siteRef)
-                                  .setZoneRef("room")
+                                  .setRoomRef("room")
                                   .setFloorRef("floor")
                                   .addMarker("discharge")
                                   .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("writable")
@@ -312,7 +312,7 @@ public class TestRemoteHsSync
         Equip v = new Equip.Builder()
                           .setSiteRef(siteRef)
                           .setDisplayName(siteDis+"-VAV-"+nodeAddr)
-                          .setZoneRef("SYSTEM")
+                          .setRoomRef("SYSTEM")
                           .setFloorRef("SYSTEM")
                           .addMarker("equip")
                           .addMarker("vav")
@@ -323,7 +323,7 @@ public class TestRemoteHsSync
         Equip v1 = new Equip.Builder()
                            .setSiteRef(siteRef)
                            .setDisplayName(siteDis+"-VAV-"+(nodeAddr+1))
-                           .setZoneRef("SYSTEM")
+                           .setRoomRef("SYSTEM")
                            .setFloorRef("SYSTEM")
                            .addMarker("equip")
                            .addMarker("vav")
@@ -335,7 +335,7 @@ public class TestRemoteHsSync
                                   .setDisplayName(siteDis+"AHU-"+nodeAddr+"-TestTemp")
                                   .setEquipRef(equipRef)
                                   .setSiteRef(siteRef)
-                                  .setZoneRef("SYSTEM")
+                                  .setRoomRef("SYSTEM")
                                   .setFloorRef("SYSTEM")
                                   .addMarker("discharge")
                                   .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("writable")
@@ -348,7 +348,7 @@ public class TestRemoteHsSync
                                   .setDisplayName(siteDis+"AHU-"+nodeAddr+"-TestTemp1")
                                   .setEquipRef(equipRef)
                                   .setSiteRef(siteRef)
-                                  .setZoneRef("SYSTEM")
+                                  .setRoomRef("SYSTEM")
                                   .setFloorRef("SYSTEM")
                                   .addMarker("discharge")
                                   .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("writable")
@@ -433,7 +433,7 @@ public class TestRemoteHsSync
         Equip v = new Equip.Builder()
                           .setSiteRef(siteRef)
                           .setDisplayName(siteDis+"-VAV-"+nodeAddr)
-                          .setZoneRef("room")
+                          .setRoomRef("room")
                           .setFloorRef("floor")
                           .addMarker("equip")
                           .addMarker("vav")
@@ -444,7 +444,7 @@ public class TestRemoteHsSync
         Equip v1 = new Equip.Builder()
                            .setSiteRef(siteRef)
                            .setDisplayName(siteDis+"-VAV-"+(nodeAddr+1))
-                           .setZoneRef("room1")
+                           .setRoomRef("room1")
                            .setFloorRef("floor")
                            .addMarker("equip")
                            .addMarker("vav")
@@ -456,7 +456,7 @@ public class TestRemoteHsSync
                                   .setDisplayName(siteDis+"AHU-"+nodeAddr+"-TestTemp")
                                   .setEquipRef(equipRef)
                                   .setSiteRef(siteRef)
-                                  .setZoneRef("room")
+                                  .setRoomRef("room")
                                   .setFloorRef("floor")
                                   .addMarker("discharge")
                                   .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("writable")
@@ -469,7 +469,7 @@ public class TestRemoteHsSync
                                    .setDisplayName(siteDis+"AHU-"+nodeAddr+"-TestTemp1")
                                    .setEquipRef(equipRef)
                                    .setSiteRef(siteRef)
-                                   .setZoneRef("room")
+                                   .setRoomRef("room")
                                    .setFloorRef("floor")
                                    .addMarker("discharge")
                                    .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("writable")
@@ -642,12 +642,12 @@ public class TestRemoteHsSync
     
         System.out.println("ZONES ----->");
         for (Zone q : p.getZones()) {
-            System.out.println(q.getDisplayName()+" zoneRef :"+q.getId());
+            System.out.println(q.getDisplayName()+" roomRef :"+q.getId());
         }
         
         System.out.println("EQUIPS ----->");
         for (Equip q : p.getEquips()) {
-            System.out.println(q.getDisplayName()+" zoneRef :"+q.getZoneRef());
+            System.out.println(q.getDisplayName()+" roomRef :"+q.getRoomRef());
         }
         System.out.println("POINTS ---->");
         for (Point p1 : p.getPoints()) {

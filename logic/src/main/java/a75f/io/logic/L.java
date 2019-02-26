@@ -22,6 +22,15 @@ import a75f.io.logic.bo.building.lights.LightProfile;
 
 public class L
 {
+    public static final String TAG_CCU = "CCU";
+    public static final String TAG_CCU_UI = "CCU_UI";
+    public static final String TAG_CCU_ZONE = "CCU_ZONE";
+    public static final String TAG_CCU_SYSTEM = "CCU_SYSTEM";
+    public static final String TAG_CCU_JOB = "CCU_JOB";
+    public static final String TAG_CCU_HS = "CCU_HS";
+    public static final String TAG_CCU_DEVICE = "CCU_DEVICE";
+    public static final String TAG_CCU_SERIAL = "CCU_SERIAL";
+    public static final String TAG_CCU_SCHEDULER = "CCU_SCHEDULER";
 
     public static Context app()
     {

@@ -387,8 +387,8 @@ public class UsbService extends Service
 				device = entry.getValue();
 				int deviceVID = device.getVendorId();
 				int devicePID = device.getProductId();
-				Log.i("USB", "Device VID: " + deviceVID);
-				Log.i("USB", "Device PID: " + devicePID);
+				Log.i("CCU_SERIAL", "USB Device VID: " + deviceVID);
+				Log.i("CCU_SERIAL", "USB Device PID: " + devicePID);
 				if (deviceVID == 0x0403 || deviceVID == 0x1027 || deviceVID == 1003)
 				{
 					boolean success = grantRootPermissionToUSBDevice(device);
@@ -437,7 +437,7 @@ public class UsbService extends Service
 	{
 		IBinder b = ServiceManager.getService(Context.USB_SERVICE);
 		IUsbManager service = IUsbManager.Stub.asInterface(b);
-		Log.i("USB", "Try connecting!");
+		Log.i("CCU_SERIAL", "Try connecting!");
 		// There is a device connected to our Android device. Try to open it as a Serial Port.
 		try
 		{

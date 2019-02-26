@@ -1,7 +1,6 @@
 package a75f.io.logic;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -44,6 +43,7 @@ import a75f.io.logic.bo.building.system.vav.VavAnalogRtu;
 import a75f.io.logic.bo.building.system.vav.VavBacnetRtu;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
+import a75f.io.logic.bo.building.system.vav.VavStagedRtuWithVfd;
 import a75f.io.logic.bo.building.vav.VavParallelFanProfile;
 import a75f.io.logic.bo.building.vav.VavReheatProfile;
 import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
@@ -231,7 +231,7 @@ public class Globals {
 
     public void registerSiteToPubNub(final String siteId) {
 
-        Log.d("CCU","registerSiteToPubNub "+siteId.replace("@",""));
+        CcuLog.d(L.TAG_CCU,"registerSiteToPubNub "+siteId.replace("@",""));
 
         PNConfiguration pnConfiguration = new PNConfiguration();
         pnConfiguration.setSubscribeKey("sub-c-6a55a31c-d30e-11e8-b41d-e643bd6bdd68");
@@ -247,8 +247,8 @@ public class Globals {
         final JsonObject messageJsonObject = new JsonObject();
 
         messageJsonObject.addProperty("msg", "Configuration");
-
-        System.out.println("CCU Message to send: " + messageJsonObject.toString());
+    
+        CcuLog.d(L.TAG_CCU,"CCU Message to send: " + messageJsonObject.toString());
 
         pubnub.addListener(new SubscribeCallback() {
             @Override
@@ -264,7 +264,7 @@ public class Globals {
                     // UI / internal notifications, etc
 
                     if (status.getCategory() == PNStatusCategory.PNConnectedCategory) {
-                        Log.d("CCU", "PNConnectedCategory publish");
+                        CcuLog.d(L.TAG_CCU, "PNConnectedCategory publish");
                         pubnub.publish().channel(siteId.replace("@","")).message(messageJsonObject).async(new PNCallback<PNPublishResult>() {
                             @Override
                             public void onResponse(PNPublishResult result, PNStatus status) {
@@ -307,7 +307,7 @@ public class Globals {
                 }
 
                 JsonElement receivedMessageObject = message.getMessage();
-                CcuLog.d("CCU", "PubNub Received message content: " + receivedMessageObject.toString());
+                CcuLog.d(L.TAG_CCU, "PubNub Received message content: " + receivedMessageObject.toString());
                 // extract desired parts of the payload, using Gson
                 JsonObject msgObject = message.getMessage().getAsJsonObject();
                 String cmd = msgObject.get("cmd") != null ? msgObject.get("cmd").getAsString(): "";
@@ -353,13 +353,13 @@ public class Globals {
     public void addProfilesForEquips() {
         HashMap site = CCUHsApi.getInstance().read(Tags.SITE);
         if (site == null || site.size() == 0) {
-            Log.d("CCUHS", "Site does not exist. Profiles not loaded");
+            CcuLog.d(L.TAG_CCU, "Site does not exist. Profiles not loaded");
             return;
         }
         for (Floor f : HSUtil.getFloors()) {
             for (Zone z : HSUtil.getZones(f.getId())) {
                 for (Equip eq : HSUtil.getEquips(z.getId())) {
-                    Log.d("CCUHS", " Equip " + eq.getDisplayName() + " profile : " + eq.getProfile());
+                    CcuLog.d(L.TAG_CCU, " Equip " + eq.getDisplayName() + " profile : " + eq.getProfile());
                     switch (ProfileType.valueOf(eq.getProfile())) {
                         case VAV_REHEAT:
                             VavReheatProfile vr = new VavReheatProfile();
@@ -385,7 +385,7 @@ public class Globals {
         HashMap equip = CCUHsApi.getInstance().read("equip and system");
         if (equip != null && equip.size() > 0) {
             Equip eq = new Equip.Builder().setHashMap(equip).build();
-            Log.d("CCUHS", "SystemEquip " + eq.getDisplayName() + " System profile " + eq.getProfile());
+            CcuLog.d(L.TAG_CCU, "SystemEquip " + eq.getDisplayName() + " System profile " + eq.getProfile());
             switch (ProfileType.valueOf(eq.getProfile())) {
                 case SYSTEM_VAV_ANALOG_RTU:
                     VavAnalogRtu analogRtuProfile = new VavAnalogRtu();
@@ -397,6 +397,11 @@ public class Globals {
                     VavStagedRtu stagedRtuProfile = new VavStagedRtu();
                     stagedRtuProfile.addSystemEquip();
                     L.ccu().systemProfile = stagedRtuProfile;
+                    break;
+                case SYSTEM_VAV_STAGED_VFD_RTU:
+                    VavStagedRtuWithVfd stagedVfdRtuProfile = new VavStagedRtuWithVfd();
+                    stagedVfdRtuProfile.addSystemEquip();
+                    L.ccu().systemProfile = stagedVfdRtuProfile;
                     break;
                 case SYSTEM_VAV_HYBRID_RTU:
                     VavAdvancedHybridRtu hybridRtuProfile = new VavAdvancedHybridRtu();
@@ -420,7 +425,7 @@ public class Globals {
                     L.ccu().systemProfile = new DefaultSystem();
             }
         } else {
-            Log.d("CCUHS", "System Equip does not exist.Create VavAnalogRtu System Profile");
+            CcuLog.d(L.TAG_CCU, "System Equip does not exist.Create VavAnalogRtu System Profile");
             L.ccu().systemProfile = new VavAnalogRtu();
 
         }

@@ -1,7 +1,5 @@
 package a75f.io.logic.bo.building.vav;
 
-import android.util.Log;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import a75.io.algos.CO2Loop;
@@ -10,6 +8,8 @@ import a75.io.algos.GenericPIController;
 import a75.io.algos.VOCLoop;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Damper;
@@ -41,7 +41,7 @@ public class VavSeriesFanProfile extends VavProfile
     @JsonIgnore
     @Override
     public void updateZonePoints() {
-        Log.d(TAG, "VAV Series Fan Control");
+        CcuLog.d(L.TAG_CCU_ZONE, "VAV Series Fan Control");
         
         if(mInterface != null)
         {
@@ -52,7 +52,7 @@ public class VavSeriesFanProfile extends VavProfile
         {
             if (vavDeviceMap.get(node) == null) {
                 addLogicalMap(node);
-                Log.d(TAG, " Logical Map added for node " + node);
+                CcuLog.d(L.TAG_CCU_ZONE, " Logical Map added for node " + node);
                 continue;
             }
             VAVLogicalMap vavDevice = vavDeviceMap.get(node);
@@ -71,18 +71,17 @@ public class VavSeriesFanProfile extends VavProfile
             double dischargeSp = vavDevice.getDischargeSp();
             setTempCooling = vavDevice.getDesiredTempCooling();
             setTempHeating = vavDevice.getDesiredTempHeating();
+            vavDevice.setDesiredTemp((setTempCooling+setTempHeating)/2);
             Equip vavEquip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + node + "\"")).build();
     
-            if (vavDevice.getDesiredTemp() == 0) {
-                vavDevice.setDesiredTemp((setTempCooling+setTempHeating)/2);
-            }
             if (roomTemp == 0) {
-                Log.d(TAG,"Skip PI update for "+node+" roomTemp : "+roomTemp);
+                CcuLog.d(L.TAG_CCU_ZONE,"Skip PI update for "+node+" roomTemp : "+roomTemp);
                 continue;
             }
             
             Damper damper = vavUnit.vavDamper;
             Valve valve = vavUnit.reheatValve;
+            setDamperLimits(node, damper);
             int loopOp;//New value of loopOp
             //TODO
             //If supply air temperature from air handler is greater than room temperature, Cooling shall be
@@ -145,19 +144,18 @@ public class VavSeriesFanProfile extends VavProfile
             
             if (!damper.isOverrideActive())
             {
-                //setDamperLimits(node, damper);
                 //CO2 loop output from 0-50% modulates damper min position.
                 if (/*mode == OCCUPIED && */co2Loop.getLoopOutput(co2) <= 50)
                 {
                     damper.iaqCompensatedMinPos = damper.minPosition + (damper.maxPosition - damper.minPosition) * co2Loop.getLoopOutput() / 50;
-                    Log.d("VAV", "CO2LoopOp :" + co2Loop.getLoopOutput() + ", adjusted minposition " + damper.iaqCompensatedMinPos);
+                    CcuLog.d(L.TAG_CCU_ZONE, "CO2LoopOp :" + co2Loop.getLoopOutput() + ", adjusted minposition " + damper.iaqCompensatedMinPos);
                 }
     
                 //VOC loop output from 0-50% modulates damper min position.
                 if (/*mode == OCCUPIED && */vocLoop.getLoopOutput(voc) <= 50)
                 {
                     damper.iaqCompensatedMinPos = damper.minPosition + (damper.maxPosition - damper.minPosition) * vocLoop.getLoopOutput() / 50;
-                    Log.d("VAV", "VOCLoopOp :" + vocLoop.getLoopOutput() + ", adjusted minposition " + damper.iaqCompensatedMinPos);
+                    CcuLog.d(L.TAG_CCU_ZONE, "VOCLoopOp :" + vocLoop.getLoopOutput() + ", adjusted minposition " + damper.iaqCompensatedMinPos);
                 }
                 
                 if (loopOp == 0)
@@ -216,12 +214,12 @@ public class VavSeriesFanProfile extends VavProfile
                 fanReady = false;
             }
     
-            Log.d("VAV","CoolingLoop "+node +"roomTemp :"+roomTemp+" setTempCooling: "+setTempCooling);
+            CcuLog.d(L.TAG_CCU_ZONE,"CoolingLoop "+node +"roomTemp :"+roomTemp+" setTempCooling: "+setTempCooling);
             coolingLoop.dump();
-            Log.d("VAV","HeatingLoop "+node +"roomTemp :"+roomTemp+" setTempHeating: "+setTempHeating);
+            CcuLog.d(L.TAG_CCU_ZONE,"HeatingLoop "+node +"roomTemp :"+roomTemp+" setTempHeating: "+setTempHeating);
             heatingLoop.dump();
-            
-            Log.d(TAG, "STATE :"+state+" ,loopOp: " + loopOp + " ,damper:" + damper.currentPosition
+    
+            CcuLog.d(L.TAG_CCU_ZONE, "STATE :"+state+" ,loopOp: " + loopOp + " ,damper:" + damper.currentPosition
                                                         +", valve:"+valve.currentPosition+" fanStart: "+vavUnit.fanStart);
             updateTRResponse(node);
             vavDevice.setDamperPos(damper.currentPosition);

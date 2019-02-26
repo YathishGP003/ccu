@@ -98,11 +98,11 @@ public abstract class VavProfile extends ZoneProfile
      * @param addr
      * @param config
      * @param floorRef
-     * @param zoneRef
+     * @param roomRef
      */
-    public void addLogicalMapAndPoints(short addr, VavProfileConfiguration config, String floorRef, String zoneRef) {
+    public void addLogicalMapAndPoints(short addr, VavProfileConfiguration config, String floorRef, String roomRef) {
         VAVLogicalMap deviceMap = new VAVLogicalMap(getProfileType(), addr);
-        deviceMap.createHaystackPoints(config, floorRef, zoneRef );
+        deviceMap.createHaystackPoints(config, floorRef, roomRef );
         vavDeviceMap.put(addr, deviceMap);
         deviceMap.satResetRequest.setImportanceMultiplier(getPriority().multiplier);
         deviceMap.co2ResetRequest.setImportanceMultiplier(getPriority().multiplier);
@@ -219,7 +219,11 @@ public abstract class VavProfile extends ZoneProfile
         }
         
         Damper d = vavDeviceMap.get(node).getVavUnit().vavDamper;
-        int damperLoopOp = (d.currentPosition - d.iaqCompensatedMinPos) * 100/ (d.maxPosition - d.iaqCompensatedMinPos);
+    
+        int damperLoopOp = 0;
+        if (d.maxPosition > d.iaqCompensatedMinPos) {
+            damperLoopOp = (d.currentPosition - d.iaqCompensatedMinPos) * 100/ (d.maxPosition - d.iaqCompensatedMinPos);
+        }
         
         TrimResponseRequest spResetRequest = vavDeviceMap.get(node).spResetRequest;
         if (damperLoopOp > 95) {

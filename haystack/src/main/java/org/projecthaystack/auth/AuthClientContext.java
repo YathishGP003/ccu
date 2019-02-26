@@ -7,14 +7,21 @@
 //
 package org.projecthaystack.auth;
 
-import org.projecthaystack.client.CallNetworkException;
 import org.projecthaystack.client.HClient;
 import org.projecthaystack.util.Base64;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 final public class AuthClientContext
 {
@@ -321,7 +328,6 @@ final public class AuthClientContext
       String val = c.getHeaderField(key);
       System.out.println(key + ": " + val);
     }
-    System.out.println();
     if (body)
     {
       InputStream in = c.getInputStream();

@@ -46,6 +46,7 @@ public class DefaultSystemProfile extends Fragment
                 protected Void doInBackground( final Void ... params ) {
                     if (systemProfile != null) {
                         systemProfile.deleteSystemEquip();
+                        L.ccu().systemProfile = null;
                     }
                     systemProfile = new DefaultSystem();
                     L.ccu().systemProfile = systemProfile;

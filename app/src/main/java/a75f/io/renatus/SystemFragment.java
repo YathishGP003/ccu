@@ -124,19 +124,38 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			cbDehumidifier.setEnabled(false);
 			return;
 		}
+		systemAuto.setEnabled(L.ccu().systemProfile.isCoolingAvailable() && L.ccu().systemProfile.isHeatingAvailable());
+		systemCool.setEnabled(L.ccu().systemProfile.isCoolingAvailable());
+		systemHeat.setEnabled(L.ccu().systemProfile.isHeatingAvailable());
+		
 		SystemMode systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("rtu and mode")];
 		switch (systemMode) {
 			case OFF:
 				systemOff.setChecked(true);
 				break;
 			case AUTO:
-				systemAuto.setChecked(true);
+				if (systemAuto.isEnabled())
+				{
+					systemAuto.setChecked(true);
+				} else {
+					setUserIntentBackground("rtu and mode", SystemMode.OFF.ordinal());
+				}
 				break;
 			case COOLONLY:
-				systemCool.setChecked(true);
+				if (systemCool.isEnabled())
+				{
+					systemCool.setChecked(true);
+				} else {
+					setUserIntentBackground("rtu and mode", SystemMode.OFF.ordinal());
+				}
 				break;
 			case HEATONLY:
-				systemHeat.setChecked(true);
+				if (systemHeat.isEnabled())
+				{
+					systemHeat.setChecked(true);
+				} else {
+					setUserIntentBackground("rtu and mode", SystemMode.OFF.ordinal());
+				}
 				break;
 			default:
 				systemOff.setChecked(true);
@@ -212,25 +231,6 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		targetMinInsideHumidity.setOnItemSelectedListener(this);
 		targetMaxInsideHumidity.setOnItemSelectedListener(this);
 		
-		/*cbHumidifier.setChecked(TunerUtil.readSystemUserIntentVal("enable and humidifier") > 0);
-		cbHumidifier.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
-		{
-			@Override
-			public void onCheckedChanged(CompoundButton compoundButton, boolean b)
-			{
-				setUserIntentBackground("enable and humidifier", b == true ? 1 : 0);
-			}
-		});
-		
-		cbDehumidifier.setChecked(TunerUtil.readSystemUserIntentVal("enable and dehumidifier") > 0);
-		cbDehumidifier.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
-		{
-			@Override
-			public void onCheckedChanged(CompoundButton compoundButton, boolean b)
-			{
-				setUserIntentBackground("enable and dehumidifier", b == true ? 1 : 0);
-			}
-		});*/
 	}
 
 	private void showScheduleDialog() {
@@ -264,17 +264,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				Schedule schedule = new Schedule.Builder().setHDict(hDict).build();
 
 				CCUHsApi.getInstance().updateSchedule(schedule);
-
-				new Thread()
-				{
-					@Override
-					public void run()
-					{
-						CCUHsApi.getInstance().syncEntityTree();
-					}
-				}.start();
-
-
+				CCUHsApi.getInstance().syncEntityTree();
 			}
 
 		});
@@ -299,10 +289,10 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		switch (arg0.getId())
 		{
 			case R.id.targetMaxInsideHumidity:
-				setUserIntentBackground("target and min and inside and humidity", val);
+				setUserIntentBackground("target and max and inside and humidity", val);
 				break;
 			case R.id.targetMinInsideHumidity:
-				setUserIntentBackground("target and max and inside and humidity", val);
+				setUserIntentBackground("target and min and inside and humidity", val);
 				break;
 		}
 	}

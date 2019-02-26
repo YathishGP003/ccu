@@ -49,7 +49,7 @@ public class HttpUtil
                     return null;
                 }
                 clientToken = parseToken(jsonToken);
-                System.out.println("Client Token: " + clientToken);
+                CcuLog.i("CCU_HS","Client Token: " + clientToken);
             }
         }
         URL url;
@@ -94,7 +94,7 @@ public class HttpUtil
             if(connection.getResponseCode() == 401)
             {
                 clientToken = parseToken(authorizeToken(CLIENT_ID, "", CLIENT_SECRET, TENANT_ID));
-                System.out.println("Client Token: " + clientToken);
+                CcuLog.i("CCU_HS","Client Token: " + clientToken);
                 executePost(targetURL, urlParameters);
             }
 
@@ -116,7 +116,7 @@ public class HttpUtil
 
     public static String parseToken(String jsonResponse)
     {
-        System.out.println("JsonResponse: " + jsonResponse);
+        CcuLog.i("CCU_HS","JsonResponse: " + jsonResponse);
         JsonParser parser = new JsonParser();
         JsonElement jsonTree = parser.parse(jsonResponse);
 
@@ -157,9 +157,9 @@ public class HttpUtil
 
                    // "client_id=" + client_id + "&scope=" + SCOPE +
                     //"&client_secret=" + client_secret + "&grant_type=client_credentials";
-
-            System.out.println(url.toString());
-            System.out.println(urlParameters);
+    
+            CcuLog.i("CCU_HS",url.toString());
+            CcuLog.i("CCU_HS",urlParameters);
             connection.setRequestProperty("Content-Length", "" +
                     Integer.toString(urlParameters.getBytes("UTF-8").length));
             connection.setRequestProperty("Content-Language", "en-US");

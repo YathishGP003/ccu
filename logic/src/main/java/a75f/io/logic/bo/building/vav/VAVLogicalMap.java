@@ -15,6 +15,8 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZonePriority;
@@ -110,6 +112,9 @@ public class VAVLogicalMap
                 break;
         }
         nodeAddr = node;
+        
+        vavUnit.vavDamper.minPosition = (int)getDamperLimit("cooling", "min");
+        vavUnit.vavDamper.maxPosition = (int)getDamperLimit("cooling", "max");
         //createHaystackPoints();
     }
     
@@ -169,7 +174,7 @@ public class VAVLogicalMap
         Equip.Builder b = new Equip.Builder()
                           .setSiteRef(siteRef)
                           .setDisplayName(equipDis)
-                          .setZoneRef(room)
+                          .setRoomRef(room)
                           .setFloorRef(floor)
                           .setProfile(profileType.name())
                           .setPriority(config.getPriority().name())
@@ -194,7 +199,7 @@ public class VAVLogicalMap
                                 .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-dischargeAirTemp")
                                 .setEquipRef(equipRef)
                                 .setSiteRef(siteRef)
-                                .setZoneRef(room)
+                                .setRoomRef(room)
                                 .setFloorRef(floor)
                                 .addMarker("discharge").addMarker("vav")
                                 .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("his").addMarker("logical").addMarker("zone").addMarker("equipHis")
@@ -209,7 +214,7 @@ public class VAVLogicalMap
                                 .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-enteringAirTemp")
                                 .setEquipRef(equipRef)
                                 .setSiteRef(siteRef)
-                                .setZoneRef(room)
+                                .setRoomRef(room)
                                 .setFloorRef(floor)
                                 .addMarker("entering").addMarker("vav")
                                 .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("his").addMarker("logical").addMarker("zone").addMarker("equipHis")
@@ -223,7 +228,7 @@ public class VAVLogicalMap
                                 .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-damperPos")
                                 .setEquipRef(equipRef)
                                 .setSiteRef(siteRef)
-                                .setZoneRef(room)
+                                .setRoomRef(room)
                                 .setFloorRef(floor)
                                 .addMarker("damper").addMarker("vav").addMarker("base").addMarker("cmd").addMarker("his").addMarker("logical").addMarker("zone").addMarker("equipHis")
                                 .setGroup(String.valueOf(nodeAddr))
@@ -235,7 +240,7 @@ public class VAVLogicalMap
                                   .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-normalizedDamperPos")
                                   .setEquipRef(equipRef)
                                   .setSiteRef(siteRef)
-                                  .setZoneRef(room)
+                                  .setRoomRef(room)
                                   .setFloorRef(floor)
                                   .addMarker("damper").addMarker("vav").addMarker("normalized").addMarker("cmd").addMarker("his").addMarker("logical").addMarker("zone").addMarker("equipHis")
                                   .setGroup(String.valueOf(nodeAddr))
@@ -247,7 +252,7 @@ public class VAVLogicalMap
                                   .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-ReheatPos")
                                   .setEquipRef(equipRef)
                                   .setSiteRef(siteRef)
-                                  .setZoneRef(room)
+                                  .setRoomRef(room)
                                   .setFloorRef(floor)
                                   .addMarker("reheat").addMarker("vav")
                                   .addMarker("water").addMarker("valve").addMarker("cmd").addMarker("his").addMarker("logical").addMarker("zone").addMarker("equipHis")
@@ -260,7 +265,7 @@ public class VAVLogicalMap
                                   .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-currentTemp")
                                   .setEquipRef(equipRef)
                                   .setSiteRef(siteRef)
-                                  .setZoneRef(room)
+                                  .setRoomRef(room)
                                   .setFloorRef(floor)
                                   .addMarker("zone").addMarker("vav")
                                   .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
@@ -274,7 +279,7 @@ public class VAVLogicalMap
                                     .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-humidity")
                                     .setEquipRef(equipRef)
                                     .setSiteRef(siteRef)
-                                    .setZoneRef(room)
+                                    .setRoomRef(room)
                                     .setFloorRef(floor)
                                     .addMarker("zone").addMarker("vav")
                                     .addMarker("air").addMarker("humidity").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
@@ -287,7 +292,7 @@ public class VAVLogicalMap
                                  .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-co2")
                                  .setEquipRef(equipRef)
                                  .setSiteRef(siteRef)
-                                 .setZoneRef(room)
+                                 .setRoomRef(room)
                                  .setFloorRef(floor)
                                  .addMarker("zone").addMarker("vav")
                                  .addMarker("air").addMarker("co2").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
@@ -300,7 +305,7 @@ public class VAVLogicalMap
                                  .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-voc")
                                  .setEquipRef(equipRef)
                                  .setSiteRef(siteRef)
-                                 .setZoneRef(room)
+                                 .setRoomRef(room)
                                  .setFloorRef(floor)
                                  .addMarker("zone").addMarker("vav")
                                  .addMarker("air").addMarker("voc").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
@@ -313,10 +318,10 @@ public class VAVLogicalMap
                                            .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-desiredTemp")
                                            .setEquipRef(equipRef)
                                            .setSiteRef(siteRef)
-                                           .setZoneRef(room)
+                                           .setRoomRef(room)
                                            .setFloorRef(floor)
                                            .addMarker("zone").addMarker("air").addMarker("temp").addMarker("desired").addMarker("vav").addMarker("average")
-                                           .addMarker("sp").addMarker("writable").addMarker("his").addMarker("equipHis")
+                                           .addMarker("sp").addMarker("writable").addMarker("his").addMarker("equipHis").addMarker("userIntent")
                                            .setGroup(String.valueOf(nodeAddr))
                                            .setUnit("\u00B0F")
                                            .setTz(tz)
@@ -327,10 +332,10 @@ public class VAVLogicalMap
                                     .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-desiredTempCooling")
                                     .setEquipRef(equipRef)
                                     .setSiteRef(siteRef)
-                                    .setZoneRef(room)
+                                    .setRoomRef(room)
                                     .setFloorRef(floor)
                                     .addMarker("zone").addMarker("air").addMarker("temp").addMarker("desired").addMarker("vav").addMarker("cooling")
-                                    .addMarker("sp").addMarker("writable").addMarker("his").addMarker("equipHis")
+                                    .addMarker("sp").addMarker("writable").addMarker("his").addMarker("equipHis").addMarker("userIntent")
                                     .setGroup(String.valueOf(nodeAddr))
                                     .setUnit("\u00B0F")
                                     .setTz(tz)
@@ -341,10 +346,10 @@ public class VAVLogicalMap
                                            .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-desiredTempHeating")
                                            .setEquipRef(equipRef)
                                            .setSiteRef(siteRef)
-                                           .setZoneRef(room)
+                                           .setRoomRef(room)
                                            .setFloorRef(floor)
                                            .addMarker("zone").addMarker("air").addMarker("temp").addMarker("desired").addMarker("vav").addMarker("heating")
-                                           .addMarker("sp").addMarker("writable").addMarker("his").addMarker("equipHis")
+                                           .addMarker("sp").addMarker("writable").addMarker("his").addMarker("equipHis").addMarker("userIntent")
                                            .setGroup(String.valueOf(nodeAddr))
                                            .setUnit("\u00B0F")
                                            .setTz(tz)
@@ -355,7 +360,7 @@ public class VAVLogicalMap
                                     .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-heatingLoopOp")
                                     .setEquipRef(equipRef)
                                     .setSiteRef(siteRef)
-                                    .setZoneRef(room)
+                                    .setRoomRef(room)
                                     .setFloorRef(floor)
                                     .addMarker("heating").addMarker("loop").addMarker("sp").addMarker("his").addMarker("vav").addMarker("equipHis")
                                     .addMarker("zone")
@@ -368,7 +373,7 @@ public class VAVLogicalMap
                                       .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-coolingLoopOp")
                                       .setEquipRef(equipRef)
                                       .setSiteRef(siteRef)
-                                      .setZoneRef(room)
+                                      .setRoomRef(room)
                                       .setFloorRef(floor)
                                       .addMarker("cooling").addMarker("loop").addMarker("sp").addMarker("his").addMarker("vav").addMarker("equipHis")
                                       .addMarker("zone")
@@ -381,7 +386,7 @@ public class VAVLogicalMap
                                       .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-dischargeSp")
                                       .setEquipRef(equipRef)
                                       .setSiteRef(siteRef)
-                                      .setZoneRef(room)
+                                      .setRoomRef(room)
                                       .setFloorRef(floor)
                                       .addMarker("discharge").addMarker("air").addMarker("temp").addMarker("zone").addMarker("equipHis")
                                       .addMarker("sp").addMarker("his").addMarker("vav")
@@ -394,7 +399,7 @@ public class VAVLogicalMap
                                     .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-satRequestPercentage")
                                     .setEquipRef(equipRef)
                                     .setSiteRef(siteRef)
-                                    .setZoneRef(room)
+                                    .setRoomRef(room)
                                     .setFloorRef(floor)
                                     .addMarker("request").addMarker("hour").addMarker("cumulative").addMarker("vav")
                                     .addMarker("tr").addMarker("supply").addMarker("air").addMarker("temp").addMarker("his").addMarker("zone").addMarker("equipHis")
@@ -407,7 +412,7 @@ public class VAVLogicalMap
                                              .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-co2RequestPercentage")
                                              .setEquipRef(equipRef)
                                              .setSiteRef(siteRef)
-                                             .setZoneRef(room)
+                                             .setRoomRef(room)
                                              .setFloorRef(floor)
                                              .addMarker("request").addMarker("hour").addMarker("cumulative").addMarker("vav")
                                              .addMarker("tr").addMarker("co2").addMarker("temp").addMarker("his").addMarker("zone").addMarker("equipHis")
@@ -420,7 +425,7 @@ public class VAVLogicalMap
                                              .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-hwstRequestPercentage")
                                              .setEquipRef(equipRef)
                                              .setSiteRef(siteRef)
-                                             .setZoneRef(room)
+                                             .setRoomRef(room)
                                              .setFloorRef(floor)
                                              .addMarker("request").addMarker("hour").addMarker("cumulative").addMarker("vav")
                                              .addMarker("tr").addMarker("hwst").addMarker("his").addMarker("zone").addMarker("equipHis")
@@ -433,7 +438,7 @@ public class VAVLogicalMap
                                              .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-pressureRequestPercentage")
                                              .setEquipRef(equipRef)
                                              .setSiteRef(siteRef)
-                                             .setZoneRef(room)
+                                             .setRoomRef(room)
                                              .setFloorRef(floor)
                                              .addMarker("request").addMarker("hour").addMarker("cumulative").addMarker("vav")
                                              .addMarker("tr").addMarker("pressure").addMarker("his").addMarker("zone").addMarker("equipHis")
@@ -696,7 +701,7 @@ public class VAVLogicalMap
             switch (op.getPort()) {
                 case ANALOG_OUT_ONE:
                 case ANALOG_OUT_TWO:
-                    Log.d("CCU"," Update analog"+op.getPort()+" type "+op.getAnalogActuatorType());
+                    CcuLog.d(L.TAG_CCU_ZONE," Update analog" + op.getPort() + " type " + op.getAnalogActuatorType());
                     SmartNode.updatePhysicalPoint(nodeAddr, op.getPort().toString(), op.getAnalogActuatorType());
                     break;
                 case RELAY_ONE:

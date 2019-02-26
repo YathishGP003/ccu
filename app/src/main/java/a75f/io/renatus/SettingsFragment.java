@@ -70,6 +70,10 @@ public class SettingsFragment extends Fragment
 						break;
 					case 3:
 						getActivity().getSupportFragmentManager().beginTransaction()
+						             .replace(R.id.profileContainer, new VavStagedRtuWithVfdProfile()).commit();
+						break;
+					case 4:
+						getActivity().getSupportFragmentManager().beginTransaction()
 						             .replace(R.id.profileContainer, new VavHybridRtuProfile()).commit();
 						break;
 

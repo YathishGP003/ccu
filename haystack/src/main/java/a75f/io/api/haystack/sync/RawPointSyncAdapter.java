@@ -57,9 +57,9 @@ public class RawPointSyncAdapter extends EntitySyncAdapter
                     {
                         m.put("floorRef", HRef.copy(CCUHsApi.getInstance().getGUID(m.get("floorRef").toString())));
                     }
-                    if (m.get("zoneRef") != null && !m.get("zoneRef").toString().equals("SYSTEM"))
+                    if (m.get("roomRef") != null && !m.get("roomRef").toString().equals("SYSTEM"))
                     {
-                        m.put("zoneRef", HRef.copy(CCUHsApi.getInstance().getGUID(m.get("zoneRef").toString())));
+                        m.put("roomRef", HRef.copy(CCUHsApi.getInstance().getGUID(m.get("roomRef").toString())));
                     }
                     entities.add(HSUtil.mapToHDict(m));
                 }

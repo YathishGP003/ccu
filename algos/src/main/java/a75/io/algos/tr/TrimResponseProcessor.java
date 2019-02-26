@@ -81,6 +81,6 @@ public class TrimResponseProcessor
         }
         
         setPoint = sp;
-        Log.d("VAV", "setpoint "+setPoint);
+        Log.d("CCU_SYSTEM", "setpoint "+setPoint);
     }
 }

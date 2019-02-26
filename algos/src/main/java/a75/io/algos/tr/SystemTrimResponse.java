@@ -128,7 +128,7 @@ public class SystemTrimResponse
     }
     
     public void dump() {
-        Log.d("VAV TR"," SP0: "+SP0+" SPmin: "+SPmin+" SPmax: "+SPmax+" Td: "+Td+" T: "+T+" I: "+I+" R: "+R+" SPtrim: "+SPtrim
+        Log.d("CCU_SYSTEM"," SP0: "+SP0+" SPmin: "+SPmin+" SPmax: "+SPmax+" Td: "+Td+" T: "+T+" I: "+I+" R: "+R+" SPtrim: "+SPtrim
                             +" SPres: "+SPres+" SPresmax: "+SPresmax);
     }
     

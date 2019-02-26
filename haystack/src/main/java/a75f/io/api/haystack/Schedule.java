@@ -1,6 +1,7 @@
 package a75f.io.api.haystack;
 
 import org.joda.time.DateTime;
+import org.joda.time.Days;
 import org.joda.time.Interval;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
@@ -26,15 +27,31 @@ import java.util.Map;
  * TODO: return values queried anything that has this scheduleRef should be able to query it and have the results returned if it is in schedule.
  *
  */
-
-
 public class Schedule extends Entity {
+
+    public boolean checkIntersection(ArrayList<Days> daysArrayList) {
+
+        ArrayList<Interval> intervalsOfAdditions = getScheduledIntervals(daysArrayList);
+        ArrayList<Interval> intervalsOfCurrent = getScheduledIntervals(getDaysSorted());
+
+        for(Interval additions : intervalsOfAdditions)
+        {
+            for(Interval current : intervalsOfCurrent) {
+
+                boolean hasOverlap = additions.overlaps(current);
+                if(hasOverlap)
+                    return true;
+            }
+        }
+
+        return false;
+    }
 
     private DateTime getTime() {
         return new DateTime(MockTime.getInstance().getMockTime());
     }
 
-    public Occupied getCurrentValueForMarker(String marker)
+    public Occupied getCurrentValues()
     {
         Occupied occupied = null;
         ArrayList<Days> daysSorted = getDaysSorted();
@@ -44,13 +61,12 @@ public class Schedule extends Entity {
         {
             if(scheduledIntervals.get(i).contains(getTime().getMillis()) || scheduledIntervals.get(i).isAfter(getTime().getMillis()))
             {
-                if ((marker.equals("cooling") && daysSorted.get(i).isCooling)
-                        || (marker.equals("heating") && daysSorted.get(i).isHeating)) {
                     occupied = new Occupied();
                     occupied.setOccupied(scheduledIntervals.get(i).contains(getTime().getMillis()));
                     occupied.setValue(daysSorted.get(i).mVal);
+                    occupied.setCoolingVal(daysSorted.get(i).mCoolingVal);
+                    occupied.setHeatingVal(daysSorted.get(i).mHeatingVal);
                     return occupied;
-                }
             }
         }
 
@@ -58,6 +74,8 @@ public class Schedule extends Entity {
             occupied = new Occupied();
             occupied.setOccupied(scheduledIntervals.get(0).contains(getTime().getMillis()));
             occupied.setValue(daysSorted.get(0).mVal);
+            occupied.setCoolingVal(daysSorted.get(0).mCoolingVal);
+            occupied.setHeatingVal(daysSorted.get(0).mHeatingVal);
         }
 
         return occupied;
@@ -192,6 +210,7 @@ public class Schedule extends Entity {
     }
 
 
+
     public static class Builder {
         private String mId;
 
@@ -298,19 +317,23 @@ public class Schedule extends Entity {
 
     public static class Days {
 
-
-        private boolean isCooling;
-        private boolean isHeating;
-
-
         private int mSthh;
         private int mStmm;
         private int mDay;
-        private double mVal;
+        private Double mVal;
+        private Double mHeatingVal;
+        private Double mCoolingVal;
         private int mEtmm;
         private int mEthh;
         private boolean mSunrise;
         private boolean mSunset;
+
+        public static boolean checkIntersection(ArrayList<Days> daysArrayList) {
+
+
+
+            return false;
+        }
 
 
         public int getSthh() {
@@ -337,11 +360,11 @@ public class Schedule extends Entity {
             this.mDay = day;
         }
 
-        public double getVal() {
+        public Double getVal() {
             return mVal;
         }
 
-        public void setVal(double val) {
+        public void setVal(Double val) {
             this.mVal = val;
         }
 
@@ -389,9 +412,6 @@ public class Schedule extends Entity {
         private static Days parseSingleDay(HDict hDict) {
             Days days = new Days();
 
-            days.isCooling = hDict.has("cooling");
-
-            days.isHeating = hDict.has("heating");
             days.mDay = hDict.getInt("day");
             days.mEthh = hDict.has("ethh") ? hDict.getInt("ethh") : -1;
             days.mEtmm = hDict.has("etmm") ? hDict.getInt("etmm") : -1;
@@ -399,14 +419,28 @@ public class Schedule extends Entity {
             days.mStmm = hDict.has("stmm") ? hDict.getInt("stmm") : -1;
             days.mSunrise = hDict.has("sunrise");
             days.mSunset = hDict.has("sunset");
-            days.mVal = hDict.getDouble("curVal");
+
+            days.mVal = hDict.has("curVal") ? hDict.getDouble("curVal") : null;
+            days.mCoolingVal = hDict.has("coolVal") ? hDict.getDouble("coolVal") : null;
+            days.mHeatingVal = hDict.has("heatVal") ? hDict.getDouble("heatVal") : null;
 
             return days;
         }
 
-        public void check(int dayOfWeek, int hourOfDay, int minuteOfHour) {
+        public Double getHeatingVal() {
+            return mHeatingVal;
+        }
 
+        public void setHeatingVal(Double heatingVal) {
+            this.mHeatingVal = heatingVal;
+        }
 
+        public Double getCoolingVal() {
+            return mCoolingVal;
+        }
+
+        public void setCoolingVal(Double coolingVal) {
+            this.mCoolingVal = coolingVal;
         }
     }
 
@@ -416,13 +450,19 @@ public class Schedule extends Entity {
         for (int i = 0; i < getDays().size(); i++) {
             Days day = mDays.get(i);
             HDictBuilder hDictDay = new HDictBuilder()
-                    .add(day.isCooling ? "cooling" : "heating")
                     .add("day", HNum.make(day.mDay))
                     .add("sthh", HNum.make(day.mSthh))
                     .add("stmm", HNum.make(day.mStmm))
                     .add("ethh", HNum.make(day.mEthh))
-                    .add("etmm", HNum.make(day.mEtmm))
-                    .add("curVal", HNum.make(day.mVal)); //need boolean & string support
+                    .add("etmm", HNum.make(day.mEtmm));
+           if(day.mHeatingVal != null)
+                hDictDay.add("heatVal", HNum.make(day.getHeatingVal().doubleValue()));
+           if(day.mCoolingVal != null)
+                hDictDay.add("coolVal", HNum.make(day.getCoolingVal().doubleValue()));
+            if(day.mVal != null)
+                hDictDay.add("curVal", HNum.make(day.getVal().doubleValue()));
+
+            //need boolean & string support
             if (day.mSunset) hDictDay.add("sunset", day.mSunset);
             if (day.mSunrise) hDictDay.add("sunrise", day.mSunrise);
 

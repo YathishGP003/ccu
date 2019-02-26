@@ -15,6 +15,8 @@ import a75f.io.api.haystack.Schedule;
 
 public class VAVScheduler {
 
+    private static final int SCHEDULER_PRIORITY = 12;
+
 
     private static final String TAG = "VAVScheduler";
     boolean occupied; // determined by schedule
@@ -26,18 +28,15 @@ public class VAVScheduler {
 
         Log.i(TAG, "Equip: " + equip);
         Log.i(TAG, "Equip Schedule: " + equipSchedule);
-        Occupied cooling = equipSchedule.getCurrentValueForMarker("cooling");
-        Occupied heating = equipSchedule.getCurrentValueForMarker("heating");
+        Occupied occ = equipSchedule.getCurrentValues();
 
-        if (cooling != null) {
-            Double coolingTemp = cooling.isOccupied() ? (double) cooling.getValue() : ((double) cooling.getValue() + coolingDeadBand);
+        if (occ != null) {
+            Double coolingTemp = occ.isOccupied() ? (double) occ.getValue() : ((double) occ.getCoolingVal() + coolingDeadBand);
             setDesiredTemp(equip, coolingTemp, "cooling");
-        }
-        if (heating != null) {
-            Double heatingTemp = heating.isOccupied() ? (double) heating.getValue() : ((double) heating.getValue() - heatingDeadBand);
+
+            Double heatingTemp = occ.isOccupied() ? (double) occ.getValue() : ((double) occ.getHeatingVal() - heatingDeadBand);
             setDesiredTemp(equip, heatingTemp, "heating");
         }
-
     }
 
 
@@ -51,7 +50,7 @@ public class VAVScheduler {
 
         CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
         try {
-            CCUHsApi.getInstance().pointWrite(HRef.make(id.replace("@","")), 9, "Scheduler", desiredTemp != null ? HNum.make(desiredTemp) : HNum.make(0), HNum.make(0));
+            CCUHsApi.getInstance().pointWrite(HRef.make(id.replace("@","")), 12, "Scheduler", desiredTemp != null ? HNum.make(desiredTemp) : HNum.make(0), HNum.make(0));
         } catch (Exception e) {
             e.printStackTrace();
         }

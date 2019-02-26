@@ -3,43 +3,42 @@ package a75f.io.renatus;
 import android.annotation.SuppressLint;
 
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
-import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
-import android.widget.FrameLayout;
 import android.widget.NumberPicker;
-import android.widget.Switch;
-import android.widget.TableRow;
-import android.widget.TextView;
-
-import org.javolution.util.SparseArray;
+import android.widget.Toast;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.sql.Time;
+import java.util.ArrayList;
 
+import a75f.io.api.haystack.DAYS;
+import a75f.io.api.haystack.Schedule;
 import a75f.io.renatus.util.TimeUtils;
 
+
 @SuppressLint("ValidFragment")
-public class ManualSchedulerDialogFragment extends DialogFragment{
+public class ManualSchedulerDialogFragment extends DialogFragment {
+
+    private static final String SCHEDULE_KEY = "SCHEDULE_KEY";
+    private Schedule.Days mDay;
+    public static int NO_REPLACE = -1;
+    private int mPosition;
 
     public interface ManualScheduleDialogListener {
-        public boolean onClickSave(double minTemp, double maxTemp, int startTime, int endTime,
-                                   Boolean isMonday, Boolean isTuesday, Boolean isWednesday, Boolean isThursday, Boolean isFriday, Boolean isSaturday, Boolean isSunday);
+        public boolean onClickSave(int position, double minTemp, double maxTemp, int startTime, int endTime,
+                                   ArrayList<DAYS> days);
 
         public boolean onClickCancel(DialogFragment dialog);
     }
@@ -49,6 +48,13 @@ public class ManualSchedulerDialogFragment extends DialogFragment{
     public ManualSchedulerDialogFragment(ManualScheduleDialogListener mListener) {
         this.mListener = mListener;
     }
+
+    public ManualSchedulerDialogFragment(ManualScheduleDialogListener mListener, int position, Schedule.Days day) {
+        this.mPosition = position;
+        this.mDay = day;
+        this.mListener = mListener;
+    }
+
 
     NumberPicker npStartTime;
     NumberPicker npEndTime;
@@ -77,6 +83,13 @@ public class ManualSchedulerDialogFragment extends DialogFragment{
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
+
+        if(mDay != null)
+        {
+            Toast.makeText(ManualSchedulerDialogFragment.this.getContext(), "Schedule is not null", Toast.LENGTH_LONG).show();
+        }
+
+
         LayoutInflater inflater = (LayoutInflater) LayoutInflater.from(getActivity());//getActivity().getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.dialog_manualschedule, null);
         npStartTime = view.findViewById(R.id.np1);
@@ -94,6 +107,9 @@ public class ManualSchedulerDialogFragment extends DialogFragment{
         checkBoxFriday = view.findViewById(R.id.checkBoxFri);
         checkBoxSaturday = view.findViewById(R.id.checkBoxSat);
         checkBoxSunday = view.findViewById(R.id.checkBoxSun);
+
+
+
 
         npStartTime.setMinValue(nMinVal);
         npStartTime.setMaxValue(nMaxVal);
@@ -161,11 +177,11 @@ public class ManualSchedulerDialogFragment extends DialogFragment{
         checkBoxMonday.setOnCheckedChangeListener(new OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 // update your model (or other business logic) based on isChecked
-                if(isChecked) {
+                if (isChecked) {
                     booleanisMonday = true;
                     checkBoxMonday.setTextColor(Color.parseColor("#ffffff"));
                     checkBoxMonday.setBackground(getResources().getDrawable(R.drawable.bg_weekdays_selector));
-                }else {
+                } else {
                     booleanisMonday = false;
                     checkBoxMonday.setTextColor(Color.parseColor("#000000"));
                     checkBoxMonday.setBackground(null);
@@ -175,11 +191,11 @@ public class ManualSchedulerDialogFragment extends DialogFragment{
         checkBoxTuesday.setOnCheckedChangeListener(new OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 // update your model (or other business logic) based on isChecked
-                if(isChecked) {
+                if (isChecked) {
                     booleanisTuesday = true;
                     checkBoxTuesday.setTextColor(Color.parseColor("#ffffff"));
                     checkBoxTuesday.setBackground(getResources().getDrawable(R.drawable.bg_weekdays_selector));
-                }else {
+                } else {
                     booleanisTuesday = false;
                     checkBoxTuesday.setTextColor(Color.parseColor("#000000"));
                     checkBoxTuesday.setBackground(null);
@@ -189,11 +205,11 @@ public class ManualSchedulerDialogFragment extends DialogFragment{
         checkBoxWednesday.setOnCheckedChangeListener(new OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 // update your model (or other business logic) based on isChecked
-                if(isChecked) {
+                if (isChecked) {
                     booleanisWednesday = true;
                     checkBoxWednesday.setTextColor(Color.parseColor("#ffffff"));
                     checkBoxWednesday.setBackground(getResources().getDrawable(R.drawable.bg_weekdays_selector));
-                }else {
+                } else {
                     booleanisWednesday = false;
                     checkBoxWednesday.setTextColor(Color.parseColor("#000000"));
                     checkBoxWednesday.setBackground(null);
@@ -203,11 +219,11 @@ public class ManualSchedulerDialogFragment extends DialogFragment{
         checkBoxThursday.setOnCheckedChangeListener(new OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 // update your model (or other business logic) based on isChecked
-                if(isChecked) {
+                if (isChecked) {
                     booleanisThursday = true;
                     checkBoxThursday.setTextColor(Color.parseColor("#ffffff"));
                     checkBoxThursday.setBackground(getResources().getDrawable(R.drawable.bg_weekdays_selector));
-                }else {
+                } else {
                     booleanisThursday = false;
                     checkBoxThursday.setTextColor(Color.parseColor("#000000"));
                     checkBoxThursday.setBackground(null);
@@ -217,11 +233,11 @@ public class ManualSchedulerDialogFragment extends DialogFragment{
         checkBoxFriday.setOnCheckedChangeListener(new OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 // update your model (or other business logic) based on isChecked
-                if(isChecked) {
+                if (isChecked) {
                     booleanisFriday = true;
                     checkBoxFriday.setTextColor(Color.parseColor("#ffffff"));
                     checkBoxFriday.setBackground(getResources().getDrawable(R.drawable.bg_weekdays_selector));
-                }else {
+                } else {
                     booleanisFriday = false;
                     checkBoxFriday.setTextColor(Color.parseColor("#000000"));
                     checkBoxFriday.setBackground(null);
@@ -231,11 +247,11 @@ public class ManualSchedulerDialogFragment extends DialogFragment{
         checkBoxSaturday.setOnCheckedChangeListener(new OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 // update your model (or other business logic) based on isChecked
-                if(isChecked) {
+                if (isChecked) {
                     booleanisSaturday = true;
                     checkBoxSaturday.setTextColor(Color.parseColor("#ffffff"));
                     checkBoxSaturday.setBackground(getResources().getDrawable(R.drawable.bg_weekdays_selector));
-                }else {
+                } else {
                     booleanisSaturday = false;
                     checkBoxSaturday.setTextColor(Color.parseColor("#000000"));
                     checkBoxSaturday.setBackground(null);
@@ -245,11 +261,11 @@ public class ManualSchedulerDialogFragment extends DialogFragment{
         checkBoxSunday.setOnCheckedChangeListener(new OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 // update your model (or other business logic) based on isChecked
-                if(isChecked) {
+                if (isChecked) {
                     booleanisSunday = true;
                     checkBoxSunday.setTextColor(Color.parseColor("#ffffff"));
                     checkBoxSunday.setBackground(getResources().getDrawable(R.drawable.bg_weekdays_selector));
-                }else {
+                } else {
                     booleanisSunday = false;
                     checkBoxSunday.setTextColor(Color.parseColor("#000000"));
                     checkBoxSunday.setBackground(null);
@@ -257,30 +273,66 @@ public class ManualSchedulerDialogFragment extends DialogFragment{
             }
         });
 
-        buttonSave.setOnClickListener(new View.OnClickListener()
-        {
+        buttonSave.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view)
-            {
-                mListener.onClickSave(72,74,npStartTime.getValue(),npEndTime.getValue(),booleanisMonday,booleanisTuesday,booleanisWednesday,booleanisThursday,booleanisFriday,booleanisSaturday,booleanisSunday);
+            public void onClick(View view) {
+                ArrayList<DAYS> days = new ArrayList<DAYS>();
+                if (booleanisMonday) days.add(DAYS.MONDAY);
+                if (booleanisTuesday) days.add(DAYS.TUESDAY);
+                if (booleanisWednesday) days.add(DAYS.WEDNESDAY);
+                if (booleanisThursday) days.add(DAYS.THURSDAY);
+                if (booleanisFriday) days.add(DAYS.FRIDAY);
+                if (booleanisSaturday) days.add(DAYS.SATURDAY);
+                if (booleanisSunday) days.add(DAYS.SUNDAY);
+                if(mDay == null)
+                    mListener.onClickSave(NO_REPLACE,74, 72, npStartTime.getValue() / 4, npEndTime.getValue() / 4, days);
+                else
+                    mListener.onClickSave(mPosition, 74, 72, npStartTime.getValue() / 4, npEndTime.getValue() / 4, days);
                 dismiss();
             }
         });
 
-        buttonCancel.setOnClickListener(new View.OnClickListener()
-        {
+        buttonCancel.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view)
-            {
+            public void onClick(View view) {
                 dismiss();
             }
         });
 
-        AlertDialog builder = new  AlertDialog.Builder(getActivity(), R.style.NewDialogStyle)
+        AlertDialog builder = new AlertDialog.Builder(getActivity(), R.style.NewDialogStyle)
                 .setView(view)
                 .setCancelable(false)
                 .create();
+
+        if(mDay != null)
+        {
+            checkDays(mDay);
+            checkTime(mDay);
+        }
+
         return builder;
+    }
+
+    private void checkTime(Schedule.Days mDay) {
+        int startTimePosition = mDay.getSthh() * 4 + mDay.getStmm() / 15;
+        Log.i("Schedule", "StartTime Position: " + startTimePosition);
+        int endTimePosition = mDay.getEthh() * 4 + mDay.getEtmm() / 15;
+        Log.i("Schedule", "EndTime Position: " + endTimePosition);
+
+
+        npStartTime.setValue(startTimePosition);
+        npEndTime.setValue(endTimePosition);
+    }
+
+    private void checkDays(Schedule.Days days) {
+
+        if(days.getDay() == DAYS.MONDAY.ordinal()) checkBoxMonday.setChecked(true);
+        else if(days.getDay() == DAYS.TUESDAY.ordinal()) checkBoxTuesday.setChecked(true);
+        else if(days.getDay() == DAYS.WEDNESDAY.ordinal()) checkBoxWednesday.setChecked(true);
+        else if(days.getDay() == DAYS.THURSDAY.ordinal()) checkBoxThursday.setChecked(true);
+        else if(days.getDay() == DAYS.FRIDAY.ordinal()) checkBoxFriday.setChecked(true);
+        else if(days.getDay() == DAYS.SATURDAY.ordinal()) checkBoxSaturday.setChecked(true);
+        else if(days.getDay() == DAYS.SUNDAY.ordinal()) checkBoxSunday.setChecked(true);
     }
 
 

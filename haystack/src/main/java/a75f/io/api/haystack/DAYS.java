@@ -1,4 +1,4 @@
-package a75f.io.logic.bo.building.definitions;
+package a75f.io.api.haystack;
 
 /**
  * Created by Yinten on 9/9/2017.

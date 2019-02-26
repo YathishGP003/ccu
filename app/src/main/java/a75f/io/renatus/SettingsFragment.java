@@ -72,17 +72,7 @@ public class SettingsFragment extends Fragment
 						getActivity().getSupportFragmentManager().beginTransaction()
 						             .replace(R.id.profileContainer, new VavHybridRtuProfile()).commit();
 						break;
-					/*case 2:
-						getActivity().getSupportFragmentManager().beginTransaction()
-						             .replace(R.id.profileContainer, new VavIERtuProfile()).commit();
-						break;
-					case 4:
-						L.ccu().systemProfile = new VavBacnetRtu();
-						
-					case 5:
-						getActivity().getSupportFragmentManager().beginTransaction()
-						             .replace(R.id.profileContainer, new DABStagedProfile()).commit();
-						break;*/
+
 				}
 			}
 			@Override

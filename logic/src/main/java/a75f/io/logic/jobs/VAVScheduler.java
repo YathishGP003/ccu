@@ -31,10 +31,10 @@ public class VAVScheduler {
         Occupied occ = equipSchedule.getCurrentValues();
 
         if (occ != null) {
-            Double coolingTemp = occ.isOccupied() ? (double) occ.getValue() : ((double) occ.getCoolingVal() + coolingDeadBand);
+            Double coolingTemp = occ.isOccupied() ? (double) occ.getCoolingVal() : ((double) occ.getCoolingVal() + coolingDeadBand);
             setDesiredTemp(equip, coolingTemp, "cooling");
 
-            Double heatingTemp = occ.isOccupied() ? (double) occ.getValue() : ((double) occ.getHeatingVal() - heatingDeadBand);
+            Double heatingTemp = occ.isOccupied() ? (double) occ.getHeatingVal() : ((double) occ.getHeatingVal() - heatingDeadBand);
             setDesiredTemp(equip, heatingTemp, "heating");
         }
     }

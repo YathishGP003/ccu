@@ -3,6 +3,7 @@ package a75f.io.api.haystack;
 import android.content.Context;
 import android.util.Log;
 
+import org.projecthaystack.HDate;
 import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
@@ -20,6 +21,7 @@ import org.projecthaystack.io.HZincWriter;
 import org.projecthaystack.server.HStdOps;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -677,6 +679,8 @@ public class CCUHsApi {
         hDictBuilder.add("dis", HStr.make(ccuName));
         hDictBuilder.add("installer", HStr.make(installerEmail));
         hDictBuilder.add("siteRef", getSiteId());
+        System.out.println("DATE: " + HDateTime.make(System.currentTimeMillis()).date.toZinc());
+        hDictBuilder.add("createdDate", HDateTime.make(System.currentTimeMillis()).date);
         hDictBuilder.add("device");
         tagsDb.addHDict(localId, hDictBuilder.toDict());
         return localId;
@@ -713,6 +717,8 @@ public class CCUHsApi {
 
     public void updateSchedule(Schedule schedule) {
         addSchedule(schedule.getId(), schedule.getScheduleHDict());
+
+        Log.i("Schedule", "Schedule: " + schedule.getScheduleHDict().toZinc());
         if (tagsDb.idMap.get(schedule.getId()) != null)
         {
             System.out.println("Update tagsDb: " + tagsDb.idMap.get(schedule.getId()));

@@ -31,8 +31,11 @@ import java.util.ArrayList;
  *
  * Add method to add new schedules - done
  * Add method to edit a schedule - done
- * Add method to edit a vacation
+ * Add method to edit a vacation - IP
  * Add validation - done
+ * Add UI to edit zone based schedules
+ * Get Tuners from haystack for dead bands
+ * Speak with Shilpa about where requirements end for this task
  *
  */
 public class SchedulerFragment extends Fragment implements AdapterView.OnItemSelectedListener,ManualScheduleDialogListener {

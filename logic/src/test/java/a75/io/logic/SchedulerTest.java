@@ -11,12 +11,11 @@ import org.projecthaystack.HRef;
 
 import java.util.UUID;
 
-import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.MockTime;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.logic.DefaultSchedules;
-import a75f.io.logic.bo.building.definitions.DAYS;
+import a75f.io.api.haystack.DAYS;
 
 public class SchedulerTest
 {

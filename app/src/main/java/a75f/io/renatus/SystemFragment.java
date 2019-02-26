@@ -49,9 +49,6 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	SeekBar  sbComfortValue;
 	EditText stageStatusNow;
 	Spinner mSysSpinnerSchedule;
-
-
-	
 	
 	RadioButton systemOff;
 	RadioButton systemAuto;

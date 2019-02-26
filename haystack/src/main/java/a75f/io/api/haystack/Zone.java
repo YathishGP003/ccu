@@ -18,6 +18,26 @@ public class Zone extends Entity
 
     private String scheduleRef;
 
+    public boolean isSystemSchedule()
+    {
+        Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule();
+        if(systemSchedule.getId().equals(scheduleRef))
+            return true;
+
+
+        return false;
+    }
+
+    public boolean hasSchedule()
+    {
+        if(scheduleRef == null || scheduleRef.equals(""))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
     public void setId(String id)
     {
         this.id = id;

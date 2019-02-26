@@ -1,5 +1,7 @@
 package a75f.io.logic.jobs;
 
+import android.util.Log;
+
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 
@@ -15,6 +17,8 @@ import a75f.io.logic.L;
 
 public class VAVScheduler {
 
+    private static final int SCHEDULER_PRIORITY = 12;
+
 
     private static final String TAG = "VAVScheduler";
     boolean occupied; // determined by schedule
@@ -23,21 +27,20 @@ public class VAVScheduler {
 
 
     public static void processEquip(Equip equip, Schedule equipSchedule) {
-    
-        CcuLog.d(L.TAG_CCU_SCHEDULER,"Equip: " + equip);
-        CcuLog.d(L.TAG_CCU_SCHEDULER, "Equip Schedule: " + equipSchedule);
-        Occupied cooling = equipSchedule.getCurrentValueForMarker("cooling");
-        Occupied heating = equipSchedule.getCurrentValueForMarker("heating");
 
-        if (cooling != null) {
-            Double coolingTemp = cooling.isOccupied() ? (double) cooling.getValue() : ((double) cooling.getValue() + coolingDeadBand);
+
+        Log.i(TAG, "Equip: " + equip);
+        Log.i(TAG, "Equip Schedule: " + equipSchedule);
+        Occupied occ = equipSchedule.getCurrentValues();
+
+
+        if (occ != null) {
+            Double coolingTemp = occ.isOccupied() ? (double) occ.getCoolingVal() : ((double) occ.getCoolingVal() + coolingDeadBand);
             setDesiredTemp(equip, coolingTemp, "cooling");
-        }
-        if (heating != null) {
-            Double heatingTemp = heating.isOccupied() ? (double) heating.getValue() : ((double) heating.getValue() - heatingDeadBand);
+
+            Double heatingTemp = occ.isOccupied() ? (double) occ.getHeatingVal() : ((double) occ.getHeatingVal() - heatingDeadBand);
             setDesiredTemp(equip, heatingTemp, "heating");
         }
-
     }
 
 
@@ -49,7 +52,7 @@ public class VAVScheduler {
         }
         String id = ((HashMap) points.get(0)).get("id").toString();
         try {
-            CCUHsApi.getInstance().pointWrite(HRef.make(id.replace("@","")), 9, "Scheduler", desiredTemp != null ? HNum.make(desiredTemp) : HNum.make(0), HNum.make(0));
+            CCUHsApi.getInstance().pointWrite(HRef.make(id.replace("@","")), 12, "Scheduler", desiredTemp != null ? HNum.make(desiredTemp) : HNum.make(0), HNum.make(0));
         } catch (Exception e) {
             e.printStackTrace();
         }

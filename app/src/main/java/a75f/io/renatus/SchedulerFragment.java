@@ -4,35 +4,43 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
-import android.support.constraint.ConstraintSet;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.res.ResourcesCompat;
 import android.text.Html;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.DAYS;
+import a75f.io.api.haystack.Schedule;
 import a75f.io.renatus.ManualSchedulerDialogFragment.ManualScheduleDialogListener;
 import a75f.io.renatus.util.FontManager;
 
-import android.widget.Toast;
-
 import java.util.ArrayList;
 
-/**
- * Created by Suresh Kumar On 02/05/19.
- */
 
+
+/***
+ *
+ * Add method to add new schedules - done
+ * Add method to edit a schedule - done
+ * Add method to edit a vacation - IP
+ * Add validation - done
+ * Add UI to edit zone based schedules
+ * Get Tuners from haystack for dead bands
+ * Speak with Shilpa about where requirements end for this task
+ *
+ */
 public class SchedulerFragment extends Fragment implements AdapterView.OnItemSelectedListener,ManualScheduleDialogListener {
 
+	private static final String PARAM_SCHEDULE_ID = "PARAM_SCHEDULE_ID";
 	TextView textViewMonday;
 	TextView textViewTuesday;
 	TextView textViewWednesday;
@@ -47,9 +55,12 @@ public class SchedulerFragment extends Fragment implements AdapterView.OnItemSel
 	TextView textViewaddEntryIcon;
 	TextView textViewVacations;
 	TextView textViewaddVacations;
+	Schedule schedule;
 
 	ConstraintLayout constraintScheduler;
 	ArrayList<View> viewTimeLines;
+
+	String mScheduleId;
 
 	final int ID_DIALOG_SCHEDULE = 01;
 
@@ -64,6 +75,14 @@ public class SchedulerFragment extends Fragment implements AdapterView.OnItemSel
 		return new SchedulerFragment();
 	}
 
+	public static SchedulerFragment newInstance(String scheduleId)
+	{
+		SchedulerFragment schedulerFragment = new SchedulerFragment();
+		Bundle args = new Bundle();
+		args.putString(PARAM_SCHEDULE_ID, scheduleId);
+		schedulerFragment.setArguments(args);
+		return schedulerFragment;
+	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -71,6 +90,18 @@ public class SchedulerFragment extends Fragment implements AdapterView.OnItemSel
 		View rootView = inflater.inflate(R.layout.fragment_scheduler, container, false);
 
 		Typeface iconFont = FontManager.getTypeface(getActivity(), FontManager.FONTAWESOME);
+
+		if(getArguments() != null && getArguments().containsKey(PARAM_SCHEDULE_ID)) {
+			mScheduleId = getArguments().getString(PARAM_SCHEDULE_ID);
+			schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
+		}
+		else
+		{
+			schedule = CCUHsApi.getInstance().getSystemSchedule();
+		}
+
+
+
 
 		//Scheduler Layout
 		constraintScheduler = rootView.findViewById(R.id.constraintLt_Scheduler);
@@ -172,7 +203,47 @@ public class SchedulerFragment extends Fragment implements AdapterView.OnItemSel
 		});
 
 
+
+		loadSchedule();
+
+
+
 		return rootView;
+	}
+
+
+
+
+
+	private void loadSchedule() {
+
+
+
+		hasTextViewChildren();
+
+
+		//constraintScheduler.removeAllViews();
+		ArrayList<Schedule.Days> days = schedule.getDays();
+		for(int i = 0; i < days.size(); i++)
+		{
+			System.out.println("STHH: " + days.get(i).getSthh() + " ETHH: " + days.get(i).getEthh());
+			drawSchedule(i, days.get(i).getCoolingVal(), days.get(i).getHeatingVal(), days.get(i).getSthh(), days.get(i).getEthh(), DAYS.values()[days.get(i).getDay()]);
+		}
+
+	}
+
+	private void hasTextViewChildren() {
+
+		for(int i = 0; i < constraintScheduler.getChildCount(); i++)
+		{
+			if(constraintScheduler.getChildAt(i).getTag() != null)
+			{
+				constraintScheduler.removeViewAt(i);
+				hasTextViewChildren();
+				break;
+			}
+		}
+
 	}
 
 	private void showDialog(int id) {
@@ -184,6 +255,19 @@ public class SchedulerFragment extends Fragment implements AdapterView.OnItemSel
 					ft.remove(prev);
 				}
 				ManualSchedulerDialogFragment newFragment = new ManualSchedulerDialogFragment(this);
+				newFragment.show(ft, "schedule");
+		}
+	}
+
+	private void showDialog(int id, int position, Schedule.Days day) {
+		switch (id) {
+			case ID_DIALOG_SCHEDULE:
+				FragmentTransaction ft = getFragmentManager().beginTransaction();
+				Fragment prev = getFragmentManager().findFragmentByTag("schedule");
+				if (prev != null) {
+					ft.remove(prev);
+				}
+				ManualSchedulerDialogFragment newFragment = new ManualSchedulerDialogFragment(this, position, day);
 				newFragment.show(ft, "schedule");
 		}
 	}
@@ -209,145 +293,112 @@ public class SchedulerFragment extends Fragment implements AdapterView.OnItemSel
 	}
 
 
-	public boolean onClickSave(double minTemp, double maxTemp, int startTime, int endTime,
-							   Boolean isMonday, Boolean isTuesday, Boolean isWednesday, Boolean isThursday, Boolean isFriday, Boolean isSaturday, Boolean isSunday)
+	public boolean onClickSave(int position, double coolingTemp, double heatingTemp, int startTime, int endTime, ArrayList<DAYS> days)
 	{
-		String strminTemp = FontManager.getColoredSpanned(Double.toString(minTemp),colorMinTemp);
-		String strmaxTemp = FontManager.getColoredSpanned(Double.toString(maxTemp),colorMaxTemp);
+		Schedule.Days remove = null;
+		if(position != ManualSchedulerDialogFragment.NO_REPLACE)
+		{
+			remove = schedule.getDays().remove(position);
+		}
+
+		ArrayList<Schedule.Days> daysArrayList = new ArrayList<Schedule.Days>();
+
+		for(DAYS day : days) {
+			Schedule.Days dayBO = new Schedule.Days();
+			dayBO.setEthh(endTime);
+			dayBO.setSthh(startTime);
+			dayBO.setHeatingVal(heatingTemp);
+			dayBO.setCoolingVal(coolingTemp);
+			dayBO.setSunset(false);
+			dayBO.setSunrise(false);
+			dayBO.setDay(day.ordinal());
+			daysArrayList.add(dayBO);
+		}
+
+		boolean intersection = schedule.checkIntersection(daysArrayList);
+		if(intersection)
+		{
+			if(remove != null)
+				schedule.getDays().add(position, remove);
+			Toast.makeText(SchedulerFragment.this.getContext(), "Overlap occured can not add", Toast.LENGTH_SHORT).show();
+		}
+		else
+		{
+
+			schedule.getDays().addAll(daysArrayList);
+			CCUHsApi.getInstance().updateSchedule(schedule);
+			loadSchedule();
+		}
+
+		return true;
+	}
+
+	private void drawSchedule(int position, double heatingTemp, double coolingTemp, int startTime, int endTime, DAYS day)
+	{
+
+		System.out.println("Start Time: " + startTime);
+		System.out.println("End Time: " + endTime);
+		String strminTemp = FontManager.getColoredSpanned(Double.toString(coolingTemp),colorMinTemp);
+		String strmaxTemp = FontManager.getColoredSpanned(Double.toString(heatingTemp),colorMaxTemp);
 
 		Typeface typeface = Typeface.createFromAsset(getActivity().getAssets(),"fonts/lato_regular.ttf");
 
-		int tempStartTime = (startTime/4);
-		int tempEndTime = (endTime/4);
-
-		if(isMonday)
-		{
-			TextView textViewTemp = new TextView(getActivity());
-			textViewTemp.setGravity(Gravity.CENTER);
-			textViewTemp.setText(Html.fromHtml(strminTemp+" "+strmaxTemp));
-			textViewTemp.setBackground(getResources().getDrawable(R.drawable.temperature_background));
-			textViewTemp.setTypeface(typeface);
-			textViewTemp.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 24.0f);
-
-			textViewTemp.setId(View.generateViewId());
-
-            ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(0,40);
-			lp.topToTop = textViewMonday.getId();
-			lp.bottomToBottom = textViewMonday.getId();
-			lp.startToStart = viewTimeLines.get(tempStartTime).getId();
-			lp.endToEnd = viewTimeLines.get(tempEndTime).getId();
-			constraintScheduler.addView(textViewTemp,lp);
-
+		TextView temperTextView = null;
+		switch (day) {
+			case MONDAY:
+				temperTextView = textViewMonday;
+				break;
+			case TUESDAY:
+				temperTextView = textViewTuesday;
+				break;
+			case WEDNESDAY:
+				temperTextView = textViewWednesday;
+				break;
+			case THURSDAY:
+				temperTextView = textViewThursday;
+				break;
+			case FRIDAY:
+				temperTextView = textViewFriday;
+				break;
+			case SATURDAY:
+				temperTextView = textViewSaturday;
+				break;
+			case SUNDAY:
+				temperTextView = textViewSunday;
+				break;
 		}
-		if(isTuesday)
-		{
-			TextView textViewTemp = new TextView(getActivity());
-			textViewTemp.setGravity(Gravity.CENTER);
-			textViewTemp.setText(Html.fromHtml(strminTemp+" "+strmaxTemp));
-			textViewTemp.setBackground(getResources().getDrawable(R.drawable.temperature_background));
-			textViewTemp.setTypeface(typeface);
-			textViewTemp.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 24.0f);
-			textViewTemp.setId(View.generateViewId());
 
-            ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(0,40);
-			lp.topToTop = textViewTuesday.getId();
-			lp.bottomToBottom = textViewTuesday.getId();
-			lp.startToStart = viewTimeLines.get(tempStartTime).getId();
-			lp.endToEnd = viewTimeLines.get(tempEndTime).getId();
-			constraintScheduler.addView(textViewTemp,lp);
 
-		}
-		if(isWednesday)
-		{
-			TextView textViewTemp = new TextView(getActivity());
-			textViewTemp.setGravity(Gravity.CENTER);
-			textViewTemp.setText(Html.fromHtml(strminTemp+" "+strmaxTemp));
-			textViewTemp.setBackground(getResources().getDrawable(R.drawable.temperature_background));
-			textViewTemp.setTypeface(typeface);
-			textViewTemp.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 24.0f);
-			textViewTemp.setId(View.generateViewId());
 
-            ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(0,40);
-			lp.topToTop = textViewWednesday.getId();
-			lp.bottomToBottom = textViewWednesday.getId();
-			lp.startToStart = viewTimeLines.get(tempStartTime).getId();
-			lp.endToEnd = viewTimeLines.get(tempEndTime).getId();
-			constraintScheduler.addView(textViewTemp,lp);
+			drawScheduleBlock(position,strminTemp, strmaxTemp, typeface, startTime, endTime, temperTextView);
 
-		}
-		if(isThursday)
-		{
-			TextView textViewTemp = new TextView(getActivity());
-			textViewTemp.setGravity(Gravity.CENTER);
-			textViewTemp.setText(Html.fromHtml(strminTemp+" "+strmaxTemp));
-			textViewTemp.setBackground(getResources().getDrawable(R.drawable.temperature_background));
-			textViewTemp.setTypeface(typeface);
-			textViewTemp.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 24.0f);
-			textViewTemp.setId(View.generateViewId());
+	}
 
-            ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(0,40);
-			lp.topToTop = textViewThursday.getId();
-			lp.bottomToBottom = textViewThursday.getId();
-			lp.startToStart = viewTimeLines.get(tempStartTime).getId();
-			lp.endToEnd = viewTimeLines.get(tempEndTime).getId();
-			constraintScheduler.addView(textViewTemp,lp);
+	private void drawScheduleBlock(int position, String strminTemp, String strmaxTemp, Typeface typeface, int tempStartTime, int tempEndTime, TextView textViewSunday) {
+		TextView textViewTemp = new TextView(getActivity());
+		textViewTemp.setGravity(Gravity.CENTER);
+		textViewTemp.setText(Html.fromHtml(strminTemp + " " + strmaxTemp));
+		textViewTemp.setBackground(getResources().getDrawable(R.drawable.temperature_background));
+		textViewTemp.setTypeface(typeface);
+		textViewTemp.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18.0f);
+		textViewTemp.setId(View.generateViewId());
+		textViewTemp.setSingleLine();
+		ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(0, ConstraintLayout.LayoutParams.WRAP_CONTENT);
+		lp.topToTop = textViewSunday.getId();
+		lp.bottomToBottom = textViewSunday.getId();
+		lp.startToStart = viewTimeLines.get(tempStartTime).getId();
+		lp.endToEnd = viewTimeLines.get(tempEndTime).getId();
+		constraintScheduler.addView(textViewTemp, lp);
 
-		}
-		if(isFriday)
-		{
-			TextView textViewTemp = new TextView(getActivity());
-			textViewTemp.setGravity(Gravity.CENTER);
-			textViewTemp.setText(Html.fromHtml(strminTemp+" "+strmaxTemp));
-			textViewTemp.setBackground(getResources().getDrawable(R.drawable.temperature_background));
-			textViewTemp.setTypeface(typeface);
-			textViewTemp.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 24.0f);
-			textViewTemp.setId(View.generateViewId());
-
-            ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(0,40);
-			lp.topToTop = textViewFriday.getId();
-			lp.bottomToBottom = textViewFriday.getId();
-			lp.startToStart = viewTimeLines.get(tempStartTime).getId();
-			lp.endToEnd = viewTimeLines.get(tempEndTime).getId();
-			constraintScheduler.addView(textViewTemp,lp);
-
-		}
-		if(isSaturday)
-		{
-			TextView textViewTemp = new TextView(getActivity());
-			textViewTemp.setGravity(Gravity.CENTER);
-			textViewTemp.setText(Html.fromHtml(strminTemp+" "+strmaxTemp));
-			textViewTemp.setBackground(getResources().getDrawable(R.drawable.temperature_background));
-			textViewTemp.setTypeface(typeface);
-			textViewTemp.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 24.0f);
-			textViewTemp.setId(View.generateViewId());
-
-            ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(0,40);
-			lp.topToTop = textViewSaturday.getId();
-			lp.bottomToBottom = textViewSaturday.getId();
-			lp.startToStart = viewTimeLines.get(tempStartTime).getId();
-			lp.endToEnd = viewTimeLines.get(tempEndTime).getId();
-			constraintScheduler.addView(textViewTemp,lp);
-
-		}
-		if(isSunday)
-		{
-			TextView textViewTemp = new TextView(getActivity());
-			textViewTemp.setGravity(Gravity.CENTER);
-			textViewTemp.setText(Html.fromHtml(strminTemp+" "+strmaxTemp));
-			textViewTemp.setBackground(getResources().getDrawable(R.drawable.temperature_background));
-			textViewTemp.setTypeface(typeface);
-			textViewTemp.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 24.0f);
-			textViewTemp.setId(View.generateViewId());
-
-            ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(0,40);
-			lp.topToTop = textViewSunday.getId();
-			lp.bottomToBottom = textViewSunday.getId();
-			lp.startToStart = viewTimeLines.get(tempStartTime).getId();
-			lp.endToEnd = viewTimeLines.get(tempEndTime).getId();
-			constraintScheduler.addView(textViewTemp,lp);
-
-		}
-		return true;
+		textViewTemp.setTag(position);
+		textViewTemp.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				int clickedPosition = (Integer)v.getTag();
+				Toast.makeText(SchedulerFragment.this.getContext(), "Clicked: " + clickedPosition, Toast.LENGTH_SHORT).show();
+				showDialog(ID_DIALOG_SCHEDULE, clickedPosition, schedule.getDays().get(clickedPosition));
+			}
+		});
 	}
 
 

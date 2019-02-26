@@ -31,6 +31,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logic.DefaultSchedules;
@@ -438,13 +439,14 @@ public class FloorPlanFragment extends Fragment
 					"Room " + addRoomEdit.getText() + " added", Toast.LENGTH_SHORT).show();
 			Floor floor = floorList.get(mFloorListAdapter.getSelectedPostion());
 			HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
-			String scheduleID = DefaultSchedules.generateDefaultSchedule();
+
+			Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule();
 
 			Zone hsZone = new Zone.Builder()
                                    .setDisplayName(addRoomEdit.getText().toString())
                                    .setFloorRef(floor.getId())
                                    .setSiteRef(siteMap.get("id").toString())
-									.setScheduleRef(scheduleID)
+									.setScheduleRef(systemSchedule.getId())
                                    .build();
 
 			hsZone.setId(CCUHsApi.getInstance().addZone(hsZone));

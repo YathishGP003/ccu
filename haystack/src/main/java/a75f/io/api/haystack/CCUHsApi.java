@@ -723,8 +723,8 @@ public class CCUHsApi {
         Log.i("Schedule", "Schedule: " + schedule.getScheduleHDict().toZinc());
         if (tagsDb.idMap.get(schedule.getId()) != null)
         {
-            CcuLog.d("CCU_HS","Update tagsDb: " + tagsDb.idMap.get(schedule.getId()));
-            tagsDb.updateIdMap.put(schedule.getId(), tagsDb.idMap.get(schedule.getId()));
+            CcuLog.d("CCU_HS","Update tagsDb: " + tagsDb.idMap.get("@" + schedule.getId()));
+            tagsDb.updateIdMap.put("@" + schedule.getId(), tagsDb.idMap.get("@" + schedule.getId()));
         }
     }
 

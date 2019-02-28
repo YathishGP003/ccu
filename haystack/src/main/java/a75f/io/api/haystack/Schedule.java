@@ -326,7 +326,7 @@ public class Schedule extends Entity {
                 Map.Entry pair = (Map.Entry) it.next();
                 //System.out.println(pair.getKey() + " = " + pair.getValue());
                 if (pair.getKey().equals("id")) {
-                    this.mId = pair.getValue().toString();
+                    this.mId = pair.getValue().toString().replaceAll("@", "");
                 } else if (pair.getKey().equals("dis")) {
                     this.mDis = pair.getValue().toString();
                 } else if (pair.getKey().equals("vacation")) {

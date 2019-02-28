@@ -11,6 +11,8 @@ import org.projecthaystack.io.HZincWriter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -90,7 +92,23 @@ public class EntitySyncHandler
         }
         CcuLog.i("CCU", "Response: \n" + response);
     }
-    
+
+    public static HashSet<String> ref = new HashSet<>();
+
+    static
+    {
+        ref.add("siteRef");
+        ref.add("equipRef");
+        ref.add("deviceRef");
+        ref.add("pointRef");
+        ref.add("floorRef");
+        ref.add("roomRef");
+        ref.add("ahuRef");
+        ref.add("scheduleRef");
+
+
+    }
+
     /**
      * Update request should be sent with GUID as part of the entity.
      */
@@ -101,46 +119,38 @@ public class EntitySyncHandler
             if (CCUHsApi.getInstance().getGUID(luid) == null) {
                 continue;
             }
-            HashMap entity = CCUHsApi.getInstance().readMapById(luid);
-            entity.put("id", HRef.copy(CCUHsApi.getInstance().getGUID(luid)));
-            if (entity.get("siteRef") != null && CCUHsApi.getInstance().getGUID(entity.get("siteRef").toString()) != null)
-            {
-                entity.put("siteRef", HRef.copy(CCUHsApi.getInstance().getGUID(entity.get("siteRef").toString())));
-            }
-            if (entity.get("equipRef") != null && CCUHsApi.getInstance().getGUID(entity.get("equipRef").toString()) != null)
-            {
-                entity.put("equipRef", HRef.copy(CCUHsApi.getInstance().getGUID(entity.get("equipRef").toString())));
-            }
-            if (entity.get("deviceRef") != null && CCUHsApi.getInstance().getGUID(entity.get("deviceRef").toString()) != null)
-            {
-                entity.put("deviceRef", HRef.copy(CCUHsApi.getInstance().getGUID(entity.get("deviceRef").toString())));
-            }
-            if (entity.get("pointRef") != null && CCUHsApi.getInstance().getGUID(entity.get("pointRef").toString()) != null)
-            {
-                entity.put("pointRef", HRef.copy(CCUHsApi.getInstance().getGUID(entity.get("pointRef").toString())));
-            }
-            if (entity.get("floorRef") != null && CCUHsApi.getInstance().getGUID(entity.get("floorRef").toString()) != null)
-            {
-                entity.put("floorRef", HRef.copy(CCUHsApi.getInstance().getGUID(entity.get("floorRef").toString())));
-            }
-            if (entity.get("roomRef") != null && CCUHsApi.getInstance().getGUID(entity.get("roomRef").toString()) != null)
-            {
-                entity.put("roomRef", HRef.copy(CCUHsApi.getInstance().getGUID(entity.get("roomRef").toString())));
-            }
-            if (entity.get("ahuRef") != null && CCUHsApi.getInstance().getGUID(entity.get("ahuRef").toString()) != null)
-            {
-                entity.put("ahuRef", HRef.copy(CCUHsApi.getInstance().getGUID(entity.get("ahuRef").toString())));
-            }
-            if (entity.get("scheduleRef") != null && CCUHsApi.getInstance().getGUID(entity.get("scheduleRef").toString()) != null)
-            {
-                entity.put("scheduleRef", HRef.copy(CCUHsApi.getInstance().getGUID(entity.get("scheduleRef").toString())));
-            }
-            entities.add(HSUtil.mapToHDict(entity));
+
+            HDict entity = CCUHsApi.getInstance().readHDictById(luid);
+            HDictBuilder builder = new HDictBuilder();
+            builder.add(entity);
+            builder.add("id", HRef.copy(CCUHsApi.getInstance().getGUID(luid)));
+            updateRefs(entity, builder);
+            entities.add(builder.toDict());
         }
-    
-        if (entities.size() > 0)
+
+
+        updateEntities(entities);
+
+    }
+
+    private void updateRefs(HDict entity, HDictBuilder builder) {
+        Iterator<String> iterator = ref.iterator();
+        while(iterator.hasNext())
         {
-            HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
+            String hRef = iterator.next();
+            if (entity.has(hRef))
+            {
+                String guid = CCUHsApi.getInstance().getGUID(entity.getRef(hRef).toCode());
+                builder.add(hRef, HRef.copy(guid));
+            }
+        }
+    }
+
+    private void updateEntities(ArrayList<HDict> hDIcts)
+    {
+        if (hDIcts != null && hDIcts.size() > 0)
+        {
+            HGrid grid = HGridBuilder.dictsToGrid(hDIcts.toArray(new HDict[hDIcts.size()]));
             String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
             CcuLog.i("CCU", "Response: \n" + response);
             if (response != null)

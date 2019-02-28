@@ -328,8 +328,7 @@ public class SchedulerFragment extends Fragment implements AdapterView.OnItemSel
 
 			schedule.getDays().addAll(daysArrayList);
 			CCUHsApi.getInstance().updateSchedule(schedule);
-			L.saveCCUState();
-			//CCUHsApi.getInstance().syncEntityTree();
+			CCUHsApi.getInstance().syncEntityTree();
 			loadSchedule();
 		}
 

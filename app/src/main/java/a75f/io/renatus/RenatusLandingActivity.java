@@ -48,17 +48,14 @@ public class RenatusLandingActivity extends AppCompatActivity
         {
             setContentView(R.layout.activity_renatus_landing);
 
-//            if (!DalContext.getSharedClient().isUserLoggedIn())
-//            {
-//                loadSplash();
-//            }
-//
             mSettingPagerAdapter = new SettingsPagerAdapter(getSupportFragmentManager());
             mStatusPagerAdapter = new StatusPagerAdapter(getSupportFragmentManager());
-            mViewPager = (ViewPager) findViewById(R.id.container);
-            mTabLayout = (TabLayout) findViewById(R.id.tabs);
+
+
+            mViewPager = findViewById(R.id.container);
+            mTabLayout = findViewById(R.id.tabs);
             mTabLayout.setTabMode(TabLayout.MODE_SCROLLABLE);
-            pageSwitchButton = (ImageButton) findViewById(R.id.pageSwitchButton);
+            pageSwitchButton = findViewById(R.id.pageSwitchButton);
             pageSwitchButton.setOnClickListener(new View.OnClickListener()
             {
                 @Override
@@ -109,6 +106,7 @@ public class RenatusLandingActivity extends AppCompatActivity
     {
         if (settingView == true)
         {
+
             mViewPager.setAdapter(mStatusPagerAdapter);
             mTabLayout.post(new Runnable()
             {

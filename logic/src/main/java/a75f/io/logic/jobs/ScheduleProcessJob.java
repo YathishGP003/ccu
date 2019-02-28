@@ -19,7 +19,7 @@ public class ScheduleProcessJob extends BaseJob {
     public void doJob() {
 
 
-        Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule();
+        Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false);
 
         /* The systemSchedule isn't initiated yet, so schedules shouldn't be ran*/
 
@@ -36,7 +36,7 @@ public class ScheduleProcessJob extends BaseJob {
 
             if(equip != null) {
                
-                Schedule equipSchedule = Schedule.getScheduleForEquip(equip);
+                Schedule equipSchedule = Schedule.getScheduleForEquip(equip, false);
                 if (equipSchedule != null) {
                     writePointsForEquip(equip, equipSchedule);
                 }

@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.text.method.DigitsKeyListener;
 import android.text.method.KeyListener;
@@ -31,10 +32,6 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.tuners.TunerConstants;
 
-/**
- * Created by samjithsadasivan on 1/31/19.
- */
-
 public class ZoneFragmentTemp extends Fragment
 {
     ExpandableListView            expandableListView;
@@ -60,10 +57,9 @@ public class ZoneFragmentTemp extends Fragment
                              Bundle savedInstanceState)
     {
         View rootView = inflater.inflate(R.layout.fragment_tuner_editor, container, false);
-        //ButterKnife.bind(this, rootView);
         return rootView;
     }
-    
+
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
     {
@@ -72,18 +68,8 @@ public class ZoneFragmentTemp extends Fragment
         expandableListDetail = new HashMap<>();
         updateData();
         expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
-        expandableListAdapter = new EquipTempExpandableListAdapter(getActivity(), expandableListTitle, expandableListDetail, tunerMap);
+        expandableListAdapter = new EquipTempExpandableListAdapter(ZoneFragmentTemp.this, expandableListTitle, expandableListDetail, tunerMap);
         expandableListView.setAdapter(expandableListAdapter);
-        /*expandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
-        
-            @Override
-            public void onGroupExpand(int groupPosition) {
-                Toast.makeText(getActivity(),
-                        expandableListTitle.get(groupPosition) + " List Expanded.",
-                        Toast.LENGTH_SHORT).show();
-            }
-        });*/
-        
         expandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v,
@@ -237,5 +223,4 @@ public class ZoneFragmentTemp extends Fragment
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
     }
-    
 }

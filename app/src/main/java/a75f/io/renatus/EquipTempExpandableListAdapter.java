@@ -1,7 +1,11 @@
 package a75f.io.renatus;
 
+
 import android.content.Context;
 import android.graphics.Typeface;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +13,7 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,22 +21,24 @@ import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Schedule;
+import a75f.io.renatus.SchedulerFragment.OnExitListener;
 
 import static a75f.io.renatus.ZoneFragmentTemp.getPointVal;
+
 
 /**
  * Created by samjithsadasivan on 1/31/19.
  */
 public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
 {
-    private Context                       context;
+    private Fragment mFragment;
     private List<String>                  expandableListTitle;
     private HashMap<String, List<String>> expandableListDetail;
     private HashMap<String, String>       idMap;
     
-    public EquipTempExpandableListAdapter(Context context, List<String> expandableListTitle,
-                                      HashMap<String, List<String>> expandableListDetail, HashMap idmap) {
-        this.context = context;
+    public EquipTempExpandableListAdapter(Fragment fragment, List<String> expandableListTitle,
+                                          HashMap<String, List<String>> expandableListDetail, HashMap idmap) {
+        this.mFragment = fragment;
         this.expandableListTitle = expandableListTitle;
         this.expandableListDetail = expandableListDetail;
         this.idMap = idmap;
@@ -50,7 +57,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
 
 
         if(!expandedListText.equals("schedule")) {
-            LayoutInflater layoutInflater = (LayoutInflater) this.context
+            LayoutInflater layoutInflater = (LayoutInflater) this.mFragment.getContext()
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = layoutInflater.inflate(R.layout.tuner_list_item, null);
 
@@ -66,25 +73,44 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
         }
         else
         {
-            LayoutInflater layoutInflater = (LayoutInflater) this.context
+            LayoutInflater layoutInflater = (LayoutInflater) this.mFragment.getContext()
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             String equipId = idMap.get(expandedListText);
             convertView = layoutInflater.inflate(R.layout.temp_schedule, null);
             TextView scheduleStatus = convertView.findViewById(R.id.schedule_status_tv);
-            scheduleStatus.setText("Status & " + equipId + " :: " + expandedListText);
-
-            Schedule schedule = Schedule.getScheduleByEquipId(equipId);
-
-
-            CCUHsApi.getInstance().readHDictById(equipId);
-
-
             Spinner scheduleSpinner = convertView.findViewById(R.id.schedule_spinner);
-
-
             ImageButton scheduleImageButton = convertView.findViewById(R.id.schedule_edit_button);
             TextView vacationStatus = convertView.findViewById(R.id.vacation_status);
             ImageButton vacationEditButton = convertView.findViewById(R.id.vacation_edit_button);
+
+            scheduleStatus.setText("Status & " + equipId + " :: " + expandedListText);
+            Schedule schedule = Schedule.getScheduleByEquipId(equipId);
+            Schedule vacationSchedule = Schedule.getVacationByEquipId(equipId);
+
+            scheduleImageButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    SchedulerFragment schedulerFragment = SchedulerFragment.newInstance();
+                    FragmentManager childFragmentManager = mFragment.getChildFragmentManager();
+                    childFragmentManager.beginTransaction()
+                            .replace(R.id.zone_fragment_temp, schedulerFragment)
+                            .addToBackStack(null).commit();
+
+                    schedulerFragment.setOnExitListener(new OnExitListener(){
+                        @Override
+                        public void onExit() {
+                            Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+            });
+
+            if(schedule.isSiteSchedule())
+                scheduleSpinner.setSelection(0);
+            else if(schedule.isZoneSchedule())
+                scheduleSpinner.setSelection(1);
+            else if(schedule.isNamedSchedule())
+                scheduleSpinner.setSelection(2);
 
 
         }
@@ -123,7 +149,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                              View convertView, ViewGroup parent) {
         String listTitle = (String) getGroup(listPosition);
         if (convertView == null) {
-            LayoutInflater layoutInflater = (LayoutInflater) this.context.
+            LayoutInflater layoutInflater = (LayoutInflater) this.mFragment.getContext().
                                                                                  getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = layoutInflater.inflate(R.layout.tuner_list_group, null);
         }

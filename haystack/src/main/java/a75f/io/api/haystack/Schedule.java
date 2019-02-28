@@ -32,6 +32,20 @@ import a75f.io.logger.CcuLog;
  */
 public class Schedule extends Entity {
 
+    public boolean isSiteSchedule()
+    {
+        return getMarkers().contains("system");
+    }
+
+    public boolean isZoneSchedule()
+    {
+        return getMarkers().contains("zone");
+    }
+
+    public boolean isNamedSchedule()
+    {
+        return getMarkers().contains("named");
+    }
 
 
     public static Schedule getScheduleByEquipId(String equipId)
@@ -39,29 +53,45 @@ public class Schedule extends Entity {
         HashMap equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
         Equip equip = new Equip.Builder().setHashMap(equipHashMap).build();
 
-        return getScheduleForEquip(equip);
+        return getScheduleForEquip(equip, false);
     }
 
-    public static Schedule getScheduleForEquip(Equip equip) {
+    public static Schedule getVacationByEquipId(String equipId)
+    {
+        HashMap equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
+        Equip equip = new Equip.Builder().setHashMap(equipHashMap).build();
+
+        return getScheduleForEquip(equip, true);
+
+    }
+
+    public static Schedule getScheduleForEquip(Equip equip, boolean vacation)
+    {
             if(equip.getRoomRef() != null) {
                 CcuLog.d("Schedule", "Equip Zone Ref: " + equip.getRoomRef());
                 HashMap zoneHashMap = CCUHsApi.getInstance().readMapById(equip.getRoomRef().replace("@", ""));
 
                 Zone build = new Zone.Builder().setHashMap(zoneHashMap).build();
-                if(build.getScheduleRef() != null && !build.getScheduleRef().equals(""))
+
+                String ref = null;
+                if(vacation)
+                    ref = build.getVacationRef();
+                else
+                    ref = build.getScheduleRef();
+
+                if(ref != null && !ref.equals(""))
                 {
-                    Schedule schedule = CCUHsApi.getInstance().getScheduleById(build.getScheduleRef());
+                    Schedule schedule = CCUHsApi.getInstance().getScheduleById(ref);
 
                     if(schedule != null) {
                         CcuLog.d("Schedule", "Schedule: "+ schedule.toString());
-
                         return schedule;
                     }
                 }
             }
 
 
-            return CCUHsApi.getInstance().getSystemSchedule();
+            return CCUHsApi.getInstance().getSystemSchedule(vacation);
         }
 
     public boolean checkIntersection(ArrayList<Days> daysArrayList) {

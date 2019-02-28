@@ -20,6 +20,7 @@ import android.widget.Toast;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.DAYS;
 import a75f.io.api.haystack.Schedule;
+import a75f.io.logic.L;
 import a75f.io.renatus.ManualSchedulerDialogFragment.ManualScheduleDialogListener;
 import a75f.io.renatus.util.FontManager;
 
@@ -91,14 +92,6 @@ public class SchedulerFragment extends Fragment implements AdapterView.OnItemSel
 
 		Typeface iconFont = FontManager.getTypeface(getActivity(), FontManager.FONTAWESOME);
 
-		if(getArguments() != null && getArguments().containsKey(PARAM_SCHEDULE_ID)) {
-			mScheduleId = getArguments().getString(PARAM_SCHEDULE_ID);
-			schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
-		}
-		else
-		{
-			schedule = CCUHsApi.getInstance().getSystemSchedule();
-		}
 
 
 
@@ -218,6 +211,14 @@ public class SchedulerFragment extends Fragment implements AdapterView.OnItemSel
 	private void loadSchedule() {
 
 
+		if(getArguments() != null && getArguments().containsKey(PARAM_SCHEDULE_ID)) {
+			mScheduleId = getArguments().getString(PARAM_SCHEDULE_ID);
+			schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
+		}
+		else
+		{
+			schedule = CCUHsApi.getInstance().getSystemSchedule();
+		}
 
 		hasTextViewChildren();
 
@@ -327,6 +328,7 @@ public class SchedulerFragment extends Fragment implements AdapterView.OnItemSel
 
 			schedule.getDays().addAll(daysArrayList);
 			CCUHsApi.getInstance().updateSchedule(schedule);
+			CCUHsApi.getInstance().syncEntityTree();
 			loadSchedule();
 		}
 

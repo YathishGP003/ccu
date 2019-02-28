@@ -2,6 +2,7 @@ package a75f.io.api.haystack;
 
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
+import org.projecthaystack.HList;
 import org.projecthaystack.HVal;
 
 import java.util.ArrayList;
@@ -77,6 +78,7 @@ public class HSUtil
         HDictBuilder b = new HDictBuilder();
         for (Map.Entry<String, Object> entry : m.entrySet())
         {
+
             if (entry.getValue() instanceof HVal)
             {
                 b.add(entry.getKey(), (HVal) entry.getValue());

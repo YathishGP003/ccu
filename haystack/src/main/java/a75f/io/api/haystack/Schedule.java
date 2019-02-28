@@ -12,9 +12,12 @@ import org.projecthaystack.HRef;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+
+import a75f.io.logger.CcuLog;
 
 
 /***
@@ -28,6 +31,38 @@ import java.util.Map;
  *
  */
 public class Schedule extends Entity {
+
+
+
+    public static Schedule getScheduleByEquipId(String equipId)
+    {
+        HashMap equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
+        Equip equip = new Equip.Builder().setHashMap(equipHashMap).build();
+
+        return getScheduleForEquip(equip);
+    }
+
+    public static Schedule getScheduleForEquip(Equip equip) {
+            if(equip.getRoomRef() != null) {
+                CcuLog.d("Schedule", "Equip Zone Ref: " + equip.getRoomRef());
+                HashMap zoneHashMap = CCUHsApi.getInstance().readMapById(equip.getRoomRef().replace("@", ""));
+
+                Zone build = new Zone.Builder().setHashMap(zoneHashMap).build();
+                if(build.getScheduleRef() != null && !build.getScheduleRef().equals(""))
+                {
+                    Schedule schedule = CCUHsApi.getInstance().getScheduleById(build.getScheduleRef());
+
+                    if(schedule != null) {
+                        CcuLog.d("Schedule", "Schedule: "+ schedule.toString());
+
+                        return schedule;
+                    }
+                }
+            }
+
+
+            return CCUHsApi.getInstance().getSystemSchedule();
+        }
 
     public boolean checkIntersection(ArrayList<Days> daysArrayList) {
 
@@ -291,7 +326,7 @@ public class Schedule extends Entity {
                 Map.Entry pair = (Map.Entry) it.next();
                 //System.out.println(pair.getKey() + " = " + pair.getValue());
                 if (pair.getKey().equals("id")) {
-                    this.mId = pair.getValue().toString();
+                    this.mId = pair.getValue().toString().replaceAll("@", "");
                 } else if (pair.getKey().equals("dis")) {
                     this.mDis = pair.getValue().toString();
                 } else if (pair.getKey().equals("vacation")) {
@@ -456,11 +491,11 @@ public class Schedule extends Entity {
                     .add("ethh", HNum.make(day.mEthh))
                     .add("etmm", HNum.make(day.mEtmm));
            if(day.mHeatingVal != null)
-                hDictDay.add("heatVal", HNum.make(day.getHeatingVal().doubleValue()));
+                hDictDay.add("heatVal", HNum.make(day.getHeatingVal()));
            if(day.mCoolingVal != null)
-                hDictDay.add("coolVal", HNum.make(day.getCoolingVal().doubleValue()));
+                hDictDay.add("coolVal", HNum.make(day.getCoolingVal()));
             if(day.mVal != null)
-                hDictDay.add("curVal", HNum.make(day.getVal().doubleValue()));
+                hDictDay.add("curVal", HNum.make(day.getVal()));
 
             //need boolean & string support
             if (day.mSunset) hDictDay.add("sunset", day.mSunset);

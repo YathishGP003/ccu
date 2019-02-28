@@ -41,6 +41,7 @@ public class ZoneFragmentTemp extends Fragment
     ExpandableListAdapter         expandableListAdapter;
     List<String>                  expandableListTitle;
     HashMap<String, List<String>> expandableListDetail;
+
     
     HashMap<String, String> tunerMap = new HashMap();
     int lastExpandedPosition;
@@ -100,7 +101,7 @@ public class ZoneFragmentTemp extends Fragment
                 String tunerVal = String.valueOf(getPointVal(tunerMap.get(tunerName)));
                 KeyListener keyListener = DigitsKeyListener.getInstance("0123456789.");
                 taskEditText.setKeyListener(keyListener);
-                
+
                 AlertDialog dialog = new AlertDialog.Builder(getActivity())
                                              .setTitle(tunerName)
                                              .setMessage(tunerVal)
@@ -133,6 +134,8 @@ public class ZoneFragmentTemp extends Fragment
                     expandableListView.collapseGroup(lastExpandedPosition);
                 }
                 lastExpandedPosition = groupPosition;
+
+
             }
         });
     }
@@ -154,11 +157,12 @@ public class ZoneFragmentTemp extends Fragment
                 tunerList.add(currTmep.get("dis").toString());
                 tunerList.add(coolDT.get("dis").toString());
                 tunerList.add(heatDT.get("dis").toString());
+                tunerList.add("schedule");
     
                 tunerMap.put(currTmep.get("dis").toString(), currTmep.get("id").toString());
                 tunerMap.put(coolDT.get("dis").toString(), coolDT.get("id").toString());
                 tunerMap.put(heatDT.get("dis").toString(), heatDT.get("id").toString());
-                
+                tunerMap.put("schedule", m.get("id").toString());
                 expandableListDetail.put(m.get("dis").toString(), tunerList);
             }
         }

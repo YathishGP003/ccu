@@ -693,9 +693,7 @@ public class CCUHsApi {
         return site.row(0).getRef("id");
     }
 
-    public void addSchedule(String localId, HDict defaultSchedule) {
-        tagsDb.addHDict(localId, defaultSchedule);
-    }
+
 
     public Schedule getSiteSchedule()
     {
@@ -707,14 +705,17 @@ public class CCUHsApi {
     {
 
         Schedule schedule = null;
-        HDict scheduleHDict = tagsDb.read("schedule", false);
+        HDict scheduleHDict = tagsDb.read("schedule and system and not vacation", false);
         if(scheduleHDict != null) {
-            schedule = new Schedule.Builder().setHDict(tagsDb.read("schedule")).build();
+            schedule = new Schedule.Builder().setHDict(scheduleHDict).build();
         }
 
         return schedule;
     }
 
+    public void addSchedule(String localId, HDict defaultSchedule) {
+        tagsDb.addHDict(localId, defaultSchedule);
+    }
 
     public void updateSchedule(Schedule schedule) {
         addSchedule(schedule.getId(), schedule.getScheduleHDict());

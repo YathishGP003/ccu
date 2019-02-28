@@ -6,6 +6,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.ImageButton;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -13,13 +15,13 @@ import java.util.HashMap;
 import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Schedule;
 
 import static a75f.io.renatus.ZoneFragmentTemp.getPointVal;
 
 /**
  * Created by samjithsadasivan on 1/31/19.
  */
-
 public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
 {
     private Context                       context;
@@ -42,28 +44,59 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
     }
     
     @Override
-    public long getChildId(int listPosition, int expandedListPosition) {
-        return expandedListPosition;
-    }
-    
-    @Override
     public View getChildView(int listPosition, final int expandedListPosition,
                              boolean isLastChild, View convertView, ViewGroup parent) {
         final String expandedListText = (String) getChild(listPosition, expandedListPosition);
-        if (convertView == null) {
+
+
+        if(!expandedListText.equals("schedule")) {
             LayoutInflater layoutInflater = (LayoutInflater) this.context
-                                                                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = layoutInflater.inflate(R.layout.tuner_list_item, null);
+
+
+            TextView expandedListTextView = (TextView) convertView
+                    .findViewById(R.id.expandedListItemName);
+            TextView expandedListTextVal = (TextView) convertView
+                    .findViewById(R.id.expandedListItemVal);
+
+
+            expandedListTextView.setText(expandedListText);
+            expandedListTextVal.setText(""+getPointVal(idMap.get(expandedListText)));
         }
-        TextView expandedListTextView = (TextView) convertView
-                                                           .findViewById(R.id.expandedListItemName);
-        TextView expandedListTextVal = (TextView) convertView
-                                                          .findViewById(R.id.expandedListItemVal);
-        expandedListTextView.setText(expandedListText);
-        expandedListTextVal.setText(""+getPointVal(idMap.get(expandedListText)));
+        else
+        {
+            LayoutInflater layoutInflater = (LayoutInflater) this.context
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            String equipId = idMap.get(expandedListText);
+            convertView = layoutInflater.inflate(R.layout.temp_schedule, null);
+            TextView scheduleStatus = convertView.findViewById(R.id.schedule_status_tv);
+            scheduleStatus.setText("Status & " + equipId + " :: " + expandedListText);
+
+            Schedule schedule = Schedule.getScheduleByEquipId(equipId);
+
+
+            CCUHsApi.getInstance().readHDictById(equipId);
+
+
+            Spinner scheduleSpinner = convertView.findViewById(R.id.schedule_spinner);
+
+
+            ImageButton scheduleImageButton = convertView.findViewById(R.id.schedule_edit_button);
+            TextView vacationStatus = convertView.findViewById(R.id.vacation_status);
+            ImageButton vacationEditButton = convertView.findViewById(R.id.vacation_edit_button);
+
+
+        }
+
         return convertView;
     }
-    
+
+    @Override
+    public long getChildId(int listPosition, int expandedListPosition) {
+        return expandedListPosition;
+    }
+
     @Override
     public int getChildrenCount(int listPosition) {
         return this.expandableListDetail.get(this.expandableListTitle.get(listPosition))

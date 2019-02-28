@@ -36,17 +36,10 @@ public class ScheduleProcessJob extends BaseJob {
 
             if(equip != null) {
                
-                Schedule equipSchedule = getScheduleForEquip(equip);
+                Schedule equipSchedule = Schedule.getScheduleForEquip(equip);
                 if (equipSchedule != null) {
                     writePointsForEquip(equip, equipSchedule);
-                } else {
-                    CcuLog.d(L.TAG_CCU_JOB, "Schedule is Null, use system Schedule!");
-                    writePointsForEquip(equip, systemSchedule);
                 }
-            }
-            else
-            {
-                CcuLog.d(L.TAG_CCU_JOB, "Equip is Null!");
             }
         }
         CcuLog.d(L.TAG_CCU_JOB,"<- ScheduleProcessJob");
@@ -61,29 +54,6 @@ public class ScheduleProcessJob extends BaseJob {
 
 
     /* Check to see if this equips zoneRef has a ScheduleRef, if it does use that or use */
-    private Schedule getScheduleForEquip(Equip equip) {
 
-
-
-        if(equip.getRoomRef() != null) {
-            CcuLog.d(L.TAG_CCU_SCHEDULER, "Equip Zone Ref: " + equip.getRoomRef());
-            HashMap zoneHashMap = CCUHsApi.getInstance().readMapById(equip.getRoomRef().replace("@", ""));
-
-            Zone build = new Zone.Builder().setHashMap(zoneHashMap).build();
-            if(build.getScheduleRef() != null && !build.getScheduleRef().equals(""))
-            {
-                Schedule schedule = CCUHsApi.getInstance().getScheduleById(build.getScheduleRef());
-
-                if(schedule != null) {
-                    CcuLog.d(L.TAG_CCU_SCHEDULER, "Schedule: "+ schedule.toString());
-
-                    return schedule;
-                }
-            }
-        }
-
-
-        return null;
-    }
 
 }

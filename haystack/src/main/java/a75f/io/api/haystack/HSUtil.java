@@ -83,14 +83,6 @@ public class HSUtil
             {
                 b.add(entry.getKey(), (HVal) entry.getValue());
             }
-            else if(entry.getValue() instanceof HDict)
-            {
-                b.add(entry.getKey(), (HDict)entry.getValue());
-            }
-            else if(entry.getValue() instanceof HList)
-            {
-                b.add(entry.getKey(), (HList)entry.getValue());
-            }
             else
             {
                 b.add(entry.getKey(), (String) entry.getValue());

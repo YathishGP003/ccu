@@ -37,7 +37,7 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
     private int mPosition;
 
     public interface ManualScheduleDialogListener {
-        public boolean onClickSave(int position, double minTemp, double maxTemp, int startTime, int endTime,
+        public boolean onClickSave(int position, double minTemp, double maxTemp, int startTimeHour, int endTimeHour, int startTimeMinute, int endTimeMinute,
                                    ArrayList<DAYS> days);
 
         public boolean onClickCancel(DialogFragment dialog);
@@ -284,10 +284,20 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
                 if (booleanisFriday) days.add(DAYS.FRIDAY);
                 if (booleanisSaturday) days.add(DAYS.SATURDAY);
                 if (booleanisSunday) days.add(DAYS.SUNDAY);
+
+
+
+                int startHour = (npStartTime.getValue() - (npStartTime.getValue() % 4)) / 4;
+                int startMinutes = (npStartTime.getValue() % 4) * 15;
+
+                int endHour = (npEndTime.getValue() - (npEndTime.getValue() % 4)) / 4;
+                int endMinutes = (npEndTime.getValue() % 4) * 15;
+
+
                 if(mDay == null)
-                    mListener.onClickSave(NO_REPLACE,74, 72, npStartTime.getValue() / 4, npEndTime.getValue() / 4, days);
+                    mListener.onClickSave(NO_REPLACE,74, 72, startHour, endHour, startMinutes, endMinutes, days);
                 else
-                    mListener.onClickSave(mPosition, 74, 72, npStartTime.getValue() / 4, npEndTime.getValue() / 4, days);
+                    mListener.onClickSave(mPosition, 74, 72, startHour, endHour, startMinutes, endMinutes, days);
                 dismiss();
             }
         });

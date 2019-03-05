@@ -8,19 +8,19 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.text.Html;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
+import android.view.ViewTreeObserver;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.DAYS;
 import a75f.io.api.haystack.Schedule;
-import a75f.io.logic.L;
 import a75f.io.renatus.ManualSchedulerDialogFragment.ManualScheduleDialogListener;
 import a75f.io.renatus.util.FontManager;
 
@@ -38,11 +38,13 @@ import java.util.ArrayList;
  * Speak with Shilpa about where requirements end for this task
  *
  */
-public class SchedulerFragment extends Fragment implements AdapterView.OnItemSelectedListener, ManualScheduleDialogListener {
+public class SchedulerFragment extends Fragment implements ManualScheduleDialogListener {
 
     private static final String PARAM_SCHEDULE_ID = "PARAM_SCHEDULE_ID";
 
 
+
+    private float mPixelsBetweenAnHour;
     TextView textViewMonday;
     TextView textViewTuesday;
     TextView textViewWednesday;
@@ -125,7 +127,7 @@ public class SchedulerFragment extends Fragment implements AdapterView.OnItemSel
         textViewFriday = rootView.findViewById(R.id.textViewFriday);
         textViewSaturday = rootView.findViewById(R.id.textViewSaturday);
         textViewSunday = rootView.findViewById(R.id.textViewSunday);
-
+        rootView.fin
         //Time lines with 2 hrs Interval 00:00 to 24:00
         view00 = rootView.findViewById(R.id.view00);
         view02 = rootView.findViewById(R.id.view02);
@@ -168,6 +170,7 @@ public class SchedulerFragment extends Fragment implements AdapterView.OnItemSel
         viewTimeLines.add(view08);
         viewTimeLines.add(view09);
         viewTimeLines.add(view10);
+        viewTimeLines.add(view11);
         viewTimeLines.add(view12);
         viewTimeLines.add(view13);
         viewTimeLines.add(view14);
@@ -202,8 +205,32 @@ public class SchedulerFragment extends Fragment implements AdapterView.OnItemSel
             }
         });
 
+
+
+
+        //Measure the amount of pixels between an hour after the constraintScheduler layout draws the bars for the first time.
+        //After they are measured load the schedule.
+        ViewTreeObserver vto = constraintScheduler.getViewTreeObserver();
+        vto.addOnGlobalLayoutListener (new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                constraintScheduler.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+
+                View viewHourOne = viewTimeLines.get(1);
+                View viewHourTwo = viewTimeLines.get(2);
+
+                mPixelsBetweenAnHour = viewHourTwo.getX() - viewHourOne.getX();
+                if(mPixelsBetweenAnHour == 0) throw new RuntimeException();
+
+                loadSchedule();
+
+            }
+        });
+
         return rootView;
     }
+
+
 
 
 
@@ -217,14 +244,21 @@ public class SchedulerFragment extends Fragment implements AdapterView.OnItemSel
             schedule = CCUHsApi.getInstance().getSystemSchedule(false);
         }
 
-        hasTextViewChildren();
+        SchedulerFragment.this.getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                hasTextViewChildren();
 
-        ArrayList<Schedule.Days> days = schedule.getDays();
-        for (int i = 0; i < days.size(); i++) {
-            Schedule.Days daysElement = days.get(i);
-            drawSchedule(i, daysElement.getCoolingVal(), daysElement.getHeatingVal(),
-                    daysElement.getSthh(), daysElement.getEthh(), DAYS.values()[daysElement.getDay()]);
-        }
+                ArrayList<Schedule.Days> days = schedule.getDays();
+                for (int i = 0; i < days.size(); i++) {
+                    Schedule.Days daysElement = days.get(i);
+                    drawSchedule(i, daysElement.getCoolingVal(), daysElement.getHeatingVal(),
+                            daysElement.getSthh(), daysElement.getEthh(), daysElement.getStmm(), daysElement.getEtmm(), DAYS.values()[daysElement.getDay()]);
+                }
+            }
+        });
+
+
 
     }
 
@@ -264,28 +298,9 @@ public class SchedulerFragment extends Fragment implements AdapterView.OnItemSel
         }
     }
 
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        loadSchedule();
-    }
-
-    @Override
-    public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,
-                               long arg3) {
-        double val = Double.parseDouble(arg0.getSelectedItem().toString());
-        switch (arg0.getId()) {
-
-        }
-    }
-
-    @Override
-    public void onNothingSelected(AdapterView<?> arg0) {
-        // TODO Auto-generated method stub
-
-    }
 
 
-    public boolean onClickSave(int position, double coolingTemp, double heatingTemp, int startTime, int endTime, ArrayList<DAYS> days) {
+    public boolean onClickSave(int position, double coolingTemp, double heatingTemp, int startTimeHour, int endTimeHour, int startTimeMinute, int endTimeMinute, ArrayList<DAYS> days) {
         Schedule.Days remove = null;
         if (position != ManualSchedulerDialogFragment.NO_REPLACE) {
             remove = schedule.getDays().remove(position);
@@ -295,8 +310,10 @@ public class SchedulerFragment extends Fragment implements AdapterView.OnItemSel
 
         for (DAYS day : days) {
             Schedule.Days dayBO = new Schedule.Days();
-            dayBO.setEthh(endTime);
-            dayBO.setSthh(startTime);
+            dayBO.setEthh(endTimeHour);
+            dayBO.setSthh(startTimeHour);
+            dayBO.setEtmm(endTimeMinute);
+            dayBO.setStmm(startTimeMinute);
             dayBO.setHeatingVal(heatingTemp);
             dayBO.setCoolingVal(coolingTemp);
             dayBO.setSunset(false);
@@ -321,10 +338,9 @@ public class SchedulerFragment extends Fragment implements AdapterView.OnItemSel
         return true;
     }
 
-    private void drawSchedule(int position, double heatingTemp, double coolingTemp, int startTime, int endTime, DAYS day) {
+    private void drawSchedule(int position, double heatingTemp, double coolingTemp, int startTimeHH, int endTimeHH, int startTimeMM, int endTimeMM, DAYS day) {
 
-        System.out.println("Start Time: " + startTime);
-        System.out.println("End Time: " + endTime);
+
         String strminTemp = FontManager.getColoredSpanned(Double.toString(coolingTemp), colorMinTemp);
         String strmaxTemp = FontManager.getColoredSpanned(Double.toString(heatingTemp), colorMaxTemp);
 
@@ -356,11 +372,16 @@ public class SchedulerFragment extends Fragment implements AdapterView.OnItemSel
         }
 
 
-        drawScheduleBlock(position, strminTemp, strmaxTemp, typeface, startTime, endTime, temperTextView);
+        drawScheduleBlock(position, strminTemp, strmaxTemp, typeface, startTimeHH, endTimeHH,startTimeMM, endTimeMM, temperTextView);
 
     }
 
-    private void drawScheduleBlock(int position, String strminTemp, String strmaxTemp, Typeface typeface, int tempStartTime, int tempEndTime, TextView textViewSunday) {
+    private void drawScheduleBlock(int position, String strminTemp, String strmaxTemp, Typeface typeface, int tempStartTime, int tempEndTime,
+                                   int startTimeMM, int endTimeMM, TextView textViewSunday) {
+
+        Log.i("Scheduler", "tempStartTime: " + tempStartTime + " tempEndTime: " + tempEndTime + " startTimeMM: " + startTimeMM + " endTimeMM " + endTimeMM);
+
+
         TextView textViewTemp = new TextView(getActivity());
         textViewTemp.setGravity(Gravity.CENTER);
         textViewTemp.setText(Html.fromHtml(strminTemp + " " + strmaxTemp));
@@ -372,8 +393,20 @@ public class SchedulerFragment extends Fragment implements AdapterView.OnItemSel
         ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(0, ConstraintLayout.LayoutParams.WRAP_CONTENT);
         lp.topToTop = textViewSunday.getId();
         lp.bottomToBottom = textViewSunday.getId();
+
+
+
+        Log.i("Scheduler", "Pixels Per Hour: " + mPixelsBetweenAnHour);
+        Log.i("Scheduler", "Left Margin (startTimeMM / 60.0) * mPixelsBetweenAnHour" + (startTimeMM / 60.0) * mPixelsBetweenAnHour);
+        Log.i("Scheduler", "(int)(((60 - endTimeMM) / 60.0) * mPixelsBetweenAnHour)" + (int)(((60 - endTimeMM) / 60.0) * mPixelsBetweenAnHour));
+
+
         lp.startToStart = viewTimeLines.get(tempStartTime).getId();
         lp.endToEnd = viewTimeLines.get(tempEndTime).getId();
+
+        lp.leftMargin = (int)((startTimeMM / 60.0) * mPixelsBetweenAnHour);
+        lp.rightMargin = (int)(((60 - endTimeMM) / 60.0) * mPixelsBetweenAnHour);
+
         constraintScheduler.addView(textViewTemp, lp);
 
         textViewTemp.setTag(position);

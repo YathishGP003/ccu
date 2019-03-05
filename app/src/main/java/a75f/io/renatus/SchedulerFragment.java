@@ -45,6 +45,7 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
 
 
     private float mPixelsBetweenAnHour;
+    private float mPixelsBetweenADay;
     TextView textViewMonday;
     TextView textViewTuesday;
     TextView textViewWednesday;
@@ -127,7 +128,7 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
         textViewFriday = rootView.findViewById(R.id.textViewFriday);
         textViewSaturday = rootView.findViewById(R.id.textViewSaturday);
         textViewSunday = rootView.findViewById(R.id.textViewSunday);
-        rootView.fin
+
         //Time lines with 2 hrs Interval 00:00 to 24:00
         view00 = rootView.findViewById(R.id.view00);
         view02 = rootView.findViewById(R.id.view02);
@@ -220,6 +221,12 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
                 View viewHourTwo = viewTimeLines.get(2);
 
                 mPixelsBetweenAnHour = viewHourTwo.getX() - viewHourOne.getX();
+
+
+                mPixelsBetweenADay = constraintScheduler.getHeight() / 7;
+
+                //Leave 20% for padding.
+                mPixelsBetweenADay = mPixelsBetweenADay - (mPixelsBetweenADay * .2f);
                 if(mPixelsBetweenAnHour == 0) throw new RuntimeException();
 
                 loadSchedule();
@@ -390,15 +397,8 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
         textViewTemp.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18.0f);
         textViewTemp.setId(View.generateViewId());
         textViewTemp.setSingleLine();
-        ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(0, ConstraintLayout.LayoutParams.WRAP_CONTENT);
-        lp.topToTop = textViewSunday.getId();
-        lp.bottomToBottom = textViewSunday.getId();
-
-
-
-        Log.i("Scheduler", "Pixels Per Hour: " + mPixelsBetweenAnHour);
-        Log.i("Scheduler", "Left Margin (startTimeMM / 60.0) * mPixelsBetweenAnHour" + (startTimeMM / 60.0) * mPixelsBetweenAnHour);
-        Log.i("Scheduler", "(int)(((60 - endTimeMM) / 60.0) * mPixelsBetweenAnHour)" + (int)(((60 - endTimeMM) / 60.0) * mPixelsBetweenAnHour));
+        ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(0, (int)mPixelsBetweenADay);
+        lp.baselineToBaseline = textViewSunday.getId();
 
 
         lp.startToStart = viewTimeLines.get(tempStartTime).getId();

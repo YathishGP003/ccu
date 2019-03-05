@@ -115,9 +115,9 @@ dependencies {
     implementation 'com.android.support:support-v4:27.1.0'
     implementation 'com.android.support:recyclerview-v7:27.1.0'
     testImplementation 'junit:junit:4.12'
-    androidTestCompile 'com.android.support:support-annotations:27.1.0'
-    androidTestCompile 'com.android.support.test:runner:1.0.1'
-    androidTestCompile 'com.android.support.test:rules:1.0.1'
+    androidTestImplementation 'com.android.support:support-annotations:27.1.0'
+    androidTestImplementation 'com.android.support.test:runner:1.0.1'
+    androidTestImplementation 'com.android.support.test:rules:1.0.1'
     annotationProcessor('com.jakewharton:butterknife-compiler:8.7.0') {
             exclude group: 'com.google.guava'
     }

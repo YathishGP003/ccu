@@ -15,6 +15,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.ImageButton;
 import android.widget.NumberPicker;
 import android.widget.Toast;
 
@@ -90,8 +91,18 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
         }
 
 
-        LayoutInflater inflater = (LayoutInflater) LayoutInflater.from(getActivity());//getActivity().getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater = (LayoutInflater) LayoutInflater.from(getActivity());
         View view = inflater.inflate(R.layout.dialog_manualschedule, null);
+
+        ImageButton deleteButton = view.findViewById(R.id.buttonDelete);
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.onClickSave(mPosition, 74, 72, 0, 0, 0, 0, null);
+            }
+        });
+
+
         npStartTime = view.findViewById(R.id.np1);
         npEndTime = view.findViewById(R.id.np2);
         setDividerColor(npStartTime);

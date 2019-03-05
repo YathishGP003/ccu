@@ -300,26 +300,38 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
 
 
 
+
+    /*
+        If days is null & position > -1 a deletion has occured.   This will be removed from the schedule.
+
+        If position is -1, this means that is a creation event.  There is no data needing to be updated.
+
+        If position > -1 and day is not null.   This means an edit has occured.
+     */
     public boolean onClickSave(int position, double coolingTemp, double heatingTemp, int startTimeHour, int endTimeHour, int startTimeMinute, int endTimeMinute, ArrayList<DAYS> days) {
         Schedule.Days remove = null;
         if (position != ManualSchedulerDialogFragment.NO_REPLACE) {
             remove = schedule.getDays().remove(position);
         }
 
+
         ArrayList<Schedule.Days> daysArrayList = new ArrayList<Schedule.Days>();
 
-        for (DAYS day : days) {
-            Schedule.Days dayBO = new Schedule.Days();
-            dayBO.setEthh(endTimeHour);
-            dayBO.setSthh(startTimeHour);
-            dayBO.setEtmm(endTimeMinute);
-            dayBO.setStmm(startTimeMinute);
-            dayBO.setHeatingVal(heatingTemp);
-            dayBO.setCoolingVal(coolingTemp);
-            dayBO.setSunset(false);
-            dayBO.setSunrise(false);
-            dayBO.setDay(day.ordinal());
-            daysArrayList.add(dayBO);
+        if(days != null) {
+
+            for (DAYS day : days) {
+                Schedule.Days dayBO = new Schedule.Days();
+                dayBO.setEthh(endTimeHour);
+                dayBO.setSthh(startTimeHour);
+                dayBO.setEtmm(endTimeMinute);
+                dayBO.setStmm(startTimeMinute);
+                dayBO.setHeatingVal(heatingTemp);
+                dayBO.setCoolingVal(coolingTemp);
+                dayBO.setSunset(false);
+                dayBO.setSunrise(false);
+                dayBO.setDay(day.ordinal());
+                daysArrayList.add(dayBO);
+            }
         }
 
         boolean intersection = schedule.checkIntersection(daysArrayList);

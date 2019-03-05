@@ -2,7 +2,6 @@ package a75f.io.renatus;
 
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
@@ -388,9 +387,15 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
         textViewTemp.setText(Html.fromHtml(strminTemp + " " + strmaxTemp));
         textViewTemp.setBackground(getResources().getDrawable(R.drawable.temperature_background));
         textViewTemp.setTypeface(typeface);
-        textViewTemp.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18.0f);
+
+        float fontSize = 18.0f;
+        if(tempEndTime - tempStartTime <= 1) fontSize = 12.0f;
+        if(tempEndTime - tempStartTime <= 2) fontSize = 16.0f;
+
+
+        textViewTemp.setTextSize(TypedValue.COMPLEX_UNIT_DIP, fontSize);
         textViewTemp.setId(View.generateViewId());
-        textViewTemp.setSingleLine();
+
         ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(0, (int)mPixelsBetweenADay);
         lp.baselineToBaseline = textView.getId();
 

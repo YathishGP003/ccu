@@ -105,7 +105,6 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
 
         Typeface iconFont = FontManager.getTypeface(getActivity(), FontManager.FONTAWESOME);
 
-
         //Scheduler Layout
         constraintScheduler = rootView.findViewById(R.id.constraintLt_Scheduler);
 
@@ -236,11 +235,6 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
 
         return rootView;
     }
-
-
-
-
-
 
     private void loadSchedule() {
 
@@ -384,7 +378,7 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
     }
 
     private void drawScheduleBlock(int position, String strminTemp, String strmaxTemp, Typeface typeface, int tempStartTime, int tempEndTime,
-                                   int startTimeMM, int endTimeMM, TextView textViewSunday) {
+                                   int startTimeMM, int endTimeMM, TextView textView) {
 
         Log.i("Scheduler", "tempStartTime: " + tempStartTime + " tempEndTime: " + tempEndTime + " startTimeMM: " + startTimeMM + " endTimeMM " + endTimeMM);
 
@@ -398,14 +392,24 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
         textViewTemp.setId(View.generateViewId());
         textViewTemp.setSingleLine();
         ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(0, (int)mPixelsBetweenADay);
-        lp.baselineToBaseline = textViewSunday.getId();
+        lp.baselineToBaseline = textView.getId();
 
+
+
+        int leftMargin = startTimeMM > 0 ? (int)((startTimeMM / 60.0) * mPixelsBetweenAnHour) : lp.leftMargin;
+        int rightMargin = endTimeMM > 0 ? (int)(((60 - endTimeMM) / 60.0) * mPixelsBetweenAnHour) : lp.rightMargin;
+        Log.i("Scheduler", "leftMargin: " + leftMargin);
+        Log.i("Scheduler", "rightMargin: " + rightMargin);
+
+        lp.leftMargin = leftMargin;
+        lp.rightMargin = rightMargin;
+
+        if(endTimeMM > 0)
+            tempEndTime++;
 
         lp.startToStart = viewTimeLines.get(tempStartTime).getId();
         lp.endToEnd = viewTimeLines.get(tempEndTime).getId();
 
-        lp.leftMargin = (int)((startTimeMM / 60.0) * mPixelsBetweenAnHour);
-        lp.rightMargin = (int)(((60 - endTimeMM) / 60.0) * mPixelsBetweenAnHour);
 
         constraintScheduler.addView(textViewTemp, lp);
 
@@ -419,7 +423,6 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
             }
         });
     }
-
 
     public boolean onClickCancel(DialogFragment dialog) {
         return true;

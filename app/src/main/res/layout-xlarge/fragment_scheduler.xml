@@ -585,7 +585,7 @@
             android:layout_width="1px"
             android:layout_height="0dp"
             android:background="#1A000000"
-            app:layout_constraintTop_toBottomOf="@+id/textView16"
+            app:layout_constraintTop_toBottomOf="@+id/textView18"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@+id/view20"
             app:layout_constraintStart_toStartOf="@+id/view18"

@@ -202,10 +202,6 @@ public class SchedulerFragment extends Fragment implements AdapterView.OnItemSel
             }
         });
 
-
-
-
-
         return rootView;
     }
 
@@ -234,11 +230,9 @@ public class SchedulerFragment extends Fragment implements AdapterView.OnItemSel
 
     private void hasTextViewChildren() {
 
-        for (int i = 0; i < constraintScheduler.getChildCount(); i++) {
+        for (int i = constraintScheduler.getChildCount() - 1; i >= 0; i--) {
             if (constraintScheduler.getChildAt(i).getTag() != null) {
                 constraintScheduler.removeViewAt(i);
-                hasTextViewChildren();
-                break;
             }
         }
 

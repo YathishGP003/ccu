@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ImageButton;
 import android.widget.Spinner;
@@ -21,6 +22,7 @@ import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Schedule;
+import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.renatus.SchedulerFragment.OnExitListener;
 
 import static a75f.io.renatus.ZoneFragmentTemp.getPointVal;
@@ -82,19 +84,26 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
             ImageButton scheduleImageButton = convertView.findViewById(R.id.schedule_edit_button);
             TextView vacationStatus = convertView.findViewById(R.id.vacation_status);
             ImageButton vacationEditButton = convertView.findViewById(R.id.vacation_edit_button);
+            HashMap equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
 
-            scheduleStatus.setText("Status & " + equipId + " :: " + expandedListText);
+            String zoneId = Schedule.getZoneIdByEquipId(equipId);
+            String status = ScheduleProcessJob.getSystemStateString(zoneId);
+
+
+            scheduleStatus.setText(status);
+
+
             Schedule schedule = Schedule.getScheduleByEquipId(equipId);
             Schedule vacationSchedule = Schedule.getVacationByEquipId(equipId);
 
             scheduleImageButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    SchedulerFragment schedulerFragment = SchedulerFragment.newInstance();
-                    FragmentManager childFragmentManager = mFragment.getChildFragmentManager();
+                    SchedulerFragment schedulerFragment = SchedulerFragment.newInstance(schedule.getId());
+                    FragmentManager childFragmentManager = mFragment.getFragmentManager();
                     childFragmentManager.beginTransaction()
-                            .replace(R.id.zone_fragment_temp, schedulerFragment)
-                            .addToBackStack(null).commit();
+                            .add(R.id.zone_fragment_temp, schedulerFragment)
+                            .addToBackStack("schedule").commit();
 
                     schedulerFragment.setOnExitListener(new OnExitListener(){
                         @Override
@@ -111,6 +120,43 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                 scheduleSpinner.setSelection(1);
             else if(schedule.isNamedSchedule())
                 scheduleSpinner.setSelection(2);
+
+
+            scheduleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    System.out.println("Item Selected Listener: " + position);
+
+                    if(position == 0)
+                    {
+                        if(schedule.isZoneSchedule())
+                        {
+
+                        }
+                    }
+                    else if(position == 1)
+                    {
+                        if(schedule.isZoneSchedule())
+                        {
+                            //Do nothing
+                        }
+                        else if(schedule.isZoneSchedule())
+                        {
+                            //Open empty zone schedule dialog
+                        }
+                        //create new zone schedule
+                    }
+                    else
+                    {
+                        //list named schedules
+                    }
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+
+                }
+            });
 
 
         }

@@ -22,11 +22,11 @@ public class VAVScheduler {
 
     private static final String TAG = "VAVScheduler";
     boolean occupied; // determined by schedule
-    private static int heatingDeadBand = 5;
-    private static int coolingDeadBand = 5;
+    public static int heatingDeadBand = 5;
+    public static int coolingDeadBand = 5;
 
 
-    public static void processEquip(Equip equip, Schedule equipSchedule) {
+    public static Occupied processEquip(Equip equip, Schedule equipSchedule) {
 
 
         Log.i(TAG, "Equip: " + equip);
@@ -34,13 +34,17 @@ public class VAVScheduler {
         Occupied occ = equipSchedule.getCurrentValues();
 
 
-        if (occ != null) {
+        if (occ != null && ScheduleProcessJob.putOccupiedModeCache(equip.getRoomRef(), occ)) {
+
+
             Double coolingTemp = occ.isOccupied() ? (double) occ.getCoolingVal() : ((double) occ.getCoolingVal() + coolingDeadBand);
             setDesiredTemp(equip, coolingTemp, "cooling");
 
             Double heatingTemp = occ.isOccupied() ? (double) occ.getHeatingVal() : ((double) occ.getHeatingVal() - heatingDeadBand);
             setDesiredTemp(equip, heatingTemp, "heating");
         }
+
+        return occ;
     }
 
 

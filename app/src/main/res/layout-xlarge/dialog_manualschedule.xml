@@ -19,7 +19,7 @@
 				android:id="@+id/buttonDelete"
 				android:layout_width="wrap_content"
 				android:layout_height="48dp"
-				android:layout_marginEnd="44dp"
+				android:background="@android:color/transparent"
 				app:layout_constraintEnd_toEndOf="parent"
 				app:layout_constraintTop_toTopOf="parent"
 				app:srcCompat="@android:drawable/ic_menu_delete" />
@@ -30,6 +30,7 @@
 				android:layout_height="wrap_content"
 				android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
 				android:text="Desired Temperature"
+				app:layout_constraintBottom_toBottomOf="@+id/buttonDelete"
 				app:layout_constraintTop_toTopOf="parent"
 				app:layout_constraintLeft_toLeftOf="parent"/>
 
@@ -99,13 +100,12 @@
 				app:layout_constraintTop_toBottomOf="@+id/ltNumberPicker"/>
 
 			<LinearLayout
+				android:padding="8dp"
 				android:id="@+id/radioGrp"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:orientation="horizontal"
-				android:layout_marginTop="10dp"
 				app:layout_constraintTop_toBottomOf="@+id/textViewAppliesto"
-				app:layout_constraintBottom_toBottomOf="parent"
 				app:layout_constraintEnd_toEndOf="parent"
 				app:layout_constraintStart_toStartOf="parent">
 

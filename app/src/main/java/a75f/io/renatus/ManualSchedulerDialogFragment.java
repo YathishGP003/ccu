@@ -99,6 +99,7 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
             @Override
             public void onClick(View v) {
                 mListener.onClickSave(mPosition, 74, 72, 0, 0, 0, 0, null);
+                dismiss(); 
             }
         });
 

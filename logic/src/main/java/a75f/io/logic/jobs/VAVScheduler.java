@@ -56,7 +56,7 @@ public class VAVScheduler {
         }
         String id = ((HashMap) points.get(0)).get("id").toString();
         try {
-            CCUHsApi.getInstance().pointWrite(HRef.make(id.replace("@","")), 12, "Scheduler", desiredTemp != null ? HNum.make(desiredTemp) : HNum.make(0), HNum.make(0));
+            CCUHsApi.getInstance().pointWrite(HRef.make(id.replace("@","")), 9, "Scheduler", desiredTemp != null ? HNum.make(desiredTemp) : HNum.make(0), HNum.make(0));
         } catch (Exception e) {
             e.printStackTrace();
         }

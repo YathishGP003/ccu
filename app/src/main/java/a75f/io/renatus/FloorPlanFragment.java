@@ -440,7 +440,7 @@ public class FloorPlanFragment extends Fragment
 			Floor floor = floorList.get(mFloorListAdapter.getSelectedPostion());
 			HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
 
-			Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule();
+			Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false);
 
 			Zone hsZone = new Zone.Builder()
                                    .setDisplayName(addRoomEdit.getText().toString())

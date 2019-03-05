@@ -17,10 +17,11 @@ public class Zone extends Entity
     private String siteRef;
 
     private String scheduleRef;
+    private String vacationRef;
 
     public boolean isSystemSchedule()
     {
-        Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule();
+        Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false);
         if(systemSchedule.getId().equals(scheduleRef))
             return true;
 
@@ -76,6 +77,7 @@ public class Zone extends Entity
         return siteRef;
     }
     public String getScheduleRef() { return scheduleRef; }
+    public String getVacationRef() { return vacationRef; }
 
     public static class Builder {
         private String            displayName;
@@ -84,6 +86,7 @@ public class Zone extends Entity
         private String siteRef;
         private String id;
         private String scheduleRef;
+        private String vacationRef;
 
         public Builder setDisplayName(String displayName)
         {
@@ -121,6 +124,7 @@ public class Zone extends Entity
             z.markers = this.markers;
             z.siteRef = this.siteRef;
             z.scheduleRef = this.scheduleRef;
+            z.vacationRef = this.vacationRef;
             z.id = this.id;
             return z;
         }
@@ -130,7 +134,6 @@ public class Zone extends Entity
             Iterator it = site.entrySet().iterator();
             while (it.hasNext()) {
                 Map.Entry pair = (Map.Entry)it.next();
-                //System.out.println(pair.getKey() + " = " + pair.getValue());
                 if(pair.getKey().equals("id"))
                 {
                     this.id = pair.getValue().toString();
@@ -154,6 +157,10 @@ public class Zone extends Entity
                 else if(pair.getKey().equals("scheduleRef"))
                 {
                     this.scheduleRef = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("vacationRef"))
+                {
+                    this.vacationRef = pair.getValue().toString();
                 }
                 it.remove();
             }

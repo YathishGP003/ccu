@@ -701,11 +701,16 @@ public class CCUHsApi {
         return schedule;
     }
 
-    public Schedule getSystemSchedule()
+    public Schedule getSystemSchedule(boolean vacation)
     {
 
+        String filter = null;
+        if(!vacation)
+            filter = "schedule and system and not vacation";
+        else
+            filter = "schedule and system and vacation";
         Schedule schedule = null;
-        HDict scheduleHDict = tagsDb.read("schedule and system and not vacation", false);
+        HDict scheduleHDict = tagsDb.read(filter, false);
         if(scheduleHDict != null) {
             schedule = new Schedule.Builder().setHDict(scheduleHDict).build();
         }

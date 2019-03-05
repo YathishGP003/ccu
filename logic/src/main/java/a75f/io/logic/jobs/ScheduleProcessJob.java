@@ -1,32 +1,109 @@
 package a75f.io.logic.jobs;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BaseJob;
 import a75f.io.logic.L;
 
+
+/*
+    The scheduler needs to maintain the state of things, so it doesn't write
+
+    It needs to maintain a cache by ID of each equip & zone of
+    current mode, scheduled values, status text, overrides
+
+    It needs to notify registered listening components when a change occurs to any of these ie. UI.
+
+    It needs to be able to manage overrides being sent to it.   Other parts of the code will send
+    in an override and the scheduler will be responsible for handling it.
+
+    It needs to update the haystack database as needed.
+
+    The UI should have a test screen were an override can be sent to test.
+    There should also be a diagnostics screen to see the current state of the scheduler.
+
+    If the application restarts the scheduler should be able to rebuild it overrides and cache etc.
+
+    Each minute the scheduler will check for updates, so if the cache is extremely stale -- it will be overridden.
+
+    The scheduler cache should be queryable by ID.  
+ */
 public class ScheduleProcessJob extends BaseJob {
 
     private static final String TAG = "ScheduleProcessJob";
 
+    static HashMap<String, Occupied> occupiedHashMap = new HashMap<String, Occupied>();
+
+    public static Occupied getOccupiedModeCache(String id) {
+        if(!occupiedHashMap.containsKey(id))
+        {
+            Schedule schedule = Schedule.getScheduleForZone(id, false);
+            if(schedule != null)
+            {
+                occupiedHashMap.put(id, schedule.getCurrentValues());
+            }
+        }
+
+        return occupiedHashMap.get(id);
+    }
+
+
+    /*
+     *  If the occupied mode is different when putting it in the cache return true.
+     *
+     *  If it is the same return false.
+     */
+    public static boolean putOccupiedModeCache(String id, Occupied occupied)
+    {
+        if(!occupiedHashMap.containsKey(id))
+        {
+            Log.i("SchedulerCache", "Putting in new key");
+            occupiedHashMap.put(id, occupied);
+            return true;
+        }
+
+        Occupied currentOccupiedMode = occupiedHashMap.get(id);
+        if(currentOccupiedMode != null)
+        {
+            if(occupied.equals(currentOccupiedMode))
+            {
+                Log.i("SchedulerCache", "Reusing old occupied values");
+                return false;
+            }
+            else
+            {
+
+                Log.i("SchedulerCache", "Putting in new occupied values");
+                occupiedHashMap.put(id, occupied);
+                return true;
+            }
+        }
+
+        return false;
+
+    }
+
+
     @Override
     public void doJob() {
-
-
-        Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule();
-
+        Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false);
         /* The systemSchedule isn't initiated yet, so schedules shouldn't be ran*/
 
         if(systemSchedule == null)
             return;
         CcuLog.d(L.TAG_CCU_JOB,"ScheduleProcessJob");
         //Read all equips
+
+
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip");
         for(HashMap hs : equips)
         {
@@ -36,9 +113,13 @@ public class ScheduleProcessJob extends BaseJob {
 
             if(equip != null) {
                
-                Schedule equipSchedule = Schedule.getScheduleForEquip(equip);
+                Schedule equipSchedule = Schedule.getScheduleForZone(equip.getRoomRef().replace("@", ""), false);
                 if (equipSchedule != null) {
                     writePointsForEquip(equip, equipSchedule);
+                }
+                else
+                {
+                    writePointsForEquip(equip, systemSchedule);
                 }
             }
         }
@@ -53,7 +134,90 @@ public class ScheduleProcessJob extends BaseJob {
     }
 
 
-    /* Check to see if this equips zoneRef has a ScheduleRef, if it does use that or use */
+    /**
+     * - Process all zones
+     * - Make caches
+     * - Write to equips
+     *
+     * @param zoneId
+     * @return
+     */
+    /*
+        Mode Text
+
+        In temporary hold *This is for forced occupied mode
+        In vacation, till
+        Away
+        In setpoint - DR Mode
+        In setpoint
+        In precondition - DR Mode
+        In preconditioning
+        In energy saving setback
 
 
+        Non-named schedules
+
+        Heating & Cooling Modes
+        {Current Mode}, Changes to {temp}F at {next schedule change}"
+
+        Auto Mode
+
+        {Current Mode}, Changes to Energy Saving Range of %.1f-%.1fF at %s
+        In Vacation
+
+         {vacation end time formatted Sep 16}
+
+        Named schedules
+        Heating & Cooling Modes
+
+        {Current Mode}, {Named schedule name} changes to {temp}F at {next schedule change}"
+
+        Auto Mode
+
+        {Current Mode}, {Named schedule name} changes to Energy Saving Range of %.1f-%.1fF at %s
+
+        In Vacation
+
+         {vacation end time formatted Sep 16}
+
+        To calculate the status text, get the mode text and append it into the formulas for either the different modes {Heating & Cooling, Auto, Vacation}.
+        Each requires a calculation of when the next event is going to occur and what the temperature or temperature range will be at that point.
+
+        One exception is that the date the vacation ends needs to append when the vacation ends.
+     */
+
+    public static String getSystemStateString(String zoneId)
+    {
+
+        Occupied cachedOccupied = getOccupiedModeCache(zoneId);
+        Status returnStatus = Status.setpoint;
+        double firstTemp = 0;
+        double secondTemp = 0;
+        if(cachedOccupied == null)
+        {
+            return "Setting up..";
+        }
+        //{Current Mode}, Changes to Energy Saving Range of %.1f-%.1fF at %s
+        if(cachedOccupied.isOccupied())
+        {
+            return String.format("In %s, changes to energy saving range of %.1f-%.1fF at %02d:%02d", "set point",
+                    cachedOccupied.getHeatingVal() - VAVScheduler.heatingDeadBand,
+                    cachedOccupied.getCoolingVal() + VAVScheduler.coolingDeadBand,
+                    cachedOccupied.getCurrentlyOccupiedSchedule().getEthh(),
+                    cachedOccupied.getCurrentlyOccupiedSchedule().getEtmm());
+        }
+        else
+        {
+            return String.format("In %s, changes to energy saving range of %.1f-%.1fF at %02d:%02d", "set back",
+                    cachedOccupied.getHeatingVal(),
+                    cachedOccupied.getCoolingVal(),
+                    cachedOccupied.getNextOccupiedSchedule().getSthh(),
+                    cachedOccupied.getNextOccupiedSchedule().getStmm());
+        }
+    }
+
+    public enum Status
+    {
+        setpoint,setback,preconditioning
+    }
 }

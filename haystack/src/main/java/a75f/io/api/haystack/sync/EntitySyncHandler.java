@@ -140,7 +140,10 @@ public class EntitySyncHandler
             String hRef = iterator.next();
             if (entity.has(hRef))
             {
-                String guid = CCUHsApi.getInstance().getGUID(entity.getRef(hRef).toCode());
+                Log.e("sync", "Update Refs, hRef " + hRef + " : " + entity.toZinc());
+
+                String guid = CCUHsApi.getInstance().getGUID(entity.get(hRef) instanceof HRef ? ((HRef) entity.get(hRef)).toCode()
+                        : entity.getStr(hRef));
                 builder.add(hRef, HRef.copy(guid));
             }
         }

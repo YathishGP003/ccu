@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 
 import a75f.io.logger.CcuLog;
 
@@ -32,49 +33,77 @@ import a75f.io.logger.CcuLog;
  */
 public class Schedule extends Entity {
 
+    public boolean isSiteSchedule() {
+        return getMarkers().contains("system");
+    }
+
+    public boolean isZoneSchedule() {
+        return getMarkers().contains("zone");
+    }
+
+    public boolean isNamedSchedule() {
+        return getMarkers().contains("named");
+    }
 
 
-    public static Schedule getScheduleByEquipId(String equipId)
-    {
+    public static String getZoneIdByEquipId(String equipId) {
+        HashMap equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
+        Equip equip = new Equip.Builder().setHashMap(equipHashMap).build();
+        return equip.getRoomRef().replace("@", "");
+    }
+
+    public static Schedule getScheduleByEquipId(String equipId) {
         HashMap equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
         Equip equip = new Equip.Builder().setHashMap(equipHashMap).build();
 
-        return getScheduleForEquip(equip);
+        return getScheduleForZone(equip.getRoomRef().replace("@", ""), false);
     }
 
-    public static Schedule getScheduleForEquip(Equip equip) {
-            if(equip.getRoomRef() != null) {
-                CcuLog.d("Schedule", "Equip Zone Ref: " + equip.getRoomRef());
-                HashMap zoneHashMap = CCUHsApi.getInstance().readMapById(equip.getRoomRef().replace("@", ""));
+    public static Schedule getVacationByEquipId(String equipId) {
+        HashMap equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
+        Equip equip = new Equip.Builder().setHashMap(equipHashMap).build();
 
-                Zone build = new Zone.Builder().setHashMap(zoneHashMap).build();
-                if(build.getScheduleRef() != null && !build.getScheduleRef().equals(""))
-                {
-                    Schedule schedule = CCUHsApi.getInstance().getScheduleById(build.getScheduleRef());
+        return getScheduleForZone(equip.getRoomRef().replace("@", ""), true);
 
-                    if(schedule != null) {
-                        CcuLog.d("Schedule", "Schedule: "+ schedule.toString());
+    }
 
-                        return schedule;
-                    }
-                }
+    public static Schedule getScheduleForZone(String zoneId, boolean vacation) {
+
+        CcuLog.d("Schedule", "Equip Zone Ref: " + zoneId);
+        HashMap zoneHashMap = CCUHsApi.getInstance().readMapById(zoneId);
+
+        Zone build = new Zone.Builder().setHashMap(zoneHashMap).build();
+
+        String ref = null;
+        if (vacation)
+            ref = build.getVacationRef();
+        else
+            ref = build.getScheduleRef();
+
+        if (ref != null && !ref.equals("")) {
+            Schedule schedule = CCUHsApi.getInstance().getScheduleById(ref);
+
+            if (schedule != null) {
+                CcuLog.d("Schedule", "Schedule: " + schedule.toString());
+                return schedule;
             }
-
-
-            return CCUHsApi.getInstance().getSystemSchedule();
         }
+
+        return CCUHsApi.getInstance().getSystemSchedule(vacation);
+    }
+
+
 
     public boolean checkIntersection(ArrayList<Days> daysArrayList) {
 
         ArrayList<Interval> intervalsOfAdditions = getScheduledIntervals(daysArrayList);
         ArrayList<Interval> intervalsOfCurrent = getScheduledIntervals(getDaysSorted());
 
-        for(Interval additions : intervalsOfAdditions)
-        {
-            for(Interval current : intervalsOfCurrent) {
+        for (Interval additions : intervalsOfAdditions) {
+            for (Interval current : intervalsOfCurrent) {
 
                 boolean hasOverlap = additions.overlaps(current);
-                if(hasOverlap)
+                if (hasOverlap)
                     return true;
             }
         }
@@ -86,31 +115,40 @@ public class Schedule extends Entity {
         return new DateTime(MockTime.getInstance().getMockTime());
     }
 
-    public Occupied getCurrentValues()
-    {
+    public Occupied getCurrentValues() {
         Occupied occupied = null;
         ArrayList<Days> daysSorted = getDaysSorted();
         ArrayList<Interval> scheduledIntervals = getScheduledIntervals(daysSorted);
 
-        for(int i = 0; i < daysSorted.size(); i++)
-        {
-            if(scheduledIntervals.get(i).contains(getTime().getMillis()) || scheduledIntervals.get(i).isAfter(getTime().getMillis()))
-            {
-                    occupied = new Occupied();
-                    occupied.setOccupied(scheduledIntervals.get(i).contains(getTime().getMillis()));
-                    occupied.setValue(daysSorted.get(i).mVal);
-                    occupied.setCoolingVal(daysSorted.get(i).mCoolingVal);
-                    occupied.setHeatingVal(daysSorted.get(i).mHeatingVal);
-                    return occupied;
+        for (int i = 0; i < daysSorted.size(); i++) {
+            if (scheduledIntervals.get(i).contains(getTime().getMillis()) || scheduledIntervals.get(i).isAfter(getTime().getMillis())) {
+
+                boolean currentlyOccupied = scheduledIntervals.get(i).contains(getTime().getMillis());
+                occupied = new Occupied();
+                occupied.setOccupied(currentlyOccupied);
+                occupied.setValue(daysSorted.get(i).mVal);
+                occupied.setCoolingVal(daysSorted.get(i).mCoolingVal);
+                occupied.setHeatingVal(daysSorted.get(i).mHeatingVal);
+
+                if (currentlyOccupied) {
+                    occupied.setCurrentlyOccupiedSchedule(daysSorted.get(i));
+                } else {
+                    occupied.setNextOccupiedSchedule(daysSorted.get(i));
+                }
+
+                return occupied;
             }
         }
 
-        if(daysSorted.size() > 0) {
+
+        /* In case it runs off the ends of the schedule */
+        if (daysSorted.size() > 0) {
             occupied = new Occupied();
-            occupied.setOccupied(scheduledIntervals.get(0).contains(getTime().getMillis()));
+            occupied.setOccupied(false);
             occupied.setValue(daysSorted.get(0).mVal);
             occupied.setCoolingVal(daysSorted.get(0).mCoolingVal);
             occupied.setHeatingVal(daysSorted.get(0).mHeatingVal);
+            occupied.setNextOccupiedSchedule(daysSorted.get(0));
         }
 
         return occupied;
@@ -183,12 +221,10 @@ public class Schedule extends Entity {
     }
 
 
-    private ArrayList<Interval> getScheduledIntervals(ArrayList<Days> daysSorted)
-    {
+    private ArrayList<Interval> getScheduledIntervals(ArrayList<Days> daysSorted) {
         ArrayList<Interval> intervals = new ArrayList<Interval>();
 
-        for (Days day : daysSorted)
-        {
+        for (Days day : daysSorted) {
             DateTime startDateTime = new DateTime(MockTime.getInstance().getMockTime())
                     .withHourOfDay(day.getSthh())
                     .withMinuteOfHour(day.getStmm())
@@ -210,40 +246,34 @@ public class Schedule extends Entity {
 
     /**
      * Sorts the days by MM, then by HH, then by DD
+     *
      * @return Sorted list of days
      */
     public ArrayList<Days> getDaysSorted() {
 
-        Collections.sort(mDays, new Comparator<Days>()
-        {
+        Collections.sort(mDays, new Comparator<Days>() {
             @Override
-            public int compare(Days o1, Days o2)
-            {
+            public int compare(Days o1, Days o2) {
                 return Integer.valueOf(o1.getStmm()).compareTo(Integer.valueOf(o2.getStmm()));
             }
         });
 
-        Collections.sort(mDays, new Comparator<Days>()
-        {
+        Collections.sort(mDays, new Comparator<Days>() {
             @Override
-            public int compare(Days o1, Days o2)
-            {
+            public int compare(Days o1, Days o2) {
                 return Integer.valueOf(o1.getSthh()).compareTo(Integer.valueOf(o2.getSthh()));
             }
         });
 
-        Collections.sort(mDays, new Comparator<Days>()
-        {
+        Collections.sort(mDays, new Comparator<Days>() {
             @Override
-            public int compare(Days o1, Days o2)
-            {
+            public int compare(Days o1, Days o2) {
                 return Integer.valueOf(o1.mDay).compareTo(Integer.valueOf(o2.mDay));
             }
         });
 
         return mDays;
     }
-
 
 
     public static class Builder {
@@ -352,6 +382,29 @@ public class Schedule extends Entity {
 
     public static class Days {
 
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Days days = (Days) o;
+            return mSthh == days.mSthh &&
+                    mStmm == days.mStmm &&
+                    mDay == days.mDay &&
+                    mEtmm == days.mEtmm &&
+                    mEthh == days.mEthh &&
+                    mSunrise == days.mSunrise &&
+                    mSunset == days.mSunset &&
+                    Objects.equals(mVal, days.mVal) &&
+                    Objects.equals(mHeatingVal, days.mHeatingVal) &&
+                    Objects.equals(mCoolingVal, days.mCoolingVal);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mSthh, mStmm, mDay, mVal, mHeatingVal, mCoolingVal, mEtmm, mEthh, mSunrise, mSunset);
+        }
+
         private int mSthh;
         private int mStmm;
         private int mDay;
@@ -364,7 +417,6 @@ public class Schedule extends Entity {
         private boolean mSunset;
 
         public static boolean checkIntersection(ArrayList<Days> daysArrayList) {
-
 
 
             return false;
@@ -477,6 +529,8 @@ public class Schedule extends Entity {
         public void setCoolingVal(Double coolingVal) {
             this.mCoolingVal = coolingVal;
         }
+
+
     }
 
     public HDict getScheduleHDict() {
@@ -490,11 +544,11 @@ public class Schedule extends Entity {
                     .add("stmm", HNum.make(day.mStmm))
                     .add("ethh", HNum.make(day.mEthh))
                     .add("etmm", HNum.make(day.mEtmm));
-           if(day.mHeatingVal != null)
+            if (day.mHeatingVal != null)
                 hDictDay.add("heatVal", HNum.make(day.getHeatingVal()));
-           if(day.mCoolingVal != null)
+            if (day.mCoolingVal != null)
                 hDictDay.add("coolVal", HNum.make(day.getCoolingVal()));
-            if(day.mVal != null)
+            if (day.mVal != null)
                 hDictDay.add("curVal", HNum.make(day.getVal()));
 
             //need boolean & string support

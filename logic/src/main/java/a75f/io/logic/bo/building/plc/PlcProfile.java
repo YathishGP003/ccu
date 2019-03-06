@@ -2,9 +2,12 @@ package a75f.io.logic.bo.building.plc;
 
 import android.util.Log;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.ZoneProfile;
@@ -51,6 +54,13 @@ public class PlcProfile extends ZoneProfile
         return new HashSet<Short>(){{
             add((short)plcEquip.nodeAddr);
         }};
+    }
+    
+    @Override
+    public Equip getEquip()
+    {
+        HashMap equip = CCUHsApi.getInstance().read("equip and group == \""+plcEquip.nodeAddr+"\"");
+        return new Equip.Builder().setHashMap(equip).build();
     }
     
     @Override

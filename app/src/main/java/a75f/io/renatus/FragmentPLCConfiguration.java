@@ -211,6 +211,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                 if (mProfileConfig != null) {
                     targetValSp.setSelection(targetValAdapter.getPosition(mProfileConfig.pidTargetValue), false);
                 }
+                th1InSensorSp.setSelection(0, false);
                 
             }
             @Override
@@ -244,6 +245,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                 if (mProfileConfig != null) {
                     targetValSp.setSelection(targetValAdapter.getPosition(mProfileConfig.pidTargetValue), false);
                 }
+                analog1InSensorSp.setSelection(0, false);
             }
             @Override
             public void onNothingSelected(AdapterView<?> adapterView)

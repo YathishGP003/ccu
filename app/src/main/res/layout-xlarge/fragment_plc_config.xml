@@ -89,7 +89,7 @@
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
         android:layout_gravity="center_vertical"
-        android:text="Use Analog-in2 for dynamic setpoint"
+        android:text="Use Analog-in2 for dynamic setpoint             "
         android:textSize="@dimen/text_medium_xlarge" />
 
     <LinearLayout
@@ -182,7 +182,7 @@
         android:layout_gravity="center_vertical"
         android:layout_marginLeft="20dp"
         android:layout_marginTop="10dp"
-        android:text="Expected Zero Error at Midpoint"
+        android:text="Expected Zero Error at Midpoint                     "
         android:textSize="@dimen/text_medium_xlarge"/>
 
     <Button

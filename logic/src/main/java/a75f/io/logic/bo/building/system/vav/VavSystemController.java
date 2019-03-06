@@ -98,7 +98,7 @@ public class VavSystemController
                 
                 for (Equip q : HSUtil.getEquips(z.getId()))
                 {
-                    if (getEquipCurrentTemp(q.getId()) == 0)
+                    if (q.getMarkers().contains("vav") == false || getEquipCurrentTemp(q.getId()) == 0)
                     {
                         continue;
                     }
@@ -336,10 +336,12 @@ public class VavSystemController
         double humiditySum = 0;
         double humidityZones = 0;
     
-        for (ZoneProfile z : L.ccu().zoneProfiles)
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        ArrayList<HashMap> vavEquips = hayStack.readAll("equip and vav and zone");
+    
+        for (HashMap q : vavEquips)
         {
-            Equip q = z.getEquip();
-            double humidityVal = CCUHsApi.getInstance().readHisValByQuery("point and air and humidity and sensor and current and equipRef == \""+q.getId()+"\"");
+            double humidityVal = hayStack.readHisValByQuery("point and air and humidity and sensor and current and equipRef == \""+q.get("id")+"\"");
     
             if (humidityVal != 0) {
                 humiditySum += humidityVal;

@@ -199,8 +199,8 @@ public class LSmartNode
                 String [] arrOfStr = type.split("-");
                 if (arrOfStr.length == 2)
                 {
-                    int min = Integer.parseInt(arrOfStr[0]);
-                    int max = Integer.parseInt(arrOfStr[1]);
+                    int min = (int)Double.parseDouble(arrOfStr[0]);
+                    int max = (int)Double.parseDouble(arrOfStr[1]);
                     if (max > min) {
                         return (short) (min * 10 + (max - min ) * 10 * val/100);
                     } else {

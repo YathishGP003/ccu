@@ -142,7 +142,7 @@ public class Pulse
 		Sensor analogSensor;
 		try
 		{
-			int index = Integer.parseInt(pp.get("type").toString());
+			int index = (int)Double.parseDouble(pp.get("type").toString());
 			analogSensor = Sensor.getSensorList().get(index);
 		}catch (NumberFormatException e) {
 			e.printStackTrace();

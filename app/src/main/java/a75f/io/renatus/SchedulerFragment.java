@@ -1,12 +1,20 @@
 package a75f.io.renatus;
 
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v4.widget.TextViewCompat;
+import android.support.v7.content.res.AppCompatResources;
+import android.support.v7.widget.AppCompatImageView;
+import android.support.v7.widget.AppCompatTextView;
 import android.text.Html;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -14,6 +22,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.Space;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,6 +50,12 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
 
     private static final String PARAM_SCHEDULE_ID = "PARAM_SCHEDULE_ID";
 
+
+
+
+    private Drawable mDrawableBreakLineLeft;
+    private Drawable mDrawableBreakLineRight;
+    private Drawable mDrawableTimeMarker;
 
 
     private float mPixelsBetweenAnHour;
@@ -117,6 +132,10 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
 
         textViewVacations = rootView.findViewById(R.id.vacationsTitle);
         textViewaddVacations = rootView.findViewById(R.id.addVacations);
+
+        mDrawableBreakLineLeft = AppCompatResources.getDrawable(getContext(), R.drawable.ic_break_line_left_svg);
+        mDrawableBreakLineRight = AppCompatResources.getDrawable(getContext(), R.drawable.ic_break_line_right_svg);
+        mDrawableTimeMarker = AppCompatResources.getDrawable(getContext(), R.drawable.ic_time_marker_svg);
 
         //Week Days
         textViewMonday = rootView.findViewById(R.id.textViewMonday);
@@ -253,7 +272,9 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
                 for (int i = 0; i < days.size(); i++) {
                     Schedule.Days daysElement = days.get(i);
                     drawSchedule(i, daysElement.getCoolingVal(), daysElement.getHeatingVal(),
-                            daysElement.getSthh(), daysElement.getEthh(), daysElement.getStmm(), daysElement.getEtmm(), DAYS.values()[daysElement.getDay()]);
+                            daysElement.getSthh(), daysElement.getEthh(),
+                            daysElement.getStmm(), daysElement.getEtmm(),
+                            DAYS.values()[daysElement.getDay()]);
                 }
             }
         });
@@ -358,6 +379,29 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
 
         Typeface typeface = Typeface.createFromAsset(getActivity().getAssets(), "fonts/lato_regular.ttf");
 
+
+        if(startTimeHH > endTimeHH)
+        {
+            drawScheduleBlock(position, strminTemp, strmaxTemp, typeface, endTimeHH,
+                    24,endTimeMM, 0,
+                    getTextViewFromDay(day), false, true);
+            drawScheduleBlock(position, strminTemp, strmaxTemp, typeface, 0,
+                    startTimeHH, 0, startTimeMM,
+                    getTextViewFromDay(day.getNextDay()), true, false);
+        }
+        else
+        {
+
+            drawScheduleBlock(position, strminTemp, strmaxTemp,
+                    typeface, startTimeHH, endTimeHH,startTimeMM,
+                    endTimeMM, getTextViewFromDay(day), false, false);
+        }
+
+
+    }
+
+    private TextView getTextViewFromDay(DAYS day) {
+
         TextView temperTextView = null;
         switch (day) {
             case MONDAY:
@@ -383,51 +427,95 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
                 break;
         }
 
-
-        drawScheduleBlock(position, strminTemp, strmaxTemp, typeface, startTimeHH, endTimeHH,startTimeMM, endTimeMM, temperTextView);
+        return temperTextView;
 
     }
 
-    private void drawScheduleBlock(int position, String strminTemp, String strmaxTemp, Typeface typeface, int tempStartTime, int tempEndTime,
-                                   int startTimeMM, int endTimeMM, TextView textView) {
+    private void drawScheduleBlock(int position, String strminTemp, String strmaxTemp, Typeface typeface,
+                                   int tempStartTime, int tempEndTime,
+                                   int startTimeMM, int endTimeMM, TextView textView, boolean leftBreak, boolean rightBreak) {
 
         Log.i("Scheduler", "tempStartTime: " + tempStartTime + " tempEndTime: " + tempEndTime + " startTimeMM: " + startTimeMM + " endTimeMM " + endTimeMM);
 
 
-        TextView textViewTemp = new TextView(getActivity());
+
+
+        AppCompatTextView textViewTemp = new AppCompatTextView(getActivity());
         textViewTemp.setGravity(Gravity.CENTER);
         textViewTemp.setText(Html.fromHtml(strminTemp + " " + strmaxTemp));
-        textViewTemp.setBackground(getResources().getDrawable(R.drawable.temperature_background));
+
         textViewTemp.setTypeface(typeface);
-
-        float fontSize = 18.0f;
-        if(tempEndTime - tempStartTime <= 1) fontSize = 12.0f;
-        if(tempEndTime - tempStartTime <= 2) fontSize = 16.0f;
-
-
-        textViewTemp.setTextSize(TypedValue.COMPLEX_UNIT_DIP, fontSize);
+        TextViewCompat.setAutoSizeTextTypeWithDefaults(textViewTemp, TextViewCompat.AUTO_SIZE_TEXT_TYPE_UNIFORM);
+        textViewTemp.setMaxLines(2);
         textViewTemp.setId(View.generateViewId());
+
+
 
         ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(0, (int)mPixelsBetweenADay);
         lp.baselineToBaseline = textView.getId();
 
 
-
         int leftMargin = startTimeMM > 0 ? (int)((startTimeMM / 60.0) * mPixelsBetweenAnHour) : lp.leftMargin;
         int rightMargin = endTimeMM > 0 ? (int)(((60 - endTimeMM) / 60.0) * mPixelsBetweenAnHour) : lp.rightMargin;
-        Log.i("Scheduler", "leftMargin: " + leftMargin);
-        Log.i("Scheduler", "rightMargin: " + rightMargin);
 
         lp.leftMargin = leftMargin;
         lp.rightMargin = rightMargin;
 
-        if(endTimeMM > 0)
-            tempEndTime++;
+        Drawable drawableCompat = null;
 
-        lp.startToStart = viewTimeLines.get(tempStartTime).getId();
-        lp.endToEnd = viewTimeLines.get(tempEndTime).getId();
+        if(leftBreak)
+        {
+            drawableCompat = getResources().getDrawable(R.drawable.temperature_background_left);
+            textViewTemp.setCompoundDrawablesWithIntrinsicBounds(mDrawableBreakLineLeft, null, null, null);
+
+            Space space = new Space(getActivity());
+            space.setId(View.generateViewId());
+            float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, getResources().getDisplayMetrics());
 
 
+            ConstraintLayout.LayoutParams spaceLP = new ConstraintLayout.LayoutParams((int)px, 10);
+            spaceLP.rightToLeft = viewTimeLines.get(tempStartTime).getId();
+
+            constraintScheduler.addView(space, spaceLP);
+
+
+            if(endTimeMM > 0)
+                tempEndTime++;
+
+            lp.startToStart = space.getId();
+            lp.endToEnd = viewTimeLines.get(tempEndTime).getId();
+
+
+        }
+        else if(rightBreak)
+        {
+            drawableCompat = getResources().getDrawable(R.drawable.temperature_background_right);
+            textViewTemp.setCompoundDrawablesWithIntrinsicBounds(null, null, mDrawableBreakLineRight, null);
+            Space space = new Space(getActivity());
+            space.setId(View.generateViewId());
+            float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, getResources().getDisplayMetrics());
+
+
+            ConstraintLayout.LayoutParams spaceLP = new ConstraintLayout.LayoutParams((int)px, 10);
+            spaceLP.leftToRight = viewTimeLines.get(tempEndTime).getId();
+
+            constraintScheduler.addView(space, spaceLP);
+
+            lp.startToStart = viewTimeLines.get(tempStartTime).getId();
+            lp.endToEnd = space.getId();
+        }
+        else
+        {
+            drawableCompat = getResources().getDrawable(R.drawable.temperature_background);
+
+            if(endTimeMM > 0)
+                tempEndTime++;
+
+            lp.startToStart = viewTimeLines.get(tempStartTime).getId();
+            lp.endToEnd = viewTimeLines.get(tempEndTime).getId();
+        }
+
+        textViewTemp.setBackground(drawableCompat);
         constraintScheduler.addView(textViewTemp, lp);
 
         textViewTemp.setTag(position);

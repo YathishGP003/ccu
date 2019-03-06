@@ -15,4 +15,9 @@ public enum DAYS {
 	public String toString() {
 		return name;
 	}
+
+	public DAYS getNextDay() {
+		if(this.ordinal() == 6) return MONDAY;
+		else return DAYS.values()[this.ordinal()+1];
+	}
 }

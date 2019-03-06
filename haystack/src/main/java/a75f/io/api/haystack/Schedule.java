@@ -83,7 +83,7 @@ public class Schedule extends Entity {
         if (ref != null && !ref.equals("")) {
             Schedule schedule = CCUHsApi.getInstance().getScheduleById(ref);
 
-            if (schedule != null) {
+            if (schedule != null && !schedule.mMarkers.contains("disabled")) {
                 CcuLog.d("Schedule", "Schedule: " + schedule.toString());
                 return schedule;
             }
@@ -91,6 +91,21 @@ public class Schedule extends Entity {
 
         return CCUHsApi.getInstance().getSystemSchedule(vacation);
     }
+
+
+    public static Schedule disableScheduleForZone(String zoneId, boolean enabled)
+    {
+        HashMap zoneHashMap = CCUHsApi.getInstance().readMapById(zoneId);
+        Zone build = new Zone.Builder().setHashMap(zoneHashMap).build();
+        boolean currentlyDisabled = build.getMarkers().contains("disabled");
+
+        //if(currentlyDisabled)
+          //  return;
+        //else
+        return null;
+
+    }
+
 
 
 
@@ -225,6 +240,8 @@ public class Schedule extends Entity {
         ArrayList<Interval> intervals = new ArrayList<Interval>();
 
         for (Days day : daysSorted) {
+
+
             DateTime startDateTime = new DateTime(MockTime.getInstance().getMockTime())
                     .withHourOfDay(day.getSthh())
                     .withMinuteOfHour(day.getStmm())
@@ -236,8 +253,16 @@ public class Schedule extends Entity {
                     .withSecondOfMinute(0).withDayOfWeek(
                             day.getDay() +
                                     1);
-            Interval scheduledInterval =
-                    new Interval(startDateTime, endDateTime);
+
+            Interval scheduledInterval = null;
+            if(startDateTime.isAfter(endDateTime))
+            {
+                scheduledInterval = new Interval(endDateTime, startDateTime.withDayOfWeek(DAYS.values()[day.getDay()].getNextDay().ordinal() + 1));
+            }
+            else {
+                scheduledInterval =
+                        new Interval(startDateTime, endDateTime);
+            }
             intervals.add(scheduledInterval);
         }
 

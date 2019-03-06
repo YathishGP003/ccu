@@ -114,10 +114,14 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                 }
             });
 
-            if(schedule.isSiteSchedule())
+            if(schedule.isSiteSchedule()) {
                 scheduleSpinner.setSelection(0);
-            else if(schedule.isZoneSchedule())
+                scheduleImageButton.setVisibility(View.GONE);
+            }
+            else if(schedule.isZoneSchedule()) {
                 scheduleSpinner.setSelection(1);
+                scheduleImageButton.setVisibility(View.VISIBLE);
+            }
             else if(schedule.isNamedSchedule())
                 scheduleSpinner.setSelection(2);
 
@@ -131,7 +135,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                     {
                         if(schedule.isZoneSchedule())
                         {
-
+                            //Schedule.
                         }
                     }
                     else if(position == 1)

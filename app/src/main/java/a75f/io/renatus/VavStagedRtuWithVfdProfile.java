@@ -158,13 +158,13 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
     }
     
     private void setUpSpinners() {
-        relay1Spinner.setSelection((int)systemProfile.getConfigAssociation("relay1"));
-        relay2Spinner.setSelection((int)systemProfile.getConfigAssociation("relay2"));
-        relay3Spinner.setSelection((int)systemProfile.getConfigAssociation("relay3"));
-        relay4Spinner.setSelection((int)systemProfile.getConfigAssociation("relay4"));
-        relay5Spinner.setSelection((int)systemProfile.getConfigAssociation("relay5"));
-        relay6Spinner.setSelection((int)systemProfile.getConfigAssociation("relay6"));
-        relay7Spinner.setSelection((int)systemProfile.getConfigAssociation("relay7"));
+        relay1Spinner.setSelection((int)systemProfile.getConfigAssociation("relay1"), false);
+        relay2Spinner.setSelection((int)systemProfile.getConfigAssociation("relay2"), false);
+        relay3Spinner.setSelection((int)systemProfile.getConfigAssociation("relay3"), false);
+        relay4Spinner.setSelection((int)systemProfile.getConfigAssociation("relay4"), false);
+        relay5Spinner.setSelection((int)systemProfile.getConfigAssociation("relay5"), false);
+        relay6Spinner.setSelection((int)systemProfile.getConfigAssociation("relay6"), false);
+        relay7Spinner.setSelection((int)systemProfile.getConfigAssociation("relay7"), false);
         
         relay1Spinner.setEnabled(relay1Cb.isChecked());
         relay2Spinner.setEnabled(relay2Cb.isChecked());
@@ -199,26 +199,26 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         analog2Recirculate.setAdapter(analogAdapter);;
         analog2Recirculate.setSelection((int)systemProfile.getConfigVal("analog2 and recirculate"));
         analog2CoolStage1.setAdapter(analogAdapter);
-        analog2CoolStage1.setSelection((int)systemProfile.getConfigVal("analog2 and cooling and stage1"));
+        analog2CoolStage1.setSelection((int)systemProfile.getConfigVal("analog2 and cooling and stage1"), false);
         analog2CoolStage2.setAdapter(analogAdapter);
-        analog2CoolStage2.setSelection((int)systemProfile.getConfigVal("analog2 and cooling and stage2"));
+        analog2CoolStage2.setSelection((int)systemProfile.getConfigVal("analog2 and cooling and stage2"), false);
         analog2CoolStage3.setAdapter(analogAdapter);
-        analog2CoolStage3.setSelection((int)systemProfile.getConfigVal("analog2 and cooling and stage3"));
+        analog2CoolStage3.setSelection((int)systemProfile.getConfigVal("analog2 and cooling and stage3"), false);
         analog2CoolStage4.setAdapter(analogAdapter);
-        analog2CoolStage4.setSelection((int)systemProfile.getConfigVal("analog2 and cooling and stage4"));
+        analog2CoolStage4.setSelection((int)systemProfile.getConfigVal("analog2 and cooling and stage4"), false);
         analog2CoolStage5.setAdapter(analogAdapter);
-        analog2CoolStage5.setSelection((int)systemProfile.getConfigVal("analog2 and cooling and stage5"));
+        analog2CoolStage5.setSelection((int)systemProfile.getConfigVal("analog2 and cooling and stage5"), false);
     
         analog2HeatStage1.setAdapter(analogAdapter);
-        analog2HeatStage1.setSelection((int)systemProfile.getConfigVal("analog2 and heating and stage1"));
+        analog2HeatStage1.setSelection((int)systemProfile.getConfigVal("analog2 and heating and stage1"), false);
         analog2HeatStage2.setAdapter(analogAdapter);
-        analog2HeatStage2.setSelection((int)systemProfile.getConfigVal("analog2 and heating and stage2"));
+        analog2HeatStage2.setSelection((int)systemProfile.getConfigVal("analog2 and heating and stage2"), false);
         analog2HeatStage3.setAdapter(analogAdapter);
-        analog2HeatStage3.setSelection((int)systemProfile.getConfigVal("analog2 and heating and stage3"));
+        analog2HeatStage3.setSelection((int)systemProfile.getConfigVal("analog2 and heating and stage3"), false);
         analog2HeatStage4.setAdapter(analogAdapter);
-        analog2HeatStage4.setSelection((int)systemProfile.getConfigVal("analog2 and heating and stage4"));
+        analog2HeatStage4.setSelection((int)systemProfile.getConfigVal("analog2 and heating and stage4"), false);
         analog2HeatStage5.setAdapter(analogAdapter);
-        analog2HeatStage5.setSelection((int)systemProfile.getConfigVal("analog2 and heating and stage5"));
+        analog2HeatStage5.setSelection((int)systemProfile.getConfigVal("analog2 and heating and stage5"), false);
         
         analog2TestSpinner.setOnItemSelectedListener(this);
         updateAnalogOptions();

@@ -24,7 +24,7 @@ public class VavTRTuners
                                              .setSiteRef(siteRef)
                                              .setEquipRef(equipRef)
                                              .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
-                                             .addMarker("sat").addMarker("spinit").addMarker("writable").addMarker("his")
+                                             .addMarker("sat").addMarker("spinit").addMarker("writable").addMarker("his").addMarker("equipHis")
                                              .setUnit("\u00B0F")
                                              .setTz(tz)
                                              .build();
@@ -37,7 +37,7 @@ public class VavTRTuners
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipRef)
                                   .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
-                                  .addMarker("sat").addMarker("spmin").addMarker("writable").addMarker("his")
+                                  .addMarker("sat").addMarker("spmin").addMarker("writable").addMarker("his").addMarker("equipHis")
                                   .setUnit("\u00B0F")
                                   .setTz(tz)
                                   .build();
@@ -50,7 +50,7 @@ public class VavTRTuners
                                  .setSiteRef(siteRef)
                                  .setEquipRef(equipRef)
                                  .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
-                                 .addMarker("sat").addMarker("spmax").addMarker("writable").addMarker("his")
+                                 .addMarker("sat").addMarker("spmax").addMarker("writable").addMarker("his").addMarker("equipHis")
                                  .setUnit("\u00B0F")
                                  .setTz(tz)
                                  .build();
@@ -63,7 +63,7 @@ public class VavTRTuners
                                  .setSiteRef(siteRef)
                                  .setEquipRef(equipRef)
                                  .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
-                                 .addMarker("sat").addMarker("timeDelay").addMarker("writable").addMarker("his")
+                                 .addMarker("sat").addMarker("timeDelay").addMarker("writable").addMarker("his").addMarker("equipHis")
                                  .setUnit("m")
                                  .setTz(tz)
                                  .build();
@@ -76,7 +76,7 @@ public class VavTRTuners
                                      .setSiteRef(siteRef)
                                      .setEquipRef(equipRef)
                                      .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
-                                     .addMarker("sat").addMarker("timeInterval").addMarker("writable").addMarker("his")
+                                     .addMarker("sat").addMarker("timeInterval").addMarker("writable").addMarker("his").addMarker("equipHis")
                                      .setUnit("m")
                                      .setTz(tz)
                                      .build();
@@ -89,7 +89,7 @@ public class VavTRTuners
                                         .setSiteRef(siteRef)
                                         .setEquipRef(equipRef)
                                         .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
-                                        .addMarker("sat").addMarker("ignoreRequest").addMarker("writable").addMarker("his")
+                                        .addMarker("sat").addMarker("ignoreRequest").addMarker("writable").addMarker("his").addMarker("equipHis")
                                         .setTz(tz)
                                         .build();
         String satIgnoreRequestId = hayStack.addPoint(satIgnoreRequest);
@@ -101,7 +101,7 @@ public class VavTRTuners
                                          .setSiteRef(siteRef)
                                          .setEquipRef(equipRef)
                                          .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
-                                         .addMarker("sat").addMarker("sptrim").addMarker("writable").addMarker("his")
+                                         .addMarker("sat").addMarker("sptrim").addMarker("writable").addMarker("his").addMarker("equipHis")
                                          .setUnit("\u00B0F")
                                          .setTz(tz)
                                          .build();
@@ -114,7 +114,7 @@ public class VavTRTuners
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipRef)
                                   .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
-                                  .addMarker("sat").addMarker("spres").addMarker("writable").addMarker("his")
+                                  .addMarker("sat").addMarker("spres").addMarker("writable").addMarker("his").addMarker("equipHis")
                                   .setUnit("\u00B0F")
                                   .setTz(tz)
                                   .build();
@@ -127,7 +127,7 @@ public class VavTRTuners
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipRef)
                                   .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
-                                  .addMarker("sat").addMarker("spresmax").addMarker("writable").addMarker("his")
+                                  .addMarker("sat").addMarker("spresmax").addMarker("writable").addMarker("his").addMarker("equipHis")
                                   .setUnit("\u00B0F")
                                   .setTz(tz)
                                   .build();
@@ -167,7 +167,7 @@ public class VavTRTuners
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipRef)
                                   .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
-                                  .addMarker("staticPressure").addMarker("spinit").addMarker("writable").addMarker("his")
+                                  .addMarker("staticPressure").addMarker("spinit").addMarker("writable").addMarker("his").addMarker("equipHis")
                                   .setUnit("in")
                                   .setTz(tz)
                                   .build();
@@ -180,7 +180,7 @@ public class VavTRTuners
                                  .setSiteRef(siteRef)
                                  .setEquipRef(equipRef)
                                  .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
-                                 .addMarker("staticPressure").addMarker("spmin").addMarker("writable").addMarker("his")
+                                 .addMarker("staticPressure").addMarker("spmin").addMarker("writable").addMarker("his").addMarker("equipHis")
                                  .setUnit("in")
                                  .setTz(tz)
                                  .build();
@@ -193,7 +193,7 @@ public class VavTRTuners
                                  .setSiteRef(siteRef)
                                  .setEquipRef(equipRef)
                                  .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
-                                 .addMarker("staticPressure").addMarker("spmax").addMarker("writable").addMarker("his")
+                                 .addMarker("staticPressure").addMarker("spmax").addMarker("writable").addMarker("his").addMarker("equipHis")
                                  .setUnit("in")
                                  .setTz(tz)
                                  .build();
@@ -206,7 +206,7 @@ public class VavTRTuners
                                      .setSiteRef(siteRef)
                                      .setEquipRef(equipRef)
                                      .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
-                                     .addMarker("staticPressure").addMarker("timeDelay").addMarker("writable").addMarker("his")
+                                     .addMarker("staticPressure").addMarker("timeDelay").addMarker("writable").addMarker("his").addMarker("equipHis")
                                      .setUnit("m")
                                      .setTz(tz)
                                      .build();
@@ -219,7 +219,7 @@ public class VavTRTuners
                                         .setSiteRef(siteRef)
                                         .setEquipRef(equipRef)
                                         .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
-                                        .addMarker("staticPressure").addMarker("timeInterval").addMarker("writable").addMarker("his")
+                                        .addMarker("staticPressure").addMarker("timeInterval").addMarker("writable").addMarker("his").addMarker("equipHis")
                                         .setUnit("m")
                                         .setTz(tz)
                                         .build();
@@ -232,7 +232,7 @@ public class VavTRTuners
                                          .setSiteRef(siteRef)
                                          .setEquipRef(equipRef)
                                          .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
-                                         .addMarker("staticPressure").addMarker("ignoreRequest").addMarker("writable").addMarker("his")
+                                         .addMarker("staticPressure").addMarker("ignoreRequest").addMarker("writable").addMarker("his").addMarker("equipHis")
                                          .setTz(tz)
                                          .build();
         String staticPressureIgnoreRequestId = hayStack.addPoint(staticPressureIgnoreRequest);
@@ -244,7 +244,7 @@ public class VavTRTuners
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipRef)
                                   .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
-                                  .addMarker("staticPressure").addMarker("sptrim").addMarker("writable").addMarker("his")
+                                  .addMarker("staticPressure").addMarker("sptrim").addMarker("writable").addMarker("his").addMarker("equipHis")
                                   .setUnit("in")
                                   .setTz(tz)
                                   .build();
@@ -257,7 +257,7 @@ public class VavTRTuners
                                  .setSiteRef(siteRef)
                                  .setEquipRef(equipRef)
                                  .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
-                                 .addMarker("staticPressure").addMarker("spres").addMarker("writable").addMarker("his")
+                                 .addMarker("staticPressure").addMarker("spres").addMarker("writable").addMarker("his").addMarker("equipHis")
                                  .setUnit("in")
                                  .setTz(tz)
                                  .build();
@@ -270,7 +270,7 @@ public class VavTRTuners
                                     .setSiteRef(siteRef)
                                     .setEquipRef(equipRef)
                                     .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
-                                    .addMarker("staticPressure").addMarker("spresmax").addMarker("writable").addMarker("his")
+                                    .addMarker("staticPressure").addMarker("spresmax").addMarker("writable").addMarker("his").addMarker("equipHis")
                                     .setUnit("in")
                                     .setTz(tz)
                                     .build();
@@ -311,7 +311,7 @@ public class VavTRTuners
                                              .setSiteRef(siteRef)
                                              .setEquipRef(equipRef)
                                              .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
-                                             .addMarker("co2").addMarker("spinit").addMarker("writable").addMarker("his")
+                                             .addMarker("co2").addMarker("spinit").addMarker("writable").addMarker("his").addMarker("equipHis")
                                              .setUnit("ppm")
                                              .setTz(tz)
                                              .build();
@@ -324,7 +324,7 @@ public class VavTRTuners
                                             .setSiteRef(siteRef)
                                             .setEquipRef(equipRef)
                                             .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
-                                            .addMarker("co2").addMarker("spmin").addMarker("writable").addMarker("his")
+                                            .addMarker("co2").addMarker("spmin").addMarker("writable").addMarker("his").addMarker("equipHis")
                                             .setUnit("ppm")
                                             .setTz(tz)
                                             .build();
@@ -337,7 +337,7 @@ public class VavTRTuners
                                             .setSiteRef(siteRef)
                                             .setEquipRef(equipRef)
                                             .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
-                                            .addMarker("co2").addMarker("spmax").addMarker("writable").addMarker("his")
+                                            .addMarker("co2").addMarker("spmax").addMarker("writable").addMarker("his").addMarker("equipHis")
                                             .setUnit("ppm")
                                             .setTz(tz)
                                             .build();
@@ -350,7 +350,7 @@ public class VavTRTuners
                                                 .setSiteRef(siteRef)
                                                 .setEquipRef(equipRef)
                                                 .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
-                                                .addMarker("co2").addMarker("timeDelay").addMarker("writable").addMarker("his")
+                                                .addMarker("co2").addMarker("timeDelay").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                 .setUnit("m")
                                                 .setTz(tz)
                                                 .build();
@@ -363,7 +363,7 @@ public class VavTRTuners
                                                    .setSiteRef(siteRef)
                                                    .setEquipRef(equipRef)
                                                    .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
-                                                   .addMarker("co2").addMarker("timeInterval").addMarker("writable").addMarker("his")
+                                                   .addMarker("co2").addMarker("timeInterval").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                    .setUnit("m")
                                                    .setTz(tz)
                                                    .build();
@@ -376,7 +376,7 @@ public class VavTRTuners
                                                     .setSiteRef(siteRef)
                                                     .setEquipRef(equipRef)
                                                     .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
-                                                    .addMarker("co2").addMarker("ignoreRequest").addMarker("writable").addMarker("his")
+                                                    .addMarker("co2").addMarker("ignoreRequest").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                     .setTz(tz)
                                                     .build();
         String co2IgnoreRequestId = hayStack.addPoint(co2IgnoreRequest);
@@ -388,7 +388,7 @@ public class VavTRTuners
                                              .setSiteRef(siteRef)
                                              .setEquipRef(equipRef)
                                              .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
-                                             .addMarker("co2").addMarker("sptrim").addMarker("writable").addMarker("his")
+                                             .addMarker("co2").addMarker("sptrim").addMarker("writable").addMarker("his").addMarker("equipHis")
                                              .setUnit("ppm")
                                              .setTz(tz)
                                              .build();
@@ -401,7 +401,7 @@ public class VavTRTuners
                                             .setSiteRef(siteRef)
                                             .setEquipRef(equipRef)
                                             .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
-                                            .addMarker("co2").addMarker("spres").addMarker("writable").addMarker("his")
+                                            .addMarker("co2").addMarker("spres").addMarker("writable").addMarker("his").addMarker("equipHis")
                                             .setUnit("ppm")
                                             .setTz(tz)
                                             .build();
@@ -414,7 +414,7 @@ public class VavTRTuners
                                                .setSiteRef(siteRef)
                                                .setEquipRef(equipRef)
                                                .addMarker("system").addMarker("tuner").addMarker("tr").addMarker("sp").addMarker("vav")
-                                               .addMarker("co2").addMarker("spresmax").addMarker("writable").addMarker("his")
+                                               .addMarker("co2").addMarker("spresmax").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                .setUnit("ppm")
                                                .setTz(tz)
                                                .build();

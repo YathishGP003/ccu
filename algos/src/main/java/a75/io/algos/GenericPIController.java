@@ -131,6 +131,6 @@ public class GenericPIController
     
     public void dump() {
         CcuLog.d("CCU_ZONE","PI-LOOP error: " + error + " limitedErr: " + limitedError + " proportionalErr: " + proportionalError +
-        "integralErr: " + integralError + " cumulativeErr: " + cumulativeError + " CV: " + controlVariable);
+        " integralErr: " + integralError + " cumulativeErr: " + cumulativeError + " cv: " + controlVariable);
     }
 }

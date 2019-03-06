@@ -36,6 +36,7 @@ import a75f.io.logic.bo.building.Day;
 import a75f.io.logic.bo.building.NamedSchedule;
 import a75f.io.logic.bo.building.Schedule;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.plc.PlcProfile;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedHybridRtu;
@@ -376,6 +377,11 @@ public class Globals {
                             vpf.addLogicalMap(Short.valueOf(eq.getGroup()));
                             L.ccu().zoneProfiles.add(vpf);
                             break;
+                        case PLC:
+                            PlcProfile plc = new PlcProfile();
+                            plc.addPlcEquip(Short.valueOf(eq.getGroup()));
+                            L.ccu().zoneProfiles.add(plc);
+                            break;
                     }
                 }
             }
@@ -425,8 +431,8 @@ public class Globals {
                     L.ccu().systemProfile = new DefaultSystem();
             }
         } else {
-            CcuLog.d(L.TAG_CCU, "System Equip does not exist.Create VavAnalogRtu System Profile");
-            L.ccu().systemProfile = new VavAnalogRtu();
+            CcuLog.d(L.TAG_CCU, "System Equip does not exist.Create Dafault System Profile");
+            L.ccu().systemProfile = new DefaultSystem();
 
         }
     }

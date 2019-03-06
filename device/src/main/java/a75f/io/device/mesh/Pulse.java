@@ -1,5 +1,7 @@
 package a75f.io.device.mesh;
 
+import android.util.Log;
+
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 
@@ -14,6 +16,7 @@ import a75f.io.device.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 import a75f.io.device.serial.SmartNodeSensorReading_t;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.Sensor;
 import a75f.io.logic.bo.building.SensorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.tuners.TunerUtil;
@@ -60,14 +63,14 @@ public class Pulse
 					case ANALOG_IN_ONE:
 						val = smartNodeRegularUpdateMessage_t.update.externalAnalogVoltageInput1.get();
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-						hayStack.writeHisValById(logPoint.get("id").toString(), getAnalogConversion(val));
-						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : analog1In "+getAnalogConversion(val));
+						hayStack.writeHisValById(logPoint.get("id").toString(), getAnalogConversion(phyPoint, logPoint, val));
+						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : analog1In "+getAnalogConversion(phyPoint, logPoint, val));
 						break;
 					case ANALOG_IN_TWO:
-						val = smartNodeRegularUpdateMessage_t.update.externalAnalogVoltageInput1.get();
+						val = smartNodeRegularUpdateMessage_t.update.externalAnalogVoltageInput2.get();
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-						hayStack.writeHisValById(logPoint.get("id").toString(), getAnalogConversion(val));
-						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : analog2In "+getAnalogConversion(val));
+						hayStack.writeHisValById(logPoint.get("id").toString(), getAnalogConversion(phyPoint, logPoint, val));
+						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : analog2In "+getAnalogConversion(phyPoint, logPoint, val));
 						break;
 					case TH1_IN:
 						val = smartNodeRegularUpdateMessage_t.update.externalThermistorInput1.get();
@@ -134,8 +137,21 @@ public class Pulse
 		return val/2;
 	}
 	
-	public static Double getAnalogConversion(Double val) {
-		return val/10.0;
+	public static Double getAnalogConversion(HashMap pp, HashMap lp, Double val) {
+		val = val/1000;
+		Sensor analogSensor;
+		try
+		{
+			int index = Integer.parseInt(pp.get("type").toString());
+			analogSensor = Sensor.getSensorList().get(index);
+		}catch (NumberFormatException e) {
+			e.printStackTrace();
+			return val;
+		}
+		Log.d("regularSmartNode ","sensor type "+pp.get("type").toString()+" val "+val);
+		return analogSensor.minEngineeringValue +
+		                (analogSensor.maxEngineeringValue- analogSensor.minEngineeringValue) * val / (analogSensor.maxVoltage - analogSensor.minVoltage);
+		
 	}
 	
 	private static void updateDesiredTemp(int node, Double dt) {

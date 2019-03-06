@@ -139,6 +139,9 @@ public class ZoneFragmentTemp extends Fragment
                 HashMap coolDT = CCUHsApi.getInstance().read("point and air and temp and desired and cooling and sp and equipRef == \""+m.get("id")+"\"");
                 HashMap heatDT = CCUHsApi.getInstance().read("point and air and temp and desired and heating and sp and equipRef == \""+m.get("id")+"\"");
                 
+                if (currTmep.size() == 0 || coolDT.size() == 0 || heatDT.size() == 0) {
+                    continue;
+                }
                 ArrayList tunerList = new ArrayList();
                 tunerList.add(currTmep.get("dis").toString());
                 tunerList.add(coolDT.get("dis").toString());

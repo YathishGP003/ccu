@@ -110,7 +110,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
     
         setSystemLoopOp("cooling", systemCoolingLoopOp);
         setCmdSignal("cooling",signal);
-        if (getConfigVal("analog1 and output and enabled") > 0)
+        if (getConfigEnabled("analog1") > 0)
         {
             ControlMote.setAnalogOut("analog1", signal);
         }
@@ -130,7 +130,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         }
         setSystemLoopOp("fan", systemFanLoopOp);
         setCmdSignal("fan", signal);
-        if (getConfigVal("analog2 and output and enabled") > 0)
+        if (getConfigEnabled("analog2") > 0)
         {
             ControlMote.setAnalogOut("analog2", signal);
         }
@@ -151,7 +151,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
     
         setSystemLoopOp("heating", systemHeatingLoopOp);
         setCmdSignal("heating", signal);
-        if (getConfigVal("analog3 and output and enabled") > 0)
+        if (getConfigEnabled("analog3") > 0)
         {
             ControlMote.setAnalogOut("analog3", signal);
         }
@@ -182,7 +182,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         CcuLog.d(L.TAG_CCU_SYSTEM, "analogMin: "+analogMin+" analogMax: "+analogMax+" Composite: "+signal);
         
         setCmdSignal("composite",signal);
-        if (getConfigVal("analog4 and output and enabled") > 0)
+        if (getConfigEnabled("analog4") > 0)
         {
             ControlMote.setAnalogOut("analog4", signal);
         }

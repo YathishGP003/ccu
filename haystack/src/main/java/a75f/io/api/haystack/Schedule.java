@@ -83,7 +83,7 @@ public class Schedule extends Entity {
         if (ref != null && !ref.equals("")) {
             Schedule schedule = CCUHsApi.getInstance().getScheduleById(ref);
 
-            if (schedule != null) {
+            if (schedule != null && !schedule.mMarkers.contains("disabled")) {
                 CcuLog.d("Schedule", "Schedule: " + schedule.toString());
                 return schedule;
             }
@@ -91,6 +91,21 @@ public class Schedule extends Entity {
 
         return CCUHsApi.getInstance().getSystemSchedule(vacation);
     }
+
+
+    public static Schedule disableScheduleForZone(String zoneId, boolean enabled)
+    {
+        HashMap zoneHashMap = CCUHsApi.getInstance().readMapById(zoneId);
+        Zone build = new Zone.Builder().setHashMap(zoneHashMap).build();
+        boolean currentlyDisabled = build.getMarkers().contains("disabled");
+
+        //if(currentlyDisabled)
+          //  return;
+        //else
+        return null;
+
+    }
+
 
 
 
@@ -225,6 +240,8 @@ public class Schedule extends Entity {
         ArrayList<Interval> intervals = new ArrayList<Interval>();
 
         for (Days day : daysSorted) {
+
+
             DateTime startDateTime = new DateTime(MockTime.getInstance().getMockTime())
                     .withHourOfDay(day.getSthh())
                     .withMinuteOfHour(day.getStmm())
@@ -236,8 +253,18 @@ public class Schedule extends Entity {
                     .withSecondOfMinute(0).withDayOfWeek(
                             day.getDay() +
                                     1);
-            Interval scheduledInterval =
-                    new Interval(startDateTime, endDateTime);
+
+            Interval scheduledInterval = null;
+            if(startDateTime.isAfter(endDateTime))
+            {
+                scheduledInterval = new Interval(endDateTime, startDateTime.withDayOfWeek(DAYS.values()[day.getDay()].getNextDay().ordinal() + 1));
+            }
+            else {
+                scheduledInterval =
+                        new Interval(startDateTime, endDateTime);
+            }
+
+
             intervals.add(scheduledInterval);
         }
 
@@ -273,6 +300,22 @@ public class Schedule extends Entity {
         });
 
         return mDays;
+    }
+
+    public void populateIntersections() {
+        ArrayList<Interval> scheduledIntervals = getScheduledIntervals(getDays());
+
+        for(int i = 0; i < scheduledIntervals.size(); i++)
+        {
+            for(int ii = 0; ii < scheduledIntervals.size(); ii++)
+            {
+                if(scheduledIntervals.get(i).getEndMillis() == scheduledIntervals.get(ii).getStartMillis())
+                {
+                    this.mDays.get(i).setIntersection(true);
+                }
+            }
+        }
+
     }
 
 
@@ -405,6 +448,8 @@ public class Schedule extends Entity {
             return Objects.hash(mSthh, mStmm, mDay, mVal, mHeatingVal, mCoolingVal, mEtmm, mEthh, mSunrise, mSunset);
         }
 
+
+        private boolean mIntersection;
         private int mSthh;
         private int mStmm;
         private int mDay;
@@ -415,12 +460,6 @@ public class Schedule extends Entity {
         private int mEthh;
         private boolean mSunrise;
         private boolean mSunset;
-
-        public static boolean checkIntersection(ArrayList<Days> daysArrayList) {
-
-
-            return false;
-        }
 
 
         public int getSthh() {
@@ -531,6 +570,15 @@ public class Schedule extends Entity {
         }
 
 
+        public boolean isIntersection()
+        {
+            return mIntersection;
+        }
+
+        public void setIntersection(boolean mIntersection)
+        {
+            this.mIntersection = mIntersection;
+        }
     }
 
     public HDict getScheduleHDict() {

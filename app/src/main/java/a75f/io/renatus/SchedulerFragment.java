@@ -78,6 +78,10 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
     Button textViewaddVacations;
     Schedule schedule;
 
+
+
+
+
     ConstraintLayout constraintScheduler;
     ArrayList<View> viewTimeLines;
 
@@ -322,7 +326,7 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
 
                 ManualCalendarDialogFragment calendarDialogFragment = new ManualCalendarDialogFragment(new ManualCalendarDialogFragment.ManualCalendarDialogListener() {
                     @Override
-                    public boolean onClickSave(int position, DateTime startDate, DateTime endDate) {
+                    public boolean onClickSave(int position, String vacationName, DateTime startDate, DateTime endDate) {
                         return false;
                     }
 
@@ -330,7 +334,7 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
                     public boolean onClickCancel(DialogFragment dialog) {
                         return false;
                     }
-                },0, DateTime.now(), DateTime.now());
+                });
 
                 calendarDialogFragment.show(ft, "popup");
                 break;

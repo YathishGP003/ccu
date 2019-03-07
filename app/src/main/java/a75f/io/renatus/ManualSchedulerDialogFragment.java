@@ -85,16 +85,20 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
 
-        if(mDay != null)
-        {
-            Toast.makeText(ManualSchedulerDialogFragment.this.getContext(), "Schedule is not null", Toast.LENGTH_LONG).show();
-        }
-
-
         LayoutInflater inflater = (LayoutInflater) LayoutInflater.from(getActivity());
         View view = inflater.inflate(R.layout.dialog_manualschedule, null);
 
         ImageButton deleteButton = view.findViewById(R.id.buttonDelete);
+
+
+        if(mDay == null)
+        {
+            deleteButton.setVisibility(View.INVISIBLE);
+        }
+        else
+        {
+            deleteButton.setVisibility(View.VISIBLE);
+        }
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -144,14 +148,8 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
             Method method = npStartTime.getClass().getDeclaredMethod("changeValueByOne", boolean.class);
             method.setAccessible(true);
             method.invoke(npStartTime, true);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            //Log.e("Crash", e.getMessage());
         }
 
 
@@ -162,6 +160,7 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
         npEndTime.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         npEndTime.setVisibility(View.VISIBLE);
         npEndTime.setWrapSelectorWheel(false);
+
         npEndTime.setFormatter(new NumberPicker.Formatter() {
 
             @Override
@@ -175,14 +174,8 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
             Method method = npEndTime.getClass().getDeclaredMethod("changeValueByOne", boolean.class);
             method.setAccessible(true);
             method.invoke(npEndTime, true);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            Log.e("Crash", "Reflection Crash?");
         }
 
 

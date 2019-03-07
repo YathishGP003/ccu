@@ -662,7 +662,10 @@
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/constraintLt_Scheduler" />
 
-            <TextView
+            <Button
+                android:background="@color/transparent"
+                android:enabled="true"
+                android:clickable="true"
                 android:id="@+id/addVacations"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

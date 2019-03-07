@@ -19,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Space;
 import android.widget.TextView;
@@ -50,6 +51,8 @@ import java.util.ArrayList;
 public class SchedulerFragment extends Fragment implements ManualScheduleDialogListener {
 
     private static final String PARAM_SCHEDULE_ID = "PARAM_SCHEDULE_ID";
+    private static final int ID_DIALOG_VACATION = 02;
+    private static final int ID_DIALOG_SCHEDULE = 01;
 
 
     private Drawable mDrawableBreakLineLeft;
@@ -72,7 +75,7 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
     TextView textViewaddEntry;
     TextView textViewaddEntryIcon;
     TextView textViewVacations;
-    TextView textViewaddVacations;
+    Button textViewaddVacations;
     Schedule schedule;
 
     ConstraintLayout constraintScheduler;
@@ -80,7 +83,7 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
 
     String mScheduleId;
 
-    final int ID_DIALOG_SCHEDULE = 01;
+
 
     String colorMinTemp = "";
     String colorMaxTemp = "";
@@ -132,6 +135,13 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
         textViewVacations = rootView.findViewById(R.id.vacationsTitle);
         textViewaddVacations = rootView.findViewById(R.id.addVacations);
 
+
+        textViewaddVacations.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showDialog(ID_DIALOG_VACATION);
+            }
+        });
         mDrawableBreakLineLeft = AppCompatResources.getDrawable(getContext(), R.drawable.ic_break_line_left_svg);
         mDrawableBreakLineRight = AppCompatResources.getDrawable(getContext(), R.drawable.ic_break_line_right_svg);
         mDrawableTimeMarker = AppCompatResources.getDrawable(getContext(), R.drawable.ic_time_marker_svg);
@@ -277,8 +287,6 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
                 }
             }
         });
-
-
     }
 
     private void hasTextViewChildren() {
@@ -292,31 +300,62 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
     }
 
     private void showDialog(int id) {
+
+
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
         switch (id) {
             case ID_DIALOG_SCHEDULE:
-                FragmentTransaction ft = getFragmentManager().beginTransaction();
-                Fragment prev = getFragmentManager().findFragmentByTag("schedule");
+                Fragment prev = getFragmentManager().findFragmentByTag("popup");
                 if (prev != null) {
                     ft.remove(prev);
                 }
                 ManualSchedulerDialogFragment newFragment = new ManualSchedulerDialogFragment(this);
-                newFragment.show(ft, "schedule");
+                newFragment.show(ft, "popup");
+                break;
+
+            case ID_DIALOG_VACATION:
+                Fragment vacationFragment = getFragmentManager().findFragmentByTag("popup");
+                if(vacationFragment != null)
+                {
+                    ft.remove(vacationFragment);
+                }
+
+                ManualCalendarDialogFragment calendarDialogFragment = new ManualCalendarDialogFragment(new ManualCalendarDialogFragment.ManualCalendarDialogListener() {
+                    @Override
+                    public boolean onClickSave(int position, DateTime startDate, DateTime endDate) {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onClickCancel(DialogFragment dialog) {
+                        return false;
+                    }
+                },0, DateTime.now(), DateTime.now());
+
+                calendarDialogFragment.show(ft, "popup");
+                break;
+
         }
     }
 
     private void showDialog(int id, int position, Schedule.Days day) {
+
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+
         switch (id) {
             case ID_DIALOG_SCHEDULE:
-                FragmentTransaction ft = getFragmentManager().beginTransaction();
-                Fragment prev = getFragmentManager().findFragmentByTag("schedule");
-                if (prev != null) {
-                    ft.remove(prev);
+
+                Fragment scheduleFragment = getFragmentManager().findFragmentByTag("popup");
+                if (scheduleFragment != null) {
+                    ft.remove(scheduleFragment);
                 }
                 ManualSchedulerDialogFragment newFragment = new ManualSchedulerDialogFragment(this, position, day);
-                newFragment.show(ft, "schedule");
+                newFragment.show(ft, "popup");
+                break;
+
+
         }
     }
-
 
     /*
         If days is null & position > -1 a deletion has occured.   This will be removed from the schedule.

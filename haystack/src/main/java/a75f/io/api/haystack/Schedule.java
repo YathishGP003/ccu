@@ -263,6 +263,8 @@ public class Schedule extends Entity {
                 scheduledInterval =
                         new Interval(startDateTime, endDateTime);
             }
+
+
             intervals.add(scheduledInterval);
         }
 
@@ -298,6 +300,22 @@ public class Schedule extends Entity {
         });
 
         return mDays;
+    }
+
+    public void populateIntersections() {
+        ArrayList<Interval> scheduledIntervals = getScheduledIntervals(getDays());
+
+        for(int i = 0; i < scheduledIntervals.size(); i++)
+        {
+            for(int ii = 0; ii < scheduledIntervals.size(); ii++)
+            {
+                if(scheduledIntervals.get(i).getEndMillis() == scheduledIntervals.get(ii).getStartMillis())
+                {
+                    this.mDays.get(i).setIntersection(true);
+                }
+            }
+        }
+
     }
 
 
@@ -430,6 +448,8 @@ public class Schedule extends Entity {
             return Objects.hash(mSthh, mStmm, mDay, mVal, mHeatingVal, mCoolingVal, mEtmm, mEthh, mSunrise, mSunset);
         }
 
+
+        private boolean mIntersection;
         private int mSthh;
         private int mStmm;
         private int mDay;
@@ -440,12 +460,6 @@ public class Schedule extends Entity {
         private int mEthh;
         private boolean mSunrise;
         private boolean mSunset;
-
-        public static boolean checkIntersection(ArrayList<Days> daysArrayList) {
-
-
-            return false;
-        }
 
 
         public int getSthh() {
@@ -556,6 +570,15 @@ public class Schedule extends Entity {
         }
 
 
+        public boolean isIntersection()
+        {
+            return mIntersection;
+        }
+
+        public void setIntersection(boolean mIntersection)
+        {
+            this.mIntersection = mIntersection;
+        }
     }
 
     public HDict getScheduleHDict() {

@@ -137,8 +137,7 @@ public class VavReheatProfile extends VavProfile
                         valveController.updateControlVariable(dischargeSp, dischargeTemp);
                         valve.currentPosition = (int) (valveController.getControlVariable() * 100 / valveController.getMaxAllowedError());
                         loopOp = heatingLoopOp;
-    
-    
+                        
                         CcuLog.d(L.TAG_CCU_ZONE,"Invalid air temp :  supplyAirTemp: "+supplyAirTemp+" dischargeTemp: "+dischargeTemp);
                         if (valve.currentPosition < 0) {
                             CcuLog.d(L.TAG_CCU_ZONE," Invalid valve opening: "+valve.currentPosition);
@@ -227,8 +226,7 @@ public class VavReheatProfile extends VavProfile
             coolingLoop.dump();
             CcuLog.d(L.TAG_CCU_ZONE,"HeatingLoop "+node +" roomTemp :"+roomTemp+" setTempHeating: "+setTempHeating);
             heatingLoop.dump();
-    
-    
+            
             CcuLog.d(L.TAG_CCU_ZONE, "STATE :"+state+" ZoneState : "+getState()+" ,loopOp: " + loopOp + " ,damper:" + damper.currentPosition+", valve:"+valve.currentPosition);
             updateTRResponse(node);
     

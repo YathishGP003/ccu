@@ -44,30 +44,12 @@
                 android:orientation="vertical">
 
                 <RadioButton
-                    android:id="@+id/dabModuleTypeRB"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:layout_weight="0.1"
-                    android:layout_width="match_parent"
-                    android:text=" Dynamic Airflow Balancing"
-                    android:textSize="@dimen/text_medium_xlarge"/>
-
-                <TextView
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="60dp"
-                    android:layout_marginRight="30dp"
-                    android:layout_weight="0.1"
-                    android:layout_width="match_parent"
-                    android:text="Controls dampers in ductwork to provide zone by zone airflow control"
-                    android:textSize="@dimen/text_small_xlarge"/>
-
-                <RadioButton
                     android:id="@+id/vavModuleTypeRB"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:layout_weight="0.1"
                     android:layout_width="match_parent"
-                    android:text=" VAV Terminal"
+                    android:text=" VAV with Reheat"
                     android:textSize="@dimen/text_medium_xlarge"/>
 
                 <TextView
@@ -76,7 +58,7 @@
                     android:layout_marginRight="30dp"
                     android:layout_weight="0.1"
                     android:layout_width="match_parent"
-                    android:text="Manages reheat coils in VAV to control zone temperature"
+                    android:text="Control a VAV box for airflow and reheat valves/electric coils"
                     android:textSize="@dimen/text_small_xlarge"/>
 
                 <RadioGroup
@@ -101,7 +83,7 @@
                         android:layout_marginTop="25dp"
                         android:layout_weight="0.1"
                         android:layout_width="wrap_content"
-                        android:text=" Vav Reheat Terminal"
+                        android:text=" Vav Reheat - No Fan"
                         android:textSize="@dimen/text_medium_xlarge"/>
 
                     <RadioButton
@@ -110,7 +92,7 @@
                         android:layout_marginTop="25dp"
                         android:layout_weight="0.1"
                         android:layout_width="wrap_content"
-                        android:text=" Vav Series Fan Terminal"
+                        android:text=" Vav Reheat - Series Fan"
                         android:textSize="@dimen/text_medium_xlarge"/>
 
                     <RadioButton
@@ -119,10 +101,29 @@
                         android:layout_marginTop="25dp"
                         android:layout_weight="0.1"
                         android:layout_width="wrap_content"
-                        android:text=" Vav Parallel Fan Terminal"
+                        android:text=" Vav Reheat - Parallel Fan"
                         android:textSize="@dimen/text_medium_xlarge"/>
 
                 </RadioGroup>
+
+                <RadioButton
+                    android:id="@+id/dabModuleTypeRB"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:layout_weight="0.1"
+                    android:layout_width="match_parent"
+                    android:text=" Dynamic Airflow Balancing"
+                    android:textSize="@dimen/text_medium_xlarge"/>
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="60dp"
+                    android:layout_marginRight="30dp"
+                    android:layout_weight="0.1"
+                    android:layout_width="match_parent"
+                    android:text="Controls dampers in ductwork to provide zone by zone airflow control"
+                    android:textSize="@dimen/text_small_xlarge"/>
+
 
                 <RadioButton
                     android:id="@+id/lcmModuleTypeRB"
@@ -140,6 +141,24 @@
                     android:layout_weight="0.1"
                     android:layout_width="match_parent"
                     android:text="Controls 2 independent zones via relays and 2 variable light units via 0-10v output."
+                    android:textSize="@dimen/text_small_xlarge"/>
+
+                <RadioButton
+                    android:id="@+id/piModuleTypeRB"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:layout_weight="0.1"
+                    android:layout_width="match_parent"
+                    android:text=" PI Loop Controller"
+                    android:textSize="@dimen/text_medium_xlarge"/>
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="60dp"
+                    android:layout_marginRight="30dp"
+                    android:layout_weight="0.1"
+                    android:layout_width="match_parent"
+                    android:text="Generic PI control for range of applications with sensors connected via analog inputs"
                     android:textSize="@dimen/text_small_xlarge"/>
 
                 <RadioButton

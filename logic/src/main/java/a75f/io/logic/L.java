@@ -308,11 +308,14 @@ public class L
         Log.d("CCU","Profiles "+L.ccu().zoneProfiles.size());
         for(ZoneProfile p : L.ccu().zoneProfiles) {
             Log.d("CCU","Profile "+p.getProfileType());
+            
+            //TODO -
             for (Short node : p.getNodeAddresses()) {
                 if (node == addr) {
                     return p;
                 }
             }
+            
         }
         Log.d("CCU","Profile Not found for "+addr);
         return null;

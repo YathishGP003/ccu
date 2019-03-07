@@ -36,6 +36,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 import butterknife.BindView;
@@ -535,6 +536,12 @@ public class FloorPlanFragment extends Fragment
 				System.out.println("Config "+config +" profile "+profile.getProfileType());
 				showDialogFragment(FragmentVAVConfiguration
 						                   .newInstance(Short.parseShort(nodeAddr),zone.getDisplayName(), config.getNodeType(), floor.getDisplayName(), profile.getProfileType()), FragmentVAVConfiguration.ID);
+				
+				break;
+			case PLC:
+				showDialogFragment(FragmentPLCConfiguration
+						                   .newInstance(Short.parseShort(nodeAddr),zone.getDisplayName(), NodeType.SMART_NODE, floor.getDisplayName()), FragmentPLCConfiguration.ID);
+			
 			
 		}
 		

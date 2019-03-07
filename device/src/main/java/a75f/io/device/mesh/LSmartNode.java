@@ -24,6 +24,8 @@ import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
 import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
 
+import static a75f.io.logic.L.TAG_CCU_DEVICE;
+
 /**
  * Created by Yinten isOn 8/17/2017.
  */
@@ -126,7 +128,7 @@ public class LSmartNode
                                 controlsMessage_t.controls.damperPosition.set(mappedVal);
                                 mappedVal = 0;
                             }
-                            Log.d("CCU"," Set "+p.getPort()+" type "+p.getType()+" logicalVal: "+logicalVal+ " mappedVal "+mappedVal);
+                            Log.d(TAG_CCU_DEVICE, " Set " + p.getPort() + " type " + p.getType() + " logicalVal: " + logicalVal + " mappedVal " + mappedVal);
                             LSmartNode.getSmartNodePort(controlsMessage_t, p.getPort()).set(mappedVal);
                             
                         }
@@ -179,6 +181,9 @@ public class LSmartNode
     }
     
     public static short mapAnalogOut(String type, short val) {
+        if (val < 0) {
+            val = 0;//TODO-
+        }
         switch (type)
         {
             case "0-10v":
@@ -190,6 +195,18 @@ public class LSmartNode
                 return (short) (20 + scaleAnalog(val, 80));
             case "10-2v":
                 return (short) (100 - scaleAnalog(val, 80));
+            default:
+                String [] arrOfStr = type.split("-");
+                if (arrOfStr.length == 2)
+                {
+                    int min = (int)Double.parseDouble(arrOfStr[0]);
+                    int max = (int)Double.parseDouble(arrOfStr[1]);
+                    if (max > min) {
+                        return (short) (min * 10 + (max - min ) * 10 * val/100);
+                    } else {
+                        return (short) (min * 10 - (min - max ) * 10 * val/100);
+                    }
+                }
         }
         return (short) 0;
     }
@@ -260,12 +277,12 @@ public class LSmartNode
     
     public static double getDesiredTemp(short node)
     {
-        ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and desired and average and sp and group == \""+node+"\"");
-        String id = ((HashMap)points.get(0)).get("id").toString();
-        if (id == null || id == "") {
-            throw new IllegalArgumentException();
+        HashMap point = CCUHsApi.getInstance().read("point and air and temp and desired and average and sp and group == \""+node+"\"");
+        if (point == null || point.size() == 0) {
+            Log.d(TAG_CCU_DEVICE, " Desired Temp point does not exist for equip , sending 0");
+            return 0;
         }
-        return CCUHsApi.getInstance().readDefaultValById(id);
+        return CCUHsApi.getInstance().readDefaultValById(point.get("id").toString());
     }
     
     /********************************END SEED MESSAGES**************************************/

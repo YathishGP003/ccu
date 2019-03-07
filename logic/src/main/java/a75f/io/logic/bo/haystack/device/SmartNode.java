@@ -91,6 +91,7 @@ public class SmartNode
                             .setDisplayName("Th1In-"+smartNodeAddress)
                             .setDeviceRef(deviceRef)
                             .setSiteRef(siteRef)
+                            .setType("0")
                             .setPort(Port.TH1_IN.toString())
                             .setRoomRef(roomRef)
                             .setFloorRef(floorRef)
@@ -102,6 +103,7 @@ public class SmartNode
                         .setDisplayName("Th2In-"+smartNodeAddress)
                         .setDeviceRef(deviceRef)
                         .setSiteRef(siteRef)
+                        .setType("0")
                         .setPort(Port.TH2_IN.toString())
                         .setRoomRef(roomRef)
                         .setFloorRef(floorRef)
@@ -229,7 +231,7 @@ public class SmartNode
         CCUHsApi.getInstance().addPoint(desiredTemp);
     }
     
-    public static void updatePhysicalPoint(int addr, String port, String type) {
+    public static void updatePhysicalPointType(int addr, String port, String type) {
         Log.d("CCU"," Update Physical point "+port+" "+type);
     
         HashMap device = CCUHsApi.getInstance().read("device and addr == \""+addr+"\"");
@@ -245,6 +247,22 @@ public class SmartNode
             p.setType(type);
             CCUHsApi.getInstance().updatePoint(p,p.getId());
         }
+    }
+    
+    public static void updatePhysicalPointRef(int addr, String port, String pointRef) {
+        Log.d("CCU"," Update Physical point "+port);
+        
+        HashMap device = CCUHsApi.getInstance().read("device and addr == \""+addr+"\"");
+        if (device == null)
+        {
+            return ;
+        }
+        
+        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
+        RawPoint p = new RawPoint.Builder().setHashMap(point).build();
+        p.setPointRef(pointRef);
+        CCUHsApi.getInstance().updatePoint(p,p.getId());
+       
     }
     
     public static void setPointEnabled(int addr, String port, boolean enabled) {

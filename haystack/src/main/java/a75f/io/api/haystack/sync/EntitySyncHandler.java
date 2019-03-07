@@ -16,7 +16,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.HSUtil;
 import a75f.io.logger.CcuLog;
 
 /**
@@ -144,7 +143,10 @@ public class EntitySyncHandler
 
                 String guid = CCUHsApi.getInstance().getGUID(entity.get(hRef) instanceof HRef ? ((HRef) entity.get(hRef)).toCode()
                         : entity.getStr(hRef));
-                builder.add(hRef, HRef.copy(guid));
+                if (guid != null)
+                {
+                    builder.add(hRef, HRef.copy(guid));
+                }
             }
         }
     }

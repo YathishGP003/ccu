@@ -702,11 +702,11 @@ public class VAVLogicalMap
                 case ANALOG_OUT_ONE:
                 case ANALOG_OUT_TWO:
                     CcuLog.d(L.TAG_CCU_ZONE," Update analog" + op.getPort() + " type " + op.getAnalogActuatorType());
-                    SmartNode.updatePhysicalPoint(nodeAddr, op.getPort().toString(), op.getAnalogActuatorType());
+                    SmartNode.updatePhysicalPointType(nodeAddr, op.getPort().toString(), op.getAnalogActuatorType());
                     break;
                 case RELAY_ONE:
                 case RELAY_TWO:
-                    SmartNode.updatePhysicalPoint(nodeAddr, op.getPort().toString(), op.getRelayActuatorType());
+                    SmartNode.updatePhysicalPointType(nodeAddr, op.getPort().toString(), op.getRelayActuatorType());
                     break;
             }
         }

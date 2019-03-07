@@ -1,5 +1,7 @@
 package a75f.io.api.haystack;
 
+import android.util.Log;
+
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HList;
@@ -42,6 +44,7 @@ public class HSUtil
         ArrayList<Equip> equipList = new ArrayList<>();
         for (HashMap m : equips)
         {
+            Log.d("CCU_UI","Equip in Zone "+m);
             equipList.add(new Equip.Builder().setHashMap(m).build());
         }
         return equipList;

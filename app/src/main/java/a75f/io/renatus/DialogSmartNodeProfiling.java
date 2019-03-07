@@ -51,6 +51,8 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     RadioButton lcmModuleTypeRB;
     @BindView(R.id.sseModuleTypeRB)
     RadioButton sseModuleTypeRB;
+    @BindView(R.id.piModuleTypeRB)
+    RadioButton piLoopModuleTypeRB;
     @BindView(R.id.rmModuleTypeRB)
     RadioButton rmModuleTypeRB;
     @BindView(R.id.emrModuleTypeRB)
@@ -138,6 +140,8 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
                     
             }
             showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, profile, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
+        } else if (piLoopModuleTypeRB.isChecked()) {
+            showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.PLC, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
         }
     }
     

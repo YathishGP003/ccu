@@ -460,7 +460,7 @@ public class TestHayStack
         hayStack.syncEntityTree();
         System.out.print(hayStack.tagsDb.idMap);
         System.out.print(hayStack.tagsDb.updateIdMap);
-        SmartNode.updatePhysicalPoint(nodeAddr, Port.ANALOG_OUT_ONE.toString(), "2-10v");
+        SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_OUT_ONE.toString(), "2-10v");
         System.out.print(hayStack.tagsDb.updateIdMap);
         hayStack.entitySyncHandler.doSyncUpdateEntities();
         System.out.print(hayStack.tagsDb.updateIdMap);

@@ -26,6 +26,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Building Schedule"
+                android:textSize="28sp"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
                 android:textStyle="bold"
                 app:fontFamily="@font/lato_bold"
@@ -40,6 +41,7 @@
                 android:layout_marginRight="5dp"
                 android:fontFamily="@font/lato_bold"
                 android:gravity="center_horizontal|top"
+                android:textSize="28sp"
                 android:padding="2.5dp"
                 android:text="Add entry"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
@@ -654,6 +656,7 @@
                 android:id="@+id/vacationsTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textSize="28sp"
                 android:layout_marginTop="50dp"
                 android:fontFamily="@font/lato_bold"
                 android:text="Vacations"
@@ -669,6 +672,7 @@
                 android:layout_marginTop="50dp"
                 android:background="@color/transparent"
                 android:clickable="true"
+                android:textSize="28sp"
                 android:enabled="true"
                 android:fontFamily="@font/lato_bold"
                 android:text="Add Vacations"
@@ -691,8 +695,8 @@
                     android:orientation="horizontal"
                     android:paddingTop="10dp"
                     android:paddingBottom="10dp"
-                    android:layout_marginLeft="20dp"
-                    android:layout_marginRight="20dp"
+                    android:layout_marginLeft="40dp"
+                    android:layout_marginRight="24dp"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintTop_toTopOf="parent">
 
@@ -703,7 +707,7 @@
                         android:layout_weight="1"
                         android:textSize="28sp"
                         android:text="Vacation Title"
-                        android:textStyle="bold" />
+                         />
 
 
                     <TextView
@@ -713,7 +717,7 @@
                         android:layout_weight="1"
                         android:text="Start Date"
                         android:textSize="28sp"
-                        android:textStyle="bold" />
+                         />
 
                     <TextView
                         android:id="@+id/vacationEndDateHeader"
@@ -722,26 +726,19 @@
                         android:layout_weight="1"
                         android:text="End Date"
                         android:textSize="28sp"
-                        android:textStyle="bold" />
+                         />
 
-                    <Button
-                        android:id="@+id/vacationButtonHeader"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:visibility="invisible"
-                        android:paddingLeft="16dp"
-                        android:paddingRight="16dp"
-                        android:text="vacation"
-                        android:textSize="10sp"
-                        android:textStyle="bold" />
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content" android:layout_weight="1"></LinearLayout>
 
                 </LinearLayout>
 
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/vacationRecycler"
                     android:layout_width="match_parent"
-                    android:layout_marginLeft="20dp"
-                    android:layout_marginRight="20dp"
+                    android:layout_marginLeft="40dp"
+                    android:layout_marginRight="24dp"
                     android:layout_height="200dp"
                     app:layout_behavior="@string/appbar_scrolling_view_behavior"
                     app:layout_constraintLeft_toLeftOf="parent"

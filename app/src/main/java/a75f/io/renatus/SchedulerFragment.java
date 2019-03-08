@@ -11,6 +11,8 @@ import android.support.v4.widget.TextViewCompat;
 import android.support.v7.content.res.AppCompatResources;
 import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.AppCompatTextView;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.util.Log;
 import android.util.TypedValue;
@@ -27,14 +29,16 @@ import android.widget.Toast;
 
 import org.joda.time.DateTime;
 
+import java.util.ArrayList;
+
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.DAYS;
 import a75f.io.api.haystack.MockTime;
 import a75f.io.api.haystack.Schedule;
+import a75f.io.logic.DefaultSchedules;
 import a75f.io.renatus.ManualSchedulerDialogFragment.ManualScheduleDialogListener;
+import a75f.io.renatus.schedules.VacationAdapter;
 import a75f.io.renatus.util.FontManager;
-
-import java.util.ArrayList;
 
 
 /***
@@ -77,20 +81,13 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
     TextView textViewVacations;
     Button textViewaddVacations;
     Schedule schedule;
-
-
-
-
-
     ConstraintLayout constraintScheduler;
     ArrayList<View> viewTimeLines;
-
     String mScheduleId;
-
-
-
     String colorMinTemp = "";
     String colorMaxTemp = "";
+    RecyclerView mVacationRecycler;
+
     private OnExitListener mOnExitListener;
 
     @Override
@@ -127,7 +124,7 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
 
         //Scheduler Layout
         constraintScheduler = rootView.findViewById(R.id.constraintLt_Scheduler);
-
+        mVacationRecycler = rootView.findViewById(R.id.vacationRecycler);
         textViewScheduletitle = rootView.findViewById(R.id.scheduleTitle);
         textViewaddEntry = rootView.findViewById(R.id.addEntry);
         textViewaddEntryIcon = rootView.findViewById(R.id.addEntryIcon);
@@ -238,7 +235,7 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
 
 
         //Measure the amount of pixels between an hour after the constraintScheduler layout draws the bars for the first time.
-        //After they are measured load the schedule.
+        //After they are measured d the schedule.
         ViewTreeObserver vto = constraintScheduler.getViewTreeObserver();
         vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -256,6 +253,7 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
                 if (mPixelsBetweenAnHour == 0) throw new RuntimeException();
 
                 loadSchedule();
+                loadVacations();
                 drawCurrentTime();
 
             }
@@ -264,13 +262,16 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
         return rootView;
     }
 
-    private void loadSchedule() {
+    private void loadSchedule()
+    {
+
+
 
         if (getArguments() != null && getArguments().containsKey(PARAM_SCHEDULE_ID)) {
             mScheduleId = getArguments().getString(PARAM_SCHEDULE_ID);
             schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
         } else {
-            schedule = CCUHsApi.getInstance().getSystemSchedule(false);
+            schedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
         }
 
 
@@ -326,7 +327,11 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
 
                 ManualCalendarDialogFragment calendarDialogFragment = new ManualCalendarDialogFragment(new ManualCalendarDialogFragment.ManualCalendarDialogListener() {
                     @Override
-                    public boolean onClickSave(int position, String vacationName, DateTime startDate, DateTime endDate) {
+                    public boolean onClickSave(int position, String vacationName, DateTime startDate, DateTime endDate)
+                    {
+                        DefaultSchedules.addVacation(vacationName, startDate, endDate);
+                        loadVacations();
+
                         return false;
                     }
 
@@ -339,6 +344,15 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
                 calendarDialogFragment.show(ft, "popup");
                 break;
 
+        }
+    }
+
+    private void loadVacations() {
+        ArrayList<Schedule> vacations = CCUHsApi.getInstance().getSystemSchedule(true);
+        if(vacations != null) {
+            VacationAdapter adapter = new VacationAdapter(vacations);
+            mVacationRecycler.setAdapter(adapter);
+            mVacationRecycler.setLayoutManager(new LinearLayoutManager(this.getContext()));
         }
     }
 
@@ -356,8 +370,6 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
                 ManualSchedulerDialogFragment newFragment = new ManualSchedulerDialogFragment(this, position, day);
                 newFragment.show(ft, "popup");
                 break;
-
-
         }
     }
 

@@ -15,13 +15,12 @@ public class Zone extends Entity
     private ArrayList<String> markers;
     private String floorRef;
     private String siteRef;
-
     private String scheduleRef;
     private String vacationRef;
 
     public boolean isSystemSchedule()
     {
-        Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false);
+        Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
         if(systemSchedule.getId().equals(scheduleRef))
             return true;
 

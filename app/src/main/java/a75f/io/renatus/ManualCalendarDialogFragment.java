@@ -2,21 +2,13 @@ package a75f.io.renatus;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
-import android.content.res.Resources;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.NumberPicker;
 import android.widget.Toast;
 
 import com.prolificinteractive.materialcalendarview.CalendarDay;
@@ -24,14 +16,9 @@ import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 
 import org.joda.time.DateTime;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
 
-import a75f.io.api.haystack.DAYS;
 import a75f.io.api.haystack.Schedule;
-import a75f.io.renatus.util.TimeUtils;
 
 
 @SuppressLint("ValidFragment")
@@ -83,8 +70,7 @@ public class ManualCalendarDialogFragment extends DialogFragment implements View
         mButtonSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                mCalendarView.getSelectedDates();
+                processCalendar();
                 dismiss();
             }
         });
@@ -126,28 +112,26 @@ public class ManualCalendarDialogFragment extends DialogFragment implements View
 
     private boolean processCalendar() {
 
-
-
         boolean validated = validate();
 
         if(!validated)
             return false;
-
-
 
         if(mCalendarView.getSelectedDates().size() == 1)
         {
             List<CalendarDay> selectedDates = mCalendarView.getSelectedDates();
 
             mListener.onClickSave(NO_REPLACE, mVacationName.getText().toString(),
-                    new DateTime(selectedDates.get(0).getDate().toEpochDay()), new DateTime(selectedDates.get(0).getDate().toEpochDay()));
+                    new DateTime().withDate(selectedDates.get(0).getYear(), selectedDates.get(0).getMonth(), selectedDates.get(0).getDay()).withTimeAtStartOfDay(), new DateTime().withDate(selectedDates.get(0).getYear(),
+                            selectedDates.get(0).getMonth(), selectedDates.get(0).getDay()).withTime(23,59,59,0));
         }
         else if(mCalendarView.getSelectedDates().size() > 1)
         {
             List<CalendarDay> selectedDates = mCalendarView.getSelectedDates();
 
             mListener.onClickSave(NO_REPLACE, mVacationName.getText().toString(),
-                    new DateTime(selectedDates.get(0).getDate().toEpochDay()), new DateTime(selectedDates.get(selectedDates.size() - 1).getDate().toEpochDay()));
+                    new DateTime().withDate(selectedDates.get(0).getYear(), selectedDates.get(0).getMonth(), selectedDates.get(0).getDay()).withTimeAtStartOfDay(),
+                    new DateTime().withDate(selectedDates.get(1).getYear(), selectedDates.get(1).getMonth(), selectedDates.get(1).getDay()).withTime(23,59,59,0));
         }
 
 

@@ -34,7 +34,6 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
-import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZoneProfile;
@@ -441,7 +440,7 @@ public class FloorPlanFragment extends Fragment
 			Floor floor = floorList.get(mFloorListAdapter.getSelectedPostion());
 			HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
 
-			Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false);
+			Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
 
 			Zone hsZone = new Zone.Builder()
                                    .setDisplayName(addRoomEdit.getText().toString())

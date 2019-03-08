@@ -1,12 +1,12 @@
 package a75f.io.logic;
 
+import org.joda.time.DateTime;
 import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HList;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
-import org.projecthaystack.HTimeZone;
 
 import java.util.UUID;
 
@@ -97,70 +97,26 @@ public class DefaultSchedules {
     }
 
 
-    public static void generateDefaultVacation() {
+    public static void addVacation(String name, DateTime startDate, DateTime endDate) {
 
         HRef siteId = CCUHsApi.getInstance().getSiteId();
 
-        HDict[] days = new HDict[5];
-
-        days[0] = getDefaultForDay(DAYS.MONDAY.ordinal());
-        days[1] = getDefaultForDay(DAYS.TUESDAY.ordinal());
-        days[2] = getDefaultForDay(DAYS.WEDNESDAY.ordinal());
-        days[3] = getDefaultForDay(DAYS.THURSDAY.ordinal());
-        days[4] = getDefaultForDay(DAYS.FRIDAY.ordinal());
-
-        HList hList = HList.make(days);
-
         HRef localId = HRef.make(UUID.randomUUID().toString());
         HDict defaultSchedule = new HDictBuilder()
                 .add("id", localId)
-                .add("unit", "\\u00B0F")
-                .add("kind", "Number")
                 .add("temp")
                 .add("schedule")
+                .add("system")
                 .add("vacation")
                 .add("cooling")
                 .add("heating")
-                .add("stdt", HDateTime.make(2019, 12, 24, 0, 0, HTimeZone.UTC, 0))
-                .add("etdt", HDateTime.make(2019, 12, 30, 0, 0, HTimeZone.UTC, 0))
-                .add("dis", "Default Site Schedule")
-                .add("days", hList)
-                .add("siteRef", siteId)
-                .toDict();
-
-
-        CCUHsApi.getInstance().addSchedule(localId.toVal(), defaultSchedule);
-
-    }
-
-    public static void generateDefaultSchedule(HRef siteId) {
-
-        HDict[] days = new HDict[5];
-
-        days[0] = getDefaultForDay(DAYS.MONDAY.ordinal());
-        days[1] = getDefaultForDay(DAYS.TUESDAY.ordinal());
-        days[2] = getDefaultForDay(DAYS.WEDNESDAY.ordinal());
-        days[3] = getDefaultForDay(DAYS.THURSDAY.ordinal());
-        days[4] = getDefaultForDay(DAYS.FRIDAY.ordinal());
-
-
-        HList hList = HList.make(days);
-    
-        HRef localId = HRef.make(UUID.randomUUID().toString());
-        HDict defaultSchedule = new HDictBuilder()
-                .add("id", localId)
-                .add("unit", "\\u00B0F")
-                .add("kind", "Number")
-                .add("system")
-                .add("temp")
-                .add("schedule")
-                .add("cooling")
-                .add("heating")
-                .add("dis", "Default Site Schedule")
-                .add("days", hList)
+                .add("stdt", HDateTime.make(startDate.getMillis()))
+                .add("etdt", HDateTime.make(endDate.getMillis()))
+                .add("dis", name)
                 .add("siteRef", siteId)
                 .toDict();
 
         CCUHsApi.getInstance().addSchedule(localId.toVal(), defaultSchedule);
+
     }
 }

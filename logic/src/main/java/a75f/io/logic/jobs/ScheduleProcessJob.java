@@ -9,7 +9,6 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Schedule;
-import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BaseJob;
 import a75f.io.logic.L;
@@ -95,7 +94,7 @@ public class ScheduleProcessJob extends BaseJob {
 
     @Override
     public void doJob() {
-        Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false);
+        Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
         /* The systemSchedule isn't initiated yet, so schedules shouldn't be ran*/
 
         if(systemSchedule == null)

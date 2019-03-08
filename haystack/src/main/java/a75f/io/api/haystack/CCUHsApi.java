@@ -3,7 +3,6 @@ package a75f.io.api.haystack;
 import android.content.Context;
 import android.util.Log;
 
-import org.projecthaystack.HDate;
 import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
@@ -21,7 +20,6 @@ import org.projecthaystack.io.HZincWriter;
 import org.projecthaystack.server.HStdOps;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -701,21 +699,23 @@ public class CCUHsApi {
         return schedule;
     }
 
-    public Schedule getSystemSchedule(boolean vacation)
+    public ArrayList<Schedule> getSystemSchedule(boolean vacation)
     {
-
+        ArrayList<Schedule> schedules = new ArrayList<>();
         String filter = null;
         if(!vacation)
             filter = "schedule and system and not vacation";
         else
             filter = "schedule and system and vacation";
-        Schedule schedule = null;
-        HDict scheduleHDict = tagsDb.read(filter, false);
-        if(scheduleHDict != null) {
-            schedule = new Schedule.Builder().setHDict(scheduleHDict).build();
+
+        HGrid scheduleHGrid = tagsDb.readAll(filter);
+
+        for(int i = 0; i < scheduleHGrid.numRows(); i++)
+        {
+            schedules.add(new Schedule.Builder().setHDict(scheduleHGrid.row(i)).build());
         }
 
-        return schedule;
+        return schedules;
     }
 
     public void addSchedule(String localId, HDict defaultSchedule) {

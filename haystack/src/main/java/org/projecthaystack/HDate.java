@@ -10,8 +10,6 @@ package org.projecthaystack;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-import org.projecthaystack.io.HZincReader;
-
 /**
  * HDate models a date (day in year) tag value.
  *
@@ -27,6 +25,8 @@ public class HDate extends HVal
     if (day < 1 || day > 31) throw new IllegalArgumentException("Invalid day");
     return new HDate(year, month, day);
   }
+
+
 
   /** Construct from Java calendar instance */
   public static HDate make(Calendar c)

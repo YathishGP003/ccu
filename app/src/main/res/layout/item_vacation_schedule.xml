@@ -41,9 +41,10 @@
 
         <ImageButton
             android:id="@+id/vacationEditButton"
+            android:padding="8dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
+            android:background="?android:attr/selectableItemBackground"
             android:layout_marginRight="24dp"
             android:src="@android:drawable/ic_menu_edit"
             android:text="vacation"
@@ -51,9 +52,10 @@
 
         <ImageButton
             android:id="@+id/vacationDeleteButton"
+            android:padding="8dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
+            android:background="?android:attr/selectableItemBackground"
             android:src="@android:drawable/ic_menu_delete"
             android:text="vacation"
             android:textSize="10sp" />

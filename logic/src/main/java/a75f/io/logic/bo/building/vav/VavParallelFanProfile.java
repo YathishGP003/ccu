@@ -187,6 +187,8 @@ public class VavParallelFanProfile extends VavProfile
                 vavUnit.fanStart = false;
             }
     
+            valve.currentPosition = Math.max(valve.currentPosition, 0);
+            valve.currentPosition = Math.min(valve.currentPosition, 100);
     
             CcuLog.d(L.TAG_CCU_ZONE,"CoolingLoop "+node +"roomTemp :"+roomTemp+" setTempHeating: "+setTempCooling);
             coolingLoop.dump();

@@ -214,6 +214,9 @@ public class VavSeriesFanProfile extends VavProfile
                 fanReady = false;
             }
     
+            valve.currentPosition = Math.max(valve.currentPosition, 0);
+            valve.currentPosition = Math.min(valve.currentPosition, 100);
+            
             CcuLog.d(L.TAG_CCU_ZONE,"CoolingLoop "+node +"roomTemp :"+roomTemp+" setTempCooling: "+setTempCooling);
             coolingLoop.dump();
             CcuLog.d(L.TAG_CCU_ZONE,"HeatingLoop "+node +"roomTemp :"+roomTemp+" setTempHeating: "+setTempHeating);

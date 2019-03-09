@@ -1,4 +1,4 @@
-package a75f.io.renatus;
+package a75f.io.renatus.schedules;
 
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Space;
 import android.widget.TextView;
@@ -36,8 +37,8 @@ import a75f.io.api.haystack.DAYS;
 import a75f.io.api.haystack.MockTime;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.logic.DefaultSchedules;
-import a75f.io.renatus.ManualSchedulerDialogFragment.ManualScheduleDialogListener;
-import a75f.io.renatus.schedules.VacationAdapter;
+import a75f.io.renatus.R;
+import a75f.io.renatus.schedules.ManualSchedulerDialogFragment.ManualScheduleDialogListener;
 import a75f.io.renatus.util.FontManager;
 
 
@@ -58,12 +59,9 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
     private static final int ID_DIALOG_VACATION = 02;
     private static final int ID_DIALOG_SCHEDULE = 01;
 
-
     private Drawable mDrawableBreakLineLeft;
     private Drawable mDrawableBreakLineRight;
     private Drawable mDrawableTimeMarker;
-
-
     private float mPixelsBetweenAnHour;
     private float mPixelsBetweenADay;
     TextView textViewMonday;
@@ -87,8 +85,9 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
     String colorMinTemp = "";
     String colorMaxTemp = "";
     RecyclerView mVacationRecycler;
-
     private OnExitListener mOnExitListener;
+    private VacationAdapter mVacationAdapter;
+
 
     @Override
     public void onStop() {
@@ -140,7 +139,7 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
         textViewaddVacations.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showDialog(ID_DIALOG_VACATION);
+                showVacationDialog();
             }
         });
         mDrawableBreakLineLeft = AppCompatResources.getDrawable(getContext(), R.drawable.ic_break_line_left_svg);
@@ -220,18 +219,8 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
         colorMaxTemp = "#" + colorMaxTemp.substring(3);
         //colorMaxTemp = "#" + Integer.toHexString(ContextCompat.getColor(getActivity(), R.color.max_temp));
 
-        textViewaddEntry.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showDialog(ID_DIALOG_SCHEDULE);
-            }
-        });
-        textViewaddEntryIcon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showDialog(ID_DIALOG_SCHEDULE);
-            }
-        });
+        textViewaddEntry.setOnClickListener(view -> showDialog(ID_DIALOG_SCHEDULE));
+        textViewaddEntryIcon.setOnClickListener(view -> showDialog(ID_DIALOG_SCHEDULE));
 
 
         //Measure the amount of pixels between an hour after the constraintScheduler layout draws the bars for the first time.
@@ -264,9 +253,6 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
 
     private void loadSchedule()
     {
-
-
-
         if (getArguments() != null && getArguments().containsKey(PARAM_SCHEDULE_ID)) {
             mScheduleId = getArguments().getString(PARAM_SCHEDULE_ID);
             schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
@@ -305,8 +291,6 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
     }
 
     private void showDialog(int id) {
-
-
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         switch (id) {
             case ID_DIALOG_SCHEDULE:
@@ -319,39 +303,68 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
                 break;
 
             case ID_DIALOG_VACATION:
-                Fragment vacationFragment = getFragmentManager().findFragmentByTag("popup");
-                if(vacationFragment != null)
-                {
-                    ft.remove(vacationFragment);
-                }
 
-                ManualCalendarDialogFragment calendarDialogFragment = new ManualCalendarDialogFragment(new ManualCalendarDialogFragment.ManualCalendarDialogListener() {
-                    @Override
-                    public boolean onClickSave(int position, String vacationName, DateTime startDate, DateTime endDate)
-                    {
-                        DefaultSchedules.addVacation(vacationName, startDate, endDate);
-                        loadVacations();
-
-                        return false;
-                    }
-
-                    @Override
-                    public boolean onClickCancel(DialogFragment dialog) {
-                        return false;
-                    }
-                });
-
-                calendarDialogFragment.show(ft, "popup");
                 break;
 
         }
     }
 
+    private void showVacationDialog()
+    {
+        showVacationDialog(null);
+    }
+
+    private void showVacationDialog(String vacationId)
+    {
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        Schedule vacationSchedule = CCUHsApi.getInstance().getScheduleById(vacationId);
+
+        Fragment vacationFragment = getFragmentManager().findFragmentByTag("popup");
+        if(vacationFragment != null)
+        {
+            ft.remove(vacationFragment);
+        }
+
+        ManualCalendarDialogFragment calendarDialogFragment = new ManualCalendarDialogFragment(vacationSchedule != null ? vacationSchedule.getId() : null,
+                vacationSchedule != null ? vacationSchedule.getDis() : null,
+                vacationSchedule != null ? vacationSchedule.getStartDate() : null, vacationSchedule != null ? vacationSchedule.getEndDate() : null,
+                new ManualCalendarDialogFragment.ManualCalendarDialogListener() {
+            @Override
+            public boolean onClickSave(String vacationId, String vacationName, DateTime startDate, DateTime endDate)
+            {
+
+                DefaultSchedules.upsertVacation(vacationId, vacationName, startDate, endDate);
+                loadVacations();
+                return false;
+            }
+
+            @Override
+            public boolean onClickCancel(DialogFragment dialog) {
+                return false;
+            }
+        });
+
+        calendarDialogFragment.show(ft, "popup");
+
+    }
+
+    ImageButton.OnClickListener mEditOnClickListener = v -> {
+        String id = v.getTag().toString();
+        showVacationDialog(id);
+    };
+
+    ImageButton.OnClickListener mDeleteOnClickListener = v ->  {
+            String id = v.getTag().toString();
+            CCUHsApi.getInstance().deleteEntity(id);
+            loadVacations();
+    };
+
+
     private void loadVacations() {
         ArrayList<Schedule> vacations = CCUHsApi.getInstance().getSystemSchedule(true);
         if(vacations != null) {
-            VacationAdapter adapter = new VacationAdapter(vacations);
-            mVacationRecycler.setAdapter(adapter);
+            mVacationAdapter = new VacationAdapter(vacations, mEditOnClickListener, mDeleteOnClickListener);
+            mVacationRecycler.setAdapter(mVacationAdapter);
             mVacationRecycler.setLayoutManager(new LinearLayoutManager(this.getContext()));
         }
     }
@@ -373,13 +386,6 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
         }
     }
 
-    /*
-        If days is null & position > -1 a deletion has occured.   This will be removed from the schedule.
-
-        If position is -1, this means that is a creation event.  There is no data needing to be updated.
-
-        If position > -1 and day is not null.   This means an edit has occured.
-     */
     public boolean onClickSave(int position, double coolingTemp, double heatingTemp, int startTimeHour, int endTimeHour, int startTimeMinute, int endTimeMinute, ArrayList<DAYS> days) {
         Schedule.Days remove = null;
         if (position != ManualSchedulerDialogFragment.NO_REPLACE) {

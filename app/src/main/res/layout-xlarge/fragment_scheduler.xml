@@ -10,7 +10,7 @@
     android:paddingRight="72dp"
     tools:ignore="MissingDefaultResource">
 
-    <ScrollView
+    <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scrollbars="none"
@@ -26,6 +26,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Building Schedule"
+                android:textSize="28sp"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
                 android:textStyle="bold"
                 app:fontFamily="@font/lato_bold"
@@ -40,6 +41,7 @@
                 android:layout_marginRight="5dp"
                 android:fontFamily="@font/lato_bold"
                 android:gravity="center_horizontal|top"
+                android:textSize="28sp"
                 android:padding="2.5dp"
                 android:text="Add entry"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
@@ -654,6 +656,7 @@
                 android:id="@+id/vacationsTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textSize="28sp"
                 android:layout_marginTop="50dp"
                 android:fontFamily="@font/lato_bold"
                 android:text="Vacations"
@@ -663,13 +666,14 @@
                 app:layout_constraintTop_toBottomOf="@+id/constraintLt_Scheduler" />
 
             <Button
-                android:background="@color/transparent"
-                android:enabled="true"
-                android:clickable="true"
                 android:id="@+id/addVacations"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="50dp"
+                android:background="@color/transparent"
+                android:clickable="true"
+                android:textSize="28sp"
+                android:enabled="true"
                 android:fontFamily="@font/lato_bold"
                 android:text="Add Vacations"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
@@ -683,7 +687,65 @@
                 android:layout_marginTop="30dp"
                 app:layout_constraintTop_toBottomOf="@+id/vacationsTitle">
 
+
+                <LinearLayout
+                    android:id="@+id/header_wrapper"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp"
+                    android:layout_marginLeft="40dp"
+                    android:layout_marginRight="24dp"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <TextView
+                        android:id="@+id/vacationTitleHeader"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textSize="28sp"
+                        android:text="Vacation Title"
+                         />
+
+
+                    <TextView
+                        android:id="@+id/vacationStartDateHeader"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Start Date"
+                        android:textSize="28sp"
+                         />
+
+                    <TextView
+                        android:id="@+id/vacationEndDateHeader"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="End Date"
+                        android:textSize="28sp"
+                         />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content" android:layout_weight="1"></LinearLayout>
+
+                </LinearLayout>
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/vacationRecycler"
+                    android:layout_width="match_parent"
+                    android:layout_marginLeft="40dp"
+                    android:layout_marginRight="24dp"
+                    android:layout_height="200dp"
+                    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/header_wrapper" />
+
+
             </android.support.constraint.ConstraintLayout>
         </android.support.constraint.ConstraintLayout>
-    </ScrollView>
+    </android.support.v4.widget.NestedScrollView>
 </android.support.constraint.ConstraintLayout>

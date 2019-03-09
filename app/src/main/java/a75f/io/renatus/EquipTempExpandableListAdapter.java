@@ -5,7 +5,6 @@ import android.content.Context;
 import android.graphics.Typeface;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,7 +22,8 @@ import java.util.List;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.logic.jobs.ScheduleProcessJob;
-import a75f.io.renatus.SchedulerFragment.OnExitListener;
+import a75f.io.renatus.schedules.SchedulerFragment;
+import a75f.io.renatus.schedules.SchedulerFragment.OnExitListener;
 
 import static a75f.io.renatus.ZoneFragmentTemp.getPointVal;
 

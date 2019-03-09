@@ -4,6 +4,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
+import a75f.io.renatus.schedules.SchedulerFragment;
+
 /**
  * Created by samjithsadasivan isOn 8/7/17.
  */

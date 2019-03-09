@@ -1,8 +1,8 @@
 package a75f.io.api.haystack;
 
 import org.joda.time.DateTime;
-import org.joda.time.Days;
 import org.joda.time.Interval;
+import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HList;
@@ -89,7 +89,7 @@ public class Schedule extends Entity {
             }
         }
 
-        return CCUHsApi.getInstance().getSystemSchedule(vacation);
+        return CCUHsApi.getInstance().getSystemSchedule(vacation).get(0);
     }
 
 
@@ -99,11 +99,7 @@ public class Schedule extends Entity {
         Zone build = new Zone.Builder().setHashMap(zoneHashMap).build();
         boolean currentlyDisabled = build.getMarkers().contains("disabled");
 
-        //if(currentlyDisabled)
-          //  return;
-        //else
         return null;
-
     }
 
 
@@ -194,6 +190,11 @@ public class Schedule extends Entity {
     private String mKind;
     private String mUnit;
     private ArrayList<Days> mDays = new ArrayList<Days>();
+
+    private DateTime mStartDate;
+    private DateTime mEndDate;
+
+
 
     public String getmSiteId() {
         return mSiteId;
@@ -318,6 +319,24 @@ public class Schedule extends Entity {
 
     }
 
+    public String getEndDateString()
+    {
+        return mEndDate != null ? mEndDate.toString("y-M-d") : "No end date";
+    }
+
+    public String getStartDateString()
+    {
+        return mStartDate != null ? mStartDate.toString("y-M-d") : "No start date";
+    }
+
+    public DateTime getStartDate() {
+        return mStartDate;
+    }
+
+    public DateTime getEndDate() {
+        return mEndDate;
+    }
+
 
     public static class Builder {
         private String mId;
@@ -330,6 +349,10 @@ public class Schedule extends Entity {
         private ArrayList<Days> mDays = new ArrayList<Days>();
         private String mTZ;
         private String mSiteId;
+        private DateTime mStartDate;
+        private DateTime mEndDate;
+
+
 
         public Schedule.Builder setId(String id) {
             this.mId = id;
@@ -388,6 +411,8 @@ public class Schedule extends Entity {
             s.mUnit = this.mUnit;
             s.mDays = this.mDays;
             s.mTZ = this.mTZ;
+            s.mStartDate = this.mStartDate;
+            s.mEndDate = this.mEndDate;
             return s;
         }
 
@@ -414,7 +439,14 @@ public class Schedule extends Entity {
                     this.mDays = Days.parse((HList) pair.getValue());
                 } else if (pair.getKey().equals("siteRef")) {
                     this.mSiteId = schedule.getRef("siteRef").val;
-                } else {
+                } else if (pair.getKey().equals("stdt"))
+                {
+                    this.mStartDate = new DateTime(((HDateTime)schedule.get("stdt")).millis());
+                } else if(pair.getKey().equals("etdt"))
+                {
+                    this.mEndDate = new DateTime(((HDateTime)schedule.get("etdt")).millis());
+                }
+                else {
                     this.mMarkers.add(pair.getKey().toString());
                 }
             }

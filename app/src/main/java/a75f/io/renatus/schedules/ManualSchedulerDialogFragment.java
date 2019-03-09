@@ -1,7 +1,6 @@
-package a75f.io.renatus;
+package a75f.io.renatus.schedules;
 
 import android.annotation.SuppressLint;
-
 import android.app.Dialog;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -17,31 +16,29 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageButton;
 import android.widget.NumberPicker;
-import android.widget.Toast;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 import a75f.io.api.haystack.DAYS;
 import a75f.io.api.haystack.Schedule;
+import a75f.io.renatus.R;
 import a75f.io.renatus.util.TimeUtils;
 
 
 @SuppressLint("ValidFragment")
 public class ManualSchedulerDialogFragment extends DialogFragment {
 
-    private static final String SCHEDULE_KEY = "SCHEDULE_KEY";
     private Schedule.Days mDay;
     public static int NO_REPLACE = -1;
     private int mPosition;
 
     public interface ManualScheduleDialogListener {
-        public boolean onClickSave(int position, double minTemp, double maxTemp, int startTimeHour, int endTimeHour, int startTimeMinute, int endTimeMinute,
+        boolean onClickSave(int position, double minTemp, double maxTemp, int startTimeHour, int endTimeHour, int startTimeMinute, int endTimeMinute,
                                    ArrayList<DAYS> days);
 
-        public boolean onClickCancel(DialogFragment dialog);
+        boolean onClickCancel(DialogFragment dialog);
     }
 
     private ManualScheduleDialogListener mListener;
@@ -55,7 +52,6 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
         this.mDay = day;
         this.mListener = mListener;
     }
-
 
     NumberPicker npStartTime;
     NumberPicker npEndTime;
@@ -85,7 +81,7 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
 
-        LayoutInflater inflater = (LayoutInflater) LayoutInflater.from(getActivity());
+        LayoutInflater inflater = LayoutInflater.from(getActivity());
         View view = inflater.inflate(R.layout.dialog_manualschedule, null);
 
         ImageButton deleteButton = view.findViewById(R.id.buttonDelete);

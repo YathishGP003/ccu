@@ -70,6 +70,7 @@ public class TunerUtil
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        hayStack.writePoint(id, TunerConstants.SYSTEM_BUILDING_VAL_LEVEL, "ccu", val, 0);
+        hayStack.writePoint(id, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", val, 0);
+        hayStack.writeHisValById(id, val);
     }
 }

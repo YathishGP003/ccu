@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -59,8 +60,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	Spinner targetMaxInsideHumidity;
 	Spinner targetMinInsideHumidity;
 	
-	CheckBox cbHumidifier;
-	CheckBox cbDehumidifier;
+	CheckBox cbCompHumidity;
+	CheckBox cbDemandResponse;
 	
 	RadioGroup systemModeRg;
 	public SystemFragment()
@@ -111,10 +112,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		targetMaxInsideHumidity = view.findViewById(R.id.targetMaxInsideHumidity);
 		targetMinInsideHumidity = view.findViewById(R.id.targetMinInsideHumidity);
 		
-		cbHumidifier = view.findViewById(R.id.cbHumidification);
-		cbHumidifier.setVisibility(View.INVISIBLE);
-		cbDehumidifier = view.findViewById(R.id.cbDehumidification);
-		cbDehumidifier.setVisibility(View.INVISIBLE);
+		cbCompHumidity = view.findViewById(R.id.cbCompHumidity);
+		cbDemandResponse = view.findViewById(R.id.cbDemandResponse);
 		
 		if (L.ccu().systemProfile instanceof DefaultSystem) {
 			systemOff.setEnabled(false);
@@ -124,8 +123,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			sbComfortValue.setEnabled(false);
 			targetMaxInsideHumidity.setEnabled(false);
 			targetMinInsideHumidity.setEnabled(false);
-			cbHumidifier.setEnabled(false);
-			cbDehumidifier.setEnabled(false);
+			cbCompHumidity.setEnabled(false);
+			cbDemandResponse.setEnabled(false);
 			return;
 		}
 		systemOff.setOnClickListener(new View.OnClickListener()
@@ -229,6 +228,27 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		
 		targetMinInsideHumidity.setOnItemSelectedListener(this);
 		targetMaxInsideHumidity.setOnItemSelectedListener(this);
+		
+		cbCompHumidity.setChecked(TunerUtil.readSystemUserIntentVal("compensate and humidity") > 0);
+		cbDemandResponse.setChecked(TunerUtil.readSystemUserIntentVal("demand and response") > 0);
+		
+		cbCompHumidity.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+		{
+			@Override
+			public void onCheckedChanged(CompoundButton compoundButton, boolean b)
+			{
+				setUserIntentBackground("compensate and humidity", b ? 1: 0);
+			}
+		});
+		
+		cbDemandResponse.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+		{
+			@Override
+			public void onCheckedChanged(CompoundButton compoundButton, boolean b)
+			{
+				setUserIntentBackground("demand and response", b ? 1: 0);
+			}
+		});
 		
 	}
 

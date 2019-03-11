@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
@@ -17,10 +18,10 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.Toast;
-
 
 import org.projecthaystack.HDict;
 import org.projecthaystack.HGrid;
@@ -60,6 +61,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	
 	CheckBox cbHumidifier;
 	CheckBox cbDehumidifier;
+	
+	RadioGroup systemModeRg;
 	public SystemFragment()
 	{
 	}
@@ -97,6 +100,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				return true;
 			}
 		});
+		systemModeRg = view.findViewById(R.id.systemConditioningMode);
 		systemOff = view.findViewById(R.id.systemOff);
 		systemAuto = view.findViewById(R.id.systemAuto);
 		systemCool = view.findViewById(R.id.systemManualCool);
@@ -123,42 +127,6 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			cbHumidifier.setEnabled(false);
 			cbDehumidifier.setEnabled(false);
 			return;
-		}
-		systemAuto.setEnabled(L.ccu().systemProfile.isCoolingAvailable() && L.ccu().systemProfile.isHeatingAvailable());
-		systemCool.setEnabled(L.ccu().systemProfile.isCoolingAvailable());
-		systemHeat.setEnabled(L.ccu().systemProfile.isHeatingAvailable());
-		
-		SystemMode systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("rtu and mode")];
-		switch (systemMode) {
-			case OFF:
-				systemOff.setChecked(true);
-				break;
-			case AUTO:
-				if (systemAuto.isEnabled())
-				{
-					systemAuto.setChecked(true);
-				} else {
-					setUserIntentBackground("rtu and mode", SystemMode.OFF.ordinal());
-				}
-				break;
-			case COOLONLY:
-				if (systemCool.isEnabled())
-				{
-					systemCool.setChecked(true);
-				} else {
-					setUserIntentBackground("rtu and mode", SystemMode.OFF.ordinal());
-				}
-				break;
-			case HEATONLY:
-				if (systemHeat.isEnabled())
-				{
-					systemHeat.setChecked(true);
-				} else {
-					setUserIntentBackground("rtu and mode", SystemMode.OFF.ordinal());
-				}
-				break;
-			default:
-				systemOff.setChecked(true);
 		}
 		systemOff.setOnClickListener(new View.OnClickListener()
 		{
@@ -192,6 +160,37 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				setUserIntentBackground("rtu and mode", SystemMode.HEATONLY.ordinal());
 			}
 		});
+		
+		systemModeRg.clearCheck();
+		
+		systemAuto.setEnabled(L.ccu().systemProfile.isCoolingAvailable() && L.ccu().systemProfile.isHeatingAvailable());
+		systemCool.setEnabled(L.ccu().systemProfile.isCoolingAvailable());
+		systemHeat.setEnabled(L.ccu().systemProfile.isHeatingAvailable());
+		
+		final Handler handler = new Handler();
+		handler.post(new Runnable() {
+	                    @Override
+	                    public void run() {
+		                    SystemMode systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("rtu and mode")];
+		                    Log.d("CCU_UI"," Set system Mode "+systemMode);
+		                    switch (systemMode) {
+			                    case OFF:
+				                    systemOff.setChecked(true);
+				                    break;
+			                    case AUTO:
+				                    systemAuto.setChecked(true);
+				                    break;
+			                    case COOLONLY:
+				                    systemCool.setChecked(true);
+				                    break;
+			                    case HEATONLY:
+				                    systemHeat.setChecked(true);
+				                    break;
+			                    default:
+				                    systemOff.setChecked(true);
+		                    }
+	                    }
+                    });
 		
 		sbComfortValue.setProgress(5 - (int)TunerUtil.readSystemUserIntentVal("desired and ci"));
 		sbComfortValue.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {

@@ -56,12 +56,14 @@ public abstract class VavSystemProfile extends SystemProfile
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap siteMap = hayStack.read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
+        String tz = siteMap.get("tz").toString();
         Point targetCumulativeDamper = new Point.Builder()
                                                .setDisplayName(HSUtil.getDis(equipref)+ "-" + "targetCumulativeDamper")
                                                .setSiteRef(siteRef)
                                                .setEquipRef(equipref)
                                                .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
                                                .addMarker("target").addMarker("cumulative").addMarker("damper").addMarker("sp")
+                                               .setTz(tz)
                                                .build();
         String targetCumulativeDamperId = hayStack.addPoint(targetCumulativeDamper);
         HashMap targetCumulativeDamperP = hayStack.read("point and tuner and default and vav and target and cumulative and damper");
@@ -82,6 +84,7 @@ public abstract class VavSystemProfile extends SystemProfile
                                                .setEquipRef(equipref)
                                                .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
                                                .addMarker("analog").addMarker("fan").addMarker("speed").addMarker("multiplier").addMarker("sp")
+                                               .setTz(tz)
                                                .build();
         String analogFanSpeedMultiplierId = hayStack.addPoint(analogFanSpeedMultiplier);
         HashMap analogFanSpeedMultiplierP = hayStack.read("point and tuner and default and vav and analog and fan and speed and multiplier");
@@ -100,6 +103,7 @@ public abstract class VavSystemProfile extends SystemProfile
                                                  .setEquipRef(equipref)
                                                  .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
                                                  .addMarker("humidity").addMarker("hysteresis").addMarker("sp")
+                                                 .setTz(tz)
                                                  .build();
         String humidityHysteresisId = hayStack.addPoint(humidityHysteresis);
         HashMap humidityHysteresisPoint = hayStack.read("point and tuner and default and vav and humidity and hysteresis");
@@ -118,6 +122,7 @@ public abstract class VavSystemProfile extends SystemProfile
                                            .setEquipRef(equipref)
                                            .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
                                            .addMarker("relay").addMarker("deactivation").addMarker("hysteresis").addMarker("sp")
+                                           .setTz(tz)
                                            .build();
         String relayDeactivationHysteresisId = hayStack.addPoint(relayDeactivationHysteresis);
         HashMap relayDeactivationHysteresisPoint = hayStack.read("point and tuner and default and vav and relay and deactivation and hysteresis");

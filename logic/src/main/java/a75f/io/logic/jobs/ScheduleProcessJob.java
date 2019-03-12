@@ -94,12 +94,27 @@ public class ScheduleProcessJob extends BaseJob {
 
     @Override
     public void doJob() {
+    
+        CcuLog.d(L.TAG_CCU_JOB,"ScheduleProcessJob->");
+        
+        HashMap site = CCUHsApi.getInstance().read("site");
+        if (site.size() == 0) {
+            CcuLog.d(L.TAG_CCU_JOB,"No Site Registered ! <-ScheduleProcessJob ");
+            return;
+        }
+    
+        HashMap ccu = CCUHsApi.getInstance().read("ccu");
+        if (ccu.size() == 0) {
+            CcuLog.d(L.TAG_CCU_JOB,"No CCU Registered ! <-ScheduleProcessJob ");
+            return;
+        }
+        
         Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
         /* The systemSchedule isn't initiated yet, so schedules shouldn't be ran*/
 
         if(systemSchedule == null)
             return;
-        CcuLog.d(L.TAG_CCU_JOB,"ScheduleProcessJob");
+        
         //Read all equips
 
 

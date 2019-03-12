@@ -4,7 +4,6 @@ package a75f.io.logic.bo.building.system.vav;
  * Created by samjithsadasivan on 8/14/18.
  */
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75.io.algos.vav.VavTRSystem;
@@ -593,9 +592,8 @@ public class VavAnalogRtu extends VavSystemProfile
     }
     
     public double getConfigVal(String tags) {
-    
-        //return CCUHsApi.getInstance().readDefaultVal("point and system and config and "+tags);
-        CCUHsApi hayStack = CCUHsApi.getInstance();
+        return CCUHsApi.getInstance().readDefaultVal("point and system and config and "+tags);
+        /*CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap cdb = hayStack.read("point and system and config and "+tags);
     
         ArrayList values = hayStack.readPoint(cdb.get("id").toString());
@@ -608,39 +606,12 @@ public class VavAnalogRtu extends VavSystemProfile
                 }
             }
         }
-        return 0;
+        return 0;*/
     }
     
     public void setConfigVal(String tags, double val) {
         CCUHsApi.getInstance().writeDefaultVal("point and system and config and "+tags, val);
     }
-    
-    /*public double getConfigVal(String tags, int level) {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and system and config and "+tags);
-    
-        ArrayList values = hayStack.readPoint(cdb.get("id").toString());
-        if (values != null && values.size() > 0)
-        {
-            HashMap valMap = ((HashMap) values.get(level-1));
-            if (valMap.get("val") != null) {
-                return Double.parseDouble(valMap.get("val").toString());
-            }
-        }
-        return 0;
-    }
-    
-    public void setConfigVal(String tags, int level, double val) {
-    
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and system and config and "+tags);
-    
-        String id = cdb.get("id").toString();
-        if (id == null || id == "") {
-            throw new IllegalArgumentException();
-        }
-        hayStack.writePoint(id, level, "ccu", val, 0);
-    }*/
     
     public double getConfigEnabled(String config) {
         return CCUHsApi.getInstance().readDefaultVal("point and system and config and output and enabled and "+config);

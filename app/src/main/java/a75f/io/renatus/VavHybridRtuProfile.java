@@ -1,10 +1,12 @@
 package a75f.io.renatus;
 
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,8 +23,10 @@ import a75f.io.device.mesh.MeshUtil;
 import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedHybridRtu;
 import a75f.io.logic.tuners.TunerConstants;
+import a75f.io.logic.tuners.TunerUtil;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -461,6 +465,49 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
         // TODO Auto-generated method stub
     }
     
+    public void updateSystemMode() {
+        SystemMode systemMode = SystemMode.values()[(int)systemProfile.getUserIntentVal("rtu and mode")];
+        if (systemMode == SystemMode.OFF) {
+            return;
+        }
+        if ((systemMode == SystemMode.AUTO && (!systemProfile.isCoolingAvailable() || !systemProfile.isHeatingAvailable()))
+            || (systemMode == SystemMode.COOLONLY && !systemProfile.isCoolingAvailable())
+            || (systemMode == SystemMode.HEATONLY && !systemProfile.isHeatingAvailable()))
+        {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.NewDialogStyle);//, AlertDialog.THEME_HOLO_DARK);
+            String str = "Operational Mode changed from '" + systemMode.name() + "' to '" + SystemMode.OFF.name() + "' based on changed equipment selection.";
+            str = str + "\nPlease select appropriate operational mode from System Settings.";
+            builder.setCancelable(false)
+                   .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                       public void onClick(DialogInterface dialog, int id) {
+                           dialog.cancel();
+                       }
+                   })
+                   .setTitle("Operational Mode Changed")
+                   .setMessage(str);
+            
+            AlertDialog dlg = builder.create();
+            dlg.show();
+            setUserIntentBackground("rtu and mode", SystemMode.OFF.ordinal());
+        }
+    }
+    
+    private void setUserIntentBackground(String query, double val) {
+        
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground( final Void ... params ) {
+                TunerUtil.writeSystemUserIntentVal(query, val);
+                return null;
+            }
+            
+            @Override
+            protected void onPostExecute( final Void result ) {
+                // continue what you are doing...
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+    }
+    
     private void setConfigEnabledBackground(String config, double val)
     {
         new AsyncTask<Void, Void, Void>()
@@ -469,13 +516,16 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
             protected Void doInBackground(final Void... params)
             {
                 systemProfile.setConfigEnabled(config, val);
+                systemProfile.updateStagesSelected();
                 return null;
             }
             
             @Override
             protected void onPostExecute(final Void result)
             {
-                // continue what you are doing...
+                if (val == 0) {
+                    updateSystemMode();
+                }
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
     }
@@ -488,13 +538,14 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
             protected Void doInBackground(final Void... params)
             {
                 systemProfile.setConfigAssociation(config, val);
+                systemProfile.updateStagesSelected();
                 return null;
             }
             
             @Override
             protected void onPostExecute(final Void result)
             {
-                // continue what you are doing...
+                updateSystemMode();
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
     }

@@ -34,6 +34,10 @@ public class Sensor
         
         sensors.add(new Sensor("Generic 0-10V","V", 0, 10,0,10,0.1));
         sensors.add(new Sensor("0-2 in. Pressure Sensor","inches wc.",0,10,0,2,0.1));
+        sensors.add(new Sensor("humidity","%",0,10,0,100,1.0));
+        sensors.add(new Sensor("co2","ppm",0,10,0,2000,10.0));
+        sensors.add(new Sensor("co","ppm",0,10,0,2000,10.0));
+    
         return sensors;
     }
 }

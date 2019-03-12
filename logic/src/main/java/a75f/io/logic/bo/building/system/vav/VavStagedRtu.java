@@ -85,6 +85,7 @@ public class VavStagedRtu extends VavSystemProfile
                 hayStack.deleteEntityTree(equip.get("id").toString());
             } else {
                 initTRSystem();
+                updateStagesSelected();
                 return;
             }
         }

@@ -56,12 +56,14 @@ public abstract class VavSystemProfile extends SystemProfile
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap siteMap = hayStack.read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
+        String tz = siteMap.get("tz").toString();
         Point targetCumulativeDamper = new Point.Builder()
                                                .setDisplayName(HSUtil.getDis(equipref)+ "-" + "targetCumulativeDamper")
                                                .setSiteRef(siteRef)
                                                .setEquipRef(equipref)
                                                .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
                                                .addMarker("target").addMarker("cumulative").addMarker("damper").addMarker("sp")
+                                               .setTz(tz)
                                                .build();
         String targetCumulativeDamperId = hayStack.addPoint(targetCumulativeDamper);
         HashMap targetCumulativeDamperP = hayStack.read("point and tuner and default and vav and target and cumulative and damper");
@@ -82,6 +84,7 @@ public abstract class VavSystemProfile extends SystemProfile
                                                .setEquipRef(equipref)
                                                .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
                                                .addMarker("analog").addMarker("fan").addMarker("speed").addMarker("multiplier").addMarker("sp")
+                                               .setTz(tz)
                                                .build();
         String analogFanSpeedMultiplierId = hayStack.addPoint(analogFanSpeedMultiplier);
         HashMap analogFanSpeedMultiplierP = hayStack.read("point and tuner and default and vav and analog and fan and speed and multiplier");
@@ -100,6 +103,7 @@ public abstract class VavSystemProfile extends SystemProfile
                                                  .setEquipRef(equipref)
                                                  .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
                                                  .addMarker("humidity").addMarker("hysteresis").addMarker("sp")
+                                                 .setTz(tz)
                                                  .build();
         String humidityHysteresisId = hayStack.addPoint(humidityHysteresis);
         HashMap humidityHysteresisPoint = hayStack.read("point and tuner and default and vav and humidity and hysteresis");
@@ -118,6 +122,7 @@ public abstract class VavSystemProfile extends SystemProfile
                                            .setEquipRef(equipref)
                                            .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
                                            .addMarker("relay").addMarker("deactivation").addMarker("hysteresis").addMarker("sp")
+                                           .setTz(tz)
                                            .build();
         String relayDeactivationHysteresisId = hayStack.addPoint(relayDeactivationHysteresis);
         HashMap relayDeactivationHysteresisPoint = hayStack.read("point and tuner and default and vav and relay and deactivation and hysteresis");
@@ -146,7 +151,7 @@ public abstract class VavSystemProfile extends SystemProfile
                                   .setTz(tz)
                                   .build();
         String desiredCIId = CCUHsApi.getInstance().addPoint(desiredCI);
-        CCUHsApi.getInstance().writePoint(desiredCIId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.SYSTEM_DEFAULT_CI, 0);
+        CCUHsApi.getInstance().writePoint(desiredCIId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.SYSTEM_DEFAULT_CI, 0);
         CCUHsApi.getInstance().writeHisValById(desiredCIId, TunerConstants.SYSTEM_DEFAULT_CI);
         
         Point systemState = new Point.Builder()
@@ -157,7 +162,7 @@ public abstract class VavSystemProfile extends SystemProfile
                                     .setTz(tz)
                                     .build();
         String systemStateId = CCUHsApi.getInstance().addPoint(systemState);
-        CCUHsApi.getInstance().writePoint(systemStateId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", (double) SystemState.OFF.ordinal(), 0);
+        CCUHsApi.getInstance().writePoint(systemStateId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", (double) SystemState.OFF.ordinal(), 0);
         CCUHsApi.getInstance().writeHisValById(systemStateId, (double) SystemState.OFF.ordinal());
     
         Point targetMaxInsideHumidty  = new Point.Builder()
@@ -169,7 +174,7 @@ public abstract class VavSystemProfile extends SystemProfile
                                     .addMarker("inside").addMarker("humidity").addMarker("sp")
                                     .build();
         String targetMaxInsideHumidtyId = CCUHsApi.getInstance().addPoint(targetMaxInsideHumidty);
-        CCUHsApi.getInstance().writePoint(targetMaxInsideHumidtyId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.TARGET_MAX_INSIDE_HUMIDITY, 0);
+        CCUHsApi.getInstance().writePoint(targetMaxInsideHumidtyId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.TARGET_MAX_INSIDE_HUMIDITY, 0);
         CCUHsApi.getInstance().writeHisValById(targetMaxInsideHumidtyId, TunerConstants.TARGET_MAX_INSIDE_HUMIDITY);
         
         Point targetMinInsideHumidty  = new Point.Builder()
@@ -181,29 +186,33 @@ public abstract class VavSystemProfile extends SystemProfile
                                                 .setTz(tz)
                                                 .build();
         String targetMinInsideHumidtyId = CCUHsApi.getInstance().addPoint(targetMinInsideHumidty);
-        CCUHsApi.getInstance().writePoint(targetMinInsideHumidtyId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.TARGET_MIN_INSIDE_HUMIDITY, 0);
+        CCUHsApi.getInstance().writePoint(targetMinInsideHumidtyId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.TARGET_MIN_INSIDE_HUMIDITY, 0);
         CCUHsApi.getInstance().writeHisValById(targetMaxInsideHumidtyId, TunerConstants.TARGET_MIN_INSIDE_HUMIDITY);
         
-        /*Point enableHumidifier  = new Point.Builder()
-                                                .setDisplayName(equipDis+"-"+"enableHumidifier")
+        Point compensateHumidity  = new Point.Builder()
+                                                .setDisplayName(equipDis+"-"+"compensateHumidity")
                                                 .setSiteRef(siteRef)
                                                 .setEquipRef(equipref)
-                                                .addMarker("system").addMarker("userIntent").addMarker("writable")
-                                                .addMarker("enable").addMarker("humidifier")
+                                                .addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("his")
+                                                .addMarker("compensate").addMarker("humidity")
+                                                .setTz(tz)
                                                 .build();
-        String enableHumidifierId = CCUHsApi.getInstance().addPoint(enableHumidifier);
-        CCUHsApi.getInstance().writePoint(enableHumidifierId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",0.0, 0);
-    
-        Point enableDehumidifier  = new Point.Builder()
-                                          .setDisplayName(equipDis+"-"+"enableDehumidifier")
+        String compensateHumidityId = CCUHsApi.getInstance().addPoint(compensateHumidity);
+        CCUHsApi.getInstance().writePoint(compensateHumidityId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu",0.0, 0);
+        CCUHsApi.getInstance().writeHisValById(compensateHumidityId, 0.0);
+        
+        Point demandResponseMode  = new Point.Builder()
+                                          .setDisplayName(equipDis+"-"+"demandResponseMode")
                                           .setSiteRef(siteRef)
                                           .setEquipRef(equipref)
-                                          .addMarker("system").addMarker("userIntent").addMarker("writable")
-                                          .addMarker("enable").addMarker("dehumidifier")
+                                          .addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("his")
+                                          .addMarker("demand").addMarker("response")
+                                          .setTz(tz)
                                           .build();
-        String enableDehumidifierId = CCUHsApi.getInstance().addPoint(enableDehumidifier);
-        CCUHsApi.getInstance().writePoint(enableDehumidifierId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu",0.0, 0);*/
-    
+        String demandResponseModeId = CCUHsApi.getInstance().addPoint(demandResponseMode);
+        CCUHsApi.getInstance().writePoint(demandResponseModeId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu",0.0, 0);
+        CCUHsApi.getInstance().writeHisValById(demandResponseModeId, 0.0);
+        
     }
     
     public void updateAhuRef(String systemEquipId) {

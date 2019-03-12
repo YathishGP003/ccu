@@ -185,9 +185,9 @@ public class RegisterGatherCCUDetails extends Activity {
 
                 if(!Globals.getInstance().siteAlreadyCreated()) {
                     BuildingTuners.getInstance();
-                    DefaultSchedules.generateDefaultSchedule();
                     //DefaultSchedules.generateDefaultVacation();
                 }
+                DefaultSchedules.generateDefaultSchedule();
                 L.saveCCUState();
                 CCUHsApi.getInstance().log();
                 CCUHsApi.getInstance().syncEntityTree();

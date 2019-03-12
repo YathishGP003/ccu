@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
+import a75f.io.api.haystack.sync.EntityParser;
 import a75f.io.api.haystack.sync.EntitySyncHandler;
 import a75f.io.api.haystack.sync.HisSyncHandler;
 import a75f.io.api.haystack.sync.HttpUtil;
@@ -736,11 +737,16 @@ public class CCUHsApi
             return false;
         }
 
-        HGrid remoteSiteDetails = getRemoteSiteDetails(siteId);
-
-
-        tagsDb.addHGrid(remoteSite);
-        tagsDb.addHGrid(remoteSiteDetails);
+        //HGrid remoteSiteDetails = getRemoteSiteDetails(siteId);
+        
+        EntityParser p = new EntityParser(remoteSite);
+        Site s = p.getSite();
+        tagsDb.idMap.put("@"+tagsDb.addSite(s), s.getId());
+        Log.d("CCU_HS","Added Site "+s.getId());
+        
+        //tagsDb.addHGrid(remoteSite);
+        //tagsDb.addHGrid(remoteSiteDetails);
+        
         tagsDb.log();
 
         return true;

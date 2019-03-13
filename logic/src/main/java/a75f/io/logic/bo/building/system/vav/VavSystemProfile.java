@@ -62,7 +62,7 @@ public abstract class VavSystemProfile extends SystemProfile
                                                .setSiteRef(siteRef)
                                                .setEquipRef(equipref)
                                                .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
-                                               .addMarker("target").addMarker("cumulative").addMarker("damper").addMarker("sp")
+                                               .addMarker("target").addMarker("cumulative").addMarker("damper").addMarker("sp").addMarker("equipHis")
                                                .setTz(tz)
                                                .build();
         String targetCumulativeDamperId = hayStack.addPoint(targetCumulativeDamper);
@@ -83,7 +83,7 @@ public abstract class VavSystemProfile extends SystemProfile
                                                .setSiteRef(siteRef)
                                                .setEquipRef(equipref)
                                                .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
-                                               .addMarker("analog").addMarker("fan").addMarker("speed").addMarker("multiplier").addMarker("sp")
+                                               .addMarker("analog").addMarker("fan").addMarker("speed").addMarker("multiplier").addMarker("sp").addMarker("equipHis")
                                                .setTz(tz)
                                                .build();
         String analogFanSpeedMultiplierId = hayStack.addPoint(analogFanSpeedMultiplier);
@@ -102,7 +102,7 @@ public abstract class VavSystemProfile extends SystemProfile
                                                  .setSiteRef(siteRef)
                                                  .setEquipRef(equipref)
                                                  .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
-                                                 .addMarker("humidity").addMarker("hysteresis").addMarker("sp")
+                                                 .addMarker("humidity").addMarker("hysteresis").addMarker("sp").addMarker("equipHis")
                                                  .setTz(tz)
                                                  .build();
         String humidityHysteresisId = hayStack.addPoint(humidityHysteresis);
@@ -121,7 +121,7 @@ public abstract class VavSystemProfile extends SystemProfile
                                            .setSiteRef(siteRef)
                                            .setEquipRef(equipref)
                                            .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
-                                           .addMarker("relay").addMarker("deactivation").addMarker("hysteresis").addMarker("sp")
+                                           .addMarker("relay").addMarker("deactivation").addMarker("hysteresis").addMarker("sp").addMarker("equipHis")
                                            .setTz(tz)
                                            .build();
         String relayDeactivationHysteresisId = hayStack.addPoint(relayDeactivationHysteresis);
@@ -147,7 +147,7 @@ public abstract class VavSystemProfile extends SystemProfile
                                   .setDisplayName(equipDis+"-"+"desiredCI")
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipref)
-                                  .addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("ci").addMarker("desired").addMarker("sp").addMarker("his")
+                                  .addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("ci").addMarker("desired").addMarker("sp").addMarker("his").addMarker("equipHis")
                                   .setTz(tz)
                                   .build();
         String desiredCIId = CCUHsApi.getInstance().addPoint(desiredCI);
@@ -158,7 +158,7 @@ public abstract class VavSystemProfile extends SystemProfile
                                     .setDisplayName(equipDis+"-"+"systemMode")
                                     .setSiteRef(siteRef)
                                     .setEquipRef(equipref)
-                                    .addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("rtu").addMarker("mode").addMarker("sp").addMarker("his")
+                                    .addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("rtu").addMarker("mode").addMarker("sp").addMarker("his").addMarker("equipHis")
                                     .setTz(tz)
                                     .build();
         String systemStateId = CCUHsApi.getInstance().addPoint(systemState);
@@ -169,7 +169,7 @@ public abstract class VavSystemProfile extends SystemProfile
                                     .setDisplayName(equipDis+"-"+"targetMaxInsideHumidty")
                                     .setSiteRef(siteRef)
                                     .setEquipRef(equipref)
-                                    .addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("target").addMarker("max").addMarker("his")
+                                    .addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("target").addMarker("max").addMarker("his").addMarker("equipHis")
                                     .setTz(tz)
                                     .addMarker("inside").addMarker("humidity").addMarker("sp")
                                     .build();
@@ -182,7 +182,7 @@ public abstract class VavSystemProfile extends SystemProfile
                                                 .setSiteRef(siteRef)
                                                 .setEquipRef(equipref)
                                                 .addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("target")
-                                                .addMarker("min").addMarker("inside").addMarker("humidity").addMarker("sp").addMarker("his")
+                                                .addMarker("min").addMarker("inside").addMarker("humidity").addMarker("sp").addMarker("his").addMarker("equipHis")
                                                 .setTz(tz)
                                                 .build();
         String targetMinInsideHumidtyId = CCUHsApi.getInstance().addPoint(targetMinInsideHumidty);
@@ -193,7 +193,7 @@ public abstract class VavSystemProfile extends SystemProfile
                                                 .setDisplayName(equipDis+"-"+"compensateHumidity")
                                                 .setSiteRef(siteRef)
                                                 .setEquipRef(equipref)
-                                                .addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("his")
+                                                .addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                 .addMarker("compensate").addMarker("humidity")
                                                 .setTz(tz)
                                                 .build();
@@ -205,7 +205,7 @@ public abstract class VavSystemProfile extends SystemProfile
                                           .setDisplayName(equipDis+"-"+"demandResponseMode")
                                           .setSiteRef(siteRef)
                                           .setEquipRef(equipref)
-                                          .addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("his")
+                                          .addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("his").addMarker("equipHis")
                                           .addMarker("demand").addMarker("response")
                                           .setTz(tz)
                                           .build();

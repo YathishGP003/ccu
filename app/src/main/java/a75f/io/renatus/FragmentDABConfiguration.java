@@ -1,9 +1,509 @@
 package a75f.io.renatus;
 
+import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.content.Intent;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v7.widget.SwitchCompat;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.LinearLayout;
+import android.widget.NumberPicker;
+import android.widget.Spinner;
+import android.widget.TextView;
+
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
+import a75f.io.logic.bo.building.NodeType;
+import a75f.io.logic.bo.building.Output;
+import a75f.io.logic.bo.building.Zone;
+import a75f.io.logic.bo.building.ZonePriority;
+import a75f.io.logic.bo.building.definitions.DamperShape;
+import a75f.io.logic.bo.building.definitions.DamperType;
+import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
+import a75f.io.logic.bo.building.definitions.Port;
+import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.definitions.ReheatType;
+import a75f.io.logic.bo.building.hvac.Damper;
+import a75f.io.logic.bo.building.system.dab.DabProfile;
+import a75f.io.logic.bo.building.system.dab.DabProfileConfiguration;
+import a75f.io.renatus.BASE.BaseDialogFragment;
+import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import butterknife.ButterKnife;
+
 /**
  * Created by samjithsadasivan on 3/13/19.
  */
 
-public class FragmentDABConfiguration
+public class FragmentDABConfiguration extends BaseDialogFragment implements AdapterView.OnItemSelectedListener, CheckBox.OnCheckedChangeListener
 {
+    public static final String ID = FragmentDABConfiguration.class.getSimpleName();
+    
+    static final int TEMP_OFFSET_LIMIT = 100;
+    
+    private short    mSmartNodeAddress;
+    private NodeType mNodeType;
+    private Zone     mZone;
+    
+    LinearLayout damper1layout;
+    LinearLayout damper2layout;
+    Spinner      damperType;
+    Spinner      damperSize;
+    Spinner      damperShape;
+    //Spinner      damper2Type;
+    LinearLayout reheatOptionLayout;
+    Button       setButton;
+    Spinner      zonePriority;
+    NumberPicker temperatureOffset;
+    NumberPicker maxCoolingDamperPos;
+    NumberPicker minCoolingDamperPos;
+    NumberPicker maxHeatingDamperPos;
+    NumberPicker minHeatingDamperPos;
+    SwitchCompat enableOccupancyControl;
+    SwitchCompat enableCO2Control;
+    SwitchCompat enableIAQControl;
+    
+    Damper mDamper;
+    
+    private ProfileType             mProfileType;
+    private DabProfile              mDabProfile;
+    private DabProfileConfiguration mProfileConfig;
+    
+    private ArrayList<Damper.Parameters> mDampers = new ArrayList<Damper.Parameters>();
+    ArrayAdapter<String> damperTypesAdapter;
+    ArrayAdapter<String> reheatTypesAdapter;
+    
+    //ArrayAdapter<String> damperActuatorAdapter;
+    //ArrayAdapter<String> relayActuatorAdapter;
+    //ArrayAdapter<String> reheatPortAdapter;
+    
+    DamperType damperTypeSelected;
+    //int damperActuatorSelection;
+    ReheatType reheatTypeSelected;
+    //int reheatActuatorSelection;
+    
+    String floorRef;
+    String zoneRef;
+    
+    public FragmentDABConfiguration()
+    {
+    }
+    
+    public static FragmentDABConfiguration newInstance(short smartNodeAddress, String roomName, NodeType nodeType, String floorName, ProfileType profileType)
+    {
+        FragmentDABConfiguration f = new FragmentDABConfiguration();
+        Bundle bundle = new Bundle();
+        bundle.putShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR, smartNodeAddress);
+        bundle.putString(FragmentCommonBundleArgs.ARG_NAME, roomName);
+        bundle.putString(FragmentCommonBundleArgs.FLOOR_NAME, floorName);
+        bundle.putString(FragmentCommonBundleArgs.NODE_TYPE, nodeType.toString());
+        bundle.putInt(FragmentCommonBundleArgs.PROFILE_TYPE, profileType.ordinal());
+        f.setArguments(bundle);
+        return f;
+    }
+    
+    @Override
+    public String getIdString()
+    {
+        return ID;
+    }
+    
+    
+    @Override
+    public void onStart()
+    {
+        super.onStart();
+        Dialog dialog = getDialog();
+        if (dialog != null)
+        {
+            int width = ViewGroup.LayoutParams.WRAP_CONTENT;
+            int height = ViewGroup.LayoutParams.WRAP_CONTENT;
+            dialog.getWindow().setLayout(width, height);
+        }
+        setTitle();
+    }
+    
+    private void setTitle() {
+        Dialog dialog = getDialog();
+        
+        if (dialog == null) {
+            return;
+        }
+        dialog.setTitle("DAB Configuration");
+        TextView titleView = this.getDialog().findViewById(android.R.id.title);
+        if(titleView != null)
+        {
+            titleView.setGravity(Gravity.CENTER);
+            titleView.setTextColor(getResources().getColor(R.color.progress_color_orange));
+        }
+        int titleDividerId = getContext().getResources()
+                                         .getIdentifier("titleDivider", "id", "android");
+        
+        View titleDivider = dialog.findViewById(titleDividerId);
+        if (titleDivider != null) {
+            titleDivider.setBackgroundColor(getContext().getResources()
+                                                        .getColor(R.color.transparent));
+        }
+    }
+    
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
+    {
+        View view = inflater.inflate(R.layout.fragment_dab_config, container, false);
+        mSmartNodeAddress = getArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR);
+        zoneRef = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
+        floorRef = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
+        mNodeType = NodeType.valueOf(getArguments().getString(FragmentCommonBundleArgs.NODE_TYPE));
+        //mZone = L.findZoneByName(mFloorName, mRoomName);
+        mProfileType = ProfileType.values()[getArguments().getInt(FragmentCommonBundleArgs.PROFILE_TYPE)];
+        ButterKnife.bind(this, view);
+        return view;
+    }
+    
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
+    {
+        reheatOptionLayout = (LinearLayout)view.findViewById(R.id.dabReheatOptions);
+        
+        setButton = (Button) view.findViewById(R.id.setBtn);
+        
+        mDabProfile = (DabProfile) L.getProfile(mSmartNodeAddress);
+        
+        if (mDabProfile != null) {
+            CcuLog.d(L.TAG_CCU_UI,  "Get DABConfig: ");
+            mProfileConfig = (DabProfileConfiguration) mDabProfile.getProfileConfiguration(mSmartNodeAddress);
+        } else {
+            CcuLog.d(L.TAG_CCU_UI, "Create Vav Profile: ");
+            mDabProfile = new DabProfile();
+        }
+        
+        //fillDamperDetails();
+        
+        damper1layout  = (LinearLayout)view.findViewById(R.id.damper1layout);
+        //damperType.setSelection(mFSVData.getDamperType());
+        //if(mFSVData.getDamperType() != 4)
+        damper1layout.setVisibility(View.VISIBLE);
+        
+        damperSize = view.findViewById(R.id.damperSize);
+        ArrayAdapter<CharSequence> damperSizeAdapter = ArrayAdapter.createFromResource(getActivity(),
+                R.array.damper_size, R.layout.spinner_dropdown_item);
+        damperSizeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        damperSize.setAdapter(damperSizeAdapter);
+        //damperSize.setSelection((mFSVData.getDamperSize()-4)/2);
+        
+        ArrayList<String> damperShapes = new ArrayList<>();
+        for (DamperShape shape : DamperShape.values()) {
+            damperShapes.add(shape.displayName);
+        }
+        ArrayAdapter<String> damperShapeAdapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_dropdown_item, damperShapes);
+        damperShapeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        damperShape = view.findViewById(R.id.damperShape);
+        damperShape.setAdapter(damperShapeAdapter);
+    
+        /*// Add second damper details
+        damper2Type = (Spinner) view.findViewById(R.id.damperType2);
+        ArrayAdapter<Damper.Parameters> damper2TypeAdapter = new ArrayAdapter<Damper.Parameters>(getActivity(), R.layout.spinner_dropdown_item, mDampers);
+        damper2TypeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        damper2Type.setAdapter(damper2TypeAdapter);
+        damper2Type.setOnItemSelectedListener(this);
+        //damper2Type.setSelection(mFSVData.getDamper2Type());
+        damper2layout = (LinearLayout)view.findViewById(R.id.damper2layout);
+        final Spinner damper2Size = (Spinner) view.findViewById(R.id.damperSize2);
+        //if(mFSVData.getDamper2Type() != 4)
+            damper2layout.setVisibility(View.VISIBLE);
+    
+        ArrayAdapter<CharSequence> damper2SizeAdapter = ArrayAdapter.createFromResource(getActivity(),
+                R.array.damper_size, R.layout.spinner_dropdown_item);
+        damper2SizeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        damper2Size.setAdapter(damper2SizeAdapter);
+        //damper2Size.setSelection((mFSVData.getDamper2Size() - 4) / 2);
+    
+        final Spinner damper2Shape = (Spinner) view.findViewById(R.id.damperShape2);
+        damper2Shape.setAdapter(damperShapeAdapter);*/
+        //damperShape.setSelection(mFSVData.getDamperShape());
+        //damper2Shape.setSelection(mFSVData.getDamper2Shape());
+        temperatureOffset = (NumberPicker) view.findViewById(R.id.temperatureOffset);
+        setNumberPickerDividerColor(temperatureOffset);
+        temperatureOffset.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+        String[] nums = new String[TEMP_OFFSET_LIMIT * 2 + 1];//{"-4","-3","-2","-1","0","1","2","3","4"};
+        for (int nNum = 0; nNum < TEMP_OFFSET_LIMIT * 2 + 1; nNum++)
+            nums[nNum] = String.valueOf((float) (nNum - TEMP_OFFSET_LIMIT) / 10);
+        temperatureOffset.setDisplayedValues(nums);
+        temperatureOffset.setMinValue(0);
+        temperatureOffset.setMaxValue(TEMP_OFFSET_LIMIT * 2);
+        temperatureOffset.setValue(TEMP_OFFSET_LIMIT);
+        temperatureOffset.setWrapSelectorWheel(false);
+        
+        maxCoolingDamperPos = view.findViewById(R.id.maxDamperPos);
+        setNumberPickerDividerColor(maxCoolingDamperPos);
+        maxCoolingDamperPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+        maxCoolingDamperPos.setMinValue(0);
+        maxCoolingDamperPos.setMaxValue(100);
+        maxCoolingDamperPos.setValue(80);
+        maxCoolingDamperPos.setWrapSelectorWheel(false);
+        
+        minCoolingDamperPos = view.findViewById(R.id.minDamperPos);
+        setNumberPickerDividerColor(minCoolingDamperPos);
+        minCoolingDamperPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+        minCoolingDamperPos.setMinValue(0);
+        minCoolingDamperPos.setMaxValue(100);
+        minCoolingDamperPos.setValue(40);
+        minCoolingDamperPos.setWrapSelectorWheel(false);
+        
+        maxHeatingDamperPos = view.findViewById(R.id.maxHeatingDamperPos);
+        setNumberPickerDividerColor(maxHeatingDamperPos);
+        maxHeatingDamperPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+        maxHeatingDamperPos.setMinValue(0);
+        maxHeatingDamperPos.setMaxValue(100);
+        maxHeatingDamperPos.setValue(80);
+        maxHeatingDamperPos.setWrapSelectorWheel(false);
+        
+        minHeatingDamperPos = view.findViewById(R.id.minHeatingDamperPos);
+        setNumberPickerDividerColor(minHeatingDamperPos);
+        minHeatingDamperPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+        minHeatingDamperPos.setMinValue(0);
+        minHeatingDamperPos.setMaxValue(100);
+        minHeatingDamperPos.setValue(40);
+        minHeatingDamperPos.setWrapSelectorWheel(false);
+        
+        
+        enableOccupancyControl = view.findViewById(R.id.enableOccupancyControl);
+        enableCO2Control = view.findViewById(R.id.enableCO2Control);
+        enableIAQControl = view.findViewById(R.id.enableIAQControl);
+        zonePriority = view.findViewById(R.id.zonePriority);
+        ArrayAdapter<CharSequence> zonePriorityAdapter = ArrayAdapter.createFromResource(getActivity(),
+                R.array.zone_priority, R.layout.spinner_dropdown_item);
+        zonePriorityAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        zonePriority.setAdapter(zonePriorityAdapter);
+        
+        final SwitchCompat useOccupancyDetection = (SwitchCompat) view.findViewById(R.id.useOccupancyDetection);
+        //useOccupancyDetection.setChecked(mFSVData.getUseOccupancyDetection());
+        
+        final SwitchCompat ignoreSetpoint = (SwitchCompat) view.findViewById(R.id.ignoreSetpoint);
+        //ignoreSetpoint.setChecked(mFSVData.getIgnoreSetpointChange());
+        
+        LinearLayout zonePriorityLayout = (LinearLayout) view.findViewById(R.id.zonePriorityLayout);
+        //zonePriorityLayout.setVisibility((SystemSettingsData.getTier().ordinal() <= CCU_TIER.EXPERT.ordinal()) ? View.VISIBLE : View.GONE);
+        
+        damperType = view.findViewById(R.id.damperType);
+        
+        ArrayList<String> damperTypes = new ArrayList<>();
+        for (DamperType damper : DamperType.values()) {
+            damperTypes.add(damper.displayName);
+        }
+        damperTypesAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, damperTypes);
+        damperTypesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        damperType.setAdapter(damperTypesAdapter);
+        
+        damperType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                damperTypeSelected = DamperType.values()[position];
+            }
+            
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            
+            }
+        });
+        
+        
+        if (mProfileConfig != null) {
+            damperType.setSelection(damperTypesAdapter.getPosition(DamperType.values()[mProfileConfig.damperType].displayName), false);
+            damperSize.setSelection(damperSizeAdapter.getPosition(String.valueOf(mProfileConfig.damperSize)), false);
+            damperShape.setSelection(damperShapeAdapter.getPosition(DamperShape.values()[mProfileConfig.damperShape].displayName), false);
+            enableOccupancyControl.setChecked(mProfileConfig.enableOccupancyControl);
+            enableCO2Control.setChecked(mProfileConfig.enableCO2Control);
+            enableIAQControl.setChecked(mProfileConfig.enableIAQControl);
+            zonePriority.setSelection(mProfileConfig.getPriority().ordinal());
+            int offsetIndex = (int)mProfileConfig.temperaturOffset+TEMP_OFFSET_LIMIT;
+            temperatureOffset.setValue(offsetIndex);
+            minCoolingDamperPos.setValue(mProfileConfig.minDamperCooling);
+            maxCoolingDamperPos.setValue(mProfileConfig.maxDamperCooling);
+            minHeatingDamperPos.setValue(mProfileConfig.minDamperHeating);
+            maxHeatingDamperPos.setValue(mProfileConfig.maxDamperHeating);
+            
+            
+        } else {
+            zonePriority.setSelection(1);//LOW
+        }
+        
+        setButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                
+                new AsyncTask<Void, Void, Void>() {
+                    
+                    ProgressDialog progressDlg = new ProgressDialog(getActivity());
+                    
+                    @Override
+                    protected void onPreExecute() {
+                        setButton.setEnabled(false);
+                        progressDlg.setMessage("Saving VAV Configuration");
+                        progressDlg.show();
+                        super.onPreExecute();
+                    }
+                    
+                    @Override
+                    protected Void doInBackground( final Void ... params ) {
+                        setupVavZoneProfile();
+                        L.saveCCUState();
+                        
+                        return null;
+                    }
+                    
+                    @Override
+                    protected void onPostExecute( final Void result ) {
+                        progressDlg.dismiss();
+                        FragmentDABConfiguration.this.closeAllBaseDialogFragments();
+                        getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
+                    }
+                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+                
+            }
+        });
+        
+    }
+    
+    private void setupVavZoneProfile() {
+        
+        DabProfileConfiguration dabConfig = new DabProfileConfiguration();
+        dabConfig.damperType = damperTypeSelected.ordinal();
+        dabConfig.damperSize = Integer.parseInt(damperSize.getSelectedItem().toString());
+        dabConfig.damperShape = DamperType.values()[damperShape.getSelectedItemPosition()].ordinal();
+        dabConfig.setNodeType(mNodeType);
+        dabConfig.setNodeAddress(mSmartNodeAddress);
+        dabConfig.enableOccupancyControl = enableOccupancyControl.isChecked();
+        dabConfig.enableCO2Control = enableCO2Control.isChecked();
+        dabConfig.enableIAQControl = enableIAQControl.isChecked();
+        dabConfig.setPriority(ZonePriority.values()[zonePriority.getSelectedItemPosition()]);
+        dabConfig.minDamperCooling = (minCoolingDamperPos.getValue());
+        dabConfig.maxDamperCooling = (maxCoolingDamperPos.getValue());
+        dabConfig.minDamperHeating = (minHeatingDamperPos.getValue());
+        dabConfig.maxDamperHeating = (maxHeatingDamperPos.getValue());
+        dabConfig.temperaturOffset = temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
+        
+        Output analog1Op = new Output();
+        analog1Op.setAddress(mSmartNodeAddress);
+        analog1Op.setPort(Port.ANALOG_OUT_ONE);
+        analog1Op.mOutputAnalogActuatorType = OutputAnalogActuatorType.getEnum(damperTypeSelected.displayName);
+        dabConfig.getOutputs().add(analog1Op);
+    
+    
+        mDabProfile.getProfileConfiguration().put(mSmartNodeAddress, dabConfig);
+        if (mProfileConfig == null) {
+            mDabProfile.addDabEquip(mSmartNodeAddress, dabConfig, floorRef, zoneRef );
+        } else {
+            mDabProfile.updateDabEquip(dabConfig);
+        }
+        L.ccu().zoneProfiles.add(mDabProfile);
+        CcuLog.d(L.TAG_CCU_UI, "Set DAB Config: Profiles - "+L.ccu().zoneProfiles.size());
+    }
+    
+    private void setNumberPickerDividerColor(NumberPicker pk) {
+        Class<?> numberPickerClass = null;
+        try {
+            numberPickerClass = Class.forName("android.widget.NumberPicker");
+            Field selectionDivider = numberPickerClass.getDeclaredField("mSelectionDivider");
+            selectionDivider.setAccessible(true);
+            //if(!CCUUtils.isxlargedevice(getActivity())) {
+            selectionDivider.set(pk, getResources().getDrawable(R.drawable.line_959595));
+            //}else{
+            //   selectionDivider.set(pk, getResources().getDrawable(R.drawable.connect_192x48_orange));
+            //}
+            
+        } catch (ClassNotFoundException e) {
+            Log.e("class not found",e.toString());
+        } catch (NoSuchFieldException e) {
+            Log.e("NoSuchFieldException",e.toString());
+        } catch (IllegalAccessException e) {
+            Log.e("IllegalAccessException",e.toString());
+        }catch (Exception e){
+            Log.e("dividerexception",e.getMessage().toString());
+        }
+    }
+    
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        
+        switch (parent.getId()){
+            case R.id.damperType:
+                damperType.setSelection(position);
+                if(position == 4)
+                    damper1layout.setVisibility(View.INVISIBLE);
+                else
+                    damper1layout.setVisibility(View.VISIBLE);
+                damper1layout.invalidate();
+                break;
+            /*case R.id.damperType2:
+                damper2Type.setSelection(position);
+                if(position == 4)
+                    damper2layout.setVisibility(View.INVISIBLE);
+                else
+                    damper2layout.setVisibility(View.VISIBLE);
+                damper2layout.invalidate();
+                break;*/
+        }
+    }
+    
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+    
+    }
+    
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        switch (buttonView.getId()) {
+            case R.id.fsvDabReheatOption:
+                /*if(isChecked)
+                    reheatOptionLayout.setVisibility(View.VISIBLE);
+                else
+                    reheatOptionLayout.setVisibility(View.INVISIBLE);
+                reheatOptionLayout.invalidate();*/
+        }
+    }
+    
+    
+    public void fillDamperDetails() {
+        mDampers.add(Damper.TYPE.GENERIC_0To10V.ordinal(), new Damper.Parameters(Damper.TYPE.GENERIC_0To10V.ordinal(),
+                                                                                        Damper.TYPE.GENERIC_0To10V.toString(),
+                                                                                        0, 0, 0, 0, 0));
+        mDampers.add(Damper.TYPE.GENERIC_2TO10V.ordinal(), new Damper.Parameters(Damper.TYPE.GENERIC_2TO10V.ordinal(),
+                                                                                        Damper.TYPE.GENERIC_2TO10V.toString(),
+                                                                                        0, 0, 0, 0, 0));
+        mDampers.add(Damper.TYPE.GENERIC_10To0V.ordinal(), new Damper.Parameters(Damper.TYPE.GENERIC_10To0V.ordinal(),
+                                                                                        Damper.TYPE.GENERIC_10To0V.toString(),
+                                                                                        0, 0, 0, 0, 0));
+        mDampers.add(Damper.TYPE.GENERIC_10To2V.ordinal(), new Damper.Parameters(Damper.TYPE.GENERIC_10To2V.ordinal(),
+                                                                                        Damper.TYPE.GENERIC_10To2V.toString(),
+                                                                                        0, 0, 0, 0, 0));
+        mDampers.add(Damper.TYPE.MAT_RADIAL1.ordinal(), new Damper.Parameters(Damper.TYPE.MAT_RADIAL1.ordinal(),
+                                                                                     Damper.TYPE.MAT_RADIAL1.toString(),
+                                                                                     Damper.TYPE.MAT_RADIAL1.getDefaultMotorRPM(),
+                                                                                     Damper.TYPE.MAT_RADIAL1.getDefaultOperatingCurrent(),
+                                                                                     Damper.TYPE.MAT_RADIAL1.getDefaultStallCurrent(),
+                                                                                     Damper.TYPE.MAT_RADIAL1.getDefaultForwardBacklash(),
+                                                                                     Damper.TYPE.MAT_RADIAL1.getDefaultReverseBacklash()));
+    }
+    
+    
+    
+    
+    
+    
+    
 }

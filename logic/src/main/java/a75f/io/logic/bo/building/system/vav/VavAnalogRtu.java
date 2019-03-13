@@ -15,6 +15,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemConstants;
+import a75f.io.logic.bo.building.system.SystemEquip;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.tuners.VavTRTuners;
@@ -263,6 +264,7 @@ public class VavAnalogRtu extends VavSystemProfile
                 hayStack.deleteEntityTree(equip.get("id").toString());
             } else {
                 initTRSystem();
+                sysEquip = new SystemEquip(equip.get("id").toString());
                 return;
             }
         }
@@ -286,6 +288,7 @@ public class VavAnalogRtu extends VavSystemProfile
         addTunerPoints(equipRef);
         addVavSystemTuners(equipRef);
         updateAhuRef(equipRef);
+        sysEquip = new SystemEquip(equipRef);
         new ControlMote(siteRef);
         initTRSystem();
         L.saveCCUState();
@@ -614,9 +617,11 @@ public class VavAnalogRtu extends VavSystemProfile
     }
     
     public double getConfigEnabled(String config) {
-        return CCUHsApi.getInstance().readDefaultVal("point and system and config and output and enabled and "+config);
+        return sysEquip.getConfigEnabled(config)? 1:0;
+        //return CCUHsApi.getInstance().readDefaultVal("point and system and config and output and enabled and "+config);
     }
     public void setConfigEnabled(String config, double val) {
+        sysEquip.setConfigEnabled(config, val);
         CCUHsApi.getInstance().writeDefaultVal("point and system and config and output and enabled and "+config, val);
     }
     

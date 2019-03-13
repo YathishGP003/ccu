@@ -8,4 +8,18 @@ import a75f.io.logic.bo.building.BaseProfileConfiguration;
 
 public class DabProfileConfiguration extends BaseProfileConfiguration
 {
+    public int damperType;
+    public int damperSize;
+    public int damperShape;
+    
+    public boolean enableOccupancyControl;
+    public boolean enableCO2Control;
+    public boolean enableIAQControl;
+    
+    public int minDamperCooling;
+    public int maxDamperCooling;
+    public int minDamperHeating;
+    public int maxDamperHeating;
+    
+    public double temperaturOffset;
 }

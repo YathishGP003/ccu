@@ -894,7 +894,6 @@ public class VAVLogicalMap
         }
         CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
         CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
-        this.desiredTemp = desiredTemp;
     }
     
     public double getDesiredTempHeating()
@@ -926,7 +925,6 @@ public class VAVLogicalMap
         }
         CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
         CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
-        this.desiredTemp = desiredTemp;
     }
     
     public double getDamperLimit(String coolHeat, String minMax)

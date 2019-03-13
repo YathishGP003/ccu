@@ -11,6 +11,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
+import a75f.io.logic.bo.building.system.SystemEquip;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.tuners.VavTRTuners;
@@ -86,6 +87,7 @@ public class VavStagedRtu extends VavSystemProfile
             } else {
                 initTRSystem();
                 updateStagesSelected();
+                sysEquip = new SystemEquip(equip.get("id").toString());
                 return;
             }
         }
@@ -109,6 +111,7 @@ public class VavStagedRtu extends VavSystemProfile
         addTunerPoints(equipRef);
         addVavSystemTuners(equipRef);
         updateAhuRef(equipRef);
+        sysEquip = new SystemEquip(equipRef);
         new ControlMote(siteRef);
         initTRSystem();
         L.saveCCUState();
@@ -484,16 +487,20 @@ public class VavStagedRtu extends VavSystemProfile
     }
     
     public double getConfigEnabled(String config) {
-        return CCUHsApi.getInstance().readDefaultVal("point and system and config and output and enabled and "+config);
+        return sysEquip.getConfigEnabled(config)? 1:0;
+        //return CCUHsApi.getInstance().readDefaultVal("point and system and config and output and enabled and "+config);
     }
     public void setConfigEnabled(String config, double val) {
+        sysEquip.setConfigEnabled(config, val);
         CCUHsApi.getInstance().writeDefaultVal("point and system and config and output and enabled and "+config, val);
     }
     
     public double getConfigAssociation(String config) {
-        return CCUHsApi.getInstance().readDefaultVal("point and system and config and output and association and "+config);
+        return sysEquip.getRelayOpAssociation(config);
+        //return CCUHsApi.getInstance().readDefaultVal("point and system and config and output and association and "+config);
     }
     public void setConfigAssociation(String config, double val) {
+        sysEquip.setRelayOpAssociation(config, val);
         HashMap cmd = CCUHsApi.getInstance().read("point and system and cmd and "+config);
         Stage updatedStage = Stage.values()[(int)val];
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);

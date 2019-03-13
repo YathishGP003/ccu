@@ -13,6 +13,8 @@ public abstract class SystemProfile
     
     public TRSystem trSystem;
     
+    public SystemEquip sysEquip;
+    
     public abstract void doSystemControl();
     
     public abstract void addSystemEquip();

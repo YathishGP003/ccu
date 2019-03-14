@@ -38,6 +38,7 @@ import a75f.io.logic.bo.building.Schedule;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.plc.PlcProfile;
 import a75f.io.logic.bo.building.system.DefaultSystem;
+import a75f.io.logic.bo.building.system.dab.DabProfile;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedHybridRtu;
 import a75f.io.logic.bo.building.system.vav.VavAnalogRtu;
@@ -381,6 +382,11 @@ public class Globals {
                             PlcProfile plc = new PlcProfile();
                             plc.addPlcEquip(Short.valueOf(eq.getGroup()));
                             L.ccu().zoneProfiles.add(plc);
+                            break;
+                        case DAB:
+                            DabProfile dab = new DabProfile();
+                            dab.addDabEquip(Short.valueOf(eq.getGroup()));
+                            L.ccu().zoneProfiles.add(dab);
                             break;
                     }
                 }

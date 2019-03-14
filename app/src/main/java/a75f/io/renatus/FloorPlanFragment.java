@@ -540,6 +540,11 @@ public class FloorPlanFragment extends Fragment
 			case PLC:
 				showDialogFragment(FragmentPLCConfiguration
 						                   .newInstance(Short.parseShort(nodeAddr),zone.getDisplayName(), NodeType.SMART_NODE, floor.getDisplayName()), FragmentPLCConfiguration.ID);
+				break;
+			case DAB:
+				showDialogFragment(FragmentDABConfiguration
+						                   .newInstance(Short.parseShort(nodeAddr),zone.getDisplayName(), NodeType.SMART_NODE, floor.getDisplayName(), profile.getProfileType()), FragmentDABConfiguration.ID);
+				break;
 			
 			
 		}

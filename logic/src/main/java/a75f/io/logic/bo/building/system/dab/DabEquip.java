@@ -5,15 +5,23 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import a75.io.algos.GenericPIController;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
+import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
+import a75f.io.logic.bo.building.ZonePriority;
+import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.tuners.BuildingTuners;
+import a75f.io.logic.tuners.TunerUtil;
 
 /**
  * Created by samjithsadasivan on 3/13/19.
@@ -26,12 +34,22 @@ public class DabEquip
     
     double damperPos= 0;
     
+    GenericPIController damperController;
+    CCUHsApi hayStack = CCUHsApi.getInstance();
+    String equipRef = null;
+    
     public DabEquip(ProfileType type, int node) {
         profileType = type;
         nodeAddr = node;
+        
     }
     
     public void init() {
+        damperController = new GenericPIController();
+        damperController.setMaxAllowedError(hayStack.readDefaultVal("point and proportional and range and equipRef == \""+equipRef+"\""));
+        damperController.setIntegralGain(TunerUtil.readTunerValByQuery("pid and igain and equipRef == \"" + equipRef + "\""));
+        damperController.setProportionalGain(TunerUtil.readTunerValByQuery("pid and pgain and equipRef == \""+equipRef+"\""));
+        damperController.setIntegralMaxTimeout((int)TunerUtil.readTunerValByQuery("pid and itimeout and equipRef == \""+equipRef+"\""));
     
     }
     
@@ -376,11 +394,58 @@ public class DabEquip
     }
     
     public DabProfileConfiguration getProfileConfiguration() {
-        return null;
+        DabProfileConfiguration config = new DabProfileConfiguration();
+        config.minDamperCooling = ((int)getDamperLimit("cooling","min"));
+        config.maxDamperCooling = ((int)getDamperLimit("cooling","max"));
+        config.minDamperHeating = ((int)getDamperLimit("heating","min"));
+        config.maxDamperHeating = ((int)getDamperLimit("heating","max"));
+    
+        config.damperType = (int)getConfigNumVal("damper and type");
+        config.damperSize = (int)getConfigNumVal("damper and size");
+        config.damperShape = (int)getConfigNumVal("damper and shape");
+        config.enableOccupancyControl = getConfigNumVal("enable and occupancy") > 0 ? true : false ;
+        config.enableCO2Control = getConfigNumVal("enable and co2") > 0 ? true : false ;
+        config.enableIAQControl = getConfigNumVal("enable and iaq") > 0 ? true : false ;
+        config.setPriority(ZonePriority.values()[(int)getConfigNumVal("priority")]);
+        config.temperaturOffset = getConfigNumVal("temperature and offset");
+    
+        config.setNodeType(NodeType.SMART_NODE);//TODO - revisit
+    
+    
+        RawPoint a1 = SmartNode.getPhysicalPoint(nodeAddr, Port.ANALOG_OUT_ONE.toString());
+        if (a1 != null && a1.getEnabled()) {
+            Output analogOne = new Output();
+            analogOne.setAddress((short)nodeAddr);
+            analogOne.setPort(Port.ANALOG_OUT_ONE);
+            analogOne.mOutputAnalogActuatorType = OutputAnalogActuatorType.getEnum(a1.getType());
+            config.getOutputs().add(analogOne);
+        }
+        return config;
     }
     
     public void update(DabProfileConfiguration config) {
+        for (Output op : config.getOutputs()) {
+            switch (op.getPort()) {
+                case ANALOG_OUT_ONE:
+                    CcuLog.d(L.TAG_CCU_ZONE, " Update analog" + op.getPort() + " type " + op.getAnalogActuatorType());
+                    SmartNode.updatePhysicalPointType(nodeAddr, op.getPort().toString(), op.getAnalogActuatorType());
+                    break;
+            }
+        }
+        
     
+        setConfigNumVal("damper and type",config.damperType);
+        setConfigNumVal("damper and size",config.damperSize);
+        setConfigNumVal("damper and shape",config.damperShape);
+        setConfigNumVal("enable and occupancy",config.enableOccupancyControl == true ? 1.0 : 0);
+        setConfigNumVal("enable and co2",config.enableCO2Control == true ? 1.0 : 0);
+        setConfigNumVal("enable and iaq",config.enableCO2Control == true ? 1.0 : 0);
+        setConfigNumVal("priority",config.getPriority().ordinal());
+        setConfigNumVal("temperature and offset",config.temperaturOffset);
+        setDamperLimit("cooling","min",config.minDamperCooling);
+        setDamperLimit("cooling","max",config.maxDamperCooling);
+        setDamperLimit("heating","min",config.minDamperHeating);
+        setDamperLimit("heating","max",config.maxDamperHeating);
     }
     
     public void setConfigNumVal(String tags,double val) {

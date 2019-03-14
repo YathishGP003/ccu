@@ -94,7 +94,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
 
 
             Schedule schedule = Schedule.getScheduleByEquipId(equipId);
-            Schedule vacationSchedule = Schedule.getVacationByEquipId(equipId);
+            //Schedule vacationSchedule = Schedule.getVacationByEquipId(equipId);
 
             scheduleImageButton.setOnClickListener(new View.OnClickListener() {
                 @Override

@@ -88,8 +88,13 @@ public class Schedule extends Entity {
                 return schedule;
             }
         }
-
-        return CCUHsApi.getInstance().getSystemSchedule(vacation).get(0);
+    
+        ArrayList<Schedule> schedules = CCUHsApi.getInstance().getSystemSchedule(vacation);
+        if (schedules != null && schedules.size() > 0) {
+            return schedules.get(0);
+        } else {
+            return null;
+        }
     }
 
 

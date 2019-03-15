@@ -289,19 +289,19 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
                 sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 1 : 0));
                 break;
             case R.id.relay3Test:
-                sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 2 : 0));
+                sendRelayActivationTestSignal((short)(relay3Test.isChecked() ? 1 << 2 : 0));
                 break;
             case R.id.relay4Test:
-                sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 3 : 0));
+                sendRelayActivationTestSignal((short)(relay4Test.isChecked() ? 1 << 3 : 0));
                 break;
             case R.id.relay5Test:
-                sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 4 : 0));
+                sendRelayActivationTestSignal((short)(relay5Test.isChecked() ? 1 << 4 : 0));
                 break;
             case R.id.relay6Test:
-                sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 5 : 0));
+                sendRelayActivationTestSignal((short)(relay6Test.isChecked() ? 1 << 5 : 0));
                 break;
             case R.id.relay7Test:
-                sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 6 : 0));
+                sendRelayActivationTestSignal((short)(relay7Test.isChecked() ? 1 << 6 : 0));
                 break;
                 
         }

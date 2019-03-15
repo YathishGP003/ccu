@@ -72,7 +72,7 @@ public abstract class VavSystemProfile extends SystemProfile
             if (valMap.get("val") != null)
             {
                 hayStack.pointWrite(HRef.copy(targetCumulativeDamperId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(targetCumulativeDamperId, Double.parseDouble(valMap.get("level").toString()));
+                hayStack.writeHisValById(targetCumulativeDamperId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
         
@@ -93,7 +93,7 @@ public abstract class VavSystemProfile extends SystemProfile
             if (valMap.get("val") != null)
             {
                 hayStack.pointWrite(HRef.copy(analogFanSpeedMultiplierId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(analogFanSpeedMultiplierId, Double.parseDouble(valMap.get("level").toString()));
+                hayStack.writeHisValById(analogFanSpeedMultiplierId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
         
@@ -112,7 +112,7 @@ public abstract class VavSystemProfile extends SystemProfile
             if (valMap.get("val") != null)
             {
                 hayStack.pointWrite(HRef.copy(humidityHysteresisId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(humidityHysteresisId, Double.parseDouble(valMap.get("level").toString()));
+                hayStack.writeHisValById(humidityHysteresisId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
         
@@ -131,7 +131,7 @@ public abstract class VavSystemProfile extends SystemProfile
             if (valMap.get("val") != null)
             {
                 hayStack.pointWrite(HRef.copy(relayDeactivationHysteresisId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(relayDeactivationHysteresisId, Double.parseDouble(valMap.get("level").toString()));
+                hayStack.writeHisValById(relayDeactivationHysteresisId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
     }

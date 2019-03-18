@@ -260,8 +260,14 @@ public class VavStagedRtu extends VavSystemProfile
                         }
                         break;
                     case FAN_1:
+                        if ((fanStages > 0 && VavSystemController.getInstance().systemOccupied)
+                                || (fanStages > 0 && systemFanLoopOp > 0)) {
+                            relayState = 1;
+                        } else {
+                            relayState = 0;
+                        }
+                        break;
                     case FAN_2:
-                        //TODO - or occupied
                         if (fanStages > 0 && systemFanLoopOp > 0)
                         {
                             relayState = 1;

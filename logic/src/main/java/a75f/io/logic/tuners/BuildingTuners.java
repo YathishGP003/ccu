@@ -66,9 +66,25 @@ public class BuildingTuners
         equipRef = hayStack.addEquip(tunerEquip);
         equipDis = siteDis+"-BuildingTuner";
         tz = siteMap.get("tz").toString();
+        
+        addDefaultSystemTuners();
         addDefaultVavTuners();
         addDefaultPlcTuners();
         
+    }
+    
+    public void addDefaultSystemTuners() {
+        Point preConditioingRate = new Point.Builder()
+                                           .setDisplayName(equipDis+"-"+"preConditioingRate")
+                                           .setSiteRef(siteRef)
+                                           .setEquipRef(equipRef)
+                                           .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
+                                           .addMarker("system").addMarker("precon").addMarker("rate").addMarker("sp")
+                                           .setTz(tz)
+                                           .build();
+        String preConditioingRateId = hayStack.addPoint(preConditioingRate);
+        hayStack.writePoint(preConditioingRateId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.SYSTEM_PRECONDITION_RATE, 0);
+        hayStack.writeHisValById(preConditioingRateId, TunerConstants.SYSTEM_PRECONDITION_RATE);
     }
     
     

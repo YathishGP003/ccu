@@ -207,10 +207,8 @@ public class VavAnalogRtu extends VavSystemProfile
         
         if (getConfigVal("relay3 and output and enabled") > 0)
         {
-            //TODO - TEMP
-            boolean occupancy = true;
             double staticPressuremOp = getStaticPressure() - SystemConstants.SP_CONFIG_MIN;
-            signal = (occupancy || staticPressuremOp > 0) ? 1 : 0;
+            signal = (VavSystemController.getInstance().systemOccupied || staticPressuremOp > 0) ? 1 : 0;
             setCmdSignal("occupancy",signal * 100);
             ControlMote.setRelayState("relay3", signal );
             

@@ -35,6 +35,7 @@ public abstract class VavSystemProfile extends SystemProfile
         addSystemLoopOpPoint("cooling", siteRef, equipRef, equipDis, tz);
         addSystemLoopOpPoint("heating", siteRef, equipRef, equipDis, tz);
         addSystemLoopOpPoint("fan", siteRef, equipRef, equipDis, tz);
+        addSystemPoints(siteRef, equipRef, equipDis, tz);
     }
     
     private void addSystemLoopOpPoint(String loop, String siteRef, String equipref, String equipDis, String tz){
@@ -46,6 +47,34 @@ public abstract class VavSystemProfile extends SystemProfile
                                  .setTz(tz)
                                  .build();
         CCUHsApi.getInstance().addPoint(relay1Op);
+    }
+    
+    private void addSystemPoints(String siteRef, String equipref, String equipDis, String tz){
+        Point systemOccupancy = new Point.Builder()
+                                 .setDisplayName(equipDis+"-"+"Occupancy")
+                                 .setSiteRef(siteRef)
+                                 .setEquipRef(equipref)
+                                 .addMarker("system").addMarker("occupancy").addMarker("status").addMarker("his").addMarker("equipHis").addMarker("sp")
+                                 .setTz(tz)
+                                 .build();
+        CCUHsApi.getInstance().addPoint(systemOccupancy);
+    
+        Point systemOperatingMode = new Point.Builder()
+                                        .setDisplayName(equipDis+"-"+"OperatingMode")
+                                        .setSiteRef(siteRef)
+                                        .setEquipRef(equipref)
+                                        .addMarker("system").addMarker("operating").addMarker("mode").addMarker("his").addMarker("equipHis").addMarker("sp")
+                                        .setTz(tz)
+                                        .build();
+        CCUHsApi.getInstance().addPoint(systemOperatingMode);
+    }
+    
+    public void setSystemOccupancy(double val) {
+        CCUHsApi.getInstance().writeHisValByQuery("point and system and occupancy and status and his", val);
+    }
+    
+    public void setSystemOperatingMode(double val) {
+        CCUHsApi.getInstance().writeHisValByQuery("point and system and operating and mode and his", val);
     }
     
     public void setSystemLoopOp(String loop, double val) {
@@ -132,6 +161,25 @@ public abstract class VavSystemProfile extends SystemProfile
             {
                 hayStack.pointWrite(HRef.copy(relayDeactivationHysteresisId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
                 hayStack.writeHisValById(relayDeactivationHysteresisId, Double.parseDouble(valMap.get("val").toString()));
+            }
+        }
+    
+        Point preConditioningRate = new Point.Builder()
+                                                    .setDisplayName(HSUtil.getDis(equipref)+ "-" + "preConditioningRate")
+                                                    .setSiteRef(siteRef)
+                                                    .setEquipRef(equipref)
+                                                    .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
+                                                    .addMarker("precon").addMarker("rate").addMarker("sp").addMarker("equipHis")
+                                                    .setTz(tz)
+                                                    .build();
+        String preConditioningRateId = hayStack.addPoint(preConditioningRate);
+        HashMap preConditioningRatePoint = hayStack.read("point and tuner and default and precon and rate");
+        ArrayList<HashMap> preConditioningRateArr = hayStack.readPoint(preConditioningRatePoint.get("id").toString());
+        for (HashMap valMap : preConditioningRateArr) {
+            if (valMap.get("val") != null)
+            {
+                hayStack.pointWrite(HRef.copy(preConditioningRateId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                hayStack.writeHisValById(preConditioningRateId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
     }

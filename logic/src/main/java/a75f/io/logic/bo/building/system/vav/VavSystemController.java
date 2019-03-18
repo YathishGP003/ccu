@@ -19,6 +19,7 @@ import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.util.HSEquipUtil;
+import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.system.SystemMode.AUTO;
@@ -69,6 +70,9 @@ public class VavSystemController
     double weightedAverageCoolingOnlyLoadMA;
     double weightedAverageHeatingOnlyLoadMA;
     
+    boolean systemOccupied = false;
+    boolean systemPreCon = false;
+    
     private VavSystemController()
     {
         piController = new ControlLoop();
@@ -91,13 +95,19 @@ public class VavSystemController
         CcuLog.d(L.TAG_CCU_SYSTEM, "runVavSystemControlAlgo -> ciDesired: " + ciDesired + " systemMode: " + systemMode);
     
         weightedAverageCoolingOnlyLoadSum = weightedAverageHeatingOnlyLoadSum = weightedAverageLoadSum = 0;
-        
+        systemOccupied = false;
+        systemPreCon = false;
         for (Floor f: HSUtil.getFloors())
         {
             for(Zone z: HSUtil.getZones(f.getId())) {
+    
+                if (ScheduleProcessJob.getOccupiedModeCache(z.getId()).isOccupied()) {
+                    systemOccupied = true;
+                }
                 
                 for (Equip q : HSUtil.getEquips(z.getId()))
                 {
+                    
                     if (q.getMarkers().contains("vav") == false || getEquipCurrentTemp(q.getId()) == 0)
                     {
                         continue;
@@ -124,6 +134,8 @@ public class VavSystemController
         
         }
     
+        CcuLog.d(L.TAG_CCU_SYSTEM, "systemOccupied : "+systemOccupied);
+        profile.setSystemOccupancy(systemOccupied ? 0:1);
         if (prioritySum == 0) {
             CcuLog.d(L.TAG_CCU_SYSTEM, "No valid temperature, Skip VavSystemControlAlgo");
             return;
@@ -165,6 +177,7 @@ public class VavSystemController
             systemState = OFF;
         }
         
+        profile.setSystemOperatingMode(systemState.ordinal());
         
         piController.dump();
         if (systemState == COOLING) {
@@ -206,6 +219,16 @@ public class VavSystemController
     
     public int getHeatingSignal() {
         return heatingSignal;
+    }
+    
+    public int getSystemOccupancy() {
+        if (systemOccupied) {
+            return ScheduleProcessJob.Status.setpoint.ordinal();
+        } else if (systemPreCon) {
+            return ScheduleProcessJob.Status.preconditioning.ordinal();
+        } else {
+            return ScheduleProcessJob.Status.setback.ordinal();
+        }
     }
     
     public boolean isAllZonesHeating() {

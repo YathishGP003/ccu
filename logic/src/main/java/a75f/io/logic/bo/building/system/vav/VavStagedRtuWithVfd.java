@@ -121,6 +121,18 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
                     }
                 }
             }
+        } else if (VavSystemController.getInstance().systemOccupied) {
+            for (int i = 1; i < 8; i++)
+            {
+                if (getConfigEnabled("relay" + i) > 0 && getCmdSignal("relay" + i) > 0)
+                {
+                    int val = (int) getConfigAssociation("relay" + i);
+                    if ( val == Stage.FAN_1.ordinal())  {
+                        signal = getConfigVal("analog2 and recirculate");
+                    }
+                }
+            }
+            
         }
         setCmdSignal("analog2",10*signal);
         ControlMote.setAnalogOut("analog2", 10 * signal);

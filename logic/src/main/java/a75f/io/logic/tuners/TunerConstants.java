@@ -54,6 +54,8 @@ public class TunerConstants
     public static final double ZONE_PRIORITY_SPREAD = 2.0;
     public static final double ZONE_PRIORITY_MULTIPLIER = 1.3;
     
+    public static final double SYSTEM_PRECONDITION_RATE = 15.0;
+    
     public static final double MIN_COOLING_DAMPER = 40;
     public static final double MAX_COOLING_DAMPER = 80;
     public static final double MIN_HEATING_DAMPER = 40;

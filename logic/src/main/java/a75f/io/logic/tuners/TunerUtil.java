@@ -1,5 +1,8 @@
 package a75f.io.logic.tuners;
 
+import org.projecthaystack.HNum;
+import org.projecthaystack.HRef;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -70,7 +73,7 @@ public class TunerUtil
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        hayStack.writePoint(id, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", val, 0);
+        hayStack.pointWrite(HRef.copy(id), TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", HNum.make(val), HNum.make(0,"ms"));
         hayStack.writeHisValById(id, val);
     }
 }

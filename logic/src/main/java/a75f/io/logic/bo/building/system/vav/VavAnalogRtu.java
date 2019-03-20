@@ -76,6 +76,11 @@ public class VavAnalogRtu extends VavSystemProfile
     }
     
     @Override
+    public ProfileType getProfileType() {
+        return ProfileType.SYSTEM_VAV_ANALOG_RTU;
+    }
+    
+    @Override
     public void doSystemControl() {
         if (trSystem != null) {
             trSystem.processResetResponse();

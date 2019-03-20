@@ -48,6 +48,11 @@ public class VavStagedRtu extends VavSystemProfile
         return "VAV Staged RTU";
     }
     
+    @Override
+    public ProfileType getProfileType() {
+        return ProfileType.SYSTEM_VAV_STAGED_RTU;
+    }
+    
     public VavStagedRtu() {
     }
     

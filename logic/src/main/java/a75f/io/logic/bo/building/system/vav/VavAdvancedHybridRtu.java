@@ -30,6 +30,11 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
     }
     
     @Override
+    public ProfileType getProfileType() {
+        return ProfileType.SYSTEM_VAV_HYBRID_RTU;
+    }
+    
+    @Override
     public void addSystemEquip() {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap equip = hayStack.read("equip and system");

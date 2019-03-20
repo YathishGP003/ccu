@@ -2,6 +2,7 @@ package a75f.io.logic.bo.building.system;
 
 import a75.io.algos.tr.TRSystem;
 import a75f.io.logic.bo.building.Schedule;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 
 /**
  * Created by Yinten isOn 8/15/2017.
@@ -22,6 +23,8 @@ public abstract class SystemProfile
     public abstract boolean isCoolingAvailable();
     
     public abstract boolean isHeatingAvailable();
+    
+    public abstract ProfileType getProfileType();
     
     public  int getSystemSAT() {
         return 0;

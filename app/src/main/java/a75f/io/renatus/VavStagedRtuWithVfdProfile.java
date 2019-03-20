@@ -23,6 +23,7 @@ import a75f.io.device.mesh.MeshUtil;
 import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtuWithVfd;
@@ -96,7 +97,7 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
     {
-        if (L.ccu().systemProfile instanceof VavStagedRtuWithVfd) {
+        if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_VFD_RTU) {
             systemProfile = (VavStagedRtuWithVfd) L.ccu().systemProfile;
             relay1Cb.setChecked(systemProfile.getConfigEnabled("relay1") > 0);
             relay2Cb.setChecked(systemProfile.getConfigEnabled("relay2") > 0);

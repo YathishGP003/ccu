@@ -337,6 +337,12 @@ public class Schedule extends Entity {
         return mEndDate;
     }
 
+    public boolean isActiveVacation()
+    {
+        Interval interval = new Interval(getStartDate(), getEndDate());
+        return interval.contains(MockTime.getInstance().getMockTime());
+    }
+
 
     public static class Builder {
         private String mId;

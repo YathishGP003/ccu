@@ -13,6 +13,7 @@ public class Occupied {
     private Schedule.Days mNextOccupiedScheduleDay;
     private Double mHeatingDeadband;
     private Double mCoolingDeadband;
+    private Schedule vacation;
 
     @Override
     public boolean equals(Object o) {
@@ -27,12 +28,12 @@ public class Occupied {
                 Objects.equals(mCoolingVal, occupied.mCoolingVal) &&
                 Objects.equals(mHeatingVal, occupied.mHeatingVal) &&
                 Objects.equals(mCurrentlyOccupiedScheduleDay, occupied.mCurrentlyOccupiedScheduleDay) &&
-                Objects.equals(mNextOccupiedScheduleDay, occupied.mNextOccupiedScheduleDay);
+                Objects.equals(mNextOccupiedScheduleDay, occupied.mNextOccupiedScheduleDay) && Objects.equals(occupied.vacation, vacation);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mOccupied, mValue, mCoolingVal, mHeatingVal, mMillisecondsUntilNextChange, mCurrentlyOccupiedScheduleDay, mNextOccupiedScheduleDay, mCoolingDeadband, mHeatingDeadband);
+        return Objects.hash(mOccupied, mValue, mCoolingVal, mHeatingVal, mMillisecondsUntilNextChange, mCurrentlyOccupiedScheduleDay, mNextOccupiedScheduleDay, mCoolingDeadband, mHeatingDeadband, vacation);
     }
 
     public boolean isOccupied() {
@@ -103,4 +104,15 @@ public class Occupied {
 
     public double getHeatingDeadBand() { return mHeatingDeadband; }
     public double getCoolingDeadBand() { return mCoolingDeadband; }
+
+    public void setVacation(Schedule vacation)
+    {
+        this.vacation = vacation;
+    }
+
+
+    public Schedule getVacation()
+    {
+        return vacation;
+    }
 }

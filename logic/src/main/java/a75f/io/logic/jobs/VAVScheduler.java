@@ -26,18 +26,25 @@ public class VAVScheduler {
 
 
 
-    public static Occupied processEquip(Equip equip, Schedule equipSchedule) {
+    public static Occupied processEquip(Equip equip, Schedule equipSchedule, Schedule vacation) {
 
 
         Log.i(TAG, "Equip: " + equip);
         Log.i(TAG, "Equip Schedule: " + equipSchedule);
         Occupied occ = equipSchedule.getCurrentValues();
 
+        if(vacation != null)
+            occ.setOccupied(false);
+
+        occ.setVacation(vacation);
+
         double heatingDeadBand = TunerUtil.readTunerValByQuery("heating and deadband and equipRef==\""+equip.getId() + "\"");
         double coolingDeadBand = TunerUtil.readTunerValByQuery("cooling and deadband and equipRef==\""+equip.getId() + "\"");
 
         occ.setHeatingDeadBand(heatingDeadBand);
         occ.setCoolingDeadBand(coolingDeadBand);
+
+
 
         if (occ != null && ScheduleProcessJob.putOccupiedModeCache(equip.getRoomRef(), occ)) {
 

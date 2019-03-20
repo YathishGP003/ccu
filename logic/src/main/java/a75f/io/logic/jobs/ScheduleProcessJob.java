@@ -95,6 +95,10 @@ public class ScheduleProcessJob extends BaseJob {
     @Override
     public void doJob() {
         Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
+
+        ArrayList<Schedule> activeVacationSchedules = CCUHsApi.getInstance().getSystemSchedule(true);
+
+        Schedule activeVacationSchedule = getActiveVacation(activeVacationSchedules);
         /* The systemSchedule isn't initiated yet, so schedules shouldn't be ran*/
 
         if(systemSchedule == null)
@@ -114,21 +118,36 @@ public class ScheduleProcessJob extends BaseJob {
                
                 Schedule equipSchedule = Schedule.getScheduleForZone(equip.getRoomRef().replace("@", ""), false);
                 if (equipSchedule != null) {
-                    writePointsForEquip(equip, equipSchedule);
+                    writePointsForEquip(equip, equipSchedule, activeVacationSchedule);
                 }
                 else
                 {
-                    writePointsForEquip(equip, systemSchedule);
+                    writePointsForEquip(equip, systemSchedule, activeVacationSchedule);
                 }
             }
         }
         CcuLog.d(L.TAG_CCU_JOB,"<- ScheduleProcessJob");
     }
 
-    private void writePointsForEquip(Equip equip, Schedule equipSchedule) {
+    private Schedule getActiveVacation(ArrayList<Schedule> activeVacationSchedules)
+    {
+        for(Schedule schedule : activeVacationSchedules)
+        {
+            if(schedule.isVacation() && schedule.isActiveVacation())
+            {
+                return schedule;
+            }
+
+        }
+
+        return null;
+
+    }
+
+    private void writePointsForEquip(Equip equip, Schedule equipSchedule, Schedule vacation) {
         if(equip.getMarkers().contains("vav"))
         {
-            VAVScheduler.processEquip(equip, equipSchedule);
+            VAVScheduler.processEquip(equip, equipSchedule, vacation);
         }
     }
 
@@ -205,13 +224,19 @@ public class ScheduleProcessJob extends BaseJob {
                     cachedOccupied.getCurrentlyOccupiedSchedule().getEthh(),
                     cachedOccupied.getCurrentlyOccupiedSchedule().getEtmm());
         }
-        else
+        else if(cachedOccupied.getVacation() != null)
         {
-            return String.format("In %s, changes to energy saving range of %.1f-%.1fF at %02d:%02d", "unoccupied mode",
+            return String.format("In %s, changes to energy saving range of %.1f-%.1fF on %s", "vacation mode",
                     cachedOccupied.getHeatingVal(),
                     cachedOccupied.getCoolingVal(),
-                    cachedOccupied.getNextOccupiedSchedule().getSthh(),
-                    cachedOccupied.getNextOccupiedSchedule().getStmm());
+                    cachedOccupied.getVacation().getEndDateString());
+        } else
+        {
+            return String.format("In %s, changes to energy saving range of %.1f-%.1fF at %02d:%02d", "unoccupied mode",
+                                 cachedOccupied.getHeatingVal(),
+                                 cachedOccupied.getCoolingVal(),
+                                 cachedOccupied.getNextOccupiedSchedule().getSthh(),
+                                 cachedOccupied.getNextOccupiedSchedule().getStmm());
         }
     }
 

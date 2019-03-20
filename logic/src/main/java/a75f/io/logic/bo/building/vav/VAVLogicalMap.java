@@ -249,7 +249,7 @@ public class VAVLogicalMap
         String normalizedDPId = CCUHsApi.getInstance().addPoint(normalizedDamperPos);
     
         Point reheatPos = new Point.Builder()
-                                  .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-ReheatPos")
+                                  .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-reheatPos")
                                   .setEquipRef(equipRef)
                                   .setSiteRef(siteRef)
                                   .setRoomRef(room)

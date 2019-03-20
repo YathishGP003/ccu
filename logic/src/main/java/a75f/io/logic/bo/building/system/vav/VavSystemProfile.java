@@ -51,7 +51,7 @@ public abstract class VavSystemProfile extends SystemProfile
     
     private void addSystemPoints(String siteRef, String equipref, String equipDis, String tz){
         Point systemOccupancy = new Point.Builder()
-                                 .setDisplayName(equipDis+"-"+"Occupancy")
+                                 .setDisplayName(equipDis+"-"+"occupancy")
                                  .setSiteRef(siteRef)
                                  .setEquipRef(equipref)
                                  .addMarker("system").addMarker("occupancy").addMarker("status").addMarker("his").addMarker("equipHis").addMarker("sp")
@@ -60,21 +60,64 @@ public abstract class VavSystemProfile extends SystemProfile
         CCUHsApi.getInstance().addPoint(systemOccupancy);
     
         Point systemOperatingMode = new Point.Builder()
-                                        .setDisplayName(equipDis+"-"+"OperatingMode")
+                                        .setDisplayName(equipDis+"-"+"operatingMode")
                                         .setSiteRef(siteRef)
                                         .setEquipRef(equipref)
                                         .addMarker("system").addMarker("operating").addMarker("mode").addMarker("his").addMarker("equipHis").addMarker("sp")
                                         .setTz(tz)
                                         .build();
         CCUHsApi.getInstance().addPoint(systemOperatingMode);
+    
+        Point ciRunning = new Point.Builder()
+                                        .setDisplayName(equipDis+"-"+"systemCI")
+                                        .setSiteRef(siteRef)
+                                        .setEquipRef(equipref)
+                                        .addMarker("system").addMarker("ci").addMarker("running").addMarker("his").addMarker("equipHis").addMarker("sp")
+                                        .setTz(tz)
+                                        .build();
+        CCUHsApi.getInstance().addPoint(ciRunning);
+        
+    
+        Point averageHumidity = new Point.Builder()
+                                            .setDisplayName(equipDis+"-"+"averageHumidity")
+                                            .setSiteRef(siteRef)
+                                            .setEquipRef(equipref)
+                                            .addMarker("system").addMarker("average").addMarker("humidity").addMarker("his").addMarker("equipHis").addMarker("sp")
+                                            .setTz(tz)
+                                            .build();
+        CCUHsApi.getInstance().addPoint(averageHumidity);
+    
+        Point averageTemperature = new Point.Builder()
+                                        .setDisplayName(equipDis+"-"+"averageTemperature")
+                                        .setSiteRef(siteRef)
+                                        .setEquipRef(equipref)
+                                        .addMarker("system").addMarker("average").addMarker("temp").addMarker("his").addMarker("equipHis").addMarker("sp")
+                                        .setTz(tz)
+                                        .build();
+        CCUHsApi.getInstance().addPoint(averageTemperature);
+    
+        Point weightedAverageCoolingLoadMA = new Point.Builder()
+                                           .setDisplayName(equipDis+"-"+"weightedAverageCoolingLoadMA")
+                                           .setSiteRef(siteRef)
+                                           .setEquipRef(equipref)
+                                           .addMarker("system").addMarker("moving").addMarker("average").addMarker("cooling").addMarker("load").addMarker("his").addMarker("equipHis").addMarker("sp")
+                                           .setTz(tz)
+                                           .build();
+        CCUHsApi.getInstance().addPoint(weightedAverageCoolingLoadMA);
+    
+        Point weightedAverageHeatingLoadMA = new Point.Builder()
+                                                     .setDisplayName(equipDis+"-"+"weightedAverageHeatingLoadMA")
+                                                     .setSiteRef(siteRef)
+                                                     .setEquipRef(equipref)
+                                                     .addMarker("system").addMarker("moving").addMarker("average").addMarker("heating").addMarker("load").addMarker("his").addMarker("equipHis").addMarker("sp")
+                                                     .setTz(tz)
+                                                     .build();
+        CCUHsApi.getInstance().addPoint(weightedAverageHeatingLoadMA);
+        
     }
     
-    public void setSystemOccupancy(double val) {
-        CCUHsApi.getInstance().writeHisValByQuery("point and system and occupancy and status and his", val);
-    }
-    
-    public void setSystemOperatingMode(double val) {
-        CCUHsApi.getInstance().writeHisValByQuery("point and system and operating and mode and his", val);
+    public void setSystemPoint(String tags, double val) {
+        CCUHsApi.getInstance().writeHisValByQuery("point and system and his and "+tags, val);
     }
     
     public void setSystemLoopOp(String loop, double val) {

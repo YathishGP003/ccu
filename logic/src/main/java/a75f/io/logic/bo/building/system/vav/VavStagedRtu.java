@@ -307,7 +307,7 @@ public class VavStagedRtu extends VavSystemProfile
                         break;
                     case HUMIDIFIER:
                     case DEHUMIDIFIER:
-                        double humidity = VavSystemController.getInstance().getSystemHumidity();
+                        double humidity = VavSystemController.getInstance().getAverageSystemHumidity();
                         double targetMinHumidity = TunerUtil.readSystemUserIntentVal("target and min and inside and humidity");
                         double targetMaxHumidity = TunerUtil.readSystemUserIntentVal("target and max and inside and humidity");
                         double humidityHysteresis = TunerUtil.readTunerValByQuery("humidity and hysteresis");

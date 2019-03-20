@@ -14,6 +14,7 @@ import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.tuners.TunerUtil;
 
 public class VAVScheduler {
 
@@ -22,8 +23,7 @@ public class VAVScheduler {
 
     private static final String TAG = "VAVScheduler";
     boolean occupied; // determined by schedule
-    public static int heatingDeadBand = 5;
-    public static int coolingDeadBand = 5;
+
 
 
     public static Occupied processEquip(Equip equip, Schedule equipSchedule) {
@@ -33,14 +33,19 @@ public class VAVScheduler {
         Log.i(TAG, "Equip Schedule: " + equipSchedule);
         Occupied occ = equipSchedule.getCurrentValues();
 
+        double heatingDeadBand = TunerUtil.readTunerValByQuery("heating and deadband and equipRef==\""+equip.getId() + "\"");
+        double coolingDeadBand = TunerUtil.readTunerValByQuery("cooling and deadband and equipRef==\""+equip.getId() + "\"");
+
+        occ.setHeatingDeadBand(heatingDeadBand);
+        occ.setCoolingDeadBand(coolingDeadBand);
 
         if (occ != null && ScheduleProcessJob.putOccupiedModeCache(equip.getRoomRef(), occ)) {
 
 
-            Double coolingTemp = occ.isOccupied() ? (double) occ.getCoolingVal() : ((double) occ.getCoolingVal() + coolingDeadBand);
+            Double coolingTemp = occ.isOccupied() ? occ.getCoolingVal() : (occ.getCoolingVal() + occ.getCoolingDeadBand());
             setDesiredTemp(equip, coolingTemp, "cooling");
 
-            Double heatingTemp = occ.isOccupied() ? (double) occ.getHeatingVal() : ((double) occ.getHeatingVal() - heatingDeadBand);
+            Double heatingTemp = occ.isOccupied() ? occ.getHeatingVal() : (occ.getHeatingVal() - occ.getHeatingDeadBand());
             setDesiredTemp(equip, heatingTemp, "heating");
         }
 

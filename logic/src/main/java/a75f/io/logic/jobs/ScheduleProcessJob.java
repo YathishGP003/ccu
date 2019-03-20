@@ -147,11 +147,11 @@ public class ScheduleProcessJob extends BaseJob {
         In temporary hold *This is for forced occupied mode
         In vacation, till
         Away
-        In setpoint - DR Mode
-        In setpoint
+        In OCCUPIED - DR Mode
+        In OCCUPIED
         In precondition - DR Mode
-        In preconditioning
-        In energy saving setback
+        In PRECONDITIONING
+        In energy saving UNOCCUPIED
 
 
         Non-named schedules
@@ -188,8 +188,8 @@ public class ScheduleProcessJob extends BaseJob {
     public static String getSystemStateString(String zoneId)
     {
 
-        Occupied cachedOccupied = getOccupiedModeCache(zoneId);
-        Status returnStatus = Status.setpoint;
+        Occupied cachedOccupied = getOccupiedModeCache("@" + zoneId);
+        Status returnStatus = Status.OCCUPIED;
         double firstTemp = 0;
         double secondTemp = 0;
         if(cachedOccupied == null)
@@ -199,15 +199,15 @@ public class ScheduleProcessJob extends BaseJob {
         //{Current Mode}, Changes to Energy Saving Range of %.1f-%.1fF at %s
         if(cachedOccupied.isOccupied())
         {
-            return String.format("In %s, changes to energy saving range of %.1f-%.1fF at %02d:%02d", "set point",
-                    cachedOccupied.getHeatingVal() - VAVScheduler.heatingDeadBand,
-                    cachedOccupied.getCoolingVal() + VAVScheduler.coolingDeadBand,
+            return String.format("In %s, changes to energy saving range of %.1f-%.1fF at %02d:%02d", "occupied mode",
+                    cachedOccupied.getHeatingVal() - cachedOccupied.getHeatingDeadBand(),
+                    cachedOccupied.getCoolingVal() + cachedOccupied.getCoolingDeadBand(),
                     cachedOccupied.getCurrentlyOccupiedSchedule().getEthh(),
                     cachedOccupied.getCurrentlyOccupiedSchedule().getEtmm());
         }
         else
         {
-            return String.format("In %s, changes to energy saving range of %.1f-%.1fF at %02d:%02d", "set back",
+            return String.format("In %s, changes to energy saving range of %.1f-%.1fF at %02d:%02d", "unoccupied mode",
                     cachedOccupied.getHeatingVal(),
                     cachedOccupied.getCoolingVal(),
                     cachedOccupied.getNextOccupiedSchedule().getSthh(),
@@ -217,6 +217,6 @@ public class ScheduleProcessJob extends BaseJob {
 
     public enum Status
     {
-        setpoint,setback,preconditioning
+        OCCUPIED, UNOCCUPIED, PRECONDITIONING
     }
 }

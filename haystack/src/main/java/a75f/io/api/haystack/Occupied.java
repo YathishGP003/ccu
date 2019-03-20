@@ -11,6 +11,8 @@ public class Occupied {
     private long mMillisecondsUntilNextChange;
     private Schedule.Days mCurrentlyOccupiedScheduleDay;
     private Schedule.Days mNextOccupiedScheduleDay;
+    private Double mHeatingDeadband;
+    private Double mCoolingDeadband;
 
     @Override
     public boolean equals(Object o) {
@@ -19,6 +21,8 @@ public class Occupied {
         Occupied occupied = (Occupied) o;
         return mOccupied == occupied.mOccupied &&
                 mMillisecondsUntilNextChange == occupied.mMillisecondsUntilNextChange &&
+                Objects.equals(mCoolingDeadband, occupied.mCoolingDeadband) &&
+                Objects.equals(mHeatingDeadband, occupied.mHeatingDeadband) &&
                 Objects.equals(mValue, occupied.mValue) &&
                 Objects.equals(mCoolingVal, occupied.mCoolingVal) &&
                 Objects.equals(mHeatingVal, occupied.mHeatingVal) &&
@@ -28,7 +32,7 @@ public class Occupied {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mOccupied, mValue, mCoolingVal, mHeatingVal, mMillisecondsUntilNextChange, mCurrentlyOccupiedScheduleDay, mNextOccupiedScheduleDay);
+        return Objects.hash(mOccupied, mValue, mCoolingVal, mHeatingVal, mMillisecondsUntilNextChange, mCurrentlyOccupiedScheduleDay, mNextOccupiedScheduleDay, mCoolingDeadband, mHeatingDeadband);
     }
 
     public boolean isOccupied() {
@@ -86,4 +90,17 @@ public class Occupied {
     public Schedule.Days getNextOccupiedSchedule() {
         return mNextOccupiedScheduleDay;
     }
+
+    public void setHeatingDeadBand(double heatingDeadBand)
+    {
+        mHeatingDeadband = heatingDeadBand;
+    }
+
+    public void setCoolingDeadBand(double coolingDeadband)
+    {
+        mCoolingDeadband = coolingDeadband;
+    }
+
+    public double getHeatingDeadBand() { return mHeatingDeadband; }
+    public double getCoolingDeadBand() { return mCoolingDeadband; }
 }

@@ -45,7 +45,7 @@ public class SSEZonePreconditioningTest extends BaseSimulationTest
 	
 	@Override
 	public String getTestDescription() {
-		return "Tests whether cooling started 15 minutes before the actual schedule owing to preconditioning." +
+		return "Tests whether cooling started 15 minutes before the actual schedule owing to PRECONDITIONING." +
 		       "Creates a schedule to start cooling 30 minutes later.Relay1 and Relay2 outputs of smartnode 7006 configured as Cooling and Fan respectively." +
 		       "Room temperature is kept above set temperature by 1 degree and default precondition rate is 15";
 	}
@@ -92,7 +92,7 @@ public class SSEZonePreconditioningTest extends BaseSimulationTest
 				case 8:
 				case 9:
 				case 10:
-					//Not is schedule, but preconditioning triggered ; both cooling and fan should be on
+					//Not is schedule, but PRECONDITIONING triggered ; both cooling and fan should be on
 					if ((params.digital_out_1 == 1) && (params.digital_out_2 == 1))
 					{
 						result.analysis += "<p>Check Point " + mRunner.getLoopCounter() + ": PASS" + "</p>";

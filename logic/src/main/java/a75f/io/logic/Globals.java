@@ -397,7 +397,6 @@ public class Globals {
                     VavAnalogRtu analogRtuProfile = new VavAnalogRtu();
                     analogRtuProfile.addSystemEquip();
                     L.ccu().systemProfile = analogRtuProfile;
-                    
                     break;
                 case SYSTEM_VAV_STAGED_RTU:
                     VavStagedRtu stagedRtuProfile = new VavStagedRtu();

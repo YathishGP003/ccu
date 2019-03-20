@@ -44,6 +44,11 @@ public class VavIERtu extends VavSystemProfile
     }
     
     @Override
+    public ProfileType getProfileType() {
+        return ProfileType.SYSTEM_VAV_IE_RTU;
+    }
+    
+    @Override
     public void doSystemControl() {
     
     }

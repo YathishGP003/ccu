@@ -25,6 +25,11 @@ public class DefaultSystem extends SystemProfile
         return "Default";
     }
     
+    @Override
+    public ProfileType getProfileType() {
+        return ProfileType.SYSTEM_DEFAULT;
+    }
+    
     public DefaultSystem() {
       addSystemEquip();
     }

@@ -37,6 +37,11 @@ public class VavBacnetRtu extends VavSystemProfile
     }
     
     @Override
+    public ProfileType getProfileType() {
+        return ProfileType.SYSTEM_VAV_BACNET_RTU;
+    }
+    
+    @Override
     public void deleteSystemEquip() {
         HashMap equip = CCUHsApi.getInstance().read("equip and system");
         if (equip.get("profile").equals(ProfileType.SYSTEM_VAV_BACNET_RTU.name())) {

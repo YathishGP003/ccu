@@ -23,6 +23,7 @@ import a75f.io.device.mesh.MeshUtil;
 import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedHybridRtu;
 import a75f.io.logic.tuners.TunerConstants;
@@ -99,9 +100,9 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
     
     
     VavAdvancedHybridRtu systemProfile = null;
-    public static VavStagedRtuProfile newInstance()
+    public static VavHybridRtuProfile newInstance()
     {
-        return new VavStagedRtuProfile();
+        return new VavHybridRtuProfile();
     }
     
     @Override
@@ -115,7 +116,7 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
     {
-        if (L.ccu().systemProfile instanceof VavAdvancedHybridRtu)
+        if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_HYBRID_RTU)
         {
             systemProfile = (VavAdvancedHybridRtu) L.ccu().systemProfile;
             relay1Cb.setChecked(systemProfile.getConfigEnabled("relay1") > 0);

@@ -131,14 +131,7 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
         npStartTime.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         npStartTime.setVisibility(View.VISIBLE);
         npStartTime.setWrapSelectorWheel(false);
-        npStartTime.setFormatter(new NumberPicker.Formatter() {
-
-            @Override
-            public String format(int value) {
-                return TimeUtils.valToTime(value);
-            }
-
-        });
+        npStartTime.setFormatter(value -> TimeUtils.valToTime(value));
 
         try {
             Method method = npStartTime.getClass().getDeclaredMethod("changeValueByOne", boolean.class);
@@ -157,14 +150,7 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
         npEndTime.setVisibility(View.VISIBLE);
         npEndTime.setWrapSelectorWheel(false);
 
-        npEndTime.setFormatter(new NumberPicker.Formatter() {
-
-            @Override
-            public String format(int value) {
-                return TimeUtils.valToTime(value);
-            }
-
-        });
+        npEndTime.setFormatter(value -> TimeUtils.valToTime(value));
 
         try {
             Method method = npEndTime.getClass().getDeclaredMethod("changeValueByOne", boolean.class);
@@ -318,13 +304,9 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
     private void checkTemp(Schedule.Days mDay)
     {
         if(mDay.getCoolingVal() != null)
-            mCoolingTempET.setVisibility(View.GONE);
-        else
             mCoolingTempET.setText(mDay.getCoolingVal().toString());
 
         if(mDay.getHeatingVal() != null)
-            mHeatingTempET.setVisibility(View.GONE);
-        else
             mHeatingTempET.setText(mDay.getHeatingVal().toString());
     }
 

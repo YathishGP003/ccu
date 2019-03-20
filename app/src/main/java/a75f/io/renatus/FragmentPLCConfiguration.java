@@ -201,8 +201,8 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                 }
                 ArrayList<Double> targetVal = new ArrayList<Double>();
                 Sensor r = Sensor.getSensorList().get(i-1);
-                for (int pos = (int)(10*r.minEngineeringValue); pos <= (10*r.maxEngineeringValue); pos+=(10*r.incrementEgineeringValue)) {
-                    targetVal.add(pos /10.0);
+                for (int pos = (int)(100*r.minEngineeringValue); pos <= (100*r.maxEngineeringValue); pos+=(100*r.incrementEgineeringValue)) {
+                    targetVal.add(pos /100.0);
                 }
                 ArrayAdapter<Double> targetValAdapter = new ArrayAdapter<Double>(getActivity(), android.R.layout.simple_spinner_item, targetVal);
                 targetValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -284,8 +284,8 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                 Log.d("CCU_UI"," analog2InSensorSp Selected : "+i);
                 ArrayList<Double> targetVal = new ArrayList<Double>();
                 Sensor r = Sensor.getSensorList().get(i);
-                for (int pos = (int)(10 * r.minEngineeringValue); pos <= (10* r.maxEngineeringValue); pos+= (10 * r.incrementEgineeringValue)) {
-                    targetVal.add(pos /10.0);
+                for (int pos = (int)(100 * (r.minEngineeringValue < 0 ? r.minEngineeringValue : -1*r.maxEngineeringValue)); pos <= (100* r.maxEngineeringValue); pos+= (100 * r.incrementEgineeringValue)) {
+                    targetVal.add(pos /100.0);
                 }
                 ArrayAdapter<Double> offsetAdapter = new ArrayAdapter<Double>(getActivity(), android.R.layout.simple_spinner_item, targetVal);
                 offsetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);

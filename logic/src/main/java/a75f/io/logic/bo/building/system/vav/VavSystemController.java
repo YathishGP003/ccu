@@ -73,6 +73,9 @@ public class VavSystemController
     boolean systemOccupied = false;
     boolean systemPreCon = false;
     
+    double averageSystemHumidity = 0;
+    double averageSystemTemperature = 0;
+    
     private VavSystemController()
     {
         piController = new ControlLoop();
@@ -97,6 +100,13 @@ public class VavSystemController
         weightedAverageCoolingOnlyLoadSum = weightedAverageHeatingOnlyLoadSum = weightedAverageLoadSum = 0;
         systemOccupied = false;
         systemPreCon = false;
+        
+        updateSystemHumidity();
+        updateSystemTemperature();
+        
+        profile.setSystemPoint("average and humidity", averageSystemHumidity);
+        profile.setSystemPoint("average and temp", averageSystemTemperature);
+        
         for (Floor f: HSUtil.getFloors())
         {
             for(Zone z: HSUtil.getZones(f.getId())) {
@@ -135,7 +145,7 @@ public class VavSystemController
         }
     
         CcuLog.d(L.TAG_CCU_SYSTEM, "systemOccupied : "+systemOccupied);
-        profile.setSystemOccupancy(systemOccupied ? 0:1);
+        profile.setSystemPoint("occupancy and status", systemOccupied ? 0:1);
         if (prioritySum == 0) {
             CcuLog.d(L.TAG_CCU_SYSTEM, "No valid temperature, Skip VavSystemControlAlgo");
             return;
@@ -146,6 +156,8 @@ public class VavSystemController
         weightedAverageLoad = weightedAverageLoadSum / prioritySum;
         
         comfortIndex = (int)(totalCoolingLoad + totalHeatingLoad) /zoneCount;
+        
+        profile.setSystemPoint("ci and running", comfortIndex);
     
         weightedAverageCoolingOnlyLoadMAQueue.add(weightedAverageCoolingOnlyLoad);
         weightedAverageHeatingOnlyLoadMAQueue.add(weightedAverageHeatingOnlyLoad);
@@ -177,7 +189,7 @@ public class VavSystemController
             systemState = OFF;
         }
         
-        profile.setSystemOperatingMode(systemState.ordinal());
+        profile.setSystemPoint("operating and mode", systemState.ordinal());
         
         piController.dump();
         if (systemState == COOLING) {
@@ -194,6 +206,9 @@ public class VavSystemController
         CcuLog.d(L.TAG_CCU_SYSTEM, "weightedAverageCoolingOnlyLoadMA: "+weightedAverageCoolingOnlyLoadMA+" weightedAverageHeatingOnlyLoadMA: "
                                                     +weightedAverageHeatingOnlyLoadMA +" systemState: "+systemState+" coolingSignal: "+coolingSignal+" heatingSignal: "+heatingSignal);
     
+        profile.setSystemPoint("moving and average and cooling and load",weightedAverageCoolingOnlyLoadMA);
+        profile.setSystemPoint("moving and average and heating and load",weightedAverageHeatingOnlyLoadMA);
+        
         if (systemState == HEATING)
         {
             normalizeAirflow();
@@ -354,7 +369,7 @@ public class VavSystemController
         return getZoneDesiredTemp(zoneRef);//TODO - TEMP
     }*/
     
-    public double getSystemHumidity() {
+    public void updateSystemHumidity() {
         //Average across zones or from proxy zone.
         double humiditySum = 0;
         double humidityZones = 0;
@@ -371,7 +386,35 @@ public class VavSystemController
                 humidityZones++;
             }
         }
-        return humidityZones == 0 ? 0 : humiditySum/humidityZones;
+        averageSystemHumidity = humidityZones == 0 ? 0 : humiditySum/humidityZones;
+    }
+    
+    public double getAverageSystemHumidity() {
+        return averageSystemHumidity;
+    }
+    
+    public void updateSystemTemperature() {
+        //Average across zones or from proxy zone.
+        double tempSum = 0;
+        double tempZones = 0;
+        
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        ArrayList<HashMap> vavEquips = hayStack.readAll("equip and vav and zone");
+        
+        for (HashMap q : vavEquips)
+        {
+            double tempVal = hayStack.readHisValByQuery("point and air and temp and sensor and current and equipRef == \""+q.get("id")+"\"");
+            
+            if (tempVal != 0) {
+                tempSum += tempVal;
+                tempZones++;
+            }
+        }
+        averageSystemTemperature = tempZones == 0 ? 0 : tempSum/tempZones;
+    }
+    
+    public double getAverageSystemTemperature() {
+        return averageSystemTemperature;
     }
     
     /*public double getDynamicPriority(double zoneLoad, String zoneRef) {

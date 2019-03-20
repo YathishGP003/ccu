@@ -240,6 +240,20 @@ public class ScheduleProcessJob extends BaseJob {
         }
     }
 
+
+    public static String getVacationStateString(String zoneId)
+    {
+        Occupied cachedOccupied = getOccupiedModeCache("@" + zoneId);
+        if(cachedOccupied.getVacation() != null)
+        {
+            return "Active Vacation";
+        }
+        else
+        {
+            return "No Active Vacation";
+        }
+    }
+
     public enum Status
     {
         OCCUPIED, UNOCCUPIED, PRECONDITIONING

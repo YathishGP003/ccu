@@ -183,7 +183,10 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
                 signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * systemHeatingLoopOp/100));
             }
         } else {
-            signal = 0;
+            double coolingMin = getConfigVal("analog4 and cooling and min");
+            double heatingMin = getConfigVal("analog4 and heating and min");
+    
+            signal = (int) (ANALOG_SCALE * (coolingMin + heatingMin) /2);
         }
         CcuLog.d(L.TAG_CCU_SYSTEM, "analogMin: "+analogMin+" analogMax: "+analogMax+" Composite: "+signal);
         

@@ -1,9 +1,11 @@
 package a75f.io.logic.bo.building.system;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75.io.algos.tr.TRSystem;
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
 import a75f.io.logic.bo.building.Schedule;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.dab.DabSystemController;
@@ -18,6 +20,8 @@ public abstract class SystemProfile
     public Schedule schedule = new Schedule();
     
     public TRSystem trSystem;
+    
+    public String equipRef = null;
     
     public abstract void doSystemControl();
     
@@ -83,8 +87,24 @@ public abstract class SystemProfile
     }
     
     public String getSystemEquipRef() {
-        HashMap equip = CCUHsApi.getInstance().read("equip and system");
-        return equip.get("id").toString();
+        if (equipRef == null)
+        {
+            HashMap equip = CCUHsApi.getInstance().read("equip and system");
+            equipRef = equip.get("id").toString();
+        }
+        return equipRef;
+    }
+    
+    public void updateAhuRef(String systemEquipId) {
+        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone");
+        
+        for (HashMap m : equips)
+        {
+            Equip q = new Equip.Builder().setHashMap(m).setAhuRef(systemEquipId).build();
+            CCUHsApi.getInstance().updateEquip(q, q.getId());
+        }
+        
+        CCUHsApi.getInstance().updateCCUahuRef(systemEquipId);
     }
     
 }

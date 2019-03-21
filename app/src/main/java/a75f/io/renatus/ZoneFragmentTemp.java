@@ -134,7 +134,7 @@ public class ZoneFragmentTemp extends Fragment
         {
             Log.d("CCU_UI","Equip: "+m);
             Equip p = new Equip.Builder().setHashMap(m).build();
-            if (p.getProfile() != null && !p.getProfile().contains("SYSTEM"))
+            if (p.getProfile() != null && !p.getProfile().contains("SYSTEM") && p.getProfile().contains("VAV"))
             {
                 HashMap currTmep = CCUHsApi.getInstance().read("point and air and temp and sensor and current and equipRef == \""+p.getId()+"\"");
                 HashMap coolDT = CCUHsApi.getInstance().read("point and air and temp and desired and cooling and sp and equipRef == \""+p.getId()+"\"");

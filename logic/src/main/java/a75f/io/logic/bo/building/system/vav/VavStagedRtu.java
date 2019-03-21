@@ -22,8 +22,8 @@ import static a75f.io.logic.bo.building.hvac.Stage.FAN_2;
 import static a75f.io.logic.bo.building.hvac.Stage.HEATING_1;
 import static a75f.io.logic.bo.building.hvac.Stage.HEATING_2;
 import static a75f.io.logic.bo.building.hvac.Stage.HUMIDIFIER;
-import static a75f.io.logic.bo.building.system.vav.VavSystemController.State.COOLING;
-import static a75f.io.logic.bo.building.system.vav.VavSystemController.State.HEATING;
+import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
+import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
 
 /**
  * Created by samjithsadasivan on 8/14/18.
@@ -152,7 +152,7 @@ public class VavStagedRtu extends VavSystemProfile
             systemHeatingLoopOp = 0;
         }
         
-        double analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier");
+        double analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier", getSystemEquipRef());
         if (VavSystemController.getInstance().getSystemState() == COOLING)
         {
             double spSpMax = VavTRTuners.getStaticPressureTRTunerVal("spmax");
@@ -171,7 +171,7 @@ public class VavStagedRtu extends VavSystemProfile
         
         updateStagesSelected();
     
-        double relayDeactHysteresis = TunerUtil.readTunerValByQuery("relay and deactivation and hysteresis");
+        double relayDeactHysteresis = TunerUtil.readTunerValByQuery("relay and deactivation and hysteresis", getSystemEquipRef());
         CcuLog.d(L.TAG_CCU_SYSTEM, "systemCoolingLoopOp: "+systemCoolingLoopOp + " systemHeatingLoopOp: " + systemHeatingLoopOp+" systemFanLoopOp: "+systemFanLoopOp);
         CcuLog.d(L.TAG_CCU_SYSTEM, "coolingStages: "+coolingStages + " heatingStages: "+heatingStages+" fanStages: "+fanStages);
         for (int i = 1; i <=7 ;i++)
@@ -315,7 +315,7 @@ public class VavStagedRtu extends VavSystemProfile
                         double humidity = VavSystemController.getInstance().getAverageSystemHumidity();
                         double targetMinHumidity = TunerUtil.readSystemUserIntentVal("target and min and inside and humidity");
                         double targetMaxHumidity = TunerUtil.readSystemUserIntentVal("target and max and inside and humidity");
-                        double humidityHysteresis = TunerUtil.readTunerValByQuery("humidity and hysteresis");
+                        double humidityHysteresis = TunerUtil.readTunerValByQuery("humidity and hysteresis", getSystemEquipRef());
                         currState = getCmdSignal("relay" + i);
                         if (stage == HUMIDIFIER)
                         {

@@ -45,11 +45,7 @@ public class ScheduleProcessJob extends BaseJob {
     public static Occupied getOccupiedModeCache(String id) {
         if(!occupiedHashMap.containsKey(id))
         {
-            Schedule schedule = Schedule.getScheduleForZone(id, false);
-            if(schedule != null)
-            {
-                occupiedHashMap.put(id, schedule.getCurrentValues());
-            }
+            return null;
         }
 
         return occupiedHashMap.get(id);
@@ -244,7 +240,12 @@ public class ScheduleProcessJob extends BaseJob {
     public static String getVacationStateString(String zoneId)
     {
         Occupied cachedOccupied = getOccupiedModeCache("@" + zoneId);
-        if(cachedOccupied.getVacation() != null)
+
+        if(cachedOccupied == null)
+        {
+            return "Setting up..";
+        }
+        else if(cachedOccupied.getVacation() != null)
         {
             return "Active Vacation";
         }

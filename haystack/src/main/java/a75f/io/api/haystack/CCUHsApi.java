@@ -3,6 +3,7 @@ package a75f.io.api.haystack;
 import android.content.Context;
 import android.util.Log;
 
+import org.projecthaystack.HDate;
 import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
@@ -805,6 +806,9 @@ public class CCUHsApi
 
     public String createCCU(String ccuName, String installerEmail)
     {
+        HashMap equip = CCUHsApi.getInstance().read("equip and system");
+        String ahuRef = equip.size() > 0 ? equip.get("id").toString() : "";
+        
         HDictBuilder hDictBuilder = new HDictBuilder();
         CcuLog.d("CCU_HS", "Site Ref: " + getSiteId());
         String localId = UUID.randomUUID().toString();
@@ -813,11 +817,39 @@ public class CCUHsApi
         hDictBuilder.add("dis", HStr.make(ccuName));
         hDictBuilder.add("installer", HStr.make(installerEmail));
         hDictBuilder.add("siteRef", getSiteId());
-        System.out.println("DATE: " + HDateTime.make(System.currentTimeMillis()).date.toZinc());
         hDictBuilder.add("createdDate", HDateTime.make(System.currentTimeMillis()).date);
+        hDictBuilder.add("ahuRef", ahuRef);
         hDictBuilder.add("device");
         tagsDb.addHDict(localId, hDictBuilder.toDict());
         return localId;
+    }
+    
+    public void updateCCUahuRef(String ahuRef) {
+        
+        Log.d("CCU_HS","updateCCUahuRef "+ahuRef);
+        HashMap ccu = read("device and ccu");
+        
+        if (ccu.size() == 0) {
+            return;
+        }
+        
+        String id = ccu.get("id").toString();
+    
+        HDictBuilder hDictBuilder = new HDictBuilder();
+        hDictBuilder.add("id", HRef.copy(id));
+        hDictBuilder.add("ccu");
+        hDictBuilder.add("dis", HStr.make(ccu.get("dis").toString()));
+        hDictBuilder.add("installer", HStr.make(ccu.get("installer").toString()));
+        hDictBuilder.add("siteRef", getSiteId());
+        hDictBuilder.add("createdDate", HDate.make(ccu.get("createdDate").toString()));
+        hDictBuilder.add("ahuRef", ahuRef);
+        hDictBuilder.add("device");
+        tagsDb.addHDict(id.replace("@",""), hDictBuilder.toDict());
+    
+        if (tagsDb.idMap.get(id) != null)
+        {
+            tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
+        }
     }
 
     public HRef getSiteId()

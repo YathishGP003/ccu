@@ -1,8 +1,13 @@
 package a75f.io.logic.bo.building.system;
 
+import java.util.HashMap;
+
 import a75.io.algos.tr.TRSystem;
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.bo.building.Schedule;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.system.dab.DabSystemController;
+import a75f.io.logic.bo.building.system.vav.VavSystemController;
 
 /**
  * Created by Yinten isOn 8/15/2017.
@@ -62,8 +67,24 @@ public abstract class SystemProfile
         return 0;
     }
     
-    /*@JsonIgnore
-    public Struct getSystemControlMsg() {
-        return null;
-    }*/
+    public SystemController getSystemController() {
+        switch (getProfileType()) {
+            case SYSTEM_VAV_ANALOG_RTU:
+            case SYSTEM_VAV_STAGED_RTU:
+            case SYSTEM_VAV_STAGED_VFD_RTU:
+            case SYSTEM_VAV_HYBRID_RTU:
+                return VavSystemController.getInstance();
+            case SYSTEM_DAB_STAGED_RTU:
+                return DabSystemController.getInstance();
+            case SYSTEM_DEFAULT:
+                return DefaultSystemController.getInstance();
+        }
+        return DefaultSystemController.getInstance();
+    }
+    
+    public String getSystemEquipRef() {
+        HashMap equip = CCUHsApi.getInstance().read("equip and system");
+        return equip.get("id").toString();
+    }
+    
 }

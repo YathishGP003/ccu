@@ -19,8 +19,8 @@ import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.tuners.VavTRTuners;
 
-import static a75f.io.logic.bo.building.system.vav.VavSystemController.State.COOLING;
-import static a75f.io.logic.bo.building.system.vav.VavSystemController.State.HEATING;
+import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
+import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
 
 /**
  * Default System handles PI controlled op
@@ -138,7 +138,7 @@ public class VavAnalogRtu extends VavSystemProfile
         analogMax = getConfigVal("analog3 and heating and max");
     
         CcuLog.d(L.TAG_CCU_SYSTEM, "analogMin: "+analogMin+" analogMax: "+analogMax+" Heating : "+VavSystemController.getInstance().getHeatingSignal());
-        if (VavSystemController.getInstance().getSystemState() == VavSystemController.State.HEATING)
+        if (VavSystemController.getInstance().getSystemState() == HEATING)
         {
             systemHeatingLoopOp = VavSystemController.getInstance().getHeatingSignal();
         } else {
@@ -161,7 +161,7 @@ public class VavAnalogRtu extends VavSystemProfile
             ControlMote.setAnalogOut("analog3", signal);
         }
         
-        double analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier");
+        double analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier", getSystemEquipRef());
         if (VavSystemController.getInstance().getSystemState() == COOLING)
         {
             double spSpMax = VavTRTuners.getStaticPressureTRTunerVal("spmax");
@@ -227,7 +227,7 @@ public class VavAnalogRtu extends VavSystemProfile
     
             boolean humidifier = getConfigVal("humidifier and type") == 0;
             
-            double humidityHysteresis = TunerUtil.readTunerValByQuery("humidity and hysteresis");
+            double humidityHysteresis = TunerUtil.readTunerValByQuery("humidity and hysteresis", getSystemEquipRef());
     
             if (humidifier) {
                 //Humidification

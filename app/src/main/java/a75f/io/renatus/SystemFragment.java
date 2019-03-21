@@ -36,8 +36,8 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
+import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
-import a75f.io.logic.bo.building.system.vav.VavSystemController;
 import a75f.io.logic.tuners.TunerUtil;
 
 
@@ -207,7 +207,19 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		});
 		
 		stageStatusNow = view.findViewById(R.id.stageStatusNow);
-		stageStatusNow.setText(VavSystemController.getInstance().getSystemState().name());
+		
+		double operatingMode = CCUHsApi.getInstance().readHisValByQuery("point and system and operating and mode");
+		
+		Log.d("CCU_UI", "operatingMode :" + operatingMode);
+		
+		handler.post(new Runnable() {
+			@Override
+			public void run() {
+				stageStatusNow.setText(SystemController.State.values()[(int)operatingMode].name());
+			}
+		});
+		
+		
 		
 		ArrayList<Double> zoroToHundred = new ArrayList<>();
 		for (double val = 0;  val <= 100.0; val++)

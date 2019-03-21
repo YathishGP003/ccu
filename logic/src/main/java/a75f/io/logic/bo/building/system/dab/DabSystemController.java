@@ -13,17 +13,17 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
+import a75f.io.logic.bo.building.system.SystemController;
 
 import static a75f.io.logic.bo.building.ZonePriority.NONE;
-import static a75f.io.logic.bo.building.system.dab.DabSystemController.State.COOLING;
-import static a75f.io.logic.bo.building.system.dab.DabSystemController.State.HEATING;
-import static a75f.io.logic.bo.building.system.dab.DabSystemController.State.OFF;
+import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
+import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
 
 /**
  * Created by samjithsadasivan on 1/9/19.
  */
 
-public class DabSystemController
+public class DabSystemController extends SystemController
 {
     public double dxCI_CO_MA = 0;
     public double dxCI_WA = 0;
@@ -39,9 +39,6 @@ public class DabSystemController
     
     int ciDesired;
     
-    public enum State {OFF, COOLING, HEATING};
-    State dxState = OFF;
-    
     private DabSystemController()
     {
         piController = new ControlLoop();
@@ -49,9 +46,6 @@ public class DabSystemController
     }
     
     public static DabSystemController getInstance() {
-        if (instance == null) {
-            instance = new DabSystemController();
-        }
         return instance;
     }
     
@@ -94,13 +88,13 @@ public class DabSystemController
         dxCI_CO_MA = dxCiMASum/dxCIMABuffer.size();
         
         if (isAllZonesCooling() || dxCI_CO_MA >= ciDesired * 1 /*MULTIPLIER to be a tuner*/) {
-            if (dxState != COOLING) {
-                dxState = COOLING;
+            if (systemState != COOLING) {
+                systemState = COOLING;
                 piController.reset();
             }
         } else if (isAllZonesHeating() || dxCI_CO_MA <= -1 * ciDesired * 1 /*MULTIPLIER*/) {
-            if (dxState != HEATING) {
-                dxState = HEATING;
+            if (systemState != HEATING) {
+                systemState = HEATING;
                 piController.reset();
             }
         }
@@ -117,7 +111,7 @@ public class DabSystemController
                 double zone_dp = getDynamicPriority(ciDesired, z.getId());
                 
                 dxCISum += zone_dxCI * zone_dp;
-                Log.d("CCU", "WA zone_dxCI: "+zone_dxCI+" zone_dp: "+zone_dp+" dxCISum: "+dxCISum+" dxState: "+dxState);
+                Log.d("CCU", "WA zone_dxCI: "+zone_dxCI+" zone_dp: "+zone_dp+" dxCISum: "+dxCISum+" dxState: "+systemState);
             }
         }
         
@@ -135,22 +129,39 @@ public class DabSystemController
             heatingSignal = 0;
             coolingSignal = (int) loopOp;
         }
-        Log.d("CCU", "runDxCIAlgo-> dxCI_CO_MA: "+dxCI_CO_MA+" dxCI_WA: "+dxCI_WA+" dxState: "+dxState+" coolingSignal: "+coolingSignal+" heatingSignal: "+heatingSignal);
+        Log.d("CCU", "runDxCIAlgo-> dxCI_CO_MA: "+dxCI_CO_MA+" dxCI_WA: "+dxCI_WA+" dxState: "+systemState+" coolingSignal: "+coolingSignal+" heatingSignal: "+heatingSignal);
     }
     
+    @Override
     public int getCoolingSignal() {
-        if (dxState != COOLING) {
+        if (systemState != COOLING) {
             return 0;
         }
         return coolingSignal;
     }
     
+    @Override
     public int getHeatingSignal() {
-        if (dxState != HEATING) {
+        if (systemState != HEATING) {
             return 0;
         }
         return heatingSignal;
     }
+    
+    @Override
+    public int getSystemOccupancy() {
+        return 0;
+    }
+    
+    @Override
+    public double getAverageSystemHumidity() {
+        return 0;
+    }
+    @Override
+    public double getAverageSystemTemperature() {
+        return 0;
+    }
+    
     
     public boolean isAllZonesHeating() {
         for (ZoneProfile p: L.ccu().zoneProfiles)
@@ -225,6 +236,6 @@ public class DabSystemController
     }
     
     public State getDxCIRtuState() {
-        return dxState;
+        return systemState;
     }
 }

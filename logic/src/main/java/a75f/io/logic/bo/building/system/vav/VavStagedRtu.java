@@ -327,6 +327,8 @@ public class VavStagedRtu extends VavSystemProfile
                             else if (humidity > (targetMinHumidity + humidityHysteresis))
                             {
                                 relayState = 0;
+                            } else {
+                                relayState = currState;
                             }
                         }
                         else
@@ -339,6 +341,8 @@ public class VavStagedRtu extends VavSystemProfile
                             else if (humidity < (targetMaxHumidity - humidityHysteresis))
                             {
                                 relayState = 0;
+                            } else {
+                                relayState = currState;
                             }
                         }
                         CcuLog.d(L.TAG_CCU_SYSTEM,"humidity :"+humidity+" targetMinHumidity: "+targetMinHumidity+" humidityHysteresis: "+humidityHysteresis+

@@ -82,14 +82,14 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
             TextView scheduleStatus = convertView.findViewById(R.id.schedule_status_tv);
             Spinner scheduleSpinner = convertView.findViewById(R.id.schedule_spinner);
             ImageButton scheduleImageButton = convertView.findViewById(R.id.schedule_edit_button);
-            TextView vacationStatus = convertView.findViewById(R.id.vacation_status);
+            TextView vacationStatusTV = convertView.findViewById(R.id.vacation_status);
             ImageButton vacationEditButton = convertView.findViewById(R.id.vacation_edit_button);
             HashMap equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
 
             String zoneId = Schedule.getZoneIdByEquipId(equipId);
             String status = ScheduleProcessJob.getSystemStateString(zoneId);
-
-
+            String vacationStatus = ScheduleProcessJob.getVacationStateString(zoneId);
+            vacationStatusTV.setText(vacationStatus);
             scheduleStatus.setText(status);
 
 

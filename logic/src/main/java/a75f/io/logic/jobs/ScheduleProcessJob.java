@@ -45,11 +45,7 @@ public class ScheduleProcessJob extends BaseJob {
     public static Occupied getOccupiedModeCache(String id) {
         if(!occupiedHashMap.containsKey(id))
         {
-            Schedule schedule = Schedule.getScheduleForZone(id, false);
-            if(schedule != null)
-            {
-                occupiedHashMap.put(id, schedule.getCurrentValues());
-            }
+            return null;
         }
 
         return occupiedHashMap.get(id);
@@ -110,6 +106,10 @@ public class ScheduleProcessJob extends BaseJob {
         }
         
         Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
+
+        ArrayList<Schedule> activeVacationSchedules = CCUHsApi.getInstance().getSystemSchedule(true);
+
+        Schedule activeVacationSchedule = getActiveVacation(activeVacationSchedules);
         /* The systemSchedule isn't initiated yet, so schedules shouldn't be ran*/
 
         if(systemSchedule == null)
@@ -129,21 +129,40 @@ public class ScheduleProcessJob extends BaseJob {
                
                 Schedule equipSchedule = Schedule.getScheduleForZone(equip.getRoomRef().replace("@", ""), false);
                 if (equipSchedule != null) {
-                    writePointsForEquip(equip, equipSchedule);
+                    writePointsForEquip(equip, equipSchedule, activeVacationSchedule);
                 }
                 else
                 {
-                    writePointsForEquip(equip, systemSchedule);
+                    writePointsForEquip(equip, systemSchedule, activeVacationSchedule);
                 }
             }
         }
         CcuLog.d(L.TAG_CCU_JOB,"<- ScheduleProcessJob");
     }
 
-    private void writePointsForEquip(Equip equip, Schedule equipSchedule) {
+    private Schedule getActiveVacation(ArrayList<Schedule> activeVacationSchedules)
+    {
+
+        if(activeVacationSchedules == null)
+            return null;
+
+        for(Schedule schedule : activeVacationSchedules)
+        {
+            if(schedule.isVacation() && schedule.isActiveVacation())
+            {
+                return schedule;
+            }
+
+        }
+
+        return null;
+
+    }
+
+    private void writePointsForEquip(Equip equip, Schedule equipSchedule, Schedule vacation) {
         if(equip.getMarkers().contains("vav"))
         {
-            VAVScheduler.processEquip(equip, equipSchedule);
+            VAVScheduler.processEquip(equip, equipSchedule, vacation);
         }
     }
 
@@ -162,11 +181,11 @@ public class ScheduleProcessJob extends BaseJob {
         In temporary hold *This is for forced occupied mode
         In vacation, till
         Away
-        In setpoint - DR Mode
-        In setpoint
+        In OCCUPIED - DR Mode
+        In OCCUPIED
         In precondition - DR Mode
-        In preconditioning
-        In energy saving setback
+        In PRECONDITIONING
+        In energy saving UNOCCUPIED
 
 
         Non-named schedules
@@ -203,8 +222,8 @@ public class ScheduleProcessJob extends BaseJob {
     public static String getSystemStateString(String zoneId)
     {
 
-        Occupied cachedOccupied = getOccupiedModeCache(zoneId);
-        Status returnStatus = Status.setpoint;
+        Occupied cachedOccupied = getOccupiedModeCache("@" + zoneId);
+        Status returnStatus = Status.OCCUPIED;
         double firstTemp = 0;
         double secondTemp = 0;
         if(cachedOccupied == null)
@@ -214,24 +233,49 @@ public class ScheduleProcessJob extends BaseJob {
         //{Current Mode}, Changes to Energy Saving Range of %.1f-%.1fF at %s
         if(cachedOccupied.isOccupied())
         {
-            return String.format("In %s, changes to energy saving range of %.1f-%.1fF at %02d:%02d", "set point",
-                    cachedOccupied.getHeatingVal() - VAVScheduler.heatingDeadBand,
-                    cachedOccupied.getCoolingVal() + VAVScheduler.coolingDeadBand,
+            return String.format("In %s, changes to energy saving range of %.1f-%.1fF at %02d:%02d", "occupied mode",
+                    cachedOccupied.getHeatingVal() - cachedOccupied.getHeatingDeadBand(),
+                    cachedOccupied.getCoolingVal() + cachedOccupied.getCoolingDeadBand(),
                     cachedOccupied.getCurrentlyOccupiedSchedule().getEthh(),
                     cachedOccupied.getCurrentlyOccupiedSchedule().getEtmm());
         }
-        else
+        else if(cachedOccupied.getVacation() != null)
         {
-            return String.format("In %s, changes to energy saving range of %.1f-%.1fF at %02d:%02d", "set back",
+            return String.format("In %s, changes to energy saving range of %.1f-%.1fF on %s", "vacation mode",
                     cachedOccupied.getHeatingVal(),
                     cachedOccupied.getCoolingVal(),
-                    cachedOccupied.getNextOccupiedSchedule().getSthh(),
-                    cachedOccupied.getNextOccupiedSchedule().getStmm());
+                    cachedOccupied.getVacation().getEndDateString());
+        } else
+        {
+            return String.format("In %s, changes to energy saving range of %.1f-%.1fF at %02d:%02d", "unoccupied mode",
+                                 cachedOccupied.getHeatingVal(),
+                                 cachedOccupied.getCoolingVal(),
+                                 cachedOccupied.getNextOccupiedSchedule().getSthh(),
+                                 cachedOccupied.getNextOccupiedSchedule().getStmm());
+        }
+    }
+
+
+    public static String getVacationStateString(String zoneId)
+    {
+        Occupied cachedOccupied = getOccupiedModeCache("@" + zoneId);
+
+        if(cachedOccupied == null)
+        {
+            return "Setting up..";
+        }
+        else if(cachedOccupied.getVacation() != null)
+        {
+            return "Active Vacation";
+        }
+        else
+        {
+            return "No Active Vacation";
         }
     }
 
     public enum Status
     {
-        setpoint,setback,preconditioning
+        UNOCCUPIED, OCCUPIED, PRECONDITIONING
     }
 }

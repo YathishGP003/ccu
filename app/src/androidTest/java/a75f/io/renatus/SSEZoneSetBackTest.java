@@ -49,9 +49,9 @@ public class SSEZoneSetBackTest extends BaseSimulationTest
 
 	@Override
 	public String getTestDescription() {
-		return "Tests various setback values under constant room_temperature and set temperature." +
+		return "Tests various UNOCCUPIED values under constant room_temperature and set temperature." +
 		       "Creates a schedule to start cooling 30 minutes later.Relay1 and Relay2 outputs of smartnode 7005 configured as Cooling and Fan respectively." +
-		       "Room temperature is kept above set temperature. Activation of cooling is monitored for different setback values.";
+		       "Room temperature is kept above set temperature. Activation of cooling is monitored for different UNOCCUPIED values.";
 	}
 
 	@Override
@@ -104,7 +104,7 @@ public class SSEZoneSetBackTest extends BaseSimulationTest
 			}
 			if (runCounter ==7)
 			{
-				result.analysis += "<p>Verified that cooling on relay_1 is turned ON/OFF appropriately for current value of setback</p> ";
+				result.analysis += "<p>Verified that cooling on relay_1 is turned ON/OFF appropriately for current value of UNOCCUPIED</p> ";
 			}
 		}
 	}
@@ -152,7 +152,7 @@ public class SSEZoneSetBackTest extends BaseSimulationTest
 		for (int val : setBackValArray) {
 			sb.add((float)val);
 		}
-		graphData.put("zone-setback",sb);
+		graphData.put("zone-UNOCCUPIED",sb);
 		return graphData;
 	}
 

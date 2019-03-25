@@ -127,6 +127,10 @@ public class ScheduleProcessJob extends BaseJob {
 
     private Schedule getActiveVacation(ArrayList<Schedule> activeVacationSchedules)
     {
+
+        if(activeVacationSchedules == null)
+            return null;
+
         for(Schedule schedule : activeVacationSchedules)
         {
             if(schedule.isVacation() && schedule.isActiveVacation())
@@ -257,6 +261,6 @@ public class ScheduleProcessJob extends BaseJob {
 
     public enum Status
     {
-        OCCUPIED, UNOCCUPIED, PRECONDITIONING
+        UNOCCUPIED, OCCUPIED, PRECONDITIONING
     }
 }

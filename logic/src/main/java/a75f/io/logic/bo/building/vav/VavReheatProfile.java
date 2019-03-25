@@ -122,7 +122,7 @@ public class VavReheatProfile extends VavProfile
                         valveController.updateControlVariable(dischargeSp, dischargeTemp);
                         valve.currentPosition = (int) (valveController.getControlVariable() * 100 / valveController.getMaxAllowedError());
                         loopOp = 0;
-                        CcuLog.d(L.TAG_CCU_ZONE, "dischargeTempSP: " + dischargeSp);
+                        CcuLog.d(L.TAG_CCU_ZONE, "dischargeSp: " + dischargeSp);
                     }
                     else
                     {

@@ -151,7 +151,14 @@ public class Schedule extends Entity {
                 } else {
                     occupied.setNextOccupiedSchedule(daysSorted.get(i));
                 }
-
+    
+                DateTime startDateTime = new DateTime(MockTime.getInstance().getMockTime())
+                                                 .withHourOfDay(daysSorted.get(i).getSthh())
+                                                 .withMinuteOfHour(daysSorted.get(i).getStmm())
+                                                 .withDayOfWeek(daysSorted.get(i).getDay() + 1)
+                                                 .withSecondOfMinute(0);
+                occupied.setMillisecondsUntilNextChange(startDateTime.getMillis());
+                
                 return occupied;
             }
         }
@@ -165,6 +172,12 @@ public class Schedule extends Entity {
             occupied.setCoolingVal(daysSorted.get(0).mCoolingVal);
             occupied.setHeatingVal(daysSorted.get(0).mHeatingVal);
             occupied.setNextOccupiedSchedule(daysSorted.get(0));
+            DateTime startDateTime = new DateTime(MockTime.getInstance().getMockTime())
+                                             .withHourOfDay(daysSorted.get(0).getSthh())
+                                             .withMinuteOfHour(daysSorted.get(0).getStmm())
+                                             .withDayOfWeek(daysSorted.get(0).getDay() + 1)
+                                             .withSecondOfMinute(0);
+            occupied.setMillisecondsUntilNextChange(startDateTime.getMillis());
         }
 
         return occupied;

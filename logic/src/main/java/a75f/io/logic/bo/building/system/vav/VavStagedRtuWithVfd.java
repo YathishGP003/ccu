@@ -126,7 +126,7 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
                     }
                 }
             }
-        } else if (VavSystemController.getInstance().systemOccupied) {
+        } else if (VavSystemController.getInstance().systemOccupancy > 0) {
             for (int i = 1; i < 8; i++)
             {
                 if (getConfigEnabled("relay" + i) > 0 && getCmdSignal("relay" + i) > 0)

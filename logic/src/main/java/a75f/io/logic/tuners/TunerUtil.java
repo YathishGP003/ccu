@@ -16,8 +16,8 @@ public class TunerUtil
 {
     public static double readTunerValByQuery(String query) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap valveStartDamperPoint = hayStack.read("point and tuner and "+query);
-        ArrayList values = hayStack.readPoint(valveStartDamperPoint.get("id").toString());
+        HashMap tunerPoint = hayStack.read("point and tuner and "+query);
+        ArrayList values = hayStack.readPoint(tunerPoint.get("id").toString());
         if (values != null && values.size() > 0)
         {
             for (int l = 1; l <= values.size() ; l++ ) {
@@ -32,8 +32,8 @@ public class TunerUtil
     
     public static double readTunerValByQuery(String query, String equipRef) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap valveStartDamperPoint = hayStack.read("point and tuner and "+query+" and equipRef == \""+equipRef+"\"");
-        ArrayList values = hayStack.readPoint(valveStartDamperPoint.get("id").toString());
+        HashMap tunerPoint = hayStack.read("point and tuner and "+query+" and equipRef == \""+equipRef+"\"");
+        ArrayList values = hayStack.readPoint(tunerPoint.get("id").toString());
         if (values != null && values.size() > 0)
         {
             for (int l = 1; l <= values.size() ; l++ ) {
@@ -48,8 +48,8 @@ public class TunerUtil
     
     public static String readTunerStrByQuery(String query) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap valveStartDamperPoint = hayStack.read("point and tuner and "+query);
-        ArrayList values = hayStack.readPoint(valveStartDamperPoint.get("id").toString());
+        HashMap tunerPoint = hayStack.read("point and tuner and "+query);
+        ArrayList values = hayStack.readPoint(tunerPoint.get("id").toString());
         if (values != null && values.size() > 0)
         {
             for (int l = 1; l <= values.size() ; l++ ) {

@@ -56,8 +56,7 @@ public class VavSystemController extends SystemController
     
     double totalCoolingLoad = 0;
     double totalHeatingLoad = 0;
-    int coolingZoneCount = 0;
-    int heatingZoneCount = 0;
+    int zoneCount = 0;
     
     double weightedAverageCoolingOnlyLoadSum;
     double weightedAverageHeatingOnlyLoadSum;
@@ -70,8 +69,7 @@ public class VavSystemController extends SystemController
     double weightedAverageCoolingOnlyLoadMA;
     double weightedAverageHeatingOnlyLoadMA;
     
-    boolean systemOccupied = false;
-    boolean systemPreCon = false;
+    int systemOccupancy = 0;
     
     double averageSystemHumidity = 0;
     double averageSystemTemperature = 0;
@@ -95,8 +93,7 @@ public class VavSystemController extends SystemController
         CcuLog.d(L.TAG_CCU_SYSTEM, "runVavSystemControlAlgo -> ciDesired: " + ciDesired + " systemMode: " + systemMode);
     
         weightedAverageCoolingOnlyLoadSum = weightedAverageHeatingOnlyLoadSum = weightedAverageLoadSum = 0;
-        systemOccupied = false;
-        systemPreCon = false;
+        systemOccupancy = 0;
         
         updateSystemHumidity();
         updateSystemTemperature();
@@ -109,7 +106,7 @@ public class VavSystemController extends SystemController
             for(Zone z: HSUtil.getZones(f.getId())) {
     
                 if (ScheduleProcessJob.getOccupiedModeCache(z.getId()).isOccupied()) {
-                    systemOccupied = true;
+                    systemOccupancy = 1;
                 }
                 
                 for (Equip q : HSUtil.getEquips(z.getId()))
@@ -129,12 +126,7 @@ public class VavSystemController extends SystemController
                     double zoneDynamicPriority = getEquipDynamicPriority(zoneCoolingLoad > 0 ? zoneCoolingLoad : zoneHeatingLoad, q.getId());
                     totalCoolingLoad += zoneCoolingLoad;
                     totalHeatingLoad += zoneHeatingLoad;
-                    if (zoneCoolingLoad > 0)
-                        coolingZoneCount++;
-                    
-                    if (zoneHeatingLoad > 0) {
-                        heatingZoneCount++;
-                    }
+                    zoneCount++;
                     weightedAverageCoolingOnlyLoadSum += zoneCoolingLoad * zoneDynamicPriority;
                     weightedAverageHeatingOnlyLoadSum += zoneHeatingLoad * zoneDynamicPriority;
                     weightedAverageLoadSum = +(zoneCoolingLoad * zoneDynamicPriority) - (zoneHeatingLoad * zoneDynamicPriority);
@@ -145,9 +137,7 @@ public class VavSystemController extends SystemController
             }
         
         }
-    
-        CcuLog.d(L.TAG_CCU_SYSTEM, "systemOccupied : "+systemOccupied);
-        profile.setSystemPoint("occupancy and status", systemOccupied ? 0:1);
+        
         if (prioritySum == 0) {
             CcuLog.d(L.TAG_CCU_SYSTEM, "No valid temperature, Skip VavSystemControlAlgo");
             return;
@@ -157,23 +147,7 @@ public class VavSystemController extends SystemController
         weightedAverageHeatingOnlyLoad = weightedAverageHeatingOnlyLoadSum / prioritySum;
         weightedAverageLoad = weightedAverageLoadSum / prioritySum;
         
-        
-        if ( heatingZoneCount > 0 || coolingZoneCount > 0)
-        {
-            comfortIndex = (int) (totalCoolingLoad + totalHeatingLoad) / (heatingZoneCount + coolingZoneCount);
-        } else {
-            comfortIndex = 0;
-        }
-        
-        
-        double preconTemp = 0;
-        if (coolingZoneCount > 0) {
-            preconTemp = totalCoolingLoad/coolingZoneCount;
-        }
-        if (heatingZoneCount > 0) {
-            preconTemp -= (totalHeatingLoad/heatingZoneCount);
-        }
-        int preconTime = (int) (preconTemp * TunerUtil.readTunerValByQuery("precon and rate", profile.getSystemEquipRef()));
+        comfortIndex = (int)(totalCoolingLoad - totalHeatingLoad) /zoneCount;
         
         profile.setSystemPoint("ci and running", comfortIndex);
     
@@ -226,6 +200,22 @@ public class VavSystemController extends SystemController
     
         profile.setSystemPoint("moving and average and cooling and load",weightedAverageCoolingOnlyLoadMA);
         profile.setSystemPoint("moving and average and heating and load",weightedAverageHeatingOnlyLoadMA);
+    
+        if (systemOccupancy == 0)
+        {
+            double preconDegree = Math.max(weightedAverageCoolingOnlyLoadMA, weightedAverageHeatingOnlyLoadMA);
+            double preconRate = CCUHsApi.getInstance().getPredictedPreconRate(profile.getSystemEquipRef());
+            if (preconRate == 0) {
+                preconRate = TunerUtil.readTunerValByQuery("precon and rate", profile.getSystemEquipRef());
+            }
+            if (preconDegree * preconRate * 60 * 1000 >= ScheduleProcessJob.getMillisToOccupancy())
+            {
+                systemOccupancy = 2; //TODO - use enum
+            }
+            CcuLog.d(L.TAG_CCU_SYSTEM, "preconRate : "+preconRate+" preconDegree: "+preconDegree);
+        }
+        profile.setSystemPoint("occupancy and status", systemOccupancy);
+        CcuLog.d(L.TAG_CCU_SYSTEM, "systemOccupancy status : "+systemOccupancy);
         
         if (systemState == HEATING)
         {
@@ -258,13 +248,7 @@ public class VavSystemController extends SystemController
     
     @Override
     public int getSystemOccupancy() {
-        if (systemOccupied) {
-            return ScheduleProcessJob.Status.setpoint.ordinal();
-        } else if (systemPreCon) {
-            return ScheduleProcessJob.Status.preconditioning.ordinal();
-        } else {
-            return ScheduleProcessJob.Status.setback.ordinal();
-        }
+        return systemOccupancy;
     }
     
     public boolean isAllZonesHeating() {

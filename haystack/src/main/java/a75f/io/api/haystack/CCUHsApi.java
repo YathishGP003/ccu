@@ -915,4 +915,36 @@ public class CCUHsApi
     {
         tagsDb.init(c);
     }
+    
+    public double getPredictedPreconRate(String ahuRef) {
+        HClient hClient   = new HClient(HttpUtil.HAYSTACK_URL, HayStackConstants.USER, HayStackConstants.PASS);
+    
+        try
+        {
+            HDict hDict = new HDictBuilder().add("filter", "equip and virtual and ahuRef == " + getGUID(ahuRef)).toDict();
+            HGrid virtualEquip = hClient.call("read", HGridBuilder.dictToGrid(hDict));
+            if (virtualEquip != null && virtualEquip.numRows() > 0)
+            {
+                HDict pDict = new HDictBuilder().add("filter", "point and predicted and rate and equipRef == " + virtualEquip.row(0).get("id").toString()).toDict();
+                HGrid preconPoint = hClient.call("read", HGridBuilder.dictToGrid(pDict));
+                if (preconPoint != null && preconPoint.numRows() > 0)
+                {
+                    HGrid hisGrid = hClient.hisRead(HRef.copy(preconPoint.row(0).get("id").toString()), "today");
+                    if (hisGrid != null && hisGrid.numRows() > 0)
+                    {
+                        HRow r = hisGrid.row(hisGrid.numRows() - 1);
+                        HDateTime date = (HDateTime) r.get("ts");
+                        double preconVal = Double.parseDouble(r.get("val").toString());
+                        Log.d("CCU_HS", "RemotePreconRate , " + date + " : " + preconVal);
+                        return preconVal;
+                    }
+                }
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
+            Log.d("CCU_HS","getPredictedPreconRate Failed : Fall back to default precon rate");
+        }
+        
+        return 0;
+    }
 }

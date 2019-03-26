@@ -17,12 +17,13 @@ import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BaseJob;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.L.TAG_CCU_JOB;
-import static a75f.io.logic.jobs.ScheduleProcessJob.Status.OCCUPIED;
-import static a75f.io.logic.jobs.ScheduleProcessJob.Status.PRECONDITIONING;
-import static a75f.io.logic.jobs.ScheduleProcessJob.Status.UNOCCUPIED;
+import static a75f.io.logic.bo.building.Occupancy.OCCUPIED;
+import static a75f.io.logic.bo.building.Occupancy.PRECONDITIONING;
+import static a75f.io.logic.bo.building.Occupancy.UNOCCUPIED;
 
 /*
     The scheduler needs to maintain the state of things, so it doesn't write
@@ -238,7 +239,7 @@ public class ScheduleProcessJob extends BaseJob {
     {
 
         Occupied cachedOccupied = getOccupiedModeCache("@" + zoneId);
-        Status returnStatus = Status.OCCUPIED;
+        Occupancy returnStatus = OCCUPIED;
         double firstTemp = 0;
         double secondTemp = 0;
         if(cachedOccupied == null)
@@ -310,7 +311,7 @@ public class ScheduleProcessJob extends BaseJob {
     
     //TODO - Currently done from SystemController as system occupancy is associated to systemEquip.
     public void updateSystemOccupancy() {
-        Status systemOccupancy = UNOCCUPIED;
+        Occupancy systemOccupancy = UNOCCUPIED;
         for (Floor f: HSUtil.getFloors())
         {
             for (Zone z : HSUtil.getZones(f.getId()))
@@ -335,10 +336,5 @@ public class ScheduleProcessJob extends BaseJob {
         }
         CCUHsApi.getInstance().writeHisValByQuery("point and system and his and occupancy and status",(double)systemOccupancy.ordinal());
         CcuLog.d(TAG_CCU_JOB, "systemOccupancy status : " + systemOccupancy);
-    }
-
-    public enum Status
-    {
-        UNOCCUPIED, OCCUPIED, PRECONDITIONING
     }
 }

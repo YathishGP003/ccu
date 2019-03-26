@@ -10,6 +10,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -104,8 +105,8 @@ public class VavSystemController extends SystemController
         for (Floor f: HSUtil.getFloors())
         {
             for(Zone z: HSUtil.getZones(f.getId())) {
-    
-                if (ScheduleProcessJob.getOccupiedModeCache(z.getId()).isOccupied()) {
+                Occupied c = ScheduleProcessJob.getOccupiedModeCache(z.getId());
+                if (c != null && c.isOccupied()) {
                     systemOccupancy = 1;
                 }
                 

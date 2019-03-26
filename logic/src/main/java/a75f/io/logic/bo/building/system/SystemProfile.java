@@ -21,7 +21,7 @@ public abstract class SystemProfile
     
     public TRSystem trSystem;
     
-    public String equipRef = null;
+    private String equipRef = null;
     
     public abstract void doSystemControl();
     

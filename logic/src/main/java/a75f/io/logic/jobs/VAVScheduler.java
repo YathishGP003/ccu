@@ -38,8 +38,8 @@ public class VAVScheduler {
 
         occ.setVacation(vacation);
 
-        double heatingDeadBand = TunerUtil.readTunerValByQuery("heating and deadband and equipRef==\""+equip.getId() + "\"");
-        double coolingDeadBand = TunerUtil.readTunerValByQuery("cooling and deadband and equipRef==\""+equip.getId() + "\"");
+        double heatingDeadBand = TunerUtil.readTunerValByQuery("heating and deadband", equip.getId());
+        double coolingDeadBand = TunerUtil.readTunerValByQuery("cooling and deadband", equip.getId());
 
         occ.setHeatingDeadBand(heatingDeadBand);
         occ.setCoolingDeadBand(coolingDeadBand);

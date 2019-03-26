@@ -115,4 +115,8 @@ public class Occupied {
     {
         return vacation;
     }
+    
+    public int getNextOccupiedStartMinutes() {
+        return 60 * mNextOccupiedScheduleDay.getSthh() + mNextOccupiedScheduleDay.getStmm();
+    }
 }

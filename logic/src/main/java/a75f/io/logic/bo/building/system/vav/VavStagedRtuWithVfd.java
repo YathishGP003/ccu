@@ -9,9 +9,11 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
 import a75f.io.logic.bo.haystack.device.ControlMote;
+import a75f.io.logic.jobs.ScheduleProcessJob;
 
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
@@ -126,7 +128,7 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
                     }
                 }
             }
-        } else if (VavSystemController.getInstance().systemOccupancy > 0) {
+        } else if (ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED) {
             for (int i = 1; i < 8; i++)
             {
                 if (getConfigEnabled("relay" + i) > 0 && getCmdSignal("relay" + i) > 0)

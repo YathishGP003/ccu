@@ -53,6 +53,7 @@ public class TunerConstants
     
     public static final double ZONE_PRIORITY_SPREAD = 2.0;
     public static final double ZONE_PRIORITY_MULTIPLIER = 1.3;
+    public static final double ZONE_UNOCCUPIED_SETBACK = 5;
     
     public static final double SYSTEM_PRECONDITION_RATE = 15.0;
     

@@ -18,6 +18,7 @@ import a75f.io.logic.bo.building.hvac.Valve;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
 import a75f.io.logic.tuners.TunerUtil;
 
+import static a75f.io.logic.bo.building.Occupancy.OCCUPIED;
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
@@ -138,9 +139,12 @@ public class VavParallelFanProfile extends VavProfile
             {
                 valve.currentPosition = 0;
             }
+    
+            boolean  enabledCO2Control = vavDevice.getConfigNumVal("enable and co2") > 0 ;
+            double occupancy = CCUHsApi.getInstance().readHisValByQuery("point and system and his and occupancy and status");
             
             //CO2 loop output from 0-50% modulates damper min position.
-            if (/*mode == OCCUPIED && */co2Loop.getLoopOutput(co2) <= 50)
+            if (enabledCO2Control && occupancy == OCCUPIED.ordinal() && co2Loop.getLoopOutput(co2) <= 50)
             {
                 //When HEATING , maxPosition = maxPosition - parallel fan factor.
                 int parallelFanFactor = 0 ;//TODO - Tuner

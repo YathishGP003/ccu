@@ -10,7 +10,6 @@ import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -22,7 +21,7 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.Spinner;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import org.projecthaystack.HDict;
 import org.projecthaystack.HGrid;
@@ -38,6 +37,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
+import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
 
 
@@ -51,6 +51,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	SeekBar  sbComfortValue;
 	EditText stageStatusNow;
 	Spinner mSysSpinnerSchedule;
+	
+	TextView systemScheduleStatus;
 	
 	RadioButton systemOff;
 	RadioButton systemAuto;
@@ -86,9 +88,9 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	@Override
 	public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
 	{
-
-		mSysSpinnerSchedule = view.findViewById(R.id.sysSpinnerSchedule);
-
+		systemScheduleStatus = view.findViewById(R.id.systemSchedule);
+		
+		/*mSysSpinnerSchedule = view.findViewById(R.id.sysSpinnerSchedule);
 		mSysSpinnerSchedule.setOnTouchListener(new View.OnTouchListener() {
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
@@ -100,7 +102,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 				return true;
 			}
-		});
+		});*/
 		systemModeRg = view.findViewById(R.id.systemConditioningMode);
 		systemOff = view.findViewById(R.id.systemOff);
 		systemAuto = view.findViewById(R.id.systemAuto);
@@ -259,6 +261,13 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			public void onCheckedChanged(CompoundButton compoundButton, boolean b)
 			{
 				setUserIntentBackground("demand and response", b ? 1: 0);
+			}
+		});
+		
+		handler.post(new Runnable() {
+			@Override
+			public void run() {
+				systemScheduleStatus.setText(ScheduleProcessJob.getSystemStatusString());
 			}
 		});
 		

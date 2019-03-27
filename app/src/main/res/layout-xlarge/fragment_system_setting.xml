@@ -70,7 +70,7 @@
                 android:layout_gravity="center|left"
                 android:layout_marginLeft="8dp"
                 android:gravity="center_vertical|center_horizontal"
-                android:text="Status"
+                android:text="Equipment Status"
                 android:textColor="#202020"
                 android:textSize="@dimen/text_medium_xlarge" />
 
@@ -206,7 +206,7 @@
         android:layout_weight="0.5"
         android:orientation="vertical">
 
-        <LinearLayout
+        <!--<LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical">
@@ -232,7 +232,7 @@
                 android:layout_marginLeft="20dp"
                 android:padding="8dp"
                 android:src="@drawable/content_edit" />
-        </LinearLayout>
+        </LinearLayout>-->
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -247,7 +247,15 @@
                 android:textSize="@dimen/text_large_xlarge"
                 android:visibility="gone" />-->
 
-            <EditText
+            <TextView
+                android:id="@+id/sysSchTv"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:text="Occupancy Status"
+                android:textColor="#202020"
+                android:textSize="@dimen/text_medium_xlarge" />
+
+            <TextView
                 android:id="@+id/systemSchedule"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

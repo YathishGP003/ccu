@@ -20,7 +20,6 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.util.HSEquipUtil;
-import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
@@ -69,7 +68,7 @@ public class VavSystemController extends SystemController
     double weightedAverageCoolingOnlyLoadMA;
     double weightedAverageHeatingOnlyLoadMA;
     
-    int systemOccupancy = 0;
+    //int systemOccupancy = 0;
     
     double averageSystemHumidity = 0;
     double averageSystemTemperature = 0;
@@ -93,7 +92,7 @@ public class VavSystemController extends SystemController
         CcuLog.d(L.TAG_CCU_SYSTEM, "runVavSystemControlAlgo -> ciDesired: " + ciDesired + " systemMode: " + systemMode);
     
         weightedAverageCoolingOnlyLoadSum = weightedAverageHeatingOnlyLoadSum = weightedAverageLoadSum = 0;
-        systemOccupancy = 0;
+        //systemOccupancy = 0;
         
         updateSystemHumidity();
         updateSystemTemperature();
@@ -104,10 +103,10 @@ public class VavSystemController extends SystemController
         for (Floor f: HSUtil.getFloors())
         {
             for(Zone z: HSUtil.getZones(f.getId())) {
-    
-                if (ScheduleProcessJob.getOccupiedModeCache(z.getId()).isOccupied()) {
+                /*Occupied c = ScheduleProcessJob.getOccupiedModeCache(z.getId());
+                if (c != null && c.isOccupied()) {
                     systemOccupancy = 1;
-                }
+                }*/
                 
                 for (Equip q : HSUtil.getEquips(z.getId()))
                 {
@@ -201,7 +200,7 @@ public class VavSystemController extends SystemController
         profile.setSystemPoint("moving and average and cooling and load",weightedAverageCoolingOnlyLoadMA);
         profile.setSystemPoint("moving and average and heating and load",weightedAverageHeatingOnlyLoadMA);
     
-        if (systemOccupancy == 0)
+        /*if (systemOccupancy == 0)
         {
             double preconDegree = Math.max(weightedAverageCoolingOnlyLoadMA, weightedAverageHeatingOnlyLoadMA);
             double preconRate = CCUHsApi.getInstance().getPredictedPreconRate(profile.getSystemEquipRef());
@@ -215,7 +214,7 @@ public class VavSystemController extends SystemController
             CcuLog.d(L.TAG_CCU_SYSTEM, "preconRate : "+preconRate+" preconDegree: "+preconDegree);
         }
         profile.setSystemPoint("occupancy and status", systemOccupancy);
-        CcuLog.d(L.TAG_CCU_SYSTEM, "systemOccupancy status : "+systemOccupancy);
+        CcuLog.d(L.TAG_CCU_SYSTEM, "systemOccupancy status : "+systemOccupancy);*/
         
         if (systemState == HEATING)
         {
@@ -244,11 +243,6 @@ public class VavSystemController extends SystemController
     @Override
     public int getHeatingSignal() {
         return heatingSignal;
-    }
-    
-    @Override
-    public int getSystemOccupancy() {
-        return systemOccupancy;
     }
     
     public boolean isAllZonesHeating() {

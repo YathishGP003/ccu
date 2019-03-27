@@ -18,6 +18,7 @@ import a75f.io.logic.bo.building.hvac.VavUnit;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
 import a75f.io.logic.tuners.TunerUtil;
 
+import static a75f.io.logic.bo.building.Occupancy.OCCUPIED;
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
@@ -172,15 +173,17 @@ public class VavReheatProfile extends VavProfile
                 valve.currentPosition = 0;
             }
             
+            boolean  enabledCO2Control = vavDevice.getConfigNumVal("enable and co2") > 0 ;
+            double occupancy = CCUHsApi.getInstance().readHisValByQuery("point and system and his and occupancy and status");
             //CO2 loop output from 0-50% modulates damper min position.
-            if (/*mode == OCCUPIED && */co2Loop.getLoopOutput(co2) <= 50)
+            if (enabledCO2Control && occupancy == OCCUPIED.ordinal() && co2Loop.getLoopOutput(co2) <= 50)
             {
                 damper.iaqCompensatedMinPos = damper.minPosition + (damper.maxPosition - damper.minPosition) * co2Loop.getLoopOutput() / 50;
                 CcuLog.d(L.TAG_CCU_ZONE,"CO2LoopOp :"+co2Loop.getLoopOutput()+", adjusted minposition "+damper.minPosition);
             }
     
             //VOC loop output from 0-50% modulates damper min position.
-            if (/*mode == OCCUPIED && */vocLoop.getLoopOutput(voc) <= 50)
+            if (occupancy == OCCUPIED.ordinal() && vocLoop.getLoopOutput(voc) <= 50)
             {
                 damper.iaqCompensatedMinPos = damper.minPosition + (damper.maxPosition - damper.minPosition) * vocLoop.getLoopOutput() / 50;
                 CcuLog.d(L.TAG_CCU_ZONE,"VOCLoopOp :"+vocLoop.getLoopOutput()+", adjusted minposition "+damper.minPosition);

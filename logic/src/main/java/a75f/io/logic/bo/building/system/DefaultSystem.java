@@ -4,7 +4,6 @@ package a75f.io.logic.bo.building.system;
  * Created by samjithsadasivan on 1/8/19.
  */
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -23,6 +22,11 @@ public class DefaultSystem extends SystemProfile
 {
     public String getProfileName() {
         return "Default";
+    }
+    
+    @Override
+    public ProfileType getProfileType() {
+        return ProfileType.SYSTEM_DEFAULT;
     }
     
     public DefaultSystem() {
@@ -72,16 +76,6 @@ public class DefaultSystem extends SystemProfile
     @Override
     public boolean isHeatingAvailable() {
         return false;
-    }
-    
-    public void updateAhuRef(String systemEquipId) {
-        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone");
-        
-        for (HashMap m : equips)
-        {
-            Equip q = new Equip.Builder().setHashMap(m).setAhuRef(systemEquipId).build();
-            CCUHsApi.getInstance().updateEquip(q, q.getId());
-        }
     }
     
     @Override

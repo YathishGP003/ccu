@@ -3,6 +3,7 @@ package a75f.io.api.haystack;
 import android.content.Context;
 import android.util.Log;
 
+import org.projecthaystack.HDate;
 import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
@@ -26,6 +27,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
+import a75f.io.api.haystack.sync.EntityParser;
 import a75f.io.api.haystack.sync.EntitySyncHandler;
 import a75f.io.api.haystack.sync.HisSyncHandler;
 import a75f.io.api.haystack.sync.HttpUtil;
@@ -736,11 +738,16 @@ public class CCUHsApi
             return false;
         }
 
-        HGrid remoteSiteDetails = getRemoteSiteDetails(siteId);
-
-
-        tagsDb.addHGrid(remoteSite);
-        tagsDb.addHGrid(remoteSiteDetails);
+        //HGrid remoteSiteDetails = getRemoteSiteDetails(siteId);
+        
+        EntityParser p = new EntityParser(remoteSite);
+        Site s = p.getSite();
+        tagsDb.idMap.put("@"+tagsDb.addSite(s), s.getId());
+        Log.d("CCU_HS","Added Site "+s.getId());
+        
+        //tagsDb.addHGrid(remoteSite);
+        //tagsDb.addHGrid(remoteSiteDetails);
+        
         tagsDb.log();
 
         return true;
@@ -799,6 +806,9 @@ public class CCUHsApi
 
     public String createCCU(String ccuName, String installerEmail)
     {
+        HashMap equip = CCUHsApi.getInstance().read("equip and system");
+        String ahuRef = equip.size() > 0 ? equip.get("id").toString() : "";
+        
         HDictBuilder hDictBuilder = new HDictBuilder();
         CcuLog.d("CCU_HS", "Site Ref: " + getSiteId());
         String localId = UUID.randomUUID().toString();
@@ -807,11 +817,39 @@ public class CCUHsApi
         hDictBuilder.add("dis", HStr.make(ccuName));
         hDictBuilder.add("installer", HStr.make(installerEmail));
         hDictBuilder.add("siteRef", getSiteId());
-        System.out.println("DATE: " + HDateTime.make(System.currentTimeMillis()).date.toZinc());
         hDictBuilder.add("createdDate", HDateTime.make(System.currentTimeMillis()).date);
+        hDictBuilder.add("ahuRef", ahuRef);
         hDictBuilder.add("device");
         tagsDb.addHDict(localId, hDictBuilder.toDict());
         return localId;
+    }
+    
+    public void updateCCUahuRef(String ahuRef) {
+        
+        Log.d("CCU_HS","updateCCUahuRef "+ahuRef);
+        HashMap ccu = read("device and ccu");
+        
+        if (ccu.size() == 0) {
+            return;
+        }
+        
+        String id = ccu.get("id").toString();
+    
+        HDictBuilder hDictBuilder = new HDictBuilder();
+        hDictBuilder.add("id", HRef.copy(id));
+        hDictBuilder.add("ccu");
+        hDictBuilder.add("dis", HStr.make(ccu.get("dis").toString()));
+        hDictBuilder.add("installer", HStr.make(ccu.get("installer").toString()));
+        hDictBuilder.add("siteRef", getSiteId());
+        hDictBuilder.add("createdDate", HDate.make(ccu.get("createdDate").toString()));
+        hDictBuilder.add("ahuRef", ahuRef);
+        hDictBuilder.add("device");
+        tagsDb.addHDict(id.replace("@",""), hDictBuilder.toDict());
+    
+        if (tagsDb.idMap.get(id) != null)
+        {
+            tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
+        }
     }
 
     public HRef getSiteId()
@@ -876,5 +914,37 @@ public class CCUHsApi
     public void loadTagsData(Context c)
     {
         tagsDb.init(c);
+    }
+    
+    public double getPredictedPreconRate(String ahuRef) {
+        HClient hClient   = new HClient(HttpUtil.HAYSTACK_URL, HayStackConstants.USER, HayStackConstants.PASS);
+    
+        try
+        {
+            HDict hDict = new HDictBuilder().add("filter", "equip and virtual and ahuRef == " + getGUID(ahuRef)).toDict();
+            HGrid virtualEquip = hClient.call("read", HGridBuilder.dictToGrid(hDict));
+            if (virtualEquip != null && virtualEquip.numRows() > 0)
+            {
+                HDict pDict = new HDictBuilder().add("filter", "point and predicted and rate and equipRef == " + virtualEquip.row(0).get("id").toString()).toDict();
+                HGrid preconPoint = hClient.call("read", HGridBuilder.dictToGrid(pDict));
+                if (preconPoint != null && preconPoint.numRows() > 0)
+                {
+                    HGrid hisGrid = hClient.hisRead(HRef.copy(preconPoint.row(0).get("id").toString()), "today");
+                    if (hisGrid != null && hisGrid.numRows() > 0)
+                    {
+                        HRow r = hisGrid.row(hisGrid.numRows() - 1);
+                        HDateTime date = (HDateTime) r.get("ts");
+                        double preconVal = Double.parseDouble(r.get("val").toString());
+                        Log.d("CCU_HS", "RemotePreconRate , " + date + " : " + preconVal);
+                        return preconVal;
+                    }
+                }
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
+            Log.d("CCU_HS","getPredictedPreconRate Failed : Fall back to default precon rate");
+        }
+        
+        return 0;
     }
 }

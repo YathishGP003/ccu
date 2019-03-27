@@ -2,10 +2,14 @@ package a75f.io.haystack.api;
 
 import org.junit.Test;
 import org.projecthaystack.HDateTime;
+import org.projecthaystack.HDict;
+import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
+import org.projecthaystack.HGridBuilder;
 import org.projecthaystack.HHisItem;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
+import org.projecthaystack.HRow;
 import org.projecthaystack.client.HClient;
 import org.projecthaystack.io.HZincWriter;
 
@@ -19,11 +23,13 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
+import a75f.io.api.haystack.sync.HttpUtil;
 
 /**
  * Created by samjithsadasivan on 9/17/18.
@@ -423,6 +429,36 @@ public class TestHS
                     System.out.println("Equip : "+ee.getDisplayName());
                     System.out.println("Equip profile : "+ee.getProfile());
                 }
+            }
+        }
+    }
+    
+    @Test
+    public void testVirtualEquip() {
+        HClient hClient   = new HClient(HttpUtil.HAYSTACK_URL, HayStackConstants.USER, HayStackConstants.PASS);
+    
+        HDict hDict = new HDictBuilder().add("filter", "equip and virtual and ahuRef == @5c98342a24aa9a00f4c5d937").toDict();
+        HGrid virtualEquip = hClient.call("read", HGridBuilder.dictToGrid(hDict));
+        virtualEquip.dump();
+        
+        if (virtualEquip != null && virtualEquip.row(0) != null ) {
+            HDict pDict = new HDictBuilder().add("filter", "point and predicted and rate and equipRef == "+virtualEquip.row(0).get("id")).toDict();
+            HGrid preconPoint = hClient.call("read", HGridBuilder.dictToGrid(pDict));
+            preconPoint.dump();
+    
+            if (preconPoint != null && preconPoint.row(0) != null )
+            {
+              
+                HGrid hisGrid = hClient.hisRead(HRef.copy(preconPoint.row(0).get("id").toString()), "today");
+                hisGrid.dump();
+                int hisCount = hisGrid.numRows();
+                System.out.println(hisCount);
+    
+                HRow r    = hisGrid.row(hisGrid.numRows()-1);
+                //HDateTime date = (HDateTime) r.get("ts");
+                double preconVal  = Double.parseDouble(r.get("val").toString());
+                
+                System.out.println(preconVal);
             }
         }
     }

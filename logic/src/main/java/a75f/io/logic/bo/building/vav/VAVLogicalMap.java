@@ -193,7 +193,7 @@ public class VAVLogicalMap
         
         BuildingTuners.getInstance().addEquipVavTuners(siteDis+"-VAV-"+nodeAddr, equipRef, config);
     
-        createVavConfigPoints(config, equipRef);
+        createVavConfigPoints(config, equipRef, floor, room);
     
         Point datPoint = new Point.Builder()
                                 .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-dischargeAirTemp")
@@ -249,7 +249,7 @@ public class VAVLogicalMap
         String normalizedDPId = CCUHsApi.getInstance().addPoint(normalizedDamperPos);
     
         Point reheatPos = new Point.Builder()
-                                  .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-ReheatPos")
+                                  .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-reheatPos")
                                   .setEquipRef(equipRef)
                                   .setSiteRef(siteRef)
                                   .setRoomRef(room)
@@ -513,7 +513,7 @@ public class VAVLogicalMap
         CCUHsApi.getInstance().syncEntityTree();
     }
     
-    public void createVavConfigPoints(VavProfileConfiguration config, String equipRef) {
+    public void createVavConfigPoints(VavProfileConfiguration config, String equipRef, String floor, String room) {
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
@@ -524,6 +524,8 @@ public class VAVLogicalMap
                                          .setDisplayName(equipDis+"-damperType")
                                          .setEquipRef(equipRef)
                                          .setSiteRef(siteRef)
+                                         .setRoomRef(room)
+                                         .setFloorRef(floor)
                                          .addMarker("config").addMarker("vav").addMarker("writable").addMarker("zone")
                                          .addMarker("damper").addMarker("type").addMarker("sp")
                                          .setGroup(String.valueOf(nodeAddr))
@@ -536,6 +538,8 @@ public class VAVLogicalMap
                                    .setDisplayName(equipDis+"-damperSize")
                                    .setEquipRef(equipRef)
                                    .setSiteRef(siteRef)
+                                   .setRoomRef(room)
+                                   .setFloorRef(floor)
                                    .addMarker("config").addMarker("vav").addMarker("writable").addMarker("zone")
                                    .addMarker("damper").addMarker("size").addMarker("sp")
                                    .setUnit("\u00B0")
@@ -549,6 +553,8 @@ public class VAVLogicalMap
                                    .setDisplayName(equipDis+"-damperShape")
                                    .setEquipRef(equipRef)
                                    .setSiteRef(siteRef)
+                                   .setRoomRef(room)
+                                   .setFloorRef(floor)
                                    .addMarker("config").addMarker("vav").addMarker("writable").addMarker("zone")
                                    .addMarker("damper").addMarker("shape").addMarker("sp")
                                    .setGroup(String.valueOf(nodeAddr))
@@ -561,6 +567,8 @@ public class VAVLogicalMap
                                    .setDisplayName(equipDis+"-reheatType")
                                    .setEquipRef(equipRef)
                                    .setSiteRef(siteRef)
+                                   .setRoomRef(room)
+                                   .setFloorRef(floor)
                                    .addMarker("config").addMarker("vav").addMarker("writable").addMarker("zone")
                                    .addMarker("reheat").addMarker("type").addMarker("sp")
                                    .setGroup(String.valueOf(nodeAddr))
@@ -573,6 +581,8 @@ public class VAVLogicalMap
                                    .setDisplayName(equipDis+"-enableOccupancyControl")
                                    .setEquipRef(equipRef)
                                    .setSiteRef(siteRef)
+                                   .setRoomRef(room)
+                                   .setFloorRef(floor)
                                    .addMarker("config").addMarker("vav").addMarker("writable").addMarker("zone")
                                    .addMarker("enable").addMarker("occupancy").addMarker("control").addMarker("sp")
                                    .setGroup(String.valueOf(nodeAddr))
@@ -585,6 +595,8 @@ public class VAVLogicalMap
                                                .setDisplayName(equipDis+"-enableCO2Control")
                                                .setEquipRef(equipRef)
                                                .setSiteRef(siteRef)
+                                               .setRoomRef(room)
+                                               .setFloorRef(floor)
                                                .addMarker("config").addMarker("vav").addMarker("writable").addMarker("zone")
                                                .addMarker("enable").addMarker("co2").addMarker("control").addMarker("sp")
                                                .setGroup(String.valueOf(nodeAddr))
@@ -597,6 +609,8 @@ public class VAVLogicalMap
                                                .setDisplayName(equipDis+"-enableIAQControl")
                                                .setEquipRef(equipRef)
                                                .setSiteRef(siteRef)
+                                               .setRoomRef(room)
+                                               .setFloorRef(floor)
                                                .addMarker("config").addMarker("vav").addMarker("writable").addMarker("zone")
                                                .addMarker("enable").addMarker("iaq").addMarker("control").addMarker("sp")
                                                .setGroup(String.valueOf(nodeAddr))
@@ -609,6 +623,8 @@ public class VAVLogicalMap
                                          .setDisplayName(equipDis+"-zonePriority")
                                          .setEquipRef(equipRef)
                                          .setSiteRef(siteRef)
+                                         .setRoomRef(room)
+                                         .setFloorRef(floor)
                                          .addMarker("config").addMarker("vav").addMarker("writable").addMarker("zone")
                                          .addMarker("priority").addMarker("sp")
                                          .setGroup(String.valueOf(nodeAddr))
@@ -621,6 +637,8 @@ public class VAVLogicalMap
                                      .setDisplayName(equipDis+"-temperatureOffset")
                                      .setEquipRef(equipRef)
                                      .setSiteRef(siteRef)
+                                     .setRoomRef(room)
+                                     .setFloorRef(floor)
                                      .addMarker("config").addMarker("vav").addMarker("writable").addMarker("zone")
                                      .addMarker("temperature").addMarker("offset").addMarker("sp")
                                      .setGroup(String.valueOf(nodeAddr))
@@ -633,6 +651,8 @@ public class VAVLogicalMap
                                          .setDisplayName(equipDis+"-minCoolingDamperPos")
                                          .setEquipRef(equipRef)
                                          .setSiteRef(siteRef)
+                                         .setRoomRef(room)
+                                         .setFloorRef(floor)
                                          .addMarker("config").addMarker("vav").addMarker("damper").addMarker("min").addMarker("cooling").addMarker("pos")
                                          .addMarker("sp").addMarker("writable").addMarker("zone")
                                          .setGroup(String.valueOf(nodeAddr))
@@ -645,6 +665,8 @@ public class VAVLogicalMap
                                          .setDisplayName(equipDis+"-maxCoolingDamperPos")
                                          .setEquipRef(equipRef)
                                          .setSiteRef(siteRef)
+                                         .setRoomRef(room)
+                                         .setFloorRef(floor)
                                          .addMarker("config").addMarker("vav").addMarker("damper").addMarker("max").addMarker("cooling").addMarker("pos")
                                          .addMarker("sp").addMarker("writable").addMarker("zone")
                                          .setGroup(String.valueOf(nodeAddr))
@@ -658,6 +680,8 @@ public class VAVLogicalMap
                                          .setDisplayName(equipDis+"-minHeatingDamperPos")
                                          .setEquipRef(equipRef)
                                          .setSiteRef(siteRef)
+                                         .setRoomRef(room)
+                                         .setFloorRef(floor)
                                          .addMarker("config").addMarker("vav").addMarker("damper").addMarker("min").addMarker("heating").addMarker("pos")
                                          .addMarker("sp").addMarker("writable").addMarker("zone")
                                          .setGroup(String.valueOf(nodeAddr))
@@ -670,6 +694,8 @@ public class VAVLogicalMap
                                          .setDisplayName(equipDis+"-maxHeatingDamperPos")
                                          .setEquipRef(equipRef)
                                          .setSiteRef(siteRef)
+                                         .setRoomRef(room)
+                                         .setFloorRef(floor)
                                          .addMarker("config").addMarker("vav").addMarker("damper").addMarker("max").addMarker("heating").addMarker("pos")
                                          .addMarker("sp").addMarker("writable").addMarker("zone")
                                          .setGroup(String.valueOf(nodeAddr))

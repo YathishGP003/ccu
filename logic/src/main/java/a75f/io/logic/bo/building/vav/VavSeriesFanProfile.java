@@ -18,6 +18,7 @@ import a75f.io.logic.bo.building.hvac.Valve;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
 import a75f.io.logic.tuners.TunerUtil;
 
+import static a75f.io.logic.bo.building.Occupancy.OCCUPIED;
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
@@ -141,18 +142,21 @@ public class VavSeriesFanProfile extends VavProfile
             {
                 valve.currentPosition = 0;
             }
+    
+            boolean  enabledCO2Control = vavDevice.getConfigNumVal("enable and co2") > 0 ;
+            double occupancy = CCUHsApi.getInstance().readHisValByQuery("point and system and his and occupancy and status");
             
             if (!damper.isOverrideActive())
             {
                 //CO2 loop output from 0-50% modulates damper min position.
-                if (/*mode == OCCUPIED && */co2Loop.getLoopOutput(co2) <= 50)
+                if (enabledCO2Control && occupancy == OCCUPIED.ordinal() && co2Loop.getLoopOutput(co2) <= 50)
                 {
                     damper.iaqCompensatedMinPos = damper.minPosition + (damper.maxPosition - damper.minPosition) * co2Loop.getLoopOutput() / 50;
                     CcuLog.d(L.TAG_CCU_ZONE, "CO2LoopOp :" + co2Loop.getLoopOutput() + ", adjusted minposition " + damper.iaqCompensatedMinPos);
                 }
     
                 //VOC loop output from 0-50% modulates damper min position.
-                if (/*mode == OCCUPIED && */vocLoop.getLoopOutput(voc) <= 50)
+                if (occupancy == OCCUPIED.ordinal() && vocLoop.getLoopOutput(voc) <= 50)
                 {
                     damper.iaqCompensatedMinPos = damper.minPosition + (damper.maxPosition - damper.minPosition) * vocLoop.getLoopOutput() / 50;
                     CcuLog.d(L.TAG_CCU_ZONE, "VOCLoopOp :" + vocLoop.getLoopOutput() + ", adjusted minposition " + damper.iaqCompensatedMinPos);
@@ -187,7 +191,7 @@ public class VavSeriesFanProfile extends VavProfile
             }
             
             
-            if (true /* mode == OCCUPIED*/) {
+            if (occupancy > 0) {
                 //Prior to starting the fan, the damper is first driven fully closed to ensure that the fan is not rotating backwards.
                 //Once the fan is proven on for a fixed time delay (15 seconds), the damper override is released
     
@@ -214,6 +218,9 @@ public class VavSeriesFanProfile extends VavProfile
                 fanReady = false;
             }
     
+            valve.currentPosition = Math.max(valve.currentPosition, 0);
+            valve.currentPosition = Math.min(valve.currentPosition, 100);
+            
             CcuLog.d(L.TAG_CCU_ZONE,"CoolingLoop "+node +"roomTemp :"+roomTemp+" setTempCooling: "+setTempCooling);
             coolingLoop.dump();
             CcuLog.d(L.TAG_CCU_ZONE,"HeatingLoop "+node +"roomTemp :"+roomTemp+" setTempHeating: "+setTempHeating);

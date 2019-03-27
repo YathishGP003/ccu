@@ -27,6 +27,7 @@ public class TunerConstants
     public static final double SYSTEM_SPTARGET_MAX = 1.5;
     
     public static final int SYSTEM_DEFAULT_VAL_LEVEL = 17;
+    public static final int UI_DEFAULT_VAL_LEVEL = 8;
     public static final int SYSTEM_BUILDING_VAL_LEVEL = 16;
     
     public static final double VAV_COOLING_DB = 1.0;
@@ -52,6 +53,9 @@ public class TunerConstants
     
     public static final double ZONE_PRIORITY_SPREAD = 2.0;
     public static final double ZONE_PRIORITY_MULTIPLIER = 1.3;
+    public static final double ZONE_UNOCCUPIED_SETBACK = 5;
+    
+    public static final double SYSTEM_PRECONDITION_RATE = 15.0;
     
     public static final double MIN_COOLING_DAMPER = 40;
     public static final double MAX_COOLING_DAMPER = 80;

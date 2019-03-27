@@ -1,5 +1,8 @@
 package a75f.io.logic.tuners;
 
+import org.projecthaystack.HNum;
+import org.projecthaystack.HRef;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -13,8 +16,24 @@ public class TunerUtil
 {
     public static double readTunerValByQuery(String query) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap valveStartDamperPoint = hayStack.read("point and tuner and "+query);
-        ArrayList values = hayStack.readPoint(valveStartDamperPoint.get("id").toString());
+        HashMap tunerPoint = hayStack.read("point and tuner and "+query);
+        ArrayList values = hayStack.readPoint(tunerPoint.get("id").toString());
+        if (values != null && values.size() > 0)
+        {
+            for (int l = 1; l <= values.size() ; l++ ) {
+                HashMap valMap = ((HashMap) values.get(l-1));
+                if (valMap.get("val") != null) {
+                    return Double.parseDouble(valMap.get("val").toString());
+                }
+            }
+        }
+        return 0;
+    }
+    
+    public static double readTunerValByQuery(String query, String equipRef) {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap tunerPoint = hayStack.read("point and tuner and "+query+" and equipRef == \""+equipRef+"\"");
+        ArrayList values = hayStack.readPoint(tunerPoint.get("id").toString());
         if (values != null && values.size() > 0)
         {
             for (int l = 1; l <= values.size() ; l++ ) {
@@ -29,8 +48,8 @@ public class TunerUtil
     
     public static String readTunerStrByQuery(String query) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap valveStartDamperPoint = hayStack.read("point and tuner and "+query);
-        ArrayList values = hayStack.readPoint(valveStartDamperPoint.get("id").toString());
+        HashMap tunerPoint = hayStack.read("point and tuner and "+query);
+        ArrayList values = hayStack.readPoint(tunerPoint.get("id").toString());
         if (values != null && values.size() > 0)
         {
             for (int l = 1; l <= values.size() ; l++ ) {
@@ -70,6 +89,7 @@ public class TunerUtil
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        hayStack.writePoint(id, TunerConstants.SYSTEM_BUILDING_VAL_LEVEL, "ccu", val, 0);
+        hayStack.pointWrite(HRef.copy(id), TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", HNum.make(val), HNum.make(0,"ms"));
+        hayStack.writeHisValById(id, val);
     }
 }

@@ -9,9 +9,11 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
 import a75f.io.logic.bo.haystack.device.ControlMote;
+import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.tuners.VavTRTuners;
 
@@ -22,8 +24,8 @@ import static a75f.io.logic.bo.building.hvac.Stage.FAN_2;
 import static a75f.io.logic.bo.building.hvac.Stage.HEATING_1;
 import static a75f.io.logic.bo.building.hvac.Stage.HEATING_2;
 import static a75f.io.logic.bo.building.hvac.Stage.HUMIDIFIER;
-import static a75f.io.logic.bo.building.system.vav.VavSystemController.State.COOLING;
-import static a75f.io.logic.bo.building.system.vav.VavSystemController.State.HEATING;
+import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
+import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
 
 /**
  * Created by samjithsadasivan on 8/14/18.
@@ -46,6 +48,11 @@ public class VavStagedRtu extends VavSystemProfile
     public String getProfileName()
     {
         return "VAV Staged RTU";
+    }
+    
+    @Override
+    public ProfileType getProfileType() {
+        return ProfileType.SYSTEM_VAV_STAGED_RTU;
     }
     
     public VavStagedRtu() {
@@ -85,6 +92,7 @@ public class VavStagedRtu extends VavSystemProfile
                 hayStack.deleteEntityTree(equip.get("id").toString());
             } else {
                 initTRSystem();
+                updateStagesSelected();
                 return;
             }
         }
@@ -146,7 +154,7 @@ public class VavStagedRtu extends VavSystemProfile
             systemHeatingLoopOp = 0;
         }
         
-        double analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier");
+        double analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier", getSystemEquipRef());
         if (VavSystemController.getInstance().getSystemState() == COOLING)
         {
             double spSpMax = VavTRTuners.getStaticPressureTRTunerVal("spmax");
@@ -165,7 +173,7 @@ public class VavStagedRtu extends VavSystemProfile
         
         updateStagesSelected();
     
-        double relayDeactHysteresis = TunerUtil.readTunerValByQuery("relay and deactivation and hysteresis");
+        double relayDeactHysteresis = TunerUtil.readTunerValByQuery("relay and deactivation and hysteresis", getSystemEquipRef());
         CcuLog.d(L.TAG_CCU_SYSTEM, "systemCoolingLoopOp: "+systemCoolingLoopOp + " systemHeatingLoopOp: " + systemHeatingLoopOp+" systemFanLoopOp: "+systemFanLoopOp);
         CcuLog.d(L.TAG_CCU_SYSTEM, "coolingStages: "+coolingStages + " heatingStages: "+heatingStages+" fanStages: "+fanStages);
         for (int i = 1; i <=7 ;i++)
@@ -259,8 +267,14 @@ public class VavStagedRtu extends VavSystemProfile
                         }
                         break;
                     case FAN_1:
+                        if ((fanStages > 0 && ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED)
+                                || (fanStages > 0 && systemFanLoopOp > 0)) {
+                            relayState = 1;
+                        } else {
+                            relayState = 0;
+                        }
+                        break;
                     case FAN_2:
-                        //TODO - or occupied
                         if (fanStages > 0 && systemFanLoopOp > 0)
                         {
                             relayState = 1;
@@ -300,10 +314,10 @@ public class VavStagedRtu extends VavSystemProfile
                         break;
                     case HUMIDIFIER:
                     case DEHUMIDIFIER:
-                        double humidity = VavSystemController.getInstance().getSystemHumidity();
+                        double humidity = VavSystemController.getInstance().getAverageSystemHumidity();
                         double targetMinHumidity = TunerUtil.readSystemUserIntentVal("target and min and inside and humidity");
                         double targetMaxHumidity = TunerUtil.readSystemUserIntentVal("target and max and inside and humidity");
-                        double humidityHysteresis = TunerUtil.readTunerValByQuery("humidity and hysteresis");
+                        double humidityHysteresis = TunerUtil.readTunerValByQuery("humidity and hysteresis", getSystemEquipRef());
                         currState = getCmdSignal("relay" + i);
                         if (stage == HUMIDIFIER)
                         {
@@ -315,6 +329,8 @@ public class VavStagedRtu extends VavSystemProfile
                             else if (humidity > (targetMinHumidity + humidityHysteresis))
                             {
                                 relayState = 0;
+                            } else {
+                                relayState = currState;
                             }
                         }
                         else
@@ -327,6 +343,8 @@ public class VavStagedRtu extends VavSystemProfile
                             else if (humidity < (targetMaxHumidity - humidityHysteresis))
                             {
                                 relayState = 0;
+                            } else {
+                                relayState = currState;
                             }
                         }
                         CcuLog.d(L.TAG_CCU_SYSTEM,"humidity :"+humidity+" targetMinHumidity: "+targetMinHumidity+" humidityHysteresis: "+humidityHysteresis+

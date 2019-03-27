@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Typeface;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -61,18 +62,18 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                              boolean isLastChild, View convertView, ViewGroup parent)
     {
         final String expandedListText = (String) getChild(listPosition, expandedListPosition);
-
+        Log.i("Scheduler", "IDE Too Slow: " + expandedListText);
 
         if (!expandedListText.equals("schedule"))
         {
             LayoutInflater layoutInflater = (LayoutInflater) this.mFragment.getContext()
                                                                            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = layoutInflater.inflate(R.layout.tuner_list_item, null);
+            convertView = layoutInflater.inflate(R.layout.tuner_list_item, parent, false);
 
 
-            TextView expandedListTextView = (TextView) convertView
+            TextView expandedListTextView = convertView
                     .findViewById(R.id.expandedListItemName);
-            TextView expandedListTextVal = (TextView) convertView
+            TextView expandedListTextVal = convertView
                     .findViewById(R.id.expandedListItemVal);
 
 
@@ -83,7 +84,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
             LayoutInflater layoutInflater = (LayoutInflater) this.mFragment.getContext()
                                                                            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             String equipId = idMap.get(expandedListText);
-            convertView = layoutInflater.inflate(R.layout.temp_schedule, null);
+            convertView = layoutInflater.inflate(R.layout.temp_schedule, parent, false);
             TextView    scheduleStatus      = convertView.findViewById(R.id.schedule_status_tv);
             Spinner     scheduleSpinner     = convertView.findViewById(R.id.schedule_spinner);
             ImageButton scheduleImageButton = convertView.findViewById(R.id.schedule_edit_button);
@@ -91,14 +92,15 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
             ImageButton vacationEditButton  = convertView.findViewById(R.id.vacation_edit_button);
             HashMap     equipHashMap        = CCUHsApi.getInstance().readMapById(equipId);
 
+
             String zoneId         = Schedule.getZoneIdByEquipId(equipId);
-            String status         = ScheduleProcessJob.getSystemStateString(zoneId);
+            String status         = ScheduleProcessJob.getZoneStatusString(zoneId);
             String vacationStatus = ScheduleProcessJob.getVacationStateString(zoneId);
             vacationStatusTV.setText(vacationStatus);
             scheduleStatus.setText(status);
 
 
-            Schedule schedule         = Schedule.getScheduleByEquipId(equipId);
+            Schedule schedule = Schedule.getScheduleByEquipId(equipId);
 
             Schedule vacationSchedule = Schedule.getVacationByEquipId(equipId);
             scheduleImageButton.setTag(schedule.getId());
@@ -110,14 +112,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                                                                            .add(R.id.zone_fragment_temp, schedulerFragment)
                                                                            .addToBackStack("schedule").commit();
 
-                                                       schedulerFragment.setOnExitListener(new OnExitListener()
-                                                       {
-                                                           @Override
-                                                           public void onExit()
-                                                           {
-                                                               Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
-                                                           }
-                                                       });
+                                                       schedulerFragment.setOnExitListener(() -> Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show());
                                                    });
 
             if (schedule.isZoneSchedule())
@@ -128,8 +123,8 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
             {
                 scheduleSpinner.setSelection(2);
                 scheduleImageButton.setVisibility(View.VISIBLE);
-            }
-            else {
+            } else
+            {
                 scheduleSpinner.setSelection(0);
                 scheduleImageButton.setVisibility(View.GONE);
             }
@@ -144,7 +139,6 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
 
                     if (position == 0)
                     {
-
                         if (schedule.isZoneSchedule())
                         {
                             schedule.setDisabled(true);
@@ -162,7 +156,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                         } else
                         {
 
-                            Zone zone = Schedule.getZoneforEquipId(equipId);
+                            Zone     zone         = Schedule.getZoneforEquipId(equipId);
                             Schedule scheduleById = null;
                             if (zone.hasSchedule())
                             {

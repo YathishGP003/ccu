@@ -9,12 +9,14 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
 import a75f.io.logic.bo.haystack.device.ControlMote;
+import a75f.io.logic.jobs.ScheduleProcessJob;
 
-import static a75f.io.logic.bo.building.system.vav.VavSystemController.State.COOLING;
-import static a75f.io.logic.bo.building.system.vav.VavSystemController.State.HEATING;
+import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
+import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
 
 /**
  * Created by samjithsadasivan on 2/18/19.
@@ -31,6 +33,11 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
     }
     
     @Override
+    public ProfileType getProfileType() {
+        return ProfileType.SYSTEM_VAV_STAGED_VFD_RTU;
+    }
+    
+    @Override
     public void addSystemEquip() {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap equip = hayStack.read("equip and system");
@@ -39,6 +46,7 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
                 hayStack.deleteEntityTree(equip.get("id").toString());
             } else {
                 initTRSystem();
+                updateStagesSelected();
                 return;
             }
         }
@@ -120,6 +128,18 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
                     }
                 }
             }
+        } else if (ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED) {
+            for (int i = 1; i < 8; i++)
+            {
+                if (getConfigEnabled("relay" + i) > 0 && getCmdSignal("relay" + i) > 0)
+                {
+                    int val = (int) getConfigAssociation("relay" + i);
+                    if ( val == Stage.FAN_1.ordinal())  {
+                        signal = getConfigVal("analog2 and recirculate");
+                    }
+                }
+            }
+            
         }
         setCmdSignal("analog2",10*signal);
         ControlMote.setAnalogOut("analog2", 10 * signal);

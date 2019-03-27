@@ -1,10 +1,12 @@
 package a75f.io.renatus;
 
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,8 +25,8 @@ import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.SystemConstants;
+import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavAnalogRtu;
-import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -268,7 +270,7 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 			@Override
 			public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l)
 			{
-				setConfigBackground("relay7 and humidifier and type", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL, i);
+				setConfigBackground("relay7 and humidifier and type", i);
 			}
 			@Override
 			public void onNothingSelected(AdapterView<?> adapterView)
@@ -299,6 +301,7 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 			}
 		});
 	}
+	
 	
 	@Override
 	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
@@ -335,28 +338,28 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 		{
 			
 			case R.id.ahuAnalog1Min:
-				setConfigBackground("cooling and sat and min", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL, val);
+				setConfigBackground("cooling and sat and min", val);
 				break;
 			case R.id.ahuAnalog1Max:
-				setConfigBackground("cooling and sat and max", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL, val);
+				setConfigBackground("cooling and sat and max", val);
 				break;
 			case R.id.ahuAnalog2Min:
-				setConfigBackground("staticPressure and min", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL, val);
+				setConfigBackground("staticPressure and min", val);
 				break;
 			case R.id.ahuAnalog2Max:
-				setConfigBackground("staticPressure and max", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL, val);
+				setConfigBackground("staticPressure and max", val);
 				break;
 			case R.id.ahuAnalog3Min:
-				setConfigBackground("heating and min", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL, val);
+				setConfigBackground("heating and min", val);
 				break;
 			case R.id.ahuAnalog3Max:
-				setConfigBackground("heating and max", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL, val);
+				setConfigBackground("heating and max", val);
 				break;
 			case R.id.ahuAnalog4Min:
-				setConfigBackground("co2 and min", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL, val);
+				setConfigBackground("co2 and min", val);
 				break;
 			case R.id.ahuAnalog4Max:
-				setConfigBackground("co2 and max", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL, val);
+				setConfigBackground("co2 and max", val);
 				break;
 			case R.id.ahuAnalog1Test:
 				sendAnalog1OutTestSignal(val);
@@ -373,13 +376,13 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 		}
 	}
 	
-	private void setConfigBackground(String tags, int level, double val) {
+
+	private void setConfigBackground(String tags, double val) {
 		new AsyncTask<String, Void, Void>() {
+
 			@Override
 			protected Void doInBackground( final String ... params ) {
 				systemProfile.setConfigVal(tags, val);
-				//SystemTunerUtil.setTuner(analog, type, level, val);
-				
 				return null;
 			}
 			
@@ -400,7 +403,9 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 			
 			@Override
 			protected void onPostExecute( final Void result ) {
-				// continue what you are doing...
+				if (!selected) {
+					updateSystemMode();
+				}
 			}
 		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
 	}
@@ -425,6 +430,33 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 	public void onNothingSelected(AdapterView<?> arg0) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public void updateSystemMode() {
+		SystemMode systemMode = SystemMode.values()[(int)systemProfile.getUserIntentVal("rtu and mode")];
+		if (systemMode == SystemMode.OFF) {
+			return;
+		}
+		if ((systemMode == SystemMode.AUTO && (!systemProfile.isCoolingAvailable() || !systemProfile.isHeatingAvailable()))
+		    || (systemMode == SystemMode.COOLONLY && !systemProfile.isCoolingAvailable())
+		    || (systemMode == SystemMode.HEATONLY && !systemProfile.isHeatingAvailable()))
+		{
+			AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.NewDialogStyle);//, AlertDialog.THEME_HOLO_DARK);
+			String str = "Operational Mode changed from '" + systemMode.name() + "' to '" + SystemMode.OFF.name() + "' based on changed equipment selection.";
+			str = str + "\nPlease select appropriate operational mode from System Settings.";
+			builder.setCancelable(false)
+			       .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+				       public void onClick(DialogInterface dialog, int id) {
+					       dialog.cancel();
+				       }
+			       })
+			       .setTitle("Operational Mode Changed")
+			       .setMessage(str);
+			
+			AlertDialog dlg = builder.create();
+			dlg.show();
+			setUserIntentBackground("rtu and mode", SystemMode.OFF.ordinal());
+		}
 	}
 	
 	public void sendAnalog1OutTestSignal(double val) {

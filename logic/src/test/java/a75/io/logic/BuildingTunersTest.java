@@ -85,7 +85,7 @@ public class BuildingTunersTest
         Equip vavEquip = new Equip.Builder()
                           .setSiteRef(siteRef)
                           .setDisplayName("TestVavEquip")
-                          .setZoneRef(null)
+                          .setRoomRef(null)
                           .setFloorRef(null)
                           .setProfile("VAV_REHEAT")
                           .setPriority("LOW")

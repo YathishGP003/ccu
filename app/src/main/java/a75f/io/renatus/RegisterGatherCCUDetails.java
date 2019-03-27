@@ -1,7 +1,6 @@
 package a75f.io.renatus;
 
 import android.app.Activity;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -150,30 +149,27 @@ public class RegisterGatherCCUDetails extends Activity {
         mUseExistingCCUButton.setVisibility(View.VISIBLE);
         mOrTextView.setVisibility(View.VISIBLE);
 
-        mUseExistingCCUButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        mUseExistingCCUButton.setOnClickListener(v ->
+                                                 {
 
-                CharSequence[] ccuStringArray = getCCUStringArray();
-                AlertDialog.Builder builder = new AlertDialog.Builder(RegisterGatherCCUDetails.this);
-                builder.setTitle(R.string.pick_ccu)
-                        .setItems(ccuStringArray, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                Toast.makeText(RegisterGatherCCUDetails.this, mCCUS.row(which).dis(), Toast.LENGTH_SHORT).show();
-                                CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, mCCUS.row(which).getRef("id"));
-                                next();
-                            }
-                        });
-                AlertDialog alertDialog = builder.create();
-                alertDialog.show();
-            }
-        });
+                                                     CharSequence[] ccuStringArray = getCCUStringArray();
+                                                     AlertDialog.Builder builder = new AlertDialog.Builder(RegisterGatherCCUDetails.this);
+                                                     builder.setTitle(R.string.pick_ccu)
+                                                             .setItems(ccuStringArray, (dialog, which) ->
+                                                             {
+                                                                 Toast.makeText(RegisterGatherCCUDetails.this, mCCUS.row(which).dis(), Toast.LENGTH_SHORT).show();
+                                                                 CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, mCCUS.row(which).getRef("id"));
+                                                                 next();
+                                                             });
+                                                     AlertDialog alertDialog = builder.create();
+                                                     alertDialog.show();
+                                                 });
     }
 
 
     private void next() {
 
-        AsyncTask<Void, Void, Void> saveState = new AsyncTask<Void, Void, Void>() {
+        new AsyncTask<Void, Void, Void>() {
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
@@ -186,8 +182,8 @@ public class RegisterGatherCCUDetails extends Activity {
                 if(!Globals.getInstance().siteAlreadyCreated()) {
                     BuildingTuners.getInstance();
                     DefaultSchedules.generateDefaultSchedule(false);
-
                 }
+
                 L.saveCCUState();
                 CCUHsApi.getInstance().log();
                 CCUHsApi.getInstance().syncEntityTree();
@@ -208,9 +204,7 @@ public class RegisterGatherCCUDetails extends Activity {
                 finish();
 
             }
-        };
-
-        saveState.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
     }
 

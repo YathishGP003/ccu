@@ -4,7 +4,6 @@ package a75f.io.logic.bo.building.system.vav;
  * Created by samjithsadasivan on 8/14/18.
  */
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75.io.algos.vav.VavTRSystem;
@@ -14,14 +13,16 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemConstants;
 import a75f.io.logic.bo.haystack.device.ControlMote;
+import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.tuners.VavTRTuners;
 
-import static a75f.io.logic.bo.building.system.vav.VavSystemController.State.COOLING;
-import static a75f.io.logic.bo.building.system.vav.VavSystemController.State.HEATING;
+import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
+import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
 
 /**
  * Default System handles PI controlled op
@@ -74,6 +75,11 @@ public class VavAnalogRtu extends VavSystemProfile
     
     public String getProfileName() {
         return "VAV Fully Modulating RTU";
+    }
+    
+    @Override
+    public ProfileType getProfileType() {
+        return ProfileType.SYSTEM_VAV_ANALOG_RTU;
     }
     
     @Override
@@ -134,7 +140,7 @@ public class VavAnalogRtu extends VavSystemProfile
         analogMax = getConfigVal("analog3 and heating and max");
     
         CcuLog.d(L.TAG_CCU_SYSTEM, "analogMin: "+analogMin+" analogMax: "+analogMax+" Heating : "+VavSystemController.getInstance().getHeatingSignal());
-        if (VavSystemController.getInstance().getSystemState() == VavSystemController.State.HEATING)
+        if (VavSystemController.getInstance().getSystemState() == HEATING)
         {
             systemHeatingLoopOp = VavSystemController.getInstance().getHeatingSignal();
         } else {
@@ -157,7 +163,7 @@ public class VavAnalogRtu extends VavSystemProfile
             ControlMote.setAnalogOut("analog3", signal);
         }
         
-        double analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier");
+        double analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier", getSystemEquipRef());
         if (VavSystemController.getInstance().getSystemState() == COOLING)
         {
             double spSpMax = VavTRTuners.getStaticPressureTRTunerVal("spmax");
@@ -208,10 +214,8 @@ public class VavAnalogRtu extends VavSystemProfile
         
         if (getConfigVal("relay3 and output and enabled") > 0)
         {
-            //TODO - TEMP
-            boolean occupancy = true;
             double staticPressuremOp = getStaticPressure() - SystemConstants.SP_CONFIG_MIN;
-            signal = (occupancy || staticPressuremOp > 0) ? 1 : 0;
+            signal = (ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED || staticPressuremOp > 0) ? 1 : 0;
             setCmdSignal("occupancy",signal * 100);
             ControlMote.setRelayState("relay3", signal );
             
@@ -219,13 +223,13 @@ public class VavAnalogRtu extends VavSystemProfile
         //TODO- TEMP
         if (getConfigVal("relay7 and output and enabled") > 0)
         {
-            double humidity = VavSystemController.getInstance().getSystemHumidity();
+            double humidity = VavSystemController.getInstance().getAverageSystemHumidity();
             double targetMinHumidity = TunerUtil.readSystemUserIntentVal("target and min and inside and humidity");
             double targetMaxHumidity = TunerUtil.readSystemUserIntentVal("target and max and inside and humidity");
     
             boolean humidifier = getConfigVal("humidifier and type") == 0;
             
-            double humidityHysteresis = TunerUtil.readTunerValByQuery("humidity and hysteresis");
+            double humidityHysteresis = TunerUtil.readTunerValByQuery("humidity and hysteresis", getSystemEquipRef());
     
             if (humidifier) {
                 //Humidification
@@ -593,9 +597,8 @@ public class VavAnalogRtu extends VavSystemProfile
     }
     
     public double getConfigVal(String tags) {
-    
-        //return CCUHsApi.getInstance().readDefaultVal("point and system and config and "+tags);
-        CCUHsApi hayStack = CCUHsApi.getInstance();
+        return CCUHsApi.getInstance().readDefaultVal("point and system and config and "+tags);
+        /*CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap cdb = hayStack.read("point and system and config and "+tags);
     
         ArrayList values = hayStack.readPoint(cdb.get("id").toString());
@@ -608,39 +611,12 @@ public class VavAnalogRtu extends VavSystemProfile
                 }
             }
         }
-        return 0;
+        return 0;*/
     }
     
     public void setConfigVal(String tags, double val) {
         CCUHsApi.getInstance().writeDefaultVal("point and system and config and "+tags, val);
     }
-    
-    /*public double getConfigVal(String tags, int level) {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and system and config and "+tags);
-    
-        ArrayList values = hayStack.readPoint(cdb.get("id").toString());
-        if (values != null && values.size() > 0)
-        {
-            HashMap valMap = ((HashMap) values.get(level-1));
-            if (valMap.get("val") != null) {
-                return Double.parseDouble(valMap.get("val").toString());
-            }
-        }
-        return 0;
-    }
-    
-    public void setConfigVal(String tags, int level, double val) {
-    
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and system and config and "+tags);
-    
-        String id = cdb.get("id").toString();
-        if (id == null || id == "") {
-            throw new IllegalArgumentException();
-        }
-        hayStack.writePoint(id, level, "ccu", val, 0);
-    }*/
     
     public double getConfigEnabled(String config) {
         return CCUHsApi.getInstance().readDefaultVal("point and system and config and output and enabled and "+config);

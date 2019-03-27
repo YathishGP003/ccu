@@ -358,7 +358,9 @@ public class ScheduleProcessJob extends BaseJob {
         {
             for (Zone z : HSUtil.getZones(f.getId()))
             {
-                if (getOccupiedModeCache(z.getId()).isOccupied())
+                Occupied c = ScheduleProcessJob.getOccupiedModeCache(z.getId());
+                
+                if (c!= null && c.isOccupied())
                 {
                     systemOccupancy = OCCUPIED;
                     currOccupied = getOccupiedModeCache(z.getId());

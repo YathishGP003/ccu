@@ -42,15 +42,15 @@ public class VavIERtuProfile extends Fragment
         if (!(L.ccu().systemProfile instanceof VavIERtu))
         {
             L.ccu().systemProfile = new VavIERtu();
-            new AsyncTask<Void, Void, Void>() {
+            new AsyncTask<String, Void, Void>() {
                 @Override
-                protected Void doInBackground( final Void ... params ) {
+                protected Void doInBackground( final String ... params ) {
                     return null;
                 }
                 @Override
                 protected void onPostExecute( final Void result ) {
                 }
-            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
         }
     }
 }

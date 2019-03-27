@@ -90,15 +90,12 @@ public class ScheduleProcessJob extends BaseJob {
 
     @Override
     public void doJob() {
-        Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
 
         ArrayList<Schedule> activeVacationSchedules = CCUHsApi.getInstance().getSystemSchedule(true);
 
         Schedule activeVacationSchedule = getActiveVacation(activeVacationSchedules);
         /* The systemSchedule isn't initiated yet, so schedules shouldn't be ran*/
 
-        if(systemSchedule == null)
-            return;
         CcuLog.d(L.TAG_CCU_JOB,"ScheduleProcessJob");
         //Read all equips
 
@@ -113,13 +110,16 @@ public class ScheduleProcessJob extends BaseJob {
             if(equip != null) {
                
                 Schedule equipSchedule = Schedule.getScheduleForZone(equip.getRoomRef().replace("@", ""), false);
-                if (equipSchedule != null) {
-                    writePointsForEquip(equip, equipSchedule, activeVacationSchedule);
-                }
-                else
+
+                if(equipSchedule == null)
                 {
-                    writePointsForEquip(equip, systemSchedule, activeVacationSchedule);
+                    CcuLog.d(L.TAG_CCU_JOB,"<- *no schedule* ScheduleProcessJob");
+                    return;
                 }
+
+
+                writePointsForEquip(equip, equipSchedule, activeVacationSchedule);
+
             }
         }
         CcuLog.d(L.TAG_CCU_JOB,"<- ScheduleProcessJob");

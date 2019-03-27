@@ -87,7 +87,7 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
             setUpSpinners();
         } else {
         
-            new AsyncTask<Void, Void, Void>() {
+            new AsyncTask<String, Void, Void>() {
             
                 ProgressDialog progressDlg = new ProgressDialog(getActivity());
                 @Override
@@ -98,7 +98,7 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
                 }
             
                 @Override
-                protected Void doInBackground( final Void ... params ) {
+                protected Void doInBackground( final String ... params ) {
                     if (systemProfile != null) {
                         systemProfile.deleteSystemEquip();
                         L.ccu().systemProfile = null;
@@ -114,7 +114,7 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
                     setUpSpinners();
                     progressDlg.dismiss();
                 }
-            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
         }
     }
     
@@ -290,9 +290,9 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
     }
     
     private void setConfigEnabledBackground(String config, double val) {
-        new AsyncTask<Void, Void, Void>() {
+        new AsyncTask<String, Void, Void>() {
             @Override
-            protected Void doInBackground( final Void ... params ) {
+            protected Void doInBackground( final String ... params ) {
                 systemProfile.setConfigEnabled(config, val);
                 return null;
             }
@@ -301,13 +301,13 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
             protected void onPostExecute( final Void result ) {
                 // continue what you are doing...
             }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
     }
     
     private void setConfigAssociationBackground(String config, double val) {
-        new AsyncTask<Void, Void, Void>() {
+        new AsyncTask<String, Void, Void>() {
             @Override
-            protected Void doInBackground( final Void ... params ) {
+            protected Void doInBackground( final String ... params ) {
                 systemProfile.setConfigAssociation(config, val);
                 return null;
             }
@@ -316,7 +316,7 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
             protected void onPostExecute( final Void result ) {
                 // continue what you are doing...
             }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
     }
     
     public void sendRelayActivationTestSignal(short val) {

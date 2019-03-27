@@ -411,7 +411,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
             @Override
             public void onClick(View v) {
     
-                new AsyncTask<Void, Void, Void>() {
+                new AsyncTask<String, Void, Void>() {
     
                     ProgressDialog progressDlg = new ProgressDialog(getActivity());
     
@@ -424,7 +424,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
                     }
     
                     @Override
-                    protected Void doInBackground( final Void ... params ) {
+                    protected Void doInBackground( final String ... params ) {
                         setupVavZoneProfile();
                         L.saveCCUState();
             
@@ -437,7 +437,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
                         FragmentVAVConfiguration.this.closeAllBaseDialogFragments();
                         getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
                     }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
                 
             }
         });

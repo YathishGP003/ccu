@@ -34,7 +34,7 @@ import a75f.io.logger.CcuLog;
 public class Schedule extends Entity {
 
     public boolean isSiteSchedule() {
-        return getMarkers().contains("system");
+        return getMarkers().contains("building");
     }
 
     public boolean isZoneSchedule() {
@@ -89,7 +89,23 @@ public class Schedule extends Entity {
             }
         }
 
-        return CCUHsApi.getInstance().getSystemSchedule(vacation).get(0);
+
+        ArrayList<Schedule> retVal = CCUHsApi.getInstance().getSystemSchedule(vacation);
+        if(retVal != null && retVal.size() > 0)
+            return retVal.get(0);
+
+        return null;
+    }
+
+    public static Zone getZoneforEquipId(String equipId)
+    {
+        HashMap equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
+        Equip equip = new Equip.Builder().setHashMap(equipHashMap).build();
+        HashMap zoneHashMap = CCUHsApi.getInstance().readMapById(equip.getRoomRef().replace("@", ""));
+
+        Zone build = new Zone.Builder().setHashMap(zoneHashMap).build();
+
+        return build;
     }
 
 
@@ -341,6 +357,13 @@ public class Schedule extends Entity {
     {
         Interval interval = new Interval(getStartDate(), getEndDate());
         return interval.contains(MockTime.getInstance().getMockTime());
+    }
+
+    public void setDisabled(boolean disabled)
+    {
+
+        if(disabled) mMarkers.add("disabled");
+        else mMarkers.remove("disabled");
     }
 
 
@@ -646,12 +669,12 @@ public class Schedule extends Entity {
 
         HList hList = HList.make(days);
         HDictBuilder defaultSchedule = new HDictBuilder()
-                .add("id", getId())
+                .add("id", HRef.copy(getId()))
                 .add("unit", getUnit())
                 .add("kind", getKind())
                 .add("dis", "Default Site Schedule")
                 .add("days", hList)
-                .add("siteRef", HRef.make(mSiteId));
+                .add("siteRef", HRef.copy(mSiteId));
 
         for (String marker : getMarkers()) {
             defaultSchedule.add(marker);

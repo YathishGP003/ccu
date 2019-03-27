@@ -95,7 +95,7 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 		    setupAnalogLimitSelectors();
 	    } else {
 		    
-		    new AsyncTask<Void, Void, Void>() {
+		    new AsyncTask<String, Void, Void>() {
 			
 			    ProgressDialog progressDlg = new ProgressDialog(getActivity());
 			    @Override
@@ -106,7 +106,7 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 			    }
 			    
 			    @Override
-			    protected Void doInBackground( final Void ... params ) {
+			    protected Void doInBackground( final String ... params ) {
 			    	if (systemProfile != null) {
 			    		systemProfile.deleteSystemEquip();
 					    L.ccu().systemProfile = null; //Makes sure that System Algos dont run until new profile is ready.
@@ -121,7 +121,7 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 				    setupAnalogLimitSelectors();
 				    progressDlg.dismiss();
 			    }
-		    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+		    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
 	    }
 		//setupTempLimitSelectors();
 	    
@@ -374,9 +374,9 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 	}
 	
 	private void setConfigBackground(String tags, int level, double val) {
-		new AsyncTask<Void, Void, Void>() {
+		new AsyncTask<String, Void, Void>() {
 			@Override
-			protected Void doInBackground( final Void ... params ) {
+			protected Void doInBackground( final String ... params ) {
 				systemProfile.setConfigVal(tags, val);
 				//SystemTunerUtil.setTuner(analog, type, level, val);
 				
@@ -387,13 +387,13 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 			protected void onPostExecute( final Void result ) {
 				// continue what you are doing...
 			}
-		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
 	}
 	
 	private void setSelectionBackground(String analog, boolean selected) {
-		new AsyncTask<Void, Void, Void>() {
+		new AsyncTask<String, Void, Void>() {
 			@Override
-			protected Void doInBackground( final Void ... params ) {
+			protected Void doInBackground( final String ... params ) {
 				systemProfile.setConfigEnabled(analog, selected ? 1: 0);
 				return null;
 			}
@@ -402,14 +402,14 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 			protected void onPostExecute( final Void result ) {
 				// continue what you are doing...
 			}
-		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
 	}
 	
 	private void setUserIntentBackground(String query, double val) {
 		
-		new AsyncTask<Void, Void, Void>() {
+		new AsyncTask<String, Void, Void>() {
 			@Override
-			protected Void doInBackground( final Void ... params ) {
+			protected Void doInBackground( final String ... params ) {
 				TunerUtil.writeSystemUserIntentVal(query, val);
 				return null;
 			}
@@ -418,7 +418,7 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 			protected void onPostExecute( final Void result ) {
 				// continue what you are doing...
 			}
-		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
 	}
 	
 	@Override

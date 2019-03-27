@@ -33,7 +33,7 @@ public class VOCLoop
             controlLoop.reset();
             return 0;
         } else {
-            controlLoop.updateControlVariable(vocTarget, vocLvel);
+            controlLoop.updateControlVariable(vocLvel, vocThreshold);
             return controlLoop.getLoopOutput();
         }
     }

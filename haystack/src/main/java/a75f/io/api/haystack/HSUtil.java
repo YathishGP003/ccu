@@ -4,7 +4,6 @@ import android.util.Log;
 
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
-import org.projecthaystack.HList;
 import org.projecthaystack.HVal;
 
 import java.util.ArrayList;
@@ -74,6 +73,12 @@ public class HSUtil
     public static Equip getEquipFromZone(String roomRef) {
         HashMap equip = CCUHsApi.getInstance().read("equip and roomRef == \""+roomRef+"\"");
         return new Equip.Builder().setHashMap(equip).build();
+    }
+    
+    public static String getZoneIdFromEquipId(String equipId) {
+        HashMap equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
+        Equip equip = new Equip.Builder().setHashMap(equipHashMap).build();
+        return equip.getRoomRef();
     }
     
     public static HDict mapToHDict(Map<String, Object> m)

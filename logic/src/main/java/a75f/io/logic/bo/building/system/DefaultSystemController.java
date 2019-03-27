@@ -25,11 +25,6 @@ public class DefaultSystemController extends SystemController
     }
     
     @Override
-    public int getSystemOccupancy() {
-        return 0;
-    }
-    
-    @Override
     public double getAverageSystemHumidity() {
         return 0;
     }

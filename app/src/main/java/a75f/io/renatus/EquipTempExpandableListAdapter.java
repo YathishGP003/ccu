@@ -87,7 +87,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
             HashMap equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
 
             String zoneId = Schedule.getZoneIdByEquipId(equipId);
-            String status = ScheduleProcessJob.getSystemStateString(zoneId);
+            String status = ScheduleProcessJob.getZoneStatusString(zoneId);
             String vacationStatus = ScheduleProcessJob.getVacationStateString(zoneId);
             vacationStatusTV.setText(vacationStatus);
             scheduleStatus.setText(status);

@@ -157,7 +157,7 @@ public class Schedule extends Entity {
                                                  .withMinuteOfHour(daysSorted.get(i).getStmm())
                                                  .withDayOfWeek(daysSorted.get(i).getDay() + 1)
                                                  .withSecondOfMinute(0);
-                occupied.setMillisecondsUntilNextChange(startDateTime.getMillis());
+                occupied.setMillisecondsUntilNextChange(startDateTime.getMillis() - MockTime.getInstance().getMockTime());
                 
                 return occupied;
             }
@@ -177,7 +177,7 @@ public class Schedule extends Entity {
                                              .withMinuteOfHour(daysSorted.get(0).getStmm())
                                              .withDayOfWeek(daysSorted.get(0).getDay() + 1)
                                              .withSecondOfMinute(0);
-            occupied.setMillisecondsUntilNextChange(startDateTime.getMillis());
+            occupied.setMillisecondsUntilNextChange(startDateTime.getMillis() - MockTime.getInstance().getMockTime());
         }
 
         return occupied;

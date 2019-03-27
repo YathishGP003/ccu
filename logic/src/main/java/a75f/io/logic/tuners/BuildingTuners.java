@@ -68,6 +68,7 @@ public class BuildingTuners
         tz = siteMap.get("tz").toString();
         
         addDefaultSystemTuners();
+        addDefaultZoneTuners();
         addDefaultVavTuners();
         addDefaultPlcTuners();
         
@@ -87,6 +88,19 @@ public class BuildingTuners
         hayStack.writeHisValById(preConditioingRateId, TunerConstants.SYSTEM_PRECONDITION_RATE);
     }
     
+    public void addDefaultZoneTuners() {
+        Point unoccupiedZoneSetback  = new Point.Builder()
+                                           .setDisplayName(equipDis+"-"+"unoccupiedZoneSetback")
+                                           .setSiteRef(siteRef)
+                                           .setEquipRef(equipRef)
+                                           .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
+                                           .addMarker("zone").addMarker("unoccupied").addMarker("setback").addMarker("sp")
+                                           .setTz(tz)
+                                           .build();
+        String unoccupiedZoneSetbackId = hayStack.addPoint(unoccupiedZoneSetback);
+        hayStack.writePoint(unoccupiedZoneSetbackId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_UNOCCUPIED_SETBACK, 0);
+        hayStack.writeHisValById(unoccupiedZoneSetbackId, TunerConstants.ZONE_UNOCCUPIED_SETBACK);
+    }
     
     public void addDefaultVavTuners() {
         
@@ -336,10 +350,32 @@ public class BuildingTuners
         
     }
     
+    public void addEquipZoneTuners(String equipdis, String equipref) {
+        Point unoccupiedZoneSetback = new Point.Builder()
+                                           .setDisplayName(equipdis+"-"+"unoccupiedZoneSetback")
+                                           .setSiteRef(siteRef)
+                                           .setEquipRef(equipref)
+                                           .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("equipHis")
+                                           .addMarker("zone").addMarker("unoccupied").addMarker("setback").addMarker("sp")
+                                           .build();
+        String unoccupiedZoneSetbackId = hayStack.addPoint(unoccupiedZoneSetback);
+        HashMap unoccupiedZoneSetbackPoint = hayStack.read("point and tuner and default and zone and unoccupied and setback");
+        ArrayList<HashMap> unoccupiedZoneSetbackArr = hayStack.readPoint(unoccupiedZoneSetbackPoint.get("id").toString());
+        for (HashMap valMap : unoccupiedZoneSetbackArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.pointWrite(HRef.copy(unoccupiedZoneSetbackId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+    }
+    
     public void addEquipVavTuners(String equipdis, String equipref, VavProfileConfiguration config) {
     
         Log.d("CCU","addEquipVavTuners for "+equipdis);
     
+        addEquipZoneTuners(equipdis, equipref);
+        
         Point zonePrioritySpread = new Point.Builder()
                                   .setDisplayName(equipdis+"-"+"zonePrioritySpread")
                                   .setSiteRef(siteRef)
@@ -644,6 +680,9 @@ public class BuildingTuners
     }
     
     public void addEquipPlcTuners(String equipdis, String equipref){
+        
+        addEquipZoneTuners(equipdis, equipref);
+        
         Point propGain = new Point.Builder()
                                  .setDisplayName(equipdis+"-"+"proportionalKFactor")
                                  .setSiteRef(siteRef)

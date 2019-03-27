@@ -14,7 +14,8 @@ public class Occupied {
     private Double mHeatingDeadband;
     private Double mCoolingDeadband;
     private Schedule vacation;
-
+    private double unoccupiedZoneSetback;
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -116,7 +117,12 @@ public class Occupied {
         return vacation;
     }
     
-    public int getNextOccupiedStartMinutes() {
-        return 60 * mNextOccupiedScheduleDay.getSthh() + mNextOccupiedScheduleDay.getStmm();
+    public double getUnoccupiedZoneSetback()
+    {
+        return unoccupiedZoneSetback;
+    }
+    public void setUnoccupiedZoneSetback(double unoccupiedZoneSetback)
+    {
+        this.unoccupiedZoneSetback = unoccupiedZoneSetback;
     }
 }

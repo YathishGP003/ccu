@@ -13,7 +13,6 @@ public abstract class SystemController
     
     public abstract int getCoolingSignal() ;
     public abstract int getHeatingSignal();
-    public abstract int getSystemOccupancy();
     public abstract double getAverageSystemHumidity();
     public abstract double getAverageSystemTemperature();
 }

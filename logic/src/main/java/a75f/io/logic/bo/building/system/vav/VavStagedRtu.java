@@ -9,9 +9,11 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
 import a75f.io.logic.bo.haystack.device.ControlMote;
+import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.tuners.VavTRTuners;
 
@@ -265,7 +267,7 @@ public class VavStagedRtu extends VavSystemProfile
                         }
                         break;
                     case FAN_1:
-                        if ((fanStages > 0 && VavSystemController.getInstance().systemOccupancy > 0)
+                        if ((fanStages > 0 && ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED)
                                 || (fanStages > 0 && systemFanLoopOp > 0)) {
                             relayState = 1;
                         } else {

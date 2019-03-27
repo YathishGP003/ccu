@@ -2,8 +2,6 @@ package a75f.io.logic.jobs;
 
 import android.util.Log;
 
-import org.joda.time.DateTime;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -18,6 +16,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.BaseJob;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Occupancy;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.L.TAG_CCU_JOB;
@@ -52,6 +51,10 @@ public class ScheduleProcessJob extends BaseJob {
     private static final String TAG = "ScheduleProcessJob";
 
     static HashMap<String, Occupied> occupiedHashMap = new HashMap<String, Occupied>();
+    
+    private static Occupancy systemOccupancy = null;
+    private static Occupied currOccupied = null;
+    private static Occupied nextOccupied = null;
 
     public static Occupied getOccupiedModeCache(String id) {
         if(!occupiedHashMap.containsKey(id))
@@ -148,6 +151,8 @@ public class ScheduleProcessJob extends BaseJob {
                 }
             }
         }
+        
+        updateSystemOccupancy();
         CcuLog.d(TAG_CCU_JOB,"<- ScheduleProcessJob");
     }
 
@@ -235,7 +240,7 @@ public class ScheduleProcessJob extends BaseJob {
         One exception is that the date the vacation ends needs to append when the vacation ends.
      */
 
-    public static String getSystemStateString(String zoneId)
+    public static String getZoneStatusString(String zoneId)
     {
 
         Occupied cachedOccupied = getOccupiedModeCache("@" + zoneId);
@@ -250,25 +255,56 @@ public class ScheduleProcessJob extends BaseJob {
         if(cachedOccupied.isOccupied())
         {
             return String.format("In %s, changes to energy saving range of %.1f-%.1fF at %02d:%02d", "occupied mode",
-                    cachedOccupied.getHeatingVal() - cachedOccupied.getHeatingDeadBand(),
-                    cachedOccupied.getCoolingVal() + cachedOccupied.getCoolingDeadBand(),
+                    cachedOccupied.getHeatingVal() - cachedOccupied.getUnoccupiedZoneSetback(),
+                    cachedOccupied.getCoolingVal() + cachedOccupied.getUnoccupiedZoneSetback(),
                     cachedOccupied.getCurrentlyOccupiedSchedule().getEthh(),
                     cachedOccupied.getCurrentlyOccupiedSchedule().getEtmm());
         }
         else if(cachedOccupied.getVacation() != null)
         {
-            return String.format("In %s, changes to energy saving range of %.1f-%.1fF on %s", "vacation mode",
+            /*return String.format("In %s, changes to energy saving range of %.1f-%.1fF on %s", "vacation mode",
                     cachedOccupied.getHeatingVal(),
                     cachedOccupied.getCoolingVal(),
+                    cachedOccupied.getVacation().getEndDateString());*/
+    
+            return String.format("In %s till %s", "vacation",
                     cachedOccupied.getVacation().getEndDateString());
+            
         } else
         {
-            return String.format("In %s, changes to energy saving range of %.1f-%.1fF at %02d:%02d", "unoccupied mode",
+            return String.format("In %s, changes to %.1f-%.1fF at %02d:%02d", "unoccupied mode",
                                  cachedOccupied.getHeatingVal(),
                                  cachedOccupied.getCoolingVal(),
                                  cachedOccupied.getNextOccupiedSchedule().getSthh(),
                                  cachedOccupied.getNextOccupiedSchedule().getStmm());
         }
+    }
+    
+    public static String getSystemStatusString() {
+        
+        if(systemOccupancy == null)
+        {
+            return "Setting up..";
+        }
+        
+        switch (systemOccupancy) {
+            case OCCUPIED:
+                return String.format("In %s | Changes to energy saving at %02d:%02d", "Setpoint",
+                        currOccupied.getCurrentlyOccupiedSchedule().getEthh(),
+                        currOccupied.getCurrentlyOccupiedSchedule().getEtmm());
+                
+            case PRECONDITIONING:
+                return "In Preconditioning";
+                
+            case UNOCCUPIED:
+                return String.format("In %s | Changes to %.1f-%.1fF at %02d:%02d", "Setback",
+                        nextOccupied.getHeatingVal(),
+                        nextOccupied.getCoolingVal(),
+                        nextOccupied.getNextOccupiedSchedule().getSthh(),
+                        nextOccupied.getNextOccupiedSchedule().getStmm());
+        }
+        
+        return "";
     }
 
 
@@ -291,50 +327,83 @@ public class ScheduleProcessJob extends BaseJob {
     }
     
     public static long getMillisToOccupancy() {
+        if (nextOccupied != null) {
+            return  nextOccupied.getMillisecondsUntilNextChange();
+        }
         long millisToOccupancy = 0;
-        DateTime now = new DateTime(System.currentTimeMillis());
-        long curr = System.currentTimeMillis();
         for (Occupied occ : occupiedHashMap.values()) {
             if (occ.isOccupied()) {
                 return 0;
             }
             if (millisToOccupancy == 0) {
-                millisToOccupancy = occ.getMillisecondsUntilNextChange() - curr ;
-            } else if ((occ.getMillisecondsUntilNextChange() - curr) < millisToOccupancy){
-                millisToOccupancy = occ.getMillisecondsUntilNextChange() - curr;
+                millisToOccupancy = occ.getMillisecondsUntilNextChange();
+            } else if (occ.getMillisecondsUntilNextChange() < millisToOccupancy){
+                millisToOccupancy = occ.getMillisecondsUntilNextChange();
             }
             Log.d(TAG_CCU_JOB, " Occupancy in millis for Equip "+occ.getMillisecondsUntilNextChange());
         }
-        Log.d(TAG_CCU_JOB, "currMills: "+curr+" millisToOccupancy : "+millisToOccupancy);
+        Log.d(TAG_CCU_JOB, " millisToOccupancy : "+millisToOccupancy);
         return millisToOccupancy;
     }
     
-    //TODO - Currently done from SystemController as system occupancy is associated to systemEquip.
     public void updateSystemOccupancy() {
-        Occupancy systemOccupancy = UNOCCUPIED;
+        
+        if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DEFAULT) {
+            Log.d(TAG_CCU_JOB, " Skip updateSystemOccupancy for Default System Profile ");
+            return;
+        }
+        
+        systemOccupancy = UNOCCUPIED;
         for (Floor f: HSUtil.getFloors())
         {
             for (Zone z : HSUtil.getZones(f.getId()))
             {
-                if (ScheduleProcessJob.getOccupiedModeCache(z.getId()).isOccupied())
+                if (getOccupiedModeCache(z.getId()).isOccupied())
                 {
                     systemOccupancy = OCCUPIED;
+                    currOccupied = getOccupiedModeCache(z.getId());
                 }
             }
         }
     
+        long millisToOccupancy = 0;
+        if (systemOccupancy == UNOCCUPIED) {
+            Occupied next = null;
+            for (Occupied occ : occupiedHashMap.values()) {
+                if (millisToOccupancy == 0) {
+                    millisToOccupancy = occ.getMillisecondsUntilNextChange();
+                    next = occ;
+                } else if (occ.getMillisecondsUntilNextChange()  < millisToOccupancy){
+                    millisToOccupancy = occ.getMillisecondsUntilNextChange();
+                    next = occ;
+                }
+            }
+            nextOccupied = next;
+            Log.d(TAG_CCU_JOB, " millisToOccupancy: "+millisToOccupancy);
+        } else {
+            nextOccupied = null;
+        }
+        
         double waCoolingOnlyLoadMA = CCUHsApi.getInstance().readHisValByQuery("system and point and moving and average and cooling and load");
-        double waHeatingOnlyLoadMA = CCUHsApi.getInstance().readHisValByQuery("system and point and moving and average and cooling and load");
+        double waHeatingOnlyLoadMA = CCUHsApi.getInstance().readHisValByQuery("system and point and moving and average and heating and load");
         if (systemOccupancy == UNOCCUPIED)
         {
             double preconDegree = Math.max(waCoolingOnlyLoadMA, waHeatingOnlyLoadMA);
-            int preconMins = (int) (preconDegree * TunerUtil.readTunerValByQuery("precon and rate", L.ccu().systemProfile.getSystemEquipRef()));
-            if (preconMins*60*1000 >= ScheduleProcessJob.getMillisToOccupancy())
+            double preconRate = CCUHsApi.getInstance().getPredictedPreconRate(L.ccu().systemProfile.getSystemEquipRef());
+            if (preconRate == 0) {
+                preconRate = TunerUtil.readTunerValByQuery("precon and rate", L.ccu().systemProfile.getSystemEquipRef());
+            }
+            if (preconDegree * preconRate * 60 * 1000 >= millisToOccupancy)
             {
                 systemOccupancy = PRECONDITIONING;
             }
+            CcuLog.d(L.TAG_CCU_SYSTEM, "preconRate : "+preconRate+" preconDegree: "+preconDegree);
         }
         CCUHsApi.getInstance().writeHisValByQuery("point and system and his and occupancy and status",(double)systemOccupancy.ordinal());
         CcuLog.d(TAG_CCU_JOB, "systemOccupancy status : " + systemOccupancy);
+    }
+    
+    public static Occupancy getSystemOccupancy() {
+        return systemOccupancy == null ? UNOCCUPIED : systemOccupancy;
     }
 }

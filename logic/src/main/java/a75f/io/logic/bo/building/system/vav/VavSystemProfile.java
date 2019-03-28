@@ -230,7 +230,7 @@ public abstract class VavSystemProfile extends SystemProfile
                                             .setSiteRef(siteRef)
                                             .setEquipRef(equipref)
                                             .addMarker("system").addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his")
-                                            .addMarker("precon").addMarker("rate").addMarker("sp").addMarker("equipHis")
+                                            .addMarker("cooling").addMarker("precon").addMarker("rate").addMarker("sp").addMarker("equipHis")
                                             .setTz(tz)
                                             .build();
         String coolingPreconditioningRateId = hayStack.addPoint(coolingPreconditioningRate);

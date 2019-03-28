@@ -747,7 +747,7 @@ public class VAVLogicalMap
         setConfigNumVal("reheat and type",config.reheatType);
         setConfigNumVal("enable and occupancy",config.enableOccupancyControl == true ? 1.0 : 0);
         setConfigNumVal("enable and co2",config.enableCO2Control == true ? 1.0 : 0);
-        setConfigNumVal("enable and iaq",config.enableCO2Control == true ? 1.0 : 0);
+        setConfigNumVal("enable and iaq",config.enableIAQControl == true ? 1.0 : 0);
         setConfigNumVal("priority",config.getPriority().ordinal());
         setConfigNumVal("temperature and offset",config.temperaturOffset);
         setDamperLimit("cooling","min",config.minDamperCooling);

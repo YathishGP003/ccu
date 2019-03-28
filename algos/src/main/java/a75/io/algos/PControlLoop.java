@@ -11,7 +11,7 @@ public class PControlLoop extends GenericPIController
 {
     @Override
     public void updateControlVariable(double setPoint, double controlPoint) {
-        error = controlPoint - setPoint;
+        error = setPoint - controlPoint;
         applyErrorLimits();
         calculateProportionalError();
         calculateControlVariable();

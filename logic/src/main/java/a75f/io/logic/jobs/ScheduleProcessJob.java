@@ -44,14 +44,14 @@ import static a75f.io.logic.bo.building.Occupancy.UNOCCUPIED;
 
     Each minute the scheduler will check for updates, so if the cache is extremely stale -- it will be overridden.
 
-    The scheduler cache should be queryable by ID.  
+    The scheduler cache should be queryable by ID.
  */
 public class ScheduleProcessJob extends BaseJob {
 
     private static final String TAG = "ScheduleProcessJob";
 
     static HashMap<String, Occupied> occupiedHashMap = new HashMap<String, Occupied>();
-    
+
     private static Occupancy systemOccupancy = null;
     private static Occupied currOccupied = null;
     private static Occupied nextOccupied = null;
@@ -62,7 +62,6 @@ public class ScheduleProcessJob extends BaseJob {
         {
             return null;
         }
-
         return occupiedHashMap.get(id);
     }
 
@@ -105,54 +104,52 @@ public class ScheduleProcessJob extends BaseJob {
 
     @Override
     public void doJob() {
-    
+
+
         CcuLog.d(TAG_CCU_JOB,"ScheduleProcessJob->");
-        
+
         HashMap site = CCUHsApi.getInstance().read("site");
         if (site.size() == 0) {
             CcuLog.d(TAG_CCU_JOB,"No Site Registered ! <-ScheduleProcessJob ");
             return;
         }
-    
+
         HashMap ccu = CCUHsApi.getInstance().read("ccu");
         if (ccu.size() == 0) {
             CcuLog.d(TAG_CCU_JOB,"No CCU Registered ! <-ScheduleProcessJob ");
             return;
         }
-        
-        Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
+
+
 
         ArrayList<Schedule> activeVacationSchedules = CCUHsApi.getInstance().getSystemSchedule(true);
 
         Schedule activeVacationSchedule = getActiveVacation(activeVacationSchedules);
         /* The systemSchedule isn't initiated yet, so schedules shouldn't be ran*/
 
-        if(systemSchedule == null)
-            return;
-        
+
         //Read all equips
-
-
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip");
         for(HashMap hs : equips)
         {
             Equip equip = new Equip.Builder().setHashMap(hs).build();
-            CcuLog.d(TAG_CCU_JOB, "Equip Dis: " + equip.toString());
-
 
             if(equip != null) {
-               
+
                 Schedule equipSchedule = Schedule.getScheduleForZone(equip.getRoomRef().replace("@", ""), false);
-                if (equipSchedule != null) {
-                    writePointsForEquip(equip, equipSchedule, activeVacationSchedule);
-                }
-                else
+
+                if(equipSchedule == null)
                 {
-                    writePointsForEquip(equip, systemSchedule, activeVacationSchedule);
+                    CcuLog.d(L.TAG_CCU_JOB,"<- *no schedule* ScheduleProcessJob");
+                    return;
                 }
+
+
+                writePointsForEquip(equip, equipSchedule, activeVacationSchedule);
+
             }
         }
-        
+
         updateSystemOccupancy();
         systemVacation = inSystemVacation();
         CcuLog.d(TAG_CCU_JOB,"<- ScheduleProcessJob");
@@ -268,10 +265,10 @@ public class ScheduleProcessJob extends BaseJob {
                     cachedOccupied.getHeatingVal(),
                     cachedOccupied.getCoolingVal(),
                     cachedOccupied.getVacation().getEndDateString());*/
-    
+
             return String.format("In %s till %s", "vacation",
                     cachedOccupied.getVacation().getEndDateString());
-            
+
         } else
         {
             return String.format("In %s, changes to %.1f-%.1fF at %02d:%02d", "unoccupied mode",
@@ -281,9 +278,9 @@ public class ScheduleProcessJob extends BaseJob {
                                  cachedOccupied.getNextOccupiedSchedule().getStmm());
         }
     }
-    
+
     public static String getSystemStatusString() {
-        
+
         if(systemOccupancy == null)
         {
             return "Setting up..";
@@ -292,16 +289,16 @@ public class ScheduleProcessJob extends BaseJob {
         if (systemVacation) {
             return "In Vacation";
         }
-        
+
         switch (systemOccupancy) {
             case OCCUPIED:
                 return String.format("In %s | Changes to energy saving at %02d:%02d", "Setpoint",
                         currOccupied.getCurrentlyOccupiedSchedule().getEthh(),
                         currOccupied.getCurrentlyOccupiedSchedule().getEtmm());
-                
+
             case PRECONDITIONING:
                 return "In Preconditioning";
-                
+
             case UNOCCUPIED:
                 return String.format("In %s | Changes to %.1f-%.1fF at %02d:%02d", "Setback",
                         nextOccupied.getHeatingVal(),
@@ -309,7 +306,7 @@ public class ScheduleProcessJob extends BaseJob {
                         nextOccupied.getNextOccupiedSchedule().getSthh(),
                         nextOccupied.getNextOccupiedSchedule().getStmm());
         }
-        
+
         return "";
     }
 
@@ -331,7 +328,7 @@ public class ScheduleProcessJob extends BaseJob {
             return "No Active Vacation";
         }
     }
-    
+
     public static long getMillisToOccupancy() {
         if (nextOccupied != null) {
             return  nextOccupied.getMillisecondsUntilNextChange();
@@ -351,16 +348,20 @@ public class ScheduleProcessJob extends BaseJob {
         Log.d(TAG_CCU_JOB, " millisToOccupancy : "+millisToOccupancy);
         return millisToOccupancy;
     }
-    
+
     public void updateSystemOccupancy() {
-        
+        if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DEFAULT) {
+            Log.d(TAG_CCU_JOB, " Skip updateSystemOccupancy for Default System Profile ");
+            return;
+        }
+
         systemOccupancy = UNOCCUPIED;
         for (Floor f: HSUtil.getFloors())
         {
             for (Zone z : HSUtil.getZones(f.getId()))
             {
                 Occupied c = ScheduleProcessJob.getOccupiedModeCache(z.getId());
-                
+
                 if (c!= null && c.isOccupied())
                 {
                     systemOccupancy = OCCUPIED;
@@ -368,7 +369,7 @@ public class ScheduleProcessJob extends BaseJob {
                 }
             }
         }
-    
+
         long millisToOccupancy = 0;
         if (systemOccupancy == UNOCCUPIED) {
             Occupied next = null;
@@ -392,7 +393,7 @@ public class ScheduleProcessJob extends BaseJob {
             CcuLog.d(TAG_CCU_JOB, "systemOccupancy status : " + systemOccupancy);
             return;
         }
-        
+
         double waCoolingOnlyLoadMA = CCUHsApi.getInstance().readHisValByQuery("system and point and moving and average and cooling and load");
         double waHeatingOnlyLoadMA = CCUHsApi.getInstance().readHisValByQuery("system and point and moving and average and heating and load");
         if (systemOccupancy == UNOCCUPIED)
@@ -417,7 +418,7 @@ public class ScheduleProcessJob extends BaseJob {
         CCUHsApi.getInstance().writeHisValByQuery("point and system and his and occupancy and status",(double)systemOccupancy.ordinal());
         CcuLog.d(TAG_CCU_JOB, "systemOccupancy status : " + systemOccupancy);
     }
-    
+
     public static Occupancy getSystemOccupancy() {
         return systemOccupancy == null ? UNOCCUPIED : systemOccupancy;
     }

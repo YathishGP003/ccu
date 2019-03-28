@@ -27,47 +27,51 @@ import a75f.io.logger.CcuLog;
  *
  * Raw creation requires id field is set to  String localId = UUID.randomUUID().toString();
  *
- * TODO: support all curVal types
- * TODO: return values queried anything that has this scheduleRef should be able to query it and have the results returned if it is in schedule.
- *
  */
-public class Schedule extends Entity {
-
-    public boolean isSiteSchedule() {
-        return getMarkers().contains("system");
+public class Schedule extends Entity
+{
+    public boolean isSiteSchedule()
+    {
+        return getMarkers().contains("building");
     }
 
-    public boolean isZoneSchedule() {
+    public boolean isZoneSchedule()
+    {
         return getMarkers().contains("zone");
     }
 
-    public boolean isNamedSchedule() {
+    public boolean isNamedSchedule()
+    {
         return getMarkers().contains("named");
     }
 
 
-    public static String getZoneIdByEquipId(String equipId) {
+    public static String getZoneIdByEquipId(String equipId)
+    {
         HashMap equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
-        Equip equip = new Equip.Builder().setHashMap(equipHashMap).build();
+        Equip   equip        = new Equip.Builder().setHashMap(equipHashMap).build();
         return equip.getRoomRef().replace("@", "");
     }
 
-    public static Schedule getScheduleByEquipId(String equipId) {
+    public static Schedule getScheduleByEquipId(String equipId)
+    {
         HashMap equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
-        Equip equip = new Equip.Builder().setHashMap(equipHashMap).build();
+        Equip   equip        = new Equip.Builder().setHashMap(equipHashMap).build();
 
         return getScheduleForZone(equip.getRoomRef().replace("@", ""), false);
     }
 
-    public static Schedule getVacationByEquipId(String equipId) {
+    public static Schedule getVacationByEquipId(String equipId)
+    {
         HashMap equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
-        Equip equip = new Equip.Builder().setHashMap(equipHashMap).build();
+        Equip   equip        = new Equip.Builder().setHashMap(equipHashMap).build();
 
         return getScheduleForZone(equip.getRoomRef().replace("@", ""), true);
 
     }
 
-    public static Schedule getScheduleForZone(String zoneId, boolean vacation) {
+    public static Schedule getScheduleForZone(String zoneId, boolean vacation)
+    {
 
         CcuLog.d("Schedule", "Equip Zone Ref: " + zoneId);
         HashMap zoneHashMap = CCUHsApi.getInstance().readMapById(zoneId);
@@ -80,43 +84,57 @@ public class Schedule extends Entity {
         else
             ref = build.getScheduleRef();
 
-        if (ref != null && !ref.equals("")) {
+        if (ref != null && !ref.equals(""))
+        {
             Schedule schedule = CCUHsApi.getInstance().getScheduleById(ref);
 
-            if (schedule != null && !schedule.mMarkers.contains("disabled")) {
+            if (schedule != null && !schedule.mMarkers.contains("disabled"))
+            {
                 CcuLog.d("Schedule", "Schedule: " + schedule.toString());
                 return schedule;
             }
         }
-    
-        ArrayList<Schedule> schedules = CCUHsApi.getInstance().getSystemSchedule(vacation);
-        if (schedules != null && schedules.size() > 0) {
-            return schedules.get(0);
-        } else {
-            return null;
-        }
+
+
+        ArrayList<Schedule> retVal = CCUHsApi.getInstance().getSystemSchedule(vacation);
+        if (retVal != null && retVal.size() > 0)
+            return retVal.get(0);
+
+        return null;
+    }
+
+    public static Zone getZoneforEquipId(String equipId)
+    {
+        HashMap equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
+        Equip   equip        = new Equip.Builder().setHashMap(equipHashMap).build();
+        HashMap zoneHashMap  = CCUHsApi.getInstance().readMapById(equip.getRoomRef().replace("@", ""));
+
+        Zone build = new Zone.Builder().setHashMap(zoneHashMap).build();
+
+        return build;
     }
 
 
     public static Schedule disableScheduleForZone(String zoneId, boolean enabled)
     {
-        HashMap zoneHashMap = CCUHsApi.getInstance().readMapById(zoneId);
-        Zone build = new Zone.Builder().setHashMap(zoneHashMap).build();
+        HashMap zoneHashMap       = CCUHsApi.getInstance().readMapById(zoneId);
+        Zone    build             = new Zone.Builder().setHashMap(zoneHashMap).build();
         boolean currentlyDisabled = build.getMarkers().contains("disabled");
 
         return null;
     }
 
 
-
-
-    public boolean checkIntersection(ArrayList<Days> daysArrayList) {
+    public boolean checkIntersection(ArrayList<Days> daysArrayList)
+    {
 
         ArrayList<Interval> intervalsOfAdditions = getScheduledIntervals(daysArrayList);
-        ArrayList<Interval> intervalsOfCurrent = getScheduledIntervals(getDaysSorted());
+        ArrayList<Interval> intervalsOfCurrent   = getScheduledIntervals(getDaysSorted());
 
-        for (Interval additions : intervalsOfAdditions) {
-            for (Interval current : intervalsOfCurrent) {
+        for (Interval additions : intervalsOfAdditions)
+        {
+            for (Interval current : intervalsOfCurrent)
+            {
 
                 boolean hasOverlap = additions.overlaps(current);
                 if (hasOverlap)
@@ -127,17 +145,21 @@ public class Schedule extends Entity {
         return false;
     }
 
-    private DateTime getTime() {
+    private DateTime getTime()
+    {
         return new DateTime(MockTime.getInstance().getMockTime());
     }
 
-    public Occupied getCurrentValues() {
-        Occupied occupied = null;
-        ArrayList<Days> daysSorted = getDaysSorted();
+    public Occupied getCurrentValues()
+    {
+        Occupied            occupied           = null;
+        ArrayList<Days>     daysSorted         = getDaysSorted();
         ArrayList<Interval> scheduledIntervals = getScheduledIntervals(daysSorted);
 
-        for (int i = 0; i < daysSorted.size(); i++) {
-            if (scheduledIntervals.get(i).contains(getTime().getMillis()) || scheduledIntervals.get(i).isAfter(getTime().getMillis())) {
+        for (int i = 0; i < daysSorted.size(); i++)
+        {
+            if (scheduledIntervals.get(i).contains(getTime().getMillis()) || scheduledIntervals.get(i).isAfter(getTime().getMillis()))
+            {
 
                 boolean currentlyOccupied = scheduledIntervals.get(i).contains(getTime().getMillis());
                 occupied = new Occupied();
@@ -146,26 +168,29 @@ public class Schedule extends Entity {
                 occupied.setCoolingVal(daysSorted.get(i).mCoolingVal);
                 occupied.setHeatingVal(daysSorted.get(i).mHeatingVal);
 
-                if (currentlyOccupied) {
+                if (currentlyOccupied)
+                {
                     occupied.setCurrentlyOccupiedSchedule(daysSorted.get(i));
-                } else {
+                } else
+                {
                     occupied.setNextOccupiedSchedule(daysSorted.get(i));
                 }
-    
+
                 DateTime startDateTime = new DateTime(MockTime.getInstance().getMockTime())
-                                                 .withHourOfDay(daysSorted.get(i).getSthh())
-                                                 .withMinuteOfHour(daysSorted.get(i).getStmm())
-                                                 .withDayOfWeek(daysSorted.get(i).getDay() + 1)
-                                                 .withSecondOfMinute(0);
+                        .withHourOfDay(daysSorted.get(i).getSthh())
+                        .withMinuteOfHour(daysSorted.get(i).getStmm())
+                        .withDayOfWeek(daysSorted.get(i).getDay() + 1)
+                        .withSecondOfMinute(0);
                 occupied.setMillisecondsUntilNextChange(startDateTime.getMillis() - MockTime.getInstance().getMockTime());
-                
+
                 return occupied;
             }
         }
 
 
         /* In case it runs off the ends of the schedule */
-        if (daysSorted.size() > 0) {
+        if (daysSorted.size() > 0)
+        {
             occupied = new Occupied();
             occupied.setOccupied(false);
             occupied.setValue(daysSorted.get(0).mVal);
@@ -173,10 +198,10 @@ public class Schedule extends Entity {
             occupied.setHeatingVal(daysSorted.get(0).mHeatingVal);
             occupied.setNextOccupiedSchedule(daysSorted.get(0));
             DateTime startDateTime = new DateTime(MockTime.getInstance().getMockTime())
-                                             .withHourOfDay(daysSorted.get(0).getSthh())
-                                             .withMinuteOfHour(daysSorted.get(0).getStmm())
-                                             .withDayOfWeek(daysSorted.get(0).getDay() + 1)
-                                             .withSecondOfMinute(0);
+                    .withHourOfDay(daysSorted.get(0).getSthh())
+                    .withMinuteOfHour(daysSorted.get(0).getStmm())
+                    .withDayOfWeek(daysSorted.get(0).getDay() + 1)
+                    .withSecondOfMinute(0);
             occupied.setMillisecondsUntilNextChange(startDateTime.getMillis() - MockTime.getInstance().getMockTime());
         }
 
@@ -201,64 +226,74 @@ public class Schedule extends Entity {
                     {ethh:16 sthh:9 day:1.0 etmm:12 val:80 stmm:0.0},
                     {sunrise:T day:1.0 val:80 sunset:T},{sunrise:F day:3 val:80 sunset:F},{sunrise:T day:3 val:80 sunset:T}]}]}*/
 
-    private String mId;
-    private boolean mIsVacation;
-    private String mDis;
+    private String          mId;
+    private boolean         mIsVacation;
+    private String          mDis;
     private HashSet<String> mMarkers;
-    private String mKind;
-    private String mUnit;
+    private String          mKind;
+    private String          mUnit;
     private ArrayList<Days> mDays = new ArrayList<Days>();
 
     private DateTime mStartDate;
     private DateTime mEndDate;
 
 
-
-    public String getmSiteId() {
+    public String getmSiteId()
+    {
         return mSiteId;
     }
 
     private String mSiteId;
 
-    public String getTZ() {
+    public String getTZ()
+    {
         return mTZ;
     }
 
     private String mTZ;
 
-    public String getId() {
+    public String getId()
+    {
         return mId;
     }
 
-    public boolean isVacation() {
+    public boolean isVacation()
+    {
         return mIsVacation;
     }
 
-    public String getDis() {
+    public String getDis()
+    {
         return mDis;
     }
 
-    public HashSet<String> getMarkers() {
+    public HashSet<String> getMarkers()
+    {
         return mMarkers;
     }
 
-    public String getKind() {
+    public String getKind()
+    {
         return mKind;
     }
 
-    public String getUnit() {
+    public String getUnit()
+    {
         return mUnit;
     }
 
-    public ArrayList<Days> getDays() {
+    public ArrayList<Days> getDays()
+    {
         return mDays;
     }
 
 
-    private ArrayList<Interval> getScheduledIntervals(ArrayList<Days> daysSorted) {
+    private ArrayList<Interval> getScheduledIntervals(ArrayList<Days> daysSorted)
+    {
         ArrayList<Interval> intervals = new ArrayList<Interval>();
 
-        for (Days day : daysSorted) {
+        for (Days day : daysSorted)
+        {
 
 
             DateTime startDateTime = new DateTime(MockTime.getInstance().getMockTime())
@@ -274,11 +309,11 @@ public class Schedule extends Entity {
                                     1);
 
             Interval scheduledInterval = null;
-            if(startDateTime.isAfter(endDateTime))
+            if (startDateTime.isAfter(endDateTime))
             {
                 scheduledInterval = new Interval(endDateTime, startDateTime.withDayOfWeek(DAYS.values()[day.getDay()].getNextDay().ordinal() + 1));
-            }
-            else {
+            } else
+            {
                 scheduledInterval =
                         new Interval(startDateTime, endDateTime);
             }
@@ -295,25 +330,32 @@ public class Schedule extends Entity {
      *
      * @return Sorted list of days
      */
-    public ArrayList<Days> getDaysSorted() {
+    public ArrayList<Days> getDaysSorted()
+    {
 
-        Collections.sort(mDays, new Comparator<Days>() {
+        Collections.sort(mDays, new Comparator<Days>()
+        {
             @Override
-            public int compare(Days o1, Days o2) {
+            public int compare(Days o1, Days o2)
+            {
                 return Integer.valueOf(o1.getStmm()).compareTo(Integer.valueOf(o2.getStmm()));
             }
         });
 
-        Collections.sort(mDays, new Comparator<Days>() {
+        Collections.sort(mDays, new Comparator<Days>()
+        {
             @Override
-            public int compare(Days o1, Days o2) {
+            public int compare(Days o1, Days o2)
+            {
                 return Integer.valueOf(o1.getSthh()).compareTo(Integer.valueOf(o2.getSthh()));
             }
         });
 
-        Collections.sort(mDays, new Comparator<Days>() {
+        Collections.sort(mDays, new Comparator<Days>()
+        {
             @Override
-            public int compare(Days o1, Days o2) {
+            public int compare(Days o1, Days o2)
+            {
                 return Integer.valueOf(o1.mDay).compareTo(Integer.valueOf(o2.mDay));
             }
         });
@@ -321,14 +363,15 @@ public class Schedule extends Entity {
         return mDays;
     }
 
-    public void populateIntersections() {
+    public void populateIntersections()
+    {
         ArrayList<Interval> scheduledIntervals = getScheduledIntervals(getDays());
 
-        for(int i = 0; i < scheduledIntervals.size(); i++)
+        for (int i = 0; i < scheduledIntervals.size(); i++)
         {
-            for(int ii = 0; ii < scheduledIntervals.size(); ii++)
+            for (int ii = 0; ii < scheduledIntervals.size(); ii++)
             {
-                if(scheduledIntervals.get(i).getEndMillis() == scheduledIntervals.get(ii).getStartMillis())
+                if (scheduledIntervals.get(i).getEndMillis() == scheduledIntervals.get(ii).getStartMillis())
                 {
                     this.mDays.get(i).setIntersection(true);
                 }
@@ -347,11 +390,13 @@ public class Schedule extends Entity {
         return mStartDate != null ? mStartDate.toString("y-M-d") : "No start date";
     }
 
-    public DateTime getStartDate() {
+    public DateTime getStartDate()
+    {
         return mStartDate;
     }
 
-    public DateTime getEndDate() {
+    public DateTime getEndDate()
+    {
         return mEndDate;
     }
 
@@ -361,70 +406,87 @@ public class Schedule extends Entity {
         return interval.contains(MockTime.getInstance().getMockTime());
     }
 
+    public void setDisabled(boolean disabled)
+    {
 
-    public static class Builder {
+        if (disabled) mMarkers.add("disabled");
+        else mMarkers.remove("disabled");
+    }
+
+
+    public static class Builder
+    {
         private String mId;
 
-        private boolean mIsVacation;
-        private String mDis;
+        private boolean         mIsVacation;
+        private String          mDis;
         private HashSet<String> mMarkers = new HashSet<String>();
-        private String mKind;
-        private String mUnit;
-        private ArrayList<Days> mDays = new ArrayList<Days>();
-        private String mTZ;
-        private String mSiteId;
-        private DateTime mStartDate;
-        private DateTime mEndDate;
+        private String          mKind;
+        private String          mUnit;
+        private ArrayList<Days> mDays    = new ArrayList<Days>();
+        private String          mTZ;
+        private String          mSiteId;
+        private DateTime        mStartDate;
+        private DateTime        mEndDate;
 
 
-
-        public Schedule.Builder setId(String id) {
+        public Schedule.Builder setId(String id)
+        {
             this.mId = id;
             return this;
         }
 
-        public Schedule.Builder setVacation(boolean vacation) {
+        public Schedule.Builder setVacation(boolean vacation)
+        {
             this.mIsVacation = vacation;
             return this;
         }
 
-        public Schedule.Builder setDisplayName(String displayName) {
+        public Schedule.Builder setDisplayName(String displayName)
+        {
             this.mDis = displayName;
             return this;
         }
 
-        public Schedule.Builder setMarkers(HashSet<String> markers) {
+        public Schedule.Builder setMarkers(HashSet<String> markers)
+        {
             this.mMarkers = markers;
             return this;
         }
 
-        public Schedule.Builder addMarker(String marker) {
+        public Schedule.Builder addMarker(String marker)
+        {
             this.mMarkers.add(marker);
             return this;
         }
 
-        public Schedule.Builder setKind(String kind) {
+        public Schedule.Builder setKind(String kind)
+        {
             this.mKind = kind;
             return this;
         }
 
         //TODO make unit enum / strings
-        public Schedule.Builder setUnit(String unit) {
+        public Schedule.Builder setUnit(String unit)
+        {
             this.mUnit = unit;
             return this;
         }
 
-        public Schedule.Builder setDays(ArrayList<Days> days) {
+        public Schedule.Builder setDays(ArrayList<Days> days)
+        {
             this.mDays = days;
             return this;
         }
 
-        public Schedule.Builder setTz(String tz) {
+        public Schedule.Builder setTz(String tz)
+        {
             this.mTZ = tz;
             return this;
         }
 
-        public Schedule build() {
+        public Schedule build()
+        {
             Schedule s = new Schedule();
             s.mId = this.mId;
             s.mMarkers = this.mMarkers;
@@ -441,36 +503,46 @@ public class Schedule extends Entity {
         }
 
 
-        public Schedule.Builder setHDict(HDict schedule) {
+        public Schedule.Builder setHDict(HDict schedule)
+        {
 
             Iterator it = schedule.iterator();
-            while (it.hasNext()) {
+            while (it.hasNext())
+            {
                 Map.Entry pair = (Map.Entry) it.next();
                 //System.out.println(pair.getKey() + " = " + pair.getValue());
-                if (pair.getKey().equals("id")) {
+                if (pair.getKey().equals("id"))
+                {
                     this.mId = pair.getValue().toString().replaceAll("@", "");
-                } else if (pair.getKey().equals("dis")) {
+                } else if (pair.getKey().equals("dis"))
+                {
                     this.mDis = pair.getValue().toString();
-                } else if (pair.getKey().equals("vacation")) {
+                } else if (pair.getKey().equals("vacation"))
+                {
                     this.mIsVacation = true;
-                } else if (pair.getKey().equals("kind")) {
+                } else if (pair.getKey().equals("kind"))
+                {
                     this.mKind = pair.getValue().toString();
-                } else if (pair.getKey().equals("unit")) {
+                } else if (pair.getKey().equals("unit"))
+                {
                     this.mUnit = pair.getValue().toString();
-                } else if (pair.getKey().equals("tz")) {
+                } else if (pair.getKey().equals("tz"))
+                {
                     this.mTZ = pair.getValue().toString();
-                } else if (pair.getKey().equals("days")) {
+                } else if (pair.getKey().equals("days"))
+                {
                     this.mDays = Days.parse((HList) pair.getValue());
-                } else if (pair.getKey().equals("siteRef")) {
+                } else if (pair.getKey().equals("siteRef"))
+                {
                     this.mSiteId = schedule.getRef("siteRef").val;
                 } else if (pair.getKey().equals("stdt"))
                 {
-                    this.mStartDate = new DateTime(((HDateTime)schedule.get("stdt")).millis());
-                } else if(pair.getKey().equals("etdt"))
+                    this.mStartDate = new DateTime(((HDateTime) schedule.get("stdt")).millis());
+                } else if (pair.getKey().equals("etdt"))
                 {
-                    this.mEndDate = new DateTime(((HDateTime)schedule.get("etdt")).millis());
-                }
-                else {
+                    this.mEndDate = new DateTime(((HDateTime) schedule.get("etdt")).millis());
+                } else
+                {
                     this.mMarkers.add(pair.getKey().toString());
                 }
             }
@@ -479,11 +551,13 @@ public class Schedule extends Entity {
     }
 
 
-    public static class Days {
+    public static class Days
+    {
 
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(Object o)
+        {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Days days = (Days) o;
@@ -500,98 +574,118 @@ public class Schedule extends Entity {
         }
 
         @Override
-        public int hashCode() {
+        public int hashCode()
+        {
             return Objects.hash(mSthh, mStmm, mDay, mVal, mHeatingVal, mCoolingVal, mEtmm, mEthh, mSunrise, mSunset);
         }
 
 
         private boolean mIntersection;
-        private int mSthh;
-        private int mStmm;
-        private int mDay;
-        private Double mVal;
-        private Double mHeatingVal;
-        private Double mCoolingVal;
-        private int mEtmm;
-        private int mEthh;
+        private int     mSthh;
+        private int     mStmm;
+        private int     mDay;
+        private Double  mVal;
+        private Double  mHeatingVal;
+        private Double  mCoolingVal;
+        private int     mEtmm;
+        private int     mEthh;
         private boolean mSunrise;
         private boolean mSunset;
 
 
-        public int getSthh() {
+        public int getSthh()
+        {
             return mSthh;
         }
 
-        public void setSthh(int sthh) {
+        public void setSthh(int sthh)
+        {
             this.mSthh = sthh;
         }
 
-        public int getStmm() {
+        public int getStmm()
+        {
             return mStmm;
         }
 
-        public void setStmm(int stmm) {
+        public void setStmm(int stmm)
+        {
             this.mStmm = stmm;
         }
 
-        public int getDay() {
+        public int getDay()
+        {
             return mDay;
         }
 
-        public void setDay(int day) {
+        public void setDay(int day)
+        {
             this.mDay = day;
         }
 
-        public Double getVal() {
+        public Double getVal()
+        {
             return mVal;
         }
 
-        public void setVal(Double val) {
+        public void setVal(Double val)
+        {
             this.mVal = val;
         }
 
-        public int getEtmm() {
+        public int getEtmm()
+        {
             return mEtmm;
         }
 
-        public void setEtmm(int etmm) {
+        public void setEtmm(int etmm)
+        {
             this.mEtmm = etmm;
         }
 
-        public int getEthh() {
+        public int getEthh()
+        {
             return mEthh;
         }
 
-        public void setEthh(int ethh) {
+        public void setEthh(int ethh)
+        {
             this.mEthh = ethh;
         }
 
-        public boolean isSunrise() {
+        public boolean isSunrise()
+        {
             return mSunrise;
         }
 
-        public void setSunrise(boolean sunrise) {
+        public void setSunrise(boolean sunrise)
+        {
             this.mSunrise = sunrise;
         }
 
-        public boolean isSunset() {
+        public boolean isSunset()
+        {
             return mSunset;
         }
 
-        public void setSunset(boolean sunset) {
+        public void setSunset(boolean sunset)
+        {
             this.mSunset = sunset;
         }
 
-        public static ArrayList<Days> parse(HList value) {
+        public static ArrayList<Days> parse(HList value)
+        {
             ArrayList<Days> days = new ArrayList<Days>();
-            for (int i = 0; i < value.size(); i++) {
+            for (int i = 0; i < value.size(); i++)
+            {
                 days.add(parseSingleDay((HDict) value.get(i)));
             }
 
             return days;
         }
 
-        private static Days parseSingleDay(HDict hDict) {
+        private static Days parseSingleDay(HDict hDict)
+        {
             Days days = new Days();
 
             days.mDay = hDict.getInt("day");
@@ -609,19 +703,23 @@ public class Schedule extends Entity {
             return days;
         }
 
-        public Double getHeatingVal() {
+        public Double getHeatingVal()
+        {
             return mHeatingVal;
         }
 
-        public void setHeatingVal(Double heatingVal) {
+        public void setHeatingVal(Double heatingVal)
+        {
             this.mHeatingVal = heatingVal;
         }
 
-        public Double getCoolingVal() {
+        public Double getCoolingVal()
+        {
             return mCoolingVal;
         }
 
-        public void setCoolingVal(Double coolingVal) {
+        public void setCoolingVal(Double coolingVal)
+        {
             this.mCoolingVal = coolingVal;
         }
 
@@ -637,10 +735,12 @@ public class Schedule extends Entity {
         }
     }
 
-    public HDict getScheduleHDict() {
+    public HDict getScheduleHDict()
+    {
         HDict[] days = new HDict[getDays().size()];
 
-        for (int i = 0; i < getDays().size(); i++) {
+        for (int i = 0; i < getDays().size(); i++)
+        {
             Days day = mDays.get(i);
             HDictBuilder hDictDay = new HDictBuilder()
                     .add("day", HNum.make(day.mDay))
@@ -664,14 +764,15 @@ public class Schedule extends Entity {
 
         HList hList = HList.make(days);
         HDictBuilder defaultSchedule = new HDictBuilder()
-                .add("id", getId())
+                .add("id", HRef.copy(getId()))
                 .add("unit", getUnit())
                 .add("kind", getKind())
                 .add("dis", "Default Site Schedule")
                 .add("days", hList)
-                .add("siteRef", HRef.make(mSiteId));
+                .add("siteRef", HRef.copy(mSiteId));
 
-        for (String marker : getMarkers()) {
+        for (String marker : getMarkers())
+        {
             defaultSchedule.add(marker);
         }
 

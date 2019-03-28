@@ -18,7 +18,7 @@ public class DefaultSchedules {
     public static final double DEFAULT_COOLING_TEMP = 75.0F;
     public static final double DEFAULT_HEATING_TEMP = 70.0F;
 
-    public static String generateDefaultSchedule() {
+    public static String generateDefaultSchedule(boolean zone) {
 
         HRef siteId = CCUHsApi.getInstance().getSiteId();
 
@@ -37,7 +37,7 @@ public class DefaultSchedules {
                 .add("id", localId)
                 .add("unit", "\\u00B0F")
                 .add("kind", "Number")
-                .add("system")
+                .add(zone ? "zone":"building")
                 .add("temp")
                 .add("schedule")
                 .add("heating")

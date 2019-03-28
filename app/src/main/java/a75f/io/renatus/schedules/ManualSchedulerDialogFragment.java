@@ -99,13 +99,12 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
         {
             deleteButton.setVisibility(View.VISIBLE);
         }
-        deleteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mListener.onClickSave(mPosition, 74, 72, 0, 0, 0, 0, null);
-                dismiss();
-            }
-        });
+
+        deleteButton.setOnClickListener(v ->
+                                        {
+                                            mListener.onClickSave(mPosition, 74, 72, 0, 0, 0, 0, null);
+                                            dismiss();
+                                        });
 
 
         npStartTime = view.findViewById(R.id.np1);

@@ -382,7 +382,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                     return;
                 }
                 
-                new AsyncTask<Void, Void, Void>() {
+                new AsyncTask<String, Void, Void>() {
         
                     ProgressDialog progressDlg = new ProgressDialog(getActivity());
         
@@ -395,7 +395,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                     }
         
                     @Override
-                    protected Void doInBackground( final Void ... params ) {
+                    protected Void doInBackground( final String ... params ) {
                         setupPlcProfile();
                         L.saveCCUState();
             
@@ -408,7 +408,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                         FragmentPLCConfiguration.this.closeAllBaseDialogFragments();
                         getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
                     }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
             }
         });
         

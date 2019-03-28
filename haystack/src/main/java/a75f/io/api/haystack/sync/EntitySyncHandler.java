@@ -132,7 +132,7 @@ public class EntitySyncHandler
 
     }
 
-    private void updateRefs(HDict entity, HDictBuilder builder) {
+    public static void updateRefs(HDict entity, HDictBuilder builder) {
         Iterator<String> iterator = ref.iterator();
         while(iterator.hasNext())
         {

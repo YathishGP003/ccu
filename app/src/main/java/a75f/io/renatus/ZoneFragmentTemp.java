@@ -214,9 +214,9 @@ public class ZoneFragmentTemp extends Fragment
     }
     
     public void setPointVal(String id, double val) {
-        new AsyncTask<Void, Void, Void>() {
+        new AsyncTask<String, Void, Void>() {
             @Override
-            protected Void doInBackground( final Void ... params ) {
+            protected Void doInBackground( final String ... params ) {
     
                 CCUHsApi hayStack = CCUHsApi.getInstance();
                 Point p = new Point.Builder().setHashMap(hayStack.readMapById(id)).build();
@@ -246,6 +246,6 @@ public class ZoneFragmentTemp extends Fragment
             protected void onPostExecute( final Void result ) {
                 // continue what you are doing...
             }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
     }
 }

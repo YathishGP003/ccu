@@ -95,7 +95,11 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
         if (mOnExitListener != null)
             mOnExitListener.onExit();
 
+
+
     }
+
+    private ConstraintLayout mVacationLayout;
 
     public SchedulerFragment() {
 
@@ -127,21 +131,17 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
         textViewScheduletitle = rootView.findViewById(R.id.scheduleTitle);
         textViewaddEntry = rootView.findViewById(R.id.addEntry);
         textViewaddEntryIcon = rootView.findViewById(R.id.addEntryIcon);
+        mVacationLayout = rootView.findViewById(R.id.constraintLt_Vacations);
 
         textViewaddEntryIcon.setTypeface(iconFont);
         textViewaddEntryIcon.setText(getString(R.string.icon_plus));
 
 
         textViewVacations = rootView.findViewById(R.id.vacationsTitle);
-        textViewaddVacations = rootView.findViewById(R.id.addVacations);
+         textViewaddVacations= rootView.findViewById(R.id.addVacations);
 
 
-        textViewaddVacations.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showVacationDialog();
-            }
-        });
+        textViewaddVacations.setOnClickListener(v -> showVacationDialog());
         mDrawableBreakLineLeft = AppCompatResources.getDrawable(getContext(), R.drawable.ic_break_line_left_svg);
         mDrawableBreakLineRight = AppCompatResources.getDrawable(getContext(), R.drawable.ic_break_line_right_svg);
         mDrawableTimeMarker = AppCompatResources.getDrawable(getContext(), R.drawable.ic_time_marker_svg);
@@ -242,7 +242,6 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
                 if (mPixelsBetweenAnHour == 0) throw new RuntimeException();
 
                 loadSchedule();
-                loadVacations();
                 drawCurrentTime();
 
             }
@@ -261,23 +260,34 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
         }
 
 
+        if(schedule != null && schedule.isZoneSchedule())
+        {
+            textViewScheduletitle.setText("Zone Schedule");
+            mVacationLayout.setVisibility(View.GONE);
+            textViewVacations.setVisibility(View.GONE);
+            textViewaddVacations.setVisibility(View.GONE);
+        }
+        else
+        {
+            loadVacations();
+        }
+
+
         schedule.populateIntersections();
 
-        SchedulerFragment.this.getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                hasTextViewChildren();
+        SchedulerFragment.this.getActivity().runOnUiThread(() ->
+                                                           {
+                                                               hasTextViewChildren();
 
-                ArrayList<Schedule.Days> days = schedule.getDays();
-                for (int i = 0; i < days.size(); i++) {
-                    Schedule.Days daysElement = days.get(i);
-                    drawSchedule(i, daysElement.getCoolingVal(), daysElement.getHeatingVal(),
-                            daysElement.getSthh(), daysElement.getEthh(),
-                            daysElement.getStmm(), daysElement.getEtmm(),
-                            DAYS.values()[daysElement.getDay()], daysElement.isIntersection());
-                }
-            }
-        });
+                                                               ArrayList<Schedule.Days> days = schedule.getDays();
+                                                               for (int i = 0; i < days.size(); i++) {
+                                                                   Schedule.Days daysElement = days.get(i);
+                                                                   drawSchedule(i, daysElement.getCoolingVal(), daysElement.getHeatingVal(),
+                                                                           daysElement.getSthh(), daysElement.getEthh(),
+                                                                           daysElement.getStmm(), daysElement.getEtmm(),
+                                                                           DAYS.values()[daysElement.getDay()], daysElement.isIntersection());
+                                                               }
+                                                           });
     }
 
     private void hasTextViewChildren() {

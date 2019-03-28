@@ -185,7 +185,7 @@ public class CCUHsApi
 
     public void updateZone(Zone z, String id)
     {
-        tagsDb.updateZone(z, id);
+        tagsDb.updateZone(z);
         if (tagsDb.idMap.get(id) != null)
         {
             tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
@@ -871,9 +871,9 @@ public class CCUHsApi
         ArrayList<Schedule> schedules = new ArrayList<>();
         String              filter    = null;
         if (!vacation)
-            filter = "schedule and system and not vacation";
+            filter = "schedule and building and not vacation";
         else
-            filter = "schedule and system and vacation";
+            filter = "schedule and building and vacation";
 
         HGrid scheduleHGrid = tagsDb.readAll(filter);
 
@@ -907,7 +907,7 @@ public class CCUHsApi
         if (scheduleRef == null)
             return null;
 
-        HDict hDict = tagsDb.readById(HRef.make(scheduleRef));
+        HDict hDict = tagsDb.readById(HRef.copy(scheduleRef));
         return new Schedule.Builder().setHDict(hDict).build();
     }
 

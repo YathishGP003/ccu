@@ -41,9 +41,9 @@ public class DefaultSystemProfile extends Fragment
         if (L.ccu().systemProfile instanceof DefaultSystem) {
         } else {
         
-            new AsyncTask<Void, Void, Void>() {
+            new AsyncTask<String, Void, Void>() {
                 @Override
-                protected Void doInBackground( final Void ... params ) {
+                protected Void doInBackground( final String ... params ) {
                     if (systemProfile != null) {
                         systemProfile.deleteSystemEquip();
                         L.ccu().systemProfile = null;
@@ -56,7 +56,7 @@ public class DefaultSystemProfile extends Fragment
                 @Override
                 protected void onPostExecute( final Void result ) {
                 }
-            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
         }
     }
 }

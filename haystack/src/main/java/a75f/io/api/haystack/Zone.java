@@ -103,16 +103,16 @@ public class Zone extends Entity
         HDictBuilder b = new HDictBuilder()
                 .add("id", HRef.copy(id))
                 .add("dis", getDisplayName())
-                .add("floorRef", HRef.copy(getFloorRef()));
+                .add("floorRef", getFloorRef());
 
         if(getScheduleRef() != null)
         {
-            b.add("scheduleRef", HRef.copy(getScheduleRef()));
+            b.add("scheduleRef", getScheduleRef());
         }
 
         if(getSiteRef() != null)
         {
-            b.add("siteRef", HRef.copy(getSiteRef()));
+            b.add("siteRef", getSiteRef());
         }
 
 

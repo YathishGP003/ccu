@@ -75,17 +75,29 @@ public class BuildingTuners
     }
     
     public void addDefaultSystemTuners() {
-        Point preConditioingRate = new Point.Builder()
-                                           .setDisplayName(equipDis+"-"+"preConditioingRate")
+        Point heatingPreconditioingRate = new Point.Builder()
+                                           .setDisplayName(equipDis+"-"+"heatingPreconditioingRate")
                                            .setSiteRef(siteRef)
                                            .setEquipRef(equipRef)
                                            .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
-                                           .addMarker("system").addMarker("precon").addMarker("rate").addMarker("sp")
+                                           .addMarker("system").addMarker("heating").addMarker("precon").addMarker("rate").addMarker("sp")
                                            .setTz(tz)
                                            .build();
-        String preConditioingRateId = hayStack.addPoint(preConditioingRate);
-        hayStack.writePoint(preConditioingRateId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.SYSTEM_PRECONDITION_RATE, 0);
-        hayStack.writeHisValById(preConditioingRateId, TunerConstants.SYSTEM_PRECONDITION_RATE);
+        String heatingPreconditioingRateId = hayStack.addPoint(heatingPreconditioingRate);
+        hayStack.writePoint(heatingPreconditioingRateId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.SYSTEM_PRECONDITION_RATE, 0);
+        hayStack.writeHisValById(heatingPreconditioingRateId, TunerConstants.SYSTEM_PRECONDITION_RATE);
+    
+        Point coolingPreconditioingRate = new Point.Builder()
+                                                  .setDisplayName(equipDis+"-"+"coolingPreconditioingRate")
+                                                  .setSiteRef(siteRef)
+                                                  .setEquipRef(equipRef)
+                                                  .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
+                                                  .addMarker("system").addMarker("cooling").addMarker("precon").addMarker("rate").addMarker("sp")
+                                                  .setTz(tz)
+                                                  .build();
+        String coolingPreconditioingRateId = hayStack.addPoint(coolingPreconditioingRate);
+        hayStack.writePoint(coolingPreconditioingRateId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.SYSTEM_PRECONDITION_RATE, 0);
+        hayStack.writeHisValById(coolingPreconditioingRateId, TunerConstants.SYSTEM_PRECONDITION_RATE);
     }
     
     public void addDefaultZoneTuners() {

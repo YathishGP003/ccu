@@ -202,9 +202,9 @@ public class VavAnalogRtu extends VavSystemProfile
         CcuLog.d(L.TAG_CCU_SYSTEM,"analogMin: "+analogMin+" analogMax: "+analogMax+" CO2: "+getSystemCO2());
         if (analogMax > analogMin)
         {
-            signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (getSystemCO2() - SystemConstants.CO2_CONFIG_MIN) / 200));
+            signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (SystemConstants.CO2_CONFIG_MAX - getSystemCO2()) / 200));
         } else {
-            signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (getSystemCO2() - SystemConstants.CO2_CONFIG_MIN) / 200));
+            signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (SystemConstants.CO2_CONFIG_MAX - getSystemCO2()) / 200));
         }
         setCmdSignal("co2",signal);
         if (getConfigVal("analog4 and output and enabled") > 0)

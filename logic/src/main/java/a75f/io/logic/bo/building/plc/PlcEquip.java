@@ -48,8 +48,8 @@ public class PlcEquip
         plc.setIntegralMaxTimeout((int)TunerUtil.readTunerValByQuery("pid and itimeout and equipRef == \""+equipRef+"\""));
         
         targetValue = hayStack.readDefaultVal("point and config and target and value and equipRef == \""+equipRef+"\"");
-        spSensorOffset = hayStack.readDefaultVal("point and config and OCCUPIED and sensor and offset and equipRef == \""+equipRef+"\"");
-        isEnabledAnalog2InForSp = hayStack.readDefaultVal("point and config and enabled and analog2 and OCCUPIED and equipRef == \""+equipRef+"\"") > 0;
+        spSensorOffset = hayStack.readDefaultVal("point and config and setpoint and sensor and offset and equipRef == \""+equipRef+"\"");
+        isEnabledAnalog2InForSp = hayStack.readDefaultVal("point and config and enabled and analog2 and setpoint and equipRef == \""+equipRef+"\"") > 0;
         isEnabledZeroErrorMidpoint = hayStack.readDefaultVal("point and config and enabled and zero and error and midpoint and equipRef == \""+equipRef+"\"") > 0;
     
     }
@@ -177,7 +177,7 @@ public class PlcEquip
                                            .setRoomRef(roomRef)
                                            .setFloorRef(floorRef)
                                            .addMarker("config").addMarker("pid").addMarker("zone").addMarker("writable")
-                                           .addMarker("enabled").addMarker("analog2").addMarker("OCCUPIED")
+                                           .addMarker("enabled").addMarker("analog2").addMarker("setpoint")
                                            .setGroup(String.valueOf(nodeAddr))
                                            .setTz(tz)
                                            .build();
@@ -205,7 +205,7 @@ public class PlcEquip
                                            .setRoomRef(roomRef)
                                            .setFloorRef(floorRef)
                                            .addMarker("config").addMarker("pid").addMarker("zone").addMarker("writable")
-                                           .addMarker("OCCUPIED").addMarker("sensor").addMarker("offset")
+                                           .addMarker("setpoint").addMarker("sensor").addMarker("offset")
                                            .setGroup(String.valueOf(nodeAddr))
                                            .setTz(tz)
                                            .build();
@@ -261,7 +261,7 @@ public class PlcEquip
                                          .setRoomRef(roomRef)
                                          .setFloorRef(floorRef)
                                          .addMarker("sp").addMarker("pid").addMarker("zone").addMarker("his").addMarker("logical").addMarker("equipHis")
-                                         .addMarker("OCCUPIED").addMarker("variable")
+                                         .addMarker("setpoint").addMarker("variable")
                                          .setGroup(String.valueOf(nodeAddr))
                                          .setTz(tz)
                                          .build();
@@ -302,10 +302,10 @@ public class PlcEquip
         p.th1InputSensor = hayStack.readDefaultVal("point and config and th1 and input and sensor and equipRef == \""+equipRef+"\"").intValue();
         p.pidTargetValue = hayStack.readDefaultVal("point and config and target and value and equipRef == \""+equipRef+"\"");
         p.pidProportionalRange = hayStack.readDefaultVal("point and proportional and range and equipRef == \""+equipRef+"\"");
-        p.useAnalogIn2ForSetpoint = hayStack.readDefaultVal("point and config and enabled and analog2 and OCCUPIED and equipRef == \""+equipRef+"\"") > 0;
+        p.useAnalogIn2ForSetpoint = hayStack.readDefaultVal("point and config and enabled and analog2 and setpoint and equipRef == \""+equipRef+"\"") > 0;
         p.analog2InputSensor = hayStack.readDefaultVal("point and config and analog2 and input and sensor and equipRef == \""+equipRef+"\"").intValue();
     
-        p.setpointSensorOffset = hayStack.readDefaultVal("point and config and OCCUPIED and sensor and offset and equipRef == \""+equipRef+"\"");
+        p.setpointSensorOffset = hayStack.readDefaultVal("point and config and setpoint and sensor and offset and equipRef == \""+equipRef+"\"");
     
         p.analog1AtMinOutput = hayStack.readDefaultVal("point and config and analog1 and min and output and equipRef == \""+equipRef+"\"");
     
@@ -325,11 +325,11 @@ public class PlcEquip
         
         hayStack.writeDefaultVal("point and config and proportional and range and equipRef == \""+equipRef+"\"", config.pidProportionalRange);
     
-        hayStack.writeDefaultVal("point and config and enabled and analog2 and OCCUPIED and equipRef == \""+equipRef+"\"", config.useAnalogIn2ForSetpoint ? 1.0 :0);
+        hayStack.writeDefaultVal("point and config and enabled and analog2 and setpoint and equipRef == \""+equipRef+"\"", config.useAnalogIn2ForSetpoint ? 1.0 :0);
     
         hayStack.writeDefaultVal("point and config and analog2 and input and sensor and equipRef == \""+equipRef+"\"", (double)config.analog2InputSensor);
     
-        hayStack.writeDefaultVal("point and config and OCCUPIED and sensor and offset and equipRef == \""+equipRef+"\"", config.setpointSensorOffset);
+        hayStack.writeDefaultVal("point and config and setpoint and sensor and offset and equipRef == \""+equipRef+"\"", config.setpointSensorOffset);
     
         hayStack.writeDefaultVal("point and config and analog1 and min and output and equipRef == \""+equipRef+"\"", config.analog1AtMinOutput);
     
@@ -339,7 +339,7 @@ public class PlcEquip
     
         SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_OUT_ONE.toString(), (int) config.analog1AtMinOutput+"-"+(int)config.analog1AtMaxOutput);
     
-        HashMap sv = hayStack.read("point and OCCUPIED and variable and equipRef == \""+equipRef+"\"");
+        HashMap sv = hayStack.read("point and setpoint and variable and equipRef == \""+equipRef+"\"");
         
         if (config.useAnalogIn2ForSetpoint) {
             SmartNode.setPointEnabled(nodeAddr, Port.ANALOG_IN_TWO.name(), true);
@@ -378,11 +378,11 @@ public class PlcEquip
     }
     public double getSpVariable()
     {
-        return hayStack.readHisValByQuery("point and OCCUPIED and variable and equipRef == \""+equipRef+"\"");
+        return hayStack.readHisValByQuery("point and setpoint and variable and equipRef == \""+equipRef+"\"");
     }
     public void setSpVariable(double spVariable)
     {
-        hayStack.writeHisValByQuery("point and OCCUPIED and variable and equipRef == \""+equipRef+"\"", spVariable);
+        hayStack.writeHisValByQuery("point and setpoint and variable and equipRef == \""+equipRef+"\"", spVariable);
     
     }
     

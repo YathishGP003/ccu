@@ -64,7 +64,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
         final String expandedListText = (String) getChild(listPosition, expandedListPosition);
         Log.i("Scheduler", "IDE Too Slow: " + expandedListText);
 
-        if (!expandedListText.equals("schedule"))
+        if (!expandedListText.startsWith("schedule"))
         {
             LayoutInflater layoutInflater = (LayoutInflater) this.mFragment.getContext()
                                                                            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);

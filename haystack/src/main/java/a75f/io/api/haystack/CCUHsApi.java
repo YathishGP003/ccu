@@ -873,7 +873,7 @@ public class CCUHsApi
         if (!vacation)
             filter = "schedule and building and not vacation";
         else
-            filter = "schedule and building and vacation";
+            filter = "schedule and vacation";
 
         HGrid scheduleHGrid = tagsDb.readAll(filter);
 

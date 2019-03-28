@@ -145,12 +145,12 @@ public class ZoneFragmentTemp extends Fragment
                     tunerList.add(currTmep.get("dis").toString());
                     tunerList.add(coolDT.get("dis").toString());
                     tunerList.add(heatDT.get("dis").toString());
-                    tunerList.add("schedule");
+                    tunerList.add("schedule_" + p.getId());
     
                     tunerMap.put(currTmep.get("dis").toString(), currTmep.get("id").toString());
                     tunerMap.put(coolDT.get("dis").toString(), coolDT.get("id").toString());
                     tunerMap.put(heatDT.get("dis").toString(), heatDT.get("id").toString());
-                    tunerMap.put("schedule", p.getId());
+                    tunerMap.put("schedule_" + p.getId(), p.getId());
     
                     expandableListDetail.put(p.getDisplayName(), tunerList);
                 }
@@ -164,12 +164,12 @@ public class ZoneFragmentTemp extends Fragment
                 ArrayList tunerList = new ArrayList();
                 tunerList.add(pv.get("dis").toString());
                 tunerList.add(cv.get("dis").toString());
-                tunerList.add("schedule");
+                tunerList.add("schedule_" + p.getId());
     
                 tunerMap.put(pv.get("dis").toString(), pv.get("id").toString());
                 tunerMap.put(cv.get("dis").toString(), cv.get("id").toString());
                 
-                tunerMap.put("schedule", p.getId());
+                tunerMap.put("schedule_" + p.getId(), p.getId());
                 expandableListDetail.put(p.getDisplayName(), tunerList);
                 
             }

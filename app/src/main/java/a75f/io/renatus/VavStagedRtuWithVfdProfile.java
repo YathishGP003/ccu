@@ -454,7 +454,7 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
             protected void onPostExecute( final Void result ) {
                 // continue what you are doing...
             }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
     
     private void setConfigEnabledBackground(String config, double val) {

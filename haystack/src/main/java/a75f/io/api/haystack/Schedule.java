@@ -27,13 +27,9 @@ import a75f.io.logger.CcuLog;
  *
  * Raw creation requires id field is set to  String localId = UUID.randomUUID().toString();
  *
- * TODO: support all curVal types
- * TODO: return values queried anything that has this scheduleRef should be able to query it and have the results returned if it is in schedule.
- *
  */
 public class Schedule extends Entity
 {
-
     public boolean isSiteSchedule()
     {
         return getMarkers().contains("building");

@@ -3,7 +3,7 @@
 
 buildscript {
 
-    ext.objectboxVersion = '2.1.0'
+    ext.objectboxVersion = '2.3.4'
 
     repositories {
         mavenLocal()
@@ -49,6 +49,5 @@ buildscript {
         minSdkVersion = 19
         targetSdkVersion = 19
     }
-
 
 }

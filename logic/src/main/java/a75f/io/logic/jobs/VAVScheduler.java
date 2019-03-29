@@ -23,9 +23,7 @@ public class VAVScheduler {
 
     private static final String TAG = "VAVScheduler";
     boolean occupied; // determined by schedule
-
-
-
+    
     public static Occupied processEquip(Equip equip, Schedule equipSchedule, Schedule vacation) {
 
 
@@ -45,11 +43,8 @@ public class VAVScheduler {
         occ.setHeatingDeadBand(heatingDeadBand);
         occ.setCoolingDeadBand(coolingDeadBand);
         occ.setUnoccupiedZoneSetback(setback);
-
-
-
+        
         if (occ != null && ScheduleProcessJob.putOccupiedModeCache(equip.getRoomRef(), occ)) {
-
 
             Double coolingTemp = occ.isOccupied() ? occ.getCoolingVal() : (occ.getCoolingVal() + occ.getUnoccupiedZoneSetback());
             setDesiredTemp(equip, coolingTemp, "cooling");

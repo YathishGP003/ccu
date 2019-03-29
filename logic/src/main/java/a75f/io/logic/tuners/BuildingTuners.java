@@ -655,7 +655,7 @@ public class BuildingTuners
     
     public void addDefaultPlcTuners() {
         Point propGain = new Point.Builder()
-                                 .setDisplayName(equipDis+"-"+"proportionalKFactor ")
+                                 .setDisplayName(equipDis+"-"+"proportionalKFactor")
                                  .setSiteRef(siteRef)
                                  .setEquipRef(equipRef)
                                  .addMarker("tuner").addMarker("default").addMarker("pid").addMarker("writable").addMarker("his").addMarker("equipHis")
@@ -667,7 +667,7 @@ public class BuildingTuners
         hayStack.writeHisValById(pgainId, TunerConstants.VAV_PROPORTIONAL_GAIN);
     
         Point integralGain = new Point.Builder()
-                                     .setDisplayName(equipDis+"-"+"integralKFactor ")
+                                     .setDisplayName(equipDis+"-"+"integralKFactor")
                                      .setSiteRef(siteRef)
                                      .setEquipRef(equipRef)
                                      .addMarker("tuner").addMarker("default").addMarker("pid").addMarker("writable").addMarker("his").addMarker("equipHis")
@@ -679,7 +679,7 @@ public class BuildingTuners
         hayStack.writeHisValById(igainId, TunerConstants.VAV_INTEGRAL_GAIN);
     
         Point integralTimeout = new Point.Builder()
-                                        .setDisplayName(equipDis+"-"+"pidIntegralTime ")
+                                        .setDisplayName(equipDis+"-"+"pidIntegralTime")
                                         .setSiteRef(siteRef)
                                         .setEquipRef(equipRef)
                                         .addMarker("tuner").addMarker("default").addMarker("pid").addMarker("writable").addMarker("his").addMarker("equipHis")

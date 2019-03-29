@@ -1,5 +1,7 @@
 package a75f.io.api.haystack;
 
+import android.util.Log;
+
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.projecthaystack.HDateTime;
@@ -50,7 +52,7 @@ public class Schedule extends Entity
     {
         HashMap equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
         Equip   equip        = new Equip.Builder().setHashMap(equipHashMap).build();
-        return equip.getRoomRef().replace("@", "");
+        return equip.getRoomRef();
     }
 
     public static Schedule getScheduleByEquipId(String equipId)
@@ -236,6 +238,16 @@ public class Schedule extends Entity
 
     private DateTime mStartDate;
     private DateTime mEndDate;
+    
+    public String getRoomRef()
+    {
+        return mRoomRef;
+    }
+    public void setRoomRef(String roomRef)
+    {
+        this.mRoomRef = roomRef;
+    }
+    private String mRoomRef;
 
 
     public String getmSiteId()
@@ -402,6 +414,7 @@ public class Schedule extends Entity
 
     public boolean isActiveVacation()
     {
+        Log.d("CCU_JOB"," getStartDate "+getStartDate()+" getEndDate "+getEndDate()+" Curr "+MockTime.getInstance().getMockTime());
         Interval interval = new Interval(getStartDate(), getEndDate());
         return interval.contains(MockTime.getInstance().getMockTime());
     }
@@ -428,8 +441,15 @@ public class Schedule extends Entity
         private String          mSiteId;
         private DateTime        mStartDate;
         private DateTime        mEndDate;
-
-
+        private String mRoomRef;
+    
+    
+        public Schedule.Builder setmRoomRef(String mRoomRef)
+        {
+            this.mRoomRef = mRoomRef;
+            return this;
+        }
+        
         public Schedule.Builder setId(String id)
         {
             this.mId = id;
@@ -499,6 +519,7 @@ public class Schedule extends Entity
             s.mTZ = this.mTZ;
             s.mStartDate = this.mStartDate;
             s.mEndDate = this.mEndDate;
+            s.mRoomRef = this.mRoomRef;
             return s;
         }
 
@@ -535,6 +556,9 @@ public class Schedule extends Entity
                 } else if (pair.getKey().equals("siteRef"))
                 {
                     this.mSiteId = schedule.getRef("siteRef").val;
+                } else if (pair.getKey().equals("roomRef"))
+                {
+                    this.mRoomRef = schedule.getRef("roomRef").toString();
                 } else if (pair.getKey().equals("stdt"))
                 {
                     this.mStartDate = new DateTime(((HDateTime) schedule.get("stdt")).millis());
@@ -770,12 +794,57 @@ public class Schedule extends Entity
                 .add("dis", "Default Site Schedule")
                 .add("days", hList)
                 .add("siteRef", HRef.copy(mSiteId));
-
+        
         for (String marker : getMarkers())
         {
             defaultSchedule.add(marker);
         }
 
+        return defaultSchedule.toDict();
+    }
+    
+    public HDict getZoneScheduleHDict(String roomRef)
+    {
+        HDict[] days = new HDict[getDays().size()];
+        
+        for (int i = 0; i < getDays().size(); i++)
+        {
+            Days day = mDays.get(i);
+            HDictBuilder hDictDay = new HDictBuilder()
+                                            .add("day", HNum.make(day.mDay))
+                                            .add("sthh", HNum.make(day.mSthh))
+                                            .add("stmm", HNum.make(day.mStmm))
+                                            .add("ethh", HNum.make(day.mEthh))
+                                            .add("etmm", HNum.make(day.mEtmm));
+            if (day.mHeatingVal != null)
+                hDictDay.add("heatVal", HNum.make(day.getHeatingVal()));
+            if (day.mCoolingVal != null)
+                hDictDay.add("coolVal", HNum.make(day.getCoolingVal()));
+            if (day.mVal != null)
+                hDictDay.add("curVal", HNum.make(day.getVal()));
+            
+            //need boolean & string support
+            if (day.mSunset) hDictDay.add("sunset", day.mSunset);
+            if (day.mSunrise) hDictDay.add("sunrise", day.mSunrise);
+            
+            days[i] = hDictDay.toDict();
+        }
+        
+        HList hList = HList.make(days);
+        HDictBuilder defaultSchedule = new HDictBuilder()
+                                               .add("id", HRef.copy(getId()))
+                                               .add("unit", getUnit())
+                                               .add("kind", getKind())
+                                               .add("dis", "Default Site Schedule")
+                                               .add("days", hList)
+                                               .add("roomRef",HRef.copy(roomRef))
+                                               .add("siteRef", HRef.copy(mSiteId));
+        
+        for (String marker : getMarkers())
+        {
+            defaultSchedule.add(marker);
+        }
+        
         return defaultSchedule.toDict();
     }
 

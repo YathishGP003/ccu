@@ -129,13 +129,13 @@ public class ScheduleProcessJob extends BaseJob {
 
 
         //Read all equips
-        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip");
+        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone");
         for(HashMap hs : equips)
         {
             Equip equip = new Equip.Builder().setHashMap(hs).build();
 
             if(equip != null) {
-
+                
                 Schedule equipSchedule = Schedule.getScheduleForZone(equip.getRoomRef().replace("@", ""), false);
 
                 if(equipSchedule == null)
@@ -144,6 +144,13 @@ public class ScheduleProcessJob extends BaseJob {
                     return;
                 }
 
+                //If building vacation is not active, check zone vacations.
+                if (activeVacationSchedule == null ) {
+                    
+                    ArrayList<Schedule> activeZoneVacationSchedules = CCUHsApi.getInstance().getZoneSchedule(equip.getRoomRef(),true);
+                    activeVacationSchedule = getActiveVacation(activeZoneVacationSchedules);
+                    Log.d(L.TAG_CCU_JOB, "Equip "+equip.getDisplayName()+" activeZoneVacationSchedules "+activeZoneVacationSchedules.size()+" activeVacationSchedule "+activeVacationSchedule);
+                }
 
                 writePointsForEquip(equip, equipSchedule, activeVacationSchedule);
 
@@ -242,7 +249,7 @@ public class ScheduleProcessJob extends BaseJob {
     public static String getZoneStatusString(String zoneId)
     {
 
-        Occupied cachedOccupied = getOccupiedModeCache("@" + zoneId);
+        Occupied cachedOccupied = getOccupiedModeCache(zoneId);
         Occupancy returnStatus = OCCUPIED;
         double firstTemp = 0;
         double secondTemp = 0;
@@ -266,12 +273,12 @@ public class ScheduleProcessJob extends BaseJob {
                     cachedOccupied.getCoolingVal(),
                     cachedOccupied.getVacation().getEndDateString());*/
 
-            return String.format("In %s till %s", "vacation",
+            return String.format("In Energy saving %s till %s", "vacation",
                     cachedOccupied.getVacation().getEndDateString());
 
         } else
         {
-            return String.format("In %s, changes to %.1f-%.1fF at %02d:%02d", "unoccupied mode",
+            return String.format("In Energy saving %s, changes to %.1f-%.1fF at %02d:%02d", "unoccupied mode",
                                  cachedOccupied.getHeatingVal(),
                                  cachedOccupied.getCoolingVal(),
                                  cachedOccupied.getNextOccupiedSchedule().getSthh(),
@@ -287,12 +294,12 @@ public class ScheduleProcessJob extends BaseJob {
         }
         
         if (systemVacation) {
-            return "In Vacation";
+            return "In Energy saving Vacation";
         }
 
         switch (systemOccupancy) {
             case OCCUPIED:
-                return String.format("In %s | Changes to energy saving at %02d:%02d", "Setpoint",
+                return String.format("In %s | Changes to energy saving at %02d:%02d", "Occupied mode",
                         currOccupied.getCurrentlyOccupiedSchedule().getEthh(),
                         currOccupied.getCurrentlyOccupiedSchedule().getEtmm());
 
@@ -300,7 +307,7 @@ public class ScheduleProcessJob extends BaseJob {
                 return "In Preconditioning";
 
             case UNOCCUPIED:
-                return String.format("In %s | Changes to %.1f-%.1fF at %02d:%02d", "Setback",
+                return String.format("In Energy saving  %s | Changes to %.1f-%.1fF at %02d:%02d", "Unoccupied mode",
                         nextOccupied.getHeatingVal(),
                         nextOccupied.getCoolingVal(),
                         nextOccupied.getNextOccupiedSchedule().getSthh(),
@@ -313,7 +320,7 @@ public class ScheduleProcessJob extends BaseJob {
 
     public static String getVacationStateString(String zoneId)
     {
-        Occupied cachedOccupied = getOccupiedModeCache("@" + zoneId);
+        Occupied cachedOccupied = getOccupiedModeCache(zoneId);
 
         if(cachedOccupied == null)
         {

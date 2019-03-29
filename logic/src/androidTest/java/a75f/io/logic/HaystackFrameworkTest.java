@@ -60,7 +60,7 @@ public class HaystackFrameworkTest {
 
         addSite();
         String testDis = "Default Site Schedule";
-        String localId = DefaultSchedules.generateDefaultSchedule(false);
+        String localId = DefaultSchedules.generateDefaultSchedule(false, null);
         System.out.println("Dict To String: " + localId);
         HDict scheduleDict = CCUHsApi.getInstance().readHDictById(localId);
         Schedule build = new Schedule.Builder().setHDict(scheduleDict).build();

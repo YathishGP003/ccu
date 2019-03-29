@@ -263,14 +263,13 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
         if(schedule != null && schedule.isZoneSchedule())
         {
             textViewScheduletitle.setText("Zone Schedule");
-            mVacationLayout.setVisibility(View.GONE);
-            textViewVacations.setVisibility(View.GONE);
-            textViewaddVacations.setVisibility(View.GONE);
+            //mVacationLayout.setVisibility(View.GONE);
+            //textViewVacations.setVisibility(View.GONE);
+            //textViewaddVacations.setVisibility(View.GONE);
         }
-        else
-        {
-            loadVacations();
-        }
+        
+        loadVacations();
+        
 
 
         schedule.populateIntersections();
@@ -343,7 +342,12 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
             public boolean onClickSave(String vacationId, String vacationName, DateTime startDate, DateTime endDate)
             {
 
-                DefaultSchedules.upsertVacation(vacationId, vacationName, startDate, endDate);
+                if (schedule != null && schedule.isZoneSchedule()) {
+                    DefaultSchedules.upsertZoneVacation(vacationId, vacationName, startDate, endDate, schedule.getRoomRef());
+                } else
+                {
+                    DefaultSchedules.upsertVacation(vacationId, vacationName, startDate, endDate);
+                }
                 loadVacations();
                 return false;
             }
@@ -371,7 +375,14 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
 
 
     private void loadVacations() {
-        ArrayList<Schedule> vacations = CCUHsApi.getInstance().getSystemSchedule(true);
+    
+        ArrayList<Schedule> vacations;
+        if (schedule.isZoneSchedule()) {
+            vacations = CCUHsApi.getInstance().getZoneSchedule(schedule.getRoomRef(), true);
+        } else
+        {
+            vacations = CCUHsApi.getInstance().getSystemSchedule(true);
+        }
         if(vacations != null) {
             mVacationAdapter = new VacationAdapter(vacations, mEditOnClickListener, mDeleteOnClickListener);
             mVacationRecycler.setAdapter(mVacationAdapter);

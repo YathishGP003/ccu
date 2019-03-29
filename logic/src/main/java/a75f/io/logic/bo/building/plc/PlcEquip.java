@@ -104,7 +104,7 @@ public class PlcEquip
                                            .setSiteRef(siteRef)
                                            .setRoomRef(roomRef)
                                            .setFloorRef(floorRef)
-                                           .addMarker("config").addMarker("pid").addMarker("th1").addMarker("zone").addMarker("writable")
+                                           .addMarker("config").addMarker("pid").addMarker("zone").addMarker("writable")
                                            .addMarker("th1").addMarker("input").addMarker("sensor")
                                            .setGroup(String.valueOf(nodeAddr))
                                            .setTz(tz)

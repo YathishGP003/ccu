@@ -79,6 +79,7 @@
             android:layout_height="48dp"
             android:scaleType="centerInside"
             android:src="@android:drawable/ic_menu_edit"
+            android:visibility="gone"
             android:padding="8dp"></ImageButton>
     </LinearLayout>
 </LinearLayout>

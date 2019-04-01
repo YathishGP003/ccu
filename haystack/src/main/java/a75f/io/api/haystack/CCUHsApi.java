@@ -873,7 +873,7 @@ public class CCUHsApi
         if (!vacation)
             filter = "schedule and building and not vacation";
         else
-            filter = "schedule and vacation";
+            filter = "schedule and building and vacation";
 
         HGrid scheduleHGrid = tagsDb.readAll(filter);
 
@@ -882,6 +882,27 @@ public class CCUHsApi
             schedules.add(new Schedule.Builder().setHDict(scheduleHGrid.row(i)).build());
         }
 
+        return schedules;
+    }
+    
+    public ArrayList<Schedule> getZoneSchedule(String zoneId, boolean vacation)
+    {
+        ArrayList<Schedule> schedules = new ArrayList<>();
+        String              filter    = null;
+        if (!vacation)
+            filter = "schedule and zone and not vacation and roomRef == "+zoneId;
+        else
+            filter = "schedule and zone and vacation and roomRef == "+zoneId;
+        
+        Log.d("CCU_HS"," getZoneSchedule : "+filter);
+        
+        HGrid scheduleHGrid = tagsDb.readAll(filter);
+        
+        for (int i = 0; i < scheduleHGrid.numRows(); i++)
+        {
+            schedules.add(new Schedule.Builder().setHDict(scheduleHGrid.row(i)).build());
+        }
+        
         return schedules;
     }
 
@@ -901,13 +922,26 @@ public class CCUHsApi
             tagsDb.updateIdMap.put("@" + schedule.getId(), tagsDb.idMap.get("@" + schedule.getId()));
         }
     }
-
+    
+    public void updateZoneSchedule(Schedule schedule, String zoneId)
+    {
+        addSchedule(schedule.getId(), schedule.getZoneScheduleHDict(zoneId));
+        
+        Log.i("Schedule", "Schedule: " + schedule.getZoneScheduleHDict(zoneId).toZinc());
+        if (tagsDb.idMap.get(schedule.getId()) != null)
+        {
+            CcuLog.d("CCU_HS", "Update tagsDb: " + tagsDb.idMap.get("@" + schedule.getId()));
+            tagsDb.updateIdMap.put("@" + schedule.getId(), tagsDb.idMap.get("@" + schedule.getId()));
+        }
+    }
+    
     public Schedule getScheduleById(String scheduleRef)
     {
         if (scheduleRef == null)
             return null;
 
         HDict hDict = tagsDb.readById(HRef.copy(scheduleRef));
+        Log.d("CCU_HS", " Schedule " +hDict.toZinc() );
         return new Schedule.Builder().setHDict(hDict).build();
     }
 

@@ -26,7 +26,6 @@ import a75f.io.api.haystack.Zone;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.renatus.schedules.SchedulerFragment;
-import a75f.io.renatus.schedules.SchedulerFragment.OnExitListener;
 
 import static a75f.io.renatus.ZoneFragmentTemp.getPointVal;
 
@@ -151,23 +150,24 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                         if (schedule.isZoneSchedule() && schedule.getMarkers().contains("disabled"))
                         {
                             schedule.setDisabled(false);
-                            CCUHsApi.getInstance().updateSchedule(schedule);
+                            CCUHsApi.getInstance().updateZoneSchedule(schedule, zoneId);
                             scheduleImageButton.setTag(schedule.getId());
                         } else
                         {
 
                             Zone     zone         = Schedule.getZoneforEquipId(equipId);
                             Schedule scheduleById = null;
+                            Log.d("CCU_UI"," Edit schedule for "+zone.getDisplayName()+" : "+zone.getId());
                             if (zone.hasSchedule())
                             {
                                 scheduleById = CCUHsApi.getInstance().getScheduleById(zone.getScheduleRef());
                                 scheduleById.setDisabled(false);
-                                CCUHsApi.getInstance().updateSchedule(scheduleById);
+                                CCUHsApi.getInstance().updateZoneSchedule(scheduleById, zone.getId());
 
 
                             } else if (!zone.hasSchedule())
                             {
-                                zone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true));
+                                zone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true, zone.getId()));
                                 CCUHsApi.getInstance().updateZone(zone, zone.getId());
                                 scheduleById = CCUHsApi.getInstance().getScheduleById(zone.getScheduleRef());
                             }

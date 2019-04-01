@@ -1,8 +1,8 @@
 #!/bin/bash
 
 app_package="a75f.io.renatus"
-dir_app_name="ui-debug"
-MAIN_ACTIVITY="RenatusLandingActivity"
+dir_app_name="app-debug"
+MAIN_ACTIVITY="SplashActivity"
 
 ADB=adb
 ADB_SH="$ADB shell su -c"
@@ -11,7 +11,7 @@ ADB_SH="$ADB shell su -c"
 #//$ADB root 2> /dev/null
 
 path_sysapp=/system/priv-app # assuming the app is priviledged
-apk_host=./build/outputs/apk
+apk_host=./build/outputs/apk/dev/debug/
 apk_name=$dir_app_name.apk
 apk_target_dir=$path_sysapp
 apk_target_sys=$apk_target_dir/$apk_name

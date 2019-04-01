@@ -915,10 +915,9 @@ public class CCUHsApi
     {
         addSchedule(schedule.getId(), schedule.getScheduleHDict());
 
-        Log.i("Schedule", "Schedule: " + schedule.getScheduleHDict().toZinc());
+        Log.i("CCH_HS", "updateSchedule: " + schedule.getScheduleHDict().toZinc());
         if (tagsDb.idMap.get(schedule.getId()) != null)
         {
-            CcuLog.d("CCU_HS", "Update tagsDb: " + tagsDb.idMap.get("@" + schedule.getId()));
             tagsDb.updateIdMap.put("@" + schedule.getId(), tagsDb.idMap.get("@" + schedule.getId()));
         }
     }
@@ -927,10 +926,9 @@ public class CCUHsApi
     {
         addSchedule(schedule.getId(), schedule.getZoneScheduleHDict(zoneId));
         
-        Log.i("Schedule", "Schedule: " + schedule.getZoneScheduleHDict(zoneId).toZinc());
+        Log.i("CCU_HS", "updateZoneSchedule: " + schedule.getZoneScheduleHDict(zoneId).toZinc());
         if (tagsDb.idMap.get(schedule.getId()) != null)
         {
-            CcuLog.d("CCU_HS", "Update tagsDb: " + tagsDb.idMap.get("@" + schedule.getId()));
             tagsDb.updateIdMap.put("@" + schedule.getId(), tagsDb.idMap.get("@" + schedule.getId()));
         }
     }
@@ -939,9 +937,9 @@ public class CCUHsApi
     {
         if (scheduleRef == null)
             return null;
-
+        
         HDict hDict = tagsDb.readById(HRef.copy(scheduleRef));
-        Log.d("CCU_HS", " Schedule " +hDict.toZinc() );
+        Log.d("CCU_HS", " getScheduleById " +hDict.toZinc() );
         return new Schedule.Builder().setHDict(hDict).build();
     }
 

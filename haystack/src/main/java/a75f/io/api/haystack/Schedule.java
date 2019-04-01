@@ -74,8 +74,7 @@ public class Schedule extends Entity
 
     public static Schedule getScheduleForZone(String zoneId, boolean vacation)
     {
-
-        CcuLog.d("Schedule", "Equip Zone Ref: " + zoneId);
+        
         HashMap zoneHashMap = CCUHsApi.getInstance().readMapById(zoneId);
 
         Zone build = new Zone.Builder().setHashMap(zoneHashMap).build();
@@ -89,15 +88,15 @@ public class Schedule extends Entity
         if (ref != null && !ref.equals(""))
         {
             Schedule schedule = CCUHsApi.getInstance().getScheduleById(ref);
-
+            
             if (schedule != null && !schedule.mMarkers.contains("disabled"))
             {
-                CcuLog.d("Schedule", "Schedule: " + schedule.toString());
+                CcuLog.d("Schedule", "Zone Schedule: for "+build.getDisplayName()+" : "+ schedule.toString());
                 return schedule;
             }
         }
-
-
+    
+        CcuLog.d("Schedule", " Zone Schedule does not exist:  get Building Schedule");
         ArrayList<Schedule> retVal = CCUHsApi.getInstance().getSystemSchedule(vacation);
         if (retVal != null && retVal.size() > 0)
             return retVal.get(0);
@@ -791,7 +790,7 @@ public class Schedule extends Entity
                 .add("id", HRef.copy(getId()))
                 .add("unit", getUnit())
                 .add("kind", getKind())
-                .add("dis", "Default Site Schedule")
+                .add("dis", "Default Building Schedule")
                 .add("days", hList)
                 .add("siteRef", HRef.copy(mSiteId));
         
@@ -835,7 +834,7 @@ public class Schedule extends Entity
                                                .add("id", HRef.copy(getId()))
                                                .add("unit", getUnit())
                                                .add("kind", getKind())
-                                               .add("dis", "Default Site Schedule")
+                                               .add("dis", "Default Zone Schedule")
                                                .add("days", hList)
                                                .add("roomRef",HRef.copy(roomRef))
                                                .add("siteRef", HRef.copy(mSiteId));

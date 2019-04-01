@@ -61,7 +61,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                              boolean isLastChild, View convertView, ViewGroup parent)
     {
         final String expandedListText = (String) getChild(listPosition, expandedListPosition);
-        Log.i("Scheduler", "IDE Too Slow: " + expandedListText);
+        //Log.i("Scheduler", "IDE Too Slow: " + expandedListText);
 
         if (!expandedListText.startsWith("schedule"))
         {
@@ -134,8 +134,6 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
                 {
-                    System.out.println("Item Selected Listener: " + position);
-
                     if (position == 0)
                     {
                         if (schedule.isZoneSchedule())
@@ -157,7 +155,6 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
 
                             Zone     zone         = Schedule.getZoneforEquipId(equipId);
                             Schedule scheduleById = null;
-                            Log.d("CCU_UI"," Edit schedule for "+zone.getDisplayName()+" : "+zone.getId());
                             if (zone.hasSchedule())
                             {
                                 scheduleById = CCUHsApi.getInstance().getScheduleById(zone.getScheduleRef());

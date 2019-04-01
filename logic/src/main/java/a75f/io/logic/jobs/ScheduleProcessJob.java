@@ -126,14 +126,16 @@ public class ScheduleProcessJob extends BaseJob {
 
         Schedule activeVacationSchedule = getActiveVacation(activeVacationSchedules);
         /* The systemSchedule isn't initiated yet, so schedules shouldn't be ran*/
-
+    
+        Log.d(L.TAG_CCU_JOB, " ActiveVacation "+activeVacationSchedule);
 
         //Read all equips
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone");
         for(HashMap hs : equips)
         {
             Equip equip = new Equip.Builder().setHashMap(hs).build();
-
+    
+            Log.d(L.TAG_CCU_JOB, " Equip "+equip.getDisplayName());
             if(equip != null) {
                 
                 Schedule equipSchedule = Schedule.getScheduleForZone(equip.getRoomRef().replace("@", ""), false);
@@ -141,18 +143,20 @@ public class ScheduleProcessJob extends BaseJob {
                 if(equipSchedule == null)
                 {
                     CcuLog.d(L.TAG_CCU_JOB,"<- *no schedule* ScheduleProcessJob");
-                    return;
+                    continue;
                 }
 
                 //If building vacation is not active, check zone vacations.
                 if (activeVacationSchedule == null ) {
                     
                     ArrayList<Schedule> activeZoneVacationSchedules = CCUHsApi.getInstance().getZoneSchedule(equip.getRoomRef(),true);
-                    activeVacationSchedule = getActiveVacation(activeZoneVacationSchedules);
+                    Schedule activeZoneVacationSchedule = getActiveVacation(activeZoneVacationSchedules);
                     Log.d(L.TAG_CCU_JOB, "Equip "+equip.getDisplayName()+" activeZoneVacationSchedules "+activeZoneVacationSchedules.size()+" activeVacationSchedule "+activeVacationSchedule);
+                    writePointsForEquip(equip, equipSchedule, activeZoneVacationSchedule);
+                } else
+                {
+                    writePointsForEquip(equip, equipSchedule, activeVacationSchedule);
                 }
-
-                writePointsForEquip(equip, equipSchedule, activeVacationSchedule);
 
             }
         }
@@ -260,7 +264,7 @@ public class ScheduleProcessJob extends BaseJob {
         //{Current Mode}, Changes to Energy Saving Range of %.1f-%.1fF at %s
         if(cachedOccupied.isOccupied())
         {
-            return String.format("In %s, changes to energy saving range of %.1f-%.1fF at %02d:%02d", "occupied mode",
+            return String.format("In %s, changes to Energy saving range of %.1f-%.1fF at %02d:%02d", "Occupied mode",
                     cachedOccupied.getHeatingVal() - cachedOccupied.getUnoccupiedZoneSetback(),
                     cachedOccupied.getCoolingVal() + cachedOccupied.getUnoccupiedZoneSetback(),
                     cachedOccupied.getCurrentlyOccupiedSchedule().getEthh(),
@@ -273,12 +277,12 @@ public class ScheduleProcessJob extends BaseJob {
                     cachedOccupied.getCoolingVal(),
                     cachedOccupied.getVacation().getEndDateString());*/
 
-            return String.format("In Energy saving %s till %s", "vacation",
+            return String.format("In Energy saving %s till %s", "Vacation",
                     cachedOccupied.getVacation().getEndDateString());
 
         } else
         {
-            return String.format("In Energy saving %s, changes to %.1f-%.1fF at %02d:%02d", "unoccupied mode",
+            return String.format("In Energy saving %s, changes to %.1f-%.1fF at %02d:%02d", "Unoccupied mode",
                                  cachedOccupied.getHeatingVal(),
                                  cachedOccupied.getCoolingVal(),
                                  cachedOccupied.getNextOccupiedSchedule().getSthh(),
@@ -299,7 +303,7 @@ public class ScheduleProcessJob extends BaseJob {
 
         switch (systemOccupancy) {
             case OCCUPIED:
-                return String.format("In %s | Changes to energy saving at %02d:%02d", "Occupied mode",
+                return String.format("In %s | Changes to Energy saving Unoccupied mode at %02d:%02d", "Occupied mode",
                         currOccupied.getCurrentlyOccupiedSchedule().getEthh(),
                         currOccupied.getCurrentlyOccupiedSchedule().getEtmm());
 

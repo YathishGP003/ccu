@@ -21,7 +21,7 @@ $ADB shell am force-stop $app_package
 
 
 # Delete previous APK
-rm -f $apk_host
+rm -rf $apk_host
 
 # Compile the APK: you can adapt this for production build, flavors, etc.
 ../gradlew assembleDebug #|| exit -1 # exit on failure
@@ -29,15 +29,18 @@ rm -f $apk_host
 
 $ADB remount # mount system
 
-$ADB push $apk_host/$apk_name $apk_target_dir
-#adb push ./build/outputs/apk/ui-debug.apk /system/priv-app/
+$ADB shell rm -f /system/priv-app/app-debug.apk
+#$ADB push $apk_host/$apk_name $apk_target_dir
+
+echo "push apk ..........."
+adb push ./build/outputs/apk/dev/debug/app-debug.apk /system/priv-app/
 
 # Give permissions
 $ADB_SH chmod 755 $apk_target_dir
 $ADB_SH chmod 644 $apk_target_sys
 
 # Reinstall app
-$ADB_SH pm install -r $apk_target_sys
+#$ADB_SH pm install -r $apk_target_sys
 
 #Unmount system
 $ADB_SH mount -o remount,ro /

@@ -252,11 +252,14 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
 
     private void loadSchedule()
     {
+        
         if (getArguments() != null && getArguments().containsKey(PARAM_SCHEDULE_ID)) {
             mScheduleId = getArguments().getString(PARAM_SCHEDULE_ID);
             schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
+            Log.d("CCU_UI"," Loaded Zone Schedule "+mScheduleId);
         } else {
             schedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
+            Log.d("CCU_UI"," Loaded System Schedule ");
         }
 
 
@@ -439,9 +442,14 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
                 schedule.getDays().add(position, remove);
             Toast.makeText(SchedulerFragment.this.getContext(), "Overlap occured can not add", Toast.LENGTH_SHORT).show();
         } else {
-
             schedule.getDays().addAll(daysArrayList);
-            CCUHsApi.getInstance().updateSchedule(schedule);
+            if (schedule.isZoneSchedule())
+            {
+                CCUHsApi.getInstance().updateZoneSchedule(schedule, schedule.getRoomRef());
+            } else
+            {
+                CCUHsApi.getInstance().updateSchedule(schedule);
+            }
             CCUHsApi.getInstance().syncEntityTree();
             loadSchedule();
         }

@@ -30,6 +30,12 @@ public class VAVScheduler {
         Log.i(TAG, "Equip: " + equip);
         Log.i(TAG, "Equip Schedule: " + equipSchedule);
         Occupied occ = equipSchedule.getCurrentValues();
+        
+        //When schedule is deleted
+        if (occ == null) {
+            ScheduleProcessJob.occupiedHashMap.remove(equip.getRoomRef());
+            return null;
+        }
 
         if(vacation != null)
             occ.setOccupied(false);

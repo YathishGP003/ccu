@@ -149,19 +149,19 @@ public class VavParallelFanProfile extends VavProfile
             boolean occupied = (occ == null ? false : occ.isOccupied());
             
             //CO2 loop output from 0-50% modulates damper min position.
-            if (enabledCO2Control && occupied && co2Loop.getLoopOutput(co2) <= 50)
+            if (enabledCO2Control && occupied && co2Loop.getLoopOutput(co2) > 0)
             {
                 //When HEATING , maxPosition = maxPosition - parallel fan factor.
                 int parallelFanFactor = 0 ;//TODO - Tuner
                 int maxDamper = damper.maxPosition - parallelFanFactor;
-                damper.iaqCompensatedMinPos = damper.minPosition + ( maxDamper - damper.minPosition) * co2Loop.getLoopOutput() / 50;
+                damper.iaqCompensatedMinPos = damper.minPosition + ( maxDamper - damper.minPosition) * Math.max(50, co2Loop.getLoopOutput()) / 50;
                 CcuLog.d(L.TAG_CCU_ZONE,"CO2LoopOp :"+co2Loop.getLoopOutput()+", adjusted minposition "+damper.iaqCompensatedMinPos);
             }
     
             //VOC loop output from 0-50% modulates damper min position.
-            if (enabledIAQControl && occupied && vocLoop.getLoopOutput(voc) <= 50)
+            if (enabledIAQControl && occupied && vocLoop.getLoopOutput(voc) > 0)
             {
-                damper.iaqCompensatedMinPos = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * vocLoop.getLoopOutput() / 50;
+                damper.iaqCompensatedMinPos = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * Math.max(50, vocLoop.getLoopOutput()) / 50;
                 CcuLog.d(L.TAG_CCU_ZONE, "VOCLoopOp :" + vocLoop.getLoopOutput() + ", adjusted minposition " + damper.iaqCompensatedMinPos);
             }
         

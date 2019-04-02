@@ -153,9 +153,14 @@ public class LSmartNode
         seedMessage.settings.roomName.set(zone.getDisplayName());
         seedMessage.smartNodeAddress.set(address);
         seedMessage.putEncrptionKey(L.getEncryptionKey());
+        seedMessage.settings.temperatureOffset.set((short)getTempOffset(address));
         //TODO-TEST
         seedMessage.settings.profileBitmap.lightingControl.set((short) 1);
         return seedMessage;
+    }
+    
+    public static double getTempOffset(short addr) {
+        return CCUHsApi.getInstance().readDefaultVal("point and zone and config and vav and temperature and offset and group == \""+addr+"\"");
     }
     
     

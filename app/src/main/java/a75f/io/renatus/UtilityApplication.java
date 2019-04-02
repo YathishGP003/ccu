@@ -1,5 +1,6 @@
 package a75f.io.renatus;
 
+import android.app.Application;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -8,7 +9,6 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.multidex.MultiDexApplication;
 import android.widget.Toast;
 
 import org.greenrobot.eventbus.EventBus;
@@ -29,7 +29,7 @@ import a75f.io.usbserial.UsbService;
  * Created by rmatt isOn 7/19/2017.
  */
 
-public abstract class UtilityApplication extends MultiDexApplication
+public abstract class UtilityApplication extends Application
 {
 
     private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver()
@@ -107,13 +107,6 @@ public abstract class UtilityApplication extends MultiDexApplication
         deviceUpdateJob.scheduleJob("DeviceUpdateJob", 60,
                 15, TimeUnit.SECONDS);
     }
-    
-    /*@Override
-    protected void attachBaseContext(Context base) {
-        super.attachBaseContext(base);
-        MultiDex.install(this);
-    }*/
-
 
     private void setFilters()
     {

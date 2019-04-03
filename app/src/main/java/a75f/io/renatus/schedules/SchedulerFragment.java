@@ -37,6 +37,7 @@ import a75f.io.api.haystack.DAYS;
 import a75f.io.api.haystack.MockTime;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.logic.DefaultSchedules;
+import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.renatus.R;
 import a75f.io.renatus.schedules.ManualSchedulerDialogFragment.ManualScheduleDialogListener;
 import a75f.io.renatus.util.FontManager;
@@ -352,6 +353,7 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
                     DefaultSchedules.upsertVacation(vacationId, vacationName, startDate, endDate);
                 }
                 loadVacations();
+                ScheduleProcessJob.updateSchedules();
                 return false;
             }
 
@@ -453,6 +455,8 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
             CCUHsApi.getInstance().syncEntityTree();
             loadSchedule();
         }
+    
+        ScheduleProcessJob.updateSchedules();
 
         return true;
     }

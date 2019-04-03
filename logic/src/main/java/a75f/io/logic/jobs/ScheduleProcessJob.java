@@ -450,49 +450,56 @@ public class ScheduleProcessJob extends BaseJob {
         return true;
     }
     
-    public static void runScheduleJob() {
-        
-        ArrayList<Schedule> activeVacationSchedules = CCUHsApi.getInstance().getSystemSchedule(true);
+    //Update Schedules instanly
+    public static void updateSchedules() {
     
-        Schedule activeVacationSchedule = getActiveVacation(activeVacationSchedules);
-        /* The systemSchedule isn't initiated yet, so schedules shouldn't be ran*/
+        new Thread() {
+            @Override
+            public void run() {
+                ArrayList<Schedule> activeVacationSchedules = CCUHsApi.getInstance().getSystemSchedule(true);
     
-        Log.d(L.TAG_CCU_JOB, " ActiveVacation "+activeVacationSchedule);
+                Schedule activeVacationSchedule = getActiveVacation(activeVacationSchedules);
+                /* The systemSchedule isn't initiated yet, so schedules shouldn't be ran*/
     
-        //Read all equips
-        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone");
-        for(HashMap hs : equips)
-        {
-            Equip equip = new Equip.Builder().setHashMap(hs).build();
-        
-            Log.d(L.TAG_CCU_JOB, " Equip "+equip.getDisplayName());
-            if(equip != null) {
-            
-                Schedule equipSchedule = Schedule.getScheduleForZone(equip.getRoomRef().replace("@", ""), false);
-            
-                if(equipSchedule == null)
+                Log.d(L.TAG_CCU_JOB, " ActiveVacation "+activeVacationSchedule);
+    
+                //Read all equips
+                ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone");
+                for(HashMap hs : equips)
                 {
-                    CcuLog.d(L.TAG_CCU_JOB,"<- *no schedule*");
-                    continue;
-                }
+                    Equip equip = new Equip.Builder().setHashMap(hs).build();
+        
+                    Log.d(L.TAG_CCU_JOB, " Equip "+equip.getDisplayName());
+                    if(equip != null) {
             
-                //If building vacation is not active, check zone vacations.
-                if (activeVacationSchedule == null ) {
+                        Schedule equipSchedule = Schedule.getScheduleForZone(equip.getRoomRef().replace("@", ""), false);
+            
+                        if(equipSchedule == null)
+                        {
+                            CcuLog.d(L.TAG_CCU_JOB,"<- *no schedule*");
+                            continue;
+                        }
+            
+                        //If building vacation is not active, check zone vacations.
+                        if (activeVacationSchedule == null ) {
                 
-                    ArrayList<Schedule> activeZoneVacationSchedules = CCUHsApi.getInstance().getZoneSchedule(equip.getRoomRef(),true);
-                    Schedule activeZoneVacationSchedule = getActiveVacation(activeZoneVacationSchedules);
-                    Log.d(L.TAG_CCU_JOB, "Equip "+equip.getDisplayName()+" activeZoneVacationSchedules "+activeZoneVacationSchedules.size()+" activeVacationSchedule "+activeVacationSchedule);
-                    writePointsForEquip(equip, equipSchedule, activeZoneVacationSchedule);
-                } else
-                {
-                    writePointsForEquip(equip, equipSchedule, activeVacationSchedule);
-                }
+                            ArrayList<Schedule> activeZoneVacationSchedules = CCUHsApi.getInstance().getZoneSchedule(equip.getRoomRef(),true);
+                            Schedule activeZoneVacationSchedule = getActiveVacation(activeZoneVacationSchedules);
+                            Log.d(L.TAG_CCU_JOB, "Equip "+equip.getDisplayName()+" activeZoneVacationSchedules "+activeZoneVacationSchedules.size()+" activeVacationSchedule "+activeVacationSchedule);
+                            writePointsForEquip(equip, equipSchedule, activeZoneVacationSchedule);
+                        } else
+                        {
+                            writePointsForEquip(equip, equipSchedule, activeVacationSchedule);
+                        }
             
-            }
-        }
+                    }
+                }
     
-        updateSystemOccupancy();
-        systemVacation = inSystemVacation();
+                updateSystemOccupancy();
+                systemVacation = inSystemVacation();
+            }
+        }.start();
+        
     }
     
 }

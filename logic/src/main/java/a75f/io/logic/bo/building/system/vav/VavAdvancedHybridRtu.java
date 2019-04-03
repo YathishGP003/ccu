@@ -85,6 +85,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         }
         VavSystemController.getInstance().runVavSystemControlAlgo();
         updateSystemPoints();
+        setTrTargetVals();
     }
     
     @Override

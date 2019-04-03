@@ -89,6 +89,7 @@ public class VavAnalogRtu extends VavSystemProfile
         }
         VavSystemController.getInstance().runVavSystemControlAlgo();
         updateSystemPoints();
+        setTrTargetVals();
     }
     
     @Override
@@ -200,11 +201,13 @@ public class VavAnalogRtu extends VavSystemProfile
         analogMin = getConfigVal("analog4 and co2 and min");
         analogMax = getConfigVal("analog4 and co2 and max");
         CcuLog.d(L.TAG_CCU_SYSTEM,"analogMin: "+analogMin+" analogMax: "+analogMax+" CO2: "+getSystemCO2());
+        double systemCO2LoopOp = (SystemConstants.CO2_CONFIG_MAX - getSystemCO2()) * 100 / 200 ;
+        setSystemLoopOp("co2", systemCO2LoopOp);
         if (analogMax > analogMin)
         {
-            signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (SystemConstants.CO2_CONFIG_MAX - getSystemCO2()) / 200));
+            signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * systemCO2LoopOp/100));
         } else {
-            signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (SystemConstants.CO2_CONFIG_MAX - getSystemCO2()) / 200));
+            signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * systemCO2LoopOp/100));
         }
         setCmdSignal("co2",signal);
         if (getConfigVal("analog4 and output and enabled") > 0)
@@ -372,38 +375,6 @@ public class VavAnalogRtu extends VavSystemProfile
                                          .setTz(tz)
                                          .build();
         CCUHsApi.getInstance().addPoint(dehumidifierSignal);
-    
-    
-        /*Point sat = new Point.Builder()
-                            .setDisplayName(equipDis+"-"+"SAT")
-                            .setSiteRef(siteRef)
-                            .setEquipRef(equipref)
-                            .addMarker("tr").addMarker("sat").addMarker("his").addMarker("system").addMarker("equipHis")
-                            .setUnit("\u00B0F")
-                            .setTz(tz)
-                            .build();
-        CCUHsApi.getInstance().addPoint(sat);
-    
-        Point co2 = new Point.Builder()
-                            .setDisplayName(equipDis+"-"+"CO2")
-                            .setSiteRef(siteRef)
-                            .setEquipRef(equipref)
-                            .addMarker("tr").addMarker("co2").addMarker("his").addMarker("system").addMarker("equipHis")
-                            .setUnit("\u00B0ppm")
-                            .setTz(tz)
-                            .build();
-        CCUHsApi.getInstance().addPoint(co2);
-    
-        Point sp = new Point.Builder()
-                           .setDisplayName(equipDis+"-"+"SP")
-                           .setSiteRef(siteRef)
-                           .setEquipRef(equipref)
-                           .addMarker("tr").addMarker("sp").addMarker("his").addMarker("system").addMarker("equipHis")
-                           .setUnit("\u00B0in")
-                           .setTz(tz)
-                           .build();
-        CCUHsApi.getInstance().addPoint(sp);*/
-        
     }
     
     public double getCmdSignal(String cmd) {

@@ -78,9 +78,9 @@ public class ZoneFragmentTemp extends Fragment
                 String tunerName = expandableListDetail.get(expandableListTitle.get(groupPosition)).get(
                         childPosition);
                 
-                if (tunerName.contains("currentTemp") || tunerName.contains("Variable")) {
+                /*if (tunerName.contains("currentTemp") || tunerName.contains("Variable")) {
                     return true ;
-                }
+                }*/
                 Toast.makeText(getActivity(), expandableListTitle.get(groupPosition) + " -> " + tunerName, Toast.LENGTH_SHORT).show();
                 
                 final EditText taskEditText = new EditText(getActivity());

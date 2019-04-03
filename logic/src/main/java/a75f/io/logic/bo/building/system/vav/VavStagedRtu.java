@@ -81,6 +81,7 @@ public class VavStagedRtu extends VavSystemProfile
         }
         VavSystemController.getInstance().runVavSystemControlAlgo();
         updateSystemPoints();
+        setTrTargetVals();
     }
     
     @Override

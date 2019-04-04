@@ -52,10 +52,10 @@ public class MeshNetwork extends DeviceNetwork
                 {
                     CcuLog.d(L.TAG_CCU_DEVICE,"=============Zone: " + zone.getDisplayName() + " =================="+bSeedMessage);
                     for(Device d : HSUtil.getDevices(zone.getId())) { //TODO Will this work? kumar
-                        String deviceType = NodeType.SMART_NODE.name();
+                        NodeType deviceType = NodeType.SMART_NODE;
                         if(d.getMarkers().contains("smartstat"))
-                            deviceType = NodeType.SMART_STAT.name();
-                        switch (NodeType.valueOf(deviceType)) {
+                            deviceType = NodeType.SMART_STAT;
+                        switch (deviceType) {
                             case SMART_NODE:
                                 if(bSeedMessage) {
                                     CcuLog.d(L.TAG_CCU_DEVICE,"=================NOW SENDING SN SEEDS====================="+zone.getId());

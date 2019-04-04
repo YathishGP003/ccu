@@ -195,6 +195,10 @@ public class ScheduleProcessJob extends BaseJob {
                 ScheduleProcessJob.putOccupiedModeCache(equip.getRoomRef(), occ);
             }
         }
+		if( !equip.getMarkers().contains("system") && equip.getMarkers().contains("standalone"))
+        {
+            StandaloneScheduler.processEquip(equip,equipSchedule,vacation);
+        }
     }
 
 

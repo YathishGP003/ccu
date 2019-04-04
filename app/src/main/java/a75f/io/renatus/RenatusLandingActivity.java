@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.ImageButton;
 
 import a75f.io.logic.L;
+import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.renatus.ENGG.RenatusEngineeringActivity;
 
 public class RenatusLandingActivity extends AppCompatActivity
@@ -96,11 +97,9 @@ public class RenatusLandingActivity extends AppCompatActivity
                 }
             });
             setViewPager();
+            ScheduleProcessJob.updateSchedules();
         }
     }
-
-
-
 
     public void setViewPager()
     {

@@ -48,6 +48,10 @@ public abstract class VavProfile extends ZoneProfile
     double setTempCooling;
     double setTempHeating;
     
+    boolean exceedsThreeDegree = false;
+    boolean exceedsFiveDegree = false;
+    
+    
     public VavProfile() {
         vavDeviceMap = new HashMap<>();
         satResetListener = new SatResetListener();
@@ -173,11 +177,25 @@ public abstract class VavProfile extends ZoneProfile
             if (vavDeviceMap.get(node).getCoolingLoop().getLoopOutput() > 95) {
                 satResetRequest.currentRequests = 1;
             }
-            if ((roomTemp - setTempCooling) >= 3) {//TODO - for 2 mins
-                satResetRequest.currentRequests = 2;
+            if ((roomTemp - setTempCooling) >= 3 ) {
+                if (exceedsThreeDegree)
+                {
+                    satResetRequest.currentRequests = 2;
+                } else {
+                    exceedsThreeDegree = true;
+                }
+            } else {
+                exceedsThreeDegree = false;
             }
-            if ((roomTemp - setTempCooling) >= 5) {//TODO - for 5 mins
-                satResetRequest.currentRequests = 3;
+            if ((roomTemp - setTempCooling) >= 5) {
+                if (exceedsFiveDegree)
+                {
+                    satResetRequest.currentRequests = 3;
+                } else {
+                    exceedsFiveDegree = true;
+                }
+            } else {
+                exceedsFiveDegree = false;
             }
         } else {
             satResetRequest.currentRequests = 0;

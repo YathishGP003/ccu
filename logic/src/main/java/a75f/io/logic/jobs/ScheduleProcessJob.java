@@ -166,7 +166,7 @@ public class ScheduleProcessJob extends BaseJob {
         CcuLog.d(TAG_CCU_JOB,"<- ScheduleProcessJob");
     }
 
-    private Schedule getActiveVacation(ArrayList<Schedule> activeVacationSchedules)
+    private static Schedule getActiveVacation(ArrayList<Schedule> activeVacationSchedules)
     {
 
         if(activeVacationSchedules == null)
@@ -185,7 +185,7 @@ public class ScheduleProcessJob extends BaseJob {
 
     }
 
-    private void writePointsForEquip(Equip equip, Schedule equipSchedule, Schedule vacation) {
+    private static void writePointsForEquip(Equip equip, Schedule equipSchedule, Schedule vacation) {
         if(equip.getMarkers().contains("vav") && !equip.getMarkers().contains("system"))
         {
             VAVScheduler.processEquip(equip, equipSchedule, vacation);
@@ -360,7 +360,7 @@ public class ScheduleProcessJob extends BaseJob {
         return millisToOccupancy;
     }
 
-    public void updateSystemOccupancy() {
+    public static void updateSystemOccupancy() {
         if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DEFAULT) {
             Log.d(TAG_CCU_JOB, " Skip updateSystemOccupancy for Default System Profile ");
             return;
@@ -448,6 +448,58 @@ public class ScheduleProcessJob extends BaseJob {
             }
         }
         return true;
+    }
+    
+    //Update Schedules instanly
+    public static void updateSchedules() {
+    
+        new Thread() {
+            @Override
+            public void run() {
+                ArrayList<Schedule> activeVacationSchedules = CCUHsApi.getInstance().getSystemSchedule(true);
+    
+                Schedule activeVacationSchedule = getActiveVacation(activeVacationSchedules);
+                /* The systemSchedule isn't initiated yet, so schedules shouldn't be ran*/
+    
+                Log.d(L.TAG_CCU_JOB, " ActiveVacation "+activeVacationSchedule);
+    
+                //Read all equips
+                ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone");
+                for(HashMap hs : equips)
+                {
+                    Equip equip = new Equip.Builder().setHashMap(hs).build();
+        
+                    Log.d(L.TAG_CCU_JOB, " Equip "+equip.getDisplayName());
+                    if(equip != null) {
+            
+                        Schedule equipSchedule = Schedule.getScheduleForZone(equip.getRoomRef().replace("@", ""), false);
+            
+                        if(equipSchedule == null)
+                        {
+                            CcuLog.d(L.TAG_CCU_JOB,"<- *no schedule*");
+                            continue;
+                        }
+            
+                        //If building vacation is not active, check zone vacations.
+                        if (activeVacationSchedule == null ) {
+                
+                            ArrayList<Schedule> activeZoneVacationSchedules = CCUHsApi.getInstance().getZoneSchedule(equip.getRoomRef(),true);
+                            Schedule activeZoneVacationSchedule = getActiveVacation(activeZoneVacationSchedules);
+                            Log.d(L.TAG_CCU_JOB, "Equip "+equip.getDisplayName()+" activeZoneVacationSchedules "+activeZoneVacationSchedules.size()+" activeVacationSchedule "+activeVacationSchedule);
+                            writePointsForEquip(equip, equipSchedule, activeZoneVacationSchedule);
+                        } else
+                        {
+                            writePointsForEquip(equip, equipSchedule, activeVacationSchedule);
+                        }
+            
+                    }
+                }
+    
+                updateSystemOccupancy();
+                systemVacation = inSystemVacation();
+            }
+        }.start();
+        
     }
     
 }

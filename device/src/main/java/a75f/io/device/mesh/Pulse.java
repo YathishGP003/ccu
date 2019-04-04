@@ -189,6 +189,12 @@ public class Pulse
 	{
 		CcuLog.d(L.TAG_CCU_DEVICE,"Regualar cm update pulse" + DLog.objectNullString((cmRegularUpdateMessage_t)));
 	}
-	
+	public static void rebootMessageFromCM(WrmOrCmRebootIndicationMessage_t wrmOrCMReootMsgs){
+		Log.d("Pulse","Reboot Messages from CM for = "+wrmOrCMReootMsgs.wrmAddress+","+wrmOrCMReootMsgs.rebootCause);
+		short address = (short)wrmOrCMReootMsgs.wrmAddress.get();
+		if(address == 0x00 || (address == 0x01) || (address == L.ccu().getSmartNodeAddressBand()+99)){
+			LSerial.getInstance().setResetSeedMessage(true);
+		}
+	}
 	
 }

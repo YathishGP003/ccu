@@ -91,6 +91,9 @@ public class LSerial
             else if (messageType == MessageType.CM_TO_CCU_OVER_USB_SN_REGULAR_UPDATE)
             {
                 Pulse.regularSNUpdate(fromBytes(data, CmToCcuOverUsbSnRegularUpdateMessage_t.class));
+            }else if(messageType == MessageType.FSV_REBOOT){
+                DLog.LogdSerial("Event Type DEVICE_REBOOT:"+data.length+","+data.toString());
+                Pulse.rebootMessageFromCM(fromBytes(data, WrmOrCmRebootIndicationMessage_t.class));
             }
         }
     }

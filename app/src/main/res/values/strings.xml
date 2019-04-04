@@ -104,6 +104,27 @@
         <item>  Named Schedule</item>
     </string-array>
 
+    <string-array name="smartstat_conditionmode">
+        <item>  OFF </item>
+        <item>  AUTO </item>
+        <item>  HEAT ONLY</item>
+        <item>  COOL ONLY</item>
+    </string-array>
+
+    <string-array name="smartstat_fanmode">
+        <item>  OFF </item>
+        <item>  AUTO </item>
+        <item>  LOW </item>
+        <item>  MEDIUM </item>
+        <item>  HIGH</item>
+    </string-array>
+
+    <string-array name="smartstat_cpufanmode">
+        <item>  OFF </item>
+        <item>  AUTO </item>
+        <item>  LOW </item>
+        <item>  HIGH</item>
+    </string-array>
     <string-array name="schedulePORT">
         <item>   LCM Zone Schedule</item>
         <item>   Circuit Schedule</item>

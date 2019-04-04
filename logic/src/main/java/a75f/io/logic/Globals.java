@@ -1,6 +1,7 @@
 package a75f.io.logic;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -28,6 +29,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
@@ -141,12 +143,15 @@ public class Globals {
 
 
     public void initilize() {
+        
         taskExecutor = Executors.newScheduledThreadPool(NUMBER_OF_CYCLICAL_TASKS_RENATUS_REQUIRES);
         populate();
         //mHeartBeatJob = new HeartBeatJob();
         //5 seconds after application initializes start heart beat
 
         int DEFAULT_HEARTBEAT_INTERVAL = 60;
+    
+        Log.d(L.TAG_CCU_JOB, " Create Process Jobs");
         
         mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL,
                 TASK_SEPERATION , TASK_SERERATION_TIMEUNIT);
@@ -311,17 +316,44 @@ public class Globals {
                 CcuLog.d(L.TAG_CCU, "PubNub Received message content: " + receivedMessageObject.toString());
                 // extract desired parts of the payload, using Gson
                 JsonObject msgObject = message.getMessage().getAsJsonObject();
-                String cmd = msgObject.get("cmd") != null ? msgObject.get("cmd").getAsString(): "";
+                String cmd = msgObject.get("command") != null ? msgObject.get("command").getAsString(): "";
                 if (cmd.equals("updatePoint"))
                 {
                     String who = msgObject.get("who").getAsString();
                     String level = msgObject.get("level").getAsString();
                     String val = msgObject.get("val").getAsString();
-                    String id = msgObject.get("id").getAsString();
-                    CcuLog.d("CCU", "Update point: cmd: " + cmd + " who: " + who + " level: " + level + " val: " + val + " id: " + id);
+                    String guid = msgObject.get("id").getAsString();
+                    CcuLog.d(L.TAG_CCU, "PubNub Update point: cmd: " + cmd + " who: " + who + " level: " + level + " val: " + val + " id: " + guid);
+                    
+                    String luid = CCUHsApi.getInstance().getLUID("@"+guid);
+                    if (luid != null && luid != "")
+                    {
     
-                    CCUHsApi.getInstance().getHSClient()
-                            .pointWrite(HRef.make(CCUHsApi.getInstance().getLUID(id)), (int) Double.parseDouble(level), who, HNum.make(Double.parseDouble(val)), HNum.make(0));
+                        CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(luid), (int) Double.parseDouble(level), who, HNum.make(Double.parseDouble(val)), HNum.make(0));
+    
+                        Point p = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(luid)).build();
+                        ArrayList values = CCUHsApi.getInstance().readPoint(luid);
+                        if (values != null && values.size() > 0)
+                        {
+                            for (int l = 1; l <= values.size() ; l++ ) {
+                                HashMap valMap = ((HashMap) values.get(l-1));
+                                if (valMap.get("val") != null) {
+                                    Log.d(L.TAG_CCU, "PubNub updated point "+p.getDisplayName()+" , level: "+l+" , val :"+Double.parseDouble(valMap.get("val").toString()));
+                                }
+                            }
+                        }
+                        
+                        for (String marker : p.getMarkers())
+                        {
+                            if (marker.equals("his"))
+                            {
+                                CCUHsApi.getInstance().writeHisValById(luid, CCUHsApi.getInstance().readPointPriorityVal(luid));
+                            }
+                        }
+                        
+                    } else {
+                        CcuLog.d(L.TAG_CCU, "Pubnub received for invalid local point : "+luid);
+                    }
                 }
                 
                 

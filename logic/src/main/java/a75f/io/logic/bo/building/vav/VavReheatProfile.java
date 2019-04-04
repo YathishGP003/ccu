@@ -80,7 +80,12 @@ public class VavReheatProfile extends VavProfile
             double dischargeSp = vavDevice.getDischargeSp();
             setTempCooling = vavDevice.getDesiredTempCooling();
             setTempHeating = vavDevice.getDesiredTempHeating();
-            vavDevice.setDesiredTemp((setTempCooling+setTempHeating)/2);
+            
+            double averageDesiredTemp = (setTempCooling+setTempHeating)/2;
+            if (averageDesiredTemp != vavDevice.getDesiredTemp())
+            {
+                vavDevice.setDesiredTemp(averageDesiredTemp);
+            }
             
             Damper damper = vavUnit.vavDamper;
             Valve valve = vavUnit.reheatValve;

@@ -110,7 +110,10 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                                                                            .add(R.id.zone_fragment_temp, schedulerFragment)
                                                                            .addToBackStack("schedule").commit();
 
-                                                       schedulerFragment.setOnExitListener(() -> Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show());
+                                                       schedulerFragment.setOnExitListener(() -> {
+                                                           Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
+                                                           ScheduleProcessJob.updateSchedules();
+                                                       });
                                                    });
 
             if (schedule.isZoneSchedule())

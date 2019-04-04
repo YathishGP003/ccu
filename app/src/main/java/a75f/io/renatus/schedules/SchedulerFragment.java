@@ -376,6 +376,7 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
             String id = v.getTag().toString();
             CCUHsApi.getInstance().deleteEntity(id);
             loadVacations();
+            ScheduleProcessJob.updateSchedules();
     };
 
 

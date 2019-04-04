@@ -454,12 +454,12 @@ public class SmartStatTestFragment extends BaseDialogFragment
 		msg.address.set(6000/*sn.getMeshAddress()*/);
 		
 		msg.settings.roomName.set(roomName.getText().toString());
-		msg.settings.profileBitmap.bitmap.set((short) (1 << profileSlection));
+		msg.settings.profileBitmap.convetionalPackageUnit.set((short) (1 << profileSlection));
 		msg.settings.maxUserTemp.set(maxT);
 		msg.settings.minUserTemp.set(minT);
 		msg.settings.showCentigrade.set(showCentigrade.isChecked() == true ? (short)1 : (short) 0);
 		msg.settings.enableOccupancyDetection.set(occDetection.isChecked() == true ? (short)1 : (short)0);
-		msg.settings.enabledRelaysBitmap.bitmap.set((short)0xFF); //Enable all relays
+		msg.settings.enabledRelaysBitmap.relay1.set((short)0xFF); //Enable all relays
 		try
 		{
 			Log.i(TAG, "CCuToCM: " + JsonSerializer.toJson(msg, true));

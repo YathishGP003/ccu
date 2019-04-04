@@ -155,6 +155,28 @@ public class ZoneFragmentTemp extends Fragment
                     expandableListDetail.put(p.getDisplayName(), tunerList);
                 }
             }
+
+            if ((p.getProfile() != null) && !p.getProfile().contains("SYSTEM") && p.getProfile().contains("SMARTSTAT"))
+            {
+                HashMap currTmep = CCUHsApi.getInstance().read("point and air and temp and sensor and current and equipRef == \""+p.getId()+"\"");
+                HashMap coolDT = CCUHsApi.getInstance().read("point and air and temp and desired and cooling and sp and equipRef == \""+p.getId()+"\"");
+                HashMap heatDT = CCUHsApi.getInstance().read("point and air and temp and desired and heating and sp and equipRef == \""+p.getId()+"\"");
+
+                if (currTmep.size() != 0 && coolDT.size() != 0 && heatDT.size() != 0) {
+                    ArrayList tunerList = new ArrayList();
+                    tunerList.add(currTmep.get("dis").toString());
+                    tunerList.add(coolDT.get("dis").toString());
+                    tunerList.add(heatDT.get("dis").toString());
+                    tunerList.add("smartstat_"+ p.getId());
+
+                    tunerMap.put(currTmep.get("dis").toString(), currTmep.get("id").toString());
+                    tunerMap.put(coolDT.get("dis").toString(), coolDT.get("id").toString());
+                    tunerMap.put(heatDT.get("dis").toString(), heatDT.get("id").toString());
+                    tunerMap.put("smartstat_"+ p.getId(),p.getId());
+
+                    expandableListDetail.put(p.getDisplayName(), tunerList);
+                }
+            }
             
             if (p.getProfile() != null && p.getProfile().equals(ProfileType.PLC.name())) {
     

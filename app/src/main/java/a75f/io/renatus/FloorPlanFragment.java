@@ -31,11 +31,14 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
+import a75f.io.device.mesh.LSerial;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZoneProfile;
+import a75f.io.logic.bo.building.sscpu.ConventionalUnitConfiguration;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -92,6 +95,8 @@ public class FloorPlanFragment extends Fragment
 						@Override
 						public void run()
 						{
+							if(LSerial.getInstance().isConnected()) //If usb connected and pairing done then reseed
+								LSerial.getInstance().setResetSeedMessage(true);
 							updateModules(getSelectedZone());
 							getActivity().unregisterReceiver(mPairingReceiver);
 						}
@@ -282,7 +287,7 @@ public class FloorPlanFragment extends Fragment
 	{
 		Log.d("CCU","Zone Selected "+zone.getDisplayName());
 		mModuleListAdapter =
-				new DataArrayAdapter<>(getActivity(), R.layout.listviewitem, createAddressList(
+				new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(), R.layout.listviewitem, createAddressList(
 						HSUtil.getEquips(zone.getId())));
 		
 		getActivity().runOnUiThread(new Runnable()
@@ -538,7 +543,14 @@ public class FloorPlanFragment extends Fragment
 			case PLC:
 				showDialogFragment(FragmentPLCConfiguration
 						                   .newInstance(Short.parseShort(nodeAddr),zone.getDisplayName(), NodeType.SMART_NODE, floor.getDisplayName()), FragmentPLCConfiguration.ID);
-			
+				break;
+				case SMARTSTAT_CONVENTIONAL_PACK_UNIT:
+					System.out.println(" floor " + floor.getDisplayName() + " zone " + zone.getDisplayName() + " node :" + nodeAddr);
+					ConventionalUnitConfiguration cpuConfig = (ConventionalUnitConfiguration) profile.getProfileConfiguration(Short.parseShort(nodeAddr));
+					System.out.println("Config " + cpuConfig + " profile " + profile.getProfileType());
+					showDialogFragment(FragmentCPUConfiguration
+							.newInstance(Short.parseShort(nodeAddr), zone.getDisplayName(), cpuConfig.getNodeType(), floor.getDisplayName(), profile.getProfileType()), FragmentCPUConfiguration.ID);
+					break;
 			
 		}
 		

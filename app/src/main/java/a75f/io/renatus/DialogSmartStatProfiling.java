@@ -1,6 +1,23 @@
 package a75f.io.renatus;
 
+import android.app.Dialog;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.TextView;
+
+import a75f.io.logic.bo.building.NodeType;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.renatus.BASE.BaseDialogFragment;
+import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * Created by ryant on 9/27/2017.
@@ -9,11 +26,124 @@ import a75f.io.renatus.BASE.BaseDialogFragment;
 public class DialogSmartStatProfiling extends BaseDialogFragment
 {
     public static final String ID = DialogSmartStatProfiling.class.getSimpleName();
-    
-    
-    public static DialogSmartStatProfiling newInstance(short mNodeAddress, String mRoomName, String mFloorName)
+    short        mNodeAddress;
+
+    String mRoomName;
+    String mFloorName;
+    @BindView(R.id.smartstatModules)
+    RadioGroup radioGroup;
+    @BindView(R.id.conPackageUnit)
+    RadioButton conPackageUnit;
+    @BindView(R.id.commPackageUnit)
+    RadioButton commPackageUnit;
+    @BindView(R.id.hpu)
+    RadioButton hpu;
+    @BindView(R.id.fancoil_2)
+    RadioButton fancoil_2;
+    @BindView(R.id.fancoil_4)
+    RadioButton fancoil_4;
+
+    @OnClick(R.id.cancel_button)
+    void onCancelButtonClick()
     {
-        return null;
+        removeDialogFragment(ID);
+    }
+
+    @OnClick(R.id.pair_button)
+    void onPairButtonClick()
+    {
+        openBLEPairingInstructions();
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState)
+    {
+        super.onViewCreated(view, savedInstanceState);
+        ButterKnife.bind(this, view);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
+    {
+        View view = inflater.inflate(R.layout.smartstat_module_selection, container, false);
+        mNodeAddress = getArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR);
+        mRoomName = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
+        mFloorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
+
+        return view;
+    }
+
+    private void openBLEPairingInstructions()
+    {
+        if (conPackageUnit.isChecked())
+        {
+            showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.SMARTSTAT_CONVENTIONAL_PACK_UNIT, NodeType.SMART_STAT), FragmentBLEInstructionScreen.ID);
+
+        }
+        else if (commPackageUnit.isChecked())
+        {
+            showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.SMARTSTAT_COMMERCIAL_PACK_UNIT, NodeType.SMART_STAT), FragmentBLEInstructionScreen.ID);
+        }
+        else if (hpu.isChecked())
+        {
+            showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.SMARTSTAT_HEAT_PUMP_UNIT, NodeType.SMART_STAT), FragmentBLEInstructionScreen.ID);
+        }
+        else if (fancoil_2.isChecked())
+        {
+            showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.SMARTSTAT_TWO_PIPE_FCU, NodeType.SMART_STAT), FragmentBLEInstructionScreen.ID);
+        }
+        else if (fancoil_4.isChecked())
+        {
+            showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.SMARTSTAT_FOUR_PIPE_FCU, NodeType.SMART_STAT), FragmentBLEInstructionScreen.ID);
+        }
+    }
+
+    @Override
+    public void onStart()
+    {
+        super.onStart();
+        Dialog dialog = getDialog();
+        if (dialog != null)
+        {
+            int width = ViewGroup.LayoutParams.MATCH_PARENT;
+            int height = ViewGroup.LayoutParams.MATCH_PARENT;
+            dialog.getWindow().setLayout(width, height);
+        }
+        setTitle();
+    }
+
+    private void setTitle() {
+        Dialog dialog = getDialog();
+
+        if (dialog == null) {
+            return;
+        }
+        dialog.setTitle("Select Module Type");
+        TextView titleView = this.getDialog().findViewById(android.R.id.title);
+        if(titleView != null)
+        {
+            titleView.setGravity(Gravity.CENTER);
+            titleView.setTextColor(getResources().getColor(R.color.progress_color_orange));
+        }
+        int titleDividerId = getContext().getResources()
+                .getIdentifier("titleDivider", "id", "android");
+
+        View titleDivider = dialog.findViewById(titleDividerId);
+        if (titleDivider != null) {
+            titleDivider.setBackgroundColor(getContext().getResources()
+                    .getColor(R.color.transparent));
+        }
+    }
+    public static DialogSmartStatProfiling newInstance(short meshAddress, String roomName, String floorName)
+    {
+
+        DialogSmartStatProfiling f = new DialogSmartStatProfiling();
+        Bundle bundle = new Bundle();
+        bundle.putShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR, meshAddress);
+        bundle.putString(FragmentCommonBundleArgs.ARG_NAME, roomName);
+        bundle.putString(FragmentCommonBundleArgs.FLOOR_NAME, floorName);
+        f.setArguments(bundle);
+        return f;
     }
     @Override
     public String getIdString()

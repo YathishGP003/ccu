@@ -105,8 +105,8 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
         }
         else if (smartstat.isChecked())
         {
-            DialogSmartStatProfiling hiaselection = DialogSmartStatProfiling.newInstance(mNodeAddress, mRoomName, mFloorName);
-            showDialogFragment(hiaselection, DialogSmartStatProfiling.ID);
+            DialogSmartStatProfiling smartStatProfiling = DialogSmartStatProfiling.newInstance(mNodeAddress, mRoomName, mFloorName);
+            showDialogFragment(smartStatProfiling, DialogSmartStatProfiling.ID);
         }
     }
     

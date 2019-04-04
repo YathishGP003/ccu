@@ -11,9 +11,16 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HayStackConstants;
+import a75f.io.device.serial.CcuToCmOverUsbDeviceTempAckMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
+import a75f.io.device.serial.CmToCcuOverUsbSmartStatLocalControlsOverrideMessage_t;
+import a75f.io.device.serial.CmToCcuOverUsbSmartStatRegularUpdateMessage_t;
+import a75f.io.device.serial.CmToCcuOverUsbSnLocalControlsOverrideMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
+import a75f.io.device.serial.MessageType;
 import a75f.io.device.serial.SmartNodeSensorReading_t;
+import a75f.io.device.serial.SmartStatFanSpeed_t;
+import a75f.io.device.serial.WrmOrCmRebootIndicationMessage_t;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Sensor;
@@ -183,5 +190,181 @@ public class Pulse
 	public static void regularCMUpdate(CmToCcuOverUsbCmRegularUpdateMessage_t cmRegularUpdateMessage_t)
 	{
 		CcuLog.d(L.TAG_CCU_DEVICE,"Regualar cm update pulse" + DLog.objectNullString((cmRegularUpdateMessage_t)));
+	}
+
+
+	public static void regularSmartStatUpdate(CmToCcuOverUsbSmartStatRegularUpdateMessage_t smartStatRegularUpdateMessage_t)
+	{
+		short nodeAddr = (short)smartStatRegularUpdateMessage_t.update.smartNodeAddress.get();
+		CCUHsApi hayStack = CCUHsApi.getInstance();
+		HashMap device = hayStack.read("device and addr == \""+nodeAddr+"\"");
+		if (device != null && device.size() > 0)
+		{
+			ArrayList<HashMap> phyPoints = hayStack.readAll("point and physical and sensor and deviceRef == \"" + device.get("id") + "\"");
+
+			for(HashMap phyPoint : phyPoints) {
+				if (phyPoint.get("pointRef") == null || phyPoint.get("pointRef") == "") {
+					continue;
+				}
+				HashMap logPoint = hayStack.read("point and id=="+phyPoint.get("pointRef"));
+				double val;
+				switch (Port.valueOf(phyPoint.get("port").toString())){
+					case SENSOR_RT:
+						val = smartStatRegularUpdateMessage_t.update.roomTemperature.get();
+						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+						hayStack.writeHisValById(logPoint.get("id").toString(), getRoomTempConversion(val));
+						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartStatUpdate : roomTemp "+getRoomTempConversion(val));
+						break;
+						//TODO Need to take care of this??? kumar
+					/*case DESIRED_TEMP:
+						val = smartStatRegularUpdateMessage_t.update.setTemperature.get();
+						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+						double desiredTemp = getDesredTempConversion(val);
+						if (desiredTemp > 0)
+						{
+							hayStack.writeHisValById(logPoint.get("id").toString(), desiredTemp);
+							updateDesiredTemp(nodeAddr, desiredTemp);
+						}
+						Log.d(TAG,"regularSmartStatUpdate : desiredTemp "+desiredTemp);
+						break;*/
+					case ANALOG_IN_ONE:
+						val = smartStatRegularUpdateMessage_t.update.externalAnalogVoltageInput1.get();
+						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+						hayStack.writeHisValById(logPoint.get("id").toString(), getAnalogConversion(phyPoint, logPoint, val));
+						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : analog1In "+getAnalogConversion(phyPoint, logPoint, val));
+						break;
+					case ANALOG_IN_TWO:
+						val = smartStatRegularUpdateMessage_t.update.externalAnalogVoltageInput1.get();
+						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+						hayStack.writeHisValById(logPoint.get("id").toString(), getAnalogConversion(phyPoint, logPoint,val));
+						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartStatUpdate : analog2In "+getAnalogConversion(phyPoint, logPoint,val));
+						break;
+					case TH1_IN:
+						val = smartStatRegularUpdateMessage_t.update.externalThermistorInput1.get();
+						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+						hayStack.writeHisValById(logPoint.get("id").toString(), ThermistorUtil.getThermistorValueToTemp(val * 10 ));
+						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : Thermistor1 "+ThermistorUtil.getThermistorValueToTemp(val * 10 ));
+						break;
+					case TH2_IN:
+						val = smartStatRegularUpdateMessage_t.update.externalThermistorInput2.get();
+						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+						hayStack.writeHisValById(logPoint.get("id").toString(), ThermistorUtil.getThermistorValueToTemp(val * 10));
+						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartStatUpdate : Thermistor2 "+ThermistorUtil.getThermistorValueToTemp(val * 10));
+						break;
+					case SENSOR_RH:
+						SmartNodeSensorReading_t[] sensorReadingsHumidity = smartStatRegularUpdateMessage_t.update.sensorReadings;
+						val = sensorReadingsHumidity[SensorType.HUMIDITY.ordinal()].sensorData.get();
+
+						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+						hayStack.writeHisValById(logPoint.get("id").toString(), getHumidityConversion(val));
+						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartStatUpdate : Humidity "+getHumidityConversion(val));
+						break;
+					case SENSOR_CO2:
+						SmartNodeSensorReading_t[] sensorReadingsCO2 = smartStatRegularUpdateMessage_t.update.sensorReadings;
+						val = sensorReadingsCO2[SensorType.CO2.ordinal()].sensorData.get();
+						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+						hayStack.writeHisValById(logPoint.get("id").toString(), val);
+						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartStatUpdate : CO2 "+val);
+						break;
+					case SENSOR_VOC:
+						SmartNodeSensorReading_t[] sensorReadingsVOC = smartStatRegularUpdateMessage_t.update.sensorReadings;
+						val = sensorReadingsVOC[SensorType.VOC.ordinal()].sensorData.get();
+
+						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+						hayStack.writeHisValById(logPoint.get("id").toString(), val);
+						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartStatUpdate : VOC "+val);
+						break;
+				}
+			}
+
+		}
+	}
+
+	public static void rebootMessageFromCM(WrmOrCmRebootIndicationMessage_t wrmOrCMReootMsgs){
+		Log.d("Pulse","Reboot Messages from CM for = "+wrmOrCMReootMsgs.wrmAddress+","+wrmOrCMReootMsgs.rebootCause);
+		short address = (short)wrmOrCMReootMsgs.wrmAddress.get();
+		if(address == 0x00 || (address == 0x01) || (address == L.ccu().getSmartNodeAddressBand()+99)){
+			LSerial.getInstance().setResetSeedMessage(true);
+		}
+	}
+	public static void updateSetTempFromSmartNode(CmToCcuOverUsbSnLocalControlsOverrideMessage_t setTempUpdate){
+		short nodeAddr = (short)setTempUpdate.smartNodeAddress.get();
+		double temp = setTempUpdate.setTemperature.get();
+		CCUHsApi hayStack = CCUHsApi.getInstance();
+		HashMap device = hayStack.read("device and addr == \""+nodeAddr+"\"");
+		if (device != null && device.size() > 0)
+		{
+
+			ArrayList<HashMap> phyPoints = hayStack.readAll("point and physical and sensor and deviceRef == \"" + device.get("id") + "\"");
+
+			for(HashMap phyPoint : phyPoints) {
+				if (phyPoint.get("pointRef") == null || phyPoint.get("pointRef") == "") {
+					continue;
+				}
+				hayStack.writeHisValById(phyPoint.get("id").toString(), temp);
+
+				HashMap logPoint = hayStack.read("point and id=="+phyPoint.get("pointRef"));
+				switch (Port.valueOf(phyPoint.get("port").toString())) {
+					case DESIRED_TEMP:
+						double desiredTemp = getDesredTempConversion(temp);
+						if (desiredTemp > 0) {
+							hayStack.writeHisValById(logPoint.get("id").toString(), desiredTemp);
+							updateDesiredTemp(nodeAddr, desiredTemp);
+						}
+						CcuLog.d(L.TAG_CCU_DEVICE, "updateSetTempFromDevice : desiredTemp " + desiredTemp);
+						sendSetTemperatureAck(nodeAddr);
+
+					break;
+				}
+			}
+		}
+	}
+
+	public static void updateSetTempFromSmartStat(CmToCcuOverUsbSmartStatLocalControlsOverrideMessage_t setTempUpdate){
+		short nodeAddr = (short)setTempUpdate.smartNodeAddress.get();
+		double temp = setTempUpdate.setTemperature.get();
+		SmartStatFanSpeed_t fanSpeed = setTempUpdate.fanSpeed.get();
+		CCUHsApi hayStack = CCUHsApi.getInstance();
+		HashMap device = hayStack.read("device and addr == \""+nodeAddr+"\"");
+		if (device != null && device.size() > 0)
+		{
+
+			ArrayList<HashMap> phyPoints = hayStack.readAll("point and physical and sensor and deviceRef == \"" + device.get("id") + "\"");
+
+			for(HashMap phyPoint : phyPoints) {
+				if (phyPoint.get("pointRef") == null || phyPoint.get("pointRef") == "") {
+					continue;
+				}
+				hayStack.writeHisValById(phyPoint.get("id").toString(), temp);
+
+				HashMap logPoint = hayStack.read("point and id=="+phyPoint.get("pointRef"));
+				switch (Port.valueOf(phyPoint.get("port").toString())) {
+					case DESIRED_TEMP:
+						double desiredTemp = getDesredTempConversion(temp);
+						if (desiredTemp > 0) {
+							hayStack.writeHisValById(logPoint.get("id").toString(), desiredTemp);
+							updateDesiredTemp(nodeAddr, desiredTemp);
+						}
+						CcuLog.d(L.TAG_CCU_DEVICE, "updateSetTempFromSmartStat : desiredTemp " + desiredTemp);
+						sendSetTemperatureAck(nodeAddr);
+
+						break;
+				}
+			}
+		}
+	}
+
+
+	public static void sendSetTemperatureAck(short address) {
+		if (!LSerial.getInstance().isConnected()) {
+			CcuLog.d(L.TAG_CCU_DEVICE,"Device not connected !!");
+			return;
+		}
+		CcuToCmOverUsbDeviceTempAckMessage_t msg = new CcuToCmOverUsbDeviceTempAckMessage_t();
+		msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_SET_TEMPERATURE_ACK);
+		msg.smartNodeAddress.set(address);
+		MeshUtil.sendStructToCM(msg);
+
+
 	}
 }

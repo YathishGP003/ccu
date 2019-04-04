@@ -41,6 +41,14 @@ public abstract class Circuit extends Schedulable
                 return OutputType.Relay;
             case RELAY_TWO:
                 return OutputType.Relay;
+            case RELAY_THREE:
+                return OutputType.Relay;
+            case RELAY_FOUR:
+                return OutputType.Relay;
+            case RELAY_FIVE:
+                return OutputType.Relay;
+            case RELAY_SIX:
+                return OutputType.Relay;
             case ANALOG_OUT_ONE:
                 return OutputType.Analog;
             case ANALOG_OUT_TWO:

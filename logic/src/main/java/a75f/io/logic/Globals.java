@@ -39,6 +39,7 @@ import a75f.io.logic.bo.building.NamedSchedule;
 import a75f.io.logic.bo.building.Schedule;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.plc.PlcProfile;
+import a75f.io.logic.bo.building.sscpu.ConventionalUnitProfile;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedHybridRtu;
@@ -414,6 +415,12 @@ public class Globals {
                             plc.addPlcEquip(Short.valueOf(eq.getGroup()));
                             L.ccu().zoneProfiles.add(plc);
                             break;
+                        case SMARTSTAT_CONVENTIONAL_PACK_UNIT:
+                            ConventionalUnitProfile cpu = new ConventionalUnitProfile();
+                            cpu.addLogicalMap(Short.valueOf(eq.getGroup()), z.getId());
+                            L.ccu().zoneProfiles.add(cpu);
+                            break;
+
                     }
                 }
             }

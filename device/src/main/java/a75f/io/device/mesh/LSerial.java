@@ -8,8 +8,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import a75f.io.device.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
+import a75f.io.device.serial.CmToCcuOverUsbSnLocalControlsOverrideMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 import a75f.io.device.serial.MessageType;
+import a75f.io.device.serial.SnSetTemperatureUpdateMessage_t;
+import a75f.io.device.serial.WrmOrCmRebootIndicationMessage_t;
 import a75f.io.usbserial.SerialAction;
 import a75f.io.usbserial.SerialEvent;
 import a75f.io.usbserial.UsbService;
@@ -22,6 +25,7 @@ public class LSerial
 {
     private static LSerial    mLSerial;
     private        UsbService mUsbService;
+    private static boolean mSendSeedMsgs;
 
     /***
      * D
@@ -47,11 +51,23 @@ public class LSerial
         if (mLSerial == null)
         {
             mLSerial = new LSerial();
+            mSendSeedMsgs = true;
         }
         return mLSerial;
     }
 
 
+
+    public boolean isReseedMessage(){
+        if(mSendSeedMsgs)
+            return true;
+        else
+            return false;
+    }
+
+    public void setResetSeedMessage(boolean bSeedMsg){
+        mSendSeedMsgs =bSeedMsg;
+    }
     /***
      * Handles all incoming messages from the CM.   It will parse them and
      * determine where they should be sent.

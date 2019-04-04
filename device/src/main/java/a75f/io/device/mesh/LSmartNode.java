@@ -17,7 +17,10 @@ import a75f.io.api.haystack.Zone;
 import a75f.io.device.serial.AddressedStruct;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
+import a75f.io.device.serial.CcuToCmOverUsbSnSettingsMessage_t;
 import a75f.io.device.serial.MessageType;
+import a75f.io.device.serial.SmartNodeControls_t;
+import a75f.io.device.serial.SmartNodeSettings_t;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZoneProfile;
@@ -56,7 +59,7 @@ public class LSmartNode
     public static ArrayList<Struct> getTestMessages(Zone zone)
     {
         ArrayList<Struct> retVal = new ArrayList<>();
-        retVal.addAll(getSeedMessages(zone));
+        //retVal.addAll(getSeedMessages(zone));
         retVal.addAll(getControlMessages(zone));
         return retVal;
     }
@@ -64,13 +67,13 @@ public class LSmartNode
     
     /***************************** SEED MESSAGES ****************************/
     
-    public static ArrayList<CcuToCmOverUsbDatabaseSeedSnMessage_t> getSeedMessages(Zone zone)
+    public static ArrayList<CcuToCmOverUsbDatabaseSeedSnMessage_t> getSeedMessages(Zone zone, String equipRef)
     {
         ArrayList<CcuToCmOverUsbDatabaseSeedSnMessage_t> seedMessages = new ArrayList<>();
         int i = 0;
         for (Device d : HSUtil.getDevices(zone.getId()))
         {
-            seedMessages.add(getSeedMessage(zone, Short.parseShort(d.getAddr())));
+            seedMessages.add(getSeedMessage(zone, Short.parseShort(d.getAddr()),equipRef));
             i++;
         }
         return seedMessages;
@@ -129,7 +132,7 @@ public class LSmartNode
                                 mappedVal = 0;
                             }
                             Log.d(TAG_CCU_DEVICE, " Set " + p.getPort() + " type " + p.getType() + " logicalVal: " + logicalVal + " mappedVal " + mappedVal);
-                            LSmartNode.getSmartNodePort(controlsMessage_t, p.getPort()).set(mappedVal);
+                            LSmartNode.getSmartNodePort(controlsMessage_t.controls, p.getPort()).set(mappedVal);
                             
                         }
                     }
@@ -143,22 +146,85 @@ public class LSmartNode
         }
         return controlMessagesHash.values();
     }
+    public static CcuToCmOverUsbSnControlsMessage_t getControlMessage(Zone zone, short node, String equipRef)
+    {
+        CcuToCmOverUsbSnControlsMessage_t controlsMessage_t = new CcuToCmOverUsbSnControlsMessage_t();
+        controlsMessage_t.smartNodeAddress.set(node);
+        controlsMessage_t.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_CONTROLS);
+        fillSmartNodeControls(controlsMessage_t.controls,zone,node,equipRef);
+        return controlsMessage_t;
+    }
     
-    
-    public static CcuToCmOverUsbDatabaseSeedSnMessage_t getSeedMessage(Zone zone, short address)
+    public static CcuToCmOverUsbDatabaseSeedSnMessage_t getSeedMessage(Zone zone, short address,String equipRef)
     {
         CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage =
                 new CcuToCmOverUsbDatabaseSeedSnMessage_t();
         seedMessage.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN);
-        seedMessage.settings.roomName.set(zone.getDisplayName());
         seedMessage.smartNodeAddress.set(address);
         seedMessage.putEncrptionKey(L.getEncryptionKey());
-        seedMessage.settings.temperatureOffset.set((short)getTempOffset(address));
-        //TODO-TEST
-        seedMessage.settings.profileBitmap.lightingControl.set((short) 1);
+        fillSmartNodeSettings(seedMessage.settings,zone,address,equipRef);
+        fillSmartNodeControls(seedMessage.controls,zone,address,equipRef);
         return seedMessage;
     }
-    
+    public static CcuToCmOverUsbSnSettingsMessage_t getSettingsMessage(Zone zone, short address, String equipRef)
+    {
+        CcuToCmOverUsbSnSettingsMessage_t settingsMessage =
+                new CcuToCmOverUsbSnSettingsMessage_t();
+        settingsMessage.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_SETTINGS);
+        settingsMessage.smartNodeAddress.set(address);
+        fillSmartNodeSettings(settingsMessage.settings,zone,address,equipRef);
+        return settingsMessage;
+    }
+    private static void fillSmartNodeSettings(SmartNodeSettings_t settings,Zone zone, short address, String equipRef){
+
+        settings.roomName.set(zone.getDisplayName());
+        settings.temperatureOffset.set((short)getTempOffset(address));
+        //TODO need to update for diff profiles
+        settings.profileBitmap.dynamicAirflowBalancing.set((short) 1);
+    }
+    private static void fillSmartNodeControls(SmartNodeControls_t controls_t,Zone zone, short node, String equipRef){
+
+
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap device = hayStack.read("device and addr == \""+node+"\"");
+
+        if (device != null && device.size() > 0)
+        {
+            ArrayList<HashMap> physicalOpPoints= hayStack.readAll("point and physical and cmd and deviceRef == \""+device.get("id")+"\"");
+
+            for (HashMap opPoint : physicalOpPoints)
+            {
+                if (opPoint.get("enabled").toString().equals("true"))
+                {
+                    RawPoint p = new RawPoint.Builder().setHashMap(opPoint).build();
+                    HashMap logicalOpPoint = hayStack.read("point and id == " + p.getPointRef());
+                    double logicalVal = hayStack.readHisValById(logicalOpPoint.get("id").toString());
+
+                    //TODO - Assuming Relay1 & Relay 2 are enabled for staged out put.
+                    short mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) : mapDigitalOut(p.getType(),
+                            p.getPort().equals(RELAY_TWO) ? logicalVal > 50 : logicalVal > 0));
+                    hayStack.writeHisValById(p.getId(), (double) mappedVal);
+
+                    if (isAnalog(p.getPort()) && p.getType().equals(PULSE) && logicalVal > 0) {
+                        mappedVal |= 0x80;
+                    }
+
+                    if (isAnalog(p.getPort()) && p.getType().equals(MAT) && logicalVal > 0) {
+                        controls_t.damperPosition.set(mappedVal);
+                        mappedVal = 0;
+                    }
+                    Log.d(TAG_CCU_DEVICE, " Set " + p.getPort() + " type " + p.getType() + " logicalVal: " + logicalVal + " mappedVal " + mappedVal);
+                    LSmartNode.getSmartNodePort(controls_t, p.getPort()).set(mappedVal);
+
+                }
+            }
+            controls_t.setTemperature.set((short) (getDesiredTemp(node) * 2));
+            if (L.ccu().systemProfile instanceof VavSystemProfile)
+            {
+                controls_t.conditioningMode.set((short) (VavSystemController.getInstance().getSystemState() == VavSystemController.State.HEATING ? 1 : 0));
+            }
+        }
+    }
     public static double getTempOffset(short addr) {
         return CCUHsApi.getInstance().readDefaultVal("point and zone and config and vav and temperature and offset and group == \""+addr+"\"");
     }
@@ -237,19 +303,19 @@ public class LSmartNode
     }
     
     
-    public static Struct.Unsigned8 getSmartNodePort(CcuToCmOverUsbSnControlsMessage_t controlsMessage_t,
+    public static Struct.Unsigned8 getSmartNodePort(SmartNodeControls_t controls,
                                                     String port)
     {
         switch (port)
         {
             case ANALOG_OUT_ONE:
-                return controlsMessage_t.controls.analogOut1;
+                return controls.analogOut1;
             case ANALOG_OUT_TWO:
-                return controlsMessage_t.controls.analogOut2;
+                return controls.analogOut2;
             case RELAY_ONE:
-                return controlsMessage_t.controls.digitalOut1;
+                return controls.digitalOut1;
             case RELAY_TWO:
-                return controlsMessage_t.controls.digitalOut2;
+                return controls.digitalOut2;
             default:
                 return null;
         }

@@ -5,12 +5,14 @@ import android.content.Context;
 import android.graphics.Typeface;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,6 +26,7 @@ import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.renatus.schedules.SchedulerFragment;
 
 import static a75f.io.renatus.ZoneFragmentTemp.getPointVal;
@@ -62,7 +65,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
         final String expandedListText = (String) getChild(listPosition, expandedListPosition);
         //Log.i("Scheduler", "IDE Too Slow: " + expandedListText);
 
-        if (!expandedListText.startsWith("schedule"))
+        if (!expandedListText.startsWith("schedule") && (!expandedListText.startsWith("smartstat")))
         {
             LayoutInflater layoutInflater = (LayoutInflater) this.mFragment.getContext()
                                                                            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -86,9 +89,13 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
             TextView    scheduleStatus      = convertView.findViewById(R.id.schedule_status_tv);
             Spinner     scheduleSpinner     = convertView.findViewById(R.id.schedule_spinner);
             ImageButton scheduleImageButton = convertView.findViewById(R.id.schedule_edit_button);
-            TextView    vacationStatusTV    = convertView.findViewById(R.id.vacation_status);
-            ImageButton vacationEditButton  = convertView.findViewById(R.id.vacation_edit_button);
-            HashMap     equipHashMap        = CCUHsApi.getInstance().readMapById(equipId);
+            TextView vacationStatusTV = convertView.findViewById(R.id.vacation_status);
+            ImageButton vacationEditButton = convertView.findViewById(R.id.vacation_edit_button);
+            LinearLayout smartStatLayout = convertView.findViewById(R.id.ss_layout);
+            TextView ssStatus = convertView.findViewById(R.id.ss_conditioning_status_tv);
+            Spinner ssCondModeSpinner = convertView.findViewById(R.id.ss_conditioning_spinner);
+            Spinner ssFanModeSpinner = convertView.findViewById(R.id.ss_fanmode_spinner);
+            HashMap equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
 
 
             String zoneId         = Schedule.getZoneIdByEquipId(equipId);
@@ -182,7 +189,43 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
 
                 }
             });
+            if(expandedListText.startsWith("smartstat")){
+                if(smartStatLayout != null) smartStatLayout.setVisibility(View.VISIBLE);
+                
+                double ssOperatingMode = CCUHsApi.getInstance().readHisValByQuery("point and standalone and temp and operation and mode and his and equipRef == \"" + equipId + "\"");
+                double ssFanOpMode = CCUHsApi.getInstance().readHisValByQuery("point and standalone and fan and operation and mode and his and equipRef == \"" + equipId + "\"");
 
+                ssCondModeSpinner.setSelection((int)ssOperatingMode);
+                ssFanModeSpinner.setSelection((int)ssFanOpMode);
+                if(equipId != null ) {
+
+                    ssStatus.setText(StandaloneScheduler.getSmartStatStatusString(equipId));
+                    ssCondModeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                            if(position != (int)ssOperatingMode)
+                                StandaloneScheduler.updateOperationalPoints(equipId,"temp",position);
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> parent) {
+
+                        }
+                    });
+                    ssFanModeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                            if(position != ssFanOpMode)
+                                StandaloneScheduler.updateOperationalPoints(equipId,"fan",position);
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> parent) {
+
+                        }
+                    });
+                }
+            }
 
         }
 

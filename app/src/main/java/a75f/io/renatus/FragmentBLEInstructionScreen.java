@@ -3,6 +3,7 @@ package a75f.io.renatus;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -143,8 +144,20 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
             }
             else
             {
-                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan
-                                                                .getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, mProfileType);
+                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, mProfileType);
+                showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
+            }
+        }
+        else if (mProfileType == ProfileType.SMARTSTAT_CONVENTIONAL_PACK_UNIT)
+        {
+            if (L.isSimulation())
+            {
+                showDialogFragment(FragmentCPUConfiguration.newInstance(mNodeAddress, mRoomName, mNodeType, mFloorName,mProfileType), FragmentCPUConfiguration.ID);
+            }
+            else
+            {
+                Log.d("FragBleInstrScrn","CPU profile. device scan");
+                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.SMARTSTAT_CONVENTIONAL_PACK_UNIT);
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
             }
         }

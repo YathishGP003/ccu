@@ -6,5 +6,5 @@ package a75f.io.logic.bo.building.definitions;
 
 public enum Input
 {
-	Analog1In, Analog2In
+	Analog1In, Analog2In,Thermistor1, Thermistor2
 }

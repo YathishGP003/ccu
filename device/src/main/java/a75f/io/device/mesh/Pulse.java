@@ -196,5 +196,48 @@ public class Pulse
 			LSerial.getInstance().setResetSeedMessage(true);
 		}
 	}
-	
+	public static void updateSetTempFromSmartNode(CmToCcuOverUsbSnLocalControlsOverrideMessage_t setTempUpdate){
+		short nodeAddr = (short)setTempUpdate.smartNodeAddress.get();
+		double temp = setTempUpdate.setTemperature.get();
+		CCUHsApi hayStack = CCUHsApi.getInstance();
+		HashMap device = hayStack.read("device and addr == \""+nodeAddr+"\"");
+		if (device != null && device.size() > 0)
+		{
+
+			ArrayList<HashMap> phyPoints = hayStack.readAll("point and physical and sensor and deviceRef == \"" + device.get("id") + "\"");
+
+			for(HashMap phyPoint : phyPoints) {
+				if (phyPoint.get("pointRef") == null || phyPoint.get("pointRef") == "") {
+					continue;
+				}
+				hayStack.writeHisValById(phyPoint.get("id").toString(), temp);
+
+				HashMap logPoint = hayStack.read("point and id=="+phyPoint.get("pointRef"));
+				switch (Port.valueOf(phyPoint.get("port").toString())) {
+					case DESIRED_TEMP:
+						double desiredTemp = getDesredTempConversion(temp);
+						if (desiredTemp > 0) {
+							hayStack.writeHisValById(logPoint.get("id").toString(), desiredTemp);
+							updateDesiredTemp(nodeAddr, desiredTemp);
+						}
+						CcuLog.d(L.TAG_CCU_DEVICE, "updateSetTempFromDevice : desiredTemp " + desiredTemp);
+						sendSetTemperatureAck(nodeAddr);
+
+					break;
+				}
+			}
+		}
+	}
+	public static void sendSetTemperatureAck(short address) {
+		if (!LSerial.getInstance().isConnected()) {
+			CcuLog.d(L.TAG_CCU_DEVICE,"Device not connected !!");
+			return;
+		}
+		CcuToCmOverUsbDeviceTempAckMessage_t msg = new CcuToCmOverUsbDeviceTempAckMessage_t();
+		msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_SET_TEMPERATURE_ACK);
+		msg.smartNodeAddress.set(address);
+		MeshUtil.sendStructToCM(msg);
+
+
+	}
 }

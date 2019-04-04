@@ -91,9 +91,18 @@ public class LSerial
             else if (messageType == MessageType.CM_TO_CCU_OVER_USB_SN_REGULAR_UPDATE)
             {
                 Pulse.regularSNUpdate(fromBytes(data, CmToCcuOverUsbSnRegularUpdateMessage_t.class));
+            }
+			else if (messageType == MessageType.CM_TO_CCU_OVER_USB_SN_SET_TEMPERATURE_UPDATE)
+            {
+                DLog.LogdSerial("Event Type:updateSetTempFromSmartStat="+data.length+","+data.toString());
+                Pulse.updateSetTempFromSmartNode(fromBytes(data, CmToCcuOverUsbSnLocalControlsOverrideMessage_t.class));;
             }else if(messageType == MessageType.FSV_REBOOT){
                 DLog.LogdSerial("Event Type DEVICE_REBOOT:"+data.length+","+data.toString());
                 Pulse.rebootMessageFromCM(fromBytes(data, WrmOrCmRebootIndicationMessage_t.class));
+            }else if(messageType == MessageType.CM_TO_CCU_OVER_USB_SMART_STAT_LOCAL_CONTROLS_OVERRIDE){
+                DLog.LogdSerial("Event Type:CM_TO_CCU_OVER_USB_SMART_STAT_LOCAL_CONTROLS_OVERRIDE="+data.length+","+data.toString());
+                Pulse.updateSetTempFromSmartStat(fromBytes(data, CmToCcuOverUsbSmartStatLocalControlsOverrideMessage_t.class));
+
             }
         }
     }

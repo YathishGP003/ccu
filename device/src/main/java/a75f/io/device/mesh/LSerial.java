@@ -8,6 +8,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import a75f.io.device.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
+import a75f.io.device.serial.CmToCcuOverUsbSmartStatLocalControlsOverrideMessage_t;
+import a75f.io.device.serial.CmToCcuOverUsbSmartStatRegularUpdateMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSnLocalControlsOverrideMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 import a75f.io.device.serial.MessageType;
@@ -92,7 +94,12 @@ public class LSerial
             {
                 Pulse.regularSNUpdate(fromBytes(data, CmToCcuOverUsbSnRegularUpdateMessage_t.class));
             }
-			else if (messageType == MessageType.CM_TO_CCU_OVER_USB_SN_SET_TEMPERATURE_UPDATE)
+            else if (messageType == MessageType.CM_TO_CCU_OVER_USB_SMART_STAT_REGULAR_UPDATE)
+            {
+                DLog.LogdSerial("Event Type: " + data.length+","+data.toString());
+                Pulse.regularSmartStatUpdate(fromBytes(data, CmToCcuOverUsbSmartStatRegularUpdateMessage_t.class));
+            }
+            else if (messageType == MessageType.CM_TO_CCU_OVER_USB_SN_SET_TEMPERATURE_UPDATE)
             {
                 DLog.LogdSerial("Event Type:updateSetTempFromSmartStat="+data.length+","+data.toString());
                 Pulse.updateSetTempFromSmartNode(fromBytes(data, CmToCcuOverUsbSnLocalControlsOverrideMessage_t.class));;

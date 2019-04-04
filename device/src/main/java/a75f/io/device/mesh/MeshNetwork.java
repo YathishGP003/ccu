@@ -1,7 +1,7 @@
 package a75f.io.device.mesh;
 
 import android.util.Log;
-
+import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
@@ -9,12 +9,16 @@ import a75f.io.device.DeviceNetwork;
 import a75f.io.device.json.serializers.JsonSerializer;
 import a75f.io.device.serial.AddressedStruct;
 import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
+import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSmartStatMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
+import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
+import a75f.io.device.serial.CcuToCmOverUsbSmartStatSettingsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnSettingsMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 
 import static a75f.io.device.mesh.MeshUtil.sendStruct;
@@ -46,42 +50,70 @@ public class MeshNetwork extends DeviceNetwork
             {
                 for (Zone zone : HSUtil.getZones(floor.getId()))
                 {
-                    CcuLog.d(L.TAG_CCU_DEVICE,"=============Zone: " + zone.getDisplayName() + " ==================");
-	                if(bSeedMessage) {
-	                    CcuLog.d(L.TAG_CCU_DEVICE,"=================NOW SENDING SEEDS=====================");
-	                    //for (CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage : LSmartNode.getSeedMessages(zone)) {
-	                    CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = LSmartNode.getSeedMessage(zone, Short.parseShort(d.getAddr()),d.getEquipRef());
-	                    if (sendStructToCM(/*(short) seedMessage.smartNodeAddress.get(),*/ seedMessage)) {
-	                        //Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
-	                    }
-	                    //}
-	                    /*CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING CONTROLS=====================");
-	                    //for (CcuToCmOverUsbSnControlsMessage_t controlsMessage : LSmartNode.getControlMessages(zone)) {
-	                    CcuToCmOverUsbSnControlsMessage_t controlsMessage = LSmartNode.getControlMessage(zone,Short.parseShort(d.getAddr()),d.getEquipRef());
-	                    if (sendStruct((short) controlsMessage.smartNodeAddress.get(), controlsMessage)) {
-	                        //Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
-	                    }
-	                    //}
-	                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING EXTRA MESSAGES LIKE SCHEDULES====================");
-	                    for (AddressedStruct extraMessage : LSmartNode.getExtraMessages(floor, zone)) {
-	                        Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
-	                        if (sendStruct(extraMessage.getAddress(), extraMessage.getStruct())) {
-	                            //Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
-	                        }
-	                    }*/
-	                }else {
-	                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING SN Settings=====================");
-	                    CcuToCmOverUsbSnSettingsMessage_t settingsMessage = LSmartNode.getSettingsMessage(zone,Short.parseShort(d.getAddr()),d.getEquipRef());
-	                    if (sendStruct((short) settingsMessage.smartNodeAddress.get(), settingsMessage)) {
-	                        //Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
-	                    }
-	                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING SN CONTROLS=====================");
-	                    CcuToCmOverUsbSnControlsMessage_t controlsMessage = LSmartNode.getControlMessage(zone,Short.parseShort(d.getAddr()),d.getEquipRef());
-	                    if (sendStruct((short) controlsMessage.smartNodeAddress.get(), controlsMessage)) {
-	                        //Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
-	                    }
-	                }
-                    
+                    CcuLog.d(L.TAG_CCU_DEVICE,"=============Zone: " + zone.getDisplayName() + " =================="+bSeedMessage);
+                    for(Device d : HSUtil.getDevices(zone.getId())) { //TODO Will this work? kumar
+                        String deviceType = NodeType.SMART_NODE.name();
+                        if(d.getMarkers().contains("smartstat"))
+                            deviceType = NodeType.SMART_STAT.name();
+                        switch (NodeType.valueOf(deviceType)) {
+                            case SMART_NODE:
+                                if(bSeedMessage) {
+                                    CcuLog.d(L.TAG_CCU_DEVICE,"=================NOW SENDING SN SEEDS====================="+zone.getId());
+                                    //for (CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage : LSmartNode.getSeedMessages(zone)) {
+                                    CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = LSmartNode.getSeedMessage(zone, Short.parseShort(d.getAddr()),d.getEquipRef());
+                                    if (sendStructToCM(/*(short) seedMessage.smartNodeAddress.get(),*/ seedMessage)) {
+                                        //Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
+                                    }
+                                    //}
+                                    /*CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING CONTROLS=====================");
+                                    //for (CcuToCmOverUsbSnControlsMessage_t controlsMessage : LSmartNode.getControlMessages(zone)) {
+                                    CcuToCmOverUsbSnControlsMessage_t controlsMessage = LSmartNode.getControlMessage(zone,Short.parseShort(d.getAddr()),d.getEquipRef());
+                                    if (sendStruct((short) controlsMessage.smartNodeAddress.get(), controlsMessage)) {
+                                        //Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
+                                    }
+                                    //}
+                                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING EXTRA MESSAGES LIKE SCHEDULES====================");
+                                    for (AddressedStruct extraMessage : LSmartNode.getExtraMessages(floor, zone)) {
+                                        Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
+                                        if (sendStruct(extraMessage.getAddress(), extraMessage.getStruct())) {
+                                            //Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
+                                        }
+                                    }*/
+                                }else {
+                                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING SN Settings=====================");
+                                    CcuToCmOverUsbSnSettingsMessage_t settingsMessage = LSmartNode.getSettingsMessage(zone,Short.parseShort(d.getAddr()),d.getEquipRef());
+                                    if (sendStruct((short) settingsMessage.smartNodeAddress.get(), settingsMessage)) {
+                                        //Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
+                                    }
+                                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING SN CONTROLS=====================");
+                                    CcuToCmOverUsbSnControlsMessage_t controlsMessage = LSmartNode.getControlMessage(zone,Short.parseShort(d.getAddr()),d.getEquipRef());
+                                    if (sendStruct((short) controlsMessage.smartNodeAddress.get(), controlsMessage)) {
+                                        //Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
+                                    }
+                                }
+                                break;
+                            case SMART_STAT:
+                                if(bSeedMessage) {
+                                    CcuLog.d(L.TAG_CCU_DEVICE,"=================NOW SENDING SS SEEDS====================="+zone.getId());
+                                        CcuToCmOverUsbDatabaseSeedSmartStatMessage_t seedSSMessage = LSmartStat.getSeedMessage(zone,Short.parseShort(d.getAddr()),d.getEquipRef());
+                                        if (sendStructToCM(seedSSMessage)) {
+                                            //Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
+                                        }
+                                }else {
+                                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING SMART_STAT Settings=====================");
+                                    CcuToCmOverUsbSmartStatSettingsMessage_t settingsMessage = LSmartStat.getSettingsMessage(zone,Short.parseShort(d.getAddr()),d.getEquipRef());
+                                    if (sendStruct((short) settingsMessage.address.get(), settingsMessage)) {
+                                        //Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
+                                    }
+                                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING SMART_STAT CONTROLS=====================");
+                                    CcuToCmOverUsbSmartStatControlsMessage_t controlsSSMessage = LSmartStat.getControlMessage(zone,Short.parseShort(d.getAddr()),d.getEquipRef());
+                                    if (sendStruct((short) controlsSSMessage.address.get(), controlsSSMessage)) {
+                                        //Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
+                                    }
+                                }
+                                break;
+                        }
+                    }
                 }
             }
             

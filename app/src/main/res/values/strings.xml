@@ -30,6 +30,16 @@
     <string name="pick_ccu">Pick CCU</string>
 
 
+    <string name="conventional_package_unit">Conventional Package Unit</string>
+    <string name="conventional_pkg_unit_desc">Has simple independent stages for cooling and heating. The fan can be switched by user between Auto/Low/High</string>
+    <string name="comm_pkg_unit_desc">Has simple independent stages for cooling and heating. User has ability to force stage 1 fan on all the time</string>
+    <string name="commercial_package_unit">Commercial Package Unit</string>
+    <string name="heat_pump_unit">Heat Pump Unit</string>
+    <string name="heat_pump_desc">In heat pump operation, there is compressor that provides conditioning</string>
+    <string name="_2_pipe_fancoil_unit">2 Pipe Fancoil Unit</string>
+    <string name="fancoil_desc">A 2 pipe fan coil unit has 2 pipes for supplyig water through a coil</string>
+    <string name="_4_fancoil_desc">A 4 pipe fan coil unit has 2 coils one for heating and another for cooling with 2 pipes each for supplying water</string>
+    <string name="_4_pipe_fancoil_unit">4 Pipe Fancoil Unit</string>
     <string-array name="sse_action_type">
         <item> Cooling </item>
         <item> Heating </item>

@@ -471,6 +471,21 @@ public class CCUHsApi
         }
         return rowList;
     }
+    
+    public double readPointPriorityVal(String id) {
+        
+        ArrayList values = readPoint(id);
+        if (values != null && values.size() > 0)
+        {
+            for (int l = 1; l <= values.size() ; l++ ) {
+                HashMap valMap = ((HashMap) values.get(l-1));
+                if (valMap.get("val") != null) {
+                    return Double.parseDouble(valMap.get("val").toString());
+                }
+            }
+        }
+        return 0;
+    }
 
     public void hisWrite(ArrayList<HisItem> hisList)
     {

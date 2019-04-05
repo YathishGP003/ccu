@@ -56,6 +56,9 @@ public class ScheduleProcessJob extends BaseJob {
     private static Occupied currOccupied = null;
     private static Occupied nextOccupied = null;
     private static boolean systemVacation = false;
+    
+    private static Schedule activeSystemVacation = null;
+    private static Occupied activeZoneVacation = null;
 
     public static Occupied getOccupiedModeCache(String id) {
         if(!occupiedHashMap.containsKey(id))
@@ -123,11 +126,11 @@ public class ScheduleProcessJob extends BaseJob {
 
 
         ArrayList<Schedule> activeVacationSchedules = CCUHsApi.getInstance().getSystemSchedule(true);
-
-        Schedule activeVacationSchedule = getActiveVacation(activeVacationSchedules);
+    
+        activeSystemVacation = getActiveVacation(activeVacationSchedules);
         /* The systemSchedule isn't initiated yet, so schedules shouldn't be ran*/
     
-        Log.d(L.TAG_CCU_JOB, " ActiveVacation "+activeVacationSchedule);
+        Log.d(L.TAG_CCU_JOB, " activeSystemVacation "+activeSystemVacation);
 
         //Read all equips
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone");
@@ -147,22 +150,22 @@ public class ScheduleProcessJob extends BaseJob {
                 }
 
                 //If building vacation is not active, check zone vacations.
-                if (activeVacationSchedule == null ) {
+                if (activeSystemVacation == null ) {
                     
                     ArrayList<Schedule> activeZoneVacationSchedules = CCUHsApi.getInstance().getZoneSchedule(equip.getRoomRef(),true);
                     Schedule activeZoneVacationSchedule = getActiveVacation(activeZoneVacationSchedules);
-                    Log.d(L.TAG_CCU_JOB, "Equip "+equip.getDisplayName()+" activeZoneVacationSchedules "+activeZoneVacationSchedules.size()+" activeVacationSchedule "+activeVacationSchedule);
+                    Log.d(L.TAG_CCU_JOB, "Equip "+equip.getDisplayName()+" activeZoneVacationSchedules "+activeZoneVacationSchedules.size()+" activeSystemVacation "+activeSystemVacation);
                     writePointsForEquip(equip, equipSchedule, activeZoneVacationSchedule);
                 } else
                 {
-                    writePointsForEquip(equip, equipSchedule, activeVacationSchedule);
+                    writePointsForEquip(equip, equipSchedule, activeSystemVacation);
                 }
 
             }
         }
 
         updateSystemOccupancy();
-        systemVacation = inSystemVacation();
+        systemVacation = activeSystemVacation != null || isAllZonesInVacation();
         CcuLog.d(TAG_CCU_JOB,"<- ScheduleProcessJob");
     }
 
@@ -302,6 +305,11 @@ public class ScheduleProcessJob extends BaseJob {
         }
         
         if (systemVacation) {
+            if (activeSystemVacation != null) {
+                return "In Energy saving Vacation till "+activeSystemVacation.getEndDateString();
+            } else if (activeZoneVacation != null) {
+                return "In Energy saving Vacation till "+activeZoneVacation.getVacation().getEndDateString();
+            }
             return "In Energy saving Vacation";
         }
 
@@ -389,6 +397,7 @@ public class ScheduleProcessJob extends BaseJob {
         if (systemOccupancy == UNOCCUPIED) {
             Occupied next = null;
             for (Occupied occ : occupiedHashMap.values()) {
+                Log.d(TAG_CCU_JOB, " occ: "+occ.toString()+" getMillisecondsUntilNextChange "+occ.getMillisecondsUntilNextChange());
                 if (millisToOccupancy == 0) {
                     millisToOccupancy = occ.getMillisecondsUntilNextChange();
                     next = occ;
@@ -416,7 +425,7 @@ public class ScheduleProcessJob extends BaseJob {
             double preconDegree = Math.max(waCoolingOnlyLoadMA, waHeatingOnlyLoadMA);
             double preconRate = CCUHsApi.getInstance().getPredictedPreconRate(L.ccu().systemProfile.getSystemEquipRef());
             if (preconRate == 0) {
-                //TODO - Revisit , as per to vav logic
+                //TODO - Revisit , as per vav logic
                 if (waCoolingOnlyLoadMA > 0)
                 {
                     preconRate = TunerUtil.readTunerValByQuery("cooling and precon and rate", L.ccu().systemProfile.getSystemEquipRef());
@@ -438,19 +447,31 @@ public class ScheduleProcessJob extends BaseJob {
         return systemOccupancy == null ? UNOCCUPIED : systemOccupancy;
     }
     
-    public static boolean inSystemVacation() {
+    public static boolean isAllZonesInVacation() {
         
+        activeZoneVacation = null;
         for (Floor f: HSUtil.getFloors())
         {
             for (Zone z : HSUtil.getZones(f.getId()))
             {
                 Occupied c = ScheduleProcessJob.getOccupiedModeCache(z.getId());
-                if (c!= null && c.getVacation() == null)
+                if (c!= null)
                 {
-                    return false;
+                    if (c.getVacation() == null) {
+                        return false;
+                    }
+                    
+                    if (activeZoneVacation == null) {
+                        activeZoneVacation = c;
+                    } else if (activeZoneVacation.getVacation().getEndDate().getMillis() > c.getVacation().getEndDate().getMillis()){
+                        activeZoneVacation = c;
+                    }
+                    
                 }
             }
         }
+        CcuLog.d(TAG_CCU_JOB, "isAllZonesInVacation vacation: "+ (activeZoneVacation == null ? " NO " : activeZoneVacation.getVacation().getEndDateString()));
+        
         return true;
     }
     
@@ -462,10 +483,10 @@ public class ScheduleProcessJob extends BaseJob {
             public void run() {
                 ArrayList<Schedule> activeVacationSchedules = CCUHsApi.getInstance().getSystemSchedule(true);
     
-                Schedule activeVacationSchedule = getActiveVacation(activeVacationSchedules);
+                activeSystemVacation = getActiveVacation(activeVacationSchedules);
                 /* The systemSchedule isn't initiated yet, so schedules shouldn't be ran*/
     
-                Log.d(L.TAG_CCU_JOB, " ActiveVacation "+activeVacationSchedule);
+                Log.d(L.TAG_CCU_JOB, " activeSystemVacation "+activeSystemVacation);
     
                 //Read all equips
                 ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone");
@@ -485,22 +506,22 @@ public class ScheduleProcessJob extends BaseJob {
                         }
             
                         //If building vacation is not active, check zone vacations.
-                        if (activeVacationSchedule == null ) {
+                        if (activeSystemVacation == null ) {
                 
                             ArrayList<Schedule> activeZoneVacationSchedules = CCUHsApi.getInstance().getZoneSchedule(equip.getRoomRef(),true);
                             Schedule activeZoneVacationSchedule = getActiveVacation(activeZoneVacationSchedules);
-                            Log.d(L.TAG_CCU_JOB, "Equip "+equip.getDisplayName()+" activeZoneVacationSchedules "+activeZoneVacationSchedules.size()+" activeVacationSchedule "+activeVacationSchedule);
+                            Log.d(L.TAG_CCU_JOB, "Equip "+equip.getDisplayName()+" activeZoneVacationSchedules "+activeZoneVacationSchedules.size()+" activeSystemVacation "+activeSystemVacation);
                             writePointsForEquip(equip, equipSchedule, activeZoneVacationSchedule);
                         } else
                         {
-                            writePointsForEquip(equip, equipSchedule, activeVacationSchedule);
+                            writePointsForEquip(equip, equipSchedule, activeSystemVacation);
                         }
             
                     }
                 }
     
                 updateSystemOccupancy();
-                systemVacation = inSystemVacation();
+                systemVacation = activeSystemVacation != null || isAllZonesInVacation();
             }
         }.start();
         

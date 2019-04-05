@@ -64,12 +64,18 @@ public class VAVScheduler {
 
 
     public static void setDesiredTemp(Equip equip, Double desiredTemp, String flag) {
-        CcuLog.d(L.TAG_CCU_SCHEDULER, "Equip: " + equip.getId() + " Temp: " + desiredTemp + " Flag: " + flag);
+        CcuLog.d(L.TAG_CCU_SCHEDULER, "Equip: " + equip.getDisplayName() + " Temp: " + desiredTemp + " Flag: " + flag);
         ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and " + flag + " and desired and sp and equipRef == \"" + equip.getId() + "\"");
         if (points == null || points.size() == 0) {
             return; //Equip might have been deleted.
         }
         String id = ((HashMap) points.get(0)).get("id").toString();
+        
+        if (getPriorityVal(id , 8) == desiredTemp) {
+            CcuLog.d(L.TAG_CCU_SCHEDULER, flag+"DesiredTemp not changed : Skip PointWrite");
+            return;
+        }
+        
         try {
             CCUHsApi.getInstance().pointWrite(HRef.make(id.replace("@","")), 9, "Scheduler", desiredTemp != null ? HNum.make(desiredTemp) : HNum.make(0), HNum.make(0));
         } catch (Exception e) {
@@ -87,6 +93,18 @@ public class VAVScheduler {
                 if (valMap.get("val") != null) {
                     return Double.parseDouble(valMap.get("val").toString());
                 }
+            }
+        }
+        return 0;
+    }
+    
+    public static double getPriorityVal(String id, int level) {
+        ArrayList values = CCUHsApi.getInstance().readPoint(id);
+        if (values != null && values.size() > 0)
+        {
+            HashMap valMap = ((HashMap) values.get(level));
+            if (valMap.get("val") != null) {
+                return Double.parseDouble(valMap.get("val").toString());
             }
         }
         return 0;

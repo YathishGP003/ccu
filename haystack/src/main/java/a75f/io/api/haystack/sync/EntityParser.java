@@ -1,6 +1,7 @@
 package a75f.io.api.haystack.sync;
 
 import org.projecthaystack.HDict;
+import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HRow;
 import org.projecthaystack.UnknownRecException;
@@ -18,6 +19,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
+import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.SettingPoint;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Zone;
@@ -44,6 +46,7 @@ public class EntityParser
     private ArrayList<Point>        points        = new ArrayList<>();
     private ArrayList<RawPoint>     phyPoints     = new ArrayList<>();
     private ArrayList<SettingPoint> settingPoints = new ArrayList<>();
+    private ArrayList<Schedule> schedules = new ArrayList<>();
     
     public EntityParser(HGrid grid) {
         mGrid = grid;
@@ -94,6 +97,8 @@ public class EntityParser
                         settingPoints.add(new SettingPoint.Builder().setHashMap(map).build());
                     } else if (map.get("point") != null ) {
                         points.add(new Point.Builder().setHashMap(map).build());
+                    } else if (map.get("schedule") != null) {
+                        schedules.add(new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build());
                     }
                 }
             }
@@ -156,6 +161,9 @@ public class EntityParser
     public ArrayList<SettingPoint> getSettingPoints()
     {
         return settingPoints;
+    }
+    public ArrayList<Schedule> getSchedules() {
+        return schedules;
     }
 
 

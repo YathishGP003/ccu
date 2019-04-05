@@ -70,7 +70,11 @@ public class VavParallelFanProfile extends VavProfile
             double dischargeSp = vavDevice.getDischargeSp();
             setTempCooling = vavDevice.getDesiredTempCooling();
             setTempHeating = vavDevice.getDesiredTempHeating();
-            vavDevice.setDesiredTemp((setTempCooling+setTempHeating)/2);
+            double averageDesiredTemp = (setTempCooling+setTempHeating)/2;
+            if (averageDesiredTemp != vavDevice.getDesiredTemp())
+            {
+                vavDevice.setDesiredTemp(averageDesiredTemp);
+            }
             Equip vavEquip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + node + "\"")).build();
     
             VOCLoop vocLoop = vavDeviceMap.get(node).getVOCLoop();

@@ -34,9 +34,11 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
+import a75f.io.device.mesh.LSerial;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZoneProfile;
+import a75f.io.logic.bo.building.sscpu.ConventionalUnitConfiguration;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -93,6 +95,8 @@ public class FloorPlanFragment extends Fragment
 						@Override
 						public void run()
 						{
+							if(LSerial.getInstance().isConnected()) //If usb connected and pairing done then reseed
+								LSerial.getInstance().setResetSeedMessage(true);
 							updateModules(getSelectedZone());
 							getActivity().unregisterReceiver(mPairingReceiver);
 						}
@@ -283,7 +287,7 @@ public class FloorPlanFragment extends Fragment
 	{
 		Log.d("CCU","Zone Selected "+zone.getDisplayName());
 		mModuleListAdapter =
-				new DataArrayAdapter<>(getActivity(), R.layout.listviewitem, createAddressList(
+				new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(), R.layout.listviewitem, createAddressList(
 						HSUtil.getEquips(zone.getId())));
 		
 		getActivity().runOnUiThread(new Runnable()
@@ -440,13 +444,12 @@ public class FloorPlanFragment extends Fragment
 			Floor floor = floorList.get(mFloorListAdapter.getSelectedPostion());
 			HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
 
-			Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
+			//Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
 
 			Zone hsZone = new Zone.Builder()
                                    .setDisplayName(addRoomEdit.getText().toString())
                                    .setFloorRef(floor.getId())
                                    .setSiteRef(siteMap.get("id").toString())
-									.setScheduleRef(systemSchedule.getId())
                                    .build();
 
 			hsZone.setId(CCUHsApi.getInstance().addZone(hsZone));
@@ -545,7 +548,14 @@ public class FloorPlanFragment extends Fragment
 				showDialogFragment(FragmentDABConfiguration
 						                   .newInstance(Short.parseShort(nodeAddr),zone.getDisplayName(), NodeType.SMART_NODE, floor.getDisplayName(), profile.getProfileType()), FragmentDABConfiguration.ID);
 				break;
-			
+				
+			case SMARTSTAT_CONVENTIONAL_PACK_UNIT:
+				System.out.println(" floor " + floor.getDisplayName() + " zone " + zone.getDisplayName() + " node :" + nodeAddr);
+				ConventionalUnitConfiguration cpuConfig = (ConventionalUnitConfiguration) profile.getProfileConfiguration(Short.parseShort(nodeAddr));
+				System.out.println("Config " + cpuConfig + " profile " + profile.getProfileType());
+				showDialogFragment(FragmentCPUConfiguration
+						.newInstance(Short.parseShort(nodeAddr), zone.getDisplayName(), cpuConfig.getNodeType(), floor.getDisplayName(), profile.getProfileType()), FragmentCPUConfiguration.ID);
+				break;
 			
 		}
 		

@@ -97,9 +97,9 @@ class ModuleListActionMenuListener implements MultiChoiceModeListener
 			L.removeHSDeviceEntities(selectedModule);
 		}
 		
-		new AsyncTask<Void, Void, Void>() {
+		new AsyncTask<String, Void, Void>() {
 			@Override
-			protected Void doInBackground( final Void ... params ) {
+			protected Void doInBackground( final String ... params ) {
 				CCUHsApi.getInstance().syncEntityTree();
 				L.saveCCUState();
 				return null;
@@ -109,7 +109,7 @@ class ModuleListActionMenuListener implements MultiChoiceModeListener
 			protected void onPostExecute( final Void result ) {
 				// continue what you are doing...
 			}
-		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
 		
     }
 	

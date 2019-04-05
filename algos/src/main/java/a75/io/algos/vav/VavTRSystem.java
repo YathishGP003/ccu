@@ -71,8 +71,8 @@ public class VavTRSystem extends TRSystem
         co2TRResponse = new SystemTrimResponseBuilder().setSP0(getCO2TRTunerVal("spinit")).setSPmin(getCO2TRTunerVal("spmin"))
                                                        .setSPmax(getCO2TRTunerVal("spmax")).setTd((int)getCO2TRTunerVal("timeDelay"))//TODO-TEST
                                                        .setT((int)getCO2TRTunerVal("timeInterval")).setI((int)getCO2TRTunerVal("ignoreRequest"))
-                                                       .setSPtrim(getCO2TRTunerVal("sptrim")).setSPres(-getCO2TRTunerVal("spres"))
-                                                       .setSPresmax(-getCO2TRTunerVal("spresmax")).buildTRSystem();
+                                                       .setSPtrim(getCO2TRTunerVal("sptrim")).setSPres(getCO2TRTunerVal("spres"))
+                                                       .setSPresmax(getCO2TRTunerVal("spresmax")).buildTRSystem();
         co2TRProcessor = new TrimResponseProcessor(co2TRResponse);
     }
     

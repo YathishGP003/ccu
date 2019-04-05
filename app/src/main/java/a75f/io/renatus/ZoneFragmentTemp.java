@@ -134,7 +134,7 @@ public class ZoneFragmentTemp extends Fragment
         {
             Log.d("CCU_UI","Equip: "+m);
             Equip p = new Equip.Builder().setHashMap(m).build();
-            if (p.getProfile() != null && !p.getProfile().contains("SYSTEM"))
+            if (p.getProfile() != null && !p.getProfile().contains("SYSTEM") && p.getProfile().contains("VAV"))
             {
                 HashMap currTmep = CCUHsApi.getInstance().read("point and air and temp and sensor and current and equipRef == \""+p.getId()+"\"");
                 HashMap coolDT = CCUHsApi.getInstance().read("point and air and temp and desired and cooling and sp and equipRef == \""+p.getId()+"\"");
@@ -145,13 +145,35 @@ public class ZoneFragmentTemp extends Fragment
                     tunerList.add(currTmep.get("dis").toString());
                     tunerList.add(coolDT.get("dis").toString());
                     tunerList.add(heatDT.get("dis").toString());
-                    tunerList.add("schedule");
+                    tunerList.add("schedule_" + p.getId());
     
                     tunerMap.put(currTmep.get("dis").toString(), currTmep.get("id").toString());
                     tunerMap.put(coolDT.get("dis").toString(), coolDT.get("id").toString());
                     tunerMap.put(heatDT.get("dis").toString(), heatDT.get("id").toString());
-                    tunerMap.put("schedule", p.getId());
+                    tunerMap.put("schedule_" + p.getId(), p.getId());
     
+                    expandableListDetail.put(p.getDisplayName(), tunerList);
+                }
+            }
+
+            if ((p.getProfile() != null) && !p.getProfile().contains("SYSTEM") && p.getProfile().contains("SMARTSTAT"))
+            {
+                HashMap currTmep = CCUHsApi.getInstance().read("point and air and temp and sensor and current and equipRef == \""+p.getId()+"\"");
+                HashMap coolDT = CCUHsApi.getInstance().read("point and air and temp and desired and cooling and sp and equipRef == \""+p.getId()+"\"");
+                HashMap heatDT = CCUHsApi.getInstance().read("point and air and temp and desired and heating and sp and equipRef == \""+p.getId()+"\"");
+
+                if (currTmep.size() != 0 && coolDT.size() != 0 && heatDT.size() != 0) {
+                    ArrayList tunerList = new ArrayList();
+                    tunerList.add(currTmep.get("dis").toString());
+                    tunerList.add(coolDT.get("dis").toString());
+                    tunerList.add(heatDT.get("dis").toString());
+                    tunerList.add("smartstat_"+ p.getId());
+
+                    tunerMap.put(currTmep.get("dis").toString(), currTmep.get("id").toString());
+                    tunerMap.put(coolDT.get("dis").toString(), coolDT.get("id").toString());
+                    tunerMap.put(heatDT.get("dis").toString(), heatDT.get("id").toString());
+                    tunerMap.put("smartstat_"+ p.getId(),p.getId());
+
                     expandableListDetail.put(p.getDisplayName(), tunerList);
                 }
             }
@@ -164,12 +186,12 @@ public class ZoneFragmentTemp extends Fragment
                 ArrayList tunerList = new ArrayList();
                 tunerList.add(pv.get("dis").toString());
                 tunerList.add(cv.get("dis").toString());
-                tunerList.add("schedule");
+                tunerList.add("schedule_" + p.getId());
     
                 tunerMap.put(pv.get("dis").toString(), pv.get("id").toString());
                 tunerMap.put(cv.get("dis").toString(), cv.get("id").toString());
                 
-                tunerMap.put("schedule", p.getId());
+                tunerMap.put("schedule_" + p.getId(), p.getId());
                 expandableListDetail.put(p.getDisplayName(), tunerList);
                 
             }
@@ -214,9 +236,9 @@ public class ZoneFragmentTemp extends Fragment
     }
     
     public void setPointVal(String id, double val) {
-        new AsyncTask<Void, Void, Void>() {
+        new AsyncTask<String, Void, Void>() {
             @Override
-            protected Void doInBackground( final Void ... params ) {
+            protected Void doInBackground( final String ... params ) {
     
                 CCUHsApi hayStack = CCUHsApi.getInstance();
                 Point p = new Point.Builder().setHashMap(hayStack.readMapById(id)).build();
@@ -246,6 +268,6 @@ public class ZoneFragmentTemp extends Fragment
             protected void onPostExecute( final Void result ) {
                 // continue what you are doing...
             }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
     }
 }

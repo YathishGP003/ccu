@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
+apply plugin: 'io.objectbox'
 
 repositories {
     maven { url 'https://maven.fabric.io/public' }
@@ -69,11 +70,13 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
+            multiDexKeepProguard file('multidex-config.pro')
         }
 
         debug {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            multiDexKeepProguard file('multidex-config.pro')
         }
     }
 
@@ -104,7 +107,7 @@ android {
 }
 
 dependencies {
-    implementation 'com.android.support:multidex:1.0.2'
+    implementation 'com.android.support:multidex:1.0.3'
     implementation project(':logic')
     implementation project(':device')
     implementation project(':usbserial')

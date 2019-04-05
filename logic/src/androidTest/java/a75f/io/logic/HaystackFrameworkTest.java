@@ -60,7 +60,7 @@ public class HaystackFrameworkTest {
 
         addSite();
         String testDis = "Default Site Schedule";
-        String localId = DefaultSchedules.generateDefaultSchedule();
+        String localId = DefaultSchedules.generateDefaultSchedule(false, null);
         System.out.println("Dict To String: " + localId);
         HDict scheduleDict = CCUHsApi.getInstance().readHDictById(localId);
         Schedule build = new Schedule.Builder().setHDict(scheduleDict).build();
@@ -72,7 +72,7 @@ public class HaystackFrameworkTest {
         Assert.assertTrue(postHDict.equals(scheduleDict));
 
 
-        Schedule siteSchedule = CCUHsApi.getInstance().getSiteSchedule();
+        Schedule siteSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
 
 
         HGrid grid = HGridBuilder.dictToGrid(siteSchedule.getScheduleHDict());
@@ -87,7 +87,8 @@ public class HaystackFrameworkTest {
         Schedule schedule = new Schedule.Builder().setHDict(hDict).build();
 
         CCUHsApi.getInstance().updateSchedule(schedule);
-        Schedule siteSchedule2 = CCUHsApi.getInstance().getSiteSchedule();
+
+        Schedule siteSchedule2 = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
 
 
         HGrid grid2 = HGridBuilder.dictToGrid(siteSchedule2.getScheduleHDict());

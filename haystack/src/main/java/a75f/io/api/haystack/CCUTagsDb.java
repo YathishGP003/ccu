@@ -629,18 +629,10 @@ public class CCUTagsDb extends HServer {
         return id.toCode();
     }
 
-    public void updateZone(Zone z, String i) {
-        HDictBuilder b = new HDictBuilder()
-                .add("id", HRef.copy(i))
-                .add("dis", z.getDisplayName())
-                .add("room", HMarker.VAL)
-                .add("floorRef", z.getFloorRef());
-
-        for (String m : z.getMarkers()) {
-            b.add(m);
-        }
+    public void updateZone(Zone z) {
+        HDict b = z.getHDict();
         HRef id = (HRef) b.get("id");
-        tagsMap.put(id.toVal(), b.toDict());
+        tagsMap.put(id.toVal(), b);
     }
 
 

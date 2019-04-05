@@ -23,6 +23,7 @@ import a75f.io.device.mesh.MeshUtil;
 import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedHybridRtu;
 import a75f.io.logic.tuners.TunerConstants;
@@ -99,9 +100,9 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
     
     
     VavAdvancedHybridRtu systemProfile = null;
-    public static VavStagedRtuProfile newInstance()
+    public static VavHybridRtuProfile newInstance()
     {
-        return new VavStagedRtuProfile();
+        return new VavHybridRtuProfile();
     }
     
     @Override
@@ -115,7 +116,7 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
     {
-        if (L.ccu().systemProfile instanceof VavAdvancedHybridRtu)
+        if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_HYBRID_RTU)
         {
             systemProfile = (VavAdvancedHybridRtu) L.ccu().systemProfile;
             relay1Cb.setChecked(systemProfile.getConfigEnabled("relay1") > 0);
@@ -136,7 +137,7 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
         }
         else
         {
-            new AsyncTask<Void, Void, Void>()
+            new AsyncTask<String, Void, Void>()
             {
                 
                 ProgressDialog progressDlg = new ProgressDialog(getActivity());
@@ -149,7 +150,7 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
                 }
                 
                 @Override
-                protected Void doInBackground(final Void... params)
+                protected Void doInBackground(final String... params)
                 {
                     if (systemProfile != null)
                     {
@@ -168,7 +169,7 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
                     setUpSpinners();
                     progressDlg.dismiss();
                 }
-            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
         }
     }
     
@@ -348,19 +349,19 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
                 sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 1 : 0));
                 break;
             case R.id.relay3Test:
-                sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 2 : 0));
+                sendRelayActivationTestSignal((short)(relay3Test.isChecked() ? 1 << 2 : 0));
                 break;
             case R.id.relay4Test:
-                sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 3 : 0));
+                sendRelayActivationTestSignal((short)(relay4Test.isChecked() ? 1 << 3 : 0));
                 break;
             case R.id.relay5Test:
-                sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 4 : 0));
+                sendRelayActivationTestSignal((short)(relay5Test.isChecked() ? 1 << 4 : 0));
                 break;
             case R.id.relay6Test:
-                sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 5 : 0));
+                sendRelayActivationTestSignal((short)(relay5Test.isChecked() ? 1 << 5 : 0));
                 break;
             case R.id.relay7Test:
-                sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 6 : 0));
+                sendRelayActivationTestSignal((short)(relay6Test.isChecked() ? 1 << 6 : 0));
                 break;
         }
     }
@@ -505,15 +506,15 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
             protected void onPostExecute( final Void result ) {
                 // continue what you are doing...
             }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
     
     private void setConfigEnabledBackground(String config, double val)
     {
-        new AsyncTask<Void, Void, Void>()
+        new AsyncTask<String, Void, Void>()
         {
             @Override
-            protected Void doInBackground(final Void... params)
+            protected Void doInBackground(final String... params)
             {
                 systemProfile.setConfigEnabled(config, val);
                 systemProfile.updateStagesSelected();
@@ -527,15 +528,15 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
                     updateSystemMode();
                 }
             }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
     
     private void setConfigAssociationBackground(String config, double val)
     {
-        new AsyncTask<Void, Void, Void>()
+        new AsyncTask<String, Void, Void>()
         {
             @Override
-            protected Void doInBackground(final Void... params)
+            protected Void doInBackground(final String... params)
             {
                 systemProfile.setConfigAssociation(config, val);
                 systemProfile.updateStagesSelected();
@@ -547,13 +548,13 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
             {
                 updateSystemMode();
             }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
     }
     
     private void setConfigBackground(String tags, int level, double val) {
-        new AsyncTask<Void, Void, Void>() {
+        new AsyncTask<String, Void, Void>() {
             @Override
-            protected Void doInBackground( final Void ... params ) {
+            protected Void doInBackground( final String ... params ) {
                 systemProfile.setConfigVal(tags, val);
                 return null;
             }
@@ -562,7 +563,7 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
             protected void onPostExecute( final Void result ) {
                 // continue what you are doing...
             }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
     }
     
     public void sendRelayActivationTestSignal(short val) {

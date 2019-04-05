@@ -17,16 +17,17 @@ import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.util.HSEquipUtil;
 import a75f.io.logic.tuners.TunerUtil;
 
+import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
+import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
+import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
 import static a75f.io.logic.bo.building.system.SystemMode.AUTO;
 import static a75f.io.logic.bo.building.system.SystemMode.COOLONLY;
 import static a75f.io.logic.bo.building.system.SystemMode.HEATONLY;
-import static a75f.io.logic.bo.building.system.vav.VavSystemController.State.COOLING;
-import static a75f.io.logic.bo.building.system.vav.VavSystemController.State.HEATING;
-import static a75f.io.logic.bo.building.system.vav.VavSystemController.State.OFF;
 /**
  * Created by samjithsadasivan on 11/9/18.
  */
@@ -35,7 +36,7 @@ import static a75f.io.logic.bo.building.system.vav.VavSystemController.State.OFF
  * DxController applies Weighted average and Moving average filters on temperature diffs.
  * MA value is used to determine AHU change over. WA determines the heating signal.
  */
-public class VavSystemController
+public class VavSystemController extends SystemController
 {
     
     private static VavSystemController instance = new VavSystemController();
@@ -51,8 +52,6 @@ public class VavSystemController
     int ciDesired;
     int comfortIndex = 0;
     
-    public enum State {OFF, COOLING, HEATING};
-    State systemState = OFF;
     
     double totalCoolingLoad = 0;
     double totalHeatingLoad = 0;
@@ -69,6 +68,11 @@ public class VavSystemController
     double weightedAverageCoolingOnlyLoadMA;
     double weightedAverageHeatingOnlyLoadMA;
     
+    //int systemOccupancy = 0;
+    
+    double averageSystemHumidity = 0;
+    double averageSystemTemperature = 0;
+    
     private VavSystemController()
     {
         piController = new ControlLoop();
@@ -76,9 +80,6 @@ public class VavSystemController
     }
     
     public static VavSystemController getInstance() {
-        if (instance == null) {
-            instance = new VavSystemController();
-        }
         return instance;
     }
     
@@ -91,13 +92,25 @@ public class VavSystemController
         CcuLog.d(L.TAG_CCU_SYSTEM, "runVavSystemControlAlgo -> ciDesired: " + ciDesired + " systemMode: " + systemMode);
     
         weightedAverageCoolingOnlyLoadSum = weightedAverageHeatingOnlyLoadSum = weightedAverageLoadSum = 0;
+        //systemOccupancy = 0;
+        
+        updateSystemHumidity();
+        updateSystemTemperature();
+        
+        profile.setSystemPoint("average and humidity", averageSystemHumidity);
+        profile.setSystemPoint("average and temp", averageSystemTemperature);
         
         for (Floor f: HSUtil.getFloors())
         {
             for(Zone z: HSUtil.getZones(f.getId())) {
+                /*Occupied c = ScheduleProcessJob.getOccupiedModeCache(z.getId());
+                if (c != null && c.isOccupied()) {
+                    systemOccupancy = 1;
+                }*/
                 
                 for (Equip q : HSUtil.getEquips(z.getId()))
                 {
+                    
                     if (q.getMarkers().contains("vav") == false || getEquipCurrentTemp(q.getId()) == 0)
                     {
                         continue;
@@ -123,7 +136,7 @@ public class VavSystemController
             }
         
         }
-    
+        
         if (prioritySum == 0) {
             CcuLog.d(L.TAG_CCU_SYSTEM, "No valid temperature, Skip VavSystemControlAlgo");
             return;
@@ -133,7 +146,9 @@ public class VavSystemController
         weightedAverageHeatingOnlyLoad = weightedAverageHeatingOnlyLoadSum / prioritySum;
         weightedAverageLoad = weightedAverageLoadSum / prioritySum;
         
-        comfortIndex = (int)(totalCoolingLoad + totalHeatingLoad) /zoneCount;
+        comfortIndex = (int)(totalCoolingLoad - totalHeatingLoad) /zoneCount;
+        
+        profile.setSystemPoint("ci and running", comfortIndex);
     
         weightedAverageCoolingOnlyLoadMAQueue.add(weightedAverageCoolingOnlyLoad);
         weightedAverageHeatingOnlyLoadMAQueue.add(weightedAverageHeatingOnlyLoad);
@@ -165,6 +180,7 @@ public class VavSystemController
             systemState = OFF;
         }
         
+        profile.setSystemPoint("operating and mode", systemState.ordinal());
         
         piController.dump();
         if (systemState == COOLING) {
@@ -181,10 +197,29 @@ public class VavSystemController
         CcuLog.d(L.TAG_CCU_SYSTEM, "weightedAverageCoolingOnlyLoadMA: "+weightedAverageCoolingOnlyLoadMA+" weightedAverageHeatingOnlyLoadMA: "
                                                     +weightedAverageHeatingOnlyLoadMA +" systemState: "+systemState+" coolingSignal: "+coolingSignal+" heatingSignal: "+heatingSignal);
     
+        profile.setSystemPoint("moving and average and cooling and load",weightedAverageCoolingOnlyLoadMA);
+        profile.setSystemPoint("moving and average and heating and load",weightedAverageHeatingOnlyLoadMA);
+    
+        /*if (systemOccupancy == 0)
+        {
+            double preconDegree = Math.max(weightedAverageCoolingOnlyLoadMA, weightedAverageHeatingOnlyLoadMA);
+            double preconRate = CCUHsApi.getInstance().getPredictedPreconRate(profile.getSystemEquipRef());
+            if (preconRate == 0) {
+                preconRate = TunerUtil.readTunerValByQuery("precon and rate", profile.getSystemEquipRef());
+            }
+            if (preconDegree * preconRate * 60 * 1000 >= ScheduleProcessJob.getMillisToOccupancy())
+            {
+                systemOccupancy = 2; //TODO - use enum
+            }
+            CcuLog.d(L.TAG_CCU_SYSTEM, "preconRate : "+preconRate+" preconDegree: "+preconDegree);
+        }
+        profile.setSystemPoint("occupancy and status", systemOccupancy);
+        CcuLog.d(L.TAG_CCU_SYSTEM, "systemOccupancy status : "+systemOccupancy);*/
+        
         if (systemState == HEATING)
         {
             normalizeAirflow();
-            adjustDamperForCumulativeTarget();
+            adjustDamperForCumulativeTarget(profile.getSystemEquipRef());
         } else {
             CCUHsApi hayStack = CCUHsApi.getInstance();
             ArrayList<HashMap> vavEquips = hayStack.readAll("equip and vav and zone");
@@ -200,10 +235,12 @@ public class VavSystemController
     
     }
     
+    @Override
     public int getCoolingSignal() {
         return coolingSignal;
     }
     
+    @Override
     public int getHeatingSignal() {
         return heatingSignal;
     }
@@ -331,7 +368,7 @@ public class VavSystemController
         return getZoneDesiredTemp(zoneRef);//TODO - TEMP
     }*/
     
-    public double getSystemHumidity() {
+    public void updateSystemHumidity() {
         //Average across zones or from proxy zone.
         double humiditySum = 0;
         double humidityZones = 0;
@@ -348,7 +385,37 @@ public class VavSystemController
                 humidityZones++;
             }
         }
-        return humidityZones == 0 ? 0 : humiditySum/humidityZones;
+        averageSystemHumidity = humidityZones == 0 ? 0 : humiditySum/humidityZones;
+    }
+    
+    @Override
+    public double getAverageSystemHumidity() {
+        return averageSystemHumidity;
+    }
+    
+    public void updateSystemTemperature() {
+        //Average across zones or from proxy zone.
+        double tempSum = 0;
+        double tempZones = 0;
+        
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        ArrayList<HashMap> vavEquips = hayStack.readAll("equip and vav and zone");
+        
+        for (HashMap q : vavEquips)
+        {
+            double tempVal = hayStack.readHisValByQuery("point and air and temp and sensor and current and equipRef == \""+q.get("id")+"\"");
+            
+            if (tempVal != 0) {
+                tempSum += tempVal;
+                tempZones++;
+            }
+        }
+        averageSystemTemperature = tempZones == 0 ? 0 : tempSum/tempZones;
+    }
+    
+    @Override
+    public double getAverageSystemTemperature() {
+        return averageSystemTemperature;
     }
     
     /*public double getDynamicPriority(double zoneLoad, String zoneRef) {
@@ -430,9 +497,9 @@ public class VavSystemController
      * If weighted damper opening is < targetCumulativeDamper  increase the dampers proportionally(each damper
      * by 1% of its value) till it is at least targetCumulativeDamper
      **/
-    public void adjustDamperForCumulativeTarget() {
+    public void adjustDamperForCumulativeTarget( String systemEquipRef) {
         
-        double cumulativeDamperTarget = TunerUtil.readTunerValByQuery("target and cumulative and damper");
+        double cumulativeDamperTarget = TunerUtil.readTunerValByQuery("target and cumulative and damper", systemEquipRef );
         double weightedDamperOpening = getWeightedDamperOpening();
         CcuLog.d(L.TAG_CCU_SYSTEM,"weightedDamperOpening : "+weightedDamperOpening +" cumulativeDamperTarget : "+cumulativeDamperTarget);
     

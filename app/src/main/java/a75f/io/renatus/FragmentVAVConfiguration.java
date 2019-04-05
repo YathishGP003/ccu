@@ -270,7 +270,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         maxCoolingDamperPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         maxCoolingDamperPos.setMinValue(0);
         maxCoolingDamperPos.setMaxValue(100);
-        maxCoolingDamperPos.setValue(80);
+        maxCoolingDamperPos.setValue(100);
         maxCoolingDamperPos.setWrapSelectorWheel(false);
     
         minCoolingDamperPos = view.findViewById(R.id.minDamperPos);
@@ -286,7 +286,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         maxHeatingDamperPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         maxHeatingDamperPos.setMinValue(0);
         maxHeatingDamperPos.setMaxValue(100);
-        maxHeatingDamperPos.setValue(80);
+        maxHeatingDamperPos.setValue(100);
         maxHeatingDamperPos.setWrapSelectorWheel(false);
     
         minHeatingDamperPos = view.findViewById(R.id.minHeatingDamperPos);
@@ -411,7 +411,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
             @Override
             public void onClick(View v) {
     
-                new AsyncTask<Void, Void, Void>() {
+                new AsyncTask<String, Void, Void>() {
     
                     ProgressDialog progressDlg = new ProgressDialog(getActivity());
     
@@ -424,7 +424,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
                     }
     
                     @Override
-                    protected Void doInBackground( final Void ... params ) {
+                    protected Void doInBackground( final String ... params ) {
                         setupVavZoneProfile();
                         L.saveCCUState();
             
@@ -437,7 +437,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
                         FragmentVAVConfiguration.this.closeAllBaseDialogFragments();
                         getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
                     }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
                 
             }
         });

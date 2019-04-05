@@ -1,7 +1,15 @@
 package a75f.io.logic.bo.building.system;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import a75.io.algos.tr.TRSystem;
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
 import a75f.io.logic.bo.building.Schedule;
+import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.system.dab.DabSystemController;
+import a75f.io.logic.bo.building.system.vav.VavSystemController;
 
 /**
  * Created by Yinten isOn 8/15/2017.
@@ -14,6 +22,7 @@ public abstract class SystemProfile
     public TRSystem trSystem;
     
     public SystemEquip sysEquip;
+    private String equipRef = null;
     
     public abstract void doSystemControl();
     
@@ -24,6 +33,8 @@ public abstract class SystemProfile
     public abstract boolean isCoolingAvailable();
     
     public abstract boolean isHeatingAvailable();
+    
+    public abstract ProfileType getProfileType();
     
     public  int getSystemSAT() {
         return 0;
@@ -61,8 +72,40 @@ public abstract class SystemProfile
         return 0;
     }
     
-    /*@JsonIgnore
-    public Struct getSystemControlMsg() {
-        return null;
-    }*/
+    public SystemController getSystemController() {
+        switch (getProfileType()) {
+            case SYSTEM_VAV_ANALOG_RTU:
+            case SYSTEM_VAV_STAGED_RTU:
+            case SYSTEM_VAV_STAGED_VFD_RTU:
+            case SYSTEM_VAV_HYBRID_RTU:
+                return VavSystemController.getInstance();
+            case SYSTEM_DAB_STAGED_RTU:
+                return DabSystemController.getInstance();
+            case SYSTEM_DEFAULT:
+                return DefaultSystemController.getInstance();
+        }
+        return DefaultSystemController.getInstance();
+    }
+    
+    public String getSystemEquipRef() {
+        if (equipRef == null)
+        {
+            HashMap equip = CCUHsApi.getInstance().read("equip and system");
+            equipRef = equip.get("id").toString();
+        }
+        return equipRef;
+    }
+    
+    public void updateAhuRef(String systemEquipId) {
+        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone");
+        
+        for (HashMap m : equips)
+        {
+            Equip q = new Equip.Builder().setHashMap(m).setAhuRef(systemEquipId).build();
+            CCUHsApi.getInstance().updateEquip(q, q.getId());
+        }
+        
+        CCUHsApi.getInstance().updateCCUahuRef(systemEquipId);
+    }
+    
 }

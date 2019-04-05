@@ -8,6 +8,8 @@ import a75.io.algos.GenericPIController;
 import a75.io.algos.VOCLoop;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Occupied;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneState;
@@ -16,6 +18,7 @@ import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.building.hvac.ParallelFanVavUnit;
 import a75f.io.logic.bo.building.hvac.Valve;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
+import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
@@ -67,7 +70,11 @@ public class VavParallelFanProfile extends VavProfile
             double dischargeSp = vavDevice.getDischargeSp();
             setTempCooling = vavDevice.getDesiredTempCooling();
             setTempHeating = vavDevice.getDesiredTempHeating();
-            vavDevice.setDesiredTemp((setTempCooling+setTempHeating)/2);
+            double averageDesiredTemp = (setTempCooling+setTempHeating)/2;
+            if (averageDesiredTemp != vavDevice.getDesiredTemp())
+            {
+                vavDevice.setDesiredTemp(averageDesiredTemp);
+            }
             Equip vavEquip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + node + "\"")).build();
     
             VOCLoop vocLoop = vavDeviceMap.get(node).getVOCLoop();
@@ -138,15 +145,28 @@ public class VavParallelFanProfile extends VavProfile
             {
                 valve.currentPosition = 0;
             }
+    
+            boolean  enabledCO2Control = vavDevice.getConfigNumVal("enable and co2") > 0 ;
+            boolean  enabledIAQControl = vavDevice.getConfigNumVal("enable and iaq") > 0 ;
+            String zoneId = HSUtil.getZoneIdFromEquipId(vavEquip.getId());
+            Occupied occ = ScheduleProcessJob.getOccupiedModeCache(zoneId);
+            boolean occupied = (occ == null ? false : occ.isOccupied());
             
             //CO2 loop output from 0-50% modulates damper min position.
-            if (/*mode == OCCUPIED && */co2Loop.getLoopOutput(co2) <= 50)
+            if (enabledCO2Control && occupied && co2Loop.getLoopOutput(co2) > 0)
             {
                 //When HEATING , maxPosition = maxPosition - parallel fan factor.
                 int parallelFanFactor = 0 ;//TODO - Tuner
                 int maxDamper = damper.maxPosition - parallelFanFactor;
-                damper.iaqCompensatedMinPos = damper.minPosition + ( maxDamper - damper.minPosition) * co2Loop.getLoopOutput() / 50;
-                CcuLog.d(L.TAG_CCU_ZONE,"CO2LoopOp :"+co2Loop.getLoopOutput()+", adjusted minposition "+damper.minPosition);
+                damper.iaqCompensatedMinPos = damper.minPosition + ( maxDamper - damper.minPosition) * Math.max(50, co2Loop.getLoopOutput()) / 50;
+                CcuLog.d(L.TAG_CCU_ZONE,"CO2LoopOp :"+co2Loop.getLoopOutput()+", adjusted minposition "+damper.iaqCompensatedMinPos);
+            }
+    
+            //VOC loop output from 0-50% modulates damper min position.
+            if (enabledIAQControl && occupied && vocLoop.getLoopOutput(voc) > 0)
+            {
+                damper.iaqCompensatedMinPos = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * Math.max(50, vocLoop.getLoopOutput()) / 50;
+                CcuLog.d(L.TAG_CCU_ZONE, "VOCLoopOp :" + vocLoop.getLoopOutput() + ", adjusted minposition " + damper.iaqCompensatedMinPos);
             }
         
             if (loopOp == 0)

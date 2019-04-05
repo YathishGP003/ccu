@@ -33,6 +33,7 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
+import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.SettingPoint;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
@@ -620,11 +621,11 @@ public class TestRemoteHsSync
 
         CCUHsApi api = new CCUHsApi();
         HClient hClient = new HClient(HttpUtil.HAYSTACK_URL, "ryan", "ryan");
-        HDict navIdDict = new HDictBuilder().add("navId", HRef.make("5c23ec0624aa9a00f4dff47d")).toDict();
+        HDict navIdDict = new HDictBuilder().add("navId", HRef.make("5ca42d50a7b11b00f45d642d")).toDict();
         HGrid hGrid = HGridBuilder.dictToGrid(navIdDict);
         HGrid sync = hClient.call("sync", hGrid);
     
-        HDict siteId = new HDictBuilder().add("id",HRef.make("5c23ec0624aa9a00f4dff47d")).toDict();
+        HDict siteId = new HDictBuilder().add("id",HRef.make("5ca42d50a7b11b00f45d642d")).toDict();
         HGrid site = hClient.call("read",HGridBuilder.dictToGrid(siteId));
         site.dump();
         sync.dump();
@@ -668,6 +669,12 @@ public class TestRemoteHsSync
         for (Device p1 : p.getDevices()) {
             System.out.println(p1.getDisplayName());
         }
+    
+        System.out.println("SCHEDULES ---->");
+        for (Schedule s1 : p.getSchedules()) {
+            System.out.println(s1.getId()+" Start "+s1.getStartDateString());
+        }
+        
         EntityPullHandler h = new EntityPullHandler();
         h.doPullSite(site);
         

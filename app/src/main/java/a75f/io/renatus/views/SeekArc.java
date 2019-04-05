@@ -913,7 +913,7 @@ public class SeekArc extends View implements RoomDataInterface
                         protected void onPostExecute( final Void result ) {
                             // continue what you are doing...
                         }
-                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     
                     Log.d("CCU_TEMP", " mDesireTemp " + mDesireTemp);
                 }

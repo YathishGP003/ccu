@@ -13,8 +13,8 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemEquip;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 
-import static a75f.io.logic.bo.building.system.vav.VavSystemController.State.COOLING;
-import static a75f.io.logic.bo.building.system.vav.VavSystemController.State.HEATING;
+import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
+import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
 
 /**
  * Created by samjithsadasivan on 2/11/19.
@@ -28,6 +28,11 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
     public String getProfileName()
     {
         return "VAV Advanced Hybrid RTU";
+    }
+    
+    @Override
+    public ProfileType getProfileType() {
+        return ProfileType.SYSTEM_VAV_HYBRID_RTU;
     }
     
     @Override
@@ -82,6 +87,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         }
         VavSystemController.getInstance().runVavSystemControlAlgo();
         updateSystemPoints();
+        setTrTargetVals();
     }
     
     @Override
@@ -180,7 +186,10 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
                 signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * systemHeatingLoopOp/100));
             }
         } else {
-            signal = 0;
+            double coolingMin = getConfigVal("analog4 and cooling and min");
+            double heatingMin = getConfigVal("analog4 and heating and min");
+    
+            signal = (int) (ANALOG_SCALE * (coolingMin + heatingMin) /2);
         }
         CcuLog.d(L.TAG_CCU_SYSTEM, "analogMin: "+analogMin+" analogMax: "+analogMax+" Composite: "+signal);
         

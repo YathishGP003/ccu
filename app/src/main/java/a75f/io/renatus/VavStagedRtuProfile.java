@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,7 @@ import a75f.io.device.mesh.MeshUtil;
 import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
@@ -27,9 +29,6 @@ import a75f.io.logic.tuners.TunerUtil;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-/**
- * Created by samjithsadasivan on 11/6/18.
- */
 
 public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemSelectedListener, CompoundButton.OnCheckedChangeListener
 {
@@ -77,7 +76,7 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
     {
-        if (L.ccu().systemProfile instanceof VavStagedRtu) {
+        if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_RTU) {
             systemProfile = (VavStagedRtu) L.ccu().systemProfile;
             relay1Cb.setChecked(systemProfile.getConfigEnabled("relay1") > 0);
             relay2Cb.setChecked(systemProfile.getConfigEnabled("relay2") > 0);
@@ -91,7 +90,7 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
             setUpSpinners();
         } else {
         
-            new AsyncTask<Void, Void, Void>() {
+            new AsyncTask<String, Void, Void>() {
             
                 ProgressDialog progressDlg = new ProgressDialog(getActivity());
                 @Override
@@ -102,7 +101,7 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
                 }
             
                 @Override
-                protected Void doInBackground( final Void ... params ) {
+                protected Void doInBackground( final String ... params ) {
                     if (systemProfile != null) {
                         systemProfile.deleteSystemEquip();
                         L.ccu().systemProfile = null;
@@ -118,7 +117,7 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
                     setUpSpinners();
                     progressDlg.dismiss();
                 }
-            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
         }
     }
     
@@ -215,19 +214,19 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
                 sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 1 : 0));
                 break;
             case R.id.relay3Test:
-                sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 2 : 0));
+                sendRelayActivationTestSignal((short)(relay3Test.isChecked() ? 1 << 2 : 0));
                 break;
             case R.id.relay4Test:
-                sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 3 : 0));
+                sendRelayActivationTestSignal((short)(relay4Test.isChecked() ? 1 << 3 : 0));
                 break;
             case R.id.relay5Test:
-                sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 4 : 0));
+                sendRelayActivationTestSignal((short)(relay5Test.isChecked() ? 1 << 4 : 0));
                 break;
             case R.id.relay6Test:
-                sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 5 : 0));
+                sendRelayActivationTestSignal((short)(relay6Test.isChecked() ? 1 << 5 : 0));
                 break;
             case R.id.relay7Test:
-                sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 6 : 0));
+                sendRelayActivationTestSignal((short)(relay7Test.isChecked() ? 1 << 6 : 0));
                 break;
                 
         }
@@ -333,13 +332,13 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
             protected void onPostExecute( final Void result ) {
                 // continue what you are doing...
             }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
     
     private void setConfigEnabledBackground(String config, double val) {
-        new AsyncTask<Void, Void, Void>() {
+        new AsyncTask<String, Void, Void>() {
             @Override
-            protected Void doInBackground( final Void ... params ) {
+            protected Void doInBackground( final String ... params ) {
                 systemProfile.setConfigEnabled(config, val);
                 systemProfile.updateStagesSelected();
                 return null;
@@ -351,13 +350,13 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
                     updateSystemMode();
                 }
             }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
     }
     
     private void setConfigAssociationBackground(String config, double val) {
-        new AsyncTask<Void, Void, Void>() {
+        new AsyncTask<String, Void, Void>() {
             @Override
-            protected Void doInBackground( final Void ... params ) {
+            protected Void doInBackground( final String ... params ) {
                 systemProfile.setConfigAssociation(config, val);
                 systemProfile.updateStagesSelected();
                 return null;
@@ -367,10 +366,11 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
             protected void onPostExecute( final Void result ) {
                 updateSystemMode();
             }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
     }
     
     public void sendRelayActivationTestSignal(short val) {
+        Log.d(L.TAG_CCU_UI, "sendRelayActivationTestSignal val : "+val);
         CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
         msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
         msg.relayBitmap.set(val);

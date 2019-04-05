@@ -1,5 +1,9 @@
 package a75f.io.api.haystack;
 
+import org.projecthaystack.HDict;
+import org.projecthaystack.HDictBuilder;
+import org.projecthaystack.HRef;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -13,15 +17,15 @@ public class Zone extends Entity
 {
     private String            displayName;
     private ArrayList<String> markers;
-    private String floorRef;
-    private String siteRef;
-    private String scheduleRef;
-    private String vacationRef;
+    private String            floorRef;
+    private String            siteRef;
+    private String            scheduleRef;
+    private String            vacationRef;
 
     public boolean isSystemSchedule()
     {
         Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
-        if(systemSchedule.getId().equals(scheduleRef))
+        if (systemSchedule.getId().equals(scheduleRef))
             return true;
 
 
@@ -30,7 +34,7 @@ public class Zone extends Entity
 
     public boolean hasSchedule()
     {
-        if(scheduleRef == null || scheduleRef.equals(""))
+        if (scheduleRef == null || scheduleRef.equals(""))
         {
             return false;
         }
@@ -44,44 +48,88 @@ public class Zone extends Entity
     }
 
     private String id;
+
     public void setFloorRef(String floorRef)
     {
         this.floorRef = floorRef;
     }
+
     public void setSiteRef(String siteRef)
     {
         this.siteRef = siteRef;
     }
+
     public String getId()
     {
         return id;
     }
-    public String toString() {
+
+    public String toString()
+    {
         return displayName;
     }
+
     public String getDisplayName()
     {
         return displayName;
     }
+
     public ArrayList<String> getMarkers()
     {
         return markers;
     }
+
     public String getFloorRef()
     {
         return floorRef;
     }
+
     public String getSiteRef()
     {
         return siteRef;
     }
+
     public String getScheduleRef() { return scheduleRef; }
+
     public String getVacationRef() { return vacationRef; }
 
-    public static class Builder {
+    public void setScheduleRef(String scheduleId)
+    {
+        scheduleRef = scheduleId;
+    }
+
+    public HDict getHDict()
+    {
+        HDictBuilder b = new HDictBuilder()
+                .add("id", HRef.copy(id))
+                .add("dis", getDisplayName())
+                .add("floorRef", getFloorRef());
+
+        if(getScheduleRef() != null)
+        {
+            b.add("scheduleRef", getScheduleRef());
+        }
+
+        if(getSiteRef() != null)
+        {
+            b.add("siteRef", getSiteRef());
+        }
+
+
+        for (String m : getMarkers())
+        {
+            b.add(m);
+        }
+
+        return b.toDict();
+    }
+
+    public static class Builder
+    {
         private String            displayName;
-        private ArrayList<String> markers = new ArrayList<>();;
-        private String            floorRef;
+        private ArrayList<String> markers = new ArrayList<>();
+
+        private String floorRef;
         private String siteRef;
         private String id;
         private String scheduleRef;
@@ -111,12 +159,14 @@ public class Zone extends Entity
             return this;
         }
 
-        public Builder setScheduleRef(String scheduleID) {
+        public Builder setScheduleRef(String scheduleID)
+        {
             this.scheduleRef = scheduleID;
             return this;
         }
-        
-        public Zone build() {
+
+        public Zone build()
+        {
             Zone z = new Zone();
             z.displayName = this.displayName;
             z.floorRef = this.floorRef;
@@ -127,43 +177,38 @@ public class Zone extends Entity
             z.id = this.id;
             return z;
         }
-    
+
         public Builder setHashMap(HashMap site)
         {
             Iterator it = site.entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry pair = (Map.Entry)it.next();
-                if(pair.getKey().equals("id"))
+            while (it.hasNext())
+            {
+                Map.Entry pair = (Map.Entry) it.next();
+                if (pair.getKey().equals("id"))
                 {
                     this.id = pair.getValue().toString();
-                }
-                else if(pair.getKey().equals("dis"))
+                } else if (pair.getKey().equals("dis"))
                 {
                     this.displayName = pair.getValue().toString();
-                }
-                else if(pair.getValue().equals("marker")/*pair.getKey().equals("marker")*/) //TODO
+                } else if (pair.getValue().equals("marker")/*pair.getKey().equals("marker")*/) //TODO
                 {
                     this.markers.add(pair.getKey().toString()/*pair.getValue().toString()*/);
-                }
-                else if(pair.getKey().equals("floorRef"))
+                } else if (pair.getKey().equals("floorRef"))
                 {
                     this.floorRef = pair.getValue().toString();
-                }
-                else if(pair.getKey().equals("siteRef"))
+                } else if (pair.getKey().equals("siteRef"))
                 {
                     this.siteRef = pair.getValue().toString();
-                }
-                else if(pair.getKey().equals("scheduleRef"))
+                } else if (pair.getKey().equals("scheduleRef"))
                 {
                     this.scheduleRef = pair.getValue().toString();
-                }
-                else if(pair.getKey().equals("vacationRef"))
+                } else if (pair.getKey().equals("vacationRef"))
                 {
                     this.vacationRef = pair.getValue().toString();
                 }
                 it.remove();
             }
-        
+
             return this;
         }
     }

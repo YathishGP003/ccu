@@ -66,12 +66,55 @@ public class BuildingTuners
         equipRef = hayStack.addEquip(tunerEquip);
         equipDis = siteDis+"-BuildingTuner";
         tz = siteMap.get("tz").toString();
+        
+        addDefaultSystemTuners();
+        addDefaultZoneTuners();
         addDefaultVavTuners();
         addDefaultPlcTuners();
+        addDefaultStandaloneTuners();
         addDefaultDabTuners();
         
     }
     
+    public void addDefaultSystemTuners() {
+        Point heatingPreconditioingRate = new Point.Builder()
+                                           .setDisplayName(equipDis+"-"+"heatingPreconditioingRate")
+                                           .setSiteRef(siteRef)
+                                           .setEquipRef(equipRef)
+                                           .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
+                                           .addMarker("system").addMarker("heating").addMarker("precon").addMarker("rate").addMarker("sp")
+                                           .setTz(tz)
+                                           .build();
+        String heatingPreconditioingRateId = hayStack.addPoint(heatingPreconditioingRate);
+        hayStack.writePoint(heatingPreconditioingRateId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.SYSTEM_PRECONDITION_RATE, 0);
+        hayStack.writeHisValById(heatingPreconditioingRateId, TunerConstants.SYSTEM_PRECONDITION_RATE);
+    
+        Point coolingPreconditioingRate = new Point.Builder()
+                                                  .setDisplayName(equipDis+"-"+"coolingPreconditioingRate")
+                                                  .setSiteRef(siteRef)
+                                                  .setEquipRef(equipRef)
+                                                  .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
+                                                  .addMarker("system").addMarker("cooling").addMarker("precon").addMarker("rate").addMarker("sp")
+                                                  .setTz(tz)
+                                                  .build();
+        String coolingPreconditioingRateId = hayStack.addPoint(coolingPreconditioingRate);
+        hayStack.writePoint(coolingPreconditioingRateId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.SYSTEM_PRECONDITION_RATE, 0);
+        hayStack.writeHisValById(coolingPreconditioingRateId, TunerConstants.SYSTEM_PRECONDITION_RATE);
+    }
+    
+    public void addDefaultZoneTuners() {
+        Point unoccupiedZoneSetback  = new Point.Builder()
+                                           .setDisplayName(equipDis+"-"+"unoccupiedZoneSetback")
+                                           .setSiteRef(siteRef)
+                                           .setEquipRef(equipRef)
+                                           .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
+                                           .addMarker("zone").addMarker("unoccupied").addMarker("setback").addMarker("sp")
+                                           .setTz(tz)
+                                           .build();
+        String unoccupiedZoneSetbackId = hayStack.addPoint(unoccupiedZoneSetback);
+        hayStack.writePoint(unoccupiedZoneSetbackId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_UNOCCUPIED_SETBACK, 0);
+        hayStack.writeHisValById(unoccupiedZoneSetbackId, TunerConstants.ZONE_UNOCCUPIED_SETBACK);
+    }
     
     public void addDefaultVavTuners() {
         
@@ -321,10 +364,32 @@ public class BuildingTuners
         
     }
     
+    public void addEquipZoneTuners(String equipdis, String equipref) {
+        Point unoccupiedZoneSetback = new Point.Builder()
+                                           .setDisplayName(equipdis+"-"+"unoccupiedZoneSetback")
+                                           .setSiteRef(siteRef)
+                                           .setEquipRef(equipref)
+                                           .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("equipHis")
+                                           .addMarker("zone").addMarker("unoccupied").addMarker("setback").addMarker("sp")
+                                           .build();
+        String unoccupiedZoneSetbackId = hayStack.addPoint(unoccupiedZoneSetback);
+        HashMap unoccupiedZoneSetbackPoint = hayStack.read("point and tuner and default and zone and unoccupied and setback");
+        ArrayList<HashMap> unoccupiedZoneSetbackArr = hayStack.readPoint(unoccupiedZoneSetbackPoint.get("id").toString());
+        for (HashMap valMap : unoccupiedZoneSetbackArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.pointWrite(HRef.copy(unoccupiedZoneSetbackId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+    }
+    
     public void addEquipVavTuners(String equipdis, String equipref, VavProfileConfiguration config) {
     
         Log.d("CCU","addEquipVavTuners for "+equipdis);
     
+        addEquipZoneTuners(equipdis, equipref);
+        
         Point zonePrioritySpread = new Point.Builder()
                                   .setDisplayName(equipdis+"-"+"zonePrioritySpread")
                                   .setSiteRef(siteRef)
@@ -592,7 +657,7 @@ public class BuildingTuners
     
     public void addDefaultPlcTuners() {
         Point propGain = new Point.Builder()
-                                 .setDisplayName(equipDis+"-"+"proportionalKFactor ")
+                                 .setDisplayName(equipDis+"-"+"proportionalKFactor")
                                  .setSiteRef(siteRef)
                                  .setEquipRef(equipRef)
                                  .addMarker("tuner").addMarker("default").addMarker("pid").addMarker("writable").addMarker("his").addMarker("equipHis")
@@ -604,7 +669,7 @@ public class BuildingTuners
         hayStack.writeHisValById(pgainId, TunerConstants.VAV_PROPORTIONAL_GAIN);
     
         Point integralGain = new Point.Builder()
-                                     .setDisplayName(equipDis+"-"+"integralKFactor ")
+                                     .setDisplayName(equipDis+"-"+"integralKFactor")
                                      .setSiteRef(siteRef)
                                      .setEquipRef(equipRef)
                                      .addMarker("tuner").addMarker("default").addMarker("pid").addMarker("writable").addMarker("his").addMarker("equipHis")
@@ -616,7 +681,7 @@ public class BuildingTuners
         hayStack.writeHisValById(igainId, TunerConstants.VAV_INTEGRAL_GAIN);
     
         Point integralTimeout = new Point.Builder()
-                                        .setDisplayName(equipDis+"-"+"pidIntegralTime ")
+                                        .setDisplayName(equipDis+"-"+"pidIntegralTime")
                                         .setSiteRef(siteRef)
                                         .setEquipRef(equipRef)
                                         .addMarker("tuner").addMarker("default").addMarker("pid").addMarker("writable").addMarker("his").addMarker("equipHis")
@@ -629,6 +694,9 @@ public class BuildingTuners
     }
     
     public void addEquipPlcTuners(String equipdis, String equipref){
+        
+        addEquipZoneTuners(equipdis, equipref);
+        
         Point propGain = new Point.Builder()
                                  .setDisplayName(equipdis+"-"+"proportionalKFactor")
                                  .setSiteRef(siteRef)
@@ -994,4 +1062,87 @@ public class BuildingTuners
         }
     
     }
+
+    public void addEquipStandaloneTuners(String equipdis, String equipref){
+        addEquipZoneTuners(equipdis,equipref);
+    }
+    public void addDefaultStandaloneTuners()
+    {
+        Point saHeatingDeadBand = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"standaloneHeatingDeadband")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his")
+                .addMarker("standalone").addMarker("heating").addMarker("deadband").addMarker("sp")
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+        String saHeatingDeadBandId = hayStack.addPoint(saHeatingDeadBand);
+        hayStack.writePoint(saHeatingDeadBandId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_HEATING_DEADBAND_DEFAULT, 0);
+        hayStack.writeHisValById(saHeatingDeadBandId, TunerConstants.STANDALONE_HEATING_DEADBAND_DEFAULT);
+
+        Point saCoolingDeadBand = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"standaloneCoolingDeadband")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .addMarker("tuner").addMarker("default").addMarker("standalone").addMarker("writable").addMarker("his")
+                .addMarker("cooling").addMarker("deadband").addMarker("sp")
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+        String saCoolingDeadBandId = hayStack.addPoint(saCoolingDeadBand);
+        hayStack.writePoint(saCoolingDeadBandId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_COOLING_DEADBAND_DEFAULT, 0);
+        hayStack.writeHisValById(saCoolingDeadBandId, TunerConstants.STANDALONE_COOLING_DEADBAND_DEFAULT);
+        Point saStage1Hysteresis = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"standaloneStage1Hysteresis")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .addMarker("tuner").addMarker("default").addMarker("standalone").addMarker("writable").addMarker("his")
+                .addMarker("stage1").addMarker("hysteresis").addMarker("sp")
+                .setTz(tz)
+                .build();
+        String saStage1HysteresisId = hayStack.addPoint(saStage1Hysteresis);
+        hayStack.writePoint(saStage1HysteresisId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_STAGE1_HYSTERESIS_DEFAULT, 0);
+        hayStack.writeHisValById(saStage1HysteresisId, TunerConstants.STANDALONE_STAGE1_HYSTERESIS_DEFAULT);
+
+        Point saAirflowSampleWaitTime = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"standaloneAirflowSampleWaitTime")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .addMarker("tuner").addMarker("default").addMarker("standalone").addMarker("writable").addMarker("his")
+                .addMarker("airflow").addMarker("sample").addMarker("wait").addMarker("time").addMarker("sp")
+                .setTz(tz)
+                .build();
+        String saAirflowSampleWaitTimeId = hayStack.addPoint(saAirflowSampleWaitTime);
+        hayStack.writePoint(saAirflowSampleWaitTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_AIRFLOW_SAMPLE_WAIT_TIME, 0);
+        hayStack.writeHisValById(saAirflowSampleWaitTimeId, TunerConstants.STANDALONE_AIRFLOW_SAMPLE_WAIT_TIME);
+
+        Point saStage1CoolingLowerOffset = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"standaloneStage1CoolingLowerOffset")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .addMarker("tuner").addMarker("default").addMarker("standalone").addMarker("writable").addMarker("his")
+                .addMarker("stage1").addMarker("cooling").addMarker("sp").addMarker("lower").addMarker("offset")
+                .setTz(tz)
+                .build();
+        String saStage1CoolingLowerOffsetId = hayStack.addPoint(saStage1CoolingLowerOffset);
+        hayStack.writePoint(saStage1CoolingLowerOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_COOLING_STAGE1_LOWER_OFFSET, 0);
+        hayStack.writeHisValById(saStage1CoolingLowerOffsetId, TunerConstants.STANDALONE_COOLING_STAGE1_LOWER_OFFSET);
+
+        Point saStage1CoolingUpperOffset = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"standaloneStage1CoolingUpperOffset")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .addMarker("tuner").addMarker("default").addMarker("standalone").addMarker("writable").addMarker("his")
+                .addMarker("stage1").addMarker("cooling").addMarker("sp").addMarker("upper").addMarker("offset")
+                .setTz(tz)
+                .build();
+        String saStage1CoolingUpperOffsetId = hayStack.addPoint(saStage1CoolingUpperOffset);
+        hayStack.writePoint(saStage1CoolingUpperOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_COOLING_STAGE1_UPPER_OFFSET, 0);
+        hayStack.writeHisValById(saStage1CoolingUpperOffsetId, TunerConstants.STANDALONE_COOLING_STAGE1_UPPER_OFFSET);
+        //TODO Still need to add heating and stage 2 tuners //kumar
+
+        CCUHsApi.getInstance().syncEntityTree();
+    }
+
 }

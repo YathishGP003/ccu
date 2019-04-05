@@ -18,7 +18,7 @@ public class DefaultSchedules {
     public static final double DEFAULT_COOLING_TEMP = 75.0F;
     public static final double DEFAULT_HEATING_TEMP = 70.0F;
 
-    public static String generateDefaultSchedule() {
+    public static String generateDefaultSchedule(boolean zone, String zoneId) {
 
         HRef siteId = CCUHsApi.getInstance().getSiteId();
 
@@ -33,21 +33,25 @@ public class DefaultSchedules {
         HList hList = HList.make(days);
 
         HRef localId = HRef.make(UUID.randomUUID().toString());
-        HDict defaultSchedule = new HDictBuilder()
+        HDictBuilder defaultSchedule = new HDictBuilder()
                 .add("id", localId)
                 .add("unit", "\\u00B0F")
                 .add("kind", "Number")
-                .add("system")
+                .add(zone ? "zone":"building")
                 .add("temp")
                 .add("schedule")
                 .add("heating")
                 .add("cooling")
-                .add("dis", "Default Site Schedule")
+                .add("dis", zone ? "Default Zone Schedule" : "Default Building Schedule")
                 .add("days", hList)
-                .add("siteRef", siteId)
-                .toDict();
+                .add("siteRef", siteId);
+        
+        if (zoneId != null) {
+            defaultSchedule.add("roomRef", HRef.copy(zoneId));
+        }
+        
 
-        CCUHsApi.getInstance().addSchedule(localId.toVal(), defaultSchedule);
+        CCUHsApi.getInstance().addSchedule(localId.toVal(), defaultSchedule.toDict());
         return localId.toCode();
     }
 
@@ -82,7 +86,7 @@ public class DefaultSchedules {
                 .add("id", localId)
                 .add("temp")
                 .add("schedule")
-                .add("system")
+                .add("building")
                 .add("vacation")
                 .add("cooling")
                 .add("heating")
@@ -92,6 +96,36 @@ public class DefaultSchedules {
                 .add("siteRef", siteId)
                 .toDict();
 
+        CCUHsApi.getInstance().addSchedule(localId.toVal(), defaultSchedule);
+    }
+    
+    public static void upsertZoneVacation(String id, String vacationName, DateTime startDate, DateTime endDate, String roomRef)
+    {
+        HRef siteId = CCUHsApi.getInstance().getSiteId();
+        HRef localId;
+        
+        if(id == null) {
+            localId = HRef.make(UUID.randomUUID().toString());
+        }
+        else {
+            localId = HRef.make(id);
+        }
+        
+        HDict defaultSchedule = new HDictBuilder()
+                                        .add("id", localId)
+                                        .add("temp")
+                                        .add("schedule")
+                                        .add("zone")
+                                        .add("vacation")
+                                        .add("cooling")
+                                        .add("heating")
+                                        .add("stdt", HDateTime.make(startDate.getMillis()))
+                                        .add("etdt", HDateTime.make(endDate.getMillis()))
+                                        .add("dis", vacationName)
+                                        .add("siteRef", siteId)
+                                        .add("roomRef", HRef.copy(roomRef))
+                                        .toDict();
+        
         CCUHsApi.getInstance().addSchedule(localId.toVal(), defaultSchedule);
     }
 }

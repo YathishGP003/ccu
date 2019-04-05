@@ -1,16 +1,12 @@
 package a75f.io.renatus;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.text.Editable;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -22,22 +18,16 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.Spinner;
-import android.widget.Toast;
-
-import org.projecthaystack.HDict;
-import org.projecthaystack.HGrid;
-import org.projecthaystack.HGridBuilder;
-import org.projecthaystack.io.HZincReader;
-import org.projecthaystack.io.HZincWriter;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.Schedule;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
+import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
-import a75f.io.logic.bo.building.system.vav.VavSystemController;
+import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
 
 
@@ -51,6 +41,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	SeekBar  sbComfortValue;
 	EditText stageStatusNow;
 	Spinner mSysSpinnerSchedule;
+	
+	TextView systemScheduleStatus;
 	
 	RadioButton systemOff;
 	RadioButton systemAuto;
@@ -86,9 +78,9 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	@Override
 	public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
 	{
-
-		mSysSpinnerSchedule = view.findViewById(R.id.sysSpinnerSchedule);
-
+		systemScheduleStatus = view.findViewById(R.id.systemSchedule);
+		
+		/*mSysSpinnerSchedule = view.findViewById(R.id.sysSpinnerSchedule);
 		mSysSpinnerSchedule.setOnTouchListener(new View.OnTouchListener() {
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
@@ -100,7 +92,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 				return true;
 			}
-		});
+		});*/
 		systemModeRg = view.findViewById(R.id.systemConditioningMode);
 		systemOff = view.findViewById(R.id.systemOff);
 		systemAuto = view.findViewById(R.id.systemAuto);
@@ -207,7 +199,19 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		});
 		
 		stageStatusNow = view.findViewById(R.id.stageStatusNow);
-		stageStatusNow.setText(VavSystemController.getInstance().getSystemState().name());
+		
+		double operatingMode = CCUHsApi.getInstance().readHisValByQuery("point and system and operating and mode");
+		
+		Log.d("CCU_UI", "operatingMode :" + operatingMode);
+		
+		handler.post(new Runnable() {
+			@Override
+			public void run() {
+				stageStatusNow.setText(SystemController.State.values()[(int)operatingMode].name());
+			}
+		});
+		
+		
 		
 		ArrayList<Double> zoroToHundred = new ArrayList<>();
 		for (double val = 0;  val <= 100.0; val++)
@@ -250,56 +254,15 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			}
 		});
 		
-	}
-
-	private void showScheduleDialog() {
-
-		AlertDialog.Builder alert = new AlertDialog.Builder(SystemFragment.this.getActivity());
-
-        Schedule siteSchedule = CCUHsApi.getInstance().getSiteSchedule();
-
-
-
-        HGrid grid = HGridBuilder.dictToGrid(siteSchedule.getScheduleHDict());
-        String systemScheduleGrid = HZincWriter.gridToString(grid);
-
-		final EditText edittext = new EditText(SystemFragment.this.getActivity());
-		alert.setMessage("Edit Schedule");
-		alert.setTitle("Edit Schedule");
-        edittext.setText(systemScheduleGrid);
-
-		alert.setView(edittext);
-
-		alert.setPositiveButton("Yes Option", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int whichButton) {
-
-				Editable editTextValue = edittext.getText();
-				Log.i(TAG, "Edit Text : " + editTextValue.toString());
-				HZincReader reader = new HZincReader(editTextValue.toString());
-                Log.i(TAG, "######Reader Dump######");
-				HGrid hGrid = reader.readGrid();
-
-				HDict hDict = hGrid.row(0);
-				Schedule schedule = new Schedule.Builder().setHDict(hDict).build();
-
-				CCUHsApi.getInstance().updateSchedule(schedule);
-				CCUHsApi.getInstance().syncEntityTree();
-			}
-
-		});
-
-		alert.setNegativeButton("No Option", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int whichButton) {
-				// what ever you want to do with No option.
-
+		handler.post(new Runnable() {
+			@Override
+			public void run() {
+				systemScheduleStatus.setText(ScheduleProcessJob.getSystemStatusString());
 			}
 		});
-
-		alert.show();
-
-
+		
 	}
-	
+
 	@Override
 	public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,
 	                           long arg3)
@@ -318,7 +281,6 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	@Override
 	public void onNothingSelected(AdapterView<?> arg0) {
 		// TODO Auto-generated method stub
-		
 	}
 	
 	private void setUserIntentBackground(String query, double val) {
@@ -335,7 +297,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			protected void onPostExecute( final Void result ) {
 				// continue what you are doing...
 			}
-		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 
 

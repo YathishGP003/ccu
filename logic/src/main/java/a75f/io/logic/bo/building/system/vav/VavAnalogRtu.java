@@ -13,15 +13,17 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemConstants;
 import a75f.io.logic.bo.building.system.SystemEquip;
 import a75f.io.logic.bo.haystack.device.ControlMote;
+import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.tuners.VavTRTuners;
 
-import static a75f.io.logic.bo.building.system.vav.VavSystemController.State.COOLING;
-import static a75f.io.logic.bo.building.system.vav.VavSystemController.State.HEATING;
+import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
+import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
 
 /**
  * Default System handles PI controlled op
@@ -77,12 +79,18 @@ public class VavAnalogRtu extends VavSystemProfile
     }
     
     @Override
+    public ProfileType getProfileType() {
+        return ProfileType.SYSTEM_VAV_ANALOG_RTU;
+    }
+    
+    @Override
     public void doSystemControl() {
         if (trSystem != null) {
             trSystem.processResetResponse();
         }
         VavSystemController.getInstance().runVavSystemControlAlgo();
         updateSystemPoints();
+        setTrTargetVals();
     }
     
     @Override
@@ -134,7 +142,7 @@ public class VavAnalogRtu extends VavSystemProfile
         analogMax = getConfigVal("analog3 and heating and max");
     
         CcuLog.d(L.TAG_CCU_SYSTEM, "analogMin: "+analogMin+" analogMax: "+analogMax+" Heating : "+VavSystemController.getInstance().getHeatingSignal());
-        if (VavSystemController.getInstance().getSystemState() == VavSystemController.State.HEATING)
+        if (VavSystemController.getInstance().getSystemState() == HEATING)
         {
             systemHeatingLoopOp = VavSystemController.getInstance().getHeatingSignal();
         } else {
@@ -157,7 +165,7 @@ public class VavAnalogRtu extends VavSystemProfile
             ControlMote.setAnalogOut("analog3", signal);
         }
         
-        double analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier");
+        double analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier", getSystemEquipRef());
         if (VavSystemController.getInstance().getSystemState() == COOLING)
         {
             double spSpMax = VavTRTuners.getStaticPressureTRTunerVal("spmax");
@@ -194,11 +202,13 @@ public class VavAnalogRtu extends VavSystemProfile
         analogMin = getConfigVal("analog4 and co2 and min");
         analogMax = getConfigVal("analog4 and co2 and max");
         CcuLog.d(L.TAG_CCU_SYSTEM,"analogMin: "+analogMin+" analogMax: "+analogMax+" CO2: "+getSystemCO2());
+        double systemCO2LoopOp = (SystemConstants.CO2_CONFIG_MAX - getSystemCO2()) * 100 / 200 ;
+        setSystemLoopOp("co2", systemCO2LoopOp);
         if (analogMax > analogMin)
         {
-            signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (getSystemCO2() - SystemConstants.CO2_CONFIG_MIN) / 200));
+            signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * systemCO2LoopOp/100));
         } else {
-            signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (getSystemCO2() - SystemConstants.CO2_CONFIG_MIN) / 200));
+            signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * systemCO2LoopOp/100));
         }
         setCmdSignal("co2",signal);
         if (getConfigVal("analog4 and output and enabled") > 0)
@@ -208,10 +218,8 @@ public class VavAnalogRtu extends VavSystemProfile
         
         if (getConfigVal("relay3 and output and enabled") > 0)
         {
-            //TODO - TEMP
-            boolean occupancy = true;
             double staticPressuremOp = getStaticPressure() - SystemConstants.SP_CONFIG_MIN;
-            signal = (occupancy || staticPressuremOp > 0) ? 1 : 0;
+            signal = (ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED || staticPressuremOp > 0) ? 1 : 0;
             setCmdSignal("occupancy",signal * 100);
             ControlMote.setRelayState("relay3", signal );
             
@@ -219,13 +227,13 @@ public class VavAnalogRtu extends VavSystemProfile
         //TODO- TEMP
         if (getConfigVal("relay7 and output and enabled") > 0)
         {
-            double humidity = VavSystemController.getInstance().getSystemHumidity();
+            double humidity = VavSystemController.getInstance().getAverageSystemHumidity();
             double targetMinHumidity = TunerUtil.readSystemUserIntentVal("target and min and inside and humidity");
             double targetMaxHumidity = TunerUtil.readSystemUserIntentVal("target and max and inside and humidity");
     
             boolean humidifier = getConfigVal("humidifier and type") == 0;
             
-            double humidityHysteresis = TunerUtil.readTunerValByQuery("humidity and hysteresis");
+            double humidityHysteresis = TunerUtil.readTunerValByQuery("humidity and hysteresis", getSystemEquipRef());
     
             if (humidifier) {
                 //Humidification
@@ -370,38 +378,6 @@ public class VavAnalogRtu extends VavSystemProfile
                                          .setTz(tz)
                                          .build();
         CCUHsApi.getInstance().addPoint(dehumidifierSignal);
-    
-    
-        /*Point sat = new Point.Builder()
-                            .setDisplayName(equipDis+"-"+"SAT")
-                            .setSiteRef(siteRef)
-                            .setEquipRef(equipref)
-                            .addMarker("tr").addMarker("sat").addMarker("his").addMarker("system").addMarker("equipHis")
-                            .setUnit("\u00B0F")
-                            .setTz(tz)
-                            .build();
-        CCUHsApi.getInstance().addPoint(sat);
-    
-        Point co2 = new Point.Builder()
-                            .setDisplayName(equipDis+"-"+"CO2")
-                            .setSiteRef(siteRef)
-                            .setEquipRef(equipref)
-                            .addMarker("tr").addMarker("co2").addMarker("his").addMarker("system").addMarker("equipHis")
-                            .setUnit("\u00B0ppm")
-                            .setTz(tz)
-                            .build();
-        CCUHsApi.getInstance().addPoint(co2);
-    
-        Point sp = new Point.Builder()
-                           .setDisplayName(equipDis+"-"+"SP")
-                           .setSiteRef(siteRef)
-                           .setEquipRef(equipref)
-                           .addMarker("tr").addMarker("sp").addMarker("his").addMarker("system").addMarker("equipHis")
-                           .setUnit("\u00B0in")
-                           .setTz(tz)
-                           .build();
-        CCUHsApi.getInstance().addPoint(sp);*/
-        
     }
     
     public double getCmdSignal(String cmd) {

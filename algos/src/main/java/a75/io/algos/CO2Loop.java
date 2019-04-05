@@ -38,7 +38,7 @@ public class CO2Loop
             controlLoop.reset();
             return 0;
         } else {
-            controlLoop.updateControlVariable(co2Target, co2Lvel);
+            controlLoop.updateControlVariable(co2Lvel, co2Threshold);
             return controlLoop.getLoopOutput();
         }
     }

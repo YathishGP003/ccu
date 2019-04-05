@@ -12,8 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.NumberPicker;
 
@@ -53,6 +52,10 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
         this.mListener = mListener;
     }
 
+
+    EditText mCoolingTempET;
+    EditText mHeatingTempET;
+
     NumberPicker npStartTime;
     NumberPicker npEndTime;
 
@@ -86,7 +89,8 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
 
         ImageButton deleteButton = view.findViewById(R.id.buttonDelete);
 
-
+        mCoolingTempET = view.findViewById(R.id.coolingTemp);
+        mHeatingTempET = view.findViewById(R.id.heatingTemp);
         if(mDay == null)
         {
             deleteButton.setVisibility(View.INVISIBLE);
@@ -95,13 +99,12 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
         {
             deleteButton.setVisibility(View.VISIBLE);
         }
-        deleteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mListener.onClickSave(mPosition, 74, 72, 0, 0, 0, 0, null);
-                dismiss();
-            }
-        });
+
+        deleteButton.setOnClickListener(v ->
+                                        {
+                                            mListener.onClickSave(mPosition, 74, 72, 0, 0, 0, 0, null);
+                                            dismiss();
+                                        });
 
 
         npStartTime = view.findViewById(R.id.np1);
@@ -120,25 +123,14 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
         checkBoxSaturday = view.findViewById(R.id.checkBoxSat);
         checkBoxSunday = view.findViewById(R.id.checkBoxSun);
 
-
-
-
         npStartTime.setMinValue(nMinVal);
         npStartTime.setMaxValue(nMaxVal);
-
 
         npStartTime.setValue(55);
         npStartTime.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         npStartTime.setVisibility(View.VISIBLE);
         npStartTime.setWrapSelectorWheel(false);
-        npStartTime.setFormatter(new NumberPicker.Formatter() {
-
-            @Override
-            public String format(int value) {
-                return TimeUtils.valToTime(value);
-            }
-
-        });
+        npStartTime.setFormatter(value -> TimeUtils.valToTime(value));
 
         try {
             Method method = npStartTime.getClass().getDeclaredMethod("changeValueByOne", boolean.class);
@@ -157,14 +149,7 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
         npEndTime.setVisibility(View.VISIBLE);
         npEndTime.setWrapSelectorWheel(false);
 
-        npEndTime.setFormatter(new NumberPicker.Formatter() {
-
-            @Override
-            public String format(int value) {
-                return TimeUtils.valToTime(value);
-            }
-
-        });
+        npEndTime.setFormatter(value -> TimeUtils.valToTime(value));
 
         try {
             Method method = npEndTime.getClass().getDeclaredMethod("changeValueByOne", boolean.class);
@@ -175,140 +160,130 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
         }
 
 
-        checkBoxMonday.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                // update your model (or other business logic) based on isChecked
-                if (isChecked) {
-                    booleanisMonday = true;
-                    checkBoxMonday.setTextColor(Color.parseColor("#ffffff"));
-                    checkBoxMonday.setBackground(getResources().getDrawable(R.drawable.bg_weekdays_selector));
-                } else {
-                    booleanisMonday = false;
-                    checkBoxMonday.setTextColor(Color.parseColor("#000000"));
-                    checkBoxMonday.setBackground(null);
-                }
-            }
-        });
-        checkBoxTuesday.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                // update your model (or other business logic) based on isChecked
-                if (isChecked) {
-                    booleanisTuesday = true;
-                    checkBoxTuesday.setTextColor(Color.parseColor("#ffffff"));
-                    checkBoxTuesday.setBackground(getResources().getDrawable(R.drawable.bg_weekdays_selector));
-                } else {
-                    booleanisTuesday = false;
-                    checkBoxTuesday.setTextColor(Color.parseColor("#000000"));
-                    checkBoxTuesday.setBackground(null);
-                }
-            }
-        });
-        checkBoxWednesday.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                // update your model (or other business logic) based on isChecked
-                if (isChecked) {
-                    booleanisWednesday = true;
-                    checkBoxWednesday.setTextColor(Color.parseColor("#ffffff"));
-                    checkBoxWednesday.setBackground(getResources().getDrawable(R.drawable.bg_weekdays_selector));
-                } else {
-                    booleanisWednesday = false;
-                    checkBoxWednesday.setTextColor(Color.parseColor("#000000"));
-                    checkBoxWednesday.setBackground(null);
-                }
-            }
-        });
-        checkBoxThursday.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                // update your model (or other business logic) based on isChecked
-                if (isChecked) {
-                    booleanisThursday = true;
-                    checkBoxThursday.setTextColor(Color.parseColor("#ffffff"));
-                    checkBoxThursday.setBackground(getResources().getDrawable(R.drawable.bg_weekdays_selector));
-                } else {
-                    booleanisThursday = false;
-                    checkBoxThursday.setTextColor(Color.parseColor("#000000"));
-                    checkBoxThursday.setBackground(null);
-                }
-            }
-        });
-        checkBoxFriday.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                // update your model (or other business logic) based on isChecked
-                if (isChecked) {
-                    booleanisFriday = true;
-                    checkBoxFriday.setTextColor(Color.parseColor("#ffffff"));
-                    checkBoxFriday.setBackground(getResources().getDrawable(R.drawable.bg_weekdays_selector));
-                } else {
-                    booleanisFriday = false;
-                    checkBoxFriday.setTextColor(Color.parseColor("#000000"));
-                    checkBoxFriday.setBackground(null);
-                }
-            }
-        });
-        checkBoxSaturday.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                // update your model (or other business logic) based on isChecked
-                if (isChecked) {
-                    booleanisSaturday = true;
-                    checkBoxSaturday.setTextColor(Color.parseColor("#ffffff"));
-                    checkBoxSaturday.setBackground(getResources().getDrawable(R.drawable.bg_weekdays_selector));
-                } else {
-                    booleanisSaturday = false;
-                    checkBoxSaturday.setTextColor(Color.parseColor("#000000"));
-                    checkBoxSaturday.setBackground(null);
-                }
-            }
-        });
-        checkBoxSunday.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                // update your model (or other business logic) based on isChecked
-                if (isChecked) {
-                    booleanisSunday = true;
-                    checkBoxSunday.setTextColor(Color.parseColor("#ffffff"));
-                    checkBoxSunday.setBackground(getResources().getDrawable(R.drawable.bg_weekdays_selector));
-                } else {
-                    booleanisSunday = false;
-                    checkBoxSunday.setTextColor(Color.parseColor("#000000"));
-                    checkBoxSunday.setBackground(null);
-                }
-            }
-        });
+        checkBoxMonday.setOnCheckedChangeListener((buttonView, isChecked) ->
+                                                  {
+                                                      // update your model (or other business logic) based on isChecked
+                                                      if (isChecked) {
+                                                          booleanisMonday = true;
+                                                          checkBoxMonday.setTextColor(Color.parseColor("#ffffff"));
+                                                          checkBoxMonday.setBackground(getResources().getDrawable(R.drawable.bg_weekdays_selector));
+                                                      } else {
+                                                          booleanisMonday = false;
+                                                          checkBoxMonday.setTextColor(Color.parseColor("#000000"));
+                                                          checkBoxMonday.setBackground(null);
+                                                      }
+                                                  });
+        checkBoxTuesday.setOnCheckedChangeListener((buttonView, isChecked) ->
+                                                   {
+                                                       // update your model (or other business logic) based on isChecked
+                                                       if (isChecked) {
+                                                           booleanisTuesday = true;
+                                                           checkBoxTuesday.setTextColor(Color.parseColor("#ffffff"));
+                                                           checkBoxTuesday.setBackground(getResources().getDrawable(R.drawable.bg_weekdays_selector));
+                                                       } else {
+                                                           booleanisTuesday = false;
+                                                           checkBoxTuesday.setTextColor(Color.parseColor("#000000"));
+                                                           checkBoxTuesday.setBackground(null);
+                                                       }
+                                                   });
+        checkBoxWednesday.setOnCheckedChangeListener((buttonView, isChecked) ->
+                                                     {
+                                                         // update your model (or other business logic) based on isChecked
+                                                         if (isChecked) {
+                                                             booleanisWednesday = true;
+                                                             checkBoxWednesday.setTextColor(Color.parseColor("#ffffff"));
+                                                             checkBoxWednesday.setBackground(getResources().getDrawable(R.drawable.bg_weekdays_selector));
+                                                         } else {
+                                                             booleanisWednesday = false;
+                                                             checkBoxWednesday.setTextColor(Color.parseColor("#000000"));
+                                                             checkBoxWednesday.setBackground(null);
+                                                         }
+                                                     });
+        checkBoxThursday.setOnCheckedChangeListener((buttonView, isChecked) ->
+                                                    {
+                                                        // update your model (or other business logic) based on isChecked
+                                                        if (isChecked) {
+                                                            booleanisThursday = true;
+                                                            checkBoxThursday.setTextColor(Color.parseColor("#ffffff"));
+                                                            checkBoxThursday.setBackground(getResources().getDrawable(R.drawable.bg_weekdays_selector));
+                                                        } else {
+                                                            booleanisThursday = false;
+                                                            checkBoxThursday.setTextColor(Color.parseColor("#000000"));
+                                                            checkBoxThursday.setBackground(null);
+                                                        }
+                                                    });
+        checkBoxFriday.setOnCheckedChangeListener((buttonView, isChecked) ->
+                                                  {
+                                                      // update your model (or other business logic) based on isChecked
+                                                      if (isChecked) {
+                                                          booleanisFriday = true;
+                                                          checkBoxFriday.setTextColor(Color.parseColor("#ffffff"));
+                                                          checkBoxFriday.setBackground(getResources().getDrawable(R.drawable.bg_weekdays_selector));
+                                                      } else {
+                                                          booleanisFriday = false;
+                                                          checkBoxFriday.setTextColor(Color.parseColor("#000000"));
+                                                          checkBoxFriday.setBackground(null);
+                                                      }
+                                                  });
+        checkBoxSaturday.setOnCheckedChangeListener((buttonView, isChecked) ->
+                                                    {
+                                                        // update your model (or other business logic) based on isChecked
+                                                        if (isChecked) {
+                                                            booleanisSaturday = true;
+                                                            checkBoxSaturday.setTextColor(Color.parseColor("#ffffff"));
+                                                            checkBoxSaturday.setBackground(getResources().getDrawable(R.drawable.bg_weekdays_selector));
+                                                        } else {
+                                                            booleanisSaturday = false;
+                                                            checkBoxSaturday.setTextColor(Color.parseColor("#000000"));
+                                                            checkBoxSaturday.setBackground(null);
+                                                        }
+                                                    });
+        checkBoxSunday.setOnCheckedChangeListener((buttonView, isChecked) ->
+                                                  {
+                                                      // update your model (or other business logic) based on isChecked
+                                                      if (isChecked) {
+                                                          booleanisSunday = true;
+                                                          checkBoxSunday.setTextColor(Color.parseColor("#ffffff"));
+                                                          checkBoxSunday.setBackground(getResources().getDrawable(R.drawable.bg_weekdays_selector));
+                                                      } else {
+                                                          booleanisSunday = false;
+                                                          checkBoxSunday.setTextColor(Color.parseColor("#000000"));
+                                                          checkBoxSunday.setBackground(null);
+                                                      }
+                                                  });
 
-        buttonSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ArrayList<DAYS> days = new ArrayList<DAYS>();
-                if (booleanisMonday) days.add(DAYS.MONDAY);
-                if (booleanisTuesday) days.add(DAYS.TUESDAY);
-                if (booleanisWednesday) days.add(DAYS.WEDNESDAY);
-                if (booleanisThursday) days.add(DAYS.THURSDAY);
-                if (booleanisFriday) days.add(DAYS.FRIDAY);
-                if (booleanisSaturday) days.add(DAYS.SATURDAY);
-                if (booleanisSunday) days.add(DAYS.SUNDAY);
+        buttonSave.setOnClickListener(view1 ->
+                                      {
+                                          ArrayList<DAYS> days = new ArrayList<>();
+                                          if (booleanisMonday) days.add(DAYS.MONDAY);
+                                          if (booleanisTuesday) days.add(DAYS.TUESDAY);
+                                          if (booleanisWednesday) days.add(DAYS.WEDNESDAY);
+                                          if (booleanisThursday) days.add(DAYS.THURSDAY);
+                                          if (booleanisFriday) days.add(DAYS.FRIDAY);
+                                          if (booleanisSaturday) days.add(DAYS.SATURDAY);
+                                          if (booleanisSunday) days.add(DAYS.SUNDAY);
 
 
 
-                int startHour = (npStartTime.getValue() - (npStartTime.getValue() % 4)) / 4;
-                int startMinutes = (npStartTime.getValue() % 4) * 15;
+                                          int startHour = (npStartTime.getValue() - (npStartTime.getValue() % 4)) / 4;
+                                          int startMinutes = (npStartTime.getValue() % 4) * 15;
 
-                int endHour = (npEndTime.getValue() - (npEndTime.getValue() % 4)) / 4;
-                int endMinutes = (npEndTime.getValue() % 4) * 15;
+                                          int endHour = (npEndTime.getValue() - (npEndTime.getValue() % 4)) / 4;
+                                          int endMinutes = (npEndTime.getValue() % 4) * 15;
 
 
-                if(mDay == null)
-                    mListener.onClickSave(NO_REPLACE,74, 72, startHour, endHour, startMinutes, endMinutes, days);
-                else
-                    mListener.onClickSave(mPosition, 74, 72, startHour, endHour, startMinutes, endMinutes, days);
-                dismiss();
-            }
-        });
+                                          if(mDay == null)
+                                              mListener.onClickSave(NO_REPLACE, Double.parseDouble(mCoolingTempET.getText().toString()),
+                                                                    Double.parseDouble(mHeatingTempET.getText().toString()),
+                                                                    startHour, endHour, startMinutes, endMinutes, days);
+                                          else
+                                              mListener.onClickSave(mPosition, Double.parseDouble(mCoolingTempET.getText().toString()),
+                                                                    Double.parseDouble(mHeatingTempET.getText().toString()),
+                                                                    startHour, endHour, startMinutes, endMinutes, days);
+                                          dismiss();
+                                      });
 
-        buttonCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dismiss();
-            }
-        });
+        buttonCancel.setOnClickListener(view12 -> dismiss());
 
         AlertDialog builder = new AlertDialog.Builder(getActivity(), R.style.NewDialogStyle)
                 .setView(view)
@@ -319,9 +294,19 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
         {
             checkDays(mDay);
             checkTime(mDay);
+            checkTemp(mDay);
         }
 
         return builder;
+    }
+
+    private void checkTemp(Schedule.Days mDay)
+    {
+        if(mDay.getCoolingVal() != null)
+            mCoolingTempET.setText(mDay.getCoolingVal().toString());
+
+        if(mDay.getHeatingVal() != null)
+            mHeatingTempET.setText(mDay.getHeatingVal().toString());
     }
 
     private void checkTime(Schedule.Days mDay) {

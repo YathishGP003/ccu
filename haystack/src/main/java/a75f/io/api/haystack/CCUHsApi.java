@@ -3,6 +3,7 @@ package a75f.io.api.haystack;
 import android.content.Context;
 import android.util.Log;
 
+import org.projecthaystack.HDate;
 import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
@@ -184,7 +185,7 @@ public class CCUHsApi
 
     public void updateZone(Zone z, String id)
     {
-        tagsDb.updateZone(z, id);
+        tagsDb.updateZone(z);
         if (tagsDb.idMap.get(id) != null)
         {
             tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
@@ -469,6 +470,21 @@ public class CCUHsApi
             rowList.add(map);
         }
         return rowList;
+    }
+    
+    public double readPointPriorityVal(String id) {
+        
+        ArrayList values = readPoint(id);
+        if (values != null && values.size() > 0)
+        {
+            for (int l = 1; l <= values.size() ; l++ ) {
+                HashMap valMap = ((HashMap) values.get(l-1));
+                if (valMap.get("val") != null) {
+                    return Double.parseDouble(valMap.get("val").toString());
+                }
+            }
+        }
+        return 0;
     }
 
     public void hisWrite(ArrayList<HisItem> hisList)
@@ -805,6 +821,9 @@ public class CCUHsApi
 
     public String createCCU(String ccuName, String installerEmail)
     {
+        HashMap equip = CCUHsApi.getInstance().read("equip and system");
+        String ahuRef = equip.size() > 0 ? equip.get("id").toString() : "";
+        
         HDictBuilder hDictBuilder = new HDictBuilder();
         CcuLog.d("CCU_HS", "Site Ref: " + getSiteId());
         String localId = UUID.randomUUID().toString();
@@ -813,11 +832,39 @@ public class CCUHsApi
         hDictBuilder.add("dis", HStr.make(ccuName));
         hDictBuilder.add("installer", HStr.make(installerEmail));
         hDictBuilder.add("siteRef", getSiteId());
-        System.out.println("DATE: " + HDateTime.make(System.currentTimeMillis()).date.toZinc());
         hDictBuilder.add("createdDate", HDateTime.make(System.currentTimeMillis()).date);
+        hDictBuilder.add("ahuRef", ahuRef);
         hDictBuilder.add("device");
         tagsDb.addHDict(localId, hDictBuilder.toDict());
         return localId;
+    }
+    
+    public void updateCCUahuRef(String ahuRef) {
+        
+        Log.d("CCU_HS","updateCCUahuRef "+ahuRef);
+        HashMap ccu = read("device and ccu");
+        
+        if (ccu.size() == 0) {
+            return;
+        }
+        
+        String id = ccu.get("id").toString();
+    
+        HDictBuilder hDictBuilder = new HDictBuilder();
+        hDictBuilder.add("id", HRef.copy(id));
+        hDictBuilder.add("ccu");
+        hDictBuilder.add("dis", HStr.make(ccu.get("dis").toString()));
+        hDictBuilder.add("installer", HStr.make(ccu.get("installer").toString()));
+        hDictBuilder.add("siteRef", getSiteId());
+        hDictBuilder.add("createdDate", HDate.make(ccu.get("createdDate").toString()));
+        hDictBuilder.add("ahuRef", ahuRef);
+        hDictBuilder.add("device");
+        tagsDb.addHDict(id.replace("@",""), hDictBuilder.toDict());
+    
+        if (tagsDb.idMap.get(id) != null)
+        {
+            tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
+        }
     }
 
     public HRef getSiteId()
@@ -839,9 +886,9 @@ public class CCUHsApi
         ArrayList<Schedule> schedules = new ArrayList<>();
         String              filter    = null;
         if (!vacation)
-            filter = "schedule and system and not vacation";
+            filter = "schedule and building and not vacation";
         else
-            filter = "schedule and system and vacation";
+            filter = "schedule and building and vacation";
 
         HGrid scheduleHGrid = tagsDb.readAll(filter);
 
@@ -850,6 +897,27 @@ public class CCUHsApi
             schedules.add(new Schedule.Builder().setHDict(scheduleHGrid.row(i)).build());
         }
 
+        return schedules;
+    }
+    
+    public ArrayList<Schedule> getZoneSchedule(String zoneId, boolean vacation)
+    {
+        ArrayList<Schedule> schedules = new ArrayList<>();
+        String              filter    = null;
+        if (!vacation)
+            filter = "schedule and zone and not vacation and roomRef == "+zoneId;
+        else
+            filter = "schedule and zone and vacation and roomRef == "+zoneId;
+        
+        Log.d("CCU_HS"," getZoneSchedule : "+filter);
+        
+        HGrid scheduleHGrid = tagsDb.readAll(filter);
+        
+        for (int i = 0; i < scheduleHGrid.numRows(); i++)
+        {
+            schedules.add(new Schedule.Builder().setHDict(scheduleHGrid.row(i)).build());
+        }
+        
         return schedules;
     }
 
@@ -862,25 +930,68 @@ public class CCUHsApi
     {
         addSchedule(schedule.getId(), schedule.getScheduleHDict());
 
-        Log.i("Schedule", "Schedule: " + schedule.getScheduleHDict().toZinc());
+        Log.i("CCH_HS", "updateSchedule: " + schedule.getScheduleHDict().toZinc());
         if (tagsDb.idMap.get(schedule.getId()) != null)
         {
-            CcuLog.d("CCU_HS", "Update tagsDb: " + tagsDb.idMap.get("@" + schedule.getId()));
             tagsDb.updateIdMap.put("@" + schedule.getId(), tagsDb.idMap.get("@" + schedule.getId()));
         }
     }
-
+    
+    public void updateZoneSchedule(Schedule schedule, String zoneId)
+    {
+        addSchedule(schedule.getId(), schedule.getZoneScheduleHDict(zoneId));
+        
+        Log.i("CCU_HS", "updateZoneSchedule: " + schedule.getZoneScheduleHDict(zoneId).toZinc());
+        if (tagsDb.idMap.get(schedule.getId()) != null)
+        {
+            tagsDb.updateIdMap.put("@" + schedule.getId(), tagsDb.idMap.get("@" + schedule.getId()));
+        }
+    }
+    
     public Schedule getScheduleById(String scheduleRef)
     {
         if (scheduleRef == null)
             return null;
-
-        HDict hDict = tagsDb.readById(HRef.make(scheduleRef));
+        
+        HDict hDict = tagsDb.readById(HRef.copy(scheduleRef));
+        Log.d("CCU_HS", " getScheduleById " +hDict.toZinc() );
         return new Schedule.Builder().setHDict(hDict).build();
     }
 
     public void loadTagsData(Context c)
     {
         tagsDb.init(c);
+    }
+    
+    public double getPredictedPreconRate(String ahuRef) {
+        HClient hClient   = new HClient(HttpUtil.HAYSTACK_URL, HayStackConstants.USER, HayStackConstants.PASS);
+    
+        try
+        {
+            HDict hDict = new HDictBuilder().add("filter", "equip and virtual and ahuRef == " + getGUID(ahuRef)).toDict();
+            HGrid virtualEquip = hClient.call("read", HGridBuilder.dictToGrid(hDict));
+            if (virtualEquip != null && virtualEquip.numRows() > 0)
+            {
+                HDict pDict = new HDictBuilder().add("filter", "point and predicted and rate and equipRef == " + virtualEquip.row(0).get("id").toString()).toDict();
+                HGrid preconPoint = hClient.call("read", HGridBuilder.dictToGrid(pDict));
+                if (preconPoint != null && preconPoint.numRows() > 0)
+                {
+                    HGrid hisGrid = hClient.hisRead(HRef.copy(preconPoint.row(0).get("id").toString()), "today");
+                    if (hisGrid != null && hisGrid.numRows() > 0)
+                    {
+                        HRow r = hisGrid.row(hisGrid.numRows() - 1);
+                        HDateTime date = (HDateTime) r.get("ts");
+                        double preconVal = Double.parseDouble(r.get("val").toString());
+                        Log.d("CCU_HS", "RemotePreconRate , " + date + " : " + preconVal);
+                        return preconVal;
+                    }
+                }
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
+            Log.d("CCU_HS","getPredictedPreconRate Failed : Fall back to default precon rate");
+        }
+        
+        return 0;
     }
 }

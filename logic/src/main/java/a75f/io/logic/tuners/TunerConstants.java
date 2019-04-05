@@ -53,6 +53,9 @@ public class TunerConstants
     
     public static final double ZONE_PRIORITY_SPREAD = 2.0;
     public static final double ZONE_PRIORITY_MULTIPLIER = 1.3;
+    public static final double ZONE_UNOCCUPIED_SETBACK = 5;
+    
+    public static final double SYSTEM_PRECONDITION_RATE = 15.0;
     
     public static final double MIN_COOLING_DAMPER = 40;
     public static final double MAX_COOLING_DAMPER = 80;
@@ -61,5 +64,22 @@ public class TunerConstants
     
     public static final int VAV_DEFAULT_VAL_LEVEL = 17;
     public static final int VAV_BUILDING_VAL_LEVEL = 16;
-    public static final int MANUAL_OVERRIDE_VAL_LEVEL = 8;
+	public static final int MANUAL_OVERRIDE_VAL_LEVEL = 8;
+
+    public static final double STANDALONE_HEATING_DEADBAND_DEFAULT = 1;
+    public static final double STANDALONE_COOLING_DEADBAND_DEFAULT = 1;
+    public static final double STANDALONE_STAGE1_HYSTERESIS_DEFAULT = 0.5;
+    public static final double STANDALONE_AIRFLOW_SAMPLE_WAIT_TIME = 30;//in minutes
+    public static final double STANDALONE_COOLING_STAGE1_LOWER_OFFSET = -150;
+    public static final double STANDALONE_COOLING_STAGE1_UPPER_OFFSET = -8;
+    public static final double STANDALONE_HEATING_STAGE1_LOWER_OFFSET = 10;
+    public static final double STANDALONE_HEATING_STAGE1_UPPER_OFFSET = 150;
+    public static final double STANDALONE_COOLING_STAGE2_LOWER_OFFSET = -150;
+    public static final double STANDALONE_COOLING_STAGE2_UPPER_OFFSET = -12;
+    public static final double STANDALONE_HEATING_STAGE2_LOWER_OFFSET = 15;
+    public static final double STANDALONE_HEATING_STAGE2_UPPER_OFFSET = 150;
+
+    public static final double STANDALONE_DEFAULT_FAN_OPERATIONAL_MODE = 1.0;//AUTO
+    public static final double STANDALONE_DEFAULT_OPERATIONAL_MODE = 1.0;//Auto
+
 }

@@ -37,6 +37,7 @@ import a75f.io.api.haystack.DAYS;
 import a75f.io.api.haystack.MockTime;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.logic.DefaultSchedules;
+import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.renatus.R;
 import a75f.io.renatus.schedules.ManualSchedulerDialogFragment.ManualScheduleDialogListener;
 import a75f.io.renatus.util.FontManager;
@@ -95,7 +96,11 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
         if (mOnExitListener != null)
             mOnExitListener.onExit();
 
+
+
     }
+
+    private ConstraintLayout mVacationLayout;
 
     public SchedulerFragment() {
 
@@ -127,21 +132,17 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
         textViewScheduletitle = rootView.findViewById(R.id.scheduleTitle);
         textViewaddEntry = rootView.findViewById(R.id.addEntry);
         textViewaddEntryIcon = rootView.findViewById(R.id.addEntryIcon);
+        mVacationLayout = rootView.findViewById(R.id.constraintLt_Vacations);
 
         textViewaddEntryIcon.setTypeface(iconFont);
         textViewaddEntryIcon.setText(getString(R.string.icon_plus));
 
 
         textViewVacations = rootView.findViewById(R.id.vacationsTitle);
-        textViewaddVacations = rootView.findViewById(R.id.addVacations);
+         textViewaddVacations= rootView.findViewById(R.id.addVacations);
 
 
-        textViewaddVacations.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showVacationDialog();
-            }
-        });
+        textViewaddVacations.setOnClickListener(v -> showVacationDialog());
         mDrawableBreakLineLeft = AppCompatResources.getDrawable(getContext(), R.drawable.ic_break_line_left_svg);
         mDrawableBreakLineRight = AppCompatResources.getDrawable(getContext(), R.drawable.ic_break_line_right_svg);
         mDrawableTimeMarker = AppCompatResources.getDrawable(getContext(), R.drawable.ic_time_marker_svg);
@@ -242,7 +243,6 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
                 if (mPixelsBetweenAnHour == 0) throw new RuntimeException();
 
                 loadSchedule();
-                loadVacations();
                 drawCurrentTime();
 
             }
@@ -253,31 +253,44 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
 
     private void loadSchedule()
     {
+        
         if (getArguments() != null && getArguments().containsKey(PARAM_SCHEDULE_ID)) {
             mScheduleId = getArguments().getString(PARAM_SCHEDULE_ID);
             schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
+            Log.d("CCU_UI"," Loaded Zone Schedule "+mScheduleId);
         } else {
             schedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
+            Log.d("CCU_UI"," Loaded System Schedule ");
         }
+
+
+        if(schedule != null && schedule.isZoneSchedule())
+        {
+            textViewScheduletitle.setText("Zone Schedule");
+            //mVacationLayout.setVisibility(View.GONE);
+            //textViewVacations.setVisibility(View.GONE);
+            //textViewaddVacations.setVisibility(View.GONE);
+        }
+        
+        loadVacations();
+        
 
 
         schedule.populateIntersections();
 
-        SchedulerFragment.this.getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                hasTextViewChildren();
+        SchedulerFragment.this.getActivity().runOnUiThread(() ->
+                                                           {
+                                                               hasTextViewChildren();
 
-                ArrayList<Schedule.Days> days = schedule.getDays();
-                for (int i = 0; i < days.size(); i++) {
-                    Schedule.Days daysElement = days.get(i);
-                    drawSchedule(i, daysElement.getCoolingVal(), daysElement.getHeatingVal(),
-                            daysElement.getSthh(), daysElement.getEthh(),
-                            daysElement.getStmm(), daysElement.getEtmm(),
-                            DAYS.values()[daysElement.getDay()], daysElement.isIntersection());
-                }
-            }
-        });
+                                                               ArrayList<Schedule.Days> days = schedule.getDays();
+                                                               for (int i = 0; i < days.size(); i++) {
+                                                                   Schedule.Days daysElement = days.get(i);
+                                                                   drawSchedule(i, daysElement.getCoolingVal(), daysElement.getHeatingVal(),
+                                                                           daysElement.getSthh(), daysElement.getEthh(),
+                                                                           daysElement.getStmm(), daysElement.getEtmm(),
+                                                                           DAYS.values()[daysElement.getDay()], daysElement.isIntersection());
+                                                               }
+                                                           });
     }
 
     private void hasTextViewChildren() {
@@ -333,8 +346,14 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
             public boolean onClickSave(String vacationId, String vacationName, DateTime startDate, DateTime endDate)
             {
 
-                DefaultSchedules.upsertVacation(vacationId, vacationName, startDate, endDate);
+                if (schedule != null && schedule.isZoneSchedule()) {
+                    DefaultSchedules.upsertZoneVacation(vacationId, vacationName, startDate, endDate, schedule.getRoomRef());
+                } else
+                {
+                    DefaultSchedules.upsertVacation(vacationId, vacationName, startDate, endDate);
+                }
                 loadVacations();
+                ScheduleProcessJob.updateSchedules();
                 return false;
             }
 
@@ -357,11 +376,19 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
             String id = v.getTag().toString();
             CCUHsApi.getInstance().deleteEntity(id);
             loadVacations();
+            ScheduleProcessJob.updateSchedules();
     };
 
 
     private void loadVacations() {
-        ArrayList<Schedule> vacations = CCUHsApi.getInstance().getSystemSchedule(true);
+    
+        ArrayList<Schedule> vacations;
+        if (schedule.isZoneSchedule()) {
+            vacations = CCUHsApi.getInstance().getZoneSchedule(schedule.getRoomRef(), true);
+        } else
+        {
+            vacations = CCUHsApi.getInstance().getSystemSchedule(true);
+        }
         if(vacations != null) {
             mVacationAdapter = new VacationAdapter(vacations, mEditOnClickListener, mDeleteOnClickListener);
             mVacationRecycler.setAdapter(mVacationAdapter);
@@ -418,12 +445,19 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
                 schedule.getDays().add(position, remove);
             Toast.makeText(SchedulerFragment.this.getContext(), "Overlap occured can not add", Toast.LENGTH_SHORT).show();
         } else {
-
             schedule.getDays().addAll(daysArrayList);
-            CCUHsApi.getInstance().updateSchedule(schedule);
+            if (schedule.isZoneSchedule())
+            {
+                CCUHsApi.getInstance().updateZoneSchedule(schedule, schedule.getRoomRef());
+            } else
+            {
+                CCUHsApi.getInstance().updateSchedule(schedule);
+            }
             CCUHsApi.getInstance().syncEntityTree();
             loadSchedule();
         }
+    
+        ScheduleProcessJob.updateSchedules();
 
         return true;
     }

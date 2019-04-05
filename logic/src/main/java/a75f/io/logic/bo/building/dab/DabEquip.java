@@ -1,4 +1,4 @@
-package a75f.io.logic.bo.building.system.dab;
+package a75f.io.logic.bo.building.dab;
 
 import android.util.Log;
 
@@ -45,11 +45,17 @@ public class DabEquip
     }
     
     public void init() {
-        damperController = new GenericPIController();
-        damperController.setMaxAllowedError(hayStack.readDefaultVal("point and proportional and range and equipRef == \""+equipRef+"\""));
-        damperController.setIntegralGain(TunerUtil.readTunerValByQuery("pid and igain and equipRef == \"" + equipRef + "\""));
-        damperController.setProportionalGain(TunerUtil.readTunerValByQuery("pid and pgain and equipRef == \""+equipRef+"\""));
-        damperController.setIntegralMaxTimeout((int)TunerUtil.readTunerValByQuery("pid and itimeout and equipRef == \""+equipRef+"\""));
+        HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \"" + nodeAddr + "\"");
+    
+        if (equipMap != null && equipMap.size() > 0)
+        {
+            equipRef = equipMap.get("id").toString();
+            damperController = new GenericPIController();
+            damperController.setMaxAllowedError(TunerUtil.readTunerValByQuery("dab and pspread and equipRef == \"" + equipRef + "\""));
+            damperController.setIntegralGain(TunerUtil.readTunerValByQuery("dab and igain and equipRef == \"" + equipRef + "\""));
+            damperController.setProportionalGain(TunerUtil.readTunerValByQuery("dab and pgain and equipRef == \"" + equipRef + "\""));
+            damperController.setIntegralMaxTimeout((int) TunerUtil.readTunerValByQuery("dab and itimeout and equipRef == \"" + equipRef + "\""));
+        }
     
     }
     
@@ -77,21 +83,34 @@ public class DabEquip
                                   .setAhuRef(ahuRef)
                                   .setTz(tz)
                                   .setGroup(String.valueOf(nodeAddr));
-        String equipRef = CCUHsApi.getInstance().addEquip(b.build());
+        equipRef = CCUHsApi.getInstance().addEquip(b.build());
         BuildingTuners.getInstance().addEquipDabTuners(siteDis + "-DAB-" + nodeAddr, equipRef);
         createDabConfigPoints(config, equipRef);
     
-        Point damperPos = new Point.Builder()
-                                  .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-damperPos")
+        Point damper1Pos = new Point.Builder()
+                                  .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-damper1Pos")
                                   .setEquipRef(equipRef)
                                   .setSiteRef(siteRef)
                                   .setRoomRef(roomRef)
                                   .setFloorRef(floorRef)
-                                  .addMarker("damper").addMarker("dab").addMarker("base").addMarker("cmd").addMarker("his").addMarker("logical").addMarker("zone").addMarker("equipHis")
+                                  .addMarker("damper").addMarker("primary").addMarker("dab").addMarker("base").addMarker("cmd").addMarker("his").addMarker("logical").addMarker("zone").addMarker("equipHis")
                                   .setGroup(String.valueOf(nodeAddr))
                                   .setTz(tz)
                                   .build();
-        String dpID = CCUHsApi.getInstance().addPoint(damperPos);
+        String dpID = CCUHsApi.getInstance().addPoint(damper1Pos);
+    
+        Point damper2Pos = new Point.Builder()
+                                  .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-damper2Pos")
+                                  .setEquipRef(equipRef)
+                                  .setSiteRef(siteRef)
+                                  .setRoomRef(roomRef)
+                                  .setFloorRef(floorRef)
+                                  .addMarker("damper").addMarker("secondary").addMarker("dab").addMarker("base").addMarker("cmd").addMarker("his").addMarker("logical").addMarker("zone").addMarker("equipHis")
+                                  .setGroup(String.valueOf(nodeAddr))
+                                  .setTz(tz)
+                                  .build();
+        String dp1ID = CCUHsApi.getInstance().addPoint(damper2Pos);
+        
     
         Point normalizedDamperPos = new Point.Builder()
                                             .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-normalizedDamperPos")
@@ -212,21 +231,29 @@ public class DabEquip
         device.voc.setEnabled(true);
         device.desiredTemp.setPointRef(dtId);
         device.desiredTemp.setEnabled(true);
+        Log.d("CCU_UI"," Op Size : "+config.getInputs().size());
         for (Output op : config.getOutputs()) {
+    
+            Log.d("CCU_UI"," Op port : "+op.getPort());
             switch (op.getPort()) {
                 case ANALOG_OUT_ONE:
+                    device.analog1Out.setType(op.getAnalogActuatorType());
+                    break;
+                case ANALOG_OUT_TWO:
                     device.analog1Out.setType(op.getAnalogActuatorType());
                     break;
             }
         }
         device.analog1Out.setEnabled(config.isOpConfigured(Port.ANALOG_OUT_ONE));
+        device.analog2Out.setEnabled(config.isOpConfigured(Port.ANALOG_OUT_TWO));
         
     
         device.addPointsToDb();
     
         
         setCurrentTemp(0);
-        setDamperPos(0);
+        setDamperPos(0, "primary");
+        setDamperPos(0, "secondary");
         setDesiredTempCooling(73.0);
         setDesiredTemp(72.0);
         setDesiredTempHeating(71.0);
@@ -245,42 +272,79 @@ public class DabEquip
         String equipDis = siteDis+"-DAB-"+nodeAddr;
         String tz = siteMap.get("tz").toString();
         
-        Point damperType = new Point.Builder()
-                                   .setDisplayName(equipDis+"-damperType")
+        Point damper1Type = new Point.Builder()
+                                   .setDisplayName(equipDis+"-damper1Type")
                                    .setEquipRef(equipRef)
                                    .setSiteRef(siteRef)
                                    .addMarker("config").addMarker("dab").addMarker("writable").addMarker("zone")
-                                   .addMarker("damper").addMarker("type").addMarker("sp")
+                                   .addMarker("damper").addMarker("primary").addMarker("type").addMarker("sp")
                                    .setGroup(String.valueOf(nodeAddr))
                                    .setTz(tz)
                                    .build();
-        String damperTypeId = CCUHsApi.getInstance().addPoint(damperType);
-        CCUHsApi.getInstance().writeDefaultValById(damperTypeId, (double)config.damperType);
+        String damperTypeId = CCUHsApi.getInstance().addPoint(damper1Type);
+        CCUHsApi.getInstance().writeDefaultValById(damperTypeId, (double)config.damper1Type);
         
-        Point damperSize = new Point.Builder()
-                                   .setDisplayName(equipDis+"-damperSize")
+        Point damper1Size = new Point.Builder()
+                                   .setDisplayName(equipDis+"-damper1Size")
                                    .setEquipRef(equipRef)
                                    .setSiteRef(siteRef)
                                    .addMarker("config").addMarker("dab").addMarker("writable").addMarker("zone")
-                                   .addMarker("damper").addMarker("size").addMarker("sp")
-                                   .setUnit("\u00B0")
+                                   .addMarker("damper").addMarker("primary").addMarker("size").addMarker("sp")
                                    .setGroup(String.valueOf(nodeAddr))
                                    .setTz(tz)
                                    .build();
-        String damperSizeId = CCUHsApi.getInstance().addPoint(damperSize);
-        CCUHsApi.getInstance().writeDefaultValById(damperSizeId, (double)config.damperSize);
+        String damper1SizeId = CCUHsApi.getInstance().addPoint(damper1Size);
+        CCUHsApi.getInstance().writeDefaultValById(damper1SizeId, (double)config.damper1Size);
         
-        Point damperShape = new Point.Builder()
-                                    .setDisplayName(equipDis+"-damperShape")
+        Point damper1Shape = new Point.Builder()
+                                    .setDisplayName(equipDis+"-damper1Shape")
                                     .setEquipRef(equipRef)
                                     .setSiteRef(siteRef)
                                     .addMarker("config").addMarker("dab").addMarker("writable").addMarker("zone")
-                                    .addMarker("damper").addMarker("shape").addMarker("sp")
+                                    .addMarker("damper").addMarker("primary").addMarker("shape").addMarker("sp")
                                     .setGroup(String.valueOf(nodeAddr))
                                     .setTz(tz)
                                     .build();
-        String damperShapeId = CCUHsApi.getInstance().addPoint(damperShape);
-        CCUHsApi.getInstance().writeDefaultValById(damperShapeId, (double)config.damperShape);
+        String damper1ShapeId = CCUHsApi.getInstance().addPoint(damper1Shape);
+        CCUHsApi.getInstance().writeDefaultValById(damper1ShapeId, (double)config.damper1Shape);
+    
+    
+        Point damper2Type = new Point.Builder()
+                                   .setDisplayName(equipDis+"-damper2Type")
+                                   .setEquipRef(equipRef)
+                                   .setSiteRef(siteRef)
+                                   .addMarker("config").addMarker("dab").addMarker("writable").addMarker("zone")
+                                   .addMarker("damper").addMarker("secondary").addMarker("type").addMarker("sp")
+                                   .setGroup(String.valueOf(nodeAddr))
+                                   .setTz(tz)
+                                   .build();
+        String damper2TypeId = CCUHsApi.getInstance().addPoint(damper2Type);
+        CCUHsApi.getInstance().writeDefaultValById(damper2TypeId, (double)config.damper2Type);
+    
+        Point damper2Size = new Point.Builder()
+                                   .setDisplayName(equipDis+"-damper2Size")
+                                   .setEquipRef(equipRef)
+                                   .setSiteRef(siteRef)
+                                   .addMarker("config").addMarker("dab").addMarker("writable").addMarker("zone")
+                                   .addMarker("damper").addMarker("secondary").addMarker("size").addMarker("sp")
+                                   .setGroup(String.valueOf(nodeAddr))
+                                   .setTz(tz)
+                                   .build();
+        String damper2SizeId = CCUHsApi.getInstance().addPoint(damper2Size);
+        CCUHsApi.getInstance().writeDefaultValById(damper2SizeId, (double)config.damper1Size);
+    
+        Point damper2Shape = new Point.Builder()
+                                    .setDisplayName(equipDis+"-damper2Shape")
+                                    .setEquipRef(equipRef)
+                                    .setSiteRef(siteRef)
+                                    .addMarker("config").addMarker("dab").addMarker("writable").addMarker("zone")
+                                    .addMarker("damper").addMarker("secondary").addMarker("shape").addMarker("sp")
+                                    .setGroup(String.valueOf(nodeAddr))
+                                    .setTz(tz)
+                                    .build();
+        String damper2ShapeId = CCUHsApi.getInstance().addPoint(damper2Shape);
+        CCUHsApi.getInstance().writeDefaultValById(damper2ShapeId, (double)config.damper2Shape);
+        
         
         
         Point enableOccupancyControl = new Point.Builder()
@@ -400,9 +464,14 @@ public class DabEquip
         config.minDamperHeating = ((int)getDamperLimit("heating","min"));
         config.maxDamperHeating = ((int)getDamperLimit("heating","max"));
     
-        config.damperType = (int)getConfigNumVal("damper and type");
-        config.damperSize = (int)getConfigNumVal("damper and size");
-        config.damperShape = (int)getConfigNumVal("damper and shape");
+        config.damper1Type = (int)getConfigNumVal("damper and primary and type");
+        config.damper1Size = (int)getConfigNumVal("damper and primary and size");
+        config.damper1Shape = (int)getConfigNumVal("damper and primary and shape");
+    
+        config.damper2Type = (int)getConfigNumVal("damper and secondary and type");
+        config.damper2Size = (int)getConfigNumVal("damper and secondary and size");
+        config.damper2Shape = (int)getConfigNumVal("damper and secondary and shape");
+        
         config.enableOccupancyControl = getConfigNumVal("enable and occupancy") > 0 ? true : false ;
         config.enableCO2Control = getConfigNumVal("enable and co2") > 0 ? true : false ;
         config.enableIAQControl = getConfigNumVal("enable and iaq") > 0 ? true : false ;
@@ -420,6 +489,16 @@ public class DabEquip
             analogOne.mOutputAnalogActuatorType = OutputAnalogActuatorType.getEnum(a1.getType());
             config.getOutputs().add(analogOne);
         }
+    
+        RawPoint a2 = SmartNode.getPhysicalPoint(nodeAddr, Port.ANALOG_OUT_TWO.toString());
+        if (a2 != null && a2.getEnabled()) {
+            Output analogTwo = new Output();
+            analogTwo.setAddress((short)nodeAddr);
+            analogTwo.setPort(Port.ANALOG_OUT_TWO);
+            analogTwo.mOutputAnalogActuatorType = OutputAnalogActuatorType.getEnum(a2.getType());
+            config.getOutputs().add(analogTwo);
+        }
+        
         return config;
     }
     
@@ -430,13 +509,21 @@ public class DabEquip
                     CcuLog.d(L.TAG_CCU_ZONE, " Update analog" + op.getPort() + " type " + op.getAnalogActuatorType());
                     SmartNode.updatePhysicalPointType(nodeAddr, op.getPort().toString(), op.getAnalogActuatorType());
                     break;
+                case ANALOG_OUT_TWO:
+                    CcuLog.d(L.TAG_CCU_ZONE, " Update analog" + op.getPort() + " type " + op.getAnalogActuatorType());
+                    SmartNode.updatePhysicalPointType(nodeAddr, op.getPort().toString(), op.getAnalogActuatorType());
+                    break;
             }
         }
         
     
-        setConfigNumVal("damper and type",config.damperType);
-        setConfigNumVal("damper and size",config.damperSize);
-        setConfigNumVal("damper and shape",config.damperShape);
+        setConfigNumVal("damper and type and primary",config.damper1Type);
+        setConfigNumVal("damper and size and primary",config.damper1Size);
+        setConfigNumVal("damper and shape and primary",config.damper1Shape);
+        setConfigNumVal("damper and type and secondary",config.damper2Type);
+        setConfigNumVal("damper and size and secondary",config.damper2Size);
+        setConfigNumVal("damper and shape and secondary",config.damper2Shape);
+        
         setConfigNumVal("enable and occupancy",config.enableOccupancyControl == true ? 1.0 : 0);
         setConfigNumVal("enable and co2",config.enableCO2Control == true ? 1.0 : 0);
         setConfigNumVal("enable and iaq",config.enableCO2Control == true ? 1.0 : 0);
@@ -601,9 +688,9 @@ public class DabEquip
     {
         return damperPos;
     }
-    public void setDamperPos(double damperPos)
+    public void setDamperPos(double damperPos, String damper)
     {
         this.damperPos = damperPos;
-        CCUHsApi.getInstance().writeHisValByQuery("point and damper and base and cmd and group == \""+nodeAddr+"\"", damperPos);
+        CCUHsApi.getInstance().writeHisValByQuery("point and damper and base and cmd and "+damper+" and group == \""+nodeAddr+"\"", damperPos);
     }
 }

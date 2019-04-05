@@ -15,8 +15,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.Spinner;
@@ -31,24 +29,25 @@ import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.Zone;
 import a75f.io.logic.bo.building.ZonePriority;
+import a75f.io.logic.bo.building.dab.DabProfile;
+import a75f.io.logic.bo.building.dab.DabProfileConfiguration;
 import a75f.io.logic.bo.building.definitions.DamperShape;
 import a75f.io.logic.bo.building.definitions.DamperType;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.definitions.ReheatType;
 import a75f.io.logic.bo.building.hvac.Damper;
-import a75f.io.logic.bo.building.system.dab.DabProfile;
-import a75f.io.logic.bo.building.system.dab.DabProfileConfiguration;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import butterknife.ButterKnife;
+
+import static a75f.io.logic.bo.building.definitions.DamperType.ZeroToTenV;
 
 /**
  * Created by samjithsadasivan on 3/13/19.
  */
 
-public class FragmentDABConfiguration extends BaseDialogFragment implements AdapterView.OnItemSelectedListener, CheckBox.OnCheckedChangeListener
+public class FragmentDABConfiguration extends BaseDialogFragment
 {
     public static final String ID = FragmentDABConfiguration.class.getSimpleName();
     
@@ -60,10 +59,13 @@ public class FragmentDABConfiguration extends BaseDialogFragment implements Adap
     
     LinearLayout damper1layout;
     LinearLayout damper2layout;
-    Spinner      damperType;
-    Spinner      damperSize;
-    Spinner      damperShape;
-    //Spinner      damper2Type;
+    Spinner      damper1Type;
+    Spinner      damper1Size;
+    Spinner      damper1Shape;
+    Spinner      damper2Type;
+    Spinner      damper2Size;
+    Spinner      damper2Shape;
+    
     LinearLayout reheatOptionLayout;
     Button       setButton;
     Spinner      zonePriority;
@@ -76,24 +78,16 @@ public class FragmentDABConfiguration extends BaseDialogFragment implements Adap
     SwitchCompat enableCO2Control;
     SwitchCompat enableIAQControl;
     
-    Damper mDamper;
-    
     private ProfileType             mProfileType;
     private DabProfile              mDabProfile;
     private DabProfileConfiguration mProfileConfig;
     
     private ArrayList<Damper.Parameters> mDampers = new ArrayList<Damper.Parameters>();
     ArrayAdapter<String> damperTypesAdapter;
-    ArrayAdapter<String> reheatTypesAdapter;
     
-    //ArrayAdapter<String> damperActuatorAdapter;
-    //ArrayAdapter<String> relayActuatorAdapter;
-    //ArrayAdapter<String> reheatPortAdapter;
     
-    DamperType damperTypeSelected;
-    //int damperActuatorSelection;
-    ReheatType reheatTypeSelected;
-    //int reheatActuatorSelection;
+    DamperType damper1TypeSelected = ZeroToTenV;
+    DamperType damper2TypeSelected = ZeroToTenV;
     
     String floorRef;
     String zoneRef;
@@ -191,19 +185,18 @@ public class FragmentDABConfiguration extends BaseDialogFragment implements Adap
             mDabProfile = new DabProfile();
         }
         
-        //fillDamperDetails();
         
         damper1layout  = (LinearLayout)view.findViewById(R.id.damper1layout);
-        //damperType.setSelection(mFSVData.getDamperType());
-        //if(mFSVData.getDamperType() != 4)
         damper1layout.setVisibility(View.VISIBLE);
+    
+        damper2layout  = (LinearLayout)view.findViewById(R.id.damper2layout);
+        damper2layout.setVisibility(View.VISIBLE);
         
-        damperSize = view.findViewById(R.id.damperSize);
+        damper1Size = view.findViewById(R.id.damper1Size);
         ArrayAdapter<CharSequence> damperSizeAdapter = ArrayAdapter.createFromResource(getActivity(),
                 R.array.damper_size, R.layout.spinner_dropdown_item);
         damperSizeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        damperSize.setAdapter(damperSizeAdapter);
-        //damperSize.setSelection((mFSVData.getDamperSize()-4)/2);
+        damper1Size.setAdapter(damperSizeAdapter);
         
         ArrayList<String> damperShapes = new ArrayList<>();
         for (DamperShape shape : DamperShape.values()) {
@@ -211,31 +204,16 @@ public class FragmentDABConfiguration extends BaseDialogFragment implements Adap
         }
         ArrayAdapter<String> damperShapeAdapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_dropdown_item, damperShapes);
         damperShapeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        damperShape = view.findViewById(R.id.damperShape);
-        damperShape.setAdapter(damperShapeAdapter);
+        damper1Shape = view.findViewById(R.id.damper1Shape);
+        damper1Shape.setAdapter(damperShapeAdapter);
     
-        /*// Add second damper details
-        damper2Type = (Spinner) view.findViewById(R.id.damperType2);
-        ArrayAdapter<Damper.Parameters> damper2TypeAdapter = new ArrayAdapter<Damper.Parameters>(getActivity(), R.layout.spinner_dropdown_item, mDampers);
-        damper2TypeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        damper2Type.setAdapter(damper2TypeAdapter);
-        damper2Type.setOnItemSelectedListener(this);
-        //damper2Type.setSelection(mFSVData.getDamper2Type());
-        damper2layout = (LinearLayout)view.findViewById(R.id.damper2layout);
-        final Spinner damper2Size = (Spinner) view.findViewById(R.id.damperSize2);
-        //if(mFSVData.getDamper2Type() != 4)
-            damper2layout.setVisibility(View.VISIBLE);
     
-        ArrayAdapter<CharSequence> damper2SizeAdapter = ArrayAdapter.createFromResource(getActivity(),
-                R.array.damper_size, R.layout.spinner_dropdown_item);
-        damper2SizeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        damper2Size.setAdapter(damper2SizeAdapter);
-        //damper2Size.setSelection((mFSVData.getDamper2Size() - 4) / 2);
-    
-        final Spinner damper2Shape = (Spinner) view.findViewById(R.id.damperShape2);
-        damper2Shape.setAdapter(damperShapeAdapter);*/
-        //damperShape.setSelection(mFSVData.getDamperShape());
-        //damper2Shape.setSelection(mFSVData.getDamper2Shape());
+        damper2Size = view.findViewById(R.id.damper2Size);
+        damper2Size.setAdapter(damperSizeAdapter);
+        damper2Shape = view.findViewById(R.id.damper2Shape);
+        damper2Shape.setAdapter(damperShapeAdapter);
+        
+        
         temperatureOffset = (NumberPicker) view.findViewById(R.id.temperatureOffset);
         setNumberPickerDividerColor(temperatureOffset);
         temperatureOffset.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
@@ -299,22 +277,48 @@ public class FragmentDABConfiguration extends BaseDialogFragment implements Adap
         LinearLayout zonePriorityLayout = (LinearLayout) view.findViewById(R.id.zonePriorityLayout);
         //zonePriorityLayout.setVisibility((SystemSettingsData.getTier().ordinal() <= CCU_TIER.EXPERT.ordinal()) ? View.VISIBLE : View.GONE);
         
-        damperType = view.findViewById(R.id.damperType);
-        
+        damper1Type = view.findViewById(R.id.damper1Type);
         ArrayList<String> damperTypes = new ArrayList<>();
         for (DamperType damper : DamperType.values()) {
             damperTypes.add(damper.displayName);
         }
         damperTypesAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, damperTypes);
         damperTypesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        damperType.setAdapter(damperTypesAdapter);
+        damper1Type.setAdapter(damperTypesAdapter);
         
-        damperType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        damper1Type.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                damperTypeSelected = DamperType.values()[position];
+                damper1TypeSelected = DamperType.values()[position];
+    
+                if(position == 4)
+                damper1layout.setVisibility(View.INVISIBLE);
+                else
+                damper1layout.setVisibility(View.VISIBLE);
+                damper1layout.invalidate();
             }
             
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            
+            }
+        });
+    
+        damper2Type = view.findViewById(R.id.damper2Type);
+        damper2Type.setAdapter(damperTypesAdapter);
+    
+        damper2Type.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                damper2TypeSelected = DamperType.values()[position];
+                damper2Type.setSelection(position);
+                if(position == 4)
+                    damper2layout.setVisibility(View.INVISIBLE);
+                else
+                    damper2layout.setVisibility(View.VISIBLE);
+                damper2layout.invalidate();
+            }
+        
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
             
@@ -323,9 +327,14 @@ public class FragmentDABConfiguration extends BaseDialogFragment implements Adap
         
         
         if (mProfileConfig != null) {
-            damperType.setSelection(damperTypesAdapter.getPosition(DamperType.values()[mProfileConfig.damperType].displayName), false);
-            damperSize.setSelection(damperSizeAdapter.getPosition(String.valueOf(mProfileConfig.damperSize)), false);
-            damperShape.setSelection(damperShapeAdapter.getPosition(DamperShape.values()[mProfileConfig.damperShape].displayName), false);
+            damper1Type.setSelection(damperTypesAdapter.getPosition(DamperType.values()[mProfileConfig.damper1Type].displayName), false);
+            damper1Size.setSelection(damperSizeAdapter.getPosition(String.valueOf(mProfileConfig.damper1Size)), false);
+            damper1Shape.setSelection(damperShapeAdapter.getPosition(DamperShape.values()[mProfileConfig.damper1Shape].displayName), false);
+    
+            damper2Type.setSelection(damperTypesAdapter.getPosition(DamperType.values()[mProfileConfig.damper2Type].displayName), false);
+            damper2Size.setSelection(damperSizeAdapter.getPosition(String.valueOf(mProfileConfig.damper2Size)), false);
+            damper2Shape.setSelection(damperShapeAdapter.getPosition(DamperShape.values()[mProfileConfig.damper2Shape].displayName), false);
+            
             enableOccupancyControl.setChecked(mProfileConfig.enableOccupancyControl);
             enableCO2Control.setChecked(mProfileConfig.enableCO2Control);
             enableIAQControl.setChecked(mProfileConfig.enableIAQControl);
@@ -353,14 +362,14 @@ public class FragmentDABConfiguration extends BaseDialogFragment implements Adap
                     @Override
                     protected void onPreExecute() {
                         setButton.setEnabled(false);
-                        progressDlg.setMessage("Saving VAV Configuration");
+                        progressDlg.setMessage("Saving DAB Configuration");
                         progressDlg.show();
                         super.onPreExecute();
                     }
                     
                     @Override
                     protected Void doInBackground( final Void ... params ) {
-                        setupVavZoneProfile();
+                        setupDabZoneProfile();
                         L.saveCCUState();
                         
                         return null;
@@ -379,12 +388,16 @@ public class FragmentDABConfiguration extends BaseDialogFragment implements Adap
         
     }
     
-    private void setupVavZoneProfile() {
+    private void setupDabZoneProfile() {
         
         DabProfileConfiguration dabConfig = new DabProfileConfiguration();
-        dabConfig.damperType = damperTypeSelected.ordinal();
-        dabConfig.damperSize = Integer.parseInt(damperSize.getSelectedItem().toString());
-        dabConfig.damperShape = DamperType.values()[damperShape.getSelectedItemPosition()].ordinal();
+        dabConfig.damper1Type = damper1TypeSelected.ordinal();
+        dabConfig.damper1Size = Integer.parseInt(damper1Size.getSelectedItem().toString());
+        dabConfig.damper1Shape = DamperType.values()[damper1Shape.getSelectedItemPosition()].ordinal();
+        dabConfig.damper2Type = damper2TypeSelected.ordinal();
+        dabConfig.damper2Size = Integer.parseInt(damper2Size.getSelectedItem().toString());
+        dabConfig.damper2Shape = DamperType.values()[damper2Shape.getSelectedItemPosition()].ordinal();
+        
         dabConfig.setNodeType(mNodeType);
         dabConfig.setNodeAddress(mSmartNodeAddress);
         dabConfig.enableOccupancyControl = enableOccupancyControl.isChecked();
@@ -400,9 +413,14 @@ public class FragmentDABConfiguration extends BaseDialogFragment implements Adap
         Output analog1Op = new Output();
         analog1Op.setAddress(mSmartNodeAddress);
         analog1Op.setPort(Port.ANALOG_OUT_ONE);
-        analog1Op.mOutputAnalogActuatorType = OutputAnalogActuatorType.getEnum(damperTypeSelected.displayName);
+        analog1Op.mOutputAnalogActuatorType = OutputAnalogActuatorType.getEnum(damper1TypeSelected.displayName);
         dabConfig.getOutputs().add(analog1Op);
     
+        Output analog2Op = new Output();
+        analog2Op.setAddress(mSmartNodeAddress);
+        analog2Op.setPort(Port.ANALOG_OUT_TWO);
+        analog2Op.mOutputAnalogActuatorType = OutputAnalogActuatorType.getEnum(damper2TypeSelected.displayName);
+        dabConfig.getOutputs().add(analog2Op);
     
         mDabProfile.getProfileConfiguration().put(mSmartNodeAddress, dabConfig);
         if (mProfileConfig == null) {
@@ -436,47 +454,6 @@ public class FragmentDABConfiguration extends BaseDialogFragment implements Adap
             Log.e("dividerexception",e.getMessage().toString());
         }
     }
-    
-    @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        
-        switch (parent.getId()){
-            case R.id.damperType:
-                damperType.setSelection(position);
-                if(position == 4)
-                    damper1layout.setVisibility(View.INVISIBLE);
-                else
-                    damper1layout.setVisibility(View.VISIBLE);
-                damper1layout.invalidate();
-                break;
-            /*case R.id.damperType2:
-                damper2Type.setSelection(position);
-                if(position == 4)
-                    damper2layout.setVisibility(View.INVISIBLE);
-                else
-                    damper2layout.setVisibility(View.VISIBLE);
-                damper2layout.invalidate();
-                break;*/
-        }
-    }
-    
-    @Override
-    public void onNothingSelected(AdapterView<?> parent) {
-    
-    }
-    
-    @Override
-    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        switch (buttonView.getId()) {
-            case R.id.fsvDabReheatOption:
-                /*if(isChecked)
-                    reheatOptionLayout.setVisibility(View.VISIBLE);
-                else
-                    reheatOptionLayout.setVisibility(View.INVISIBLE);
-                reheatOptionLayout.invalidate();*/
-        }
-    }
-    
     
     public void fillDamperDetails() {
         mDampers.add(Damper.TYPE.GENERIC_0To10V.ordinal(), new Damper.Parameters(Damper.TYPE.GENERIC_0To10V.ordinal(),

@@ -1,4 +1,4 @@
-package a75f.io.logic.bo.building.system.dab;
+package a75f.io.logic.bo.building.dab;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,7 +42,7 @@ public class DabProfile extends ZoneProfile
     @Override
     public ProfileType getProfileType()
     {
-        return ProfileType.PLC;
+        return ProfileType.DAB;
     }
     
     @Override
@@ -106,7 +106,8 @@ public class DabProfile extends ZoneProfile
         
         damper.currentPosition = (int)(damper.minPosition + (damper.maxPosition - damper.minPosition) * (damperOpController.getControlVariable() / damperOpController.getMaxAllowedError()));
     
-        dabEquip.setDamperPos(damper.currentPosition);
+        dabEquip.setDamperPos(damper.currentPosition, "primary");
+        dabEquip.setDamperPos(damper.currentPosition, "secondary");
     }
     
     protected void setDamperLimits(Damper d) {

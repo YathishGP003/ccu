@@ -10,22 +10,21 @@
         android:orientation="vertical" >
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="75dp"
             android:layout_marginLeft="20dp"
             android:orientation="horizontal"
             android:paddingTop="20dp" >
 
             <TextView
-                android:id="@+id/textView2"
                 android:layout_width="170dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:text="Damper Type"
+                android:text="Damper1 Type"
                 android:textSize="@dimen/text_medium_xlarge" />
 
             <Spinner
-                android:id="@+id/damperType"
+                android:id="@+id/damper1Type"
                 android:layout_width="160dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
@@ -33,7 +32,7 @@
                 android:paddingRight="20dp" />
             <LinearLayout
                 android:id="@+id/damper1layout"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
                 <TextView
@@ -47,7 +46,7 @@
                     android:textSize="@dimen/text_medium_xlarge" />
 
                 <Spinner
-                    android:id="@+id/damperSize"
+                    android:id="@+id/damper1Size"
                     android:layout_width="80dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
@@ -63,7 +62,7 @@
                     android:text="Shape: "/>
 
                 <Spinner
-                    android:id="@+id/damperShape"
+                    android:id="@+id/damper1Shape"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
@@ -71,24 +70,26 @@
                     android:paddingLeft="20dp"
                     android:paddingRight="20dp" />
             </LinearLayout>
+
+
         </LinearLayout>
-        <!--<LinearLayout
-            android:layout_width="wrap_content"
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="75dp"
             android:layout_marginLeft="20dp"
             android:orientation="horizontal"
             android:paddingTop="20dp" >
 
             <TextView
-                android:id="@+id/damperTypeTv2"
                 android:layout_width="170dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:text="Damper Type"
+                android:text="Damper2 Type"
                 android:textSize="@dimen/text_medium_xlarge" />
 
             <Spinner
-                android:id="@+id/damperType2"
+                android:id="@+id/damper2Type"
                 android:layout_width="160dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
@@ -96,94 +97,102 @@
                 android:paddingRight="20dp" />
             <LinearLayout
                 android:id="@+id/damper2layout"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:visibility="invisible">
+                android:orientation="horizontal">
                 <TextView
-                    android:id="@+id/damperSizeTv2"
                     android:layout_width="180dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:paddingLeft="40dp"
                     android:paddingRight="5dp"
                     android:text="Damper Size"
-                    android:textSize="@dimen/text_medium_xlarge"
-                    android:visibility="visible" />
+                    android:textSize="@dimen/text_medium_xlarge" />
 
                 <Spinner
-                    android:id="@+id/damperSize2"
+                    android:id="@+id/damper2Size"
                     android:layout_width="80dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_weight="1"
                     android:paddingLeft="20dp"
-                    android:paddingRight="20dp"
-                    android:visibility="visible" />
+                    android:paddingRight="20dp" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="@dimen/text_medium_xlarge"
-                    android:layout_gravity="center_vertical"
                     android:paddingLeft="20dp"
+                    android:layout_gravity="center_vertical"
+                    android:textSize="@dimen/text_medium_xlarge"
                     android:text="Shape: "/>
 
                 <Spinner
-                    android:id="@+id/damperShape2"
+                    android:id="@+id/damper2Shape"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_weight="1"
-
                     android:paddingLeft="20dp"
                     android:paddingRight="20dp" />
             </LinearLayout>
-        </LinearLayout>-->
 
-        <LinearLayout
-            android:id="@+id/zonePriorityLayout"
-            android:layout_width="wrap_content"
-            android:layout_height="75dp"
-            android:layout_marginLeft="20dp"
-            android:orientation="horizontal"
-            android:paddingTop="20dp" >
 
-            <TextView
-                android:id="@+id/textView21"
-                android:layout_width="170dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:text="Zone Priority"
-                android:textSize="@dimen/text_medium_xlarge" />
-
-            <Spinner
-                android:id="@+id/zonePriority"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:paddingLeft="20dp"
-                android:paddingRight="20dp" />
-
-            <android.support.v7.widget.SwitchCompat
-                android:id="@+id/ignoreSetpoint"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingLeft="40dp"
-                android:paddingRight="0dp"
-                android:layout_marginLeft="50dp"
-                android:visibility="gone"
-                android:layout_gravity="center_vertical"
-                android:text="Ignore Set Temperature Change"
-                android:textSize="@dimen/text_medium_xlarge" />
         </LinearLayout>
 
         <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_width="match_parent"
+            android:layout_height="75dp"
+            android:layout_marginLeft="20dp"
+            android:orientation="horizontal"
+            android:paddingTop="20dp">
+
+            <android.support.v7.widget.SwitchCompat
+                android:id="@+id/enableIAQControl"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Enable IAQ Control                  "
+                android:textSize="@dimen/text_medium_xlarge"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="right">
+                <TextView
+                    android:id="@+id/textView21"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:gravity="right"
+                    android:text="Zone Priority"
+                    android:textSize="@dimen/text_medium_xlarge"/>
+
+                <Spinner
+                    android:id="@+id/zonePriority"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:gravity="right"
+                    android:paddingLeft="20dp"
+                    android:paddingRight="20dp"/>
+
+                <android.support.v7.widget.SwitchCompat
+                    android:id="@+id/ignoreSetpoint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="50dp"
+                    android:paddingLeft="40dp"
+                    android:paddingRight="0dp"
+                    android:text="Ignore Set Temperature Change"
+                    android:textSize="@dimen/text_medium_xlarge"
+                    android:visibility="gone"/>
+            </LinearLayout>
+        </LinearLayout>
+
 
             <LinearLayout
                 android:id="@+id/useOccupancyLayout"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:orientation="horizontal"
@@ -195,33 +204,20 @@
                     android:id="@+id/enableOccupancyControl"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Enable Occupancy Control"
+                    android:text="Enable Occupancy Control   "
                     android:textSize="@dimen/text_medium_xlarge" />
 
-                <Space
-                    android:layout_width="30dp"
-                    android:layout_height="match_parent" />
 
                 <android.support.v7.widget.SwitchCompat
                     android:id="@+id/enableCO2Control"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Enable CO2 Control"
+                    android:gravity="right"
+                    android:text="Enable CO2 Control       "
+                    android:paddingRight="20dp"
                     android:textSize="@dimen/text_medium_xlarge" />
 
-                <Space
-                    android:layout_width="30dp"
-                    android:layout_height="match_parent" />
-
-                <android.support.v7.widget.SwitchCompat
-                    android:id="@+id/enableIAQControl"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Enable IAQ Control"
-                    android:textSize="@dimen/text_medium_xlarge" />
             </LinearLayout>
-        </LinearLayout>
-
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

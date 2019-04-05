@@ -371,6 +371,7 @@ public class BuildingTuners
                                            .setEquipRef(equipref)
                                            .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("equipHis")
                                            .addMarker("zone").addMarker("unoccupied").addMarker("setback").addMarker("sp")
+                                           .setTz(tz)
                                            .build();
         String unoccupiedZoneSetbackId = hayStack.addPoint(unoccupiedZoneSetback);
         HashMap unoccupiedZoneSetbackPoint = hayStack.read("point and tuner and default and zone and unoccupied and setback");
@@ -396,6 +397,7 @@ public class BuildingTuners
                                   .setEquipRef(equipref)
                                   .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("equipHis")
                                   .addMarker("zone").addMarker("priority").addMarker("spread").addMarker("sp")
+                                  .setTz(tz)
                                   .build();
         String zonePrioritySpreadId = hayStack.addPoint(zonePrioritySpread);
         HashMap zonePrioritySpreadPoint = hayStack.read("point and tuner and default and vav and zone and priority and spread");
@@ -414,6 +416,7 @@ public class BuildingTuners
                                            .setEquipRef(equipref)
                                            .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("equipHis")
                                            .addMarker("zone").addMarker("priority").addMarker("multiplier").addMarker("sp")
+                                           .setTz(tz)
                                            .build();
         String zonePriorityMultiplierId = hayStack.addPoint(zonePriorityMultiplier);
         HashMap zonePriorityMultiplierPoint = hayStack.read("point and tuner and default and vav and zone and priority and multiplier");
@@ -432,6 +435,7 @@ public class BuildingTuners
                                   .setEquipRef(equipref)
                                   .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("equipHis")
                                   .addMarker("cooling").addMarker("deadband").addMarker("base").addMarker("sp")
+                                  .setTz(tz)
                                   .setUnit("\u00B0F")
                                   .build();
         String coolingDbId = hayStack.addPoint(coolingDb);
@@ -451,6 +455,7 @@ public class BuildingTuners
                                   .setEquipRef(equipref)
                                   .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("equipHis")
                                   .addMarker("cooling").addMarker("deadband").addMarker("multiplier").addMarker("sp")
+                                  .setTz(tz)
                                   .build();
         String coolingDbMultiplierId = hayStack.addPoint(coolingDbMultiplier);
         HashMap coolingDbMultiplierPoint = hayStack.read("point and tuner and default and vav and cooling and deadband and multiplier");
@@ -469,6 +474,7 @@ public class BuildingTuners
                                   .setEquipRef(equipref)
                                   .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("equipHis")
                                   .addMarker("heating").addMarker("deadband").addMarker("base").addMarker("sp")
+                                  .setTz(tz)
                                   .setUnit("\u00B0F")
                                   .build();
         String heatingDbId = hayStack.addPoint(heatingDb);
@@ -487,6 +493,7 @@ public class BuildingTuners
                                   .setEquipRef(equipref)
                                   .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("equipHis")
                                   .addMarker("heating").addMarker("deadband").addMarker("multiplier").addMarker("sp")
+                                  .setTz(tz)
                                   .build();
         String heatingDbMultiplierId = hayStack.addPoint(heatingDbMultiplier);
         HashMap heatingDbMultiplierPoint = hayStack.read("point and tuner and default and vav and heating and deadband and multiplier");
@@ -504,6 +511,7 @@ public class BuildingTuners
                                  .setEquipRef(equipref)
                                  .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("equipHis")
                                  .addMarker("pgain").addMarker("sp")
+                                 .setTz(tz)
                                  .build();
         String pgainId = hayStack.addPoint(propGain);
         HashMap defPgainPoint = hayStack.read("point and tuner and default and vav and pgain");
@@ -522,6 +530,7 @@ public class BuildingTuners
                                      .setEquipRef(equipref)
                                      .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("equipHis")
                                      .addMarker("igain").addMarker("sp")
+                                     .setTz(tz)
                                      .build();
         String igainId = hayStack.addPoint(integralGain);
         HashMap defIgainPoint = hayStack.read("point and tuner and default and vav and igain");
@@ -539,6 +548,7 @@ public class BuildingTuners
                                    .setEquipRef(equipref)
                                    .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("equipHis")
                                    .addMarker("pspread").addMarker("sp")
+                                   .setTz(tz)
                                    .build();
         String pSpreadId = hayStack.addPoint(propSpread);
         HashMap defPSpreadPoint = hayStack.read("point and tuner and default and vav and pspread");
@@ -556,6 +566,7 @@ public class BuildingTuners
                                         .setEquipRef(equipref)
                                         .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("equipHis")
                                         .addMarker("itimeout").addMarker("sp")
+                                        .setTz(tz)
                                         .build();
         String iTimeoutId = hayStack.addPoint(integralTimeout);
         HashMap defITPoint = hayStack.read("point and tuner and default and vav and itimeout");
@@ -573,6 +584,7 @@ public class BuildingTuners
                                         .setEquipRef(equipref)
                                         .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("equipHis")
                                         .addMarker("valve").addMarker("start").addMarker("damper").addMarker("sp")
+                                        .setTz(tz)
                                         .build();
         String valveStartDamperId = hayStack.addPoint(valveStartDamper);
         HashMap valveStartDamperPoint = hayStack.read("point and tuner and default and vav and valve and start and damper");
@@ -591,6 +603,7 @@ public class BuildingTuners
                                       .setEquipRef(equipref)
                                       .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("equipHis")
                                       .addMarker("zone").addMarker("co2").addMarker("target").addMarker("sp")
+                                      .setTz(tz)
                                       .build();
         String zoneCO2TargetId = hayStack.addPoint(zoneCO2Target);
         HashMap zoneCO2TargetPoint = hayStack.read("point and tuner and default and vav and zone and co2 and target");
@@ -608,6 +621,7 @@ public class BuildingTuners
                                          .setEquipRef(equipref)
                                          .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("equipHis")
                                          .addMarker("zone").addMarker("co2").addMarker("threshold").addMarker("sp")
+                                         .setTz(tz)
                                          .build();
         String zoneCO2ThresholdId = hayStack.addPoint(zoneCO2Threshold);
         HashMap zoneCO2ThresholdPoint = hayStack.read("point and tuner and default and vav and zone and co2 and threshold");
@@ -625,6 +639,7 @@ public class BuildingTuners
                                          .setEquipRef(equipref)
                                          .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("sp").addMarker("equipHis")
                                          .addMarker("zone").addMarker("voc").addMarker("target")
+                                         .setTz(tz)
                                          .build();
         String zoneVOCTargetId = hayStack.addPoint(zoneVOCTarget);
         HashMap zoneVOCTargetPoint = hayStack.read("point and tuner and default and vav and zone and voc and target");
@@ -642,6 +657,7 @@ public class BuildingTuners
                                         .setEquipRef(equipref)
                                         .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("equipHis")
                                         .addMarker("zone").addMarker("voc").addMarker("threshold").addMarker("sp")
+                                        .setTz(tz)
                                         .build();
         String zoneVOCThresholdId = hayStack.addPoint(zoneVOCThreshold);
         HashMap zoneVOCThresholdPoint = hayStack.read("point and tuner and default and vav and zone and voc and threshold");
@@ -703,6 +719,7 @@ public class BuildingTuners
                                  .setEquipRef(equipref)
                                  .addMarker("tuner").addMarker("pid").addMarker("writable").addMarker("his").addMarker("equipHis")
                                  .addMarker("pgain").addMarker("sp")
+                                 .setTz(tz)
                                  .build();
         String pgainId = hayStack.addPoint(propGain);
         HashMap defPgainPoint = hayStack.read("point and tuner and default and pid and pgain");
@@ -721,6 +738,7 @@ public class BuildingTuners
                                      .setEquipRef(equipref)
                                      .addMarker("tuner").addMarker("pid").addMarker("writable").addMarker("his").addMarker("equipHis")
                                      .addMarker("igain").addMarker("sp")
+                                     .setTz(tz)
                                      .build();
         String igainId = hayStack.addPoint(integralGain);
         HashMap defIgainPoint = hayStack.read("point and tuner and default and pid and igain");
@@ -738,6 +756,7 @@ public class BuildingTuners
                                         .setEquipRef(equipref)
                                         .addMarker("tuner").addMarker("pid").addMarker("writable").addMarker("his").addMarker("equipHis")
                                         .addMarker("itimeout").addMarker("sp")
+                                        .setTz(tz)
                                         .build();
         String iTimeoutId = hayStack.addPoint(integralTimeout);
         HashMap defITPoint = hayStack.read("point and tuner and default and pid and itimeout");
@@ -890,6 +909,7 @@ public class BuildingTuners
                                            .setEquipRef(equipref)
                                            .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis")
                                            .addMarker("zone").addMarker("priority").addMarker("spread").addMarker("sp")
+                                           .setTz(tz)
                                            .build();
         String zonePrioritySpreadId = hayStack.addPoint(zonePrioritySpread);
         HashMap zonePrioritySpreadPoint = hayStack.read("point and tuner and default and dab and zone and priority and spread");
@@ -908,6 +928,7 @@ public class BuildingTuners
                                                .setEquipRef(equipref)
                                                .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                .addMarker("zone").addMarker("priority").addMarker("multiplier").addMarker("sp")
+                                               .setTz(tz)
                                                .build();
         String zonePriorityMultiplierId = hayStack.addPoint(zonePriorityMultiplier);
         HashMap zonePriorityMultiplierPoint = hayStack.read("point and tuner and default and dab and zone and priority and multiplier");
@@ -926,6 +947,7 @@ public class BuildingTuners
                                   .setEquipRef(equipref)
                                   .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis")
                                   .addMarker("cooling").addMarker("deadband").addMarker("base").addMarker("sp")
+                                  .setTz(tz)
                                   .setUnit("\u00B0F")
                                   .build();
         String coolingDbId = hayStack.addPoint(coolingDb);
@@ -945,6 +967,7 @@ public class BuildingTuners
                                             .setEquipRef(equipref)
                                             .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis")
                                             .addMarker("cooling").addMarker("deadband").addMarker("multiplier").addMarker("sp")
+                                            .setTz(tz)
                                             .build();
         String coolingDbMultiplierId = hayStack.addPoint(coolingDbMultiplier);
         HashMap coolingDbMultiplierPoint = hayStack.read("point and tuner and default and dab and cooling and deadband and multiplier");
@@ -963,6 +986,7 @@ public class BuildingTuners
                                   .setEquipRef(equipref)
                                   .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis")
                                   .addMarker("heating").addMarker("deadband").addMarker("base").addMarker("sp")
+                                  .setTz(tz)
                                   .setUnit("\u00B0F")
                                   .build();
         String heatingDbId = hayStack.addPoint(heatingDb);
@@ -981,6 +1005,7 @@ public class BuildingTuners
                                             .setEquipRef(equipref)
                                             .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis")
                                             .addMarker("heating").addMarker("deadband").addMarker("multiplier").addMarker("sp")
+                                            .setTz(tz)
                                             .build();
         String heatingDbMultiplierId = hayStack.addPoint(heatingDbMultiplier);
         HashMap heatingDbMultiplierPoint = hayStack.read("point and tuner and default and dab and heating and deadband and multiplier");
@@ -998,6 +1023,7 @@ public class BuildingTuners
                                  .setEquipRef(equipref)
                                  .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis")
                                  .addMarker("pgain").addMarker("sp")
+                                 .setTz(tz)
                                  .build();
         String pgainId = hayStack.addPoint(propGain);
         HashMap defPgainPoint = hayStack.read("point and tuner and default and dab and pgain");
@@ -1016,6 +1042,7 @@ public class BuildingTuners
                                      .setEquipRef(equipref)
                                      .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis")
                                      .addMarker("igain").addMarker("sp")
+                                     .setTz(tz)
                                      .build();
         String igainId = hayStack.addPoint(integralGain);
         HashMap defIgainPoint = hayStack.read("point and tuner and default and dab and igain");
@@ -1033,6 +1060,7 @@ public class BuildingTuners
                                    .setEquipRef(equipref)
                                    .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis")
                                    .addMarker("pspread").addMarker("sp")
+                                   .setTz(tz)
                                    .build();
         String pSpreadId = hayStack.addPoint(propSpread);
         HashMap defPSpreadPoint = hayStack.read("point and tuner and default and dab and pspread");
@@ -1050,6 +1078,7 @@ public class BuildingTuners
                                         .setEquipRef(equipref)
                                         .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis")
                                         .addMarker("itimeout").addMarker("sp")
+                                        .setTz(tz)
                                         .build();
         String iTimeoutId = hayStack.addPoint(integralTimeout);
         HashMap defITPoint = hayStack.read("point and tuner and default and dab and itimeout");

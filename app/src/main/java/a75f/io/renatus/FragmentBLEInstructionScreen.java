@@ -123,6 +123,7 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         }
         else if (mProfileType == ProfileType.PLC)
         {
+            Log.d("CCU_UI"," PLC Profile type");
             if (L.isSimulation())
             {
                 showDialogFragment(FragmentPLCConfiguration
@@ -139,8 +140,8 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         {
             if (L.isSimulation())
             {
-                showDialogFragment(FragmentPLCConfiguration
-                                           .newInstance(mNodeAddress, mRoomName, mNodeType, mFloorName), FragmentPLCConfiguration.ID);
+                showDialogFragment(FragmentDABConfiguration
+                                           .newInstance(mNodeAddress, mRoomName, mNodeType, mFloorName, mProfileType), FragmentPLCConfiguration.ID);
             }
             else
             {

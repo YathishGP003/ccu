@@ -1,4 +1,4 @@
-package a75f.io.logic.bo.building.system.dab;
+package a75f.io.logic.bo.building.dab;
 
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 
@@ -8,9 +8,13 @@ import a75f.io.logic.bo.building.BaseProfileConfiguration;
 
 public class DabProfileConfiguration extends BaseProfileConfiguration
 {
-    public int damperType;
-    public int damperSize;
-    public int damperShape;
+    public int damper1Type;
+    public int damper1Size;
+    public int damper1Shape;
+    
+    public int damper2Type;
+    public int damper2Size;
+    public int damper2Shape;
     
     public boolean enableOccupancyControl;
     public boolean enableCO2Control;

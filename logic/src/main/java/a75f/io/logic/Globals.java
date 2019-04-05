@@ -41,7 +41,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.plc.PlcProfile;
 import a75f.io.logic.bo.building.sscpu.ConventionalUnitProfile;
 import a75f.io.logic.bo.building.system.DefaultSystem;
-import a75f.io.logic.bo.building.system.dab.DabProfile;
+import a75f.io.logic.bo.building.dab.DabProfile;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedHybridRtu;
 import a75f.io.logic.bo.building.system.vav.VavAnalogRtu;

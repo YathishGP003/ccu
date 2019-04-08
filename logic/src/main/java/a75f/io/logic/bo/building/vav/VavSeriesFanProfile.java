@@ -160,14 +160,14 @@ public class VavSeriesFanProfile extends VavProfile
                 //CO2 loop output from 0-50% modulates damper min position.
                 if (enabledCO2Control && occupied && co2Loop.getLoopOutput(co2) > 0)
                 {
-                    damper.iaqCompensatedMinPos = damper.minPosition + (damper.maxPosition - damper.minPosition) * Math.max(50, co2Loop.getLoopOutput()) / 50;
+                    damper.iaqCompensatedMinPos = damper.minPosition + (damper.maxPosition - damper.minPosition) * Math.min(50, co2Loop.getLoopOutput()) / 50;
                     CcuLog.d(L.TAG_CCU_ZONE, "CO2LoopOp :" + co2Loop.getLoopOutput() + ", adjusted minposition " + damper.iaqCompensatedMinPos);
                 }
     
                 //VOC loop output from 0-50% modulates damper min position.
                 if (enabledIAQControl && occupied && vocLoop.getLoopOutput(voc) > 0)
                 {
-                    damper.iaqCompensatedMinPos = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * Math.max(50, vocLoop.getLoopOutput()) / 50;
+                    damper.iaqCompensatedMinPos = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * Math.min(50, vocLoop.getLoopOutput()) / 50;
                     CcuLog.d(L.TAG_CCU_ZONE, "VOCLoopOp :" + vocLoop.getLoopOutput() + ", adjusted minposition " + damper.iaqCompensatedMinPos);
                 }
                 
@@ -226,9 +226,6 @@ public class VavSeriesFanProfile extends VavProfile
                 vavUnit.fanSpeed = 0;
                 fanReady = false;
             }
-    
-            valve.currentPosition = Math.max(valve.currentPosition, 0);
-            valve.currentPosition = Math.min(valve.currentPosition, 100);
             
             CcuLog.d(L.TAG_CCU_ZONE,"CoolingLoop "+node +"roomTemp :"+roomTemp+" setTempCooling: "+setTempCooling);
             coolingLoop.dump();
@@ -237,9 +234,14 @@ public class VavSeriesFanProfile extends VavProfile
     
             CcuLog.d(L.TAG_CCU_ZONE, "STATE :"+state+" ,loopOp: " + loopOp + " ,damper:" + damper.currentPosition
                                                         +", valve:"+valve.currentPosition+" fanStart: "+vavUnit.fanStart);
+    
+            valve.applyLimits();
+            damper.applyLimits();
+            
             updateTRResponse(node);
             vavDevice.setDamperPos(damper.currentPosition);
             vavDevice.setReheatPos(valve.currentPosition);
+            vavDevice.setStatus(state.ordinal());
             vavDevice.updateLoopParams();
         }
     }

@@ -54,8 +54,14 @@ public class TunerConstants
     public static final double ZONE_PRIORITY_SPREAD = 2.0;
     public static final double ZONE_PRIORITY_MULTIPLIER = 1.3;
     public static final double ZONE_UNOCCUPIED_SETBACK = 5;
+    public static final double ZONE_HEATING_USERLIMIT_MIN = 72;
+    public static final double ZONE_HEATING_USERLIMIT_MAX = 67;
+    public static final double ZONE_COOLING_USERLIMIT_MIN = 72;
+    public static final double ZONE_COOLING_USERLIMIT_MAX = 77;
+    
     
     public static final double SYSTEM_PRECONDITION_RATE = 15.0;
+    public static final double USER_LIMIT_SPREAD = 4;
     
     public static final double MIN_COOLING_DAMPER = 40;
     public static final double MAX_COOLING_DAMPER = 80;

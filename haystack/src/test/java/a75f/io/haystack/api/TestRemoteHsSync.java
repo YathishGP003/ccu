@@ -42,6 +42,7 @@ import a75f.io.api.haystack.sync.EntityParser;
 import a75f.io.api.haystack.sync.EntityPullHandler;
 import a75f.io.api.haystack.sync.EntitySyncHandler;
 import a75f.io.api.haystack.sync.HttpUtil;
+import a75f.io.logger.CcuLog;
 
 /**
  * Created by samjithsadasivan on 10/11/18.
@@ -725,5 +726,18 @@ public class TestRemoteHsSync
             }
             
         }
-        }
+    }
+    
+    @Test
+    public void testPointWrite() {
+        String id = "@5ca7c308bf7e6c00f5e22079";
+    
+        HDictBuilder b = new HDictBuilder().add("id", HRef.copy(id)).add("level", 10).add("who", "ccu").add("val", "Warming Space");
+        
+        HDict[] dictArr  = {b.toDict()};
+        String  response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+        System.out.println(response);
+    }
+    
+    
 }

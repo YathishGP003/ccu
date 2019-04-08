@@ -485,6 +485,18 @@ public class VAVLogicalMap
                                          .setTz(tz)
                                          .build();
         CCUHsApi.getInstance().addPoint(spCurrentRequest);
+    
+        Point equipStatus = new Point.Builder()
+                                  .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-equipStatus")
+                                  .setEquipRef(equipRef)
+                                  .setSiteRef(siteRef)
+                                  .setRoomRef(room)
+                                  .setFloorRef(floor)
+                                  .addMarker("status").addMarker("vav").addMarker("base").addMarker("cmd").addMarker("his").addMarker("logical").addMarker("zone").addMarker("equipHis")
+                                  .setGroup(String.valueOf(nodeAddr))
+                                  .setTz(tz)
+                                  .build();
+        String equipStatusId = CCUHsApi.getInstance().addPoint(equipStatus);
         
         
         //Create Physical points and map
@@ -1106,6 +1118,10 @@ public class VAVLogicalMap
     public void setStaticPressure(double staticPressure)
     {
         this.staticPressure = staticPressure;
+    }
+    
+    public void setStatus(double status) {
+        CCUHsApi.getInstance().writeHisValByQuery("point and status and cmd and group == \""+nodeAddr+"\"", status);
     }
     
     public void updateLoopParams() {

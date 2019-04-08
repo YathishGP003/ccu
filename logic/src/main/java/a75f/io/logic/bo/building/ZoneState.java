@@ -6,7 +6,8 @@ package a75f.io.logic.bo.building;
 
 public enum ZoneState
 {
+    DEADBAND,
     COOLING,
-    HEATING,
-    DEADBAND
+    HEATING
+    
 }

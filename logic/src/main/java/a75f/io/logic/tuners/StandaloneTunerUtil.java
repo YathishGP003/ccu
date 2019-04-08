@@ -8,7 +8,7 @@ import a75f.io.api.haystack.CCUHsApi;
 public class StandaloneTunerUtil {
     public static double getStandaloneCoolingDeadband(String equipRef) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and tuner and standalone and deadband and cooling and equipRef == \""+equipRef+"\"");
+        HashMap cdb = hayStack.read("point and tuner and deadband and cooling and equipRef == \""+equipRef+"\"");
 
         if((cdb != null) && (cdb.get("id") != null) ) {
             ArrayList values = hayStack.readPoint(cdb.get("id").toString());
@@ -26,7 +26,7 @@ public class StandaloneTunerUtil {
 
     public static void setStandaloneCoolingDeadband(String equipRef, double dbVal, int level) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and tuner and standalone and deadband and cooling and equipRef == \""+equipRef+"\"");
+        HashMap cdb = hayStack.read("point and tuner and deadband and cooling and equipRef == \""+equipRef+"\"");
 
         String id = cdb.get("id").toString();
         if (id == null || id == "") {
@@ -38,7 +38,7 @@ public class StandaloneTunerUtil {
 
     public static double getStandaloneHeatingDeadband(String equipRef) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and tuner and standalone and deadband and heating and equipRef == \""+equipRef+"\"");
+        HashMap cdb = hayStack.read("point and tuner and deadband and heating and equipRef == \""+equipRef+"\"");
 
         if((cdb != null) && (cdb.get("id") != null) ) {
 
@@ -58,7 +58,7 @@ public class StandaloneTunerUtil {
 
     public static double getStandaloneStage1Hysteresis(String equipRef) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and tuner and standalone and hysteresis and stage1 and equipRef == \""+equipRef+"\"");
+        HashMap cdb = hayStack.read("point and tuner and hysteresis and stage1 and equipRef == \""+equipRef+"\"");
 
         if((cdb != null) && (cdb.get("id") != null) ) {
 
@@ -76,7 +76,7 @@ public class StandaloneTunerUtil {
     }
     public static void setStandaloneHeatingDeadband(String equipRef, double dbVal, int level) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and tuner and standalone and deadband and heating and equipRef == \""+equipRef+"\"");
+        HashMap cdb = hayStack.read("point and tuner and deadband and heating and equipRef == \""+equipRef+"\"");
 
         String id = cdb.get("id").toString();
         if (id == null || id == "") {
@@ -87,7 +87,7 @@ public class StandaloneTunerUtil {
     }
     public static double readTunerValByQuery(String query) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap tunerPoint = hayStack.read("point and tuner and standalone and "+query);
+        HashMap tunerPoint = hayStack.read("point and tuner and "+query);
         if((tunerPoint != null) && (tunerPoint.get("id") != null)) {
             ArrayList values = hayStack.readPoint(tunerPoint.get("id").toString());
             if (values != null && values.size() > 0) {
@@ -103,7 +103,7 @@ public class StandaloneTunerUtil {
     }
     public static double readTunerValByQuery(String query, String equipRef) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap tunerPoint = hayStack.read("point and tuner and standalone and "+query+" and equipRef == \""+equipRef+"\"");
+        HashMap tunerPoint = hayStack.read("point and tuner and "+query+" and equipRef == \""+equipRef+"\"");
         if((tunerPoint != null) && (tunerPoint.get("id") != null)) {
             ArrayList values = hayStack.readPoint(tunerPoint.get("id").toString());
             if (values != null && values.size() > 0) {

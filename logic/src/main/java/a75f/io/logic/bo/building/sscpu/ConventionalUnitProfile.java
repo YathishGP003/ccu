@@ -62,39 +62,40 @@ public class ConventionalUnitProfile extends ZoneProfile {
                 continue;
             }
             Log.d(TAG,"SmartStat CPU profile");
+
+            HashMap<String,Integer> relayStages = new HashMap<String,Integer>();
             ConventionalUnitLogicalMap cpuDevice = cpuDeviceMap.get(node);
             if(cpuDevice.profileType != ProfileType.SMARTSTAT_CONVENTIONAL_PACK_UNIT)
                 continue;
             double roomTemp = cpuDevice.getCurrentTemp();
             if (roomTemp == 0) {
                 resetRelays(node);
+                StandaloneScheduler.updateSmartStatStatus(null,DEADBAND, relayStages);
                 Log.d(TAG,"Invalid Temp , skip controls update for "+node+" roomTemp : "+cpuDeviceMap.get(node).getCurrentTemp());
                 continue;
             }
 			setTempCooling = cpuDevice.getDesiredTempCooling();
             setTempHeating = cpuDevice.getDesiredTempHeating();
-            cpuDevice.setDesiredTemp((setTempCooling+setTempHeating)/2.0);
+            double averageDesiredTemp = (setTempCooling+setTempHeating)/2.0;
+            if (averageDesiredTemp != cpuDevice.getDesiredTemp())
+            {
+                cpuDevice.setDesiredTemp(averageDesiredTemp);
+            }
             Equip cpuEquip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + node + "\"")).build();
 
-            String buildingTunerRef = null;
-            HashMap tunerEquip = CCUHsApi.getInstance().read("equip and tuner");
-            if (tunerEquip != null && tunerEquip.size() > 0) {
-                buildingTunerRef = tunerEquip.get("id").toString();
-            }
-            double coolingDeadBand = StandaloneTunerUtil.getStandaloneCoolingDeadband(buildingTunerRef);
-            double heatingDeadBand = StandaloneTunerUtil.getStandaloneHeatingDeadband(buildingTunerRef);
-            double hysteresis = StandaloneTunerUtil.getStandaloneStage1Hysteresis(buildingTunerRef);
             Log.d(TAG, " smartstat cpu, updates 111="+cpuEquip.getRoomRef()+","+setTempHeating+","+setTempCooling);
 
             String zoneId = HSUtil.getZoneIdFromEquipId(cpuEquip.getId());
             Occupied occuStatus = ScheduleProcessJob.getOccupiedModeCache(zoneId);
 
+            boolean occupied = (occuStatus == null ? false : occuStatus.isOccupied());
+            //For dual temp but for single mode we use tuners
+            double hysteresis = StandaloneTunerUtil.getStandaloneStage1Hysteresis(cpuEquip.getId());
 
             double ssOperatingMode = getOperationalModes("temp",cpuEquip.getId());
             double ssFanOpMode = getOperationalModes("fan",cpuEquip.getId());
             StandaloneOperationalMode opMode = StandaloneOperationalMode.values()[(int)ssOperatingMode];
             StandaloneFanSpeed fanSpeed = StandaloneFanSpeed.values()[(int)ssFanOpMode];
-            boolean occupied = (occuStatus == null ? false : occuStatus.isOccupied());
             if(!occupied &&(fanSpeed != StandaloneFanSpeed.OFF ) ){
                 if(fanSpeed != StandaloneFanSpeed.AUTO) {
                     StandaloneScheduler.updateOperationalPoints(cpuEquip.getId(), "fan", StandaloneFanSpeed.AUTO.ordinal());
@@ -104,9 +105,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
             cpuDevice.setProfilePoint("occupancy and status",occupied ? 1 : 0);
             boolean isFanStage1Enabled = getConfigEnabled("relay3", node) > 0 ? true : false;
             boolean isFanStage2Enabled = getConfigEnabled("relay6", node) > 0 ? true : false;
-
-            HashMap<String,Integer> relayStages = new HashMap<String,Integer>();
-            Log.d(TAG, " smartstat cpu, updates =" + node+","+roomTemp+","+occupied+","+isFanStage1Enabled+","+isFanStage2Enabled+","+occuStatus.getCoolingVal()+","+occuStatus.getHeatingVal());
+            Log.d(TAG, " smartstat cpu, updates =" + node+","+roomTemp+","+occupied+","+occuStatus.getCoolingDeadBand()+","+state+","+occuStatus.getCoolingVal()+","+occuStatus.getHeatingVal());
             if ((opMode == StandaloneOperationalMode.AUTO || opMode == StandaloneOperationalMode.COOL_ONLY)&& (roomTemp > setTempCooling) )
             {
 
@@ -118,7 +117,8 @@ public class ConventionalUnitProfile extends ZoneProfile {
                 setCmdSignal("heating and stage1",0,node);
 				setCmdSignal("heating and stage2",0,node);
                 if (isCoolingStage1Enabled) {
-                    if(roomTemp >= (setTempCooling + coolingDeadBand)) {
+                    if(roomTemp >= (setTempCooling + occuStatus.getCoolingDeadBand())) {
+                        Log.d(TAG, " smartstat cpu, updates stage1 cool on =" + node+","+roomTemp+","+setTempCooling+","+occuStatus.getCoolingDeadBand());
                         relayStages.put("CoolingStage1",1);
                         relayStages.put("FanStage1",1);
                         setCmdSignal("cooling and stage1", 1.0, node);
@@ -147,13 +147,13 @@ public class ConventionalUnitProfile extends ZoneProfile {
                     setCmdSignal("cooling and stage1", 0, node);
                 }
                 if(isCoolingStage2Enabled){
-                    if (roomTemp >= (setTempCooling + (coolingDeadBand * 2))) {
+                    if (roomTemp >= (setTempCooling + (occuStatus.getCoolingDeadBand() * 2))) {
                         setCmdSignal("cooling and stage2", 1.0, node);
                         relayStages.put("CoolingStage2",1);
                         relayStages.put("FanStage2",1);
                         if(isFanStage2Enabled)setCmdSignal("fan and stage2",1.0,node);
                     } else{
-                        if (roomTemp <= (setTempCooling+coolingDeadBand)) {//Turn off stage 2
+                        if (roomTemp <= (setTempCooling+occuStatus.getCoolingDeadBand())) {//Turn off stage 2
                             if(getCmdSignal("cooling and stage2", node) > 0)
                                 setCmdSignal("cooling and stage2", 0, node);
                             if (occupied && isFanStage2Enabled && (fanSpeed == StandaloneFanSpeed.FAN_HIGH)) {
@@ -174,9 +174,6 @@ public class ConventionalUnitProfile extends ZoneProfile {
                     else if(isFanStage2Enabled) setCmdSignal("fan and stage2",0,node);
                     setCmdSignal("cooling and stage2", 0, node);
                 }
-
-                double desTemp = setTempCooling + coolingDeadBand;
-                boolean isTempBreach = roomTemp >= (setTempCooling + coolingDeadBand);
             }
             else if ((opMode == StandaloneOperationalMode.AUTO || opMode == StandaloneOperationalMode.HEAT_ONLY)&&(roomTemp < setTempHeating))
             {
@@ -189,7 +186,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
                 boolean isHeatingStage2Enabled = getConfigEnabled("relay5", node) > 0;
                 if (isHeatingStage1Enabled)
                 {
-                    if(roomTemp <= (setTempHeating - heatingDeadBand)) {
+                    if(roomTemp <= (setTempHeating - occuStatus.getHeatingDeadBand())) {
                         setCmdSignal("heating and stage1", 1.0, node);
                         if(isFanStage1Enabled) setCmdSignal("fan and stage1",1.0,node);
                         relayStages.put("HeatingStage1",1);
@@ -221,7 +218,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
                 }
                 if(isHeatingStage2Enabled){
 
-                    if (roomTemp <= (setTempHeating - (heatingDeadBand * 2))) {
+                    if (roomTemp <= (setTempHeating - (occuStatus.getHeatingDeadBand() * 2))) {
                         setCmdSignal("heating and stage2", 1.0, node);
                         if(isFanStage2Enabled){
                             setCmdSignal("fan and stage2",1.0,node);
@@ -229,7 +226,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
                         relayStages.put("HeatingStage2",1);
                         relayStages.put("FanStage2",1);
                     } else {
-                        if (roomTemp >= (setTempHeating - heatingDeadBand)) {//Turn off stage 2
+                        if (roomTemp >= (setTempHeating - occuStatus.getHeatingDeadBand())) {//Turn off stage 2
                             if(getCmdSignal("heating and stage2", node) > 0)
                                 setCmdSignal("heating and stage2", 0, node);
                             if (occupied && isFanStage2Enabled && (fanSpeed == StandaloneFanSpeed.FAN_HIGH)) {

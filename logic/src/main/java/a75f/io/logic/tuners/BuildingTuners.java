@@ -1092,8 +1092,66 @@ public class BuildingTuners
     
     }
 
+    public void addEquipZoneStandaloneTuners(String equipdis, String equipref) {
+        Point saHeatingDeadBand = new Point.Builder()
+                .setDisplayName(equipdis+"-"+"standaloneHeatingDeadband")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .addMarker("tuner").addMarker("base").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("standalone").addMarker("heating").addMarker("deadband").addMarker("sp")
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+        String saHeatingDeadBandId = hayStack.addPoint(saHeatingDeadBand);
+        HashMap saHeatingDeadBandPoint = hayStack.read("point and tuner and default and base and standalone and heating and deadband");
+        ArrayList<HashMap> saHeatingDeadBandArr = hayStack.readPoint(saHeatingDeadBandPoint.get("id").toString());
+        for (HashMap valMap : saHeatingDeadBandArr) {
+            if (valMap.get("val") != null)
+            {
+                hayStack.pointWrite(HRef.copy(saHeatingDeadBandId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        Point saCoolingDeadBand = new Point.Builder()
+                .setDisplayName(equipdis+"-"+"standaloneCoolingDeadband")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .addMarker("tuner").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("cooling").addMarker("deadband").addMarker("sp")
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+        String saCoolingDeadBandId = hayStack.addPoint(saCoolingDeadBand);
+        HashMap saCoolingDeadBandPoint = hayStack.read("point and tuner and default and base and standalone and cooling and deadband");
+        ArrayList<HashMap> saCoolingDeadBandArr = hayStack.readPoint(saCoolingDeadBandPoint.get("id").toString());
+        for (HashMap valMap : saCoolingDeadBandArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.pointWrite(HRef.copy(saCoolingDeadBandId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        Point saStage1Hysteresis = new Point.Builder()
+                .setDisplayName(equipdis+"-"+"standaloneStage1Hysteresis")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .addMarker("tuner").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("stage1").addMarker("hysteresis").addMarker("sp")
+                .setTz(tz)
+                .build();
+        String saStage1HysteresisId = hayStack.addPoint(saStage1Hysteresis);
+        HashMap saStage1HysteresisPoint = hayStack.read("point and tuner and default and base and standalone and stage1 and hysteresis");
+        ArrayList<HashMap> saStage1HysteresisArr = hayStack.readPoint(saStage1HysteresisPoint.get("id").toString());
+        for (HashMap valMap : saStage1HysteresisArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.pointWrite(HRef.copy(saStage1HysteresisId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+    }
     public void addEquipStandaloneTuners(String equipdis, String equipref){
         addEquipZoneTuners(equipdis,equipref);
+        addEquipZoneStandaloneTuners(equipdis,equipref);
     }
     public void addDefaultStandaloneTuners()
     {
@@ -1101,7 +1159,7 @@ public class BuildingTuners
                 .setDisplayName(equipDis+"-"+"standaloneHeatingDeadband")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef)
-                .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his")
+                .addMarker("tuner").addMarker("default").addMarker("base").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("standalone").addMarker("heating").addMarker("deadband").addMarker("sp")
                 .setUnit("\u00B0F")
                 .setTz(tz)
@@ -1114,7 +1172,7 @@ public class BuildingTuners
                 .setDisplayName(equipDis+"-"+"standaloneCoolingDeadband")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef)
-                .addMarker("tuner").addMarker("default").addMarker("standalone").addMarker("writable").addMarker("his")
+                .addMarker("tuner").addMarker("default").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("cooling").addMarker("deadband").addMarker("sp")
                 .setUnit("\u00B0F")
                 .setTz(tz)
@@ -1126,7 +1184,7 @@ public class BuildingTuners
                 .setDisplayName(equipDis+"-"+"standaloneStage1Hysteresis")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef)
-                .addMarker("tuner").addMarker("default").addMarker("standalone").addMarker("writable").addMarker("his")
+                .addMarker("tuner").addMarker("default").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("stage1").addMarker("hysteresis").addMarker("sp")
                 .setTz(tz)
                 .build();

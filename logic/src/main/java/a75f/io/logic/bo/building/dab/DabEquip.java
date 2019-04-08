@@ -112,17 +112,29 @@ public class DabEquip
         String dp1ID = CCUHsApi.getInstance().addPoint(damper2Pos);
         
     
-        Point normalizedDamperPos = new Point.Builder()
-                                            .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-normalizedDamperPos")
+        Point normalizedDamper1Pos = new Point.Builder()
+                                            .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-normalizedDamper1Pos")
                                             .setEquipRef(equipRef)
                                             .setSiteRef(siteRef)
                                             .setRoomRef(roomRef)
                                             .setFloorRef(floorRef)
-                                            .addMarker("damper").addMarker("dab").addMarker("normalized").addMarker("cmd").addMarker("his").addMarker("logical").addMarker("zone").addMarker("equipHis")
+                                            .addMarker("damper").addMarker("primary").addMarker("dab").addMarker("normalized").addMarker("cmd").addMarker("his").addMarker("logical").addMarker("zone").addMarker("equipHis")
                                             .setGroup(String.valueOf(nodeAddr))
                                             .setTz(tz)
                                             .build();
-        String normalizedDPId = CCUHsApi.getInstance().addPoint(normalizedDamperPos);
+        String normalizedDamper1PosId = CCUHsApi.getInstance().addPoint(normalizedDamper1Pos);
+    
+        Point normalizedDamper2Pos = new Point.Builder()
+                                             .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-normalizedDamper2Pos")
+                                             .setEquipRef(equipRef)
+                                             .setSiteRef(siteRef)
+                                             .setRoomRef(roomRef)
+                                             .setFloorRef(floorRef)
+                                             .addMarker("damper").addMarker("secondary").addMarker("dab").addMarker("normalized").addMarker("cmd").addMarker("his").addMarker("logical").addMarker("zone").addMarker("equipHis")
+                                             .setGroup(String.valueOf(nodeAddr))
+                                             .setTz(tz)
+                                             .build();
+        String normalizedDamper2PosId = CCUHsApi.getInstance().addPoint(normalizedDamper2Pos);
     
         Point currentTemp = new Point.Builder()
                                     .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-currentTemp")
@@ -220,7 +232,6 @@ public class DabEquip
         CCUHsApi.getInstance().addPoint(desiredTempHeating);
     
         SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
-        device.analog1Out.setPointRef(normalizedDPId);
         device.currentTemp.setPointRef(ctID);
         device.currentTemp.setEnabled(true);
         device.humidity.setPointRef(humidityId);
@@ -231,10 +242,8 @@ public class DabEquip
         device.voc.setEnabled(true);
         device.desiredTemp.setPointRef(dtId);
         device.desiredTemp.setEnabled(true);
-        Log.d("CCU_UI"," Op Size : "+config.getInputs().size());
+        
         for (Output op : config.getOutputs()) {
-    
-            Log.d("CCU_UI"," Op port : "+op.getPort());
             switch (op.getPort()) {
                 case ANALOG_OUT_ONE:
                     device.analog1Out.setType(op.getAnalogActuatorType());
@@ -245,7 +254,9 @@ public class DabEquip
             }
         }
         device.analog1Out.setEnabled(config.isOpConfigured(Port.ANALOG_OUT_ONE));
+        device.analog1Out.setPointRef(normalizedDamper1PosId);
         device.analog2Out.setEnabled(config.isOpConfigured(Port.ANALOG_OUT_TWO));
+        device.analog2Out.setPointRef(normalizedDamper2PosId);
         
     
         device.addPointsToDb();
@@ -662,7 +673,6 @@ public class DabEquip
     
     public double getDamperLimit(String coolHeat, String minMax)
     {
-        Log.d("CCU", " getDamperLimit " + coolHeat + " minMax");
         ArrayList points = CCUHsApi.getInstance().readAll("point and config and damper and pos and "+coolHeat+" and "+minMax+" and group == \""+nodeAddr+"\"");
         if (points.size() == 0) {
             return 0;

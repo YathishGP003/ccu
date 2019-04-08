@@ -22,7 +22,6 @@ import a75f.io.device.serial.MessageType;
 import a75f.io.device.serial.SmartNodeControls_t;
 import a75f.io.device.serial.SmartNodeSettings_t;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
@@ -227,7 +226,13 @@ public class LSmartNode
         }
     }
     public static double getTempOffset(short addr) {
-        return CCUHsApi.getInstance().readDefaultVal("point and zone and config and vav and temperature and offset and group == \""+addr+"\"");
+        try
+        {
+            return CCUHsApi.getInstance().readDefaultVal("point and zone and config and temperature and offset and group == \"" + addr + "\"");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
     }
     
     

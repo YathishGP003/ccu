@@ -48,8 +48,8 @@ public class StandaloneScheduler {
         occ.setVacation(vacation);
 
 
-        double heatingDeadBand = StandaloneTunerUtil.readTunerValByQuery("heating and deadband", equip.getSiteRef());
-        double coolingDeadBand = StandaloneTunerUtil.readTunerValByQuery("cooling and deadband", equip.getSiteRef());
+        double heatingDeadBand = StandaloneTunerUtil.readTunerValByQuery("heating and deadband", equip.getId());
+        double coolingDeadBand = StandaloneTunerUtil.readTunerValByQuery("cooling and deadband", equip.getId());
         double setback = TunerUtil.readTunerValByQuery("unoccupied and setback", equip.getId());
 
         occ.setHeatingDeadBand(heatingDeadBand);
@@ -78,6 +78,10 @@ public class StandaloneScheduler {
             return; //Equip might have been deleted.
         }
         String id = ((HashMap) points.get(0)).get("id").toString();
+        if (getPriorityVal(id , 8) == desiredTemp) {
+            CcuLog.d(L.TAG_CCU_SCHEDULER, flag+"DesiredTemp not changed : Skip PointWrite");
+            return;
+        }
         try {
             CCUHsApi.getInstance().pointWrite(HRef.make(id.replace("@", "")), 9, "Scheduler", desiredTemp != null ? HNum.make(desiredTemp) : HNum.make(0), HNum.make(0));
         } catch (Exception e) {
@@ -139,7 +143,8 @@ public class StandaloneScheduler {
             status = status +" Fan OFF";
 
         //TODO if change in status need to update haystack string for App consuming this status update KUMAR
-        standaloneStatus.put(equipId,status);
+        if(equipId != null)
+            standaloneStatus.put(equipId,status);
 
     }
 
@@ -186,5 +191,18 @@ public class StandaloneScheduler {
                 // continue what you are doing...
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+    }
+
+
+    public static double getPriorityVal(String id, int level) {
+        ArrayList values = CCUHsApi.getInstance().readPoint(id);
+        if (values != null && values.size() > 0)
+        {
+            HashMap valMap = ((HashMap) values.get(level));
+            if (valMap.get("val") != null) {
+                return Double.parseDouble(valMap.get("val").toString());
+            }
+        }
+        return 0;
     }
 }

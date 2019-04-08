@@ -378,6 +378,7 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                     case VAV_PARALLEL_FAN:
                         showDialogFragment(FragmentVAVConfiguration
                                                    .newInstance(mPairingAddress, mName, mNodeType, mFloorName, mProfileType), FragmentVAVConfiguration.ID);
+                        break;
                     case SMARTSTAT_CONVENTIONAL_PACK_UNIT:
                         showDialogFragment(FragmentCPUConfiguration.newInstance(mPairingAddress, mName, mNodeType, mFloorName, mProfileType), FragmentCPUConfiguration.ID);
                         break;

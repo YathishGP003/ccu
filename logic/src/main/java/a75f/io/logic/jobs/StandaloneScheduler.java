@@ -143,11 +143,13 @@ public class StandaloneScheduler {
             status = status +" Fan OFF";
 
         //TODO if change in status need to update haystack string for App consuming this status update KUMAR
-        if(equipId != null)
-            standaloneStatus.put(equipId,status);
+        if(equipId != null) {
+            standaloneStatus.put(equipId, status);
+        }else{
+            standaloneStatus.clear();
+        }
 
     }
-
     public static String getSmartStatStatusString(String equipRef) {
         if(standaloneStatus.size() > 0 && standaloneStatus.containsKey(equipRef))
             return standaloneStatus.get(equipRef);

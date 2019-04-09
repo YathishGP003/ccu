@@ -1,5 +1,7 @@
 package a75f.io.logic.bo.building.sscpu;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
@@ -8,9 +10,6 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
-import a75f.io.api.haystack.Zone;
-import a75f.io.logic.DefaultSchedules;
-import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
@@ -18,7 +17,9 @@ import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.standalone.Stage;
 import a75f.io.logic.bo.haystack.device.SmartStat;
+import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.BuildingTuners;
+import a75f.io.logic.tuners.StandaloneTunerUtil;
 import a75f.io.logic.tuners.TunerConstants;
 
 public class ConventionalUnitLogicalMap {
@@ -168,13 +169,13 @@ public class ConventionalUnitLogicalMap {
         CCUHsApi.getInstance().addPoint(desiredTempHeating);
 
         Point datPoint = new Point.Builder()
-                .setDisplayName(equipDis+"-dischargeAirTemp")
+                .setDisplayName(equipDis+"-airflowTempSensorTh1")
                 .setEquipRef(equipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("discharge").addMarker("standalone").addMarker(profile).addMarker("equipHis")
-                .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("his").addMarker("logical").addMarker("zone")
+                .addMarker("standalone").addMarker(profile).addMarker("equipHis")
+                .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("th1").addMarker("his").addMarker("logical").addMarker("zone")
                 .setGroup(String.valueOf(nodeAddr))
                 .setUnit("\u00B0F")
                 .setTz(tz)
@@ -183,13 +184,13 @@ public class ConventionalUnitLogicalMap {
         String datID = CCUHsApi.getInstance().addPoint(datPoint);
 
         Point eatPoint = new Point.Builder()
-                .setDisplayName(equipDis+"-enteringAirTemp")
+                .setDisplayName(equipDis+"-external10kTempSensorTh2")
                 .setEquipRef(equipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("entering").addMarker("standalone").addMarker(profile).addMarker("equipHis")
-                .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("his").addMarker("logical").addMarker("zone")
+                .addMarker("standalone").addMarker(profile).addMarker("equipHis").addMarker("current")
+                .addMarker("air").addMarker("temp").addMarker("th2").addMarker("sensor").addMarker("his").addMarker("logical").addMarker("zone")
                 .setGroup(String.valueOf(nodeAddr))
                 .setUnit("\u00B0F")
                 .setTz(tz)
@@ -273,9 +274,20 @@ public class ConventionalUnitLogicalMap {
                 .setTz(tz)
                 .build();
         String r6ID = CCUHsApi.getInstance().addPoint(fanStage2);
-
+		Point equipStatus = new Point.Builder()
+                  .setDisplayName(equipDis+"-equipStatus")
+                  .setEquipRef(equipRef)
+                  .setSiteRef(siteRef)
+                  .setRoomRef(room)
+                  .setFloorRef(floor)
+				  .addMarker("standalone").addMarker("status").addMarker("cpu").addMarker("base")
+                  .addMarker("cmd").addMarker("his").addMarker("logical").addMarker("zone").addMarker("equipHis")
+                  .setGroup(String.valueOf(nodeAddr))
+                  .setTz(tz)
+                  .build();
+        String equipStatusId = CCUHsApi.getInstance().addPoint(equipStatus);
         //Create Physical points and map
-        SmartStat device = new SmartStat(nodeAddr, siteRef, floor, room,equipRef);
+        SmartStat device = new SmartStat(nodeAddr, siteRef, floor, room,equipRef,"cpu");
         //TODO Need to set it for default if not enabled, currently set it as enabled //kumar
       
             device.th1In.setPointRef(datID);
@@ -309,15 +321,27 @@ public class ConventionalUnitLogicalMap {
 
         //Initialize write array for points, otherwise a read before write will throw exception
         setCurrentTemp(0);
-        setDischargeTemp(0);
-        setSupplyAirTemp(0);
-        setDesiredTempCooling(73.0);
-        setDesiredTemp(72.0);
-        setDesiredTempHeating(71.0);
         setHumidity(0);
         setCO2(0);
         setVOC(0);
+        Schedule schedule = Schedule.getScheduleByEquipId(equipRef);
+        double coolingVal = 75.0;
+        double heatingVal = 70.0;
+        double defaultDesiredTemp = 72.5;
+        double cdb = 2.5;
+        double hdb = 2.5;
+        if(schedule != null) {
+            defaultDesiredTemp = (schedule.getCurrentValues().getCoolingVal() + schedule.getCurrentValues().getHeatingVal()) / 2.0;
+            coolingVal = schedule.getCurrentValues().getCoolingVal();
+            heatingVal = schedule.getCurrentValues().getHeatingVal();
+            cdb = hdb = (coolingVal - heatingVal) / 2.0;
+        }
 
+        setDesiredTempCooling(coolingVal);
+        setDesiredTemp(defaultDesiredTemp);
+        setDesiredTempHeating(heatingVal);
+        StandaloneTunerUtil.setStandaloneCoolingDeadband(equipRef, cdb, TunerConstants.TUNER_EQUIP_VAL_LEVEL);
+        StandaloneTunerUtil.setStandaloneHeatingDeadband(equipRef, hdb, TunerConstants.TUNER_EQUIP_VAL_LEVEL);
         CCUHsApi.getInstance().syncEntityTree();
 
 
@@ -391,7 +415,7 @@ public class ConventionalUnitLogicalMap {
                 .setFloorRef(floor)
                 .setRoomRef(room)
                 .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone")
-                .addMarker("air").addMarker("temp").addMarker("sp").addMarker("enable").addMarker(profile)
+                .addMarker("air").addMarker("temp").addMarker("sp").addMarker("enable").addMarker(profile).addMarker("th1")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
@@ -404,7 +428,7 @@ public class ConventionalUnitLogicalMap {
                 .setSiteRef(siteRef)
                 .setFloorRef(floor)
                 .setRoomRef(room)
-                .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone").addMarker("current")
+                .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone").addMarker("current").addMarker("th2")
                 .addMarker("air").addMarker("temp").addMarker("sp").addMarker("enable").addMarker(profile)
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
@@ -524,8 +548,8 @@ public class ConventionalUnitLogicalMap {
 
         setConfigNumVal("enable and occupancy",config.enableOccupancyControl == true ? 1.0 : 0);
         setConfigNumVal("temperature and offset",config.temperatureOffset);
-        setConfigNumVal("enable and air and temp",config.enableThermistor1 == true ? 1.0 : 0);
-        setConfigNumVal("enable and current and temp",config.enableThermistor2 == true ? 1.0 : 0);
+        setConfigNumVal("enable and th1",config.enableThermistor1 == true ? 1.0 : 0);
+        setConfigNumVal("enable and th2",config.enableThermistor2 == true ? 1.0 : 0);
     }
 
 
@@ -534,8 +558,8 @@ public class ConventionalUnitLogicalMap {
         ConventionalUnitConfiguration config = new ConventionalUnitConfiguration();
         config.enableOccupancyControl = getConfigNumVal("enable and occupancy") > 0 ? true : false ;
         config.temperatureOffset = getConfigNumVal("temperature and offset");
-        config.enableThermistor1 = getConfigNumVal("enable and air and temp") >  0 ? true : false;
-        config.enableThermistor2 = getConfigNumVal("enable and current and temp") > 0 ? true : false;
+        config.enableThermistor1 = getConfigNumVal("enable and th1") >  0 ? true : false;
+        config.enableThermistor2 = getConfigNumVal("enable and th2") > 0 ? true : false;
         config.setNodeType(NodeType.SMART_STAT);//TODO - revisit
 
 
@@ -727,12 +751,12 @@ public class ConventionalUnitLogicalMap {
 
     public double getSupplyAirTemp()
     {
-        supplyAirTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and entering and standalone and group == \""+nodeAddr+"\"");
+        supplyAirTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and th2 and standalone and group == \""+nodeAddr+"\"");
         return supplyAirTemp;
     }
     public void setSupplyAirTemp(double supplyAirTemp)
     {
-        CCUHsApi.getInstance().writeHisValByQuery("point and air and temp and sensor and entering and standalone and group == \""+nodeAddr+"\"", supplyAirTemp);
+        CCUHsApi.getInstance().writeHisValByQuery("point and air and temp and sensor and th2 and standalone and group == \""+nodeAddr+"\"", supplyAirTemp);
         this.supplyAirTemp = supplyAirTemp;
     }
 
@@ -743,7 +767,9 @@ public class ConventionalUnitLogicalMap {
     public double getConfigNumVal(String tags) {
         return CCUHsApi.getInstance().readDefaultVal("point and zone and config and standalone and cpu and "+tags+" and group == \""+nodeAddr+"\"");
     }
-
+    public void setStatus(double status) {
+        CCUHsApi.getInstance().writeHisValByQuery("point and status and cmd and group == \""+nodeAddr+"\"", status);
+    }
     protected void addUserIntentPoints(String equipref, String equipDis) {
 
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);

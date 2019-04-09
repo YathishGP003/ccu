@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.device.serial.CcuToCmOverUsbDeviceTempAckMessage_t;
@@ -229,6 +230,10 @@ public class Pulse
 		{
 			ArrayList<HashMap> phyPoints = hayStack.readAll("point and physical and sensor and deviceRef == \"" + device.get("id") + "\"");
 
+			String logicalCurTempPoint = "";
+			double curTempVal = 0.0;
+			double th2TempVal = 0.0;
+			boolean isTh2Enabled = false;
 			for(HashMap phyPoint : phyPoints) {
 				if (phyPoint.get("pointRef") == null || phyPoint.get("pointRef") == "") {
 					continue;
@@ -238,45 +243,33 @@ public class Pulse
 				switch (Port.valueOf(phyPoint.get("port").toString())){
 					case SENSOR_RT:
 						val = smartStatRegularUpdateMessage_t.update.roomTemperature.get();
+						curTempVal = getRoomTempConversion(val);
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-						hayStack.writeHisValById(logPoint.get("id").toString(), getRoomTempConversion(val));
-						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartStatUpdate : roomTemp "+getRoomTempConversion(val));
+						logicalCurTempPoint =  logPoint.get("id").toString();
 						break;
-						//TODO Need to take care of this??? kumar
-					/*case DESIRED_TEMP:
-						val = smartStatRegularUpdateMessage_t.update.setTemperature.get();
+					case TH2_IN:
+						val = smartStatRegularUpdateMessage_t.update.externalThermistorInput2.get();
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-						double desiredTemp = getDesredTempConversion(val);
-						if (desiredTemp > 0)
-						{
-							hayStack.writeHisValById(logPoint.get("id").toString(), desiredTemp);
-							updateDesiredTemp(nodeAddr, desiredTemp);
-						}
-						Log.d(TAG,"regularSmartStatUpdate : desiredTemp "+desiredTemp);
-						break;*/
+						isTh2Enabled = phyPoint.get("enabled").toString().equals("true");
+						if(isTh2Enabled)
+							th2TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
+						else
+							hayStack.writeHisValById(logPoint.get("id").toString(), val * 10);
+						break;
 					case ANALOG_IN_ONE:
 						val = smartStatRegularUpdateMessage_t.update.externalAnalogVoltageInput1.get();
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						hayStack.writeHisValById(logPoint.get("id").toString(), getAnalogConversion(phyPoint, logPoint, val));
-						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : analog1In "+getAnalogConversion(phyPoint, logPoint, val));
 						break;
 					case ANALOG_IN_TWO:
 						val = smartStatRegularUpdateMessage_t.update.externalAnalogVoltageInput1.get();
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						hayStack.writeHisValById(logPoint.get("id").toString(), getAnalogConversion(phyPoint, logPoint,val));
-						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartStatUpdate : analog2In "+getAnalogConversion(phyPoint, logPoint,val));
 						break;
 					case TH1_IN:
 						val = smartStatRegularUpdateMessage_t.update.externalThermistorInput1.get();
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						hayStack.writeHisValById(logPoint.get("id").toString(), ThermistorUtil.getThermistorValueToTemp(val * 10 ));
-						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : Thermistor1 "+ThermistorUtil.getThermistorValueToTemp(val * 10 ));
-						break;
-					case TH2_IN:
-						val = smartStatRegularUpdateMessage_t.update.externalThermistorInput2.get();
-						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-						hayStack.writeHisValById(logPoint.get("id").toString(), ThermistorUtil.getThermistorValueToTemp(val * 10));
-						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartStatUpdate : Thermistor2 "+ThermistorUtil.getThermistorValueToTemp(val * 10));
 						break;
 					case SENSOR_RH:
 						SmartNodeSensorReading_t[] sensorReadingsHumidity = smartStatRegularUpdateMessage_t.update.sensorReadings;
@@ -284,14 +277,12 @@ public class Pulse
 
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						hayStack.writeHisValById(logPoint.get("id").toString(), getHumidityConversion(val));
-						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartStatUpdate : Humidity "+getHumidityConversion(val));
 						break;
 					case SENSOR_CO2:
 						SmartNodeSensorReading_t[] sensorReadingsCO2 = smartStatRegularUpdateMessage_t.update.sensorReadings;
 						val = sensorReadingsCO2[SensorType.CO2.ordinal()].sensorData.get();
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						hayStack.writeHisValById(logPoint.get("id").toString(), val);
-						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartStatUpdate : CO2 "+val);
 						break;
 					case SENSOR_VOC:
 						SmartNodeSensorReading_t[] sensorReadingsVOC = smartStatRegularUpdateMessage_t.update.sensorReadings;
@@ -299,10 +290,15 @@ public class Pulse
 
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						hayStack.writeHisValById(logPoint.get("id").toString(), val);
-						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartStatUpdate : VOC "+val);
 						break;
 				}
 			}
+
+			//Write Current temp point based on th2 enabled or not
+			if(isTh2Enabled && !logicalCurTempPoint.isEmpty())
+				hayStack.writeHisValById(logicalCurTempPoint, th2TempVal);
+			else
+				hayStack.writeHisValById(logicalCurTempPoint, curTempVal);
 
 		}
 	}

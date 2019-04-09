@@ -38,7 +38,7 @@ public class SmartStat {
     public String roomRef;
 
 
-    public SmartStat(int address, String site, String floor, String room, String equipRef) {
+    public SmartStat(int address, String site, String floor, String room, String equipRef,String profile) {
         Device d = new Device.Builder()
                 .setDisplayName("SS-"+address)
                 .addMarker("network").addMarker("equipHis").addMarker("node")
@@ -48,6 +48,7 @@ public class SmartStat {
                 .setSiteRef(site)
                 .setFloorRef(floor)
                 .setRoomRef(room)
+                .setProfileType(profile)
                 .build();
         deviceRef = CCUHsApi.getInstance().addDevice(d);
         smartNodeAddress = address;

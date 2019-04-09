@@ -81,7 +81,7 @@ public class MeshUpdateTest
                                            : LSmartNode.mapDigitalOut(opPoint.get("type").toString(), logicalVal > 0));
                 hayStack.writeDefaultValById(opPoint.get("id").toString(), (double)mappedVal);
             
-                LSmartNode.getSmartNodePort(controlsMessage_t, port)
+                LSmartNode.getSmartNodePort(controlsMessage_t.controls, port)
                           .set(mappedVal);
     
                 try

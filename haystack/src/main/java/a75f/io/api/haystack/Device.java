@@ -29,11 +29,13 @@ public class Device extends Entity
     {
         this.floorRef = floorRef;
     }
+    public void setProfileType(String node){this.profileType = node;}
     private String equipRef;
     private String siteRef;
     private String roomRef;
     private String floorRef;
     private String addr;
+    private String profileType;
     private String id;
     
     public String getAddr()
@@ -63,6 +65,7 @@ public class Device extends Entity
     {
         return floorRef;
     }
+    public String getProfileType(){return profileType;}
     public String getId()
     {
         return id;
@@ -80,6 +83,7 @@ public class Device extends Entity
         private String roomRef;
         private String floorRef;
         private String id;
+        private String profileType;
         public String toString() {
             return displayName;
         }
@@ -131,7 +135,11 @@ public class Device extends Entity
             this.siteRef = siteRef;
             return this;
         }
-        
+        public Builder setProfileType(String type)
+        {
+            this.profileType = type;
+            return this;
+        }
         public Device build(){
             Device d = new Device();
             d.displayName = this.displayName;
@@ -141,6 +149,7 @@ public class Device extends Entity
             d.equipRef = this.equipRef;
             d.roomRef = this.roomRef;
             d.floorRef = this.floorRef;
+            d.profileType =this.profileType;
             d.id = this.id;
             return d;
         }
@@ -182,6 +191,10 @@ public class Device extends Entity
                 else if(pair.getKey().equals("addr"))
                 {
                     this.addr = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("profileType"))
+                {
+                    this.profileType = pair.getValue().toString();
                 }
                 it.remove();
             }

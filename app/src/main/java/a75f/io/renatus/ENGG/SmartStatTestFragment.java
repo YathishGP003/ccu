@@ -37,6 +37,7 @@ import java.util.Set;
 import a75f.io.device.json.serializers.JsonSerializer;
 import a75f.io.device.serial.CcuToCmOverUsbSmartStatSettingsMessage_t;
 import a75f.io.device.serial.MessageType;
+import a75f.io.device.serial.SmartStatProfileMap_t;
 import a75f.io.usbserial.SerialAction;
 import a75f.io.usbserial.SerialEvent;
 import a75f.io.renatus.BASE.BaseDialogFragment;
@@ -454,11 +455,11 @@ public class SmartStatTestFragment extends BaseDialogFragment
 		msg.address.set(6000/*sn.getMeshAddress()*/);
 		
 		msg.settings.roomName.set(roomName.getText().toString());
-		msg.settings.profileBitmap.convetionalPackageUnit.set((short) (1 << profileSlection));
+		msg.settings.profileBitmap.set(SmartStatProfileMap_t.values()[1 << profileSlection]);//convetionalPackageUnit.set((short) (1 << profileSlection));
 		msg.settings.maxUserTemp.set(maxT);
 		msg.settings.minUserTemp.set(minT);
-		msg.settings.showCentigrade.set(showCentigrade.isChecked() == true ? (short)1 : (short) 0);
-		msg.settings.enableOccupancyDetection.set(occDetection.isChecked() == true ? (short)1 : (short)0);
+		//msg.settings.showCentigrade.set(showCentigrade.isChecked() == true ? (short)1 : (short) 0);
+		//msg.settings.enableOccupancyDetection.set(occDetection.isChecked() == true ? (short)1 : (short)0);
 		msg.settings.enabledRelaysBitmap.relay1.set((short)0xFF); //Enable all relays
 		try
 		{

@@ -750,23 +750,37 @@ public class CCUTagsDb extends HServer {
         b.addCol("levelDis");
         b.addCol("val");
         b.addCol("who");
-
-        for (int i = 0; i < 17; ++i)
+        b.addCol("duration");
+        
+        
+        for (int i = 0; i < 17; ++i) {
+            
+            if (array.duration[i] != 0 && array.duration[i] < System.currentTimeMillis()) {
+                array.val[i] = null;
+                array.who[i] = null;
+                array.duration[i] = 0;
+            }
             b.addRow(new HVal[]{
                     HNum.make(i + 1),
                     HStr.make("" + (i + 1)),
                     array.val[i],
                     HStr.make(array.who[i]),
+                    HNum.make(array.duration[i] >  System.currentTimeMillis() ? array.duration[i] : 0)
             });
+            }
         return b.toGrid();
     }
 
     protected void onPointWrite(HDict rec, int level, HVal val, String who, HNum dur, HDict opts) {
-        CcuLog.d("CCU_HS","onPointWrite: " + rec.dis() + "  " + val + " @ " + level + " [" + who + "]");
+        CcuLog.d("CCU_HS","onPointWrite: " + rec.dis() + "  " + val + " @ " + level + " [" + who + "]"+", duration: "+dur.millis());
         CCUTagsDb.WriteArray array = (CCUTagsDb.WriteArray) writeArrays.get(rec.id().toVal());
         if (array == null) writeArrays.put(rec.id().toVal(), array = new CCUTagsDb.WriteArray());
         array.val[level - 1] = val;
         array.who[level - 1] = who;
+        
+        if (dur.val > 0) {
+            array.duration[level-1] = System.currentTimeMillis() + dur.millis();
+        }
     }
 
     public HDict getConfig() {
@@ -791,6 +805,7 @@ public class CCUTagsDb extends HServer {
     static class WriteArray {
         final HVal[] val = new HVal[17];
         final String[] who = new String[17];
+        final long[] duration = new long[17];
     }
 
     //////////////////////////////////////////////////////////////////////////

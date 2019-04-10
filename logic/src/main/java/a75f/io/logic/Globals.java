@@ -15,12 +15,15 @@ import com.pubnub.api.models.consumer.PNStatus;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 
+import org.projecthaystack.HGrid;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
+import org.projecthaystack.HRow;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -168,7 +171,7 @@ public class Globals {
 
         new CCUHsApi(this.mApplicationContext);
         CCUHsApi.getInstance().testHarnessEnabled = testHarness;
-        addProfilesForEquips();
+        loadEquipProfiles();
 
         String addrBand = getSmartNodeBand();
         L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
@@ -320,17 +323,34 @@ public class Globals {
                 String cmd = msgObject.get("command") != null ? msgObject.get("command").getAsString(): "";
                 if (cmd.equals("updatePoint"))
                 {
-                    String who = msgObject.get("who").getAsString();
-                    String level = msgObject.get("level").getAsString();
-                    String val = msgObject.get("val").getAsString();
+                    //String who = msgObject.get("who").getAsString();
+                    //String level = msgObject.get("level").getAsString();
+                    //String val = msgObject.get("val").getAsString();
                     String guid = msgObject.get("id").getAsString();
-                    CcuLog.d(L.TAG_CCU, "PubNub Update point: cmd: " + cmd + " who: " + who + " level: " + level + " val: " + val + " id: " + guid);
+                    //CcuLog.d(L.TAG_CCU, "PubNub Update point: cmd: " + cmd + " who: " + who + " level: " + level + " val: " + val + " id: " + guid);
                     
                     String luid = CCUHsApi.getInstance().getLUID("@"+guid);
                     if (luid != null && luid != "")
                     {
     
-                        CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(luid), (int) Double.parseDouble(level), who, HNum.make(Double.parseDouble(val)), HNum.make(0));
+                        HGrid pointGrid = CCUHsApi.getInstance().readPointArrRemote("@"+guid);
+                        Iterator it = pointGrid.iterator();
+                        while (it.hasNext())
+                        {
+                            HRow r = (HRow) it.next();
+                            double level = Double.parseDouble(r.get("level").toString());
+                            double val = Double.parseDouble(r.get("val").toString());
+                            String who = r.get("who").toString();
+                            double duration = Double.parseDouble(r.get("dur").toString());
+                           
+                            CcuLog.d(L.TAG_CCU,"PubNub remote point:  level "+level+" val "+val+" who "+who+" duration "+duration);
+    
+                            CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(luid), (int) level, who, HNum.make(val)
+                                                                        , HNum.make( duration == 0 ? 0 : duration - System.currentTimeMillis()));
+        
+                        }
+    
+                        
     
                         Point p = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(luid)).build();
                         ArrayList values = CCUHsApi.getInstance().readPoint(luid);
@@ -384,7 +404,7 @@ public class Globals {
         return pubnubSubscribed;
     }
 
-    public void addProfilesForEquips() {
+    public void loadEquipProfiles() {
         HashMap site = CCUHsApi.getInstance().read(Tags.SITE);
         if (site == null || site.size() == 0) {
             CcuLog.d(L.TAG_CCU, "Site does not exist. Profiles not loaded");
@@ -393,7 +413,7 @@ public class Globals {
         for (Floor f : HSUtil.getFloors()) {
             for (Zone z : HSUtil.getZones(f.getId())) {
                 for (Equip eq : HSUtil.getEquips(z.getId())) {
-                    CcuLog.d(L.TAG_CCU, " Equip " + eq.getDisplayName() + " profile : " + eq.getProfile());
+                    CcuLog.d(L.TAG_CCU, "Load Equip " + eq.getDisplayName() + " profile : " + eq.getProfile());
                     switch (ProfileType.valueOf(eq.getProfile())) {
                         case VAV_REHEAT:
                             VavReheatProfile vr = new VavReheatProfile();
@@ -430,7 +450,7 @@ public class Globals {
         HashMap equip = CCUHsApi.getInstance().read("equip and system");
         if (equip != null && equip.size() > 0) {
             Equip eq = new Equip.Builder().setHashMap(equip).build();
-            CcuLog.d(L.TAG_CCU, "SystemEquip " + eq.getDisplayName() + " System profile " + eq.getProfile());
+            CcuLog.d(L.TAG_CCU, "Load SystemEquip " + eq.getDisplayName() + " System profile " + eq.getProfile());
             switch (ProfileType.valueOf(eq.getProfile())) {
                 case SYSTEM_VAV_ANALOG_RTU:
                     VavAnalogRtu analogRtuProfile = new VavAnalogRtu();

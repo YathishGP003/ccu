@@ -159,14 +159,14 @@ public class HNum extends HVal
   public long millis()
   {
     String u = this.unit;
-    if (u == null) u = "null";
+    if (u == null) u = "ms";
     if (u.equals("ms")  || u.equals("millisecond")) return (long)val;
     if (u.equals("s")   || u.equals("sec") || u.equals("millisecond")) return (long)(val*1000.0);
     if (u.equals("min") || u.equals("minute")) return (long)(val*1000.0*60.0);
     if (u.equals("h")   || u.equals("hr") || u.equals("minute")) return (long)(val*1000.0*60.0*60.0);
     throw new IllegalStateException("Invalid duration unit: " + u);
   }
-
+  
   /**
    * Return true if the given string is null or contains only valid unit
    * chars.  If the unit name contains invalid chars return false.  This

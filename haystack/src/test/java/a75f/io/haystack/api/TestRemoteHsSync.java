@@ -8,7 +8,9 @@ import org.projecthaystack.HGridBuilder;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 import org.projecthaystack.HRow;
+import org.projecthaystack.HVal;
 import org.projecthaystack.client.HClient;
+import org.projecthaystack.io.HZincReader;
 import org.projecthaystack.io.HZincWriter;
 
 import java.io.BufferedInputStream;
@@ -42,7 +44,6 @@ import a75f.io.api.haystack.sync.EntityParser;
 import a75f.io.api.haystack.sync.EntityPullHandler;
 import a75f.io.api.haystack.sync.EntitySyncHandler;
 import a75f.io.api.haystack.sync.HttpUtil;
-import a75f.io.logger.CcuLog;
 
 /**
  * Created by samjithsadasivan on 10/11/18.
@@ -363,9 +364,11 @@ public class TestRemoteHsSync
         String tpID1 = CCUHsApi.getInstance().addPoint(testPoint1);
         //entitySyncHandler.sync();
         
-        hayStack.getHSClient().pointWrite(HRef.copy(tpID), 8,"samjith", HNum.make(72.0), HNum.make(120000, "ms"));
+        //hayStack.getHSClient().pointWrite(HRef.copy(tpID), 8,"samjith", HNum.make(72.0), HNum.make(2000, "ms"));
         //hayStack.getHSClient().pointWrite(HRef.copy(tpID), 1,"samjith", HNum.make(75.0), HNum.make(0));
         //hayStack.getHSClient().pointWrite(HRef.copy(tpID1), 8,"samjith", HNum.make(76.0), HNum.make(120000, "ms"));
+    
+        hayStack.writeDefaultValById(tpID, 800.0 );
     
         ArrayList values1 = CCUHsApi.getInstance().readPoint(tpID);
         if (values1 != null && values1.size() > 0)
@@ -377,7 +380,14 @@ public class TestRemoteHsSync
             }
         }
     
-        /*values1 = CCUHsApi.getInstance().readPoint(tpID1);
+        try
+        {
+            Thread.sleep(1000);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        values1 = CCUHsApi.getInstance().readPoint(tpID);
         if (values1 != null && values1.size() > 0)
         {
             for (int l = 1; l <= values1.size(); l++)
@@ -385,9 +395,9 @@ public class TestRemoteHsSync
                 HashMap valMap = ((HashMap) values1.get(l - 1));
                 System.out.println("TP1: "+valMap);
             }
-        }*/
+        }
     
-        hayStack.getHSClient().pointWrite(HRef.copy(tpID), 9,"samjith", HNum.make(70.0), HNum.make(0));
+        /*hayStack.getHSClient().pointWrite(HRef.copy(tpID), 9,"samjith", HNum.make(70.0), HNum.make(0));
         
         System.out.println("WWWWWWWWWWWWWWWWWWWWWWWWWW");
     
@@ -399,7 +409,7 @@ public class TestRemoteHsSync
                 HashMap valMap = ((HashMap) values1.get(l - 1));
                 System.out.println("TP: "+valMap);
             }
-        }
+        }*/
     
         /*values1 = CCUHsApi.getInstance().readPoint(tpID1);
         if (values1 != null && values1.size() > 0)
@@ -731,12 +741,35 @@ public class TestRemoteHsSync
     @Test
     public void testPointWrite() {
         String id = "@5ca7c308bf7e6c00f5e22079";
-    
-        HDictBuilder b = new HDictBuilder().add("id", HRef.copy(id)).add("level", 10).add("who", "ccu").add("val", "Warming Space");
-        
+        HDictBuilder b = new HDictBuilder().add("id", HRef.copy(id)).add("level", 1).add("who", "ccu").add("val", "Happy birthday");
         HDict[] dictArr  = {b.toDict()};
         String  response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
         System.out.println(response);
+    }
+    
+    @Test
+    public void testPointRead() {
+        String id = "@5cabbfabbf7e6c00f5e22fe9";
+        HDictBuilder b = new HDictBuilder().add("id", HRef.copy(id));
+        HDict[] dictArr  = {b.toDict()};
+        System.out.println(HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+        String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+        System.out.println(response);
+    
+        HGrid pointGrid = new HZincReader(response).readGrid();
+    
+        Iterator it = pointGrid.iterator();
+        while (it.hasNext())
+        {
+            HRow r = (HRow) it.next();
+            HVal level = r.get("level");
+            HVal val = r.get("val");
+            HVal who = r.get("who");
+            HVal duration = r.get("dur");
+            
+            System.out.println(" level "+level+" val "+val+" who "+who+" duration "+duration);
+            
+        }
     }
     
     

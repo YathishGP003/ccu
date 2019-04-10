@@ -191,13 +191,13 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
     
     private void setUpSpinners()
     {
-        relay1Spinner.setSelection((int) systemProfile.getConfigAssociation("relay1"));
-        relay2Spinner.setSelection((int) systemProfile.getConfigAssociation("relay2"));
-        relay3Spinner.setSelection((int) systemProfile.getConfigAssociation("relay3"));
-        relay4Spinner.setSelection((int) systemProfile.getConfigAssociation("relay4"));
-        relay5Spinner.setSelection((int) systemProfile.getConfigAssociation("relay5"));
-        relay6Spinner.setSelection((int) systemProfile.getConfigAssociation("relay6"));
-        relay7Spinner.setSelection((int) systemProfile.getConfigAssociation("relay7"));
+        relay1Spinner.setSelection((int) systemProfile.getConfigAssociation("relay1"), false);
+        relay2Spinner.setSelection((int) systemProfile.getConfigAssociation("relay2"), false);
+        relay3Spinner.setSelection((int) systemProfile.getConfigAssociation("relay3"), false);
+        relay4Spinner.setSelection((int) systemProfile.getConfigAssociation("relay4"), false);
+        relay5Spinner.setSelection((int) systemProfile.getConfigAssociation("relay5"), false);
+        relay6Spinner.setSelection((int) systemProfile.getConfigAssociation("relay6"), false);
+        relay7Spinner.setSelection((int) systemProfile.getConfigAssociation("relay7"), false);
         relay1Spinner.setEnabled(relay1Cb.isChecked());
         relay2Spinner.setEnabled(relay2Cb.isChecked());
         relay3Spinner.setEnabled(relay3Cb.isChecked());
@@ -234,30 +234,30 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
         ArrayAdapter<Integer> analogAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, analogArray);
         analogAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         analog1Min.setAdapter(analogAdapter);
-        analog1Min.setSelection(analogAdapter.getPosition((int) systemProfile.getConfigVal("analog1 and cooling and min")));
+        analog1Min.setSelection(analogAdapter.getPosition((int) systemProfile.getConfigVal("analog1 and cooling and min")), false);
         analog1Max.setAdapter(analogAdapter);
         double analogVal = systemProfile.getConfigVal("analog1 and cooling and max");
-        analog1Max.setSelection(analogVal != 0 ? analogAdapter.getPosition((int) analogVal) : analogArray.size() - 1);
+        analog1Max.setSelection(analogVal != 0 ? analogAdapter.getPosition((int) analogVal) : analogArray.size() - 1 , false);
         analog2Min.setAdapter(analogAdapter);
-        analog2Min.setSelection(analogAdapter.getPosition((int) systemProfile.getConfigVal("analog2 and fan and min")));
+        analog2Min.setSelection(analogAdapter.getPosition((int) systemProfile.getConfigVal("analog2 and fan and min")), false);
         analog2Max.setAdapter(analogAdapter);
         analogVal = systemProfile.getConfigVal("analog2 and fan and max");
         analog2Max.setSelection(analogVal != 0 ? analogAdapter.getPosition((int) analogVal) : analogArray.size() - 1);
         analog3Min.setAdapter(analogAdapter);
-        analog3Min.setSelection(analogAdapter.getPosition((int) systemProfile.getConfigVal("analog3 and heating and min")));
+        analog3Min.setSelection(analogAdapter.getPosition((int) systemProfile.getConfigVal("analog3 and heating and min")), false);
         analog3Max.setAdapter(analogAdapter);
         analogVal = systemProfile.getConfigVal("analog3 and heating and max");
         analog3Max.setSelection(analogVal != 0 ? analogAdapter.getPosition((int) analogVal) : analogArray.size() - 1);
         analog4MinCooling.setAdapter(analogAdapter);
-        analog4MinCooling.setSelection(analogAdapter.getPosition((int) systemProfile.getConfigVal("analog4 and cooling and min")));
+        analog4MinCooling.setSelection(analogAdapter.getPosition((int) systemProfile.getConfigVal("analog4 and cooling and min")), false);
         analog4MaxCooling.setAdapter(analogAdapter);
         analogVal = systemProfile.getConfigVal("analog4 and cooling and max");
-        analog4MaxCooling.setSelection(analogVal != 0 ? analogAdapter.getPosition((int) analogVal) : analogArray.size() - 1);
+        analog4MaxCooling.setSelection(analogVal != 0 ? analogAdapter.getPosition((int) analogVal) : analogArray.size() - 1, false);
         analog4MinHeating.setAdapter(analogAdapter);
-        analog4MinHeating.setSelection(analogAdapter.getPosition((int) systemProfile.getConfigVal("analog4 and heating and min")));
+        analog4MinHeating.setSelection(analogAdapter.getPosition((int) systemProfile.getConfigVal("analog4 and heating and min")), false);
         analog4MaxHeating.setAdapter(analogAdapter);
         analogVal = systemProfile.getConfigVal("analog4 and heating and max");
-        analog4MaxHeating.setSelection(analogVal != 0 ? analogAdapter.getPosition((int) analogVal) : analogArray.size() - 1);
+        analog4MaxHeating.setSelection(analogVal != 0 ? analogAdapter.getPosition((int) analogVal) : analogArray.size() - 1, false);
     
         ArrayList<Double> zoroToHundred = new ArrayList<>();
         for (double val = 0;  val <= 100.0; val++)

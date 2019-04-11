@@ -492,11 +492,24 @@ public class VAVLogicalMap
                                   .setSiteRef(siteRef)
                                   .setRoomRef(room)
                                   .setFloorRef(floor)
-                                  .addMarker("status").addMarker("vav").addMarker("base").addMarker("cmd").addMarker("his").addMarker("logical").addMarker("zone").addMarker("equipHis")
+                                  .addMarker("status").addMarker("vav").addMarker("his").addMarker("logical").addMarker("zone").addMarker("equipHis")
                                   .setGroup(String.valueOf(nodeAddr))
                                   .setTz(tz)
                                   .build();
         String equipStatusId = CCUHsApi.getInstance().addPoint(equipStatus);
+    
+        Point equipScheduleStatus = new Point.Builder()
+                                    .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-equipScheduleStatus")
+                                    .setEquipRef(equipRef)
+                                    .setSiteRef(siteRef)
+                                    .setRoomRef(room)
+                                    .setFloorRef(floor)
+                                    .addMarker("scheduleStatus").addMarker("logical").addMarker("zone").addMarker("writable").addMarker("equipHis")
+                                    .setGroup(String.valueOf(nodeAddr))
+                                    .setTz(tz)
+                                    .setKind("string")
+                                    .build();
+        String equipScheduleStatusId = CCUHsApi.getInstance().addPoint(equipScheduleStatus);
         
         
         //Create Physical points and map
@@ -558,6 +571,7 @@ public class VAVLogicalMap
         setHumidity(0);
         setCO2(0);
         setVOC(0);
+        setScheduleStatus("");
     
         CCUHsApi.getInstance().syncEntityTree();
     }
@@ -1121,7 +1135,17 @@ public class VAVLogicalMap
     }
     
     public void setStatus(double status) {
-        CCUHsApi.getInstance().writeHisValByQuery("point and status and cmd and group == \""+nodeAddr+"\"", status);
+        CCUHsApi.getInstance().writeHisValByQuery("point and status and group == \""+nodeAddr+"\"", status);
+    }
+    
+    public void setScheduleStatus(String status)
+    {
+        ArrayList points = CCUHsApi.getInstance().readAll("point and scheduleStatus and group == \""+nodeAddr+"\"");
+        String id = ((HashMap)points.get(0)).get("id").toString();
+        if (id == null || id == "") {
+            throw new IllegalArgumentException();
+        }
+        CCUHsApi.getInstance().writeDefaultValById(id, status);
     }
     
     public void updateLoopParams() {

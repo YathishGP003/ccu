@@ -368,7 +368,7 @@ public class TestRemoteHsSync
         //hayStack.getHSClient().pointWrite(HRef.copy(tpID), 1,"samjith", HNum.make(75.0), HNum.make(0));
         //hayStack.getHSClient().pointWrite(HRef.copy(tpID1), 8,"samjith", HNum.make(76.0), HNum.make(120000, "ms"));
     
-        hayStack.writeDefaultValById(tpID, 800.0 );
+        hayStack.writeDefaultValById(tpID, " String Write" );
     
         ArrayList values1 = CCUHsApi.getInstance().readPoint(tpID);
         if (values1 != null && values1.size() > 0)

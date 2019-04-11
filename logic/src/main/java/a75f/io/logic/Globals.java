@@ -321,60 +321,58 @@ public class Globals {
                 // extract desired parts of the payload, using Gson
                 JsonObject msgObject = message.getMessage().getAsJsonObject();
                 String cmd = msgObject.get("command") != null ? msgObject.get("command").getAsString(): "";
-                if (cmd.equals("updatePoint"))
+                try
                 {
-                    //String who = msgObject.get("who").getAsString();
-                    //String level = msgObject.get("level").getAsString();
-                    //String val = msgObject.get("val").getAsString();
-                    String guid = msgObject.get("id").getAsString();
-                    //CcuLog.d(L.TAG_CCU, "PubNub Update point: cmd: " + cmd + " who: " + who + " level: " + level + " val: " + val + " id: " + guid);
-                    
-                    String luid = CCUHsApi.getInstance().getLUID("@"+guid);
-                    if (luid != null && luid != "")
+                    if (cmd.equals("updatePoint"))
                     {
-    
-                        HGrid pointGrid = CCUHsApi.getInstance().readPointArrRemote("@"+guid);
-                        Iterator it = pointGrid.iterator();
-                        while (it.hasNext())
+                        //String who = msgObject.get("who").getAsString();
+                        //String level = msgObject.get("level").getAsString();
+                        //String val = msgObject.get("val").getAsString();
+                        String guid = msgObject.get("id").getAsString();
+                        //CcuLog.d(L.TAG_CCU, "PubNub Update point: cmd: " + cmd + " who: " + who + " level: " + level + " val: " + val + " id: " + guid);
+                        String luid = CCUHsApi.getInstance().getLUID("@" + guid);
+                        if (luid != null && luid != "")
                         {
-                            HRow r = (HRow) it.next();
-                            double level = Double.parseDouble(r.get("level").toString());
-                            double val = Double.parseDouble(r.get("val").toString());
-                            String who = r.get("who").toString();
-                            double duration = Double.parseDouble(r.get("dur").toString());
-                           
-                            CcuLog.d(L.TAG_CCU,"PubNub remote point:  level "+level+" val "+val+" who "+who+" duration "+duration);
-    
-                            CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(luid), (int) level, who, HNum.make(val)
-                                                                        , HNum.make( duration == 0 ? 0 : duration - System.currentTimeMillis()));
-        
-                        }
-    
-                        
-    
-                        Point p = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(luid)).build();
-                        ArrayList values = CCUHsApi.getInstance().readPoint(luid);
-                        if (values != null && values.size() > 0)
-                        {
-                            for (int l = 1; l <= values.size() ; l++ ) {
-                                HashMap valMap = ((HashMap) values.get(l-1));
-                                if (valMap.get("val") != null) {
-                                    Log.d(L.TAG_CCU, "PubNub updated point "+p.getDisplayName()+" , level: "+l+" , val :"+Double.parseDouble(valMap.get("val").toString()));
+                            HGrid pointGrid = CCUHsApi.getInstance().readPointArrRemote("@" + guid);
+                            Iterator it = pointGrid.iterator();
+                            while (it.hasNext())
+                            {
+                                HRow r = (HRow) it.next();
+                                double level = Double.parseDouble(r.get("level").toString());
+                                double val = Double.parseDouble(r.get("val").toString());
+                                String who = r.get("who").toString();
+                                double duration = Double.parseDouble(r.get("dur").toString());
+                                CcuLog.d(L.TAG_CCU, "PubNub remote point:  level " + level + " val " + val + " who " + who + " duration " + duration);
+                                CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(luid), (int) level, who, HNum.make(val), HNum.make(duration == 0 ? 0 : duration - System.currentTimeMillis()));
+                            }
+                            Point p = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(luid)).build();
+                            ArrayList values = CCUHsApi.getInstance().readPoint(luid);
+                            if (values != null && values.size() > 0)
+                            {
+                                for (int l = 1; l <= values.size(); l++)
+                                {
+                                    HashMap valMap = ((HashMap) values.get(l - 1));
+                                    if (valMap.get("val") != null)
+                                    {
+                                        Log.d(L.TAG_CCU, "PubNub updated point " + p.getDisplayName() + " , level: " + l + " , val :" + Double.parseDouble(valMap.get("val").toString()));
+                                    }
+                                }
+                            }
+                            for (String marker : p.getMarkers())
+                            {
+                                if (marker.equals("his"))
+                                {
+                                    CCUHsApi.getInstance().writeHisValById(luid, CCUHsApi.getInstance().readPointPriorityVal(luid));
                                 }
                             }
                         }
-                        
-                        for (String marker : p.getMarkers())
+                        else
                         {
-                            if (marker.equals("his"))
-                            {
-                                CCUHsApi.getInstance().writeHisValById(luid, CCUHsApi.getInstance().readPointPriorityVal(luid));
-                            }
+                            CcuLog.d(L.TAG_CCU, "Pubnub received for invalid local point : " + luid);
                         }
-                        
-                    } else {
-                        CcuLog.d(L.TAG_CCU, "Pubnub received for invalid local point : "+luid);
                     }
+                } catch (NumberFormatException e) {
+                    Log.d(L.TAG_CCU, " Ignoring PubNub Message "+e.getMessage());
                 }
                 
                 

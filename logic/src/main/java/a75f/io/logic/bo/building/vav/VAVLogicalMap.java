@@ -498,6 +498,19 @@ public class VAVLogicalMap
                                   .build();
         String equipStatusId = CCUHsApi.getInstance().addPoint(equipStatus);
     
+        Point equipStatusMessage = new Point.Builder()
+                                    .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-equipStatusMessage")
+                                    .setEquipRef(equipRef)
+                                    .setSiteRef(siteRef)
+                                    .setRoomRef(room)
+                                    .setFloorRef(floor)
+                                    .addMarker("status").addMarker("message").addMarker("vav").addMarker("writable").addMarker("logical").addMarker("zone").addMarker("equipHis")
+                                    .setGroup(String.valueOf(nodeAddr))
+                                    .setTz(tz)
+                                    .setKind("string")
+                                    .build();
+        String equipStatusMessageLd = CCUHsApi.getInstance().addPoint(equipStatusMessage);
+    
         Point equipScheduleStatus = new Point.Builder()
                                     .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-equipScheduleStatus")
                                     .setEquipRef(equipRef)
@@ -565,9 +578,9 @@ public class VAVLogicalMap
         setReheatPos(0);
         setDischargeTemp(0);
         setSupplyAirTemp(0);
-        setDesiredTempCooling(73.0);
+        setDesiredTempCooling(74.0);
         setDesiredTemp(72.0);
-        setDesiredTempHeating(71.0);
+        setDesiredTempHeating(70.0);
         setHumidity(0);
         setCO2(0);
         setVOC(0);
@@ -1135,7 +1148,10 @@ public class VAVLogicalMap
     }
     
     public void setStatus(double status) {
-        CCUHsApi.getInstance().writeHisValByQuery("point and status and group == \""+nodeAddr+"\"", status);
+        CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \""+nodeAddr+"\"", status);
+        
+        CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \""+nodeAddr+"\"",
+                            status == 0 ? "Recirculating Air" : status == 1 ? "Cooling Space" : "Warming Space");
     }
     
     public void setScheduleStatus(String status)

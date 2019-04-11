@@ -226,9 +226,9 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		targetMaxInsideHumidity.setAdapter(humidityAdapter);
 		
 		targetMaxInsideHumidity.setSelection(humidityAdapter
-				                                     .getPosition(TunerUtil.readSystemUserIntentVal("target and max and inside and humidity")));
+				                                     .getPosition(TunerUtil.readSystemUserIntentVal("target and max and inside and humidity")), false);
 		targetMinInsideHumidity.setSelection(humidityAdapter
-				                                     .getPosition(TunerUtil.readSystemUserIntentVal("target and min and inside and humidity")));
+				                                     .getPosition(TunerUtil.readSystemUserIntentVal("target and min and inside and humidity")), false);
 		
 		targetMinInsideHumidity.setOnItemSelectedListener(this);
 		targetMaxInsideHumidity.setOnItemSelectedListener(this);

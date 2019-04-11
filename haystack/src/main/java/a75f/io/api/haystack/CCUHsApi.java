@@ -423,6 +423,19 @@ public class CCUHsApi
             return null;
         }
     }
+    
+    public String readDefaultStrValById(String id)
+    {
+        ArrayList values = CCUHsApi.getInstance().readPoint(id);
+        if (values != null && values.size() > 0)
+        {
+            HashMap valMap = ((HashMap) values.get(HayStackConstants.DEFAULT_POINT_LEVEL - 1));
+            return valMap.get("val") == null ? "": valMap.get("val").toString();
+        } else
+        {
+            return "";
+        }
+    }
 
     public String readDefaultStrVal(String query)
     {

@@ -532,16 +532,18 @@ public class ScheduleProcessJob extends BaseJob {
     }
     
     public static void updateEquipScheduleStatus(Equip equip) {
-        Log.d(L.TAG_CCU_JOB, "updateEquipScheduleStatus "+equip.getDisplayName());
-        for (String s : equip.getMarkers()) {
-            Log.d(L.TAG_CCU_JOB, "Equip marker "+s);
-        }
         Log.d(L.TAG_CCU_JOB, "updateEquipScheduleStatus "+equip.getDisplayName()+" "+getZoneStatusString(equip.getRoomRef()));
         ArrayList points = CCUHsApi.getInstance().readAll("point and scheduleStatus and equipRef == \""+equip.getId()+"\"");
         if (points != null && points.size() > 0)
         {
             String id = ((HashMap) points.get(0)).get("id").toString();
-            CCUHsApi.getInstance().writeDefaultValById(id, getZoneStatusString(equip.getRoomRef()));
+            String currentState = CCUHsApi.getInstance().readDefaultStrValById(id);
+            if (!currentState.equals(getZoneStatusString(equip.getRoomRef())))
+            {
+                CCUHsApi.getInstance().writeDefaultValById(id, getZoneStatusString(equip.getRoomRef()));
+            } else {
+                Log.d(L.TAG_CCU_JOB, " ScheduleStatus not changed for  "+equip.getDisplayName());
+            }
         }
         
     }

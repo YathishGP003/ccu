@@ -17,6 +17,7 @@ import org.projecthaystack.HStr;
 import org.projecthaystack.HVal;
 import org.projecthaystack.UnknownRecException;
 import org.projecthaystack.client.HClient;
+import org.projecthaystack.io.HZincReader;
 import org.projecthaystack.io.HZincWriter;
 import org.projecthaystack.server.HStdOps;
 
@@ -327,7 +328,7 @@ public class CCUHsApi
      */
     public void writePoint(String id, Double val)
     {
-        pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "", HNum.make(val), HNum.make(0));
+        pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "ccu", HNum.make(val), HNum.make(0));
     }
 
     /**
@@ -343,7 +344,7 @@ public class CCUHsApi
         {
             throw new IllegalArgumentException();
         }
-        pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "", HNum.make(val), HNum.make(0));
+        pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "ccu", HNum.make(val), HNum.make(0));
     }
 
     public void writeDefaultVal(String query, String val)
@@ -354,17 +355,17 @@ public class CCUHsApi
         {
             throw new IllegalArgumentException();
         }
-        pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "", HStr.make(val), HNum.make(0));
+        pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "ccu", HStr.make(val), HNum.make(0));
     }
 
     public void writeDefaultValById(String id, Double val)
     {
-        pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "", HNum.make(val), HNum.make(0));
+        pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "ccu", HNum.make(val), HNum.make(0));
     }
 
     public void writeDefaultValById(String id, String val)
     {
-        pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "", HStr.make(val), HNum.make(0));
+        pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "ccu", HStr.make(val), HNum.make(0));
     }
 
     public void pointWrite(HRef id, int level, String who, HVal val, HNum dur)
@@ -374,11 +375,10 @@ public class CCUHsApi
         String guid = getGUID(id.toString());
         if (guid != null)
         {
-            HDictBuilder b = new HDictBuilder().add("id", HRef.copy(guid)).add("level", level).add("who", who).add("val", val);
-            if (level == 8)
-            {
-                b.add("duration", dur);
+            if (dur.unit == null) {
+                dur = HNum.make(dur.val ,"ms");
             }
+            HDictBuilder b = new HDictBuilder().add("id", HRef.copy(guid)).add("level", level).add("who", who).add("val", val).add("duration", dur);
             HDict[] dictArr  = {b.toDict()};
             String  response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
             CcuLog.d("CCU_HS", "Response: \n" + response);
@@ -472,6 +472,15 @@ public class CCUHsApi
         return rowList;
     }
     
+    public HGrid readPointArrRemote(String id) {
+        HDictBuilder b = new HDictBuilder().add("id", HRef.copy(id));
+        HDict[] dictArr  = {b.toDict()};
+        String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+        CcuLog.d("CCU_HS", "Response : "+response);
+    
+        return new HZincReader(response).readGrid();
+    }
+    
     public double readPointPriorityVal(String id) {
         
         ArrayList values = readPoint(id);
@@ -487,6 +496,7 @@ public class CCUHsApi
         return 0;
     }
 
+    
     public void hisWrite(ArrayList<HisItem> hisList)
     {
         HHisItem[] array = new HHisItem[hisList.size()];

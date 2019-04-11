@@ -62,6 +62,21 @@ public class LogFragment extends Fragment {
 		mLogView.setBackgroundResource(R.drawable.border);
 		mLogView.setTextAppearance(getActivity(), android.R.style.TextAppearance_Holo_Medium);
 		
+		/*Spinner spinner = new Spinner(getActivity());
+		//Make sure you have valid layout parameters.
+		spinner .setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+		ArrayList<String> spinnerList = new ArrayList<>();
+		spinnerList.add(L.TAG_CCU);
+		spinnerList.add(L.TAG_CCU_ZONE);
+		spinnerList.add(L.TAG_CCU_SYSTEM);
+		spinnerList.add(L.TAG_CCU_UI)
+		spinnerList.add(L.TAG_CCU_HS);
+		
+		ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter(getActivity(),
+				android.R.layout.simple_spinner_dropdown_item, spinnerList);
+		spinner.setAdapter(spinnerArrayAdapter);
+		
+		mScrollView.addView(spinner);*/
 		mScrollView.addView(mLogView);
 		return mScrollView;
 	}

@@ -194,31 +194,31 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 		analogAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		
 		analog1Min.setAdapter(analogAdapter);
-		analog1Min.setSelection(analogAdapter.getPosition((int)systemProfile.getConfigVal("cooling and sat and min")));
+		analog1Min.setSelection(analogAdapter.getPosition((int)systemProfile.getConfigVal("cooling and sat and min")), false);
 		analog1Max.setAdapter(analogAdapter);
 		double analogVal = systemProfile.getConfigVal("cooling and sat and max");
-		analog1Max.setSelection(analogVal != 0 ? analogAdapter.getPosition((int)analogVal) : analogArray.size() -1);
+		analog1Max.setSelection(analogVal != 0 ? analogAdapter.getPosition((int)analogVal) : analogArray.size() -1 , false);
 		
 		analog2Min.setAdapter(analogAdapter);
-		analog2Min.setSelection(analogAdapter.getPosition((int)systemProfile.getConfigVal("staticPressure and min")));
+		analog2Min.setSelection(analogAdapter.getPosition((int)systemProfile.getConfigVal("staticPressure and min")), false);
 		
 		analog2Max.setAdapter(analogAdapter);
 		analogVal = systemProfile.getConfigVal("staticPressure and max");
-		analog2Max.setSelection(analogVal != 0 ? analogAdapter.getPosition((int)analogVal) : analogArray.size() -1);
+		analog2Max.setSelection(analogVal != 0 ? analogAdapter.getPosition((int)analogVal) : analogArray.size() -1, false);
 		
 		analog3Min.setAdapter(analogAdapter);
-		analog3Min.setSelection(analogAdapter.getPosition((int)systemProfile.getConfigVal("heating and min")));
+		analog3Min.setSelection(analogAdapter.getPosition((int)systemProfile.getConfigVal("heating and min")), false);
 		
 		analog3Max.setAdapter(analogAdapter);
 		analogVal = systemProfile.getConfigVal("heating and max");
-		analog3Max.setSelection(analogVal != 0 ? analogAdapter.getPosition((int)analogVal) : analogArray.size() -1);
+		analog3Max.setSelection(analogVal != 0 ? analogAdapter.getPosition((int)analogVal) : analogArray.size() -1, false);
 		
 		analog4Min.setAdapter(analogAdapter);
-		analog4Min.setSelection(analogAdapter.getPosition((int)systemProfile.getConfigVal("co2 and min")));
+		analog4Min.setSelection(analogAdapter.getPosition((int)systemProfile.getConfigVal("co2 and min")), false);
 		
 		analog4Max.setAdapter(analogAdapter);
 		analogVal = systemProfile.getConfigVal("co2 and max");
-		analog4Max.setSelection(analogVal != 0 ? analogAdapter.getPosition((int)analogVal) : analogArray.size() -1);
+		analog4Max.setSelection(analogVal != 0 ? analogAdapter.getPosition((int)analogVal) : analogArray.size() -1, false);
 		
 		ArrayList<String> humidifierOptions = new ArrayList<>();
 		humidifierOptions.add("Humidifier");

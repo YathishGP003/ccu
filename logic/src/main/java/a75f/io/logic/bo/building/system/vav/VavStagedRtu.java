@@ -502,14 +502,20 @@ public class VavStagedRtu extends VavSystemProfile
     }
     
     public double getConfigEnabled(String config) {
-        return CCUHsApi.getInstance().readDefaultVal("point and system and config and output and enabled and "+config);
+        //return CCUHsApi.getInstance().readDefaultVal("point and system and config and output and enabled and "+config);
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap configPoint = hayStack.read("point and system and config and output and enabled and "+config);
+        return hayStack.readPointPriorityVal(configPoint.get("id").toString());
     }
     public void setConfigEnabled(String config, double val) {
         CCUHsApi.getInstance().writeDefaultVal("point and system and config and output and enabled and "+config, val);
     }
     
     public double getConfigAssociation(String config) {
-        return CCUHsApi.getInstance().readDefaultVal("point and system and config and output and association and "+config);
+        //return CCUHsApi.getInstance().readDefaultVal("point and system and config and output and association and "+config);
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap configPoint = hayStack.read("point and system and config and output and association and "+config);
+        return hayStack.readPointPriorityVal(configPoint.get("id").toString());
     }
     public void setConfigAssociation(String config, double val) {
         HashMap cmd = CCUHsApi.getInstance().read("point and system and cmd and "+config);

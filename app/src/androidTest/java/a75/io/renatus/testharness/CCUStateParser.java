@@ -9,6 +9,7 @@ import org.projecthaystack.HGridBuilder;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 import org.projecthaystack.HRow;
+import org.projecthaystack.HStr;
 import org.projecthaystack.client.HClient;
 import org.projecthaystack.io.HZincWriter;
 
@@ -153,7 +154,7 @@ public class CCUStateParser
             {
                 CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(m.get("id").toString()),
                         Integer.parseInt(v.get("level").toString()), v.get("who").toString(),
-                        HNum.make(Double.parseDouble(v.get("val").toString())),HNum.make(0));
+                        m.get("kind").toString().equals("string") ? HStr.make(v.get("val").toString()) : HNum.make(Double.parseDouble(v.get("val").toString())),HNum.make(0));
             }
         
         }
@@ -161,7 +162,7 @@ public class CCUStateParser
         //BuildingTuners.getInstance();
         
         CCUHsApi.getInstance().saveTagsData();
-        Globals.getInstance().addProfilesForEquips();
+        Globals.getInstance().loadEquipProfiles();
         
     }
     

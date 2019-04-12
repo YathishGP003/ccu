@@ -38,6 +38,7 @@ import java.util.HashMap;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.logger.CcuLog;
 import info.guardianproject.netcipher.NetCipher;
@@ -682,10 +683,8 @@ public class HClient extends HProj
   public static HttpsURLConnection openHttpsConnection(URL url, String method, int connectTimeout, int readTimeout)
     throws IOException
   {
-
-    //connection = (HttpsURLConnection)url.openConnection();
-
-    HttpsURLConnection c = NetCipher.getHttpsURLConnection(url);//TODO - Hack for SSLException
+    HttpsURLConnection c = CCUHsApi.getInstance().unitTestingEnabled ? (HttpsURLConnection)url.openConnection() :
+                                                      NetCipher.getHttpsURLConnection(url);//TODO - Hack for SSLException
     c.setRequestMethod(method);
     c.setInstanceFollowRedirects(false);
     c.setConnectTimeout(connectTimeout);

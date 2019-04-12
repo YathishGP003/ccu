@@ -471,6 +471,9 @@ public class CCUHsApi
     {
         HGrid              pArr    = hsClient.pointWriteArray(HRef.copy(id));
         ArrayList<HashMap> rowList = new ArrayList<>();
+        if (pArr == null || pArr.isEmpty()) {
+            return rowList;
+        }
         Iterator           it      = pArr.iterator();
         while (it.hasNext())
         {

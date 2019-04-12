@@ -105,8 +105,8 @@ public class ConventionalUnitProfile extends ZoneProfile {
             cpuDevice.setProfilePoint("occupancy and status",occupied ? 1 : 0);
             boolean isFanStage1Enabled = getConfigEnabled("relay3", node) > 0 ? true : false;
             boolean isFanStage2Enabled = getConfigEnabled("relay6", node) > 0 ? true : false;
-            Log.d(TAG, " smartstat cpu, updates =" + node+","+roomTemp+","+occupied+","+occuStatus.getCoolingDeadBand()+","+state+","+occuStatus.getCoolingVal()+","+occuStatus.getHeatingVal());
-            if ((opMode == StandaloneOperationalMode.AUTO || opMode == StandaloneOperationalMode.COOL_ONLY)&& (roomTemp >= (setTempCooling - hysteresis)) )
+            Log.d(TAG, " smartstat cpu, updates =" + node+","+roomTemp+","+occupied+","+occuStatus.getCoolingDeadBand()+","+state+","+occuStatus.getCoolingVal()+","+occuStatus.getHeatingVal()+","+isFanStage1Enabled+","+isFanStage2Enabled);
+            if (((opMode == StandaloneOperationalMode.AUTO) || (opMode == StandaloneOperationalMode.COOL_ONLY))&& (roomTemp >= (setTempCooling - hysteresis)) )
             {
 
                 //Zone is in Cooling
@@ -174,7 +174,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
                     setCmdSignal("cooling and stage2", 0, node);
                 }
             }
-            else if ((opMode == StandaloneOperationalMode.AUTO || opMode == StandaloneOperationalMode.HEAT_ONLY)&&(roomTemp <= (setTempHeating + hysteresis)))
+            else if (((opMode == StandaloneOperationalMode.AUTO) || (opMode == StandaloneOperationalMode.HEAT_ONLY))&&(roomTemp <= (setTempHeating + hysteresis)))
             {
                 //Zone is in heating
 

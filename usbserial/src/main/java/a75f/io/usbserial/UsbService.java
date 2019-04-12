@@ -13,6 +13,7 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -25,9 +26,15 @@ import com.felhr.usbserial.UsbSerialInterface;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.sql.Struct;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.LinkedBlockingQueue;
 
 
 /**
@@ -139,14 +146,25 @@ public class UsbService extends Service
 	private       UsbSerialInterface.UsbReadCallback mCallback   =
 			new UsbSerialInterface.UsbReadCallback()
 			{
-				@Override
-				public void onReceivedData(byte[] data)
-				{
+        @Override
+        public void onReceivedData(byte[] data, int mLength) {
 					if (data.length > 0)
 					{
-						
-						
-						parseBytes(data);
+						int nMsg;
+						try {
+							nMsg = (data[0] & 0xff);
+						} catch (ArrayIndexOutOfBoundsException e) {
+							Log.d("SERIAL_DEBUG",
+										"Bad message type received: " + String.valueOf(data[0] & 0xff) +
+												e.getMessage());
+							return;
+						}
+						if (data.length < 3) {
+							return; //We need minimum bytes atleast 3 with msg and fsv address causing crash for WRM Pairing
+						}
+
+						messageToClients(Arrays.copyOfRange(data, 0, mLength));
+						//parseBytes(data);
 					}
 				}
 			};
@@ -336,6 +354,8 @@ public class UsbService extends Service
 		setFilter();
 		usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
 		findSerialPortDevice();
+
+		running.start();
 	}
 	
 	
@@ -484,40 +504,83 @@ public class UsbService extends Service
 		serialPort.debug(debug);
 	}
 	
-	
+	/************************************************************************************************************************/
+
+	private final LinkedBlockingQueue<byte[]> messageQueue = new LinkedBlockingQueue<byte[]>();
+
+	Thread running = new Thread() {
+		@Override
+		public void run() {
+			super.run();
+			byte[] data;
+
+			while (true) {
+				try {
+					if (!serialPortConnected) {
+						Log.i(TAG, "Serial Port is not connected sleeping");
+						sleep(500);
+						continue;
+					} else {
+						Log.i(TAG, "Serial Port is connected.");
+					}
+
+					data = messageQueue.take();
+
+					if (serialPort != null) {
+						byte buffer[] = new byte[128];
+						byte crc = 0;
+						byte nOffset = 0;
+						int len = data.length;
+						if(len >= 128)
+							buffer = new byte[160]; //For OTA Updates
+						buffer[nOffset++] = (byte) (ESC_BYTE & 0xff);
+						buffer[nOffset++] = (byte) (SOF_BYTE & 0xff);
+						buffer[nOffset++] = (byte) (len & 0xff);
+						for (int i = 0; i < len; i++) {
+							buffer[i + nOffset] = data[i]; // add payload to the tx buffer
+							crc ^= data[i];             // calculate the new crc
+							if (data[i] == (byte) (ESC_BYTE &
+									0xff)) // if the data is equal to ESC byte then add another instance of that
+							{
+								nOffset++;
+								buffer[i + nOffset] = data[i];
+							}
+						}
+						buffer[nOffset + len] = (byte) (crc & 0xff);
+						nOffset++;
+						buffer[nOffset + len] = (byte) (ESC_BYTE & 0xff);
+						nOffset++;
+						buffer[nOffset + len] = (byte) (EOF_BYTE & 0xff);
+						nOffset++;
+						serialPort.write(Arrays.copyOfRange(buffer,0,len + nOffset));
+
+						try {
+							Thread.sleep(300);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+				} catch (Exception exception) {
+					exception.printStackTrace();
+				}
+			}
+
+		}
+
+	};
+
 	/*
 	 * This function will be called from MainActivity to write data through Serial Port
 	 */
-	public void write(byte[] data)
-	{
-		if (serialPort != null)
+	public void write(byte[] data) {
+
+		if(isConnected()) {
+			messageQueue.add(data);
+		}
+		else
 		{
-			byte buffer[] = new byte[256];
-			byte crc = 0;
-			byte nOffset = 0;
-			int len = data.length;
-			buffer[nOffset++] = (byte) (ESC_BYTE & 0xff);
-			buffer[nOffset++] = (byte) (SOF_BYTE & 0xff);
-			buffer[nOffset++] = (byte) (len & 0xff);
-			for (int i = 0; i < len; i++)
-			{
-				buffer[i + nOffset] = data[i]; // add payload to the tx buffer
-				crc ^= data[i];             // calculate the new crc
-				if (data[i] == (byte) (ESC_BYTE &
-				                       0xff)) // if the data is equal to ESC byte then add another instance of that
-				{
-					nOffset++;
-					buffer[i + nOffset] = data[i];
-				}
-			}
-			buffer[nOffset + len] = (byte) (crc & 0xff);
-			nOffset++;
-			buffer[nOffset + len] = (byte) (ESC_BYTE & 0xff);
-			nOffset++;
-			buffer[nOffset + len] = (byte) (EOF_BYTE & 0xff);
-			nOffset++;
-			//TODO: Review.
-			serialPort.write(buffer);
+			messageQueue.clear();
+			Log.i(TAG, "Serial is disconnected, message discarded");
 		}
 	}
 	
@@ -561,6 +624,7 @@ public class UsbService extends Service
 			{
 				if (serialPort.open())
 				{
+                    setDebug(false);
 					serialPortConnected = true;
 					serialPort.setBaudRate(BAUD_RATE);
 					serialPort.setDataBits(UsbSerialInterface.DATA_BITS_8);
@@ -579,7 +643,11 @@ public class UsbService extends Service
 					//
 					// Some Arduinos would need some sleep because firmware wait some time to know whether a new sketch is going
 					// to be uploaded or not
-					//Thread.sleep(2000); // sleep some. YMMV with different chips.
+                    try {
+                        sleep(2000); // sleep some. YMMV with different chips.
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
 					// Everything went as expected. Send an intent to MainActivity
 					Intent intent = new Intent(ACTION_USB_READY);
 					context.sendBroadcast(intent);

@@ -589,6 +589,7 @@ public class ConventionalUnitLogicalMap {
             relay1.mOutputRelayActuatorType = OutputRelayActuatorType.getEnum(r1.getType());
             config.getOutputs().add(relay1);
         }
+        setConfigNumVal("enable and relay1",((r1 != null) && (r1.getEnabled())) ? 1.0 : 0);
 
         RawPoint r2 = SmartStat.getPhysicalPoint(nodeAddr, Port.RELAY_TWO.toString());
         if (r2 != null && r2.getEnabled()) {
@@ -598,6 +599,8 @@ public class ConventionalUnitLogicalMap {
             relay2.mOutputRelayActuatorType = OutputRelayActuatorType.getEnum(r2.getType());
             config.getOutputs().add(relay2);
         }
+        setConfigNumVal("enable and relay2",((r2 != null) && (r2.getEnabled())) ? 1.0 : 0);
+
         RawPoint r3 = SmartStat.getPhysicalPoint(nodeAddr, Port.RELAY_THREE.toString());
         if (r3 != null && r3.getEnabled()) {
             Output relayThree = new Output();
@@ -606,6 +609,8 @@ public class ConventionalUnitLogicalMap {
             relayThree.mOutputRelayActuatorType = OutputRelayActuatorType.getEnum(r3.getType());
             config.getOutputs().add(relayThree);
         }
+        setConfigNumVal("enable and relay3",((r3 != null) && (r3.getEnabled())) ? 1.0 : 0);
+
         RawPoint r4 = SmartStat.getPhysicalPoint(nodeAddr, Port.RELAY_FOUR.toString());
         if (r4 != null && r4.getEnabled()) {
             Output relayFour = new Output();
@@ -614,6 +619,8 @@ public class ConventionalUnitLogicalMap {
             relayFour.mOutputRelayActuatorType = OutputRelayActuatorType.getEnum(r4.getType());
             config.getOutputs().add(relayFour);
         }
+        setConfigNumVal("enable and relay4",((r4 != null) && (r4.getEnabled())) ? 1.0 : 0);
+
         RawPoint r5 = SmartStat.getPhysicalPoint(nodeAddr, Port.RELAY_FIVE.toString());
         if (r5 != null && r5.getEnabled()) {
             Output relayFive = new Output();
@@ -622,6 +629,8 @@ public class ConventionalUnitLogicalMap {
             relayFive.mOutputRelayActuatorType = OutputRelayActuatorType.getEnum(r5.getType());
             config.getOutputs().add(relayFive);
         }
+        setConfigNumVal("enable and relay5",((r5 != null) && (r5.getEnabled())) ? 1.0 : 0);
+
         RawPoint r6 = SmartStat.getPhysicalPoint(nodeAddr, Port.RELAY_SIX.toString());
         if (r6 != null && r6.getEnabled()) {
             Output relaySix = new Output();
@@ -630,6 +639,7 @@ public class ConventionalUnitLogicalMap {
             relaySix.mOutputRelayActuatorType = OutputRelayActuatorType.getEnum(r6.getType());
             config.getOutputs().add(relaySix);
         }
+        setConfigNumVal("enable and relay6",((r6 != null) && (r6.getEnabled())) ? 1.0 : 0);
         return config;
     }
     public double getCurrentTemp()

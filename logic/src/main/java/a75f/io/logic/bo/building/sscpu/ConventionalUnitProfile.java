@@ -392,7 +392,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
 
 
     public double getConfigEnabled(String config, short node) {
-        return CCUHsApi.getInstance().readDefaultVal("point and standalone and config and enable and "+config+" and group == \"" + node + "\"");
+        return CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and "+config+" and group == \"" + node + "\"");
 
     }
 

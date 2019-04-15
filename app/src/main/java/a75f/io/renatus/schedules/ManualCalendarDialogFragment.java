@@ -79,8 +79,6 @@ public class ManualCalendarDialogFragment extends DialogFragment implements View
                                       CalendarDay.from(mEndDate.getYear(), mEndDate.getMonthOfYear(), mEndDate.getDayOfMonth()));
             DateTime today = new DateTime();
             if (mStartDate.dayOfYear().get() < today.dayOfYear().get() && mEndDate.dayOfYear().get() < today.dayOfYear().get() ) {
-                //mCalendarView.setEnabled(false);
-                mCalendarView.setEnabled(false);
                 mCalendarView.state().edit().setMinimumDate(CalendarDay.from(mStartDate.getYear(), mStartDate.getMonthOfYear(), mStartDate.getDayOfMonth())).commit();
                 mCalendarView.state().edit().setMaximumDate(CalendarDay.from(mEndDate.getYear(), mEndDate.getMonthOfYear(), mEndDate.getDayOfMonth())).commit();
             } else if (mStartDate.dayOfYear().get() < today.dayOfYear().get()) {
@@ -93,7 +91,7 @@ public class ManualCalendarDialogFragment extends DialogFragment implements View
         {
             mCalendarView.state().edit().setMinimumDate(CalendarDay.today()).commit();
         }
-
+        
         mButtonSave.setOnClickListener(view1 ->
                                        {
                                            processCalendar();

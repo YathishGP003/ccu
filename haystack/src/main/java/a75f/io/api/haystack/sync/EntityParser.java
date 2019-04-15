@@ -66,7 +66,6 @@ public class EntityParser
         if (mGrid == null) {
             return;
         }
-        //TODO- Could be removed to save memory
         mRows = new ArrayList<>();
         try {
             if (mGrid != null)
@@ -168,8 +167,56 @@ public class EntityParser
     public ArrayList<Schedule> getSchedules() {
         return schedules;
     }
-
-
+    
+    public void importSchedules() {
+        for(Schedule s : getSchedules()) {
+            if (s.getMarkers().contains("building"))
+            {
+                s.setmSiteId(CCUHsApi.getInstance().getSiteId().toString());
+                HRef localId = HRef.make(UUID.randomUUID().toString());
+                CCUHsApi.getInstance().addSchedule(localId.toVal(), s.getScheduleHDict());
+            }
+        }
+    }
+    
+    public void importBuildingTuner() {
+        
+        CCUHsApi hsApi = CCUHsApi.getInstance();
+        for (Equip q : getEquips()) {
+            if (q.getMarkers().contains("tuner"))
+            {
+                q.setSiteRef(hsApi.getSiteId().toString());
+                q.setFloorRef("@SYSTEM");
+                q.setRoomRef("@SYSTEM");
+                String equipLuid = hsApi.addEquip(q);
+                hsApi.putUIDMap(equipLuid, q.getId());
+                //Points
+                for (Point p : getPoints())
+                {
+                    if (p.getEquipRef().equals(q.getId()))
+                    {
+                        p.setSiteRef(hsApi.getSiteId().toString());
+                        p.setFloorRef("@SYSTEM");
+                        p.setRoomRef("@SYSTEM");
+                        p.setEquipRef(equipLuid);
+                        hsApi.putUIDMap(hsApi.addPoint(p), p.getId());
+                    }
+                }
+            }
+        }
+    
+    }
+    
+    public void importSite() {
+        CCUHsApi hsApi = CCUHsApi.getInstance();
+        if (getSite() != null)
+        {
+            Site site = getSite();
+            String siteLuid = hsApi.addSite(site);
+            hsApi.putUIDMap(siteLuid, site.getId());
+        }
+    }
+    
     
     public void importSchedules() {
         for(Schedule s : getSchedules()) {

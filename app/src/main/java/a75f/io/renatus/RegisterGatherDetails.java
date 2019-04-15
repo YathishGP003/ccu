@@ -183,6 +183,8 @@ public class RegisterGatherDetails extends Activity {
             protected void onPostExecute(Boolean success) {
                 super.onPostExecute(success);
                 RegisterGatherDetails.this.hideProgressDialog();
+                
+                //progressDlg.dismiss();
 
                 if (!success) {
                     Toast.makeText(RegisterGatherDetails.this, "The site failed to sync.", Toast.LENGTH_LONG).show();

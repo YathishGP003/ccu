@@ -253,7 +253,11 @@ public class Schedule extends Entity
     {
         return mSiteId;
     }
-
+    
+    public void setmSiteId(String mSiteId)
+    {
+        this.mSiteId = mSiteId;
+    }
     private String mSiteId;
 
     public String getTZ()

@@ -57,4 +57,9 @@ public class SerialInputStream extends InputStream implements UsbSerialInterface
             }
         }
     }
+
+    @Override
+    public void onReceivedData(byte[] data, int length) {
+
+    }
 }

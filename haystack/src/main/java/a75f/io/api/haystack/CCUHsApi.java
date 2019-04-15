@@ -50,6 +50,8 @@ public class CCUHsApi
     public HisSyncHandler    hisSyncHandler;
 
     public boolean testHarnessEnabled = false;
+    
+    public boolean unitTestingEnabled = false;
 
     public static CCUHsApi getInstance()
     {
@@ -423,6 +425,19 @@ public class CCUHsApi
             return null;
         }
     }
+    
+    public String readDefaultStrValById(String id)
+    {
+        ArrayList values = CCUHsApi.getInstance().readPoint(id);
+        if (values != null && values.size() > 0)
+        {
+            HashMap valMap = ((HashMap) values.get(HayStackConstants.DEFAULT_POINT_LEVEL - 1));
+            return valMap.get("val") == null ? "": valMap.get("val").toString();
+        } else
+        {
+            return "";
+        }
+    }
 
     public String readDefaultStrVal(String query)
     {
@@ -456,6 +471,9 @@ public class CCUHsApi
     {
         HGrid              pArr    = hsClient.pointWriteArray(HRef.copy(id));
         ArrayList<HashMap> rowList = new ArrayList<>();
+        if (pArr == null || pArr.isEmpty()) {
+            return rowList;
+        }
         Iterator           it      = pArr.iterator();
         while (it.hasNext())
         {
@@ -769,9 +787,48 @@ public class CCUHsApi
         Site s = p.getSite();
         tagsDb.idMap.put("@"+tagsDb.addSite(s), s.getId());
         Log.d("CCU_HS","Added Site "+s.getId());
+    
+        HClient hClient = new HClient(HttpUtil.HAYSTACK_URL, HayStackConstants.USER, HayStackConstants.PASS);
+        HDict navIdDict = new HDictBuilder().add("navId", HRef.make(siteId)).toDict();
+        HGrid hGrid = HGridBuilder.dictToGrid(navIdDict);
+        HGrid syncData = hClient.call("sync", hGrid);
+        
+        p = new EntityParser(syncData);
         
         //tagsDb.addHGrid(remoteSite);
         //tagsDb.addHGrid(remoteSiteDetails);
+    
+        p.importSchedules();
+        p.importBuildingTuner();
+    
+        ArrayList<HashMap> writablePoints = CCUHsApi.getInstance().readAll("point and writable");
+        for (HashMap m : writablePoints) {
+            System.out.println(m);
+            HDict pid = new HDictBuilder().add("id",HRef.copy(getGUID(m.get("id").toString()))).toDict();
+            HGrid wa = hClient.call("pointWrite",HGridBuilder.dictToGrid(pid));
+            wa.dump();
+        
+            ArrayList<HashMap> valList = new ArrayList<>();
+            Iterator it = wa.iterator();
+            while (it.hasNext()) {
+                HashMap<Object, Object> map = new HashMap<>();
+                HRow r = (HRow) it.next();
+                HRow.RowIterator ri = (HRow.RowIterator) r.iterator();
+                while (ri.hasNext()) {
+                    HDict.MapEntry e = (HDict.MapEntry) ri.next();
+                    map.put(e.getKey(), e.getValue());
+                }
+                valList.add(map);
+            }
+            
+            for(HashMap v : valList)
+            {
+                CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(m.get("id").toString()),
+                        Integer.parseInt(v.get("level").toString()), v.get("who").toString(),
+                        m.get("kind").toString().equals("string") ? HStr.make(v.get("val").toString()) : HNum.make(Double.parseDouble(v.get("val").toString())),HNum.make(0));
+            }
+        
+        }
         
         tagsDb.log();
 

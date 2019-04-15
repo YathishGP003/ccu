@@ -2,10 +2,14 @@ package a75f.io.logic.bo.building.sscpu;
 
 import android.util.Log;
 
+import org.projecthaystack.HNum;
+import org.projecthaystack.HRef;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Schedule;
@@ -189,7 +193,7 @@ public class ConventionalUnitLogicalMap {
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("standalone").addMarker(profile).addMarker("equipHis").addMarker("current")
+                .addMarker("standalone").addMarker(profile).addMarker("equipHis")/*.addMarker("current")*/
                 .addMarker("air").addMarker("temp").addMarker("th2").addMarker("sensor").addMarker("his").addMarker("logical").addMarker("zone")
                 .setGroup(String.valueOf(nodeAddr))
                 .setUnit("\u00B0F")
@@ -276,16 +280,29 @@ public class ConventionalUnitLogicalMap {
         String r6ID = CCUHsApi.getInstance().addPoint(fanStage2);
 		Point equipStatus = new Point.Builder()
                   .setDisplayName(equipDis+"-equipStatus")
-                  .setEquipRef(equipRef)
-                  .setSiteRef(siteRef)
-                  .setRoomRef(room)
-                  .setFloorRef(floor)
-				  .addMarker("standalone").addMarker("status").addMarker("cpu").addMarker("base")
-                  .addMarker("cmd").addMarker("his").addMarker("logical").addMarker("zone").addMarker("equipHis")
-                  .setGroup(String.valueOf(nodeAddr))
-                  .setTz(tz)
-                  .build();
+                                  .setEquipRef(equipRef)
+                                  .setSiteRef(siteRef)
+                                  .setRoomRef(room)
+                                  .setFloorRef(floor)
+                                  .addMarker("status").addMarker("cpu").addMarker("his").addMarker("logical").addMarker("zone").addMarker("equipHis")
+                                  .setGroup(String.valueOf(nodeAddr))
+                                  .setTz(tz)
+                                  .build();
         String equipStatusId = CCUHsApi.getInstance().addPoint(equipStatus);
+
+        Point equipScheduleStatus = new Point.Builder()
+                  .setDisplayName(equipDis+"-equipScheduleStatus")
+                                    .setEquipRef(equipRef)
+                                    .setSiteRef(siteRef)
+                                    .setRoomRef(room)
+                                    .setFloorRef(floor)
+                                    .addMarker("scheduleStatus").addMarker("cpu").addMarker("logical").addMarker("zone").addMarker("writable").addMarker("equipHis")
+                                    .setGroup(String.valueOf(nodeAddr))
+                                    .setTz(tz)
+                                    .setKind("string")
+                                    .build();
+        String equipScheduleStatusId = CCUHsApi.getInstance().addPoint(equipScheduleStatus);
+        
         //Create Physical points and map
         SmartStat device = new SmartStat(nodeAddr, siteRef, floor, room,equipRef,"cpu");
         //TODO Need to set it for default if not enabled, currently set it as enabled //kumar
@@ -318,18 +335,19 @@ public class ConventionalUnitLogicalMap {
         device.relay6.setEnabled(config.isOpConfigured(Port.RELAY_SIX));
 
         device.addPointsToDb();
-
+//initialize with default values if schedule fetch is null
+        double coolingVal = 74.0;
+        double heatingVal = 70.0;
+        double defaultDesiredTemp = 72;
+        double cdb = 2.0;
+        double hdb = 2.0;
         //Initialize write array for points, otherwise a read before write will throw exception
         setCurrentTemp(0);
         setHumidity(0);
         setCO2(0);
         setVOC(0);
+		setScheduleStatus("");
         Schedule schedule = Schedule.getScheduleByEquipId(equipRef);
-        double coolingVal = 75.0;
-        double heatingVal = 70.0;
-        double defaultDesiredTemp = 72.5;
-        double cdb = 2.5;
-        double hdb = 2.5;
         if(schedule != null) {
             defaultDesiredTemp = (schedule.getCurrentValues().getCoolingVal() + schedule.getCurrentValues().getHeatingVal()) / 2.0;
             coolingVal = schedule.getCurrentValues().getCoolingVal();
@@ -414,8 +432,7 @@ public class ConventionalUnitLogicalMap {
                 .setSiteRef(siteRef)
                 .setFloorRef(floor)
                 .setRoomRef(room)
-                .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone")
-                .addMarker("air").addMarker("temp").addMarker("sp").addMarker("enable").addMarker(profile).addMarker("th1")
+                .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone").addMarker("sp").addMarker("enable").addMarker(profile).addMarker("th1")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
@@ -428,8 +445,7 @@ public class ConventionalUnitLogicalMap {
                 .setSiteRef(siteRef)
                 .setFloorRef(floor)
                 .setRoomRef(room)
-                .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone").addMarker("current").addMarker("th2")
-                .addMarker("air").addMarker("temp").addMarker("sp").addMarker("enable").addMarker(profile)
+                .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone").addMarker("th2").addMarker("sp").addMarker("enable").addMarker(profile)
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
@@ -546,6 +562,12 @@ public class ConventionalUnitLogicalMap {
         SmartStat.setPointEnabled(nodeAddr, Port.TH1_IN.name(),config.enableThermistor1);
         SmartStat.setPointEnabled(nodeAddr, Port.TH2_IN.name(), config.enableThermistor2);
 
+        setConfigNumVal("enable and relay1",config.enableRelay1 == true ? 1.0 : 0);
+        setConfigNumVal("enable and relay2",config.enableRelay2 == true ? 1.0 : 0);
+        setConfigNumVal("enable and relay3",config.enableRelay3 == true ? 1.0 : 0);
+        setConfigNumVal("enable and relay4",config.enableRelay4 == true ? 1.0 : 0);
+        setConfigNumVal("enable and relay5",config.enableRelay5 == true ? 1.0 : 0);
+        setConfigNumVal("enable and relay6",config.enableRelay6 == true ? 1.0 : 0);
         setConfigNumVal("enable and occupancy",config.enableOccupancyControl == true ? 1.0 : 0);
         setConfigNumVal("temperature and offset",config.temperatureOffset);
         setConfigNumVal("enable and th1",config.enableThermistor1 == true ? 1.0 : 0);
@@ -571,6 +593,7 @@ public class ConventionalUnitLogicalMap {
             relay1.mOutputRelayActuatorType = OutputRelayActuatorType.getEnum(r1.getType());
             config.getOutputs().add(relay1);
         }
+        setConfigNumVal("enable and relay1",((r1 != null) && (r1.getEnabled())) ? 1.0 : 0);
 
         RawPoint r2 = SmartStat.getPhysicalPoint(nodeAddr, Port.RELAY_TWO.toString());
         if (r2 != null && r2.getEnabled()) {
@@ -580,6 +603,8 @@ public class ConventionalUnitLogicalMap {
             relay2.mOutputRelayActuatorType = OutputRelayActuatorType.getEnum(r2.getType());
             config.getOutputs().add(relay2);
         }
+        setConfigNumVal("enable and relay2",((r2 != null) && (r2.getEnabled())) ? 1.0 : 0);
+
         RawPoint r3 = SmartStat.getPhysicalPoint(nodeAddr, Port.RELAY_THREE.toString());
         if (r3 != null && r3.getEnabled()) {
             Output relayThree = new Output();
@@ -588,6 +613,8 @@ public class ConventionalUnitLogicalMap {
             relayThree.mOutputRelayActuatorType = OutputRelayActuatorType.getEnum(r3.getType());
             config.getOutputs().add(relayThree);
         }
+        setConfigNumVal("enable and relay3",((r3 != null) && (r3.getEnabled())) ? 1.0 : 0);
+
         RawPoint r4 = SmartStat.getPhysicalPoint(nodeAddr, Port.RELAY_FOUR.toString());
         if (r4 != null && r4.getEnabled()) {
             Output relayFour = new Output();
@@ -596,6 +623,8 @@ public class ConventionalUnitLogicalMap {
             relayFour.mOutputRelayActuatorType = OutputRelayActuatorType.getEnum(r4.getType());
             config.getOutputs().add(relayFour);
         }
+        setConfigNumVal("enable and relay4",((r4 != null) && (r4.getEnabled())) ? 1.0 : 0);
+
         RawPoint r5 = SmartStat.getPhysicalPoint(nodeAddr, Port.RELAY_FIVE.toString());
         if (r5 != null && r5.getEnabled()) {
             Output relayFive = new Output();
@@ -604,6 +633,8 @@ public class ConventionalUnitLogicalMap {
             relayFive.mOutputRelayActuatorType = OutputRelayActuatorType.getEnum(r5.getType());
             config.getOutputs().add(relayFive);
         }
+        setConfigNumVal("enable and relay5",((r5 != null) && (r5.getEnabled())) ? 1.0 : 0);
+
         RawPoint r6 = SmartStat.getPhysicalPoint(nodeAddr, Port.RELAY_SIX.toString());
         if (r6 != null && r6.getEnabled()) {
             Output relaySix = new Output();
@@ -612,6 +643,7 @@ public class ConventionalUnitLogicalMap {
             relaySix.mOutputRelayActuatorType = OutputRelayActuatorType.getEnum(r6.getType());
             config.getOutputs().add(relaySix);
         }
+        setConfigNumVal("enable and relay6",((r6 != null) && (r6.getEnabled())) ? 1.0 : 0);
         return config;
     }
     public double getCurrentTemp()
@@ -671,7 +703,8 @@ public class ConventionalUnitLogicalMap {
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
+        //CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
+        CCUHsApi.getInstance().pointWrite(HRef.copy(id), HayStackConstants.POINT_INIT_VAL_LEVEL, "ccu", HNum.make(desiredTemp), HNum.make(0));
         CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
         this.desiredTemp = desiredTemp;
     }
@@ -702,7 +735,8 @@ public class ConventionalUnitLogicalMap {
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
+        //CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
+        CCUHsApi.getInstance().pointWrite(HRef.copy(id), HayStackConstants.POINT_INIT_VAL_LEVEL, "ccu", HNum.make(desiredTemp), HNum.make(0));
         CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
         this.desiredTemp = desiredTemp;
     }
@@ -733,7 +767,8 @@ public class ConventionalUnitLogicalMap {
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
+        //CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
+        CCUHsApi.getInstance().pointWrite(HRef.copy(id), HayStackConstants.POINT_INIT_VAL_LEVEL, "ccu", HNum.make(desiredTemp), HNum.make(0));
         CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
         this.desiredTemp = desiredTemp;
     }
@@ -768,7 +803,17 @@ public class ConventionalUnitLogicalMap {
         return CCUHsApi.getInstance().readDefaultVal("point and zone and config and standalone and cpu and "+tags+" and group == \""+nodeAddr+"\"");
     }
     public void setStatus(double status) {
-        CCUHsApi.getInstance().writeHisValByQuery("point and status and cmd and group == \""+nodeAddr+"\"", status);
+        CCUHsApi.getInstance().writeHisValByQuery("point and status and group == \""+nodeAddr+"\"", status);
+    }
+    
+    public void setScheduleStatus(String status)
+    {
+        ArrayList points = CCUHsApi.getInstance().readAll("point and scheduleStatus and group == \""+nodeAddr+"\"");
+        String id = ((HashMap)points.get(0)).get("id").toString();
+        if (id == null || id == "") {
+            throw new IllegalArgumentException();
+        }
+        CCUHsApi.getInstance().writeDefaultValById(id, status);
     }
     protected void addUserIntentPoints(String equipref, String equipDis) {
 

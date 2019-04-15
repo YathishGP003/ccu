@@ -1,6 +1,7 @@
 package a75f.io.renatus;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -19,12 +20,12 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
-import a75f.io.logic.tuners.BuildingTuners;
 
 public class RegisterGatherDetails extends Activity {
 
     ProgressBar mProgressDialog;
     Button mUseExistingSiteButton;
+    Button noSiteButton;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -33,7 +34,7 @@ public class RegisterGatherDetails extends Activity {
         setContentView(R.layout.activity_register_gather_details);
         Globals.getInstance().setSiteAlreadyCreated(false);
         EditText siteIdEditText = (EditText) findViewById(R.id.site_id_edittext);
-        Button noSiteButton = (Button) findViewById(R.id.no_site_button);
+        noSiteButton = (Button) findViewById(R.id.no_site_button);
         mProgressDialog = (ProgressBar) findViewById(R.id.progressbar);
         mUseExistingSiteButton = (Button) findViewById(R.id.use_existing_site_button);
         mUseExistingSiteButton.setOnClickListener(new View.OnClickListener() {
@@ -130,7 +131,7 @@ public class RegisterGatherDetails extends Activity {
                 saveExistingSite(hGrid);
                 Toast.makeText(RegisterGatherDetails.this, "Using this site!", Toast.LENGTH_LONG).show();
                 // CCUHsApi.getInstance().addExistingSite(hGrid);
-                navigateToCCUScreen();
+                // navigateToCCUScreen();
 
             }
         });
@@ -153,12 +154,19 @@ public class RegisterGatherDetails extends Activity {
         System.out.println("Site ID val: " + siteIdVal);
 
         AsyncTask<String, Void, Boolean> syncSiteTask = new AsyncTask<String, Void, Boolean>() {
-
+    
+            ProgressDialog progressDlg = new ProgressDialog(getApplicationContext());
 
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
                 RegisterGatherDetails.this.showProgressDialog();
+                //progressDlg.setMessage("Fetching Site data");
+                //progressDlg.show();
+    
+                mUseExistingSiteButton.setEnabled(false);
+                noSiteButton.setEnabled(false);
+                
             }
 
             @Override
@@ -166,7 +174,7 @@ public class RegisterGatherDetails extends Activity {
                 String siteId = strings[0];
                 boolean retVal = CCUHsApi.getInstance().syncExistingSite(siteId);
                 Globals.getInstance().setSiteAlreadyCreated(true);
-                BuildingTuners.getInstance();
+                //BuildingTuners.getInstance();
                 L.ccu().systemProfile = new DefaultSystem();
                 return retVal;
             }
@@ -178,6 +186,8 @@ public class RegisterGatherDetails extends Activity {
 
                 if (!success) {
                     Toast.makeText(RegisterGatherDetails.this, "The site failed to sync.", Toast.LENGTH_LONG).show();
+                    mUseExistingSiteButton.setEnabled(true);
+                    noSiteButton.setEnabled(true);
                     return;
                 }
 

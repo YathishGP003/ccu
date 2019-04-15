@@ -203,7 +203,7 @@ public class LSerial
         if (checkDuplicate(Short.valueOf(smartNodeAddress), struct.getClass()
                                                                   .getSimpleName(), structHash))
         {
-            DLog.LogdStructAsJson(struct);
+            //DLog.LogdStructAsJson(struct);
             DLog.Logd("Struct " + struct.getClass().getSimpleName() + " was already sent, returning");
             return false;
         }
@@ -238,7 +238,7 @@ public class LSerial
         if (checkDuplicate(Short.valueOf(smartNodeAddress), struct.getClass()
                 .getSimpleName(), structHash))
         {
-            DLog.LogdStructAsJson(struct);
+            //DLog.LogdStructAsJson(struct);
             DLog.Logd("Struct " + struct.getClass().getSimpleName() + " was already sent, returning");
             return true;
         }

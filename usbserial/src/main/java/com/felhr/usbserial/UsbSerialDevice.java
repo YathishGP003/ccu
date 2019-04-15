@@ -6,6 +6,7 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbRequest;
+import android.util.Log;
 
 import com.felhr.deviceids.CH34xIds;
 import com.felhr.deviceids.CP210xIds;
@@ -13,6 +14,8 @@ import com.felhr.deviceids.FTDISioIds;
 import com.felhr.deviceids.PL2303Ids;
 
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class UsbSerialDevice implements UsbSerialInterface
@@ -160,7 +163,14 @@ public abstract class UsbSerialDevice implements UsbSerialInterface
 		{
 			if(buffer == null)
 				return 0;
-			
+			if(isFTDIDevice()) try
+			{
+				Thread.sleep(100);
+			}
+			catch (InterruptedException e)
+			{
+				e.printStackTrace();
+			}
 			return connection.bulkTransfer(outEndpoint, buffer, buffer.length, timeout);
 		}else
 		{
@@ -200,8 +210,8 @@ public abstract class UsbSerialDevice implements UsbSerialInterface
 		if(serialBuffer != null)
 			serialBuffer.debug(value);
 	}
-	
-	private boolean isFTDIDevice()
+
+	public boolean isFTDIDevice()
 	{
 		return (this instanceof FTDISerialDevice);
 	}
@@ -218,7 +228,18 @@ public abstract class UsbSerialDevice implements UsbSerialInterface
 		return false;
 	}
 	
-	
+	private static final int ESC_BYTE = 0xD9;
+	private static final int SOF_BYTE = 0x00;
+	private static final int EOF_BYTE = 0x03;
+	private int mCurrentSnToUpdate = -1;
+
+
+	private SerialState curState = SerialState.PARSE_INIT;
+	private int nDataLength = 0;
+	private int nCurIndex = 0;
+	private int nCRC = 0;
+	private byte inDataBuffer[] = new byte[1024];
+
 	/*
 	 * WorkerThread waits for request notifications from IN endpoint
 	 */
@@ -245,26 +266,86 @@ public abstract class UsbSerialDevice implements UsbSerialInterface
 				if(request != null && request.getEndpoint().getType() == UsbConstants.USB_ENDPOINT_XFER_BULK
 				   && request.getEndpoint().getDirection() == UsbConstants.USB_DIR_IN)
 				{
-					byte[] data = serialBuffer.getDataReceived();
-					
-					// FTDI devices reserves two first bytes of an IN endpoint with info about
-					// modem and Line.
-					if(isFTDIDevice())
-					{
-						((FTDISerialDevice) usbSerialDevice).ftdiUtilities.checkModemStatus(data); //Check the Modem status
-						serialBuffer.clearReadBuffer();
+					byte[] inReg = serialBuffer.getDataReceived();
+					int nRet = inReg.length;
+					serialBuffer.clearReadBuffer();
+					if(nRet > 0) {
+						int nCount = 0;
+						if (isFTDIDevice())
+							nCount = 2;
 						
-						if(data.length > 2)
-						{
-							data = Arrays.copyOfRange(data, 2, data.length);
-							
-							onReceivedData(data);
+
+						for (; nCount < nRet; nCount++) {
+							byte inData =  inReg[nCount];
+							int intData = inData & 0xff;
+							switch (curState) {
+								case PARSE_INIT:
+                                    if (intData == ESC_BYTE)
+										curState = SerialState.ESC_BYTE_RCVD;
+									break;
+								case ESC_BYTE_RCVD:
+									if (intData == SOF_BYTE)
+										curState = SerialState.SOF_BYTE_RCVD;
+									else
+										curState = SerialState.BAD_PACKET;
+
+									break;
+								case SOF_BYTE_RCVD:
+									nDataLength = inData;
+									curState = SerialState.LEN_BYTE_RCVD;
+									break;
+								case LEN_BYTE_RCVD:
+									if (nCurIndex == nDataLength) {
+										int nIncomingCRC = inData;
+										if (nIncomingCRC == nCRC)
+											curState = SerialState.CRC_RCVD;
+										else {
+											Log.d("SERIAL_RAW", "CRC Mismatch: Incoming: " + nIncomingCRC + "Calculated: " + nCRC);
+											curState = SerialState.BAD_PACKET;
+										}
+									} else if (nCurIndex < nDataLength) {
+										inDataBuffer[nCurIndex] = inData;
+										nCRC ^= inData;
+										nCurIndex++;
+										if (intData == ESC_BYTE)
+											curState = SerialState.ESC_BYTE_IN_DATA_RCVD;
+									} else
+										curState = SerialState.BAD_PACKET;
+									break;
+								case ESC_BYTE_IN_DATA_RCVD:
+									if (intData == ESC_BYTE)
+										curState = SerialState.LEN_BYTE_RCVD;
+									else
+										curState = SerialState.BAD_PACKET;
+									break;
+								case CRC_RCVD:
+									if (intData == ESC_BYTE)
+										curState = SerialState.ESC_BYTE_AS_END_OF_PACKET_RCVD;
+									else
+										curState = SerialState.BAD_PACKET;
+									break;
+								case ESC_BYTE_AS_END_OF_PACKET_RCVD:
+									if (intData == EOF_BYTE)
+										curState = SerialState.DATA_AVAILABLE;
+									else
+										curState = SerialState.BAD_PACKET;
+									break;
+
+							}
+							if (curState == SerialState.DATA_AVAILABLE) {
+								onReceivedData(inDataBuffer, nCurIndex);
+								nCurIndex = 0;
+								nCRC = 0;
+								curState = SerialState.PARSE_INIT;
+							}
+
+							if (curState == SerialState.BAD_PACKET) {
+									Log.d("SERIAL_RAW", "*******BAD PACKET RECEIVED*****");
+								nCurIndex = 0;
+								nCRC = 0;
+								curState = SerialState.PARSE_INIT;
+							}
 						}
-					}else
-					{
-						// Clear buffer, execute the callback
-						serialBuffer.clearReadBuffer();
-						onReceivedData(data);
 					}
 					// Queue a new request
 					requestIN.queue(serialBuffer.getReadBuffer(), SerialBuffer.DEFAULT_READ_BUFFER_SIZE);
@@ -286,11 +367,12 @@ public abstract class UsbSerialDevice implements UsbSerialInterface
 		{
 			return requestIN;
 		}
-		
-		private void onReceivedData(byte[] data)
+
+		private void onReceivedData(byte[] data, int length)
 		{
-			if(callback != null)
-				callback.onReceivedData(data);
+			if(callback != null) {
+				callback.onReceivedData(data, length);
+			}
 		}
 		
 		public void stopWorkingThread()
@@ -376,11 +458,11 @@ public abstract class UsbSerialDevice implements UsbSerialInterface
 						if(dataReceived.length > 2)
 						{
 							dataReceived = ((FTDISerialDevice) usbSerialDevice).ftdiUtilities.adaptArray(dataReceived);
-							onReceivedData(dataReceived);
+							onReceivedData(null, 0);
 						}
 					}else
 					{
-						onReceivedData(dataReceived);
+						onReceivedData(null, numberBytes);
 					}
 				}
 			}
@@ -395,11 +477,11 @@ public abstract class UsbSerialDevice implements UsbSerialInterface
 		{
 			working.set(false);
 		}
-		
-		private void onReceivedData(byte[] data)
+
+		private void onReceivedData(byte[] data, int length)
 		{
 			if(callback != null)
-				callback.onReceivedData(data);
+				callback.onReceivedData(data, length);
 		}
 	}
 	
@@ -474,5 +556,11 @@ public abstract class UsbSerialDevice implements UsbSerialInterface
 			writeThread.start();
 			while(!writeThread.isAlive()){} // Busy waiting
 		}
+	}
+
+	private enum SerialState
+	{
+		PARSE_INIT, ESC_BYTE_RCVD, SOF_BYTE_RCVD, LEN_BYTE_RCVD, ESC_BYTE_IN_DATA_RCVD, CRC_RCVD,
+		ESC_BYTE_AS_END_OF_PACKET_RCVD, BAD_PACKET, DATA_AVAILABLE
 	}
 }

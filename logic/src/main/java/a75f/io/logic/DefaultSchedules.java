@@ -15,7 +15,7 @@ import a75f.io.api.haystack.DAYS;
 
 public class DefaultSchedules {
 
-    public static final double DEFAULT_COOLING_TEMP = 75.0F;
+    public static final double DEFAULT_COOLING_TEMP = 74.0F;
     public static final double DEFAULT_HEATING_TEMP = 70.0F;
 
     public static String generateDefaultSchedule(boolean zone, String zoneId) {

@@ -12,7 +12,7 @@ public class Valve implements Control
     
     public int overriddenVal;
     
-    public void normalize() {
+    public void applyLimits() {
         currentPosition = Math.min(currentPosition, maxPosition);
         currentPosition = Math.max(currentPosition, minPosition);
     }

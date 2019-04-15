@@ -162,7 +162,7 @@ public class EntityPullHandler
                 }
             }
         }
-    
+        
         //CCU Devices
         for (Device d : parser.getDevices())
         {

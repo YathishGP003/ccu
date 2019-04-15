@@ -5,7 +5,9 @@ import android.util.Log;
 import org.javolution.io.Struct;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -163,6 +165,7 @@ public class LSmartNode
         seedMessage.smartNodeAddress.set(address);
         seedMessage.putEncrptionKey(L.getEncryptionKey());
         fillSmartNodeSettings(seedMessage.settings,zone,address,equipRef);
+        fillCurrentUpdatedTime(seedMessage.controls);
         fillSmartNodeControls(seedMessage.controls,zone,address,equipRef);
         return seedMessage;
     }
@@ -224,6 +227,12 @@ public class LSmartNode
                 controls_t.conditioningMode.set((short) (VavSystemController.getInstance().getSystemState() == VavSystemController.State.HEATING ? 1 : 0));
             }
         }
+    }
+
+    public static CcuToCmOverUsbSnControlsMessage_t getCurrentTimeForControlMessage(CcuToCmOverUsbSnControlsMessage_t controlsMessage_t)
+    {
+        fillCurrentUpdatedTime(controlsMessage_t.controls);
+        return controlsMessage_t;
     }
     public static double getTempOffset(short addr) {
         try
@@ -361,7 +370,29 @@ public class LSmartNode
         }
         return CCUHsApi.getInstance().readDefaultValById(point.get("id").toString());
     }
-    
+
+
+    public static int getCurrentDayOfWeekWithMondayAsStart() {
+        Calendar calendar = GregorianCalendar.getInstance();
+        switch (calendar.get(Calendar.DAY_OF_WEEK))
+        {
+            case Calendar.MONDAY: return 0;
+            case Calendar.TUESDAY: return 1;
+            case Calendar.WEDNESDAY: return 2;
+            case Calendar.THURSDAY: return 3;
+            case Calendar.FRIDAY: return 4;
+            case Calendar.SATURDAY: return 5;
+            case Calendar.SUNDAY: return 6;
+        }
+        return 0;
+    }
+    public static void fillCurrentUpdatedTime(SmartNodeControls_t controls){
+
+        Calendar curDate = GregorianCalendar.getInstance();
+        controls.time.day.set ((byte)(getCurrentDayOfWeekWithMondayAsStart() & 0xff));
+        controls.time.hours.set((byte)(curDate.get(Calendar.HOUR_OF_DAY) & 0xff));
+        controls.time.minutes.set((byte)(curDate.get(Calendar.MINUTE) & 0xff));
+    }
     /********************************END SEED MESSAGES**************************************/
     
 }

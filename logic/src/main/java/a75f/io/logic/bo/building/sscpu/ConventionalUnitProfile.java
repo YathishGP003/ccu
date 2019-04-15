@@ -105,8 +105,8 @@ public class ConventionalUnitProfile extends ZoneProfile {
             cpuDevice.setProfilePoint("occupancy and status",occupied ? 1 : 0);
             boolean isFanStage1Enabled = getConfigEnabled("relay3", node) > 0 ? true : false;
             boolean isFanStage2Enabled = getConfigEnabled("relay6", node) > 0 ? true : false;
-            Log.d(TAG, " smartstat cpu, updates =" + node+","+roomTemp+","+occupied+","+occuStatus.getCoolingDeadBand()+","+state+","+occuStatus.getCoolingVal()+","+occuStatus.getHeatingVal());
-            if ((opMode == StandaloneOperationalMode.AUTO || opMode == StandaloneOperationalMode.COOL_ONLY)&& (roomTemp > setTempCooling) )
+            Log.d(TAG, " smartstat cpu, updates =" + node+","+roomTemp+","+occupied+","+occuStatus.getCoolingDeadBand()+","+state+","+occuStatus.getCoolingVal()+","+occuStatus.getHeatingVal()+","+isFanStage1Enabled+","+isFanStage2Enabled);
+            if (((opMode == StandaloneOperationalMode.AUTO) || (opMode == StandaloneOperationalMode.COOL_ONLY))&& (roomTemp >= (setTempCooling - hysteresis)) )
             {
 
                 //Zone is in Cooling
@@ -117,14 +117,13 @@ public class ConventionalUnitProfile extends ZoneProfile {
                 setCmdSignal("heating and stage1",0,node);
 				setCmdSignal("heating and stage2",0,node);
                 if (isCoolingStage1Enabled) {
-                    if(roomTemp >= (setTempCooling + occuStatus.getCoolingDeadBand())) {
-                        Log.d(TAG, " smartstat cpu, updates stage1 cool on =" + node+","+roomTemp+","+setTempCooling+","+occuStatus.getCoolingDeadBand());
+                    if(roomTemp >= setTempCooling) {
                         relayStages.put("CoolingStage1",1);
                         relayStages.put("FanStage1",1);
                         setCmdSignal("cooling and stage1", 1.0, node);
                         if(isFanStage1Enabled) setCmdSignal("fan and stage1",1.0,node);
                     }else{
-                        if (roomTemp <= (setTempCooling+hysteresis)){//Turn off stage1
+                        if (roomTemp <= (setTempCooling-hysteresis)){//Turn off stage1
                             if(getCmdSignal("cooling and stage1", node) > 0)
                                 setCmdSignal("cooling and stage1",0,node);
 
@@ -147,13 +146,13 @@ public class ConventionalUnitProfile extends ZoneProfile {
                     setCmdSignal("cooling and stage1", 0, node);
                 }
                 if(isCoolingStage2Enabled){
-                    if (roomTemp >= (setTempCooling + (occuStatus.getCoolingDeadBand() * 2))) {
+                    if (roomTemp >= (setTempCooling + occuStatus.getCoolingDeadBand())) {
                         setCmdSignal("cooling and stage2", 1.0, node);
                         relayStages.put("CoolingStage2",1);
                         relayStages.put("FanStage2",1);
                         if(isFanStage2Enabled)setCmdSignal("fan and stage2",1.0,node);
                     } else{
-                        if (roomTemp <= (setTempCooling+occuStatus.getCoolingDeadBand())) {//Turn off stage 2
+                        if (roomTemp <= setTempCooling) {//Turn off stage 2
                             if(getCmdSignal("cooling and stage2", node) > 0)
                                 setCmdSignal("cooling and stage2", 0, node);
                             if (occupied && isFanStage2Enabled && (fanSpeed == StandaloneFanSpeed.FAN_HIGH)) {
@@ -175,7 +174,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
                     setCmdSignal("cooling and stage2", 0, node);
                 }
             }
-            else if ((opMode == StandaloneOperationalMode.AUTO || opMode == StandaloneOperationalMode.HEAT_ONLY)&&(roomTemp < setTempHeating))
+            else if (((opMode == StandaloneOperationalMode.AUTO) || (opMode == StandaloneOperationalMode.HEAT_ONLY))&&(roomTemp <= (setTempHeating + hysteresis)))
             {
                 //Zone is in heating
 
@@ -186,13 +185,13 @@ public class ConventionalUnitProfile extends ZoneProfile {
                 boolean isHeatingStage2Enabled = getConfigEnabled("relay5", node) > 0;
                 if (isHeatingStage1Enabled)
                 {
-                    if(roomTemp <= (setTempHeating - occuStatus.getHeatingDeadBand())) {
+                    if(roomTemp <= setTempHeating ) {
                         setCmdSignal("heating and stage1", 1.0, node);
                         if(isFanStage1Enabled) setCmdSignal("fan and stage1",1.0,node);
                         relayStages.put("HeatingStage1",1);
                         relayStages.put("FanStage1",1);
                     }else {
-                        if( roomTemp >= (setTempHeating - hysteresis)){
+                        if( roomTemp >= (setTempHeating + hysteresis)){
                             if(getCmdSignal("heating and stage1", node) > 0)
                                 setCmdSignal("heating and stage1",0,node);
 
@@ -218,7 +217,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
                 }
                 if(isHeatingStage2Enabled){
 
-                    if (roomTemp <= (setTempHeating - (occuStatus.getHeatingDeadBand() * 2))) {
+                    if (roomTemp <= (setTempHeating - occuStatus.getHeatingDeadBand())) {
                         setCmdSignal("heating and stage2", 1.0, node);
                         if(isFanStage2Enabled){
                             setCmdSignal("fan and stage2",1.0,node);
@@ -226,7 +225,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
                         relayStages.put("HeatingStage2",1);
                         relayStages.put("FanStage2",1);
                     } else {
-                        if (roomTemp >= (setTempHeating - occuStatus.getHeatingDeadBand())) {//Turn off stage 2
+                        if (roomTemp >= setTempHeating) {//Turn off stage 2
                             if(getCmdSignal("heating and stage2", node) > 0)
                                 setCmdSignal("heating and stage2", 0, node);
                             if (occupied && isFanStage2Enabled && (fanSpeed == StandaloneFanSpeed.FAN_HIGH)) {
@@ -253,13 +252,17 @@ public class ConventionalUnitProfile extends ZoneProfile {
             else
             {
                 if(occupied && (fanSpeed != StandaloneFanSpeed.OFF)) {
-                    if(isFanStage1Enabled ) {
+                    if(isFanStage1Enabled &&  (fanSpeed == StandaloneFanSpeed.FAN_LOW)) {
                         relayStages.put("FanStage1", 1);
                         setCmdSignal("fan and stage1",1.0,node);
+                    }else{
+                        setCmdSignal("fan and stage1",0,node);
                     }
                     if(isFanStage2Enabled  &&  (fanSpeed == StandaloneFanSpeed.FAN_HIGH)) {
                         relayStages.put("FanStage2", 1);
                         setCmdSignal("fan and stage2",1.0,node);
+                    }else {
+                        setCmdSignal("fan and stage2",0,node);
                     }
                 }else{
                     state = DEADBAND;
@@ -389,7 +392,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
 
 
     public double getConfigEnabled(String config, short node) {
-        return CCUHsApi.getInstance().readDefaultVal("point and standalone and config and enable and "+config+" and group == \"" + node + "\"");
+        return CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and "+config+" and group == \"" + node + "\"");
 
     }
 

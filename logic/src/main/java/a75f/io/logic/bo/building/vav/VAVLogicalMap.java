@@ -2,6 +2,9 @@ package a75f.io.logic.bo.building.vav;
 
 import android.util.Log;
 
+import org.projecthaystack.HNum;
+import org.projecthaystack.HRef;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -12,6 +15,7 @@ import a75.io.algos.VOCLoop;
 import a75.io.algos.tr.TrimResponseRequest;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
@@ -485,6 +489,43 @@ public class VAVLogicalMap
                                          .setTz(tz)
                                          .build();
         CCUHsApi.getInstance().addPoint(spCurrentRequest);
+    
+        Point equipStatus = new Point.Builder()
+                                  .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-equipStatus")
+                                  .setEquipRef(equipRef)
+                                  .setSiteRef(siteRef)
+                                  .setRoomRef(room)
+                                  .setFloorRef(floor)
+                                  .addMarker("status").addMarker("vav").addMarker("his").addMarker("logical").addMarker("zone").addMarker("equipHis")
+                                  .setGroup(String.valueOf(nodeAddr))
+                                  .setTz(tz)
+                                  .build();
+        String equipStatusId = CCUHsApi.getInstance().addPoint(equipStatus);
+    
+        Point equipStatusMessage = new Point.Builder()
+                                    .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-equipStatusMessage")
+                                    .setEquipRef(equipRef)
+                                    .setSiteRef(siteRef)
+                                    .setRoomRef(room)
+                                    .setFloorRef(floor)
+                                    .addMarker("status").addMarker("message").addMarker("vav").addMarker("writable").addMarker("logical").addMarker("zone").addMarker("equipHis")
+                                    .setGroup(String.valueOf(nodeAddr))
+                                    .setTz(tz)
+                                    .setKind("string")
+                                    .build();
+        String equipStatusMessageLd = CCUHsApi.getInstance().addPoint(equipStatusMessage);
+        Point equipScheduleStatus = new Point.Builder()
+                                    .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-equipScheduleStatus")
+                                    .setEquipRef(equipRef)
+                                    .setSiteRef(siteRef)
+                                    .setRoomRef(room)
+                                    .setFloorRef(floor)
+                                    .addMarker("scheduleStatus").addMarker("logical").addMarker("zone").addMarker("writable").addMarker("equipHis")
+                                    .setGroup(String.valueOf(nodeAddr))
+                                    .setTz(tz)
+                                    .setKind("string")
+                                    .build();
+        String equipScheduleStatusId = CCUHsApi.getInstance().addPoint(equipScheduleStatus);
         
         
         //Create Physical points and map
@@ -540,12 +581,13 @@ public class VAVLogicalMap
         setReheatPos(0);
         setDischargeTemp(0);
         setSupplyAirTemp(0);
-        setDesiredTempCooling(73.0);
+        setDesiredTempCooling(74.0);
         setDesiredTemp(72.0);
-        setDesiredTempHeating(71.0);
+        setDesiredTempHeating(70.0);
         setHumidity(0);
         setCO2(0);
         setVOC(0);
+        setScheduleStatus("");
     
         CCUHsApi.getInstance().syncEntityTree();
     }
@@ -955,7 +997,9 @@ public class VAVLogicalMap
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
+        //CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
+        CCUHsApi.getInstance().pointWrite(HRef.copy(id), HayStackConstants.POINT_INIT_VAL_LEVEL, "ccu", HNum.make(desiredTemp), HNum.make(0));
+        
         CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
     }
     
@@ -986,7 +1030,8 @@ public class VAVLogicalMap
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
+        //CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
+        CCUHsApi.getInstance().pointWrite(HRef.copy(id), HayStackConstants.POINT_INIT_VAL_LEVEL, "ccu", HNum.make(desiredTemp), HNum.make(0));
         CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
     }
     
@@ -1104,6 +1149,23 @@ public class VAVLogicalMap
     public void setStaticPressure(double staticPressure)
     {
         this.staticPressure = staticPressure;
+    }
+    
+    public void setStatus(double status) {
+        CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \""+nodeAddr+"\"", status);
+        
+        CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \""+nodeAddr+"\"",
+                            status == 0 ? "Recirculating Air" : status == 1 ? "Cooling Space" : "Warming Space");
+    }
+    
+    public void setScheduleStatus(String status)
+    {
+        ArrayList points = CCUHsApi.getInstance().readAll("point and scheduleStatus and group == \""+nodeAddr+"\"");
+        String id = ((HashMap)points.get(0)).get("id").toString();
+        if (id == null || id == "") {
+            throw new IllegalArgumentException();
+        }
+        CCUHsApi.getInstance().writeDefaultValById(id, status);
     }
     
     public void updateLoopParams() {

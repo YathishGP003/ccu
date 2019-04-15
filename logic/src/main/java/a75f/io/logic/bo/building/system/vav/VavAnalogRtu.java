@@ -571,21 +571,10 @@ public class VavAnalogRtu extends VavSystemProfile
     }
     
     public double getConfigVal(String tags) {
-        return CCUHsApi.getInstance().readDefaultVal("point and system and config and "+tags);
-        /*CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and system and config and "+tags);
-    
-        ArrayList values = hayStack.readPoint(cdb.get("id").toString());
-        if (values != null && values.size() > 0)
-        {
-            for (int l = 1; l <= values.size() ; l++ ) {
-                HashMap valMap = ((HashMap) values.get(l-1));
-                if (valMap.get("val") != null) {
-                    return Double.parseDouble(valMap.get("val").toString());
-                }
-            }
-        }
-        return 0;*/
+        //return CCUHsApi.getInstance().readDefaultVal("point and system and config and "+tags);
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap configPoint = hayStack.read("point and system and config and "+tags);
+        return hayStack.readPointPriorityVal(configPoint.get("id").toString());
     }
     
     public void setConfigVal(String tags, double val) {
@@ -593,8 +582,13 @@ public class VavAnalogRtu extends VavSystemProfile
     }
     
     public double getConfigEnabled(String config) {
-        return sysEquip.getConfigEnabled(config)? 1:0;
+
+        //return sysEquip.getConfigEnabled(config)? 1:0;
         //return CCUHsApi.getInstance().readDefaultVal("point and system and config and output and enabled and "+config);
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap configPoint = hayStack.read("point and system and config and output and enabled and "+config);
+        return hayStack.readPointPriorityVal(configPoint.get("id").toString());
+
     }
     public void setConfigEnabled(String config, double val) {
         sysEquip.setConfigEnabled(config, val);

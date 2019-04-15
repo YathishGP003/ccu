@@ -505,8 +505,13 @@ public class VavStagedRtu extends VavSystemProfile
     }
     
     public double getConfigEnabled(String config) {
-        return sysEquip.getConfigEnabled(config)? 1:0;
+
+        //return sysEquip.getConfigEnabled(config)? 1:0;
         //return CCUHsApi.getInstance().readDefaultVal("point and system and config and output and enabled and "+config);
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap configPoint = hayStack.read("point and system and config and output and enabled and "+config);
+        return hayStack.readPointPriorityVal(configPoint.get("id").toString());
+
     }
     public void setConfigEnabled(String config, double val) {
         sysEquip.setConfigEnabled(config, val);
@@ -514,8 +519,12 @@ public class VavStagedRtu extends VavSystemProfile
     }
     
     public double getConfigAssociation(String config) {
-        return sysEquip.getRelayOpAssociation(config);
+        //return sysEquip.getRelayOpAssociation(config);
         //return CCUHsApi.getInstance().readDefaultVal("point and system and config and output and association and "+config);
+
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap configPoint = hayStack.read("point and system and config and output and association and "+config);
+        return hayStack.readPointPriorityVal(configPoint.get("id").toString());
     }
     public void setConfigAssociation(String config, double val) {
         sysEquip.setRelayOpAssociation(config, val);

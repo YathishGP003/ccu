@@ -1,5 +1,6 @@
 package a75f.io.renatus.schedules;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
@@ -14,6 +15,7 @@ import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 
 import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 
 import java.util.List;
 
@@ -43,6 +45,7 @@ public class ManualCalendarDialogFragment extends DialogFragment implements View
 
     private ManualCalendarDialogListener mListener;
 
+    @SuppressLint("ValidFragment")
     public ManualCalendarDialogFragment(String id, String name, DateTime startDate, DateTime endDate, ManualCalendarDialogListener mListener)
     {
         this.mListener = mListener;
@@ -74,8 +77,21 @@ public class ManualCalendarDialogFragment extends DialogFragment implements View
         {
             mCalendarView.selectRange(CalendarDay.from(mStartDate.getYear(), mStartDate.getMonthOfYear(), mStartDate.getDayOfMonth()),
                                       CalendarDay.from(mEndDate.getYear(), mEndDate.getMonthOfYear(), mEndDate.getDayOfMonth()));
+            DateTime today = new DateTime();
+            if (mStartDate.dayOfYear().get() < today.dayOfYear().get() && mEndDate.dayOfYear().get() < today.dayOfYear().get() ) {
+                mCalendarView.state().edit().setMinimumDate(CalendarDay.from(mStartDate.getYear(), mStartDate.getMonthOfYear(), mStartDate.getDayOfMonth())).commit();
+                mCalendarView.state().edit().setMaximumDate(CalendarDay.from(mEndDate.getYear(), mEndDate.getMonthOfYear(), mEndDate.getDayOfMonth())).commit();
+            } else if (mStartDate.dayOfYear().get() < today.dayOfYear().get()) {
+                mCalendarView.state().edit().setMinimumDate(CalendarDay.from(mStartDate.getYear(), mStartDate.getMonthOfYear(), mStartDate.getDayOfMonth())).commit();
+            } else {
+                mCalendarView.state().edit().setMinimumDate(CalendarDay.today()).commit();
+            }
+            
+        } else
+        {
+            mCalendarView.state().edit().setMinimumDate(CalendarDay.today()).commit();
         }
-
+        
         mButtonSave.setOnClickListener(view1 ->
                                        {
                                            processCalendar();

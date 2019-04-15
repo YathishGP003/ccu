@@ -137,9 +137,9 @@ public class ScheduleProcessJob extends BaseJob {
         for(HashMap hs : equips)
         {
             Equip equip = new Equip.Builder().setHashMap(hs).build();
-    
-            Log.d(L.TAG_CCU_JOB, " Equip "+equip.getDisplayName());
             if(equip != null) {
+    
+                Log.d(L.TAG_CCU_JOB, " Equip "+equip.getDisplayName());
                 
                 Schedule equipSchedule = Schedule.getScheduleForZone(equip.getRoomRef().replace("@", ""), false);
 
@@ -160,6 +160,8 @@ public class ScheduleProcessJob extends BaseJob {
                 {
                     writePointsForEquip(equip, equipSchedule, activeSystemVacation);
                 }
+                
+                updateEquipScheduleStatus(equip);
 
             }
         }
@@ -493,10 +495,9 @@ public class ScheduleProcessJob extends BaseJob {
                 for(HashMap hs : equips)
                 {
                     Equip equip = new Equip.Builder().setHashMap(hs).build();
-        
-                    Log.d(L.TAG_CCU_JOB, " Equip "+equip.getDisplayName());
                     if(equip != null) {
-            
+    
+                        Log.d(L.TAG_CCU_JOB, " Equip "+equip.getDisplayName());
                         Schedule equipSchedule = Schedule.getScheduleForZone(equip.getRoomRef().replace("@", ""), false);
             
                         if(equipSchedule == null)
@@ -516,14 +517,34 @@ public class ScheduleProcessJob extends BaseJob {
                         {
                             writePointsForEquip(equip, equipSchedule, activeSystemVacation);
                         }
+    
+                        updateEquipScheduleStatus(equip);
             
                     }
+                    
                 }
     
                 updateSystemOccupancy();
                 systemVacation = activeSystemVacation != null || isAllZonesInVacation();
             }
         }.start();
+        
+    }
+    
+    public static void updateEquipScheduleStatus(Equip equip) {
+        Log.d(L.TAG_CCU_JOB, "updateEquipScheduleStatus "+equip.getDisplayName()+" "+getZoneStatusString(equip.getRoomRef()));
+        ArrayList points = CCUHsApi.getInstance().readAll("point and scheduleStatus and equipRef == \""+equip.getId()+"\"");
+        if (points != null && points.size() > 0)
+        {
+            String id = ((HashMap) points.get(0)).get("id").toString();
+            String currentState = CCUHsApi.getInstance().readDefaultStrValById(id);
+            if (!currentState.equals(getZoneStatusString(equip.getRoomRef())))
+            {
+                CCUHsApi.getInstance().writeDefaultValById(id, getZoneStatusString(equip.getRoomRef()));
+            } else {
+                Log.d(L.TAG_CCU_JOB, " ScheduleStatus not changed for  "+equip.getDisplayName());
+            }
+        }
         
     }
     

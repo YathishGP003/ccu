@@ -78,7 +78,7 @@ public class BuildingTuners
     
     public void addDefaultSystemTuners() {
         Point heatingPreconditioingRate = new Point.Builder()
-                                           .setDisplayName(equipDis+"-"+"heatingPreconditioingRate")
+                                           .setDisplayName(equipDis+"-"+"heatingPreconditioningRate")
                                            .setSiteRef(siteRef)
                                            .setEquipRef(equipRef)
                                            .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
@@ -90,7 +90,7 @@ public class BuildingTuners
         hayStack.writeHisValById(heatingPreconditioingRateId, TunerConstants.SYSTEM_PRECONDITION_RATE);
     
         Point coolingPreconditioingRate = new Point.Builder()
-                                                  .setDisplayName(equipDis+"-"+"coolingPreconditioingRate")
+                                                  .setDisplayName(equipDis+"-"+"coolingPreconditioningRate")
                                                   .setSiteRef(siteRef)
                                                   .setEquipRef(equipRef)
                                                   .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
@@ -100,6 +100,18 @@ public class BuildingTuners
         String coolingPreconditioingRateId = hayStack.addPoint(coolingPreconditioingRate);
         hayStack.writePoint(coolingPreconditioingRateId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.SYSTEM_PRECONDITION_RATE, 0);
         hayStack.writeHisValById(coolingPreconditioingRateId, TunerConstants.SYSTEM_PRECONDITION_RATE);
+    
+        Point userLimitSpread = new Point.Builder()
+                                                  .setDisplayName(equipDis+"-"+"userLimitSpread")
+                                                  .setSiteRef(siteRef)
+                                                  .setEquipRef(equipRef)
+                                                  .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
+                                                  .addMarker("system").addMarker("user").addMarker("limit").addMarker("spread").addMarker("sp")
+                                                  .setTz(tz)
+                                                  .build();
+        String userLimitSpreadId = hayStack.addPoint(userLimitSpread);
+        hayStack.writePoint(userLimitSpreadId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.USER_LIMIT_SPREAD, 0);
+        hayStack.writeHisValById(userLimitSpreadId, TunerConstants.USER_LIMIT_SPREAD);
     }
     
     public void addDefaultZoneTuners() {
@@ -114,6 +126,54 @@ public class BuildingTuners
         String unoccupiedZoneSetbackId = hayStack.addPoint(unoccupiedZoneSetback);
         hayStack.writePoint(unoccupiedZoneSetbackId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_UNOCCUPIED_SETBACK, 0);
         hayStack.writeHisValById(unoccupiedZoneSetbackId, TunerConstants.ZONE_UNOCCUPIED_SETBACK);
+    
+        Point heatingUserLimitMin  = new Point.Builder()
+                                               .setDisplayName(equipDis+"-"+"heatingUserLimitMin")
+                                               .setSiteRef(siteRef)
+                                               .setEquipRef(equipRef)
+                                               .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
+                                               .addMarker("zone").addMarker("heating").addMarker("user").addMarker("limit").addMarker("min").addMarker("sp")
+                                               .setTz(tz)
+                                               .build();
+        String heatingUserLimitMinId = hayStack.addPoint(heatingUserLimitMin);
+        hayStack.writePoint(heatingUserLimitMinId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_HEATING_USERLIMIT_MIN, 0);
+        hayStack.writeHisValById(heatingUserLimitMinId, TunerConstants.ZONE_HEATING_USERLIMIT_MIN);
+    
+        Point heatingUserLimitMax  = new Point.Builder()
+                                             .setDisplayName(equipDis+"-"+"heatingUserLimitMax")
+                                             .setSiteRef(siteRef)
+                                             .setEquipRef(equipRef)
+                                             .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
+                                             .addMarker("zone").addMarker("heating").addMarker("user").addMarker("limit").addMarker("max").addMarker("sp")
+                                             .setTz(tz)
+                                             .build();
+        String heatingUserLimitMaxId = hayStack.addPoint(heatingUserLimitMax);
+        hayStack.writePoint(heatingUserLimitMaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_HEATING_USERLIMIT_MAX, 0);
+        hayStack.writeHisValById(heatingUserLimitMaxId, TunerConstants.ZONE_HEATING_USERLIMIT_MAX);
+    
+        Point coolingUserLimitMin  = new Point.Builder()
+                                             .setDisplayName(equipDis+"-"+"coolingUserLimitMin")
+                                             .setSiteRef(siteRef)
+                                             .setEquipRef(equipRef)
+                                             .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
+                                             .addMarker("zone").addMarker("cooling").addMarker("user").addMarker("limit").addMarker("min").addMarker("sp")
+                                             .setTz(tz)
+                                             .build();
+        String coolingUserLimitMinId = hayStack.addPoint(coolingUserLimitMin);
+        hayStack.writePoint(coolingUserLimitMinId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_COOLING_USERLIMIT_MIN, 0);
+        hayStack.writeHisValById(coolingUserLimitMinId, TunerConstants.ZONE_COOLING_USERLIMIT_MIN);
+    
+        Point coolingUserLimitMax  = new Point.Builder()
+                                             .setDisplayName(equipDis+"-"+"coolingUserLimitMax")
+                                             .setSiteRef(siteRef)
+                                             .setEquipRef(equipRef)
+                                             .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
+                                             .addMarker("zone").addMarker("cooling").addMarker("user").addMarker("limit").addMarker("max").addMarker("sp")
+                                             .setTz(tz)
+                                             .build();
+        String coolingUserLimitMaxId = hayStack.addPoint(coolingUserLimitMax);
+        hayStack.writePoint(coolingUserLimitMaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_COOLING_USERLIMIT_MAX, 0);
+        hayStack.writeHisValById(coolingUserLimitMaxId, TunerConstants.ZONE_COOLING_USERLIMIT_MAX);
     }
     
     public void addDefaultVavTuners() {
@@ -383,6 +443,84 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(unoccupiedZoneSetbackId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
+    
+        Point heatingUserLimitMin = new Point.Builder()
+                                              .setDisplayName(equipdis+"-"+"heatingUserLimitMin")
+                                              .setSiteRef(siteRef)
+                                              .setEquipRef(equipref)
+                                              .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("equipHis")
+                                              .addMarker("zone").addMarker("heating").addMarker("user").addMarker("limit").addMarker("min").addMarker("sp")
+                                              .setTz(tz)
+                                              .build();
+        String heatingUserLimitMinId = hayStack.addPoint(heatingUserLimitMin);
+        HashMap heatingUserLimitMinPoint = hayStack.read("point and tuner and default and zone and heating and user and limit and min");
+        ArrayList<HashMap> heatingUserLimitMinArr = hayStack.readPoint(heatingUserLimitMinPoint.get("id").toString());
+        for (HashMap valMap : heatingUserLimitMinArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.pointWrite(HRef.copy(heatingUserLimitMinId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+    
+    
+        Point heatingUserLimitMax = new Point.Builder()
+                                            .setDisplayName(equipdis+"-"+"heatingUserLimitMax")
+                                            .setSiteRef(siteRef)
+                                            .setEquipRef(equipref)
+                                            .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("equipHis")
+                                            .addMarker("zone").addMarker("heating").addMarker("user").addMarker("limit").addMarker("max").addMarker("sp")
+                                            .setTz(tz)
+                                            .build();
+        String heatingUserLimitMaxId = hayStack.addPoint(heatingUserLimitMax);
+        HashMap heatingUserLimitMaxPoint = hayStack.read("point and tuner and default and zone and heating and user and limit and max");
+        ArrayList<HashMap> heatingUserLimitMaxArr = hayStack.readPoint(heatingUserLimitMaxPoint.get("id").toString());
+        for (HashMap valMap : heatingUserLimitMaxArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.pointWrite(HRef.copy(heatingUserLimitMaxId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+    
+        Point coolingUserLimitMin = new Point.Builder()
+                                            .setDisplayName(equipdis+"-"+"coolingUserLimitMin")
+                                            .setSiteRef(siteRef)
+                                            .setEquipRef(equipref)
+                                            .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("equipHis")
+                                            .addMarker("zone").addMarker("cooling").addMarker("user").addMarker("limit").addMarker("min").addMarker("sp")
+                                            .setTz(tz)
+                                            .build();
+        String coolingUserLimitMinId = hayStack.addPoint(coolingUserLimitMin);
+        HashMap coolingUserLimitMinPoint = hayStack.read("point and tuner and default and zone and cooling and user and limit and min");
+        ArrayList<HashMap> coolingUserLimitMinArr = hayStack.readPoint(coolingUserLimitMinPoint.get("id").toString());
+        for (HashMap valMap : coolingUserLimitMinArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.pointWrite(HRef.copy(coolingUserLimitMinId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+    
+        Point coolingUserLimitMax = new Point.Builder()
+                                            .setDisplayName(equipdis+"-"+"coolingUserLimitMax")
+                                            .setSiteRef(siteRef)
+                                            .setEquipRef(equipref)
+                                            .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("equipHis")
+                                            .addMarker("zone").addMarker("cooling").addMarker("user").addMarker("limit").addMarker("max").addMarker("sp")
+                                            .setTz(tz)
+                                            .build();
+        String coolingUserLimitMaxId = hayStack.addPoint(coolingUserLimitMax);
+        HashMap coolingUserLimitMaxPoint = hayStack.read("point and tuner and default and zone and cooling and user and limit and max");
+        ArrayList<HashMap> coolingUserLimitMaxArr = hayStack.readPoint(coolingUserLimitMaxPoint.get("id").toString());
+        for (HashMap valMap : coolingUserLimitMaxArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.pointWrite(HRef.copy(coolingUserLimitMaxId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+    
     }
     
     public void addEquipVavTuners(String equipdis, String equipref, VavProfileConfiguration config) {
@@ -711,7 +849,7 @@ public class BuildingTuners
     
     public void addEquipPlcTuners(String equipdis, String equipref){
         
-        addEquipZoneTuners(equipdis, equipref);
+        //addEquipZoneTuners(equipdis, equipref);
         
         Point propGain = new Point.Builder()
                                  .setDisplayName(equipdis+"-"+"proportionalKFactor")

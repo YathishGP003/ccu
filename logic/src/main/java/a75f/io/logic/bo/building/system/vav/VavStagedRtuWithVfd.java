@@ -1,6 +1,5 @@
 package a75f.io.logic.bo.building.system.vav;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -232,18 +231,7 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
         
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap cdb = hayStack.read("point and system and config and "+tags);
-        
-        ArrayList values = hayStack.readPoint(cdb.get("id").toString());
-        if (values != null && values.size() > 0)
-        {
-            for (int l = 1; l <= values.size() ; l++ ) {
-                HashMap valMap = ((HashMap) values.get(l-1));
-                if (valMap.get("val") != null) {
-                    return Double.parseDouble(valMap.get("val").toString());
-                }
-            }
-        }
-        return 0;
+        return hayStack.readPointPriorityVal(cdb.get("id").toString());
     }
     
     public void setConfigVal(String tags, double val) {

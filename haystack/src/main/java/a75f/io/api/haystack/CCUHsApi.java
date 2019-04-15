@@ -495,8 +495,8 @@ public class CCUHsApi
         HDict[] dictArr  = {b.toDict()};
         String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
         CcuLog.d("CCU_HS", "Response : "+response);
-    
-        return new HZincReader(response).readGrid();
+      
+        return response == null ? null : new HZincReader(response).readGrid();
     }
     
     public double readPointPriorityVal(String id) {

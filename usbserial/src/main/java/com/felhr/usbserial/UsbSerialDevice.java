@@ -6,6 +6,7 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbRequest;
+import android.util.Log;
 
 import com.felhr.deviceids.CH34xIds;
 import com.felhr.deviceids.CP210xIds;

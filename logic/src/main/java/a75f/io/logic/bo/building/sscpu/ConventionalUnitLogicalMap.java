@@ -2,10 +2,14 @@ package a75f.io.logic.bo.building.sscpu;
 
 import android.util.Log;
 
+import org.projecthaystack.HNum;
+import org.projecthaystack.HRef;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Schedule;
@@ -699,7 +703,8 @@ public class ConventionalUnitLogicalMap {
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
+        //CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
+        CCUHsApi.getInstance().pointWrite(HRef.copy(id), HayStackConstants.POINT_INIT_VAL_LEVEL, "ccu", HNum.make(desiredTemp), HNum.make(0));
         CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
         this.desiredTemp = desiredTemp;
     }
@@ -730,7 +735,8 @@ public class ConventionalUnitLogicalMap {
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
+        //CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
+        CCUHsApi.getInstance().pointWrite(HRef.copy(id), HayStackConstants.POINT_INIT_VAL_LEVEL, "ccu", HNum.make(desiredTemp), HNum.make(0));
         CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
         this.desiredTemp = desiredTemp;
     }
@@ -761,7 +767,8 @@ public class ConventionalUnitLogicalMap {
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
+        //CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
+        CCUHsApi.getInstance().pointWrite(HRef.copy(id), HayStackConstants.POINT_INIT_VAL_LEVEL, "ccu", HNum.make(desiredTemp), HNum.make(0));
         CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
         this.desiredTemp = desiredTemp;
     }

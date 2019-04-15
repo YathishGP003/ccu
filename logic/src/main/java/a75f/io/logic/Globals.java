@@ -335,6 +335,10 @@ public class Globals {
                         if (luid != null && luid != "")
                         {
                             HGrid pointGrid = CCUHsApi.getInstance().readPointArrRemote("@" + guid);
+                            if (pointGrid == null) {
+                                CcuLog.d(L.TAG_CCU, "Pubnub Failed to read remote point point : " + guid);
+                                return;
+                            }
                             Iterator it = pointGrid.iterator();
                             while (it.hasNext())
                             {

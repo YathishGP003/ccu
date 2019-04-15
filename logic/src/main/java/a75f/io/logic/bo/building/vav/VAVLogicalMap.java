@@ -621,7 +621,6 @@ public class VAVLogicalMap
                                    .setFloorRef(floor)
                                    .addMarker("config").addMarker("vav").addMarker("writable").addMarker("zone")
                                    .addMarker("damper").addMarker("size").addMarker("sp")
-                                   .setUnit("\u00B0")
                                    .setGroup(String.valueOf(nodeAddr))
                                    .setTz(tz)
                                    .build();

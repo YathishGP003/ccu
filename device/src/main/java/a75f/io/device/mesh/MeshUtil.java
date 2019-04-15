@@ -30,6 +30,22 @@ public class MeshUtil
         boolean retVal = LSerial.getInstance().sendSerialToCM(heartbeatMessage_t);
         return retVal;
     }
+
+    public static boolean checkDuplicateStruct(short smartNodeAddress, Struct struct)
+    {
+        return  LSerial.getInstance().compareStructSendingToNode(smartNodeAddress, struct);
+    }
+    public static boolean sendStructToNodes(Struct struct)
+    {
+        boolean retVal = LSerial.getInstance().sendSerialToNodes(struct);
+        //If the application is in simualtion mode to work over FTDI with biskit,
+        // sleep between messages, so biskit doesn't fall behind.
+        if (Globals.getInstance().isSimulation())
+        {
+            tSleep(SIMULATION_SLEEP_TIME);
+        }
+        return retVal;
+    }
     
     public static boolean sendStruct(short smartNodeAddress, Struct struct)
     {

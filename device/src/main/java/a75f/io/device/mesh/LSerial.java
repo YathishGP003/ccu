@@ -203,7 +203,7 @@ public class LSerial
         if (checkDuplicate(Short.valueOf(smartNodeAddress), struct.getClass()
                                                                   .getSimpleName(), structHash))
         {
-            DLog.LogdStructAsJson(struct);
+            //DLog.LogdStructAsJson(struct);
             DLog.Logd("Struct " + struct.getClass().getSimpleName() + " was already sent, returning");
             return false;
         }
@@ -219,7 +219,62 @@ public class LSerial
         return true;
     }
 
+    /***
+     * Compare of struct before sending packets to CM
+     *
+     * @param struct This is a representation of a C Struct, loggable to hexadecimal and JSON.
+     *                  It is a convience to deal with ByteOrder and following interface
+     *                  documentation isOn Sharepoint.
+     * @return success If serial was open and the usbService was successfully able to try to send
+     * to CM without Android stopping it.  It doesn't nessacarily mean any messages went to
+     * either the CM or the Node.
+     *
+     */
 
+    public synchronized boolean compareStructSendingToNode(short smartNodeAddress, Struct struct)
+    {
+
+        Integer structHash = Arrays.hashCode(struct.getOrderedBuffer());
+        if (checkDuplicate(Short.valueOf(smartNodeAddress), struct.getClass()
+                .getSimpleName(), structHash))
+        {
+            //DLog.LogdStructAsJson(struct);
+            DLog.Logd("Struct " + struct.getClass().getSimpleName() + " was already sent, returning");
+            return true;
+        }
+
+        //Only if the struct was wrote to serial should it be logged.
+        DLog.LogdStructAsJson(struct);
+        return false;
+    }
+    /***
+     * This method will handle all  messages being sent to the CM.  Do not use this method when
+     * dealing with structures that are supposed to go to the Smart Stat or Smart Node
+     *
+     * Logs to logcat.
+     *
+     * @param struct This is a representation of a C Struct, loggable to hexadecimal and JSON.
+     *                  It is a convience to deal with ByteOrder and following interface
+     *                  documentation isOn Sharepoint.
+     * @return success If serial was open and the usbService was successfully able to try to send
+     * to CM without Android stopping it.  It doesn't nessacarily mean any messages went to
+     * either the CM or the Node.
+     *
+     */
+
+    public synchronized boolean sendSerialToNodes(Struct struct)
+    {
+
+        if (mUsbService == null)
+        {
+            DLog.logUSBServiceNotInitialized();
+            return false;
+        }
+        //Only if the struct was wrote to serial should it be logged.
+        DLog.LogdStructAsJson(struct);
+        mUsbService.write(struct.getOrderedBuffer());
+        return true;
+    }
     /***
      * This method will handle all  messages being sent to the CM.  Do not use this method when
      * dealing with structures that are supposed to go to the Smart Stat or Smart Node

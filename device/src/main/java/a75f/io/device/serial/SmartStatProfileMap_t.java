@@ -1,0 +1,5 @@
+package a75f.io.device.serial;
+
+public enum  SmartStatProfileMap_t {
+    CONVENTIONAL_PACKAGE_UNIT, COMMERCIAL_PACKAGE_UNIT, HEAT_PUMP_UNIT, PIPE_FAN_COIL_UNI_2, PIPE_FAN_COIL_UNIT_4
+}

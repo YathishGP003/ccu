@@ -514,7 +514,6 @@ public class VAVLogicalMap
                                     .setKind("string")
                                     .build();
         String equipStatusMessageLd = CCUHsApi.getInstance().addPoint(equipStatusMessage);
-    
         Point equipScheduleStatus = new Point.Builder()
                                     .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-equipScheduleStatus")
                                     .setEquipRef(equipRef)

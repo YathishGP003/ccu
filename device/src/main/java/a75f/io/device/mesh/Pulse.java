@@ -60,14 +60,17 @@ public class Pulse
 						break;
 					case DESIRED_TEMP:
 						val = smartNodeRegularUpdateMessage_t.update.setTemperature.get();
-						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-						double desiredTemp = getDesredTempConversion(val);
-						if (desiredTemp > 0)
-						{
-							hayStack.writeHisValById(logPoint.get("id").toString(), desiredTemp);
-							updateDesiredTemp(nodeAddr, desiredTemp);
+						double curValue = hayStack.readHisValById(phyPoint.get("id").toString());
+						if(curValue != val) {
+							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+							double desiredTemp = getDesredTempConversion(val);
+							if (desiredTemp > 0) {
+								hayStack.writeHisValById(logPoint.get("id").toString(), desiredTemp);
+								updateDesiredTemp(nodeAddr, desiredTemp);
+							}
+
 						}
-						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : desiredTemp "+desiredTemp);
+						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : desiredTemp "+val +","+curValue);
 						break;
 					case ANALOG_IN_ONE:
 						val = smartNodeRegularUpdateMessage_t.update.externalAnalogVoltageInput1.get();

@@ -289,6 +289,19 @@ public class ConventionalUnitLogicalMap {
                                   .setTz(tz)
                                   .build();
         String equipStatusId = CCUHsApi.getInstance().addPoint(equipStatus);
+		
+ 		Point equipStatusMessage = new Point.Builder()
+                                    .setDisplayName(equipDis+"-equipStatusMessage")
+                                    .setEquipRef(equipRef)
+                                    .setSiteRef(siteRef)
+                                    .setRoomRef(room)
+                                    .setFloorRef(floor)
+                                    .addMarker("status").addMarker("message").addMarker("cpu").addMarker("writable").addMarker("logical").addMarker("zone").addMarker("equipHis")
+                                    .setGroup(String.valueOf(nodeAddr))
+                                    .setTz(tz)
+                                    .setKind("string")
+                                    .build();
+        String equipStatusMessageLd = CCUHsApi.getInstance().addPoint(equipStatusMessage);
 
         Point equipScheduleStatus = new Point.Builder()
                   .setDisplayName(equipDis+"-equipScheduleStatus")
@@ -347,6 +360,7 @@ public class ConventionalUnitLogicalMap {
         setCO2(0);
         setVOC(0);
 		setScheduleStatus("");
+		setSmartStatStatus("OFF"); //Intialize with off
         Schedule schedule = Schedule.getScheduleByEquipId(equipRef);
         if(schedule != null) {
             defaultDesiredTemp = (schedule.getCurrentValues().getCoolingVal() + schedule.getCurrentValues().getHeatingVal()) / 2.0;
@@ -703,8 +717,7 @@ public class ConventionalUnitLogicalMap {
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        //CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
-        CCUHsApi.getInstance().pointWrite(HRef.copy(id), HayStackConstants.POINT_INIT_VAL_LEVEL, "ccu", HNum.make(desiredTemp), HNum.make(0));
+        CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
         CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
         this.desiredTemp = desiredTemp;
     }
@@ -803,7 +816,8 @@ public class ConventionalUnitLogicalMap {
         return CCUHsApi.getInstance().readDefaultVal("point and zone and config and standalone and cpu and "+tags+" and group == \""+nodeAddr+"\"");
     }
     public void setStatus(double status) {
-        CCUHsApi.getInstance().writeHisValByQuery("point and status and group == \""+nodeAddr+"\"", status);
+        CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \""+nodeAddr+"\"", status);
+       
     }
     
     public void setScheduleStatus(String status)
@@ -814,6 +828,16 @@ public class ConventionalUnitLogicalMap {
             throw new IllegalArgumentException();
         }
         CCUHsApi.getInstance().writeDefaultValById(id, status);
+    }
+
+    public void setSmartStatStatus(String status)
+    {
+        ArrayList points = CCUHsApi.getInstance().readAll("point and status and message and writable and group == \""+nodeAddr+"\"");
+        String id = ((HashMap)points.get(0)).get("id").toString();
+        if (id == null || id == "") {
+            throw new IllegalArgumentException();
+        }
+        CCUHsApi.getInstance().writeDefaultVal(id, status);
     }
     protected void addUserIntentPoints(String equipref, String equipDis) {
 

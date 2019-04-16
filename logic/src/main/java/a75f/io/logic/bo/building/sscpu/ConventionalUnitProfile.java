@@ -284,6 +284,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
 
 
             cpuDevice.setProfilePoint("temp and conditioning and mode",state.ordinal());
+            cpuDevice.setStatus(state.ordinal());
             StandaloneScheduler.updateSmartStatStatus(cpuEquip.getId(),state, relayStages);
         }
     }

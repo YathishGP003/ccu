@@ -144,7 +144,10 @@ public class StandaloneScheduler {
 
         //TODO if change in status need to update haystack string for App consuming this status update KUMAR
         if(equipId != null) {
-            standaloneStatus.put(equipId, status);
+            if(!getSmartStatStatusString(equipId).equals(status)) {
+                standaloneStatus.put(equipId, status);
+                updateStandaloneEquipStatus(equipId);
+            }
         }else{
             standaloneStatus.clear();
         }
@@ -171,8 +174,7 @@ public class StandaloneScheduler {
                     for (String marker : p.getMarkers()) {
                         if (marker.equals("writable")) {
                             CcuLog.d(L.TAG_CCU_UI, "Set Writbale Val " + p.getDisplayName() + ": " + val);
-                            //TODO Duration is set only for 2 hours or 0??? kumar doubts
-                            CCUHsApi.getInstance().pointWrite(HRef.copy(id), TunerConstants.MANUAL_OVERRIDE_VAL_LEVEL, "manual", HNum.make(val), HNum.make(2 * 60 * 60 * 1000, "ms"));
+                            CCUHsApi.getInstance().pointWrite(HRef.copy(id), TunerConstants.MANUAL_OVERRIDE_VAL_LEVEL, "manual", HNum.make(val), HNum.make(0));
                         }
                     }
 
@@ -206,5 +208,16 @@ public class StandaloneScheduler {
             }
         }
         return 0;
+    }
+
+	public static void updateStandaloneEquipStatus(String equipId) {
+        Log.d(L.TAG_CCU_UI, "updateStandaloneEquipStatus "+getSmartStatStatusString(equipId));
+        ArrayList points = CCUHsApi.getInstance().readAll("point and status and message and writable and equipRef == \""+equipId+"\"");
+        if (points != null && points.size() > 0)
+        {
+            String id = ((HashMap) points.get(0)).get("id").toString();
+            CCUHsApi.getInstance().writeDefaultValById(id, getSmartStatStatusString(equipId));
+        }
+        
     }
 }

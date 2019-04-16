@@ -832,12 +832,7 @@ public class ConventionalUnitLogicalMap {
 
     public void setSmartStatStatus(String status)
     {
-        ArrayList points = CCUHsApi.getInstance().readAll("point and status and message and writable and group == \""+nodeAddr+"\"");
-        String id = ((HashMap)points.get(0)).get("id").toString();
-        if (id == null || id == "") {
-            throw new IllegalArgumentException();
-        }
-        CCUHsApi.getInstance().writeDefaultVal(id, status);
+        CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \""+nodeAddr+"\"", status);
     }
     protected void addUserIntentPoints(String equipref, String equipDis) {
 

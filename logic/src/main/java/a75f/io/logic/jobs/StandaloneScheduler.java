@@ -144,12 +144,11 @@ public class StandaloneScheduler {
 
         //TODO if change in status need to update haystack string for App consuming this status update KUMAR
         if(equipId != null) {
-            if(!getSmartStatStatusString(equipId).equals(status)) {
+            if(getSmartStatStatusString(equipId).equals(status) == false) {
+                if(standaloneStatus.containsKey(equipId))standaloneStatus.remove(equipId);
                 standaloneStatus.put(equipId, status);
-                updateStandaloneEquipStatus(equipId);
+                updateStandaloneEquipStatus(equipId,status);
             }
-        }else{
-            standaloneStatus.clear();
         }
 
     }
@@ -210,9 +209,8 @@ public class StandaloneScheduler {
         return 0;
     }
 
-	public static void updateStandaloneEquipStatus(String equipId) {
-        Log.d(L.TAG_CCU_UI, "updateStandaloneEquipStatus "+getSmartStatStatusString(equipId));
-        CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and equipRef == \""+equipId+"\"", getSmartStatStatusString(equipId));
+	public static void updateStandaloneEquipStatus(String equipId,String status) {
+        CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and equipRef == \""+equipId+"\"", status);
 
     }
 }

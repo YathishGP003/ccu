@@ -212,12 +212,7 @@ public class StandaloneScheduler {
 
 	public static void updateStandaloneEquipStatus(String equipId) {
         Log.d(L.TAG_CCU_UI, "updateStandaloneEquipStatus "+getSmartStatStatusString(equipId));
-        ArrayList points = CCUHsApi.getInstance().readAll("point and status and message and writable and equipRef == \""+equipId+"\"");
-        if (points != null && points.size() > 0)
-        {
-            String id = ((HashMap) points.get(0)).get("id").toString();
-            CCUHsApi.getInstance().writeDefaultValById(id, getSmartStatStatusString(equipId));
-        }
-        
+        CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and equipRef == \""+equipId+"\"", getSmartStatStatusString(equipId));
+
     }
 }

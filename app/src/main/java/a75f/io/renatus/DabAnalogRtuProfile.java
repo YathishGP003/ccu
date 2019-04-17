@@ -24,9 +24,8 @@ import a75f.io.device.mesh.MeshUtil;
 import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.system.SystemConstants;
 import a75f.io.logic.bo.building.system.SystemMode;
-import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu;
+import a75f.io.logic.bo.building.system.dab.DabFullyModulatingRtu;
 import a75f.io.logic.tuners.TunerUtil;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -35,7 +34,7 @@ import butterknife.ButterKnife;
  * Created by samjithsadasivan on 11/6/18.
  */
 
-public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemSelectedListener, CompoundButton.OnCheckedChangeListener
+public class DabAnalogRtuProfile extends Fragment implements AdapterView.OnItemSelectedListener, CompoundButton.OnCheckedChangeListener
 {
     @BindView(R.id.ahu) TableLayout     ahu;
 	
@@ -45,13 +44,10 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
     @BindView(R.id.ahuAnalog2Max) Spinner analog2Max;
     @BindView(R.id.ahuAnalog3Min) Spinner analog3Min;
     @BindView(R.id.ahuAnalog3Max) Spinner analog3Max;
-	@BindView(R.id.ahuAnalog4Min) Spinner analog4Min;
-	@BindView(R.id.ahuAnalog4Max) Spinner analog4Max;
-    
+	
     @BindView(R.id.ahuAnalog1Cb) CheckBox ahuAnalog1Cb;
     @BindView(R.id.ahuAnalog2Cb) CheckBox ahuAnalog2Cb;
     @BindView(R.id.ahuAnalog3Cb) CheckBox ahuAnalog3Cb;
-	@BindView(R.id.ahuAnalog4Cb) CheckBox ahuAnalog4Cb;
 	
 	@BindView(R.id.relay3Cb) CheckBox relay3Cb;
 	@BindView(R.id.relay7Cb) CheckBox relay7Cb;
@@ -61,16 +57,15 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
     @BindView(R.id.ahuAnalog1Test) Spinner ahuAnalog1Test;
     @BindView(R.id.ahuAnalog2Test) Spinner ahuAnalog2Test;
     @BindView(R.id.ahuAnalog3Test) Spinner ahuAnalog3Test;
-	@BindView(R.id.ahuAnalog4Test) Spinner ahuAnalog4Test;
 	
 	@BindView(R.id.relay3Test) ToggleButton relay3Test;
 	@BindView(R.id.relay7Test) ToggleButton relay7Test;
 	
-	VavFullyModulatingRtu systemProfile = null;
+	DabFullyModulatingRtu systemProfile = null;
     
-    public static VavAnalogRtuProfile newInstance()
+    public static DabAnalogRtuProfile newInstance()
     {
-        return new VavAnalogRtuProfile();
+        return new DabAnalogRtuProfile();
     }
     
     
@@ -78,7 +73,7 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState)
     {
-        View rootView = inflater.inflate(R.layout.fragment_profile_vav_analogrtu, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_profile_dab_analogrtu, container, false);
         ButterKnife.bind(this, rootView);
         return rootView;
     }
@@ -86,12 +81,11 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
     {
-	    if (L.ccu().systemProfile instanceof VavFullyModulatingRtu) {
-		    systemProfile = (VavFullyModulatingRtu) L.ccu().systemProfile;
+	    if (L.ccu().systemProfile instanceof DabFullyModulatingRtu) {
+		    systemProfile = (DabFullyModulatingRtu) L.ccu().systemProfile;
 		    ahuAnalog1Cb.setChecked(systemProfile.getConfigEnabled("analog1") > 0);
 		    ahuAnalog2Cb.setChecked(systemProfile.getConfigEnabled("analog2") > 0);
 		    ahuAnalog3Cb.setChecked(systemProfile.getConfigEnabled("analog3") > 0);
-		    ahuAnalog4Cb.setChecked(systemProfile.getConfigEnabled("analog4") > 0);
 		    relay3Cb.setChecked(systemProfile.getConfigEnabled("relay3") > 0);
 		    relay7Cb.setChecked(systemProfile.getConfigEnabled("relay7") > 0);
 		    setupAnalogLimitSelectors();
@@ -113,7 +107,7 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 			    		systemProfile.deleteSystemEquip();
 					    L.ccu().systemProfile = null; //Makes sure that System Algos dont run until new profile is ready.
 				    }
-				    systemProfile = new VavFullyModulatingRtu();
+				    systemProfile = new DabFullyModulatingRtu();
 				    systemProfile.addSystemEquip();
 				    L.ccu().systemProfile = systemProfile;
 				    return null;
@@ -130,58 +124,8 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 	    ahuAnalog1Cb.setOnCheckedChangeListener(this);
 	    ahuAnalog2Cb.setOnCheckedChangeListener(this);
 	    ahuAnalog3Cb.setOnCheckedChangeListener(this);
-	    ahuAnalog4Cb.setOnCheckedChangeListener(this);
 	    relay3Cb.setOnCheckedChangeListener(this);
 	    relay7Cb.setOnCheckedChangeListener(this);
-	}
-	
-	private void setupTempLimitSelectors() {
-  
-		ArrayList<Double> coolingSatArray = new ArrayList<>();
-		for (double pos = SystemConstants.COOLING_SAT_CONFIG_MIN; pos <= SystemConstants.COOLING_SAT_CONFIG_MAX; pos++){
-			coolingSatArray.add(pos);
-		}
-		
-		ArrayList<Double> heatingSatArray = new ArrayList<>();
-		for (double pos = SystemConstants.HEATING_SAT_CONFIG_MIN; pos <= SystemConstants.HEATING_SAT_CONFIG_MAX; pos++){
-			heatingSatArray.add(pos);
-		}
-		
-		ArrayList<Double> co2Array = new ArrayList<>();
-		for (double pos = SystemConstants.CO2_CONFIG_MIN; pos <= SystemConstants.CO2_CONFIG_MAX; pos+=10){
-			co2Array.add(pos);
-		}
-		ArrayList<Double> spArray = new ArrayList<>();
-		for (double pos = SystemConstants.SP_CONFIG_MIN; pos <= SystemConstants.SP_CONFIG_MAX; pos +=0.1){
-			spArray.add(Math.round(pos * 100D) / 100D);
-		}
-		
-		ArrayAdapter<Double> coolingSatMinAdapter = new ArrayAdapter<Double>(getActivity(), android.R.layout.simple_spinner_item, coolingSatArray);
-		coolingSatMinAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		
-		ArrayAdapter<Double> coolingSatMaxAdapter = new ArrayAdapter<Double>(getActivity(), android.R.layout.simple_spinner_item, coolingSatArray);
-		coolingSatMaxAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		
-		ArrayAdapter<Double> heatingSatMinAdapter = new ArrayAdapter<Double>(getActivity(), android.R.layout.simple_spinner_item, heatingSatArray);
-		coolingSatMinAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		
-		ArrayAdapter<Double> heatingSatMaxAdapter = new ArrayAdapter<Double>(getActivity(), android.R.layout.simple_spinner_item, heatingSatArray);
-		coolingSatMaxAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		
-		
-		ArrayAdapter<Double> co2MinAdapter = new ArrayAdapter<Double>(getActivity(), android.R.layout.simple_spinner_item, co2Array);
-		co2MinAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		
-		ArrayAdapter<Double> co2MaxAdapter = new ArrayAdapter<Double>(getActivity(), android.R.layout.simple_spinner_item, co2Array);
-		co2MaxAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		
-		ArrayAdapter<Double> spMinAdapter = new ArrayAdapter<Double>(getActivity(), android.R.layout.simple_spinner_item, spArray);
-		spMinAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		
-		ArrayAdapter<Double> spMaxAdapter = new ArrayAdapter<Double>(getActivity(), android.R.layout.simple_spinner_item, spArray);
-		spMaxAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		
-		
 	}
 	
 	private void setupAnalogLimitSelectors() {
@@ -194,16 +138,16 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 		analogAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		
 		analog1Min.setAdapter(analogAdapter);
-		analog1Min.setSelection(analogAdapter.getPosition((int)systemProfile.getConfigVal("cooling and sat and min")), false);
+		analog1Min.setSelection(analogAdapter.getPosition((int)systemProfile.getConfigVal("cooling and min")), false);
 		analog1Max.setAdapter(analogAdapter);
-		double analogVal = systemProfile.getConfigVal("cooling and sat and max");
+		double analogVal = systemProfile.getConfigVal("cooling and max");
 		analog1Max.setSelection(analogVal != 0 ? analogAdapter.getPosition((int)analogVal) : analogArray.size() -1 , false);
 		
 		analog2Min.setAdapter(analogAdapter);
-		analog2Min.setSelection(analogAdapter.getPosition((int)systemProfile.getConfigVal("staticPressure and min")), false);
+		analog2Min.setSelection(analogAdapter.getPosition((int)systemProfile.getConfigVal("fan and min")), false);
 		
 		analog2Max.setAdapter(analogAdapter);
-		analogVal = systemProfile.getConfigVal("staticPressure and max");
+		analogVal = systemProfile.getConfigVal("fan and max");
 		analog2Max.setSelection(analogVal != 0 ? analogAdapter.getPosition((int)analogVal) : analogArray.size() -1, false);
 		
 		analog3Min.setAdapter(analogAdapter);
@@ -212,13 +156,6 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 		analog3Max.setAdapter(analogAdapter);
 		analogVal = systemProfile.getConfigVal("heating and max");
 		analog3Max.setSelection(analogVal != 0 ? analogAdapter.getPosition((int)analogVal) : analogArray.size() -1, false);
-		
-		analog4Min.setAdapter(analogAdapter);
-		analog4Min.setSelection(analogAdapter.getPosition((int)systemProfile.getConfigVal("co2 and min")), false);
-		
-		analog4Max.setAdapter(analogAdapter);
-		analogVal = systemProfile.getConfigVal("co2 and max");
-		analog4Max.setSelection(analogVal != 0 ? analogAdapter.getPosition((int)analogVal) : analogArray.size() -1, false);
 		
 		ArrayList<String> humidifierOptions = new ArrayList<>();
 		humidifierOptions.add("Humidifier");
@@ -240,18 +177,18 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 		ArrayAdapter<Double> coolingSatTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
 		coolingSatTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		ahuAnalog1Test.setAdapter(coolingSatTestAdapter);
+		ahuAnalog1Test.setSelection(0,false);
 		
 		ArrayAdapter<Double> spTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
 		spTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		ahuAnalog2Test.setAdapter(spTestAdapter);
+		ahuAnalog2Test.setSelection(0,false);
 		
 		ArrayAdapter<Double> heatingSatTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
 		heatingSatTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		ahuAnalog3Test.setAdapter(heatingSatTestAdapter);
+		ahuAnalog3Test.setSelection(0,false);
 		
-		ArrayAdapter<Double> co2TestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
-		co2TestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-		ahuAnalog4Test.setAdapter(co2TestAdapter);
 		
 		analog1Min.setOnItemSelectedListener(this);
 		analog1Max.setOnItemSelectedListener(this);
@@ -259,12 +196,11 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 		analog2Max.setOnItemSelectedListener(this);
 		analog3Min.setOnItemSelectedListener(this);
 		analog3Max.setOnItemSelectedListener(this);
-		analog4Min.setOnItemSelectedListener(this);
-		analog4Max.setOnItemSelectedListener(this);
+	
 		ahuAnalog1Test.setOnItemSelectedListener(this);
 		ahuAnalog2Test.setOnItemSelectedListener(this);
 		ahuAnalog3Test.setOnItemSelectedListener(this);
-		ahuAnalog4Test.setOnItemSelectedListener(this);
+		
 		relay7Spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
 		{
 			@Override
@@ -285,7 +221,7 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 			{
 				CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
 				msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
-				msg.relayBitmap.set((short)(b? 1 << 3:0));
+				msg.relayBitmap.set((short)(b? 1 << 3: 0 ));
 				MeshUtil.sendStructToCM(msg);
 			}
 		});
@@ -296,7 +232,7 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 			{
 				CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
 				msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
-				msg.relayBitmap.set((short)(b? 1 << 7:0));
+				msg.relayBitmap.set((short)(b ? 1<< 7 : 0));
 				MeshUtil.sendStructToCM(msg);
 			}
 		});
@@ -317,9 +253,6 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 			case R.id.ahuAnalog3Cb:
 				setSelectionBackground("analog3", isChecked);
 				break;
-			case R.id.ahuAnalog4Cb:
-				setSelectionBackground("analog4", isChecked);
-				break;
 			case R.id.relay3Cb:
 				setSelectionBackground("relay3", isChecked);
 				break;
@@ -338,28 +271,22 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 		{
 			
 			case R.id.ahuAnalog1Min:
-				setConfigBackground("cooling and sat and min", val);
+				setConfigBackground("cooling and min", val);
 				break;
 			case R.id.ahuAnalog1Max:
-				setConfigBackground("cooling and sat and max", val);
+				setConfigBackground("cooling and max", val);
 				break;
 			case R.id.ahuAnalog2Min:
-				setConfigBackground("staticPressure and min", val);
+				setConfigBackground("fan and min", val);
 				break;
 			case R.id.ahuAnalog2Max:
-				setConfigBackground("staticPressure and max", val);
+				setConfigBackground("fan and max", val);
 				break;
 			case R.id.ahuAnalog3Min:
 				setConfigBackground("heating and min", val);
 				break;
 			case R.id.ahuAnalog3Max:
 				setConfigBackground("heating and max", val);
-				break;
-			case R.id.ahuAnalog4Min:
-				setConfigBackground("co2 and min", val);
-				break;
-			case R.id.ahuAnalog4Max:
-				setConfigBackground("co2 and max", val);
 				break;
 			case R.id.ahuAnalog1Test:
 				sendAnalog1OutTestSignal(val);
@@ -460,8 +387,8 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 	}
 	
 	public void sendAnalog1OutTestSignal(double val) {
-		double analogMin = systemProfile.getConfigVal("cooling and sat and min");
-		double analogMax = systemProfile.getConfigVal("cooling and sat and max");
+		double analogMin = systemProfile.getConfigVal("cooling and min");
+		double analogMax = systemProfile.getConfigVal("cooling and max");
 		
 		CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
 		msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
@@ -478,8 +405,8 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 	}
 	
 	public void sendAnalog2OutTestSignal(double val) {
-		double analogMin = systemProfile.getConfigVal("staticPressure and min");
-		double analogMax = systemProfile.getConfigVal("staticPressure and max");
+		double analogMin = systemProfile.getConfigVal("fan and min");
+		double analogMax = systemProfile.getConfigVal("fan and max");
 		
 		CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
 		msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);

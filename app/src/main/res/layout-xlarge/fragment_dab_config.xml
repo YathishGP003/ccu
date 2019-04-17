@@ -7,6 +7,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginRight="20dp"
         android:orientation="vertical" >
 
         <LinearLayout
@@ -42,7 +43,7 @@
                     android:layout_gravity="center_vertical"
                     android:paddingLeft="40dp"
                     android:paddingRight="5dp"
-                    android:text="Damper Size"
+                    android:text="Size"
                     android:textSize="@dimen/text_medium_xlarge" />
 
                 <Spinner
@@ -59,7 +60,7 @@
                     android:paddingLeft="20dp"
                     android:layout_gravity="center_vertical"
                     android:textSize="@dimen/text_medium_xlarge"
-                    android:text="Shape: "/>
+                    android:text="Shape"/>
 
                 <Spinner
                     android:id="@+id/damper1Shape"
@@ -106,7 +107,7 @@
                     android:layout_gravity="center_vertical"
                     android:paddingLeft="40dp"
                     android:paddingRight="5dp"
-                    android:text="Damper Size"
+                    android:text="Size"
                     android:textSize="@dimen/text_medium_xlarge" />
 
                 <Spinner
@@ -123,7 +124,7 @@
                     android:paddingLeft="20dp"
                     android:layout_gravity="center_vertical"
                     android:textSize="@dimen/text_medium_xlarge"
-                    android:text="Shape: "/>
+                    android:text="Shape"/>
 
                 <Spinner
                     android:id="@+id/damper2Shape"
@@ -149,7 +150,7 @@
                 android:id="@+id/enableIAQControl"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Enable IAQ Control                  "
+                android:text="Enable IAQ Control                      "
                 android:textSize="@dimen/text_medium_xlarge"/>
 
             <LinearLayout
@@ -196,15 +197,14 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingLeft="20dp"
-                android:paddingRight="0dp"
+                android:layout_marginLeft="20dp"
                 android:paddingTop="20dp" >
 
                 <android.support.v7.widget.SwitchCompat
                     android:id="@+id/enableOccupancyControl"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Enable Occupancy Control   "
+                    android:text="Enable Occupancy Control        "
                     android:textSize="@dimen/text_medium_xlarge" />
 
 
@@ -213,8 +213,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="right"
-                    android:text="Enable CO2 Control       "
-                    android:paddingRight="20dp"
+                    android:text="Enable CO2 Control                 "
                     android:textSize="@dimen/text_medium_xlarge" />
 
             </LinearLayout>
@@ -371,10 +370,13 @@
             android:layout_marginTop="16dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Set"
-            android:layout_gravity="center"
+            android:text="NEXT >"
+            android:layout_gravity="right"
             android:textStyle="bold"
-            android:gravity="center"
+            android:textSize="20dp"
+            android:textColor="@color/orange_75f"
+            android:background="?android:attr/selectableItemBackground"
+            android:gravity="right"
             android:padding="16dp"/>
 
     </LinearLayout>

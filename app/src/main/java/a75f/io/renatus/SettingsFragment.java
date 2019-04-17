@@ -76,6 +76,10 @@ public class SettingsFragment extends Fragment
 						getActivity().getSupportFragmentManager().beginTransaction()
 						             .replace(R.id.profileContainer, new VavHybridRtuProfile()).commit();
 						break;
+					case 5:
+						getActivity().getSupportFragmentManager().beginTransaction()
+						             .replace(R.id.profileContainer, new DabAnalogRtuProfile()).commit();
+						break;
 
 				}
 			}

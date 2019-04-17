@@ -70,6 +70,7 @@
         <!--<item>  VAV IE RTU </item>
         <item>  VAV Bacnet RTU </item>
         <item>  DAB Staged RTU </item>-->
+        <item>  DAB Fully Modulating RTU </item>
     </string-array>
 
     <string-array name="hvac_stage_selector">

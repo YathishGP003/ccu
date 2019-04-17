@@ -141,7 +141,7 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
             if (L.isSimulation())
             {
                 showDialogFragment(FragmentDABConfiguration
-                                           .newInstance(mNodeAddress, mRoomName, mNodeType, mFloorName, mProfileType), FragmentPLCConfiguration.ID);
+                                           .newInstance(mNodeAddress, mRoomName, mNodeType, mFloorName, mProfileType), FragmentDABConfiguration.ID);
             }
             else
             {

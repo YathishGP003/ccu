@@ -1036,11 +1036,67 @@ public class BuildingTuners
         String iTimeoutId = hayStack.addPoint(integralTimeout);
         hayStack.writePoint(iTimeoutId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.VAV_INTEGRAL_TIMEOUT, 0);
         hayStack.writeHisValById(iTimeoutId, TunerConstants.VAV_INTEGRAL_TIMEOUT);
+    
+        addDefaultDabSystemTuners();
+    }
+    
+    public void addDefaultDabSystemTuners()
+    {
+        Point targetCumulativeDamper = new Point.Builder()
+                                               .setDisplayName(equipDis+"-"+"targetCumulativeDamper")
+                                               .setSiteRef(siteRef)
+                                               .setEquipRef(equipRef)
+                                               .addMarker("tuner").addMarker("default").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis")
+                                               .addMarker("target").addMarker("cumulative").addMarker("damper").addMarker("sp")
+                                               .setTz(tz)
+                                               .build();
+        String targetCumulativeDamperId = hayStack.addPoint(targetCumulativeDamper);
+        hayStack.writePoint(targetCumulativeDamperId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.TARGET_CUMULATIVE_DAMPER, 0);
+        hayStack.writeHisValById(targetCumulativeDamperId, TunerConstants.TARGET_CUMULATIVE_DAMPER);
+        
+        Point analogFanSpeedMultiplier = new Point.Builder()
+                                                 .setDisplayName(equipDis+"-"+"analogFanSpeedMultiplier")
+                                                 .setSiteRef(siteRef)
+                                                 .setEquipRef(equipRef)
+                                                 .addMarker("tuner").addMarker("default").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis")
+                                                 .addMarker("analog").addMarker("fan").addMarker("speed").addMarker("multiplier").addMarker("sp")
+                                                 .setTz(tz)
+                                                 .build();
+        String analogFanSpeedMultiplierId = hayStack.addPoint(analogFanSpeedMultiplier);
+        hayStack.writePoint(analogFanSpeedMultiplierId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ANALOG_FANSPEED_MULTIPLIER, 0);
+        hayStack.writeHisValById(analogFanSpeedMultiplierId, TunerConstants.ANALOG_FANSPEED_MULTIPLIER);
+        
+        Point humidityHysteresis = new Point.Builder()
+                                           .setDisplayName(equipDis+"-"+"humidityHysteresis")
+                                           .setSiteRef(siteRef)
+                                           .setEquipRef(equipRef)
+                                           .addMarker("tuner").addMarker("default").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis")
+                                           .addMarker("humidity").addMarker("hysteresis").addMarker("sp")
+                                           .setTz(tz)
+                                           .build();
+        String humidityHysteresisId = hayStack.addPoint(humidityHysteresis);
+        hayStack.writePoint(humidityHysteresisId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.HUMIDITY_HYSTERESIS_PERCENT, 0);
+        hayStack.writeHisValById(humidityHysteresisId, TunerConstants.HUMIDITY_HYSTERESIS_PERCENT);
+        
+        Point relayDeactivationHysteresis = new Point.Builder()
+                                                    .setDisplayName(equipDis+"-"+"relayDeactivationHysteresis")
+                                                    .setSiteRef(siteRef)
+                                                    .setEquipRef(equipRef)
+                                                    .addMarker("tuner").addMarker("default").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis")
+                                                    .addMarker("relay").addMarker("deactivation").addMarker("hysteresis").addMarker("sp")
+                                                    .setTz(tz)
+                                                    .build();
+        String relayDeactivationHysteresisId = hayStack.addPoint(relayDeactivationHysteresis);
+        hayStack.writePoint(relayDeactivationHysteresisId, TunerConstants.VAV_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.RELAY_DEACTIVATION_HYSTERESIS, 0);
+        hayStack.writeHisValById(relayDeactivationHysteresisId, TunerConstants.RELAY_DEACTIVATION_HYSTERESIS);
+        
     }
     
     public void addEquipDabTuners(String equipdis, String equipref) {
         Log.d("CCU","addEquipDabTuners for "+equipdis);
     
+        addEquipZoneTuners(equipdis, equipref);
+        
         Point zonePrioritySpread = new Point.Builder()
                                            .setDisplayName(equipdis+"-"+"zonePrioritySpread")
                                            .setSiteRef(siteRef)

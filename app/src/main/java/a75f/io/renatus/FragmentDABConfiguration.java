@@ -3,6 +3,8 @@ package a75f.io.renatus;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -136,12 +138,32 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         if (dialog == null) {
             return;
         }
-        dialog.setTitle("DAB Configuration");
+        
+        
+        dialog.setTitle("DAB");
         TextView titleView = this.getDialog().findViewById(android.R.id.title);
         if(titleView != null)
         {
             titleView.setGravity(Gravity.CENTER);
-            titleView.setTextColor(getResources().getColor(R.color.progress_color_orange));
+            titleView.setTextColor(getResources().getColor(R.color.orange_75f));
+    
+            // Title's parent layout
+            ViewGroup viewGroup = (ViewGroup) titleView.getRootView();
+    
+            // Button
+            Button button = new Button(getActivity());
+            button.setText(" < ");
+            button.setTextSize(30);
+            button.setTypeface(null, Typeface.BOLD);
+            button.setPadding(10,10,10,10);
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            button.setLayoutParams(layoutParams);
+            button.setGravity(Gravity.LEFT);
+            button.setTextColor(getResources().getColor(R.color.orange_75f));
+            button.setOnClickListener(v->removeDialogFragment(ID));
+            button.setBackgroundColor(Color.TRANSPARENT);
+            viewGroup.addView(button);
+            
         }
         int titleDividerId = getContext().getResources()
                                          .getIdentifier("titleDivider", "id", "android");

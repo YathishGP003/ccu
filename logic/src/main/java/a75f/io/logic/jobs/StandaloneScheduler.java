@@ -52,19 +52,27 @@ public class StandaloneScheduler {
         double coolingDeadBand = StandaloneTunerUtil.readTunerValByQuery("cooling and deadband", equip.getId());
         double setback = TunerUtil.readTunerValByQuery("unoccupied and setback", equip.getId());
 
-        occ.setHeatingDeadBand(heatingDeadBand);
-        occ.setCoolingDeadBand(coolingDeadBand);
         occ.setUnoccupiedZoneSetback(setback);
 
 
         if (occ != null && ScheduleProcessJob.putOccupiedModeCache(equip.getRoomRef(), occ)) {
-
-
+            double deadbands = (occ.getCoolingVal()-occ.getHeatingVal())/2.0;
+            if(coolingDeadBand != deadbands) {
+                StandaloneTunerUtil.setStandaloneCoolingDeadband(equip.getId(), deadbands, TunerConstants.TUNER_EQUIP_VAL_LEVEL);
+                StandaloneTunerUtil.setStandaloneHeatingDeadband(equip.getId(), deadbands, TunerConstants.TUNER_EQUIP_VAL_LEVEL);
+            }
+            occ.setHeatingDeadBand(deadbands);
+            occ.setCoolingDeadBand(deadbands);
             Double coolingTemp = occ.isOccupied() ? occ.getCoolingVal() : (occ.getCoolingVal() + occ.getUnoccupiedZoneSetback());
             setDesiredTemp(equip, coolingTemp, "cooling");
 
             Double heatingTemp = occ.isOccupied() ? occ.getHeatingVal() : (occ.getHeatingVal() - occ.getUnoccupiedZoneSetback());
             setDesiredTemp(equip, heatingTemp, "heating");
+            setDesiredTemp(equip,heatingTemp+deadbands,"average");
+        }else{
+
+            occ.setHeatingDeadBand(heatingDeadBand);
+            occ.setCoolingDeadBand(coolingDeadBand);
         }
 
         return occ;

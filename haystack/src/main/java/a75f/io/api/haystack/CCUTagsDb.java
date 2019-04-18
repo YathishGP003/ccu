@@ -842,7 +842,7 @@ public class CCUTagsDb extends HServer {
 
         boolean isBool = ((HStr) entity.get("kind")).val.equals("Bool");
         ArrayList acc = new ArrayList();
-
+        
         HVal val = isBool ? HBool.make(item.val > 0) : HNum.make(item.val);
         HDict hsItem = HHisItem.make(HDateTime.make(item.getDate().getTime()), val);
         acc.add(hsItem);

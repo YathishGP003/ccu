@@ -80,6 +80,7 @@ public class VavParallelFanProfile extends VavProfile
             VOCLoop vocLoop = vavDeviceMap.get(node).getVOCLoop();
             if (roomTemp == 0) {
                 CcuLog.d(L.TAG_CCU_ZONE,"Skip PI update for "+node+" roomTemp : "+roomTemp);
+                CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \""+node+"\"", "Temperature Dead");
                 continue;
             }
             
@@ -221,7 +222,10 @@ public class VavParallelFanProfile extends VavProfile
             updateTRResponse(node);
             vavDevice.setDamperPos(damper.currentPosition);
             vavDevice.setReheatPos(valve.currentPosition);
-            vavDevice.setStatus(state.ordinal());
+            if (vavDevice.getStatus() != state.ordinal())
+            {
+                vavDevice.setStatus(state.ordinal());
+            }
             vavDevice.updateLoopParams();
         }
     }

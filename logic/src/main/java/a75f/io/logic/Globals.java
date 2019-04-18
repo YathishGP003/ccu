@@ -177,6 +177,18 @@ public class Globals {
 
         String addrBand = getSmartNodeBand();
         L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
+    
+        if (!isPubnubSubscribed())
+        {
+            HashMap site = CCUHsApi.getInstance().read("site");
+            if (site.size() > 0) {
+                String siteLUID = site.get("id").toString();
+                String siteGUID = CCUHsApi.getInstance().getGUID(siteLUID);
+                if (siteGUID != null && siteGUID != "") {
+                    Globals.getInstance().registerSiteToPubNub(siteGUID);
+                }
+            }
+        }
 
     }
 

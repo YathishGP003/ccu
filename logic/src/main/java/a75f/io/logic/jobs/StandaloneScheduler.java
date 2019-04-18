@@ -52,19 +52,27 @@ public class StandaloneScheduler {
         double coolingDeadBand = StandaloneTunerUtil.readTunerValByQuery("cooling and deadband", equip.getId());
         double setback = TunerUtil.readTunerValByQuery("unoccupied and setback", equip.getId());
 
-        occ.setHeatingDeadBand(heatingDeadBand);
-        occ.setCoolingDeadBand(coolingDeadBand);
         occ.setUnoccupiedZoneSetback(setback);
 
 
         if (occ != null && ScheduleProcessJob.putOccupiedModeCache(equip.getRoomRef(), occ)) {
-
-
+            double deadbands = (occ.getCoolingVal()-occ.getHeatingVal())/2.0;
+            if(coolingDeadBand != deadbands) {
+                StandaloneTunerUtil.setStandaloneCoolingDeadband(equip.getId(), deadbands, TunerConstants.TUNER_EQUIP_VAL_LEVEL);
+                StandaloneTunerUtil.setStandaloneHeatingDeadband(equip.getId(), deadbands, TunerConstants.TUNER_EQUIP_VAL_LEVEL);
+            }
+            occ.setHeatingDeadBand(deadbands);
+            occ.setCoolingDeadBand(deadbands);
             Double coolingTemp = occ.isOccupied() ? occ.getCoolingVal() : (occ.getCoolingVal() + occ.getUnoccupiedZoneSetback());
             setDesiredTemp(equip, coolingTemp, "cooling");
 
             Double heatingTemp = occ.isOccupied() ? occ.getHeatingVal() : (occ.getHeatingVal() - occ.getUnoccupiedZoneSetback());
             setDesiredTemp(equip, heatingTemp, "heating");
+            setDesiredTemp(equip,heatingTemp+deadbands,"average");
+        }else{
+
+            occ.setHeatingDeadBand(heatingDeadBand);
+            occ.setCoolingDeadBand(coolingDeadBand);
         }
 
         return occ;
@@ -144,9 +152,11 @@ public class StandaloneScheduler {
 
         //TODO if change in status need to update haystack string for App consuming this status update KUMAR
         if(equipId != null) {
-            standaloneStatus.put(equipId, status);
-        }else{
-            standaloneStatus.clear();
+            if(getSmartStatStatusString(equipId).equals(status) == false) {
+                if(standaloneStatus.containsKey(equipId))standaloneStatus.remove(equipId);
+                standaloneStatus.put(equipId, status);
+                updateStandaloneEquipStatus(equipId,status);
+            }
         }
 
     }
@@ -171,8 +181,7 @@ public class StandaloneScheduler {
                     for (String marker : p.getMarkers()) {
                         if (marker.equals("writable")) {
                             CcuLog.d(L.TAG_CCU_UI, "Set Writbale Val " + p.getDisplayName() + ": " + val);
-                            //TODO Duration is set only for 2 hours or 0??? kumar doubts
-                            CCUHsApi.getInstance().pointWrite(HRef.copy(id), TunerConstants.MANUAL_OVERRIDE_VAL_LEVEL, "manual", HNum.make(val), HNum.make(2 * 60 * 60 * 1000, "ms"));
+                            CCUHsApi.getInstance().pointWrite(HRef.copy(id), TunerConstants.MANUAL_OVERRIDE_VAL_LEVEL, "manual", HNum.make(val), HNum.make(0));
                         }
                     }
 
@@ -206,5 +215,10 @@ public class StandaloneScheduler {
             }
         }
         return 0;
+    }
+
+	public static void updateStandaloneEquipStatus(String equipId,String status) {
+        CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and equipRef == \""+equipId+"\"", status);
+
     }
 }

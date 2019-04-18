@@ -60,14 +60,17 @@ public class Pulse
 						break;
 					case DESIRED_TEMP:
 						val = smartNodeRegularUpdateMessage_t.update.setTemperature.get();
-						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-						double desiredTemp = getDesredTempConversion(val);
-						if (desiredTemp > 0)
-						{
-							hayStack.writeHisValById(logPoint.get("id").toString(), desiredTemp);
-							updateDesiredTemp(nodeAddr, desiredTemp);
+						double curValue = hayStack.readHisValById(phyPoint.get("id").toString());
+						if(curValue != val) {
+							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+							double desiredTemp = getDesredTempConversion(val);
+							if (desiredTemp > 0) {
+								hayStack.writeHisValById(logPoint.get("id").toString(), desiredTemp);
+								updateDesiredTemp(nodeAddr, desiredTemp);
+							}
+
 						}
-						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : desiredTemp "+desiredTemp);
+						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : desiredTemp "+val +","+curValue);
 						break;
 					case ANALOG_IN_ONE:
 						val = smartNodeRegularUpdateMessage_t.update.externalAnalogVoltageInput1.get();
@@ -187,6 +190,14 @@ public class Pulse
 		}
 		CCUHsApi.getInstance().pointWrite(HRef.copy(heatinDtPoint.get("id").toString()), HayStackConstants.DESIREDTEMP_OVERRIDE_LEVEL,"manual", HNum.make(heatingDesiredTemp), HNum.make(120*60*1000, "ms"));
 		CCUHsApi.getInstance().writeHisValById(heatinDtPoint.get("id").toString(), heatingDesiredTemp);
+
+
+		HashMap singleDtPoint = CCUHsApi.getInstance().read("point and air and temp and desired and average and sp and equipRef == \""+q.getId()+"\"");
+		if (singleDtPoint == null || singleDtPoint.size() == 0) {
+			throw new IllegalArgumentException();
+		}
+		CCUHsApi.getInstance().pointWrite(HRef.copy(singleDtPoint.get("id").toString()), HayStackConstants.DESIREDTEMP_OVERRIDE_LEVEL,"manual", HNum.make(heatingDesiredTemp), HNum.make(120*60*1000, "ms"));
+		CCUHsApi.getInstance().writeHisValById(singleDtPoint.get("id").toString(), heatingDesiredTemp+hdb);
 	}
 
     private static void updateSmartStatDesiredTemp(int node, Double dt) {
@@ -213,6 +224,13 @@ public class Pulse
         }
         CCUHsApi.getInstance().pointWrite(HRef.copy(heatinDtPoint.get("id").toString()), HayStackConstants.DESIREDTEMP_OVERRIDE_LEVEL,"manual", HNum.make(heatingDesiredTemp), HNum.make(120*60*1000, "ms"));
         CCUHsApi.getInstance().writeHisValById(heatinDtPoint.get("id").toString(), heatingDesiredTemp);
+
+		HashMap singleDtPoint = CCUHsApi.getInstance().read("point and air and temp and desired and average and sp and equipRef == \""+q.getId()+"\"");
+		if (singleDtPoint == null || singleDtPoint.size() == 0) {
+			throw new IllegalArgumentException();
+		}
+		CCUHsApi.getInstance().pointWrite(HRef.copy(singleDtPoint.get("id").toString()), HayStackConstants.DESIREDTEMP_OVERRIDE_LEVEL,"manual", HNum.make(heatingDesiredTemp), HNum.make(120*60*1000, "ms"));
+		CCUHsApi.getInstance().writeHisValById(singleDtPoint.get("id").toString(), heatingDesiredTemp+hdb);
     }
 	
 	public static void regularCMUpdate(CmToCcuOverUsbCmRegularUpdateMessage_t cmRegularUpdateMessage_t)

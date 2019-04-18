@@ -92,4 +92,16 @@ public class TunerUtil
         hayStack.pointWrite(HRef.copy(id), TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", HNum.make(val), HNum.make(0,"ms"));
         hayStack.writeHisValById(id, val);
     }
+
+    public static void writeTunerValByQuery(String query,String equipRef, double dbVal, int level) {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap cdb = hayStack.read("point and tuner and "+query +" and equipRef == \""+equipRef+"\"");
+
+        String id = cdb.get("id").toString();
+        if (id == null || id == "") {
+            throw new IllegalArgumentException();
+        }
+        hayStack.writePoint(id, level, "ccu", dbVal, 0);
+
+    }
 }

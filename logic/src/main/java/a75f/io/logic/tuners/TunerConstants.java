@@ -30,8 +30,8 @@ public class TunerConstants
     public static final int UI_DEFAULT_VAL_LEVEL = 8;
     public static final int SYSTEM_BUILDING_VAL_LEVEL = 16;
     
-    public static final double VAV_COOLING_DB = 1.0;
-    public static final double VAV_HEATING_DB = 1.0;
+    public static final double VAV_COOLING_DB = 2.0; //Default deadband value based on dual temp diff 70 and 74 ((74-70)/2.0)
+    public static final double VAV_HEATING_DB = 2.0;
     public static final double VAV_COOLING_DB_MULTPLIER = 0.5;
     public static final double VAV_HEATING_DB_MULTIPLIER = 0.5;
     public static final double VAV_PROPORTIONAL_GAIN = 0.5;
@@ -72,8 +72,8 @@ public class TunerConstants
     public static final int VAV_BUILDING_VAL_LEVEL = 16;
 	public static final int MANUAL_OVERRIDE_VAL_LEVEL = 8;
 
-    public static final double STANDALONE_HEATING_DEADBAND_DEFAULT = 1;
-    public static final double STANDALONE_COOLING_DEADBAND_DEFAULT = 1;
+    public static final double STANDALONE_HEATING_DEADBAND_DEFAULT = 2.0;//Default deadband value based on dual temp diff 70 and 74 ((74-70)/2.0)
+    public static final double STANDALONE_COOLING_DEADBAND_DEFAULT = 2.0;
     public static final double STANDALONE_STAGE1_HYSTERESIS_DEFAULT = 0.5;
     public static final double STANDALONE_AIRFLOW_SAMPLE_WAIT_TIME = 30;//in minutes
     public static final double STANDALONE_COOLING_STAGE1_LOWER_OFFSET = -150;

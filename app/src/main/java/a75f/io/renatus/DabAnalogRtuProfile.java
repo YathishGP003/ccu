@@ -7,12 +7,12 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.SwitchCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.Spinner;
 import android.widget.TableLayout;
@@ -45,12 +45,12 @@ public class DabAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
     @BindView(R.id.ahuAnalog3Min) Spinner analog3Min;
     @BindView(R.id.ahuAnalog3Max) Spinner analog3Max;
 	
-    @BindView(R.id.ahuAnalog1Cb) CheckBox ahuAnalog1Cb;
-    @BindView(R.id.ahuAnalog2Cb) CheckBox ahuAnalog2Cb;
-    @BindView(R.id.ahuAnalog3Cb) CheckBox ahuAnalog3Cb;
+    @BindView(R.id.ahuAnalog1Cb)SwitchCompat       ahuAnalog1Cb;
+    @BindView(R.id.ahuAnalog2Cb)SwitchCompat       ahuAnalog2Cb;
+    @BindView(R.id.ahuAnalog3Cb)SwitchCompat       ahuAnalog3Cb;
 	
-	@BindView(R.id.relay3Cb) CheckBox relay3Cb;
-	@BindView(R.id.relay7Cb) CheckBox relay7Cb;
+	@BindView(R.id.relay3Cb) SwitchCompat relay3Cb;
+	@BindView(R.id.relay7Cb) SwitchCompat relay7Cb;
 	
 	@BindView(R.id.relay7Spinner) Spinner relay7Spinner;
 	
@@ -297,9 +297,6 @@ public class DabAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 			case R.id.ahuAnalog3Test:
 				sendAnalog3OutTestSignal(val);
 				break;
-			case R.id.ahuAnalog4Test:
-				sendAnalog4OutTestSignal(val);
-				break;
 		}
 	}
 	
@@ -440,21 +437,4 @@ public class DabAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 		MeshUtil.sendStructToCM(msg);
 	}
 	
-	public void sendAnalog4OutTestSignal(double val) {
-		double analogMin = systemProfile.getConfigVal("co2 and min");
-		double analogMax = systemProfile.getConfigVal("co2 and max");
-		
-		CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
-		msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
-		
-		short signal;
-		if (analogMax > analogMin)
-		{
-			signal = (short) (10 * (analogMin + (analogMax - analogMin) * val/100));
-		} else {
-			signal = (short) (10 * (analogMin - (analogMin - analogMax) * val/100));
-		}
-		msg.analog3.set(signal);
-		MeshUtil.sendStructToCM(msg);
-	}
 }

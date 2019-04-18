@@ -1150,6 +1150,10 @@ public class VAVLogicalMap
         this.staticPressure = staticPressure;
     }
     
+    public double getStatus() {
+        return CCUHsApi.getInstance().readHisValByQuery("point and status and his and group == \""+nodeAddr+"\"");
+    }
+    
     public void setStatus(double status) {
         CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \""+nodeAddr+"\"", status);
         

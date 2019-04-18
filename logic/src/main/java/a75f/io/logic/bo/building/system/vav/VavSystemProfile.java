@@ -44,7 +44,7 @@ public abstract class VavSystemProfile extends SystemProfile
     
     private void addSystemLoopOpPoint(String loop, String siteRef, String equipref, String equipDis, String tz)
     {
-        Point relay1Op = new Point.Builder().setDisplayName(equipDis + "-" + loop + "LoopOutput").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker(loop).addMarker("loop").addMarker("output").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
+        Point relay1Op = new Point.Builder().setDisplayName(equipDis + "-" + loop + "LoopOutput").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker(loop).addMarker("loop").addMarker("output").addMarker("his").addMarker("writable").addMarker("equipHis").addMarker("sp").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(relay1Op);
     }
     

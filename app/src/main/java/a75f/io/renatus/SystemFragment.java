@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -56,6 +57,10 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	CheckBox cbDemandResponse;
 	
 	RadioGroup systemModeRg;
+	
+	int spinnerInit = 0;
+	boolean minHumiditySpinnerReady = false;
+	boolean maxHumiditySpinnerReady = false;
 	public SystemFragment()
 	{
 	}
@@ -103,6 +108,22 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		
 		targetMaxInsideHumidity = view.findViewById(R.id.targetMaxInsideHumidity);
 		targetMinInsideHumidity = view.findViewById(R.id.targetMinInsideHumidity);
+		
+		targetMinInsideHumidity.setOnTouchListener(new View.OnTouchListener() {
+		@Override
+		public boolean onTouch(View v, MotionEvent event) {
+			minHumiditySpinnerReady = true;
+			return false;
+		}
+		});
+		
+		targetMaxInsideHumidity.setOnTouchListener(new View.OnTouchListener() {
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				maxHumiditySpinnerReady = true;
+				return false;
+			}
+		});
 		
 		cbCompHumidity = view.findViewById(R.id.cbCompHumidity);
 		cbDemandResponse = view.findViewById(R.id.cbDemandResponse);
@@ -183,7 +204,6 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	                    }
                     });
 		
-		sbComfortValue.setProgress(5 - (int)TunerUtil.readSystemUserIntentVal("desired and ci"));
 		sbComfortValue.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 			
 			@Override
@@ -202,17 +222,6 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		
 		double operatingMode = CCUHsApi.getInstance().readHisValByQuery("point and system and operating and mode");
 		
-		Log.d("CCU_UI", "operatingMode :" + operatingMode);
-		
-		handler.post(new Runnable() {
-			@Override
-			public void run() {
-				stageStatusNow.setText(SystemController.State.values()[(int)operatingMode].name());
-			}
-		});
-		
-		
-		
 		ArrayList<Double> zoroToHundred = new ArrayList<>();
 		for (double val = 0;  val <= 100.0; val++)
 		{
@@ -222,26 +231,22 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		ArrayAdapter<Double> humidityAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
 		humidityAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		
+		
 		targetMinInsideHumidity.setAdapter(humidityAdapter);
 		targetMaxInsideHumidity.setAdapter(humidityAdapter);
 		
-		targetMaxInsideHumidity.setSelection(humidityAdapter
-				                                     .getPosition(TunerUtil.readSystemUserIntentVal("target and max and inside and humidity")), false);
-		targetMinInsideHumidity.setSelection(humidityAdapter
-				                                     .getPosition(TunerUtil.readSystemUserIntentVal("target and min and inside and humidity")), false);
-		
 		targetMinInsideHumidity.setOnItemSelectedListener(this);
 		targetMaxInsideHumidity.setOnItemSelectedListener(this);
-		
-		cbCompHumidity.setChecked(TunerUtil.readSystemUserIntentVal("compensate and humidity") > 0);
-		cbDemandResponse.setChecked(TunerUtil.readSystemUserIntentVal("demand and response") > 0);
 		
 		cbCompHumidity.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
 		{
 			@Override
 			public void onCheckedChanged(CompoundButton compoundButton, boolean b)
 			{
-				setUserIntentBackground("compensate and humidity", b ? 1: 0);
+				if (compoundButton.isPressed())
+				{
+					setUserIntentBackground("compensate and humidity", b ? 1 : 0);
+				}
 			}
 		});
 		
@@ -250,14 +255,26 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			@Override
 			public void onCheckedChanged(CompoundButton compoundButton, boolean b)
 			{
-				setUserIntentBackground("demand and response", b ? 1: 0);
+				if (compoundButton.isPressed())
+				{
+					setUserIntentBackground("demand and response", b ? 1 : 0);
+				}
 			}
 		});
 		
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
+				stageStatusNow.setText(SystemController.State.values()[(int)operatingMode].name());
 				systemScheduleStatus.setText(ScheduleProcessJob.getSystemStatusString());
+				cbCompHumidity.setChecked(TunerUtil.readSystemUserIntentVal("compensate and humidity") > 0);
+				cbDemandResponse.setChecked(TunerUtil.readSystemUserIntentVal("demand and response") > 0);
+				sbComfortValue.setProgress(5 - (int)TunerUtil.readSystemUserIntentVal("desired and ci"));
+				
+				targetMaxInsideHumidity.setSelection(humidityAdapter
+						                                     .getPosition(TunerUtil.readSystemUserIntentVal("target and max and inside and humidity")), false);
+				targetMinInsideHumidity.setSelection(humidityAdapter
+						                                     .getPosition(TunerUtil.readSystemUserIntentVal("target and min and inside and humidity")), false);
 			}
 		});
 		
@@ -268,13 +285,20 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	                           long arg3)
 	{
 		double val = Double.parseDouble(arg0.getSelectedItem().toString());
+		
 		switch (arg0.getId())
 		{
 			case R.id.targetMaxInsideHumidity:
-				setUserIntentBackground("target and max and inside and humidity", val);
+				if (maxHumiditySpinnerReady)
+				{
+					setUserIntentBackground("target and max and inside and humidity", val);
+				}
 				break;
 			case R.id.targetMinInsideHumidity:
-				setUserIntentBackground("target and min and inside and humidity", val);
+				if (minHumiditySpinnerReady)
+				{
+					setUserIntentBackground("target and min and inside and humidity", val);
+				}
 				break;
 		}
 	}

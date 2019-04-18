@@ -12,6 +12,7 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_margin="80dp"
             android:orientation="vertical">
 
 
@@ -22,7 +23,6 @@
                 android:layout_marginBottom="30dp"
                 android:layout_marginLeft="50dp"
                 android:layout_marginRight="50dp"
-                android:layout_marginTop="14dp"
                 android:stretchColumns="0"
                 android:visibility="visible">
 
@@ -39,7 +39,7 @@
                         android:textSize="@dimen/text_small_xlarge"/>
 
                     <TextView
-                        android:layout_width="400dp"
+                        android:layout_width="500dp"
                         android:layout_height="wrap_content"
                         android:text="Mapping"
                         android:textSize="@dimen/text_small_xlarge"/>
@@ -59,13 +59,31 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="15dp">
 
-                    <CheckBox
-                        android:id="@+id/ahuAnalog1Cb"
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:text="Analog-out1"
-                        android:textSize="@dimen/text_small_xlarge"/>
+                        android:orientation="horizontal">
+
+                        <android.support.v7.widget.SwitchCompat
+                            android:id="@+id/ahuAnalog1Cb"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:padding="5dp"
+                            android:thumbTint="@color/white"
+                            android:textSize="@dimen/text_small_xlarge"/>
+                        <Space
+                            android:layout_width="24dp"
+                            android:layout_height="match_parent"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Analog-out1"
+                            android:textColor="@color/black"
+                            android:textSize="@dimen/text_small_xlarge"/>
+
+                    </LinearLayout>
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -87,13 +105,30 @@
                     android:layout_marginBottom="15dp"
                     android:layout_marginTop="15dp">
 
-                    <CheckBox
-                        android:id="@+id/ahuAnalog2Cb"
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:text="Analog-out2"
-                        android:textSize="@dimen/text_small_xlarge"/>
+                        android:orientation="horizontal">
+
+                        <android.support.v7.widget.SwitchCompat
+                            android:id="@+id/ahuAnalog2Cb"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:padding="5dp"
+                            android:textSize="@dimen/text_small_xlarge"/>
+                        <Space
+                            android:layout_width="24dp"
+                            android:layout_height="match_parent"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Analog-out2"
+                            android:textColor="@color/black"
+                            android:textSize="@dimen/text_small_xlarge"/>
+
+                    </LinearLayout>
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -116,13 +151,30 @@
                     android:layout_marginBottom="15dp"
                     android:layout_marginTop="15dp">
 
-                    <CheckBox
-                        android:id="@+id/ahuAnalog3Cb"
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:text="Analog-out3"
-                        android:textSize="@dimen/text_small_xlarge"/>
+                        android:orientation="horizontal">
+
+                        <android.support.v7.widget.SwitchCompat
+                            android:id="@+id/ahuAnalog3Cb"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:padding="5dp"
+                            android:textSize="@dimen/text_small_xlarge"/>
+                        <Space
+                            android:layout_width="24dp"
+                            android:layout_height="match_parent"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Analog-out3"
+                            android:textColor="@color/black"
+                            android:textSize="@dimen/text_small_xlarge"/>
+
+                    </LinearLayout>
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -144,13 +196,30 @@
                     android:layout_marginBottom="15dp"
                     android:layout_marginTop="15dp">
 
-                    <CheckBox
-                        android:id="@+id/relay3Cb"
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:text="Relay-3"
-                        android:textSize="@dimen/text_small_xlarge"/>
+                        android:orientation="horizontal">
+
+                        <android.support.v7.widget.SwitchCompat
+                            android:id="@+id/relay3Cb"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:padding="5dp"
+                            android:textSize="@dimen/text_small_xlarge"/>
+                        <Space
+                            android:layout_width="24dp"
+                            android:layout_height="match_parent"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Relay-3"
+                            android:textColor="@color/black"
+                            android:textSize="@dimen/text_small_xlarge"/>
+
+                    </LinearLayout>
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -173,13 +242,30 @@
                     android:layout_marginBottom="15dp"
                     android:layout_marginTop="15dp">
 
-                    <CheckBox
-                        android:id="@+id/relay7Cb"
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:text="Relay-7"
-                        android:textSize="@dimen/text_small_xlarge"/>
+                        android:orientation="horizontal">
+
+                        <android.support.v7.widget.SwitchCompat
+                            android:id="@+id/relay7Cb"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:padding="5dp"
+                            android:textSize="@dimen/text_small_xlarge"/>
+                        <Space
+                            android:layout_width="24dp"
+                            android:layout_height="match_parent"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Relay-7"
+                            android:textColor="@color/black"
+                            android:textSize="@dimen/text_small_xlarge"/>
+
+                    </LinearLayout>
 
                     <Spinner
                         android:id="@+id/relay7Spinner"

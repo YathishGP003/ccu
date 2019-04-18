@@ -91,14 +91,18 @@ public class HttpUtil
                 response.append('\n');
             }
             rd.close();
-            if(connection.getResponseCode() == 401)
+            int responseCode = connection.getResponseCode();
+            if (responseCode != 200) {
+                CcuLog.i("CCU_HS","HttpError: responseCode "+responseCode);
+            }
+            if(responseCode == 401)
             {
                 clientToken = parseToken(authorizeToken(CLIENT_ID, "", CLIENT_SECRET, TENANT_ID));
                 CcuLog.i("CCU_HS","Client Token: " + clientToken);
                 executePost(targetURL, urlParameters);
             }
 
-            return connection.getResponseCode() == 200 ? response.toString() : null;
+            return responseCode == 200 ? response.toString() : null;
             
         } catch (Exception e) {
             

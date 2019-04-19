@@ -93,7 +93,7 @@ public abstract class VavProfile extends ZoneProfile
         deviceMap.co2ResetRequest.setImportanceMultiplier(getPriority().multiplier);
         deviceMap.spResetRequest.setImportanceMultiplier(getPriority().multiplier);
         deviceMap.hwstResetRequest.setImportanceMultiplier(getPriority().multiplier);
-        deviceMap.setPITuners();
+        deviceMap.init();
     }
     
     /**
@@ -112,7 +112,7 @@ public abstract class VavProfile extends ZoneProfile
         deviceMap.co2ResetRequest.setImportanceMultiplier(getPriority().multiplier);
         deviceMap.spResetRequest.setImportanceMultiplier(getPriority().multiplier);
         deviceMap.hwstResetRequest.setImportanceMultiplier(getPriority().multiplier);
-        deviceMap.setPITuners();
+        deviceMap.init();
     }
     
     public void updateLogicalMapAndPoints(short addr, VavProfileConfiguration config) {

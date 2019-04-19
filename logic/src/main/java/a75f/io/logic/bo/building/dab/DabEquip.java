@@ -6,7 +6,9 @@ import org.projecthaystack.HRef;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import a75.io.algos.CO2Loop;
 import a75.io.algos.GenericPIController;
+import a75.io.algos.VOCLoop;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HayStackConstants;
@@ -23,6 +25,7 @@ import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.tuners.BuildingTuners;
+import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 
 /**
@@ -40,10 +43,20 @@ public class DabEquip
     CCUHsApi hayStack = CCUHsApi.getInstance();
     String equipRef = null;
     
-    public DabEquip(ProfileType type, int node) {
+    CO2Loop co2Loop;
+    VOCLoop  vocLoop;
+    
+    double   co2Target = TunerConstants.ZONE_CO2_TARGET;
+    double   co2Threshold = TunerConstants.ZONE_CO2_THRESHOLD;
+    double   vocTarget = TunerConstants.ZONE_VOC_TARGET;
+    double   vocThreshold = TunerConstants.ZONE_VOC_THRESHOLD;
+    
+    public DabEquip(ProfileType type, int node)
+    {
         profileType = type;
         nodeAddr = node;
-        
+        co2Loop = new CO2Loop();
+        vocLoop = new VOCLoop();
     }
     
     public void init() {
@@ -57,6 +70,11 @@ public class DabEquip
             damperController.setIntegralGain(TunerUtil.readTunerValByQuery("dab and igain and equipRef == \"" + equipRef + "\""));
             damperController.setProportionalGain(TunerUtil.readTunerValByQuery("dab and pgain and equipRef == \"" + equipRef + "\""));
             damperController.setIntegralMaxTimeout((int) TunerUtil.readTunerValByQuery("dab and itimeout and equipRef == \"" + equipRef + "\""));
+    
+            co2Target = (int) TunerUtil.readTunerValByQuery("zone and dab and co2 and target and equipRef == \""+equipRef+"\"");
+            co2Threshold = (int) TunerUtil.readTunerValByQuery("zone and dab and co2 and threshold and equipRef == \""+equipRef+"\"");
+            vocTarget = (int) TunerUtil.readTunerValByQuery("zone and dab and voc and target and equipRef == \""+equipRef+"\"");
+            vocThreshold = (int) TunerUtil.readTunerValByQuery("zone and dab and voc and threshold and equipRef == \""+equipRef+"\"");
         }
     
     }
@@ -316,6 +334,9 @@ public class DabEquip
         CCUHsApi.getInstance().syncEntityTree();
     }
     
+    String getId(){
+        return equipRef;
+    }
     
     public void createDabConfigPoints(DabProfileConfiguration config, String equipRef) {
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
@@ -631,6 +652,15 @@ public class DabEquip
         CCUHsApi.getInstance().writeHisValByQuery("point and air and voc and sensor and current and group == \""+nodeAddr+"\"", voc);
     }
     
+    public CO2Loop getCo2Loop()
+    {
+        return co2Loop;
+    }
+    public VOCLoop getVOCLoop()
+    {
+        return vocLoop;
+    }
+    
     public double getDesiredTemp()
     {
         ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and desired and average and sp and group == \"" + nodeAddr + "\"");
@@ -745,6 +775,10 @@ public class DabEquip
     {
         this.damperPos = damperPos;
         CCUHsApi.getInstance().writeHisValByQuery("point and damper and base and cmd and "+damper+" and group == \""+nodeAddr+"\"", damperPos);
+    }
+    
+    public double getStatus() {
+        return CCUHsApi.getInstance().readHisValByQuery("point and status and his and group == \""+nodeAddr+"\"");
     }
     
     public void setStatus(double status) {

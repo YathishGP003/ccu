@@ -253,7 +253,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         maxCoolingDamperPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         maxCoolingDamperPos.setMinValue(0);
         maxCoolingDamperPos.setMaxValue(100);
-        maxCoolingDamperPos.setValue(80);
+        maxCoolingDamperPos.setValue(100);
         maxCoolingDamperPos.setWrapSelectorWheel(false);
         
         minCoolingDamperPos = view.findViewById(R.id.minDamperPos);
@@ -269,7 +269,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         maxHeatingDamperPos.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         maxHeatingDamperPos.setMinValue(0);
         maxHeatingDamperPos.setMaxValue(100);
-        maxHeatingDamperPos.setValue(80);
+        maxHeatingDamperPos.setValue(100);
         maxHeatingDamperPos.setWrapSelectorWheel(false);
         
         minHeatingDamperPos = view.findViewById(R.id.minHeatingDamperPos);

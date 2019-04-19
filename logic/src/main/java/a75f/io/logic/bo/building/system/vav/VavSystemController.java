@@ -553,7 +553,7 @@ public class VavSystemController extends SystemController
             HashMap damperPos = hayStack.read("point and damper and normalized and cmd and equipRef == \""+m.get("id").toString()+"\"");
             double limitedDamperPos = hayStack.readHisValById(damperPos.get("id").toString());
             double minLimit = 0, maxLimit = 0;
-            if (getSystemState() == COOLING) {
+            if (getStatus(m.get("group").toString()) == ZoneState.COOLING.ordinal()) {
                 minLimit = hayStack.readDefaultVal("point and zone and config and vav and min and damper and cooling and equipRef == \""+m.get("id").toString()+"\"");
                 maxLimit = hayStack.readDefaultVal("point and zone and config and vav and max and damper and cooling and equipRef == \""+m.get("id").toString()+"\"");
             } else {
@@ -565,5 +565,9 @@ public class VavSystemController extends SystemController
             limitedDamperPos = Math.max(limitedDamperPos, minLimit);
             hayStack.writeHisValById(damperPos.get("id").toString() , limitedDamperPos);
         }
+    }
+    
+    public double getStatus(String nodeAddr) {
+        return CCUHsApi.getInstance().readHisValByQuery("point and status and his and group == \""+nodeAddr+"\"");
     }
 }

@@ -122,7 +122,7 @@ public class VAVLogicalMap
         //createHaystackPoints();
     }
     
-    public void setPITuners() {
+    public void init() {
         
         HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \"" + nodeAddr + "\"");
         
@@ -195,7 +195,7 @@ public class VAVLogicalMap
         }
         String equipRef = CCUHsApi.getInstance().addEquip(b.build());
         
-        BuildingTuners.getInstance().addEquipVavTuners(siteDis+"-VAV-"+nodeAddr, equipRef, config);
+        BuildingTuners.getInstance().addVavEquipTuners(siteDis + "-VAV-" + nodeAddr, equipRef, config);
     
         createVavConfigPoints(config, equipRef, floor, room);
     

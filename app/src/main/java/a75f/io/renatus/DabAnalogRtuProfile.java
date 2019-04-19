@@ -134,7 +134,7 @@ public class DabAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 		{
 			analogArray.add(a);
 		}
-		ArrayAdapter<Integer> analogAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, analogArray);
+		ArrayAdapter<Integer> analogAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, analogArray);
 		analogAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		
 		analog1Min.setAdapter(analogAdapter);

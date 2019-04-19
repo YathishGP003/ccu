@@ -7,13 +7,13 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginRight="20dp"
+        android:layout_marginRight="40dp"
+        android:layout_marginLeft="40dp"
         android:orientation="vertical" >
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="75dp"
-            android:layout_marginLeft="20dp"
+            android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:paddingTop="20dp" >
 
@@ -78,7 +78,6 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="75dp"
-            android:layout_marginLeft="20dp"
             android:orientation="horizontal"
             android:paddingTop="20dp" >
 
@@ -142,7 +141,6 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="75dp"
-            android:layout_marginLeft="20dp"
             android:orientation="horizontal"
             android:paddingTop="20dp">
 
@@ -197,7 +195,6 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:orientation="horizontal"
-                android:layout_marginLeft="20dp"
                 android:paddingTop="20dp" >
 
                 <android.support.v7.widget.SwitchCompat
@@ -221,8 +218,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
             android:orientation="horizontal"
             android:paddingTop="20dp" >
 
@@ -256,7 +251,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="20dp"
+                android:layout_marginLeft="15dp"
                 android:orientation="vertical" >
 
                 <TextView
@@ -284,7 +279,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="20dp"
+                android:layout_marginLeft="15dp"
                 android:orientation="vertical" >
 
                 <TextView
@@ -312,7 +307,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="20dp"
+                android:layout_marginLeft="15dp"
                 android:orientation="vertical" >
 
                 <TextView
@@ -340,7 +335,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="20dp"
+                android:layout_marginLeft="15dp"
                 android:orientation="vertical" >
 
                 <TextView
@@ -377,7 +372,7 @@
             android:textColor="@color/orange_75f"
             android:background="?android:attr/selectableItemBackground"
             android:gravity="right"
-            android:padding="16dp"/>
+            android:padding="10dp"/>
 
     </LinearLayout>
 </ScrollView>

@@ -213,7 +213,7 @@ public class LSmartNode
                     }
 
                     if (isAnalog(p.getPort()) && p.getType().equals(MAT) && logicalVal > 0) {
-                        controls_t.damperPosition.set(mappedVal);
+                        controls_t.damperPosition.set((short)logicalVal);
                         mappedVal = 0;
                     }
                     Log.d(TAG_CCU_DEVICE, " Set " + p.getPort() + " type " + p.getType() + " logicalVal: " + logicalVal + " mappedVal " + mappedVal);

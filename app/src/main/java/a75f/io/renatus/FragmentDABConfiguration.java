@@ -85,7 +85,8 @@ public class FragmentDABConfiguration extends BaseDialogFragment
     private DabProfileConfiguration mProfileConfig;
     
     private ArrayList<Damper.Parameters> mDampers = new ArrayList<Damper.Parameters>();
-    ArrayAdapter<String> damperTypesAdapter;
+    ArrayAdapter<String> damper1TypesAdapter;
+    ArrayAdapter<String> damper2TypesAdapter;
     
     
     DamperType damper1TypeSelected = ZeroToTenV;
@@ -146,11 +147,10 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         {
             titleView.setGravity(Gravity.CENTER);
             titleView.setTextColor(getResources().getColor(R.color.orange_75f));
-    
-            // Title's parent layout
+            titleView.setTextSize(28);
+            titleView.setTypeface(null, Typeface.BOLD);
+            
             ViewGroup viewGroup = (ViewGroup) titleView.getRootView();
-    
-            // Button
             Button button = new Button(getActivity());
             button.setText(" < ");
             button.setTextSize(30);
@@ -290,23 +290,14 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         zonePriorityAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         zonePriority.setAdapter(zonePriorityAdapter);
         
-        final SwitchCompat useOccupancyDetection = (SwitchCompat) view.findViewById(R.id.useOccupancyDetection);
-        //useOccupancyDetection.setChecked(mFSVData.getUseOccupancyDetection());
-        
-        final SwitchCompat ignoreSetpoint = (SwitchCompat) view.findViewById(R.id.ignoreSetpoint);
-        //ignoreSetpoint.setChecked(mFSVData.getIgnoreSetpointChange());
-        
-        LinearLayout zonePriorityLayout = (LinearLayout) view.findViewById(R.id.zonePriorityLayout);
-        //zonePriorityLayout.setVisibility((SystemSettingsData.getTier().ordinal() <= CCU_TIER.EXPERT.ordinal()) ? View.VISIBLE : View.GONE);
-        
         damper1Type = view.findViewById(R.id.damper1Type);
-        ArrayList<String> damperTypes = new ArrayList<>();
+        ArrayList<String> damper1Types = new ArrayList<>();
         for (DamperType damper : DamperType.values()) {
-            damperTypes.add(damper.displayName);
+            damper1Types.add(damper.displayName+ (damper.name().equals("MAT") ? "": " (Analog-out1)"));
         }
-        damperTypesAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, damperTypes);
-        damperTypesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        damper1Type.setAdapter(damperTypesAdapter);
+        damper1TypesAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, damper1Types);
+        damper1TypesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        damper1Type.setAdapter(damper1TypesAdapter);
         
         damper1Type.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -325,9 +316,16 @@ public class FragmentDABConfiguration extends BaseDialogFragment
             
             }
         });
-    
+        
         damper2Type = view.findViewById(R.id.damper2Type);
-        damper2Type.setAdapter(damperTypesAdapter);
+    
+        ArrayList<String> damper2Types = new ArrayList<>();
+        for (DamperType damper : DamperType.values()) {
+            damper2Types.add(damper.displayName+ (damper.name().equals("MAT") ? "": " (Analog-out2)"));
+        }
+        damper2TypesAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, damper2Types);
+        damper2TypesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        damper2Type.setAdapter(damper2TypesAdapter);
     
         damper2Type.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -349,11 +347,11 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         
         
         if (mProfileConfig != null) {
-            damper1Type.setSelection(damperTypesAdapter.getPosition(DamperType.values()[mProfileConfig.damper1Type].displayName), false);
+            damper1Type.setSelection(mProfileConfig.damper1Type, false);
             damper1Size.setSelection(damperSizeAdapter.getPosition(String.valueOf(mProfileConfig.damper1Size)), false);
             damper1Shape.setSelection(damperShapeAdapter.getPosition(DamperShape.values()[mProfileConfig.damper1Shape].displayName), false);
     
-            damper2Type.setSelection(damperTypesAdapter.getPosition(DamperType.values()[mProfileConfig.damper2Type].displayName), false);
+            damper2Type.setSelection(mProfileConfig.damper2Type, false);
             damper2Size.setSelection(damperSizeAdapter.getPosition(String.valueOf(mProfileConfig.damper2Size)), false);
             damper2Shape.setSelection(damperShapeAdapter.getPosition(DamperShape.values()[mProfileConfig.damper2Shape].displayName), false);
             
@@ -476,33 +474,4 @@ public class FragmentDABConfiguration extends BaseDialogFragment
             Log.e("dividerexception",e.getMessage().toString());
         }
     }
-    
-    public void fillDamperDetails() {
-        mDampers.add(Damper.TYPE.GENERIC_0To10V.ordinal(), new Damper.Parameters(Damper.TYPE.GENERIC_0To10V.ordinal(),
-                                                                                        Damper.TYPE.GENERIC_0To10V.toString(),
-                                                                                        0, 0, 0, 0, 0));
-        mDampers.add(Damper.TYPE.GENERIC_2TO10V.ordinal(), new Damper.Parameters(Damper.TYPE.GENERIC_2TO10V.ordinal(),
-                                                                                        Damper.TYPE.GENERIC_2TO10V.toString(),
-                                                                                        0, 0, 0, 0, 0));
-        mDampers.add(Damper.TYPE.GENERIC_10To0V.ordinal(), new Damper.Parameters(Damper.TYPE.GENERIC_10To0V.ordinal(),
-                                                                                        Damper.TYPE.GENERIC_10To0V.toString(),
-                                                                                        0, 0, 0, 0, 0));
-        mDampers.add(Damper.TYPE.GENERIC_10To2V.ordinal(), new Damper.Parameters(Damper.TYPE.GENERIC_10To2V.ordinal(),
-                                                                                        Damper.TYPE.GENERIC_10To2V.toString(),
-                                                                                        0, 0, 0, 0, 0));
-        mDampers.add(Damper.TYPE.MAT_RADIAL1.ordinal(), new Damper.Parameters(Damper.TYPE.MAT_RADIAL1.ordinal(),
-                                                                                     Damper.TYPE.MAT_RADIAL1.toString(),
-                                                                                     Damper.TYPE.MAT_RADIAL1.getDefaultMotorRPM(),
-                                                                                     Damper.TYPE.MAT_RADIAL1.getDefaultOperatingCurrent(),
-                                                                                     Damper.TYPE.MAT_RADIAL1.getDefaultStallCurrent(),
-                                                                                     Damper.TYPE.MAT_RADIAL1.getDefaultForwardBacklash(),
-                                                                                     Damper.TYPE.MAT_RADIAL1.getDefaultReverseBacklash()));
-    }
-    
-    
-    
-    
-    
-    
-    
 }

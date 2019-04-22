@@ -13,7 +13,6 @@ import a75f.io.device.serial.CmToCcuOverUsbSmartStatRegularUpdateMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSnLocalControlsOverrideMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 import a75f.io.device.serial.MessageType;
-import a75f.io.device.serial.SnSetTemperatureUpdateMessage_t;
 import a75f.io.device.serial.WrmOrCmRebootIndicationMessage_t;
 import a75f.io.usbserial.SerialAction;
 import a75f.io.usbserial.SerialEvent;
@@ -101,7 +100,7 @@ public class LSerial
             }
             else if (messageType == MessageType.CM_TO_CCU_OVER_USB_SN_SET_TEMPERATURE_UPDATE)
             {
-                DLog.LogdSerial("Event Type:updateSetTempFromSmartStat="+data.length+","+data.toString());
+                DLog.LogdSerial("Event Type:updateSetTempFromSmartNode="+data.length+","+data.toString());
                 Pulse.updateSetTempFromSmartNode(fromBytes(data, CmToCcuOverUsbSnLocalControlsOverrideMessage_t.class));;
             }else if(messageType == MessageType.FSV_REBOOT){
                 DLog.LogdSerial("Event Type DEVICE_REBOOT:"+data.length+","+data.toString());
@@ -238,7 +237,7 @@ public class LSerial
         if (checkDuplicate(Short.valueOf(smartNodeAddress), struct.getClass()
                 .getSimpleName(), structHash))
         {
-            //DLog.LogdStructAsJson(struct);
+            DLog.LogdStructAsJson(struct);
             DLog.Logd("Struct " + struct.getClass().getSimpleName() + " was already sent, returning");
             return true;
         }
@@ -271,7 +270,7 @@ public class LSerial
             return false;
         }
         //Only if the struct was wrote to serial should it be logged.
-        DLog.LogdStructAsJson(struct);
+        //DLog.LogdStructAsJson(struct);
         mUsbService.write(struct.getOrderedBuffer());
         return true;
     }

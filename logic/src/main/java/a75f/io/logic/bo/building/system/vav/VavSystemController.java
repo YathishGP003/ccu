@@ -73,6 +73,10 @@ public class VavSystemController extends SystemController
     double averageSystemHumidity = 0;
     double averageSystemTemperature = 0;
     
+    double weightedAverageCoolingOnlyLoadPostML;
+    double weightedAverageHeatingOnlyLoadPostML;
+    double weightedAverageLoadPostML;
+    
     private VavSystemController()
     {
         piController = new ControlLoop();
@@ -146,12 +150,16 @@ public class VavSystemController extends SystemController
         weightedAverageHeatingOnlyLoad = weightedAverageHeatingOnlyLoadSum / prioritySum;
         weightedAverageLoad = weightedAverageLoadSum / prioritySum;
         
-        comfortIndex = (int)(totalCoolingLoad - totalHeatingLoad) /zoneCount;
+        comfortIndex = (int)(totalCoolingLoad + totalHeatingLoad) /zoneCount;
         
         profile.setSystemPoint("ci and running", comfortIndex);
     
-        weightedAverageCoolingOnlyLoadMAQueue.add(weightedAverageCoolingOnlyLoad);
-        weightedAverageHeatingOnlyLoadMAQueue.add(weightedAverageHeatingOnlyLoad);
+        weightedAverageCoolingOnlyLoadPostML = weightedAverageCoolingOnlyLoad ;//+buildingLoadOffsetML
+        weightedAverageHeatingOnlyLoadPostML = weightedAverageHeatingOnlyLoad ;//+buildingLoadOffsetML
+        weightedAverageLoadPostML = weightedAverageLoad ;///+buildingLoadOffsetML
+        
+        weightedAverageCoolingOnlyLoadMAQueue.add(weightedAverageCoolingOnlyLoadPostML);
+        weightedAverageHeatingOnlyLoadMAQueue.add(weightedAverageHeatingOnlyLoadPostML);
         
         double weightedAverageCoolingOnlyLoadMASum = 0;
         for (double val : weightedAverageCoolingOnlyLoadMAQueue) {
@@ -185,10 +193,10 @@ public class VavSystemController extends SystemController
         piController.dump();
         if (systemState == COOLING) {
             heatingSignal = 0;
-            coolingSignal = (int)piController.getLoopOutput(weightedAverageCoolingOnlyLoadMA, 0);
+            coolingSignal = (int)piController.getLoopOutput(weightedAverageCoolingOnlyLoadPostML, 0);
         } else if (systemState == HEATING){
             coolingSignal = 0;
-            heatingSignal = (int)piController.getLoopOutput(weightedAverageHeatingOnlyLoadMA, 0);
+            heatingSignal = (int)piController.getLoopOutput(weightedAverageHeatingOnlyLoadPostML, 0);
         } else {
             coolingSignal = 0;
             heatingSignal = 0;
@@ -545,7 +553,7 @@ public class VavSystemController extends SystemController
             HashMap damperPos = hayStack.read("point and damper and normalized and cmd and equipRef == \""+m.get("id").toString()+"\"");
             double limitedDamperPos = hayStack.readHisValById(damperPos.get("id").toString());
             double minLimit = 0, maxLimit = 0;
-            if (getSystemState() == COOLING) {
+            if (getStatus(m.get("group").toString()) == ZoneState.COOLING.ordinal()) {
                 minLimit = hayStack.readDefaultVal("point and zone and config and vav and min and damper and cooling and equipRef == \""+m.get("id").toString()+"\"");
                 maxLimit = hayStack.readDefaultVal("point and zone and config and vav and max and damper and cooling and equipRef == \""+m.get("id").toString()+"\"");
             } else {
@@ -557,5 +565,9 @@ public class VavSystemController extends SystemController
             limitedDamperPos = Math.max(limitedDamperPos, minLimit);
             hayStack.writeHisValById(damperPos.get("id").toString() , limitedDamperPos);
         }
+    }
+    
+    public double getStatus(String nodeAddr) {
+        return CCUHsApi.getInstance().readHisValByQuery("point and status and his and group == \""+nodeAddr+"\"");
     }
 }

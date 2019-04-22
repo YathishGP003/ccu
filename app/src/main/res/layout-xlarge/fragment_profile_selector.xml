@@ -9,13 +9,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginLeft="20dp"
+        android:layout_marginLeft="100dp"
         android:layout_marginTop="15dp"
+        android:layout_marginBottom="15dp"
         android:layout_gravity="left|center">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="30dp"
-            android:text="Select System Profile "
+            android:text="SELECT SYSTEM PROFILE "
             android:layout_gravity="left|center"
             android:textSize="@dimen/text_medium_xlarge"
             android:layout_marginLeft="20dp" />

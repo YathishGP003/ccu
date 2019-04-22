@@ -12,8 +12,8 @@ public class SystemEquip
 {
     private String equipRef;
     CCUHsApi hayStack;
-    SystemRelayOp[] systemRelayArr = new SystemRelayOp[7];
-    SystemAnalogOp[] systemAnalogArr = new SystemAnalogOp[4];
+    SystemRelayOp[] systemRelayArr = new SystemRelayOp[8];
+    SystemAnalogOp[] systemAnalogArr = new SystemAnalogOp[5];
     public SystemEquip(String ref) {
         hayStack = CCUHsApi.getInstance();
         equipRef = ref;
@@ -25,24 +25,28 @@ public class SystemEquip
     {
         for (int i = 1; i <= 7; i++) {
             HashMap relay = hayStack.read("point and system and cmd and his and relay" + i);
+            SystemRelayOp op = new SystemRelayOp();
             if (relay == null || relay.size() == 0) {
-                systemRelayArr[i].setAvailable(false);
+                op.setAvailable(false);
             } else {
                 double enabled = hayStack.readDefaultVal("point and system and config and output and enabled and relay"+i);
-                systemRelayArr[i].setEnabled(enabled > 0);
+                op.setEnabled(enabled > 0);
                 double stageVal = hayStack.readDefaultVal("point and system and config and output and association and relay"+i);
-                systemRelayArr[i].setRelayAssociation(stageVal);
+                op.setRelayAssociation(stageVal);
             }
+            systemRelayArr[i] = op;
         }
     
         for (int i = 1; i <= 4; i++) {
             HashMap analog = hayStack.read("point and system and config and output and enabled and analog" + i);
+            SystemAnalogOp op = new SystemAnalogOp();
             if (analog == null || analog.size() == 0) {
-                systemAnalogArr[i].setAvailable(false);
+                op.setAvailable(false);
             } else {
                 double enabled = hayStack.readDefaultVal("point and system and config and output and enabled and analog"+i);
-                systemAnalogArr[i].setEnabled(enabled > 0);
+                op.setEnabled(enabled > 0);
             }
+            systemAnalogArr[i] = op;
         }
         
     }
@@ -73,5 +77,23 @@ public class SystemEquip
     
     public void setAnalogOpEnabled(String analog, boolean enabled) {
         systemAnalogArr[Integer.parseInt(analog.substring(analog.length()-1))].setEnabled(enabled);
+    }
+    
+    public boolean getConfigEnabled(String config) {
+        if (config.contains("relay")) {
+            return getRelayOpEnabled(config);
+        } else if (config.contains("analog")) {
+            return getAnalogOpEnabled(config);
+        }
+        return false;
+    }
+    
+    public void setConfigEnabled(String config, double val) {
+        if (config.contains("relay")) {
+            setRelayOpEnabled(config, val > 0);
+        } else if (config.contains("analog")) {
+            setAnalogOpEnabled(config, val> 0);
+        }
+        
     }
 }

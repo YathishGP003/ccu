@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.device.serial.CcuToCmOverUsbDeviceTempAckMessage_t;
@@ -176,7 +175,7 @@ public class Pulse
 		double coolingDesiredTemp = dt + cdb;
 		double heatingDesiredTemp = dt - hdb;
 		
-		
+		CcuLog.d(L.TAG_CCU_DEVICE,"updateDesiredTemp : dt "+dt+" cdb : "+cdb+" hdb: "+hdb+" coolingDesiredTemp: "+coolingDesiredTemp+" heatingDesiredTemp: "+heatingDesiredTemp);
 		HashMap coolingDtPoint = CCUHsApi.getInstance().read("point and air and temp and desired and cooling and sp and equipRef == \""+q.getId()+"\"");
 		if (coolingDtPoint == null || coolingDtPoint.size() == 0) {
 			throw new IllegalArgumentException();

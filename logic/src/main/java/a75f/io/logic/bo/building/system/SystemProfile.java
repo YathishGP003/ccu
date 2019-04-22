@@ -27,6 +27,7 @@ public abstract class SystemProfile
     
     public TRSystem trSystem;
     
+    public SystemEquip sysEquip;
     private String equipRef = null;
     
     public abstract void doSystemControl();

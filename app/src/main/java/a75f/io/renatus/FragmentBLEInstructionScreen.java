@@ -123,6 +123,7 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         }
         else if (mProfileType == ProfileType.PLC)
         {
+            Log.d("CCU_UI"," PLC Profile type");
             if (L.isSimulation())
             {
                 showDialogFragment(FragmentPLCConfiguration
@@ -131,7 +132,21 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
             else
             {
                 FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan
-                                                                .getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.HMP);
+                                                                .getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.PLC);
+                showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
+            }
+        }
+        else if (mProfileType == ProfileType.DAB)
+        {
+            if (L.isSimulation())
+            {
+                showDialogFragment(FragmentDABConfiguration
+                                           .newInstance(mNodeAddress, mRoomName, mNodeType, mFloorName, mProfileType), FragmentDABConfiguration.ID);
+            }
+            else
+            {
+                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan
+                                                                .getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.DAB);
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
             }
         }

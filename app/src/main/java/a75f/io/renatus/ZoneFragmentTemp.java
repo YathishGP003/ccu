@@ -78,9 +78,9 @@ public class ZoneFragmentTemp extends Fragment
                 String tunerName = expandableListDetail.get(expandableListTitle.get(groupPosition)).get(
                         childPosition);
                 
-                if (tunerName.contains("currentTemp") || tunerName.contains("Variable")) {
+                /*if (tunerName.contains("currentTemp") || tunerName.contains("Variable")) {
                     return true ;
-                }
+                }*/
                 Toast.makeText(getActivity(), expandableListTitle.get(groupPosition) + " -> " + tunerName, Toast.LENGTH_SHORT).show();
                 
                 final EditText taskEditText = new EditText(getActivity());
@@ -134,7 +134,7 @@ public class ZoneFragmentTemp extends Fragment
         {
             Log.d("CCU_UI","Equip: "+m);
             Equip p = new Equip.Builder().setHashMap(m).build();
-            if (p.getProfile() != null && !p.getProfile().contains("SYSTEM") && p.getProfile().contains("VAV"))
+            if (p.getProfile() != null && !p.getProfile().contains("SYSTEM") && (p.getProfile().contains("VAV") || p.getProfile().contains("DAB")) )
             {
                 HashMap currTmep = CCUHsApi.getInstance().read("point and air and temp and sensor and current and equipRef == \""+p.getId()+"\"");
                 HashMap coolDT = CCUHsApi.getInstance().read("point and air and temp and desired and cooling and sp and equipRef == \""+p.getId()+"\"");

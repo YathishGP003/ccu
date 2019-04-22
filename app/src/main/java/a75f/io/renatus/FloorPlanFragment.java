@@ -544,13 +544,18 @@ public class FloorPlanFragment extends Fragment
 				showDialogFragment(FragmentPLCConfiguration
 						                   .newInstance(Short.parseShort(nodeAddr),zone.getDisplayName(), NodeType.SMART_NODE, floor.getDisplayName()), FragmentPLCConfiguration.ID);
 				break;
-				case SMARTSTAT_CONVENTIONAL_PACK_UNIT:
-					System.out.println(" floor " + floor.getDisplayName() + " zone " + zone.getDisplayName() + " node :" + nodeAddr);
-					ConventionalUnitConfiguration cpuConfig = (ConventionalUnitConfiguration) profile.getProfileConfiguration(Short.parseShort(nodeAddr));
-					System.out.println("Config " + cpuConfig + " profile " + profile.getProfileType());
-					showDialogFragment(FragmentCPUConfiguration
-							.newInstance(Short.parseShort(nodeAddr), zone.getDisplayName(), cpuConfig.getNodeType(), floor.getDisplayName(), profile.getProfileType()), FragmentCPUConfiguration.ID);
-					break;
+			case DAB:
+				showDialogFragment(FragmentDABConfiguration
+						                   .newInstance(Short.parseShort(nodeAddr),zone.getDisplayName(), NodeType.SMART_NODE, floor.getDisplayName(), profile.getProfileType()), FragmentDABConfiguration.ID);
+				break;
+				
+			case SMARTSTAT_CONVENTIONAL_PACK_UNIT:
+				System.out.println(" floor " + floor.getDisplayName() + " zone " + zone.getDisplayName() + " node :" + nodeAddr);
+				ConventionalUnitConfiguration cpuConfig = (ConventionalUnitConfiguration) profile.getProfileConfiguration(Short.parseShort(nodeAddr));
+				System.out.println("Config " + cpuConfig + " profile " + profile.getProfileType());
+				showDialogFragment(FragmentCPUConfiguration
+						.newInstance(Short.parseShort(nodeAddr), zone.getDisplayName(), cpuConfig.getNodeType(), floor.getDisplayName(), profile.getProfileType()), FragmentCPUConfiguration.ID);
+				break;
 			
 		}
 		

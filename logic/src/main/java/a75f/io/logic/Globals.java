@@ -44,9 +44,11 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.plc.PlcProfile;
 import a75f.io.logic.bo.building.sscpu.ConventionalUnitProfile;
 import a75f.io.logic.bo.building.system.DefaultSystem;
+import a75f.io.logic.bo.building.dab.DabProfile;
+import a75f.io.logic.bo.building.system.dab.DabFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedHybridRtu;
-import a75f.io.logic.bo.building.system.vav.VavAnalogRtu;
+import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.vav.VavBacnetRtu;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
@@ -347,7 +349,7 @@ public class Globals {
                         {
                             HGrid pointGrid = CCUHsApi.getInstance().readPointArrRemote("@" + guid);
                             if (pointGrid == null) {
-                                CcuLog.d(L.TAG_CCU, "Pubnub Failed to read remote point point : " + guid);
+                                CcuLog.d(L.TAG_CCU, "PubNub Failed to read remote point point : " + guid);
                                 return;
                             }
                             Iterator it = pointGrid.iterator();
@@ -358,7 +360,7 @@ public class Globals {
                                 double val = Double.parseDouble(r.get("val").toString());
                                 String who = r.get("who").toString();
                                 double duration = Double.parseDouble(r.get("dur").toString());
-                                CcuLog.d(L.TAG_CCU, "PubNub remote point:  level " + level + " val " + val + " who " + who + " duration " + duration);
+                                CcuLog.d(L.TAG_CCU, "PubNub remote point:  level " + level + " val " + val + " who " + who + " duration " + (duration - System.currentTimeMillis()));
                                 CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(luid), (int) level, who, HNum.make(val), HNum.make(duration == 0 ? 0 : duration - System.currentTimeMillis()));
                             }
                             Point p = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(luid)).build();
@@ -384,7 +386,7 @@ public class Globals {
                         }
                         else
                         {
-                            CcuLog.d(L.TAG_CCU, "Pubnub received for invalid local point : " + luid);
+                            CcuLog.d(L.TAG_CCU, "PubNub received for invalid local point : " + luid);
                         }
                     }
                 } catch (NumberFormatException e) {
@@ -449,12 +451,17 @@ public class Globals {
                             plc.addPlcEquip(Short.valueOf(eq.getGroup()));
                             L.ccu().zoneProfiles.add(plc);
                             break;
+                        case DAB:
+                            DabProfile dab = new DabProfile();
+                            dab.addDabEquip(Short.valueOf(eq.getGroup()));
+                            L.ccu().zoneProfiles.add(dab);
+                            break;
                         case SMARTSTAT_CONVENTIONAL_PACK_UNIT:
                             ConventionalUnitProfile cpu = new ConventionalUnitProfile();
                             cpu.addLogicalMap(Short.valueOf(eq.getGroup()), z.getId());
                             L.ccu().zoneProfiles.add(cpu);
                             break;
-
+                            
                     }
                 }
             }
@@ -467,7 +474,7 @@ public class Globals {
             CcuLog.d(L.TAG_CCU, "Load SystemEquip " + eq.getDisplayName() + " System profile " + eq.getProfile());
             switch (ProfileType.valueOf(eq.getProfile())) {
                 case SYSTEM_VAV_ANALOG_RTU:
-                    VavAnalogRtu analogRtuProfile = new VavAnalogRtu();
+                    VavFullyModulatingRtu analogRtuProfile = new VavFullyModulatingRtu();
                     analogRtuProfile.addSystemEquip();
                     L.ccu().systemProfile = analogRtuProfile;
                     break;
@@ -495,6 +502,11 @@ public class Globals {
                     VavBacnetRtu bacnetRtu = new VavBacnetRtu();
                     //bacnetRtu.initTRSystem();
                     L.ccu().systemProfile = bacnetRtu;
+                    break;
+                case SYSTEM_DAB_ANALOG_RTU:
+                    DabFullyModulatingRtu dabAnalogProfile = new DabFullyModulatingRtu();
+                    dabAnalogProfile.addSystemEquip();
+                    L.ccu().systemProfile = dabAnalogProfile;
                     break;
                 case SYSTEM_DAB_STAGED_RTU:
                     L.ccu().systemProfile = new DabStagedRtu();

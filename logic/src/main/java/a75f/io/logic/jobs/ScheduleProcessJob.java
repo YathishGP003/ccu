@@ -191,7 +191,7 @@ public class ScheduleProcessJob extends BaseJob {
     }
 
     private static void writePointsForEquip(Equip equip, Schedule equipSchedule, Schedule vacation) {
-        if(equip.getMarkers().contains("vav") && !equip.getMarkers().contains("system"))
+        if((equip.getMarkers().contains("vav") || equip.getMarkers().contains("dab")) && !equip.getMarkers().contains("system"))
         {
             VAVScheduler.processEquip(equip, equipSchedule, vacation);
         }else if (equip.getMarkers().contains("pid")) {

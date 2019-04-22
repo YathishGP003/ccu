@@ -122,7 +122,7 @@ public class VAVLogicalMap
         //createHaystackPoints();
     }
     
-    public void setPITuners() {
+    public void init() {
         
         HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \"" + nodeAddr + "\"");
         
@@ -195,7 +195,7 @@ public class VAVLogicalMap
         }
         String equipRef = CCUHsApi.getInstance().addEquip(b.build());
         
-        BuildingTuners.getInstance().addEquipVavTuners(siteDis+"-VAV-"+nodeAddr, equipRef, config);
+        BuildingTuners.getInstance().addVavEquipTuners(siteDis + "-VAV-" + nodeAddr, equipRef, config);
     
         createVavConfigPoints(config, equipRef, floor, room);
     
@@ -997,10 +997,9 @@ public class VAVLogicalMap
             throw new IllegalArgumentException();
         }
         //CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
-        CCUHsApi.getInstance().pointWrite(HRef.copy(id), HayStackConstants.POINT_INIT_VAL_LEVEL, "ccu", HNum.make(desiredTemp), HNum.make(0));
+        CCUHsApi.getInstance().pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_INIT_VAL_LEVEL, "ccu", HNum.make(desiredTemp), HNum.make(0));
         
         CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
-        this.desiredTemp = desiredTemp;
     }
     
     public double getDesiredTempHeating()
@@ -1031,9 +1030,8 @@ public class VAVLogicalMap
             throw new IllegalArgumentException();
         }
         //CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
-        CCUHsApi.getInstance().pointWrite(HRef.copy(id), HayStackConstants.POINT_INIT_VAL_LEVEL, "ccu", HNum.make(desiredTemp), HNum.make(0));
+        CCUHsApi.getInstance().pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_INIT_VAL_LEVEL, "ccu", HNum.make(desiredTemp), HNum.make(0));
         CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
-        this.desiredTemp = desiredTemp;
     }
     
     public double getDamperLimit(String coolHeat, String minMax)

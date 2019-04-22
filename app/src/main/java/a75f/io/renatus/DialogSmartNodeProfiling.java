@@ -142,6 +142,8 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
             showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, profile, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
         } else if (piLoopModuleTypeRB.isChecked()) {
             showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.PLC, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
+        }  else if (dabModuleTypeRB.isChecked()) {
+            showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.DAB, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
         }
     }
     

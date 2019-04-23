@@ -360,8 +360,11 @@ public class Globals {
                                 double val = Double.parseDouble(r.get("val").toString());
                                 String who = r.get("who").toString();
                                 double duration = Double.parseDouble(r.get("dur").toString());
-                                CcuLog.d(L.TAG_CCU, "PubNub remote point:  level " + level + " val " + val + " who " + who + " duration " + (duration - System.currentTimeMillis()));
-                                CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(luid), (int) level, who, HNum.make(val), HNum.make(duration == 0 ? 0 : duration - System.currentTimeMillis()));
+                                double dur = duration - System.currentTimeMillis();
+                                CcuLog.d(L.TAG_CCU, "PubNub remote point:  level " + level + " val " + val + " who " + who + " duration "+duration+" dur "+dur);
+                                //If dur shows it is already expired, then just write 1s to force-expire it locally.
+                                CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(luid), (int) level, who, HNum.make(val), HNum.make(duration == 0 ? 0 :
+                                                                                                                             (dur < 0 ? 1000 : duration - System.currentTimeMillis())));
                             }
                             Point p = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(luid)).build();
                             ArrayList values = CCUHsApi.getInstance().readPoint(luid);
@@ -383,6 +386,11 @@ public class Globals {
                                     CCUHsApi.getInstance().writeHisValById(luid, CCUHsApi.getInstance().readPointPriorityVal(luid));
                                 }
                             }
+    
+                            /*if (p.getMarkers().contains("desired"))
+                            {
+                                ScheduleProcessJob.handleDesiredTempUpdate(p);
+                            }*/
                         }
                         else
                         {

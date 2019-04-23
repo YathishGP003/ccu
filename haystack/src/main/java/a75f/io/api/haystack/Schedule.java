@@ -428,6 +428,24 @@ public class Schedule extends Entity
         if (disabled) mMarkers.add("disabled");
         else mMarkers.remove("disabled");
     }
+    
+    public void setDaysCoolVal(int day, double val)
+    {
+        for (Days d: mDays) {
+            if (d.mDay == day) {
+                d.mCoolingVal = val;
+            }
+        }
+    }
+    
+    public void setDaysHeatVal(int day, double val)
+    {
+        for (Days d: mDays) {
+            if (d.mDay == day) {
+                d.mHeatingVal = val;
+            }
+        }
+    }
 
 
     public static class Builder

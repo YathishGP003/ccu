@@ -195,8 +195,8 @@ public class Pulse
 		if (singleDtPoint == null || singleDtPoint.size() == 0) {
 			throw new IllegalArgumentException();
 		}
-		CCUHsApi.getInstance().pointWrite(HRef.copy(singleDtPoint.get("id").toString()), HayStackConstants.DESIREDTEMP_OVERRIDE_LEVEL,"manual", HNum.make(heatingDesiredTemp), HNum.make(120*60*1000, "ms"));
-		CCUHsApi.getInstance().writeHisValById(singleDtPoint.get("id").toString(), heatingDesiredTemp+hdb);
+		CCUHsApi.getInstance().pointWrite(HRef.copy(singleDtPoint.get("id").toString()), HayStackConstants.DESIREDTEMP_OVERRIDE_LEVEL,"manual", HNum.make(dt), HNum.make(120*60*1000, "ms"));
+		CCUHsApi.getInstance().writeHisValById(singleDtPoint.get("id").toString(), dt);
 	}
 
     private static void updateSmartStatDesiredTemp(int node, Double dt) {
@@ -228,8 +228,8 @@ public class Pulse
 		if (singleDtPoint == null || singleDtPoint.size() == 0) {
 			throw new IllegalArgumentException();
 		}
-		CCUHsApi.getInstance().pointWrite(HRef.copy(singleDtPoint.get("id").toString()), HayStackConstants.DESIREDTEMP_OVERRIDE_LEVEL,"manual", HNum.make(heatingDesiredTemp), HNum.make(120*60*1000, "ms"));
-		CCUHsApi.getInstance().writeHisValById(singleDtPoint.get("id").toString(), heatingDesiredTemp+hdb);
+		CCUHsApi.getInstance().pointWrite(HRef.copy(singleDtPoint.get("id").toString()), HayStackConstants.DESIREDTEMP_OVERRIDE_LEVEL,"manual", HNum.make(dt), HNum.make(120*60*1000, "ms"));
+		CCUHsApi.getInstance().writeHisValById(singleDtPoint.get("id").toString(), dt);
     }
 	
 	public static void regularCMUpdate(CmToCcuOverUsbCmRegularUpdateMessage_t cmRegularUpdateMessage_t)

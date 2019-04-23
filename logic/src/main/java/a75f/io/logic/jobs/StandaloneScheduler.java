@@ -113,7 +113,7 @@ public class StandaloneScheduler {
 
     public static void updateSmartStatStatus(String equipId,ZoneState state, HashMap<String,Integer> relayStages){
 
-        String status = "OFF ";
+        String status = (equipId != null) ? "OFF " : " Temperature Dead";
         switch (state){
             case COOLING:
                 if(relayStages.containsKey("CoolingStage2") && relayStages.containsKey("CoolingStage1"))

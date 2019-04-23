@@ -42,6 +42,8 @@ public abstract class SystemProfile
     
     public abstract ProfileType getProfileType();
     
+    public abstract String getStatusMessage();
+    
     public  int getSystemSAT() {
         return 0;
     }
@@ -160,5 +162,4 @@ public abstract class SystemProfile
             }
         }
     }
-    
 }

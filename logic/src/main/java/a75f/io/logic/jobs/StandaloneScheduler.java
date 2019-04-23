@@ -91,7 +91,7 @@ public class StandaloneScheduler {
             return;
         }
         try {
-            CCUHsApi.getInstance().pointWrite(HRef.make(id.replace("@", "")), 9, "Scheduler", desiredTemp != null ? HNum.make(desiredTemp) : HNum.make(0), HNum.make(0));
+            CCUHsApi.getInstance().pointWrite(HRef.make(id.replace("@", "")), 8, "Scheduler", desiredTemp != null ? HNum.make(desiredTemp) : HNum.make(0), HNum.make(0));
         } catch (Exception e) {
             e.printStackTrace();
         }

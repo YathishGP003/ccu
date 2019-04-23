@@ -146,7 +146,6 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
         setCmdSignal("analog2",10*signal);
         ControlMote.setAnalogOut("analog2", 10 * signal);
         CcuLog.d(L.TAG_CCU_SYSTEM, " analog2 Signal : "+10 * signal);
-    
     }
     
     @Override

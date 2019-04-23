@@ -20,13 +20,23 @@ import a75f.io.logic.tuners.VavTRTuners;
 
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_1;
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_2;
+import static a75f.io.logic.bo.building.hvac.Stage.COOLING_3;
+import static a75f.io.logic.bo.building.hvac.Stage.COOLING_4;
+import static a75f.io.logic.bo.building.hvac.Stage.COOLING_5;
 import static a75f.io.logic.bo.building.hvac.Stage.FAN_1;
 import static a75f.io.logic.bo.building.hvac.Stage.FAN_2;
+import static a75f.io.logic.bo.building.hvac.Stage.FAN_3;
+import static a75f.io.logic.bo.building.hvac.Stage.FAN_4;
+import static a75f.io.logic.bo.building.hvac.Stage.FAN_5;
 import static a75f.io.logic.bo.building.hvac.Stage.HEATING_1;
 import static a75f.io.logic.bo.building.hvac.Stage.HEATING_2;
+import static a75f.io.logic.bo.building.hvac.Stage.HEATING_3;
+import static a75f.io.logic.bo.building.hvac.Stage.HEATING_4;
+import static a75f.io.logic.bo.building.hvac.Stage.HEATING_5;
 import static a75f.io.logic.bo.building.hvac.Stage.HUMIDIFIER;
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
+import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
 
 /**
  * Created by samjithsadasivan on 8/14/18.
@@ -40,6 +50,8 @@ public class VavStagedRtu extends VavSystemProfile
     public int heatingStages = 0;
     public int coolingStages = 0;
     public int fanStages = 0;
+    
+    int[] stageStatus;
     
     
     public void initTRSystem() {
@@ -139,7 +151,8 @@ public class VavStagedRtu extends VavSystemProfile
     }
     
     protected synchronized void updateSystemPoints() {
-        
+    
+        stageStatus = new int[17];
         if (VavSystemController.getInstance().getSystemState() == COOLING)
         {
             double satSpMax = VavTRTuners.getSatTRTunerVal("spmax");
@@ -357,11 +370,55 @@ public class VavStagedRtu extends VavSystemProfile
                         break;
                 }
             }
+            stageStatus[stage.ordinal()] = (int)relayState;
             setCmdSignal("relay"+i, relayState);
             ControlMote.setRelayState("relay"+i, relayState);
             CcuLog.d(L.TAG_CCU_SYSTEM, stage+ " Set Relay"+i+", threshold: "+stageThreshold+", state : "+relayState);
         }
+    
+        setSystemPoint("operating and mode", VavSystemController.getInstance().systemState.ordinal());
+        String systemStatus = (VavSystemController.getInstance().systemState == OFF) ? "System OFF " : getStatusMessage();
+        CcuLog.d(L.TAG_CCU_SYSTEM, "StatusMessage: "+systemStatus);
+        CcuLog.d(L.TAG_CCU_SYSTEM, "ScheduleStatus: " + ScheduleProcessJob.getSystemStatusString());
+        CCUHsApi.getInstance().writeDefaultVal("system and status and message",systemStatus);
+        CCUHsApi.getInstance().writeDefaultVal("system and scheduleStatus", ScheduleProcessJob.getSystemStatusString());
+    
+    }
+    
+    @Override
+    public String getStatusMessage(){
+        StringBuilder status = new StringBuilder();
         
+        
+        status.append((stageStatus[FAN_1.ordinal()] > 0) ? "1":"");
+        status.append((stageStatus[FAN_2.ordinal()] > 0) ? ",2":"");
+        status.append((stageStatus[FAN_3.ordinal()] > 0) ? ",3":"");
+        status.append((stageStatus[FAN_4.ordinal()] > 0) ? ",4":"");
+        status.append((stageStatus[FAN_5.ordinal()] > 0) ? ",5":"");
+        
+        if (!status.toString().equals("")) {
+            status.insert(0, "Fan Stage ");
+            status.append(" ON ");
+        }
+        if (systemCoolingLoopOp > 0)
+        {
+            status.append("| Cooling Stage " + ((stageStatus[COOLING_1.ordinal()] > 0) ? "1" : ""));
+            status.append((stageStatus[COOLING_2.ordinal()] > 0) ? ",2" : "");
+            status.append((stageStatus[COOLING_3.ordinal()] > 0) ? ",3" : "");
+            status.append((stageStatus[COOLING_4.ordinal()] > 0) ? ",4" : "");
+            status.append((stageStatus[COOLING_5.ordinal()] > 0) ? ",5 ON " : " ON ");
+        }
+        
+        if (systemHeatingLoopOp > 0) {
+            status.append("| Heating Stage " + ((stageStatus[HEATING_1.ordinal()] > 0) ? "1" : ""));
+            status.append((stageStatus[HEATING_2.ordinal()] > 0) ? ",2" : "");
+            status.append((stageStatus[HEATING_3.ordinal()] > 0) ? ",3" : "");
+            status.append((stageStatus[HEATING_4.ordinal()] > 0) ? ",4" : "");
+            status.append((stageStatus[HEATING_5.ordinal()] > 0) ? ",5 ON" : " ON");
+        }
+        
+        
+        return status.toString();
     }
     
     public void updateStagesSelected() {
@@ -379,7 +436,7 @@ public class VavStagedRtu extends VavSystemProfile
                 {
                     coolingStages = val + 1;
                     //CcuLog.d(L.TAG_CCU_SYSTEM," Cooling stage : "+coolingStages);
-                } else if (val >= Stage.HEATING_1.ordinal() && val <= Stage.HEATING_5.ordinal() && val >= heatingStages)
+                } else if (val >= Stage.HEATING_1.ordinal() && val <= HEATING_5.ordinal() && val >= heatingStages)
                 {
                     heatingStages = val + 1;
                     //CcuLog.d(L.TAG_CCU_SYSTEM," Heating stage : "+heatingStages);

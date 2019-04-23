@@ -2,6 +2,8 @@ package a75f.io.logic.jobs;
 
 import android.util.Log;
 
+import org.joda.time.DateTime;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -9,7 +11,9 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.MockTime;
 import a75f.io.api.haystack.Occupied;
+import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
@@ -480,6 +484,12 @@ public class ScheduleProcessJob extends BaseJob {
     //Update Schedules instanly
     public static void updateSchedules() {
     
+        HashMap site = CCUHsApi.getInstance().read("site");
+        if (site.size() == 0) {
+            CcuLog.d(TAG_CCU_JOB,"No Site Registered ! <-updateSchedules ");
+            return;
+        }
+        
         new Thread() {
             @Override
             public void run() {
@@ -546,6 +556,46 @@ public class ScheduleProcessJob extends BaseJob {
             }
         }
         
+    }
+    
+    public static void handleDesiredTempUpdate(Point point) {
+    
+        String zoneId = HSUtil.getZoneIdFromEquipId(point.getRoomRef());
+        Occupied occ = ScheduleProcessJob.getOccupiedModeCache(point.getRoomRef());
+        
+        if (occ != null && occ.isOccupied()) {
+            Schedule equipSchedule = Schedule.getScheduleByEquipId(point.getEquipRef());
+    
+            if(equipSchedule == null)
+            {
+                CcuLog.d(L.TAG_CCU_JOB,"<- *no schedule* skip handleDesiredTempUpdate");
+                return;
+            }
+            
+            //TO change when setting to applyToAllTuners done.
+            if (equipSchedule.isZoneSchedule()) {
+                /*if (point.getMarkers().contains("cooling"))
+                {
+                    equipSchedule.setDaysCoolVal();
+                } else if (point.getMarkers().contains("heating")) {
+                    equipSchedule.setDaysHeatVal();
+                }*/
+            } else {
+                Schedule.Days day = occ.getCurrentlyOccupiedSchedule();
+    
+                DateTime overrideTime = new DateTime(MockTime.getInstance().getMockTime())
+                                                 .withHourOfDay(day.getSthh())
+                                                 .withMinuteOfHour(day.getStmm())
+                                                 .withDayOfWeek(day.getDay() + 1)
+                                                 .withSecondOfMinute(0);
+                
+                CCUHsApi.getInstance().writeDefaultVal("override and expiry and equipRef == \""+point.getEquipRef()+"\"", (double)overrideTime.getMillis() );
+            }
+            
+        }else if (occ!= null && !occ.isOccupied()) {
+            CCUHsApi.getInstance().writeDefaultVal("override and expiry and equipRef == \""+point.getEquipRef()+"\"", (double) (System.currentTimeMillis()+ 120*60*1000) );
+    
+        }
     }
     
 }

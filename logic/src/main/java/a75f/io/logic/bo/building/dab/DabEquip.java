@@ -85,7 +85,7 @@ public class DabEquip
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
         String tz = siteMap.get("tz").toString();
-        String equipDis = siteDis+"-VAV-"+nodeAddr;
+        String equipDis = siteDis+"-DAB-"+nodeAddr;
         String ahuRef = null;
         HashMap systemEquip = CCUHsApi.getInstance().read("equip and system");
         if (systemEquip != null && systemEquip.size() > 0) {
@@ -252,7 +252,7 @@ public class DabEquip
         CCUHsApi.getInstance().addPoint(desiredTempHeating);
     
         Point equipStatus = new Point.Builder()
-                                    .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-equipStatus")
+                                    .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-equipStatus")
                                     .setEquipRef(equipRef)
                                     .setSiteRef(siteRef)
                                     .setRoomRef(roomRef)
@@ -264,7 +264,7 @@ public class DabEquip
         String equipStatusId = CCUHsApi.getInstance().addPoint(equipStatus);
     
         Point equipStatusMessage = new Point.Builder()
-                                           .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-equipStatusMessage")
+                                           .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-equipStatusMessage")
                                            .setEquipRef(equipRef)
                                            .setSiteRef(siteRef)
                                            .setRoomRef(roomRef)
@@ -276,7 +276,7 @@ public class DabEquip
                                            .build();
         String equipStatusMessageLd = CCUHsApi.getInstance().addPoint(equipStatusMessage);
         Point equipScheduleStatus = new Point.Builder()
-                                            .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-equipScheduleStatus")
+                                            .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-equipScheduleStatus")
                                             .setEquipRef(equipRef)
                                             .setSiteRef(siteRef)
                                             .setRoomRef(roomRef)
@@ -288,7 +288,6 @@ public class DabEquip
                                             .build();
         String equipScheduleStatusId = CCUHsApi.getInstance().addPoint(equipScheduleStatus);
         
-    
         SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
         device.currentTemp.setPointRef(ctID);
         device.currentTemp.setEnabled(true);
@@ -708,7 +707,7 @@ public class DabEquip
             throw new IllegalArgumentException();
         }
         //CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
-        CCUHsApi.getInstance().pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_INIT_VAL_LEVEL, "ccu", HNum.make(desiredTemp), HNum.make(0));
+        CCUHsApi.getInstance().pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "ccu", HNum.make(desiredTemp), HNum.make(0));
         CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
     }
     
@@ -740,7 +739,7 @@ public class DabEquip
             throw new IllegalArgumentException();
         }
         //CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
-        CCUHsApi.getInstance().pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_INIT_VAL_LEVEL, "ccu", HNum.make(desiredTemp), HNum.make(0));
+        CCUHsApi.getInstance().pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "ccu", HNum.make(desiredTemp), HNum.make(0));
         CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
     }
     

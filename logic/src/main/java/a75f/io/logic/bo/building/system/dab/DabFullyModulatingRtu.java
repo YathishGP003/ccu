@@ -16,6 +16,7 @@ import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
+import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
 
 public class DabFullyModulatingRtu extends DabSystemProfile
 {
@@ -205,7 +206,24 @@ public class DabFullyModulatingRtu extends DabSystemProfile
             
             ControlMote.setRelayState("relay7", signal);
         }
+    
+        setSystemPoint("operating and mode", dabSystem.systemState.ordinal());
+        String systemStatus = (dabSystem.systemState == OFF) ? "System OFF " : getStatusMessage();
+        CcuLog.d(L.TAG_CCU_SYSTEM, "StatusMessage: "+systemStatus);
+        CcuLog.d(L.TAG_CCU_SYSTEM, "ScheduleStatus: " + ScheduleProcessJob.getSystemStatusString());
+        CCUHsApi.getInstance().writeDefaultVal("system and status and message",systemStatus);
+        CCUHsApi.getInstance().writeDefaultVal("system and scheduleStatus", ScheduleProcessJob.getSystemStatusString());
         
+    }
+    
+    @Override
+    public String getStatusMessage(){
+        StringBuilder status = new StringBuilder();
+        status.append(systemFanLoopOp > 0 ? " Fan ON ":"");
+        status.append(systemCoolingLoopOp > 0 ? " | Cooling ON ":"");
+        status.append(systemHeatingLoopOp > 0 ? " | Heating ON ":"");
+        
+        return status.toString();
     }
     
     public void addSystemEquip() {

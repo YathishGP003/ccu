@@ -75,4 +75,8 @@ public class VavIERtu extends VavSystemProfile
             CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
         }
     }
+    @Override
+    public String getStatusMessage(){
+        return "";
+    }
 }

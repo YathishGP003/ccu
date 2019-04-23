@@ -133,6 +133,7 @@ public class DialogSmartStatProfiling extends BaseDialogFragment
             titleDivider.setBackgroundColor(getContext().getResources()
                     .getColor(R.color.transparent));
         }
+        conPackageUnit.setChecked(true);
     }
     public static DialogSmartStatProfiling newInstance(short meshAddress, String roomName, String floorName)
     {

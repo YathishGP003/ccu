@@ -28,6 +28,7 @@ import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
 import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
+import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.L.TAG_CCU_DEVICE;
 
@@ -180,10 +181,14 @@ public class LSmartNode
     }
     private static void fillSmartNodeSettings(SmartNodeSettings_t settings,Zone zone, short address, String equipRef){
 
-        settings.roomName.set(zone.getDisplayName());
+        settings.maxUserTem.set((short)getMaxUserTempLimits(equipRef));
+        settings.minUserTemp.set((short)getMinUserTempLimits(equipRef));
+        settings.maxDamperOpen.set((short)100);//TODO Default 100, need to change
+        settings.minDamperOpen.set((short)40);//TODO Default 40, need to change
         settings.temperatureOffset.set((short)getTempOffset(address));
         //TODO need to update for diff profiles
         settings.profileBitmap.dynamicAirflowBalancing.set((short) 1);
+        settings.roomName.set(zone.getDisplayName());
     }
     private static void fillSmartNodeControls(SmartNodeControls_t controls_t,Zone zone, short node, String equipRef){
 
@@ -392,6 +397,18 @@ public class LSmartNode
         controls.time.day.set ((byte)(getCurrentDayOfWeekWithMondayAsStart() & 0xff));
         controls.time.hours.set((byte)(curDate.get(Calendar.HOUR_OF_DAY) & 0xff));
         controls.time.minutes.set((byte)(curDate.get(Calendar.MINUTE) & 0xff));
+    }
+
+    private static double getMaxUserTempLimits(String equipId){
+        double deadband = TunerUtil.readTunerValByQuery("cooling and deadband", equipId);
+       double maxCool =  TunerUtil.readTunerValByQuery("zone and cooling and user and limit and max",equipId);
+       return maxCool- deadband;
+    }
+
+    private static double getMinUserTempLimits(String equipId){
+        double deadband = TunerUtil.readTunerValByQuery("heating and deadband", equipId);
+        double maxHeat =  TunerUtil.readTunerValByQuery("zone and heating and user and limit and max",equipId);
+        return maxHeat+ deadband;
     }
     /********************************END SEED MESSAGES**************************************/
     

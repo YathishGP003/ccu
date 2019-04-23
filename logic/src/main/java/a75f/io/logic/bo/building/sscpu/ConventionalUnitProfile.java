@@ -71,6 +71,8 @@ public class ConventionalUnitProfile extends ZoneProfile {
             if (roomTemp == 0) {
                 resetRelays(node);
                 StandaloneScheduler.updateSmartStatStatus(null,DEADBAND, relayStages);
+                cpuDevice.setStatus(state.ordinal());
+                CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \""+node+"\"", "Temperature Dead");
                 Log.d(TAG,"Invalid Temp , skip controls update for "+node+" roomTemp : "+cpuDeviceMap.get(node).getCurrentTemp());
                 continue;
             }
@@ -284,7 +286,8 @@ public class ConventionalUnitProfile extends ZoneProfile {
 
 
             cpuDevice.setProfilePoint("temp and conditioning and mode",state.ordinal());
-            cpuDevice.setStatus(state.ordinal());
+            if(cpuDevice.getStatus() != state.ordinal())
+				cpuDevice.setStatus(state.ordinal());
             StandaloneScheduler.updateSmartStatStatus(cpuEquip.getId(),state, relayStages);
         }
     }

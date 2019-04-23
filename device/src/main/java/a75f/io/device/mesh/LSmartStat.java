@@ -165,11 +165,13 @@ public class LSmartStat {
                 break;
 
         }
-        settings_t.minUserTemp.set((short)StandaloneTunerUtil.readTunerValByQuery("zone and heating and user and limit and max",equipId));
-        settings_t.maxUserTemp.set((short)StandaloneTunerUtil.readTunerValByQuery("zone and cooling and user and limit and max",equipId));
+        double hdb = StandaloneTunerUtil.getStandaloneHeatingDeadband(equipId);
+        double cdb = StandaloneTunerUtil.getStandaloneCoolingDeadband(equipId);
+        settings_t.minUserTemp.set((short)getMinUserTempLimits(equipId, hdb));
+        settings_t.maxUserTemp.set((short)getMaxUserTempLimits(equipId, cdb));
         settings_t.temperatureOffset.set((byte)getTempOffset(address));
-        settings_t.heatingDeadBand.set((short) (StandaloneTunerUtil.getStandaloneHeatingDeadband(equipId) * 10.0)); //Send in multiples of 10
-        settings_t.coolingDeadBand.set((short) (StandaloneTunerUtil.getStandaloneCoolingDeadband(equipId) * 10.0));
+        settings_t.heatingDeadBand.set((short) ( hdb* 10.0)); //Send in multiples of 10
+        settings_t.coolingDeadBand.set((short) ( cdb* 10.0));
         //TODO need to set current occupied times slots here // ANILK
 		settings_t.holdTimeInMinutes.set((short)0);
         settings_t.changeToOccupiedTime.set((short)0);
@@ -321,5 +323,17 @@ public class LSmartStat {
         controls.time.day.set ((byte)(getCurrentDayOfWeekWithMondayAsStart() & 0xff));
         controls.time.hours.set((byte)(curDate.get(Calendar.HOUR_OF_DAY) & 0xff));
         controls.time.minutes.set((byte)(curDate.get(Calendar.MINUTE) & 0xff));
+    }
+
+
+
+    private static double getMaxUserTempLimits(String equipId, double deadband){
+        double maxCool =  StandaloneTunerUtil.readTunerValByQuery("zone and cooling and user and limit and max",equipId);
+        return maxCool- deadband;
+    }
+
+    private static double getMinUserTempLimits(String equipId, double deadband){
+        double maxHeat =  StandaloneTunerUtil.readTunerValByQuery("zone and heating and user and limit and max",equipId);
+        return maxHeat+ deadband;
     }
 }

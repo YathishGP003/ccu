@@ -44,4 +44,9 @@ public class DabStagedRtu extends SystemProfile
     @Override
     public synchronized void deleteSystemEquip() {
     }
+    
+    @Override
+    public String getStatusMessage(){
+        return "";
+    }
 }

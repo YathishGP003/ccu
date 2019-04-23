@@ -49,5 +49,10 @@ public class VavBacnetRtu extends VavSystemProfile
         }
     }
     
+    @Override
+    public String getStatusMessage(){
+        return "";
+    }
+    
     
 }

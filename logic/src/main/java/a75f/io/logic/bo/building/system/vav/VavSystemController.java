@@ -188,8 +188,6 @@ public class VavSystemController extends SystemController
             systemState = OFF;
         }
         
-        profile.setSystemPoint("operating and mode", systemState.ordinal());
-        
         piController.dump();
         if (systemState == COOLING) {
             heatingSignal = 0;

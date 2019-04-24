@@ -156,7 +156,7 @@ public class L
                 throw new IllegalArgumentException();
             }
             float desiredTemp = CCUHsApi.getInstance().readDefaultValById(id).floatValue();
-            Log.d("CCU", "DesiredTemp : "+desiredTemp);
+            //Log.d("CCU", "DesiredTemp : "+desiredTemp);
             return desiredTemp;
         }
         return 0;

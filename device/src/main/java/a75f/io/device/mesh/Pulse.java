@@ -12,6 +12,8 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.device.serial.CcuToCmOverUsbDeviceTempAckMessage_t;
+import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
+import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSmartStatLocalControlsOverrideMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSmartStatRegularUpdateMessage_t;
@@ -28,6 +30,9 @@ import a75f.io.logic.bo.building.SensorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
 import a75f.io.logic.tuners.TunerUtil;
+
+import static a75f.io.device.mesh.MeshUtil.checkDuplicateStruct;
+import static a75f.io.device.mesh.MeshUtil.sendStructToNodes;
 
 /**
  * Created by Yinten on 9/15/2017.
@@ -197,6 +202,9 @@ public class Pulse
 		}
 		CCUHsApi.getInstance().pointWrite(HRef.copy(singleDtPoint.get("id").toString()), HayStackConstants.DESIREDTEMP_OVERRIDE_LEVEL,"manual", HNum.make(dt), HNum.make(120*60*1000, "ms"));
 		CCUHsApi.getInstance().writeHisValById(singleDtPoint.get("id").toString(), dt);
+
+		sendSetTemperatureAck((short)node);
+		sendSNControlMessage((short)node,q.getId());
 	}
 
     private static void updateSmartStatDesiredTemp(int node, Double dt) {
@@ -230,6 +238,8 @@ public class Pulse
 		}
 		CCUHsApi.getInstance().pointWrite(HRef.copy(singleDtPoint.get("id").toString()), HayStackConstants.DESIREDTEMP_OVERRIDE_LEVEL,"manual", HNum.make(dt), HNum.make(120*60*1000, "ms"));
 		CCUHsApi.getInstance().writeHisValById(singleDtPoint.get("id").toString(), dt);
+		sendSetTemperatureAck((short)node);
+		sendSmartStatControlMessage((short)node,q.getId());
     }
 	
 	public static void regularCMUpdate(CmToCcuOverUsbCmRegularUpdateMessage_t cmRegularUpdateMessage_t)
@@ -352,7 +362,6 @@ public class Pulse
 							updateDesiredTemp(nodeAddr, desiredTemp);
 						}
 						CcuLog.d(L.TAG_CCU_DEVICE, "updateSetTempFromDevice : desiredTemp " + desiredTemp);
-						sendSetTemperatureAck(nodeAddr);
 
 					break;
 				}
@@ -386,8 +395,7 @@ public class Pulse
 							updateSmartStatDesiredTemp(nodeAddr, desiredTemp);
 						}
 						CcuLog.d(L.TAG_CCU_DEVICE, "updateSetTempFromSmartStat : desiredTemp " + desiredTemp);
-						sendSetTemperatureAck(nodeAddr);
-
+						
 						break;
 				}
 			}
@@ -395,6 +403,32 @@ public class Pulse
 	}
 
 
+	public static boolean sendSNControlMessage(short addr, String equipRef){
+		if (!LSerial.getInstance().isConnected()) {
+			CcuLog.d(L.TAG_CCU_DEVICE,"Device not connected !!");
+			return false;
+		}
+		CcuToCmOverUsbSnControlsMessage_t controlsMessage = LSmartNode.getControlMessage(null,addr,equipRef);
+		if(!checkDuplicateStruct((short)controlsMessage.smartNodeAddress.get(),controlsMessage)){
+
+			controlsMessage = LSmartNode.getCurrentTimeForControlMessage(controlsMessage);
+			sendStructToNodes(controlsMessage);
+		}
+		return true;
+	}
+	public static boolean sendSmartStatControlMessage(short addr, String equipRef){
+		if (!LSerial.getInstance().isConnected()) {
+			CcuLog.d(L.TAG_CCU_DEVICE,"Device not connected !!");
+			return false;
+		}
+		CcuToCmOverUsbSmartStatControlsMessage_t controlsMessage = LSmartStat.getControlMessage(null,addr,equipRef);
+		if(!checkDuplicateStruct((short)controlsMessage.address.get(),controlsMessage)){
+
+			controlsMessage = LSmartStat.getCurrentTimeForControlMessage(controlsMessage);
+			sendStructToNodes(controlsMessage);
+		}
+		return true;
+	}
 	public static void sendSetTemperatureAck(short address) {
 		if (!LSerial.getInstance().isConnected()) {
 			CcuLog.d(L.TAG_CCU_DEVICE,"Device not connected !!");

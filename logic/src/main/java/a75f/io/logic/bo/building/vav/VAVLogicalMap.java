@@ -36,7 +36,6 @@ import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
-import a75f.io.logic.tuners.VavTunerUtil;
 /**
  * Created by samjithsadasivan on 6/21/18.
  */
@@ -129,10 +128,10 @@ public class VAVLogicalMap
         if (equipMap != null && equipMap.size() > 0)
         {
             String equipId = equipMap.get("id").toString();
-            proportionalGain = VavTunerUtil.getProportionalGain(equipId);
-            integralGain = VavTunerUtil.getIntegralGain(equipId);
-            proportionalSpread = (int) VavTunerUtil.getProportionalSpread(equipId);
-            integralMaxTimeout = (int) VavTunerUtil.getIntegralTimeout(equipId);
+            proportionalGain = TunerUtil.getProportionalGain(equipId);
+            integralGain = TunerUtil.getIntegralGain(equipId);
+            proportionalSpread = (int) TunerUtil.getProportionalSpread(equipId);
+            integralMaxTimeout = (int) TunerUtil.getIntegralTimeout(equipId);
             
             co2Target = (int) TunerUtil.readTunerValByQuery("zone and vav and co2 and target and equipRef == \""+equipId+"\"");
             co2Threshold = (int) TunerUtil.readTunerValByQuery("zone and vav and co2 and threshold and equipRef == \""+equipId+"\"");

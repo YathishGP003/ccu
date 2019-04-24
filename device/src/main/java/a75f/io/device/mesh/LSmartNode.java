@@ -26,8 +26,10 @@ import a75f.io.device.serial.SmartNodeSettings_t;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZoneProfile;
+import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
 import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
+import a75f.io.logic.bo.util.HSEquipUtil;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.L.TAG_CCU_DEVICE;
@@ -181,14 +183,54 @@ public class LSmartNode
     }
     private static void fillSmartNodeSettings(SmartNodeSettings_t settings,Zone zone, short address, String equipRef){
 
-        settings.maxUserTem.set((short)getMaxUserTempLimits(equipRef));
-        settings.minUserTemp.set((short)getMinUserTempLimits(equipRef));
-        settings.maxDamperOpen.set((short)100);//TODO Default 100, need to change
-        settings.minDamperOpen.set((short)40);//TODO Default 40, need to change
+        try
+        {
+            settings.maxUserTem.set((short) getMaxUserTempLimits(equipRef));
+            settings.minUserTemp.set((short) getMinUserTempLimits(equipRef));
+        } catch (Exception e) {
+            //Equips not having user temps are bound to throw exception
+            settings.maxUserTem.set((short) 75);
+            settings.minUserTemp.set((short) 69);
+        }
+        
+        if (getStatus(address) == ZoneState.HEATING.ordinal()) {
+            settings.maxDamperOpen.set((short)getDamperLimit("heating", "max", address));
+            settings.minDamperOpen.set((short)getDamperLimit("heating", "min", address));
+        } else {
+            settings.maxDamperOpen.set((short)getDamperLimit("cooling", "max", address));
+            settings.minDamperOpen.set((short)getDamperLimit("cooling", "min", address));
+        }
+        
         settings.temperatureOffset.set((short)getTempOffset(address));
+        
         //TODO need to update for diff profiles
         settings.profileBitmap.dynamicAirflowBalancing.set((short) 1);
         settings.roomName.set(zone.getDisplayName());
+        
+        settings.forwardMotorBacklash.set((short)5);
+        settings.reverseMotorBacklash.set((short)5);
+        
+        String equipId = HSEquipUtil.getEquip(address).getId();
+        try {
+            settings.proportionalConstant.set((short)(TunerUtil.getProportionalGain(equipId) * 100));
+            settings.integralConstant.set((short)(TunerUtil.getIntegralGain(equipId) * 100));
+            settings.proportionalTemperatureRange.set((short)(TunerUtil.getProportionalSpread(equipId) * 10));
+            settings.integrationTime.set((short)TunerUtil.getIntegralTimeout(equipId));
+        } catch (Exception e) {
+            //Equips not having PI tuners are bound to throw exception
+            settings.proportionalConstant.set((short)50);
+            settings.integralConstant.set((short)50);
+            settings.proportionalTemperatureRange.set((short)15);
+            settings.integrationTime.set((short)30);
+        }
+        
+        settings.airflowHeatingTemperature.set((short)105);
+        settings.airflowCoolingTemperature.set((short)60);
+    
+        settings.showCentigrade.set((short)0);
+        settings.displayHold.set((short)0);
+        settings.militaryTime.set((short)0);
+        settings.enableOccupationDetection.set((short) getConfigNumVal("enable and occupancy",address));
     }
     private static void fillSmartNodeControls(SmartNodeControls_t controls_t,Zone zone, short node, String equipRef){
 
@@ -400,7 +442,7 @@ public class LSmartNode
     }
 
     private static double getMaxUserTempLimits(String equipId){
-        double deadband = TunerUtil.readTunerValByQuery("cooling and deadband", equipId);
+       double deadband = TunerUtil.readTunerValByQuery("cooling and deadband", equipId);
        double maxCool =  TunerUtil.readTunerValByQuery("zone and cooling and user and limit and max",equipId);
        return maxCool- deadband;
     }
@@ -410,6 +452,26 @@ public class LSmartNode
         double maxHeat =  TunerUtil.readTunerValByQuery("zone and heating and user and limit and max",equipId);
         return maxHeat+ deadband;
     }
+    
+    public static double getDamperLimit(String coolHeat, String minMax, short nodeAddr)
+    {
+        ArrayList points = CCUHsApi.getInstance().readAll("point and config and damper and pos and "+coolHeat+" and "+minMax+" and group == \""+nodeAddr+"\"");
+        if (points.size() == 0) {
+            Log.d("CCU","DamperLimit: Invalid point Send Default");
+            return minMax.equals("max") ? 100 : 40 ;
+        }
+        String id = ((HashMap)points.get(0)).get("id").toString();
+        return CCUHsApi.getInstance().readDefaultValById(id);
+    }
+    
+    public static double getStatus(short nodeAddr) {
+        return CCUHsApi.getInstance().readHisValByQuery("point and status and his and group == \""+nodeAddr+"\"");
+    }
+    
+    public static double getConfigNumVal(String tags, short nodeAddr) {
+        return CCUHsApi.getInstance().readDefaultVal("point and zone and config and vav and "+tags+" and group == \""+nodeAddr+"\"");
+    }
+    
     /********************************END SEED MESSAGES**************************************/
     
 }

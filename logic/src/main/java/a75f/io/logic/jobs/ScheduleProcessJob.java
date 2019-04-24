@@ -589,13 +589,34 @@ public class ScheduleProcessJob extends BaseJob {
                                                  .withDayOfWeek(day.getDay() + 1)
                                                  .withSecondOfMinute(0);
                 
-                CCUHsApi.getInstance().writeDefaultVal("override and expiry and equipRef == \""+point.getEquipRef()+"\"", (double)overrideTime.getMillis() );
+                //CCUHsApi.getInstance().writeDefaultVal("override and expiry and equipRef == \""+point.getEquipRef()+"\"", (double)overrideTime.getMillis() );
             }
             
         }else if (occ!= null && !occ.isOccupied()) {
-            CCUHsApi.getInstance().writeDefaultVal("override and expiry and equipRef == \""+point.getEquipRef()+"\"", (double) (System.currentTimeMillis()+ 120*60*1000) );
-    
+            /*CCUHsApi.getInstance().pointWrite(HRef.copy(point.getId()), HayStackConstants.DEFAULT_POINT_LEVEL
+                                , "Scheduler", desiredTemp != null ? HNum.make(desiredTemp) : HNum.make(0), HNum.make(0));*/
+            
         }
+    }
+    
+    public static HashMap getLongestOverride(String id) {
+        ArrayList values = CCUHsApi.getInstance().readPoint(id);
+        long duration = 0;
+        int level = 0;
+        if (values != null && values.size() > 0)
+        {
+            for (int l = 1; l <= values.size() ; l++ ) {
+                HashMap valMap = ((HashMap) values.get(l-1));
+                if (valMap.get("dur") != null ) {
+                    long dur = (long) Double.parseDouble(valMap.get("dur").toString());
+                    if (dur > duration) {
+                        level = l;
+                    }
+                }
+            }
+            return (HashMap) values.get(level-1);
+        }
+        return null;
     }
     
 }

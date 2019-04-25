@@ -62,7 +62,12 @@ public class VavReheatProfile extends VavProfile
             }
             if (vavDeviceMap.get(node).getCurrentTemp() == 0) {
                 CcuLog.d(L.TAG_CCU_ZONE,"Invalid Temp , skip controls update for "+node+" roomTemp : "+vavDeviceMap.get(node).getCurrentTemp());
-                CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \""+node+"\"", "Temperature Dead");
+                
+                String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \""+node+"\"");
+                if (!curStatus.equals("Temperature Dead"))
+                {
+                    CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"", "Temperature Dead");
+                }
                 continue;
             }
             VAVLogicalMap vavDevice = vavDeviceMap.get(node);

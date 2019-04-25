@@ -237,7 +237,7 @@ public class LSerial
         if (checkDuplicate(Short.valueOf(smartNodeAddress), struct.getClass()
                 .getSimpleName(), structHash))
         {
-            DLog.LogdStructAsJson(struct);
+            //DLog.LogdStructAsJson(struct);
             DLog.Logd("Struct " + struct.getClass().getSimpleName() + " was already sent, returning");
             return true;
         }
@@ -270,7 +270,7 @@ public class LSerial
             return false;
         }
         //Only if the struct was wrote to serial should it be logged.
-        //DLog.LogdStructAsJson(struct);
+        DLog.LogdStructAsJson(struct);
         mUsbService.write(struct.getOrderedBuffer());
         return true;
     }

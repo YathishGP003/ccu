@@ -339,8 +339,9 @@ public class Globals {
                 {
                     if (cmd.equals("updatePoint"))
                     {
-                        if (msgObject.get("who").getAsString().equals("ccu")
-                                    || msgObject.get("who").getAsString().equals("Scheduler")) {
+                        String src = msgObject.get("who").getAsString();
+                        if (src.equals("ccu")
+                                    || src.equals("Scheduler") || src.equals("manual")) {
                             CcuLog.d(L.TAG_CCU, "PubNub received for CCU write : Ignore");
                             return;
                         }

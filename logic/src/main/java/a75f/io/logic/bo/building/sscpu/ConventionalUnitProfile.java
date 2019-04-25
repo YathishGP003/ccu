@@ -23,6 +23,7 @@ import a75f.io.logic.tuners.StandaloneTunerUtil;
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
+import static a75f.io.logic.bo.building.definitions.StandaloneFanSpeed.OFF;
 
 public class ConventionalUnitProfile extends ZoneProfile {
 
@@ -102,7 +103,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
             double ssFanOpMode = getOperationalModes("fan",cpuEquip.getId());
             StandaloneOperationalMode opMode = StandaloneOperationalMode.values()[(int)ssOperatingMode];
             StandaloneFanSpeed fanSpeed = StandaloneFanSpeed.values()[(int)ssFanOpMode];
-            if(!occupied &&(fanSpeed != StandaloneFanSpeed.OFF ) ){
+            if(!occupied &&(fanSpeed != OFF ) ){
                 if(fanSpeed != StandaloneFanSpeed.AUTO) {
                     StandaloneScheduler.updateOperationalPoints(cpuEquip.getId(), "fan", StandaloneFanSpeed.AUTO.ordinal());
                     fanSpeed = StandaloneFanSpeed.AUTO;
@@ -112,7 +113,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
             boolean isFanStage1Enabled = getConfigEnabled("relay3", node) > 0 ? true : false;
             boolean isFanStage2Enabled = getConfigEnabled("relay6", node) > 0 ? true : false;
             Log.d(TAG, " smartstat cpu, updates =" + node+","+roomTemp+","+occupied+","+occuStatus.getCoolingDeadBand()+","+state+","+occuStatus.getCoolingVal()+","+occuStatus.getHeatingVal()+","+isFanStage1Enabled+","+isFanStage2Enabled);
-            if (((opMode == StandaloneOperationalMode.AUTO) || (opMode == StandaloneOperationalMode.COOL_ONLY))&& (roomTemp >= (setTempCooling - hysteresis)) )
+            if ((fanSpeed != OFF) && ((opMode == StandaloneOperationalMode.AUTO) || (opMode == StandaloneOperationalMode.COOL_ONLY))&& (roomTemp >= (setTempCooling - hysteresis)) )
             {
 
                 //Zone is in Cooling
@@ -180,7 +181,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
                     setCmdSignal("cooling and stage2", 0, node);
                 }
             }
-            else if (((opMode == StandaloneOperationalMode.AUTO) || (opMode == StandaloneOperationalMode.HEAT_ONLY))&&(roomTemp <= (setTempHeating + hysteresis)))
+            else if ((fanSpeed != OFF) &&((opMode == StandaloneOperationalMode.AUTO) || (opMode == StandaloneOperationalMode.HEAT_ONLY))&&(roomTemp <= (setTempHeating + hysteresis)))
             {
                 //Zone is in heating
 
@@ -257,7 +258,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
             }
             else
             {
-                if(occupied && (fanSpeed != StandaloneFanSpeed.OFF)) {
+                if(occupied && (fanSpeed != OFF)) {
                     if(isFanStage1Enabled &&  (fanSpeed == StandaloneFanSpeed.FAN_LOW)) {
                         relayStages.put("FanStage1", 1);
                         setCmdSignal("fan and stage1",1.0,node);

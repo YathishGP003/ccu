@@ -446,17 +446,17 @@ public class CCUHsApi
         String    id     = ((HashMap) points.get(0)).get("id").toString();
         if (id == null || id == "")
         {
-            return null;
+            return "";
         }
         ArrayList values = CCUHsApi.getInstance().readPoint(id);
         if (values != null && values.size() > 0)
         {
             HashMap valMap = ((HashMap) values.get(HayStackConstants.DEFAULT_POINT_LEVEL - 1));
             CcuLog.d("CCU_HS", "" + valMap);
-            return valMap.get("val") == null ? null : valMap.get("val").toString();
+            return valMap.get("val") == null ? "" : valMap.get("val").toString();
         } else
         {
-            return null;
+            return "";
         }
     }
 

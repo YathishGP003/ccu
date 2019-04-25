@@ -33,24 +33,22 @@ public class HttpUtil
 
 
     public static String clientToken = "";
+    public static boolean retry = true;
     //JsonParser parser = new JsonParser();
     //JsonElement jsonTree = parser.parse(tokenJson);
     //JsonObject asJsonObject = jsonTree.getAsJsonObject();
     //String token = asJsonObject.get("access_token").getAsString();
-    public static String executePost(String targetURL, String urlParameters)
+    public static synchronized String executePost(String targetURL, String urlParameters)
     {
-        synchronized (HttpUtil.class)
+        if (clientToken.equalsIgnoreCase(""))
         {
-            if (clientToken.equalsIgnoreCase(""))
+            String jsonToken = authorizeToken(CLIENT_ID, "", CLIENT_SECRET, TENANT_ID);
+            if (jsonToken == null)
             {
-                String jsonToken = authorizeToken(CLIENT_ID, "", CLIENT_SECRET, TENANT_ID);
-                if (jsonToken == null)
-                {
-                    return null;
-                }
-                clientToken = parseToken(jsonToken);
-                CcuLog.i("CCU_HS","Client Token: " + clientToken);
+                return null;
             }
+            clientToken = parseToken(jsonToken);
+            CcuLog.i("CCU_HS","Client Token: " + clientToken);
         }
         URL url;
         HttpsURLConnection connection = null;
@@ -63,8 +61,8 @@ public class HttpUtil
             connection.setRequestProperty("Content-Type",
                     "text/zinc");
     
-            CcuLog.i("CCU",url.toString());
-            CcuLog.i("CCU",urlParameters);
+            CcuLog.i("CCU_HS",url.toString());
+            CcuLog.i("CCU_HS",urlParameters);
             //System.out.println(targetURL);
             //System.out.println(urlParameters);
             connection.setRequestProperty("Content-Length", "" +
@@ -80,7 +78,19 @@ public class HttpUtil
             wr.write (urlParameters.getBytes("UTF-8"));
             wr.flush ();
             wr.close ();
-            
+    
+            int responseCode = connection.getResponseCode();
+            if (responseCode != 200) {
+                CcuLog.i("CCU_HS","HttpError: responseCode "+responseCode);
+            }
+            if(responseCode == 401 && retry)
+            {
+                retry = false;
+                clientToken = parseToken(authorizeToken(CLIENT_ID, "", CLIENT_SECRET, TENANT_ID));
+                CcuLog.i("CCU_HS","Client Token: " + clientToken);
+                return executePost(targetURL, urlParameters);
+            }
+            retry = true;
             //Get Response
             InputStream is = connection.getInputStream();
             BufferedReader rd = new BufferedReader(new InputStreamReader(is));
@@ -91,17 +101,7 @@ public class HttpUtil
                 response.append('\n');
             }
             rd.close();
-            int responseCode = connection.getResponseCode();
-            if (responseCode != 200) {
-                CcuLog.i("CCU_HS","HttpError: responseCode "+responseCode);
-            }
-            if(responseCode == 401)
-            {
-                clientToken = parseToken(authorizeToken(CLIENT_ID, "", CLIENT_SECRET, TENANT_ID));
-                CcuLog.i("CCU_HS","Client Token: " + clientToken);
-                executePost(targetURL, urlParameters);
-            }
-
+            
             return responseCode == 200 ? response.toString() : null;
             
         } catch (Exception e) {

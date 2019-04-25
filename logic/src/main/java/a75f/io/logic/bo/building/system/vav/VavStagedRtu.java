@@ -378,10 +378,17 @@ public class VavStagedRtu extends VavSystemProfile
     
         setSystemPoint("operating and mode", VavSystemController.getInstance().systemState.ordinal());
         String systemStatus = (VavSystemController.getInstance().systemState == OFF) ? "System OFF " : getStatusMessage();
+        String scheduleStatus =  ScheduleProcessJob.getSystemStatusString();
         CcuLog.d(L.TAG_CCU_SYSTEM, "StatusMessage: "+systemStatus);
-        CcuLog.d(L.TAG_CCU_SYSTEM, "ScheduleStatus: " + ScheduleProcessJob.getSystemStatusString());
-        CCUHsApi.getInstance().writeDefaultVal("system and status and message",systemStatus);
-        CCUHsApi.getInstance().writeDefaultVal("system and scheduleStatus", ScheduleProcessJob.getSystemStatusString());
+        CcuLog.d(L.TAG_CCU_SYSTEM, "ScheduleStatus: " +scheduleStatus);
+        if (!CCUHsApi.getInstance().readDefaultStrVal("system and status and message").equals(systemStatus))
+        {
+            CCUHsApi.getInstance().writeDefaultVal("system and status and message", systemStatus);
+        }
+        if (!CCUHsApi.getInstance().readDefaultStrVal("system and scheduleStatus").equals(systemStatus))
+        {
+            CCUHsApi.getInstance().writeDefaultVal("system and scheduleStatus", scheduleStatus);
+        }
     
     }
     

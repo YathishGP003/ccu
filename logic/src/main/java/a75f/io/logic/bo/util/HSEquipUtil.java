@@ -80,7 +80,7 @@ public class HSEquipUtil
         CCUHsApi.getInstance().writeHisValById(point.get("id").toString(), desiredTemp);
     }
     
-    public static Equip getEquip(double group) {
+    public static Equip getEquip(int group) {
         HashMap equip = CCUHsApi.getInstance().read("equip and group == \""+group+"\"");
         return new Equip.Builder().setHashMap(equip).build();
     }

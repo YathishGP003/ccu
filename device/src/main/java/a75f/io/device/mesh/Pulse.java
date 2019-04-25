@@ -203,8 +203,9 @@ public class Pulse
 		CCUHsApi.getInstance().pointWrite(HRef.copy(singleDtPoint.get("id").toString()), HayStackConstants.DESIREDTEMP_OVERRIDE_LEVEL,"manual", HNum.make(dt), HNum.make(120*60*1000, "ms"));
 		CCUHsApi.getInstance().writeHisValById(singleDtPoint.get("id").toString(), dt);
 
-		sendSetTemperatureAck((short)node);
 		sendSNControlMessage((short)node,q.getId());
+		sendSetTemperatureAck((short)node);
+
 	}
 
     private static void updateSmartStatDesiredTemp(int node, Double dt) {
@@ -238,9 +239,10 @@ public class Pulse
 		}
 		CCUHsApi.getInstance().pointWrite(HRef.copy(singleDtPoint.get("id").toString()), HayStackConstants.DESIREDTEMP_OVERRIDE_LEVEL,"manual", HNum.make(dt), HNum.make(120*60*1000, "ms"));
 		CCUHsApi.getInstance().writeHisValById(singleDtPoint.get("id").toString(), dt);
-		sendSetTemperatureAck((short)node);
 		sendSmartStatControlMessage((short)node,q.getId());
-    }
+		sendSetTemperatureAck((short)node);
+
+	}
 	
 	public static void regularCMUpdate(CmToCcuOverUsbCmRegularUpdateMessage_t cmRegularUpdateMessage_t)
 	{

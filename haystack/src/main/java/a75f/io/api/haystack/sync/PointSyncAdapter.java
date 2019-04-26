@@ -56,11 +56,15 @@ public class PointSyncAdapter extends EntitySyncAdapter
                     m.put("equipRef", HRef.copy(CCUHsApi.getInstance().getGUID(equipLUID)));
                     if (m.get("floorRef") != null && !m.get("floorRef").toString().equals("SYSTEM"))
                     {
-                        m.put("floorRef", HRef.copy(CCUHsApi.getInstance().getGUID(m.get("floorRef").toString())));
+                        String guid = CCUHsApi.getInstance().getGUID(m.get("floorRef").toString());
+                        if(guid != null)
+                            m.put("floorRef", HRef.copy(guid));
                     }
                     if (m.get("roomRef") != null && !m.get("roomRef").toString().equals("SYSTEM"))
                     {
-                        m.put("roomRef", HRef.copy(CCUHsApi.getInstance().getGUID(m.get("roomRef").toString())));
+                        String guid = CCUHsApi.getInstance().getGUID(m.get("roomRef").toString());
+                        if(guid != null)
+                            m.put("roomRef", HRef.copy(guid));
                     }
                     entities.add(HSUtil.mapToHDict(m));
                 }

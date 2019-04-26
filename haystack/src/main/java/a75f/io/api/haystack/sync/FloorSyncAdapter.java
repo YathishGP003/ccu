@@ -39,7 +39,9 @@ public class FloorSyncAdapter extends EntitySyncAdapter
             String luid = m.remove("id").toString();
             if (CCUHsApi.getInstance().getGUID(luid) == null) {
                 floorLUIDList.add(luid);
-                m.put("siteRef", HRef.copy(CCUHsApi.getInstance().getGUID(site.get("id").toString())));
+                String guid = CCUHsApi.getInstance().getGUID(site.get("id").toString());
+                if(guid != null)
+                    m.put("siteRef", HRef.copy(guid));
                 entities.add(HSUtil.mapToHDict(m));
             }
         }

@@ -38,7 +38,9 @@ public class ScheduleSyncAdapter extends EntitySyncAdapter
                 m.put("siteRef", HRef.copy(CCUHsApi.getInstance().getGUID(siteLUID)));
                 if (m.get("roomRef") != null && !m.get("roomRef").toString().equals("SYSTEM"))
                 {
-                    m.put("roomRef", HRef.copy(CCUHsApi.getInstance().getGUID(m.get("roomRef").toString())));
+                    String guid = CCUHsApi.getInstance().getGUID(m.get("roomRef").toString());
+                    if(guid != null)
+                        m.put("roomRef", HRef.copy(guid));
                 }
                 entities.add(HSUtil.mapToHDict(m));
             }

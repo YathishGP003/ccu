@@ -43,8 +43,10 @@ public class ZoneSyncAdapter extends EntitySyncAdapter
 
                     m.put("siteRef", HRef.copy(CCUHsApi.getInstance().getGUID(site.get("id").toString())));
                     m.put("floorRef", HRef.copy(CCUHsApi.getInstance().getGUID(m.get("floorRef").toString())));
-                    if(m.get("scheduleRef") != null)
-                        m.put("scheduleRef", HRef.copy(CCUHsApi.getInstance().getGUID(m.get("scheduleRef").toString())));
+                    if(m.get("scheduleRef") != null ) {
+                        String guid = CCUHsApi.getInstance().getGUID(m.get("scheduleRef").toString());
+                        if(guid != null) m.put("scheduleRef", HRef.copy(guid));
+                    }
                     entities.add(HSUtil.mapToHDict(m));
                 }
             }

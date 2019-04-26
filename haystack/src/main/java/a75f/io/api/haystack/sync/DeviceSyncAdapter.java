@@ -38,21 +38,31 @@ public class DeviceSyncAdapter extends EntitySyncAdapter
             if (CCUHsApi.getInstance().getGUID(luid) == null) {
                 deviceLUIDList.add(luid);
                 m.put("siteRef", HRef.copy(CCUHsApi.getInstance().getGUID(siteLUID)));
-                if (m.get("floorRef") != null && !m.get("floorRef").toString().equals("SYSTEM"))
+                //Crash happens here because device not paired but tries to sync, 
+					
+				if (m.get("floorRef") != null && !m.get("floorRef").toString().equals("SYSTEM"))
                 {
-                    m.put("floorRef", HRef.copy(CCUHsApi.getInstance().getGUID(m.get("floorRef").toString())));
+                    String guid = CCUHsApi.getInstance().getGUID(m.get("floorRef").toString());
+                    if(guid != null)
+                        m.put("floorRef", HRef.copy(guid));
                 }
                 if (m.get("roomRef") != null && !m.get("roomRef").toString().equals("SYSTEM"))
                 {
-                    m.put("roomRef", HRef.copy(CCUHsApi.getInstance().getGUID(m.get("roomRef").toString())));
+                    String guid = CCUHsApi.getInstance().getGUID(m.get("roomRef").toString());
+                    if(guid != null)
+                        m.put("roomRef", HRef.copy(guid));
                 }
                 if (m.get("equipRef") != null)
                 {
-                    m.put("equipRef", HRef.copy(CCUHsApi.getInstance().getGUID(m.get("equipRef").toString())));
+                    String guid = CCUHsApi.getInstance().getGUID(m.get("equipRef").toString());
+                    if(guid != null)
+                        m.put("equipRef", HRef.copy(guid));
                 }
                 if (m.get("ahuRef") != null)
                 {
-                    m.put("ahuRef", HRef.copy(CCUHsApi.getInstance().getGUID(m.get("ahuRef").toString())));
+					String guid = CCUHsApi.getInstance().getGUID(m.get("ahuRef").toString());
+                    if(guid != null)
+                    	m.put("ahuRef", HRef.copy(guid));
                 }
                 entities.add(HSUtil.mapToHDict(m));
             }

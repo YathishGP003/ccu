@@ -354,6 +354,7 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
                 }
                 loadVacations();
                 ScheduleProcessJob.updateSchedules();
+                CCUHsApi.getInstance().syncEntityTree();
                 return false;
             }
 

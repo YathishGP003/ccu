@@ -1,6 +1,8 @@
 package a75f.io.haystack.api;
 
+import org.joda.time.DateTime;
 import org.junit.Test;
+import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
@@ -834,6 +836,22 @@ public class TestRemoteHsSync
             
             }
         
+    }
+    
+    @Test
+    public void testCode1() {
+    
+        //2019-04-25T23:59:59+05:30 Kolkata,2019-04-26T05:29:59.000+05:30
+        System.out.println("2019-04-25T23:59:59-05:00 Chicago");
+        HDateTime hdTime = HDateTime.make("2019-04-25T23:59:59-05:00 Chicago");
+        System.out.println(hdTime.time);
+        DateTime t = new DateTime(hdTime.millis());
+        System.out.println(t);
+    
+        /*DateTime t1 = new DateTime(hdTime.date.year, hdTime.date.month, hdTime.date.day,
+                                hdTime.time.hour, hdTime.time.min, hdTime.time.sec, DateTimeZone.forID(hdTime.tz.name));*/
+        DateTime t1 = new DateTime(hdTime.millisDefaultTZ());
+        System.out.println(t1);
     }
     
     

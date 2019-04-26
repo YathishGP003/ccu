@@ -222,6 +222,14 @@ public class EntitySyncHandler
                 return true;
             }
         }
+        ArrayList<HashMap> schedules = CCUHsApi.getInstance().readAll("schedule");
+        for (Map s: schedules) {
+            if (CCUHsApi.getInstance().getGUID(s.get("id").toString()) == null) {
+                CcuLog.d("CCU_HS","Entity sync required :Schedule not synced :"+ s.get("id"));
+                syncPending = true;
+                return true;
+            }
+        }
         return false;
     }
 }

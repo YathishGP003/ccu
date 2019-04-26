@@ -7,11 +7,11 @@
 //
 package org.projecthaystack;
 
+import org.joda.time.DateTime;
+
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
-
-import org.projecthaystack.io.HZincReader;
 
 /**
  * HDateTime models a timestamp with a specific timezone.
@@ -171,6 +171,13 @@ public class HDateTime extends HVal
     }
     return millis;
   }
+  
+  public long millisDefaultTZ() {
+    DateTime dateTime = new DateTime(date.year, date.month, date.day,
+            time.hour, time.min, time.sec);
+    return  dateTime.getMillis();
+  }
+  
   private volatile long millis;
 
   /** Hash is based on date, time, tzOffset, and tz */

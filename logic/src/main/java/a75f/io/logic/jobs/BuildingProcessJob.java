@@ -4,6 +4,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import a75.io.algos.vav.VavTRSystem;
@@ -43,12 +44,14 @@ public class BuildingProcessJob extends BaseJob
         }
     
         tsData = new HashMap();
-        
-        for (ZoneProfile profile : L.ccu().zoneProfiles) {
+    
+        for (Iterator<ZoneProfile> it = L.ccu().zoneProfiles.iterator(); it.hasNext();)
+        {
+            ZoneProfile profile = it.next();
             CcuLog.d(L.TAG_CCU_JOB, "updateZonePoints -> "+profile.getProfileType());
             profile.updateZonePoints();
         }
-    
+        
         if (!Globals.getInstance().isPubnubSubscribed())
         {
             CCUHsApi.getInstance().syncEntityTree();
@@ -69,11 +72,6 @@ public class BuildingProcessJob extends BaseJob
             {
                 super.run();
                 CCUHsApi.getInstance().syncHisData();
-                /*if (Globals.getInstance().getApplicationContext().getResources().getBoolean(R.bool.write_ts))
-                {
-                    uploadTimeSeriesData();
-                }*/
-                
             }
         }.start();
         CcuLog.d(L.TAG_CCU_JOB,"<- BuildingProcessJob");

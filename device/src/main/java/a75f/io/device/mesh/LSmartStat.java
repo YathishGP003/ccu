@@ -3,22 +3,21 @@ package a75f.io.device.mesh;
 
 import android.util.Log;
 
-import java.util.ArrayList;
-
-import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSmartStatMessage_t;
-
 import org.javolution.io.Struct;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Zone;
+import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSmartStatMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSmartStatSettingsMessage_t;
 import a75f.io.device.serial.MessageType;
@@ -62,8 +61,10 @@ public class LSmartStat {
     public static Collection<CcuToCmOverUsbSmartStatControlsMessage_t> getControlMessages(Zone zone)
     {
         HashMap<Short, CcuToCmOverUsbSmartStatControlsMessage_t> controlMessagesHash = new HashMap<>();
-        for (ZoneProfile zp : L.ccu().zoneProfiles)
+        
+        for (Iterator<ZoneProfile> it = L.ccu().zoneProfiles.iterator(); it.hasNext();)
         {
+            ZoneProfile zp = it.next();
             if(zp.getProfileType().name().startsWith("SMARTSTAT")) {
                 for (short node : zp.getNodeAddresses()) {
                     CcuToCmOverUsbSmartStatControlsMessage_t controlsMessage_t;

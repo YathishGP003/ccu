@@ -272,6 +272,11 @@ public class ScheduleProcessJob extends BaseJob {
         double secondTemp = 0;
         if(cachedOccupied == null)
         {
+            Schedule currentSchedule = Schedule.getScheduleForZone(zoneId.replace("@", ""), false);
+            Log.d(L.TAG_CCU_SCHEDULER, "currentSchedule.getDays().size() "+currentSchedule.getDays().size());
+            if (currentSchedule.getDays().size() == 0) {
+                return "Empty Schedule";
+            }
             return "Setting up..";
         }
         //{Current Mode}, Changes to Energy Saving Range of %.1f-%.1fF at %s

@@ -9,6 +9,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
@@ -90,8 +91,10 @@ public class LSmartNode
     public static Collection<CcuToCmOverUsbSnControlsMessage_t> getControlMessages(Zone zone)
     {
         HashMap<Short, CcuToCmOverUsbSnControlsMessage_t> controlMessagesHash = new HashMap<>();
-        for (ZoneProfile zp : L.ccu().zoneProfiles)
+        
+        for (Iterator<ZoneProfile> it = L.ccu().zoneProfiles.iterator(); it.hasNext();)
         {
+            ZoneProfile zp = it.next();
             //zp.updateZonePoints();
             for (short node : zp.getNodeAddresses())
             {

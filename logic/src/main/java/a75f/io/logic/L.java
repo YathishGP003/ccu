@@ -5,6 +5,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.bo.building.CCUApplication;
@@ -306,16 +307,17 @@ public class L
     
     public static ZoneProfile getProfile(short addr) {
         Log.d("CCU","Profiles "+L.ccu().zoneProfiles.size());
-        for(ZoneProfile p : L.ccu().zoneProfiles) {
+    
+        for (Iterator<ZoneProfile> it = L.ccu().zoneProfiles.iterator(); it.hasNext();)
+        {
+            ZoneProfile p = it.next();
             Log.d("CCU","Profile "+p.getProfileType());
-            
-            //TODO -
             for (Short node : p.getNodeAddresses()) {
                 if (node == addr) {
                     return p;
                 }
             }
-            
+    
         }
         Log.d("CCU","Profile Not found for "+addr);
         return null;
@@ -323,7 +325,19 @@ public class L
     
     public static void removeProfile(short addr) {
         ZoneProfile deleteProfile = null;
-        for(ZoneProfile p : L.ccu().zoneProfiles) {
+    
+        for (Iterator<ZoneProfile> it = L.ccu().zoneProfiles.iterator(); it.hasNext();)
+        {
+            ZoneProfile profile = it.next();
+            for (Short node : profile.getNodeAddresses()) {
+                if (node == addr) {
+                    L.ccu().zoneProfiles.remove(profile);
+                    break;
+                }
+            }
+        }
+        
+        /*for(ZoneProfile p : L.ccu().zoneProfiles) {
             for (Short node : p.getNodeAddresses()) {
                 if (node == addr) {
                     deleteProfile = p;
@@ -334,6 +348,6 @@ public class L
         if (deleteProfile != null)
         {
             L.ccu().zoneProfiles.remove(deleteProfile);
-        }
+        }*/
     }
 }

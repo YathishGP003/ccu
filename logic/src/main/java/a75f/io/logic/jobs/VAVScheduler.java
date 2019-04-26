@@ -80,9 +80,7 @@ public class VAVScheduler {
             return; //Equip might have been deleted.
         }
         String id = ((HashMap) points.get(0)).get("id").toString();
-        double priVal = getPriorityVal(id,8);
-        double prevDesiredTemp = CCUHsApi.getInstance().readDefaultValById(id);
-        if ((priVal == desiredTemp) || (prevDesiredTemp == desiredTemp)) {
+        if (getPriorityVal(id,8) == desiredTemp) {
             CcuLog.d(L.TAG_CCU_SCHEDULER, flag+"DesiredTemp not changed : Skip PointWrite");
             return;
         }

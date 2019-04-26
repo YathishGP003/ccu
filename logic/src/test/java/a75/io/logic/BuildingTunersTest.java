@@ -12,7 +12,7 @@ import a75f.io.api.haystack.Site;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.TunerConstants;
-import a75f.io.logic.tuners.VavTunerUtil;
+import a75f.io.logic.tuners.TunerUtil;
 
 /**
  * Created by samjithsadasivan on 10/5/18.
@@ -66,14 +66,13 @@ public class BuildingTunersTest
         tuners.addDefaultVavTuners();
         HashMap tuner = CCUHsApi.getInstance().read("equip and tuner");
         String tunerEquipRef = tuner.get("id").toString();
-        VavTunerUtil.dump(tunerEquipRef);
-        
-        VavTunerUtil.setCoolingDeadband(tunerEquipRef,2.0, TunerConstants.VAV_BUILDING_VAL_LEVEL);
-        VavTunerUtil.setHeatingDeadband(tunerEquipRef,2.0, TunerConstants.VAV_BUILDING_VAL_LEVEL);
-        VavTunerUtil.setProportionalGain(tunerEquipRef, 1, TunerConstants.VAV_BUILDING_VAL_LEVEL);
-        VavTunerUtil.setIntegralGain(tunerEquipRef, 1, TunerConstants.VAV_BUILDING_VAL_LEVEL);
-        VavTunerUtil.setProportionalSpread(tunerEquipRef, 10, TunerConstants.VAV_BUILDING_VAL_LEVEL);
-        VavTunerUtil.setIntegralTimeout(tunerEquipRef, 60, TunerConstants.VAV_BUILDING_VAL_LEVEL);
+    
+        TunerUtil.setCoolingDeadband(tunerEquipRef,2.0, TunerConstants.VAV_BUILDING_VAL_LEVEL);
+        TunerUtil.setHeatingDeadband(tunerEquipRef,2.0, TunerConstants.VAV_BUILDING_VAL_LEVEL);
+        TunerUtil.setProportionalGain(tunerEquipRef, 1, TunerConstants.VAV_BUILDING_VAL_LEVEL);
+        TunerUtil.setIntegralGain(tunerEquipRef, 1, TunerConstants.VAV_BUILDING_VAL_LEVEL);
+        TunerUtil.setProportionalSpread(tunerEquipRef, 10, TunerConstants.VAV_BUILDING_VAL_LEVEL);
+        TunerUtil.setIntegralTimeout(tunerEquipRef, 60, TunerConstants.VAV_BUILDING_VAL_LEVEL);
         
         //VavTunerUtil.dump(tunerEquipRef);
         VavProfileConfiguration v = new VavProfileConfiguration();
@@ -97,7 +96,7 @@ public class BuildingTunersTest
         
         System.out.println("Add VAV Equip #######");
         tuners.addVavEquipTuners("TestVavEquip",equipRef, v);
-        VavTunerUtil.dump(equipRef);
+        
         
         
         

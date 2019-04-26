@@ -83,7 +83,11 @@ public class VavSeriesFanProfile extends VavProfile
     
             if (roomTemp == 0) {
                 CcuLog.d(L.TAG_CCU_ZONE,"Skip PI update for "+node+" roomTemp : "+roomTemp);
-                CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \""+node+"\"", "Temperature Dead");
+                String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \""+node+"\"");
+                if (!curStatus.equals("Temperature Dead"))
+                {
+                    CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"", "Temperature Dead");
+                }
                 continue;
             }
             

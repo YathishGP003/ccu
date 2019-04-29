@@ -39,8 +39,11 @@ public class ScheduleSyncAdapter extends EntitySyncAdapter
                 if (m.get("roomRef") != null && !m.get("roomRef").toString().equals("SYSTEM"))
                 {
                     String guid = CCUHsApi.getInstance().getGUID(m.get("roomRef").toString());
-                    if(guid != null)
-                        m.put("roomRef", HRef.copy(guid));
+                    if(guid == null)  {
+                        CcuLog.i("CCU_HS", "Room not synced for "+m);
+                        return false;
+                    }
+                    m.put("roomRef", HRef.copy(guid));
                 }
                 entities.add(HSUtil.mapToHDict(m));
             }
@@ -50,10 +53,10 @@ public class ScheduleSyncAdapter extends EntitySyncAdapter
         {
             HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
             String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
-            CcuLog.i("CCU", "Response: \n" + response);
+            CcuLog.i("CCU_HS", "Response: \n" + response);
             if (response == null)
             {
-                CcuLog.i("CCU", "Aborting Schedule Sync");
+                CcuLog.i("CCU_HS", "Aborting Schedule Sync");
                 return false;
             }
             HZincReader zReader = new HZincReader(response);

@@ -59,6 +59,8 @@ public class EntitySyncHandler
             doSyncRemoveIds();
         }
     
+        CcuLog.i("CCU", "UpdateIDMap : "+CCUHsApi.getInstance().tagsDb.updateIdMap);
+    
         if (CCUHsApi.getInstance().tagsDb.updateIdMap.size() > 0) {
             CcuLog.i("CCU", "UpdateIDMap : "+CCUHsApi.getInstance().tagsDb.updateIdMap);
             doSyncUpdateEntities();

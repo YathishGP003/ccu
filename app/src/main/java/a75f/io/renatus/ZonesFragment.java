@@ -46,14 +46,13 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.HmpProfile;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.lights.LightProfile;
 import a75f.io.logic.bo.building.vav.VavProfile;
 import a75f.io.renatus.views.SeekArc;
 import a75f.io.renatus.views.ZoneImageWidget;
 
 import static a75f.io.logic.L.ccu;
-import static a75f.io.logic.bo.building.definitions.ScheduleMode.NamedSchedule;
-import static a75f.io.logic.bo.building.definitions.ScheduleMode.ZoneSchedule;
 
 /**
  * Created by samjithsadasivan isOn 8/7/17.
@@ -1080,19 +1079,19 @@ public class ZonesFragment extends Fragment
             aaOccupancyMode.setDropDownViewResource(R.layout.spinner_dropdown_item);
             spinnerSchedule.setAdapter(aaOccupancyMode);
             spinnerSchedule.setOnItemSelectedListener(null);
-            spinnerSchedule.setSelection(roomData.getScheduleMode() == ZoneSchedule ? 0 : 1);
+            spinnerSchedule.setSelection(roomData.getScheduleMode() == ScheduleType.ZONE ? 0 : 1);
             spinnerSchedule.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
             {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
                 {
-                    if (position == 1 && roomData.getScheduleMode() != NamedSchedule)
+                    if (position == 1 && roomData.getScheduleMode() != ScheduleType.NAMED)
                     {
                         showLCMNamedScheduleSelector(roomData);
                     }
-                    else if (position == 0 && roomData.getScheduleMode() != ZoneSchedule)
+                    else if (position == 0 && roomData.getScheduleMode() != ScheduleType.ZONE)
                     {
-                        roomData.setScheduleMode(ZoneSchedule);
+                        roomData.setScheduleMode(ScheduleType.ZONE);
                     }
                 }
 

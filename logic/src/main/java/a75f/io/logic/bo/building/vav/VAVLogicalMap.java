@@ -495,7 +495,7 @@ public class VAVLogicalMap
                                   .setSiteRef(siteRef)
                                   .setRoomRef(room)
                                   .setFloorRef(floor)
-                                  .addMarker("status").addMarker("vav").addMarker("his").addMarker("logical").addMarker("zone").addMarker("equipHis")
+                                  .addMarker("status").addMarker("vav").addMarker("his").addMarker("zone").addMarker("equipHis")
                                   .setGroup(String.valueOf(nodeAddr))
                                   .setTz(tz)
                                   .build();
@@ -507,7 +507,7 @@ public class VAVLogicalMap
                                     .setSiteRef(siteRef)
                                     .setRoomRef(room)
                                     .setFloorRef(floor)
-                                    .addMarker("status").addMarker("message").addMarker("vav").addMarker("writable").addMarker("logical").addMarker("zone").addMarker("equipHis")
+                                    .addMarker("status").addMarker("message").addMarker("vav").addMarker("writable").addMarker("zone").addMarker("equipHis")
                                     .setGroup(String.valueOf(nodeAddr))
                                     .setTz(tz)
                                     .setKind("string")
@@ -519,13 +519,25 @@ public class VAVLogicalMap
                                     .setSiteRef(siteRef)
                                     .setRoomRef(room)
                                     .setFloorRef(floor)
-                                    .addMarker("scheduleStatus").addMarker("logical").addMarker("zone").addMarker("writable").addMarker("equipHis")
+                                    .addMarker("vav").addMarker("scheduleStatus").addMarker("zone").addMarker("writable").addMarker("equipHis")
                                     .setGroup(String.valueOf(nodeAddr))
                                     .setTz(tz)
                                     .setKind("string")
                                     .build();
         String equipScheduleStatusId = CCUHsApi.getInstance().addPoint(equipScheduleStatus);
-        
+    
+        Point equipScheduleType = new Point.Builder()
+                                           .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-scheduleType")
+                                           .setEquipRef(equipRef)
+                                           .setSiteRef(siteRef)
+                                           .setRoomRef(room)
+                                           .setFloorRef(floor)
+                                           .addMarker("zone").addMarker("vav").addMarker("scheduleType").addMarker("writable").addMarker("zone").addMarker("equipHis")
+                                           .setGroup(String.valueOf(nodeAddr))
+                                           .setTz(tz)
+                                           .build();
+        String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
+        CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
         
         //Create Physical points and map
         SmartNode device = new SmartNode(nodeAddr, siteRef, floor, room, equipRef);
@@ -703,7 +715,7 @@ public class VAVLogicalMap
                                          .setRoomRef(room)
                                          .setFloorRef(floor)
                                          .addMarker("config").addMarker("vav").addMarker("writable").addMarker("zone")
-                                         .addMarker("priority").addMarker("sp")
+                                         .addMarker("priority").addMarker("userIntent").addMarker("sp")
                                          .setGroup(String.valueOf(nodeAddr))
                                          .setTz(tz)
                                          .build();

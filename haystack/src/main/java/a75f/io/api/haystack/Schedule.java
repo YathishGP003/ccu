@@ -812,7 +812,7 @@ public class Schedule extends Entity
                 .add("id", HRef.copy(getId()))
                 .add("unit", getUnit())
                 .add("kind", getKind())
-                .add("dis", "Default Building Schedule")
+                .add("dis", "Building Schedule")
                 .add("days", hList)
                 .add("siteRef", HRef.copy(mSiteId));
         
@@ -856,7 +856,7 @@ public class Schedule extends Entity
                                                .add("id", HRef.copy(getId()))
                                                .add("unit", getUnit())
                                                .add("kind", getKind())
-                                               .add("dis", "Default Zone Schedule")
+                                               .add("dis", "Zone Schedule")
                                                .add("days", hList)
                                                .add("roomRef",HRef.copy(roomRef))
                                                .add("siteRef", HRef.copy(mSiteId));

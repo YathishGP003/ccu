@@ -287,6 +287,19 @@ public class DabEquip
                                             .setKind("string")
                                             .build();
         String equipScheduleStatusId = CCUHsApi.getInstance().addPoint(equipScheduleStatus);
+    
+        Point equipScheduleType = new Point.Builder()
+                                          .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-scheduleType")
+                                          .setEquipRef(equipRef)
+                                          .setSiteRef(siteRef)
+                                          .setRoomRef(roomRef)
+                                          .setFloorRef(floorRef)
+                                          .addMarker("zone").addMarker("dab").addMarker("scheduleType").addMarker("writable").addMarker("zone").addMarker("equipHis")
+                                          .setGroup(String.valueOf(nodeAddr))
+                                          .setTz(tz)
+                                          .build();
+        String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
+        CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
         
         SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
         device.currentTemp.setPointRef(ctID);

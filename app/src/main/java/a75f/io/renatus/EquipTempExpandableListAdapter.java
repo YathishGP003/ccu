@@ -1,11 +1,10 @@
 package a75f.io.renatus;
 
-
 import android.content.Context;
 import android.graphics.Typeface;
+import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +24,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logic.DefaultSchedules;
+import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.renatus.schedules.SchedulerFragment;
@@ -41,6 +41,9 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
     private List<String>                  expandableListTitle;
     private HashMap<String, List<String>> expandableListDetail;
     private HashMap<String, String>       idMap;
+    
+    Schedule mSchedule = null;
+    int mScheduleType;
 
     public EquipTempExpandableListAdapter(Fragment fragment, List<String> expandableListTitle,
                                           HashMap<String, List<String>> expandableListDetail, HashMap idmap)
@@ -103,12 +106,13 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
             String vacationStatus = ScheduleProcessJob.getVacationStateString(zoneId);
             vacationStatusTV.setText(vacationStatus);
             scheduleStatus.setText(status);
-
-
-            Schedule schedule = Schedule.getScheduleByEquipId(equipId);
+            String scheduleTypeId = CCUHsApi.getInstance().readId("point and scheduleType and equipRef == \""+equipId+"\"");
+            mScheduleType = (int)CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId);
+    
+            mSchedule = Schedule.getScheduleByEquipId(equipId);
 
             Schedule vacationSchedule = Schedule.getVacationByEquipId(equipId);
-            scheduleImageButton.setTag(schedule.getId());
+            scheduleImageButton.setTag(mSchedule.getId());
             scheduleImageButton.setOnClickListener(v ->
                                                    {
                                                        SchedulerFragment schedulerFragment    = SchedulerFragment.newInstance((String) v.getTag());
@@ -119,21 +123,23 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
 
                                                        schedulerFragment.setOnExitListener(() -> {
                                                            Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
+                                                           mSchedule = Schedule.getScheduleByEquipId(equipId);
+                                                           //CCUHsApi.getInstance().updateZoneSchedule(mSchedule, zoneId)
                                                            ScheduleProcessJob.updateSchedules();
+                                                           
+                                                           
                                                        });
                                                    });
-
-            if (schedule.isZoneSchedule())
+            
+            scheduleSpinner.setSelection(mScheduleType);
+            if (mSchedule.isZoneSchedule())
             {
-                scheduleSpinner.setSelection(1);
                 scheduleImageButton.setVisibility(View.VISIBLE);
-            } else if (schedule.isNamedSchedule())
+            } else if (mSchedule.isNamedSchedule())
             {
-                scheduleSpinner.setSelection(2);
                 scheduleImageButton.setVisibility(View.VISIBLE);
             } else
             {
-                scheduleSpinner.setSelection(0);
                 scheduleImageButton.setVisibility(View.GONE);
             }
 
@@ -145,20 +151,25 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                 {
                     if (position == 0)
                     {
-                        if (schedule.isZoneSchedule())
+                        if (mSchedule.isZoneSchedule())
                         {
-                            schedule.setDisabled(true);
-                            CCUHsApi.getInstance().updateSchedule(schedule);
+                            mSchedule.setDisabled(true);
+                            CCUHsApi.getInstance().updateSchedule(mSchedule);
                         }
                         scheduleImageButton.setVisibility(View.GONE);
+                        
+                        if (mScheduleType != ScheduleType.BUILDING.ordinal()) {
+                            setScheduleType(scheduleTypeId, ScheduleType.BUILDING);
+                            mScheduleType = ScheduleType.BUILDING.ordinal();
+                        }
 
                     } else if (position == 1)
                     {
-                        if (schedule.isZoneSchedule() && schedule.getMarkers().contains("disabled"))
+                        if (mSchedule.isZoneSchedule() && mSchedule.getMarkers().contains("disabled"))
                         {
-                            schedule.setDisabled(false);
-                            CCUHsApi.getInstance().updateZoneSchedule(schedule, zoneId);
-                            scheduleImageButton.setTag(schedule.getId());
+                            mSchedule.setDisabled(false);
+                            CCUHsApi.getInstance().updateZoneSchedule(mSchedule, zoneId);
+                            scheduleImageButton.setTag(mSchedule.getId());
                         } else
                         {
 
@@ -176,14 +187,20 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                                 zone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true, zone.getId()));
                                 CCUHsApi.getInstance().updateZone(zone, zone.getId());
                                 scheduleById = CCUHsApi.getInstance().getScheduleById(zone.getScheduleRef());
+                                CCUHsApi.getInstance().syncEntityTree();
                             }
                             scheduleImageButton.setTag(scheduleById.getId());
                             scheduleImageButton.setVisibility(View.VISIBLE);
+                        }
+                        if (mScheduleType != ScheduleType.ZONE.ordinal()) {
+                            setScheduleType(scheduleTypeId, ScheduleType.ZONE);
+                            mScheduleType = ScheduleType.ZONE.ordinal();
                         }
                     } else
                     {
                         //list named schedules
                     }
+                    mSchedule = Schedule.getScheduleByEquipId(equipId);
                 }
 
                 @Override
@@ -312,5 +329,20 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
             }
         }
         return 0;
+    }
+    
+    private void setScheduleType(String id, ScheduleType schedule) {
+        new AsyncTask<String, Void, Void>() {
+            @Override
+            protected Void doInBackground( final String ... params ) {
+                CCUHsApi.getInstance().writeDefaultValById(id, (double)schedule.ordinal());
+                return null;
+            }
+            
+            @Override
+            protected void onPostExecute( final Void result ) {
+                // continue what you are doing...
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
     }
 }

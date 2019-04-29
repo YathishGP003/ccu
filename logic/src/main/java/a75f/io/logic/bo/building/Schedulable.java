@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 
 import a75f.io.logic.bo.building.definitions.OverrideType;
-import a75f.io.logic.bo.building.definitions.ScheduleMode;
+import a75f.io.logic.bo.building.definitions.ScheduleType;
 
 /**
  * Created by Yinten on 9/21/2017.
@@ -18,7 +18,7 @@ public class Schedulable
     protected ArrayList<Schedule> mSchedules     = new ArrayList<>();
     protected float mLogicalValue;
     protected OverrideType mOverrideType = OverrideType.NONE;
-    protected ScheduleMode mScheduleMode = ScheduleMode.ZoneSchedule;
+    protected ScheduleType mScheduleMode = ScheduleType.ZONE;
     
     /***
      * This value is used differently depending on the OverrideType
@@ -50,7 +50,7 @@ public class Schedulable
     }
     
     
-    public void addSchedules(ArrayList<Schedule> schedules, ScheduleMode scheduleMode)
+    public void addSchedules(ArrayList<Schedule> schedules, ScheduleType scheduleMode)
     {
         this.mSchedules = schedules;
         this.mScheduleMode = scheduleMode;
@@ -81,13 +81,13 @@ public class Schedulable
     }
     
     
-    public ScheduleMode getScheduleMode()
+    public ScheduleType getScheduleMode()
     {
         return mScheduleMode;
     }
     
     
-    public void setScheduleMode(ScheduleMode scheduleMode)
+    public void setScheduleMode(ScheduleType scheduleMode)
     {
         this.mScheduleMode = scheduleMode;
     }
@@ -130,7 +130,7 @@ public class Schedulable
     
     public void setNamedSchedule(String namedSchedule)
     {
-        this.setScheduleMode(ScheduleMode.NamedSchedule);
+        this.setScheduleMode(ScheduleType.NAMED);
         this.mNamedSchedule = namedSchedule;
     }
 }

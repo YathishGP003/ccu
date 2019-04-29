@@ -428,11 +428,12 @@ public class ScheduleProcessJob extends BaseJob {
             CcuLog.d(TAG_CCU_JOB, "systemOccupancy status : " + systemOccupancy);
             return;
         }
-
-        double waCoolingOnlyLoadMA = CCUHsApi.getInstance().readHisValByQuery("system and point and moving and average and cooling and load");
-        double waHeatingOnlyLoadMA = CCUHsApi.getInstance().readHisValByQuery("system and point and moving and average and heating and load");
+        
         if (systemOccupancy == UNOCCUPIED)
         {
+            double waCoolingOnlyLoadMA = CCUHsApi.getInstance().readHisValByQuery("system and point and moving and average and cooling and load");
+            double waHeatingOnlyLoadMA = CCUHsApi.getInstance().readHisValByQuery("system and point and moving and average and heating and load");
+            
             double preconDegree = Math.max(waCoolingOnlyLoadMA, waHeatingOnlyLoadMA);
             double preconRate = CCUHsApi.getInstance().getPredictedPreconRate(L.ccu().systemProfile.getSystemEquipRef());
             if (preconRate == 0) {

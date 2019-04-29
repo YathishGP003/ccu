@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
-import a75f.io.logic.bo.building.definitions.ScheduleMode;
+import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.lights.LightProfile;
 import a75f.io.logic.bo.building.lights.LightProfileConfiguration;
 
@@ -60,7 +60,7 @@ public class CCUApplicationTest
         schedule.setDays(intsaslist);
         ArrayList<Schedule> s = new ArrayList<>();
         s.add(schedule);
-        p1.setScheduleMode(ScheduleMode.ZoneSchedule);
+        p1.setScheduleMode(ScheduleType.ZONE);
         p1.setSchedules(s);
         /*try
         {

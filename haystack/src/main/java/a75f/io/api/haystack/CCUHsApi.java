@@ -513,7 +513,31 @@ public class CCUHsApi
         }
         return 0;
     }
-
+    
+    public Double readPointPriorityValByQuery(String query)
+    {
+        ArrayList points = readAll(query);
+        String    id     = points.size() == 0 ? null : ((HashMap) points.get(0)).get("id").toString();
+        if (id == null || id == "")
+        {
+            return null;
+        }
+        
+        return readPointPriorityVal(id);
+    }
+    
+    public String readId(String query)
+    {
+        ArrayList points = readAll(query);
+        String    id     = points.size() == 0 ? null : ((HashMap) points.get(0)).get("id").toString();
+        if (id == null || id == "")
+        {
+            return null;
+        }
+        
+        return id;
+    }
+    
     
     public void hisWrite(ArrayList<HisItem> hisList)
     {
@@ -649,25 +673,20 @@ public class CCUHsApi
 
     public void deleteEntityTree(String id)
     {
-
         CcuLog.d("CCU_HS", "deleteEntityTree " + id);
-
         HashMap entity = CCUHsApi.getInstance().read("id == " + id);
         if (entity.get("site") != null)
         {
-
             ArrayList<HashMap> floors = readAll("floor");
             for (HashMap floor : floors)
             {
                 deleteEntityTree(floor.get("id").toString());
             }
-
             ArrayList<HashMap> equips = readAll("equip and siteRef == \"" + id + "\"");
             for (HashMap equip : equips)
             {
                 deleteEntityTree(equip.get("id").toString());
             }
-
             ArrayList<HashMap> devices = readAll("device and siteRef == \"" + id + "\"");
             for (HashMap device : devices)
             {
@@ -679,17 +698,27 @@ public class CCUHsApi
                 deleteEntity(schedule.get("id").toString());
             }
             deleteEntity(id);
-
-        } else if (entity.get("floor") != null)
+        }
+        else if (entity.get("floor") != null)
         {
             ArrayList<HashMap> rooms = readAll("room and floorRef == \"" + id + "\"");
             for (HashMap room : rooms)
             {
-                deleteEntity(room.get("id").toString());
+                deleteEntityTree(room.get("id").toString());
             }
             deleteEntity(entity.get("id").toString());
-
-        } else if (entity.get("equip") != null)
+        }
+        else if (entity.get("room") != null)
+        {
+            ArrayList<HashMap> schedules = readAll("schedule and roomRef == "+ id );
+            Log.d("CCU","  delete Schedules in room "+schedules.size());
+            for (HashMap schedule : schedules)
+            {
+                deleteEntity(schedule.get("id").toString());
+            }
+        
+             deleteEntity(entity.get("id").toString());
+        }else if (entity.get("equip") != null)
         {
             ArrayList<HashMap> points = readAll("point and equipRef == \"" + id + "\"");
             for (HashMap point : points)
@@ -998,7 +1027,7 @@ public class CCUHsApi
         addSchedule(schedule.getId(), schedule.getScheduleHDict());
 
         Log.i("CCH_HS", "updateSchedule: " + schedule.getScheduleHDict().toZinc());
-        if (tagsDb.idMap.get(schedule.getId()) != null)
+        if (tagsDb.idMap.get("@" +schedule.getId()) != null)
         {
             tagsDb.updateIdMap.put("@" + schedule.getId(), tagsDb.idMap.get("@" + schedule.getId()));
         }
@@ -1009,7 +1038,7 @@ public class CCUHsApi
         addSchedule(schedule.getId(), schedule.getZoneScheduleHDict(zoneId));
         
         Log.i("CCU_HS", "updateZoneSchedule: " + schedule.getZoneScheduleHDict(zoneId).toZinc());
-        if (tagsDb.idMap.get(schedule.getId()) != null)
+        if (tagsDb.idMap.get("@" +schedule.getId()) != null)
         {
             tagsDb.updateIdMap.put("@" + schedule.getId(), tagsDb.idMap.get("@" + schedule.getId()));
         }

@@ -25,9 +25,8 @@ import android.widget.ToggleButton;
 
 import java.util.ArrayList;
 
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
-import a75f.io.logic.bo.building.lights.LightProfile;
-import a75f.io.logic.bo.building.lights.LightProfileConfiguration;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.TestProfile;
@@ -36,8 +35,9 @@ import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
-import a75f.io.logic.bo.building.definitions.ScheduleMode;
-import a75f.io.logic.L;
+import a75f.io.logic.bo.building.definitions.ScheduleType;
+import a75f.io.logic.bo.building.lights.LightProfile;
+import a75f.io.logic.bo.building.lights.LightProfileConfiguration;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.FloorPlanFragment;
@@ -221,7 +221,7 @@ public class LightingZoneProfileFragment extends BaseDialogFragment
                 if (!mLightProfile.hasSchedules())
                 {
                     mLightProfile
-                            .addSchedules(ccu().getDefaultLightSchedule(), ScheduleMode.ZoneSchedule);
+                            .addSchedules(ccu().getDefaultLightSchedule(), ScheduleType.ZONE);
                 }
                 L.saveCCUState();
                 getActivity()

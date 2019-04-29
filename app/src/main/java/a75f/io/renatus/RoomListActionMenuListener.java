@@ -100,7 +100,7 @@ class RoomListActionMenuListener implements MultiChoiceModeListener
 			for (Device d : HSUtil.getDevices(sZone.getId())) {
 				L.removeHSDeviceEntities(Short.parseShort(d.getAddr()));
 			}
-			CCUHsApi.getInstance().deleteEntity(sZone.getId());
+			CCUHsApi.getInstance().deleteEntityTree(sZone.getId());
 			floorPlanActivity.refreshScreen();
 		}
 		new AsyncTask<String, Void, Void>() {

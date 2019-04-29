@@ -378,6 +378,7 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
             CCUHsApi.getInstance().deleteEntity(id);
             loadVacations();
             ScheduleProcessJob.updateSchedules();
+            CCUHsApi.getInstance().syncEntityTree();
     };
 
 
@@ -461,6 +462,10 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
         ScheduleProcessJob.updateSchedules();
 
         return true;
+    }
+    
+    private void saveScheduleData() {
+    
     }
 
     private void drawSchedule(int position, double heatingTemp, double coolingTemp, int startTimeHH, int endTimeHH, int startTimeMM, int endTimeMM, DAYS day, boolean intersection) {

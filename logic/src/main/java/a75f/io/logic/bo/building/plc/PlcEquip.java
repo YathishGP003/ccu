@@ -268,6 +268,19 @@ public class PlcEquip
         String setpointVariableId  = hayStack.addPoint(setpointVariable );
         hayStack.writeHisValById(setpointVariableId, 0.0);
     
+        Point equipScheduleType = new Point.Builder()
+                                          .setDisplayName(equipDis+"-scheduleType")
+                                          .setEquipRef(equipRef)
+                                          .setSiteRef(siteRef)
+                                          .setRoomRef(roomRef)
+                                          .setFloorRef(floorRef)
+                                          .addMarker("zone").addMarker("pid").addMarker("scheduleType").addMarker("writable").addMarker("zone").addMarker("equipHis")
+                                          .setGroup(String.valueOf(nodeAddr))
+                                          .setTz(tz)
+                                          .build();
+        String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
+        CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
+    
         SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
     
         if (config.analog1InputSensor > 0) {

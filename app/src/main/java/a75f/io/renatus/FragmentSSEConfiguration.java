@@ -23,19 +23,19 @@ import android.widget.ToggleButton;
 
 import java.util.ArrayList;
 
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
-import a75f.io.logic.bo.building.sse.SingleStageProfile;
 import a75f.io.logic.bo.building.TestProfile;
 import a75f.io.logic.bo.building.Zone;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
-import a75f.io.logic.bo.building.definitions.ScheduleMode;
+import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.definitions.SingleStageMode;
 import a75f.io.logic.bo.building.sse.SingleStageLogicalMap;
-import a75f.io.logic.L;
+import a75f.io.logic.bo.building.sse.SingleStageProfile;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 
@@ -158,7 +158,7 @@ public class FragmentSSEConfiguration extends BaseDialogFragment implements Comp
                 singleStageLogicalMap.getLogicalMap().put(Port.RELAY_ONE, getSingleStageMode(spRelay1Action));
                 singleStageLogicalMap.getLogicalMap().put(Port.RELAY_TWO, getSingleStageMode(spRelay2Action));
                 
-                mSingleStageProfile.setScheduleMode(ScheduleMode.SystemSchedule);
+                mSingleStageProfile.setScheduleMode(ScheduleType.BUILDING);
                 mSingleStageProfile.setSchedules(ccu().getDefaultTemperatureSchedule());
                 
                 L.saveCCUState();

@@ -313,6 +313,19 @@ public class ConventionalUnitLogicalMap {
                                     .setKind("string")
                                     .build();
         String equipScheduleStatusId = CCUHsApi.getInstance().addPoint(equipScheduleStatus);
+    
+        Point equipScheduleType = new Point.Builder()
+                                          .setDisplayName(equipDis+"-scheduleType")
+                                          .setEquipRef(equipRef)
+                                          .setSiteRef(siteRef)
+                                          .setRoomRef(room)
+                                          .setFloorRef(floor)
+                                          .addMarker("zone").addMarker("cpu").addMarker("scheduleType").addMarker("writable").addMarker("zone").addMarker("equipHis")
+                                          .setGroup(String.valueOf(nodeAddr))
+                                          .setTz(tz)
+                                          .build();
+        String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
+        CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
         
         //Create Physical points and map
         SmartStat device = new SmartStat(nodeAddr, siteRef, floor, room,equipRef,"cpu");

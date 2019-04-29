@@ -31,24 +31,20 @@ import java.util.Collections;
 import java.util.Comparator;
 
 import a75f.io.api.haystack.MockTime;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Circuit;
 import a75f.io.logic.bo.building.Floor;
-import a75f.io.logic.bo.building.lights.LightProfile;
 import a75f.io.logic.bo.building.Output;
-import a75f.io.logic.bo.building.Schedule;
 import a75f.io.logic.bo.building.Zone;
 import a75f.io.logic.bo.building.definitions.OverrideType;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.L;
+import a75f.io.logic.bo.building.lights.LightProfile;
 
+import static a75f.io.logic.L.ccu;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_TWO;
 import static a75f.io.logic.bo.building.definitions.Port.RELAY_ONE;
 import static a75f.io.logic.bo.building.definitions.Port.RELAY_TWO;
-import static a75f.io.logic.bo.building.definitions.ScheduleMode.CircuitSchedule;
-import static a75f.io.logic.bo.building.definitions.ScheduleMode.NamedSchedule;
-import static a75f.io.logic.bo.building.definitions.ScheduleMode.ZoneSchedule;
-import static a75f.io.logic.L.ccu;
 
 public class LightingDetailAdapter extends BaseAdapter
 {
@@ -385,7 +381,7 @@ public class LightingDetailAdapter extends BaseAdapter
         {
             int position = (int) parent.getTag();
             
-            Circuit snOutput = snOutPortList.get(position);
+           /* Circuit snOutput = snOutPortList.get(position);
             //Zone schedule selected, remove circuit or named schedule from
             // circuit, set to zone schedule
             if (pos == 0 && snOutput.getScheduleMode() != ZoneSchedule) //lcm zone schedule
@@ -406,7 +402,7 @@ public class LightingDetailAdapter extends BaseAdapter
             //named schedule
             {
                 showLCMNamedScheduleSelector(snOutput);
-            }
+            }*/
         }
         
         

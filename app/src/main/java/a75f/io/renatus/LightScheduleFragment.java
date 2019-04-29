@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Circuit;
 import a75f.io.logic.bo.building.Day;
 import a75f.io.logic.bo.building.Floor;
@@ -23,8 +24,7 @@ import a75f.io.logic.bo.building.Zone;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.definitions.ScheduleMode;
-import a75f.io.logic.L;
+import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import butterknife.BindView;
@@ -142,7 +142,7 @@ public class LightScheduleFragment extends BaseDialogFragment
         //If mScheduableType == SchedualbeType.Output && it's not a zone schedule
         // resolve schedule will resolve the circuits named schedule or zone schedule.
         if (mSchedulableType == SchedulableType.Output &&
-            mCircuit.getScheduleMode() != ScheduleMode.ZoneSchedule)
+            mCircuit.getScheduleMode() != ScheduleType.ZONE)
         {
             mSchedules = L.resolveSchedules(mCircuit);
         }
@@ -188,12 +188,12 @@ public class LightScheduleFragment extends BaseDialogFragment
                 mSchedules.add(new Schedule());
                 if (mSchedulableType == SchedulableType.Output)
                 {
-                    mCircuit.addSchedules(mSchedules, ScheduleMode.CircuitSchedule);
+                    //mCircuit.addSchedules(mSchedules, ScheduleMode.CircuitSchedule);
                 }
                 else
                 {
                     mZoneProfile.setSchedules(mSchedules);
-                    mZoneProfile.setScheduleMode(ScheduleMode.ZoneSchedule);
+                    mZoneProfile.setScheduleMode(ScheduleType.ZONE);
                 }
             }
             ArrayList<Integer> days = new ArrayList<Integer>();

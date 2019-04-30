@@ -282,7 +282,7 @@ public class ConventionalUnitLogicalMap {
                                   .setSiteRef(siteRef)
                                   .setRoomRef(room)
                                   .setFloorRef(floor)
-                                  .addMarker("status").addMarker("cpu").addMarker("his").addMarker("logical").addMarker("zone").addMarker("equipHis")
+                                  .addMarker("status").addMarker("cpu").addMarker("his").addMarker("zone").addMarker("equipHis")
                                   .setGroup(String.valueOf(nodeAddr))
                                   .setTz(tz)
                                   .build();
@@ -294,7 +294,7 @@ public class ConventionalUnitLogicalMap {
                                     .setSiteRef(siteRef)
                                     .setRoomRef(room)
                                     .setFloorRef(floor)
-                                    .addMarker("status").addMarker("message").addMarker("cpu").addMarker("writable").addMarker("logical").addMarker("zone").addMarker("equipHis")
+                                    .addMarker("status").addMarker("message").addMarker("cpu").addMarker("writable").addMarker("zone").addMarker("equipHis")
                                     .setGroup(String.valueOf(nodeAddr))
                                     .setTz(tz)
                                     .setKind("string")
@@ -320,7 +320,7 @@ public class ConventionalUnitLogicalMap {
                                           .setSiteRef(siteRef)
                                           .setRoomRef(room)
                                           .setFloorRef(floor)
-                                          .addMarker("zone").addMarker("cpu").addMarker("scheduleType").addMarker("writable").addMarker("zone").addMarker("equipHis")
+                                          .addMarker("zone").addMarker("cpu").addMarker("scheduleType").addMarker("writable").addMarker("zone").addMarker("equipHis").addMarker("his")
                                           .setGroup(String.valueOf(nodeAddr))
                                           .setTz(tz)
                                           .build();
@@ -401,7 +401,7 @@ public class ConventionalUnitLogicalMap {
                 .build();
         CCUHsApi.getInstance().addPoint(cpuOccupancy);
 
-        Point cpuOperatingMode = new Point.Builder()
+        Point cpuConditioingMode = new Point.Builder()
                 .setDisplayName(equipDis + "-" + "ConditionMode")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipref)
@@ -410,7 +410,9 @@ public class ConventionalUnitLogicalMap {
                 .addMarker("standalone").addMarker("temp").addMarker("conditioning").addMarker("mode").addMarker("his").addMarker("equipHis").addMarker("sp").addMarker("zone")
                 .setTz(tz)
                 .build();
-        CCUHsApi.getInstance().addPoint(cpuOperatingMode);
+        CCUHsApi.getInstance().addPoint(cpuConditioingMode);
+
+
     }
 
     public void setProfilePoint(String tags, double val) {

@@ -325,19 +325,7 @@ public class L
     
     public static void removeProfile(short addr) {
         ZoneProfile deleteProfile = null;
-    
-        for (Iterator<ZoneProfile> it = L.ccu().zoneProfiles.iterator(); it.hasNext();)
-        {
-            ZoneProfile profile = it.next();
-            for (Short node : profile.getNodeAddresses()) {
-                if (node == addr) {
-                    L.ccu().zoneProfiles.remove(profile);
-                    break;
-                }
-            }
-        }
-        
-        /*for(ZoneProfile p : L.ccu().zoneProfiles) {
+        for(ZoneProfile p : L.ccu().zoneProfiles) {
             for (Short node : p.getNodeAddresses()) {
                 if (node == addr) {
                     deleteProfile = p;
@@ -348,6 +336,6 @@ public class L
         if (deleteProfile != null)
         {
             L.ccu().zoneProfiles.remove(deleteProfile);
-        }*/
+        }
     }
 }

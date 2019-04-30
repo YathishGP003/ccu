@@ -86,12 +86,12 @@ public class StandaloneScheduler {
             return; //Equip might have been deleted.
         }
         String id = ((HashMap) points.get(0)).get("id").toString();
-        if (getPriorityVal(id,8) == desiredTemp) {
+        if (getPriorityVal(id,9) == desiredTemp) {
             CcuLog.d(L.TAG_CCU_SCHEDULER, flag+"DesiredTemp not changed : Skip PointWrite");
             return;
         }
         try {
-            CCUHsApi.getInstance().pointWrite(HRef.make(id.replace("@", "")), 8, "Scheduler", desiredTemp != null ? HNum.make(desiredTemp) : HNum.make(0), HNum.make(0));
+            CCUHsApi.getInstance().pointWrite(HRef.make(id.replace("@", "")), 9, "Scheduler", desiredTemp != null ? HNum.make(desiredTemp) : HNum.make(0), HNum.make(0));
         } catch (Exception e) {
             e.printStackTrace();
         }

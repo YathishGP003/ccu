@@ -44,10 +44,9 @@ public class BuildingProcessJob extends BaseJob
         }
     
         tsData = new HashMap();
-    
-        for (Iterator<ZoneProfile> it = L.ccu().zoneProfiles.iterator(); it.hasNext();)
-        {
-            ZoneProfile profile = it.next();
+        
+		//Revoking since crash happens due to iterations
+        for (ZoneProfile profile : L.ccu().zoneProfiles) {
             CcuLog.d(L.TAG_CCU_JOB, "updateZonePoints -> "+profile.getProfileType());
             profile.updateZonePoints();
         }

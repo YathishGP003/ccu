@@ -53,20 +53,22 @@ public class PointSyncAdapter extends EntitySyncAdapter
                 {
                     pointLUIDList.add(luid);
                     m.put("siteRef", HRef.copy(CCUHsApi.getInstance().getGUID(siteLUID)));
-                    m.put("equipRef", HRef.copy(CCUHsApi.getInstance().getGUID(equipLUID)));
-                    if (m.get("floorRef") != null && !m.get("floorRef").toString().equals("SYSTEM"))
-                    {
-                        String guid = CCUHsApi.getInstance().getGUID(m.get("floorRef").toString());
-                        if(guid != null)
-                            m.put("floorRef", HRef.copy(guid));
+                    String gEquipLUID = CCUHsApi.getInstance().getGUID(equipLUID);
+                    //Crash here ...due to sync...While no equips no need to sync equip pointers
+                    if(gEquipLUID != null) {
+                        m.put("equipRef", HRef.copy(gEquipLUID));
+                        if (m.get("floorRef") != null && !m.get("floorRef").toString().equals("SYSTEM")) {
+                            String guid = CCUHsApi.getInstance().getGUID(m.get("floorRef").toString());
+                            if (guid != null)
+                                m.put("floorRef", HRef.copy(guid));
+                        }
+                        if (m.get("roomRef") != null && !m.get("roomRef").toString().equals("SYSTEM")) {
+                            String guid = CCUHsApi.getInstance().getGUID(m.get("roomRef").toString());
+                            if (guid != null)
+                                m.put("roomRef", HRef.copy(guid));
+                        }
+                        entities.add(HSUtil.mapToHDict(m));
                     }
-                    if (m.get("roomRef") != null && !m.get("roomRef").toString().equals("SYSTEM"))
-                    {
-                        String guid = CCUHsApi.getInstance().getGUID(m.get("roomRef").toString());
-                        if(guid != null)
-                            m.put("roomRef", HRef.copy(guid));
-                    }
-                    entities.add(HSUtil.mapToHDict(m));
                 }
             }
         

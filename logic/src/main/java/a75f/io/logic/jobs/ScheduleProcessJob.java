@@ -570,7 +570,6 @@ public class ScheduleProcessJob extends BaseJob {
     public static void handleDesiredTempUpdate(Point point, boolean manual, double val) {
     
         CcuLog.d(L.TAG_CCU_JOB, "handleDesiredTempUpdate for "+point.getDisplayName());
-        String zoneId = HSUtil.getZoneIdFromEquipId(point.getRoomRef());
         Occupied occ = ScheduleProcessJob.getOccupiedModeCache(point.getRoomRef());
         
         if (occ != null && occ.isOccupied()) {
@@ -582,24 +581,37 @@ public class ScheduleProcessJob extends BaseJob {
                 return;
             }
             
+            if (!manual) {
+                HashMap overrideLevel = getAppOverride(point.getId());
+                val = Double.parseDouble(overrideLevel.get("val").toString());
+            }
+            
             //TO change when setting to applyToAllTuners done.
             if (equipSchedule.isZoneSchedule()) {
-                /*if (point.getMarkers().contains("cooling"))
+                if (point.getMarkers().contains("cooling"))
                 {
-                    equipSchedule.setDaysCoolVal();
+                    equipSchedule.setDaysCoolVal(val, false);
                 } else if (point.getMarkers().contains("heating")) {
-                    equipSchedule.setDaysHeatVal();
-                }*/
+                    equipSchedule.setDaysHeatVal(val, false);
+                }
+                CCUHsApi.getInstance().updateZoneSchedule(equipSchedule, equipSchedule.getRoomRef());
+                CCUHsApi.getInstance().syncEntityTree();
             } else {
                 Schedule.Days day = occ.getCurrentlyOccupiedSchedule();
     
-                DateTime overrideTime = new DateTime(MockTime.getInstance().getMockTime())
-                                                 .withHourOfDay(day.getSthh())
-                                                 .withMinuteOfHour(day.getStmm())
+                DateTime overrideExpiry = new DateTime(MockTime.getInstance().getMockTime())
+                                                 .withHourOfDay(day.getEthh())
+                                                 .withMinuteOfHour(day.getEtmm())
                                                  .withDayOfWeek(day.getDay() + 1)
                                                  .withSecondOfMinute(0);
+    
+                CcuLog.d(L.TAG_CCU_JOB,"overrideExpiry "+overrideExpiry+" overrideExpiryMills "+overrideExpiry.getMillis()+" System "+System.currentTimeMillis());
                 
-                //CCUHsApi.getInstance().writeDefaultVal("override and expiry and equipRef == \""+point.getEquipRef()+"\"", (double)overrideTime.getMillis() );
+                CCUHsApi.getInstance().pointWrite(HRef.copy(point.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, "ccu", HNum.make(val), HNum.make(overrideExpiry.getMillis()
+                                                                                                                                                     - System.currentTimeMillis(), "ms"));
+    
+                setAppOverrideExpiry(point, overrideExpiry.getMillis());
+                
             }
             
         }else if (occ!= null && !occ.isOccupied()) {
@@ -636,6 +648,7 @@ public class ScheduleProcessJob extends BaseJob {
         }
     }
     
+    
     public static HashMap getAppOverride(String id) {
         ArrayList values = CCUHsApi.getInstance().readPoint(id);
         long duration = -1;
@@ -659,6 +672,35 @@ public class ScheduleProcessJob extends BaseJob {
             return duration == -1 ? null : (HashMap) values.get(level-1);
         }
         return null;
+    }
+    
+    public static void setAppOverrideExpiry(Point point, long overrRideExpiry) {
+    
+    
+        HashMap overrideLevel = getAppOverride(point.getId());
+        Log.d(L.TAG_CCU_JOB, " setAppOverrideExpiry : " + overrideLevel);
+        if (overrideLevel == null) {
+            return;
+        }
+        double dur = Double.parseDouble(overrideLevel.get("duration").toString());
+        //Write to level 9/10
+        ArrayList values = CCUHsApi.getInstance().readPoint(point.getId());
+        if (values != null && values.size() > 0)
+        {
+            for (int l = 9; l <= values.size(); l++)
+            {
+                HashMap valMap = ((HashMap) values.get(l - 1));
+                Log.d(L.TAG_CCU_JOB, " Desired Temp Override : " + valMap);
+                if (valMap.get("duration") != null && valMap.get("val") != null)
+                {
+                    long d = (long) Double.parseDouble(valMap.get("duration").toString());
+                    if (d == 0)
+                    {
+                        CCUHsApi.getInstance().pointWrite(HRef.copy(point.getId()), l, "ccu", HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(overrRideExpiry - System.currentTimeMillis(), "ms"));
+                    }
+                }
+            }
+        }
     }
     
 }

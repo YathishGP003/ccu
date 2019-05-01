@@ -22,7 +22,7 @@ public class DeviceUpdateJob extends BaseJob
     
     public void doJob()
     {
-        CcuLog.d(L.TAG_CCU_JOB, "DeviceUpdateJob ->");
+        CcuLog.d(L.TAG_CCU_JOB, "DeviceUpdateJob -> ");
         HashMap site = CCUHsApi.getInstance().read("site");
         if (site == null || site.size() == 0) {
             CcuLog.d(L.TAG_CCU_DEVICE,"No Site Registered ! <-DeviceUpdateJob ");

@@ -4,7 +4,6 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import a75.io.algos.vav.VavTRSystem;
@@ -29,7 +28,7 @@ public class BuildingProcessJob extends BaseJob
     
     @Override
     public void doJob() {
-        CcuLog.d(L.TAG_CCU_JOB,"BuildingProcessJob ->");
+        CcuLog.d(L.TAG_CCU_JOB,"BuildingProcessJob -> "+CCUHsApi.getInstance());
     
         HashMap site = CCUHsApi.getInstance().read("site");
         if (site.size() == 0) {

@@ -70,7 +70,7 @@ public class TunerConstants
     
     public static final int VAV_DEFAULT_VAL_LEVEL = 17;
     public static final int VAV_BUILDING_VAL_LEVEL = 16;
-	public static final int MANUAL_OVERRIDE_VAL_LEVEL = 8;
+	public static final int MANUAL_OVERRIDE_VAL_LEVEL = 7;
 
     public static final double STANDALONE_HEATING_DEADBAND_DEFAULT = 2.0;//Default deadband value based on dual temp diff 70 and 74 ((74-70)/2.0)
     public static final double STANDALONE_COOLING_DEADBAND_DEFAULT = 2.0;

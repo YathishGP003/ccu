@@ -367,9 +367,9 @@ public class Globals {
                                 double duration = Double.parseDouble(r.get("dur").toString());
                                 double dur = duration - System.currentTimeMillis();
                                 CcuLog.d(L.TAG_CCU, "PubNub remote point:  level " + level + " val " + val + " who " + who + " duration "+duration+" dur "+dur);
-                                //If dur shows it is already expired, then just write 1s to force-expire it locally.
+                                //If dur shows it is already expired, then just write 1ms to force-expire it locally.
                                 CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(luid), (int) level, who, HNum.make(val), HNum.make(duration == 0 ? 0 :
-                                                                                                                             (dur < 0 ? 1000 : duration - System.currentTimeMillis())));
+                                                                                                                             (dur < 0 ? 1 : duration - System.currentTimeMillis())));
                             }
                             Point p = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(luid)).build();
                             ArrayList values = CCUHsApi.getInstance().readPoint(luid);
@@ -380,22 +380,21 @@ public class Globals {
                                     HashMap valMap = ((HashMap) values.get(l - 1));
                                     if (valMap.get("val") != null)
                                     {
-                                        Log.d(L.TAG_CCU, "PubNub updated point " + p.getDisplayName() + " , level: " + l + " , val :" + Double.parseDouble(valMap.get("val").toString()));
+                                        Log.d(L.TAG_CCU, "PubNub updated point " + p.getDisplayName() + " , level: " + l + " , val :" + Double.parseDouble(valMap.get("val").toString())
+                                                                +" duration "+valMap.get("duration"));
                                     }
                                 }
                             }
-                            for (String marker : p.getMarkers())
-                            {
-                                if (marker.equals("his"))
-                                {
-                                    CCUHsApi.getInstance().writeHisValById(luid, CCUHsApi.getInstance().readPointPriorityVal(luid));
-                                }
-                            }
     
-                            /*if (p.getMarkers().contains("desired"))
+                            if (p.getMarkers().contains("his"))
                             {
-                                ScheduleProcessJob.handleDesiredTempUpdate(p);
-                            }*/
+                                CCUHsApi.getInstance().writeHisValById(luid, CCUHsApi.getInstance().readPointPriorityVal(luid));
+                            }
+                            
+                            if (p.getMarkers().contains("desired"))
+                            {
+                                ScheduleProcessJob.handleDesiredTempUpdate(p, false, 0);
+                            }
                         }
                         else
                         {

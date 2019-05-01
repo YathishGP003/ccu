@@ -3,6 +3,8 @@ package a75f.io.logic.jobs;
 import android.util.Log;
 
 import org.joda.time.DateTime;
+import org.projecthaystack.HNum;
+import org.projecthaystack.HRef;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,6 +13,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.MockTime;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Point;
@@ -113,7 +116,7 @@ public class ScheduleProcessJob extends BaseJob {
     public void doJob() {
 
 
-        CcuLog.d(TAG_CCU_JOB,"ScheduleProcessJob->");
+        CcuLog.d(TAG_CCU_JOB,"ScheduleProcessJob-> "+CCUHsApi.getInstance());
 
         HashMap site = CCUHsApi.getInstance().read("site");
         if (site.size() == 0) {
@@ -564,8 +567,9 @@ public class ScheduleProcessJob extends BaseJob {
         
     }
     
-    public static void handleDesiredTempUpdate(Point point) {
+    public static void handleDesiredTempUpdate(Point point, boolean manual, double val) {
     
+        CcuLog.d(L.TAG_CCU_JOB, "handleDesiredTempUpdate for "+point.getDisplayName());
         String zoneId = HSUtil.getZoneIdFromEquipId(point.getRoomRef());
         Occupied occ = ScheduleProcessJob.getOccupiedModeCache(point.getRoomRef());
         
@@ -599,28 +603,60 @@ public class ScheduleProcessJob extends BaseJob {
             }
             
         }else if (occ!= null && !occ.isOccupied()) {
-            /*CCUHsApi.getInstance().pointWrite(HRef.copy(point.getId()), HayStackConstants.DEFAULT_POINT_LEVEL
-                                , "Scheduler", desiredTemp != null ? HNum.make(desiredTemp) : HNum.make(0), HNum.make(0));*/
             
-        }
-    }
-    
-    public static HashMap getLongestOverride(String id) {
-        ArrayList values = CCUHsApi.getInstance().readPoint(id);
-        long duration = 0;
-        int level = 0;
-        if (values != null && values.size() > 0)
-        {
-            for (int l = 1; l <= values.size() ; l++ ) {
-                HashMap valMap = ((HashMap) values.get(l-1));
-                if (valMap.get("dur") != null ) {
-                    long dur = (long) Double.parseDouble(valMap.get("dur").toString());
-                    if (dur > duration) {
-                        level = l;
+            if (manual) {
+                CCUHsApi.getInstance().pointWrite(HRef.copy(point.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, "manual", HNum.make(val) , HNum.make(2 * 60 * 60 * 1000, "ms"));
+            } else
+            {
+                HashMap overrideLevel = getAppOverride(point.getId());
+                Log.d(L.TAG_CCU_JOB, " Desired Temp priorityLevel : " + overrideLevel);
+                double dur = Double.parseDouble(overrideLevel.get("duration").toString());
+                CCUHsApi.getInstance().pointWrite(HRef.copy(point.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, "ccu", HNum.make(Double.parseDouble(overrideLevel.get("val").toString())), HNum.make(dur == 0 ? 120 * 60 * 1000 : dur - System.currentTimeMillis(), "ms"));
+                //Write to level 9/10
+                ArrayList values = CCUHsApi.getInstance().readPoint(point.getId());
+                if (values != null && values.size() > 0)
+                {
+                    for (int l = 9; l <= values.size(); l++)
+                    {
+                        HashMap valMap = ((HashMap) values.get(l - 1));
+                        Log.d(L.TAG_CCU_JOB, " Desired Temp Override : " + valMap);
+                        if (valMap.get("duration") != null && valMap.get("val") != null)
+                        {
+                            long d = (long) Double.parseDouble(valMap.get("duration").toString());
+                            if (d == 0)
+                            {
+                                CCUHsApi.getInstance().pointWrite(HRef.copy(point.getId()), l, "ccu", HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(dur == 0 ? 120 * 60 * 1000 : dur - System.currentTimeMillis(), "ms"));
+                            }
+                        }
                     }
                 }
             }
-            return (HashMap) values.get(level-1);
+            
+            HSUtil.printPointArr(point);
+        }
+    }
+    
+    public static HashMap getAppOverride(String id) {
+        ArrayList values = CCUHsApi.getInstance().readPoint(id);
+        long duration = -1;
+        int level = 0;
+        if (values != null && values.size() > 0)
+        {
+            for (int l = 9; l <= values.size() ; l++ ) {
+                HashMap valMap = ((HashMap) values.get(l-1));
+                Log.d(L.TAG_CCU_JOB, " Desired Temp Override : "+valMap);
+                if (valMap.get("duration") != null && valMap.get("val") != null ) {
+                    long dur = (long) Double.parseDouble(valMap.get("duration").toString());
+                    if (dur == 0) {
+                        return valMap;
+                    }
+                    if (dur > duration) {
+                        level = l;
+                        duration = dur;
+                    }
+                }
+            }
+            return duration == -1 ? null : (HashMap) values.get(level-1);
         }
         return null;
     }

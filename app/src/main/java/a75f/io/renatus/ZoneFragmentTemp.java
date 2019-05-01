@@ -17,9 +17,6 @@ import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
 
-import org.projecthaystack.HNum;
-import org.projecthaystack.HRef;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,7 +27,7 @@ import a75f.io.api.haystack.Point;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.tuners.TunerConstants;
+import a75f.io.logic.jobs.ScheduleProcessJob;
 
 public class ZoneFragmentTemp extends Fragment
 {
@@ -242,25 +239,19 @@ public class ZoneFragmentTemp extends Fragment
     
                 CCUHsApi hayStack = CCUHsApi.getInstance();
                 Point p = new Point.Builder().setHashMap(hayStack.readMapById(id)).build();
-                for (String marker : p.getMarkers())
+                if (p.getMarkers().contains("writable"))
                 {
-                    if (marker.equals("writable"))
-                    {
-                        CcuLog.d(L.TAG_CCU_UI, "Set Writbale Val "+p.getDisplayName()+": " +val);
-                        CCUHsApi.getInstance().pointWrite(HRef.copy(id), TunerConstants.MANUAL_OVERRIDE_VAL_LEVEL, "manual", HNum.make(val) , HNum.make(2 * 60 * 60 * 1000, "ms"));
-                    }
+                    CcuLog.d(L.TAG_CCU_UI, "Set Writbale Val "+p.getDisplayName()+": " +val);
+                    //CCUHsApi.getInstance().pointWrite(HRef.copy(id), TunerConstants.MANUAL_OVERRIDE_VAL_LEVEL, "manual", HNum.make(val) , HNum.make(2 * 60 * 60 * 1000, "ms"));
+                    ScheduleProcessJob.handleDesiredTempUpdate(p, true, val);
+    
                 }
     
-                for (String marker : p.getMarkers())
+                if (p.getMarkers().contains("his"))
                 {
-                    if (marker.equals("his"))
-                    {
-                        CcuLog.d(L.TAG_CCU_UI, "Set His Val "+id+": " +val);
-                        hayStack.writeHisValById(id, val);
-                    }
+                    CcuLog.d(L.TAG_CCU_UI, "Set His Val "+id+": " +val);
+                    hayStack.writeHisValById(id, val);
                 }
-                
-                
                 return null;
             }
             

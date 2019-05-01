@@ -106,8 +106,7 @@ public class EntitySyncHandler
         ref.add("roomRef");
         ref.add("ahuRef");
         ref.add("scheduleRef");
-
-
+        
     }
 
     /**

@@ -22,7 +22,6 @@ import java.util.Objects;
 
 import a75f.io.logger.CcuLog;
 
-
 /***
  * Supports Schedule to HDict
  * HDict to Schedule
@@ -438,7 +437,15 @@ public class Schedule extends Entity
         } else
         {
             int day = DateTime.now().dayOfWeek().get() - 1;
-            mDays.get(day).mCoolingVal = val;
+            for (Days d : mDays) {
+                if (d.mDay == day)
+                {
+                    d.mCoolingVal = val;
+                    Log.d("CCU_JOB", " Set mCoolingVal : "+val+" day "+day);
+                    break;
+                }
+            }
+            
         }
     }
     
@@ -451,7 +458,14 @@ public class Schedule extends Entity
         } else
         {
             int day = DateTime.now().dayOfWeek().get() - 1;
-            mDays.get(day).mHeatingVal = val;
+            for (Days d : mDays) {
+                if (d.mDay == day)
+                {
+                    d.mHeatingVal = val;
+                    Log.d("CCU_JOB", " Set mHeatingVal : "+val+" day "+day);
+                    break;
+                }
+            }
         }
     }
 

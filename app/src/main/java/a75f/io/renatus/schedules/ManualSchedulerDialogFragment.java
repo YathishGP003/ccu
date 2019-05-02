@@ -126,7 +126,7 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
         npStartTime.setMinValue(nMinVal);
         npStartTime.setMaxValue(nMaxVal);
 
-        npStartTime.setValue(55);
+        npStartTime.setValue(32);
         npStartTime.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         npStartTime.setVisibility(View.VISIBLE);
         npStartTime.setWrapSelectorWheel(false);
@@ -144,7 +144,7 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
         npEndTime.setMinValue(nMinVal);
         npEndTime.setMaxValue(nMaxVal);
 
-        npEndTime.setValue(90);
+        npEndTime.setValue(70);
         npEndTime.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         npEndTime.setVisibility(View.VISIBLE);
         npEndTime.setWrapSelectorWheel(false);

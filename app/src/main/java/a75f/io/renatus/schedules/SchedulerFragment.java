@@ -404,7 +404,6 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
 
         switch (id) {
             case ID_DIALOG_SCHEDULE:
-
                 Fragment scheduleFragment = getFragmentManager().findFragmentByTag("popup");
                 if (scheduleFragment != null) {
                     ft.remove(scheduleFragment);
@@ -425,7 +424,6 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
         ArrayList<Schedule.Days> daysArrayList = new ArrayList<Schedule.Days>();
 
         if (days != null) {
-
             for (DAYS day : days) {
                 Schedule.Days dayBO = new Schedule.Days();
                 dayBO.setEthh(endTimeHour);

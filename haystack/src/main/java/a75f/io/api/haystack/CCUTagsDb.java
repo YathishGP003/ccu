@@ -777,10 +777,7 @@ public class CCUTagsDb extends HServer {
         if (array == null) writeArrays.put(rec.id().toVal(), array = new CCUTagsDb.WriteArray());
         array.val[level - 1] = val;
         array.who[level - 1] = who;
-        
-        if (dur.val > 0) {
-            array.duration[level-1] = System.currentTimeMillis() + dur.millis();
-        }
+        array.duration[level-1] = dur.val > 0 ? System.currentTimeMillis() + dur.millis() : 0;
     }
 
     public HDict getConfig() {

@@ -98,4 +98,36 @@ public class HSUtil
         }
         return b.toDict();
     }
+    
+    public static void printPointArr(String id) {
+        ArrayList values = CCUHsApi.getInstance().readPoint(id);
+        if (values != null && values.size() > 0)
+        {
+            for (int l = 1; l <= values.size(); l++)
+            {
+                HashMap valMap = ((HashMap) values.get(l - 1));
+                if (valMap.get("val") != null)
+                {
+                    Log.d("CCU_HS", " Override updated point " + id + " , level: " + l + " , val :" + Double.parseDouble(valMap.get("val").toString())
+                                    +" duration: "+Double.parseDouble(valMap.get("duration").toString()));
+                }
+            }
+        }
+    }
+    
+    public static void printPointArr(Point p) {
+        ArrayList values = CCUHsApi.getInstance().readPoint(p.getId());
+        if (values != null && values.size() > 0)
+        {
+            for (int l = 1; l <= values.size(); l++)
+            {
+                HashMap valMap = ((HashMap) values.get(l - 1));
+                if (valMap.get("val") != null)
+                {
+                    Log.d("CCU_HS", "Updated point " + p.getDisplayName() + " , level: " + l + " , val :" + Double.parseDouble(valMap.get("val").toString())
+                                                        +" duration: "+Double.parseDouble(valMap.get("duration").toString()));
+                }
+            }
+        }
+    }
 }

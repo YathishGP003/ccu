@@ -416,7 +416,7 @@ public class Schedule extends Entity
 
     public boolean isActiveVacation()
     {
-        Log.d("CCU_JOB"," getStartDate "+getStartDate()+" getEndDate "+getEndDate()+" Curr "+MockTime.getInstance().getMockTime());
+        Log.d("CCU_JOB","isActiveVacation  vacStart "+getStartDate().getMillis()+" vacEn "+getEndDate().getMillis()+" Curr "+MockTime.getInstance().getMockTime());
         Interval interval = new Interval(getStartDate(), getEndDate());
         return interval.contains(MockTime.getInstance().getMockTime());
     }

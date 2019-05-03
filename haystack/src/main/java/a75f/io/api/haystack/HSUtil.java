@@ -130,4 +130,30 @@ public class HSUtil
             }
         }
     }
+    
+    public static double getPriorityVal(String id) {
+        ArrayList values = CCUHsApi.getInstance().readPoint(id);
+        if (values != null && values.size() > 0)
+        {
+            for (int l = 1; l <= values.size() ; l++ ) {
+                HashMap valMap = ((HashMap) values.get(l-1));
+                if (valMap.get("val") != null) {
+                    return Double.parseDouble(valMap.get("val").toString());
+                }
+            }
+        }
+        return 0;
+    }
+    
+    public static double getPriorityLevelVal(String id, int level) {
+        ArrayList values = CCUHsApi.getInstance().readPoint(id);
+        if (values != null && values.size() > 0)
+        {
+            HashMap valMap = ((HashMap) values.get(level));
+            if (valMap.get("val") != null) {
+                return Double.parseDouble(valMap.get("val").toString());
+            }
+        }
+        return 0;
+    }
 }

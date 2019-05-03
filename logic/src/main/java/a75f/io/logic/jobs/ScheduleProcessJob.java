@@ -172,9 +172,9 @@ public class ScheduleProcessJob extends BaseJob {
 
             }
         }
-
-        updateSystemOccupancy();
+        
         systemVacation = activeSystemVacation != null || isAllZonesInVacation();
+        updateSystemOccupancy();
         CcuLog.d(TAG_CCU_JOB,"<- ScheduleProcessJob");
     }
 
@@ -366,26 +366,6 @@ public class ScheduleProcessJob extends BaseJob {
         }
     }
 
-    public static long getMillisToOccupancy() {
-        if (nextOccupied != null) {
-            return  nextOccupied.getMillisecondsUntilNextChange();
-        }
-        long millisToOccupancy = 0;
-        for (Occupied occ : occupiedHashMap.values()) {
-            if (occ.isOccupied()) {
-                return 0;
-            }
-            if (millisToOccupancy == 0) {
-                millisToOccupancy = occ.getMillisecondsUntilNextChange();
-            } else if (occ.getMillisecondsUntilNextChange() < millisToOccupancy){
-                millisToOccupancy = occ.getMillisecondsUntilNextChange();
-            }
-            Log.d(TAG_CCU_JOB, " Occupancy in millis for Equip "+occ.getMillisecondsUntilNextChange());
-        }
-        Log.d(TAG_CCU_JOB, " millisToOccupancy : "+millisToOccupancy);
-        return millisToOccupancy;
-    }
-
     public static void updateSystemOccupancy() {
         if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DEFAULT) {
             Log.d(TAG_CCU_JOB, " Skip updateSystemOccupancy for Default System Profile ");
@@ -393,6 +373,11 @@ public class ScheduleProcessJob extends BaseJob {
         }
 
         systemOccupancy = UNOCCUPIED;
+        if (systemVacation) {
+            Log.d(TAG_CCU_JOB, " In SystemVacation : Skip updateSystemOccupancy : systemOccupancy : "+systemOccupancy);
+            return;
+        }
+        
         for (Floor f: HSUtil.getFloors())
         {
             for (Zone z : HSUtil.getZones(f.getId()))
@@ -542,9 +527,9 @@ public class ScheduleProcessJob extends BaseJob {
                     }
                     
                 }
-    
-                updateSystemOccupancy();
+                
                 systemVacation = activeSystemVacation != null || isAllZonesInVacation();
+                updateSystemOccupancy();
             }
         }.start();
         
@@ -682,7 +667,7 @@ public class ScheduleProcessJob extends BaseJob {
     
     public static void setAppOverrideExpiry(Point point, long overrRideExpiry) {
         HashMap overrideLevel = getAppOverride(point.getId());
-        Log.d(L.TAG_CCU_JOB, " setAppOverrideExpiry : " + overrideLevel);
+        Log.d(L.TAG_CCU_JOB, " setAppOverrideExpiry : overrideLevel " + overrideLevel);
         if (overrideLevel == null) {
             return;
         }

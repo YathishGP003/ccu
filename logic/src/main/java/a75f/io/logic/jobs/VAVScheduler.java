@@ -10,6 +10,7 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.logger.CcuLog;
@@ -80,7 +81,7 @@ public class VAVScheduler {
             return; //Equip might have been deleted.
         }
         String id = ((HashMap) points.get(0)).get("id").toString();
-        if (getPriorityVal(id,8) == desiredTemp) {
+        if (HSUtil.getPriorityLevelVal(id,8) == desiredTemp) {
             CcuLog.d(L.TAG_CCU_SCHEDULER, flag+"DesiredTemp not changed : Skip PointWrite");
             return;
         }
@@ -90,32 +91,8 @@ public class VAVScheduler {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        CCUHsApi.getInstance().writeHisValById(id, getPriorityVal(id));
+        CCUHsApi.getInstance().writeHisValById(id, HSUtil.getPriorityVal(id));
     }
     
-    public static double getPriorityVal(String id) {
-        ArrayList values = CCUHsApi.getInstance().readPoint(id);
-        if (values != null && values.size() > 0)
-        {
-            for (int l = 1; l <= values.size() ; l++ ) {
-                HashMap valMap = ((HashMap) values.get(l-1));
-                if (valMap.get("val") != null) {
-                    return Double.parseDouble(valMap.get("val").toString());
-                }
-            }
-        }
-        return 0;
-    }
     
-    public static double getPriorityVal(String id, int level) {
-        ArrayList values = CCUHsApi.getInstance().readPoint(id);
-        if (values != null && values.size() > 0)
-        {
-            HashMap valMap = ((HashMap) values.get(level));
-            if (valMap.get("val") != null) {
-                return Double.parseDouble(valMap.get("val").toString());
-            }
-        }
-        return 0;
-    }
 }

@@ -10,6 +10,7 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
@@ -443,7 +444,8 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(unoccupiedZoneSetbackId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
-    
+        hayStack.writeHisValById(unoccupiedZoneSetbackId, HSUtil.getPriorityVal(unoccupiedZoneSetbackId));
+        
         Point heatingUserLimitMin = new Point.Builder()
                                               .setDisplayName(equipdis+"-"+"heatingUserLimitMin")
                                               .setSiteRef(siteRef)
@@ -462,7 +464,7 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(heatingUserLimitMinId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
-    
+        hayStack.writeHisValById(heatingUserLimitMinId, HSUtil.getPriorityVal(heatingUserLimitMinId));
     
         Point heatingUserLimitMax = new Point.Builder()
                                             .setDisplayName(equipdis+"-"+"heatingUserLimitMax")
@@ -482,7 +484,8 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(heatingUserLimitMaxId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
-    
+        hayStack.writeHisValById(heatingUserLimitMaxId, HSUtil.getPriorityVal(heatingUserLimitMaxId));
+        
         Point coolingUserLimitMin = new Point.Builder()
                                             .setDisplayName(equipdis+"-"+"coolingUserLimitMin")
                                             .setSiteRef(siteRef)
@@ -501,7 +504,8 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(coolingUserLimitMinId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
-    
+        hayStack.writeHisValById(coolingUserLimitMinId, HSUtil.getPriorityVal(coolingUserLimitMinId));
+        
         Point coolingUserLimitMax = new Point.Builder()
                                             .setDisplayName(equipdis+"-"+"coolingUserLimitMax")
                                             .setSiteRef(siteRef)
@@ -520,7 +524,7 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(coolingUserLimitMaxId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
-    
+        hayStack.writeHisValById(coolingUserLimitMaxId, HSUtil.getPriorityVal(coolingUserLimitMaxId));
     }
     
     public void addVavEquipTuners(String equipdis, String equipref, VavProfileConfiguration config) {
@@ -547,7 +551,8 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(zonePrioritySpreadId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
-    
+        hayStack.writeHisValById(zonePrioritySpreadId, HSUtil.getPriorityVal(zonePrioritySpreadId));
+        
         Point zonePriorityMultiplier = new Point.Builder()
                                            .setDisplayName(equipdis+"-"+"zonePriorityMultiplier")
                                            .setSiteRef(siteRef)
@@ -566,6 +571,7 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(zonePriorityMultiplierId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
+        hayStack.writeHisValById(zonePriorityMultiplierId, HSUtil.getPriorityVal(zonePriorityMultiplierId));
         
         Point coolingDb = new Point.Builder()
                                   .setDisplayName(equipdis+"-"+"coolingDeadband")
@@ -586,6 +592,7 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(coolingDbId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
+        hayStack.writeHisValById(coolingDbId, HSUtil.getPriorityVal(coolingDbId));
     
         Point coolingDbMultiplier = new Point.Builder()
                                   .setDisplayName(equipdis+"-"+"coolingDeadbandMultiplier")
@@ -605,6 +612,7 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(coolingDbMultiplierId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
+        hayStack.writeHisValById(coolingDbMultiplierId, HSUtil.getPriorityVal(coolingDbMultiplierId));
         
         Point heatingDb = new Point.Builder()
                                   .setDisplayName(equipdis+"-"+"heatingDeadband")
@@ -624,6 +632,7 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(heatingDbId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
+        hayStack.writeHisValById(coolingDbMultiplierId, HSUtil.getPriorityVal(coolingDbMultiplierId));
     
         Point heatingDbMultiplier = new Point.Builder()
                                   .setDisplayName(equipdis+"-"+"heatingDeadbandMultiplier")
@@ -642,6 +651,7 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(heatingDbMultiplierId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
+        hayStack.writeHisValById(heatingDbMultiplierId, HSUtil.getPriorityVal(heatingDbMultiplierId));
         
         Point propGain = new Point.Builder()
                                  .setDisplayName(equipdis+"-"+"proportionalKFactor")
@@ -660,7 +670,7 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(pgainId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
-        
+        hayStack.writeHisValById(pgainId, HSUtil.getPriorityVal(pgainId));
         
         Point integralGain = new Point.Builder()
                                      .setDisplayName(equipdis+"-"+"integralKFactor")
@@ -679,6 +689,7 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(igainId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
+        hayStack.writeHisValById(igainId, HSUtil.getPriorityVal(igainId));
         
         Point propSpread = new Point.Builder()
                                    .setDisplayName(equipdis+"-"+"temperatureProportionalRange")
@@ -697,6 +708,7 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(pSpreadId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
+        hayStack.writeHisValById(pSpreadId, HSUtil.getPriorityVal(pSpreadId));
         
         Point integralTimeout = new Point.Builder()
                                         .setDisplayName(equipdis+"-"+"temperatureIntegralTime")
@@ -715,6 +727,7 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(iTimeoutId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
+        hayStack.writeHisValById(iTimeoutId, HSUtil.getPriorityVal(iTimeoutId));
     
         Point valveStartDamper = new Point.Builder()
                                         .setDisplayName(equipdis+"-"+"valveActuationStartDamperPosDuringSysHeating")
@@ -733,7 +746,7 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(valveStartDamperId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
-    
+        hayStack.writeHisValById(valveStartDamperId, HSUtil.getPriorityVal(valveStartDamperId));
     
         Point zoneCO2Target = new Point.Builder()
                                       .setDisplayName(equipdis+"-"+"zoneCO2Target")
@@ -752,6 +765,7 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(zoneCO2TargetId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
+        hayStack.writeHisValById(zoneCO2TargetId, HSUtil.getPriorityVal(zoneCO2TargetId));
     
         Point zoneCO2Threshold = new Point.Builder()
                                          .setDisplayName(equipdis+"-"+"zoneCO2Threshold")
@@ -770,6 +784,7 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(zoneCO2ThresholdId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
+        hayStack.writeHisValById(zoneCO2ThresholdId, HSUtil.getPriorityVal(zoneCO2ThresholdId));
         
         Point zoneVOCTarget = new Point.Builder()
                                          .setDisplayName(equipdis+"-"+"zoneVOCTarget")
@@ -788,6 +803,7 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(zoneVOCTargetId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
+        hayStack.writeHisValById(zoneVOCTargetId, HSUtil.getPriorityVal(zoneVOCTargetId));
     
         Point zoneVOCThreshold = new Point.Builder()
                                         .setDisplayName(equipdis+"-"+"zoneVOCThreshold")
@@ -806,6 +822,7 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(zoneVOCThresholdId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
+        hayStack.writeHisValById(zoneVOCThresholdId, HSUtil.getPriorityVal(zoneVOCThresholdId));
         
     }
     
@@ -868,7 +885,7 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(pgainId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
-    
+        hayStack.writeHisValById(pgainId, HSUtil.getPriorityVal(pgainId));
     
         Point integralGain = new Point.Builder()
                                      .setDisplayName(equipdis+"-"+"integralKFactor")
@@ -887,7 +904,8 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(igainId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
-    
+        hayStack.writeHisValById(igainId, HSUtil.getPriorityVal(igainId));
+        
         Point integralTimeout = new Point.Builder()
                                         .setDisplayName(equipdis+"-"+"pidIntegralTime")
                                         .setSiteRef(siteRef)
@@ -905,6 +923,7 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(iTimeoutId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
+        hayStack.writeHisValById(iTimeoutId, HSUtil.getPriorityVal(iTimeoutId));
     }
     
     public void addDefaultDabTuners(){
@@ -1163,6 +1182,7 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(zonePrioritySpreadId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
+        hayStack.writeHisValById(zonePrioritySpreadId, HSUtil.getPriorityVal(zonePrioritySpreadId));
     
         Point zonePriorityMultiplier = new Point.Builder()
                                                .setDisplayName(equipdis+"-"+"zonePriorityMultiplier")
@@ -1182,6 +1202,7 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(zonePriorityMultiplierId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
+        hayStack.writeHisValById(zonePriorityMultiplierId, HSUtil.getPriorityVal(zonePriorityMultiplierId));
     
         Point coolingDb = new Point.Builder()
                                   .setDisplayName(equipdis+"-"+"coolingDeadband")
@@ -1202,6 +1223,7 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(coolingDbId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
+        hayStack.writeHisValById(coolingDbId, HSUtil.getPriorityVal(coolingDbId));
     
         Point coolingDbMultiplier = new Point.Builder()
                                             .setDisplayName(equipdis+"-"+"coolingDeadbandMultiplier")
@@ -1221,6 +1243,7 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(coolingDbMultiplierId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
+        hayStack.writeHisValById(coolingDbMultiplierId, HSUtil.getPriorityVal(coolingDbMultiplierId));
     
         Point heatingDb = new Point.Builder()
                                   .setDisplayName(equipdis+"-"+"heatingDeadband")
@@ -1240,6 +1263,7 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(heatingDbId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
+        hayStack.writeHisValById(heatingDbId, HSUtil.getPriorityVal(heatingDbId));
     
         Point heatingDbMultiplier = new Point.Builder()
                                             .setDisplayName(equipdis+"-"+"heatingDeadbandMultiplier")
@@ -1258,6 +1282,7 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(heatingDbMultiplierId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
+        hayStack.writeHisValById(heatingDbMultiplierId, HSUtil.getPriorityVal(heatingDbMultiplierId));
     
         Point propGain = new Point.Builder()
                                  .setDisplayName(equipdis+"-"+"proportionalKFactor")
@@ -1276,7 +1301,7 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(pgainId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
-    
+        hayStack.writeHisValById(pgainId, HSUtil.getPriorityVal(pgainId));
     
         Point integralGain = new Point.Builder()
                                      .setDisplayName(equipdis+"-"+"integralKFactor")
@@ -1295,6 +1320,7 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(igainId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
+        hayStack.writeHisValById(igainId, HSUtil.getPriorityVal(igainId));
     
         Point propSpread = new Point.Builder()
                                    .setDisplayName(equipdis+"-"+"temperatureProportionalRange")
@@ -1313,6 +1339,7 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(pSpreadId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
+        hayStack.writeHisValById(pSpreadId, HSUtil.getPriorityVal(pSpreadId));
     
         Point integralTimeout = new Point.Builder()
                                         .setDisplayName(equipdis+"-"+"temperatureIntegralTime")
@@ -1331,6 +1358,7 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(iTimeoutId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
+        hayStack.writeHisValById(iTimeoutId, HSUtil.getPriorityVal(iTimeoutId));
     
         Point zoneCO2Target = new Point.Builder()
                                       .setDisplayName(equipdis+"-"+"zoneCO2Target")
@@ -1349,6 +1377,7 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(zoneCO2TargetId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
+        hayStack.writeHisValById(zoneCO2TargetId, HSUtil.getPriorityVal(zoneCO2TargetId));
     
         Point zoneCO2Threshold = new Point.Builder()
                                          .setDisplayName(equipdis+"-"+"zoneCO2Threshold")
@@ -1367,6 +1396,7 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(zoneCO2ThresholdId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
+        hayStack.writeHisValById(zoneCO2ThresholdId, HSUtil.getPriorityVal(zoneCO2ThresholdId));
     
         Point zoneVOCTarget = new Point.Builder()
                                       .setDisplayName(equipdis+"-"+"zoneVOCTarget")
@@ -1385,6 +1415,7 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(zoneVOCTargetId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
+        hayStack.writeHisValById(zoneVOCTargetId, HSUtil.getPriorityVal(zoneVOCTargetId));
     
         Point zoneVOCThreshold = new Point.Builder()
                                          .setDisplayName(equipdis+"-"+"zoneVOCThreshold")
@@ -1403,6 +1434,7 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(zoneVOCThresholdId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
+        hayStack.writeHisValById(zoneVOCThresholdId, HSUtil.getPriorityVal(zoneVOCThresholdId));
     
     }
 
@@ -1425,6 +1457,8 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(saHeatingDeadBandId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
+        hayStack.writeHisValById(saHeatingDeadBandId, HSUtil.getPriorityVal(saHeatingDeadBandId));
+        
         Point saCoolingDeadBand = new Point.Builder()
                 .setDisplayName(equipdis+"-"+"standaloneCoolingDeadband")
                 .setSiteRef(siteRef)
@@ -1444,6 +1478,8 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(saCoolingDeadBandId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
+        hayStack.writeHisValById(saCoolingDeadBandId, HSUtil.getPriorityVal(saCoolingDeadBandId));
+        
         Point saStage1Hysteresis = new Point.Builder()
                 .setDisplayName(equipdis+"-"+"standaloneStage1Hysteresis")
                 .setSiteRef(siteRef)
@@ -1462,6 +1498,8 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(saStage1HysteresisId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
+        hayStack.writeHisValById(saStage1HysteresisId, HSUtil.getPriorityVal(saStage1HysteresisId));
+        
     }
     public void addEquipStandaloneTuners(String equipdis, String equipref){
         addEquipZoneTuners(equipdis,equipref);

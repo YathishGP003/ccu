@@ -135,10 +135,12 @@ public class Schedule extends Entity
         {
             for (Interval current : intervalsOfCurrent)
             {
-
                 boolean hasOverlap = additions.overlaps(current);
                 if (hasOverlap)
+                {
+                    Log.d("CCU_UI"," hasOverlap "+" additions "+additions.toString()+" current "+current);
                     return true;
+                }
             }
         }
 
@@ -309,23 +311,25 @@ public class Schedule extends Entity
         for (Days day : daysSorted)
         {
 
+            long now = MockTime.getInstance().getMockTime();
 
-            DateTime startDateTime = new DateTime(MockTime.getInstance().getMockTime())
+            DateTime startDateTime = new DateTime(now)
                     .withHourOfDay(day.getSthh())
                     .withMinuteOfHour(day.getStmm())
                     .withDayOfWeek(day.getDay() + 1)
-                    .withSecondOfMinute(0);
-            DateTime endDateTime = new DateTime(MockTime.getInstance().getMockTime())
+                    .withSecondOfMinute(0)
+                    .withMillisOfSecond(0);
+            DateTime endDateTime = new DateTime(now)
                     .withHourOfDay(day.getEthh())
                     .withMinuteOfHour(day.getEtmm())
-                    .withSecondOfMinute(0).withDayOfWeek(
+                    .withSecondOfMinute(0).withMillisOfSecond(0).withDayOfWeek(
                             day.getDay() +
                                     1);
 
             Interval scheduledInterval = null;
             if (startDateTime.isAfter(endDateTime))
             {
-                scheduledInterval = new Interval(endDateTime, startDateTime.withDayOfWeek(DAYS.values()[day.getDay()].getNextDay().ordinal() + 1));
+                scheduledInterval = new Interval(startDateTime, endDateTime.withDayOfWeek(DAYS.values()[day.getDay()].getNextDay().ordinal() + 1));
             } else
             {
                 scheduledInterval =
@@ -416,7 +420,7 @@ public class Schedule extends Entity
 
     public boolean isActiveVacation()
     {
-        Log.d("CCU_JOB","isActiveVacation  vacStart "+getStartDate().getMillis()+" vacEn "+getEndDate().getMillis()+" Curr "+MockTime.getInstance().getMockTime());
+        Log.d("CCU_JOB","isActiveVacation  vacStart "+getStartDate().getMillis()+" vacEnd "+getEndDate().getMillis()+" Curr "+MockTime.getInstance().getMockTime());
         Interval interval = new Interval(getStartDate(), getEndDate());
         return interval.contains(MockTime.getInstance().getMockTime());
     }

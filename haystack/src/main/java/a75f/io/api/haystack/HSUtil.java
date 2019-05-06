@@ -43,7 +43,7 @@ public class HSUtil
         ArrayList<Equip> equipList = new ArrayList<>();
         for (HashMap m : equips)
         {
-            Log.d("CCU_UI", "Equip in Zone " + roomRef + " : " + m);
+            //Log.d("CCU_UI", "Equip in Zone " + roomRef + " : " + m);
             equipList.add(new Equip.Builder().setHashMap(m).build());
         }
         return equipList;

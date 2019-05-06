@@ -602,7 +602,7 @@ public class CCUHsApi
         String    id     = points.size() == 0 ? null : ((HashMap) points.get(0)).get("id").toString();
         if (id == null || id == "")
         {
-            return null;
+            return 0.0; //Crash because we return null, which should be 0
         }
 
         HisItem item = curRead(id);

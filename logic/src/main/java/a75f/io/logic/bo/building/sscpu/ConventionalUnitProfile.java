@@ -259,7 +259,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
             else
             {
                 if(occupied && (fanSpeed != OFF)) {
-                    if(isFanStage1Enabled &&  (fanSpeed == StandaloneFanSpeed.FAN_LOW)) {
+                    if(isFanStage1Enabled &&   ((fanSpeed == StandaloneFanSpeed.FAN_LOW) || (fanSpeed == StandaloneFanSpeed.FAN_HIGH))) {
                         relayStages.put("FanStage1", 1);
                         setCmdSignal("fan and stage1",1.0,node);
                     }else{

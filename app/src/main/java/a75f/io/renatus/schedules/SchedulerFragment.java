@@ -436,7 +436,7 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
                 dayBO.setSunrise(false);
                 dayBO.setDay(day.ordinal());
                 daysArrayList.add(dayBO);
-            }
+                }
         }
 
         boolean intersection = schedule.checkIntersection(daysArrayList);
@@ -476,11 +476,11 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
 
 
         if (startTimeHH > endTimeHH) {
-            drawScheduleBlock(position, strminTemp, strmaxTemp, typeface, endTimeHH,
-                    24, endTimeMM, 0,
+            drawScheduleBlock(position, strminTemp, strmaxTemp, typeface, startTimeHH,
+                    24, startTimeMM, 0,
                     getTextViewFromDay(day), false, true, intersection);
             drawScheduleBlock(position, strminTemp, strmaxTemp, typeface, 0,
-                    startTimeHH, 0, startTimeMM,
+                    endTimeHH, 0, endTimeMM,
                     getTextViewFromDay(day.getNextDay()), true, false, intersection);
         } else {
             drawScheduleBlock(position, strminTemp, strmaxTemp,
@@ -557,7 +557,7 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
                                    int startTimeMM, int endTimeMM, TextView textView,
                                    boolean leftBreak, boolean rightBreak, boolean intersection) {
 
-        Log.i("Scheduler", "tempStartTime: " + tempStartTime + " tempEndTime: " + tempEndTime + " startTimeMM: " + startTimeMM + " endTimeMM " + endTimeMM);
+        Log.i("CCU_UI", "tempStartTime: " + tempStartTime + " tempEndTime: " + tempEndTime + " startTimeMM: " + startTimeMM + " endTimeMM " + endTimeMM);
 
 
         AppCompatTextView textViewTemp = new AppCompatTextView(getActivity());

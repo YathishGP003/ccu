@@ -185,8 +185,13 @@ public class Pulse
 		}
 		ScheduleProcessJob.handleDesiredTempUpdate(new Point.Builder().setHashMap(coolingDtPoint).build(), true, coolingDesiredTemp);
 		//CCUHsApi.getInstance().pointWrite(HRef.copy(coolingDtPoint.get("id").toString()), HayStackConstants.DESIREDTEMP_OVERRIDE_LEVEL,"manual", HNum.make(coolingDesiredTemp), HNum.make(120*60*1000, "ms"));
-		CCUHsApi.getInstance().writeHisValById(coolingDtPoint.get("id").toString(), coolingDesiredTemp);
-		
+		try {
+		//TODO - Recheck this... Causing null pointer exception, every time when we change a set temp from biskit
+			CCUHsApi.getInstance().writeHisValById(coolingDtPoint.get("id").toString(), coolingDesiredTemp);
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+
 		HashMap heatinDtPoint = CCUHsApi.getInstance().read("point and air and temp and desired and heating and sp and equipRef == \""+q.getId()+"\"");
 		if (heatinDtPoint == null || heatinDtPoint.size() == 0) {
 			throw new IllegalArgumentException();
@@ -194,7 +199,11 @@ public class Pulse
 		ScheduleProcessJob.handleDesiredTempUpdate(new Point.Builder().setHashMap(heatinDtPoint).build(), true, heatingDesiredTemp);
 		
 		//CCUHsApi.getInstance().pointWrite(HRef.copy(heatinDtPoint.get("id").toString()), HayStackConstants.DESIREDTEMP_OVERRIDE_LEVEL,"manual", HNum.make(heatingDesiredTemp), HNum.make(120*60*1000, "ms"));
-		CCUHsApi.getInstance().writeHisValById(heatinDtPoint.get("id").toString(), heatingDesiredTemp);
+		try{
+			CCUHsApi.getInstance().writeHisValById(heatinDtPoint.get("id").toString(), heatingDesiredTemp);
+		}catch (Exception e){
+			e.printStackTrace();
+		}
 
 
 		HashMap singleDtPoint = CCUHsApi.getInstance().read("point and air and temp and desired and average and sp and equipRef == \""+q.getId()+"\"");
@@ -204,7 +213,11 @@ public class Pulse
 		ScheduleProcessJob.handleDesiredTempUpdate(new Point.Builder().setHashMap(singleDtPoint).build(), true, dt);
 		
 		//CCUHsApi.getInstance().pointWrite(HRef.copy(singleDtPoint.get("id").toString()), HayStackConstants.DESIREDTEMP_OVERRIDE_LEVEL,"manual", HNum.make(dt), HNum.make(120*60*1000, "ms"));
-		CCUHsApi.getInstance().writeHisValById(singleDtPoint.get("id").toString(), dt);
+		try {
+			CCUHsApi.getInstance().writeHisValById(singleDtPoint.get("id").toString(), dt);
+		}catch (Exception e){
+			e.printStackTrace();
+		}
 
 		sendSNControlMessage((short)node,q.getId());
 		sendSetTemperatureAck((short)node);
@@ -228,7 +241,11 @@ public class Pulse
         }
 	    ScheduleProcessJob.handleDesiredTempUpdate(new Point.Builder().setHashMap(coolingDtPoint).build(), true, coolingDesiredTemp);
         //CCUHsApi.getInstance().pointWrite(HRef.copy(coolingDtPoint.get("id").toString()), HayStackConstants.DESIREDTEMP_OVERRIDE_LEVEL,"manual", HNum.make(coolingDesiredTemp), HNum.make(120*60*1000, "ms"));
-        CCUHsApi.getInstance().writeHisValById(coolingDtPoint.get("id").toString(), coolingDesiredTemp);
+        try{
+            CCUHsApi.getInstance().writeHisValById(coolingDtPoint.get("id").toString(), coolingDesiredTemp);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
         HashMap heatinDtPoint = CCUHsApi.getInstance().read("point and air and temp and desired and heating and sp and equipRef == \""+q.getId()+"\"");
         if (heatinDtPoint == null || heatinDtPoint.size() == 0) {
@@ -236,7 +253,11 @@ public class Pulse
         }
 	    ScheduleProcessJob.handleDesiredTempUpdate(new Point.Builder().setHashMap(heatinDtPoint).build(), true, heatingDesiredTemp);
         //CCUHsApi.getInstance().pointWrite(HRef.copy(heatinDtPoint.get("id").toString()), HayStackConstants.DESIREDTEMP_OVERRIDE_LEVEL,"manual", HNum.make(heatingDesiredTemp), HNum.make(120*60*1000, "ms"));
-        CCUHsApi.getInstance().writeHisValById(heatinDtPoint.get("id").toString(), heatingDesiredTemp);
+        try{
+            CCUHsApi.getInstance().writeHisValById(heatinDtPoint.get("id").toString(), heatingDesiredTemp);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
 		HashMap singleDtPoint = CCUHsApi.getInstance().read("point and air and temp and desired and average and sp and equipRef == \""+q.getId()+"\"");
 		if (singleDtPoint == null || singleDtPoint.size() == 0) {
@@ -244,7 +265,11 @@ public class Pulse
 		}
 	    ScheduleProcessJob.handleDesiredTempUpdate(new Point.Builder().setHashMap(singleDtPoint).build(), true, dt);
 		//CCUHsApi.getInstance().pointWrite(HRef.copy(singleDtPoint.get("id").toString()), HayStackConstants.DESIREDTEMP_OVERRIDE_LEVEL,"manual", HNum.make(dt), HNum.make(120*60*1000, "ms"));
-		CCUHsApi.getInstance().writeHisValById(singleDtPoint.get("id").toString(), dt);
+		try {
+		    CCUHsApi.getInstance().writeHisValById(singleDtPoint.get("id").toString(), dt);
+        }catch (Exception e){
+		    e.printStackTrace();
+        }
 		sendSmartStatControlMessage((short)node,q.getId());
 		sendSetTemperatureAck((short)node);
 

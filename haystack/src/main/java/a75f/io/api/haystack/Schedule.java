@@ -146,6 +146,42 @@ public class Schedule extends Entity
 
         return false;
     }
+    
+    public Interval getOverLapInterval(Days day) {
+        ArrayList<Interval> intervalsOfCurrent   = getScheduledIntervals(getDaysSorted());
+        Interval intervalOfAddition = getScheduledInterval(day);
+        for (Interval current : intervalsOfCurrent)
+        {
+            boolean hasOverlap = intervalOfAddition.overlaps(current);
+            if (hasOverlap)
+            {
+                if (current.getStart().minuteOfDay().get() < current.getEnd().minuteOfDay().get())
+                {
+                    if (intervalOfAddition.getEndMillis() < current.getStartMillis())
+                    {
+                        return new Interval(intervalOfAddition.getEndMillis(), current.getStartMillis());
+                    }
+                    else if (intervalOfAddition.getStartMillis()> current.getStartMillis() &&
+                                                intervalOfAddition.getStartMillis() < current.getEndMillis())
+                    {
+                        return new Interval(intervalOfAddition.getStartMillis(), current.getEndMillis());
+                    }
+                } else {
+                    //Multi-day schedule
+                    if (intervalOfAddition.getEndMillis() > current.getStartMillis() &&
+                                                intervalOfAddition.getStartMillis() < current.getStartMillis())
+                    {
+                        return new Interval(current.getStartMillis(), intervalOfAddition.getEndMillis());
+                    }
+                    else if (intervalOfAddition.getStartMillis() < current.getEndMillis())
+                    {
+                        return new Interval(intervalOfAddition.getStartMillis(), current.getEndMillis());
+                    }
+                }
+            }
+        }
+        return null;
+    }
 
     private DateTime getTime()
     {
@@ -342,7 +378,35 @@ public class Schedule extends Entity
 
         return intervals;
     }
-
+    
+    private Interval getScheduledInterval(Days day)
+    {
+        
+        long now = MockTime.getInstance().getMockTime();
+        
+        DateTime startDateTime = new DateTime(now)
+                                         .withHourOfDay(day.getSthh())
+                                         .withMinuteOfHour(day.getStmm())
+                                         .withDayOfWeek(day.getDay() + 1)
+                                         .withSecondOfMinute(0)
+                                         .withMillisOfSecond(0);
+        DateTime endDateTime = new DateTime(now)
+                                       .withHourOfDay(day.getEthh())
+                                       .withMinuteOfHour(day.getEtmm())
+                                       .withSecondOfMinute(0).withMillisOfSecond(0).withDayOfWeek(
+                        day.getDay() +
+                        1);
+        
+        if (startDateTime.isAfter(endDateTime))
+        {
+            return new Interval(startDateTime, endDateTime.withDayOfWeek(DAYS.values()[day.getDay()].getNextDay().ordinal() + 1));
+        } else
+        {
+            return new Interval(startDateTime, endDateTime);
+        }
+        
+    }
+    
     /**
      * Sorts the days by MM, then by HH, then by DD
      *

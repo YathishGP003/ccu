@@ -1,5 +1,7 @@
 package a75f.io.renatus.schedules;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -29,6 +31,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
 
 import java.util.ArrayList;
 
@@ -443,7 +446,28 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
         if (intersection) {
             if (remove != null)
                 schedule.getDays().add(position, remove);
-            Toast.makeText(SchedulerFragment.this.getContext(), "Overlap occured can not add", Toast.LENGTH_SHORT).show();
+            
+            StringBuilder overlapDays = new StringBuilder();
+            for (Schedule.Days day : daysArrayList) {
+                Interval overlap = schedule.getOverLapInterval(day);
+                if (overlap != null) {
+                    overlapDays.append(getDayString(day)+"("+overlap.getStart().hourOfDay().get()+":"+(overlap.getStart().minuteOfHour().get() == 0 ? "00" : overlap.getStart().minuteOfHour().get())
+                                       +" - " +overlap.getEnd().hourOfDay().get()+":"+(overlap.getEnd().minuteOfHour().get()  == 0 ? "00": overlap.getEnd().minuteOfHour().get())+ ") ");
+                }
+            }
+    
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setMessage("Current settings override existing schedules \n"+overlapDays.toString())
+                   .setCancelable(false)
+                   .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                       public void onClick(DialogInterface dialog, int id) {
+                           //do things
+                       }
+                   });
+            
+            AlertDialog alert = builder.create();
+            alert.show();
+            
         } else {
             schedule.getDays().addAll(daysArrayList);
             if (schedule.isZoneSchedule())
@@ -460,6 +484,26 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
         ScheduleProcessJob.updateSchedules();
 
         return true;
+    }
+    
+    private String getDayString(Schedule.Days day) {
+        switch (day.getDay()) {
+            case 0:
+                return "Mo";
+            case 1:
+                return "Tu";
+            case 2:
+                return "We";
+            case 3:
+                return "Th";
+            case 4:
+                return "Fr";
+            case 5:
+                return "Sa";
+            case 6:
+                return "Su";
+        }
+        return "";
     }
     
     private void saveScheduleData() {

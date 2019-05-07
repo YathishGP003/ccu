@@ -134,7 +134,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
                             if(getCmdSignal("cooling and stage1", node) > 0)
                                 setCmdSignal("cooling and stage1",0,node);
 
-                            if(occupied && isFanStage1Enabled && (fanSpeed == StandaloneFanSpeed.FAN_LOW)){
+                            if(occupied && isFanStage1Enabled && ((fanSpeed == StandaloneFanSpeed.FAN_LOW) || (fanSpeed == StandaloneFanSpeed.FAN_HIGH))){
                                 relayStages.put("FanStage1",1);
                                 setCmdSignal("fan and stage1",1.0,node);
                             }else if(isFanStage1Enabled)
@@ -202,7 +202,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
                             if(getCmdSignal("heating and stage1", node) > 0)
                                 setCmdSignal("heating and stage1",0,node);
 
-                            if(occupied && isFanStage1Enabled &&  (fanSpeed == StandaloneFanSpeed.FAN_LOW)){
+                            if(occupied && isFanStage1Enabled &&   ((fanSpeed == StandaloneFanSpeed.FAN_LOW) || (fanSpeed == StandaloneFanSpeed.FAN_HIGH))){
                                 relayStages.put("FanStage1",1);
                                 setCmdSignal("fan and stage1",1.0,node);
                             }else if(isFanStage1Enabled){
@@ -259,7 +259,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
             else
             {
                 if(occupied && (fanSpeed != OFF)) {
-                    if(isFanStage1Enabled &&  (fanSpeed == StandaloneFanSpeed.FAN_LOW)) {
+                    if(isFanStage1Enabled &&   ((fanSpeed == StandaloneFanSpeed.FAN_LOW) || (fanSpeed == StandaloneFanSpeed.FAN_HIGH))) {
                         relayStages.put("FanStage1", 1);
                         setCmdSignal("fan and stage1",1.0,node);
                     }else{

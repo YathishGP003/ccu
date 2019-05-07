@@ -299,7 +299,8 @@ public class LSmartStat {
             Log.d(TAG_CCU_DEVICE, " Desired Temp point does not exist for equip , sending 0");
             return 0;
         }
-        return CCUHsApi.getInstance().readDefaultValById(point.get("id").toString());
+        //return CCUHsApi.getInstance().readDefaultValById(point.get("id").toString());
+        return CCUHsApi.getInstance().readPointPriorityVal(point.get("id").toString());
     }
 
 

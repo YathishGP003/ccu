@@ -395,6 +395,10 @@ public class Globals {
                             {
                                 ScheduleProcessJob.handleDesiredTempUpdate(p, false, 0);
                             }
+                            
+                            if (p.getMarkers().contains("scheduleType")) {
+                                ScheduleProcessJob.handleScheduleTypeUpdate(p);
+                            }
                         }
                         else
                         {

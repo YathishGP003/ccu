@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logic.DefaultSchedules;
@@ -336,6 +337,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
             @Override
             protected Void doInBackground( final String ... params ) {
                 CCUHsApi.getInstance().writeDefaultValById(id, (double)schedule.ordinal());
+                ScheduleProcessJob.handleScheduleTypeUpdate(new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(id)).build());
                 return null;
             }
             

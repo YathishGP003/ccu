@@ -691,4 +691,28 @@ public class ScheduleProcessJob extends BaseJob {
         }
     }
     
+    public static void clearOverrides(String id) {
+        ArrayList values = CCUHsApi.getInstance().readPoint(id);
+        if (values != null && values.size() > 0)
+        {
+            for (int l = 1; l <= values.size() ; l++ )
+            {
+                HashMap valMap = ((HashMap) values.get(l - 1));
+                if (l != 8 && valMap.get("duration") != null && valMap.get("val") != null)
+                {
+                    CCUHsApi.getInstance().pointWrite(HRef.copy(id), l, "ccu", HNum.make(0), HNum.make(1, "ms"));
+                }
+            }
+        }
+    }
+    
+    public static void handleScheduleTypeUpdate(Point p){
+        CcuLog.d(L.TAG_CCU_JOB, "handleScheduleTypeUpdate for "+p.getDisplayName());
+        HashMap coolDT = CCUHsApi.getInstance().read("point and desired and cooling and temp and equipRef == \""+p.getEquipRef()+"\"");
+        clearOverrides(coolDT.get("id").toString());
+        HashMap heatDT = CCUHsApi.getInstance().read("point and desired and heating and temp and equipRef == \""+p.getEquipRef()+"\"");
+        clearOverrides(heatDT.get("id").toString());
+        
+    }
+    
 }

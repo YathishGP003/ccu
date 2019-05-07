@@ -363,8 +363,6 @@ public class ConventionalUnitLogicalMap {
         double coolingVal = 74.0;
         double heatingVal = 70.0;
         double defaultDesiredTemp = 72;
-        double cdb = 2.0;
-        double hdb = 2.0;
         //Initialize write array for points, otherwise a read before write will throw exception
         setCurrentTemp(0);
         setHumidity(0);
@@ -377,14 +375,11 @@ public class ConventionalUnitLogicalMap {
             defaultDesiredTemp = (schedule.getCurrentValues().getCoolingVal() + schedule.getCurrentValues().getHeatingVal()) / 2.0;
             coolingVal = schedule.getCurrentValues().getCoolingVal();
             heatingVal = schedule.getCurrentValues().getHeatingVal();
-            cdb = hdb = (coolingVal - heatingVal) / 2.0;
         }
 
         setDesiredTempCooling(coolingVal);
         setDesiredTemp(defaultDesiredTemp);
         setDesiredTempHeating(heatingVal);
-        StandaloneTunerUtil.setStandaloneCoolingDeadband(equipRef, cdb, TunerConstants.TUNER_EQUIP_VAL_LEVEL);
-        StandaloneTunerUtil.setStandaloneHeatingDeadband(equipRef, hdb, TunerConstants.TUNER_EQUIP_VAL_LEVEL);
         CCUHsApi.getInstance().syncEntityTree();
 
 
@@ -562,7 +557,7 @@ public class ConventionalUnitLogicalMap {
                 .build();
         String enableRelay6Id = CCUHsApi.getInstance().addPoint(enableRelay6);
         CCUHsApi.getInstance().writeDefaultValById(enableRelay6Id, (double)(config.enableRelay6 == true? 1.0 : 0));
-        addUserIntentPoints(equipRef,equipDis);
+        addUserIntentPoints(equipRef,equipDis,room,floor);
 
 
         setConfigNumVal("enable and relay1",config.enableRelay1 == true ? 1.0 : 0);
@@ -855,7 +850,7 @@ public class ConventionalUnitLogicalMap {
     {
         CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \""+nodeAddr+"\"", status);
     }
-    protected void addUserIntentPoints(String equipref, String equipDis) {
+    protected void addUserIntentPoints(String equipref, String equipDis, String room, String floor) {
 
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         String siteRef = siteMap.get("id").toString();
@@ -865,6 +860,8 @@ public class ConventionalUnitLogicalMap {
                 .setDisplayName(equipDis+"-"+"FanOpMode")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipref)
+                .setFloorRef(floor)
+                .setRoomRef(room)
                 .addMarker("standalone").addMarker("userIntent").addMarker("writable").addMarker("fan").addMarker("operation").addMarker("mode").addMarker("his").addMarker("equipHis")
                 .addMarker("cpu").addMarker("zone")
                 .setTz(tz)
@@ -876,6 +873,8 @@ public class ConventionalUnitLogicalMap {
         Point operationalMode = new Point.Builder()
                 .setDisplayName(equipDis+"-"+"OperationalMode")
                 .setSiteRef(siteRef)
+                .setFloorRef(floor)
+                .setRoomRef(room)
                 .setEquipRef(equipref)
                 .addMarker("standalone").addMarker("userIntent").addMarker("writable").addMarker("operation").addMarker("mode").addMarker("zone").addMarker("his").addMarker("equipHis")
                 .addMarker("cpu").addMarker("temp")

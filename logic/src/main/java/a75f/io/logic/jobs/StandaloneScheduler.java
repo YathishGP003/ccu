@@ -54,26 +54,16 @@ public class StandaloneScheduler {
         double setback = TunerUtil.readTunerValByQuery("unoccupied and setback", equip.getId());
 
         occ.setUnoccupiedZoneSetback(setback);
-
-
+        occ.setHeatingDeadBand(heatingDeadBand);
+        occ.setCoolingDeadBand(coolingDeadBand);
         if (occ != null && ScheduleProcessJob.putOccupiedModeCache(equip.getRoomRef(), occ)) {
-            double deadbands = (occ.getCoolingVal()-occ.getHeatingVal())/2.0;
-            if(coolingDeadBand != deadbands) {
-                StandaloneTunerUtil.setStandaloneCoolingDeadband(equip.getId(), deadbands, TunerConstants.TUNER_EQUIP_VAL_LEVEL);
-                StandaloneTunerUtil.setStandaloneHeatingDeadband(equip.getId(), deadbands, TunerConstants.TUNER_EQUIP_VAL_LEVEL);
-            }
-            occ.setHeatingDeadBand(deadbands);
-            occ.setCoolingDeadBand(deadbands);
+            double avgTemp = (occ.getCoolingVal()+occ.getHeatingVal())/2.0;
             Double coolingTemp = occ.isOccupied() ? occ.getCoolingVal() : (occ.getCoolingVal() + occ.getUnoccupiedZoneSetback());
             setDesiredTemp(equip, coolingTemp, "cooling");
 
             Double heatingTemp = occ.isOccupied() ? occ.getHeatingVal() : (occ.getHeatingVal() - occ.getUnoccupiedZoneSetback());
             setDesiredTemp(equip, heatingTemp, "heating");
-            setDesiredTemp(equip,heatingTemp+deadbands,"average");
-        }else{
-
-            occ.setHeatingDeadBand(heatingDeadBand);
-            occ.setCoolingDeadBand(coolingDeadBand);
+            setDesiredTemp(equip,avgTemp,"average");
         }
 
         return occ;
@@ -169,7 +159,7 @@ public class StandaloneScheduler {
                     for (String marker : p.getMarkers()) {
                         if (marker.equals("writable")) {
                             CcuLog.d(L.TAG_CCU_UI, "Set Writbale Val " + p.getDisplayName() + ": " + val);
-                            CCUHsApi.getInstance().pointWrite(HRef.copy(id), TunerConstants.MANUAL_OVERRIDE_VAL_LEVEL, "manual", HNum.make(val), HNum.make(0));
+                            CCUHsApi.getInstance().pointWrite(HRef.copy(id), TunerConstants.UI_DEFAULT_VAL_LEVEL, "manual", HNum.make(val), HNum.make(0));
                         }
                     }
 

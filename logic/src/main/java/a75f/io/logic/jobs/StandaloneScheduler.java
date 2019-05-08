@@ -58,6 +58,9 @@ public class StandaloneScheduler {
         occ.setCoolingDeadBand(coolingDeadBand);
         if (occ != null && ScheduleProcessJob.putOccupiedModeCache(equip.getRoomRef(), occ)) {
             double avgTemp = (occ.getCoolingVal()+occ.getHeatingVal())/2.0;
+            double deadbands = (occ.getCoolingVal() - occ.getHeatingVal()) / 2.0 ;
+            occ.setCoolingDeadBand(deadbands);
+            occ.setHeatingDeadBand(deadbands);
             Double coolingTemp = occ.isOccupied() ? occ.getCoolingVal() : (occ.getCoolingVal() + occ.getUnoccupiedZoneSetback());
             setDesiredTemp(equip, coolingTemp, "cooling");
 
@@ -159,7 +162,7 @@ public class StandaloneScheduler {
                     for (String marker : p.getMarkers()) {
                         if (marker.equals("writable")) {
                             CcuLog.d(L.TAG_CCU_UI, "Set Writbale Val " + p.getDisplayName() + ": " + val);
-                            CCUHsApi.getInstance().pointWrite(HRef.copy(id), TunerConstants.UI_DEFAULT_VAL_LEVEL, "manual", HNum.make(val), HNum.make(0));
+                            CCUHsApi.getInstance().pointWrite(HRef.copy(id), TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", HNum.make(val), HNum.make(0));
                         }
                     }
 

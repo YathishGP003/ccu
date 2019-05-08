@@ -712,6 +712,8 @@ public class ScheduleProcessJob extends BaseJob {
         clearOverrides(coolDT.get("id").toString());
         HashMap heatDT = CCUHsApi.getInstance().read("point and desired and heating and temp and equipRef == \""+p.getEquipRef()+"\"");
         clearOverrides(heatDT.get("id").toString());
+        HashMap avgDt = CCUHsApi.getInstance().read("point and desired and average and temp and equipRef == \""+p.getEquipRef()+"\"");
+        clearOverrides(avgDt.get("id").toString());
         
     }
     

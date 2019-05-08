@@ -7,6 +7,8 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Point;
 import a75f.io.device.serial.CcuToCmOverUsbDeviceTempAckMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
@@ -27,6 +29,7 @@ import a75f.io.logic.bo.building.SensorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
+import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.device.mesh.MeshUtil.checkDuplicateStruct;
@@ -174,6 +177,12 @@ public class Pulse
 		
 		double cdb = TunerUtil.readTunerValByQuery("deadband and base and cooling and equipRef == \""+q.getId()+"\"");
 		double hdb = TunerUtil.readTunerValByQuery("deadband and base and heating and equipRef == \""+q.getId()+"\"");
+		String zoneId = HSUtil.getZoneIdFromEquipId(q.getId());
+		Occupied occ = ScheduleProcessJob.getOccupiedModeCache(zoneId);
+		if(occ != null) {
+			cdb = occ.getCoolingDeadBand();
+			hdb = occ.getHeatingDeadBand();
+		}
 		
 		double coolingDesiredTemp = dt + cdb;
 		double heatingDesiredTemp = dt - hdb;
@@ -230,7 +239,12 @@ public class Pulse
 
         double cdb = StandaloneTunerUtil.readTunerValByQuery("deadband and base and cooling and equipRef == \""+q.getId()+"\"");
         double hdb = StandaloneTunerUtil.readTunerValByQuery("deadband and base and heating and equipRef == \""+q.getId()+"\"");
-
+        String zoneId = HSUtil.getZoneIdFromEquipId(q.getId());
+        Occupied occ = ScheduleProcessJob.getOccupiedModeCache(zoneId);
+		if(occ != null) {
+			cdb = occ.getCoolingDeadBand();
+			hdb = occ.getHeatingDeadBand();
+		}
         double coolingDesiredTemp = dt + cdb;
         double heatingDesiredTemp = dt - hdb;
 
@@ -432,6 +446,9 @@ public class Pulse
 						break;
 				}
 			}
+			HashMap fanOpModePoint = CCUHsApi.getInstance().read("point and standalone and fan and operation and mode and his and equipRef== \"" + device.get("equipRef") + "\"");
+			if(fanOpModePoint != null && fanOpModePoint.size() > 0)
+				CCUHsApi.getInstance().writePoint(fanOpModePoint.get("id").toString(), TunerConstants.UI_DEFAULT_VAL_LEVEL,"manual",(double)fanSpeed.ordinal(),0);
 		}
 	}
 

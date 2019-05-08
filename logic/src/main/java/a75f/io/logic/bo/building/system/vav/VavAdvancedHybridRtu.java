@@ -201,6 +201,20 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
     }
     
     @Override
+    public String getStatusMessage(){
+        StringBuilder status = new StringBuilder();
+        status.append(systemFanLoopOp > 0 ? " Fan ON ":"");
+        status.append(systemCoolingLoopOp > 0 ? "| Cooling ON ":"");
+        status.append(systemHeatingLoopOp > 0 ? "| Heating ON ":"");
+        
+        if (!status.toString().equals("")) {
+            status.insert(0, super.getStatusMessage()+" ; Analog ");
+        }
+        
+        return status.toString();
+    }
+    
+    @Override
     public synchronized void deleteSystemEquip() {
         HashMap equip = CCUHsApi.getInstance().read("equip and system");
         if (equip.get("profile").equals(ProfileType.SYSTEM_VAV_HYBRID_RTU.name())) {

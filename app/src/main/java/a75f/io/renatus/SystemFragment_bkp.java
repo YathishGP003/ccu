@@ -1,12 +1,10 @@
 package a75f.io.renatus;
 
-import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.SwitchCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -14,62 +12,63 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.NumberPicker;
+import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
+import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
+
 
 /**
  * Created by samjithsadasivan isOn 8/7/17.
  */
 
-public class SystemFragment extends Fragment implements AdapterView.OnItemSelectedListener
+public class SystemFragment_bkp extends Fragment implements AdapterView.OnItemSelectedListener
 {
 	private static final String TAG = "SystemFragment_bkp";
 	SeekBar  sbComfortValue;
+	EditText stageStatusNow;
+	Spinner mSysSpinnerSchedule;
+	
+	TextView systemScheduleStatus;
+	
+	RadioButton systemOff;
+	RadioButton systemAuto;
+	RadioButton systemCool;
+	RadioButton systemHeat;
 	
 	Spinner targetMaxInsideHumidity;
 	Spinner targetMinInsideHumidity;
 	
-	SwitchCompat   cbCompHumidity;
-	SwitchCompat cbDemandResponse;
+	CheckBox cbCompHumidity;
+	CheckBox cbDemandResponse;
 	
+	RadioGroup systemModeRg;
 	
 	int spinnerInit = 0;
 	boolean minHumiditySpinnerReady = false;
 	boolean maxHumiditySpinnerReady = false;
-	
-	
-	TextView profileTitle;
-	NumberPicker systemModePicker;
-	
-	TextView occupancyStatus;
-	TextView equipmentStatus;
-	
-	boolean coolingAvailable = false;
-	boolean heatingAvailable = false;
-	
-	ArrayList<String> modesAvailable = new ArrayList<>();
-	
-	public SystemFragment()
+	public SystemFragment_bkp()
 	{
 	}
 	
 	
-	public static SystemFragment newInstance()
+	public static SystemFragment_bkp newInstance()
 	{
-		return new SystemFragment();
+		return new SystemFragment_bkp();
 	}
 	
 	
@@ -77,58 +76,34 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 	                         Bundle savedInstanceState)
 	{
-		View rootView = inflater.inflate(R.layout.fragment_system_setting, container, false);
+		View rootView = inflater.inflate(R.layout.fragment_system_setting_bkp, container, false);
 		return rootView;
 	}
 	
 	@Override
 	public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
 	{
+		systemScheduleStatus = view.findViewById(R.id.systemSchedule);
 		
-		profileTitle = view.findViewById(R.id.profileTitle);
-		systemModePicker = view.findViewById(R.id.systemModePicker);
-		coolingAvailable = L.ccu().systemProfile.isCoolingAvailable();
-		heatingAvailable = L.ccu().systemProfile.isHeatingAvailable();
-		
-		modesAvailable.add(SystemMode.OFF.displayName);
-		if (coolingAvailable && heatingAvailable) {
-			modesAvailable.add(SystemMode.AUTO.displayName);
-		}
-		if (coolingAvailable) {
-			modesAvailable.add(SystemMode.COOLONLY.displayName);
-		}
-		if (heatingAvailable) {
-			modesAvailable.add(SystemMode.HEATONLY.displayName);
-		}
-		
-		systemModePicker.setMinValue(0);
-		systemModePicker.setMaxValue(modesAvailable.size()-1);
-		
-		systemModePicker.setDisplayedValues(modesAvailable.toArray(new String[modesAvailable.size()]));
-		systemModePicker.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
-		systemModePicker.setWrapSelectorWheel(false);
-		setDividerColor(systemModePicker);
-		
-		
-		systemModePicker.setOnScrollListener(new NumberPicker.OnScrollListener() {
+		/*mSysSpinnerSchedule = view.findViewById(R.id.sysSpinnerSchedule);
+		mSysSpinnerSchedule.setOnTouchListener(new View.OnTouchListener() {
 			@Override
-			public void onScrollStateChange(NumberPicker numberPicker, int scrollState) {
-				if (systemModePicker.getValue() != TunerUtil.readSystemUserIntentVal("rtu and mode")) {
-					int newMode = systemModePicker.getValue();
-					setUserIntentBackground("rtu and mode", SystemMode.getEnum(modesAvailable.get(newMode)).ordinal() );
+			public boolean onTouch(View v, MotionEvent event) {
+				Toast.makeText(SystemFragment_bkp.this.getActivity(), "Schedule edit popup", Toast.LENGTH_SHORT).show();
+				if(event.getAction() == MotionEvent.ACTION_DOWN) {
+					showScheduleDialog();
 				}
+
+
+				return true;
 			}
-		});
-		
-		occupancyStatus = view.findViewById(R.id.occupancyStatus);
-		equipmentStatus = view.findViewById(R.id.equipmentStatus);
-		
-		/*systemModeRg = view.findViewById(R.id.systemConditioningMode);
+		});*/
+		systemModeRg = view.findViewById(R.id.systemConditioningMode);
 		systemOff = view.findViewById(R.id.systemOff);
 		systemAuto = view.findViewById(R.id.systemAuto);
 		systemCool = view.findViewById(R.id.systemManualCool);
 		systemHeat = view.findViewById(R.id.systemManualHeat);
-*/
+
 		sbComfortValue = view.findViewById(R.id.systemComfortValue);
 		
 		targetMaxInsideHumidity = view.findViewById(R.id.targetMaxInsideHumidity);
@@ -154,10 +129,10 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		cbDemandResponse = view.findViewById(R.id.cbDemandResponse);
 		
 		if (L.ccu().systemProfile instanceof DefaultSystem) {
-		/*	systemOff.setEnabled(false);
+			systemOff.setEnabled(false);
 			systemAuto.setEnabled(false);
 			systemCool.setEnabled(false);
-			systemHeat.setEnabled(false);*/
+			systemHeat.setEnabled(false);
 			sbComfortValue.setEnabled(false);
 			targetMaxInsideHumidity.setEnabled(false);
 			targetMinInsideHumidity.setEnabled(false);
@@ -165,8 +140,42 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			cbDemandResponse.setEnabled(false);
 			return;
 		}
+		systemOff.setOnClickListener(new View.OnClickListener()
+		{
+			@Override
+			public void onClick(View view)
+			{
+				setUserIntentBackground("rtu and mode", SystemMode.OFF.ordinal());
+			}
+		});
+		systemAuto.setOnClickListener(new View.OnClickListener()
+		{
+			@Override
+			public void onClick(View view)
+			{
+				setUserIntentBackground("rtu and mode", SystemMode.AUTO.ordinal());
+			}
+		});
+		systemCool.setOnClickListener(new View.OnClickListener()
+		{
+			@Override
+			public void onClick(View view)
+			{
+				setUserIntentBackground("rtu and mode", SystemMode.COOLONLY.ordinal());
+			}
+		});
+		systemHeat.setOnClickListener(new View.OnClickListener()
+		{
+			@Override
+			public void onClick(View view)
+			{
+				setUserIntentBackground("rtu and mode", SystemMode.HEATONLY.ordinal());
+			}
+		});
 		
-		/*systemAuto.setEnabled(L.ccu().systemProfile.isCoolingAvailable() && L.ccu().systemProfile.isHeatingAvailable());
+		systemModeRg.clearCheck();
+		
+		systemAuto.setEnabled(L.ccu().systemProfile.isCoolingAvailable() && L.ccu().systemProfile.isHeatingAvailable());
 		systemCool.setEnabled(L.ccu().systemProfile.isCoolingAvailable());
 		systemHeat.setEnabled(L.ccu().systemProfile.isHeatingAvailable());
 		
@@ -194,7 +203,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		                    }
 	                    }
                     });
-		*/
+		
 		sbComfortValue.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 			
 			@Override
@@ -209,7 +218,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			}
 		});
 		
-		profileTitle.setText(L.ccu().systemProfile.getProfileName());
+		stageStatusNow = view.findViewById(R.id.stageStatusNow);
 		
 		double operatingMode = CCUHsApi.getInstance().readHisValByQuery("point and system and operating and mode");
 		
@@ -219,8 +228,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			zoroToHundred.add(val);
 		}
 		
-		ArrayAdapter<Double> humidityAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, zoroToHundred);
-		humidityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		ArrayAdapter<Double> humidityAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
+		humidityAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		
 		
 		targetMinInsideHumidity.setAdapter(humidityAdapter);
@@ -252,14 +261,12 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				}
 			}
 		});
-		final Handler handler = new Handler();
+		
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
-				systemModePicker.setValue((int)TunerUtil.readSystemUserIntentVal("rtu and mode"));
-				Log.d("CCU_UI",L.ccu().systemProfile.getStatusMessage());
-				equipmentStatus.setText(L.ccu().systemProfile.getStatusMessage());
-				occupancyStatus.setText(ScheduleProcessJob.getSystemStatusString());
+				stageStatusNow.setText(SystemController.State.values()[(int)operatingMode].name());
+				systemScheduleStatus.setText(ScheduleProcessJob.getSystemStatusString());
 				cbCompHumidity.setChecked(TunerUtil.readSystemUserIntentVal("compensate and humidity") > 0);
 				cbDemandResponse.setChecked(TunerUtil.readSystemUserIntentVal("demand and response") > 0);
 				sbComfortValue.setProgress(5 - (int)TunerUtil.readSystemUserIntentVal("desired and ci"));
@@ -298,28 +305,6 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	@Override
 	public void onNothingSelected(AdapterView<?> arg0) {
 		// TODO Auto-generated method stub
-	}
-	
-	private void setDividerColor(NumberPicker picker) {
-		Field[] numberPickerFields = NumberPicker.class.getDeclaredFields();
-		for (Field field : numberPickerFields) {
-			if (field.getName().equals("mSelectionDivider")) {
-				field.setAccessible(true);
-				try {
-					field.set(picker, getResources().getDrawable(R.drawable.divider_np));
-				} catch (IllegalArgumentException e) {
-					Log.v("NP", "Illegal Argument Exception");
-					e.printStackTrace();
-				} catch (Resources.NotFoundException e) {
-					Log.v("NP", "Resources NotFound");
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					Log.v("NP", "Illegal Access Exception");
-					e.printStackTrace();
-				}
-				break;
-			}
-		}
 	}
 	
 	private void setUserIntentBackground(String query, double val) {

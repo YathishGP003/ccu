@@ -15,6 +15,7 @@ import java.util.Iterator;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSmartStatMessage_t;
@@ -30,6 +31,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.Port;
+import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
 
 import static a75f.io.logic.L.TAG_CCU_DEVICE;
@@ -171,8 +173,17 @@ public class LSmartStat {
         settings_t.minUserTemp.set((short)getMinUserTempLimits(equipId, hdb));
         settings_t.maxUserTemp.set((short)getMaxUserTempLimits(equipId, cdb));
         settings_t.temperatureOffset.set((byte)getTempOffset(address));
-        settings_t.heatingDeadBand.set((short) ( hdb* 10.0)); //Send in multiples of 10
-        settings_t.coolingDeadBand.set((short) ( cdb* 10.0));
+        try {
+            Log.d("LSmartStat","sch status="+equipId+","+zone.getId());
+            Occupied occuStatus = ScheduleProcessJob.getOccupiedModeCache(zone.getId());
+            if(occuStatus != null)
+            Log.d("LSmartStat","sch status22="+occuStatus.getCoolingVal()+","+occuStatus.getHeatingVal()+","+occuStatus.getHeatingDeadBand()+","+occuStatus.getCoolingDeadBand());
+            settings_t.heatingDeadBand.set((short) (occuStatus.getHeatingDeadBand() * 10)); //Send in multiples of 10
+            settings_t.coolingDeadBand.set((short) (occuStatus.getCoolingDeadBand() * 10));
+        }catch (Exception e){
+            settings_t.heatingDeadBand.set((short)20);//default deadband is 2.0, sending in multiples
+            settings_t.coolingDeadBand.set((short)20);
+        }
         //TODO need to set current occupied times slots here // ANILK
 		settings_t.holdTimeInMinutes.set((short)0);
         settings_t.changeToOccupiedTime.set((short)0);
@@ -227,7 +238,7 @@ public class LSmartStat {
 
     public static double getOperationalMode(String cmd, String equipRef){
 
-        return  CCUHsApi.getInstance().readHisValByQuery("point and standalone and operation and mode and his and "+cmd+" and equipRef== \"" + equipRef + "\"");
+        return CCUHsApi.getInstance().readPointPriorityValByQuery("point and standalone and operation and mode and his and "+cmd+" and equipRef== \"" + equipRef + "\"");
     }
 
     private static short getConfigEnabled(String relays, short address){

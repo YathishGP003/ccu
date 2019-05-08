@@ -33,6 +33,7 @@ public class StatusPagerAdapter extends FragmentStatePagerAdapter
 				fragment = ZoneFragmentTemp.newInstance();
 				break;
 			case 2:
+				//fragment = SystemFragment_bkp.newInstance();
 				fragment = SystemFragment.newInstance();
 				break;
 			case 3:

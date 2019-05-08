@@ -73,7 +73,7 @@ public class Globals {
 
 
     private static final int      NUMBER_OF_CYCLICAL_TASKS_RENATUS_REQUIRES = 10;
-    private static final int      TASK_SEPERATION                           = 45;
+    private static final int      TASK_SEPERATION                           = 15;
     private static final TimeUnit TASK_SERERATION_TIMEUNIT                  = TimeUnit.SECONDS;
 
     private static Globals globals;
@@ -159,13 +159,6 @@ public class Globals {
     
         Log.d(L.TAG_CCU_JOB, " Create Process Jobs");
         
-        mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL,
-                TASK_SEPERATION , TASK_SERERATION_TIMEUNIT);
-
-        mScheduleProcessJob.scheduleJob("Schedule Process Job", DEFAULT_HEARTBEAT_INTERVAL - 10,
-                TASK_SEPERATION, TASK_SERERATION_TIMEUNIT);
-
-
         isSimulation = getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                 .getBoolean("biskit_mode", false);
         testHarness = getApplicationContext().getResources().getBoolean(R.bool.test_harness);
@@ -189,7 +182,15 @@ public class Globals {
                 }
             }
         }
-
+        
+        mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL,
+                TASK_SEPERATION , TASK_SERERATION_TIMEUNIT);
+    
+        mScheduleProcessJob.scheduleJob("Schedule Process Job", DEFAULT_HEARTBEAT_INTERVAL,
+                TASK_SEPERATION +15, TASK_SERERATION_TIMEUNIT);
+    
+    
+    
     }
 
     private void populate() {

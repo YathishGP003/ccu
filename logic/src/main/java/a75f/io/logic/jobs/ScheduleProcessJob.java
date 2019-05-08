@@ -477,6 +477,7 @@ public class ScheduleProcessJob extends BaseJob {
     
     //Update Schedules instanly
     public static void updateSchedules() {
+        CcuLog.d(TAG_CCU_JOB,"updateSchedules ->");
     
         HashMap site = CCUHsApi.getInstance().read("site");
         if (site.size() == 0) {
@@ -530,6 +531,7 @@ public class ScheduleProcessJob extends BaseJob {
                 
                 systemVacation = activeSystemVacation != null || isAllZonesInVacation();
                 updateSystemOccupancy();
+                CcuLog.d(TAG_CCU_JOB,"<- updateSchedules");
             }
         }.start();
         

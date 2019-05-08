@@ -51,7 +51,7 @@ public class VavStagedRtu extends VavSystemProfile
     public int coolingStages = 0;
     public int fanStages = 0;
     
-    int[] stageStatus;
+    int[] stageStatus = new int[17];
     
     
     public void initTRSystem() {
@@ -395,7 +395,6 @@ public class VavStagedRtu extends VavSystemProfile
     @Override
     public String getStatusMessage(){
         StringBuilder status = new StringBuilder();
-        
         
         status.append((stageStatus[FAN_1.ordinal()] > 0) ? "1":"");
         status.append((stageStatus[FAN_2.ordinal()] > 0) ? ",2":"");

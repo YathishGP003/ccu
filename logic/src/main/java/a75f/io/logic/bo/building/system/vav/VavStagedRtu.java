@@ -422,9 +422,9 @@ public class VavStagedRtu extends VavSystemProfile
             status.append((stageStatus[HEATING_4.ordinal()] > 0) ? ",4" : "");
             status.append((stageStatus[HEATING_5.ordinal()] > 0) ? ",5 ON" : " ON");
         }
-        
-        
-        return status.toString();
+    
+    
+        return status.toString().equals("")? "OFF" : status.toString();
     }
     
     public void updateStagesSelected() {

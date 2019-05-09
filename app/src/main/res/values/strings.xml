@@ -143,10 +143,10 @@
     </string-array>
 
     <string-array name="zone_priority">
-        <item >High</item>
-        <item >Normal</item>
-        <item >Low</item>
         <item >No Priority</item>
+        <item >Low</item>
+        <item >Normal</item>
+        <item >High</item>
     </string-array>
 
     <string-array name="damper_size">

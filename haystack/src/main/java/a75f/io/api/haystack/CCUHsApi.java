@@ -620,9 +620,10 @@ public class CCUHsApi
 
         ArrayList points = readAll(query);
         String    id     = points.size() == 0 ? null : ((HashMap) points.get(0)).get("id").toString();
-        /*if (id == null || id == "") {
+        if (id == null || id == "") {
+            CcuLog.d("CCU_HS","write point id is null");
             return;
-        }*/
+        }
 
         HisItem item = new HisItem(id, new Date(), val);
         hisWrite(item);

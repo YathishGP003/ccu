@@ -286,18 +286,22 @@ public class FloorPlanFragment extends Fragment
 	private void updateModules(Zone zone)
 	{
 		Log.d("CCU","Zone Selected "+zone.getDisplayName());
-		mModuleListAdapter =
-				new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(), R.layout.listviewitem, createAddressList(
-						HSUtil.getEquips(zone.getId())));
-		
-		getActivity().runOnUiThread(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				moduleListView.setAdapter(mModuleListAdapter);
+		try {
+			ArrayList<Equip> zoneEquips  = HSUtil.getEquips(zone.getId());
+			if(zoneEquips != null && (zoneEquips.size() > 0)) {
+				mModuleListAdapter =
+						new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(), R.layout.listviewitem, createAddressList(zoneEquips));
+
+				getActivity().runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						moduleListView.setAdapter(mModuleListAdapter);
+					}
+				});
 			}
-		});
+		}catch (Exception e){
+			e.printStackTrace();
+		}
 	}
 	
 	private ArrayList<String> createAddressList(ArrayList<Equip> equips)
@@ -524,40 +528,41 @@ public class FloorPlanFragment extends Fragment
 		String nodeAddr = mModuleListAdapter.getItem(position);
 		
 		ZoneProfile profile = L.getProfile(Short.parseShort(nodeAddr));
-		
-		switch (profile.getProfileType()) {
+		if(profile != null) {
+
+			switch (profile.getProfileType()) {
 			/*case HMP:
 				showDialogFragment(FragmentHMPConfiguration
 						                   .newInstance(nodeAddr,getSelectedZone().roomName, config.getNodeType(), getSelectedFloor().mFloorName), FragmentHMPConfiguration.ID);
 				break;*/
-			case VAV_REHEAT:
-			case VAV_SERIES_FAN:
-			case VAV_PARALLEL_FAN:
-				System.out.println(" floor "+floor.getDisplayName()+" zone "+zone.getDisplayName()+" node :"+nodeAddr);
-				VavProfileConfiguration config = (VavProfileConfiguration)profile.getProfileConfiguration(Short.parseShort(nodeAddr));
-				System.out.println("Config "+config +" profile "+profile.getProfileType());
-				showDialogFragment(FragmentVAVConfiguration
-						                   .newInstance(Short.parseShort(nodeAddr),zone.getDisplayName(), config.getNodeType(), floor.getDisplayName(), profile.getProfileType()), FragmentVAVConfiguration.ID);
-				
+				case VAV_REHEAT:
+				case VAV_SERIES_FAN:
+				case VAV_PARALLEL_FAN:
+					System.out.println(" floor " + floor.getDisplayName() + " zone " + zone.getDisplayName() + " node :" + nodeAddr);
+					VavProfileConfiguration config = (VavProfileConfiguration) profile.getProfileConfiguration(Short.parseShort(nodeAddr));
+					System.out.println("Config " + config + " profile " + profile.getProfileType());
+					showDialogFragment(FragmentVAVConfiguration
+							.newInstance(Short.parseShort(nodeAddr), zone.getDisplayName(), config.getNodeType(), floor.getDisplayName(), profile.getProfileType()), FragmentVAVConfiguration.ID);
+					break;
+				case PLC:
+					showDialogFragment(FragmentPLCConfiguration
+							                   .newInstance(Short.parseShort(nodeAddr),zone.getDisplayName(), NodeType.SMART_NODE, floor.getDisplayName()), FragmentPLCConfiguration.ID);
 				break;
-			case PLC:
-				showDialogFragment(FragmentPLCConfiguration
-						                   .newInstance(Short.parseShort(nodeAddr),zone.getDisplayName(), NodeType.SMART_NODE, floor.getDisplayName()), FragmentPLCConfiguration.ID);
-				break;
-			case DAB:
-				showDialogFragment(FragmentDABConfiguration
-						                   .newInstance(Short.parseShort(nodeAddr),zone.getDisplayName(), NodeType.SMART_NODE, floor.getDisplayName(), profile.getProfileType()), FragmentDABConfiguration.ID);
-				break;
-				
-			case SMARTSTAT_CONVENTIONAL_PACK_UNIT:
-				System.out.println(" floor " + floor.getDisplayName() + " zone " + zone.getDisplayName() + " node :" + nodeAddr);
-				ConventionalUnitConfiguration cpuConfig = (ConventionalUnitConfiguration) profile.getProfileConfiguration(Short.parseShort(nodeAddr));
-				System.out.println("Config " + cpuConfig + " profile " + profile.getProfileType());
-				showDialogFragment(FragmentCPUConfiguration
-						.newInstance(Short.parseShort(nodeAddr), zone.getDisplayName(), cpuConfig.getNodeType(), floor.getDisplayName(), profile.getProfileType()), FragmentCPUConfiguration.ID);
-				break;
-			
-		}
+				case DAB:
+					showDialogFragment(FragmentDABConfiguration
+											   .newInstance(Short.parseShort(nodeAddr),zone.getDisplayName(), NodeType.SMART_NODE, floor.getDisplayName(), profile.getProfileType()), FragmentDABConfiguration.ID);
+					break;
+				case SMARTSTAT_CONVENTIONAL_PACK_UNIT:
+					System.out.println(" floor " + floor.getDisplayName() + " zone " + zone.getDisplayName() + " node :" + nodeAddr);
+					ConventionalUnitConfiguration cpuConfig = (ConventionalUnitConfiguration) profile.getProfileConfiguration(Short.parseShort(nodeAddr));
+					System.out.println("Config " + cpuConfig + " profile " + profile.getProfileType());
+					showDialogFragment(FragmentCPUConfiguration
+							.newInstance(Short.parseShort(nodeAddr), zone.getDisplayName(), cpuConfig.getNodeType(), floor.getDisplayName(), profile.getProfileType()), FragmentCPUConfiguration.ID);
+					break;
+
+			}
+		}else
+			Toast.makeText(getActivity(),"Zone profile is empty, recheck your DB",Toast.LENGTH_LONG);
 		
 		
 	}

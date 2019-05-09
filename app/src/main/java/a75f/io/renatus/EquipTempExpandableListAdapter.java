@@ -213,8 +213,8 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
             if(expandedListText.startsWith("smartstat")){
                 if(smartStatLayout != null) smartStatLayout.setVisibility(View.VISIBLE);
                 
-                double ssOperatingMode = CCUHsApi.getInstance().readHisValByQuery("point and standalone and temp and operation and mode and his and equipRef == \"" + equipId + "\"");
-                double ssFanOpMode = CCUHsApi.getInstance().readHisValByQuery("point and standalone and fan and operation and mode and his and equipRef == \"" + equipId + "\"");
+                double ssOperatingMode = CCUHsApi.getInstance().readPointPriorityValByQuery("point and standalone and temp and operation and mode and his and equipRef == \"" + equipId + "\"");
+                double ssFanOpMode = CCUHsApi.getInstance().readPointPriorityValByQuery("point and standalone and fan and operation and mode and his and equipRef == \"" + equipId + "\"");
 
                 ssCondModeSpinner.setSelection((int)ssOperatingMode);
                 ssFanModeSpinner.setSelection((int)ssFanOpMode);
@@ -224,8 +224,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                     ssCondModeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                         @Override
                         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                            if(position != (int)ssOperatingMode)
-                                StandaloneScheduler.updateOperationalPoints(equipId,"temp",position);
+                            StandaloneScheduler.updateOperationalPoints(equipId,"temp",position);
                         }
 
                         @Override
@@ -236,8 +235,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                     ssFanModeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                         @Override
                         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                            if(position != ssFanOpMode)
-                                StandaloneScheduler.updateOperationalPoints(equipId,"fan",position);
+                            StandaloneScheduler.updateOperationalPoints(equipId,"fan",position);
                         }
 
                         @Override

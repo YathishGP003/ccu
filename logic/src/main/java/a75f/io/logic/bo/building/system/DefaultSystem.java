@@ -20,6 +20,7 @@ import a75f.io.logic.bo.haystack.device.ControlMote;
  */
 public class DefaultSystem extends SystemProfile
 {
+    @Override
     public String getProfileName() {
         return "Default";
     }

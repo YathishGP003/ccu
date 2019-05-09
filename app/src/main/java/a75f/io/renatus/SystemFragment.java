@@ -158,6 +158,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			systemAuto.setEnabled(false);
 			systemCool.setEnabled(false);
 			systemHeat.setEnabled(false);*/
+			systemModePicker.setEnabled(false);
 			sbComfortValue.setEnabled(false);
 			targetMaxInsideHumidity.setEnabled(false);
 			targetMinInsideHumidity.setEnabled(false);
@@ -257,8 +258,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			@Override
 			public void run() {
 				systemModePicker.setValue((int)TunerUtil.readSystemUserIntentVal("rtu and mode"));
-				Log.d("CCU_UI",L.ccu().systemProfile.getStatusMessage());
-				equipmentStatus.setText(L.ccu().systemProfile.getStatusMessage());
+				String status = L.ccu().systemProfile.getStatusMessage();
+				equipmentStatus.setText(status.equals("") ? "OFF":status);
 				occupancyStatus.setText(ScheduleProcessJob.getSystemStatusString());
 				cbCompHumidity.setChecked(TunerUtil.readSystemUserIntentVal("compensate and humidity") > 0);
 				cbDemandResponse.setChecked(TunerUtil.readSystemUserIntentVal("demand and response") > 0);

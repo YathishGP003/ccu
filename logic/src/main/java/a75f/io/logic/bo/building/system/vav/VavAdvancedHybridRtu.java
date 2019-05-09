@@ -210,8 +210,8 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         if (!status.toString().equals("")) {
             status.insert(0, super.getStatusMessage()+" ; Analog ");
         }
-        
-        return status.toString();
+    
+        return status.toString().equals("")? "OFF" : status.toString();
     }
     
     @Override

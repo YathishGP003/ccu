@@ -288,8 +288,8 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         status.append(systemFanLoopOp > 0 ? " Fan ON ":"");
         status.append(systemCoolingLoopOp > 0 ? " | Cooling ON ":"");
         status.append(systemHeatingLoopOp > 0 ? " | Heating ON ":"");
-        
-        return status.toString();
+    
+        return status.toString().equals("")? "OFF" : status.toString();
     }
     
     public void addSystemEquip() {

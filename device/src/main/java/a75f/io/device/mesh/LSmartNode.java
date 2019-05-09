@@ -446,13 +446,13 @@ public class LSmartNode
     }
 
     private static double getMaxUserTempLimits(String equipId){
-       double deadband = TunerUtil.readTunerValByQuery("cooling and deadband", equipId);
+        double deadband = TunerUtil.readTunerValByQuery("cooling and deadband and base", equipId);
        double maxCool =  TunerUtil.readTunerValByQuery("zone and cooling and user and limit and max",equipId);
        return maxCool- deadband;
     }
 
     private static double getMinUserTempLimits(String equipId){
-        double deadband = TunerUtil.readTunerValByQuery("heating and deadband", equipId);
+        double deadband = TunerUtil.readTunerValByQuery("heating and deadband and base", equipId);
         double maxHeat =  TunerUtil.readTunerValByQuery("zone and heating and user and limit and max",equipId);
         return maxHeat+ deadband;
     }

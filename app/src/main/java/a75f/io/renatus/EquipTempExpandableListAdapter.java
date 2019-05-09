@@ -224,8 +224,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                     ssCondModeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                         @Override
                         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                            if(position != (int)ssOperatingMode)
-                                StandaloneScheduler.updateOperationalPoints(equipId,"temp",position);
+                            StandaloneScheduler.updateOperationalPoints(equipId,"temp",position);
                         }
 
                         @Override
@@ -236,8 +235,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                     ssFanModeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                         @Override
                         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                            if(position != ssFanOpMode)
-                                StandaloneScheduler.updateOperationalPoints(equipId,"fan",position);
+                            StandaloneScheduler.updateOperationalPoints(equipId,"fan",position);
                         }
 
                         @Override

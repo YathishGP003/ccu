@@ -97,8 +97,15 @@ public class FloorPlanFragment extends Fragment
 						{
 							if(LSerial.getInstance().isConnected()) //If usb connected and pairing done then reseed
 								LSerial.getInstance().setResetSeedMessage(true);
-							updateModules(getSelectedZone());
-							getActivity().unregisterReceiver(mPairingReceiver);
+							try{
+								updateModules(getSelectedZone());
+								//Crash here because of activity null while moving to other fragment and return back here after edit config
+								if((getActivity() != null) && (mPairingReceiver != null))
+								getActivity().unregisterReceiver(mPairingReceiver);
+
+							}catch (Exception e){
+								e.printStackTrace();
+							}
 						}
 					}).start();
 					break;

@@ -44,8 +44,8 @@ public class VAVScheduler {
 
         occ.setVacation(vacation);
 
-        double heatingDeadBand = TunerUtil.readTunerValByQuery("heating and deadband", equip.getId());
-        double coolingDeadBand = TunerUtil.readTunerValByQuery("cooling and deadband", equip.getId());
+        double heatingDeadBand = TunerUtil.readTunerValByQuery("heating and deadband and base", equip.getId());
+        double coolingDeadBand = TunerUtil.readTunerValByQuery("cooling and deadband and base", equip.getId());
         double setback = TunerUtil.readTunerValByQuery("unoccupied and setback", equip.getId());
         
         occ.setHeatingDeadBand(heatingDeadBand);
@@ -54,6 +54,9 @@ public class VAVScheduler {
         
         if (occ != null && ScheduleProcessJob.putOccupiedModeCache(equip.getRoomRef(), occ)) {
             double avgTemp = (occ.getCoolingVal()+occ.getHeatingVal())/2.0;
+            double deadbands = (occ.getCoolingVal() - occ.getHeatingVal()) / 2.0 ;
+            occ.setCoolingDeadBand(deadbands);
+            occ.setHeatingDeadBand(deadbands);
             Double coolingTemp = occ.isOccupied() ? occ.getCoolingVal() : (occ.getCoolingVal() + occ.getUnoccupiedZoneSetback());
             setDesiredTemp(equip, coolingTemp, "cooling");
 

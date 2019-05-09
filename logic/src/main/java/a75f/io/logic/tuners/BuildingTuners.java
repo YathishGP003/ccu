@@ -632,7 +632,7 @@ public class BuildingTuners
                 hayStack.pointWrite(HRef.copy(heatingDbId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
             }
         }
-        hayStack.writeHisValById(coolingDbMultiplierId, HSUtil.getPriorityVal(coolingDbMultiplierId));
+        hayStack.writeHisValById(heatingDbId, HSUtil.getPriorityVal(heatingDbId));
     
         Point heatingDbMultiplier = new Point.Builder()
                                   .setDisplayName(equipdis+"-"+"heatingDeadbandMultiplier")

@@ -213,8 +213,8 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
             if(expandedListText.startsWith("smartstat")){
                 if(smartStatLayout != null) smartStatLayout.setVisibility(View.VISIBLE);
                 
-                double ssOperatingMode = CCUHsApi.getInstance().readHisValByQuery("point and standalone and temp and operation and mode and his and equipRef == \"" + equipId + "\"");
-                double ssFanOpMode = CCUHsApi.getInstance().readHisValByQuery("point and standalone and fan and operation and mode and his and equipRef == \"" + equipId + "\"");
+                double ssOperatingMode = CCUHsApi.getInstance().readPointPriorityValByQuery("point and standalone and temp and operation and mode and his and equipRef == \"" + equipId + "\"");
+                double ssFanOpMode = CCUHsApi.getInstance().readPointPriorityValByQuery("point and standalone and fan and operation and mode and his and equipRef == \"" + equipId + "\"");
 
                 ssCondModeSpinner.setSelection((int)ssOperatingMode);
                 ssFanModeSpinner.setSelection((int)ssFanOpMode);

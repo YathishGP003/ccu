@@ -368,7 +368,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
             
             
         } else {
-            zonePriority.setSelection(1);//LOW
+            zonePriority.setSelection(2);//NORMAL
         }
         
         setButton.setOnClickListener(new View.OnClickListener(){

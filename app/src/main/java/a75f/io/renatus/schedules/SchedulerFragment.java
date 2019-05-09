@@ -457,8 +457,9 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
             }
     
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            builder.setMessage("Current settings override existing schedules \n"+overlapDays.toString())
+            builder.setMessage("Current settings cannot be applied because schedules are conflicting on \n"+overlapDays.toString())
                    .setCancelable(false)
+                   .setIcon(android.R.drawable.ic_dialog_alert)
                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                        public void onClick(DialogInterface dialog, int id) {
                            //do things

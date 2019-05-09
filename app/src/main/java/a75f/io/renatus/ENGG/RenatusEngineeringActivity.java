@@ -5,6 +5,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import a75f.io.logger.CcuLog;
 import a75f.io.renatus.R;
 
 public class RenatusEngineeringActivity extends AppCompatActivity
@@ -42,25 +43,11 @@ public class RenatusEngineeringActivity extends AppCompatActivity
 	@Override
 	public void onStart() {
 		super.onStart();
-		
-	    initializeLogging();
 	}
 	
-	public void initializeLogging() {
-		// Wraps Android's native log framework.
-		/*LogWrapper logWrapper = new LogWrapper();
-		// Using CcuLog, front-end to the logging chain, emulates android.util.log method signatures.
-		CcuLog.setLogNode(logWrapper);
-		
-		// Filter strips out everything except the message text.
-		MessageOnlyLogFilter msgFilter = new MessageOnlyLogFilter();
-		//logWrapper.setNext(msgFilter);
-		
-		// On screen logging via a fragment with a TextView.
-		LogFragment logFragment = (LogFragment) getSupportFragmentManager()
-				                                        .findFragmentById(R.id.log_fragment);
-		msgFilter.setNext(logFragment.getLogView());
-		
-		//CcuLog.i(TAG, "Ready");*/
+	@Override
+	public void onStop() {
+		super.onStop();
+		CcuLog.setLogNode(null);
 	}
 }

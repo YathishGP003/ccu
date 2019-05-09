@@ -22,6 +22,7 @@ import android.widget.TextView;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.L;
@@ -36,7 +37,7 @@ import a75f.io.logic.tuners.TunerUtil;
 
 public class SystemFragment extends Fragment implements AdapterView.OnItemSelectedListener
 {
-	private static final String TAG = "SystemFragment_bkp";
+	private static final String TAG = "SystemFragment";
 	SeekBar  sbComfortValue;
 	
 	Spinner targetMaxInsideHumidity;
@@ -51,6 +52,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	boolean maxHumiditySpinnerReady = false;
 	
 	
+	TextView ccuName;
 	TextView profileTitle;
 	NumberPicker systemModePicker;
 	
@@ -85,6 +87,9 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
 	{
 		
+		ccuName = view.findViewById(R.id.ccuName);
+		HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
+		ccuName.setText(ccu.get("dis").toString());
 		profileTitle = view.findViewById(R.id.profileTitle);
 		systemModePicker = view.findViewById(R.id.systemModePicker);
 		coolingAvailable = L.ccu().systemProfile.isCoolingAvailable();
@@ -123,12 +128,6 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		occupancyStatus = view.findViewById(R.id.occupancyStatus);
 		equipmentStatus = view.findViewById(R.id.equipmentStatus);
 		
-		/*systemModeRg = view.findViewById(R.id.systemConditioningMode);
-		systemOff = view.findViewById(R.id.systemOff);
-		systemAuto = view.findViewById(R.id.systemAuto);
-		systemCool = view.findViewById(R.id.systemManualCool);
-		systemHeat = view.findViewById(R.id.systemManualHeat);
-*/
 		sbComfortValue = view.findViewById(R.id.systemComfortValue);
 		
 		targetMaxInsideHumidity = view.findViewById(R.id.targetMaxInsideHumidity);
@@ -154,10 +153,6 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		cbDemandResponse = view.findViewById(R.id.cbDemandResponse);
 		
 		if (L.ccu().systemProfile instanceof DefaultSystem) {
-		/*	systemOff.setEnabled(false);
-			systemAuto.setEnabled(false);
-			systemCool.setEnabled(false);
-			systemHeat.setEnabled(false);*/
 			systemModePicker.setEnabled(false);
 			sbComfortValue.setEnabled(false);
 			targetMaxInsideHumidity.setEnabled(false);
@@ -167,37 +162,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			return;
 		}
 		
-		/*systemAuto.setEnabled(L.ccu().systemProfile.isCoolingAvailable() && L.ccu().systemProfile.isHeatingAvailable());
-		systemCool.setEnabled(L.ccu().systemProfile.isCoolingAvailable());
-		systemHeat.setEnabled(L.ccu().systemProfile.isHeatingAvailable());
-		
-		final Handler handler = new Handler();
-		handler.post(new Runnable() {
-	                    @Override
-	                    public void run() {
-		                    SystemMode systemMode = SystemMode.values()[(int)TunerUtil.readSystemUserIntentVal("rtu and mode")];
-		                    Log.d("CCU_UI"," Set system Mode "+systemMode);
-		                    switch (systemMode) {
-			                    case OFF:
-				                    systemOff.setChecked(true);
-				                    break;
-			                    case AUTO:
-				                    systemAuto.setChecked(true);
-				                    break;
-			                    case COOLONLY:
-				                    systemCool.setChecked(true);
-				                    break;
-			                    case HEATONLY:
-				                    systemHeat.setChecked(true);
-				                    break;
-			                    default:
-				                    systemOff.setChecked(true);
-		                    }
-	                    }
-                    });
-		*/
 		sbComfortValue.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-			
 			@Override
 			public void onProgressChanged(SeekBar seekBar, int progresValue, boolean fromUser) {
 			}

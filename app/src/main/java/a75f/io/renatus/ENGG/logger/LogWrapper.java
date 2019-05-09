@@ -57,7 +57,7 @@ public class LogWrapper implements LogNode
 		
 		// This is functionally identical to CcuLog.x(tag, useMsg);
 		// For instance, if priority were CcuLog.VERBOSE, this would be the same as CcuLog.v(tag, useMsg)
-		Log.println(priority, tag, useMsg);
+		// Log.println(priority, tag, useMsg);
 		
 		// If this isn't the last node in the chain, move things along.
 		if (mNext != null) {

@@ -565,7 +565,8 @@ public class DabEquip
         config.enableOccupancyControl = getConfigNumVal("enable and occupancy") > 0 ? true : false ;
         config.enableCO2Control = getConfigNumVal("enable and co2") > 0 ? true : false ;
         config.enableIAQControl = getConfigNumVal("enable and iaq") > 0 ? true : false ;
-        config.setPriority(ZonePriority.values()[(int)getConfigNumVal("priority")]);
+        //config.setPriority(ZonePriority.values()[(int)getConfigNumVal("priority")]);
+        config.setPriority(ZonePriority.values()[(int)getZonePriorityValue()]);
         config.temperaturOffset = getConfigNumVal("temperature and offset");
     
         config.setNodeType(NodeType.SMART_NODE);//TODO - revisit
@@ -814,5 +815,9 @@ public class DabEquip
             throw new IllegalArgumentException();
         }
         CCUHsApi.getInstance().writeDefaultValById(id, status);
+    }
+    public double getZonePriorityValue(){
+        HashMap equip = CCUHsApi.getInstance().read("equip and group == \""+nodeAddr+"\"");
+        return CCUHsApi.getInstance().readPointPriorityValByQuery("zone and priority and config and equipRef == \""+equip.get("id")+"\"");
     }
 }

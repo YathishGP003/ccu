@@ -377,7 +377,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
             
             
         } else {
-            zonePriority.setSelection(1);//LOW
+            zonePriority.setSelection(2);//NORMAL
         }
     
         

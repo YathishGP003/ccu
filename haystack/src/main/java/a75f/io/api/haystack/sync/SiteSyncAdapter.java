@@ -22,7 +22,7 @@ public class SiteSyncAdapter extends EntitySyncAdapter
 {
     @Override
     public boolean onSync() {
-        CcuLog.i("CCU", "doSyncSite ->");
+        CcuLog.i("CCU_HS_SYNC", "onSync Site");
         HDict sDict =  CCUHsApi.getInstance().readHDict("site");
         HDictBuilder b = new HDictBuilder().add(sDict);
         String siteLUID = b.remove("id").toString();
@@ -33,7 +33,7 @@ public class SiteSyncAdapter extends EntitySyncAdapter
             entities.add(b.toDict());
             HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
             String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
-            CcuLog.i("CCU", "Response : "+response);
+            CcuLog.i("CCU_HS_SYNC", "Response : "+response);
             if (response == null) {
                 return false;
             }
@@ -69,7 +69,7 @@ public class SiteSyncAdapter extends EntitySyncAdapter
         
         }*/
     
-        CcuLog.i("CCU", "<- doSyncSite");
+        CcuLog.i("CCU_HS_SYNC", "<- doSyncSite");
         return true;
     }
 }

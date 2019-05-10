@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
@@ -24,7 +26,7 @@ import a75f.io.logger.CcuLog;
 
 public class EntitySyncHandler
 {
-    private static final String TAG = EntitySyncHandler.class.getSimpleName();
+    private static final String TAG = "CCU_HS_SYNC";
     //CCUHsApi hayStack;
     
     EntitySyncAdapter siteAdapter     = new SiteSyncAdapter();
@@ -37,8 +39,8 @@ public class EntitySyncHandler
     EntitySyncAdapter scheduleAdapter = new ScheduleSyncAdapter();
     
     public boolean syncPending = false;
-    
     public boolean syncProgress = false;//TODO- Revisit
+    public boolean syncScheduled = true;
     
     public synchronized void sync() {
         syncProgress = true;
@@ -50,19 +52,23 @@ public class EntitySyncHandler
                     && deviceAdapter.onSync() && rawPointAdapter.onSync()
                     && scheduleAdapter.onSync())
                      {
+                         CcuLog.i(TAG, "Entity Sync Completed");
                          syncPending = false;
+            } else {
+                CcuLog.i(TAG, "Entity Sync Failed , Schedule Retry");
+                scheduleSync();
             }
         }
         
         if (CCUHsApi.getInstance().tagsDb.removeIdMap.size() > 0) {
-            CcuLog.i("CCU", "RemoveIDMap : "+CCUHsApi.getInstance().tagsDb.removeIdMap);
+            CcuLog.i(TAG, "RemoveIDMap : "+CCUHsApi.getInstance().tagsDb.removeIdMap);
             doSyncRemoveIds();
         }
     
-        CcuLog.i("CCU", "UpdateIDMap : "+CCUHsApi.getInstance().tagsDb.updateIdMap);
+        CcuLog.i(TAG, "UpdateIDMap : "+CCUHsApi.getInstance().tagsDb.updateIdMap);
     
         if (CCUHsApi.getInstance().tagsDb.updateIdMap.size() > 0) {
-            CcuLog.i("CCU", "UpdateIDMap : "+CCUHsApi.getInstance().tagsDb.updateIdMap);
+            CcuLog.i(TAG, "UpdateIDMap : "+CCUHsApi.getInstance().tagsDb.updateIdMap);
             doSyncUpdateEntities();
         }
         syncProgress = false;
@@ -74,7 +80,7 @@ public class EntitySyncHandler
     
     public void doSyncRemoveIds()
     {
-        CcuLog.i("CCU", "doSyncRemoveIds->");
+        CcuLog.i(TAG, "doSyncRemoveIds->");
         ArrayList<HDict> entities = new ArrayList<>();
         
         for (String removeId : CCUHsApi.getInstance().tagsDb.removeIdMap.values())
@@ -91,7 +97,7 @@ public class EntitySyncHandler
         {
             CCUHsApi.getInstance().tagsDb.removeIdMap.clear();
         }
-        CcuLog.i("CCU", "Response: \n" + response);
+        CcuLog.i(TAG, "Response: \n" + response);
     }
 
     public static HashSet<String> ref = new HashSet<>();
@@ -113,7 +119,7 @@ public class EntitySyncHandler
      * Update request should be sent with GUID as part of the entity.
      */
     public void doSyncUpdateEntities() {
-        CcuLog.i("CCU", "doSyncUpdateEntities->");
+        CcuLog.i(TAG, "doSyncUpdateEntities->");
         ArrayList<HDict> entities = new ArrayList<>();
         for (String luid : CCUHsApi.getInstance().tagsDb.updateIdMap.keySet()) {
             if (CCUHsApi.getInstance().getGUID(luid) == null) {
@@ -158,7 +164,7 @@ public class EntitySyncHandler
         {
             HGrid grid = HGridBuilder.dictsToGrid(hDIcts.toArray(new HDict[hDIcts.size()]));
             String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
-            CcuLog.i("CCU", "Response: \n" + response);
+            CcuLog.i(TAG, "Response: \n" + response);
             if (response != null)
             {
                 CcuLog.i("CCU", "Updated Entities: "+CCUHsApi.getInstance().tagsDb.updateIdMap);
@@ -175,7 +181,7 @@ public class EntitySyncHandler
 
         for (Map s: sites) {
             if (CCUHsApi.getInstance().getGUID(s.get("id").toString()) == null) {
-                CcuLog.d("CCU_HS","Entity sync required :Site not synced :"+ s.get("id"));
+                CcuLog.d(TAG,"Entity sync required :Site not synced :"+ s.get("id"));
                 syncPending = true;
                 return true;
             }
@@ -184,7 +190,7 @@ public class EntitySyncHandler
         ArrayList<HashMap> floors = CCUHsApi.getInstance().readAll("floor");
         for (Map f: floors) {
             if (CCUHsApi.getInstance().getGUID(f.get("id").toString()) == null) {
-                CcuLog.d("CCU_HS","Entity sync required :Floor not synced :"+ f.get("id"));
+                CcuLog.d(TAG,"Entity sync required :Floor not synced :"+ f.get("id"));
                 syncPending = true;
                 return true;
             }
@@ -193,7 +199,7 @@ public class EntitySyncHandler
         ArrayList<HashMap> zones = CCUHsApi.getInstance().readAll("zone");
         for (Map z: zones) {
             if (CCUHsApi.getInstance().getGUID(z.get("id").toString()) == null) {
-                CcuLog.d("CCU_HS","Entity sync required :Zone not synced :"+ z.get("id"));
+                CcuLog.d(TAG,"Entity sync required :Zone not synced :"+ z.get("id"));
                 syncPending = true;
                 return true;
             }
@@ -202,7 +208,7 @@ public class EntitySyncHandler
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip");
         for (Map q: equips) {
             if (CCUHsApi.getInstance().getGUID(q.get("id").toString()) == null) {
-                CcuLog.d("CCU_HS","Entity sync required :Equip not synced :"+ q.get("id"));
+                CcuLog.d(TAG,"Entity sync required :Equip not synced :"+ q.get("id"));
                 syncPending = true;
                 return true;
             }
@@ -210,7 +216,7 @@ public class EntitySyncHandler
         ArrayList<HashMap> devices = CCUHsApi.getInstance().readAll("device");
         for (Map d: devices) {
             if (CCUHsApi.getInstance().getGUID(d.get("id").toString()) == null) {
-                CcuLog.d("CCU_HS","Entity sync required :device not synced :"+ d.get("id"));
+                CcuLog.d(TAG,"Entity sync required :device not synced :"+ d.get("id"));
                 syncPending = true;
                 return true;
             }
@@ -218,7 +224,7 @@ public class EntitySyncHandler
         ArrayList<HashMap> points = CCUHsApi.getInstance().readAll("point");
         for (Map p: points) {
             if (CCUHsApi.getInstance().getGUID(p.get("id").toString()) == null) {
-                CcuLog.d("CCU_HS","Entity sync required :Point not synced :"+ p.get("id"));
+                CcuLog.d(TAG,"Entity sync required :Point not synced :"+ p.get("id"));
                 syncPending = true;
                 return true;
             }
@@ -226,11 +232,28 @@ public class EntitySyncHandler
         ArrayList<HashMap> schedules = CCUHsApi.getInstance().readAll("schedule");
         for (Map s: schedules) {
             if (CCUHsApi.getInstance().getGUID(s.get("id").toString()) == null) {
-                CcuLog.d("CCU_HS","Entity sync required :Schedule not synced :"+ s.get("id"));
+                CcuLog.d(TAG,"Entity sync required :Schedule not synced :"+ s.get("id"));
                 syncPending = true;
                 return true;
             }
         }
         return false;
+    }
+    
+    //retry sync after 30 sec
+    public void scheduleSync() {
+        syncScheduled = true;
+        Timer timer = new Timer();
+        TimerTask timerTask = new TimerTask() {
+            public void run() {
+               CcuLog.i(TAG, "Entity Sync Scheduled");
+               syncScheduled = false;
+               if (!syncProgress)
+               {
+                   sync();
+               }
+            }
+        };
+        timer.schedule(timerTask, 30000);
     }
 }

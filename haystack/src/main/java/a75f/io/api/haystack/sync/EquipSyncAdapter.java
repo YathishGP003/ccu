@@ -25,7 +25,7 @@ public class EquipSyncAdapter extends EntitySyncAdapter
 {
     @Override
     public boolean onSync() {
-        CcuLog.i("CCU", "doSyncEquips ->");
+        CcuLog.i("CCU_HS_SYNC", "onSync Equips");
         HashMap site = CCUHsApi.getInstance().read("site");
         String siteLUID = site.get("id").toString();
         
@@ -40,7 +40,7 @@ public class EquipSyncAdapter extends EntitySyncAdapter
         
         for (Map m: equips)
         {
-            CcuLog.i("CCU", m.toString());
+            CcuLog.i("CCU_HS_SYNC", m.toString());
             String luid = m.remove("id").toString();
             if (CCUHsApi.getInstance().getGUID(luid) == null) {
                 equipLUIDList.add(luid);
@@ -48,20 +48,26 @@ public class EquipSyncAdapter extends EntitySyncAdapter
                 if (m.get("floorRef") != null && !m.get("floorRef").toString().equals("SYSTEM"))
                 {
                     String guid = CCUHsApi.getInstance().getGUID(m.get("floorRef").toString());
-                    if(guid != null)
-                        m.put("floorRef", HRef.copy(guid));
+                    if(guid == null) {
+                        return false;
+                    }
+                    m.put("floorRef", HRef.copy(guid));
                 }
                 if (m.get("roomRef") != null && !m.get("roomRef").toString().equals("SYSTEM") )
                 {
                     String guid = CCUHsApi.getInstance().getGUID(m.get("roomRef").toString());
-                    if(guid != null)
-                        m.put("roomRef", HRef.copy(guid));
+                    if(guid == null) {
+                        return false;
+                    }
+                    m.put("roomRef", HRef.copy(guid));
                 }
-                if (m.get("ahuRef") != null && CCUHsApi.getInstance().getGUID(m.get("ahuRef").toString()) != null)
+                if (m.get("ahuRef") != null)
                 {
                     String guid = CCUHsApi.getInstance().getGUID(m.get("ahuRef").toString());
-                    if(guid != null)
-                        m.put("ahuRef", HRef.copy(guid));
+                    if(guid == null) {
+                        return false;
+                    }
+                    m.put("ahuRef", HRef.copy(guid));
                 }
                 entities.add(HSUtil.mapToHDict(m));
             }
@@ -70,7 +76,7 @@ public class EquipSyncAdapter extends EntitySyncAdapter
         {
             HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
             String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
-            CcuLog.i("CCU", "Response: \n" + response);
+            CcuLog.i("CCU_HS_SYNC", "Response: \n" + response);
             if (response == null)
             {
                 return false;
@@ -95,10 +101,10 @@ public class EquipSyncAdapter extends EntitySyncAdapter
     }
     
     private boolean syncSystemEquip(String siteRef) {
-        CcuLog.i("CCU", "doSyncSystemEquip ->");
+        CcuLog.i("CCU_HS_SYNC", "SyncSystemEquip");
         HashMap systemEquip = CCUHsApi.getInstance().read("equip and system");
         if (systemEquip == null || systemEquip.size() == 0) {
-            CcuLog.d("CCU","Abort System, System Equip does not exist");
+            CcuLog.d("CCU_HS_SYNC","Abort System, System Equip does not exist");
             return false;
         }
         String equipLUID = systemEquip.remove("id").toString();
@@ -112,7 +118,7 @@ public class EquipSyncAdapter extends EntitySyncAdapter
     
         HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
         String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
-        CcuLog.i("CCU", "Response: \n" + response);
+        CcuLog.i("CCU_HS_SYNC", "Response: \n" + response);
         if (response == null)
         {
             return false;

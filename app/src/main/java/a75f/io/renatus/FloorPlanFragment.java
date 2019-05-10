@@ -31,7 +31,6 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
-import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.mesh.LSerial;
@@ -293,22 +292,18 @@ public class FloorPlanFragment extends Fragment
 	private void updateModules(Zone zone)
 	{
 		Log.d("CCU","Zone Selected "+zone.getDisplayName());
-		try {
-			ArrayList<Equip> zoneEquips  = HSUtil.getEquips(zone.getId());
-			if(zoneEquips != null && (zoneEquips.size() > 0)) {
-				mModuleListAdapter =
-						new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(), R.layout.listviewitem, createAddressList(zoneEquips));
-
-				getActivity().runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						moduleListView.setAdapter(mModuleListAdapter);
-					}
-				});
+		mModuleListAdapter =
+				new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(), R.layout.listviewitem, createAddressList(
+						HSUtil.getEquips(zone.getId())));
+		
+		getActivity().runOnUiThread(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				moduleListView.setAdapter(mModuleListAdapter);
 			}
-		}catch (Exception e){
-			e.printStackTrace();
-		}
+		});
 	}
 	
 	private ArrayList<String> createAddressList(ArrayList<Equip> equips)

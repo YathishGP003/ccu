@@ -25,6 +25,7 @@ public class ScheduleSyncAdapter extends EntitySyncAdapter
 {
     @Override
     public boolean onSync() {
+        CcuLog.i("CCU_HS_SYNC", "onSync Schedules");
         ArrayList<HashMap> schedules = CCUHsApi.getInstance().readAll("schedule");
         HashMap site = CCUHsApi.getInstance().read("site");
         String siteLUID = site.get("id").toString();
@@ -53,10 +54,10 @@ public class ScheduleSyncAdapter extends EntitySyncAdapter
         {
             HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
             String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
-            CcuLog.i("CCU_HS", "Response: \n" + response);
+            CcuLog.i("CCU_HS_SYNC", "Response: \n" + response);
             if (response == null)
             {
-                CcuLog.i("CCU_HS", "Aborting Schedule Sync");
+                CcuLog.i("CCU_HS_SYNC", "Aborting Schedule Sync");
                 return false;
             }
             HZincReader zReader = new HZincReader(response);

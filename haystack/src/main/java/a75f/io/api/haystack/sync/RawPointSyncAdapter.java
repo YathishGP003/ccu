@@ -25,7 +25,7 @@ public class RawPointSyncAdapter extends EntitySyncAdapter
 {
     @Override
     public boolean onSync() {
-        CcuLog.i("CCU", "doSyncPhyPoints ->");
+        CcuLog.i("CCU_HS_SYNC", "onSync Physical points");
         HashMap site = CCUHsApi.getInstance().read("site");
         String siteLUID = site.get("id").toString();
         
@@ -52,20 +52,26 @@ public class RawPointSyncAdapter extends EntitySyncAdapter
                     if (m.get("pointRef") != null)
                     {
                         String guid = CCUHsApi.getInstance().getGUID(m.get("pointRef").toString());
-                        if(guid != null)
-                            m.put("pointRef", HRef.copy(guid));
+                        if(guid == null) {
+                            return false;
+                        }
+                        m.put("pointRef", HRef.copy(guid));
                     }
                     if (m.get("floorRef") != null && !m.get("floorRef").toString().equals("SYSTEM"))
                     {
                         String guid = CCUHsApi.getInstance().getGUID(m.get("floorRef").toString());
-                        if(guid != null)
-                            m.put("floorRef", HRef.copy(guid));
+                        if(guid == null) {
+                            return false;
+                        }
+                        m.put("floorRef", HRef.copy(guid));
                     }
                     if (m.get("roomRef") != null && !m.get("roomRef").toString().equals("SYSTEM"))
                     {
                         String guid = CCUHsApi.getInstance().getGUID(m.get("roomRef").toString());
-                        if(guid != null)
-                            m.put("roomRef", HRef.copy(guid));
+                        if(guid == null) {
+                            return false;
+                        }
+                        m.put("roomRef", HRef.copy(guid));
                     }
                     entities.add(HSUtil.mapToHDict(m));
                 }
@@ -74,7 +80,7 @@ public class RawPointSyncAdapter extends EntitySyncAdapter
             {
                 HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
                 String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
-                CcuLog.i("CCU", "Response: \n" + response);
+                CcuLog.i("CCU_HS_SYNC", "Response: \n" + response);
                 if (response == null)
                 {
                     return false;

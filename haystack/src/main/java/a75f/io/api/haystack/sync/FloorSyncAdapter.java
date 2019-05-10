@@ -26,7 +26,7 @@ public class FloorSyncAdapter extends EntitySyncAdapter
     @Override
     public boolean onSync() {
     
-        CcuLog.i("CCU", "doSyncFloors ->");
+        CcuLog.i("CCU_HS_SYNC", "onSync Floors");
         ArrayList<HashMap> floors = CCUHsApi.getInstance().readAll("floor");
         ArrayList<String> floorLUIDList = new ArrayList();
     
@@ -40,8 +40,10 @@ public class FloorSyncAdapter extends EntitySyncAdapter
             if (CCUHsApi.getInstance().getGUID(luid) == null) {
                 floorLUIDList.add(luid);
                 String guid = CCUHsApi.getInstance().getGUID(site.get("id").toString());
-                if(guid != null)
-                    m.put("siteRef", HRef.copy(guid));
+                if(guid == null) {
+                   return false;
+                }
+                m.put("siteRef", HRef.copy(guid));
                 entities.add(HSUtil.mapToHDict(m));
             }
         }
@@ -50,10 +52,10 @@ public class FloorSyncAdapter extends EntitySyncAdapter
         {
             HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
             String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
-            CcuLog.i("CCU", "Response: \n" + response);
+            CcuLog.i("CCU_HS_SYNC", "Response: \n" + response);
             if (response == null)
             {
-                CcuLog.i("CCU", "Aborting Floor Sync");
+                CcuLog.i("CCU_HS_SYNC", "Aborting Floor Sync");
                 return false;
             }
             HZincReader zReader = new HZincReader(response);

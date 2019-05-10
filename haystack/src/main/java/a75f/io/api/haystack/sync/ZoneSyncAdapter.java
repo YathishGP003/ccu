@@ -25,7 +25,7 @@ public class ZoneSyncAdapter extends EntitySyncAdapter
 {
     @Override
     public boolean onSync() {
-        CcuLog.i("CCU", "doSyncZones ->");
+        CcuLog.i("CCU_HS_SYNC", "onSync Zones");
         ArrayList<HashMap> floors = CCUHsApi.getInstance().readAll("floor");
         ArrayList<String> zoneLUIDList = new ArrayList();
         ArrayList<HDict> entities = new ArrayList<>();
@@ -35,7 +35,7 @@ public class ZoneSyncAdapter extends EntitySyncAdapter
             ArrayList<HashMap> zones = CCUHsApi.getInstance().readAll("room and floorRef == \""+f.get("id")+"\"");
             for (Map m : zones)
             {
-                CcuLog.i("CCU", m.toString());
+                CcuLog.i("CCU_HS_SYNC", m.toString());
                 String luid = m.remove("id").toString();
                 if (CCUHsApi.getInstance().getGUID(luid) == null)
                 {
@@ -56,10 +56,10 @@ public class ZoneSyncAdapter extends EntitySyncAdapter
         {
             HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
             String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
-            CcuLog.i("CCU", "Response: \n" + response);
+            CcuLog.i("CCU_HS_SYNC", "Response: \n" + response);
             if (response == null)
             {
-                CcuLog.i("CCU", "Aborting Zone Sync");
+                CcuLog.i("CCU_HS_SYNC", "Aborting Zone Sync");
                 return false;
             }
             HZincReader zReader = new HZincReader(response);

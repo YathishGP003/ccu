@@ -25,7 +25,7 @@ public class DeviceSyncAdapter extends EntitySyncAdapter
 {
     @Override
     public boolean onSync() {
-        CcuLog.i("CCU", "doSyncDevices ->");
+        CcuLog.i("CCU_HS_SYNC", "onSync Devices");
         HashMap site = CCUHsApi.getInstance().read("site");
         String siteLUID = site.get("id").toString();
         ArrayList<HashMap> devices = CCUHsApi.getInstance().readAll("device");
@@ -33,7 +33,7 @@ public class DeviceSyncAdapter extends EntitySyncAdapter
         ArrayList<HDict> entities = new ArrayList<>();
         for (Map m: devices)
         {
-            CcuLog.i("CCU", m.toString());
+            CcuLog.i("CCU_HS_SYNC", m.toString());
             String luid = m.remove("id").toString();
             if (CCUHsApi.getInstance().getGUID(luid) == null) {
                 deviceLUIDList.add(luid);
@@ -43,26 +43,34 @@ public class DeviceSyncAdapter extends EntitySyncAdapter
 				if (m.get("floorRef") != null && !m.get("floorRef").toString().equals("SYSTEM"))
                 {
                     String guid = CCUHsApi.getInstance().getGUID(m.get("floorRef").toString());
-                    if(guid != null)
-                        m.put("floorRef", HRef.copy(guid));
+                    if(guid == null) {
+                        return false;
+                    }
+                    m.put("floorRef", HRef.copy(guid));
                 }
                 if (m.get("roomRef") != null && !m.get("roomRef").toString().equals("SYSTEM"))
                 {
                     String guid = CCUHsApi.getInstance().getGUID(m.get("roomRef").toString());
-                    if(guid != null)
-                        m.put("roomRef", HRef.copy(guid));
+                    if(guid == null) {
+                        return false;
+                    }
+                    m.put("roomRef", HRef.copy(guid));
                 }
                 if (m.get("equipRef") != null)
                 {
                     String guid = CCUHsApi.getInstance().getGUID(m.get("equipRef").toString());
-                    if(guid != null)
-                        m.put("equipRef", HRef.copy(guid));
+                    if(guid == null) {
+                        return false;
+                    }
+                    m.put("equipRef", HRef.copy(guid));
                 }
                 if (m.get("ahuRef") != null)
                 {
 					String guid = CCUHsApi.getInstance().getGUID(m.get("ahuRef").toString());
-                    if(guid != null)
-                    	m.put("ahuRef", HRef.copy(guid));
+                    if(guid == null) {
+                        return false;
+                    }
+                    m.put("ahuRef", HRef.copy(guid));
                 }
                 entities.add(HSUtil.mapToHDict(m));
             }
@@ -72,7 +80,7 @@ public class DeviceSyncAdapter extends EntitySyncAdapter
         {
             HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
             String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
-            CcuLog.i("CCU", "Response: \n" + response);
+            CcuLog.i("CCU_HS_SYNC", "Response: \n" + response);
             if (response == null) {
                 return false;
             }

@@ -116,7 +116,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
             signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemCoolingLoopOp/100)));
         }
     
-        setSystemLoopOp("cooling", systemCoolingLoopOp);
+        //setSystemLoopOp("cooling", systemCoolingLoopOp);
         setCmdSignal("cooling",signal);
         if (getConfigEnabled("analog1") > 0)
         {
@@ -136,7 +136,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         {
             signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemFanLoopOp/100)));
         }
-        setSystemLoopOp("fan", systemFanLoopOp);
+        //setSystemLoopOp("fan", systemFanLoopOp);
         setCmdSignal("fan", signal);
         if (getConfigEnabled("analog2") > 0)
         {
@@ -157,7 +157,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
             signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemHeatingLoopOp / 100)));
         }
     
-        setSystemLoopOp("heating", systemHeatingLoopOp);
+        //setSystemLoopOp("heating", systemHeatingLoopOp);
         setCmdSignal("heating", signal);
         if (getConfigEnabled("analog3") > 0)
         {

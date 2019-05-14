@@ -6,5 +6,5 @@ package a75f.io.logic.bo.building;
 
 public enum Occupancy
 {
-    UNOCCUPIED, OCCUPIED, PRECONDITIONING
+    UNOCCUPIED, OCCUPIED, PRECONDITIONING, FORCED_OCCUPIED
 }

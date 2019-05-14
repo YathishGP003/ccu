@@ -15,7 +15,6 @@ import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 
 public class VAVScheduler {
@@ -81,11 +80,7 @@ public class VAVScheduler {
             return;
         }
         
-        try {
-            CCUHsApi.getInstance().pointWrite(HRef.make(id.replace("@","")), 8, "Scheduler", desiredTemp != null ? HNum.make(desiredTemp) : HNum.make(0), HNum.make(0));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        CCUHsApi.getInstance().pointWrite(HRef.make(id.replace("@","")), 8, "Scheduler", desiredTemp != null ? HNum.make(desiredTemp) : HNum.make(0), HNum.make(0));
         CCUHsApi.getInstance().writeHisValById(id, HSUtil.getPriorityVal(id));
     }
     

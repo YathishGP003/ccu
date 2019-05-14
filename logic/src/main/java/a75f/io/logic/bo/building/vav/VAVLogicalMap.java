@@ -519,7 +519,7 @@ public class VAVLogicalMap
                                     .setSiteRef(siteRef)
                                     .setRoomRef(room)
                                     .setFloorRef(floor)
-                                    .addMarker("vav").addMarker("scheduleStatus").addMarker("zone").addMarker("writable").addMarker("equipHis")
+                                    .addMarker("vav").addMarker("scheduleStatus").addMarker("zone").addMarker("writable").addMarker("his").addMarker("equipHis")
                                     .setGroup(String.valueOf(nodeAddr))
                                     .setTz(tz)
                                     .setKind("string")

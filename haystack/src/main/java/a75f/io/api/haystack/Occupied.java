@@ -15,6 +15,7 @@ public class Occupied {
     private Double mCoolingDeadband;
     private Schedule vacation;
     private double unoccupiedZoneSetback;
+    private long temporaryHoldExpiry;
     
     @Override
     public boolean equals(Object o) {
@@ -124,5 +125,13 @@ public class Occupied {
     public void setUnoccupiedZoneSetback(double unoccupiedZoneSetback)
     {
         this.unoccupiedZoneSetback = unoccupiedZoneSetback;
+    }
+    public long getTemporaryHoldExpiry()
+    {
+        return temporaryHoldExpiry;
+    }
+    public void setTemporaryHoldExpiry(long temporaryHoldExpiry)
+    {
+        this.temporaryHoldExpiry = temporaryHoldExpiry;
     }
 }

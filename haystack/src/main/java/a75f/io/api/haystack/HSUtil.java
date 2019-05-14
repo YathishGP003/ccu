@@ -149,11 +149,21 @@ public class HSUtil
         ArrayList values = CCUHsApi.getInstance().readPoint(id);
         if (values != null && values.size() > 0)
         {
-            HashMap valMap = ((HashMap) values.get(level));
+            HashMap valMap = ((HashMap) values.get(level-1));
             if (valMap.get("val") != null) {
                 return Double.parseDouble(valMap.get("val").toString());
             }
         }
         return 0;
+    }
+    
+    public static HashMap getPriorityLevel(String id, int level) {
+        ArrayList values = CCUHsApi.getInstance().readPoint(id);
+        if (values != null && values.size() > 0)
+        {
+            HashMap valMap = ((HashMap) values.get(level-1));
+            return valMap;
+        }
+        return null;
     }
 }

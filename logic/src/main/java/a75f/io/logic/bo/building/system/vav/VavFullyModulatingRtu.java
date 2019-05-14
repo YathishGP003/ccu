@@ -176,6 +176,8 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             systemFanLoopOp = (int) ((getStaticPressure() - spSpMin)  * 100 / (spSpMax - spSpMin)) ;
         } else if (VavSystemController.getInstance().getSystemState() == HEATING){
             systemFanLoopOp = (int) (VavSystemController.getInstance().getHeatingSignal() * analogFanSpeedMultiplier);
+        } else {
+            systemFanLoopOp = 0;
         }
         
     

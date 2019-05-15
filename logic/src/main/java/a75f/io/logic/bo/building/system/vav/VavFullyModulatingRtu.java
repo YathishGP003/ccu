@@ -228,7 +228,8 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             
         }
         
-        if (getConfigVal("relay7 and output and enabled") > 0)
+        if (getConfigVal("relay7 and output and enabled") > 0
+                                && VavSystemController.getInstance().getSystemState() != OFF)
         {
             double humidity = VavSystemController.getInstance().getAverageSystemHumidity();
             double targetMinHumidity = TunerUtil.readSystemUserIntentVal("target and min and inside and humidity");
@@ -267,6 +268,10 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                                       " targetMaxHumidity: "+targetMaxHumidity+" signal: "+signal*100);
     
             ControlMote.setRelayState("relay7", signal);
+        } else {
+            setCmdSignal("humidifier",0);
+            setCmdSignal("dehumidifier",0);
+            ControlMote.setRelayState("relay7", 0);
         }
     
         setSystemPoint("operating and mode", VavSystemController.getInstance().systemState.ordinal());
@@ -278,7 +283,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         {
             CCUHsApi.getInstance().writeDefaultVal("system and status and message", systemStatus);
         }
-        if (!CCUHsApi.getInstance().readDefaultStrVal("system and scheduleStatus").equals(systemStatus))
+        if (!CCUHsApi.getInstance().readDefaultStrVal("system and scheduleStatus").equals(scheduleStatus))
         {
             CCUHsApi.getInstance().writeDefaultVal("system and scheduleStatus", scheduleStatus);
         }

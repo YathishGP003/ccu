@@ -333,42 +333,49 @@ public class VavStagedRtu extends VavSystemProfile
                         break;
                     case HUMIDIFIER:
                     case DEHUMIDIFIER:
-                        double humidity = VavSystemController.getInstance().getAverageSystemHumidity();
-                        double targetMinHumidity = TunerUtil.readSystemUserIntentVal("target and min and inside and humidity");
-                        double targetMaxHumidity = TunerUtil.readSystemUserIntentVal("target and max and inside and humidity");
-                        double humidityHysteresis = TunerUtil.readTunerValByQuery("humidity and hysteresis", getSystemEquipRef());
-                        currState = getCmdSignal("relay" + i);
-                        if (stage == HUMIDIFIER)
+                        if (VavSystemController.getInstance().getSystemState() == OFF) {
+                            relayState = 0;
+                        } else
                         {
-                            //Humidification
-                            if (humidity < targetMinHumidity)
+                            double humidity = VavSystemController.getInstance().getAverageSystemHumidity();
+                            double targetMinHumidity = TunerUtil.readSystemUserIntentVal("target and min and inside and humidity");
+                            double targetMaxHumidity = TunerUtil.readSystemUserIntentVal("target and max and inside and humidity");
+                            double humidityHysteresis = TunerUtil.readTunerValByQuery("humidity and hysteresis", getSystemEquipRef());
+                            currState = getCmdSignal("relay" + i);
+                            if (stage == HUMIDIFIER)
                             {
-                                relayState = 1;
+                                //Humidification
+                                if (humidity < targetMinHumidity)
+                                {
+                                    relayState = 1;
+                                }
+                                else if (humidity > (targetMinHumidity + humidityHysteresis))
+                                {
+                                    relayState = 0;
+                                }
+                                else
+                                {
+                                    relayState = currState;
+                                }
                             }
-                            else if (humidity > (targetMinHumidity + humidityHysteresis))
+                            else
                             {
-                                relayState = 0;
-                            } else {
-                                relayState = currState;
+                                //Dehumidification
+                                if (humidity > targetMaxHumidity)
+                                {
+                                    relayState = 1;
+                                }
+                                else if (humidity < (targetMaxHumidity - humidityHysteresis))
+                                {
+                                    relayState = 0;
+                                }
+                                else
+                                {
+                                    relayState = currState;
+                                }
                             }
+                            CcuLog.d(L.TAG_CCU_SYSTEM, "humidity :" + humidity + " targetMinHumidity: " + targetMinHumidity + " humidityHysteresis: " + humidityHysteresis + " targetMaxHumidity: " + targetMaxHumidity);
                         }
-                        else
-                        {
-                            //Dehumidification
-                            if (humidity > targetMaxHumidity)
-                            {
-                                relayState = 1;
-                            }
-                            else if (humidity < (targetMaxHumidity - humidityHysteresis))
-                            {
-                                relayState = 0;
-                            } else {
-                                relayState = currState;
-                            }
-                        }
-                        CcuLog.d(L.TAG_CCU_SYSTEM,"humidity :"+humidity+" targetMinHumidity: "+targetMinHumidity+" humidityHysteresis: "+humidityHysteresis+
-                                                  " targetMaxHumidity: "+targetMaxHumidity);
-    
                         break;
                 }
             }
@@ -387,7 +394,7 @@ public class VavStagedRtu extends VavSystemProfile
         {
             CCUHsApi.getInstance().writeDefaultVal("system and status and message", systemStatus);
         }
-        if (!CCUHsApi.getInstance().readDefaultStrVal("system and scheduleStatus").equals(systemStatus))
+        if (!CCUHsApi.getInstance().readDefaultStrVal("system and scheduleStatus").equals(scheduleStatus))
         {
             CCUHsApi.getInstance().writeDefaultVal("system and scheduleStatus", scheduleStatus);
         }

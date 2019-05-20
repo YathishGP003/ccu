@@ -1,4 +1,4 @@
-package a75f.io.logic.bo.building.sscpu;
+package a75f.io.logic.bo.building.sshpu;
 
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
@@ -18,40 +18,39 @@ import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.sscpu.ConventionalUnitConfiguration;
 import a75f.io.logic.bo.building.standalone.Stage;
 import a75f.io.logic.bo.haystack.device.SmartStat;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.TunerConstants;
 
-public class ConventionalUnitLogicalMap {
+public class HeatPumpUnitEquip{
+
 
     int nodeAddr;
     ProfileType profileType;
-    ConventionalUnitProfile smartStatCpuUnit;
+    HeatPumpUnitProfile smartStatCpuUnit;
 
     double      currentTemp;
     double      humidity;
     double desiredTemp;
-    double supplyAirTemp;
-    double dischargeTemp;
-
-
-    public ConventionalUnitLogicalMap(ProfileType T, int node) {
+    public HeatPumpUnitEquip(ProfileType T, int node) {
 
         profileType = T;
-        smartStatCpuUnit = new ConventionalUnitProfile();
+        smartStatCpuUnit = new HeatPumpUnitProfile();
         nodeAddr = node;
     }
-    public void createHaystackPoints(ConventionalUnitConfiguration config, String floor, String room) {
+
+    public void createHaystackPoints(HeatPumpUnitConfiguration config, String floor, String room) {
 
         //Create Logical points
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
         String tz = siteMap.get("tz").toString();
-        String equipDis = siteDis+"-CPU-"+nodeAddr;
-        String profile = "smartstat";
-		String gatewayRef = null;
+        String equipDis = siteDis+"-HPU-"+nodeAddr;
+        String profile = "hpu";
+        String gatewayRef = null;
         HashMap systemEquip = CCUHsApi.getInstance().read("equip and system");
         if (systemEquip != null && systemEquip.size() > 0) {
             gatewayRef = systemEquip.get("id").toString();
@@ -66,13 +65,13 @@ public class ConventionalUnitLogicalMap {
                 .setAhuRef(gatewayRef)
                 .setTz(tz)
                 .setGroup(String.valueOf(nodeAddr));
-            b.setDisplayName(equipDis);
-            b.addMarker("cpu");
-            profile = "cpu";
+        b.setDisplayName(equipDis);
+        b.addMarker(profile);
         String equipRef = CCUHsApi.getInstance().addEquip(b.build());
-        BuildingTuners.getInstance().addEquipStandaloneTuners(siteDis+"-CPU-"+nodeAddr, equipRef);
 
-        createConventionalConfigPoints(config, equipRef,floor,room);
+        BuildingTuners.getInstance().addEquipStandaloneTuners(siteDis+"-HPU-"+nodeAddr, equipRef);
+
+        createHeatPumpConfigPoints(config, equipRef,floor,room);
 
         addProfilePoints(siteRef,equipRef,equipDis,tz,floor,room);
         Point currentTemp = new Point.Builder()
@@ -81,8 +80,8 @@ public class ConventionalUnitLogicalMap {
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("zone").addMarker("standalone").addMarker("cpu")
-                .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("current").addMarker("his").addMarker("cur").addMarker("logical").addMarker("equipHis")
+                .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("cur")
+                .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
                 .setUnit("\u00B0F")
                 .setTz(tz)
@@ -95,8 +94,8 @@ public class ConventionalUnitLogicalMap {
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("zone").addMarker("standalone").addMarker("cpu")
-                .addMarker("air").addMarker("humidity").addMarker("sensor").addMarker("current").addMarker("his").addMarker("cur").addMarker("logical").addMarker("equipHis")
+                .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("cur")
+                .addMarker("air").addMarker("humidity").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
@@ -108,8 +107,8 @@ public class ConventionalUnitLogicalMap {
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("zone").addMarker("standalone").addMarker("cpu")
-                .addMarker("air").addMarker("co2").addMarker("sensor").addMarker("current").addMarker("his").addMarker("cur").addMarker("logical").addMarker("equipHis")
+                .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("cur")
+                .addMarker("air").addMarker("co2").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
@@ -121,8 +120,8 @@ public class ConventionalUnitLogicalMap {
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("zone").addMarker("standalone").addMarker("cpu")
-                .addMarker("air").addMarker("voc").addMarker("sensor").addMarker("current").addMarker("his").addMarker("cur").addMarker("logical").addMarker("equipHis")
+                .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("cur")
+                .addMarker("air").addMarker("voc").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
@@ -175,8 +174,8 @@ public class ConventionalUnitLogicalMap {
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("standalone").addMarker(profile).addMarker("equipHis")
-                .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("th1").addMarker("his").addMarker("cur").addMarker("logical").addMarker("zone")
+                .addMarker("standalone").addMarker(profile).addMarker("equipHis").addMarker("cur")
+                .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("th1").addMarker("his").addMarker("logical").addMarker("zone")
                 .setGroup(String.valueOf(nodeAddr))
                 .setUnit("\u00B0F")
                 .setTz(tz)
@@ -190,65 +189,65 @@ public class ConventionalUnitLogicalMap {
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("standalone").addMarker(profile).addMarker("equipHis")/*.addMarker("current")*/
-                .addMarker("air").addMarker("temp").addMarker("th2").addMarker("sensor").addMarker("his").addMarker("cur").addMarker("logical").addMarker("zone")
+                .addMarker("standalone").addMarker(profile).addMarker("equipHis").addMarker("cur")
+                .addMarker("air").addMarker("temp").addMarker("th2").addMarker("sensor").addMarker("his").addMarker("logical").addMarker("zone")
                 .setGroup(String.valueOf(nodeAddr))
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
         String eatID = CCUHsApi.getInstance().addPoint(eatPoint);
 
-        Point coolingStage1 = new Point.Builder()
-                .setDisplayName(equipDis+"-coolingStage1")
+        Point compressorStage1 = new Point.Builder()
+                .setDisplayName(equipDis+"-compressorStage1")
                 .setEquipRef(equipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("standalone").addMarker("cooling").addMarker("stage1").addMarker("his").addMarker("zone")
+                .addMarker("standalone").addMarker("compressor").addMarker("stage1").addMarker("his").addMarker("zone")
                 .addMarker("logical").addMarker(profile).addMarker("equipHis").addMarker("cmd")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
-        String r1ID = CCUHsApi.getInstance().addPoint(coolingStage1);
+        String r1ID = CCUHsApi.getInstance().addPoint(compressorStage1);
 
-        Point coolingStage2 = new Point.Builder()
-                .setDisplayName(equipDis+"-coolingStage2")
+        Point compressorStage2 = new Point.Builder()
+                .setDisplayName(equipDis+"-compressorStage2")
                 .setEquipRef(equipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("standalone").addMarker("cooling").addMarker("stage2").addMarker("his").addMarker("zone")
+                .addMarker("standalone").addMarker("compressor").addMarker("stage2").addMarker("his").addMarker("zone")
                 .addMarker("logical").addMarker(profile).addMarker("equipHis").addMarker("cmd")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
-        String r2ID = CCUHsApi.getInstance().addPoint(coolingStage2);
+        String r2ID = CCUHsApi.getInstance().addPoint(compressorStage2);
 
         Point heatingStage1 = new Point.Builder()
-                .setDisplayName(equipDis+"-heatingStage1")
+                .setDisplayName(equipDis+"-auxHeating")
                 .setEquipRef(equipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("standalone").addMarker("heating").addMarker("stage1").addMarker("his").addMarker("zone")
+                .addMarker("standalone").addMarker("aux").addMarker("heating").addMarker("his").addMarker("zone")
                 .addMarker("logical").addMarker(profile).addMarker("equipHis").addMarker("cmd")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
         String r4ID = CCUHsApi.getInstance().addPoint(heatingStage1);
 
-        Point heatingStage2 = new Point.Builder()
-                .setDisplayName(equipDis+"-heatingStage2")
+        Point heatpumpChangeover = new Point.Builder()
+                .setDisplayName(equipDis+"-heatpumpChangeover")
                 .setEquipRef(equipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("standalone").addMarker("heating").addMarker("stage2").addMarker("his").addMarker("zone")
+                .addMarker("standalone").addMarker("heatpump").addMarker("changeover").addMarker("stage1").addMarker("his").addMarker("zone")
                 .addMarker("logical").addMarker(profile).addMarker("equipHis").addMarker("cmd")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
-        String r5ID = CCUHsApi.getInstance().addPoint(heatingStage2);
+        String r6ID = CCUHsApi.getInstance().addPoint(heatpumpChangeover);
 
         Point fanStage1 = new Point.Builder()
                 .setDisplayName(equipDis+"-fanStage1")
@@ -274,67 +273,78 @@ public class ConventionalUnitLogicalMap {
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
-        String r6ID = CCUHsApi.getInstance().addPoint(fanStage2);
-		Point equipStatus = new Point.Builder()
-                  .setDisplayName(equipDis+"-equipStatus")
-                                  .setEquipRef(equipRef)
-                                  .setSiteRef(siteRef)
-                                  .setRoomRef(room)
-                                  .setFloorRef(floor)
-                                  .addMarker("status").addMarker("cpu").addMarker("his").addMarker("zone").addMarker("equipHis")
-                                  .setGroup(String.valueOf(nodeAddr))
-                                  .setTz(tz)
-                                  .build();
+        String r5ID = CCUHsApi.getInstance().addPoint(fanStage2);
+        /*Point heatpumpChangeoverType = new Point.Builder()
+                .setDisplayName(equipDis+"-heatpumpChangeoverType")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(room)
+                .setFloorRef(floor)
+                .addMarker("standalone").addMarker("changeover").addMarker("type").addMarker("his").addMarker("zone")
+                .addMarker("logical").addMarker(profile).addMarker("equipHis").addMarker("cmd")
+                .setGroup(String.valueOf(nodeAddr))
+                .setTz(tz)
+                .build();
+        String coType = CCUHsApi.getInstance().addPoint(heatpumpChangeoverType);*/
+        Point equipStatus = new Point.Builder()
+                .setDisplayName(equipDis+"-equipStatus")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(room)
+                .setFloorRef(floor)
+                .addMarker("status").addMarker("hpu").addMarker("his").addMarker("zone").addMarker("equipHis")
+                .setGroup(String.valueOf(nodeAddr))
+                .setTz(tz)
+                .build();
         String equipStatusId = CCUHsApi.getInstance().addPoint(equipStatus);
-		
- 		Point equipStatusMessage = new Point.Builder()
-                                    .setDisplayName(equipDis+"-equipStatusMessage")
-                                    .setEquipRef(equipRef)
-                                    .setSiteRef(siteRef)
-                                    .setRoomRef(room)
-                                    .setFloorRef(floor)
-                                    .addMarker("status").addMarker("message").addMarker("cpu").addMarker("writable").addMarker("zone").addMarker("equipHis")
-                                    .setGroup(String.valueOf(nodeAddr))
-                                    .setTz(tz)
-                                    .setKind("string")
-                                    .build();
-        String equipStatusMessageLd = CCUHsApi.getInstance().addPoint(equipStatusMessage);
 
+        Point equipStatusMessage = new Point.Builder()
+                .setDisplayName(equipDis+"-equipStatusMessage")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(room)
+                .setFloorRef(floor)
+                .addMarker("status").addMarker("message").addMarker(profile).addMarker("writable").addMarker("zone").addMarker("equipHis")
+                .setGroup(String.valueOf(nodeAddr))
+                .setTz(tz)
+                .setKind("string")
+                .build();
+        String equipStatusMessageLd = CCUHsApi.getInstance().addPoint(equipStatusMessage);
         Point equipScheduleStatus = new Point.Builder()
-                  .setDisplayName(equipDis+"-equipScheduleStatus")
-                                    .setEquipRef(equipRef)
-                                    .setSiteRef(siteRef)
-                                    .setRoomRef(room)
-                                    .setFloorRef(floor)
-                                    .addMarker("scheduleStatus").addMarker("cpu").addMarker("logical").addMarker("zone").addMarker("writable").addMarker("equipHis").addMarker("his")
-                                    .setGroup(String.valueOf(nodeAddr))
-                                    .setTz(tz)
-                                    .setKind("string")
-                                    .build();
+                .setDisplayName(equipDis+"-equipScheduleStatus")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(room)
+                .setFloorRef(floor)
+                .addMarker("scheduleStatus").addMarker(profile).addMarker("logical").addMarker("zone").addMarker("writable").addMarker("equipHis")
+                .setGroup(String.valueOf(nodeAddr))
+                .setTz(tz)
+                .setKind("string")
+                .build();
         String equipScheduleStatusId = CCUHsApi.getInstance().addPoint(equipScheduleStatus);
-    
+
         Point equipScheduleType = new Point.Builder()
-                                          .setDisplayName(equipDis+"-scheduleType")
-                                          .setEquipRef(equipRef)
-                                          .setSiteRef(siteRef)
-                                          .setRoomRef(room)
-                                          .setFloorRef(floor)
-                                          .addMarker("zone").addMarker("cpu").addMarker("scheduleType").addMarker("writable").addMarker("zone").addMarker("equipHis").addMarker("his")
-                                          .setGroup(String.valueOf(nodeAddr))
-                                          .setTz(tz)
-                                          .build();
+                .setDisplayName(equipDis+"-scheduleType")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(room)
+                .setFloorRef(floor)
+                .addMarker("zone").addMarker("cpu").addMarker("scheduleType").addMarker("writable").addMarker("zone").addMarker("equipHis").addMarker("his")
+                .setGroup(String.valueOf(nodeAddr))
+                .setTz(tz)
+                .build();
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
+        //TODO, what if already equip exists in a zone and its schedule is zone or named? Kumar
         CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
-        
         //Create Physical points and map
-        SmartStat device = new SmartStat(nodeAddr, siteRef, floor, room,equipRef,"cpu");
+        SmartStat device = new SmartStat(nodeAddr, siteRef, floor, room,equipRef,profile);
         //TODO Need to set it for default if not enabled, currently set it as enabled //kumar
-      
-            device.th1In.setPointRef(datID);
-            device.th1In.setEnabled(config.enableThermistor1);
-            device.th2In.setPointRef(eatID);
-            device.th2In.setEnabled(config.enableThermistor2);
-            device.currentTemp.setPointRef(ctID);
+
+        device.th1In.setPointRef(datID);
+        device.th1In.setEnabled(config.enableThermistor1);
+        device.th2In.setPointRef(eatID);
+        device.th2In.setEnabled(config.enableThermistor2);
+        device.currentTemp.setPointRef(ctID);
         device.currentTemp.setEnabled(true);
         device.humidity.setPointRef(humidityId);
         device.humidity.setEnabled(true);
@@ -362,13 +372,12 @@ public class ConventionalUnitLogicalMap {
         double coolingVal = 74.0;
         double heatingVal = 70.0;
         double defaultDesiredTemp = 72;
-        //Initialize write array for points, otherwise a read before write will throw exception
         setCurrentTemp(0);
         setHumidity(0);
         setCO2(0);
         setVOC(0);
-		setScheduleStatus("");
-		setSmartStatStatus("OFF"); //Intialize with off
+        setScheduleStatus("");
+        setSmartStatStatus("OFF"); //Intialize with off
         Schedule schedule = Schedule.getScheduleByEquipId(equipRef);
         if(schedule != null) {
             defaultDesiredTemp = (schedule.getCurrentValues().getCoolingVal() + schedule.getCurrentValues().getHeatingVal()) / 2.0;
@@ -412,13 +421,13 @@ public class ConventionalUnitLogicalMap {
     public void setProfilePoint(String tags, double val) {
         CCUHsApi.getInstance().writeHisValByQuery("point and zone and standalone and his and "+tags, val);
     }
-    public void createConventionalConfigPoints(ConventionalUnitConfiguration config, String equipRef, String floor, String room) {
+    public void createHeatPumpConfigPoints(HeatPumpUnitConfiguration config, String equipRef, String floor, String room) {
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
-        String equipDis = siteDis+"-CPU-"+nodeAddr;
+        String equipDis = siteDis+"-HPU-"+nodeAddr;
         String tz = siteMap.get("tz").toString();
-        String profile = "cpu";
+        String profile = "hpu";
         Point enableOccupancyControl = new Point.Builder()
                 .setDisplayName(equipDis + "-enableOccupancyControl")
                 .setEquipRef(equipRef)
@@ -474,7 +483,7 @@ public class ConventionalUnitLogicalMap {
         CCUHsApi.getInstance().writeDefaultValById(enableexternal10KProbeTh2Id, (double)(config.enableThermistor2 == true? 1.0 : 0));
 
         Point enableRelay1 = new Point.Builder()
-                .setDisplayName(equipDis+"-enable"+ Stage.COOLING_1.displayName)
+                .setDisplayName(equipDis+"-enableCompressorStage1")
                 .setEquipRef(equipRef)
                 .setSiteRef(siteRef)
                 .setFloorRef(floor)
@@ -488,7 +497,7 @@ public class ConventionalUnitLogicalMap {
         CCUHsApi.getInstance().writeDefaultValById(enableRelay1Id, (double)(config.enableRelay1 == true? 1.0 : 0));
 
         Point enableRelay2 = new Point.Builder()
-                .setDisplayName(equipDis+"-enableCoolingStage2")
+                .setDisplayName(equipDis+"-enableCompressorStage2")
                 .setEquipRef(equipRef)
                 .setSiteRef(siteRef)
                 .setFloorRef(floor)
@@ -516,7 +525,7 @@ public class ConventionalUnitLogicalMap {
         CCUHsApi.getInstance().writeDefaultValById(enableRelay3Id, (double)(config.enableRelay3 == true? 1.0 : 0));
 
         Point enableRelay4 = new Point.Builder()
-                .setDisplayName(equipDis+"-enableHeatingStage1")
+                .setDisplayName(equipDis+"-enableAuxHeating")
                 .setEquipRef(equipRef)
                 .setSiteRef(siteRef)
                 .setFloorRef(floor)
@@ -530,7 +539,7 @@ public class ConventionalUnitLogicalMap {
         CCUHsApi.getInstance().writeDefaultValById(enableRelay4Id, (double)(config.enableRelay4 == true? 1.0 : 0));
 
         Point enableRelay5 = new Point.Builder()
-                .setDisplayName(equipDis+"-enableHeatingStage2")
+                .setDisplayName(equipDis+"-enableFanStage2")
                 .setEquipRef(equipRef)
                 .setSiteRef(siteRef)
                 .setFloorRef(floor)
@@ -544,7 +553,7 @@ public class ConventionalUnitLogicalMap {
         CCUHsApi.getInstance().writeDefaultValById(enableRelay5Id, (double)(config.enableRelay5 == true? 1.0 : 0));
 
         Point enableRelay6 = new Point.Builder()
-                .setDisplayName(equipDis+"-enableFanStage2")
+                .setDisplayName(equipDis+"-enableHeatPumpChangeOver")
                 .setEquipRef(equipRef)
                 .setSiteRef(siteRef)
                 .setFloorRef(floor)
@@ -557,8 +566,10 @@ public class ConventionalUnitLogicalMap {
         String enableRelay6Id = CCUHsApi.getInstance().addPoint(enableRelay6);
         CCUHsApi.getInstance().writeDefaultValById(enableRelay6Id, (double)(config.enableRelay6 == true? 1.0 : 0));
 
+//TODO need to consider once new UI is done...
+
         Point relay6Type = new Point.Builder()
-                .setDisplayName(equipDis+"-relay6Type")
+                .setDisplayName(equipDis+"-heatPumpChangeoverType")
                 .setEquipRef(equipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
@@ -568,8 +579,21 @@ public class ConventionalUnitLogicalMap {
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
-        String relay6TypeId = CCUHsApi.getInstance().addPoint(relay6Type);
-        CCUHsApi.getInstance().writeDefaultValById(relay6TypeId, (double)config.relay6Type);
+        String relay6TypeID = CCUHsApi.getInstance().addPoint(relay6Type);
+        CCUHsApi.getInstance().writeDefaultValById(relay6TypeID, (double)config.changeOverRelay6Type);
+        Point relay5FanType = new Point.Builder()
+                .setDisplayName(equipDis+"-fanHighRelayType")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(room)
+                .setFloorRef(floor)
+                .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone")
+                .addMarker("relay5").addMarker("type").addMarker("sp").addMarker(profile)
+                .setGroup(String.valueOf(nodeAddr))
+                .setTz(tz)
+                .build();
+        String relay5FanTypeId = CCUHsApi.getInstance().addPoint(relay5FanType);
+        CCUHsApi.getInstance().writeDefaultValById(relay5FanTypeId, (double)config.fanRelay5Type);
         addUserIntentPoints(equipRef,equipDis,room,floor);
 
 
@@ -579,7 +603,8 @@ public class ConventionalUnitLogicalMap {
         setConfigNumVal("enable and relay4",config.enableRelay4 == true ? 1.0 : 0);
         setConfigNumVal("enable and relay5",config.enableRelay5 == true ? 1.0 : 0);
         setConfigNumVal("enable and relay6",config.enableRelay6 == true ? 1.0 : 0);
-        setConfigNumVal("relay6 and type",(double)config.relay6Type);
+        setConfigNumVal("relay6 and type",config.changeOverRelay6Type);
+        setConfigNumVal("relay5 and type",config.fanRelay5Type);
         setConfigNumVal("enable and occupancy",config.enableOccupancyControl == true ? 1.0 : 0);
         setConfigNumVal("temperature and offset",config.temperatureOffset);
         setConfigNumVal("enable and th1",config.enableThermistor1 == true ? 1.0 : 0);
@@ -587,7 +612,7 @@ public class ConventionalUnitLogicalMap {
 
     }
 
-    public void updateHaystackPoints(ConventionalUnitConfiguration config) {
+    public void updateHaystackPoints(HeatPumpUnitConfiguration config) {
         for (Output op : config.getOutputs()) {
             switch (op.getPort()) {
                 case RELAY_ONE:
@@ -619,19 +644,21 @@ public class ConventionalUnitLogicalMap {
         setConfigNumVal("temperature and offset",config.temperatureOffset);
         setConfigNumVal("enable and th1",config.enableThermistor1 == true ? 1.0 : 0);
         setConfigNumVal("enable and th2",config.enableThermistor2 == true ? 1.0 : 0);
-        setConfigNumVal("relay6 and type",(double)config.relay6Type);
+        setConfigNumVal("relay6 and type",config.changeOverRelay6Type);
+        setConfigNumVal("relay5 and type",config.fanRelay5Type);
     }
 
 
 
-    public ConventionalUnitConfiguration getProfileConfiguration() {
-        ConventionalUnitConfiguration config = new ConventionalUnitConfiguration();
+    public HeatPumpUnitConfiguration getProfileConfiguration() {
+        HeatPumpUnitConfiguration config = new HeatPumpUnitConfiguration();
         config.enableOccupancyControl = getConfigNumVal("enable and occupancy") > 0 ? true : false ;
         config.temperatureOffset = getConfigNumVal("temperature and offset");
         config.enableThermistor1 = getConfigNumVal("enable and th1") >  0 ? true : false;
         config.enableThermistor2 = getConfigNumVal("enable and th2") > 0 ? true : false;
         config.setNodeType(NodeType.SMART_STAT);//TODO - revisit
-        config.relay6Type = (int)getConfigNumVal("relay6 and type"); //TODO need to revisit once ui is done
+        config.fanRelay5Type = (int)getConfigNumVal("relay5 and type");
+        config.changeOverRelay6Type = (int)getConfigNumVal("relay6 and type");
 
 
         RawPoint r1 = SmartStat.getPhysicalPoint(nodeAddr, Port.RELAY_ONE.toString());
@@ -777,7 +804,6 @@ public class ConventionalUnitLogicalMap {
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        //CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
         CCUHsApi.getInstance().pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "ccu", HNum.make(desiredTemp), HNum.make(0));
         CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
     }
@@ -808,50 +834,26 @@ public class ConventionalUnitLogicalMap {
         if (id == null || id == "") {
             throw new IllegalArgumentException();
         }
-        //CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
         CCUHsApi.getInstance().pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "ccu", HNum.make(desiredTemp), HNum.make(0));
         CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
     }
-    
-    public double getDischargeTemp()
-    {
-        dischargeTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and th1 and standalone and group == \""+nodeAddr+"\"");
-        return dischargeTemp;
-    }
-    public void setDischargeTemp(double dischargeTemp)
-    {
-        CCUHsApi.getInstance().writeHisValByQuery("point and air and temp and sensor and th1 and standalone and group == \""+nodeAddr+"\"", dischargeTemp);
-        this.dischargeTemp = dischargeTemp;
-    }
-
-    public double getSupplyAirTemp()
-    {
-        supplyAirTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and th2 and standalone and group == \""+nodeAddr+"\"");
-        return supplyAirTemp;
-    }
-    public void setSupplyAirTemp(double supplyAirTemp)
-    {
-        CCUHsApi.getInstance().writeHisValByQuery("point and air and temp and sensor and th2 and standalone and group == \""+nodeAddr+"\"", supplyAirTemp);
-        this.supplyAirTemp = supplyAirTemp;
-    }
 
     public void setConfigNumVal(String tags,double val) {
-        CCUHsApi.getInstance().writeDefaultVal("point and zone and config and standalone and cpu and "+tags+" and group == \""+nodeAddr+"\"", val);
+        CCUHsApi.getInstance().writeDefaultVal("point and zone and config and standalone and hpu and "+tags+" and group == \""+nodeAddr+"\"", val);
     }
 
     public double getConfigNumVal(String tags) {
-        return CCUHsApi.getInstance().readDefaultVal("point and zone and config and standalone and cpu and "+tags+" and group == \""+nodeAddr+"\"");
+        return CCUHsApi.getInstance().readDefaultVal("point and zone and config and standalone and hpu and "+tags+" and group == \""+nodeAddr+"\"");
     }
-    
-    
+
+
     public double getStatus() {
         return CCUHsApi.getInstance().readHisValByQuery("point and status and his and group == \""+nodeAddr+"\"");
     }
     public void setStatus(double status) {
         CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \""+nodeAddr+"\"", status);
-       
     }
-    
+
     public void setScheduleStatus(String status)
     {
         ArrayList points = CCUHsApi.getInstance().readAll("point and scheduleStatus and group == \""+nodeAddr+"\"");
@@ -879,7 +881,7 @@ public class ConventionalUnitLogicalMap {
                 .setFloorRef(floor)
                 .setRoomRef(room)
                 .addMarker("standalone").addMarker("userIntent").addMarker("writable").addMarker("fan").addMarker("operation").addMarker("mode").addMarker("his").addMarker("equipHis")
-                .addMarker("cpu").addMarker("zone")
+                .addMarker("hpu").addMarker("zone")
                 .setTz(tz)
                 .build();
         String fanOpModeId = CCUHsApi.getInstance().addPoint(fanOpMode);
@@ -893,7 +895,7 @@ public class ConventionalUnitLogicalMap {
                 .setRoomRef(room)
                 .setEquipRef(equipref)
                 .addMarker("standalone").addMarker("userIntent").addMarker("writable").addMarker("operation").addMarker("mode").addMarker("zone").addMarker("his").addMarker("equipHis")
-                .addMarker("cpu").addMarker("temp")
+                .addMarker("hpu").addMarker("temp")
                 .setTz(tz)
                 .build();
         String operationalModeId = CCUHsApi.getInstance().addPoint(operationalMode);

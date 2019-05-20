@@ -1,9 +1,8 @@
-package a75f.io.logic.bo.building.sscpu;
-
+package a75f.io.logic.bo.building.sshpu;
 
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 
-public class ConventionalUnitConfiguration extends BaseProfileConfiguration {
+public class HeatPumpUnitConfiguration extends BaseProfileConfiguration {
     public boolean enableOccupancyControl;
     public boolean enableThermistor1;
     public boolean enableThermistor2;
@@ -15,5 +14,6 @@ public class ConventionalUnitConfiguration extends BaseProfileConfiguration {
     public boolean enableRelay4;
     public boolean enableRelay5;
     public boolean enableRelay6;
-    public int relay6Type;
+    public int changeOverRelay6Type; //NotEnabled(0), Energize in cooling(1), Energize in heating (2)
+    public int fanRelay5Type;//NotEnabled(0), Fan Stage2(1), Humidifier(2), De-humidifier(3)
 }

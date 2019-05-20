@@ -31,6 +31,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.mesh.LSerial;
@@ -38,6 +39,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.sscpu.ConventionalUnitConfiguration;
+import a75f.io.logic.bo.building.sshpu.HeatPumpUnitConfiguration;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -555,11 +557,12 @@ public class FloorPlanFragment extends Fragment
 											   .newInstance(Short.parseShort(nodeAddr),zone.getDisplayName(), NodeType.SMART_NODE, floor.getDisplayName(), profile.getProfileType()), FragmentDABConfiguration.ID);
 					break;
 				case SMARTSTAT_CONVENTIONAL_PACK_UNIT:
-					System.out.println(" floor " + floor.getDisplayName() + " zone " + zone.getDisplayName() + " node :" + nodeAddr);
-					ConventionalUnitConfiguration cpuConfig = (ConventionalUnitConfiguration) profile.getProfileConfiguration(Short.parseShort(nodeAddr));
-					System.out.println("Config " + cpuConfig + " profile " + profile.getProfileType());
 					showDialogFragment(FragmentCPUConfiguration
-							.newInstance(Short.parseShort(nodeAddr), zone.getDisplayName(), cpuConfig.getNodeType(), floor.getDisplayName(), profile.getProfileType()), FragmentCPUConfiguration.ID);
+							.newInstance(Short.parseShort(nodeAddr), zone.getDisplayName(), /*cpuConfig.getNodeType()*/ NodeType.SMART_STAT, floor.getDisplayName(), profile.getProfileType()), FragmentCPUConfiguration.ID);
+					break;
+				case SMARTSTAT_HEAT_PUMP_UNIT:
+					showDialogFragment(FragmentHeatPumpConfiguration
+							.newInstance(Short.parseShort(nodeAddr),zone.getDisplayName(),NodeType.SMART_STAT,floor.getDisplayName(),profile.getProfileType()),FragmentHeatPumpConfiguration.ID);
 					break;
 
 			}

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+    >
+
+    <ImageView
+        android:id="@+id/zoneImage"
+        android:layout_width="90dp"
+        android:layout_height="90dp"
+        android:layout_centerInParent="true"
+        />
+
+    <TextView
+        android:id="@+id/zoneName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:gravity="center"
+        android:textSize="@dimen/status_text"
+        android:layout_marginBottom="15dp"
+        android:textColor="@color/dark_gray"
+        android:text="Chris"/>
+
+    <TextView
+        android:id="@+id/zoneTemp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textSize="@dimen/status_text"
+        android:text="100 F"
+        android:layout_above="@+id/zoneName"
+        android:layout_alignParentStart="true"
+        android:textColor="@color/outer_temp_text_darker_gray"
+        android:visibility="invisible"/>
+</RelativeLayout>

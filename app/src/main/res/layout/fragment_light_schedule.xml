@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+
+            <CheckBox
+                android:id="@+id/checkBoxMon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Monday"/>
+
+            <CheckBox
+                android:id="@+id/checkBoxTue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Tuesday"/>
+
+            <CheckBox
+                android:id="@+id/checkBoxWed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Wednesday"/>
+
+            <CheckBox
+                android:id="@+id/checkBoxThu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Thursday"/>
+
+            <CheckBox
+                android:id="@+id/checkBoxFri"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Friday"/>
+
+            <CheckBox
+                android:id="@+id/checkBoxSat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Saturday"/>
+
+            <CheckBox
+                android:id="@+id/checkBoxSun"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Sunday"/>
+
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="236dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textViewSt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="Start Time"/>
+
+
+            <TimePicker
+                android:id="@+id/timePickerSt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:timePickerMode="spinner"/>
+
+            <TextView
+                android:id="@+id/textViewEt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="Stop Time"/>
+
+
+            <TimePicker
+                android:id="@+id/timePickerEt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:timePickerMode="spinner"/>
+
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/temperatureEditText"
+        android:padding="20dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        ></EditText>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/scheduleSave"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Save"
+            android:textColor="@color/black"/>
+
+
+        <Button
+            android:id="@+id/scheduleCancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Cancel"
+            android:textColor="@color/black"/>
+    </LinearLayout>
+
+</LinearLayout>

@@ -306,7 +306,7 @@ public class ConventionalUnitLogicalMap {
                                     .setSiteRef(siteRef)
                                     .setRoomRef(room)
                                     .setFloorRef(floor)
-                                    .addMarker("scheduleStatus").addMarker("cpu").addMarker("logical").addMarker("zone").addMarker("writable").addMarker("equipHis")
+                                    .addMarker("scheduleStatus").addMarker("cpu").addMarker("logical").addMarker("zone").addMarker("writable").addMarker("equipHis").addMarker("his")
                                     .setGroup(String.valueOf(nodeAddr))
                                     .setTz(tz)
                                     .setKind("string")

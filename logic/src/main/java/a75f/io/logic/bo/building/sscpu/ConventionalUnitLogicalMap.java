@@ -306,7 +306,7 @@ public class ConventionalUnitLogicalMap {
                                     .setSiteRef(siteRef)
                                     .setRoomRef(room)
                                     .setFloorRef(floor)
-                                    .addMarker("scheduleStatus").addMarker("cpu").addMarker("logical").addMarker("zone").addMarker("writable").addMarker("equipHis")
+                                    .addMarker("scheduleStatus").addMarker("cpu").addMarker("logical").addMarker("zone").addMarker("writable").addMarker("equipHis").addMarker("his")
                                     .setGroup(String.valueOf(nodeAddr))
                                     .setTz(tz)
                                     .setKind("string")
@@ -556,6 +556,20 @@ public class ConventionalUnitLogicalMap {
                 .build();
         String enableRelay6Id = CCUHsApi.getInstance().addPoint(enableRelay6);
         CCUHsApi.getInstance().writeDefaultValById(enableRelay6Id, (double)(config.enableRelay6 == true? 1.0 : 0));
+
+        Point relay6Type = new Point.Builder()
+                .setDisplayName(equipDis+"-relay6Type")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(room)
+                .setFloorRef(floor)
+                .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone")
+                .addMarker("relay6").addMarker("type").addMarker("sp").addMarker(profile)
+                .setGroup(String.valueOf(nodeAddr))
+                .setTz(tz)
+                .build();
+        String relay6TypeId = CCUHsApi.getInstance().addPoint(relay6Type);
+        CCUHsApi.getInstance().writeDefaultValById(relay6TypeId, (double)config.relay6Type);
         addUserIntentPoints(equipRef,equipDis,room,floor);
 
 
@@ -565,6 +579,7 @@ public class ConventionalUnitLogicalMap {
         setConfigNumVal("enable and relay4",config.enableRelay4 == true ? 1.0 : 0);
         setConfigNumVal("enable and relay5",config.enableRelay5 == true ? 1.0 : 0);
         setConfigNumVal("enable and relay6",config.enableRelay6 == true ? 1.0 : 0);
+        setConfigNumVal("relay6 and type",(double)config.relay6Type);
         setConfigNumVal("enable and occupancy",config.enableOccupancyControl == true ? 1.0 : 0);
         setConfigNumVal("temperature and offset",config.temperatureOffset);
         setConfigNumVal("enable and th1",config.enableThermistor1 == true ? 1.0 : 0);
@@ -604,6 +619,7 @@ public class ConventionalUnitLogicalMap {
         setConfigNumVal("temperature and offset",config.temperatureOffset);
         setConfigNumVal("enable and th1",config.enableThermistor1 == true ? 1.0 : 0);
         setConfigNumVal("enable and th2",config.enableThermistor2 == true ? 1.0 : 0);
+        setConfigNumVal("relay6 and type",(double)config.relay6Type);
     }
 
 
@@ -615,6 +631,7 @@ public class ConventionalUnitLogicalMap {
         config.enableThermistor1 = getConfigNumVal("enable and th1") >  0 ? true : false;
         config.enableThermistor2 = getConfigNumVal("enable and th2") > 0 ? true : false;
         config.setNodeType(NodeType.SMART_STAT);//TODO - revisit
+        config.relay6Type = (int)getConfigNumVal("relay6 and type"); //TODO need to revisit once ui is done
 
 
         RawPoint r1 = SmartStat.getPhysicalPoint(nodeAddr, Port.RELAY_ONE.toString());
@@ -884,5 +901,21 @@ public class ConventionalUnitLogicalMap {
         CCUHsApi.getInstance().writeHisValById(operationalModeId, TunerConstants.STANDALONE_DEFAULT_OPERATIONAL_MODE);
 
 
+        Point targetDehumidifier = new Point.Builder()
+                .setDisplayName(equipDis + "-" + "targetDehumidifier")
+                .setSiteRef(siteRef).setEquipRef(equipref)
+                .addMarker("standalone").addMarker("userIntent").addMarker("writable").addMarker("target").addMarker("his").addMarker("equipHis")
+                .setTz(tz).addMarker("dehumidifier").addMarker("sp").build();
+        String targetDehumidifierId = CCUHsApi.getInstance().addPoint(targetDehumidifier);
+        CCUHsApi.getInstance().writePoint(targetDehumidifierId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_TARGET_DEHUMIDIFIER, 0);
+        CCUHsApi.getInstance().writeHisValById(targetDehumidifierId, TunerConstants.STANDALONE_TARGET_DEHUMIDIFIER);
+        Point targetHumidty = new Point.Builder()
+                .setDisplayName(equipDis + "-" + "targetHumidity")
+                .setSiteRef(siteRef).setEquipRef(equipref)
+                .addMarker("standalone").addMarker("userIntent").addMarker("writable").addMarker("target").addMarker("humidity").addMarker("sp")
+                .addMarker("his").addMarker("equipHis").setTz(tz).build();
+        String targetHumidtyId = CCUHsApi.getInstance().addPoint(targetHumidty);
+        CCUHsApi.getInstance().writePoint(targetHumidtyId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_TARGET_HUMIDITY, 0);
+        CCUHsApi.getInstance().writeHisValById(targetHumidtyId, TunerConstants.STANDALONE_TARGET_HUMIDITY);
     }
 }

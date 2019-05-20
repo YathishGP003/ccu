@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:baselineAligned="false"
+              android:id="@+id/floorPlanLayout"
+              android:layout_height="match_parent"
+              android:layout_width="match_parent"
+              android:orientation="vertical">
+
+
+    <TextView
+        android:background="@color/progress_gray"
+        android:gravity="center_vertical"
+        android:id="@+id/titleLcm"
+        android:layout_height="60dp"
+        android:layout_width="match_parent"
+        android:paddingLeft="40dp"
+        android:text="SSE Parameters"
+        android:textColor="@color/dark_gray"
+        android:textSize="@dimen/text_medium_xlarge"/>
+
+    <RelativeLayout
+        android:background="@drawable/snsse"
+        android:id="@+id/main"
+        android:layout_height="560dp"
+        android:layout_width="match_parent">
+
+
+        <TableLayout
+            android:id="@+id/table"
+            android:layout_height="420dp"
+            android:layout_marginLeft="500dp"
+            android:layout_marginRight="15dp"
+            android:layout_marginTop="0dp"
+            android:layout_width="match_parent"
+            android:shrinkColumns="*"
+            android:stretchColumns="*">
+
+            <TableRow
+                android:height="30dp"
+                android:layout_width="match_parent">
+
+                <TextView
+                    android:id="@+id/textView27"
+                    android:text="Enable"
+                    android:textSize="@dimen/text_small_xlarge"
+                    android:textStyle="bold"/>
+
+
+                <TextView
+                    android:text="Actuator Type"
+                    android:textSize="@dimen/text_small_xlarge"
+                    android:textStyle="bold"/>
+
+                <TextView
+                    android:id="@+id/textView28"
+
+                    android:text="Action"
+                    android:textSize="@dimen/text_small_xlarge"
+                    android:textStyle="bold"/>
+
+                <TextView
+                    android:text="Circuit Name"
+                    android:textSize="@dimen/text_small_xlarge"
+                    android:textStyle="bold"/>
+
+                <TextView
+                    android:text="."
+                    android:textSize="@dimen/text_small_xlarge"
+                    android:textStyle="bold"></TextView>
+
+                <TextView
+                    android:text="Force Test"
+                    android:textSize="@dimen/text_small_xlarge"
+                    android:textStyle="bold"/>
+            </TableRow>
+
+
+            <TableRow
+                android:height="35dp"
+                android:layout_height="match_parent"
+                android:layout_width="match_parent">
+
+                <android.support.v7.widget.SwitchCompat
+                    android:id="@+id/lcmRelay1Switch"/>
+
+                <Spinner
+                    android:id="@+id/lcmRelay1Actuator"
+
+                    android:text="Actuator Type"
+                    android:textSize="@dimen/text_small_xlarge"/>
+
+                <Spinner
+                    android:id="@+id/lcmRelay1HeatCoolFanSpinner"
+
+                    android:text="Action"
+                    android:textSize="@dimen/text_small_xlarge"/>
+
+
+                <EditText
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:id="@+id/lcmRelay1EditName"
+
+                    android:textSize="@dimen/text_small_xlarge"/>
+
+                <ImageView
+                    android:id="@+id/lcmRelay1EditImg"
+                    android:src="@drawable/content_edit"/>
+
+
+                <ToggleButton
+                    android:background="@drawable/selector"
+                    android:id="@+id/testr1"></ToggleButton>
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:minHeight="95dp">
+
+                <android.support.v7.widget.SwitchCompat
+                    android:id="@+id/lcmRelay2Switch"
+                    />
+
+                <Spinner
+                    android:id="@+id/lcmRelay2Actuator"
+
+                    android:text="Actuator Type"
+                    android:textSize="@dimen/text_small_xlarge"/>
+
+                <Spinner
+                    android:id="@+id/lcmRelay2HeatCoolFanSpinner"
+                    android:text="Action"
+                    android:textSize="@dimen/text_small_xlarge"/>
+
+                <EditText
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:id="@+id/lcmRelay2EditName"
+                    android:textSize="@dimen/text_small_xlarge"/>
+
+
+                <ImageView
+                    android:id="@+id/lcmRelay2EditImg"
+                    android:src="@drawable/content_edit"/>
+
+
+                <ToggleButton
+                    android:background="@drawable/selector"
+                    android:id="@+id/testr2"
+                    android:layout_height="45dp"
+                    android:layout_width="45dp"></ToggleButton>
+
+            </TableRow>
+        </TableLayout>
+    </RelativeLayout>
+
+    <View
+        android:background="@color/progress_gray"
+        android:id="@+id/divider"
+        android:layout_alignParentBottom="true"
+        android:layout_height="3dp"
+        android:layout_width="match_parent"></View>
+
+    <LinearLayout
+        android:layout_height="70dp"
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:weightSum="2">
+
+        <TextView
+            android:background="@color/white"
+            android:gravity="center"
+            android:id="@+id/lcmCancelCommand"
+            android:layout_height="70dp"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:text="Cancel"
+            android:textColor="@color/dark_gray"/>
+
+        <TextView
+            android:background="@color/white"
+            android:gravity="center"
+            android:id="@+id/lcmSetCommand"
+            android:layout_height="70dp"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:text="Set"
+            android:textColor="@color/accent"/>
+    </LinearLayout>
+</LinearLayout>

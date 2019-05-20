@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="10dp"
+                android:background="@color/orange_multi">
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:text="Status"
+        android:textSize="@dimen/text_medium_xlarge"
+        android:textColor="#202020"
+        android:layout_gravity="center|left" />
+
+    <EditText
+        android:id="@+id/statusMsg"
+        android:layout_width="750dp"
+        android:layout_height="wrap_content"
+        android:clickable="false"
+        android:ems="10"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:gravity="center"
+        android:text=""
+        android:textSize="@dimen/text_small_xlarge"
+        android:layout_marginLeft="10dp"
+        android:textColor="#202020"
+        android:layout_gravity="center|left">
+
+        <requestFocus />
+    </EditText>
+</LinearLayout>

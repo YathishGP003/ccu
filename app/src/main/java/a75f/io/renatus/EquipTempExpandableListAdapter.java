@@ -5,10 +5,12 @@ import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -99,6 +101,9 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
             TextView ssStatus = convertView.findViewById(R.id.ss_conditioning_status_tv);
             Spinner ssCondModeSpinner = convertView.findViewById(R.id.ss_conditioning_spinner);
             Spinner ssFanModeSpinner = convertView.findViewById(R.id.ss_fanmode_spinner);
+            LinearLayout ssHumiDifier = convertView.findViewById(R.id.ss_humidity_layout);
+            TextView ssHumiDifierTV = convertView.findViewById(R.id.ss_target_humidity_tv);
+            Spinner ssHumiDifierSpinner = convertView.findViewById(R.id.ss_humidity_spinner);
             HashMap equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
 
 
@@ -212,10 +217,50 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
             });
             if(expandedListText.startsWith("smartstat")){
                 if(smartStatLayout != null) smartStatLayout.setVisibility(View.VISIBLE);
-                
+                String profileType = expandedListText.substring(0,13);
+
                 double ssOperatingMode = CCUHsApi.getInstance().readPointPriorityValByQuery("point and standalone and temp and operation and mode and his and equipRef == \"" + equipId + "\"");
                 double ssFanOpMode = CCUHsApi.getInstance().readPointPriorityValByQuery("point and standalone and fan and operation and mode and his and equipRef == \"" + equipId + "\"");
+                double ssFanHighHumdOption = 1.0;
+                double ssTargetHumidity = 25.0;
+                double ssTargetDehumidity = 45.0;
+                if(profileType.equals("smartstat_hpu"))
+                    ssFanHighHumdOption = CCUHsApi.getInstance().readDefaultVal("point and zone and config and relay5 and type and equipRef == \"" + equipId + "\"");
+                else
+                    ssFanHighHumdOption = CCUHsApi.getInstance().readDefaultVal("point and zone and config and relay6 and type and equipRef == \"" + equipId + "\"");
 
+                if(ssFanHighHumdOption > 1.0) {
+                    ssHumiDifier.setVisibility(View.VISIBLE);
+                    ArrayList<Integer> arrayHumdityTargetList = new ArrayList<Integer>();
+                    for (int pos = 1; pos <= 100; pos++)
+                        arrayHumdityTargetList.add(pos);
+                    ArrayAdapter<Integer> humidityTargetAdapter = new ArrayAdapter<Integer>(mFragment.getContext(),android.R.layout.simple_spinner_dropdown_item,arrayHumdityTargetList);
+                    ssHumiDifierSpinner.setAdapter(humidityTargetAdapter);
+                    if(ssFanHighHumdOption == 2.0) {
+                        ssTargetHumidity = CCUHsApi.getInstance().readDefaultVal("point and standalone and target and humidity and his and equipRef == \"" + equipId + "\"");
+                        ssHumiDifierSpinner.setSelection((int)ssTargetHumidity -1);
+                    }else {
+                        ssHumiDifierTV.setText("Target Dehumidify:");
+                        ssTargetDehumidity = CCUHsApi.getInstance().readDefaultVal("point and standalone and target and dehumidifier and his and equipRef == \"" + equipId + "\"");
+                        ssHumiDifierSpinner.setSelection((int)ssTargetDehumidity - 1);
+                    }
+                    double finalSsFanHighHumdOption = ssFanHighHumdOption;
+                    ssHumiDifierSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                            if(finalSsFanHighHumdOption == 3.0)
+                                StandaloneScheduler.updateOperationalPoints(equipId,"target and dehumidifier",position+1);
+                            else
+                                StandaloneScheduler.updateOperationalPoints(equipId,"target and humidity",position+1);
+
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> parent) {
+
+                        }
+                    });
+                }
                 ssCondModeSpinner.setSelection((int)ssOperatingMode);
                 ssFanModeSpinner.setSelection((int)ssFanOpMode);
                 if(equipId != null ) {
@@ -224,7 +269,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                     ssCondModeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                         @Override
                         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                            StandaloneScheduler.updateOperationalPoints(equipId,"temp",position);
+                            StandaloneScheduler.updateOperationalPoints(equipId,"temp and operation and mode",position);
                         }
 
                         @Override
@@ -235,7 +280,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                     ssFanModeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                         @Override
                         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                            StandaloneScheduler.updateOperationalPoints(equipId,"fan",position);
+                            StandaloneScheduler.updateOperationalPoints(equipId, "fan and operation and mode", position);
                         }
 
                         @Override

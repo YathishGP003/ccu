@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/fragment_main_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:text="@string/main_content"></TextView>
+
+    <Spinner
+        android:id="@+id/fragment_main_port_spinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"></Spinner>
+
+    <EditText
+        android:id="@+id/fragment_main_sn_name_edittext"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:text="SmartNode Name"></EditText>
+
+    <ToggleButton
+        android:id="@+id/fragment_main_ble_device_type"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textOff="Smart Node"
+        android:textOn="Smart Stat"/>
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:text="Done"/>
+
+</LinearLayout>

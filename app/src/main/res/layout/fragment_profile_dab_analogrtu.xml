@@ -1,0 +1,432 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical" >
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:overScrollMode="never">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="40dp"
+            android:orientation="vertical">
+
+
+            <TableLayout
+                android:id="@+id/ahu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="30dp"
+                android:layout_marginLeft="50dp"
+                android:layout_marginRight="50dp"
+                android:stretchColumns="0"
+                android:visibility="visible">
+
+                <TableRow
+                    android:id="@+id/ahuHeader"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Enable"
+                        android:textSize="@dimen/text_small_xlarge"/>
+
+                    <TextView
+                        android:layout_width="500dp"
+                        android:layout_height="wrap_content"
+                        android:text="Mapping"
+                        android:textSize="@dimen/text_small_xlarge"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="Test Signal"
+                        android:textSize="@dimen/text_small_xlarge"/>
+
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/ahuAnalog1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <android.support.v7.widget.SwitchCompat
+                            android:id="@+id/ahuAnalog1Cb"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:padding="5dp"
+                            android:thumbTint="@color/white"
+                            android:textSize="@dimen/text_small_xlarge"/>
+                        <Space
+                            android:layout_width="24dp"
+                            android:layout_height="match_parent"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Analog-out1"
+                            android:textColor="@color/black"
+                            android:textSize="@dimen/text_small_xlarge"/>
+
+                    </LinearLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Cooling"
+                        android:textSize="@dimen/text_small_xlarge"/>
+
+                    <Spinner
+                        android:id="@+id/ahuAnalog1Test"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"/>
+
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/ahuAnalog2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp"
+                    android:layout_marginTop="15dp">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <android.support.v7.widget.SwitchCompat
+                            android:id="@+id/ahuAnalog2Cb"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:padding="5dp"
+                            android:textSize="@dimen/text_small_xlarge"/>
+                        <Space
+                            android:layout_width="24dp"
+                            android:layout_height="match_parent"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Analog-out2"
+                            android:textColor="@color/black"
+                            android:textSize="@dimen/text_small_xlarge"/>
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Fan Speed"
+                        android:textSize="@dimen/text_small_xlarge"/>
+
+                    <Spinner
+                        android:id="@+id/ahuAnalog2Test"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"/>
+
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/ahuAnalog3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp"
+                    android:layout_marginTop="15dp">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <android.support.v7.widget.SwitchCompat
+                            android:id="@+id/ahuAnalog3Cb"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:padding="5dp"
+                            android:textSize="@dimen/text_small_xlarge"/>
+                        <Space
+                            android:layout_width="24dp"
+                            android:layout_height="match_parent"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Analog-out3"
+                            android:textColor="@color/black"
+                            android:textSize="@dimen/text_small_xlarge"/>
+
+                    </LinearLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Heating"
+                        android:textSize="@dimen/text_small_xlarge"/>
+
+                    <Spinner
+                        android:id="@+id/ahuAnalog3Test"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"/>
+
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/ahuRelay3Cb"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp"
+                    android:layout_marginTop="15dp">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <android.support.v7.widget.SwitchCompat
+                            android:id="@+id/relay3Cb"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:padding="5dp"
+                            android:textSize="@dimen/text_small_xlarge"/>
+                        <Space
+                            android:layout_width="24dp"
+                            android:layout_height="match_parent"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Relay-3"
+                            android:textColor="@color/black"
+                            android:textSize="@dimen/text_small_xlarge"/>
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Fan Enable"
+                        android:textSize="@dimen/text_small_xlarge"/>
+
+                    <ToggleButton
+                        android:id="@+id/relay3Test"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"/>
+
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/ahuRelay7Cb"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp"
+                    android:layout_marginTop="15dp">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <android.support.v7.widget.SwitchCompat
+                            android:id="@+id/relay7Cb"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:padding="5dp"
+                            android:textSize="@dimen/text_small_xlarge"/>
+                        <Space
+                            android:layout_width="24dp"
+                            android:layout_height="match_parent"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Relay-7"
+                            android:textColor="@color/black"
+                            android:textSize="@dimen/text_small_xlarge"/>
+
+                    </LinearLayout>
+
+                    <Spinner
+                        android:id="@+id/relay7Spinner"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="left"
+                        android:textSize="@dimen/text_small_xlarge"/>
+
+                    <ToggleButton
+                        android:id="@+id/relay7Test"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"/>
+
+                </TableRow>
+
+                <TableLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:stretchColumns="0">
+
+                    <TableRow
+                        android:id="@+id/ahuRow"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginBottom="14dp"
+                        android:layout_marginTop="14dp">
+
+                        <ImageView
+                            android:layout_width="fill_parent"
+                            android:layout_height="1dp"
+                            android:src="@color/progress_gray_dark"/>
+                    </TableRow>
+                </TableLayout>
+
+                <GridLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp"
+                    android:columnCount="4">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_column="0"
+                        android:layout_gravity="left"
+                        android:layout_marginBottom="20dp"
+                        android:layout_marginTop="14dp"
+                        android:layout_row="0"
+                        android:text="Analog-out1 at Min Cooling"
+                        android:textColor="@color/black"
+                        android:textSize="@dimen/text_small_xlarge"/>
+
+                    <Spinner
+                        android:id="@+id/ahuAnalog1Min"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="left"
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginBottom="14dp"
+                        android:dropDownWidth="match_parent"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:layout_marginBottom="20dp"
+                        android:layout_marginLeft="14dp"
+                        android:layout_marginTop="14dp"
+                        android:text="Analog-out1 at Max Cooling"
+                        android:textColor="@color/black"
+                        android:textSize="@dimen/text_small_xlarge"
+                        />
+
+                    <Spinner
+                        android:id="@+id/ahuAnalog1Max"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_column="3"
+                        android:layout_marginBottom="14dp"
+                        android:layout_marginLeft="20dp"
+                        />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_column="0"
+                        android:layout_gravity="left"
+                        android:layout_marginBottom="20dp"
+                        android:layout_marginTop="14dp"
+                        android:layout_row="1"
+                        android:text="Analog-out2 at Min Fan"
+                        android:textColor="@color/black"
+                        android:textSize="@dimen/text_small_xlarge"/>
+
+                    <Spinner
+                        android:id="@+id/ahuAnalog2Min"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="left"
+                        android:layout_marginBottom="14dp"
+                        android:layout_marginLeft="20dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:layout_marginBottom="20dp"
+                        android:layout_marginLeft="14dp"
+                        android:layout_marginTop="14dp"
+                        android:text="Analog-out2 at Max Fan"
+                        android:textColor="@color/black"
+                        android:textSize="@dimen/text_small_xlarge"/>
+
+                    <Spinner
+                        android:id="@+id/ahuAnalog2Max"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:layout_marginBottom="14dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_column="0"
+                        android:layout_gravity="left"
+                        android:layout_marginBottom="20dp"
+                        android:layout_marginTop="14dp"
+                        android:layout_row="2"
+                        android:text="Analog-out3 at Min Heating"
+                        android:textColor="@color/black"
+                        android:textSize="@dimen/text_small_xlarge"/>
+
+                    <Spinner
+                        android:id="@+id/ahuAnalog3Min"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="left"
+                        android:layout_marginBottom="14dp"
+                        android:layout_marginLeft="20dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:layout_marginBottom="20dp"
+                        android:layout_marginLeft="40dp"
+                        android:layout_marginTop="14dp"
+                        android:text="Analog-out3 at Max Heating"
+                        android:textColor="@color/black"
+                        android:textSize="@dimen/text_small_xlarge"/>
+
+                    <Spinner
+                        android:id="@+id/ahuAnalog3Max"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:layout_marginBottom="14dp"/>
+
+                </GridLayout>
+            </TableLayout>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

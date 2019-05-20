@@ -24,6 +24,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import a75f.io.renatus.FragmentCPUConfiguration;
+import a75f.io.renatus.FragmentHeatPumpConfiguration;
 import a75f.io.renatus.bluetooth.BLEAction;
 import a75f.io.renatus.bluetooth.BLEProvisionService;
 import a75f.io.device.ble.BLERoomName;
@@ -381,6 +382,9 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                         break;
                     case SMARTSTAT_CONVENTIONAL_PACK_UNIT:
                         showDialogFragment(FragmentCPUConfiguration.newInstance(mPairingAddress, mName, mNodeType, mFloorName, mProfileType), FragmentCPUConfiguration.ID);
+                        break;
+                    case SMARTSTAT_HEAT_PUMP_UNIT:
+                        showDialogFragment(FragmentHeatPumpConfiguration.newInstance(mPairingAddress, mName, mNodeType, mFloorName, mProfileType), FragmentHeatPumpConfiguration.ID);
                         break;
                 }
                 

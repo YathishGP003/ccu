@@ -164,12 +164,24 @@ public class ZoneFragmentTemp extends Fragment
                     tunerList.add(currTmep.get("dis").toString());
                     tunerList.add(coolDT.get("dis").toString());
                     tunerList.add(heatDT.get("dis").toString());
-                    tunerList.add("smartstat_"+ p.getId());
+                    //tunerList.add("schedule_" + p.getId());
+                    ProfileType ptype = ProfileType.valueOf(p.getProfile());
+                    Log.d("ZoneFragTemp","SmartStat ptype="+ptype.name()+","+p.getProfile());
+                    switch (ptype){
+                        case SMARTSTAT_CONVENTIONAL_PACK_UNIT:
+                            tunerList.add("smartstat_cpu"+ p.getId());
+                            tunerMap.put("smartstat_cpu"+ p.getId(),p.getId());
+                            break;
+                        case SMARTSTAT_HEAT_PUMP_UNIT:
+                            tunerList.add("smartstat_hpu"+ p.getId());
+                            tunerMap.put("smartstat_hpu"+ p.getId(),p.getId());
+                            break;
+                    }
 
                     tunerMap.put(currTmep.get("dis").toString(), currTmep.get("id").toString());
                     tunerMap.put(coolDT.get("dis").toString(), coolDT.get("id").toString());
                     tunerMap.put(heatDT.get("dis").toString(), heatDT.get("id").toString());
-                    tunerMap.put("smartstat_"+ p.getId(),p.getId());
+                    //tunerMap.put("schedule_" + p.getId(), p.getId());
 
                     expandableListDetail.put(p.getDisplayName(), tunerList);
                 }

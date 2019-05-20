@@ -12,8 +12,10 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.NumberPicker;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -45,24 +47,25 @@ public class FragmentCPUConfiguration extends BaseDialogFragment {
     private ConventionalUnitConfiguration mProfileConfig;
 
 
-    SwitchCompat switchThermistor1;
-    SwitchCompat switchCoolingY1;
+    ToggleButton switchThermistor1;
+    ToggleButton switchCoolingY1;
     ToggleButton testCoolingY1;
-    SwitchCompat switchCoolingY2;
+    ToggleButton switchCoolingY2;
     ToggleButton testCoolingY2;
-    SwitchCompat switchFanLowG;
+    ToggleButton switchFanLowG;
     ToggleButton testFanLowG;
-    SwitchCompat switchHeatingW1;
+    ToggleButton switchHeatingW1;
     ToggleButton testHeatingW1;
-    SwitchCompat switchHeatingW2;
+    ToggleButton switchHeatingW2;
     ToggleButton testHeatingW2;
-    SwitchCompat switchFanHighOb;
+    ToggleButton switchFanHighOb;
     ToggleButton testFanHighOb;
-    SwitchCompat switchOccSensor;
-    SwitchCompat switchExtTempSensor;
+    ToggleButton switchOccSensor;
+    ToggleButton switchExtTempSensor;
     Button setButton;
     Button cancelButton;
     NumberPicker temperatureOffset;
+    Spinner fanHumiDSpinner;
 
     public FragmentCPUConfiguration()
     {
@@ -95,8 +98,8 @@ public class FragmentCPUConfiguration extends BaseDialogFragment {
         Dialog dialog = getDialog();
         if (dialog != null)
         {
-            int width = ViewGroup.LayoutParams.WRAP_CONTENT;
-            int height = ViewGroup.LayoutParams.WRAP_CONTENT;
+            int width = 1165;//ViewGroup.LayoutParams.WRAP_CONTENT;
+            int height = 720;//ViewGroup.LayoutParams.WRAP_CONTENT;
             dialog.getWindow().setLayout(width, height);
         }
         setTitle();
@@ -107,13 +110,6 @@ public class FragmentCPUConfiguration extends BaseDialogFragment {
 
         if (dialog == null) {
             return;
-        }
-        dialog.setTitle("SmartStat CPU Configuration");
-        TextView titleView = this.getDialog().findViewById(android.R.id.title);
-        if(titleView != null)
-        {
-            titleView.setGravity(Gravity.CENTER);
-            titleView.setTextColor(getResources().getColor(R.color.progress_color_orange));
         }
         int titleDividerId = getContext().getResources()
                 .getIdentifier("titleDivider", "id", "android");
@@ -129,7 +125,8 @@ public class FragmentCPUConfiguration extends BaseDialogFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
-        View view = inflater.inflate(R.layout.fragment_smartstat_cpu, container, false);
+        getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+        View view = inflater.inflate(R.layout.fragment_cpu_config, container, false);
         mSmartNodeAddress = getArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR);
         roomRef = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
         floorRef = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
@@ -154,15 +151,16 @@ public class FragmentCPUConfiguration extends BaseDialogFragment {
 
         }
 
-        switchCoolingY1 = (SwitchCompat)view.findViewById(R.id.switchy1);
-        switchCoolingY2 = (SwitchCompat)view.findViewById(R.id.switchy2);
-        switchHeatingW1 = (SwitchCompat)view.findViewById(R.id.switchw1);
-        switchHeatingW2 = (SwitchCompat)view.findViewById(R.id.switchw2);
-        switchFanLowG = (SwitchCompat)view.findViewById(R.id.switchg);
-        switchFanHighOb = (SwitchCompat)view.findViewById(R.id.switchob);
-        switchThermistor1 = (SwitchCompat)view.findViewById(R.id.switchTh1);
-        switchExtTempSensor = (SwitchCompat)view.findViewById(R.id.switchCpuExternal10kTempSensor);
+        switchCoolingY1 = (ToggleButton)view.findViewById(R.id.toggleCoolStage1);
+        switchCoolingY2 = (ToggleButton)view.findViewById(R.id.toggleCoolStage2);
+        switchHeatingW1 = (ToggleButton)view.findViewById(R.id.toggleHeatStage1);
+        switchHeatingW2 = (ToggleButton)view.findViewById(R.id.toggleHeatStage2);
+        switchFanLowG = (ToggleButton)view.findViewById(R.id.toggleCpuFanLow);
+        switchFanHighOb = (ToggleButton)view.findViewById(R.id.toggleCpuFanHigh);
+        switchThermistor1 = (ToggleButton)view.findViewById(R.id.toggleCpuAirflow);
+        switchExtTempSensor = (ToggleButton)view.findViewById(R.id.toogleCpuExtSensor);
         temperatureOffset = (NumberPicker) view.findViewById(R.id.temperatureOffset);
+        fanHumiDSpinner = (Spinner)view.findViewById(R.id.spinnerCpuFanHigh);
         setNumberPickerDividerColor(temperatureOffset);
         temperatureOffset.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         String[] nums = new String[TEMP_OFFSET_LIMIT * 2 + 1];//{"-4","-3","-2","-1","0","1","2","3","4"};
@@ -175,7 +173,7 @@ public class FragmentCPUConfiguration extends BaseDialogFragment {
         temperatureOffset.setWrapSelectorWheel(false);
 
 
-        switchOccSensor = view.findViewById(R.id.switchoccSensor);
+        switchOccSensor = view.findViewById(R.id.toggleCpuOccupancy);
 
 
         setButton = (Button) view.findViewById(R.id.setBtn);
@@ -210,6 +208,8 @@ public class FragmentCPUConfiguration extends BaseDialogFragment {
                     }
                 }
             }
+
+            fanHumiDSpinner.setSelection(mProfileConfig.relay6Type - 1);
         }
         setButton.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -257,6 +257,7 @@ public class FragmentCPUConfiguration extends BaseDialogFragment {
         cpuConfig.temperatureOffset = temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
         cpuConfig.enableThermistor1 = switchThermistor1.isChecked();
         cpuConfig.enableThermistor2 = switchExtTempSensor.isChecked();
+        cpuConfig.relay6Type = fanHumiDSpinner.getSelectedItemPosition()+1;
 
 
         if(switchCoolingY1.isChecked()) {

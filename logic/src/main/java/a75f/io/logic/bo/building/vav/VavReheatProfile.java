@@ -2,8 +2,6 @@ package a75f.io.logic.bo.building.vav;
 
 import android.util.Log;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import a75.io.algos.CO2Loop;
 import a75.io.algos.ControlLoop;
 import a75.io.algos.GenericPIController;
@@ -35,7 +33,7 @@ public class VavReheatProfile extends VavProfile
 {
   
     private boolean satCompensationEnabled = false;
-    @JsonIgnore
+    
     @Override
     public ProfileType getProfileType()
     {
@@ -44,7 +42,6 @@ public class VavReheatProfile extends VavProfile
     
     //VAV damper and reheat coil control logic is implemented according to section 1.3.E.6 of
     //ASHRAE RP-1455: Advanced Control Sequences for HVAC Systems Phase I, Air Distribution and Terminal Systems
-    @JsonIgnore
     @Override
     public void updateZonePoints() {
         
@@ -60,9 +57,18 @@ public class VavReheatProfile extends VavProfile
                 CcuLog.d(L.TAG_CCU_ZONE, " Logical Map added for node " + node);
                 continue;
             }
-            if (vavDeviceMap.get(node).getCurrentTemp() == 0) {
-                CcuLog.d(L.TAG_CCU_ZONE,"Invalid Temp , skip controls update for "+node+" roomTemp : "+vavDeviceMap.get(node).getCurrentTemp());
+            if (isZoneDead()) {
+                CcuLog.d(L.TAG_CCU_ZONE,"Zone Dead "+node+" roomTemp : "+vavDeviceMap.get(node).getCurrentTemp());
                 
+                String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \""+node+"\"");
+                if (!curStatus.equals("Zone Dead"))
+                {
+                    CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"", "Zone Dead");
+                }
+                continue;
+            } else if (isTemperatureDead()){
+                CcuLog.d(L.TAG_CCU_ZONE,"Temperature Dead "+node+" roomTemp : "+vavDeviceMap.get(node).getCurrentTemp());
+    
                 String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \""+node+"\"");
                 if (!curStatus.equals("Temperature Dead"))
                 {
@@ -70,6 +76,7 @@ public class VavReheatProfile extends VavProfile
                 }
                 continue;
             }
+            
             VAVLogicalMap vavDevice = vavDeviceMap.get(node);
             ControlLoop coolingLoop = vavDevice.getCoolingLoop();
             ControlLoop heatingLoop = vavDevice.getHeatingLoop();
@@ -261,13 +268,11 @@ public class VavReheatProfile extends VavProfile
     
             vavDevice.setDamperPos(damper.currentPosition);
             vavDevice.setReheatPos(valve.currentPosition);
-            if (vavDevice.getStatus() != state.ordinal())
-            {
-                vavDevice.setStatus(state.ordinal());
-            }
+            CcuLog.d(L.TAG_CCU_ZONE, "buildingLimitMaxBreached "+buildingLimitMaxBreached()+" buildingLimitMinBreached "+buildingLimitMinBreached());
+            
+            vavDevice.setStatus(state.ordinal(), VavSystemController.getInstance().isEmergencyMode() && (state == HEATING ? buildingLimitMinBreached()
+                                                         : state == COOLING ? buildingLimitMaxBreached() : false));
             vavDevice.updateLoopParams();
-            
-            
         }
     }
     @Override

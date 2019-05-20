@@ -21,6 +21,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.building.system.dab.DabSystemController;
 import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
@@ -77,13 +78,45 @@ public class DabProfile extends ZoneProfile
     }
     
     @Override
+    public boolean isZoneDead() {
+        
+        double buildingLimitMax =  TunerUtil.readTunerValByQuery("building and limit and max", L.ccu().systemProfile.getSystemEquipRef());
+        double buildingLimitMin =  TunerUtil.readTunerValByQuery("building and limit and min", L.ccu().systemProfile.getSystemEquipRef());
+        
+        double tempDeadLeeway = TunerUtil.readTunerValByQuery("temp and dead and leeway",L.ccu().systemProfile.getSystemEquipRef());
+    
+        if (dabEquip.getCurrentTemp() > (buildingLimitMax + tempDeadLeeway)
+            || dabEquip.getCurrentTemp() < (buildingLimitMin - tempDeadLeeway))
+        {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    @Override
     public void updateZonePoints()
     {
-        if (dabEquip.getCurrentTemp() == 0) {
-            CcuLog.d(L.TAG_CCU_ZONE,"Invalid Temp , skip controls update for "+dabEquip.nodeAddr+" roomTemp : "+dabEquip.getCurrentTemp());
-            CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \""+dabEquip.nodeAddr+"\"", "Temperature Dead");
+        if (isZoneDead()) {
+            CcuLog.d(L.TAG_CCU_ZONE,"Zone Dead: "+dabEquip.nodeAddr+" roomTemp : "+dabEquip.getCurrentTemp());
+        
+            String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \""+dabEquip.nodeAddr+"\"");
+            if (!curStatus.equals("Zone Dead"))
+            {
+                CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + dabEquip.nodeAddr + "\"", "Zone Dead");
+            }
+            return;
+        } else if (dabEquip.getCurrentTemp() == 0){
+            CcuLog.d(L.TAG_CCU_ZONE,"Temperature Dead: "+dabEquip.nodeAddr+" roomTemp : "+dabEquip.getCurrentTemp());
+        
+            String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \""+dabEquip.nodeAddr+"\"");
+            if (!curStatus.equals("Temperature Dead"))
+            {
+                CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + dabEquip.nodeAddr + "\"", "Temperature Dead");
+            }
             return;
         }
+        
         double setTempCooling = dabEquip.getDesiredTempCooling();
         double setTempHeating = dabEquip.getDesiredTempHeating();
         double roomTemp = dabEquip.getCurrentTemp();
@@ -151,10 +184,8 @@ public class DabProfile extends ZoneProfile
         dabEquip.setDamperPos(damper.currentPosition, "primary");
         dabEquip.setDamperPos(damper.currentPosition, "secondary");
     
-        if (dabEquip.getStatus() != state.ordinal())
-        {
-            dabEquip.setStatus(state.ordinal());
-        }
+        dabEquip.setStatus(state.ordinal(), DabSystemController.getInstance().isEmergencyMode() && (state == HEATING ? buildingLimitMinBreached()
+                                                    : state == COOLING ? buildingLimitMaxBreached() : false));
         CcuLog.d(L.TAG_CCU_ZONE, "System STATE :" + DabSystemController.getInstance().getSystemState() + " ZoneState : " + getState() + " ,CV: " + damperOpController.getControlVariable() + " ,damper:" + damper.currentPosition);
     
     }
@@ -171,7 +202,7 @@ public class DabProfile extends ZoneProfile
                 break;
             case DEADBAND:
                 d.minPosition = 40;
-                d.maxPosition = 80;
+                d.maxPosition = 100;
                 break;
         }
     }

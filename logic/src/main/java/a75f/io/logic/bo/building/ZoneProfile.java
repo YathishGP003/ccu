@@ -8,8 +8,10 @@ import java.util.Set;
 import java.util.UUID;
 
 import a75f.io.api.haystack.Equip;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.RoomDataInterface;
+import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 
@@ -95,6 +97,10 @@ public abstract class ZoneProfile extends Schedulable
             mInterface.refreshView();
     }
     
+    public boolean isZoneDead() {
+        return false;
+    }
+    
     @JsonIgnore
     public double getDisplayCurrentTemp()
     {
@@ -133,6 +139,28 @@ public abstract class ZoneProfile extends Schedulable
     @JsonIgnore
     public ZoneState getState() {
         return state;
+    }
+    
+    public boolean buildingLimitMinBreached() {
+        double buildingLimitMin =  TunerUtil.readTunerValByQuery("building and limit and min", L.ccu().systemProfile.getSystemEquipRef());
+        double tempDeadLeeway = TunerUtil.readTunerValByQuery("temp and dead and leeway",L.ccu().systemProfile.getSystemEquipRef());
+    
+        double currentTemp = getCurrentTemp();
+        if (currentTemp < buildingLimitMin && currentTemp > (buildingLimitMin-tempDeadLeeway)) {
+            return true;
+        }
+        return false;
+    }
+    
+    public boolean buildingLimitMaxBreached() {
+        double buildingLimitMax =  TunerUtil.readTunerValByQuery("building and limit and max", L.ccu().systemProfile.getSystemEquipRef());
+        double tempDeadLeeway = TunerUtil.readTunerValByQuery("temp and dead and leeway",L.ccu().systemProfile.getSystemEquipRef());
+    
+        double currentTemp = getCurrentTemp();
+        if (currentTemp > buildingLimitMax && currentTemp < (buildingLimitMax+tempDeadLeeway)) {
+            return true;
+        }
+        return false;
     }
 }
 

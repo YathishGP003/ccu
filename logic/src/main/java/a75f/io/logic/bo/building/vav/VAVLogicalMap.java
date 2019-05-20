@@ -1171,11 +1171,26 @@ public class VAVLogicalMap
         return CCUHsApi.getInstance().readHisValByQuery("point and status and his and group == \""+nodeAddr+"\"");
     }
     
-    public void setStatus(double status) {
-        CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \""+nodeAddr+"\"", status);
+    public void setStatus(double status, boolean emergency) {
         
-        CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \""+nodeAddr+"\"",
-                            status == 0 ? "Recirculating Air" : status == 1 ? "Cooling Space" : "Warming Space");
+        if (getStatus() != status )
+        {
+            CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + nodeAddr + "\"", status);
+        }
+        
+        String message;
+        if (emergency) {
+            message = (status == 0 ? "Recirculating Air" : status == 1 ? "Emergency Cooling" : "Emergency Heating");
+        } else
+        {
+            message = (status == 0 ? "Recirculating Air" : status == 1 ? "Cooling Space" : "Warming Space");
+        }
+    
+        String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \""+nodeAddr+"\"");
+        if (!curStatus.equals(message))
+        {
+            CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + nodeAddr + "\"", message);
+        }
     }
     
     public void setScheduleStatus(String status)

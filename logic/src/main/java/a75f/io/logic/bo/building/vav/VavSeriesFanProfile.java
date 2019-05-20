@@ -1,7 +1,5 @@
 package a75f.io.logic.bo.building.vav;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import a75.io.algos.CO2Loop;
 import a75.io.algos.ControlLoop;
 import a75.io.algos.GenericPIController;
@@ -34,14 +32,13 @@ public class VavSeriesFanProfile extends VavProfile
 {
     
     private boolean fanReady = false;
-    @JsonIgnore
+    
     @Override
     public ProfileType getProfileType()
     {
         return ProfileType.VAV_SERIES_FAN;
     }
     
-    @JsonIgnore
     @Override
     public void updateZonePoints() {
         CcuLog.d(L.TAG_CCU_ZONE, "VAV Series Fan Control");
@@ -81,8 +78,18 @@ public class VavSeriesFanProfile extends VavProfile
             }
             Equip vavEquip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + node + "\"")).build();
     
-            if (roomTemp == 0) {
-                CcuLog.d(L.TAG_CCU_ZONE,"Skip PI update for "+node+" roomTemp : "+roomTemp);
+            if (isZoneDead()) {
+                CcuLog.d(L.TAG_CCU_ZONE,"Zone Dead : "+node+" roomTemp : "+vavDeviceMap.get(node).getCurrentTemp());
+        
+                String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \""+node+"\"");
+                if (!curStatus.equals("Zone Dead"))
+                {
+                    CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"", "Zone Dead");
+                }
+                continue;
+            } else if (isTemperatureDead()){
+                CcuLog.d(L.TAG_CCU_ZONE,"Temperature Dead: "+node+" roomTemp : "+vavDeviceMap.get(node).getCurrentTemp());
+        
                 String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \""+node+"\"");
                 if (!curStatus.equals("Temperature Dead"))
                 {
@@ -246,10 +253,8 @@ public class VavSeriesFanProfile extends VavProfile
             updateTRResponse(node);
             vavDevice.setDamperPos(damper.currentPosition);
             vavDevice.setReheatPos(valve.currentPosition);
-            if (vavDevice.getStatus() != state.ordinal())
-            {
-                vavDevice.setStatus(state.ordinal());
-            }
+            vavDevice.setStatus(state.ordinal(), VavSystemController.getInstance().isEmergencyMode() && (state == HEATING ? buildingLimitMinBreached()
+                                                         : state == COOLING ? buildingLimitMaxBreached() : false));
             vavDevice.updateLoopParams();
         }
     }

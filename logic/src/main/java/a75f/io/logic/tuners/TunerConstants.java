@@ -62,6 +62,10 @@ public class TunerConstants
     
     public static final double SYSTEM_PRECONDITION_RATE = 15.0;
     public static final double USER_LIMIT_SPREAD = 4;
+    public static final double BUILDING_LIMIT_MIN = 55;
+    public static final double BUILDING_LIMIT_MAX = 90;
+    public static final double BUILDING_TO_ZONE_DIFFERENTIAL = 3;
+    public static final double ZONE_TEMP_DEAD_LEEWAY = 10;
     
     public static final double MIN_COOLING_DAMPER = 40;
     public static final double MAX_COOLING_DAMPER = 80;

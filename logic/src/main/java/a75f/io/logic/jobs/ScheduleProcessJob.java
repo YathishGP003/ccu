@@ -24,6 +24,7 @@ import a75f.io.logic.BaseJob;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.L.TAG_CCU_JOB;
@@ -139,8 +140,7 @@ public class ScheduleProcessJob extends BaseJob {
         ArrayList<Schedule> activeVacationSchedules = CCUHsApi.getInstance().getSystemSchedule(true);
     
         activeSystemVacation = getActiveVacation(activeVacationSchedules);
-        /* The systemSchedule isn't initiated yet, so schedules shouldn't be ran*/
-    
+        
         Log.d(L.TAG_CCU_JOB, " activeSystemVacation "+activeSystemVacation);
     
         //Read all equips
@@ -329,6 +329,14 @@ public class ScheduleProcessJob extends BaseJob {
             }
             return "In Energy saving Vacation";
         }
+        
+        if (L.ccu().systemProfile.getSystemController().isEmergencyMode()) {
+            if (L.ccu().systemProfile.getSystemController().getSystemState() == SystemController.State.HEATING) {
+                return "Building Limit Breach | Emergency Heating turned on";
+            } else if (L.ccu().systemProfile.getSystemController().getSystemState() == SystemController.State.COOLING) {
+                return "Building Limit Breach | Emergency Cooling turned on";
+            }
+        }
 
         switch (systemOccupancy) {
             case OCCUPIED:
@@ -392,20 +400,6 @@ public class ScheduleProcessJob extends BaseJob {
             return;
         }
         
-        /*for (Floor f: HSUtil.getFloors())
-        {
-            for (Zone z : HSUtil.getZones(f.getId()))
-            {
-                Occupied c = ScheduleProcessJob.getOccupiedModeCache(z.getId());
-
-                if (c!= null && c.isOccupied())
-                {
-                    systemOccupancy = OCCUPIED;
-                    currOccupied = getOccupiedModeCache(z.getId());
-                }
-            }
-        }
-        */
         for (Occupied occ : occupiedHashMap.values()) {
             if (occ.isOccupied())
             {

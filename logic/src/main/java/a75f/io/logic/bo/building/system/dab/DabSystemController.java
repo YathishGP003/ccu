@@ -132,6 +132,7 @@ public class DabSystemController extends SystemController
         
         if (prioritySum == 0) {
             CcuLog.d(L.TAG_CCU_SYSTEM, "No valid temperature, Skip DabSystemControlAlgo");
+            systemState = OFF;
             return;
         }
         
@@ -152,21 +153,51 @@ public class DabSystemController extends SystemController
             weightedAverageLoadPostMLQSum += val;
         }
         weightedAverageLoadMA = weightedAverageLoadPostMLQSum/weightedAverageLoadPostMLQ.size();
-        
-        
-        if ((systemMode == COOLONLY || systemMode == AUTO) && weightedAverageLoadMA > 0) {
-            if (systemState != COOLING) {
+    
+        if ((systemState == COOLING || systemState == OFF) && buildingLimitMaxBreached("dab")) {
+            CcuLog.d(L.TAG_CCU_SYSTEM, " Emergency COOLING Active");
+            emergencyMode = false;
+            if (systemState != COOLING)
+            {
                 systemState = COOLING;
                 piController.reset();
             }
-        } else if ((systemMode == HEATONLY || systemMode == AUTO) && weightedAverageLoadMA < 0) {
+        } else if ((systemState == HEATING || systemState == OFF) && buildingLimitMinBreached("dab")) {
+            CcuLog.d(L.TAG_CCU_SYSTEM, " Emergency HEATING Active");
+            emergencyMode = true;
             if (systemState != HEATING)
             {
                 systemState = HEATING;
                 piController.reset();
             }
-        } else {
-            systemState = OFF;
+        } else
+        {
+            if (emergencyMode) {
+                CcuLog.d(L.TAG_CCU_SYSTEM, " Emergency CONDITIONING Disabled");
+                piController.reset();
+                emergencyMode = false;
+            }
+            
+            if ((systemMode == COOLONLY || systemMode == AUTO) && weightedAverageLoadMA > 0)
+            {
+                if (systemState != COOLING)
+                {
+                    systemState = COOLING;
+                    piController.reset();
+                }
+            }
+            else if ((systemMode == HEATONLY || systemMode == AUTO) && weightedAverageLoadMA < 0)
+            {
+                if (systemState != HEATING)
+                {
+                    systemState = HEATING;
+                    piController.reset();
+                }
+            }
+            else
+            {
+                systemState = OFF;
+            }
         }
         
         profile.setSystemPoint("operating and mode", systemState.ordinal());

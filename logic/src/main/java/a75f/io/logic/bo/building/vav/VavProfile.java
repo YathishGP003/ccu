@@ -20,6 +20,7 @@ import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.building.hvac.Valve;
 import a75f.io.logic.bo.building.hvac.VavUnit;
 import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
+import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.ZonePriority.NONE;
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
@@ -144,7 +145,8 @@ public abstract class VavProfile extends ZoneProfile
                 d.maxPosition = (int)deviceMap.getDamperLimit("heating", "max");;
                 break;
             case DEADBAND:
-                //TODO - ?
+                d.minPosition = 40;
+                d.maxPosition = 100;
                 break;
         }
     }
@@ -159,6 +161,38 @@ public abstract class VavProfile extends ZoneProfile
     public BaseProfileConfiguration getProfileConfiguration(short address)
     {
         return vavDeviceMap.get(address) != null ? vavDeviceMap.get(address).getProfileConfiguration() : null;
+    }
+    
+    
+    @Override
+    public boolean isZoneDead() {
+    
+        double buildingLimitMax =  TunerUtil.readTunerValByQuery("building and limit and max", L.ccu().systemProfile.getSystemEquipRef());
+        double buildingLimitMin =  TunerUtil.readTunerValByQuery("building and limit and min", L.ccu().systemProfile.getSystemEquipRef());
+    
+        double tempDeadLeeway = TunerUtil.readTunerValByQuery("temp and dead and leeway",L.ccu().systemProfile.getSystemEquipRef());
+    
+        for (short node : vavDeviceMap.keySet())
+        {
+            if (vavDeviceMap.get(node).getCurrentTemp() > (buildingLimitMax + tempDeadLeeway)
+                || vavDeviceMap.get(node).getCurrentTemp() < (buildingLimitMin - tempDeadLeeway))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public boolean isTemperatureDead() {
+        
+        for (short node : vavDeviceMap.keySet())
+        {
+            if (vavDeviceMap.get(node).getCurrentTemp() == 0)
+            {
+                return true;
+            }
+        }
+        return false;
     }
     
     @JsonIgnore

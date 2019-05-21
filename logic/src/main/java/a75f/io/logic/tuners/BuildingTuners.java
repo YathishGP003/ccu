@@ -113,6 +113,56 @@ public class BuildingTuners
         String userLimitSpreadId = hayStack.addPoint(userLimitSpread);
         hayStack.writePoint(userLimitSpreadId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.USER_LIMIT_SPREAD, 0);
         hayStack.writeHisValById(userLimitSpreadId, TunerConstants.USER_LIMIT_SPREAD);
+    
+        Point buildingLimitMin = new Point.Builder()
+                                        .setDisplayName(equipDis+"-"+"buildingLimitMin")
+                                        .setSiteRef(siteRef)
+                                        .setEquipRef(equipRef)
+                                        .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
+                                        .addMarker("system").addMarker("building").addMarker("limit").addMarker("min").addMarker("sp")
+                                        .setTz(tz)
+                                        .build();
+        String buildingLimitMinId = hayStack.addPoint(buildingLimitMin);
+        hayStack.writePoint(buildingLimitMinId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.BUILDING_LIMIT_MIN, 0);
+        hayStack.writeHisValById(buildingLimitMinId, TunerConstants.BUILDING_LIMIT_MIN);
+    
+        Point buildingLimitMax = new Point.Builder()
+                                         .setDisplayName(equipDis+"-"+"buildingLimitMax")
+                                         .setSiteRef(siteRef)
+                                         .setEquipRef(equipRef)
+                                         .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
+                                         .addMarker("system").addMarker("building").addMarker("limit").addMarker("max").addMarker("sp")
+                                         .setTz(tz)
+                                         .build();
+        String buildingLimitMaxId = hayStack.addPoint(buildingLimitMax);
+        hayStack.writePoint(buildingLimitMaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.BUILDING_LIMIT_MAX, 0);
+        hayStack.writeHisValById(buildingLimitMaxId, TunerConstants.BUILDING_LIMIT_MAX);
+    
+        Point buildingToZoneDifferential = new Point.Builder()
+                                         .setDisplayName(equipDis+"-"+"buildingToZoneDifferential")
+                                         .setSiteRef(siteRef)
+                                         .setEquipRef(equipRef)
+                                         .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
+                                         .addMarker("system").addMarker("building").addMarker("zone").addMarker("differential").addMarker("sp")
+                                         .setTz(tz)
+                                         .build();
+        String buildingToZoneDifferentialId = hayStack.addPoint(buildingToZoneDifferential);
+        hayStack.writePoint(buildingToZoneDifferentialId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.BUILDING_TO_ZONE_DIFFERENTIAL, 0);
+        hayStack.writeHisValById(buildingToZoneDifferentialId, TunerConstants.BUILDING_TO_ZONE_DIFFERENTIAL);
+    
+        Point zoneTemperatureDeadLeeway = new Point.Builder()
+                                                   .setDisplayName(equipDis+"-"+"zoneTemperatureDeadLeeway")
+                                                   .setSiteRef(siteRef)
+                                                   .setEquipRef(equipRef)
+                                                   .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
+                                                   .addMarker("system").addMarker("zone").addMarker("temp").addMarker("dead").addMarker("leeway").addMarker("sp")
+                                                   .setTz(tz)
+                                                   .build();
+        String zoneTemperatureDeadLeewayId = hayStack.addPoint(zoneTemperatureDeadLeeway);
+        hayStack.writePoint(zoneTemperatureDeadLeewayId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_TEMP_DEAD_LEEWAY, 0);
+        hayStack.writeHisValById(zoneTemperatureDeadLeewayId, TunerConstants.ZONE_TEMP_DEAD_LEEWAY);
+        
+        
     }
     
     public void addDefaultZoneTuners() {

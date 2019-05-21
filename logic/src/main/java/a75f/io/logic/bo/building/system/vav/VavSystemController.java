@@ -77,6 +77,7 @@ public class VavSystemController extends SystemController
     double weightedAverageHeatingOnlyLoadPostML;
     double weightedAverageLoadPostML;
     
+    
     private VavSystemController()
     {
         piController = new ControlLoop();
@@ -115,7 +116,7 @@ public class VavSystemController extends SystemController
                 for (Equip q : HSUtil.getEquips(z.getId()))
                 {
                     
-                    if (q.getMarkers().contains("vav") == false || getEquipCurrentTemp(q.getId()) == 0)
+                    if (q.getMarkers().contains("vav") == false || isZoneDead(q) || isTemperatureDead(q))
                     {
                         continue;
                     }
@@ -143,6 +144,7 @@ public class VavSystemController extends SystemController
         
         if (prioritySum == 0) {
             CcuLog.d(L.TAG_CCU_SYSTEM, "No valid temperature, Skip VavSystemControlAlgo");
+            systemState = OFF;
             return;
         }
         
@@ -173,19 +175,49 @@ public class VavSystemController extends SystemController
         }
         weightedAverageHeatingOnlyLoadMA = weightedAverageHeatingOnlyLoadMASum/weightedAverageHeatingOnlyLoadMAQueue.size();
     
-        if ((systemMode == COOLONLY || systemMode == AUTO) && weightedAverageCoolingOnlyLoadMA > 0) {
-            if (systemState != COOLING) {
+        if ((systemState == COOLING || systemState == OFF) && buildingLimitMaxBreached("vav")) {
+            CcuLog.d(L.TAG_CCU_SYSTEM, " Emergency COOLING Active");
+            emergencyMode = true;
+            if (systemState != COOLING)
+            {
                 systemState = COOLING;
                 piController.reset();
             }
-        } else if ((systemMode == HEATONLY || systemMode == AUTO) && (weightedAverageCoolingOnlyLoadMA == 0 && weightedAverageHeatingOnlyLoadMA > 0)) {
+        } else if ((systemState == HEATING || systemState == OFF) && buildingLimitMinBreached("vav")) {
+            CcuLog.d(L.TAG_CCU_SYSTEM, " Emergency HEATING Active");
+            emergencyMode = true;
             if (systemState != HEATING)
             {
                 systemState = HEATING;
                 piController.reset();
             }
-        } else {
-            systemState = OFF;
+        } else
+        {
+            if (emergencyMode) {
+                CcuLog.d(L.TAG_CCU_SYSTEM, " Emergency CONDITIONING Disabled");
+                piController.reset();
+                emergencyMode = false;
+            }
+            if ((systemMode == COOLONLY || systemMode == AUTO) && weightedAverageCoolingOnlyLoadMA > 0)
+            {
+                if (systemState != COOLING)
+                {
+                    systemState = COOLING;
+                    piController.reset();
+                }
+            }
+            else if ((systemMode == HEATONLY || systemMode == AUTO) && (weightedAverageCoolingOnlyLoadMA == 0 && weightedAverageHeatingOnlyLoadMA > 0))
+            {
+                if (systemState != HEATING)
+                {
+                    systemState = HEATING;
+                    piController.reset();
+                }
+            }
+            else
+            {
+                systemState = OFF;
+            }
         }
         
         piController.dump();
@@ -205,22 +237,6 @@ public class VavSystemController extends SystemController
     
         profile.setSystemPoint("moving and average and cooling and load",weightedAverageCoolingOnlyLoadMA);
         profile.setSystemPoint("moving and average and heating and load",weightedAverageHeatingOnlyLoadMA);
-    
-        /*if (systemOccupancy == 0)
-        {
-            double preconDegree = Math.max(weightedAverageCoolingOnlyLoadMA, weightedAverageHeatingOnlyLoadMA);
-            double preconRate = CCUHsApi.getInstance().getPredictedPreconRate(profile.getSystemEquipRef());
-            if (preconRate == 0) {
-                preconRate = TunerUtil.readTunerValByQuery("precon and rate", profile.getSystemEquipRef());
-            }
-            if (preconDegree * preconRate * 60 * 1000 >= ScheduleProcessJob.getMillisToOccupancy())
-            {
-                systemOccupancy = 2; //TODO - use enum
-            }
-            CcuLog.d(L.TAG_CCU_SYSTEM, "preconRate : "+preconRate+" preconDegree: "+preconDegree);
-        }
-        profile.setSystemPoint("occupancy and status", systemOccupancy);
-        CcuLog.d(L.TAG_CCU_SYSTEM, "systemOccupancy status : "+systemOccupancy);*/
         
         if (systemState == HEATING)
         {
@@ -312,6 +328,18 @@ public class VavSystemController extends SystemController
     public double getEquipTempTarget(String zoneRef) //Humidity compensated
     {
         return getEquipDesiredTemp(zoneRef);//TODO - TEMP
+    }
+    
+    public boolean isZoneDead(Equip q) {
+    
+        return CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and equipRef == \""+q.getId()+"\"")
+                       .equals("Zone Dead");
+    }
+    
+    public boolean isTemperatureDead(Equip q) {
+        
+        return CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and equipRef == \""+q.getId()+"\"")
+                       .equals("Zone Dead");
     }
     
     public double getEquipDynamicPriority(double zoneLoad, String equipRef) {

@@ -123,6 +123,71 @@ public abstract class SystemProfile
         String siteRef = (String) siteMap.get(Tags.ID);
         String tz = siteMap.get("tz").toString();
         equipRef = getSystemEquipRef();
+    
+        Point userLimitSpread = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "userLimitSpread").setSiteRef(siteRef).setEquipRef(equipRef).addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("user").addMarker("limit").addMarker("spread").addMarker("sp").addMarker("equipHis").setTz(tz).build();
+        String userLimitSpreadId = hayStack.addPoint(userLimitSpread);
+        HashMap userLimitSpreadPoint = hayStack.read("point and tuner and default and user and limit and spread");
+        ArrayList<HashMap> userLimitSpreadPointArr = hayStack.readPoint(userLimitSpreadPoint.get("id").toString());
+        for (HashMap valMap : userLimitSpreadPointArr)
+        {
+            if (valMap.get("val") != null)
+            {
+                hayStack.pointWrite(HRef.copy(userLimitSpreadId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                hayStack.writeHisValById(userLimitSpreadId, Double.parseDouble(valMap.get("val").toString()));
+            }
+        }
+    
+        Point buildingLimitMin = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "buildingLimitMin").setSiteRef(siteRef).setEquipRef(equipRef).addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("building").addMarker("limit").addMarker("min").addMarker("sp").addMarker("equipHis").setTz(tz).build();
+        String buildingLimitMinId = hayStack.addPoint(buildingLimitMin);
+        HashMap buildingLimitMinPoint = hayStack.read("point and tuner and default and building and limit and min");
+        ArrayList<HashMap> buildingLimitMinPointArr = hayStack.readPoint(buildingLimitMinPoint.get("id").toString());
+        for (HashMap valMap : buildingLimitMinPointArr)
+        {
+            if (valMap.get("val") != null)
+            {
+                hayStack.pointWrite(HRef.copy(buildingLimitMinId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                hayStack.writeHisValById(buildingLimitMinId, Double.parseDouble(valMap.get("val").toString()));
+            }
+        }
+    
+        Point buildingLimitMax = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "buildingLimitMax").setSiteRef(siteRef).setEquipRef(equipRef).addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("building").addMarker("limit").addMarker("max").addMarker("sp").addMarker("equipHis").setTz(tz).build();
+        String buildingLimitMaxId = hayStack.addPoint(buildingLimitMax);
+        HashMap buildingLimitMaxPoint = hayStack.read("point and tuner and default and building and limit and max");
+        ArrayList<HashMap> buildingLimitMaxPointArr = hayStack.readPoint(buildingLimitMaxPoint.get("id").toString());
+        for (HashMap valMap : buildingLimitMaxPointArr)
+        {
+            if (valMap.get("val") != null)
+            {
+                hayStack.pointWrite(HRef.copy(buildingLimitMaxId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                hayStack.writeHisValById(buildingLimitMaxId, Double.parseDouble(valMap.get("val").toString()));
+            }
+        }
+    
+        Point buildingToZoneDifferential = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "buildingToZoneDifferential").setSiteRef(siteRef).setEquipRef(equipRef).addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("building").addMarker("zone").addMarker("differential").addMarker("sp").addMarker("equipHis").setTz(tz).build();
+        String buildingToZoneDifferentialId = hayStack.addPoint(buildingToZoneDifferential);
+        HashMap buildingToZoneDifferentialPoint = hayStack.read("point and tuner and default and building and zone and differential");
+        ArrayList<HashMap> buildingToZoneDifferentialPointArr = hayStack.readPoint(buildingToZoneDifferentialPoint.get("id").toString());
+        for (HashMap valMap : buildingToZoneDifferentialPointArr)
+        {
+            if (valMap.get("val") != null)
+            {
+                hayStack.pointWrite(HRef.copy(buildingToZoneDifferentialId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                hayStack.writeHisValById(buildingToZoneDifferentialId, Double.parseDouble(valMap.get("val").toString()));
+            }
+        }
+    
+        Point zoneTemperatureDeadLeeway = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "zoneTemperatureDeadLeeway").setSiteRef(siteRef).setEquipRef(equipRef).addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("zone").addMarker("temp").addMarker("dead").addMarker("leeway").addMarker("sp").addMarker("equipHis").setTz(tz).build();
+        String zoneTemperatureDeadLeewayId = hayStack.addPoint(zoneTemperatureDeadLeeway);
+        HashMap zoneTemperatureDeadLeewayPoint = hayStack.read("point and tuner and default and zone and temp and dead and leeway");
+        ArrayList<HashMap> zoneTemperatureDeadLeewayPointArr = hayStack.readPoint(zoneTemperatureDeadLeewayPoint.get("id").toString());
+        for (HashMap valMap : zoneTemperatureDeadLeewayPointArr)
+        {
+            if (valMap.get("val") != null)
+            {
+                hayStack.pointWrite(HRef.copy(zoneTemperatureDeadLeewayId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                hayStack.writeHisValById(zoneTemperatureDeadLeewayId, Double.parseDouble(valMap.get("val").toString()));
+            }
+        }
         
         Point heatingPreconditioningRate = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "heatingPreconditioningRate").setSiteRef(siteRef).setEquipRef(equipRef).addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("heating").addMarker("precon").addMarker("rate").addMarker("sp").addMarker("equipHis").setTz(tz).build();
         String heatingPreconditioningRateId = hayStack.addPoint(heatingPreconditioningRate);
@@ -146,19 +211,6 @@ public abstract class SystemProfile
             {
                 hayStack.pointWrite(HRef.copy(coolingPreconditioningRateId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
                 hayStack.writeHisValById(coolingPreconditioningRateId, Double.parseDouble(valMap.get("val").toString()));
-            }
-        }
-    
-        Point userLimitSpread = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "userLimitSpread").setSiteRef(siteRef).setEquipRef(equipRef).addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("user").addMarker("limit").addMarker("spread").addMarker("sp").addMarker("equipHis").setTz(tz).build();
-        String userLimitSpreadId = hayStack.addPoint(userLimitSpread);
-        HashMap userLimitSpreadPoint = hayStack.read("point and tuner and default and user and limit and spread");
-        ArrayList<HashMap> userLimitSpreadPointArr = hayStack.readPoint(userLimitSpreadPoint.get("id").toString());
-        for (HashMap valMap : userLimitSpreadPointArr)
-        {
-            if (valMap.get("val") != null)
-            {
-                hayStack.pointWrite(HRef.copy(userLimitSpreadId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(userLimitSpreadId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
     }

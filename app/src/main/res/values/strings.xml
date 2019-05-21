@@ -112,7 +112,7 @@
         <item>  COOL ONLY</item>
     </string-array>
 
-    <string-array name="smartstat_fanmode">
+    <string-array name="smartstat_2pfcu_fanmode">
         <item>  OFF </item>
         <item>  AUTO </item>
         <item>  LOW </item>
@@ -120,11 +120,20 @@
         <item>  HIGH</item>
     </string-array>
 
-    <string-array name="smartstat_cpufanmode">
+    <string-array name="smartstat_fanmode">
         <item>  OFF </item>
         <item>  AUTO </item>
         <item>  LOW </item>
         <item>  HIGH</item>
+    </string-array>
+    <string-array name="smartstat_relay_fanHumiD">
+        <item>  FAN HIGH SPEED </item>
+        <item>  HUMIDIFIER </item>
+        <item>  DEHUMIDIFIER </item>
+    </string-array>
+    <string-array name="smartstat_relay_hp_changeover">
+        <item>  O - ENERGIZE IN COOLING</item>
+        <item>  B - ENERGIZE IN HEATING</item>
     </string-array>
     <string-array name="schedulePORT">
         <item>   LCM Zone Schedule</item>
@@ -165,5 +174,22 @@
     <string name="title_activity_system_scheduler">System Scheduler</string>
 
     <string name="icon_plus">&#xf067;</string>
-
+    <!--Heat Pump Input-->
+    <string name="title_enable">ENABLE</string>
+    <string name="title_testsignal">TEST SIGNAL</string>
+    <string name="title_offset">TEMP OFFSET</string>
+    <string name="label_compstage1">Compressor Stage 1</string>
+    <string name="label_compstage2">Compressor Stage 2</string>
+    <string name="label_fanlow">Fan Low Speed</string>
+    <string name="label_auxheat">Aux Heating Stage 1</string>
+    <string name="label_fanhigh">Fan High Speed</string>
+    <string name="label_pumpchange">Heat Pump Changeover</string>
+    <string name="label_airflowtemp">Airflow Temperature Sensor</string>
+    <string name="label_enableoccup">Enable Occupancy Sensing</string>
+    <string name="label_extsensor">Use External 10k Temp Sensor</string>
+    <string name="button_set">SET</string>
+    <string name="label_coolstage1">Cooling Stage 1</string>
+    <string name="label_coolstage2">Cooling Stage 2</string>
+    <string name="label_heatstage1">Heating Stage 1</string>
+    <string name="label_heatstage2">Heating Stage 2</string>
 </resources>

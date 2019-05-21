@@ -15,4 +15,5 @@ public class ConventionalUnitConfiguration extends BaseProfileConfiguration {
     public boolean enableRelay4;
     public boolean enableRelay5;
     public boolean enableRelay6;
+    public int relay6Type;
 }

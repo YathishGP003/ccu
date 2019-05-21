@@ -124,8 +124,16 @@ public class StandaloneScheduler {
         if(status.equals("OFF") && relayStages.size() > 0) status = "";
         if(relayStages.containsKey("FanStage2") && relayStages.containsKey("FanStage1"))
             status = status + " Fan 1&2 ON";
+        else if(relayStages.containsKey("Humidifier") && relayStages.containsKey("FanStage1"))
+            status = status + " Fan 1 ON, Humidifier ON";
+        else if(relayStages.containsKey("Dehumidifier") && relayStages.containsKey("FanStage1"))
+            status = status + " Fan 1 ON, Dehumidifier ON";
         else if(relayStages.containsKey("FanStage2"))
             status = status + " Fan 2 ON";
+        else if(relayStages.containsKey("Humidifier"))
+            status = status + " Humidifier ON";
+        else if(relayStages.containsKey("Dehumidifier"))
+            status = status + " Dehumidifier ON";
         else if(relayStages.containsKey("FanStage1"))
             status = status + " Fan 1 ON";
         else
@@ -155,7 +163,7 @@ public class StandaloneScheduler {
             protected Void doInBackground( final String ... params ) {
 
                 CCUHsApi hayStack = CCUHsApi.getInstance();
-                HashMap cdb = hayStack.read("point and standalone and operation and mode and "+cmd+" and equipRef == \""+equipRef+"\"");
+                HashMap cdb = hayStack.read("point and standalone and "+cmd+" and equipRef == \""+equipRef+"\"");
                 if(cdb != null && (cdb.get("id") != null)) {
                     String id = cdb.get("id").toString();
                     Point p = new Point.Builder().setHashMap(hayStack.readMapById(id)).build();

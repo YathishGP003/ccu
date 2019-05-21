@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="40dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:id="@+id/selectMsg"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:textSize="20sp"
+            android:text="Enter Room"/>
+        <EditText
+            android:id="@+id/roomName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:text="DefaultRoom"/>
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+        <TextView
+            android:id="@+id/selectChannel"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:textSize="20sp"
+            android:text="Select Channel"/>
+        <Spinner
+            android:id="@+id/channelSelector"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
+
+        </Spinner>
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+        <Button
+            android:id="@+id/pairButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pair"
+            android:padding="5dp"
+            android:layout_marginRight="20dp"/>
+
+    </LinearLayout>
+
+</LinearLayout>

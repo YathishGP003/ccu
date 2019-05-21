@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_height="match_parent"
+              android:layout_width="match_parent"
+              android:orientation="vertical">
+
+    <TextView
+        style="@style/WindowTextStyle"
+        android:id="@+id/default_text_view"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:paddingBottom="8dp"
+        android:paddingLeft="8dp"
+        android:paddingTop="20dp"
+        android:text="place holder">
+    </TextView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="@drawable/deviceselection"
+        android:orientation="horizontal">
+
+
+        <RadioGroup
+            android:id="@+id/deviceTypeSelection"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+
+            <RadioButton
+                android:id="@+id/smartNode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="70dp"
+                android:layout_marginTop="135dp"
+                android:text="Smartnode"
+                android:textSize="@dimen/text_medium_xlarge" />
+
+
+            <RadioButton
+                android:id="@+id/smartstat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="70dp"
+                android:layout_marginTop="200dp"
+                android:text="SmartStat"
+                android:textSize="@dimen/text_medium_xlarge" />
+
+
+        </RadioGroup>
+
+        <RadioGroup
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:visibility="gone">
+
+            <RadioButton
+                android:id="@+id/hia"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="50dp"
+                android:layout_marginTop="150dp"
+                android:clickable="false"
+                android:focusable="false"
+                android:text="ITM-HIA"
+                android:textColor="@color/selection_gray"/>
+
+
+            <RadioButton
+                android:id="@+id/lpi"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="50dp"
+                android:layout_marginTop="180dp"
+                android:clickable="false"
+                android:focusable="false"
+                android:text="ITM-LPI"
+                android:textColor="@color/selection_gray"/>
+        </RadioGroup>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_gravity="right"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:orientation="horizontal"
+        android:paddingBottom="8dp"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:paddingTop="8dp">
+
+        <Button
+            style="@style/buttonstyle"
+            android:id="@+id/first_button"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="Cancel"></Button>
+
+        <Button
+            style="@style/buttonstyle"
+            android:id="@+id/second_button"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="Pair"></Button>
+
+    </LinearLayout>
+
+</LinearLayout>

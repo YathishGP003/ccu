@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/llmain"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/orange_multi"
+    android:orientation="horizontal">
+
+    <Space
+        android:layout_width="30dp"
+        android:layout_height="match_parent" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:padding="5dp">
+
+        <TextView
+            android:id="@+id/iftt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:text="IFTT"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="#202020"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/ifttNoStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="visible"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Nothing Scheduled, Use Support portal to schedule IFTT"
+            android:layout_marginStart="45dp"
+            android:layout_alignParentTop="true"
+            android:layout_toEndOf="@+id/iftt" />
+        <LinearLayout
+            android:id="@+id/ifttStatusNow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_below="@+id/iftt"
+            android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/iftt"
+            android:layout_marginLeft="20dp"
+            android:id="@+id/linear1"
+            android:orientation="horizontal"
+            android:weightSum="3">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginBottom="10dp"
+                android:orientation="vertical">
+                <TextView
+                    android:id="@+id/LogicalName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center|left"
+                    android:layout_marginLeft="5dp"
+                    android:gravity="center_vertical"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="#202020" />
+                <TextView
+                    android:id="@+id/status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center|left"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginLeft="5dp"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="#202020" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+                <TextView
+                    android:id="@+id/LogicalName2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center|left"
+                    android:gravity="center_vertical"
+                    android:layout_marginLeft="5dp"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="#202020" />
+                <TextView
+                    android:id="@+id/status2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center|left"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginLeft="5dp"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="#202020" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+                <TextView
+                    android:id="@+id/LogicalName3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center|left"
+                    android:layout_marginLeft="5dp"
+                    android:gravity="center_vertical"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="#202020" />
+                <TextView
+                    android:id="@+id/status3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center|left"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginLeft="5dp"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="#202020" />
+            </LinearLayout>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/linear1"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="10dp"
+            android:id="@+id/row2"
+            android:visibility="gone"
+            android:orientation="horizontal"
+            android:weightSum="3">
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+                <TextView
+                    android:id="@+id/LogicalName4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center|left"
+                    android:layout_marginLeft="5dp"
+                    android:gravity="center_vertical"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="#202020" />
+                <TextView
+                    android:id="@+id/status4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center|left"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginLeft="5dp"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="#202020" />
+            </LinearLayout>
+	    <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/LogicalName5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center|left"
+                android:layout_marginLeft="5dp"
+                android:gravity="center_vertical"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="#202020" />
+            <TextView
+                android:id="@+id/status5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center|left"
+                android:gravity="center_vertical"
+                android:layout_marginTop="5dp"
+                android:layout_marginLeft="5dp"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="#202020" />
+        </LinearLayout>
+        </LinearLayout>
+        </LinearLayout>
+    </RelativeLayout>
+
+
+    <Space
+        android:layout_width="30dp"
+        android:layout_height="match_parent" />
+</LinearLayout>

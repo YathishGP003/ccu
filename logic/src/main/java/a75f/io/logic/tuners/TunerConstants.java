@@ -88,7 +88,11 @@ public class TunerConstants
     public static final double STANDALONE_COOLING_STAGE2_UPPER_OFFSET = -12;
     public static final double STANDALONE_HEATING_STAGE2_LOWER_OFFSET = 15;
     public static final double STANDALONE_HEATING_STAGE2_UPPER_OFFSET = 150;
+    public static final double STANDALONE_HUMIDIFIER_TARGET_THRESHOLD = 25;
+    public static final double STANDALONE_DEHUMIDIFIER_TARGET_THRESHOLD = 45;
 
+    public static final double STANDALONE_TARGET_DEHUMIDIFIER = 45;
+    public static final double STANDALONE_TARGET_HUMIDITY = 25;
     public static final double STANDALONE_DEFAULT_FAN_OPERATIONAL_MODE = 1.0;//AUTO
     public static final double STANDALONE_DEFAULT_OPERATIONAL_MODE = 1.0;//Auto
 

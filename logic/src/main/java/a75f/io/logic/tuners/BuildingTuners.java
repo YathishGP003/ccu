@@ -1558,7 +1558,7 @@ public class BuildingTuners
     public void addDefaultStandaloneTuners()
     {
         Point saHeatingDeadBand = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"standaloneHeatingDeadband")
+                .setDisplayName(equipDis+"-standaloneHeatingDeadband")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("default").addMarker("base").addMarker("writable").addMarker("his").addMarker("equipHis")
@@ -1571,7 +1571,7 @@ public class BuildingTuners
         hayStack.writeHisValById(saHeatingDeadBandId, TunerConstants.STANDALONE_HEATING_DEADBAND_DEFAULT);
 
         Point saCoolingDeadBand = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"standaloneCoolingDeadband")
+                .setDisplayName(equipDis+"-standaloneCoolingDeadband")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("default").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
@@ -1583,7 +1583,7 @@ public class BuildingTuners
         hayStack.writePoint(saCoolingDeadBandId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_COOLING_DEADBAND_DEFAULT, 0);
         hayStack.writeHisValById(saCoolingDeadBandId, TunerConstants.STANDALONE_COOLING_DEADBAND_DEFAULT);
         Point saStage1Hysteresis = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"standaloneStage1Hysteresis")
+                .setDisplayName(equipDis+"-standaloneStage1Hysteresis")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("default").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
@@ -1595,7 +1595,7 @@ public class BuildingTuners
         hayStack.writeHisValById(saStage1HysteresisId, TunerConstants.STANDALONE_STAGE1_HYSTERESIS_DEFAULT);
 
         Point saAirflowSampleWaitTime = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"standaloneAirflowSampleWaitTime")
+                .setDisplayName(equipDis+"-standaloneAirflowSampleWaitTime")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("default").addMarker("standalone").addMarker("writable").addMarker("his")
@@ -1607,7 +1607,7 @@ public class BuildingTuners
         hayStack.writeHisValById(saAirflowSampleWaitTimeId, TunerConstants.STANDALONE_AIRFLOW_SAMPLE_WAIT_TIME);
 
         Point saStage1CoolingLowerOffset = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"standaloneStage1CoolingLowerOffset")
+                .setDisplayName(equipDis+"-standaloneStage1CoolingLowerOffset")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("default").addMarker("standalone").addMarker("writable").addMarker("his")
@@ -1619,7 +1619,7 @@ public class BuildingTuners
         hayStack.writeHisValById(saStage1CoolingLowerOffsetId, TunerConstants.STANDALONE_COOLING_STAGE1_LOWER_OFFSET);
 
         Point saStage1CoolingUpperOffset = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"standaloneStage1CoolingUpperOffset")
+                .setDisplayName(equipDis+"-standaloneStage1CoolingUpperOffset")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("default").addMarker("standalone").addMarker("writable").addMarker("his")

@@ -145,8 +145,30 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="20dp"
-                android:entries="@array/smartstat_cpufanmode"
+                android:entries="@array/smartstat_fanmode"
                 android:spinnerMode="dropdown"></Spinner>
+
+            <LinearLayout
+                android:id="@+id/ss_humidity_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:padding="10dp"
+                android:visibility="gone">
+                <TextView
+                    android:id="@+id/ss_target_humidity_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="10dp"
+                    android:text="Target Humidity:"
+                    android:textStyle="bold"></TextView>
+
+                <Spinner
+                    android:id="@+id/ss_humidity_spinner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:spinnerMode="dropdown"></Spinner>
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 

@@ -396,7 +396,7 @@ public class ScheduleProcessJob extends BaseJob {
                 systemOccupancy = FORCED_OCCUPIED;
                 CCUHsApi.getInstance().writeHisValByQuery("point and system and his and occupancy and status",(double)systemOccupancy.ordinal());
             }
-            Log.d(TAG_CCU_JOB, " In SystemVacation :s ystem Occupancy : "+systemOccupancy);
+            Log.d(TAG_CCU_JOB, " In SystemVacation :system Occupancy : "+systemOccupancy);
             return;
         }
         

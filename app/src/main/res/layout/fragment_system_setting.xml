@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:SwitchCompat="http://schemas.android.com/apk/res-auto"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/profileTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="100dp"
+        android:layout_marginTop="16dp"
+        android:textSize="36sp"
+        android:text="System Profile"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <NumberPicker
+            android:id="@+id/systemModePicker"
+            android:layout_width="200dp"
+            android:layout_height="240dp"
+            android:layout_gravity="center"
+            android:layout_marginBottom="90dp"
+            android:textColor="#202020"
+            android:scaleX="1.2"
+            android:scaleY="1.2"
+            android:textSize="32sp">
+
+        </NumberPicker>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="50dp"
+            android:layout_marginRight="50dp"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="40dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Occupancy Status:"
+                    android:textColor="#202020"
+                    android:textSize="24sp"/>
+
+                <TextView
+                    android:id="@+id/occupancyStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:text=""
+                    android:textSize="20sp"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Equipment Status:"
+                    android:textColor="#202020"
+                    android:textSize="24sp"/>
+
+                <TextView
+                    android:id="@+id/equipmentStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:text=""
+                    android:textSize="20sp"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp">
+
+                <TextView
+                    android:id="@+id/textView6"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:layout_weight="1"
+                    android:text="Economy"
+                    android:textColor="#202020"
+                    android:textSize="26sp"/>
+
+                <TextView
+                    android:id="@+id/textView5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:layout_marginRight="8dp"
+                    android:layout_weight="1"
+                    android:gravity="right"
+                    android:text="Comfort"
+                    android:textColor="#202020"
+                    android:textSize="24sp"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="24dp"
+                android:layout_marginRight="24dp">
+
+                <SeekBar
+                    android:id="@+id/systemComfortValue"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:max="3"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Min Inside Humidity"
+                        android:textColor="#202020"
+                        android:textSize="24sp"/>
+
+                    <Spinner
+                        android:id="@+id/targetMinInsideHumidity"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="20dp"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="right"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Max Inside Humidity"
+                        android:textColor="#202020"
+                        android:textSize="24sp"/>
+
+                    <Spinner
+                        android:id="@+id/targetMaxInsideHumidity"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="20dp"/>
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:text="Compensate for Humidity"
+                    android:textColor="#202020"
+                    android:textSize="24sp"/>
+
+                <Space
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"/>
+
+                <android.support.v7.widget.SwitchCompat
+                    android:id="@+id/cbCompHumidity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:padding="4dp"
+                    android:thumb="@drawable/switch_thumb_selector"
+                    SwitchCompat:track="@drawable/switch_track_selector"
+                    android:textColor="#202020"
+                    android:textSize="24sp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:text="Demand Response Mode"
+                    android:textColor="#202020"
+                    android:textSize="24sp"/>
+
+                <Space
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"/>
+
+                <android.support.v7.widget.SwitchCompat
+                    android:id="@+id/cbDemandResponse"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="4dp"
+                    android:layout_gravity="right"
+                    android:thumb="@drawable/switch_thumb_selector"
+                    SwitchCompat:track="@drawable/switch_track_selector"
+                    android:textColor="#202020"
+                    android:textSize="24sp"/>
+            </LinearLayout>
+
+
+            <!-- <android.support.v7.widget.SwitchCompat
+                android:id="@+id/cbCompHumidity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:text="Compensate for Humidity                                                          "
+                android:textSize="26sp"
+                android:textColor="#202020" />
+
+            <android.support.v7.widget.SwitchCompat
+                android:id="@+id/cbDemandResponse"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:text="Demand Response Mode                                                            "
+                android:textSize="26sp"
+                android:textColor="#202020"/>
+-->
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

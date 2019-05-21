@@ -43,6 +43,7 @@ import a75f.io.logic.bo.building.Schedule;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.plc.PlcProfile;
 import a75f.io.logic.bo.building.sscpu.ConventionalUnitProfile;
+import a75f.io.logic.bo.building.sshpu.HeatPumpUnitProfile;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.dab.DabProfile;
 import a75f.io.logic.bo.building.system.dab.DabFullyModulatingRtu;
@@ -477,6 +478,11 @@ public class Globals {
                             ConventionalUnitProfile cpu = new ConventionalUnitProfile();
                             cpu.addLogicalMap(Short.valueOf(eq.getGroup()), z.getId());
                             L.ccu().zoneProfiles.add(cpu);
+                            break;
+                        case SMARTSTAT_HEAT_PUMP_UNIT:
+                            HeatPumpUnitProfile hpu = new HeatPumpUnitProfile();
+                            hpu.addLogicalMap(Short.valueOf(eq.getGroup()), z.getId());
+                            L.ccu().zoneProfiles.add(hpu);
                             break;
                             
                     }

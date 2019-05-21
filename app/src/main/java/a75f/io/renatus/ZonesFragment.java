@@ -847,7 +847,8 @@ public class ZonesFragment extends Fragment
             else */if (zoneProfile.getProfileType() == ProfileType.VAV_REHEAT ||
                      zoneProfile.getProfileType() == ProfileType.VAV_SERIES_FAN ||
                      zoneProfile.getProfileType() == ProfileType.VAV_PARALLEL_FAN ||
-                     zoneProfile.getProfileType() == ProfileType.SMARTSTAT_CONVENTIONAL_PACK_UNIT)
+                     zoneProfile.getProfileType() == ProfileType.SMARTSTAT_CONVENTIONAL_PACK_UNIT ||
+                    zoneProfile.getProfileType() == ProfileType.SMARTSTAT_HEAT_PUMP_UNIT)
             {
                 HashMap zoneMap = CCUHsApi.getInstance().read("equip and roomRef == \"" + zoneProfile.getEquip().getRoomRef() + "\"");
                 Zone z = new Zone.Builder().setHashMap(zoneMap).build();

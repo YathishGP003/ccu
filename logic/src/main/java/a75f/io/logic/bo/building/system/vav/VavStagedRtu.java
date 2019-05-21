@@ -286,7 +286,8 @@ public class VavStagedRtu extends VavSystemProfile
                         }
                         break;
                     case FAN_1:
-                        if ((fanStages > 0 && ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED)
+                        if ((fanStages > 0 && ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED
+                                            && VavSystemController.getInstance().getSystemState() != OFF)
                                 || (fanStages > 0 && systemFanLoopOp > 0)) {
                             relayState = 1;
                         } else {

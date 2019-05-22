@@ -203,7 +203,7 @@ public class LSmartStat {
         settings_t.enabledRelaysBitmap.relay6.set(getConfigEnabled(Port.RELAY_SIX.name(),address));
         settings_t.otherBitMaps.centigrade.set((short)0);
         settings_t.otherBitMaps.occupancySensor.set((byte)getOccupancyEnable(address));
-        settings_t.otherBitMaps.heatPumpUnitChangeOverB.set((short)0);
+        settings_t.otherBitMaps.heatPumpUnitChangeOverB.set((short)(getHeatPumpChangeOverType(address) < 2 ? 0 : 1));
         settings_t.otherBitMaps.enableExternal10kTempSensor.set(getConfigEnabled(Port.TH2_IN.name(),address));
         settings_t.otherBitMaps.enableBeaconing.set((short)0);
     }
@@ -238,6 +238,9 @@ public class LSmartStat {
 
     public static double getOccupancyEnable(short addr) {
         return CCUHsApi.getInstance().readDefaultVal("point and zone and config and standalone and occupancy and enable and group == \""+addr+"\"");
+    }
+    public static double getHeatPumpChangeOverType(short addr) {
+        return CCUHsApi.getInstance().readDefaultVal("point and zone and config and standalone and relay6 and type and group == \""+addr+"\"");
     }
 
     public static double getOperationalMode(String cmd, String equipRef){

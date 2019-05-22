@@ -13,6 +13,7 @@ import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
 import a75f.io.logic.bo.building.system.SystemEquip;
+import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
@@ -286,7 +287,8 @@ public class VavStagedRtu extends VavSystemProfile
                         }
                         break;
                     case FAN_1:
-                        if ((fanStages > 0 && ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED)
+                        if ((fanStages > 0 && ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED
+                                            && VavSystemController.getInstance().getSystemState() != OFF)
                                 || (fanStages > 0 && systemFanLoopOp > 0)) {
                             relayState = 1;
                         } else {
@@ -333,11 +335,12 @@ public class VavStagedRtu extends VavSystemProfile
                         break;
                     case HUMIDIFIER:
                     case DEHUMIDIFIER:
-                        if (VavSystemController.getInstance().getSystemState() == OFF) {
+                        SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("rtu and mode")];
+                        if (systemMode == SystemMode.OFF) {
                             relayState = 0;
                         } else
                         {
-                            double humidity = VavSystemController.getInstance().getAverageSystemHumidity();
+                            double humidity = 20;//VavSystemController.getInstance().getAverageSystemHumidity();
                             double targetMinHumidity = TunerUtil.readSystemUserIntentVal("target and min and inside and humidity");
                             double targetMaxHumidity = TunerUtil.readSystemUserIntentVal("target and max and inside and humidity");
                             double humidityHysteresis = TunerUtil.readTunerValByQuery("humidity and hysteresis", getSystemEquipRef());

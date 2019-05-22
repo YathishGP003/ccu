@@ -315,23 +315,10 @@
             android:layout_below="@+id/textEnable">
 
             <ToggleButton
-                android:id="@+id/testComStage1"
-                android:layout_width="60dp"
-                android:layout_height="40dp"
-                android:background="@drawable/toggle_testselector"
-                android:layout_gravity="center_horizontal"
-                android:checked="false"
-                android:textAppearance="@style/text_toggleappearance"
-                android:textColor="@drawable/toggle_textselector"
-                android:textOff="OFF"
-                android:textOn="ON" />
-
-            <ToggleButton
-                android:id="@+id/testComStage2"
+                android:id="@+id/testHpuRelay1"
                 android:layout_width="60dp"
                 android:layout_height="40dp"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="24dp"
                 android:background="@drawable/toggle_testselector"
                 android:checked="false"
                 android:textAppearance="@style/text_toggleappearance"
@@ -340,7 +327,7 @@
                 android:textOn="ON" />
 
             <ToggleButton
-                android:id="@+id/testFanLow"
+                android:id="@+id/testHpuRelay2"
                 android:layout_width="60dp"
                 android:layout_height="40dp"
                 android:layout_gravity="center_horizontal"
@@ -353,7 +340,7 @@
                 android:textOn="ON" />
 
             <ToggleButton
-                android:id="@+id/testAuxHeat"
+                android:id="@+id/testHpuRelay3"
                 android:layout_width="60dp"
                 android:layout_height="40dp"
                 android:layout_gravity="center_horizontal"
@@ -366,7 +353,7 @@
                 android:textOn="ON" />
 
             <ToggleButton
-                android:id="@+id/testFanHigh"
+                android:id="@+id/testHpuRelay4"
                 android:layout_width="60dp"
                 android:layout_height="40dp"
                 android:layout_gravity="center_horizontal"
@@ -379,7 +366,20 @@
                 android:textOn="ON" />
 
             <ToggleButton
-                android:id="@+id/testHeatPump"
+                android:id="@+id/testHpuRelay5"
+                android:layout_width="60dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/toggle_testselector"
+                android:checked="false"
+                android:textAppearance="@style/text_toggleappearance"
+                android:textColor="@drawable/toggle_textselector"
+                android:textOff="OFF"
+                android:textOn="ON" />
+
+            <ToggleButton
+                android:id="@+id/testHpuRelay6"
                 android:layout_width="60dp"
                 android:layout_height="40dp"
                 android:layout_gravity="center_horizontal"

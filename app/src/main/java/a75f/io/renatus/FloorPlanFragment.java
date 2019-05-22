@@ -294,18 +294,18 @@ public class FloorPlanFragment extends Fragment
 	private void updateModules(Zone zone)
 	{
 		Log.d("CCU","Zone Selected "+zone.getDisplayName());
-		mModuleListAdapter =
-				new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(), R.layout.listviewitem, createAddressList(
-						HSUtil.getEquips(zone.getId())));
-		
-		getActivity().runOnUiThread(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				moduleListView.setAdapter(mModuleListAdapter);
+			ArrayList<Equip> zoneEquips  = HSUtil.getEquips(zone.getId());
+			if(zoneEquips != null && (zoneEquips.size() > 0)) {
+				mModuleListAdapter =
+						new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(), R.layout.listviewitem, createAddressList(zoneEquips));
+
+				getActivity().runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						moduleListView.setAdapter(mModuleListAdapter);
+					}
+				});
 			}
-		});
 	}
 	
 	private ArrayList<String> createAddressList(ArrayList<Equip> equips)

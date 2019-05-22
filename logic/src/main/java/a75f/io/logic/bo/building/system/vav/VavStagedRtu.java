@@ -196,6 +196,7 @@ public class VavStagedRtu extends VavSystemProfile
         double relayDeactHysteresis = TunerUtil.readTunerValByQuery("relay and deactivation and hysteresis", getSystemEquipRef());
         CcuLog.d(L.TAG_CCU_SYSTEM, "systemCoolingLoopOp: "+systemCoolingLoopOp + " systemHeatingLoopOp: " + systemHeatingLoopOp+" systemFanLoopOp: "+systemFanLoopOp);
         CcuLog.d(L.TAG_CCU_SYSTEM, "coolingStages: "+coolingStages + " heatingStages: "+heatingStages+" fanStages: "+fanStages);
+        SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("rtu and mode")];
         for (int i = 1; i <=7 ;i++)
         {
             double relayState = 0;
@@ -287,7 +288,7 @@ public class VavStagedRtu extends VavSystemProfile
                         }
                         break;
                     case FAN_1:
-                        if ((fanStages > 0 && (ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED
+                        if ((fanStages > 0 && systemMode != SystemMode.OFF && (ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED
                                             || VavSystemController.getInstance().getSystemState() != OFF))
                                 || (fanStages > 0 && systemFanLoopOp > 0)) {
                             relayState = 1;
@@ -335,7 +336,6 @@ public class VavStagedRtu extends VavSystemProfile
                         break;
                     case HUMIDIFIER:
                     case DEHUMIDIFIER:
-                        SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("rtu and mode")];
                         if (systemMode == SystemMode.OFF) {
                             relayState = 0;
                         } else
@@ -389,7 +389,7 @@ public class VavStagedRtu extends VavSystemProfile
         }
     
         setSystemPoint("operating and mode", VavSystemController.getInstance().systemState.ordinal());
-        String systemStatus = (VavSystemController.getInstance().systemState == OFF) ? "System OFF " : getStatusMessage();
+        String systemStatus = getStatusMessage();
         String scheduleStatus =  ScheduleProcessJob.getSystemStatusString();
         CcuLog.d(L.TAG_CCU_SYSTEM, "StatusMessage: "+systemStatus);
         CcuLog.d(L.TAG_CCU_SYSTEM, "ScheduleStatus: " +scheduleStatus);
@@ -436,7 +436,7 @@ public class VavStagedRtu extends VavSystemProfile
         }
     
     
-        return status.toString().equals("")? "OFF" : status.toString();
+        return status.toString().equals("")? "System OFF" : status.toString();
     }
     
     public void updateStagesSelected() {

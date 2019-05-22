@@ -14,13 +14,21 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.NumberPicker;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
 
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.device.mesh.MeshUtil;
+import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
+import a75f.io.device.serial.MessageType;
+import a75f.io.device.serial.SmartStatConditioningMode_t;
+import a75f.io.device.serial.SmartStatFanSpeed_t;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
@@ -33,9 +41,11 @@ import a75f.io.logic.bo.building.sscpu.ConventionalUnitProfile;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnCheckedChanged;
 
-public class FragmentCPUConfiguration extends BaseDialogFragment {
+public class FragmentCPUConfiguration extends BaseDialogFragment implements CompoundButton.OnCheckedChangeListener {
     public static final String ID = FragmentCPUConfiguration.class.getSimpleName();
     static final int TEMP_OFFSET_LIMIT = 100;
     String floorRef;
@@ -49,17 +59,17 @@ public class FragmentCPUConfiguration extends BaseDialogFragment {
 
     ToggleButton switchThermistor1;
     ToggleButton switchCoolingY1;
-    ToggleButton testCoolingY1;
+    @BindView(R.id.testCpuRelay1)ToggleButton testCoolingY1;
     ToggleButton switchCoolingY2;
-    ToggleButton testCoolingY2;
+    @BindView(R.id.testCpuRelay2)ToggleButton testCoolingY2;
     ToggleButton switchFanLowG;
-    ToggleButton testFanLowG;
+    @BindView(R.id.testCpuRelay3)ToggleButton testFanLowG;
     ToggleButton switchHeatingW1;
-    ToggleButton testHeatingW1;
+    @BindView(R.id.testCpuRelay4)ToggleButton testHeatingW1;
     ToggleButton switchHeatingW2;
-    ToggleButton testHeatingW2;
+    @BindView(R.id.testCpuRelay5)ToggleButton testHeatingW2;
     ToggleButton switchFanHighOb;
-    ToggleButton testFanHighOb;
+    @BindView(R.id.testCpuRelay6)ToggleButton testFanHighOb;
     ToggleButton switchOccSensor;
     ToggleButton switchExtTempSensor;
     Button setButton;
@@ -342,5 +352,70 @@ public class FragmentCPUConfiguration extends BaseDialogFragment {
         }catch (Exception e){
             Log.e("dividerexception",e.getMessage().toString());
         }
+    }
+
+    @Override
+    @OnCheckedChanged({R.id.testCpuRelay1,R.id.testCpuRelay2,R.id.testCpuRelay3,R.id.testCpuRelay4,R.id.testCpuRelay5,R.id.testCpuRelay6})
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        switch (buttonView.getId())
+        {
+            case R.id.testCpuRelay1:
+                sendRelayActivationTestSignal( (short) (testCoolingY1.isChecked() ? 1: 0), Port.RELAY_ONE);
+                break;
+            case R.id.testCpuRelay2:
+                sendRelayActivationTestSignal( (short) (testCoolingY2.isChecked() ? 1: 0), Port.RELAY_TWO);
+                break;
+            case R.id.testCpuRelay3:
+                sendRelayActivationTestSignal( (short) (testFanLowG.isChecked() ? 1: 0), Port.RELAY_THREE);
+                break;
+            case R.id.testCpuRelay4:
+                sendRelayActivationTestSignal( (short) (testHeatingW1.isChecked() ? 1: 0), Port.RELAY_FOUR);
+                break;
+            case R.id.testCpuRelay5:
+                sendRelayActivationTestSignal( (short) (testHeatingW2.isChecked() ? 1: 0), Port.RELAY_FIVE);
+                break;
+            case R.id.testCpuRelay6:
+                sendRelayActivationTestSignal( (short) (testFanHighOb.isChecked() ? 1: 0), Port.RELAY_SIX);
+                break;
+        }
+    }
+
+    public void sendRelayActivationTestSignal(short val,Port port) {
+        CcuToCmOverUsbSmartStatControlsMessage_t msg = new CcuToCmOverUsbSmartStatControlsMessage_t();
+        msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SMART_STAT_CONTROLS);
+        msg.address.set(mSmartNodeAddress);
+        msg.controls.setTemperature.set((short)(getDesiredTemp(mSmartNodeAddress)*2));
+        msg.controls.conditioningMode.set(SmartStatConditioningMode_t.CONDITIONING_MODE_AUTO);
+        msg.controls.fanSpeed.set(SmartStatFanSpeed_t.FAN_SPEED_AUTO);
+        switch (port){
+            case RELAY_ONE:
+                msg.controls.relay1.set(val);
+                break;
+            case RELAY_TWO:
+                msg.controls.relay2.set(val);
+                break;
+            case RELAY_THREE:
+                msg.controls.relay3.set(val);
+                break;
+            case RELAY_FOUR:
+                msg.controls.relay4.set(val);
+                break;
+            case RELAY_FIVE:
+                msg.controls.relay5.set(val);
+                break;
+            case RELAY_SIX:
+                msg.controls.relay6.set(val);
+                break;
+        }
+        MeshUtil.sendStructToCM(msg);
+    }
+    public static double getDesiredTemp(short node)
+    {
+        HashMap point = CCUHsApi.getInstance().read("point and air and temp and desired and average and sp and group == \""+node+"\"");
+        if (point == null || point.size() == 0) {
+            Log.d("HPU", " Desired Temp point does not exist for equip , sending 0");
+            return 72;
+        }
+        return CCUHsApi.getInstance().readPointPriorityVal(point.get("id").toString());
     }
 }

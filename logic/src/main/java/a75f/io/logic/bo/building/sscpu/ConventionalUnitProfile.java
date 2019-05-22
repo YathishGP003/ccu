@@ -10,10 +10,12 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
+import a75f.io.logic.bo.building.ZoneTempState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.SmartStatFanRelayType;
 import a75f.io.logic.bo.building.definitions.StandaloneFanSpeed;
@@ -21,6 +23,7 @@ import a75f.io.logic.bo.building.definitions.StandaloneOperationalMode;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
+import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
@@ -41,14 +44,31 @@ public class ConventionalUnitProfile extends ZoneProfile {
         cpuDeviceMap = new HashMap<>();
     }
 
-    @JsonIgnore
     @Override
     public ProfileType getProfileType()
     {
         return ProfileType.SMARTSTAT_CONVENTIONAL_PACK_UNIT;
     }
-
-    @JsonIgnore
+	
+	@Override
+    public boolean isZoneDead() {
+    
+        double buildingLimitMax =  TunerUtil.readTunerValByQuery("building and limit and max", L.ccu().systemProfile.getSystemEquipRef());
+        double buildingLimitMin =  TunerUtil.readTunerValByQuery("building and limit and min", L.ccu().systemProfile.getSystemEquipRef());
+    
+        double tempDeadLeeway = TunerUtil.readTunerValByQuery("temp and dead and leeway",L.ccu().systemProfile.getSystemEquipRef());
+    
+        for (short node : cpuDeviceMap.keySet())
+        {
+            double curTemp = cpuDeviceMap.get(node).getCurrentTemp();
+            if (curTemp > (buildingLimitMax + tempDeadLeeway)
+                    || curTemp < (buildingLimitMin - tempDeadLeeway))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
     @Override
     public void updateZonePoints() {
 
@@ -71,14 +91,13 @@ public class ConventionalUnitProfile extends ZoneProfile {
             if(cpuDevice.profileType != ProfileType.SMARTSTAT_CONVENTIONAL_PACK_UNIT)
                 continue;
             double roomTemp = cpuDevice.getCurrentTemp();
-            if (roomTemp == 0) {
-                resetRelays(node);
-                StandaloneScheduler.updateSmartStatStatus(null,DEADBAND, relayStages);
+            Equip cpuEquip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + node + "\"")).build();
+            if(isZoneDead()){
+                resetRelays(cpuEquip.getId(),node);
                 cpuDevice.setStatus(state.ordinal());
-                String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \""+node+"\"");
-                if (!curStatus.equals("Temperature Dead"))
-                {
-                    CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"", "Temperature Dead");
+                String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \"" + node + "\"");
+                if (!curStatus.equals("Zone Temp Dead")) {
+                    CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"", "Zone Temp Dead");
                 }
 				Log.d(TAG,"Invalid Temp , skip controls update for "+node+" roomTemp : "+cpuDeviceMap.get(node).getCurrentTemp());
                 continue;
@@ -90,14 +109,19 @@ public class ConventionalUnitProfile extends ZoneProfile {
             {
                 cpuDevice.setDesiredTemp(averageDesiredTemp);
             }
-            Equip cpuEquip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + node + "\"")).build();
 
             Log.d(TAG, " smartstat cpu, updates 111="+cpuEquip.getRoomRef()+","+setTempHeating+","+setTempCooling);
 
             String zoneId = HSUtil.getZoneIdFromEquipId(cpuEquip.getId());
             Occupied occuStatus = ScheduleProcessJob.getOccupiedModeCache(zoneId);
-
-            boolean occupied = (occuStatus == null ? false : occuStatus.isOccupied());
+            double coolingDeadband = 2.0;
+            double heatingDeadband = 2.0;
+            boolean occupied = false;
+            if(occuStatus != null){
+                coolingDeadband = occuStatus.getCoolingDeadBand();
+                heatingDeadband = occuStatus.getHeatingDeadBand();
+                occupied = occuStatus.isOccupied();
+            }
             //For dual temp but for single mode we use tuners
             double hysteresis = StandaloneTunerUtil.getStandaloneStage1Hysteresis(cpuEquip.getId());
 
@@ -126,7 +150,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
             }
             boolean isFanStage1Enabled = getConfigEnabled("relay3", node) > 0 ? true : false;
             boolean isFanStage2Enabled = getConfigEnabled("relay6", node) > 0 ? true : false;
-            Log.d(TAG, " smartstat cpu, updates =" + node+","+roomTemp+","+occupied+","+occuStatus.getCoolingDeadBand()+","+state+","+occuStatus.getCoolingVal()+","+occuStatus.getHeatingVal()+","+isFanStage1Enabled+","+isFanStage2Enabled);
+            Log.d(TAG, " smartstat cpu, updates =" + node+","+roomTemp+","+occupied+","+coolingDeadband+","+state+","+isFanStage1Enabled+","+isFanStage2Enabled);
             if ((fanSpeed != OFF) && ((opMode == StandaloneOperationalMode.AUTO) || (opMode == StandaloneOperationalMode.COOL_ONLY))&& (roomTemp >= (setTempCooling - hysteresis)) )
             {
 
@@ -167,7 +191,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
                     setCmdSignal("cooling and stage1", 0, node);
                 }
                 if(isCoolingStage2Enabled){
-                    if (roomTemp >= (setTempCooling + occuStatus.getCoolingDeadBand())) {
+                    if (roomTemp >= (setTempCooling + coolingDeadband)) {
                         setCmdSignal("cooling and stage2", 1.0, node);
                         relayStages.put("CoolingStage2",1);
                         if(isFanStage2Enabled && (fanHighType == SmartStatFanRelayType.FAN_STAGE2)){
@@ -198,7 +222,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
                 }
                 if(isFanStage2Enabled && ((fanHighType == SmartStatFanRelayType.HUMIDIFIER) || (fanHighType == SmartStatFanRelayType.DE_HUMIDIFIER)))
                     updateHumidityStatus(fanHighType,node,cpuDevice.getHumidity(),targetThreshold,relayStages);
-                Log.d(TAG, " smartstat cpu,cooling updates =" + node+","+roomTemp+","+occuStatus.isOccupied()+","+isCoolingStage1Enabled+","+opMode.name()+","+fanSpeed.name()+","+cs1);
+                Log.d(TAG, " smartstat cpu,cooling updates =" + node+","+roomTemp+","+occupied+","+isCoolingStage1Enabled+","+opMode.name()+","+fanSpeed.name()+","+cs1);
             }
             else if ((fanSpeed != OFF) &&((opMode == StandaloneOperationalMode.AUTO) || (opMode == StandaloneOperationalMode.HEAT_ONLY))&&(roomTemp <= (setTempHeating + hysteresis)))
             {
@@ -243,7 +267,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
                 }
                 if(isHeatingStage2Enabled){
 
-                    if (roomTemp <= (setTempHeating - occuStatus.getHeatingDeadBand())) {
+                    if (roomTemp <= (setTempHeating - heatingDeadband)) {
                         setCmdSignal("heating and stage2", 1.0, node);
                         if(isFanStage2Enabled && (fanHighType == SmartStatFanRelayType.FAN_STAGE2)){
                             relayStages.put("FanStage2",1);
@@ -276,7 +300,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
 
                 if(isFanStage2Enabled && ((fanHighType == SmartStatFanRelayType.HUMIDIFIER) || (fanHighType == SmartStatFanRelayType.DE_HUMIDIFIER)))
                     updateHumidityStatus(fanHighType,node,cpuDevice.getHumidity(),targetThreshold,relayStages);
-                Log.d(TAG, " smartstat cpu,heating updates =" + node+","+roomTemp+","+occuStatus.isOccupied()+","+setTempHeating+","+occuStatus.getHeatingDeadBand()+","+opMode.name()+","+fanSpeed.name());
+                Log.d(TAG, " smartstat cpu,heating updates =" + node+","+roomTemp+","+occupied+","+setTempHeating+","+heatingDeadband+","+opMode.name()+","+fanSpeed.name());
             }
             else
             {
@@ -318,8 +342,12 @@ public class ConventionalUnitProfile extends ZoneProfile {
 
             cpuDevice.setProfilePoint("temp and conditioning and mode",state.ordinal());
             if(cpuDevice.getStatus() != state.ordinal())
-				cpuDevice.setStatus(state.ordinal());
-            StandaloneScheduler.updateSmartStatStatus(cpuEquip.getId(),state, relayStages);
+                cpuDevice.setStatus(state.ordinal());
+           ZoneTempState temperatureState = ZoneTempState.NONE;
+            if(buildingLimitMinBreached() ||  buildingLimitMaxBreached() )
+                temperatureState = ZoneTempState.EMERGENCY;
+
+            StandaloneScheduler.updateSmartStatStatus(cpuEquip.getId(),state, relayStages, temperatureState);
         }
     }
 
@@ -446,7 +474,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
         return CCUHsApi.getInstance().readHisValByQuery("point and standalone and operation and mode and his and "+cmd+" and equipRef == \"" + equipRef + "\"");
     }
 
-    private void resetRelays(short node){
+    private void resetRelays(String equipRef, short node){
 
         if(getCmdSignal("cooling and stage1", node) > 0)
             setCmdSignal("cooling and stage1",0,node);
@@ -460,6 +488,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
             setCmdSignal("fan and stage1",0,node);
         if(getCmdSignal("fan and stage2", node) > 0)
             setCmdSignal("fan and stage2",0,node);
+        StandaloneScheduler.updateSmartStatStatus(equipRef,DEADBAND, new HashMap<String, Integer>(),ZoneTempState.TEMP_DEAD);
     }
 
     public void updateHumidityStatus(SmartStatFanRelayType fanHighType, Short addr, double curValue, double targetThreshold, HashMap<String,Integer> relayStages){

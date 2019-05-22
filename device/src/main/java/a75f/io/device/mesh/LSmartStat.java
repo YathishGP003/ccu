@@ -17,6 +17,7 @@ import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.RawPoint;
+import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSmartStatMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
@@ -180,14 +181,17 @@ public class LSmartStat {
             Log.d("LSmartStat","sch status22="+occuStatus.getCoolingVal()+","+occuStatus.getHeatingVal()+","+occuStatus.getHeatingDeadBand()+","+occuStatus.getCoolingDeadBand());
             settings_t.heatingDeadBand.set((short) (occuStatus.getHeatingDeadBand() * 10)); //Send in multiples of 10
             settings_t.coolingDeadBand.set((short) (occuStatus.getCoolingDeadBand() * 10));
+            settings_t.changeToOccupiedTime.set((short)(occuStatus.getCurrentOccupiedSlot()));
+            settings_t.changeToUnoccupiedTime.set((short)(occuStatus.getCurrentUnOccupiedSlot()));
+
         }catch (Exception e){
             settings_t.heatingDeadBand.set((short)20);//default deadband is 2.0, sending in multiples
             settings_t.coolingDeadBand.set((short)20);
+            settings_t.changeToOccupiedTime.set((short)36);//9 am
+            settings_t.changeToUnoccupiedTime.set((short)72);//6 pm
         }
         //TODO need to set current occupied times slots here // ANILK
-		settings_t.holdTimeInMinutes.set((short)0);
-        settings_t.changeToOccupiedTime.set((short)0);
-        settings_t.changeToUnoccupiedTime.set((short)0);
+        settings_t.holdTimeInMinutes.set((short)120);//default 
         settings_t.lightingIntensityForOccupantDetected.set((short)0);
 
 
@@ -199,7 +203,7 @@ public class LSmartStat {
         settings_t.enabledRelaysBitmap.relay6.set(getConfigEnabled(Port.RELAY_SIX.name(),address));
         settings_t.otherBitMaps.centigrade.set((short)0);
         settings_t.otherBitMaps.occupancySensor.set((byte)getOccupancyEnable(address));
-        settings_t.otherBitMaps.heatPumpUnitChangeOverB.set((short)0);
+        settings_t.otherBitMaps.heatPumpUnitChangeOverB.set((short)(getHeatPumpChangeOverType(address) < 2 ? 0 : 1));
         settings_t.otherBitMaps.enableExternal10kTempSensor.set(getConfigEnabled(Port.TH2_IN.name(),address));
         settings_t.otherBitMaps.enableBeaconing.set((short)0);
     }
@@ -234,6 +238,9 @@ public class LSmartStat {
 
     public static double getOccupancyEnable(short addr) {
         return CCUHsApi.getInstance().readDefaultVal("point and zone and config and standalone and occupancy and enable and group == \""+addr+"\"");
+    }
+    public static double getHeatPumpChangeOverType(short addr) {
+        return CCUHsApi.getInstance().readDefaultVal("point and zone and config and standalone and relay6 and type and group == \""+addr+"\"");
     }
 
     public static double getOperationalMode(String cmd, String equipRef){

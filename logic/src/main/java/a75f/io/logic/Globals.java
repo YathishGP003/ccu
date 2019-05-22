@@ -444,6 +444,60 @@ public class Globals {
             CcuLog.d(L.TAG_CCU, "Site does not exist. Profiles not loaded");
             return;
         }
+
+
+        HashMap equip = CCUHsApi.getInstance().read("equip and system");
+        if (equip != null && equip.size() > 0) {
+            Equip eq = new Equip.Builder().setHashMap(equip).build();
+            CcuLog.d(L.TAG_CCU, "Load SystemEquip " + eq.getDisplayName() + " System profile " + eq.getProfile());
+            switch (ProfileType.valueOf(eq.getProfile())) {
+                case SYSTEM_VAV_ANALOG_RTU:
+                    VavFullyModulatingRtu analogRtuProfile = new VavFullyModulatingRtu();
+                    analogRtuProfile.addSystemEquip();
+                    L.ccu().systemProfile = analogRtuProfile;
+
+                    break;
+                case SYSTEM_VAV_STAGED_RTU:
+                    VavStagedRtu stagedRtuProfile = new VavStagedRtu();
+                    stagedRtuProfile.addSystemEquip();
+                    L.ccu().systemProfile = stagedRtuProfile;
+                    break;
+                case SYSTEM_VAV_STAGED_VFD_RTU:
+                    VavStagedRtuWithVfd stagedVfdRtuProfile = new VavStagedRtuWithVfd();
+                    stagedVfdRtuProfile.addSystemEquip();
+                    L.ccu().systemProfile = stagedVfdRtuProfile;
+                    break;
+                case SYSTEM_VAV_HYBRID_RTU:
+                    VavAdvancedHybridRtu hybridRtuProfile = new VavAdvancedHybridRtu();
+                    hybridRtuProfile.addSystemEquip();
+                    L.ccu().systemProfile = hybridRtuProfile;
+                    break;
+                case SYSTEM_VAV_IE_RTU:
+                    VavIERtu ieRtuProfile = new VavIERtu();
+                    ieRtuProfile.addSystemEquip();
+                    L.ccu().systemProfile = ieRtuProfile;
+                    break;
+                case SYSTEM_VAV_BACNET_RTU:
+                    VavBacnetRtu bacnetRtu = new VavBacnetRtu();
+                    //bacnetRtu.initTRSystem();
+                    L.ccu().systemProfile = bacnetRtu;
+                    break;
+                case SYSTEM_DAB_ANALOG_RTU:
+                    DabFullyModulatingRtu dabAnalogProfile = new DabFullyModulatingRtu();
+                    dabAnalogProfile.addSystemEquip();
+                    L.ccu().systemProfile = dabAnalogProfile;
+                    break;
+                case SYSTEM_DAB_STAGED_RTU:
+                    L.ccu().systemProfile = new DabStagedRtu();
+                    break;
+                default:
+                    L.ccu().systemProfile = new DefaultSystem();
+            }
+        } else {
+            CcuLog.d(L.TAG_CCU, "System Equip does not exist.Create Dafault System Profile");
+            L.ccu().systemProfile = new DefaultSystem();
+
+        }
         for (Floor f : HSUtil.getFloors()) {
             for (Zone z : HSUtil.getZones(f.getId())) {
                 for (Equip eq : HSUtil.getEquips(z.getId())) {
@@ -488,58 +542,6 @@ public class Globals {
                     }
                 }
             }
-
-        }
-
-        HashMap equip = CCUHsApi.getInstance().read("equip and system");
-        if (equip != null && equip.size() > 0) {
-            Equip eq = new Equip.Builder().setHashMap(equip).build();
-            CcuLog.d(L.TAG_CCU, "Load SystemEquip " + eq.getDisplayName() + " System profile " + eq.getProfile());
-            switch (ProfileType.valueOf(eq.getProfile())) {
-                case SYSTEM_VAV_ANALOG_RTU:
-                    VavFullyModulatingRtu analogRtuProfile = new VavFullyModulatingRtu();
-                    analogRtuProfile.addSystemEquip();
-                    L.ccu().systemProfile = analogRtuProfile;
-                    break;
-                case SYSTEM_VAV_STAGED_RTU:
-                    VavStagedRtu stagedRtuProfile = new VavStagedRtu();
-                    stagedRtuProfile.addSystemEquip();
-                    L.ccu().systemProfile = stagedRtuProfile;
-                    break;
-                case SYSTEM_VAV_STAGED_VFD_RTU:
-                    VavStagedRtuWithVfd stagedVfdRtuProfile = new VavStagedRtuWithVfd();
-                    stagedVfdRtuProfile.addSystemEquip();
-                    L.ccu().systemProfile = stagedVfdRtuProfile;
-                    break;
-                case SYSTEM_VAV_HYBRID_RTU:
-                    VavAdvancedHybridRtu hybridRtuProfile = new VavAdvancedHybridRtu();
-                    hybridRtuProfile.addSystemEquip();
-                    L.ccu().systemProfile = hybridRtuProfile;
-                    break;
-                case SYSTEM_VAV_IE_RTU:
-                    VavIERtu ieRtuProfile = new VavIERtu();
-                    ieRtuProfile.addSystemEquip();
-                    L.ccu().systemProfile = ieRtuProfile;
-                    break;
-                case SYSTEM_VAV_BACNET_RTU:
-                    VavBacnetRtu bacnetRtu = new VavBacnetRtu();
-                    //bacnetRtu.initTRSystem();
-                    L.ccu().systemProfile = bacnetRtu;
-                    break;
-                case SYSTEM_DAB_ANALOG_RTU:
-                    DabFullyModulatingRtu dabAnalogProfile = new DabFullyModulatingRtu();
-                    dabAnalogProfile.addSystemEquip();
-                    L.ccu().systemProfile = dabAnalogProfile;
-                    break;
-                case SYSTEM_DAB_STAGED_RTU:
-                    L.ccu().systemProfile = new DabStagedRtu();
-                    break;
-                default:
-                    L.ccu().systemProfile = new DefaultSystem();
-            }
-        } else {
-            CcuLog.d(L.TAG_CCU, "System Equip does not exist.Create Dafault System Profile");
-            L.ccu().systemProfile = new DefaultSystem();
 
         }
     }

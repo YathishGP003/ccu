@@ -18,10 +18,14 @@ import android.widget.Spinner;
 import android.widget.ToggleButton;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
 
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.mesh.MeshUtil;
 import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
 import a75f.io.device.serial.MessageType;
+import a75f.io.device.serial.SmartStatConditioningMode_t;
+import a75f.io.device.serial.SmartStatFanSpeed_t;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
@@ -35,6 +39,8 @@ import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnCheckedChanged;
+
 
 public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements CompoundButton.OnCheckedChangeListener{
     public static final String ID = FragmentHeatPumpConfiguration.class.getSimpleName();
@@ -356,6 +362,7 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
     }
 
     @Override
+    @OnCheckedChanged({R.id.testHpuRelay1,R.id.testHpuRelay2,R.id.testHpuRelay3,R.id.testHpuRelay4,R.id.testHpuRelay5,R.id.testHpuRelay6})
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         switch (buttonView.getId())
         {
@@ -386,6 +393,9 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
         CcuToCmOverUsbSmartStatControlsMessage_t msg = new CcuToCmOverUsbSmartStatControlsMessage_t();
         msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SMART_STAT_CONTROLS);
         msg.address.set(mSmartNodeAddress);
+        msg.controls.setTemperature.set((short)(getDesiredTemp(mSmartNodeAddress)*2));
+        msg.controls.conditioningMode.set(SmartStatConditioningMode_t.CONDITIONING_MODE_AUTO);
+        msg.controls.fanSpeed.set(SmartStatFanSpeed_t.FAN_SPEED_AUTO);
         switch (port){
             case RELAY_ONE:
                 msg.controls.relay1.set(val);
@@ -407,5 +417,14 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
                 break;
         }
         MeshUtil.sendStructToCM(msg);
+    }
+    public static double getDesiredTemp(short node)
+    {
+        HashMap point = CCUHsApi.getInstance().read("point and air and temp and desired and average and sp and group == \""+node+"\"");
+        if (point == null || point.size() == 0) {
+            Log.d("HPU", " Desired Temp point does not exist for equip , sending 0");
+            return 72;
+        }
+        return CCUHsApi.getInstance().readPointPriorityVal(point.get("id").toString());
     }
 }

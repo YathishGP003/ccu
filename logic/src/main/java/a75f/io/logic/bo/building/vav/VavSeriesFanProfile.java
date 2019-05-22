@@ -79,21 +79,12 @@ public class VavSeriesFanProfile extends VavProfile
             Equip vavEquip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + node + "\"")).build();
     
             if (isZoneDead()) {
-                CcuLog.d(L.TAG_CCU_ZONE,"Zone Dead : "+node+" roomTemp : "+vavDeviceMap.get(node).getCurrentTemp());
+                CcuLog.d(L.TAG_CCU_ZONE,"Zone Temp Dead : "+node+" roomTemp : "+vavDeviceMap.get(node).getCurrentTemp());
         
                 String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \""+node+"\"");
-                if (!curStatus.equals("Zone Dead"))
+                if (!curStatus.equals("Zone Temp Dead"))
                 {
-                    CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"", "Zone Dead");
-                }
-                continue;
-            } else if (isTemperatureDead()){
-                CcuLog.d(L.TAG_CCU_ZONE,"Temperature Dead: "+node+" roomTemp : "+vavDeviceMap.get(node).getCurrentTemp());
-        
-                String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \""+node+"\"");
-                if (!curStatus.equals("Temperature Dead"))
-                {
-                    CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"", "Temperature Dead");
+                    CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"", "Zone Temp Dead");
                 }
                 continue;
             }

@@ -98,21 +98,12 @@ public class DabProfile extends ZoneProfile
     public void updateZonePoints()
     {
         if (isZoneDead()) {
-            CcuLog.d(L.TAG_CCU_ZONE,"Zone Dead: "+dabEquip.nodeAddr+" roomTemp : "+dabEquip.getCurrentTemp());
+            CcuLog.d(L.TAG_CCU_ZONE,"Zone Temp Dead: "+dabEquip.nodeAddr+" roomTemp : "+dabEquip.getCurrentTemp());
         
             String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \""+dabEquip.nodeAddr+"\"");
-            if (!curStatus.equals("Zone Dead"))
+            if (!curStatus.equals("Zone Temp Dead"))
             {
                 CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + dabEquip.nodeAddr + "\"", "Zone Dead");
-            }
-            return;
-        } else if (dabEquip.getCurrentTemp() == 0){
-            CcuLog.d(L.TAG_CCU_ZONE,"Temperature Dead: "+dabEquip.nodeAddr+" roomTemp : "+dabEquip.getCurrentTemp());
-        
-            String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \""+dabEquip.nodeAddr+"\"");
-            if (!curStatus.equals("Temperature Dead"))
-            {
-                CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + dabEquip.nodeAddr + "\"", "Temperature Dead");
             }
             return;
         }
@@ -156,7 +147,7 @@ public class DabProfile extends ZoneProfile
             }
            
         }
-        
+        damperOpController.dump();
         setDamperLimits(damper);
     
         boolean  enabledCO2Control = dabEquip.getConfigNumVal("enable and co2") > 0 ;
@@ -164,7 +155,7 @@ public class DabProfile extends ZoneProfile
         String zoneId = HSUtil.getZoneIdFromEquipId(dabEquip.getId());
         Occupied occ = ScheduleProcessJob.getOccupiedModeCache(zoneId);
         boolean occupied = (occ == null ? false : occ.isOccupied());
-        Log.d(L.TAG_CCU_ZONE, "Zone occupaancy : " + occupied + " occ " + occ);
+        
         //CO2 loop output from 0-50% modulates damper min position.
         if (enabledCO2Control && occupied && co2Loop.getLoopOutput(co2) > 0)
         {
@@ -176,13 +167,17 @@ public class DabProfile extends ZoneProfile
         if (enabledIAQControl && occupied && vocLoop.getLoopOutput(voc) > 0)
         {
             damper.iaqCompensatedMinPos = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * Math.min(50, vocLoop.getLoopOutput()) / 50;
-            CcuLog.d(L.TAG_CCU_ZONE,"VOCLoopOp :"+vocLoop.getLoopOutput()+", adjusted minposition "+damper.iaqCompensatedMinPos);
+            CcuLog.d(L.TAG_CCU_ZONE,"VOCLoopOp :"+vocLoop.getLoopOutput()+", adjusted minposition "+damper.iaqCompensatedMinPos+" damper.minPosition "+damper.minPosition);
         }
+    
         
         damper.currentPosition = (int)(damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * (damperOpController.getControlVariable() / damperOpController.getMaxAllowedError()));
-    
+        
         dabEquip.setDamperPos(damper.currentPosition, "primary");
         dabEquip.setDamperPos(damper.currentPosition, "secondary");
+        
+        dabEquip.setNormalizedDamperPos(damper.currentPosition, "primary");
+        dabEquip.setNormalizedDamperPos(damper.currentPosition, "secondary");
     
         dabEquip.setStatus(state.ordinal(), DabSystemController.getInstance().isEmergencyMode() && (state == HEATING ? buildingLimitMinBreached()
                                                     : state == COOLING ? buildingLimitMaxBreached() : false));
@@ -205,5 +200,6 @@ public class DabProfile extends ZoneProfile
                 d.maxPosition = 100;
                 break;
         }
+        d.iaqCompensatedMinPos = d.minPosition;
     }
 }

@@ -63,6 +63,7 @@ public class DefaultSystem extends SystemProfile
                                    .setTz(siteMap.get("tz").toString())
                                    .build();
         String equipRef = hayStack.addEquip(systemEquip);
+        addSystemTuners();
         updateAhuRef(equipRef);
         new ControlMote(siteRef);
         L.saveCCUState();

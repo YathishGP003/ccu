@@ -68,6 +68,16 @@ public class ControlMote
         setAnalogOut("analog4",0);
     }
     
+    public void resetCMOp(){
+        for (int i = 1; i <= 8; i++)
+        {
+            setRelayState("relay" + i, 0);
+        }
+        for (int i = 1; i <= 4; i++)
+        {
+            setAnalogOut("analog" + 4, 0);
+        }
+    }
     
     private void addAnalogOutValPoint(String analog) {
         

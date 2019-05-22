@@ -287,8 +287,8 @@ public class VavStagedRtu extends VavSystemProfile
                         }
                         break;
                     case FAN_1:
-                        if ((fanStages > 0 && ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED
-                                            && VavSystemController.getInstance().getSystemState() != OFF)
+                        if ((fanStages > 0 && (ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED
+                                            || VavSystemController.getInstance().getSystemState() != OFF))
                                 || (fanStages > 0 && systemFanLoopOp > 0)) {
                             relayState = 1;
                         } else {
@@ -340,7 +340,7 @@ public class VavStagedRtu extends VavSystemProfile
                             relayState = 0;
                         } else
                         {
-                            double humidity = 20;//VavSystemController.getInstance().getAverageSystemHumidity();
+                            double humidity = VavSystemController.getInstance().getAverageSystemHumidity();
                             double targetMinHumidity = TunerUtil.readSystemUserIntentVal("target and min and inside and humidity");
                             double targetMaxHumidity = TunerUtil.readSystemUserIntentVal("target and max and inside and humidity");
                             double humidityHysteresis = TunerUtil.readTunerValByQuery("humidity and hysteresis", getSystemEquipRef());

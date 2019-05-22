@@ -1,5 +1,6 @@
 package a75f.io.api.haystack;
 
+import java.util.Calendar;
 import java.util.Objects;
 
 public class Occupied {
@@ -133,5 +134,42 @@ public class Occupied {
     public void setTemporaryHoldExpiry(long temporaryHoldExpiry)
     {
         this.temporaryHoldExpiry = temporaryHoldExpiry;
+    }
+
+    public int getCurrentOccupiedSlot(){
+        if(mCurrentlyOccupiedScheduleDay != null) {
+            Calendar now = Calendar.getInstance();
+            now.set(Calendar.HOUR_OF_DAY,mCurrentlyOccupiedScheduleDay.getSthh());
+            now.set(Calendar.MINUTE,mCurrentlyOccupiedScheduleDay.getStmm());
+            now.set(Calendar.SECOND,30);
+            return (now.get(Calendar.HOUR_OF_DAY) * 4) + (now.get(Calendar.MINUTE) / 15);
+        }else if(mNextOccupiedScheduleDay != null){
+            Calendar nextCal = Calendar.getInstance();
+            nextCal.set(Calendar.HOUR_OF_DAY,mNextOccupiedScheduleDay.getSthh());
+            nextCal.set(Calendar.MINUTE,mNextOccupiedScheduleDay.getStmm());
+            nextCal.set(Calendar.SECOND,30);
+            return (nextCal.get(Calendar.HOUR_OF_DAY) * 4) + (nextCal.get(Calendar.MINUTE) / 15);
+        }else{
+            //Default 9 AM
+            return 36;
+        }
+    }
+    public int getCurrentUnOccupiedSlot(){
+        if(mCurrentlyOccupiedScheduleDay != null) {
+            Calendar now = Calendar.getInstance();
+            now.set(Calendar.HOUR_OF_DAY,mCurrentlyOccupiedScheduleDay.getEthh());
+            now.set(Calendar.MINUTE,mCurrentlyOccupiedScheduleDay.getEtmm());
+            now.set(Calendar.SECOND,30);
+            return (now.get(Calendar.HOUR_OF_DAY) * 4) + (now.get(Calendar.MINUTE) / 15);
+        }else if(mNextOccupiedScheduleDay != null){
+            Calendar nextCal = Calendar.getInstance();
+            nextCal.set(Calendar.HOUR_OF_DAY,mNextOccupiedScheduleDay.getEthh());
+            nextCal.set(Calendar.MINUTE,mNextOccupiedScheduleDay.getEtmm());
+            nextCal.set(Calendar.SECOND,30);
+            return (nextCal.get(Calendar.HOUR_OF_DAY) * 4) + (nextCal.get(Calendar.MINUTE) / 15);
+        }else{
+            //Default 6 PM
+            return 72;
+        }
     }
 }

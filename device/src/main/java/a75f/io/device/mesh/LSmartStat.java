@@ -17,6 +17,7 @@ import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.RawPoint;
+import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSmartStatMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
@@ -180,14 +181,17 @@ public class LSmartStat {
             Log.d("LSmartStat","sch status22="+occuStatus.getCoolingVal()+","+occuStatus.getHeatingVal()+","+occuStatus.getHeatingDeadBand()+","+occuStatus.getCoolingDeadBand());
             settings_t.heatingDeadBand.set((short) (occuStatus.getHeatingDeadBand() * 10)); //Send in multiples of 10
             settings_t.coolingDeadBand.set((short) (occuStatus.getCoolingDeadBand() * 10));
+            settings_t.changeToOccupiedTime.set((short)(occuStatus.getCurrentOccupiedSlot()));
+            settings_t.changeToUnoccupiedTime.set((short)(occuStatus.getCurrentUnOccupiedSlot()));
+
         }catch (Exception e){
             settings_t.heatingDeadBand.set((short)20);//default deadband is 2.0, sending in multiples
             settings_t.coolingDeadBand.set((short)20);
+            settings_t.changeToOccupiedTime.set((short)36);//9 am
+            settings_t.changeToUnoccupiedTime.set((short)72);//6 pm
         }
         //TODO need to set current occupied times slots here // ANILK
-		settings_t.holdTimeInMinutes.set((short)0);
-        settings_t.changeToOccupiedTime.set((short)0);
-        settings_t.changeToUnoccupiedTime.set((short)0);
+        settings_t.holdTimeInMinutes.set((short)120);//default 
         settings_t.lightingIntensityForOccupantDetected.set((short)0);
 
 

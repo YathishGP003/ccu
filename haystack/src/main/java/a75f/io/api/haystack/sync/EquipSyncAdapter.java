@@ -61,7 +61,7 @@ public class EquipSyncAdapter extends EntitySyncAdapter
                     }
                     m.put("roomRef", HRef.copy(guid));
                 }
-                if (m.get("ahuRef") != null)
+                if (m.get("ahuRef") != null && CCUHsApi.getInstance().getGUID(m.get("ahuRef").toString()) != null)
                 {
                     String guid = CCUHsApi.getInstance().getGUID(m.get("ahuRef").toString());
                     if(guid == null) {

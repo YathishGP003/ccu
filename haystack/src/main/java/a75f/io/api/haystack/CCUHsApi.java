@@ -340,13 +340,16 @@ public class CCUHsApi
      */
     public void writeDefaultVal(String query, Double val)
     {
-        ArrayList points = readAll(query);
-        String    id     = ((HashMap) points.get(0)).get("id").toString();
-        if (id == null || id == "")
-        {
-            throw new IllegalArgumentException();
+        try {
+            ArrayList points = readAll(query);
+            String id = ((HashMap) points.get(0)).get("id").toString();
+            if (id == null || id == "") {
+                throw new IllegalArgumentException();
+            }
+            pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "ccu", HNum.make(val), HNum.make(0));
+        }catch (Exception e){
+            e.printStackTrace();
         }
-        pointWrite(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, "ccu", HNum.make(val), HNum.make(0));
     }
 
     public void writeDefaultVal(String query, String val)
@@ -1007,12 +1010,13 @@ public class CCUHsApi
             filter = "schedule and zone and vacation and roomRef == "+zoneId;
         
         Log.d("CCU_HS"," getZoneSchedule : "+filter);
-        
-        HGrid scheduleHGrid = tagsDb.readAll(filter);
-        
-        for (int i = 0; i < scheduleHGrid.numRows(); i++)
-        {
-            schedules.add(new Schedule.Builder().setHDict(scheduleHGrid.row(i)).build());
+        if(filter != null) {
+
+            HGrid scheduleHGrid = tagsDb.readAll(filter);
+
+            for (int i = 0; i < scheduleHGrid.numRows(); i++) {
+                schedules.add(new Schedule.Builder().setHDict(scheduleHGrid.row(i)).build());
+            }
         }
         
         return schedules;

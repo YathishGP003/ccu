@@ -399,7 +399,7 @@ public class CCUHsApi
         String    id     = ((HashMap) points.get(0)).get("id").toString();
         if (id == null || id == "")
         {
-            return null;
+            return 0.0;
         }
         ArrayList values = CCUHsApi.getInstance().readPoint(id);
         if (values != null && values.size() > 0)

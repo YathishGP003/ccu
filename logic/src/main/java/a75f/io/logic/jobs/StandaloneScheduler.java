@@ -18,6 +18,7 @@ import a75f.io.api.haystack.Schedule;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneState;
+import a75f.io.logic.bo.building.ZoneTempState;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
@@ -92,28 +93,42 @@ public class StandaloneScheduler {
         CCUHsApi.getInstance().writeHisValById(id, HSUtil.getPriorityVal(id));
     }
 
-    public static void updateSmartStatStatus(String equipId,ZoneState state, HashMap<String,Integer> relayStages){
+    public static void updateSmartStatStatus(String equipId, ZoneState state, HashMap<String,Integer> relayStages, ZoneTempState temperatureState){
+        String status = "OFF ";
+        switch (temperatureState){
+            case RF_DEAD:
+                status = "RF Signal dead ";
+                break;
+            case TEMP_DEAD:
+                status = "Zone temp dead ";
+                break;
+            case EMERGENCY:
+                status = "Emergency ";
+                break;
+            case NONE:
+                status = "";
+                break;
+        }
 
-        String status = (equipId != null) ? "OFF " : " Temperature Dead";
         switch (state){
             case COOLING:
                 if(relayStages.containsKey("CoolingStage2") && relayStages.containsKey("CoolingStage1"))
-                    status = "Cooling 1&2 ON,";
+                    status = status +"Cooling 1&2 ON,";
                 else if(relayStages.containsKey("CoolingStage2"))
-                    status = "Cooling 2 ON,";
+                    status = status +" Cooling 2 ON,";
                 else if(relayStages.containsKey("CoolingStage1"))
-                    status = "Cooling 1 ON,";
+                    status = status + "Cooling 1 ON,";
                 else
                     status = "Cooling OFF,";
 
                 break;
             case HEATING:
                 if(relayStages.containsKey("HeatingStage2") && relayStages.containsKey("HeatingStage1"))
-                    status = "Heating 1&2 ON,";
+                    status = status + "Heating 1&2 ON,";
                 else if(relayStages.containsKey("HeatingStage2"))
-                    status = "Heating 2 ON,";
+                    status = status + "Heating 2 ON,";
                 else if(relayStages.containsKey("HeatingStage1"))
-                    status = "Heating 1 ON,";
+                    status = status + "Heating 1 ON,";
                 else
                     status = "Heating OFF,";
                 break;
@@ -121,7 +136,7 @@ public class StandaloneScheduler {
                 break;
         }
 
-        if(status.equals("OFF") && relayStages.size() > 0) status = "";
+        if(status.equals("OFF ") && relayStages.size() > 0) status = "";
         if(relayStages.containsKey("FanStage2") && relayStages.containsKey("FanStage1"))
             status = status + " Fan 1&2 ON";
         else if(relayStages.containsKey("Humidifier") && relayStages.containsKey("FanStage1"))

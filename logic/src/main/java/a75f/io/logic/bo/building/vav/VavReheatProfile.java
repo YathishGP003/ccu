@@ -17,6 +17,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.building.hvac.Valve;
 import a75f.io.logic.bo.building.hvac.VavUnit;
+import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
@@ -97,10 +98,10 @@ public class VavReheatProfile extends VavProfile
     
             Equip vavEquip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + node + "\"")).build();
             
-            int loopOp = 0;//New value of loopOp
-            //TODO
+            int loopOp = 0;
             //If supply air temperature from air handler is greater than room temperature, Cooling shall be
             //locked out.
+            SystemController.State conditioning = L.ccu().systemProfile.getSystemController().getSystemState();
             if (roomTemp > setTempCooling)
             {
                 //Zone is in Cooling
@@ -112,8 +113,11 @@ public class VavReheatProfile extends VavProfile
                     coolingLoop.setEnabled();
                     heatingLoop.setDisabled();
                 }
-                int coolingOp = (int) coolingLoop.getLoopOutput(roomTemp, setTempCooling);
-                loopOp = coolingOp;
+                if (conditioning == SystemController.State.COOLING)
+                {
+                    loopOp = (int) coolingLoop.getLoopOutput(roomTemp, setTempCooling);
+                }
+                
             }
             else if (roomTemp < setTempHeating)
             {
@@ -125,7 +129,7 @@ public class VavReheatProfile extends VavProfile
                     coolingLoop.setDisabled();
                 }
                 int heatingLoopOp = (int) heatingLoop.getLoopOutput(setTempHeating, roomTemp);
-                if (VavSystemController.getInstance().getSystemState() == VavSystemController.State.COOLING)
+                if (conditioning == SystemController.State.COOLING)
                 {
                     if (heatingLoopOp <= 50)
                     {
@@ -162,7 +166,7 @@ public class VavReheatProfile extends VavProfile
                         loopOp = heatingLoopOp;
                         
                         }
-                } else
+                } else if (conditioning == SystemController.State.HEATING)
                 {
                     loopOp = heatingLoopOp;
                 }
@@ -176,9 +180,7 @@ public class VavReheatProfile extends VavProfile
                     valve.currentPosition = 0;
                     heatingLoop.setDisabled();
                     coolingLoop.setDisabled();
-                    
                 }
-                loopOp = 0;
             }
             
             if (valveController.getControlVariable() == 0)
@@ -228,8 +230,7 @@ public class VavReheatProfile extends VavProfile
             }*/
     
             //REHEAT control during heating does not follow RP1455.
-            if (VavSystemController.getInstance().getSystemState() == VavSystemController.State.HEATING
-                                && state == HEATING)
+            if (conditioning == SystemController.State.HEATING && state == HEATING)
             {
                 double valveStartDamperPercent = TunerUtil.readTunerValByQuery("vav and valve and start and damper and equipRef == \""+vavEquip.getId()+"\"");
                 double maxHeatingPos = vavDevice.getDamperLimit("heating", "max");
@@ -251,7 +252,7 @@ public class VavReheatProfile extends VavProfile
             CcuLog.d(L.TAG_CCU_ZONE,"HeatingLoop "+node +" roomTemp :"+roomTemp+" setTempHeating: "+setTempHeating);
             heatingLoop.dump();
             
-            CcuLog.d(L.TAG_CCU_ZONE, "System STATE :"+VavSystemController.getInstance().getSystemState()+" ZoneState : "+getState()+" ,loopOp: " + loopOp + " ,damper:" + damper.currentPosition+", valve:"+valve.currentPosition);
+            CcuLog.d(L.TAG_CCU_ZONE, "System Conditioning :"+conditioning+" ZoneState : "+getState()+" ,loopOp: " + loopOp + " ,damper:" + damper.currentPosition+", valve:"+valve.currentPosition);
             updateTRResponse(node);
     
             valve.applyLimits();

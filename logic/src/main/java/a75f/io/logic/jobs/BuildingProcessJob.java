@@ -1,5 +1,7 @@
 package a75f.io.logic.jobs;
 
+import android.util.Log;
+
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -35,35 +37,36 @@ public class BuildingProcessJob extends BaseJob
         }
     
         tsData = new HashMap();
-        
-		//Revoking since crash happens due to iterations
-        for (ZoneProfile profile : L.ccu().zoneProfiles) {
-            CcuLog.d(L.TAG_CCU_JOB, "updateZonePoints -> "+profile.getProfileType());
-            profile.updateZonePoints();
-        }
-        
-        if (!Globals.getInstance().isPubnubSubscribed())
-        {
-            CCUHsApi.getInstance().syncEntityTree();
-            String siteLUID = site.get("id").toString();
-            String siteGUID = CCUHsApi.getInstance().getGUID(siteLUID);
-            if (siteGUID != null && siteGUID != "") {
-                Globals.getInstance().registerSiteToPubNub(siteGUID);
+
+        try {
+            //TODO Crash here causing issues in Analytics portal #RENATUS-396 kumar
+            for (ZoneProfile profile : L.ccu().zoneProfiles) {
+                profile.updateZonePoints();
             }
-        }
-    
-        L.ccu().systemProfile.doSystemControl();
-        L.saveCCUState();
-    
-        new Thread()
-        {
-            @Override
-            public void run()
-            {
-                super.run();
-                CCUHsApi.getInstance().syncHisData();
+
+            if (!Globals.getInstance().isPubnubSubscribed()) {
+                CCUHsApi.getInstance().syncEntityTree();
+                String siteLUID = site.get("id").toString();
+                String siteGUID = CCUHsApi.getInstance().getGUID(siteLUID);
+                if (siteGUID != null && siteGUID != "") {
+                    Globals.getInstance().registerSiteToPubNub(siteGUID);
+                }
             }
-        }.start();
+
+            L.ccu().systemProfile.doSystemControl();
+            L.saveCCUState();
+
+            new Thread() {
+                @Override
+                public void run() {
+                    super.run();
+                    CCUHsApi.getInstance().syncHisData();
+                }
+            }.start();
+        }catch (Exception e){
+            Log.d(L.TAG_CCU_JOB,"BuildingProcessJob Sync Exception = "+e.getMessage());
+            e.printStackTrace();
+        }
         CcuLog.d(L.TAG_CCU_JOB,"<- BuildingProcessJob");
     }
 }

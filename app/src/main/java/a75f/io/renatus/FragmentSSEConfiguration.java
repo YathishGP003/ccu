@@ -108,7 +108,7 @@ public class FragmentSSEConfiguration extends BaseDialogFragment implements Comp
         {
             lcmCancelCommand.setVisibility(View.INVISIBLE);
         }
-        setUpTestTriggers();
+        //setUpTestTriggers();
         spRelay1 = (Spinner) view.findViewById(R.id.lcmRelay1Actuator);
         spRelay2 = (Spinner) view.findViewById(R.id.lcmRelay2Actuator);
         relay1Switch = (SwitchCompat) view.findViewById(R.id.lcmRelay1Switch);

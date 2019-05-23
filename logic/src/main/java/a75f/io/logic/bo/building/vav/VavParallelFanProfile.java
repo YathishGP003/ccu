@@ -15,6 +15,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.building.hvac.ParallelFanVavUnit;
 import a75f.io.logic.bo.building.hvac.Valve;
+import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
@@ -87,8 +88,8 @@ public class VavParallelFanProfile extends VavProfile
             Damper damper = vavUnit.vavDamper;
             Valve valve = vavUnit.reheatValve;
             setDamperLimits(node, damper);
-            int loopOp;//New value of loopOp
-            //TODO
+            int loopOp = 0;
+            SystemController.State conditioning = L.ccu().systemProfile.getSystemController().getSystemState();
             //If supply air temperature from air handler is greater than room temperature, Cooling shall be
             //locked out.
             if (roomTemp > setTempCooling)
@@ -101,9 +102,10 @@ public class VavParallelFanProfile extends VavProfile
                     coolingLoop.setEnabled();
                     heatingLoop.setDisabled();
                 }
-                int coolingOp = (int) coolingLoop.getLoopOutput(roomTemp, setTempCooling);
-                loopOp = coolingOp;
-            
+                if (conditioning == SystemController.State.COOLING)
+                {
+                    loopOp = (int) coolingLoop.getLoopOutput(roomTemp, setTempCooling);
+                }
             }
             else if (roomTemp < setTempHeating)
             {
@@ -114,18 +116,15 @@ public class VavParallelFanProfile extends VavProfile
                     heatingLoop.setEnabled();
                     coolingLoop.setDisabled();
                 }
-            
-                int heatingLoopOp = (int) heatingLoop.getLoopOutput(setTempHeating, roomTemp);
-                if (VavSystemController.getInstance().getSystemState() == VavSystemController.State.COOLING)
+                
+                if (conditioning == SystemController.State.COOLING)
                 {
-                    dischargeSp = supplyAirTemp + (MAX_DISCHARGE_TEMP - supplyAirTemp) * heatingLoopOp / 100;
+                    loopOp = (int) heatingLoop.getLoopOutput(setTempHeating, roomTemp);
+                    dischargeSp = supplyAirTemp + (MAX_DISCHARGE_TEMP - supplyAirTemp) * loopOp / 100;
                     vavDevice.setDischargeSp(dischargeSp);
                     valveController.updateControlVariable(dischargeSp, dischargeTemp);
                     valve.currentPosition = (int) (valveController.getControlVariable() * 100 / valveController.getMaxAllowedError());
                 }
-    
-                
-                loopOp = heatingLoopOp;
             }
             else
             {
@@ -179,9 +178,8 @@ public class VavParallelFanProfile extends VavProfile
                 damper.currentPosition = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * loopOp / 100;
             }
     
-            //REHEAT control that does not follow RP-1455.
-            if (VavSystemController.getInstance().getSystemState() == VavSystemController.State.HEATING &&
-                                                        state == HEATING)
+            //REHEAT control does follow RP-1455 during heating.
+            if (conditioning == VavSystemController.State.HEATING && state == HEATING)
             {
                 double valveStartDamperPercent = TunerUtil.readTunerValByQuery("vav and valve and start and damper and equipRef == \""+vavEquip.getId()+"\"");
                 double maxHeatingPos = vavDevice.getDamperLimit("heating", "max");

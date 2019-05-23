@@ -108,11 +108,6 @@ public class VavSystemController extends SystemController
         for (Floor f: HSUtil.getFloors())
         {
             for(Zone z: HSUtil.getZones(f.getId())) {
-                /*Occupied c = ScheduleProcessJob.getOccupiedModeCache(z.getId());
-                if (c != null && c.isOccupied()) {
-                    systemOccupancy = 1;
-                }*/
-                
                 for (Equip q : HSUtil.getEquips(z.getId()))
                 {
                     

@@ -19,6 +19,7 @@ import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Damper;
+import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.dab.DabSystemController;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
@@ -121,6 +122,9 @@ public class DabProfile extends ZoneProfile
         
         Damper damper = new Damper();
         Log.d(L.TAG_CCU_ZONE, "DAB : roomTemp" + roomTemp + " setTempCooling:  " + setTempCooling+" setTempHeating: "+setTempHeating);
+    
+        SystemController.State conditioning = L.ccu().systemProfile.getSystemController().getSystemState();
+    
         if (roomTemp > setTempCooling)
         {
             //Zone is in Cooling
@@ -129,7 +133,10 @@ public class DabProfile extends ZoneProfile
                 state = COOLING;
                 damperOpController.reset();
             }
-            damperOpController.updateControlVariable(roomTemp, setTempCooling);
+            if (conditioning == SystemController.State.COOLING)
+            {
+                damperOpController.updateControlVariable(roomTemp, setTempCooling);
+            }
         }
         else if (roomTemp < setTempHeating)
         {
@@ -139,7 +146,10 @@ public class DabProfile extends ZoneProfile
                 state = HEATING;
                 damperOpController.reset();
             }
-            damperOpController.updateControlVariable(setTempHeating, roomTemp);
+            if (conditioning == SystemController.State.HEATING)
+            {
+                damperOpController.updateControlVariable(setTempHeating, roomTemp);
+            }
         } else {
             if (state != DEADBAND) {
                 state = DEADBAND;

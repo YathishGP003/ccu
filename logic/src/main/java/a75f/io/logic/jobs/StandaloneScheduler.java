@@ -108,6 +108,9 @@ public class StandaloneScheduler {
             case NONE:
                 status = "";
                 break;
+            case FAN_OP_MODE_OFF:
+                status = "OFF ";
+                break;
         }
 
         switch (state){
@@ -136,25 +139,25 @@ public class StandaloneScheduler {
                 break;
         }
 
-        if(status.equals("OFF ") && relayStages.size() > 0) status = "";
-        if(relayStages.containsKey("FanStage2") && relayStages.containsKey("FanStage1"))
-            status = status + " Fan 1&2 ON";
-        else if(relayStages.containsKey("Humidifier") && relayStages.containsKey("FanStage1"))
-            status = status + " Fan 1 ON, Humidifier ON";
-        else if(relayStages.containsKey("Dehumidifier") && relayStages.containsKey("FanStage1"))
-            status = status + " Fan 1 ON, Dehumidifier ON";
-        else if(relayStages.containsKey("FanStage2"))
-            status = status + " Fan 2 ON";
-        else if(relayStages.containsKey("Humidifier"))
-            status = status + " Humidifier ON";
-        else if(relayStages.containsKey("Dehumidifier"))
-            status = status + " Dehumidifier ON";
-        else if(relayStages.containsKey("FanStage1"))
-            status = status + " Fan 1 ON";
-        else
-            status = status +" Fan OFF";
-
-        //TODO if change in status need to update haystack string for App consuming this status update KUMAR
+        if(temperatureState != ZoneTempState.FAN_OP_MODE_OFF) {
+            if (status.equals("OFF ") && relayStages.size() > 0) status = "";
+            if (relayStages.containsKey("FanStage2") && relayStages.containsKey("FanStage1"))
+                status = status + " Fan 1&2 ON";
+            else if (relayStages.containsKey("Humidifier") && relayStages.containsKey("FanStage1"))
+                status = status + " Fan 1 ON, Humidifier ON";
+            else if (relayStages.containsKey("Dehumidifier") && relayStages.containsKey("FanStage1"))
+                status = status + " Fan 1 ON, Dehumidifier ON";
+            else if (relayStages.containsKey("FanStage2"))
+                status = status + " Fan 2 ON";
+            else if (relayStages.containsKey("Humidifier"))
+                status = status + " Humidifier ON";
+            else if (relayStages.containsKey("Dehumidifier"))
+                status = status + " Dehumidifier ON";
+            else if (relayStages.containsKey("FanStage1"))
+                status = status + " Fan 1 ON";
+            else
+                status = status + " Fan OFF";
+        }
         if(equipId != null) {
             if(getSmartStatStatusString(equipId).equals(status) == false) {
                 if(standaloneStatus.containsKey(equipId))standaloneStatus.remove(equipId);

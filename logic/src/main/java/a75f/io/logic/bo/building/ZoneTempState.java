@@ -4,5 +4,6 @@ public enum ZoneTempState {
     NONE,
     RF_DEAD,
     TEMP_DEAD,
-    EMERGENCY
+    EMERGENCY,
+    FAN_OP_MODE_OFF
 }

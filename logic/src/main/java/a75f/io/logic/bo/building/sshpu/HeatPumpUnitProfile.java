@@ -86,11 +86,12 @@ public class HeatPumpUnitProfile extends ZoneProfile {
             if (hpuDevice.profileType != ProfileType.SMARTSTAT_HEAT_PUMP_UNIT)
                 continue;
             double roomTemp = hpuDevice.getCurrentTemp();
+            double curHumidity = hpuDevice.getHumidity();
             Equip hpuEquip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + node + "\"")).build();
             
 
             if(isZoneDead()){
-                resetRelays(hpuEquip.getId(), node,ZoneTempState.TEMP_DEAD);
+                resetRelays(hpuEquip.getId(),node,curHumidity, ZoneTempState.TEMP_DEAD);
                 hpuDevice.setStatus(state.ordinal());
                 String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \"" + node + "\"");
                 if (!curStatus.equals("Zone Temp Dead")) {
@@ -130,33 +131,37 @@ public class HeatPumpUnitProfile extends ZoneProfile {
             if((fanSpeed != OFF) ){
                 switch (opMode){
                     case AUTO:
-                        if(roomTemp > averageDesiredTemp){
-                            state = COOLING;
-                            hpuCoolOnlyMode(hpuDevice, hpuEquip.getId(), roomTemp,setTempCooling,occuStatus,node,fanSpeed);
-                        }else if(roomTemp < averageDesiredTemp){
+                        if(roomTemp < averageDesiredTemp){
                             state = HEATING;
                             hpuHeatOnlyMode(hpuDevice,hpuEquip.getId(),roomTemp,setTempHeating,occuStatus,node,fanSpeed);
                         }else {
-                            state = DEADBAND;
+                            state = COOLING;
+                            hpuCoolOnlyMode(hpuDevice, hpuEquip.getId(), roomTemp,setTempCooling,occuStatus,node,fanSpeed);
                         }
                         break;
                     case COOL_ONLY:
                         if(roomTemp > averageDesiredTemp){
                             state = COOLING;
                             hpuCoolOnlyMode(hpuDevice,hpuEquip.getId(),roomTemp,setTempCooling,occuStatus,node,fanSpeed);
+                        }else {
+                            state = DEADBAND;
+                            resetRelays(hpuEquip.getId(),node,curHumidity,ZoneTempState.NONE);
                         }
                         break;
                     case HEAT_ONLY:
                         if(roomTemp < averageDesiredTemp){
                             state = HEATING;
                             hpuHeatOnlyMode(hpuDevice,hpuEquip.getId(),roomTemp,setTempHeating,occuStatus,node,fanSpeed);
+                        }else {
+                            state = DEADBAND;
+                            resetRelays(hpuEquip.getId(),node,curHumidity,ZoneTempState.NONE);
                         }
                         break;
                     case OFF: {
                         HashMap<String, Integer> relayStages = new HashMap<String, Integer>();
                         switch (fanSpeed) {
                             case AUTO:
-                                resetRelays(hpuEquip.getId(), node,ZoneTempState.NONE);
+                                resetRelays(hpuEquip.getId(), node,curHumidity,ZoneTempState.NONE);
                                 break;
                             case FAN_LOW:
                                 if(occupied) {
@@ -186,7 +191,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
             }else {
                 //No condition happens
                 state = DEADBAND;
-                resetRelays(hpuEquip.getId(),node,ZoneTempState.NONE);
+                resetRelays(hpuEquip.getId(),node,curHumidity,ZoneTempState.FAN_OP_MODE_OFF);
             }
 
 
@@ -318,8 +323,10 @@ public class HeatPumpUnitProfile extends ZoneProfile {
         return CCUHsApi.getInstance().readHisValByQuery("point and standalone and operation and mode and his and " + cmd + " and equipRef == \"" + equipRef + "\"");
     }
 
-    private void resetRelays(String equipId, short node, ZoneTempState temperatureState) {
+    private void resetRelays(String equipId, short node, double humidity, ZoneTempState temperatureState) {
 
+
+        int fanStage2Type = (int)getConfigType("relay5",node);
         if (getCmdSignal("compressor and stage1", node) > 0)
             setCmdSignal("compressor and stage1", 0, node);
         if (getCmdSignal("compressor and stage2", node) > 0)
@@ -332,7 +339,11 @@ public class HeatPumpUnitProfile extends ZoneProfile {
             setCmdSignal("fan and stage1", 0, node);
         if (getCmdSignal("fan and stage2", node) > 0)
             setCmdSignal("fan and stage2", 0, node);
-        StandaloneScheduler.updateSmartStatStatus(equipId, DEADBAND, new HashMap<String, Integer>(),temperatureState);
+
+         HashMap<String,Integer> relayStages = new HashMap<String, Integer>();
+         if(temperatureState != ZoneTempState.FAN_OP_MODE_OFF)
+             updateHumidityStatus(fanStage2Type,node,equipId,humidity,relayStages);
+        StandaloneScheduler.updateSmartStatStatus(equipId, DEADBAND,relayStages ,temperatureState);
     }
 
     private void hpuCoolOnlyMode(HeatPumpUnitEquip hpuEquip, String equipId, double curTemp, double coolingDesiredTemp, Occupied occuStatus,Short addr, StandaloneFanSpeed fanSpeed){
@@ -505,7 +516,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
         switch (fanRelayType){
 
             case HUMIDIFIER:
-                if(hpuEquip.getHumidity() > humidifierTargetThreshold) {
+                if(hpuEquip.getHumidity() < humidifierTargetThreshold) {
                     relayStages.put("Humidifier",1);
                     setCmdSignal("fan and stage2", 1.0, addr);
                 }else if(getCmdSignal("fan and stage2",addr) > 0){
@@ -516,7 +527,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                 }
                 break;
             case DE_HUMIDIFIER:
-                if(hpuEquip.getHumidity() < humidifierTargetThreshold) {
+                if(hpuEquip.getHumidity() > humidifierTargetThreshold) {
                     setCmdSignal("fan and stage2", 1.0, addr);
                     relayStages.put("Dehumidifier",1);
                 }else if(getCmdSignal("fan and stage2",addr) > 0){
@@ -759,6 +770,40 @@ public class HeatPumpUnitProfile extends ZoneProfile {
             temperatureState = ZoneTempState.EMERGENCY;
         StandaloneScheduler.updateSmartStatStatus(equipId, state, relayStages,temperatureState);
 
+    }
+    public void updateHumidityStatus(int fanStage2Type, Short addr,String equipId, double curValue, HashMap<String,Integer> relayStages){
+
+        double targetThreshold = 25.0;
+
+        SmartStatFanRelayType fanRelayType = SmartStatFanRelayType.values()[fanStage2Type];
+        switch (fanRelayType){
+
+            case HUMIDIFIER:
+
+                targetThreshold = CCUHsApi.getInstance().readDefaultVal("point and standalone and target and humidity and equipRef == \"" + equipId + "\"");
+                if(curValue < targetThreshold) {
+                    relayStages.put("Humidifier",1);
+                    setCmdSignal("fan and stage2", 1.0, addr);
+                }else if(getCmdSignal("fan and stage2",addr) > 0){
+                    if(curValue > (targetThreshold + (targetThreshold * 0.05)))
+                        setCmdSignal("fan and stage2",0, addr);
+                    else
+                        relayStages.put("Humdifier",1);
+                }
+                break;
+            case DE_HUMIDIFIER:
+                targetThreshold = CCUHsApi.getInstance().readDefaultVal("point and standalone and target and dehumidifier and equipRef == \"" + equipId + "\"");
+                if(curValue > targetThreshold) {
+                    setCmdSignal("fan and stage2", 1.0, addr);
+                    relayStages.put("Dehumidifier",1);
+                }else if(getCmdSignal("fan and stage2",addr) > 0){
+                    if(curValue < (targetThreshold - (targetThreshold * 0.05)))
+                        setCmdSignal("fan and stage2",0, addr);
+                    else
+                        relayStages.put("Dehumidifier",1);
+                }
+                break;
+        }
     }
 }
 

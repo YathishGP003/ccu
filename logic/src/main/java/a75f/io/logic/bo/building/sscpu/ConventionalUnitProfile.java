@@ -325,7 +325,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
                     if (fanHighType == SmartStatFanRelayType.FAN_STAGE2) {
                         if (getCmdSignal("fan and stage2", node) > 0)
                             setCmdSignal("fan and stage2", 0, node);
-                    }else if(isFanStage2Enabled && ((fanHighType == SmartStatFanRelayType.HUMIDIFIER) || (fanHighType == SmartStatFanRelayType.DE_HUMIDIFIER)))
+                    }else if( (fanSpeed != OFF ) && isFanStage2Enabled && ((fanHighType == SmartStatFanRelayType.HUMIDIFIER) || (fanHighType == SmartStatFanRelayType.DE_HUMIDIFIER)))
                         updateHumidityStatus(fanHighType,node,cpuDevice.getHumidity(),targetThreshold,relayStages);
                 }
                 //Turn off all cooling and heating stages

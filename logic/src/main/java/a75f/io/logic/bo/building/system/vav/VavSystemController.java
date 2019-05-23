@@ -485,6 +485,7 @@ public class VavSystemController extends SystemController
         return p.val * Math.pow(zonePriorityMultiplier, (zoneLoad/zonePrioritySpread) > 10 ? 10 : (zoneLoad/zonePrioritySpread));
     }*/
     
+    @Override
     public State getSystemState() {
         return systemState;
     }

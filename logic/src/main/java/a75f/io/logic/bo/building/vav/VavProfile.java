@@ -149,6 +149,7 @@ public abstract class VavProfile extends ZoneProfile
                 d.maxPosition = 100;
                 break;
         }
+        d.iaqCompensatedMinPos = d.minPosition;
     }
     
     @JsonIgnore

@@ -28,12 +28,11 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
-import a75f.io.logic.bo.building.system.vav.VavSystemController;
-import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
 import a75f.io.logic.bo.util.HSEquipUtil;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.L.TAG_CCU_DEVICE;
+import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
 
 /**
  * Created by Yinten isOn 8/17/2017.
@@ -145,10 +144,7 @@ public class LSmartNode
                         }
                     }
                     controlsMessage_t.controls.setTemperature.set((short) (getDesiredTemp(node) * 2));
-                    if (L.ccu().systemProfile instanceof VavSystemProfile)
-                    {
-                        controlsMessage_t.controls.conditioningMode.set((short) (VavSystemController.getInstance().getSystemState() == VavSystemController.State.HEATING ? 1 : 0));
-                    }
+                    controlsMessage_t.controls.conditioningMode.set((short) (L.ccu().systemProfile.getSystemController().getSystemState() == HEATING ? 1 : 0));
                 }
             }
         }
@@ -272,10 +268,8 @@ public class LSmartNode
                 }
             }
             controls_t.setTemperature.set((short) (getDesiredTemp(node) * 2));
-            if (L.ccu().systemProfile instanceof VavSystemProfile)
-            {
-                controls_t.conditioningMode.set((short) (VavSystemController.getInstance().getSystemState() == VavSystemController.State.HEATING ? 1 : 0));
-            }
+            controls_t.conditioningMode.set((short) (L.ccu().systemProfile.getSystemController().getSystemState() == HEATING ? 1 : 0));
+    
         }
     }
 
@@ -473,7 +467,7 @@ public class LSmartNode
     }
     
     public static double getConfigNumVal(String tags, short nodeAddr) {
-        return CCUHsApi.getInstance().readDefaultVal("point and zone and config and vav and "+tags+" and group == \""+nodeAddr+"\"");
+        return CCUHsApi.getInstance().readDefaultVal("point and zone and config and "+tags+" and group == \""+nodeAddr+"\"");
     }
     
     /********************************END SEED MESSAGES**************************************/

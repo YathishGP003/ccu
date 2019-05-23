@@ -796,6 +796,11 @@ public class DabEquip
         CCUHsApi.getInstance().writeHisValByQuery("point and damper and base and cmd and "+damper+" and group == \""+nodeAddr+"\"", damperPos);
     }
     
+    public void setNormalizedDamperPos(double damperPos, String damper)
+    {
+        CCUHsApi.getInstance().writeHisValByQuery("point and damper and normalized and cmd and "+damper+" and group == \""+nodeAddr+"\"", damperPos);
+    }
+    
     public double getStatus() {
         return CCUHsApi.getInstance().readHisValByQuery("point and status and his and group == \""+nodeAddr+"\"");
     }

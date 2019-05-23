@@ -25,7 +25,6 @@ import a75f.io.logic.tuners.VavTRTuners;
 
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
-import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
 
 /**
  * Default System handles PI controlled op
@@ -276,7 +275,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         }
     
         setSystemPoint("operating and mode", VavSystemController.getInstance().systemState.ordinal());
-        String systemStatus = (VavSystemController.getInstance().systemState == OFF) ? "System OFF " : getStatusMessage();
+        String systemStatus = getStatusMessage();
         String scheduleStatus = ScheduleProcessJob.getSystemStatusString();
         CcuLog.d(L.TAG_CCU_SYSTEM, "StatusMessage: "+systemStatus);
         CcuLog.d(L.TAG_CCU_SYSTEM, "ScheduleStatus: " +scheduleStatus);
@@ -297,7 +296,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         status.append(systemCoolingLoopOp > 0 ? " | Cooling ON ":"");
         status.append(systemHeatingLoopOp > 0 ? " | Heating ON ":"");
     
-        return status.toString().equals("")? "OFF" : status.toString();
+        return status.toString().equals("")? "System OFF" : status.toString();
     }
     
     public void addSystemEquip() {

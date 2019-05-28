@@ -499,7 +499,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
                     relayStages.put("Humidifier",1);
                     setCmdSignal("fan and stage2", 1.0, addr);
                 }else if(getCmdSignal("fan and stage2",addr) > 0){
-                    if(curValue > (targetThreshold + (targetThreshold * 0.05)))
+                    if(curValue > (targetThreshold + 5))
                         setCmdSignal("fan and stage2",0, addr);
                     else
                         relayStages.put("Humdifier",1);
@@ -510,7 +510,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
                     setCmdSignal("fan and stage2", 1.0, addr);
                     relayStages.put("Dehumidifier",1);
                 }else if(getCmdSignal("fan and stage2",addr) > 0){
-                    if(curValue < (targetThreshold - (targetThreshold * 0.05)))
+                    if(curValue < (targetThreshold - 5))
                         setCmdSignal("fan and stage2",0, addr);
                     else
                         relayStages.put("Dehumidifier",1);

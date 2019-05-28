@@ -34,7 +34,7 @@ import static a75f.io.logic.bo.building.definitions.StandaloneFanSpeed.OFF;
 public class HeatPumpUnitProfile extends ZoneProfile {
 
 
-    public static String TAG = HeatPumpUnitEquip.class.getSimpleName().toUpperCase();
+    public static String TAG = HeatPumpUnitProfile.class.getSimpleName().toUpperCase();
 
     public HashMap<Short, HeatPumpUnitEquip> hpuDeviceMap;
     double setTempCooling = 74.0;
@@ -133,16 +133,16 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                     case AUTO:
                         if(roomTemp < averageDesiredTemp){
                             state = HEATING;
-                            hpuHeatOnlyMode(hpuDevice,hpuEquip.getId(),roomTemp,setTempHeating,occuStatus,node,fanSpeed);
+                            hpuHeatOnlyMode(hpuDevice,hpuEquip.getId(),roomTemp,occuStatus,node,fanSpeed);
                         }else {
                             state = COOLING;
-                            hpuCoolOnlyMode(hpuDevice, hpuEquip.getId(), roomTemp,setTempCooling,occuStatus,node,fanSpeed);
+                            hpuCoolOnlyMode(hpuDevice, hpuEquip.getId(), roomTemp,occuStatus,node,fanSpeed);
                         }
-                        break;
+                            break;
                     case COOL_ONLY:
                         if(roomTemp > averageDesiredTemp){
                             state = COOLING;
-                            hpuCoolOnlyMode(hpuDevice,hpuEquip.getId(),roomTemp,setTempCooling,occuStatus,node,fanSpeed);
+                            hpuCoolOnlyMode(hpuDevice,hpuEquip.getId(),roomTemp,occuStatus,node,fanSpeed);
                         }else {
                             state = DEADBAND;
                             resetRelays(hpuEquip.getId(),node,curHumidity,ZoneTempState.NONE);
@@ -151,7 +151,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                     case HEAT_ONLY:
                         if(roomTemp < averageDesiredTemp){
                             state = HEATING;
-                            hpuHeatOnlyMode(hpuDevice,hpuEquip.getId(),roomTemp,setTempHeating,occuStatus,node,fanSpeed);
+                            hpuHeatOnlyMode(hpuDevice,hpuEquip.getId(),roomTemp,occuStatus,node,fanSpeed);
                         }else {
                             state = DEADBAND;
                             resetRelays(hpuEquip.getId(),node,curHumidity,ZoneTempState.NONE);
@@ -346,7 +346,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
         StandaloneScheduler.updateSmartStatStatus(equipId, DEADBAND,relayStages ,temperatureState);
     }
 
-    private void hpuCoolOnlyMode(HeatPumpUnitEquip hpuEquip, String equipId, double curTemp, double coolingDesiredTemp, Occupied occuStatus,Short addr, StandaloneFanSpeed fanSpeed){
+    private void hpuCoolOnlyMode(HeatPumpUnitEquip hpuEquip, String equipId, double curTemp,  Occupied occuStatus,Short addr, StandaloneFanSpeed fanSpeed){
 
 
         double hysteresis = StandaloneTunerUtil.getStandaloneStage1Hysteresis(equipId);
@@ -377,7 +377,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
         HashMap<String, Integer> relayStages = new HashMap<String, Integer>();
         Log.d(TAG,"hpuCoolOnlyMode ="+occupied+","+addr+","+isAuxHeatingEnabled+","+isCompressorStage1Enabled+","+isCompressorStage2Enabled+","+isFanStage1Enabled);
         if(isAuxHeatingEnabled && (getCmdSignal("aux and heating ",addr) > 0))setCmdSignal("aux and heating ",0,addr);
-        if(curTemp >= coolingDesiredTemp){
+        if(curTemp >= setTempCooling){
             //Turn on relay1
             if(isCompressorStage1Enabled){
                 relayStages.put("CoolingStage1",1);
@@ -385,7 +385,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
             }else{
                 setCmdSignal("compressor and stage1", 0, addr);
             }
-            if(curTemp >= (coolingDesiredTemp + coolingDeadband)){
+            if(curTemp >= (setTempCooling + coolingDeadband)){
                 //Turn on Stage 2
                 if(isCompressorStage2Enabled) {
                     relayStages.put("CoolingStage2", 1);
@@ -393,7 +393,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                 }else {
                     if(getCmdSignal("compressor and stage2", addr) > 0)setCmdSignal("compressor and stage2",0,addr);
                 }
-            }else if(curTemp <= coolingDesiredTemp){
+            }else if(curTemp <= setTempCooling){
                 setCmdSignal("compressor and stage2",0,addr);
             }else{
                 if(getCmdSignal("compressor and stage2",addr) > 0){
@@ -466,7 +466,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                 }
             }
         }else{
-            if(curTemp <= coolingDesiredTemp - hysteresis){
+            if(curTemp <= (setTempCooling - hysteresis)){
                 //Turn off stage1
                 setCmdSignal("compressor and stage1",0,addr);
                 switch (hpChangeOverType){
@@ -494,7 +494,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                                 relayStages.put("FanStage1", 1);
                                 setCmdSignal("fan and stage1", 1.0, addr);
                             }
-                            if(isFanRelay5Enabled) {
+                            if(isFanRelay5Enabled && (fanRelayType == SmartStatFanRelayType.FAN_STAGE2)) {
                                 relayStages.put("FanStage2", 1);
                                 setCmdSignal("fan and stage2", 1.0, addr);
                             }
@@ -506,8 +506,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                     setCmdSignal("fan and stage2",0,addr);
                 }
             }else{
-
-                if((getCmdSignal("compressor and stage1", addr) > 0) || (isFanRelay5Enabled && (getCmdSignal("changeover and stage1",addr) > 0)))
+                if((getCmdSignal("compressor and stage1", addr) > 0) || ((hpChangeOverType == SmartStatHeatPumpChangeOverType.ENERGIZE_IN_COOLING) && (getCmdSignal("changeover and stage1",addr) > 0)))
                     relayStages.put("CoolingStage1",1);
                 if(getCmdSignal("fan and stage1", addr) > 0)relayStages.put("FanStage1",1);
             }
@@ -520,7 +519,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                     relayStages.put("Humidifier",1);
                     setCmdSignal("fan and stage2", 1.0, addr);
                 }else if(getCmdSignal("fan and stage2",addr) > 0){
-                    if(hpuEquip.getHumidity() < (humidifierTargetThreshold - (humidifierTargetThreshold * 0.05)))
+                    if(hpuEquip.getHumidity() < (humidifierTargetThreshold + 5))
                         setCmdSignal("fan and stage2",0, addr);
                     else
                         relayStages.put("Humdifier",1);
@@ -531,7 +530,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                     setCmdSignal("fan and stage2", 1.0, addr);
                     relayStages.put("Dehumidifier",1);
                 }else if(getCmdSignal("fan and stage2",addr) > 0){
-                    if(hpuEquip.getHumidity() > (humidifierTargetThreshold +(humidifierTargetThreshold * 0.05)))
+                    if(hpuEquip.getHumidity() < (humidifierTargetThreshold - 5))
                         setCmdSignal("fan and stage2",0, addr);
                     else
                         relayStages.put("Dehumidifier",1);
@@ -544,7 +543,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
             temperatureState = ZoneTempState.EMERGENCY;
         StandaloneScheduler.updateSmartStatStatus(equipId, state, relayStages,temperatureState);
     }
-    private void hpuHeatOnlyMode(HeatPumpUnitEquip hpuEquip,String equipId, double curTemp, double heatingDesiredTemp, Occupied occuStatus,Short addr, StandaloneFanSpeed fanSpeed){
+    private void hpuHeatOnlyMode(HeatPumpUnitEquip hpuEquip,String equipId, double curTemp, Occupied occuStatus,Short addr, StandaloneFanSpeed fanSpeed){
         double hysteresis = StandaloneTunerUtil.getStandaloneStage1Hysteresis(equipId);
         boolean isCompressorStage1Enabled = getConfigEnabled("relay1",addr) > 0 ? true : false;
         boolean isCompressorStage2Enabled = getConfigEnabled("relay2",addr) > 0 ? true : false;
@@ -558,7 +557,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
         double heatingDeadband = 2.0;
         boolean occupied = false;
         if(occuStatus != null){
-            heatingDeadband = occuStatus.getCoolingDeadBand();
+            heatingDeadband = occuStatus.getHeatingDeadBand();
             occupied = occuStatus.isOccupied();
         }
         switch (fanRelayType){
@@ -571,23 +570,23 @@ public class HeatPumpUnitProfile extends ZoneProfile {
         }
         SmartStatHeatPumpChangeOverType hpChangeOverType = SmartStatHeatPumpChangeOverType.values()[heatPumpChangeoverType];
         HashMap<String, Integer> relayStages = new HashMap<String, Integer>();
-        if(curTemp <= heatingDesiredTemp){
+        if(curTemp <= setTempHeating){
             if(isAuxHeatingEnabled){
-                if(curTemp <= (heatingDesiredTemp - (2 * heatingDeadband)) ) {
+                if(curTemp <= (setTempHeating - (2 * heatingDeadband)) ) {
                     relayStages.put("HeatingStage2", 1);
                     setCmdSignal("aux and heating ",1.0,addr);
-                }else if(!isCompressorStage2Enabled && (curTemp <= heatingDesiredTemp - heatingDeadband)){
+                }else if(!isCompressorStage2Enabled && (curTemp <= setTempHeating - heatingDeadband)){
                     relayStages.put("HeatingStage2", 1);
                     setCmdSignal("aux and heating ",1.0,addr);
                     setCmdSignal("compressor and stage2",0,addr);
-                } else if(!isCompressorStage1Enabled && (curTemp <= heatingDesiredTemp)) {
+                } else if(!isCompressorStage1Enabled && (curTemp <= setTempHeating)) {
                     relayStages.put("HeatingStage1", 1);
                     setCmdSignal("aux and heating ",1.0,addr);
                     setCmdSignal("compressor and stage1",0,addr);
                 } else if(getCmdSignal("aux and heating ",addr)> 0){
-                    if( isCompressorStage2Enabled && isCompressorStage2Enabled && (curTemp >= (heatingDesiredTemp - heatingDeadband)))
+                    if( isCompressorStage2Enabled && isCompressorStage2Enabled && (curTemp >= (setTempHeating - heatingDeadband)))
                         setCmdSignal("aux and heating ",0,addr);
-                    else if(isCompressorStage1Enabled && !isCompressorStage2Enabled && (curTemp >= heatingDesiredTemp))
+                    else if(isCompressorStage1Enabled && !isCompressorStage2Enabled && (curTemp >= setTempHeating))
                         setCmdSignal("aux and heating ",0,addr);
                     else {
                         relayStages.put("HeatingStage2",1);
@@ -613,7 +612,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                     setCmdSignal("heatpump and changeover and stage1",0,addr);
                     break;
             }
-            if(curTemp <= (heatingDesiredTemp - heatingDeadband)){
+            if(curTemp <= (setTempHeating - heatingDeadband)){
                 //Turn on Stage 2
                 if(isCompressorStage2Enabled) {
                     relayStages.put("HeatingStage2", 1);
@@ -621,7 +620,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                 }else {
                     if(getCmdSignal("compressor and stage2", addr) > 0)setCmdSignal("compressor and stage2",0,addr);
                 }
-            }else if(curTemp >= heatingDesiredTemp){
+            }else if(curTemp >= setTempHeating){
                 setCmdSignal("compressor and stage2",0,addr);
             }else{
                 if(getCmdSignal("compressor and stage2",addr) > 0){
@@ -684,7 +683,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                 }
             }
         }else{
-            if(curTemp >= heatingDesiredTemp + hysteresis){
+            if(curTemp >= (setTempHeating + hysteresis)){
                 //Turn off stage1
 
                 if(isAuxHeatingEnabled ){
@@ -746,7 +745,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                     relayStages.put("Humidifier", 1);
                     setCmdSignal("fan and stage2", 1.0, addr);
                 }else if(getCmdSignal("fan and stage2",addr) > 0){
-                    if(hpuEquip.getHumidity() > (humidifierTargetThreshold + (humidifierTargetThreshold * 0.05)))
+                    if(hpuEquip.getHumidity() > (humidifierTargetThreshold + 5))
                         setCmdSignal("fan and stage2",0, addr);
                     else
                         relayStages.put("Humidifier",1);
@@ -757,7 +756,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                     relayStages.put("Dehumidifier", 1);
                     setCmdSignal("fan and stage2", 1.0, addr);
                 }else if(getCmdSignal("fan and stage2",addr) > 0){
-                    if(hpuEquip.getHumidity() < (humidifierTargetThreshold -(humidifierTargetThreshold * 0.05)))
+                    if(hpuEquip.getHumidity() < (humidifierTargetThreshold - 5))
                         setCmdSignal("fan and stage2",0, addr);
                     else
                         relayStages.put("Dehumidifier",1);
@@ -785,7 +784,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                     relayStages.put("Humidifier",1);
                     setCmdSignal("fan and stage2", 1.0, addr);
                 }else if(getCmdSignal("fan and stage2",addr) > 0){
-                    if(curValue > (targetThreshold + (targetThreshold * 0.05)))
+                    if(curValue > (targetThreshold + 5))
                         setCmdSignal("fan and stage2",0, addr);
                     else
                         relayStages.put("Humdifier",1);
@@ -797,7 +796,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                     setCmdSignal("fan and stage2", 1.0, addr);
                     relayStages.put("Dehumidifier",1);
                 }else if(getCmdSignal("fan and stage2",addr) > 0){
-                    if(curValue < (targetThreshold - (targetThreshold * 0.05)))
+                    if(curValue < (targetThreshold - 5))
                         setCmdSignal("fan and stage2",0, addr);
                     else
                         relayStages.put("Dehumidifier",1);

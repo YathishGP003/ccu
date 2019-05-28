@@ -84,13 +84,13 @@
                 android:minWidth="77dp"
                 android:theme="@style/DefaultNumberPickerTheme" />
 
-            <ImageView
-                android:id="@+id/imageHPInput"
-                android:layout_below="@+id/textEnable"
-                android:layout_width="250dp"
-                android:layout_height="717dp"
-                android:layout_marginTop="32dp"
-                android:src="@drawable/input_heatpump"/>
+        <ImageView
+            android:id="@+id/imageHPInput"
+            android:layout_width="250dp"
+            android:layout_height="630dp"
+            android:layout_below="@+id/textEnable"
+            android:layout_marginTop="32dp"
+            android:src="@drawable/input_heatpump1" />
         <LinearLayout
                 android:id="@+id/lt_toggles"
                 android:layout_width="wrap_content"
@@ -391,23 +391,23 @@
                 android:textOff="OFF"
                 android:textOn="ON" />
         </LinearLayout>
+
+        <Button
+            android:id="@+id/set"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginRight="24dp"
+            android:layout_marginBottom="150dp"
+            android:background="@null"
+            android:button="@null"
+            android:fontFamily="@font/lato_regular"
+            android:text="@string/button_set"
+            android:textAllCaps="true"
+            android:textColor="@color/orange_75f"
+            android:textSize="19.5dp" />
         </RelativeLayout>
     </ScrollView>
-
-    <Button
-        android:id="@+id/set"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginRight="24dp"
-        android:layout_marginBottom="150dp"
-        android:background="@null"
-        android:button="@null"
-        android:fontFamily="@font/lato_regular"
-        android:text="@string/button_set"
-        android:textAllCaps="true"
-        android:textColor="@color/orange_75f"
-        android:textSize="19.5dp" />
 
 </RelativeLayout>

@@ -239,14 +239,14 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
                     @Override
                     protected void onPreExecute() {
                         setButton.setEnabled(false);
-                        progressDlg.setMessage("Saving CPU Configuration");
+                        progressDlg.setMessage("Saving HPU Configuration");
                         progressDlg.show();
                         super.onPreExecute();
                     }
 
                     @Override
                     protected Void doInBackground(final String... params) {
-                        setupCPUZoneProfile();
+                        setupHPUZoneProfile();
                         L.saveCCUState();
 
                         return null;
@@ -264,7 +264,7 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
         });
     }
 
-    private void setupCPUZoneProfile() {
+    private void setupHPUZoneProfile() {
 
         HeatPumpUnitConfiguration hpuConfig = new HeatPumpUnitConfiguration();
         hpuConfig.setNodeType(mNodeType);

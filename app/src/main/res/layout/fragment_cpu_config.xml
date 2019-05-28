@@ -10,7 +10,7 @@
 
 
     <TextView
-        android:id="@+id/textHeatPump"
+        android:id="@+id/textTwoPFCU"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
@@ -26,7 +26,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:layout_marginLeft="70dp"
-        android:layout_below="@+id/textHeatPump">
+        android:layout_below="@+id/textTwoPFCU">
         <RelativeLayout
             android:id="@+id/rlPassFields"
             android:layout_width="match_parent"
@@ -86,11 +86,11 @@
 
             <ImageView
                 android:id="@+id/imageHPInput"
-                android:layout_below="@+id/textEnable"
                 android:layout_width="250dp"
-                android:layout_height="717dp"
+                android:layout_height="630dp"
+                android:layout_below="@+id/textEnable"
                 android:layout_marginTop="32dp"
-                android:src="@drawable/input_heatpump"/>
+                android:src="@drawable/input_heatpump1" />
             <LinearLayout
                 android:id="@+id/lt_toggles"
                 android:layout_width="wrap_content"
@@ -381,22 +381,22 @@
                     android:textOn="ON" />
             </LinearLayout>
         </RelativeLayout>
-    </ScrollView>
 
-    <Button
-        android:id="@+id/setBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginRight="24dp"
-        android:layout_marginBottom="150dp"
-        android:background="@null"
-        android:button="@null"
-        android:fontFamily="@font/lato_regular"
-        android:text="@string/button_set"
-        android:textAllCaps="true"
-        android:textColor="@color/orange_75f"
-        android:textSize="19.5dp" />
+        <Button
+            android:id="@+id/setBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginRight="24dp"
+            android:layout_marginBottom="150dp"
+            android:background="@null"
+            android:button="@null"
+            android:fontFamily="@font/lato_regular"
+            android:text="@string/button_set"
+            android:textAllCaps="true"
+            android:textColor="@color/orange_75f"
+            android:textSize="19.5dp" />
+    </ScrollView>
 
 </RelativeLayout>

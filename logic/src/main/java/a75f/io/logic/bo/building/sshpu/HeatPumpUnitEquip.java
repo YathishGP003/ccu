@@ -29,7 +29,7 @@ public class HeatPumpUnitEquip{
 
     int nodeAddr;
     ProfileType profileType;
-    HeatPumpUnitProfile smartStatCpuUnit;
+    HeatPumpUnitProfile smartStatHpuUnit;
 
     double      currentTemp;
     double      humidity;
@@ -37,7 +37,7 @@ public class HeatPumpUnitEquip{
     public HeatPumpUnitEquip(ProfileType T, int node) {
 
         profileType = T;
-        smartStatCpuUnit = new HeatPumpUnitProfile();
+        smartStatHpuUnit = new HeatPumpUnitProfile();
         nodeAddr = node;
     }
 
@@ -329,7 +329,7 @@ public class HeatPumpUnitEquip{
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("zone").addMarker("cpu").addMarker("scheduleType").addMarker("writable").addMarker("zone").addMarker("equipHis").addMarker("his")
+                .addMarker("zone").addMarker(profile).addMarker("scheduleType").addMarker("writable").addMarker("zone").addMarker("equipHis").addMarker("his")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
@@ -575,7 +575,7 @@ public class HeatPumpUnitEquip{
                 .setRoomRef(room)
                 .setFloorRef(floor)
                 .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone")
-                .addMarker("relay6").addMarker("type").addMarker("sp").addMarker(profile)
+                .addMarker("relay6").addMarker("changeover").addMarker("type").addMarker("sp").addMarker(profile)
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
@@ -588,7 +588,7 @@ public class HeatPumpUnitEquip{
                 .setRoomRef(room)
                 .setFloorRef(floor)
                 .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone")
-                .addMarker("relay5").addMarker("type").addMarker("sp").addMarker(profile)
+                .addMarker("relay5").addMarker("fan").addMarker("type").addMarker("sp").addMarker(profile)
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();

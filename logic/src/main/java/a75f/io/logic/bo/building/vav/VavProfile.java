@@ -127,32 +127,18 @@ public abstract class VavProfile extends ZoneProfile
     }
     
     
-    @JsonIgnore
     @Override
     public void updateZonePoints() {
         Log.d(TAG, " Invalid VAV Unit Type");
     }
     
     protected void setDamperLimits(short node, Damper d) {
-        VAVLogicalMap deviceMap = vavDeviceMap.get(node);
-        switch (state) {
-            case COOLING:
-                d.minPosition = (int)deviceMap.getDamperLimit("cooling", "min");
-                d.maxPosition = (int)deviceMap.getDamperLimit("cooling", "max");;
-                break;
-            case HEATING:
-                d.minPosition = (int)deviceMap.getDamperLimit("heating", "min");;
-                d.maxPosition = (int)deviceMap.getDamperLimit("heating", "max");;
-                break;
-            case DEADBAND:
-                d.minPosition = 40;
-                d.maxPosition = 100;
-                break;
-        }
+        d.minPosition = (int)vavDeviceMap.get(node).getDamperLimit(state == HEATING ? "heating":"cooling", "min");
+        d.maxPosition = (int)vavDeviceMap.get(node).getDamperLimit(state == HEATING ? "heating":"cooling", "max");
         d.iaqCompensatedMinPos = d.minPosition;
     }
     
-    @JsonIgnore
+   
     public VavUnit getVavControls(short address) {
         return vavDeviceMap.get(address) != null ? vavDeviceMap.get(address).getVavUnit() : null;
     }

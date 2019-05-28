@@ -111,7 +111,7 @@ public class VavSystemController extends SystemController
                 for (Equip q : HSUtil.getEquips(z.getId()))
                 {
                     
-                    if (q.getMarkers().contains("vav") == false || isZoneDead(q) || isTemperatureDead(q))
+                    if (q.getMarkers().contains("vav") == false || isZoneDead(q))
                     {
                         continue;
                     }
@@ -328,13 +328,7 @@ public class VavSystemController extends SystemController
     public boolean isZoneDead(Equip q) {
     
         return CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and equipRef == \""+q.getId()+"\"")
-                       .equals("Zone Dead");
-    }
-    
-    public boolean isTemperatureDead(Equip q) {
-        
-        return CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and equipRef == \""+q.getId()+"\"")
-                       .equals("Zone Dead");
+                       .equals("Zone Temp Dead");
     }
     
     public double getEquipDynamicPriority(double zoneLoad, String equipRef) {

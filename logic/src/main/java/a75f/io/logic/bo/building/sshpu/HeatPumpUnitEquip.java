@@ -18,8 +18,6 @@ import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.sscpu.ConventionalUnitConfiguration;
-import a75f.io.logic.bo.building.standalone.Stage;
 import a75f.io.logic.bo.haystack.device.SmartStat;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.TunerConstants;
@@ -182,7 +180,7 @@ public class HeatPumpUnitEquip{
                 .build();
 
         String datID = CCUHsApi.getInstance().addPoint(datPoint);
-
+        CCUHsApi.getInstance().writeHisValById(datID, 0.0);
         Point eatPoint = new Point.Builder()
                 .setDisplayName(equipDis+"-external10kTempSensorTh2")
                 .setEquipRef(equipRef)
@@ -196,6 +194,7 @@ public class HeatPumpUnitEquip{
                 .setTz(tz)
                 .build();
         String eatID = CCUHsApi.getInstance().addPoint(eatPoint);
+        CCUHsApi.getInstance().writeHisValById(eatID, 0.0);
 
         Point compressorStage1 = new Point.Builder()
                 .setDisplayName(equipDis+"-compressorStage1")

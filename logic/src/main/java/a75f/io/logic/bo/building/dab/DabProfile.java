@@ -196,20 +196,8 @@ public class DabProfile extends ZoneProfile
     }
     
     protected void setDamperLimits(Damper d) {
-        switch (state) {
-            case COOLING:
-                d.minPosition = (int)dabEquip.getDamperLimit("cooling", "min");
-                d.maxPosition = (int)dabEquip.getDamperLimit("cooling", "max");
-                break;
-            case HEATING:
-                d.minPosition = (int)dabEquip.getDamperLimit("heating", "min");;
-                d.maxPosition = (int)dabEquip.getDamperLimit("heating", "max");;
-                break;
-            case DEADBAND:
-                d.minPosition = 40;
-                d.maxPosition = 100;
-                break;
-        }
+        d.minPosition = (int)dabEquip.getDamperLimit(state == HEATING ? "heating":"cooling", "min");
+        d.maxPosition = (int)dabEquip.getDamperLimit(state == HEATING ? "heating":"cooling", "max");
         d.iaqCompensatedMinPos = d.minPosition;
     }
 }

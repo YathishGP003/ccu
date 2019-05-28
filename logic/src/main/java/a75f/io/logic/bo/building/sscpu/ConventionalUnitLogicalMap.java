@@ -183,6 +183,7 @@ public class ConventionalUnitLogicalMap {
                 .build();
 
         String datID = CCUHsApi.getInstance().addPoint(datPoint);
+        CCUHsApi.getInstance().writeHisValById(datID, 0.0);
 
         Point eatPoint = new Point.Builder()
                 .setDisplayName(equipDis+"-external10kTempSensorTh2")
@@ -197,7 +198,8 @@ public class ConventionalUnitLogicalMap {
                 .setTz(tz)
                 .build();
         String eatID = CCUHsApi.getInstance().addPoint(eatPoint);
-
+        CCUHsApi.getInstance().writeHisValById(eatID, 0.0);
+        
         Point coolingStage1 = new Point.Builder()
                 .setDisplayName(equipDis+"-coolingStage1")
                 .setEquipRef(equipRef)

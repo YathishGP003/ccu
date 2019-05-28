@@ -10,6 +10,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
@@ -131,6 +132,8 @@ public class DabFullyModulatingRtu extends DabSystemProfile
             systemFanLoopOp = (int) (dabSystem.getCoolingSignal() * analogFanSpeedMultiplier);
         } else if (dabSystem.getSystemState() == HEATING){
             systemFanLoopOp = (int) (dabSystem.getHeatingSignal() * analogFanSpeedMultiplier);
+        } else {
+            systemFanLoopOp = 0;
         }
         
         //TODO:
@@ -165,8 +168,9 @@ public class DabFullyModulatingRtu extends DabSystemProfile
             ControlMote.setRelayState("relay3", signal );
             
         }
-        
-        if (getConfigVal("relay7 and output and enabled") > 0)
+    
+        SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("rtu and mode")];
+        if (getConfigVal("relay7 and output and enabled") > 0 && systemMode != SystemMode.OFF)
         {
             double humidity = dabSystem.getAverageSystemHumidity();
             double targetMinHumidity = TunerUtil.readSystemUserIntentVal("target and min and inside and humidity");
@@ -205,6 +209,10 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                       " targetMaxHumidity: "+targetMaxHumidity+" signal: "+signal*100);
             
             ControlMote.setRelayState("relay7", signal);
+        }else {
+            setCmdSignal("humidifier",0);
+            setCmdSignal("dehumidifier",0);
+            ControlMote.setRelayState("relay7", 0);
         }
     
         setSystemPoint("operating and mode", dabSystem.systemState.ordinal());

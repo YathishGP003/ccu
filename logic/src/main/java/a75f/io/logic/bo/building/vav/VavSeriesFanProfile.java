@@ -23,6 +23,7 @@ import a75f.io.logic.tuners.TunerUtil;
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
+import static a75f.io.logic.bo.building.ZoneState.TEMP_DEAD;
 
 /**
  * Created by samjithsadasivan on 8/23/18.
@@ -81,7 +82,7 @@ public class VavSeriesFanProfile extends VavProfile
     
             if (isZoneDead()) {
                 CcuLog.d(L.TAG_CCU_ZONE,"Zone Temp Dead : "+node+" roomTemp : "+vavDeviceMap.get(node).getCurrentTemp());
-        
+                state = TEMP_DEAD;
                 String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \""+node+"\"");
                 if (!curStatus.equals("Zone Temp Dead"))
                 {

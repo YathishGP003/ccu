@@ -188,6 +188,7 @@ public abstract class VavProfile extends ZoneProfile
         if (vavDeviceMap.get(node) ==  null) {
             return null;
         }
+        
         double roomTemp = vavDeviceMap.get(node).getCurrentTemp();
         TrimResponseRequest satResetRequest = vavDeviceMap.get(node).satResetRequest;
         

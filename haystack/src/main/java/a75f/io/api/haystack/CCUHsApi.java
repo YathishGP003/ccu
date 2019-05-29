@@ -930,7 +930,7 @@ public class CCUHsApi
         hDictBuilder.add("id", HRef.make(localId));
         hDictBuilder.add("ccu");
         hDictBuilder.add("dis", HStr.make(ccuName));
-        hDictBuilder.add("installer", HStr.make(installerEmail));
+        hDictBuilder.add("fmEmail", HStr.make(installerEmail));
         hDictBuilder.add("siteRef", getSiteId());
         hDictBuilder.add("createdDate", HDateTime.make(System.currentTimeMillis()).date);
         hDictBuilder.add("ahuRef", ahuRef);
@@ -938,7 +938,34 @@ public class CCUHsApi
         tagsDb.addHDict(localId, hDictBuilder.toDict());
         return localId;
     }
-    
+
+    public void updateCCU(String ccuName, String installerEmail, String ahuRef)
+    {
+        Log.d("CCU_HS","updateCCUahuRef "+ahuRef);
+        HashMap ccu = read("device and ccu");
+
+        if (ccu.size() == 0) {
+            return;
+        }
+        String id = ccu.get("id").toString();
+
+        HDictBuilder hDictBuilder = new HDictBuilder();
+        hDictBuilder.add("id", HRef.copy(id));
+        hDictBuilder.add("ccu");
+        hDictBuilder.add("dis", HStr.make(ccuName));
+        hDictBuilder.add("fmEmail", HStr.make(installerEmail));
+        hDictBuilder.add("siteRef", getSiteId());
+        hDictBuilder.add("createdDate", HDate.make(ccu.get("createdDate").toString()));
+        hDictBuilder.add("ahuRef", ahuRef);
+        hDictBuilder.add("device");
+        tagsDb.addHDict(id.replace("@",""), hDictBuilder.toDict());
+
+        if (tagsDb.idMap.get(id) != null)
+        {
+            tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));
+        }
+    }
+
     public void updateCCUahuRef(String ahuRef) {
         
         Log.d("CCU_HS","updateCCUahuRef "+ahuRef);
@@ -954,7 +981,7 @@ public class CCUHsApi
         hDictBuilder.add("id", HRef.copy(id));
         hDictBuilder.add("ccu");
         hDictBuilder.add("dis", HStr.make(ccu.get("dis").toString()));
-        hDictBuilder.add("installer", HStr.make(ccu.get("installer").toString()));
+        hDictBuilder.add("fmEmail", HStr.make(ccu.get("fmEmail").toString()));
         hDictBuilder.add("siteRef", getSiteId());
         hDictBuilder.add("createdDate", HDate.make(ccu.get("createdDate").toString()));
         hDictBuilder.add("ahuRef", ahuRef);

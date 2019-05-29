@@ -1,0 +1,337 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+
+    <RelativeLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="parent">
+
+        <RelativeLayout
+            android:id="@+id/rlFields"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="vertical">
+
+            <TextView
+                android:id="@+id/textSuccess"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal|center_vertical"
+                android:textAppearance="@style/text_header"
+                android:text="@string/title_success"/>
+
+            <TextView
+                android:id="@+id/textInstruction"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/textSuccess"
+                android:layout_marginTop="40dp"
+                android:gravity="left|center_vertical"
+                android:textAppearance="@style/text_appearance"
+                android:text="@string/desc_firsttime" />
+
+            <RelativeLayout
+                android:layout_below="@+id/textInstruction"
+                android:layout_marginTop="69dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:id="@+id/lt_row1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                <TextView
+                    android:id="@+id/labelCCUName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="29dp"
+                    android:textAppearance="@style/text_appearance"
+                    android:text="@string/label_ccuname"
+                    android:gravity="left|center_vertical"/>
+
+                <TextView
+                    android:id="@+id/textCCUName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="29dp"
+                    android:layout_marginLeft="5dp"
+                    android:gravity="left|center_vertical"
+                    android:textAppearance="@style/text_values"
+                     />
+                <TextView
+                    android:id="@+id/labelSerialNo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="29dp"
+                    android:layout_marginLeft="32dp"
+                    android:textAppearance="@style/text_appearance"
+                    android:text="@string/label_serialno"
+                    android:gravity="left|center_vertical"/>
+
+                <TextView
+                    android:id="@+id/textSerialNo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="29dp"
+                    android:layout_marginLeft="5dp"
+                    android:gravity="left|center_vertical"
+                    android:textAppearance="@style/text_values"
+                     />
+
+                <TextView
+                    android:id="@+id/labelCCUVer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="29dp"
+                    android:layout_marginLeft="32dp"
+                    android:textAppearance="@style/text_appearance"
+                    android:text="@string/label_ccuversion"
+                    android:gravity="left|center_vertical"/>
+
+                <TextView
+                    android:id="@+id/textCCUVer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="29dp"
+                    android:layout_marginLeft="5dp"
+                    android:gravity="left|center_vertical"
+                    android:textAppearance="@style/text_values"
+                    />
+                </LinearLayout>
+
+
+
+                <LinearLayout
+                        android:id="@+id/lt_row2"
+                        android:layout_below="@id/lt_row1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/labelCMSerial"
+                            android:layout_width="wrap_content"
+                            android:layout_height="29dp"
+                            android:textAppearance="@style/text_appearance"
+                            android:text="@string/label_cmserialno"
+                            android:gravity="left|center_vertical"/>
+
+                        <TextView
+                            android:id="@+id/textCMSerial"
+                            android:layout_width="wrap_content"
+                            android:layout_height="29dp"
+                            android:layout_marginLeft="5dp"
+                            android:gravity="left|center_vertical"
+                            android:textAppearance="@style/text_values"
+                             />
+
+                        <TextView
+                            android:id="@+id/labelFirmware"
+                            android:layout_width="wrap_content"
+                            android:layout_height="29dp"
+                            android:layout_marginLeft="29dp"
+                            android:textAppearance="@style/text_appearance"
+                            android:text="@string/label_firmversion"
+                            android:gravity="left|center_vertical"/>
+
+                        <TextView
+                            android:id="@+id/textFirmware"
+                            android:layout_width="wrap_content"
+                            android:layout_height="29dp"
+                            android:layout_marginLeft="5dp"
+                            android:gravity="left|center_vertical"
+                            android:textAppearance="@style/text_values"
+                             />
+
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/lt_row3"
+                    android:layout_below="@id/lt_row2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/labelBuildLimit"
+                        android:layout_width="wrap_content"
+                        android:layout_height="29dp"
+                        android:textAppearance="@style/text_appearance"
+                        android:text="@string/label_buildinglimits"
+                        android:gravity="left|center_vertical"/>
+
+                    <TextView
+                        android:id="@+id/textBuildingLimit"
+                        android:layout_width="wrap_content"
+                        android:layout_height="29dp"
+                        android:layout_marginLeft="5dp"
+                        android:gravity="left|center_vertical"
+                        android:textAppearance="@style/text_values"
+                        />
+
+                    <TextView
+                        android:id="@+id/labelHeatLimit"
+                        android:layout_width="wrap_content"
+                        android:layout_height="29dp"
+                        android:layout_marginLeft="29dp"
+                        android:textAppearance="@style/text_appearance"
+                        android:text="@string/label_heatinglimits"
+                        android:gravity="left|center_vertical"/>
+
+                    <TextView
+                        android:id="@+id/textHeatingLimits"
+                        android:layout_width="wrap_content"
+                        android:layout_height="29dp"
+                        android:layout_marginLeft="5dp"
+                        android:gravity="left|center_vertical"
+                        android:textAppearance="@style/text_values"
+                        />
+
+                    <TextView
+                        android:id="@+id/labelCoolLimit"
+                        android:layout_width="wrap_content"
+                        android:layout_height="29dp"
+                        android:layout_marginLeft="29dp"
+                        android:textAppearance="@style/text_appearance"
+                        android:text="@string/label_coolinglimits"
+                        android:gravity="left|center_vertical"/>
+
+                    <TextView
+                        android:id="@+id/textCoolingLimits"
+                        android:layout_width="wrap_content"
+                        android:layout_height="29dp"
+                        android:layout_marginLeft="5dp"
+                        android:gravity="left|center_vertical"
+                        android:textAppearance="@style/text_values"
+                        />
+
+                    <TextView
+                        android:id="@+id/labelZoneRange"
+                        android:layout_width="wrap_content"
+                        android:layout_height="29dp"
+                        android:layout_marginLeft="29dp"
+                        android:textAppearance="@style/text_appearance"
+                        android:text="@string/label_zonerange"
+                        android:gravity="left|center_vertical"/>
+
+                    <TextView
+                        android:id="@+id/textZoneRange"
+                        android:layout_width="wrap_content"
+                        android:layout_height="29dp"
+                        android:layout_marginLeft="5dp"
+                        android:gravity="left|center_vertical"
+                        android:textAppearance="@style/text_values"
+                         />
+
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/lt_row4"
+                    android:layout_below="@id/lt_row3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/labelCurrentTemp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="29dp"
+                        android:textAppearance="@style/text_appearance"
+                        android:text="@string/label_currenttemp"
+                        android:gravity="left|center_vertical"/>
+
+                    <TextView
+                        android:id="@+id/textTemperature"
+                        android:layout_width="wrap_content"
+                        android:layout_height="29dp"
+                        android:layout_marginLeft="5dp"
+                        android:gravity="left|center_vertical"
+                        android:textAppearance="@style/text_values"
+                        />
+
+                    <TextView
+                        android:id="@+id/labelCurrentHumidity"
+                        android:layout_width="wrap_content"
+                        android:layout_height="29dp"
+                        android:layout_marginLeft="46dp"
+                        android:textAppearance="@style/text_appearance"
+                        android:text="@string/label_currenthumidity"
+                        android:gravity="left|center_vertical"/>
+
+                    <TextView
+                        android:id="@+id/textHumidity"
+                        android:layout_width="wrap_content"
+                        android:layout_height="26dp"
+                        android:layout_marginLeft="5dp"
+                        android:gravity="left|center_vertical"
+                        android:textAppearance="@style/text_values"
+                        />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/lt_row5"
+                    android:layout_below="@id/lt_row4"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/labelHvac"
+                        android:layout_width="wrap_content"
+                        android:layout_height="29dp"
+                        android:textAppearance="@style/text_appearance"
+                        android:text="@string/label_hvacequip"
+                        android:gravity="left|center_vertical"/>
+
+                    <TextView
+                        android:id="@+id/textHvac"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:gravity="left|center_vertical"
+                        android:textAppearance="@style/text_values"
+                        />
+
+                </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/lt_row6"
+                    android:layout_below="@id/lt_row5"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/labelComfort"
+                        android:layout_width="wrap_content"
+                        android:layout_height="29dp"
+                        android:textAppearance="@style/text_appearance"
+                        android:text="@string/label_comfortselector"
+                        android:gravity="left|center_vertical"/>
+
+                    <TextView
+                        android:id="@+id/textComfort"
+                        android:layout_width="wrap_content"
+                        android:layout_height="29dp"
+                        android:layout_marginLeft="5dp"
+                        android:gravity="left|center_vertical"
+                        android:textAppearance="@style/text_values"
+                        />
+
+                </LinearLayout>
+            </RelativeLayout>
+
+
+    </RelativeLayout>
+    </RelativeLayout>
+</android.support.constraint.ConstraintLayout>

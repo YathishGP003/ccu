@@ -76,6 +76,9 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+<activity android:name=".registartion.FreshRegistration"
+            android:theme="@style/RenatusAppTheme.NoActionBar">
+        </activity>
 
         <activity
             android:name=".RenatusLandingActivity" android:launchMode="singleTask"

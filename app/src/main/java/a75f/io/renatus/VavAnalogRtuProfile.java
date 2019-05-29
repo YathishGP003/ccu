@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.Spinner;
@@ -20,6 +21,7 @@ import android.widget.ToggleButton;
 
 import java.util.ArrayList;
 
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.mesh.MeshUtil;
 import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
 import a75f.io.device.serial.MessageType;
@@ -28,6 +30,8 @@ import a75f.io.logic.bo.building.system.SystemConstants;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.renatus.registartion.FreshRegistration;
+import a75f.io.renatus.util.Prefs;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -37,37 +41,40 @@ import butterknife.ButterKnife;
 
 public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemSelectedListener, CompoundButton.OnCheckedChangeListener
 {
-    @BindView(R.id.ahu) TableLayout     ahu;
-	
-    @BindView(R.id.ahuAnalog1Min) Spinner analog1Min;
-    @BindView(R.id.ahuAnalog1Max) Spinner analog1Max;
-    @BindView(R.id.ahuAnalog2Min) Spinner analog2Min;
-    @BindView(R.id.ahuAnalog2Max) Spinner analog2Max;
-    @BindView(R.id.ahuAnalog3Min) Spinner analog3Min;
-    @BindView(R.id.ahuAnalog3Max) Spinner analog3Max;
-	@BindView(R.id.ahuAnalog4Min) Spinner analog4Min;
-	@BindView(R.id.ahuAnalog4Max) Spinner analog4Max;
-    
-    @BindView(R.id.ahuAnalog1Cb) CheckBox ahuAnalog1Cb;
-    @BindView(R.id.ahuAnalog2Cb) CheckBox ahuAnalog2Cb;
-    @BindView(R.id.ahuAnalog3Cb) CheckBox ahuAnalog3Cb;
-	@BindView(R.id.ahuAnalog4Cb) CheckBox ahuAnalog4Cb;
-	
-	@BindView(R.id.relay3Cb) CheckBox relay3Cb;
-	@BindView(R.id.relay7Cb) CheckBox relay7Cb;
-	
+	//@BindView(R.id.ahu) TableLayout     ahu;
+	@BindView(R.id.analog1Min) Spinner analog1Min;
+	@BindView(R.id.analog1Max) Spinner analog1Max;
+	@BindView(R.id.analog2Min) Spinner analog2Min;
+	@BindView(R.id.analog2Max) Spinner analog2Max;
+	@BindView(R.id.analog3Min) Spinner analog3Min;
+	@BindView(R.id.analog3Max) Spinner analog3Max;
+	@BindView(R.id.analog4Min) Spinner analog4Min;
+	@BindView(R.id.analog4Max) Spinner analog4Max;
+
+	@BindView(R.id.toggleAnalog1) ToggleButton ahuAnalog1Tb;
+	@BindView(R.id.toggleAnalog2) ToggleButton ahuAnalog2Tb;
+	@BindView(R.id.toogleAnalog3) ToggleButton ahuAnalog3Tb;
+	@BindView(R.id.toggleAnalog4) ToggleButton ahuAnalog4Tb;
+
+	@BindView(R.id.toggleRelay3) ToggleButton relay3Tb;
+	@BindView(R.id.toggleRelay7) ToggleButton relay7Tb;
+
 	@BindView(R.id.relay7Spinner) Spinner relay7Spinner;
-	
-    @BindView(R.id.ahuAnalog1Test) Spinner ahuAnalog1Test;
-    @BindView(R.id.ahuAnalog2Test) Spinner ahuAnalog2Test;
-    @BindView(R.id.ahuAnalog3Test) Spinner ahuAnalog3Test;
-	@BindView(R.id.ahuAnalog4Test) Spinner ahuAnalog4Test;
-	
+
+	@BindView(R.id.analog1Spinner) Spinner ahuAnalog1Test;
+	@BindView(R.id.analog2Spinner) Spinner ahuAnalog2Test;
+	@BindView(R.id.analog3Spinner) Spinner ahuAnalog3Test;
+	@BindView(R.id.analog4Spinner) Spinner ahuAnalog4Test;
+
 	@BindView(R.id.relay3Test) ToggleButton relay3Test;
 	@BindView(R.id.relay7Test) ToggleButton relay7Test;
 	
 	VavFullyModulatingRtu systemProfile = null;
-    
+	@BindView(R.id.buttonNext)
+	Button mNext;
+	String PROFILE = "VAV_FULLY_MODULATING";
+	Prefs prefs;
+	boolean isFromReg = false;
     public static VavAnalogRtuProfile newInstance()
     {
         return new VavAnalogRtuProfile();
@@ -78,63 +85,94 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState)
     {
-        View rootView = inflater.inflate(R.layout.fragment_profile_vav_analogrtu, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_profile_vavfullyahu, container, false);
         ButterKnife.bind(this, rootView);
+		if(getArguments() != null) {
+			isFromReg = getArguments().getBoolean("REGISTRATION_WIZARD");
+		}
         return rootView;
     }
     
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
     {
-	    if (L.ccu().systemProfile instanceof VavFullyModulatingRtu) {
-		    systemProfile = (VavFullyModulatingRtu) L.ccu().systemProfile;
-		    ahuAnalog1Cb.setChecked(systemProfile.getConfigEnabled("analog1") > 0);
-		    ahuAnalog2Cb.setChecked(systemProfile.getConfigEnabled("analog2") > 0);
-		    ahuAnalog3Cb.setChecked(systemProfile.getConfigEnabled("analog3") > 0);
-		    ahuAnalog4Cb.setChecked(systemProfile.getConfigEnabled("analog4") > 0);
-		    relay3Cb.setChecked(systemProfile.getConfigEnabled("relay3") > 0);
-		    relay7Cb.setChecked(systemProfile.getConfigEnabled("relay7") > 0);
-		    setupAnalogLimitSelectors();
-	    } else {
-		    
-		    new AsyncTask<String, Void, Void>() {
-			
-			    ProgressDialog progressDlg = new ProgressDialog(getActivity());
-			    @Override
-			    protected void onPreExecute() {
-				    progressDlg.setMessage("Loading System Profile");
-				    progressDlg.show();
-				    super.onPreExecute();
-			    }
-			    
-			    @Override
-			    protected Void doInBackground( final String ... params ) {
-			    	if (systemProfile != null) {
-			    		systemProfile.deleteSystemEquip();
-					    L.ccu().systemProfile = null; //Makes sure that System Algos dont run until new profile is ready.
-				    }
-				    systemProfile = new VavFullyModulatingRtu();
-				    systemProfile.addSystemEquip();
-				    L.ccu().systemProfile = systemProfile;
-				    return null;
-			    }
-			    @Override
-			    protected void onPostExecute( final Void result ) {
-				    setupAnalogLimitSelectors();
-				    progressDlg.dismiss();
-			    }
-		    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
-	    }
-		//setupTempLimitSelectors();
-	    
-	    ahuAnalog1Cb.setOnCheckedChangeListener(this);
-	    ahuAnalog2Cb.setOnCheckedChangeListener(this);
-	    ahuAnalog3Cb.setOnCheckedChangeListener(this);
-	    ahuAnalog4Cb.setOnCheckedChangeListener(this);
-	    relay3Cb.setOnCheckedChangeListener(this);
-	    relay7Cb.setOnCheckedChangeListener(this);
+		prefs = new Prefs(getContext().getApplicationContext());
+
+			if (L.ccu().systemProfile instanceof VavFullyModulatingRtu) {
+				systemProfile = (VavFullyModulatingRtu) L.ccu().systemProfile;
+				ahuAnalog1Tb.setChecked(systemProfile.getConfigEnabled("analog1") > 0);
+				ahuAnalog2Tb.setChecked(systemProfile.getConfigEnabled("analog2") > 0);
+				ahuAnalog3Tb.setChecked(systemProfile.getConfigEnabled("analog3") > 0);
+				ahuAnalog4Tb.setChecked(systemProfile.getConfigEnabled("analog4") > 0);
+				relay3Tb.setChecked(systemProfile.getConfigEnabled("relay3") > 0);
+				relay7Tb.setChecked(systemProfile.getConfigEnabled("relay7") > 0);
+				setupAnalogLimitSelectors();
+			} else {
+
+				new AsyncTask<String, Void, Void>() {
+
+					ProgressDialog progressDlg = new ProgressDialog(getActivity());
+
+					@Override
+					protected void onPreExecute() {
+						progressDlg.setMessage("Loading System Profile");
+						progressDlg.show();
+						super.onPreExecute();
+					}
+
+					@Override
+					protected Void doInBackground(final String... params) {
+						if (systemProfile != null) {
+							systemProfile.deleteSystemEquip();
+							L.ccu().systemProfile = null; //Makes sure that System Algos dont run until new profile is ready.
+						}
+						systemProfile = new VavFullyModulatingRtu();
+						systemProfile.addSystemEquip();
+						L.ccu().systemProfile = systemProfile;
+						return null;
+					}
+
+					@Override
+					protected void onPostExecute(final Void result) {
+						setupAnalogLimitSelectors();
+						progressDlg.dismiss();
+						CCUHsApi.getInstance().saveTagsData();
+						CCUHsApi.getInstance().syncEntityTree();
+					}
+				}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+			}
+			//setupTempLimitSelectors();
+
+			ahuAnalog1Tb.setOnCheckedChangeListener(this);
+			ahuAnalog2Tb.setOnCheckedChangeListener(this);
+			ahuAnalog3Tb.setOnCheckedChangeListener(this);
+			ahuAnalog4Tb.setOnCheckedChangeListener(this);
+			relay3Tb.setOnCheckedChangeListener(this);
+			relay7Tb.setOnCheckedChangeListener(this);
+
+		if(isFromReg){
+			mNext.setVisibility(View.VISIBLE);
+		}
+		else {
+			mNext.setVisibility(View.GONE);
+		}
+
+
+		mNext.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				goTonext();
+			}
+		});
 	}
-	
+
+	private void goTonext() {
+		//Intent i = new Intent(mContext, RegisterGatherCCUDetails.class);
+		//startActivity(i);
+		prefs.setBoolean("PROFILE_SETUP",true);
+		prefs.setString("PROFILE",PROFILE);
+		((FreshRegistration)getActivity()).selectItem(18);
+	}
 	private void setupTempLimitSelectors() {
   
 		ArrayList<Double> coolingSatArray = new ArrayList<>();

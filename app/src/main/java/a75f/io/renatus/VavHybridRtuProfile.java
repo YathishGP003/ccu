@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.Spinner;
@@ -19,6 +20,7 @@ import android.widget.ToggleButton;
 
 import java.util.ArrayList;
 
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.mesh.MeshUtil;
 import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
 import a75f.io.device.serial.MessageType;
@@ -28,6 +30,8 @@ import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedHybridRtu;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.renatus.registartion.FreshRegistration;
+import a75f.io.renatus.util.Prefs;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -37,59 +41,45 @@ import butterknife.ButterKnife;
 
 public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemSelectedListener, CompoundButton.OnCheckedChangeListener
 {
-    
-    @BindView(R.id.relay1Cb)
-    CheckBox relay1Cb;
-    @BindView(R.id.relay2Cb)
-    CheckBox relay2Cb;
-    @BindView(R.id.relay3Cb)
-    CheckBox relay3Cb;
-    @BindView(R.id.relay4Cb)
-    CheckBox relay4Cb;
-    @BindView(R.id.relay5Cb)
-    CheckBox relay5Cb;
-    @BindView(R.id.relay6Cb)
-    CheckBox relay6Cb;
-    @BindView(R.id.relay7Cb)
-    CheckBox relay7Cb;
-    
-    @BindView(R.id.relay1Spinner)
-    Spinner relay1Spinner;
-    @BindView(R.id.relay2Spinner)
-    Spinner relay2Spinner;
-    @BindView(R.id.relay3Spinner)
-    Spinner relay3Spinner;
-    @BindView(R.id.relay4Spinner)
-    Spinner relay4Spinner;
-    @BindView(R.id.relay5Spinner)
-    Spinner relay5Spinner;
-    @BindView(R.id.relay6Spinner)
-    Spinner relay6Spinner;
-    @BindView(R.id.relay7Spinner)
-    Spinner relay7Spinner;
-    
+    @BindView(R.id.toggleRelay1) ToggleButton relay1Tb;
+    @BindView(R.id.toggleRelay2) ToggleButton relay2Tb;
+    @BindView(R.id.toggleRelay3) ToggleButton relay3Tb;
+    @BindView(R.id.toggleRelay4) ToggleButton relay4Tb;
+    @BindView(R.id.toggleRelay5) ToggleButton relay5Tb;
+    @BindView(R.id.toggleRelay6) ToggleButton relay6Tb;
+    @BindView(R.id.toggleRelay7) ToggleButton relay7Tb;
+
+    @BindView(R.id.relay1Spinner) Spinner relay1Spinner;
+    @BindView(R.id.relay2Spinner) Spinner relay2Spinner;
+    @BindView(R.id.relay3Spinner) Spinner relay3Spinner;
+    @BindView(R.id.relay4Spinner) Spinner relay4Spinner;
+    @BindView(R.id.relay5Spinner) Spinner relay5Spinner;
+    @BindView(R.id.relay6Spinner) Spinner relay6Spinner;
+    @BindView(R.id.relay7Spinner) Spinner relay7Spinner;
+
     @BindView(R.id.ahuAnalog1Min) Spinner analog1Min;
     @BindView(R.id.ahuAnalog1Max) Spinner analog1Max;
     @BindView(R.id.ahuAnalog2Min) Spinner analog2Min;
     @BindView(R.id.ahuAnalog2Max) Spinner analog2Max;
     @BindView(R.id.ahuAnalog3Min) Spinner analog3Min;
     @BindView(R.id.ahuAnalog3Max) Spinner analog3Max;
-    
-    @BindView(R.id.ahuAnalog1Cb) CheckBox ahuAnalog1Cb;
-    @BindView(R.id.ahuAnalog2Cb) CheckBox ahuAnalog2Cb;
-    @BindView(R.id.ahuAnalog3Cb) CheckBox ahuAnalog3Cb;
-    @BindView(R.id.ahuAnalog4Cb) CheckBox ahuAnalog4Cb;
-    
-    @BindView(R.id.ahuAnalog1Test) Spinner ahuAnalog1Test;
-    @BindView(R.id.ahuAnalog2Test) Spinner ahuAnalog2Test;
-    @BindView(R.id.ahuAnalog3Test) Spinner ahuAnalog3Test;
-    @BindView(R.id.ahuAnalog4Test) Spinner ahuAnalog4Test;
-    
     @BindView(R.id.ahuAnalog4MinCooling) Spinner analog4MinCooling;
     @BindView(R.id.ahuAnalog4MaxCooling) Spinner analog4MaxCooling;
     @BindView(R.id.ahuAnalog4MinHeating) Spinner analog4MinHeating;
     @BindView(R.id.ahuAnalog4MaxHeating) Spinner analog4MaxHeating;
-    
+
+    @BindView(R.id.toggleAnalog1) ToggleButton ahuAnalog1Tb;
+    @BindView(R.id.toggleAnalog2) ToggleButton ahuAnalog2Tb;
+    @BindView(R.id.toggleAnalog3) ToggleButton ahuAnalog3Tb;
+    @BindView(R.id.toggleAnalog4) ToggleButton ahuAnalog4Tb;
+
+    @BindView(R.id.ahuAnalog1Test) Spinner ahuAnalog1Test;
+    @BindView(R.id.ahuAnalog2Test) Spinner ahuAnalog2Test;
+    @BindView(R.id.ahuAnalog3Test) Spinner ahuAnalog3Test;
+    @BindView(R.id.ahuAnalog4Test) Spinner ahuAnalog4Test;
+
+
+
     @BindView(R.id.relay1Test)ToggleButton relay1Test;
     @BindView(R.id.relay2Test)ToggleButton relay2Test;
     @BindView(R.id.relay3Test)ToggleButton relay3Test;
@@ -97,8 +87,12 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
     @BindView(R.id.relay5Test)ToggleButton relay5Test;
     @BindView(R.id.relay6Test)ToggleButton relay6Test;
     @BindView(R.id.relay7Test)ToggleButton relay7Test;
-    
-    
+
+    @BindView(R.id.buttonNext)
+    Button mNext;
+    String PROFILE = "VAV_HYBRID_RTU";
+    boolean isFromReg = false;
+    Prefs prefs;
     VavAdvancedHybridRtu systemProfile = null;
     public static VavHybridRtuProfile newInstance()
     {
@@ -110,83 +104,108 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
     {
         View rootView = inflater.inflate(R.layout.fragment_profile_hybridrtu, container, false);
         ButterKnife.bind(this, rootView);
+        if(getArguments() != null) {
+            isFromReg = getArguments().getBoolean("REGISTRATION_WIZARD");
+        }
         return rootView;
     }
     
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
     {
-        if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_HYBRID_RTU)
-        {
-            systemProfile = (VavAdvancedHybridRtu) L.ccu().systemProfile;
-            relay1Cb.setChecked(systemProfile.getConfigEnabled("relay1") > 0);
-            relay2Cb.setChecked(systemProfile.getConfigEnabled("relay2") > 0);
-            relay3Cb.setChecked(systemProfile.getConfigEnabled("relay3") > 0);
-            relay4Cb.setChecked(systemProfile.getConfigEnabled("relay4") > 0);
-            relay5Cb.setChecked(systemProfile.getConfigEnabled("relay5") > 0);
-            relay6Cb.setChecked(systemProfile.getConfigEnabled("relay6") > 0);
-            relay7Cb.setChecked(systemProfile.getConfigEnabled("relay7") > 0);
-    
-            ahuAnalog1Cb.setChecked(systemProfile.getConfigEnabled("analog1") > 0);
-            ahuAnalog2Cb.setChecked(systemProfile.getConfigEnabled("analog2") > 0);
-            ahuAnalog3Cb.setChecked(systemProfile.getConfigEnabled("analog3") > 0);
-            ahuAnalog4Cb.setChecked(systemProfile.getConfigEnabled("analog4") > 0);
-            
-            setUpCheckBoxes();
-            setUpSpinners();
-        }
-        else
-        {
-            new AsyncTask<String, Void, Void>()
-            {
-                
-                ProgressDialog progressDlg = new ProgressDialog(getActivity());
-                @Override
-                protected void onPreExecute()
-                {
-                    progressDlg.setMessage("Loading System Profile");
-                    progressDlg.show();
-                    super.onPreExecute();
-                }
-                
-                @Override
-                protected Void doInBackground(final String... params)
-                {
-                    if (systemProfile != null)
-                    {
-                        systemProfile.deleteSystemEquip();
-                        L.ccu().systemProfile = null;
+        prefs = new Prefs(getContext().getApplicationContext());
+        if (getUserVisibleHint()) {
+            if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_HYBRID_RTU) {
+                systemProfile = (VavAdvancedHybridRtu) L.ccu().systemProfile;
+                relay1Tb.setChecked(systemProfile.getConfigEnabled("relay1") > 0);
+                relay2Tb.setChecked(systemProfile.getConfigEnabled("relay2") > 0);
+                relay3Tb.setChecked(systemProfile.getConfigEnabled("relay3") > 0);
+                relay4Tb.setChecked(systemProfile.getConfigEnabled("relay4") > 0);
+                relay5Tb.setChecked(systemProfile.getConfigEnabled("relay5") > 0);
+                relay6Tb.setChecked(systemProfile.getConfigEnabled("relay6") > 0);
+                relay7Tb.setChecked(systemProfile.getConfigEnabled("relay7") > 0);
+
+                ahuAnalog1Tb.setChecked(systemProfile.getConfigEnabled("analog1") > 0);
+                ahuAnalog2Tb.setChecked(systemProfile.getConfigEnabled("analog2") > 0);
+                ahuAnalog3Tb.setChecked(systemProfile.getConfigEnabled("analog3") > 0);
+                ahuAnalog4Tb.setChecked(systemProfile.getConfigEnabled("analog4") > 0);
+
+                setUpCheckBoxes();
+                setUpSpinners();
+            } else {
+                new AsyncTask<String, Void, Void>() {
+
+                    ProgressDialog progressDlg = new ProgressDialog(getActivity());
+
+                    @Override
+                    protected void onPreExecute() {
+                        progressDlg.setMessage("Loading System Profile");
+                        progressDlg.show();
+                        super.onPreExecute();
                     }
-                    systemProfile = new VavAdvancedHybridRtu();
-                    systemProfile.addSystemEquip();
-                    L.ccu().systemProfile = systemProfile;
-                    return null;
-                }
-                @Override
-                protected void onPostExecute(final Void result)
-                {
-                    setUpCheckBoxes();
-                    setUpSpinners();
-                    progressDlg.dismiss();
-                }
-            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+
+                    @Override
+                    protected Void doInBackground(final String... params) {
+                        if (systemProfile != null) {
+                            systemProfile.deleteSystemEquip();
+                            L.ccu().systemProfile = null;
+                        }
+                        systemProfile = new VavAdvancedHybridRtu();
+                        systemProfile.addSystemEquip();
+                        L.ccu().systemProfile = systemProfile;
+                        return null;
+                    }
+
+                    @Override
+                    protected void onPostExecute(final Void result) {
+                        setUpCheckBoxes();
+                        setUpSpinners();
+                        progressDlg.dismiss();
+                        CCUHsApi.getInstance().saveTagsData();
+                        CCUHsApi.getInstance().syncEntityTree();
+                    }
+                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+            }
         }
+
+        if(isFromReg){
+            mNext.setVisibility(View.VISIBLE);
+        }
+        else {
+            mNext.setVisibility(View.GONE);
+        }
+
+
+        mNext.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                // TODO Auto-generated method stub
+                goTonext();
+            }
+        });
+
     }
-    
+
+    private void goTonext() {
+        //Intent i = new Intent(mContext, RegisterGatherCCUDetails.class);
+        //startActivity(i);
+        prefs.setBoolean("PROFILE_SETUP",true);
+        prefs.setString("PROFILE",PROFILE);
+        ((FreshRegistration)getActivity()).selectItem(18);
+    }
     private void setUpCheckBoxes()
     {
-        relay1Cb.setOnCheckedChangeListener(this);
-        relay2Cb.setOnCheckedChangeListener(this);
-        relay3Cb.setOnCheckedChangeListener(this);
-        relay4Cb.setOnCheckedChangeListener(this);
-        relay5Cb.setOnCheckedChangeListener(this);
-        relay6Cb.setOnCheckedChangeListener(this);
-        relay7Cb.setOnCheckedChangeListener(this);
-    
-        ahuAnalog1Cb.setOnCheckedChangeListener(this);
-        ahuAnalog2Cb.setOnCheckedChangeListener(this);
-        ahuAnalog3Cb.setOnCheckedChangeListener(this);
-        ahuAnalog4Cb.setOnCheckedChangeListener(this);
+        relay1Tb.setOnCheckedChangeListener(this);
+        relay2Tb.setOnCheckedChangeListener(this);
+        relay3Tb.setOnCheckedChangeListener(this);
+        relay4Tb.setOnCheckedChangeListener(this);
+        relay5Tb.setOnCheckedChangeListener(this);
+        relay6Tb.setOnCheckedChangeListener(this);
+        relay7Tb.setOnCheckedChangeListener(this);
+
+        ahuAnalog1Tb.setOnCheckedChangeListener(this);
+        ahuAnalog2Tb.setOnCheckedChangeListener(this);
+        ahuAnalog3Tb.setOnCheckedChangeListener(this);
+        ahuAnalog4Tb.setOnCheckedChangeListener(this);
     }
     
     private void setUpSpinners()
@@ -198,13 +217,13 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
         relay5Spinner.setSelection((int) systemProfile.getConfigAssociation("relay5"), false);
         relay6Spinner.setSelection((int) systemProfile.getConfigAssociation("relay6"), false);
         relay7Spinner.setSelection((int) systemProfile.getConfigAssociation("relay7"), false);
-        relay1Spinner.setEnabled(relay1Cb.isChecked());
-        relay2Spinner.setEnabled(relay2Cb.isChecked());
-        relay3Spinner.setEnabled(relay3Cb.isChecked());
-        relay4Spinner.setEnabled(relay4Cb.isChecked());
-        relay5Spinner.setEnabled(relay5Cb.isChecked());
-        relay6Spinner.setEnabled(relay6Cb.isChecked());
-        relay7Spinner.setEnabled(relay7Cb.isChecked());
+        relay1Spinner.setEnabled(relay1Tb.isChecked());
+        relay2Spinner.setEnabled(relay2Tb.isChecked());
+        relay3Spinner.setEnabled(relay3Tb.isChecked());
+        relay4Spinner.setEnabled(relay4Tb.isChecked());
+        relay5Spinner.setEnabled(relay5Tb.isChecked());
+        relay6Spinner.setEnabled(relay6Tb.isChecked());
+        relay7Spinner.setEnabled(relay7Tb.isChecked());
         relay1Spinner.setOnItemSelectedListener(this);
         relay2Spinner.setOnItemSelectedListener(this);
         relay3Spinner.setOnItemSelectedListener(this);
@@ -302,44 +321,44 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
     {
         switch (buttonView.getId())
         {
-            case R.id.relay1Cb:
+            case R.id.toggleRelay1:
                 relay1Spinner.setEnabled(isChecked);
                 setConfigEnabledBackground("relay1", isChecked ? 1 : 0);
                 break;
-            case R.id.relay2Cb:
+            case R.id.toggleRelay2:
                 relay2Spinner.setEnabled(isChecked);
                 setConfigEnabledBackground("relay2", isChecked ? 1 : 0);
                 break;
-            case R.id.relay3Cb:
+            case R.id.toggleRelay3:
                 relay3Spinner.setEnabled(isChecked);
                 setConfigEnabledBackground("relay3", isChecked ? 1 : 0);
                 break;
-            case R.id.relay4Cb:
+            case R.id.toggleRelay4:
                 relay4Spinner.setEnabled(isChecked);
                 setConfigEnabledBackground("relay4", isChecked ? 1 : 0);
                 break;
-            case R.id.relay5Cb:
+            case R.id.toggleRelay5:
                 relay5Spinner.setEnabled(isChecked);
                 setConfigEnabledBackground("relay5", isChecked ? 1 : 0);
                 break;
-            case R.id.relay6Cb:
+            case R.id.toggleRelay6:
                 relay6Spinner.setEnabled(isChecked);
                 setConfigEnabledBackground("relay6", isChecked ? 1 : 0);
                 break;
-            case R.id.relay7Cb:
+            case R.id.toggleRelay7:
                 relay7Spinner.setEnabled(isChecked);
                 setConfigEnabledBackground("relay7", isChecked ? 1 : 0);
                 break;
-            case R.id.ahuAnalog1Cb:
+            case R.id.toggleAnalog1:
                 setConfigEnabledBackground("analog1", isChecked ? 1 : 0);
                 break;
-            case R.id.ahuAnalog2Cb:
+            case R.id.toggleAnalog2:
                 setConfigEnabledBackground("analog2", isChecked ? 1 : 0);
                 break;
-            case R.id.ahuAnalog3Cb:
+            case R.id.toggleAnalog3:
                 setConfigEnabledBackground("analog3", isChecked ? 1 : 0);
                 break;
-            case R.id.ahuAnalog4Cb:
+            case R.id.toggleAnalog4:
                 setConfigEnabledBackground("analog4", isChecked ? 1 : 0);
                 break;
             case R.id.relay1Test:
@@ -373,43 +392,43 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
         switch (arg0.getId())
         {
             case R.id.relay1Spinner:
-                if (relay1Cb.isChecked())
+                if (relay1Tb.isChecked())
                 {
                     setConfigAssociationBackground("relay1", relay1Spinner.getSelectedItemPosition());
                 }
                 break;
             case R.id.relay2Spinner:
-                if (relay2Cb.isChecked())
+                if (relay2Tb.isChecked())
                 {
                     setConfigAssociationBackground("relay2", relay2Spinner.getSelectedItemPosition());
                 }
                 break;
             case R.id.relay3Spinner:
-                if (relay3Cb.isChecked())
+                if (relay3Tb.isChecked())
                 {
                     setConfigAssociationBackground("relay3", relay3Spinner.getSelectedItemPosition());
                 }
                 break;
             case R.id.relay4Spinner:
-                if (relay4Cb.isChecked())
+                if (relay4Tb.isChecked())
                 {
                     setConfigAssociationBackground("relay4", relay4Spinner.getSelectedItemPosition());
                 }
                 break;
             case R.id.relay5Spinner:
-                if (relay5Cb.isChecked())
+                if (relay5Tb.isChecked())
                 {
                     setConfigAssociationBackground("relay5", relay5Spinner.getSelectedItemPosition());
                 }
                 break;
             case R.id.relay6Spinner:
-                if (relay6Cb.isChecked())
+                if (relay6Tb.isChecked())
                 {
                     setConfigAssociationBackground("relay6", relay6Spinner.getSelectedItemPosition());
                 }
                 break;
             case R.id.relay7Spinner:
-                if (relay7Cb.isChecked())
+                if (relay7Tb.isChecked())
                 {
                     setConfigAssociationBackground("relay7", relay7Spinner.getSelectedItemPosition());
                 }

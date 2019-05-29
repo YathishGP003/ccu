@@ -324,7 +324,9 @@ public class CCUTagsDb extends HServer {
                 .add("site", HMarker.VAL)
                 .add("geoCity", s.getGeoCity())
                 .add("geoState", s.getGeoState())
-                .add("geoAddr", "" + s.getGeoCity() + "," + s.getGeoState())
+                .add("geoCountry", s.getGeoCountry())
+                .add("geoPostalCode", s.getGeoPostalCode())
+                .add("geoAddr", "" + s.getGeoAddress())
                 .add("tz", s.getTz())
                 .add("area", HNum.make(s.getArea(), "ft\u00B2"));
 
@@ -344,7 +346,9 @@ public class CCUTagsDb extends HServer {
                 .add("site", HMarker.VAL)
                 .add("geoCity", s.getGeoCity())
                 .add("geoState", s.getGeoState())
-                .add("geoAddr", "" + s.getGeoCity() + "," + s.getGeoState())
+                .add("geoCountry", s.getGeoCountry())
+                .add("geoPostalCode", s.getGeoPostalCode())
+                .add("geoAddr", "" + s.getGeoAddress())
                 .add("tz", s.getTz())
                 .add("area", HNum.make(s.getArea(), "ft\u00B2"));
 

@@ -62,15 +62,17 @@
         <item>  0-50A Current Transformer</item>
     </string-array>
     <string-array name="system_profile_select">
-        <item>  Default </item>
-        <item>  VAV Fully Modulating RTU </item>
+        <item>  Default System Profile</item>
         <item>  VAV Staged RTU </item>
+        <item>  VAV Fully Modulating RTU </item>
         <item>  VAV Staged RTU with VFD Fan</item>
         <item>  VAV Advanced Hybrid RTU </item>
         <!--<item>  VAV IE RTU </item>
-        <item>  VAV Bacnet RTU </item>
-        <item>  DAB Staged RTU </item>-->
-        <item>  DAB Fully Modulating RTU </item>
+        <item>  VAV Bacnet RTU </item>-->
+        <item>  DAB Staged RTU </item>
+        <item>  DAB Fully Modulating AHU</item>
+        <item>  DAB Staged RTU with VFD Fan</item>
+        <item>  DAB Advanced Hybrid AHU</item>
     </string-array>
 
     <string-array name="hvac_stage_selector">
@@ -174,6 +176,159 @@
     <string name="title_activity_system_scheduler">System Scheduler</string>
 
     <string name="icon_plus">&#xf067;</string>
+
+
+    <!--Registration Strings-->
+    <string name="title_ccu">CCU</string>
+    <string name="ccufullform">Central Control Unit</string>
+    <string name="ccuversion">Ver 2.0</string>
+    <string name="wifipassword">Enter Wifi Password</string>
+
+    <!--Fragment Titles-->
+    <string name="installtype">Select Type Of Install</string>
+    <string name="connectwifi">Connect to Wifi</string>
+
+    <string name="installcreatenew">Create New Site</string>
+    <string name="desccreatenew">Use this option to create a new sit. This will be the First CCU</string>
+
+    <string name="installaddccu">Add CCU to Existing Site</string>
+    <string name="descaddccu">Use this option to add to existing building. You will need to have Site Admin Credentials</string>
+
+    <string name="installpreconfig">Pre-Configured CCU</string>
+    <string name="descpreconfigccu">Use this option if you have a 6 digit pre-configuration code provided by the 75F support team</string>
+
+    <string name="installreplaceccu">Replace Existing CCU</string>
+    <string name="descreplaceccu">Use this option if the CCU is damaged and needs to be replaced</string>
+
+    <string name="installwithoutcloud">Setup Without Cloud</string>
+    <string name="descwithoutcloud">Operate as an Independent CCU \nNOTE : Remote Access and Apps will not be available until the CCU is registered \nYou may create a new site or connect to an existing site at a later time</string>
+
+
+    <!--Input Fields Labels and Hints -->
+    <string name="mandatory">\u002A</string>
+    <string name="notmandatory"> </string>
+    <string name="input_sitename">Site Name</string>
+    <string name="hint_sitename">A user friendly name. eg Renatus Tower</string>
+    <string name="input_timezone">Time Zone</string>
+    <string name="input_streetadd">Street Address</string>
+    <string name="input_streetadd2">Street Address 2</string>
+    <string name="input_city">City</string>
+    <string name="input_state">State</string>
+    <string name="input_country">Country</string>
+    <string name="input_zip">Zip</string>
+    <string name="input_ccuname">CCU Name</string>
+    <string name="input_facilityemail">Facility Manager Email ID</string>
+    <string name="button_next">Next </string>
+
+    <!--Installer Option-->
+    <string name="title_installeroption">Installer Options</string>
+    <string name="pairingadd">Pairing Start Address </string>
+    <string name="pairingadddesc">If Using Multiple CCUS in the same building, \nensure each CCU is assigned a different starting address.</string>
+    <string name="outsideairtemp">Use Outside Air Temperature Lockout</string>
+    <string name="outsideairtempdesc">Disable Heating and Cooling based on Outside Air Temperatures</string>
+    <string name="title_building">Building</string>
+    <string name="templimit">Temperature Limits</string>
+    <string name="templimitdesc">Building limits specify the max/min temperatures before alerts will be \ngenerated and emergency heating/cooling will occur</string>
+    <string name="usecelsius">Use Celsius</string>
+    <string name="usemiltime">Use Military Time</string>
+    <string name="usesingletemp">Use Single Desired Temperature</string>
+    <string name="usetempforall">Use Same Occupied Temperature for all Days</string>
+
+    <!--Security-->
+    <string name="title_security">SECURITY</string>
+    <string name="passforzone">Require Password for Zone Settings Change</string>
+    <string name="passforsystem">Require Password for System Settings Change</string>
+    <string name="passforbuilding">Require Password for Building Change</string>
+    <string name="passforsetup">Require Password for Setup Change</string>
+    <string name="taptoedit">Tap here to Set Password</string>
+    <string name="nopassset">No Password Set. Tap to Set Password</string>
+    <string name="currentpass">Current Password ( Leave blank if not set)</string>
+    <string name="newpassword">New Password</string>
+    <string name="repeatnewpass">Repeat New Password</string>
+    <string name="setnewpass">Set New</string>
+    <string name="clearpass">Clear Existing</string>
+
+    <!--Add to Exisiting-->
+    <string name="hint_siteid">Enter Site ID</string>
+    <string name="input_siteid">Enter Site ID</string>
+    <string name="title_viewlist">VIEW LIST OF ASSIGNED SITES</string>
+    <string name="hint_password">Password</string>
+
+    <!--Preconfigured CCU-->
+    <string name="title_preconfig">PRECONFIGURED CCU</string>
+    <string name="hint_configcode">Enter 6 Digit Pre-configuration Code</string>
+    <string name="input_configcode">Pre-configuration Code</string>
+    <string name="hint_confirmcode">Confirm Code</string>
+
+    <!--System Profile-->
+    <string name="title_systemprofile">SELECT SYSTEM PROFILE</string>
+    <string name="string_gateway">Default System acts as a Gateway \nwithout connecting to physical equipment</string>
+    <string name="gateway_ex">Example use cases are when we only use Zone/Terminal profiles that \n
+        operate in standalone mode without any central plan equipment \n
+        e.g. zones configured to be Hot water Mixing Pacakge, \n
+        Generic PI Controller,Standalone Conventional Package Unit etc.</string>
+
+
+
+    <!--VAV Staged RTU Profile-->
+    <string name="title_mapping">MAPPING</string>
+    <string name="label_relay1">Relay-1</string>
+    <string name="label_relay2">Relay-2</string>
+    <string name="label_relay3">Relay-3</string>
+    <string name="label_relay4">Relay-4</string>
+    <string name="label_relay5">Relay-5</string>
+    <string name="label_relay6">Relay-6</string>
+    <string name="label_relay7">Relay-7</string>
+
+
+    <!--VAV Fully Modulating AHU Profile-->
+    <string name="label_analog1">Analog-out1</string>
+    <string name="label_analog2">Analog-out2</string>
+    <string name="label_analog3">Analog-out3</string>
+    <string name="label_analog4">Analog-out4</string>
+    <string name="label_cooling">Cooling</string>
+    <string name="label_fanspeed">Fan Speed</string>
+    <string name="label_heating">Heating</string>
+    <string name="label_outsideair">Outside Air</string>
+    <string name="label_fanenable">Fan Enable</string>
+    <string name="label_mincooling">Analog-out1 at \nMin Cooling</string>
+    <string name="label_maxcooling">Analog-out1 at \nMax Cooling</string>
+    <string name="label_minpressure">Analog-out2 at \nMin Static Pressure</string>
+    <string name="label_maxpressure">Analog-out2 at \nMax Static Pressure</string>
+    <string name="label_minheating">Analog-out3 at \nMin Heating</string>
+    <string name="label_maxheating">Analog-out3 at \nMax Heating</string>
+    <string name="label_minfa">Analog-out4 at \nMin Fresh Air</string>
+    <string name="label_maxfa">Analog-out4 at \nMax Fresh Air</string>
+
+
+    <!--VAV Staged RTU with VFD Fan Profile-->
+    <string name="label_economizer">Analog-out2 \nDuring Economizer</string>
+    <string name="label_recirculate">Analog-out2 \nDuring Recirculate</string>
+    <string name="label_coolstage1">Analog-out2 \nDuring Cool Stage 1</string>
+    <string name="label_coolstage2">Analog-out2 \nDuring Cool Stage 2</string>
+    <string name="label_coolstage3">Analog-out2 \nDuring Cool Stage 3</string>
+    <string name="label_coolstage4">Analog-out2 \nDuring Cool Stage 4</string>
+    <string name="label_coolstage5">Analog-out2 \nDuring Cool Stage 5</string>
+    <string name="label_heatstage1">Analog-out2 \nDuring Heat Stage 1</string>
+    <string name="label_heatstage2">Analog-out2 \nDuring Heat Stage 2</string>
+    <string name="label_heatstage3">Analog-out2 \nDuring Heat Stage 3</string>
+    <string name="label_heatstage4">Analog-out2 \nDuring Heat Stage 4</string>
+    <string name="label_heatstage5">Analog-out2 \nDuring Heat Stage 5</string>
+
+
+    <!--VAV Advanced Hybrid AHU Profile-->
+    <string name="label_composite">Composite</string>
+    <string name="label_a1mincool">Analog-out1 \nAt Min Cooling</string>
+    <string name="label_a1maxcool">Analog-out1 \nAt Max Cooling</string>
+    <string name="label_a2minpres">Analog-out2 \nAt Min Static Pressure</string>
+    <string name="label_a2maxpres">Analog-out2 \nAt Max Static Pressure</string>
+    <string name="label_a3minheat">Analog-out3 \nAt Min Heating</string>
+    <string name="label_a3maxheat">Analog-out3 \nAt Max Heating</string>
+    <string name="label_a4mincool">Analog-out4 \nAt Min Cooling</string>
+    <string name="label_a4maxcool">Analog-out4 \nAt Max Cooling</string>
+    <string name="label_a4minheat">Analog-out4 \nAt Min Heating</string>
+    <string name="label_a4maxheat">Analog-out4 \nAt Max Heating</string>
+
     <!--Heat Pump Input-->
     <string name="title_enable">ENABLE</string>
     <string name="title_testsignal">TEST SIGNAL</string>
@@ -188,8 +343,27 @@
     <string name="label_enableoccup">Enable Occupancy Sensing</string>
     <string name="label_extsensor">Use External 10k Temp Sensor</string>
     <string name="button_set">SET</string>
-    <string name="label_coolstage1">Cooling Stage 1</string>
-    <string name="label_coolstage2">Cooling Stage 2</string>
-    <string name="label_heatstage1">Heating Stage 1</string>
-    <string name="label_heatstage2">Heating Stage 2</string>
+    <string name="label_hpcoolstage1">Cooling Stage 1</string>
+    <string name="label_hpcoolstage2">Cooling Stage 2</string>
+    <string name="label_hpheatstage1">Heating Stage 1</string>
+    <string name="label_hpheatstage2">Heating Stage 2</string>
+
+    <!--Congrats Screen-->
+    <string name="title_congrats">CONGRATULATIONS!</string>
+    <string name="title_success">You have successfully Installed a 75F System!</string>
+    <string name="desc_firsttime">If this is your first installation, the facility manager will receive an email with the Login Password for Facilisight.\nOnce logged in please configure the Heatmap and Schedule</string>
+    <string name="label_ccuname">CCU Name : </string>
+    <string name="label_serialno">Serial No. : </string>
+    <string name="label_ccuversion">CCU Version : </string>
+    <string name="label_cmserialno">CM Serial Number : </string>
+    <string name="label_firmversion">CM Firmware Version : </string>
+    <string name="label_buildinglimits">Building Limits : </string>
+    <string name="label_heatinglimits">Heating User Limits : </string>
+    <string name="label_coolinglimits">Cooling User Limits : </string>
+    <string name="label_zonerange">Zone Range : </string>
+    <string name="label_currenttemp">Current Temperature : </string>
+    <string name="label_currenthumidity">Current Humidity : </string>
+    <string name="label_hvacequip">Current Humidity : </string>
+    <string name="label_comfortselector">Comfort Selector : </string>
+    <string name="button_finish">Finish</string>
 </resources>

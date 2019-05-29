@@ -1,11 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical" >
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
     <ScrollView
         android:layout_width="match_parent"
         android:overScrollMode="never"
         android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+
+            <TextView
+                android:id="@+id/textDefaultSystem"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="120dp"
+                android:textAppearance="@style/text_appearance"
+                android:gravity="center_vertical|center_horizontal"
+                android:text="@string/string_gateway"/>
+
+
+            <TextView
+                android:id="@+id/textExample"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/textDefaultSystem"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="32dp"
+                android:textAppearance="@style/text_appearance"
+                android:gravity="center_vertical|center_horizontal"
+                android:text="@string/gateway_ex"/>
+
+            <Button
+                android:id="@+id/buttonNext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentBottom="true"
+                android:layout_below="@+id/textExample"
+                android:layout_marginTop="176dp"
+                android:layout_marginRight="10dp"
+                android:background="@null"
+                android:drawableRight="@drawable/icon_arrowright"
+                android:drawablePadding="5dp"
+                android:fontFamily="@font/lato_bold"
+                android:text="@string/button_next"
+                android:textColor="@color/orange_75f"
+                android:textSize="24dp" />
+        </RelativeLayout>
+
+
     </ScrollView>
-</LinearLayout>
+</RelativeLayout>

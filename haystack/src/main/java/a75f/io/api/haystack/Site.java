@@ -14,8 +14,9 @@ public class Site extends Entity
     private ArrayList<String> markers;
     private String geoCity;
     private String geoState;
-    private String geoAddress;
-    private String geoZip;
+    private String geoAddr;
+    private String geoCountry;
+    private String geoPostalCode;
     private String tz;
     private double area;
     private String id;
@@ -41,11 +42,11 @@ public class Site extends Entity
     }
     public String getGeoAddress()
     {
-        return geoAddress;
+        return geoAddr;
     }
-    public String getGeoZip()
+    public String getGeoPostalCode()
     {
-        return geoZip;
+        return geoPostalCode;
     }
     public String getTz()
     {
@@ -55,6 +56,7 @@ public class Site extends Entity
     {
         return area;
     }
+    public String getGeoCountry() {return geoCountry;}
     public String toString() {
         return displayName;
     }
@@ -68,16 +70,16 @@ public class Site extends Entity
         private ArrayList<String> markers = new ArrayList<>();
         private String geoCity;
         private String geoState;
-        private String geoAddress;
-        private String geoZipCode;
+        private String geoAddr;
+        private String geoPostalCode;
         private String tz;
         private String id;
-
+        private String geoCountry;
         private double area;
 
 
         public Builder setGeoZip(String siteZip) {
-            this.geoZipCode = siteZip;
+            this.geoPostalCode = siteZip;
             return this;
         }
 
@@ -106,9 +108,9 @@ public class Site extends Entity
             this.geoState = geoState;
             return this;
         }
-        public Builder setGeoAddress(String geoAddress)
+        public Builder setGeoAddress(String geoAddr)
         {
-            this.geoAddress = geoAddress;
+            this.geoAddr = geoAddr;
             return this;
         }
         public Builder setTz(String tz)
@@ -121,19 +123,23 @@ public class Site extends Entity
             this.area = area;
             return this;
         }
-        
+        public Builder setGeoCountry(String geoCountry) {
+            this.geoCountry = geoCountry;
+            return this;
+        }
         public Site build()
         {
             Site s = new Site();
             s.displayName = this.displayName;
             s.markers = this.markers;
-            s.geoAddress = this.geoAddress;
+            s.geoAddr = this.geoAddr;
             s.geoCity = this.geoCity;
             s.geoState = this.geoState;
             s.area = this.area;
             s.tz = this.tz;
-            s.geoZip = this.geoZipCode;
+            s.geoPostalCode = this.geoPostalCode;
             s.id = this.id;
+            s.geoCountry = this.geoCountry;
             return s;
         }
 
@@ -151,6 +157,10 @@ public class Site extends Entity
                 {
                     this.displayName = pair.getValue().toString();
                 }
+                else if(pair.getKey().equals("geoAddr"))
+                {
+                    this.geoAddr = pair.getValue().toString();
+                }
                 else if(pair.getKey().equals("geoCity"))
                 {
                     this.geoCity = pair.getValue().toString();
@@ -159,9 +169,13 @@ public class Site extends Entity
                 {
                     this.geoState = pair.getValue().toString();
                 }
-                else if(pair.getKey().equals("geoZipCode"))
+                else if(pair.getKey().equals("geoCountry"))
                 {
-                    this.geoZipCode = pair.getValue().toString();
+                    this.geoCountry = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("geoPostalCode"))
+                {
+                    this.geoPostalCode = pair.getValue().toString();
                 }
                 else if(pair.getKey().equals("tz"))
                 {

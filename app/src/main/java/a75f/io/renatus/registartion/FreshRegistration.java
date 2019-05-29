@@ -1,0 +1,1106 @@
+package a75f.io.renatus.registartion;
+
+import android.app.FragmentTransaction;
+import android.content.Context;
+import android.content.Intent;
+import android.net.wifi.WifiManager;
+import android.os.Bundle;
+import android.support.constraint.ConstraintLayout;
+
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.util.TypedValue;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.ToggleButton;
+
+import java.util.ArrayList;
+
+import a75f.io.renatus.DABFullyAHUProfile;
+import a75f.io.renatus.DABHybridAhuProfile;
+import a75f.io.renatus.DABStagedProfile;
+import a75f.io.renatus.DABStagedRtuWithVfdProfile;
+import a75f.io.renatus.DefaultSystemProfile;
+import a75f.io.renatus.FloorPlanFragment;
+import a75f.io.renatus.R;
+import a75f.io.renatus.RenatusLandingActivity;
+import a75f.io.renatus.SystemFragment;
+import a75f.io.renatus.VavAnalogRtuProfile;
+import a75f.io.renatus.VavHybridRtuProfile;
+import a75f.io.renatus.VavStagedRtuProfile;
+import a75f.io.renatus.VavStagedRtuWithVfdProfile;
+import a75f.io.renatus.util.Prefs;
+
+public class FreshRegistration extends AppCompatActivity implements VerticalTabAdapter.OnItemClickListener, SwitchFragment {
+    //CustomViewPager pager;
+    //ViewPager pager;
+    RegistrationAdapter pageAdapter;
+    VerticalTabAdapter verticalTabAdapter;
+    ListView listView_icons;
+    ImageView imageView_logo;
+
+    //Header Components
+    RelativeLayout  rl_Header;
+    TextView        textView_title;
+    ImageView       imageView_Goback;
+    Spinner         spinnerSystemProile;
+    ImageView       imageRefresh;
+    ToggleButton    toggleWifi;
+    Button          buttonNext;
+    Prefs           prefs;
+    //Wifi On-Off
+    WifiManager mainWifiObj;
+    int NO_OF_SCREENS = 21;
+    int[] menu_icons = new int[]{
+            R.drawable.ic_goarrow_svg,
+            R.drawable.ic_wifi_svg,
+            R.drawable.ic_settings_svg,
+            R.drawable.ic_options_svg,
+            R.drawable.ic_security_svg,
+            R.drawable.ic_ticket_alt_solid,
+    };
+
+    FrameLayout container;
+
+    //Installer Wizard Fragments
+    InstallTypeFragment installTypeFragment;
+    WifiFragment wifiFragment;
+    CreateNewSite createNewSite;
+    InstallerOptions installerOptions;
+    Security securityFragment;
+    AddtoExisting addtoExisting;
+    PreConfigCCU preConfigCCU;
+    ReplaceCCU replaceCCU;
+    DefaultSystemProfile defaultSystemProfile;
+    VavStagedRtuProfile vavStagedRTU;
+    VavAnalogRtuProfile vavAnalogRTU;
+    VavStagedRtuWithVfdProfile vavStagedRtuWithVfdProfile;
+    VavHybridRtuProfile vavAdvancedHybridRtu;
+    DABStagedProfile dabStagedProfile;
+    DABFullyAHUProfile dabFullyAHUProfile;
+    DABStagedRtuWithVfdProfile dabStagedRtuWithVfdProfile;
+    DABHybridAhuProfile dabHybridAhuProfile;
+    FloorPlanFragment floorPlanFragment;
+    SystemFragment systemFragment;
+    CongratsFragment congratsFragment;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_freshregistration);
+        //pager = findViewById(R.id.pager);
+        container = findViewById(R.id.container);
+        listView_icons = findViewById(R.id.listView_icons);
+        imageView_logo = findViewById(R.id.imageLogo);
+        buttonNext = findViewById(R.id.buttonNext);
+
+        prefs = new Prefs(FreshRegistration.this);
+
+        rl_Header = findViewById(R.id.layoutHeader);
+        textView_title = findViewById(R.id.textTitleFragment);
+        imageView_Goback = findViewById(R.id.imageGoback);
+        spinnerSystemProile = findViewById(R.id.spinnerSystemProfile);
+        imageRefresh = (ImageView) findViewById(R.id.imageRefresh);
+        toggleWifi = (ToggleButton) findViewById(R.id.toggleWifi);
+
+        showIcons(false);
+        verticalTabAdapter = new VerticalTabAdapter(this,menu_icons, listView_icons, this,0);
+        //pageAdapter = new RegistrationAdapter(this,getSupportFragmentManager(), NO_OF_SCREENS);
+        //pager.setAdapter(pageAdapter);
+        listView_icons.setAdapter(verticalTabAdapter);
+        //pager.setCurrentItem(pager.getCurrentItem());
+        //pager.setOffscreenPageLimit(2);
+        rl_Header.setVisibility(View.GONE);
+
+        int position = 0;
+        Bundle extras = getIntent().getExtras();
+        if(extras != null) {
+            position = extras.getInt("viewpager_position");
+        }
+
+
+        Animation animation = new RotateAnimation(0.0f, 360.0f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+        animation.setDuration(1200);
+
+        imageView_Goback.setOnClickListener(new View.OnClickListener() {
+
+            public void onClick(View v) {
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                Fragment currentFragment = fragmentManager.findFragmentById(R.id.container);
+
+                // TODO Auto-generated method stub
+                //selectItem(1);
+                if (currentFragment instanceof WifiFragment){
+                    selectItem(1);
+                }
+                if (currentFragment instanceof CreateNewSite){
+                    selectItem(1);
+                }
+                if (currentFragment instanceof InstallerOptions){
+                    String installType = prefs.getString("INSTALL_TYPE");
+                    if(installType.equals("OFFLINE"))
+                    {
+                        selectItem(1);
+                    }else
+                    {
+                        selectItem(3);
+                    }
+                }
+                if (currentFragment instanceof Security){
+                    selectItem(4);
+                }
+                if (currentFragment instanceof AddtoExisting){
+                    selectItem(1);
+                }
+                if (currentFragment instanceof PreConfigCCU){
+                    selectItem(1);
+                }
+                if (currentFragment instanceof ReplaceCCU){
+                    selectItem(1);
+                }
+                if (currentFragment instanceof DefaultSystemProfile){
+                    selectItem(5);
+                }
+                if (currentFragment instanceof VavStagedRtuProfile){
+                    selectItem(5);
+                }
+                if (currentFragment instanceof VavAnalogRtuProfile){
+                    selectItem(5);
+                }
+                if (currentFragment instanceof VavStagedRtuWithVfdProfile){
+                    selectItem(5);
+                }
+                if (currentFragment instanceof VavHybridRtuProfile){
+                    selectItem(5);
+                }
+                if (currentFragment instanceof DABStagedProfile){
+                    selectItem(5);
+                }
+                if (currentFragment instanceof DABFullyAHUProfile){
+                    selectItem(5);
+                }
+                if (currentFragment instanceof DABStagedRtuWithVfdProfile){
+                    selectItem(5);
+                }
+                if (currentFragment instanceof DABHybridAhuProfile){
+                    selectItem(5);
+                }
+                if (currentFragment instanceof FloorPlanFragment){
+
+                    //selectItem(9);
+
+                    String profileType = prefs.getString("PROFILE");
+                    if(profileType.equals("DEFAULT"))
+                    {
+                        spinnerSystemProile.setSelection(0);
+                        selectItem(9);
+                    }
+                    if(profileType.equals("VAV_STAGED_RTU"))
+                    {
+                        spinnerSystemProile.setSelection(1);
+                        selectItem(10);
+                    }
+                    if(profileType.equals("VAV_FULLY_MODULATING"))
+                    {
+                        spinnerSystemProile.setSelection(2);
+                        selectItem(11);
+                    }
+                    if(profileType.equals("VAV_STAGED_RTU_VFD"))
+                    {
+                        spinnerSystemProile.setSelection(3);
+                        selectItem(12);
+                    }
+                    if(profileType.equals("VAV_HYBRID_RTU"))
+                    {
+                        spinnerSystemProile.setSelection(4);
+                        selectItem(13);
+                    }
+                    if(profileType.equals("DAB_STAGED_RTU"))
+                    {
+                        spinnerSystemProile.setSelection(5);
+                        selectItem(14);
+                    }
+                    if(profileType.equals("DAB_FULLY_MODULATING"))
+                    {
+                        spinnerSystemProile.setSelection(6);
+                        selectItem(15);
+                    }
+                    if(profileType.equals("DAB_STAGED_RTU_VFD"))
+                    {
+                        spinnerSystemProile.setSelection(7);
+                        selectItem(16);
+                    }
+                    if(profileType.equals("DAB_HYBRID_RTU"))
+                    {
+                        spinnerSystemProile.setSelection(8);
+                        selectItem(17);
+                    }
+
+                }
+                if (currentFragment instanceof SystemFragment){
+                    selectItem(18);
+                }
+            }
+        });
+
+        imageRefresh.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                // TODO Auto-generated method stub
+                if(mainWifiObj.isWifiEnabled()) {
+                    animation.setRepeatCount(0);
+                    animation.setDuration(1200);
+                    imageRefresh.startAnimation(animation);
+                    mainWifiObj.startScan();
+                }
+            }
+        });
+
+        buttonNext.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                // TODO Auto-generated method stub
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                Fragment currentFragment = fragmentManager.findFragmentById(R.id.container);
+                if (currentFragment instanceof FloorPlanFragment){
+                    selectItem(19);
+                }
+                if (currentFragment instanceof SystemFragment){
+                    selectItem(20);
+                }
+                if (currentFragment instanceof CongratsFragment){
+                    prefs.setBoolean("REGISTRATION",true);
+                    Intent i = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
+                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(i);
+                    finish();
+                }
+
+                /*//int fragmentItem = pager.getCurrentItem();
+                // TODO Auto-generated method stub
+                //selectItem(1);
+                if(fragmentItem == 18) {
+                    selectItem(19);
+                }
+                if(fragmentItem == 19) {
+                    selectItem(20);
+                }
+                if(fragmentItem == 20) {
+                    prefs.setBoolean("REGISTRATION",true);
+                    Intent i = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
+                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(i);
+                    finish();
+                }*/
+            }
+        });
+
+        mainWifiObj = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+
+        toggleWifi.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    mainWifiObj = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                    if (isChecked) { if (!mainWifiObj.isWifiEnabled()) {
+                            animation.setDuration(2000);
+                            imageRefresh.startAnimation(animation);
+                            mainWifiObj = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                            mainWifiObj.setWifiEnabled(true);
+                        }
+                    } else {
+                        if (mainWifiObj.isWifiEnabled()) {
+                            mainWifiObj = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                            mainWifiObj.setWifiEnabled(false);
+                        }
+                    }
+                }
+        });
+
+        spinnerSystemProile.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+        {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                if(position==0) {
+                    selectItem(9);
+                }if(position==1) {
+                    selectItem(10);
+                }if(position==2) {
+                    selectItem(11);
+                }if(position==3) {
+                    selectItem(12);
+                }if(position==4) {
+                    selectItem(13);
+                }if(position==5) {
+                    selectItem(14);
+                }if(position==6) {
+                    selectItem(15);
+                }if(position==7) {
+                    selectItem(16);
+                }if(position==8) {
+                    selectItem(17);
+                }
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+
+            }
+
+        });
+        //showIcons(true);
+        //pager.setCurrentItem(position);
+        selectItem(position);
+    }
+
+    public void showIcons(boolean showIcons)
+    {
+        if(!showIcons) {
+            listView_icons.setVisibility(View.INVISIBLE);
+            imageView_logo.setVisibility(View.INVISIBLE);
+            rl_Header.setVisibility(View.GONE);
+            buttonNext.setVisibility(View.GONE);
+        }
+        else {
+            buttonNext.setVisibility(View.GONE);
+            listView_icons.setVisibility(View.VISIBLE);
+            imageView_logo.setVisibility(View.VISIBLE);
+            rl_Header.setVisibility(View.VISIBLE);
+        }
+    }
+
+    public void setRl_Header(String title, int position)
+    {
+
+
+    }
+     public void setToggleWifi(boolean status)
+    {
+        toggleWifi.setChecked(status);
+    }
+
+
+    /*public void GoTo(int from, int to) {
+        if(from == 2)
+        {
+            pageAdapter.GoTo(from, to);
+        }
+        selectItem(from);
+    }*/
+
+    public void Switch(int position)
+    {
+        selectItem(position);
+    }
+
+    @Override
+    public void selectItem(int position) {
+        Fragment fragment = null;
+        FragmentManager fragmentManager = getSupportFragmentManager();
+
+        if(position==0)
+        {
+            showIcons(false);
+        }
+        else {
+            showIcons(true);
+        }
+        //pageAdapter = new RegistrationAdapter(this,getSupportFragmentManager(), NO_OF_SCREENS);
+        //pager.setAdapter(pageAdapter);
+        //pager.setCurrentItem(position, true);
+
+        Log.i("Tab","Position:"+position);
+
+        if(position == 0) {
+            fragment = new StartCCUFragment();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, fragment)
+                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .commit();
+
+            textView_title.setVisibility(View.GONE);
+            spinnerSystemProile.setVisibility(View.GONE);
+            imageView_Goback.setVisibility(View.GONE);
+            buttonNext.setVisibility(View.GONE);
+            toggleWifi.setVisibility(View.GONE);
+            imageRefresh.setVisibility(View.GONE);
+
+        }
+
+        if(position == 1) {
+            fragment = new InstallTypeFragment();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, fragment)
+                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .commit();
+
+            verticalTabAdapter.setCurrentSelected(0);
+
+            textView_title.setVisibility(View.VISIBLE);
+            textView_title.setText(getText(R.string.installtype));
+            spinnerSystemProile.setVisibility(View.GONE);
+            imageView_Goback.setVisibility(View.GONE);
+            toggleWifi.setVisibility(View.GONE);
+            buttonNext.setVisibility(View.GONE);
+            imageRefresh.setVisibility(View.GONE);
+
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+            params.setMargins(0,0,178,0);
+            textView_title.setLayoutParams(params);
+
+            ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
+            paramsPager.topMargin = 136;
+            paramsPager.leftMargin = 280;
+            paramsPager.bottomMargin = 24;
+            paramsPager.rightMargin = 0;
+            container.setLayoutParams(paramsPager);
+
+        }
+        if(position == 2) {
+
+            fragment = new WifiFragment();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, fragment)
+                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .commit();
+
+            verticalTabAdapter.setCurrentSelected(1);
+            textView_title.setText(getText(R.string.connectwifi));
+            textView_title.setVisibility(View.VISIBLE);
+            spinnerSystemProile.setVisibility(View.GONE);
+            imageView_Goback.setVisibility(View.VISIBLE);
+            toggleWifi.setVisibility(View.VISIBLE);
+            buttonNext.setVisibility(View.GONE);
+            imageRefresh.setVisibility(View.VISIBLE);
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+            params.setMargins(0,0,333,0);
+            textView_title.setLayoutParams(params);
+
+            ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
+            paramsPager.topMargin = 130;
+            paramsPager.leftMargin = 400;
+            paramsPager.bottomMargin = 24;
+            paramsPager.rightMargin = 0;
+            container.setLayoutParams(paramsPager);
+        }
+        if(position == 3) {
+
+            fragment = new CreateNewSite();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, fragment)
+                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .commit();
+
+            verticalTabAdapter.setCurrentSelected(2);
+
+            textView_title.setText(getText(R.string.installcreatenew));
+            textView_title.setVisibility(View.VISIBLE);
+            spinnerSystemProile.setVisibility(View.GONE);
+            imageView_Goback.setVisibility(View.VISIBLE);
+            toggleWifi.setVisibility(View.GONE);
+            buttonNext.setVisibility(View.GONE);
+            imageRefresh.setVisibility(View.GONE);
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+            params.setMargins(0,0,312,0);
+            textView_title.setLayoutParams(params);
+
+            ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
+            paramsPager.topMargin = 142;
+            paramsPager.leftMargin = 400;
+            paramsPager.bottomMargin = 24;
+            paramsPager.rightMargin = 0;
+            container.setLayoutParams(paramsPager);
+        }
+        if(position == 4) {
+
+
+            fragment = new InstallerOptions();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, fragment)
+                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .commit();
+
+            verticalTabAdapter.setCurrentSelected(3);
+
+            textView_title.setText(getText(R.string.title_installeroption));
+            textView_title.setVisibility(View.VISIBLE);
+            spinnerSystemProile.setVisibility(View.GONE);
+            imageView_Goback.setVisibility(View.VISIBLE);
+            toggleWifi.setVisibility(View.GONE);
+            buttonNext.setVisibility(View.GONE);
+            imageRefresh.setVisibility(View.GONE);
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+            params.setMargins(0,0,603,0);
+            textView_title.setLayoutParams(params);
+
+            ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
+            paramsPager.topMargin = 126;
+            paramsPager.leftMargin = 350;
+            paramsPager.bottomMargin = 24;
+            paramsPager.rightMargin = 0;
+            container.setLayoutParams(paramsPager);
+        }
+        if(position == 5) {
+
+            fragment = new Security();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, fragment)
+                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .commit();
+
+
+            verticalTabAdapter.setCurrentSelected(4);
+
+            textView_title.setText(getText(R.string.title_security));
+            textView_title.setVisibility(View.VISIBLE);
+            spinnerSystemProile.setVisibility(View.GONE);
+            imageView_Goback.setVisibility(View.VISIBLE);
+            toggleWifi.setVisibility(View.GONE);
+            buttonNext.setVisibility(View.GONE);
+            imageRefresh.setVisibility(View.GONE);
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+            params.setMargins(0,0,776,0);
+            textView_title.setLayoutParams(params);
+
+            ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
+            paramsPager.topMargin = 106;
+            paramsPager.leftMargin = 359;
+            paramsPager.bottomMargin = 24;
+            paramsPager.rightMargin = 0;
+            container.setLayoutParams(paramsPager);
+        }
+        if(position == 6) {
+
+            fragment = new AddtoExisting();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, fragment)
+                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .commit();
+
+
+            verticalTabAdapter.setCurrentSelected(2);
+
+            textView_title.setText(getText(R.string.installaddccu));
+            textView_title.setVisibility(View.VISIBLE);
+            spinnerSystemProile.setVisibility(View.GONE);
+            imageView_Goback.setVisibility(View.VISIBLE);
+            toggleWifi.setVisibility(View.GONE);
+            buttonNext.setVisibility(View.GONE);
+            imageRefresh.setVisibility(View.GONE);
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+            params.setMargins(0,0,260,0);
+            textView_title.setLayoutParams(params);
+
+            ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
+            paramsPager.topMargin = 100;
+            paramsPager.leftMargin = 420;
+            paramsPager.bottomMargin = 24;
+            paramsPager.rightMargin = 0;
+            container.setLayoutParams(paramsPager);
+        }
+        if(position == 7) {
+
+            fragment = new PreConfigCCU();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, fragment)
+                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .commit();
+
+            verticalTabAdapter.setCurrentSelected(2);
+
+            textView_title.setText(getText(R.string.title_preconfig));
+            textView_title.setVisibility(View.VISIBLE);
+            spinnerSystemProile.setVisibility(View.GONE);
+            imageView_Goback.setVisibility(View.VISIBLE);
+            toggleWifi.setVisibility(View.GONE);
+            buttonNext.setVisibility(View.GONE);
+            imageRefresh.setVisibility(View.GONE);
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+            params.setMargins(0,0,260,0);
+            textView_title.setLayoutParams(params);
+
+            ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
+            paramsPager.topMargin = 305;
+            paramsPager.leftMargin = 420;
+            paramsPager.bottomMargin = 24;
+            paramsPager.rightMargin = 92;
+            container.setLayoutParams(paramsPager);
+        }
+        if(position == 8) {
+
+            fragment = new ReplaceCCU();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, fragment)
+                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .commit();
+
+
+            verticalTabAdapter.setCurrentSelected(2);
+
+            textView_title.setText(getText(R.string.installreplaceccu));
+            textView_title.setVisibility(View.VISIBLE);
+            spinnerSystemProile.setVisibility(View.GONE);
+            imageView_Goback.setVisibility(View.VISIBLE);
+            toggleWifi.setVisibility(View.GONE);
+            buttonNext.setVisibility(View.GONE);
+            imageRefresh.setVisibility(View.GONE);
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+            params.setMargins(0,0,240,0);
+            textView_title.setLayoutParams(params);
+
+            ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
+            paramsPager.topMargin = 156;
+            paramsPager.leftMargin = 420;
+            paramsPager.bottomMargin = 24;
+            paramsPager.rightMargin = 90;
+            container.setLayoutParams(paramsPager);
+        }
+        if(position == 9) {
+
+
+            fragment = new DefaultSystemProfile();
+
+            Bundle data = new Bundle();
+            data.putBoolean("REGISTRATION_WIZARD", true);
+            fragment.setArguments(data);
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, fragment)
+                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .commit();
+
+
+            verticalTabAdapter.setCurrentSelected(5);
+
+            textView_title.setText(getText(R.string.title_systemprofile));
+            textView_title.setVisibility(View.VISIBLE);
+            spinnerSystemProile.setVisibility(View.VISIBLE);
+            imageView_Goback.setVisibility(View.VISIBLE);
+            toggleWifi.setVisibility(View.GONE);
+            buttonNext.setVisibility(View.GONE);
+            imageRefresh.setVisibility(View.GONE);
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+            params.setMargins(0,0,560,0);
+            textView_title.setLayoutParams(params);
+
+            ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
+            paramsPager.topMargin = 156;
+            paramsPager.leftMargin = 250;
+            paramsPager.bottomMargin = 24;
+            paramsPager.rightMargin = 82;
+            container.setLayoutParams(paramsPager);
+        }
+        if(position == 10) {
+
+            fragment = new VavStagedRtuProfile();
+
+            Bundle data = new Bundle();
+            data.putBoolean("REGISTRATION_WIZARD", true);
+            fragment.setArguments(data);
+
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, fragment)
+                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .commit();
+
+
+
+            verticalTabAdapter.setCurrentSelected(5);
+
+            textView_title.setText(getText(R.string.title_systemprofile));
+            textView_title.setVisibility(View.VISIBLE);
+            spinnerSystemProile.setVisibility(View.VISIBLE);
+            imageView_Goback.setVisibility(View.VISIBLE);
+            toggleWifi.setVisibility(View.GONE);
+            buttonNext.setVisibility(View.GONE);
+            imageRefresh.setVisibility(View.GONE);
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+            params.setMargins(0,0,560,0);
+            textView_title.setLayoutParams(params);
+
+            ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
+            paramsPager.topMargin = 146;
+            paramsPager.leftMargin = 250;
+            paramsPager.bottomMargin = 24;
+            paramsPager.rightMargin = 26;
+            container.setLayoutParams(paramsPager);
+        }
+        if(position == 11) {
+
+
+            fragment = new VavAnalogRtuProfile();
+
+            Bundle data = new Bundle();
+            data.putBoolean("REGISTRATION_WIZARD", true);
+            fragment.setArguments(data);
+
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, fragment)
+                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .commit();
+
+
+
+            verticalTabAdapter.setCurrentSelected(5);
+
+            textView_title.setText(getText(R.string.title_systemprofile));
+            textView_title.setVisibility(View.VISIBLE);
+            spinnerSystemProile.setVisibility(View.VISIBLE);
+            imageView_Goback.setVisibility(View.VISIBLE);
+            toggleWifi.setVisibility(View.GONE);
+            buttonNext.setVisibility(View.GONE);
+            imageRefresh.setVisibility(View.GONE);
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+            params.setMargins(0,0,560,0);
+            textView_title.setLayoutParams(params);
+
+            ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
+            paramsPager.topMargin = 146;
+            paramsPager.leftMargin = 250;
+            paramsPager.bottomMargin = 24;
+            paramsPager.rightMargin = 26;
+            container.setLayoutParams(paramsPager);
+        }
+        if(position == 12) {
+
+            fragment = new VavStagedRtuWithVfdProfile();
+
+            Bundle data = new Bundle();
+            data.putBoolean("REGISTRATION_WIZARD", true);
+            fragment.setArguments(data);
+
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, fragment)
+                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .commit();
+
+
+            verticalTabAdapter.setCurrentSelected(5);
+
+            textView_title.setText(getText(R.string.title_systemprofile));
+            textView_title.setVisibility(View.VISIBLE);
+            spinnerSystemProile.setVisibility(View.VISIBLE);
+            imageView_Goback.setVisibility(View.VISIBLE);
+            toggleWifi.setVisibility(View.GONE);
+            buttonNext.setVisibility(View.GONE);
+            imageRefresh.setVisibility(View.GONE);
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+            params.setMargins(0,0,560,0);
+            textView_title.setLayoutParams(params);
+
+            ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
+            paramsPager.topMargin = 146;
+            paramsPager.leftMargin = 250;
+            paramsPager.bottomMargin = 24;
+            paramsPager.rightMargin = 26;
+            container.setLayoutParams(paramsPager);
+        }
+        if(position == 13) {
+
+            fragment = new VavHybridRtuProfile();
+
+            Bundle data = new Bundle();
+            data.putBoolean("REGISTRATION_WIZARD", true);
+            fragment.setArguments(data);
+
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, fragment)
+                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .commit();
+
+
+            verticalTabAdapter.setCurrentSelected(5);
+
+            textView_title.setText(getText(R.string.title_systemprofile));
+            textView_title.setVisibility(View.VISIBLE);
+            spinnerSystemProile.setVisibility(View.VISIBLE);
+            imageView_Goback.setVisibility(View.VISIBLE);
+            toggleWifi.setVisibility(View.GONE);
+            buttonNext.setVisibility(View.GONE);
+            imageRefresh.setVisibility(View.GONE);
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+            params.setMargins(0,0,560,0);
+            textView_title.setLayoutParams(params);
+
+            ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
+            paramsPager.topMargin = 146;
+            paramsPager.leftMargin = 250;
+            paramsPager.bottomMargin = 24;
+            paramsPager.rightMargin = 26;
+            container.setLayoutParams(paramsPager);
+        }
+        if(position == 14) {
+
+            fragment = new DABStagedProfile();
+
+            Bundle data = new Bundle();
+            data.putBoolean("REGISTRATION_WIZARD", true);
+            fragment.setArguments(data);
+
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, fragment)
+                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .commit();
+
+
+            verticalTabAdapter.setCurrentSelected(5);
+
+            textView_title.setText(getText(R.string.title_systemprofile));
+            textView_title.setVisibility(View.VISIBLE);
+            spinnerSystemProile.setVisibility(View.VISIBLE);
+            imageView_Goback.setVisibility(View.VISIBLE);
+            toggleWifi.setVisibility(View.GONE);
+            buttonNext.setVisibility(View.GONE);
+            imageRefresh.setVisibility(View.GONE);
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+            params.setMargins(0,0,560,0);
+            textView_title.setLayoutParams(params);
+
+            ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
+            paramsPager.topMargin = 146;
+            paramsPager.leftMargin = 250;
+            paramsPager.bottomMargin = 24;
+            paramsPager.rightMargin = 26;
+            container.setLayoutParams(paramsPager);
+        }
+        if(position == 15) {
+
+            fragment = new DABFullyAHUProfile();
+
+            Bundle data = new Bundle();
+            data.putBoolean("REGISTRATION_WIZARD", true);
+            fragment.setArguments(data);
+
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, fragment)
+                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .commit();
+
+
+            verticalTabAdapter.setCurrentSelected(5);
+
+            textView_title.setText(getText(R.string.title_systemprofile));
+            textView_title.setVisibility(View.VISIBLE);
+            spinnerSystemProile.setVisibility(View.VISIBLE);
+            imageView_Goback.setVisibility(View.VISIBLE);
+            toggleWifi.setVisibility(View.GONE);
+            buttonNext.setVisibility(View.GONE);
+            imageRefresh.setVisibility(View.GONE);
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+            params.setMargins(0,0,560,0);
+            textView_title.setLayoutParams(params);
+
+            ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
+            paramsPager.topMargin = 146;
+            paramsPager.leftMargin = 250;
+            paramsPager.bottomMargin = 24;
+            paramsPager.rightMargin = 26;
+            container.setLayoutParams(paramsPager);
+        }
+        if(position == 16) {
+
+            fragment = new DABStagedRtuWithVfdProfile();
+
+            Bundle data = new Bundle();
+            data.putBoolean("REGISTRATION_WIZARD", true);
+            fragment.setArguments(data);
+
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, fragment)
+                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .commit();
+
+
+            verticalTabAdapter.setCurrentSelected(5);
+
+            textView_title.setText(getText(R.string.title_systemprofile));
+            textView_title.setVisibility(View.VISIBLE);
+            spinnerSystemProile.setVisibility(View.VISIBLE);
+            imageView_Goback.setVisibility(View.VISIBLE);
+            toggleWifi.setVisibility(View.GONE);
+            buttonNext.setVisibility(View.GONE);
+            imageRefresh.setVisibility(View.GONE);
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+            params.setMargins(0,0,560,0);
+            textView_title.setLayoutParams(params);
+
+            ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
+            paramsPager.topMargin = 146;
+            paramsPager.leftMargin = 250;
+            paramsPager.bottomMargin = 24;
+            paramsPager.rightMargin = 26;
+            container.setLayoutParams(paramsPager);
+        }
+        if(position == 17) {
+
+            fragment = new DABHybridAhuProfile();
+
+            Bundle data = new Bundle();
+            data.putBoolean("REGISTRATION_WIZARD", true);
+            fragment.setArguments(data);
+
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, fragment)
+                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .commit();
+
+
+            verticalTabAdapter.setCurrentSelected(5);
+
+            textView_title.setText(getText(R.string.title_systemprofile));
+            textView_title.setVisibility(View.VISIBLE);
+            spinnerSystemProile.setVisibility(View.VISIBLE);
+            imageView_Goback.setVisibility(View.VISIBLE);
+            toggleWifi.setVisibility(View.GONE);
+            buttonNext.setVisibility(View.GONE);
+            imageRefresh.setVisibility(View.GONE);
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+            params.setMargins(0,0,560,0);
+            textView_title.setLayoutParams(params);
+
+            ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
+            paramsPager.topMargin = 146;
+            paramsPager.leftMargin = 250;
+            paramsPager.bottomMargin = 24;
+            paramsPager.rightMargin = 26;
+            container.setLayoutParams(paramsPager);
+        }
+        if(position == 18) {
+
+            fragment = new FloorPlanFragment();
+
+            Bundle data = new Bundle();
+            data.putBoolean("REGISTRATION_WIZARD", true);
+            fragment.setArguments(data);
+
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, fragment)
+                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .commit();
+
+
+            showIcons(false);
+            rl_Header.setVisibility(View.VISIBLE);
+            buttonNext.setVisibility(View.VISIBLE);
+            textView_title.setVisibility(View.GONE);
+            spinnerSystemProile.setVisibility(View.GONE);
+            imageView_Goback.setVisibility(View.VISIBLE);
+            toggleWifi.setVisibility(View.GONE);
+            imageRefresh.setVisibility(View.GONE);
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+            params.setMargins(0,0,560,0);
+            textView_title.setLayoutParams(params);
+
+            ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
+            paramsPager.topMargin = -10;
+            paramsPager.leftMargin = 112;
+            paramsPager.bottomMargin = 0;
+            paramsPager.rightMargin = 0;
+            container.setLayoutParams(paramsPager);
+        }
+        if(position == 19) {
+
+
+            fragment = new SystemFragment();
+
+            Bundle data = new Bundle();
+            data.putBoolean("REGISTRATION_WIZARD", true);
+            fragment.setArguments(data);
+
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, fragment)
+                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .commit();
+
+
+            showIcons(false);
+            rl_Header.setVisibility(View.VISIBLE);
+            buttonNext.setVisibility(View.VISIBLE);
+            textView_title.setVisibility(View.GONE);
+            spinnerSystemProile.setVisibility(View.GONE);
+            imageView_Goback.setVisibility(View.VISIBLE);
+            toggleWifi.setVisibility(View.GONE);
+            imageRefresh.setVisibility(View.GONE);
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+            params.setMargins(0,0,560,0);
+            textView_title.setLayoutParams(params);
+
+            TypedValue tv = new TypedValue();
+            int actionBarHeight = 0;
+            if (getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true))
+            {
+                actionBarHeight = TypedValue.complexToDimensionPixelSize(tv.data,getResources().getDisplayMetrics());
+            }
+
+            ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
+            paramsPager.topMargin = actionBarHeight;
+            paramsPager.leftMargin = 112;
+            paramsPager.bottomMargin = 0;
+            paramsPager.rightMargin = 0;
+            container.setLayoutParams(paramsPager);
+        }
+        if(position == 20) {
+
+            fragment = new CongratsFragment();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, fragment)
+                    .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
+                    .commit();
+
+            showIcons(false);
+            rl_Header.setVisibility(View.VISIBLE);
+            textView_title.setText(getText(R.string.title_congrats));
+            buttonNext.setVisibility(View.VISIBLE);
+            buttonNext.setText(getText(R.string.button_finish));
+            buttonNext.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+            textView_title.setVisibility(View.VISIBLE);
+            spinnerSystemProile.setVisibility(View.GONE);
+            imageView_Goback.setVisibility(View.GONE);
+            toggleWifi.setVisibility(View.GONE);
+            imageRefresh.setVisibility(View.GONE);
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+            params.setMargins(0,0,465,0);
+            textView_title.setLayoutParams(params);
+
+            ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
+            paramsPager.topMargin = 126;
+            paramsPager.leftMargin = 116;
+            paramsPager.bottomMargin = 24;
+            paramsPager.rightMargin = 101;
+            container.setLayoutParams(paramsPager);
+        }
+    }
+
+
+}

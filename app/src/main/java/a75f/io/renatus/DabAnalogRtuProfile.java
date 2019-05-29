@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.Spinner;
 import android.widget.TableLayout;
@@ -27,6 +28,8 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.dab.DabFullyModulatingRtu;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.renatus.registartion.FreshRegistration;
+import a75f.io.renatus.util.Prefs;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -60,7 +63,12 @@ public class DabAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 	
 	@BindView(R.id.relay3Test) ToggleButton relay3Test;
 	@BindView(R.id.relay7Test) ToggleButton relay7Test;
-	
+
+	Prefs prefs;
+	@BindView(R.id.buttonNext)
+	Button mNext;
+	String PROFILE = "DAB_FULLY_MODULATING";
+	boolean isFromReg = false;
 	DabFullyModulatingRtu systemProfile = null;
     
     public static DabAnalogRtuProfile newInstance()
@@ -75,12 +83,17 @@ public class DabAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
     {
         View rootView = inflater.inflate(R.layout.fragment_profile_dab_analogrtu, container, false);
         ButterKnife.bind(this, rootView);
+		if(getArguments() != null) {
+			isFromReg = getArguments().getBoolean("REGISTRATION_WIZARD");
+		}
         return rootView;
     }
     
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
     {
+		prefs = new Prefs(getContext().getApplicationContext());
+
 	    if (L.ccu().systemProfile instanceof DabFullyModulatingRtu) {
 		    systemProfile = (DabFullyModulatingRtu) L.ccu().systemProfile;
 		    ahuAnalog1Cb.setChecked(systemProfile.getConfigEnabled("analog1") > 0);
@@ -126,8 +139,31 @@ public class DabAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 	    ahuAnalog3Cb.setOnCheckedChangeListener(this);
 	    relay3Cb.setOnCheckedChangeListener(this);
 	    relay7Cb.setOnCheckedChangeListener(this);
+
+		isFromReg = getArguments().getBoolean("REGISTRATION_WIZARD");
+
+		if(isFromReg){
+			mNext.setVisibility(View.VISIBLE);
+		}
+		else {
+			mNext.setVisibility(View.GONE);
+		}
+
+		mNext.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				goTonext();
+			}
+		});
 	}
-	
+
+	private void goTonext() {
+		//Intent i = new Intent(mContext, RegisterGatherCCUDetails.class);
+		//startActivity(i);
+		prefs.setBoolean("PROFILE_SETUP",true);
+		prefs.setString("PROFILE",PROFILE);
+		((FreshRegistration)getActivity()).selectItem(18);
+	}
 	private void setupAnalogLimitSelectors() {
 		ArrayList<Integer> analogArray = new ArrayList<>();
 		for (int a = 0; a <= 10; a++)

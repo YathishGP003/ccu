@@ -35,7 +35,7 @@ public class DABFullyAHUProfile extends Fragment
 
     @BindView(R.id.toggleAnalog1) ToggleButton ahuAnalog1Tb;
     @BindView(R.id.toggleAnalog2) ToggleButton ahuAnalog2Tb;
-    @BindView(R.id.toogleAnalog3) ToggleButton ahuAnalog3Tb;
+    @BindView(R.id.toggleAnalog3) ToggleButton ahuAnalog3Tb;
 
     @BindView(R.id.toggleRelay3) ToggleButton relay3Tb;
     @BindView(R.id.toggleRelay7) ToggleButton relay7Tb;

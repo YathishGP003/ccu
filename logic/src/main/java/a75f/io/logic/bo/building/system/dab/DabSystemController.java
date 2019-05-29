@@ -104,7 +104,7 @@ public class DabSystemController extends SystemController
                 for (Equip q : HSUtil.getEquips(z.getId()))
                 {
                     
-                    if (q.getMarkers().contains("dab") == false || getEquipCurrentTemp(q.getId()) == 0)
+                    if (q.getMarkers().contains("dab") == false || isZoneDead(q))
                     {
                         continue;
                     }
@@ -350,13 +350,18 @@ public class DabSystemController extends SystemController
         for (HashMap q : dabEquips)
         {
             double tempVal = hayStack.readHisValByQuery("point and air and temp and sensor and current and equipRef == \""+q.get("id")+"\"");
-            
-            if (tempVal != 0) {
+    
+            if (!isZoneDead(new Equip.Builder().setHashMap(q).build())) {
                 tempSum += tempVal;
                 tempZones++;
             }
         }
         averageSystemTemperature = tempZones == 0 ? 0 : tempSum/tempZones;
+    }
+    
+    public boolean isZoneDead(Equip q) {
+        return CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and equipRef == \""+q.getId()+"\"")
+                       .equals("Zone Temp Dead");
     }
     
     @Override

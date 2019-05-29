@@ -13,10 +13,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.Spinner;
-import android.widget.TableLayout;
 import android.widget.ToggleButton;
 
 import java.util.ArrayList;
@@ -53,7 +51,7 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 
 	@BindView(R.id.toggleAnalog1) ToggleButton ahuAnalog1Tb;
 	@BindView(R.id.toggleAnalog2) ToggleButton ahuAnalog2Tb;
-	@BindView(R.id.toogleAnalog3) ToggleButton ahuAnalog3Tb;
+	@BindView(R.id.toggleAnalog3) ToggleButton ahuAnalog3Tb;
 	@BindView(R.id.toggleAnalog4) ToggleButton ahuAnalog4Tb;
 
 	@BindView(R.id.toggleRelay3) ToggleButton relay3Tb;
@@ -346,22 +344,22 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 	{
 		switch (buttonView.getId())
 		{
-			case R.id.ahuAnalog1Cb:
+			case R.id.toggleAnalog1:
 				setSelectionBackground("analog1", isChecked);
 				break;
-			case R.id.ahuAnalog2Cb:
+			case R.id.toggleAnalog2:
 				setSelectionBackground("analog2", isChecked);
 				break;
-			case R.id.ahuAnalog3Cb:
+			case R.id.toggleAnalog3:
 				setSelectionBackground("analog3", isChecked);
 				break;
-			case R.id.ahuAnalog4Cb:
+			case R.id.toggleAnalog4:
 				setSelectionBackground("analog4", isChecked);
 				break;
-			case R.id.relay3Cb:
+			case R.id.toggleRelay3:
 				setSelectionBackground("relay3", isChecked);
 				break;
-			case R.id.relay7Cb:
+			case R.id.toggleRelay7:
 				setSelectionBackground("relay7", isChecked);
 				break;
 		}
@@ -375,40 +373,40 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 		switch (arg0.getId())
 		{
 			
-			case R.id.ahuAnalog1Min:
+			case R.id.analog1Min:
 				setConfigBackground("cooling and sat and min", val);
 				break;
-			case R.id.ahuAnalog1Max:
+			case R.id.analog1Max:
 				setConfigBackground("cooling and sat and max", val);
 				break;
-			case R.id.ahuAnalog2Min:
+			case R.id.analog2Min:
 				setConfigBackground("staticPressure and min", val);
 				break;
-			case R.id.ahuAnalog2Max:
+			case R.id.analog2Max:
 				setConfigBackground("staticPressure and max", val);
 				break;
-			case R.id.ahuAnalog3Min:
+			case R.id.analog3Min:
 				setConfigBackground("heating and min", val);
 				break;
-			case R.id.ahuAnalog3Max:
+			case R.id.analog3Max:
 				setConfigBackground("heating and max", val);
 				break;
-			case R.id.ahuAnalog4Min:
+			case R.id.analog4Min:
 				setConfigBackground("co2 and min", val);
 				break;
-			case R.id.ahuAnalog4Max:
+			case R.id.analog4Max:
 				setConfigBackground("co2 and max", val);
 				break;
-			case R.id.ahuAnalog1Test:
+			case R.id.analog1Spinner:
 				sendAnalog1OutTestSignal(val);
 				break;
-			case R.id.ahuAnalog2Test:
+			case R.id.analog2Spinner:
 				sendAnalog2OutTestSignal(val);
 				break;
-			case R.id.ahuAnalog3Test:
+			case R.id.analog3Spinner:
 				sendAnalog3OutTestSignal(val);
 				break;
-			case R.id.ahuAnalog4Test:
+			case R.id.analog4Spinner:
 				sendAnalog4OutTestSignal(val);
 				break;
 		}

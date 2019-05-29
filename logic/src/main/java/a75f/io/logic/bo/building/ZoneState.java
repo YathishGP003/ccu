@@ -8,6 +8,7 @@ public enum ZoneState
 {
     DEADBAND,
     COOLING,
-    HEATING
+    HEATING,
+    TEMP_DEAD
     
 }

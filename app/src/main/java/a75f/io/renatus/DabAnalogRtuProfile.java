@@ -13,7 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.Spinner;
 import android.widget.TableLayout;
@@ -65,8 +64,12 @@ public class DabAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 	@BindView(R.id.relay7Test) ToggleButton relay7Test;
 
 	Prefs prefs;
-	@BindView(R.id.buttonNext)
+	
+	//TODO- TEMP
+	/*@BindView(R.id.buttonNext)
 	Button mNext;
+	*/
+	
 	String PROFILE = "DAB_FULLY_MODULATING";
 	boolean isFromReg = false;
 	DabFullyModulatingRtu systemProfile = null;
@@ -139,10 +142,11 @@ public class DabAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 	    ahuAnalog3Cb.setOnCheckedChangeListener(this);
 	    relay3Cb.setOnCheckedChangeListener(this);
 	    relay7Cb.setOnCheckedChangeListener(this);
-
-		isFromReg = getArguments().getBoolean("REGISTRATION_WIZARD");
-
-		if(isFromReg){
+	
+	    //TODO-TEMP
+		//isFromReg = getArguments().getBoolean("REGISTRATION_WIZARD");
+	 
+		/*if(isFromReg){
 			mNext.setVisibility(View.VISIBLE);
 		}
 		else {
@@ -154,7 +158,7 @@ public class DabAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 				// TODO Auto-generated method stub
 				goTonext();
 			}
-		});
+		});*/
 	}
 
 	private void goTonext() {
@@ -171,7 +175,7 @@ public class DabAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 			analogArray.add(a);
 		}
 		ArrayAdapter<Integer> analogAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, analogArray);
-		analogAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+		analogAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		
 		analog1Min.setAdapter(analogAdapter);
 		analog1Min.setSelection(analogAdapter.getPosition((int)systemProfile.getConfigVal("cooling and min")), false);

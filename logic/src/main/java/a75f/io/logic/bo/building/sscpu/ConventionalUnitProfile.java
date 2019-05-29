@@ -133,7 +133,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
             SmartStatFanRelayType fanHighType = SmartStatFanRelayType.values()[(int)fanStage2Type];
             if(!occupied &&(fanSpeed != OFF ) ){
                 if(fanSpeed != StandaloneFanSpeed.AUTO) {
-                    StandaloneScheduler.updateOperationalPoints(cpuEquip.getId(), "fan", StandaloneFanSpeed.AUTO.ordinal());
+                    StandaloneScheduler.updateOperationalPoints(cpuEquip.getId(), "fan and operation and mode", StandaloneFanSpeed.AUTO.ordinal());
                     fanSpeed = StandaloneFanSpeed.AUTO;
                 }
             }
@@ -183,7 +183,9 @@ public class ConventionalUnitProfile extends ZoneProfile {
                         }
                     }
                 }else{
-                    if(occupied && isFanStage1Enabled && fanSpeed == StandaloneFanSpeed.FAN_LOW){
+                    //TODO Do we  need to send his data when not enabled???
+
+                    if(occupied && isFanStage1Enabled && (fanSpeed == StandaloneFanSpeed.FAN_LOW)){
                         relayStages.put("FanStage1",1);
                         setCmdSignal("fan and stage1",1.0,node);
                     }else if(isFanStage1Enabled)

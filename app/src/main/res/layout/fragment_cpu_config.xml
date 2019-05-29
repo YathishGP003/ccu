@@ -380,7 +380,6 @@
                     android:textOff="OFF"
                     android:textOn="ON" />
             </LinearLayout>
-        </RelativeLayout>
 
         <Button
             android:id="@+id/setBtn"
@@ -397,6 +396,8 @@
             android:textAllCaps="true"
             android:textColor="@color/orange_75f"
             android:textSize="19.5dp" />
+
+        </RelativeLayout>
     </ScrollView>
 
 </RelativeLayout>

@@ -7,11 +7,13 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.Spinner;
@@ -19,6 +21,7 @@ import android.widget.ToggleButton;
 
 import java.util.ArrayList;
 
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.mesh.MeshUtil;
 import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
 import a75f.io.device.serial.MessageType;
@@ -28,6 +31,8 @@ import a75f.io.logic.bo.building.hvac.Stage;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtuWithVfd;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.renatus.registartion.FreshRegistration;
+import a75f.io.renatus.util.Prefs;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -37,16 +42,16 @@ import butterknife.ButterKnife;
 
 public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.OnItemSelectedListener, CompoundButton.OnCheckedChangeListener
 {
-    @BindView(R.id.relay1Cb) CheckBox relay1Cb;
-    @BindView(R.id.relay2Cb) CheckBox relay2Cb;
-    @BindView(R.id.relay3Cb) CheckBox relay3Cb;
-    @BindView(R.id.relay4Cb) CheckBox relay4Cb;
-    @BindView(R.id.relay5Cb) CheckBox relay5Cb;
-    @BindView(R.id.relay6Cb) CheckBox relay6Cb;
-    @BindView(R.id.relay7Cb) CheckBox relay7Cb;
-    @BindView(R.id.analog2Cb) CheckBox analog2Cb;
-    
-    
+    @BindView(R.id.toggleRelay1) ToggleButton relay1Tb;
+    @BindView(R.id.toggleRelay2) ToggleButton relay2Tb;
+    @BindView(R.id.toggleRelay3) ToggleButton relay3Tb;
+    @BindView(R.id.toggleRelay4) ToggleButton relay4Tb;
+    @BindView(R.id.toggleRelay5) ToggleButton relay5Tb;
+    @BindView(R.id.toggleRelay6) ToggleButton relay6Tb;
+    @BindView(R.id.toggleRelay7) ToggleButton relay7Tb;
+    @BindView(R.id.toggleAnalog2) ToggleButton analog2Tb;
+
+
     @BindView(R.id.relay1Spinner)Spinner relay1Spinner;
     @BindView(R.id.relay2Spinner)Spinner relay2Spinner;
     @BindView(R.id.relay3Spinner)Spinner relay3Spinner;
@@ -54,8 +59,8 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
     @BindView(R.id.relay5Spinner)Spinner relay5Spinner;
     @BindView(R.id.relay6Spinner)Spinner relay6Spinner;
     @BindView(R.id.relay7Spinner)Spinner relay7Spinner;
-    @BindView(R.id.analog2TestSpinner)Spinner analog2TestSpinner;
-    
+    @BindView(R.id.fanspeedSpinner)Spinner analog2TestSpinner;
+
     @BindView(R.id.analog2Economizer) Spinner analog2Economizer;
     @BindView(R.id.analog2Recirculate) Spinner analog2Recirculate;
     @BindView(R.id.analog2CoolStage1) Spinner analog2CoolStage1;
@@ -68,7 +73,7 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
     @BindView(R.id.analog2HeatStage3) Spinner analog2HeatStage3;
     @BindView(R.id.analog2HeatStage4) Spinner analog2HeatStage4;
     @BindView(R.id.analog2HeatStage5) Spinner analog2HeatStage5;
-    
+
     @BindView(R.id.relay1Test) ToggleButton relay1Test;
     @BindView(R.id.relay2Test) ToggleButton relay2Test;
     @BindView(R.id.relay3Test) ToggleButton relay3Test;
@@ -76,83 +81,125 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
     @BindView(R.id.relay5Test) ToggleButton relay5Test;
     @BindView(R.id.relay6Test) ToggleButton relay6Test;
     @BindView(R.id.relay7Test) ToggleButton relay7Test;
-    
-    
+
+
     VavStagedRtuWithVfd systemProfile = null;
+    String TAG = "VAV_STAGED_RTU_VFD";
+    @BindView(R.id.buttonNext)
+    Button mNext;
+    String PROFILE = "VAV_STAGED_RTU_VFD";
+    Prefs prefs;
+    boolean isFromReg = false;
     public static VavStagedRtuWithVfdProfile newInstance()
     {
         return new VavStagedRtuWithVfdProfile();
     }
-    
-    
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState)
     {
         View rootView = inflater.inflate(R.layout.fragment_profile_vav_staged_vfd, container, false);
         ButterKnife.bind(this, rootView);
+        if(getArguments() != null) {
+            isFromReg = getArguments().getBoolean("REGISTRATION_WIZARD");
+        }
         return rootView;
     }
-    
+
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
     {
-        if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_VFD_RTU) {
-            systemProfile = (VavStagedRtuWithVfd) L.ccu().systemProfile;
-            relay1Cb.setChecked(systemProfile.getConfigEnabled("relay1") > 0);
-            relay2Cb.setChecked(systemProfile.getConfigEnabled("relay2") > 0);
-            relay3Cb.setChecked(systemProfile.getConfigEnabled("relay3") > 0);
-            relay4Cb.setChecked(systemProfile.getConfigEnabled("relay4") > 0);
-            relay5Cb.setChecked(systemProfile.getConfigEnabled("relay5") > 0);
-            relay6Cb.setChecked(systemProfile.getConfigEnabled("relay6") > 0);
-            relay7Cb.setChecked(systemProfile.getConfigEnabled("relay7") > 0);
-            analog2Cb.setChecked(systemProfile.getConfigEnabled("analog2") > 0);
-            setUpCheckBoxes();
-            setUpSpinners();
-        } else {
-            
-            new AsyncTask<String, Void, Void>() {
-                
-                ProgressDialog progressDlg = new ProgressDialog(getActivity());
-                @Override
-                protected void onPreExecute() {
-                    progressDlg.setMessage("Loading System Profile");
-                    progressDlg.show();
-                    super.onPreExecute();
-                }
-                
-                @Override
-                protected Void doInBackground( final String ... params ) {
-                    if (systemProfile != null) {
-                        systemProfile.deleteSystemEquip();
-                        L.ccu().systemProfile = null;
+        prefs = new Prefs(getContext().getApplicationContext());
+        //if(getUserVisibleHint()) {
+            Log.i(TAG,"isVisibletoUser:"+getUserVisibleHint());
+            if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_VFD_RTU) {
+                systemProfile = (VavStagedRtuWithVfd) L.ccu().systemProfile;
+                relay1Tb.setChecked(systemProfile.getConfigEnabled("relay1") > 0);
+                relay2Tb.setChecked(systemProfile.getConfigEnabled("relay2") > 0);
+                relay3Tb.setChecked(systemProfile.getConfigEnabled("relay3") > 0);
+                relay4Tb.setChecked(systemProfile.getConfigEnabled("relay4") > 0);
+                relay5Tb.setChecked(systemProfile.getConfigEnabled("relay5") > 0);
+                relay6Tb.setChecked(systemProfile.getConfigEnabled("relay6") > 0);
+                relay7Tb.setChecked(systemProfile.getConfigEnabled("relay7") > 0);
+                analog2Tb.setChecked(systemProfile.getConfigEnabled("analog2") > 0);
+                setUpCheckBoxes();
+                setUpSpinners();
+            } else {
+
+                new AsyncTask<String, Void, Void>() {
+
+                    ProgressDialog progressDlg = new ProgressDialog(getActivity());
+
+                    @Override
+                    protected void onPreExecute() {
+                        progressDlg.setMessage("Loading System Profile");
+                        progressDlg.show();
+                        super.onPreExecute();
                     }
-                    systemProfile = new VavStagedRtuWithVfd();
-                    systemProfile.addSystemEquip();
-                    L.ccu().systemProfile = systemProfile;
-                    return null;
-                }
-                @Override
-                protected void onPostExecute( final Void result ) {
-                    setUpCheckBoxes();
-                    setUpSpinners();
-                    progressDlg.dismiss();
-                }
-            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+
+                    @Override
+                    protected Void doInBackground(final String... params) {
+                        if (systemProfile != null) {
+                            systemProfile.deleteSystemEquip();
+                            L.ccu().systemProfile = null;
+                        }
+                        systemProfile = new VavStagedRtuWithVfd();
+                        systemProfile.addSystemEquip();
+                        L.ccu().systemProfile = systemProfile;
+                        return null;
+                    }
+
+                    @Override
+                    protected void onPostExecute(final Void result) {
+                        setUpCheckBoxes();
+                        setUpSpinners();
+                        CCUHsApi.getInstance().saveTagsData();
+                        CCUHsApi.getInstance().syncEntityTree();
+                        progressDlg.dismiss();
+                    }
+                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+            }
+        //}
+
+
+
+        if(isFromReg){
+            mNext.setVisibility(View.VISIBLE);
         }
+        else {
+            mNext.setVisibility(View.GONE);
+        }
+
+
+        mNext.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                // TODO Auto-generated method stub
+                goTonext();
+            }
+        });
     }
-    
+
+    private void goTonext() {
+        //Intent i = new Intent(mContext, RegisterGatherCCUDetails.class);
+        //startActivity(i);
+        prefs.setBoolean("PROFILE_SETUP",true);
+        prefs.setString("PROFILE",PROFILE);
+        ((FreshRegistration)getActivity()).selectItem(18);
+    }
+
     private void setUpCheckBoxes() {
-        
-        relay1Cb.setOnCheckedChangeListener(this);
-        relay2Cb.setOnCheckedChangeListener(this);
-        relay3Cb.setOnCheckedChangeListener(this);
-        relay4Cb.setOnCheckedChangeListener(this);
-        relay5Cb.setOnCheckedChangeListener(this);
-        relay6Cb.setOnCheckedChangeListener(this);
-        relay7Cb.setOnCheckedChangeListener(this);
-        analog2Cb.setOnCheckedChangeListener(this);
-        
+
+        relay1Tb.setOnCheckedChangeListener(this);
+        relay2Tb.setOnCheckedChangeListener(this);
+        relay3Tb.setOnCheckedChangeListener(this);
+        relay4Tb.setOnCheckedChangeListener(this);
+        relay5Tb.setOnCheckedChangeListener(this);
+        relay6Tb.setOnCheckedChangeListener(this);
+        relay7Tb.setOnCheckedChangeListener(this);
+        analog2Tb.setOnCheckedChangeListener(this);
+
         relay1Test.setOnCheckedChangeListener(this);
         relay2Test.setOnCheckedChangeListener(this);
         relay3Test.setOnCheckedChangeListener(this);
@@ -161,7 +208,7 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         relay6Test.setOnCheckedChangeListener(this);
         relay7Test.setOnCheckedChangeListener(this);
     }
-    
+
     private void setUpSpinners() {
         relay1Spinner.setSelection((int)systemProfile.getConfigAssociation("relay1"), false);
         relay2Spinner.setSelection((int)systemProfile.getConfigAssociation("relay2"), false);
@@ -170,15 +217,15 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         relay5Spinner.setSelection((int)systemProfile.getConfigAssociation("relay5"), false);
         relay6Spinner.setSelection((int)systemProfile.getConfigAssociation("relay6"), false);
         relay7Spinner.setSelection((int)systemProfile.getConfigAssociation("relay7"), false);
-        
-        relay1Spinner.setEnabled(relay1Cb.isChecked());
-        relay2Spinner.setEnabled(relay2Cb.isChecked());
-        relay3Spinner.setEnabled(relay3Cb.isChecked());
-        relay4Spinner.setEnabled(relay4Cb.isChecked());
-        relay5Spinner.setEnabled(relay5Cb.isChecked());
-        relay6Spinner.setEnabled(relay6Cb.isChecked());
-        relay7Spinner.setEnabled(relay7Cb.isChecked());
-        
+
+        relay1Spinner.setEnabled(relay1Tb.isChecked());
+        relay2Spinner.setEnabled(relay2Tb.isChecked());
+        relay3Spinner.setEnabled(relay3Tb.isChecked());
+        relay4Spinner.setEnabled(relay4Tb.isChecked());
+        relay5Spinner.setEnabled(relay5Tb.isChecked());
+        relay6Spinner.setEnabled(relay6Tb.isChecked());
+        relay7Spinner.setEnabled(relay7Tb.isChecked());
+
         relay1Spinner.setOnItemSelectedListener(this);
         relay2Spinner.setOnItemSelectedListener(this);
         relay3Spinner.setOnItemSelectedListener(this);
@@ -186,9 +233,9 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         relay5Spinner.setOnItemSelectedListener(this);
         relay6Spinner.setOnItemSelectedListener(this);
         relay7Spinner.setOnItemSelectedListener(this);
-        
-        
-    
+
+
+
         ArrayList<Integer> analogArray = new ArrayList<>();
         for (int a = 0; a <= 10; a++)
         {
@@ -196,9 +243,9 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         }
         ArrayAdapter<Integer> analogAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, analogArray);
         analogAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        
+
         analog2TestSpinner.setAdapter(analogAdapter);
-    
+
         analog2Economizer.setAdapter(analogAdapter);
         analog2Economizer.setSelection((int)systemProfile.getConfigVal("analog2 and economizer"));
         analog2Recirculate.setAdapter(analogAdapter);;
@@ -213,7 +260,7 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         analog2CoolStage4.setSelection((int)systemProfile.getConfigVal("analog2 and cooling and stage4"), false);
         analog2CoolStage5.setAdapter(analogAdapter);
         analog2CoolStage5.setSelection((int)systemProfile.getConfigVal("analog2 and cooling and stage5"), false);
-    
+
         analog2HeatStage1.setAdapter(analogAdapter);
         analog2HeatStage1.setSelection((int)systemProfile.getConfigVal("analog2 and heating and stage1"), false);
         analog2HeatStage2.setAdapter(analogAdapter);
@@ -224,14 +271,14 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         analog2HeatStage4.setSelection((int)systemProfile.getConfigVal("analog2 and heating and stage4"), false);
         analog2HeatStage5.setAdapter(analogAdapter);
         analog2HeatStage5.setSelection((int)systemProfile.getConfigVal("analog2 and heating and stage5"), false);
-        
+
         analog2TestSpinner.setOnItemSelectedListener(this);
         updateAnalogOptions();
     }
-    
+
     private void updateAnalogOptions() {
         systemProfile.updateStagesSelected();
-        boolean analogEnabled = analog2Cb.isChecked();
+        boolean analogEnabled = analog2Tb.isChecked();
         analog2Economizer.setEnabled(false);
         analog2Recirculate.setEnabled(false);
         analog2CoolStage1.setEnabled(analogEnabled && systemProfile.isStageEnabled(Stage.COOLING_1));
@@ -239,49 +286,49 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         analog2CoolStage3.setEnabled(analogEnabled && systemProfile.isStageEnabled(Stage.COOLING_3));
         analog2CoolStage4.setEnabled(analogEnabled && systemProfile.isStageEnabled(Stage.COOLING_4));
         analog2CoolStage5.setEnabled(analogEnabled && systemProfile.isStageEnabled(Stage.COOLING_5));
-    
+
         analog2HeatStage1.setEnabled(analogEnabled && systemProfile.isStageEnabled(Stage.HEATING_1));
         analog2HeatStage2.setEnabled(analogEnabled && systemProfile.isStageEnabled(Stage.HEATING_2));
         analog2HeatStage3.setEnabled(analogEnabled && systemProfile.isStageEnabled(Stage.HEATING_3));
         analog2HeatStage4.setEnabled(analogEnabled && systemProfile.isStageEnabled(Stage.HEATING_4));
         analog2HeatStage5.setEnabled(analogEnabled && systemProfile.isStageEnabled(Stage.HEATING_5));
     }
-    
+
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
     {
         switch (buttonView.getId())
         {
-            case R.id.relay1Cb:
-                relay1Spinner.setEnabled(relay1Cb.isChecked());
-                setConfigEnabledBackground("relay1",relay1Cb.isChecked() ? 1: 0);
+            case R.id.toggleRelay1:
+                relay1Spinner.setEnabled(relay1Tb.isChecked());
+                setConfigEnabledBackground("relay1",relay1Tb.isChecked() ? 1: 0);
                 break;
-            case R.id.relay2Cb:
-                relay2Spinner.setEnabled(relay2Cb.isChecked());
-                setConfigEnabledBackground("relay2",relay2Cb.isChecked() ? 1: 0);
+            case R.id.toggleRelay2:
+                relay2Spinner.setEnabled(relay2Tb.isChecked());
+                setConfigEnabledBackground("relay2",relay2Tb.isChecked() ? 1: 0);
                 break;
-            case R.id.relay3Cb:
-                relay3Spinner.setEnabled(relay3Cb.isChecked());
-                setConfigEnabledBackground("relay3",relay3Cb.isChecked() ? 1: 0);
+            case R.id.toggleRelay3:
+                relay3Spinner.setEnabled(relay3Tb.isChecked());
+                setConfigEnabledBackground("relay3",relay3Tb.isChecked() ? 1: 0);
                 break;
-            case R.id.relay4Cb:
-                relay4Spinner.setEnabled(relay4Cb.isChecked());
-                setConfigEnabledBackground("relay4",relay4Cb.isChecked() ? 1: 0);
+            case R.id.toggleRelay4:
+                relay4Spinner.setEnabled(relay4Tb.isChecked());
+                setConfigEnabledBackground("relay4",relay4Tb.isChecked() ? 1: 0);
                 break;
-            case R.id.relay5Cb:
-                relay5Spinner.setEnabled(relay5Cb.isChecked());
-                setConfigEnabledBackground("relay5",relay5Cb.isChecked() ? 1: 0);
+            case R.id.toggleRelay5:
+                relay5Spinner.setEnabled(relay5Tb.isChecked());
+                setConfigEnabledBackground("relay5",relay5Tb.isChecked() ? 1: 0);
                 break;
-            case R.id.relay6Cb:
-                relay6Spinner.setEnabled(relay6Cb.isChecked());
-                setConfigEnabledBackground("relay6",relay6Cb.isChecked() ? 1: 0);
+            case R.id.toggleRelay6:
+                relay6Spinner.setEnabled(relay6Tb.isChecked());
+                setConfigEnabledBackground("relay6",relay6Tb.isChecked() ? 1: 0);
                 break;
-            case R.id.relay7Cb:
-                relay7Spinner.setEnabled(relay7Cb.isChecked());
-                setConfigEnabledBackground("relay7",relay7Cb.isChecked() ? 1: 0);
+            case R.id.toggleRelay7:
+                relay7Spinner.setEnabled(relay7Tb.isChecked());
+                setConfigEnabledBackground("relay7",relay7Tb.isChecked() ? 1: 0);
                 break;
-            case R.id.analog2Cb:
-                setConfigEnabledBackground("analog2",analog2Cb.isChecked() ? 1: 0);
+            case R.id.toggleAnalog2:
+                setConfigEnabledBackground("analog2",analog2Tb.isChecked() ? 1: 0);
                 break;
             case R.id.relay1Test:
                 sendRelayActivationTestSignal((short) (relay1Test.isChecked() ? 1: 0));
@@ -304,12 +351,12 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
             case R.id.relay7Test:
                 sendRelayActivationTestSignal((short)(relay7Test.isChecked() ? 1 << 6 : 0));
                 break;
-                
+
         }
         updateAnalogOptions();
     }
-    
-    
+
+
     @Override
     public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,
                                long arg3)
@@ -317,57 +364,57 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         switch (arg0.getId())
         {
             case R.id.relay1Spinner:
-                if (relay1Cb.isChecked())
+                if (relay1Tb.isChecked())
                 {
                     setConfigAssociationBackground("relay1", relay1Spinner.getSelectedItemPosition());
                     updateAnalogOptions();
                 }
                 break;
             case R.id.relay2Spinner:
-                if (relay2Cb.isChecked())
+                if (relay2Tb.isChecked())
                 {
                     setConfigAssociationBackground("relay2", relay2Spinner.getSelectedItemPosition());
                     updateAnalogOptions();
                 }
                 break;
             case R.id.relay3Spinner:
-                if (relay3Cb.isChecked())
+                if (relay3Tb.isChecked())
                 {
                     setConfigAssociationBackground("relay3", relay3Spinner.getSelectedItemPosition());
                     updateAnalogOptions();
                 }
                 break;
             case R.id.relay4Spinner:
-                if (relay4Cb.isChecked())
+                if (relay4Tb.isChecked())
                 {
                     setConfigAssociationBackground("relay4", relay4Spinner.getSelectedItemPosition());
                     updateAnalogOptions();
                 }
                 break;
             case R.id.relay5Spinner:
-                if (relay5Cb.isChecked())
+                if (relay5Tb.isChecked())
                 {
                     setConfigAssociationBackground("relay5", relay5Spinner.getSelectedItemPosition());
                     updateAnalogOptions();
                 }
                 break;
             case R.id.relay6Spinner:
-                if (relay6Cb.isChecked())
+                if (relay6Tb.isChecked())
                 {
                     setConfigAssociationBackground("relay6", relay6Spinner.getSelectedItemPosition());
                     updateAnalogOptions();
                 }
                 break;
             case R.id.relay7Spinner:
-                if (relay7Cb.isChecked())
+                if (relay7Tb.isChecked())
                 {
                     setConfigAssociationBackground("relay7", relay7Spinner.getSelectedItemPosition());
                     updateAnalogOptions();
                 }
                 break;
-            case R.id.analog2TestSpinner:
+           /* case R.id.analog2TestSpinner:
                 sendAnalog2OutTestSignal(Double.parseDouble(arg0.getSelectedItem().toString()));
-                break;
+                break;*/
             case R.id.analog2Economizer:
                 setConfigBackground("analog2 and economizer", Double.parseDouble(arg0.getSelectedItem().toString()));
                 break;
@@ -404,59 +451,59 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
             case R.id.analog2HeatStage5:
                 setConfigBackground("analog2 and cool and stage5", Double.parseDouble(arg0.getSelectedItem().toString()));
                 break;
-            
+
         }
     }
-    
+
     @Override
     public void onNothingSelected(AdapterView<?> arg0) {
         // TODO Auto-generated method stub
-        
+
     }
-    
+
     public void updateSystemMode() {
         SystemMode systemMode = SystemMode.values()[(int)systemProfile.getUserIntentVal("rtu and mode")];
         if (systemMode == SystemMode.OFF) {
             return;
         }
         if ((systemMode == SystemMode.AUTO && (!systemProfile.isCoolingAvailable() || !systemProfile.isHeatingAvailable()))
-            || (systemMode == SystemMode.COOLONLY && !systemProfile.isCoolingAvailable())
-            || (systemMode == SystemMode.HEATONLY && !systemProfile.isHeatingAvailable()))
+                || (systemMode == SystemMode.COOLONLY && !systemProfile.isCoolingAvailable())
+                || (systemMode == SystemMode.HEATONLY && !systemProfile.isHeatingAvailable()))
         {
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.NewDialogStyle);//, AlertDialog.THEME_HOLO_DARK);
             String str = "Operational Mode changed from '" + systemMode.name() + "' to '" + SystemMode.OFF.name() + "' based on changed equipment selection.";
             str = str + "\nPlease select appropriate operational mode from System Settings.";
             builder.setCancelable(false)
-                   .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                       public void onClick(DialogInterface dialog, int id) {
-                           dialog.cancel();
-                       }
-                   })
-                   .setTitle("Operational Mode Changed")
-                   .setMessage(str);
-            
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    })
+                    .setTitle("Operational Mode Changed")
+                    .setMessage(str);
+
             AlertDialog dlg = builder.create();
             dlg.show();
             setUserIntentBackground("rtu and mode", SystemMode.OFF.ordinal());
         }
     }
-    
+
     private void setUserIntentBackground(String query, double val) {
-        
+
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground( final Void ... params ) {
                 TunerUtil.writeSystemUserIntentVal(query, val);
                 return null;
             }
-            
+
             @Override
             protected void onPostExecute( final Void result ) {
                 // continue what you are doing...
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
-    
+
     private void setConfigEnabledBackground(String config, double val) {
         new AsyncTask<String, Void, Void>() {
             @Override
@@ -465,7 +512,7 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
                 systemProfile.updateStagesSelected();
                 return null;
             }
-            
+
             @Override
             protected void onPostExecute( final Void result ) {
                 if (val == 0) {
@@ -474,7 +521,7 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
     }
-    
+
     private void setConfigAssociationBackground(String config, double val) {
         new AsyncTask<String, Void, Void>() {
             @Override
@@ -483,14 +530,14 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
                 systemProfile.updateStagesSelected();
                 return null;
             }
-            
+
             @Override
             protected void onPostExecute( final Void result ) {
                 updateSystemMode();
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
     }
-    
+
     private void setConfigBackground(String config, double val) {
         new AsyncTask<String, Void, Void>() {
             @Override
@@ -498,21 +545,21 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
                 systemProfile.setConfigVal(config, val);
                 return null;
             }
-            
+
             @Override
             protected void onPostExecute( final Void result ) {
                 // continue what you are doing...
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
     }
-    
+
     public void sendRelayActivationTestSignal(short val) {
         CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
         msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
         msg.relayBitmap.set(val);
         MeshUtil.sendStructToCM(msg);
     }
-    
+
     public void sendAnalog2OutTestSignal(double val) {
         CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
         msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);

@@ -1,278 +1,584 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical" >
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical">
     <ScrollView
         android:layout_width="match_parent"
         android:overScrollMode="never"
+        android:scrollbars="none"
         android:layout_height="match_parent">
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-            <TableLayout
-                android:id="@+id/vavStagedRtu"
-                android:layout_width="match_parent"
+            <ImageView
+                android:id="@+id/imageRTUInput"
+                android:layout_marginTop="72dp"
+                android:layout_width="253dp"
+                android:layout_height="416dp"
+                android:layout_alignParentLeft="true"
+                android:src="@drawable/input_dab_rtu"/>
+            <LinearLayout
+                android:id="@+id/lt_inputs"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="50dp"
-                android:layout_marginRight="50dp"
-                android:layout_marginTop="14dp"
-                android:layout_marginBottom="30dp"
-                android:stretchColumns="0"
-                android:visibility="visible">
+                android:orientation="vertical"
+                android:layout_toRightOf="@+id/imageRTUInput">
 
-                <TableRow
-                    android:id="@+id/genericRTUHeader"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="2dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Equipment List"
-                        android:textSize="@dimen/text_medium_xlarge"
-                        android:visibility="invisible" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="   Selector List  item touch  "
-                        android:textSize="@dimen/text_medium_xlarge"
-                        android:visibility="invisible" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:text="Test Signal"
-                        android:textSize="@dimen/text_medium_xlarge"
-                        android:visibility="visible"/>
-
-                </TableRow>
-
-                <TableRow
-                    android:id="@+id/tableRow1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
-                    android:layout_marginBottom="14dp" >
-
-                    <CheckBox
-                        android:id="@+id/coolingStage1"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingRight="14dp"
-                        android:textSize="@dimen/text_small_xlarge"
-                        android:layout_gravity="center_vertical"
-                        android:text="   Cooling Stage 1 (Relay 1)" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text=""
-                        android:textSize="@dimen/text_large_xlarge" />
-
-                    <ToggleButton
-                        android:id="@+id/coolingStage1Test"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:background="@drawable/selector"
-                        android:text="" />
-
-                </TableRow>
-
-                <TableRow
-                    android:id="@+id/tableRow2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
-                    android:layout_marginBottom="14dp" >
-
-                    <CheckBox
-                        android:id="@+id/coolingStage2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingRight="14dp"
-                        android:textSize="@dimen/text_small_xlarge"
-                        android:layout_gravity="center_vertical"
-                        android:text="   Cooling Stage 2 (Relay 2)" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text=""
-                        android:textSize="@dimen/text_large_xlarge" />
-                    <ToggleButton
-                        android:id="@+id/coolingStage2Test"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:background="@drawable/selector"
-                        android:text="" />
-
-                </TableRow>
-
-                <TableRow
-                    android:id="@+id/tableRow3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
-                    android:layout_marginBottom="14dp" >
-
-                    <CheckBox
-                        android:id="@+id/coolingStage3"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingRight="14dp"
-                        android:textSize="@dimen/text_small_xlarge"
-                        android:layout_gravity="center_vertical"
-                        android:text="   Cooling Stage 3 (Relay 3)" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text=""
-                        android:textSize="@dimen/text_large_xlarge" />
-                    <ToggleButton
-                        android:id="@+id/coolingStage3Test"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:background="@drawable/selector"
-                        android:text="" />
-
-                </TableRow>
-
-                <TableRow
-                    android:id="@+id/tableRow4"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
-                    android:layout_marginBottom="14dp" >
-
-                    <CheckBox
-                        android:id="@+id/coolingStage4"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingRight="14dp"
-                        android:textSize="@dimen/text_small_xlarge"
-                        android:layout_gravity="center_vertical"
-                        android:text="   Cooling Stage 4 (Relay 4)" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text=""
-                        android:textSize="@dimen/text_large_xlarge" />
-                    <ToggleButton
-                        android:id="@+id/coolingStage4Test"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:background="@drawable/selector"
-                        android:text="" />
-
-                </TableRow>
-
-                <TableRow
-                    android:id="@+id/tableRow5"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
-                    android:layout_marginBottom="14dp" >
-
-                    <CheckBox
-                        android:id="@+id/coolingStage5"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingRight="14dp"
-                        android:textSize="@dimen/text_small_xlarge"
-                        android:layout_gravity="center_vertical"
-                        android:text="   Cooling Stage 5 (Relay 5)" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text=""
-                        android:textSize="@dimen/text_large_xlarge" />
-                    <ToggleButton
-                        android:id="@+id/coolingStage5Test"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:background="@drawable/selector"
-                        android:text="" />
-
-                </TableRow>
-
-                <TableRow
-                    android:id="@+id/tableRow6"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
-                    android:layout_marginBottom="14dp" >
-
-                    <CheckBox
-                        android:id="@+id/fanStage1"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingRight="14dp"
-                        android:textSize="@dimen/text_small_xlarge"
-                        android:layout_gravity="center_vertical"
-                        android:text="   Fan Stage 1 (Relay 6)" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text=""
-                        android:textSize="@dimen/text_large_xlarge" />
-                    <ToggleButton
-                        android:id="@+id/fanStage1Test"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:background="@drawable/selector"
-                        android:text="" />
-
-                </TableRow>
-
-                <TableRow
-                    android:id="@+id/tableRow7"
+                <TableLayout
+                    android:id="@+id/vavStagedRtu"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="12dp"
                     android:layout_marginTop="14dp"
-                    android:layout_marginBottom="14dp" >
+                    android:layout_marginBottom="16dp"
+                    android:stretchColumns="0"
+                    android:visibility="visible">
 
-                    <CheckBox
-                        android:id="@+id/fanStage2"
+                    <TableRow
+                        android:id="@+id/genericRTUHeader"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="2dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="@string/title_enable"
+                            android:textAppearance="@style/text_label"
+                            android:gravity="center_horizontal"
+                            android:layout_weight="1"
+                            />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="@string/title_mapping"
+                            android:textAppearance="@style/text_label"
+                            android:gravity="center_horizontal"
+                            android:layout_marginLeft="34dp"
+                            />
+
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="34dp"
+                            android:text="@string/title_testsignal"
+                            android:gravity="center_horizontal"
+                            android:textAppearance="@style/text_label"/>
+
+                    </TableRow>
+
+                    <TableRow
+                        android:id="@+id/tableRow1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="26dp">
+
+                        <RelativeLayout
+                            android:layout_width="0dp"
+                            android:layout_height="40dp"
+                            android:layout_weight="1">
+
+                            <ToggleButton
+                                android:id="@+id/toggleRelay1"
+                                android:layout_width="46.12dp"
+                                android:layout_height="27.42dp"
+                                android:layout_alignParentLeft="true"
+                                android:layout_centerVertical="true"
+                                android:layout_marginLeft="10dp"
+                                android:background="@drawable/toggle_selector"
+                                android:checked="false"
+                                android:textOff=""
+                                android:textOn="" />
+
+                            <TextView
+                                android:id="@+id/textCompStage1"
+                                android:layout_width="wrap_content"
+                                android:layout_toRightOf="@+id/toggleRelay1"
+                                android:layout_marginLeft="20dp"
+                                android:layout_height="wrap_content"
+                                android:layout_centerVertical="true"
+                                android:textAppearance="@style/text_appearance"
+                                android:text="@string/label_relay1"/>
+                        </RelativeLayout>
+                        <RelativeLayout
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="40dp"
+                            android:layout_marginLeft="34dp">
+                            <Spinner
+                                android:id="@+id/relay1Spinner"
+                                android:layout_width="202dp"
+                                android:layout_height="wrap_content"
+                                android:layout_centerHorizontal="true"
+                                android:layout_centerVertical="true"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                android:entries="@array/hvac_stage_selector"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="40dp"
+                            android:layout_marginLeft="34dp">
+                            <ToggleButton
+                                android:id="@+id/relay1Test"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/toggle_testselector"
+                                android:layout_centerHorizontal="true"
+                                android:layout_centerVertical="true"
+                                android:checked="false"
+                                android:textAppearance="@style/text_toggleappearance"
+                                android:textColor="@drawable/toggle_textselector"
+                                android:textOff="OFF"
+                                android:textOn="ON" />
+                        </RelativeLayout>
+                    </TableRow>
+
+                    <TableRow
+                        android:id="@+id/tableRow2"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:paddingRight="14dp"
-                        android:textSize="@dimen/text_small_xlarge"
-                        android:layout_gravity="center_vertical"
-                        android:text="   Fan Stage 2 (Relay 7)" />
+                        android:layout_marginTop="24dp" >
 
-                    <TextView
+                        <RelativeLayout
+                            android:layout_width="0dp"
+                            android:layout_height="40dp"
+                            android:layout_weight="1">
+
+                            <ToggleButton
+                                android:id="@+id/toggleRelay2"
+                                android:layout_width="46.12dp"
+                                android:layout_height="27.42dp"
+                                android:layout_alignParentLeft="true"
+                                android:layout_centerVertical="true"
+                                android:layout_marginLeft="10dp"
+                                android:background="@drawable/toggle_selector"
+                                android:checked="false"
+                                android:textOff=""
+                                android:textOn="" />
+
+                            <TextView
+                                android:id="@+id/textCompStage2"
+                                android:layout_width="wrap_content"
+                                android:layout_toRightOf="@+id/toggleRelay2"
+                                android:layout_marginLeft="20dp"
+                                android:layout_height="wrap_content"
+                                android:layout_centerVertical="true"
+                                android:textAppearance="@style/text_appearance"
+                                android:text="@string/label_relay2"/>
+                        </RelativeLayout>
+                        <RelativeLayout
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="40dp"
+                            android:layout_marginLeft="34dp">
+                            <Spinner
+                                android:id="@+id/relay2Spinner"
+                                android:layout_width="202dp"
+                                android:layout_height="wrap_content"
+                                android:layout_centerHorizontal="true"
+                                android:layout_centerVertical="true"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                android:entries="@array/hvac_stage_selector"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="40dp"
+                            android:layout_marginLeft="34dp">
+                            <ToggleButton
+                                android:id="@+id/relay2Test"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/toggle_testselector"
+                                android:layout_centerHorizontal="true"
+                                android:layout_centerVertical="true"
+                                android:checked="false"
+                                android:textAppearance="@style/text_toggleappearance"
+                                android:textColor="@drawable/toggle_textselector"
+                                android:textOff="OFF"
+                                android:textOn="ON" />
+                        </RelativeLayout>
+                    </TableRow>
+
+                    <TableRow
+                        android:id="@+id/tableRow3"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text=""
-                        android:textSize="@dimen/text_large_xlarge" />
-                    <ToggleButton
-                        android:id="@+id/fanStage2Test"
+                        android:layout_marginTop="24dp" >
+
+                        <RelativeLayout
+                            android:layout_width="0dp"
+                            android:layout_height="40dp"
+                            android:layout_weight="1">
+
+                            <ToggleButton
+                                android:id="@+id/toggleRelay3"
+                                android:layout_width="46.12dp"
+                                android:layout_height="27.42dp"
+                                android:layout_alignParentLeft="true"
+                                android:layout_centerVertical="true"
+                                android:layout_marginLeft="10dp"
+                                android:background="@drawable/toggle_selector"
+                                android:checked="false"
+                                android:textOff=""
+                                android:textOn="" />
+
+                            <TextView
+                                android:id="@+id/textCompStage3"
+                                android:layout_width="wrap_content"
+                                android:layout_toRightOf="@+id/toggleRelay3"
+                                android:layout_marginLeft="20dp"
+                                android:layout_height="wrap_content"
+                                android:layout_centerVertical="true"
+                                android:textAppearance="@style/text_appearance"
+                                android:text="@string/label_relay3"/>
+                        </RelativeLayout>
+                        <RelativeLayout
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="40dp"
+                            android:layout_marginLeft="34dp">
+                            <Spinner
+                                android:id="@+id/relay3Spinner"
+                                android:layout_width="202dp"
+                                android:layout_height="wrap_content"
+                                android:layout_centerHorizontal="true"
+                                android:layout_centerVertical="true"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                android:entries="@array/hvac_stage_selector"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="40dp"
+                            android:layout_marginLeft="34dp">
+                            <ToggleButton
+                                android:id="@+id/relay3Test"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/toggle_testselector"
+                                android:layout_centerHorizontal="true"
+                                android:checked="false"
+                                android:textAppearance="@style/text_toggleappearance"
+                                android:textColor="@drawable/toggle_textselector"
+                                android:textOff="OFF"
+                                android:textOn="ON" />
+                        </RelativeLayout>
+
+                    </TableRow>
+
+                    <TableRow
+                        android:id="@+id/tableRow4"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:background="@drawable/selector"
-                        android:text="" />
+                        android:layout_marginTop="24dp" >
 
-                </TableRow>
+                        <RelativeLayout
+                            android:layout_width="0dp"
+                            android:layout_height="40dp"
+                            android:layout_weight="1">
 
-            </TableLayout>
-        </LinearLayout>
+                            <ToggleButton
+                                android:id="@+id/toggleRelay4"
+                                android:layout_width="46.12dp"
+                                android:layout_height="27.42dp"
+                                android:layout_alignParentLeft="true"
+                                android:layout_centerVertical="true"
+                                android:layout_marginLeft="10dp"
+                                android:background="@drawable/toggle_selector"
+                                android:checked="false"
+                                android:textOff=""
+                                android:textOn="" />
+
+                            <TextView
+                                android:id="@+id/textCompStage4"
+                                android:layout_width="wrap_content"
+                                android:layout_toRightOf="@+id/toggleRelay4"
+                                android:layout_marginLeft="20dp"
+                                android:layout_height="wrap_content"
+                                android:layout_centerVertical="true"
+                                android:textAppearance="@style/text_appearance"
+                                android:text="@string/label_relay4"/>
+                        </RelativeLayout>
+                        <RelativeLayout
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="40dp"
+                            android:layout_marginLeft="34dp">
+                            <Spinner
+                                android:id="@+id/relay4Spinner"
+                                android:layout_width="202dp"
+                                android:layout_height="wrap_content"
+                                android:layout_centerHorizontal="true"
+                                android:layout_centerVertical="true"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                android:entries="@array/hvac_stage_selector"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="40dp"
+                            android:layout_marginLeft="34dp">
+                            <ToggleButton
+                                android:id="@+id/relay4Test"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/toggle_testselector"
+                                android:layout_centerHorizontal="true"
+                                android:checked="false"
+                                android:textAppearance="@style/text_toggleappearance"
+                                android:textColor="@drawable/toggle_textselector"
+                                android:textOff="OFF"
+                                android:textOn="ON" />
+                        </RelativeLayout>
+
+                    </TableRow>
+
+                    <TableRow
+                        android:id="@+id/tableRow5"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="24dp" >
+
+                        <RelativeLayout
+                            android:layout_width="0dp"
+                            android:layout_height="40dp"
+                            android:layout_weight="1">
+
+                            <ToggleButton
+                                android:id="@+id/toggleRelay5"
+                                android:layout_width="46.12dp"
+                                android:layout_height="27.42dp"
+                                android:layout_alignParentLeft="true"
+                                android:layout_centerVertical="true"
+                                android:layout_marginLeft="10dp"
+                                android:background="@drawable/toggle_selector"
+                                android:checked="false"
+                                android:textOff=""
+                                android:textOn="" />
+
+                            <TextView
+                                android:id="@+id/textCompStage5"
+                                android:layout_width="wrap_content"
+                                android:layout_toRightOf="@+id/toggleRelay5"
+                                android:layout_marginLeft="20dp"
+                                android:layout_height="wrap_content"
+                                android:layout_centerVertical="true"
+                                android:textAppearance="@style/text_appearance"
+                                android:text="@string/label_relay5"/>
+                        </RelativeLayout>
+                        <RelativeLayout
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="40dp"
+                            android:layout_marginLeft="34dp">
+                            <Spinner
+                                android:id="@+id/relay5Spinner"
+                                android:layout_width="202dp"
+                                android:layout_height="wrap_content"
+                                android:layout_centerHorizontal="true"
+                                android:layout_centerVertical="true"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                android:entries="@array/hvac_stage_selector"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="40dp"
+                            android:layout_marginLeft="34dp">
+                            <ToggleButton
+                                android:id="@+id/relay5Test"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/toggle_testselector"
+                                android:layout_centerHorizontal="true"
+                                android:checked="false"
+                                android:textAppearance="@style/text_toggleappearance"
+                                android:textColor="@drawable/toggle_textselector"
+                                android:textOff="OFF"
+                                android:textOn="ON" />
+                        </RelativeLayout>
+
+
+                    </TableRow>
+
+                    <TableRow
+                        android:id="@+id/tableRow6"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="24dp" >
+
+                        <RelativeLayout
+                            android:layout_width="0dp"
+                            android:layout_height="40dp"
+                            android:layout_weight="1">
+
+                            <ToggleButton
+                                android:id="@+id/toggleRelay6"
+                                android:layout_width="46.12dp"
+                                android:layout_height="27.42dp"
+                                android:layout_alignParentLeft="true"
+                                android:layout_centerVertical="true"
+                                android:layout_marginLeft="10dp"
+                                android:background="@drawable/toggle_selector"
+                                android:checked="false"
+                                android:textOff=""
+                                android:textOn="" />
+
+                            <TextView
+                                android:id="@+id/textCompStage6"
+                                android:layout_width="wrap_content"
+                                android:layout_toRightOf="@+id/toggleRelay6"
+                                android:layout_marginLeft="20dp"
+                                android:layout_height="wrap_content"
+                                android:layout_centerVertical="true"
+                                android:textAppearance="@style/text_appearance"
+                                android:text="@string/label_relay6"/>
+                        </RelativeLayout>
+                        <RelativeLayout
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="40dp"
+                            android:layout_marginLeft="34dp">
+                            <Spinner
+                                android:id="@+id/relay6Spinner"
+                                android:layout_width="202dp"
+                                android:layout_height="wrap_content"
+                                android:layout_centerVertical="true"
+                                android:layout_centerHorizontal="true"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                android:entries="@array/hvac_stage_selector"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="40dp"
+                            android:layout_marginLeft="34dp">
+                            <ToggleButton
+                                android:id="@+id/relay6Test"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/toggle_testselector"
+                                android:layout_centerHorizontal="true"
+                                android:checked="false"
+                                android:textAppearance="@style/text_toggleappearance"
+                                android:textColor="@drawable/toggle_textselector"
+                                android:textOff="OFF"
+                                android:textOn="ON" />
+                        </RelativeLayout>
+
+
+                    </TableRow>
+
+                    <TableRow
+                        android:id="@+id/tableRow7"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="24dp">
+
+                        <RelativeLayout
+                            android:layout_width="0dp"
+                            android:layout_height="40dp"
+                            android:layout_weight="1">
+
+                            <ToggleButton
+                                android:id="@+id/toggleRelay7"
+                                android:layout_width="46.12dp"
+                                android:layout_height="27.42dp"
+                                android:layout_alignParentLeft="true"
+                                android:layout_centerVertical="true"
+                                android:layout_marginLeft="10dp"
+                                android:background="@drawable/toggle_selector"
+                                android:checked="false"
+                                android:textOff=""
+                                android:textOn="" />
+
+                            <TextView
+                                android:id="@+id/textCompStage7"
+                                android:layout_width="wrap_content"
+                                android:layout_toRightOf="@+id/toggleRelay7"
+                                android:layout_marginLeft="20dp"
+                                android:layout_height="wrap_content"
+                                android:layout_centerVertical="true"
+                                android:textAppearance="@style/text_appearance"
+                                android:text="@string/label_relay7"/>
+                        </RelativeLayout>
+                        <RelativeLayout
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="40dp"
+                            android:layout_marginLeft="34dp">
+                            <Spinner
+                                android:id="@+id/relay7Spinner"
+                                android:layout_width="202dp"
+                                android:layout_height="wrap_content"
+                                android:layout_centerVertical="true"
+                                android:layout_centerHorizontal="true"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                android:entries="@array/hvac_stage_selector"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="40dp"
+                            android:layout_marginLeft="34dp">
+                            <ToggleButton
+                                android:id="@+id/relay7Test"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/toggle_testselector"
+                                android:layout_centerHorizontal="true"
+                                android:checked="false"
+                                android:textAppearance="@style/text_toggleappearance"
+                                android:textColor="@drawable/toggle_textselector"
+                                android:textOff="OFF"
+                                android:textOn="ON" />
+                        </RelativeLayout>
+
+
+                    </TableRow>
+
+
+                </TableLayout>
+            </LinearLayout>
+            <Button
+                android:id="@+id/buttonNext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_below="@+id/lt_inputs"
+                android:layout_marginTop="20dp"
+                android:layout_marginRight="30dp"
+                android:background="@null"
+                android:drawableRight="@drawable/icon_arrowright"
+                android:drawablePadding="5dp"
+                android:fontFamily="@font/lato_bold"
+                android:text="@string/button_next"
+                android:textColor="@color/orange_75f"
+                android:textSize="24dp" />
+        </RelativeLayout>
     </ScrollView>
 </LinearLayout>

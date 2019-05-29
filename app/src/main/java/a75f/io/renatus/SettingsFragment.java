@@ -52,6 +52,33 @@ public class SettingsFragment extends Fragment
 			@Override
 			public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l)
 			{
+				/*if (currentFragment instanceof DefaultSystemProfile){
+					selectItem(5);
+				}
+				if (currentFragment instanceof VavStagedRtuProfile){
+					selectItem(5);
+				}
+				if (currentFragment instanceof VavAnalogRtuProfile){
+					selectItem(5);
+				}
+				if (currentFragment instanceof VavStagedRtuWithVfdProfile){
+					selectItem(5);
+				}
+				if (currentFragment instanceof VavHybridRtuProfile){
+					selectItem(5);
+				}
+				if (currentFragment instanceof DABStagedProfile){
+					selectItem(5);
+				}
+				if (currentFragment instanceof DABFullyAHUProfile){
+					selectItem(5);
+				}
+				if (currentFragment instanceof DABStagedRtuWithVfdProfile){
+					selectItem(5);
+				}
+				if (currentFragment instanceof DABHybridAhuProfile){
+					selectItem(5);
+				}*/
 				switch (i)
 				{
 					case 0:
@@ -61,9 +88,47 @@ public class SettingsFragment extends Fragment
 					
 					case 1:
 						getActivity().getSupportFragmentManager().beginTransaction()
-						             .replace(R.id.profileContainer, new VavAnalogRtuProfile()).commit();
+						             .replace(R.id.profileContainer, new VavStagedRtuProfile()).commit();
 						break;
 					
+					case 2:
+						getActivity().getSupportFragmentManager().beginTransaction()
+						             .replace(R.id.profileContainer, new VavAnalogRtuProfile()).commit();
+						break;
+					case 3:
+						getActivity().getSupportFragmentManager().beginTransaction()
+						             .replace(R.id.profileContainer, new VavStagedRtuWithVfdProfile()).commit();
+						break;
+					case 4:
+						getActivity().getSupportFragmentManager().beginTransaction()
+						             .replace(R.id.profileContainer, new VavHybridRtuProfile()).commit();
+						break;
+					case 5:
+						getActivity().getSupportFragmentManager().beginTransaction()
+						             .replace(R.id.profileContainer, new DABStagedProfile()).commit();
+						break;
+					case 6:
+						getActivity().getSupportFragmentManager().beginTransaction()
+						             .replace(R.id.profileContainer, new DabAnalogRtuProfile()).commit();
+						break;
+					case 7:
+						getActivity().getSupportFragmentManager().beginTransaction()
+						             .replace(R.id.profileContainer, new DABStagedRtuWithVfdProfile()).commit();
+						break;
+					case 8:
+						getActivity().getSupportFragmentManager().beginTransaction()
+						             .replace(R.id.profileContainer, new DABHybridAhuProfile()).commit();
+						break;
+					/*case 0:
+						getActivity().getSupportFragmentManager().beginTransaction()
+						             .replace(R.id.profileContainer, new DefaultSystemProfile()).commit();
+						break;
+
+					case 1:
+						getActivity().getSupportFragmentManager().beginTransaction()
+						             .replace(R.id.profileContainer, new VavAnalogRtuProfile()).commit();
+						break;
+
 					case 2:
 						getActivity().getSupportFragmentManager().beginTransaction()
 						             .replace(R.id.profileContainer, new VavStagedRtuProfile()).commit();
@@ -80,7 +145,7 @@ public class SettingsFragment extends Fragment
 						getActivity().getSupportFragmentManager().beginTransaction()
 						             .replace(R.id.profileContainer, new DabAnalogRtuProfile()).commit();
 						break;
-
+*/
 				}
 			}
 			@Override

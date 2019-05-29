@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:padding="16dp"
+    tools:context=".registartion.StartCCUFragment">
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical">
+
+        <RelativeLayout
+            android:id="@+id/startCCU"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="74dp">
+            <TextView
+                android:id="@+id/textCCU"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:fontFamily="@font/lato_black"
+                android:text="@string/title_ccu"
+                android:textSize="82dp"
+                android:textColor="@color/title_color"
+                android:layout_alignParentRight="true"/>
+            <TextView
+                android:id="@+id/textCCUfullform"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/ccufullform"
+                android:layout_below="@+id/textCCU"
+                android:layout_alignParentRight="true"
+                android:textColor="@android:color/black"
+                android:alpha="0.6"
+                app:fontFamily="@font/lato_light"
+                android:textSize="30dp"
+                android:singleLine="true"
+                android:gravity="right"/>
+            <TextView
+                android:id="@+id/textVersion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:fontFamily="@font/lato_light"
+                android:text="@string/ccuversion"
+                android:layout_below="@+id/textCCUfullform"
+                android:layout_alignParentRight="true"
+                android:textSize="18dp"
+                android:alpha="0.6"
+                android:singleLine="true"
+                android:gravity="right"/>
+
+        </RelativeLayout>
+
+        <ImageView
+            android:layout_width="12dp"
+            android:layout_height="20dp"
+            android:layout_marginRight="24dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/icon_arrowright"/>
+    </RelativeLayout>
+
+</FrameLayout>

@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:id="@+id/layoutCreateNewSite"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="70dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/imageGoback"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:padding="2.5dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="64dp"
+            android:rotation="180"
+            app:srcCompat="@drawable/icon_arrowright" />
+
+        <TextView
+            android:id="@+id/textInstaller"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="310dp"
+            android:gravity="left|center_vertical"
+            android:fontFamily="@font/lato_bold"
+            android:text="@string/title_installeroption"
+            android:textAllCaps="true"
+            android:textColor="@color/orange_75f"
+            android:textSize="33.5dp"
+            android:textStyle="bold" />
+    </RelativeLayout>
+
+
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layoutCreateNewSite"
+        android:scrollbars="none"
+        android:scrollbarStyle="insideOverlay">
+
+        <RelativeLayout
+            android:id="@+id/rlFields"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="78dp"
+            android:scrollbars="vertical">
+
+            <TextView
+                android:id="@+id/textCCU"
+                android:textAllCaps="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/timeZoneSelector"
+                android:layout_marginTop="20dp"
+                android:textColor="@color/orange_75f"
+                android:fontFamily="@font/lato_bold"
+                android:textStyle="bold"
+                android:text="@string/title_ccu"
+                android:textSize="34dp" />
+
+            <TextView
+                android:id="@+id/textPairingAddress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/textCCU"
+                android:layout_marginLeft="76dp"
+                android:text="@string/pairingadd"
+                android:textColor="@color/black"
+                android:alpha="0.87"
+                android:layout_marginTop="42dp"
+                android:textSize="25dp"/>
+
+            <TextView
+                android:id="@+id/textPairingDesc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/textPairingAddress"
+                android:layout_marginLeft="76dp"
+                android:text="@string/pairingadddesc"
+                android:textColor="@color/black"
+                android:alpha="0.60"
+                android:textSize="19.5dp"/>
+
+            <Spinner
+                android:id="@+id/spinnerAddress"
+                style="@style/Widget.AppCompat.Spinner.Underlined"
+                android:layout_width="100dp"
+                android:layout_height="42dp"
+                android:layout_below="@+id/textCCU"
+                android:layout_alignParentRight="true"
+                android:spinnerMode="dropdown"
+                android:layout_marginTop="42dp"/>
+
+            <TextView
+                android:id="@+id/textUseOutside"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/textPairingDesc"
+                android:layout_marginLeft="76dp"
+                android:text="@string/outsideairtemp"
+                android:textColor="@color/black"
+                android:alpha="0.87"
+                android:layout_marginTop="36dp"
+                android:textSize="25dp"/>
+
+
+            <TextView
+                android:id="@+id/textUseOutsideDesc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/textUseOutside"
+                android:layout_marginLeft="76dp"
+                android:text="@string/outsideairtempdesc"
+                android:textColor="@color/black"
+                android:alpha="0.60"
+                android:textSize="19.5dp"/>
+
+
+            <ToggleButton
+                android:id="@+id/toggleOustideAir"
+                android:layout_width="47dp"
+                android:layout_height="28dp"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:background="@drawable/toggle_selector"
+                android:checked="false"
+                android:layout_marginTop="36dp"
+                android:textOff=""
+                android:textOn=""
+                android:layout_below="@+id/textPairingDesc" />
+
+
+            <TextView
+                android:id="@+id/textBuilding"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAllCaps="true"
+                android:layout_below="@+id/textUseOutsideDesc"
+                android:layout_marginTop="36dp"
+                android:textColor="@color/orange_75f"
+                android:fontFamily="@font/lato_bold"
+                android:text="@string/title_building"
+                android:textStyle="bold"
+                android:textSize="34dp" />
+
+            <TextView
+                android:id="@+id/textTempLimit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/textBuilding"
+                android:layout_marginLeft="76dp"
+                android:text="@string/templimit"
+                android:textColor="@color/black"
+                android:alpha="0.87"
+                android:layout_marginTop="42dp"
+                android:textSize="25dp"/>
+
+            <TextView
+                android:id="@+id/textTempLimitDesc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/textTempLimit"
+                android:layout_marginLeft="76dp"
+                android:text="@string/templimitdesc"
+                android:textColor="@color/black"
+                android:alpha="0.60"
+                android:textSize="19.5dp"/>
+
+            <ImageView
+                android:id="@+id/imageTemp"
+                android:layout_width="590dp"
+                android:layout_height="100dp"
+                android:layout_below="@+id/textTempLimitDesc"
+                android:layout_marginTop="36dp"
+                android:layout_marginLeft="76dp"
+                android:src="@drawable/placeholder_buildinglimit"
+                />
+
+            <TextView
+                android:id="@+id/textUseCelsius"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/imageTemp"
+                android:layout_marginLeft="76dp"
+                android:text="@string/usecelsius"
+                android:textColor="@color/black"
+                android:alpha="0.87"
+                android:layout_marginTop="36dp"
+                android:textSize="25dp"/>
+
+            <ToggleButton
+                android:id="@+id/toggleCelsius"
+                android:layout_width="47dp"
+                android:layout_height="28dp"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:background="@drawable/toggle_selector"
+                android:checked="false"
+                android:layout_marginTop="36dp"
+                android:textOff=""
+                android:textOn=""
+                android:layout_below="@+id/imageTemp" />
+
+            <TextView
+                android:id="@+id/textUseMT"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/textUseCelsius"
+                android:layout_marginLeft="76dp"
+                android:text="@string/usemiltime"
+                android:textColor="@color/black"
+                android:alpha="0.87"
+                android:layout_marginTop="36dp"
+                android:textSize="25dp"/>
+
+            <ToggleButton
+                android:id="@+id/toggleMT"
+                android:layout_width="47dp"
+                android:layout_height="28dp"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:background="@drawable/toggle_selector"
+                android:checked="true"
+                android:layout_marginTop="36dp"
+                android:textOff=""
+                android:textOn=""
+                android:layout_below="@+id/textUseCelsius" />
+
+            <TextView
+                android:id="@+id/textSingleTemp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/textUseMT"
+                android:layout_marginLeft="76dp"
+                android:text="@string/usesingletemp"
+                android:textColor="@color/black"
+                android:alpha="0.87"
+                android:layout_marginTop="36dp"
+                android:textSize="25dp"/>
+
+
+            <ToggleButton
+                android:id="@+id/toggleSingleTemp"
+                android:layout_width="47dp"
+                android:layout_height="28dp"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:background="@drawable/toggle_selector"
+                android:checked="false"
+                android:layout_marginTop="36dp"
+                android:textOff=""
+                android:textOn=""
+                android:layout_below="@+id/textUseMT" />
+
+            <TextView
+                android:id="@+id/textTempforAll"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/textSingleTemp"
+                android:layout_marginLeft="76dp"
+                android:text="@string/usetempforall"
+                android:textColor="@color/black"
+                android:alpha="0.87"
+                android:layout_marginTop="36dp"
+                android:textSize="25dp"/>
+
+            <ToggleButton
+                android:id="@+id/toggleTempAll"
+                android:layout_width="47dp"
+                android:layout_height="28dp"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:background="@drawable/toggle_selector"
+                android:checked="false"
+                android:layout_marginTop="36dp"
+                android:textOff=""
+                android:textOn=""
+                android:layout_below="@+id/textSingleTemp" />
+
+
+            <Button
+                android:id="@+id/buttonNext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/toggleTempAll"
+                android:layout_alignParentRight="true"
+                android:layout_marginTop="36dp"
+                android:layout_marginBottom="24dp"
+                android:background="@null"
+                android:drawableRight="@drawable/icon_arrowright"
+                android:drawablePadding="5dp"
+                android:fontFamily="@font/lato_bold"
+                android:text="@string/button_next"
+                android:textColor="@color/orange_75f"
+                android:textSize="24dp" />
+        </RelativeLayout>
+    </ScrollView>
+</android.support.constraint.ConstraintLayout>

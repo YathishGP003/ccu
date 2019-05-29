@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_logoscreen"
+    tools:context=".registartion.FreshRegistration">
+
+
+    <ListView
+        android:id="@+id/listView_icons"
+        android:layout_width="56dp"
+        android:layout_height="456dp"
+        android:layout_marginLeft="130dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:orientation="vertical"
+        android:divider="@null"
+        android:scrollbars="none">
+    </ListView>
+
+    <!--<a75f.io.renatus.registartion.CustomViewPager
+        android:id="@+id/pager"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layoutCreateNewSite"
+        />-->
+    <FrameLayout
+        android:id="@+id/container"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layoutCreateNewSite">
+    </FrameLayout>
+    <RelativeLayout
+        android:id="@+id/layoutHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="70dp"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/imageGoback"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:padding="2.5dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="64dp"
+            android:rotation="180"
+            app:srcCompat="@drawable/icon_arrowright" />
+
+        <TextView
+            android:id="@+id/textTitleFragment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:fontFamily="@font/lato_bold"
+            android:text="@string/title_systemprofile"
+            android:textAllCaps="true"
+            android:textColor="@color/orange_75f"
+            android:textSize="33.5dp"
+            android:textStyle="bold" />
+
+        <android.support.v7.widget.AppCompatSpinner
+            android:id="@+id/spinnerSystemProfile"
+            style="@style/Widget.AppCompat.Spinner.Underlined"
+            android:layout_width="370dp"
+            android:layout_height="53dp"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="56dp"
+            android:layout_below="@+id/textInputSitename"
+            android:spinnerMode="dropdown"
+            android:entries="@array/system_profile_select"/>
+
+        <ToggleButton
+            android:id="@+id/toggleWifi"
+            android:layout_width="47dp"
+            android:layout_height="28dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="106dp"
+            android:background="@drawable/toggle_selector"
+            android:checked="false"
+            android:textOff=""
+            android:textOn="" />
+
+        <ImageView
+            android:id="@+id/imageRefresh"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="54dp"
+            app:srcCompat="@drawable/ic_refresh" />
+
+    </RelativeLayout>
+
+    <ImageView
+        android:id="@+id/imageLogo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:srcCompat="@drawable/ic_logo_svg"
+        android:layout_marginLeft="38dp"
+        android:layout_marginBottom="36dp"/>
+
+    <Button
+        android:id="@+id/buttonNext"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:background="@null"
+        android:drawableRight="@drawable/icon_arrowright"
+        android:drawablePadding="5dp"
+        android:fontFamily="@font/lato_bold"
+        android:text="@string/button_next"
+        android:textColor="@color/orange_75f"
+        android:textSize="24dp"
+        android:layout_marginRight="38dp"
+        android:layout_marginBottom="36dp"/>
+
+    <!-- <android.support.v4.view.ViewPager
+         android:id="@+id/pager"
+         android:layout_width="match_parent"
+         android:layout_height="match_parent" />-->
+
+
+</android.support.constraint.ConstraintLayout>

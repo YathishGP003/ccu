@@ -12,7 +12,9 @@ public class Site
     public ArrayList<String> markers;
     public String            geoCity;
     public String            geoState;
-    public String            geoAddress;
+    public String            geoAddr;
+    public String            geoCountry;
+    public String            geoPostalCode;
     public String            geoZip;
     public String            tz;
     public double            area;
@@ -20,11 +22,12 @@ public class Site
     public Site() {
     
     }
-    public Site(String name,String city, String state, String zip, String tz, double area) {
+    public Site(String name,String city, String state, String country,String zip, String tz, double area) {
         this.displayName = name;
         this.geoCity = city;
         this.geoState = state;
-        this.geoZip = zip;
+        this.geoCountry = country;
+        this.geoPostalCode = zip;
         this.tz = tz;
         this.area = area;
     }
@@ -33,7 +36,9 @@ public class Site
         this.displayName = s.getDisplayName();
         this.geoCity = s.getGeoCity();
         this.geoState = s.getGeoState();
-        this.geoZip = s.getGeoZip();
+        this.geoCountry = s.getGeoCountry();
+        this.geoPostalCode = s.getGeoPostalCode();
+        this.geoAddr = s.getGeoAddress();
         this.tz = s.getTz();
         this.area = s.getArea();
     }

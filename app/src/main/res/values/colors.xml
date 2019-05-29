@@ -56,6 +56,7 @@
     <color name="min_temp">#E24301</color>
     <color name="max_temp">#5990B4</color>
     <color name="bg_temp">#1A000000</color>
+
     <color name="text_color">#DE000000</color>
     <color name="title_color">#55565A</color>
     <color name="line_greycolor">#707070</color>

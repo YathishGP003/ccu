@@ -121,7 +121,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
             StandaloneFanSpeed fanSpeed = StandaloneFanSpeed.values()[(int) ssFanOpMode];
             if (!occupied && (fanSpeed != OFF)) {
                 if (fanSpeed != StandaloneFanSpeed.AUTO) {
-                    StandaloneScheduler.updateOperationalPoints(hpuEquip.getId(), "fan", StandaloneFanSpeed.AUTO.ordinal());
+                    StandaloneScheduler.updateOperationalPoints(hpuEquip.getId(), "fan and operation and mode", StandaloneFanSpeed.AUTO.ordinal());
                     fanSpeed = StandaloneFanSpeed.AUTO;
                 }
             }
@@ -326,20 +326,29 @@ public class HeatPumpUnitProfile extends ZoneProfile {
     private void resetRelays(String equipId, short node, double humidity, ZoneTempState temperatureState) {
 
 
-        int fanStage2Type = (int)getConfigType("relay5",node);
-        if (getCmdSignal("compressor and stage1", node) > 0)
-            setCmdSignal("compressor and stage1", 0, node);
-        if (getCmdSignal("compressor and stage2", node) > 0)
-            setCmdSignal("compressor and stage2", 0, node);
-        if (getCmdSignal("aux and heating ", node) > 0)
-            setCmdSignal("aux and heating ", 0, node);
-        if (getCmdSignal("changeover and stage1", node) > 0)
-            setCmdSignal("changeover and stage1", 0, node);
-        if (getCmdSignal("fan and stage1", node) > 0)
-            setCmdSignal("fan and stage1", 0, node);
-        if (getCmdSignal("fan and stage2", node) > 0)
-            setCmdSignal("fan and stage2", 0, node);
+        int fanStage2Type = (int) getConfigType("relay5", node);
+        try {
+            if (getCmdSignal("compressor and stage1", node) > 0)
+                setCmdSignal("compressor and stage1", 0, node);
+            if (getCmdSignal("compressor and stage2", node) > 0)
+                setCmdSignal("compressor and stage2", 0, node);
+            if (getCmdSignal("aux and heating ", node) > 0)
+                setCmdSignal("aux and heating ", 0, node);
+            if (getCmdSignal("changeover and stage1", node) > 0)
+                setCmdSignal("changeover and stage1", 0, node);
+            if (getCmdSignal("fan and stage1", node) > 0)
+                setCmdSignal("fan and stage1", 0, node);
+            if (getCmdSignal("fan and stage2", node) > 0)
+                setCmdSignal("fan and stage2", 0, node);
+        }catch (Exception e){
 
+            if(temperatureState == ZoneTempState.TEMP_DEAD){
+                setCmdSignal("compressor and stage1", 0, node);
+                setCmdSignal("compressor and stage2", 0, node);
+                setCmdSignal("aux and heating ", 0, node);
+                setCmdSignal("changeover and stage1", 0, node);
+            }
+        }
          HashMap<String,Integer> relayStages = new HashMap<String, Integer>();
          if(temperatureState != ZoneTempState.FAN_OP_MODE_OFF)
              updateHumidityStatus(fanStage2Type,node,equipId,humidity,relayStages);

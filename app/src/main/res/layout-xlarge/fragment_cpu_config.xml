@@ -380,23 +380,25 @@
                     android:textOff="OFF"
                     android:textOn="ON" />
             </LinearLayout>
+
+
+
+
+            <Button
+                android:id="@+id/setBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentBottom="true"
+                android:layout_marginRight="24dp"
+                android:layout_marginBottom="150dp"
+                android:background="@null"
+                android:button="@null"
+                android:fontFamily="@font/lato_regular"
+                android:text="@string/button_set"
+                android:textAllCaps="true"
+                android:textColor="@color/orange_75f"
+                android:textSize="19.5dp" />
         </RelativeLayout>
     </ScrollView>
-
-    <Button
-        android:id="@+id/setBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginRight="24dp"
-        android:layout_marginBottom="150dp"
-        android:background="@null"
-        android:button="@null"
-        android:fontFamily="@font/lato_regular"
-        android:text="@string/button_set"
-        android:textAllCaps="true"
-        android:textColor="@color/orange_75f"
-        android:textSize="19.5dp" />
-
 </RelativeLayout>

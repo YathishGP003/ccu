@@ -102,101 +102,105 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
     public synchronized void updateSystemPoints() {
         super.updateSystemPoints();
         
-        double analogMin = getConfigVal("analog1 and cooling and min");
-        double analogMax = getConfigVal("analog1 and cooling and max");
-        CcuLog.d(L.TAG_CCU_SYSTEM, "analogMin: " + analogMin + " analogMax: " + analogMax + " systemCoolingLoopOp: " + systemCoolingLoopOp);
-    
-        int signal = 0;
-        if (analogMax > analogMin)
-        {
-            signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (systemCoolingLoopOp/100)));
-        }
-        else
-        {
-            signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemCoolingLoopOp/100)));
-        }
-    
-        //setSystemLoopOp("cooling", systemCoolingLoopOp);
-        setCmdSignal("cooling",signal);
+        int signal;
+        double analogMin = 0, analogMax = 0;
         if (getConfigEnabled("analog1") > 0)
         {
-            ControlMote.setAnalogOut("analog1", signal);
-        }
+            analogMin = getConfigVal("analog1 and cooling and min");
+            analogMax = getConfigVal("analog1 and cooling and max");
+            CcuLog.d(L.TAG_CCU_SYSTEM, "analog1Min: " + analogMin + " analog1Max: " + analogMax + " systemCoolingLoopOp: " + systemCoolingLoopOp);
     
-        analogMin = getConfigVal("analog2 and fan and min");
-        analogMax = getConfigVal("analog2 and fan and max");
     
-        CcuLog.d(L.TAG_CCU_SYSTEM, "analogMin: "+analogMin+" analogMax: "+analogMax+" systemFanLoopOp: "+systemFanLoopOp);
-    
-        if (analogMax > analogMin)
-        {
-            signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (systemFanLoopOp/100)));
-        }
-        else
-        {
-            signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemFanLoopOp/100)));
-        }
-        //setSystemLoopOp("fan", systemFanLoopOp);
-        setCmdSignal("fan", signal);
-        if (getConfigEnabled("analog2") > 0)
-        {
-            ControlMote.setAnalogOut("analog2", signal);
-        }
-        
-        
-        analogMin = getConfigVal("analog3 and heating and min");
-        analogMax = getConfigVal("analog3 and heating and max");
-    
-        CcuLog.d(L.TAG_CCU_SYSTEM, "analogMin: "+analogMin+" analogMax: "+analogMax+" systemHeatingLoopOp : "+systemHeatingLoopOp);
-        if (analogMax > analogMin)
-        {
-            signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (systemHeatingLoopOp / 100)));
-        }
-        else
-        {
-            signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemHeatingLoopOp / 100)));
-        }
-    
-        //setSystemLoopOp("heating", systemHeatingLoopOp);
-        setCmdSignal("heating", signal);
-        if (getConfigEnabled("analog3") > 0)
-        {
-            ControlMote.setAnalogOut("analog3", signal);
-        }
-    
-        if (VavSystemController.getInstance().getSystemState() == COOLING)
-        {
-            analogMin = getConfigVal("analog4 and cooling and min");
-            analogMax = getConfigVal("analog4 and cooling and max");
             if (analogMax > analogMin)
             {
-                signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * systemCoolingLoopOp/100));
-            } else {
-                signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * systemCoolingLoopOp/100));
+                signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (systemCoolingLoopOp/100)));
             }
-        } else if (VavSystemController.getInstance().getSystemState() == HEATING)
-        {
-            analogMin = getConfigVal("analog4 and heating and min");
-            analogMax = getConfigVal("analog4 and heating and max");
-            if (analogMax > analogMin)
+            else
             {
-                signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * systemHeatingLoopOp/100));
-            } else {
-                signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * systemHeatingLoopOp/100));
+                signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemCoolingLoopOp/100)));
             }
         } else {
-            double coolingMin = getConfigVal("analog4 and cooling and min");
-            double heatingMin = getConfigVal("analog4 and heating and min");
-    
-            signal = (int) (ANALOG_SCALE * (coolingMin + heatingMin) /2);
+            signal = 0;
         }
-        CcuLog.d(L.TAG_CCU_SYSTEM, "analogMin: "+analogMin+" analogMax: "+analogMax+" Composite: "+signal);
+        setCmdSignal("cooling",signal);
+        ControlMote.setAnalogOut("analog1", signal);
         
-        setCmdSignal("composite",signal);
+        if (getConfigEnabled("analog2") > 0)
+        {
+            analogMin = getConfigVal("analog2 and fan and min");
+            analogMax = getConfigVal("analog2 and fan and max");
+    
+            CcuLog.d(L.TAG_CCU_SYSTEM, "analog2Min: "+analogMin+" analog2Max: "+analogMax+" systemFanLoopOp: "+systemFanLoopOp);
+    
+            if (analogMax > analogMin)
+            {
+                signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (systemFanLoopOp/100)));
+            }
+            else
+            {
+                signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemFanLoopOp/100)));
+            }
+        } else {
+            signal = 0;
+        }
+        setCmdSignal("fan", signal);
+        ControlMote.setAnalogOut("analog2", signal);
+        
+        if (getConfigEnabled("analog3") > 0)
+        {
+            analogMin = getConfigVal("analog3 and heating and min");
+            analogMax = getConfigVal("analog3 and heating and max");
+    
+            CcuLog.d(L.TAG_CCU_SYSTEM, "analog3Min: "+analogMin+" analog3Max: "+analogMax+" systemHeatingLoopOp : "+systemHeatingLoopOp);
+            if (analogMax > analogMin)
+            {
+                signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (systemHeatingLoopOp / 100)));
+            }
+            else
+            {
+                signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemHeatingLoopOp / 100)));
+            }
+        } else  {
+            signal = 0;
+        }
+        setCmdSignal("heating", signal);
+        ControlMote.setAnalogOut("analog3", signal);
+        
         if (getConfigEnabled("analog4") > 0)
         {
-            ControlMote.setAnalogOut("analog4", signal);
+            if (VavSystemController.getInstance().getSystemState() == COOLING)
+            {
+                analogMin = getConfigVal("analog4 and cooling and min");
+                analogMax = getConfigVal("analog4 and cooling and max");
+                if (analogMax > analogMin)
+                {
+                    signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * systemCoolingLoopOp/100));
+                } else {
+                    signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * systemCoolingLoopOp/100));
+                }
+            } else if (VavSystemController.getInstance().getSystemState() == HEATING)
+            {
+                analogMin = getConfigVal("analog4 and heating and min");
+                analogMax = getConfigVal("analog4 and heating and max");
+                if (analogMax > analogMin)
+                {
+                    signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * systemHeatingLoopOp/100));
+                } else {
+                    signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * systemHeatingLoopOp/100));
+                }
+            } else {
+                double coolingMin = getConfigVal("analog4 and cooling and min");
+                double heatingMin = getConfigVal("analog4 and heating and min");
+        
+                signal = (int) (ANALOG_SCALE * (coolingMin + heatingMin) /2);
+            }
+            CcuLog.d(L.TAG_CCU_SYSTEM, "analogMin: "+analogMin+" analogMax: "+analogMax+" Composite: "+signal);
+        } else {
+            signal = 0;
+            
         }
+        setCmdSignal("composite",signal);
+        ControlMote.setAnalogOut("analog4", signal);
         
     }
     
@@ -209,6 +213,8 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         
         if (!status.toString().equals("")) {
             status.insert(0, super.getStatusMessage()+" ; Analog ");
+        } else {
+            status.append(super.getStatusMessage());
         }
     
         return status.toString().equals("")? "OFF" : status.toString();

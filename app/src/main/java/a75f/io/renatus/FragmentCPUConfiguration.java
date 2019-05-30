@@ -360,27 +360,27 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
         switch (buttonView.getId())
         {
             case R.id.testCpuRelay1:
-                sendRelayActivationTestSignal( (short) (testCoolingY1.isChecked() ? 1: 0), Port.RELAY_ONE);
+                sendRelayActivationTestSignal();
                 break;
             case R.id.testCpuRelay2:
-                sendRelayActivationTestSignal( (short) (testCoolingY2.isChecked() ? 1: 0), Port.RELAY_TWO);
+                sendRelayActivationTestSignal();
                 break;
             case R.id.testCpuRelay3:
-                sendRelayActivationTestSignal( (short) (testFanLowG.isChecked() ? 1: 0), Port.RELAY_THREE);
+                sendRelayActivationTestSignal();
                 break;
             case R.id.testCpuRelay4:
-                sendRelayActivationTestSignal( (short) (testHeatingW1.isChecked() ? 1: 0), Port.RELAY_FOUR);
+                sendRelayActivationTestSignal();
                 break;
             case R.id.testCpuRelay5:
-                sendRelayActivationTestSignal( (short) (testHeatingW2.isChecked() ? 1: 0), Port.RELAY_FIVE);
+                sendRelayActivationTestSignal();
                 break;
             case R.id.testCpuRelay6:
-                sendRelayActivationTestSignal( (short) (testFanHighOb.isChecked() ? 1: 0), Port.RELAY_SIX);
+                sendRelayActivationTestSignal();
                 break;
         }
     }
 
-    public void sendRelayActivationTestSignal(short val,Port port) {
+    public void sendRelayActivationTestSignal() {
         CcuToCmOverUsbSmartStatControlsMessage_t msg = new CcuToCmOverUsbSmartStatControlsMessage_t();
         msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SMART_STAT_CONTROLS);
         msg.address.set(mSmartNodeAddress);

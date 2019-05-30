@@ -223,7 +223,7 @@
                     android:id="@+id/textCoolStage1"
                     android:layout_width="wrap_content"
                     android:layout_height="28.5dp"
-                    android:text="@string/label_coolstage1"
+                    android:text="@string/label_cpucoolstage1"
                     android:textAppearance="@style/text_appearance" />
 
                 <TextView
@@ -231,7 +231,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="28.5dp"
                     android:layout_marginTop="32dp"
-                    android:text="@string/label_coolstage2"
+                    android:text="@string/label_cpucoolstage2"
                     android:textAppearance="@style/text_appearance" />
                 <TextView
                     android:id="@+id/textFanLow"
@@ -246,7 +246,7 @@
                     android:layout_width="195dp"
                     android:layout_height="28.5dp"
                     android:layout_marginTop="32dp"
-                    android:text="@string/label_heatstage1"
+                    android:text="@string/label_cpuheatstage1"
                     android:textAppearance="@style/text_appearance" />
 
                 <TextView
@@ -254,8 +254,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="28.5dp"
                     android:layout_marginTop="32dp"
-                    android:textAppearance="@style/text_appearance"
-                    android:text="@string/label_heatstage2"/>
+                    android:text="@string/label_cpuheatstage2"
+                    android:textAppearance="@style/text_appearance" />
 
                 <android.support.v7.widget.AppCompatSpinner
                     android:id="@+id/spinnerCpuFanHigh"

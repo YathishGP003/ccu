@@ -365,7 +365,8 @@ public class HeatPumpUnitProfile extends ZoneProfile {
         boolean isCompressorStage2Enabled = getConfigEnabled("relay2",addr) > 0 ? true : false;
         boolean isFanStage1Enabled = getConfigEnabled("relay3", addr) > 0 ? true : false; //relay3 for fan low
         boolean isFanRelay5Enabled = getConfigEnabled("relay5", addr) > 0 ? true : false; //relay5 for fan high
-        boolean isAuxHeatingEnabled = getConfigEnabled("relay4",addr)> 0 ? true : false;//Aux Heating
+        boolean isAuxHeatingEnabled = getConfigEnabled("relay4",addr)> 0 ? true : false;//Aux
+        double curHumidity = hpuEquip.getHumidity();
         double humidifierTargetThreshold = 25.0;
         int fanStage2Type = (int)getConfigType("relay5",addr);
         double coolingDeadband = 2.0;
@@ -526,22 +527,22 @@ public class HeatPumpUnitProfile extends ZoneProfile {
         switch (fanRelayType){
 
             case HUMIDIFIER:
-                if(hpuEquip.getHumidity() < humidifierTargetThreshold) {
+                if(curHumidity < humidifierTargetThreshold) {
                     relayStages.put("Humidifier",1);
                     setCmdSignal("fan and stage2", 1.0, addr);
                 }else if(getCmdSignal("fan and stage2",addr) > 0){
-                    if(hpuEquip.getHumidity() < (humidifierTargetThreshold + 5))
+                    if(hpuEquip.getHumidity() > (humidifierTargetThreshold + 5.0))
                         setCmdSignal("fan and stage2",0, addr);
                     else
                         relayStages.put("Humdifier",1);
                 }
                 break;
             case DE_HUMIDIFIER:
-                if(hpuEquip.getHumidity() > humidifierTargetThreshold) {
+                if(curHumidity > humidifierTargetThreshold) {
                     setCmdSignal("fan and stage2", 1.0, addr);
                     relayStages.put("Dehumidifier",1);
                 }else if(getCmdSignal("fan and stage2",addr) > 0){
-                    if(hpuEquip.getHumidity() < (humidifierTargetThreshold - 5))
+                    if(curHumidity < (humidifierTargetThreshold - 5.0))
                         setCmdSignal("fan and stage2",0, addr);
                     else
                         relayStages.put("Dehumidifier",1);
@@ -562,6 +563,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
         boolean isFanRelay5Enabled = getConfigEnabled("relay5", addr) > 0 ? true : false; //relay5 for fan high
         boolean isAuxHeatingEnabled = getConfigEnabled("relay4",addr)> 0 ? true : false;//Aux Heating
         int fanStage2Type = (int)getConfigType("relay5",addr);
+        double curHumidity = hpuEquip.getHumidity();
         SmartStatFanRelayType fanRelayType = SmartStatFanRelayType.values()[fanStage2Type];
         int heatPumpChangeoverType = (int)getConfigType("relay6",addr);
         double humidifierTargetThreshold = 25.0;//
@@ -726,7 +728,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                                 relayStages.put("FanStage1", 1);
                                 setCmdSignal("fan and stage1", 1.0, addr);
                             }
-                            if(isFanRelay5Enabled) {
+                            if(isFanRelay5Enabled && (fanRelayType == SmartStatFanRelayType.FAN_STAGE2)) {
                                 relayStages.put("FanStage2", 1);
                                 setCmdSignal("fan and stage2", 1.0, addr);
                             }

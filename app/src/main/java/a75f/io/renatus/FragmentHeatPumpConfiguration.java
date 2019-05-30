@@ -367,55 +367,41 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
         switch (buttonView.getId())
         {
             case R.id.testHpuRelay1:
-                sendRelayActivationTestSignal( (short) (testComY1.isChecked() ? 1: 0), Port.RELAY_ONE);
+                sendRelayActivationTestSignal();
                 break;
             case R.id.testHpuRelay2:
-                sendRelayActivationTestSignal( (short) (testComY2.isChecked() ? 1: 0), Port.RELAY_TWO);
+                sendRelayActivationTestSignal( );
                 break;
             case R.id.testHpuRelay3:
-                sendRelayActivationTestSignal( (short) (testFanLowG.isChecked() ? 1: 0), Port.RELAY_THREE);
+                sendRelayActivationTestSignal();
                 break;
             case R.id.testHpuRelay4:
-                sendRelayActivationTestSignal( (short) (testAuxHeating.isChecked() ? 1: 0), Port.RELAY_FOUR);
+                sendRelayActivationTestSignal();
                 break;
             case R.id.testHpuRelay5:
-                sendRelayActivationTestSignal( (short) (testFanHighOb.isChecked() ? 1: 0), Port.RELAY_FIVE);
+                sendRelayActivationTestSignal();
                 break;
             case R.id.testHpuRelay6:
-                sendRelayActivationTestSignal( (short) (testHeatChangeOver.isChecked() ? 1: 0), Port.RELAY_SIX);
+                sendRelayActivationTestSignal();
                 break;
         }
     }
 
 
-    public void sendRelayActivationTestSignal(short val,Port port) {
-        Log.d(L.TAG_CCU_UI, "sendRelayActivationTestSignal val : "+val);
+    public void sendRelayActivationTestSignal() {
         CcuToCmOverUsbSmartStatControlsMessage_t msg = new CcuToCmOverUsbSmartStatControlsMessage_t();
         msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SMART_STAT_CONTROLS);
         msg.address.set(mSmartNodeAddress);
         msg.controls.setTemperature.set((short)(getDesiredTemp(mSmartNodeAddress)*2));
         msg.controls.conditioningMode.set(SmartStatConditioningMode_t.CONDITIONING_MODE_AUTO);
         msg.controls.fanSpeed.set(SmartStatFanSpeed_t.FAN_SPEED_AUTO);
-        switch (port){
-            case RELAY_ONE:
-                msg.controls.relay1.set(val);
-                break;
-            case RELAY_TWO:
-                msg.controls.relay2.set(val);
-                break;
-            case RELAY_THREE:
-                msg.controls.relay3.set(val);
-                break;
-            case RELAY_FOUR:
-                msg.controls.relay4.set(val);
-                break;
-            case RELAY_FIVE:
-                msg.controls.relay5.set(val);
-                break;
-            case RELAY_SIX:
-                msg.controls.relay6.set(val);
-                break;
-        }
+        msg.controls.relay1.set((short)(testComY1.isChecked() ? 1 : 0));
+        msg.controls.relay2.set((short)(testComY2.isChecked() ? 1 : 0));
+        msg.controls.relay3.set((short)(testFanLowG.isChecked() ? 1 : 0));
+        msg.controls.relay4.set((short)(testAuxHeating.isChecked() ? 1 : 0));
+        msg.controls.relay5.set((short)(testFanHighOb.isChecked() ? 1 : 0));
+        msg.controls.relay6.set((short)(testHeatChangeOver.isChecked() ? 1 : 0));
+
         MeshUtil.sendStructToCM(msg);
     }
     public static double getDesiredTemp(short node)

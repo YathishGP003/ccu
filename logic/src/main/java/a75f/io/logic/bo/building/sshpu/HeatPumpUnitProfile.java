@@ -340,8 +340,10 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                 setCmdSignal("changeover and stage1", 0, node);
             if (getCmdSignal("fan and stage1", node) > 0)
                 setCmdSignal("fan and stage1", 0, node);
-            if (getCmdSignal("fan and stage2", node) > 0)
-                setCmdSignal("fan and stage2", 0, node);
+            if((fanStage2Type == SmartStatFanRelayType.FAN_STAGE2.ordinal()) || (temperatureState == ZoneTempState.FAN_OP_MODE_OFF)) {
+                if (getCmdSignal("fan and stage2", node) > 0)
+                    setCmdSignal("fan and stage2", 0, node);
+            }
         }catch (Exception e){
 
             if(temperatureState == ZoneTempState.TEMP_DEAD){

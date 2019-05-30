@@ -230,7 +230,7 @@ public class Point extends Entity
                 {
                     this.tz = pair.getValue().toString();
                 }
-                it.remove();
+                //it.remove();
             }
             return this;
         }

@@ -206,7 +206,7 @@ public class Zone extends Entity
                 {
                     this.vacationRef = pair.getValue().toString();
                 }
-                it.remove();
+                //it.remove();
             }
 
             return this;

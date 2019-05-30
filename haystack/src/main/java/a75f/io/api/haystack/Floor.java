@@ -94,7 +94,7 @@ public class Floor extends Entity
                 {
                     this.siteRef = pair.getValue().toString();
                 }
-                it.remove();
+                //it.remove();
             }
         
             return this;

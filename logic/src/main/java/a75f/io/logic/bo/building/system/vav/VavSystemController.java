@@ -397,7 +397,7 @@ public class VavSystemController extends SystemController
         double humidityZones = 0;
     
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        ArrayList<HashMap> vavEquips = hayStack.readAll("equip and vav and zone");
+        ArrayList<HashMap> vavEquips = hayStack.readAll("equip and zone");
     
         for (HashMap q : vavEquips)
         {
@@ -422,7 +422,7 @@ public class VavSystemController extends SystemController
         double tempZones = 0;
         
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        ArrayList<HashMap> vavEquips = hayStack.readAll("equip and vav and zone");
+        ArrayList<HashMap> vavEquips = hayStack.readAll("equip and zone");
         
         for (HashMap q : vavEquips)
         {

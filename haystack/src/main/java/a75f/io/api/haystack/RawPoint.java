@@ -281,7 +281,7 @@ public class RawPoint extends Entity
                 {
                     this.tz = pair.getValue().toString();
                 }
-                it.remove();
+                //it.remove();
             }
             return this;
         }

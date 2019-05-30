@@ -186,7 +186,7 @@ public class Site extends Entity
                     this.area = Double.parseDouble(pair.getValue().toString().replaceAll("[^0-9]", ""));
                 }
 
-                it.remove();
+                //it.remove();
             }
 
             return this;

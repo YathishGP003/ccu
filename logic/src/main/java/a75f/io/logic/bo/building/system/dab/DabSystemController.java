@@ -320,7 +320,7 @@ public class DabSystemController extends SystemController
         double humidityZones = 0;
         
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        ArrayList<HashMap> dabEquips = hayStack.readAll("equip and dab and zone");
+        ArrayList<HashMap> dabEquips = hayStack.readAll("equip and zone");
         
         for (HashMap q : dabEquips)
         {
@@ -345,12 +345,11 @@ public class DabSystemController extends SystemController
         double tempZones = 0;
         
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        ArrayList<HashMap> dabEquips = hayStack.readAll("equip and dab and zone");
+        ArrayList<HashMap> dabEquips = hayStack.readAll("equip and zone");
         
         for (HashMap q : dabEquips)
         {
             double tempVal = hayStack.readHisValByQuery("point and air and temp and sensor and current and equipRef == \""+q.get("id")+"\"");
-    
             if (!isZoneDead(new Equip.Builder().setHashMap(q).build())) {
                 tempSum += tempVal;
                 tempZones++;

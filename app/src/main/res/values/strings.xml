@@ -343,6 +343,11 @@
     <string name="label_enableoccup">Enable Occupancy Sensing</string>
     <string name="label_extsensor">Use External 10k Temp Sensor</string>
     <string name="button_set">SET</string>
+    <string name="label_hpcoolstage1">Cooling Stage 1</string>
+    <string name="label_hpcoolstage2">Cooling Stage 2</string>
+    <string name="label_hpheatstage1">Heating Stage 1</string>
+    <string name="label_hpheatstage2">Heating Stage 2</string>
+
     <string name="label_coolstage1">Cooling Stage 1</string>
     <string name="label_coolstage2">Cooling Stage 2</string>
     <string name="label_heatstage1">Heating Stage 1</string>

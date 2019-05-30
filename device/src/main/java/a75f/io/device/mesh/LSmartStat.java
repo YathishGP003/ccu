@@ -154,18 +154,23 @@ public class LSmartStat {
         switch (profile){
             case "cpu":
                 settings_t.profileBitmap.set(SmartStatProfileMap_t.CONVENTIONAL_PACKAGE_UNIT);
+                settings_t.otherBitMaps.heatPumpUnitChangeOverB.set((short)0);
                 break;
             case "compu":
                 settings_t.profileBitmap.set(SmartStatProfileMap_t.COMMERCIAL_PACKAGE_UNIT);
+                settings_t.otherBitMaps.heatPumpUnitChangeOverB.set((short)0);
                 break;
             case "hpu":
                 settings_t.profileBitmap.set(SmartStatProfileMap_t.HEAT_PUMP_UNIT);
+                settings_t.otherBitMaps.heatPumpUnitChangeOverB.set((short)(getHeatPumpChangeOverType(address) < 2 ? 0 : 1));
                 break;
-            case "2pfcu":
+            case "pfcu2":
                 settings_t.profileBitmap.set(SmartStatProfileMap_t.PIPE_FAN_COIL_UNI_2);
+                settings_t.otherBitMaps.heatPumpUnitChangeOverB.set((short)0);
                 break;
-            case "4pfcu":
+            case "pfcu4":
                 settings_t.profileBitmap.set(SmartStatProfileMap_t.PIPE_FAN_COIL_UNIT_4);
+                settings_t.otherBitMaps.heatPumpUnitChangeOverB.set((short)0);
                 break;
 
         }
@@ -203,7 +208,6 @@ public class LSmartStat {
         settings_t.enabledRelaysBitmap.relay6.set(getConfigEnabled(Port.RELAY_SIX.name(),address));
         settings_t.otherBitMaps.centigrade.set((short)0);
         settings_t.otherBitMaps.occupancySensor.set((byte)getOccupancyEnable(address));
-        settings_t.otherBitMaps.heatPumpUnitChangeOverB.set((short)(getHeatPumpChangeOverType(address) < 2 ? 0 : 1));
         settings_t.otherBitMaps.enableExternal10kTempSensor.set(getConfigEnabled(Port.TH2_IN.name(),address));
         settings_t.otherBitMaps.enableBeaconing.set((short)0);
     }

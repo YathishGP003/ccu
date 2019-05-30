@@ -196,7 +196,7 @@ public class Device extends Entity
                 {
                     this.profileType = pair.getValue().toString();
                 }
-                it.remove();
+                //it.remove();
             }
         
             return this;

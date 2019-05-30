@@ -170,7 +170,7 @@ public class SettingPoint extends Entity
                 {
                     this.val = pair.getValue().toString();
                 }
-                it.remove();
+                //it.remove();
             }
             return this;
         }

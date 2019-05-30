@@ -80,15 +80,22 @@ public class MeshNetwork extends DeviceNetwork
                                 }
                                 break;
                             case SMART_STAT:
+                                String profile = "cpu";
+                                if(d.getMarkers().contains("hpu"))
+                                    profile = "hpu";
+                                else if(d.getMarkers().contains("pfcu2"))
+                                    profile = "pfcu2";
+                                else if(d.getMarkers().contains("pfcu4"))
+                                    profile = "pfcu4";
                                 if(bSeedMessage) {
                                     CcuLog.d(L.TAG_CCU_DEVICE,"=================NOW SENDING SS SEEDS====================="+zone.getId());
-                                        CcuToCmOverUsbDatabaseSeedSmartStatMessage_t seedSSMessage = LSmartStat.getSeedMessage(zone,Short.parseShort(d.getAddr()),d.getEquipRef(),d.getProfileType());
+                                        CcuToCmOverUsbDatabaseSeedSmartStatMessage_t seedSSMessage = LSmartStat.getSeedMessage(zone,Short.parseShort(d.getAddr()),d.getEquipRef(),profile);
                                         if (sendStructToCM( seedSSMessage)) {
                                             //Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
                                         }
                                 }else {
                                     CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING SMART_STAT Settings=====================");
-                                    CcuToCmOverUsbSmartStatSettingsMessage_t settingsMessage = LSmartStat.getSettingsMessage(zone,Short.parseShort(d.getAddr()),d.getEquipRef(),d.getProfileType());
+                                    CcuToCmOverUsbSmartStatSettingsMessage_t settingsMessage = LSmartStat.getSettingsMessage(zone,Short.parseShort(d.getAddr()),d.getEquipRef(),profile);
                                     if (sendStruct((short) settingsMessage.address.get(), settingsMessage)) {
                                         //Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
                                     }

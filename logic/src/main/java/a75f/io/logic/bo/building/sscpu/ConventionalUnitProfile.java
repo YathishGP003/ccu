@@ -38,6 +38,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
     public HashMap<Short, ConventionalUnitLogicalMap> cpuDeviceMap;
     double setTempCooling = 73.0;
     double setTempHeating = 71.0;
+    boolean occupied;
 
     public ConventionalUnitProfile(){
 
@@ -116,12 +117,12 @@ public class ConventionalUnitProfile extends ZoneProfile {
             Occupied occuStatus = ScheduleProcessJob.getOccupiedModeCache(zoneId);
             double coolingDeadband = 2.0;
             double heatingDeadband = 2.0;
-            boolean occupied = false;
             if(occuStatus != null){
                 coolingDeadband = occuStatus.getCoolingDeadBand();
                 heatingDeadband = occuStatus.getHeatingDeadBand();
                 occupied = occuStatus.isOccupied();
-            }
+            }else
+                occupied = false;
             //For dual temp but for single mode we use tuners
             double hysteresis = StandaloneTunerUtil.getStandaloneStage1Hysteresis(cpuEquip.getId());
 
@@ -497,26 +498,33 @@ public class ConventionalUnitProfile extends ZoneProfile {
         switch (fanHighType){
 
             case HUMIDIFIER:
-                if(curValue < targetThreshold) {
-                    relayStages.put("Humidifier",1);
-                    setCmdSignal("fan and stage2", 1.0, addr);
-                }else if(getCmdSignal("fan and stage2",addr) > 0){
-                    if(curValue > (targetThreshold + 5))
-                        setCmdSignal("fan and stage2",0, addr);
-                    else
-                        relayStages.put("Humdifier",1);
-                }
+                if(curValue > 0 && occupied) {
+                    if (curValue < targetThreshold) {
+                        relayStages.put("Humidifier", 1);
+                        setCmdSignal("fan and stage2", 1.0, addr);
+                    } else if (getCmdSignal("fan and stage2", addr) > 0) {
+                        if (curValue > (targetThreshold + 5/*(targetThreshold * 0.05)*/))
+                            setCmdSignal("fan and stage2", 0, addr);
+                        else
+                            relayStages.put("Humdifier", 1);
+                    }
+                }else
+                    setCmdSignal("fan and stage2", 0, addr);
+
                 break;
             case DE_HUMIDIFIER:
-                if(curValue > targetThreshold) {
-                    setCmdSignal("fan and stage2", 1.0, addr);
-                    relayStages.put("Dehumidifier",1);
-                }else if(getCmdSignal("fan and stage2",addr) > 0){
-                    if(curValue < (targetThreshold - 5))
-                        setCmdSignal("fan and stage2",0, addr);
-                    else
-                        relayStages.put("Dehumidifier",1);
-                }
+                if(curValue > 0 && occupied) {
+                    if (curValue > targetThreshold) {
+                        setCmdSignal("fan and stage2", 1.0, addr);
+                        relayStages.put("Dehumidifier", 1);
+                    } else if (getCmdSignal("fan and stage2", addr) > 0) {
+                        if (curValue < (targetThreshold - 5/*(targetThreshold * 0.05)*/))
+                            setCmdSignal("fan and stage2", 0, addr);
+                        else
+                            relayStages.put("Dehumidifier", 1);
+                    }
+                }else
+                    setCmdSignal("fan and stage2", 0, addr);
                 break;
         }
     }

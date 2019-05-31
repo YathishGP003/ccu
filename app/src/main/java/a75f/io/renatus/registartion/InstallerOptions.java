@@ -16,11 +16,15 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 
 import org.projecthaystack.HGrid;
+import org.projecthaystack.HRef;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.HayStackConstants;
+import a75f.io.api.haystack.SettingPoint;
+import a75f.io.api.haystack.Tags;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -117,7 +121,6 @@ public class InstallerOptions extends Fragment {
 
 
         HashMap ccu = CCUHsApi.getInstance().read("ccu");
-
             //if ccu exists
             if(ccu.size() >0)
             {
@@ -164,6 +167,17 @@ public class InstallerOptions extends Fragment {
 
         mNext.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                String ccuId = ccu.get("id").toString();
+                ccuId = ccuId.replace("@","");
+                String ccuName = ccu.get("dis").toString();
+                CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(ccuId));
+                HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
+                SettingPoint snBand = new SettingPoint.Builder()
+                        .setDeviceRef(ccuId)
+                        .setSiteRef(siteMap.get("id").toString())
+                        .setDisplayName(ccuName+"-smartNodeBand")
+                        .addMarker("snband").addMarker("sp").setVal(addressBandSelected).build();
+                CCUHsApi.getInstance().addPoint(snBand);
                 // TODO Auto-generated method stub
                 goTonext();
             }

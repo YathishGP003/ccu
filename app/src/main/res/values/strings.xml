@@ -240,13 +240,18 @@
     <string name="passforsystem">Require Password for System Settings Change</string>
     <string name="passforbuilding">Require Password for Building Change</string>
     <string name="passforsetup">Require Password for Setup Change</string>
-    <string name="taptoedit">Tap here to Set Password</string>
+    <string name="taptoset">Tap here to Set Password</string>
     <string name="nopassset">No Password Set. Tap to Set Password</string>
-    <string name="currentpass">Current Password ( Leave blank if not set)</string>
+    <string name="currentpass">Current Password</string>
     <string name="newpassword">New Password</string>
     <string name="repeatnewpass">Repeat New Password</string>
     <string name="setnewpass">Set New</string>
     <string name="clearpass">Clear Existing</string>
+    <string name="systemsettings">System Settings</string>
+    <string name="zonesettings">Zone Settings</string>
+    <string name="buildingchange">Building Change</string>
+    <string name="setupchange">Setup Change</string>
+    <string name="taptochange">Tap here to Clear or Change Password</string>
 
     <!--Add to Exisiting-->
     <string name="hint_siteid">Enter Site ID</string>

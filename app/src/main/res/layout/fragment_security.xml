@@ -80,7 +80,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textPassforZone"
                 android:layout_marginLeft="76dp"
-                android:text="@string/taptoedit"
+                android:text="@string/taptoset"
                 android:textColor="@color/black"
                 android:alpha="0.60"
                 android:textSize="19.5dp"/>
@@ -90,10 +90,12 @@
                 android:id="@+id/toggleZonePass"
                 android:layout_width="47dp"
                 android:layout_height="28dp"
+                android:layout_alignParentEnd="true"
                 android:layout_alignParentRight="true"
+                android:layout_marginTop="72dp"
+                android:layout_marginEnd="0dp"
                 android:background="@drawable/toggle_selector"
                 android:checked="false"
-                android:layout_marginTop="72dp"
                 android:textOff=""
                 android:textOn="" />
 
@@ -155,7 +157,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textPassforBuild"
                 android:layout_marginLeft="76dp"
-                android:text="@string/taptoedit"
+                android:text="@string/taptoset"
                 android:textColor="@color/black"
                 android:alpha="0.60"
                 android:textSize="19.5dp"/>
@@ -193,7 +195,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textPassforSetup"
                 android:layout_marginLeft="76dp"
-                android:text="@string/taptoedit"
+                android:text="@string/taptoset"
                 android:textColor="@color/black"
                 android:alpha="0.60"
                 android:textSize="19.5dp"/>

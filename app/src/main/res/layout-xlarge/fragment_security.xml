@@ -80,7 +80,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textPassforZone"
                 android:layout_marginLeft="76dp"
-                android:text="@string/taptoedit"
+                android:text="@string/taptoset"
                 android:textColor="@color/black"
                 android:alpha="0.60"
                 android:textSize="19.5dp"/>
@@ -155,7 +155,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textPassforBuild"
                 android:layout_marginLeft="76dp"
-                android:text="@string/taptoedit"
+                android:text="@string/taptoset"
                 android:textColor="@color/black"
                 android:alpha="0.60"
                 android:textSize="19.5dp"/>
@@ -193,7 +193,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textPassforSetup"
                 android:layout_marginLeft="76dp"
-                android:text="@string/taptoedit"
+                android:text="@string/taptoset"
                 android:textColor="@color/black"
                 android:alpha="0.60"
                 android:textSize="19.5dp"/>

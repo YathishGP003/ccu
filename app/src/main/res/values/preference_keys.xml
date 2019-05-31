@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="SETUP_PASSWORD_KEY">setup_password</string>
+
+    <string name="SET_ZONE_PASSWORD">set_zone_password</string>
+    <string name="SET_SYSTEM_PASSWORD">set_system_password</string>
+    <string name="SET_BUILDING_PASSWORD">set_building_password</string>
+    <string name="SET_SETUP_PASSWORD">set_setup_password</string>
+
+    <string name="ZONE_SETTINGS_PASSWORD_KEY">zone_settings_password</string>
+    <string name="SYSTEM_SETTINGS_PASSWORD_KEY">system_settings_password</string>
+    <string name="BUILDING_SETTINGS_PASSWORD_KEY">building_settings_password</string>
+    <string name="USE_SETUP_PASSWORD_KEY">use_setup_password</string>
+    <string name="USE_SAME_SETTINGS_PASSWORD_KEY">use_same_settings_password</string>
+</resources>

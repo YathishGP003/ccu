@@ -15,15 +15,9 @@ import com.pubnub.api.models.consumer.PNStatus;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 
-import org.projecthaystack.HGrid;
-import org.projecthaystack.HNum;
-import org.projecthaystack.HRef;
-import org.projecthaystack.HRow;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -32,25 +26,25 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
-import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.a75f.io.logic.pubnub.PubNubHandler;
 import a75f.io.logic.bo.building.CCUApplication;
 import a75f.io.logic.bo.building.Day;
 import a75f.io.logic.bo.building.NamedSchedule;
 import a75f.io.logic.bo.building.Schedule;
+import a75f.io.logic.bo.building.dab.DabProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.plc.PlcProfile;
 import a75f.io.logic.bo.building.sscpu.ConventionalUnitProfile;
 import a75f.io.logic.bo.building.sshpu.HeatPumpUnitProfile;
 import a75f.io.logic.bo.building.system.DefaultSystem;
-import a75f.io.logic.bo.building.dab.DabProfile;
 import a75f.io.logic.bo.building.system.dab.DabFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedHybridRtu;
-import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.vav.VavBacnetRtu;
+import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtuWithVfd;
@@ -333,93 +327,14 @@ public class Globals {
                 }
 
                 JsonElement receivedMessageObject = message.getMessage();
-                CcuLog.d(L.TAG_CCU, "PubNub Received message content: " + receivedMessageObject.toString());
-                // extract desired parts of the payload, using Gson
-                JsonObject msgObject = message.getMessage().getAsJsonObject();
-                String cmd = msgObject.get("command") != null ? msgObject.get("command").getAsString(): "";
+                CcuLog.d(L.TAG_CCU_PUBNUB, "PubNub Received message content: " + receivedMessageObject.toString());
+                
                 try
                 {
-                    if (cmd.equals("updatePoint"))
-                    {
-                        String src = msgObject.get("who").getAsString();
-                        if (src.equals("ccu")
-                                    || src.equals("Scheduler") || src.equals("manual")) {
-                            CcuLog.d(L.TAG_CCU, "PubNub received for CCU write : Ignore");
-                            return;
-                        }
-                        //String level = msgObject.get("level").getAsString();
-                        //String val = msgObject.get("val").getAsString();
-                        String guid = msgObject.get("id").getAsString();
-                        //CcuLog.d(L.TAG_CCU, "PubNub Update point: cmd: " + cmd + " who: " + who + " level: " + level + " val: " + val + " id: " + guid);
-                        String luid = CCUHsApi.getInstance().getLUID("@" + guid);
-                        if (luid != null && luid != "")
-                        {
-                            HGrid pointGrid = CCUHsApi.getInstance().readPointArrRemote("@" + guid);
-                            if (pointGrid == null) {
-                                CcuLog.d(L.TAG_CCU, "PubNub Failed to read remote point point : " + guid);
-                                return;
-                            }
-                            Iterator it = pointGrid.iterator();
-                            while (it.hasNext())
-                            {
-                                HRow r = (HRow) it.next();
-                                double level = Double.parseDouble(r.get("level").toString());
-                                double val = Double.parseDouble(r.get("val").toString());
-                                String who = r.get("who").toString();
-                                double duration = Double.parseDouble(r.get("dur").toString());
-                                double dur = duration - System.currentTimeMillis();
-                                CcuLog.d(L.TAG_CCU, "PubNub remote point:  level " + level + " val " + val + " who " + who + " duration "+duration+" dur "+dur);
-                                //If dur shows it is already expired, then just write 1ms to force-expire it locally.
-                                CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(luid), (int) level, who, HNum.make(val), HNum.make(duration == 0 ? 0 :
-                                                                                                                             (dur < 0 ? 1 : duration - System.currentTimeMillis())));
-                            }
-                            Point p = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(luid)).build();
-                            ArrayList values = CCUHsApi.getInstance().readPoint(luid);
-                            if (values != null && values.size() > 0)
-                            {
-                                for (int l = 1; l <= values.size(); l++)
-                                {
-                                    HashMap valMap = ((HashMap) values.get(l - 1));
-                                    if (valMap.get("val") != null)
-                                    {
-                                        Log.d(L.TAG_CCU, "PubNub updated point " + p.getDisplayName() + " , level: " + l + " , val :" + Double.parseDouble(valMap.get("val").toString())
-                                                                +" duration "+valMap.get("duration"));
-                                    }
-                                }
-                            }
-    
-                            if (p.getMarkers().contains("his"))
-                            {
-                                CCUHsApi.getInstance().writeHisValById(luid, CCUHsApi.getInstance().readPointPriorityVal(luid));
-                            }
-                            
-                            if (p.getMarkers().contains("desired"))
-                            {
-                                ScheduleProcessJob.handleDesiredTempUpdate(p, false, 0);
-                            }
-                            
-                            if (p.getMarkers().contains("scheduleType")) {
-                                ScheduleProcessJob.handleScheduleTypeUpdate(p);
-                            }
-                        }
-                        else
-                        {
-                            CcuLog.d(L.TAG_CCU, "PubNub received for invalid local point : " + luid);
-                        }
-                    }
+                    PubNubHandler.handleMessage(message.getMessage().getAsJsonObject());
                 } catch (NumberFormatException e) {
-                    Log.d(L.TAG_CCU, " Ignoring PubNub Message "+e.getMessage());
+                    Log.d(L.TAG_CCU_PUBNUB, " Ignoring PubNub Message "+e.getMessage());
                 }
-                
-                
-
-
-            /*
-                log the following items with your favorite logger
-                    - message.getMessage()
-                    - message.getSubscription()
-                    - message.getTimetoken()
-            */
             }
 
             @Override

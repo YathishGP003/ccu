@@ -32,6 +32,7 @@ public class L
     public static final String TAG_CCU_DEVICE = "CCU_DEVICE";
     public static final String TAG_CCU_SERIAL = "CCU_SERIAL";
     public static final String TAG_CCU_SCHEDULER = "CCU_SCHEDULER";
+    public static final String TAG_CCU_PUBNUB = "CCU_PUBNUB";
 
     public static Context app()
     {

@@ -15,6 +15,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.NumberPicker;
+import android.widget.Toast;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -270,7 +271,18 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
 
                                           int endHour = (npEndTime.getValue() - (npEndTime.getValue() % 4)) / 4;
                                           int endMinutes = (npEndTime.getValue() % 4) * 15;
-
+    
+                                          if (startHour == endHour && startMinutes == endMinutes)
+                                          {
+                                              Toast.makeText(ManualSchedulerDialogFragment.this.getContext(), "Start time and End time cannot be the same", Toast.LENGTH_SHORT).show();
+                                              return;
+                                          }
+    
+                                          if (days.size() == 0)
+                                          {
+                                              Toast.makeText(ManualSchedulerDialogFragment.this.getContext(), "Select one or more days to apply the schedule", Toast.LENGTH_SHORT).show();
+                                              return;
+                                          }
 
                                           if(mDay == null)
                                               mListener.onClickSave(NO_REPLACE, Double.parseDouble(mCoolingTempET.getText().toString()),

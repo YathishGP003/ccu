@@ -68,7 +68,7 @@ public class ControlMote
         setAnalogOut("analog4",0);
     }
     
-    public void resetCMOp(){
+    public void resetAllOp(){
         for (int i = 1; i <= 8; i++)
         {
             setRelayState("relay" + i, 0);

@@ -311,9 +311,8 @@ public class LSmartNode
     }
     
     public static short mapAnalogOut(String type, short val) {
-        if (val < 0) {
-            val = 0;//TODO-
-        }
+        val = (short)Math.min(val, 100);
+        val = (short)Math.max(val, 0);
         switch (type)
         {
             case "0-10v":

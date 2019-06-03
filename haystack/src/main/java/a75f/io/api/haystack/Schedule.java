@@ -308,6 +308,10 @@ public class Schedule extends Entity
     {
         return mId;
     }
+    
+    public void setId(String mId) {
+        this.mId = mId;
+    }
 
     public boolean isVacation()
     {

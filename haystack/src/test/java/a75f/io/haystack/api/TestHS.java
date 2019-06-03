@@ -11,11 +11,13 @@ import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 import org.projecthaystack.HRow;
 import org.projecthaystack.client.HClient;
+import org.projecthaystack.io.HZincReader;
 import org.projecthaystack.io.HZincWriter;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -26,6 +28,7 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
@@ -460,6 +463,29 @@ public class TestHS
                 
                 System.out.println(preconVal);
             }
+        }
+    }
+    
+    @Test
+    public void testRemoteRead() {
+        String id = "5cef00977c9a5c00723326da";
+    
+        HDictBuilder b = new HDictBuilder().add("id", HRef.copy(id));
+        HDict[] dictArr  = {b.toDict()};
+        String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "read", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+        System.out.println("Response : " + response);
+        HGrid sGrid =  new HZincReader(response).readGrid();
+        if (sGrid == null) {
+            //CcuLog.d(L.TAG_CCU, "PubNub Failed to read remote point point : " + guid);
+            return;
+        }
+    
+        Iterator it = sGrid.iterator();
+        while (it.hasNext())
+        {
+            HRow r = (HRow) it.next();
+            Schedule s = new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build();
+            System.out.println(s);
         }
     }
 }

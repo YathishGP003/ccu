@@ -502,6 +502,15 @@ public class CCUHsApi
         return response == null ? null : new HZincReader(response).readGrid();
     }
     
+    public HGrid readByIdRemote(String id) {
+        HDictBuilder b = new HDictBuilder().add("id", HRef.copy(id));
+        HDict[] dictArr  = {b.toDict()};
+        String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "read", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+        CcuLog.d("CCU_HS", "Response : "+response);
+        return response == null ? null : new HZincReader(response).readGrid();
+    }
+    
+    
     public double readPointPriorityVal(String id) {
         
         ArrayList values = readPoint(id);
@@ -1074,6 +1083,11 @@ public class CCUHsApi
         {
             tagsDb.updateIdMap.put("@" + schedule.getId(), tagsDb.idMap.get("@" + schedule.getId()));
         }
+    }
+    
+    public void updateScheduleNoSync(Schedule schedule, String zoneId) {
+        addSchedule(schedule.getId(), (zoneId == null ? schedule.getScheduleHDict() : schedule.getZoneScheduleHDict(zoneId)));
+        Log.i("CCU_HS", "updateSchedule: " + (zoneId == null ? schedule.getScheduleHDict().toZinc(): schedule.getZoneScheduleHDict(zoneId).toZinc()));
     }
     
     public Schedule getScheduleById(String scheduleRef)

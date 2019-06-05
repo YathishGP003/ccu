@@ -10,7 +10,7 @@ public enum SensorType
     HUMIDITY("humidity"),
     CO2("co2"),
     CO("co"),
-    NO("no2"),
+    NO("no"),
     VOC("voc"),
     PRESSURE("pressure"),
     OCCUPANCY("occupancy"),

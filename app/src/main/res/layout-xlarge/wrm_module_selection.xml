@@ -180,6 +180,24 @@
                     android:textSize="@dimen/text_small_xlarge"/>
 
                 <RadioButton
+                    android:id="@+id/emrModuleTypeRB"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="25dp"
+                    android:layout_weight="0.1"
+                    android:layout_width="match_parent"
+                    android:text=" Energy Meter"
+                    android:textSize="@dimen/text_medium_xlarge"/>
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="60dp"
+                    android:layout_weight="0.1"
+                    android:layout_width="match_parent"
+                    android:text="Hook up a Modbus energy meter to monitor electricity consumption"
+                    android:textSize="@dimen/text_small_xlarge"/>
+
+
+                <RadioButton
                     android:checked="false"
                     android:clickable="false"
                     android:focusable="false"
@@ -200,27 +218,6 @@
                     android:layout_weight="0.1"
                     android:layout_width="match_parent"
                     android:text="Allows monitoring of refrigeration units via temperature probes"
-                    android:textSize="@dimen/text_small_xlarge"/>
-
-                <RadioButton
-                    android:checked="false"
-                    android:clickable="false"
-                    android:focusable="false"
-                    android:id="@+id/emrModuleTypeRB"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="25dp"
-                    android:layout_weight="0.1"
-                    android:layout_width="match_parent"
-                    android:text=" Energy Meter"
-                    android:textColor="@color/selection_gray"
-                    android:textSize="@dimen/text_medium_xlarge"/>
-
-                <TextView
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="60dp"
-                    android:layout_weight="0.1"
-                    android:layout_width="match_parent"
-                    android:text="Connects to pulse type energy meters or current transformers to monitor energy usage "
                     android:textSize="@dimen/text_small_xlarge"/>
 
                 <RadioButton

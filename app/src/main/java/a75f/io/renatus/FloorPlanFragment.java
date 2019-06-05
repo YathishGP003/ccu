@@ -31,15 +31,12 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
-import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.mesh.LSerial;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZoneProfile;
-import a75f.io.logic.bo.building.sscpu.ConventionalUnitConfiguration;
-import a75f.io.logic.bo.building.sshpu.HeatPumpUnitConfiguration;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -305,6 +302,8 @@ public class FloorPlanFragment extends Fragment
 						moduleListView.setAdapter(mModuleListAdapter);
 					}
 				});
+			} else {
+				moduleListView.setAdapter(null);
 			}
 	}
 	
@@ -542,9 +541,7 @@ public class FloorPlanFragment extends Fragment
 				case VAV_REHEAT:
 				case VAV_SERIES_FAN:
 				case VAV_PARALLEL_FAN:
-					System.out.println(" floor " + floor.getDisplayName() + " zone " + zone.getDisplayName() + " node :" + nodeAddr);
-					VavProfileConfiguration config = (VavProfileConfiguration) profile.getProfileConfiguration(Short.parseShort(nodeAddr));
-					System.out.println("Config " + config + " profile " + profile.getProfileType());
+					VavProfileConfiguration config = profile.getProfileConfiguration(Short.parseShort(nodeAddr));
 					showDialogFragment(FragmentVAVConfiguration
 							.newInstance(Short.parseShort(nodeAddr), zone.getDisplayName(), config.getNodeType(), floor.getDisplayName(), profile.getProfileType()), FragmentVAVConfiguration.ID);
 					break;
@@ -555,6 +552,10 @@ public class FloorPlanFragment extends Fragment
 				case DAB:
 					showDialogFragment(FragmentDABConfiguration
 											   .newInstance(Short.parseShort(nodeAddr),zone.getDisplayName(), NodeType.SMART_NODE, floor.getDisplayName(), profile.getProfileType()), FragmentDABConfiguration.ID);
+					break;
+				case EMR:
+					showDialogFragment(FragmentEMRConfiguration
+							                   .newInstance(Short.parseShort(nodeAddr),zone.getDisplayName(), NodeType.SMART_NODE, floor.getDisplayName()), FragmentEMRConfiguration.ID);
 					break;
 				case SMARTSTAT_CONVENTIONAL_PACK_UNIT:
 					showDialogFragment(FragmentCPUConfiguration

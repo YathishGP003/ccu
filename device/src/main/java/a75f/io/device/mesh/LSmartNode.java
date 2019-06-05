@@ -229,7 +229,12 @@ public class LSmartNode
         settings.showCentigrade.set((short)0);
         settings.displayHold.set((short)0);
         settings.militaryTime.set((short)0);
-        settings.enableOccupationDetection.set((short) getConfigNumVal("enable and occupancy",address));
+        try
+        {
+            settings.enableOccupationDetection.set((short) getConfigNumVal("enable and occupancy", address));
+        } catch (Exception e) {
+            settings.enableOccupationDetection.set((short)0);
+        }
     }
     private static void fillSmartNodeControls(SmartNodeControls_t controls_t,Zone zone, short node, String equipRef){
 

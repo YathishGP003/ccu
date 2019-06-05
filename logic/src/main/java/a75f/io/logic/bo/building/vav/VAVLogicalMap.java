@@ -553,14 +553,9 @@ public class VAVLogicalMap
         //device.analog2Out.setEnabled(true);
         device.currentTemp.setPointRef(ctID);
         device.currentTemp.setEnabled(true);
-        device.humidity.setPointRef(humidityId);
-        device.humidity.setEnabled(true);
-        device.co2.setPointRef(co2Id);
-        device.co2.setEnabled(true);
-        device.voc.setPointRef(vocId);
-        device.voc.setEnabled(true);
         device.desiredTemp.setPointRef(dtId);
         device.desiredTemp.setEnabled(true);
+        
         for (Output op : config.getOutputs()) {
             switch (op.getPort()) {
                 case ANALOG_OUT_ONE:
@@ -581,11 +576,12 @@ public class VAVLogicalMap
         device.analog2Out.setEnabled(config.isOpConfigured(Port.ANALOG_OUT_TWO));
         device.relay1.setEnabled(config.isOpConfigured(Port.RELAY_ONE));
         device.relay2.setEnabled(config.isOpConfigured(Port.RELAY_TWO));
-        
         device.addPointsToDb();
         
-        //Log.d("VAV", CCUHsApi.getInstance().tagsDb.getDbMap().toString());
-    
+        device.addSensor(Port.SENSOR_RH, humidityId);
+        device.addSensor(Port.SENSOR_CO2, co2Id);
+        device.addSensor(Port.SENSOR_VOC, vocId);
+        
         //Initialize write array for points, otherwise a read before write will throw exception
         setCurrentTemp(0);
         setDamperPos(0);

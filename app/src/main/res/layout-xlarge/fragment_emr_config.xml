@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:layout_marginLeft="40dp"
+              android:layout_marginRight="40dp"
+              android:orientation="vertical">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="24dp"
+        android:text="This profile allows monitoring and graphing of energy usage via Modbus energy meter
+                      connected to the Smart Node. Please wire up the meter as shown below."
+        android:layout_gravity="center"
+        android:textSize="@dimen/text_large"/>
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:src="@drawable/enerfy_meter_orange"
+        android:layout_weight="1"/>
+
+    <Button
+        android:id="@+id/setBtn"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="24dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SET"
+        android:layout_gravity="right"
+        android:textStyle="bold"
+        android:textSize="20dp"
+        android:textColor="@color/orange_75f"
+        android:background="?android:attr/selectableItemBackground"
+        android:gravity="right"
+        android:padding="10dp"/>
+</LinearLayout>

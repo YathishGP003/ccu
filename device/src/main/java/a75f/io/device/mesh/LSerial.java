@@ -1,6 +1,9 @@
 package a75f.io.device.mesh;
 
 import android.os.Build;
+import android.content.Context;
+import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
 
 import org.javolution.io.Struct;
 
@@ -9,6 +12,7 @@ import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import a75f.io.device.DeviceConstants;
 import a75f.io.device.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSmartStatLocalControlsOverrideMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSmartStatRegularUpdateMessage_t;
@@ -73,14 +77,16 @@ public class LSerial
     }
     /***
      * Handles all incoming messages from the CM.   It will parse them and
-     * determine where they should be sent.
+     * determine where they should be sent. It will also broadcast the events as an Intent
+     * so that any external handlers can receive them.
      *
      * Logs to logcat.
      *
+     * @param context The caller's Context, which will be used to broadcast the event to external handlers
      * @param event The serial event from the CM
      */
 
-    public static void handleSerialEvent(SerialEvent event)
+    public static void handleSerialEvent(Context context, SerialEvent event)
     {
         DLog.LogdSerial("Event Type: " + event.getSerialAction().name());
         if (event.getSerialAction() == SerialAction.MESSAGE_FROM_SERIAL_PORT)
@@ -104,14 +110,26 @@ public class LSerial
             {
                 DLog.LogdSerial("Event Type:updateSetTempFromSmartNode="+data.length+","+data.toString());
                 Pulse.updateSetTempFromSmartNode(fromBytes(data, CmToCcuOverUsbSnLocalControlsOverrideMessage_t.class));;
-            }else if(messageType == MessageType.FSV_REBOOT){
+            }
+            else if(messageType == MessageType.FSV_REBOOT)
+            {
                 DLog.LogdSerial("Event Type DEVICE_REBOOT:"+data.length+","+data.toString());
                 Pulse.rebootMessageFromCM(fromBytes(data, WrmOrCmRebootIndicationMessage_t.class));
-            }else if(messageType == MessageType.CM_TO_CCU_OVER_USB_SMART_STAT_LOCAL_CONTROLS_OVERRIDE){
+            }
+            else if(messageType == MessageType.CM_TO_CCU_OVER_USB_SMART_STAT_LOCAL_CONTROLS_OVERRIDE)
+            {
                 DLog.LogdSerial("Event Type:CM_TO_CCU_OVER_USB_SMART_STAT_LOCAL_CONTROLS_OVERRIDE="+data.length+","+data.toString());
                 Pulse.updateSetTempFromSmartStat(fromBytes(data, CmToCcuOverUsbSmartStatLocalControlsOverrideMessage_t.class));
-
             }
+
+            // Broadcast event so that external handlers can access it
+            Intent eventIntent = new Intent(DeviceConstants.IntentActions.LSERIAL_MESSAGE);
+            eventIntent.putExtra("eventType", messageType);
+            eventIntent.putExtra("eventBytes", data);
+
+            //LocalBroadcastManager.getInstance(context).sendBroadcast(eventIntent);
+            Intent foo = new Intent(context, OTAUpdateService.class);
+            context.startService(eventIntent);  //which?
         }
     }
 

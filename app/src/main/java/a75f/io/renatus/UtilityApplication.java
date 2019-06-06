@@ -295,7 +295,7 @@ public abstract class UtilityApplication extends Application
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void onSerialEvent(SerialEvent event)
     {
-        LSerial.handleSerialEvent(event);
+        LSerial.handleSerialEvent(this, event);
     }
 
 

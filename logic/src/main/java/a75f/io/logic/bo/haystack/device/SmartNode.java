@@ -6,6 +6,8 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
+import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
@@ -208,6 +210,46 @@ public class SmartNode
                                     .setTz(tz)
                                     .build();
         CCUHsApi.getInstance().addPoint(sensor);
+    }
+    
+    public RawPoint addSensor(Port p) {
+        Equip q = new Equip.Builder().setHashMap(CCUHsApi.getInstance()
+                                              .read("equip and group == \""+smartNodeAddress+"\"")).build();
+    
+        Point equipSensor = new Point.Builder()
+                                 .setDisplayName(q.getDisplayName()+"-"+p.getPortSensor())
+                                 .setEquipRef(q.getId())
+                                 .setSiteRef(siteRef)
+                                 .setRoomRef(roomRef)
+                                 .setFloorRef(floorRef)
+                                 .addMarker("zone").addMarker("sensor").addMarker(p.getPortSensor()).addMarker("his").addMarker("cur").addMarker("logical").addMarker("equipHis")
+                                 .setGroup(String.valueOf(smartNodeAddress))
+                                 .setTz(tz)
+                                 .build();
+        String pointRef = CCUHsApi.getInstance().addPoint(equipSensor);
+        RawPoint deviceSensor = new RawPoint.Builder()
+                                  .setDisplayName(p.toString()+"-"+smartNodeAddress)
+                                  .setDeviceRef(deviceRef)
+                                  .setSiteRef(siteRef)
+                                  .setRoomRef(roomRef)
+                                  .setFloorRef(floorRef)
+                                  .setPointRef(pointRef)
+                                  .setEnabled(true)
+                                  .addMarker("sensor").addMarker("his")
+                                  .setPort(p.toString())
+                                  .setTz(tz)
+                                  .build();
+        deviceSensor.setId(CCUHsApi.getInstance().addPoint(deviceSensor));
+        
+        CCUHsApi.getInstance().scheduleSync();
+        
+        return deviceSensor;
+    }
+    
+    public RawPoint getRawPoint(Port p) {
+        HashMap sensorPoint = CCUHsApi.getInstance().read("point and sensor and physical and deviceRef == \""+deviceRef+"\""
+                                                     +" and port == \""+p.toString()+"\"");
+        return sensorPoint.size() > 0 ? new RawPoint.Builder().setHashMap(sensorPoint).build() : null;
     }
     
     public void addPointsToDb() {

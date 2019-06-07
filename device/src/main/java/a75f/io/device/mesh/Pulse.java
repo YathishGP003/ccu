@@ -10,6 +10,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.RawPoint;
 import a75f.io.device.serial.CcuToCmOverUsbDeviceTempAckMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
@@ -27,6 +28,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Sensor;
 import a75f.io.logic.bo.building.SensorType;
 import a75f.io.logic.bo.building.definitions.Port;
+import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
 import a75f.io.logic.tuners.TunerConstants;
@@ -101,7 +103,7 @@ public class Pulse
 						hayStack.writeHisValById(logPoint.get("id").toString(), ThermistorUtil.getThermistorValueToTemp(val * 10));
 						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : Thermistor2 "+ThermistorUtil.getThermistorValueToTemp(val * 10));
 						break;
-					case SENSOR_RH:
+					/*case SENSOR_RH:
 						SmartNodeSensorReading_t[] sensorReadingsHumidity = smartNodeRegularUpdateMessage_t.update.sensorReadings;
 						for (SmartNodeSensorReading_t r : sensorReadingsHumidity) {
 							if (r.sensorType.get() == SensorType.HUMIDITY.ordinal()) {
@@ -152,11 +154,70 @@ public class Pulse
 						hayStack.writeHisValById(logPoint.get("id").toString(), val);
 						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : EMR "+val);
 						break;
-					
+					*/
 				}
 			}
 			
+			SmartNodeSensorReading_t[] sensorReadings = smartNodeRegularUpdateMessage_t.update.sensorReadings;
+			if (sensorReadings.length > 0) {
+				handleSensorEvents(sensorReadings, nodeAddr);
+			}
+			
 		}
+	}
+	
+	private static void handleSensorEvents(SmartNodeSensorReading_t[] sensorReadings, short addr) {
+		SmartNode node = new SmartNode(addr);
+		int emVal = 0;
+		for (SmartNodeSensorReading_t r : sensorReadings) {
+			SensorType t = SensorType.values()[r.sensorType.get()];
+			Port p = t.getSensorPort();
+			if (p == null) {
+				continue;
+			}
+			double val = r.sensorData.get();
+			RawPoint sp = node.getRawPoint(p);
+			if (sp == null) {
+				sp = node.addSensor(p);
+                CcuLog.d(L.TAG_CCU_DEVICE, " Sensor Added , type "+t+" port "+p);
+			}
+			CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : "+t+" : "+val);
+			switch (t) {
+				case HUMIDITY:
+					CCUHsApi.getInstance().writeHisValById(sp.getId(), val );
+					CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), getHumidityConversion(val));
+					break;
+				case CO2:
+				case CO:
+				case NO:
+				case VOC:
+				case PRESSURE:
+				case OCCUPANCY:
+				case SOUND:
+				case CO2_EQUIVALENT:
+				case ILLUMINANCE:
+				case UVI:
+					CCUHsApi.getInstance().writeHisValById(sp.getId(), val );
+					CCUHsApi.getInstance().writeHisValById(sp.getPointRef(),val);
+					break;
+				case ENERGY_METER_HIGH:
+					emVal = emVal > 0 ?  (emVal | (r.sensorData.get() << 12)) : r.sensorData.get();
+					break;
+				case ENERGY_METER_LOW:
+					emVal = emVal > 0 ? ((emVal << 12) | r.sensorData.get()) : r.sensorData.get();
+					break;
+			}
+		}
+		
+		if (emVal > 0) {
+			RawPoint sp = node.getRawPoint(Port.SENSOR_ENERGY_METER);
+			if (sp == null) {
+				sp = node.addSensor(Port.SENSOR_ENERGY_METER);
+			}
+			CCUHsApi.getInstance().writeHisValById(sp.getId(), (double)emVal );
+			CCUHsApi.getInstance().writeHisValById(sp.getPointRef(),(double)emVal);
+		}
+	
 	}
 	
 	public static Double getRoomTempConversion(Double temp) {

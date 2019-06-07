@@ -807,6 +807,10 @@ public class CCUHsApi
             }
         }.start();
     }
+    
+    public void scheduleSync() {
+        entitySyncHandler.scheduleSync();
+    }
 
     public void syncHisData()
     {

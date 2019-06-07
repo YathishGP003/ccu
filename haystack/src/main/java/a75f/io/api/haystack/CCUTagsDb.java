@@ -623,6 +623,7 @@ public class CCUTagsDb extends HServer {
                 .add("id", HRef.make(UUID.randomUUID().toString()))
                 .add("dis", z.getDisplayName())
                 .add("room", HMarker.VAL)
+                .add("siteRef", z.getSiteRef())
                 .add("floorRef", z.getFloorRef());
 
         for (String m : z.getMarkers()) {

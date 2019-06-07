@@ -48,6 +48,8 @@ public class UpdateScheduleHandler
             {
                 Schedule s = new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build();
                 s.setId(luid);
+                s.setmSiteId(CCUHsApi.getInstance().getSiteId().toString());
+                s.setRoomRef(CCUHsApi.getInstance().getLUID(s.getRoomRef()));
                 if (s.getMarkers().contains("building"))
                 {
                     CCUHsApi.getInstance().updateScheduleNoSync(s, null);
@@ -60,10 +62,11 @@ public class UpdateScheduleHandler
             else
             {
                 //New schedule/vacation added by apps.
-                HDict sDict = new HDictBuilder().add(r).toDict();
+                HDictBuilder sDict = new HDictBuilder().add(r).add("siteRef", CCUHsApi.getInstance().getSiteId().toString());
+                sDict.add("roomRef",CCUHsApi.getInstance().getLUID(sDict.get("roomRef").toString()));
                 luid = UUID.randomUUID().toString();
-                CCUHsApi.getInstance().addSchedule(luid, sDict );
-                CCUHsApi.getInstance().putUIDMap("@"+luid, "@"+guid) ; //Prepend @ ?
+                CCUHsApi.getInstance().addSchedule(luid, sDict.toDict() );
+                CCUHsApi.getInstance().putUIDMap(luid, "@"+guid) ;
             }
             ScheduleProcessJob.updateSchedules();
         }

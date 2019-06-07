@@ -40,7 +40,7 @@ public class EntitySyncHandler
     
     public boolean syncPending = false;
     public boolean syncProgress = false;//TODO- Revisit
-    public boolean syncScheduled = true;
+    public boolean syncScheduled = false;
     
     public synchronized void sync() {
         syncProgress = true;
@@ -242,6 +242,9 @@ public class EntitySyncHandler
     
     //retry sync after 30 sec
     public void scheduleSync() {
+        if (syncScheduled) {
+            return;
+        }
         syncScheduled = true;
         Timer timer = new Timer();
         TimerTask timerTask = new TimerTask() {

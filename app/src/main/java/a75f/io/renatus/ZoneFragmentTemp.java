@@ -205,6 +205,14 @@ public class ZoneFragmentTemp extends Fragment
                 
             }
     
+            if (p.getProfile() != null && p.getProfile().equals(ProfileType.EMR.name())) {
+                HashMap emr = CCUHsApi.getInstance().read("point and emr and equipRef == \""+p.getId()+"\"");
+                ArrayList tunerList = new ArrayList();
+                tunerList.add(emr.get("dis").toString());
+                tunerMap.put(emr.get("dis").toString(), emr.get("id").toString());
+                expandableListDetail.put(p.getDisplayName(), tunerList);
+            }
+    
             
             
         }

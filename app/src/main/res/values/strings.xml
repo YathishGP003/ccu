@@ -183,6 +183,7 @@
     <string name="ccufullform">Central Control Unit</string>
     <string name="ccuversion">Ver 2.0</string>
     <string name="wifipassword">Enter Wifi Password</string>
+    <string name="msg_turnonwifi">Turn ON WiFi to see available networks</string>
 
     <!--Fragment Titles-->
     <string name="installtype">Select Type Of Install</string>
@@ -368,7 +369,9 @@
     <string name="label_zonerange">Zone Range : </string>
     <string name="label_currenttemp">Current Temperature : </string>
     <string name="label_currenthumidity">Current Humidity : </string>
-    <string name="label_hvacequip">Current Humidity : </string>
+    <string name="label_hvacequip">HVAC Equipment : </string>
     <string name="label_comfortselector">Comfort Selector : </string>
     <string name="button_finish">Finish</string>
+
+
 </resources>

@@ -15,6 +15,10 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="parent">
 
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none">
         <RelativeLayout
             android:id="@+id/rlFields"
             android:layout_width="match_parent"
@@ -34,15 +38,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textSuccess"
-                android:layout_marginTop="40dp"
-                android:gravity="left|center_vertical"
+                android:layout_marginTop="16dp"
+                android:gravity="center_horizontal|center_vertical"
                 android:textAppearance="@style/text_appearance"
                 android:text="@string/desc_firsttime" />
 
             <RelativeLayout
                 android:layout_below="@+id/textInstruction"
-                android:layout_marginTop="69dp"
+                android:layout_marginTop="24dp"
                 android:layout_width="match_parent"
+                android:layout_marginLeft="368dp"
                 android:layout_height="wrap_content">
 
                 <LinearLayout
@@ -66,97 +71,124 @@
                     android:gravity="left|center_vertical"
                     android:textAppearance="@style/text_values"
                      />
-                <TextView
-                    android:id="@+id/labelSerialNo"
-                    android:layout_width="wrap_content"
-                    android:layout_height="29dp"
-                    android:layout_marginLeft="32dp"
-                    android:textAppearance="@style/text_appearance"
-                    android:text="@string/label_serialno"
-                    android:gravity="left|center_vertical"/>
-
-                <TextView
-                    android:id="@+id/textSerialNo"
-                    android:layout_width="wrap_content"
-                    android:layout_height="29dp"
-                    android:layout_marginLeft="5dp"
-                    android:gravity="left|center_vertical"
-                    android:textAppearance="@style/text_values"
-                     />
-
-                <TextView
-                    android:id="@+id/labelCCUVer"
-                    android:layout_width="wrap_content"
-                    android:layout_height="29dp"
-                    android:layout_marginLeft="32dp"
-                    android:textAppearance="@style/text_appearance"
-                    android:text="@string/label_ccuversion"
-                    android:gravity="left|center_vertical"/>
-
-                <TextView
-                    android:id="@+id/textCCUVer"
-                    android:layout_width="wrap_content"
-                    android:layout_height="29dp"
-                    android:layout_marginLeft="5dp"
-                    android:gravity="left|center_vertical"
-                    android:textAppearance="@style/text_values"
-                    />
-                </LinearLayout>
-
-
-
-                <LinearLayout
-                        android:id="@+id/lt_row2"
-                        android:layout_below="@id/lt_row1"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:id="@+id/labelCMSerial"
-                            android:layout_width="wrap_content"
-                            android:layout_height="29dp"
-                            android:textAppearance="@style/text_appearance"
-                            android:text="@string/label_cmserialno"
-                            android:gravity="left|center_vertical"/>
-
-                        <TextView
-                            android:id="@+id/textCMSerial"
-                            android:layout_width="wrap_content"
-                            android:layout_height="29dp"
-                            android:layout_marginLeft="5dp"
-                            android:gravity="left|center_vertical"
-                            android:textAppearance="@style/text_values"
-                             />
-
-                        <TextView
-                            android:id="@+id/labelFirmware"
-                            android:layout_width="wrap_content"
-                            android:layout_height="29dp"
-                            android:layout_marginLeft="29dp"
-                            android:textAppearance="@style/text_appearance"
-                            android:text="@string/label_firmversion"
-                            android:gravity="left|center_vertical"/>
-
-                        <TextView
-                            android:id="@+id/textFirmware"
-                            android:layout_width="wrap_content"
-                            android:layout_height="29dp"
-                            android:layout_marginLeft="5dp"
-                            android:gravity="left|center_vertical"
-                            android:textAppearance="@style/text_values"
-                             />
 
 
                 </LinearLayout>
 
+
                 <LinearLayout
-                    android:id="@+id/lt_row3"
-                    android:layout_below="@id/lt_row2"
+                    android:id="@+id/lt_row12"
+                    android:layout_below="@id/lt_row1"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="2.5dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/labelSerialNo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="29dp"
+                        android:textAppearance="@style/text_appearance"
+                        android:text="@string/label_serialno"
+                        android:gravity="left|center_vertical"/>
+
+                    <TextView
+                        android:id="@+id/textSerialNo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="29dp"
+                        android:layout_marginLeft="5dp"
+                        android:gravity="left|center_vertical"
+                        android:textAppearance="@style/text_values"
+                        />
+
+                </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/lt_row13"
+                    android:layout_below="@id/lt_row12"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2.5dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/labelCCUVer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="29dp"
+                        
+                        android:textAppearance="@style/text_appearance"
+                        android:text="@string/label_ccuversion"
+                        android:gravity="left|center_vertical"/>
+
+                    <TextView
+                        android:id="@+id/textCCUVer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="29dp"
+                        android:layout_marginLeft="5dp"
+                        android:gravity="left|center_vertical"
+                        android:textAppearance="@style/text_values"
+                        />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/lt_row14"
+                    android:layout_below="@id/lt_row13"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2.5dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/labelCMSerial"
+                        android:layout_width="wrap_content"
+                        android:layout_height="29dp"
+                        android:textAppearance="@style/text_appearance"
+                        android:text="@string/label_cmserialno"
+                        android:gravity="left|center_vertical"/>
+
+                    <TextView
+                        android:id="@+id/textCMSerial"
+                        android:layout_width="wrap_content"
+                        android:layout_height="29dp"
+                        android:layout_marginLeft="5dp"
+                        android:gravity="left|center_vertical"
+                        android:textAppearance="@style/text_values"
+                        />
+
+                </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/lt_row15"
+                    android:layout_below="@id/lt_row14"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2.5dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/labelFirmware"
+                        android:layout_width="wrap_content"
+                        android:layout_height="29dp"
+                        
+                        android:textAppearance="@style/text_appearance"
+                        android:text="@string/label_firmversion"
+                        android:gravity="left|center_vertical"/>
+
+                    <TextView
+                        android:id="@+id/textFirmware"
+                        android:layout_width="wrap_content"
+                        android:layout_height="29dp"
+                        android:layout_marginLeft="5dp"
+                        android:gravity="left|center_vertical"
+                        android:textAppearance="@style/text_values"
+                        />
+
+                </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/lt_row16"
+                    android:layout_below="@id/lt_row15"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2.5dp"
                     android:orientation="horizontal">
 
                     <TextView
@@ -176,11 +208,21 @@
                         android:textAppearance="@style/text_values"
                         />
 
+                </LinearLayout>
+                <LinearLayout
+                        android:id="@+id/lt_row17"
+                        android:layout_below="@id/lt_row16"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2.5dp"
+                        android:orientation="horizontal">
+
+
                     <TextView
                         android:id="@+id/labelHeatLimit"
                         android:layout_width="wrap_content"
                         android:layout_height="29dp"
-                        android:layout_marginLeft="29dp"
+                        
                         android:textAppearance="@style/text_appearance"
                         android:text="@string/label_heatinglimits"
                         android:gravity="left|center_vertical"/>
@@ -194,11 +236,23 @@
                         android:textAppearance="@style/text_values"
                         />
 
+
+
+                </LinearLayout>
+                <LinearLayout
+                        android:id="@+id/lt_row18"
+                        android:layout_below="@id/lt_row17"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2.5dp"
+                        android:orientation="horizontal">
+
+
                     <TextView
                         android:id="@+id/labelCoolLimit"
                         android:layout_width="wrap_content"
                         android:layout_height="29dp"
-                        android:layout_marginLeft="29dp"
+                        
                         android:textAppearance="@style/text_appearance"
                         android:text="@string/label_coolinglimits"
                         android:gravity="left|center_vertical"/>
@@ -212,11 +266,21 @@
                         android:textAppearance="@style/text_values"
                         />
 
+                </LinearLayout> 
+                <LinearLayout
+                        android:id="@+id/lt_row19"
+                        android:layout_below="@id/lt_row18"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2.5dp"
+                        android:orientation="horizontal">
+
+
                     <TextView
                         android:id="@+id/labelZoneRange"
                         android:layout_width="wrap_content"
                         android:layout_height="29dp"
-                        android:layout_marginLeft="29dp"
+                        
                         android:textAppearance="@style/text_appearance"
                         android:text="@string/label_zonerange"
                         android:gravity="left|center_vertical"/>
@@ -228,19 +292,18 @@
                         android:layout_marginLeft="5dp"
                         android:gravity="left|center_vertical"
                         android:textAppearance="@style/text_values"
-                         />
+                        />
 
 
                 </LinearLayout>
-
                 <LinearLayout
-                    android:id="@+id/lt_row4"
-                    android:layout_below="@id/lt_row3"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:orientation="horizontal">
-
+                        android:id="@+id/lt_row20"
+                        android:layout_below="@id/lt_row19"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2.5dp"
+                        android:orientation="horizontal">
+                    
                     <TextView
                         android:id="@+id/labelCurrentTemp"
                         android:layout_width="wrap_content"
@@ -257,12 +320,23 @@
                         android:gravity="left|center_vertical"
                         android:textAppearance="@style/text_values"
                         />
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:id="@+id/lt_row21"
+                    android:layout_below="@id/lt_row20"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2.5dp"
+                    android:orientation="horizontal">
+
+                   
 
                     <TextView
                         android:id="@+id/labelCurrentHumidity"
                         android:layout_width="wrap_content"
                         android:layout_height="29dp"
-                        android:layout_marginLeft="46dp"
                         android:textAppearance="@style/text_appearance"
                         android:text="@string/label_currenthumidity"
                         android:gravity="left|center_vertical"/>
@@ -278,11 +352,11 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    android:id="@+id/lt_row5"
-                    android:layout_below="@id/lt_row4"
+                    android:id="@+id/lt_row22"
+                    android:layout_below="@id/lt_row21"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="2.5dp"
                     android:orientation="horizontal">
 
                     <TextView
@@ -304,11 +378,11 @@
 
                 </LinearLayout>
                 <LinearLayout
-                    android:id="@+id/lt_row6"
-                    android:layout_below="@id/lt_row5"
+                    android:id="@+id/lt_row23"
+                    android:layout_below="@id/lt_row22"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="2.5dp"
                     android:orientation="horizontal">
 
                     <TextView
@@ -332,6 +406,7 @@
             </RelativeLayout>
 
 
-    </RelativeLayout>
+            </RelativeLayout>
+        </ScrollView>
     </RelativeLayout>
 </android.support.constraint.ConstraintLayout>

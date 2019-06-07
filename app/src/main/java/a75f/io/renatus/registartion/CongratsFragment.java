@@ -1,6 +1,8 @@
 package a75f.io.renatus.registartion;
 
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
@@ -123,10 +125,21 @@ public class CongratsFragment extends Fragment {
         String oaoStatus = "NO";
         String analogStatus = "-|0|-|-";
 
+        PackageManager pm = mContext.getPackageManager();
+        PackageInfo pi;
+        try {
+            pi = pm.getPackageInfo("a75f.io.renatus", 0);
+            String str = pi.versionName + "." + String.valueOf(pi.versionCode);
+            mCCUVersion.setText(str);
+        } catch (PackageManager.NameNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
         mCCUName.setText(ccu.get("dis").toString());
         mSerialNo.setText(site.get("id").toString());
-        mCMSerialNo.setText("d1C88dd514801d5f");
-        mCMFirwareVer.setText("3.21.24.9");
+        mCMSerialNo.setText("NA");
+        mCMFirwareVer.setText("NA");
         mBuildingLimits.setText(buldingLimit);
         mHeatingLimits.setText(heatingLimit);
         mCoolingLimits.setText(coolingLimit);

@@ -19,12 +19,15 @@ import android.widget.NumberPicker;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemMode;
@@ -35,7 +38,7 @@ import a75f.io.logic.tuners.TunerUtil;
  * Created by samjithsadasivan isOn 8/7/17.
  */
 
-public class SystemFragment extends Fragment implements AdapterView.OnItemSelectedListener
+public class SystemFragment extends Fragment implements AdapterView.OnItemSelectedListener//, CCUHsApi.SystemDataInterface
 {
 	private static final String TAG = "SystemFragment";
 	SeekBar  sbComfortValue;
@@ -43,9 +46,12 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	Spinner targetMaxInsideHumidity;
 	Spinner targetMinInsideHumidity;
 	
-	SwitchCompat   cbCompHumidity;
-	SwitchCompat cbDemandResponse;
-	
+	//SwitchCompat tbCompHumidity;
+	//SwitchCompat cbDemandResponse;
+	ToggleButton tbCompHumidity;
+	ToggleButton tbDemandResponse;
+
+
 	
 	int spinnerInit = 0;
 	boolean minHumiditySpinnerReady = false;
@@ -63,7 +69,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	boolean heatingAvailable = false;
 	
 	ArrayList<String> modesAvailable = new ArrayList<>();
-	
+	ArrayAdapter<Double> humidityAdapter;
 	public SystemFragment()
 	{
 	}
@@ -73,8 +79,19 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	{
 		return new SystemFragment();
 	}
-	
-	
+
+	public void refreshScreen()
+	{
+		fetchPoints();
+	}
+
+	@Override
+	public void onResume() {
+		// TODO Auto-generated method stub
+		super.onResume();
+		//fetchPoints();
+		//CCUHsApi.setSystemDataInterface(this);
+	}
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 	                         Bundle savedInstanceState)
@@ -149,16 +166,16 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			}
 		});
 		
-		cbCompHumidity = view.findViewById(R.id.cbCompHumidity);
-		cbDemandResponse = view.findViewById(R.id.cbDemandResponse);
-		
+		tbCompHumidity = view.findViewById(R.id.tbCompHumidity);
+		tbDemandResponse = view.findViewById(R.id.tbDemandResponse);
+
 		if (L.ccu().systemProfile instanceof DefaultSystem) {
 			systemModePicker.setEnabled(false);
 			sbComfortValue.setEnabled(false);
 			targetMaxInsideHumidity.setEnabled(false);
 			targetMinInsideHumidity.setEnabled(false);
-			cbCompHumidity.setEnabled(false);
-			cbDemandResponse.setEnabled(false);
+			tbCompHumidity.setEnabled(false);
+			tbDemandResponse.setEnabled(false);
 			return;
 		}
 		
@@ -185,7 +202,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			zoroToHundred.add(val);
 		}
 		
-		ArrayAdapter<Double> humidityAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, zoroToHundred);
+		humidityAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, zoroToHundred);
 		humidityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		
 		
@@ -195,7 +212,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		targetMinInsideHumidity.setOnItemSelectedListener(this);
 		targetMaxInsideHumidity.setOnItemSelectedListener(this);
 		
-		cbCompHumidity.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+		tbCompHumidity.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
 		{
 			@Override
 			public void onCheckedChanged(CompoundButton compoundButton, boolean b)
@@ -206,8 +223,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				}
 			}
 		});
-		
-		cbDemandResponse.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+
+		tbDemandResponse.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
 		{
 			@Override
 			public void onCheckedChanged(CompoundButton compoundButton, boolean b)
@@ -218,7 +235,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				}
 			}
 		});
-		final Handler handler = new Handler();
+
+		/*final Handler handler = new Handler();
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
@@ -226,19 +244,45 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				String status = L.ccu().systemProfile.getStatusMessage();
 				equipmentStatus.setText(status.equals("") ? "OFF":status);
 				occupancyStatus.setText(ScheduleProcessJob.getSystemStatusString());
-				cbCompHumidity.setChecked(TunerUtil.readSystemUserIntentVal("compensate and humidity") > 0);
-				cbDemandResponse.setChecked(TunerUtil.readSystemUserIntentVal("demand and response") > 0);
+				tbCompHumidity.setChecked(TunerUtil.readSystemUserIntentVal("compensate and humidity") > 0);
+				tbDemandResponse.setChecked(TunerUtil.readSystemUserIntentVal("demand and response") > 0);
 				sbComfortValue.setProgress(5 - (int)TunerUtil.readSystemUserIntentVal("desired and ci"));
-				
+
 				targetMaxInsideHumidity.setSelection(humidityAdapter
 						                                     .getPosition(TunerUtil.readSystemUserIntentVal("target and max and inside and humidity")), false);
 				targetMinInsideHumidity.setSelection(humidityAdapter
 						                                     .getPosition(TunerUtil.readSystemUserIntentVal("target and min and inside and humidity")), false);
 			}
-		});
+		});*/
+
+		fetchPoints();
 		
 	}
 
+	public void fetchPoints()
+	{
+		getActivity().runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+
+				systemModePicker.setValue((int)TunerUtil.readSystemUserIntentVal("rtu and mode"));
+				String status = L.ccu().systemProfile.getStatusMessage();
+				equipmentStatus.setText(status.equals("") ? "OFF":status);
+				occupancyStatus.setText(ScheduleProcessJob.getSystemStatusString());
+				tbCompHumidity.setChecked(TunerUtil.readSystemUserIntentVal("compensate and humidity") > 0);
+				tbDemandResponse.setChecked(TunerUtil.readSystemUserIntentVal("demand and response") > 0);
+				sbComfortValue.setProgress(5 - (int)TunerUtil.readSystemUserIntentVal("desired and ci"));
+
+				targetMaxInsideHumidity.setSelection(humidityAdapter
+						.getPosition(TunerUtil.readSystemUserIntentVal("target and max and inside and humidity")), false);
+				targetMinInsideHumidity.setSelection(humidityAdapter
+						.getPosition(TunerUtil.readSystemUserIntentVal("target and min and inside and humidity")), false);
+
+			}
+		});
+
+	}
 	@Override
 	public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,
 	                           long arg3)

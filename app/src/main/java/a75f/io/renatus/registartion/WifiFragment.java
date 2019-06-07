@@ -24,6 +24,7 @@ import android.view.animation.RotateAnimation;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import java.util.ArrayList;
@@ -58,6 +59,7 @@ public class WifiFragment extends Fragment /*implements InstallType */{
     Context                     mContext;
     Handler                     mHandler;
     Runnable                    mRunable;
+    TextView                    mTurnonwifi;
     private SwitchFragment switchFragment;
     int goToNext = 0;
     Prefs prefs;
@@ -104,7 +106,9 @@ public class WifiFragment extends Fragment /*implements InstallType */{
         toggleWifi = (ToggleButton) rootView.findViewById(R.id.toggleWifi);
         recyclerWifi = (RecyclerView)rootView.findViewById(R.id.recyclerWifi);
         progressbar = (ProgressBar) rootView.findViewById(R.id.progressbar);
+        mTurnonwifi = (TextView) rootView.findViewById(R.id.textView_turnon);
         progressbar.setVisibility(View.GONE);
+        mTurnonwifi.setVisibility(View.GONE);
 
         mContext = getContext().getApplicationContext();
 
@@ -164,9 +168,11 @@ public class WifiFragment extends Fragment /*implements InstallType */{
                         //toggleWifi.setChecked(mainWifiObj.isWifiEnabled());
                             if (mainWifiObj.isWifiEnabled())
                             {
+                                mTurnonwifi.setVisibility(View.GONE);
                                 toggleWifi.setChecked(true);
                             }else {
                                 toggleWifi.setChecked(false);
+                                mTurnonwifi.setVisibility(View.VISIBLE);
                             }
                     }
                     showScanResult();
@@ -196,6 +202,11 @@ public class WifiFragment extends Fragment /*implements InstallType */{
                                 mainWifiObj.setWifiEnabled(false);
                             }
                         progressbar.setVisibility(View.GONE);
+                        mTurnonwifi.setVisibility(View.GONE);
+                    }
+                    if(!mainWifiObj.isWifiEnabled())
+                    {
+                        mTurnonwifi.setVisibility(View.VISIBLE);
                     }
                 }
             }
@@ -208,7 +219,9 @@ public class WifiFragment extends Fragment /*implements InstallType */{
         {
             mainWifiObj.startScan();
         }
-
+        else{
+            mTurnonwifi.setVisibility(View.VISIBLE);
+        }
         return rootView;
     }
 

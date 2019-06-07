@@ -1,18 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:SwitchCompat="http://schemas.android.com/apk/res-auto"
-              android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent">
-
-    <TextView
-        android:id="@+id/profileTitle"
-        android:layout_width="match_parent"
+    xmlns:SwitchCompat="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools">
+    <RelativeLayout
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingLeft="100dp"
-        android:layout_marginTop="16dp"
-        android:textSize="36sp"
-        android:text="System Profile"/>
+        android:layout_marginTop="36dp">
+
+        <TextView
+            android:id="@+id/ccuName"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:minWidth="220dp"
+            android:gravity="right|center_vertical"
+            android:textAppearance="@style/title_orange"
+            android:text="CCU"/>
+
+        <TextView
+            android:id="@+id/profileTitle"
+            android:layout_toRightOf="@+id/ccuName"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginLeft="14dp"
+            android:gravity="left|center_vertical"
+            android:textAppearance="@style/title_grey"
+            android:text="System Profile"/>
+
+    </RelativeLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -20,9 +37,10 @@
 
         <NumberPicker
             android:id="@+id/systemModePicker"
-            android:layout_width="200dp"
-            android:layout_height="240dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:layout_marginLeft="100dp"
             android:layout_marginBottom="90dp"
             android:textColor="#202020"
             android:scaleX="1.2"
@@ -34,8 +52,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginLeft="50dp"
-            android:layout_marginRight="50dp"
+            android:layout_marginLeft="100dp"
+            android:layout_marginRight="100dp"
             android:orientation="vertical">
 
             <LinearLayout
@@ -46,10 +64,9 @@
 
                 <TextView
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="30dp"
                     android:text="Occupancy Status:"
-                    android:textColor="#202020"
-                    android:textSize="24sp"/>
+                    android:textAppearance="@style/label_black" />
 
                 <TextView
                     android:id="@+id/occupancyStatus"
@@ -69,10 +86,9 @@
 
                 <TextView
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="30dp"
                     android:text="Equipment Status:"
-                    android:textColor="#202020"
-                    android:textSize="24sp"/>
+                    android:textAppearance="@style/label_black" />
 
                 <TextView
                     android:id="@+id/equipmentStatus"
@@ -92,12 +108,12 @@
                 <TextView
                     android:id="@+id/textView6"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="30dp"
                     android:layout_gravity="bottom"
                     android:layout_weight="1"
-                    android:text="Economy"
-                    android:textColor="#202020"
-                    android:textSize="26sp"/>
+                    android:text="ECONOMY"
+                    android:textAppearance="@style/label_black"
+                    android:textSize="19.5sp"/>
 
                 <TextView
                     android:id="@+id/textView5"
@@ -107,15 +123,16 @@
                     android:layout_marginRight="8dp"
                     android:layout_weight="1"
                     android:gravity="right"
-                    android:text="Comfort"
+                    android:text="COMFORT"
                     android:textColor="#202020"
-                    android:textSize="24sp"/>
+                    android:textSize="19.5sp"/>
 
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
                 android:layout_marginLeft="24dp"
                 android:layout_marginRight="24dp">
 
@@ -142,17 +159,20 @@
 
                     <TextView
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="30dp"
                         android:text="Min Inside Humidity"
-                        android:textColor="#202020"
-                        android:textSize="24sp"/>
+                        android:layout_gravity="center_vertical"
+                        android:textAppearance="@style/label_black"/>
 
                     <Spinner
                         android:id="@+id/targetMinInsideHumidity"
-                        android:layout_width="wrap_content"
+                        android:layout_width="104dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginLeft="42dp"
                         android:layout_gravity="center_vertical"
-                        android:layout_marginLeft="20dp"/>
+                        style="@style/Widget.AppCompat.Spinner.Underlined"
+                        android:entries="@array/hvac_stage_selector"
+                        tools:listitem="@layout/spinner_dropdown_item"/>
                 </LinearLayout>
 
                 <LinearLayout
@@ -164,17 +184,21 @@
 
                     <TextView
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="30dp"
+                        android:layout_gravity="center_vertical"
                         android:text="Max Inside Humidity"
                         android:textColor="#202020"
                         android:textSize="24sp"/>
 
                     <Spinner
                         android:id="@+id/targetMaxInsideHumidity"
-                        android:layout_width="wrap_content"
+                        android:layout_width="104dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginLeft="42dp"
                         android:layout_gravity="center_vertical"
-                        android:layout_marginLeft="20dp"/>
+                        style="@style/Widget.AppCompat.Spinner.Underlined"
+                        android:entries="@array/hvac_stage_selector"
+                        tools:listitem="@layout/spinner_dropdown_item"/>
                 </LinearLayout>
 
             </LinearLayout>
@@ -187,27 +211,36 @@
 
                 <TextView
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="30dp"
                     android:layout_gravity="left"
                     android:text="Compensate for Humidity"
-                    android:textColor="#202020"
-                    android:textSize="24sp"/>
+                    android:textAppearance="@style/label_black"/>
 
                 <Space
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"/>
 
-                <android.support.v7.widget.SwitchCompat
-                    android:id="@+id/cbCompHumidity"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                <!-- <android.support.v7.widget.SwitchCompat
+                     android:id="@+id/cbCompHumidity"
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:layout_gravity="right"
+                     android:padding="4dp"
+                     android:thumb="@drawable/switch_thumb_selector"
+                     SwitchCompat:track="@drawable/switch_track_selector"
+                     android:textColor="#202020"
+                     android:textSize="24sp"/>-->
+                <ToggleButton
+                    android:id="@+id/tbCompHumidity"
+                    android:layout_width="46.12dp"
+                    android:layout_height="27.42dp"
+                    android:layout_centerVertical="true"
                     android:layout_gravity="right"
-                    android:padding="4dp"
-                    android:thumb="@drawable/switch_thumb_selector"
-                    SwitchCompat:track="@drawable/switch_track_selector"
-                    android:textColor="#202020"
-                    android:textSize="24sp"/>
+                    android:background="@drawable/toggle_selector"
+                    android:checked="false"
+                    android:textOff=""
+                    android:textOn="" />
             </LinearLayout>
 
             <LinearLayout
@@ -218,27 +251,39 @@
 
                 <TextView
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="30dp"
                     android:layout_gravity="left"
                     android:text="Demand Response Mode"
-                    android:textColor="#202020"
-                    android:textSize="24sp"/>
+                    android:textAppearance="@style/label_black"/>
 
                 <Space
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"/>
 
-                <android.support.v7.widget.SwitchCompat
-                    android:id="@+id/cbDemandResponse"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:padding="4dp"
+                <!--
+                                <android.support.v7.widget.SwitchCompat
+                                    android:id="@+id/cbDemandResponse"
+                                    android:layout_width="46.12dp"
+                                    android:layout_height="27.42dp"
+                                    android:padding="4dp"
+                                    android:layout_gravity="right"
+                                    android:thumb="@drawable/switch_thumb_selector"
+                                    SwitchCompat:track="@drawable/switch_track_selector"
+                                    android:textColor="#202020"
+                                    android:textSize="24sp"/>
+                -->
+
+                <ToggleButton
+                    android:id="@+id/tbDemandResponse"
+                    android:layout_width="46.12dp"
+                    android:layout_height="27.42dp"
+                    android:layout_centerVertical="true"
                     android:layout_gravity="right"
-                    android:thumb="@drawable/switch_thumb_selector"
-                    SwitchCompat:track="@drawable/switch_track_selector"
-                    android:textColor="#202020"
-                    android:textSize="24sp"/>
+                    android:background="@drawable/toggle_selector"
+                    android:checked="false"
+                    android:textOff=""
+                    android:textOn="" />
             </LinearLayout>
 
 

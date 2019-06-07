@@ -359,8 +359,12 @@ public class DabSystemController extends SystemController
     }
     
     public boolean isZoneDead(Equip q) {
-        return CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and equipRef == \""+q.getId()+"\"")
-                       .equals("Zone Temp Dead");
+        try
+        {
+            return CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and equipRef == \"" + q.getId() + "\"").equals("Zone Temp Dead");
+        } catch (Exception e) {
+            return false;
+        }
     }
     
     @Override

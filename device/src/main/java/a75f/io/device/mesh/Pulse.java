@@ -137,6 +137,21 @@ public class Pulse
 						hayStack.writeHisValById(logPoint.get("id").toString(), val);
 						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : VOC "+val);
 						break;
+					case SENSOR_ENERGY_METER:
+						SmartNodeSensorReading_t[] sensorReadingsERM = smartNodeRegularUpdateMessage_t.update.sensorReadings;
+						int low = 0 ,high = 0;
+						for (SmartNodeSensorReading_t r : sensorReadingsERM) {
+							if (r.sensorType.get() == SensorType.ENERGY_METER_LOW.ordinal()) {
+								low = r.sensorData.get();
+							}else if (r.sensorType.get() == SensorType.ENERGY_METER_HIGH.ordinal()) {
+								high = r.sensorData.get();
+							}
+						}
+						val = (high << 12) | low ;
+						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+						hayStack.writeHisValById(logPoint.get("id").toString(), val);
+						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : EMR "+val);
+						break;
 					
 				}
 			}

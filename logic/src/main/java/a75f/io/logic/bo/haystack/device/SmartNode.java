@@ -29,9 +29,6 @@ public class SmartNode
     public RawPoint relay1;
     public RawPoint relay2;
     public RawPoint currentTemp;
-    public RawPoint humidity;
-    public RawPoint co2;
-    public RawPoint voc;
     public RawPoint desiredTemp;
     
     public String deviceRef;
@@ -39,6 +36,7 @@ public class SmartNode
     public String floorRef;
     public String roomRef;
     
+    String tz;
     
     public SmartNode(int address, String site, String floor, String room, String equipRef) {
         Device d = new Device.Builder()
@@ -55,13 +53,27 @@ public class SmartNode
         siteRef = site;
         floorRef = floor;
         roomRef = room;
+    
+        HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
+        tz = siteMap.get("tz").toString();
+    
         createPoints();
     }
     
-    private void createPoints() {
-        HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
-        String tz = siteMap.get("tz").toString();
+    public SmartNode(int address) {
+        HashMap device = CCUHsApi.getInstance().read("device and addr == \""+address+"\"");
+        Device d = new Device.Builder().setHashMap(device).build();
         
+        deviceRef = d.getId();
+        smartNodeAddress = Integer.parseInt(d.getAddr());
+        siteRef = d.getSiteRef();
+        floorRef = d.getFloorRef();
+        roomRef = d.getRoomRef();
+        HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
+        tz = siteMap.get("tz").toString();
+    }
+    
+    private void createPoints() {
         analog1In = new RawPoint.Builder()
                                 .setDisplayName("Analog1In-"+smartNodeAddress)
                                 .setDeviceRef(deviceRef)
@@ -180,39 +192,22 @@ public class SmartNode
                               .setPort(Port.DESIRED_TEMP.toString())
                               .setTz(tz)
                               .build();
+    }
     
-        humidity = new RawPoint.Builder()
-                              .setDisplayName("humidity-"+smartNodeAddress)
-                              .setDeviceRef(deviceRef)
-                              .setSiteRef(siteRef)
-                              .setRoomRef(roomRef)
-                              .setFloorRef(floorRef)
-                              .addMarker("sensor").addMarker("his")
-                              .setPort(Port.SENSOR_RH.toString())
-                              .setTz(tz)
-                              .build();
-    
-        co2 = new RawPoint.Builder()
-                           .setDisplayName("co2-"+smartNodeAddress)
-                           .setDeviceRef(deviceRef)
-                           .setSiteRef(siteRef)
-                           .setRoomRef(roomRef)
-                           .setFloorRef(floorRef)
-                           .addMarker("sensor").addMarker("his")
-                           .setPort(Port.SENSOR_CO2.toString())
-                           .setTz(tz)
-                           .build();
-    
-        voc = new RawPoint.Builder()
-                           .setDisplayName("voc-"+smartNodeAddress)
-                           .setDeviceRef(deviceRef)
-                           .setSiteRef(siteRef)
-                           .setRoomRef(roomRef)
-                           .setFloorRef(floorRef)
-                           .addMarker("sensor").addMarker("his")
-                           .setPort(Port.SENSOR_VOC.toString())
-                           .setTz(tz)
-                           .build();
+    public void addSensor(Port p, String pointRef) {
+        RawPoint sensor = new RawPoint.Builder()
+                                    .setDisplayName(p.toString()+"-"+smartNodeAddress)
+                                    .setDeviceRef(deviceRef)
+                                    .setSiteRef(siteRef)
+                                    .setRoomRef(roomRef)
+                                    .setFloorRef(floorRef)
+                                    .setPointRef(pointRef)
+                                    .setEnabled(true)
+                                    .addMarker("sensor").addMarker("his")
+                                    .setPort(p.toString())
+                                    .setTz(tz)
+                                    .build();
+        CCUHsApi.getInstance().addPoint(sensor);
     }
     
     public void addPointsToDb() {
@@ -225,9 +220,6 @@ public class SmartNode
         CCUHsApi.getInstance().addPoint(relay1);
         CCUHsApi.getInstance().addPoint(relay2);
         CCUHsApi.getInstance().addPoint(currentTemp);
-        CCUHsApi.getInstance().addPoint(humidity);
-        CCUHsApi.getInstance().addPoint(co2);
-        CCUHsApi.getInstance().addPoint(voc);
         CCUHsApi.getInstance().addPoint(desiredTemp);
     }
     

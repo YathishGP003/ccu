@@ -36,6 +36,7 @@ import a75f.io.logic.bo.building.NamedSchedule;
 import a75f.io.logic.bo.building.Schedule;
 import a75f.io.logic.bo.building.dab.DabProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.erm.EmrProfile;
 import a75f.io.logic.bo.building.plc.PlcProfile;
 import a75f.io.logic.bo.building.sscpu.ConventionalUnitProfile;
 import a75f.io.logic.bo.building.sshpu.HeatPumpUnitProfile;
@@ -433,15 +434,20 @@ public class Globals {
                             vpf.addLogicalMap(Short.valueOf(eq.getGroup()));
                             L.ccu().zoneProfiles.add(vpf);
                             break;
+                        case DAB:
+                            DabProfile dab = new DabProfile();
+                            dab.addDabEquip(Short.valueOf(eq.getGroup()));
+                            L.ccu().zoneProfiles.add(dab);
+                            break;
                         case PLC:
                             PlcProfile plc = new PlcProfile();
                             plc.addPlcEquip(Short.valueOf(eq.getGroup()));
                             L.ccu().zoneProfiles.add(plc);
                             break;
-                        case DAB:
-                            DabProfile dab = new DabProfile();
-                            dab.addDabEquip(Short.valueOf(eq.getGroup()));
-                            L.ccu().zoneProfiles.add(dab);
+                        case EMR:
+                            EmrProfile emr = new EmrProfile();
+                            emr.addEmrEquip(Short.valueOf(eq.getGroup()));
+                            L.ccu().zoneProfiles.add(emr);
                             break;
                         case SMARTSTAT_CONVENTIONAL_PACK_UNIT:
                             ConventionalUnitProfile cpu = new ConventionalUnitProfile();

@@ -423,6 +423,8 @@ public class TestHS
                                    .build();
     
         String tpID1 = CCUHsApi.getInstance().addPoint(testPoint1);
+    
+        Zone     zone         = Schedule.getZoneforEquipId(equipRef);
         
         for (Floor ff : HSUtil.getFloors()) {
             System.out.println( "Floor : "+ ff.getDisplayName());

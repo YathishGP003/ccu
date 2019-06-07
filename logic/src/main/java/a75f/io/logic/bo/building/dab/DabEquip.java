@@ -304,12 +304,6 @@ public class DabEquip
         SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
         device.currentTemp.setPointRef(ctID);
         device.currentTemp.setEnabled(true);
-        device.humidity.setPointRef(humidityId);
-        device.humidity.setEnabled(true);
-        device.co2.setPointRef(co2Id);
-        device.co2.setEnabled(true);
-        device.voc.setPointRef(vocId);
-        device.voc.setEnabled(true);
         device.desiredTemp.setPointRef(dtId);
         device.desiredTemp.setEnabled(true);
         
@@ -327,8 +321,11 @@ public class DabEquip
         device.analog1Out.setPointRef(normalizedDamper1PosId);
         device.analog2Out.setEnabled(config.isOpConfigured(Port.ANALOG_OUT_TWO));
         device.analog2Out.setPointRef(normalizedDamper2PosId);
-        
     
+        device.addSensor(Port.SENSOR_RH, humidityId);
+        device.addSensor(Port.SENSOR_CO2, co2Id);
+        device.addSensor(Port.SENSOR_VOC, vocId);
+        
         device.addPointsToDb();
     
         

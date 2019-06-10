@@ -40,7 +40,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     }
     
     public String getProfileName() {
-        return "DAB Fully Modulating RTU";
+        return "DAB Fully Modulating AHU";
     }
     
     @Override

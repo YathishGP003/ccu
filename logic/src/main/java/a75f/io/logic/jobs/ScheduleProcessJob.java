@@ -722,6 +722,9 @@ public class ScheduleProcessJob extends BaseJob {
                 }
             }
         }
+        if (thExpiry > 0) {
+            CcuLog.d(L.TAG_CCU_JOB, "thExpiry "+thExpiry);
+        }
         return thExpiry;
     }
     

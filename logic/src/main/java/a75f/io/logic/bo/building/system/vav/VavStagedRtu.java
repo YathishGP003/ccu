@@ -336,7 +336,7 @@ public class VavStagedRtu extends VavSystemProfile
                         break;
                     case HUMIDIFIER:
                     case DEHUMIDIFIER:
-                        if (systemMode == SystemMode.OFF) {
+                        if (systemMode == SystemMode.OFF || ScheduleProcessJob.getSystemOccupancy() == Occupancy.UNOCCUPIED) {
                             relayState = 0;
                         } else
                         {

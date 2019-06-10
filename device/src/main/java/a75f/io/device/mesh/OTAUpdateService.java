@@ -40,12 +40,17 @@ import java.io.OutputStream;
 import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 import a75f.io.api.haystack.Device;
 import a75f.io.device.DeviceConstants;
 import a75f.io.device.serial.CcuToCmOverUsbFirmwareMetadataMessage_t;
+import a75f.io.device.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
+import a75f.io.device.serial.CmToCcuOverUsbFirmwarePacketRequest_t;
 import a75f.io.device.serial.FirmwareDeviceType_t;
+import a75f.io.device.serial.MessageType;
+import a75f.io.logic.BuildConfig;
 import a75f.io.logic.bo.util.ByteArrayUtils;
 
 public class OTAUpdateService extends IntentService {
@@ -61,9 +66,7 @@ public class OTAUpdateService extends IntentService {
     //static final String DOWNLOAD_BASE_URL = "http://updates.75fahrenheit.com/sn_fw/";
     static final String DOWNLOAD_BASE_URL = "http://updates.75fahrenheit.com/";
     private static final File DOWNLOAD_DIR = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-    private static final char[] HEX_CODE = "0123456789ABCDEF".toCharArray();
     private static final int MASK_8 = 0xFF;
-    private static final int MASK_4 = 0xF;
     private static Looper mLooper;
     private static Messenger mMessenger;
     private int mLastSentPacket = -1;
@@ -88,42 +91,6 @@ public class OTAUpdateService extends IntentService {
 
     public OTAUpdateService() {
         super("OTAUpdateService");
-    }
-
-    /**
-     * Utility methods to convert a hex string to a byte array
-     *
-     * @param s The string to be converted
-     * @return A byte array of the converted string
-     */
-    private static byte[] hexStringToByteArray(String s) {
-        int len = s.length();
-        byte[] data = new byte[len / 2];
-        for (int i = 0; i < len; i += 2) {
-            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-                    + Character.digit(s.charAt(i + 1), 16));
-        }
-        return data;
-    }
-
-    /**
-     * A utility methods to convert a byte array to a hex string
-     * Based on the javax.xml implementation, with modifications
-     *
-     * @param data   The array to be converted
-     * @param spaces A flag for whether the output should have spaces between each byte
-     * @return A hex string of the converted byte array
-     */
-    private static String byteArrayToHexString(byte[] data, boolean spaces) {
-        StringBuilder r = new StringBuilder();
-        for (byte b : data) {
-            r.append(HEX_CODE[(b >> 4) & MASK_4]);
-            r.append(HEX_CODE[(b & MASK_4)]);
-            if (spaces) {
-                r.append(' ');
-            }
-        }
-        return r.toString();
     }
 
     @Override
@@ -152,11 +119,6 @@ public class OTAUpdateService extends IntentService {
     }
 
     @Override
-    public IBinder onBind(Intent intent) {
-        return mMessenger.getBinder();
-    }
-
-    @Override
     public void onDestroy() {
         super.onDestroy();
 
@@ -177,9 +139,71 @@ public class OTAUpdateService extends IntentService {
         }
         /* The OTA update is in progress, and is being notified from the CM */
         else if(action.equals(DeviceConstants.IntentActions.LSERIAL_MESSAGE)) {
-            String eventType = intent.getStringExtra("eventType");
+            MessageType eventType = (MessageType) intent.getSerializableExtra("eventType");
+            byte[] eventBytes = intent.getByteArrayExtra("eventBytes");
 
-            //determine event type and respond accordingly
+            switch(eventType) {
+                case CM_TO_CCU_OVER_USB_FIRMWARE_PACKET_REQUEST:
+                    handlePacketRequest(eventBytes);
+                    break;
+
+                case FSV_REBOOT:
+                    //is this a general node reboot?
+                    handleNodeReboot(eventBytes);
+                    break;
+            }
+        }
+    }
+
+    public void handlePacketRequest(byte[] eventBytes) {
+        if(timer != null){
+            timer.cancel();
+            isTimerStarted = false;
+        }
+
+        CmToCcuOverUsbFirmwarePacketRequest_t msg = new CmToCcuOverUsbFirmwarePacketRequest_t();
+        msg.setByteBuffer(ByteBuffer.wrap(eventBytes), 0);
+
+        sendPacket(msg.lwMeshAddress.get(), msg.sequenceNumber.get());
+    }
+
+    public void handleNodeReboot(byte[] eventBytes) {
+        if(timer != null){
+            timer.cancel();
+            isTimerStarted = false;
+        }
+
+
+
+        bundle = msg.getData();
+        if (bundle.getInt("lwMeshAddress") == otaUpdateService.mLwMeshAddress
+                && mUpdateInProgress) {
+            short versionMajor = (short) bundle.getInt("versionMajor");
+            short versionMinor = (short) bundle.getInt("versionMinor");
+            CCUKinveyInterface.uploadErrorConditions(new Alert(Alert.AlertType.FIRMWARE_OTA_UPDATE_ENDED, "SYSTEM").setArgs(AlertsData.getCCUName(),snOtaUpdateService.mLwMeshAddress, versionMajor+"."+versionMinor),snOtaUpdateService.mLwMeshAddress);
+            if (mUpdateWaitingToComplete && versionMatches(versionMajor, versionMinor)) {
+                Log.d(TAG, "[UPDATE] [SUCCESSFUL]"
+                        + " [SN:" + mLwMeshAddress + "]"
+                        + " {PACKETS:" + mLastSentPacket
+                        + "] Updated to target: " + versionMajor + "." + versionMinor);
+
+                resetUpdate();
+                SerialService.getInstance().dettachClient(mMessenger);
+                stopSelf();
+
+
+            } else {
+                Log.d(TAG, "[UPDATE] [FAILED]"
+                        + " [SN:" + mLwMeshAddress + "]"
+                        + " {PACKETS:" + mLastSentPacket + "]"
+                        + " [TARGET: " + mVersionMajor
+                        + "." + mVersionMinor
+                        + "] [ACTUAL: " + versionMajor + "." + versionMinor + "]");
+
+                resetUpdate();
+                SerialService.getInstance().dettachClient(mMessenger);
+                stopSelf();
+            }
         }
     }
 
@@ -481,10 +505,10 @@ public class OTAUpdateService extends IntentService {
 
         if (packetNumber > mLastSentPacket) {
             mLastSentPacket = packetNumber;
-            if (CCUApp.DEBUG) {
+            if (BuildConfig.DEBUG) {
                 if (packetNumber % 100 == 0) {
                     Log.d(TAG, "[UPDATE] [SN:" + lwMeshAddress + "]"+"PS:"+packets.size()+","+packet.length+","+sequenceNumber+" [PN:" + mLastSentPacket
-                            + "] [DATA: " + byteArrayToHexString(packet, true) +  "]");
+                            + "] [DATA: " + ByteArrayUtils.byteArrayToHexString(packet, true) +  "]");
                 }
             }
         }
@@ -535,7 +559,7 @@ public class OTAUpdateService extends IntentService {
         byte[] packet = ByteArrayUtils.addBytes(msgType, address, device, major, minor, length, mFirmwareSignature);
 
         if (BuildConfig.DEBUG) {
-            Log.d(TAG, "[METADATA] [SN:" + mLwMeshAddress + "] [DATA: " + byteArrayToHexString(packet, true) + "]");
+            Log.d(TAG, "[METADATA] [SN:" + mLwMeshAddress + "] [DATA: " + ByteArrayUtils.byteArrayToHexString(packet, true) + "]");
         }
 
         try {
@@ -577,7 +601,7 @@ public class OTAUpdateService extends IntentService {
                         break;
                     case "firmwareSignature":
                         String firmwareUpdateString = reader.nextString();
-                        mFirmwareSignature = hexStringToByteArray(firmwareUpdateString);
+                        mFirmwareSignature = ByteArrayUtils.hexStringToByteArray(firmwareUpdateString);
                         break;
                     default:
                         reader.skipValue();
@@ -601,7 +625,7 @@ public class OTAUpdateService extends IntentService {
             Log.d(TAG, "[METADATA] [SN:" + mLwMeshAddress
                     + "] [VER:" + mVersionMajor + "." + mVersionMinor
                     + "] [LEN:" + mUpdateLength
-                    + "] [SIG:" + byteArrayToHexString(mFirmwareSignature, true) + "]");
+                    + "] [SIG:" + ByteArrayUtils.byteArrayToHexString(mFirmwareSignature, true) + "]");
         }
         return true;
     }
@@ -717,12 +741,12 @@ public class OTAUpdateService extends IntentService {
             String action = intent.getAction();
 
             switch(action) {
-                case DeviceConstants.LSERIAL_MESSAGE_INTENT:
+                case DeviceConstants.IntentActions.LSERIAL_MESSAGE:
                     // do something
                     break;
             }
         }
-    }
+    };
 
     /**
      * Handles incoming messaged from the SerialService

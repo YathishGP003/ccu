@@ -151,6 +151,18 @@ public class VavStagedRtu extends VavSystemProfile
         return (heatingStages > 0);
     }
     
+    @Override
+    public boolean isCoolingActive(){
+        return stageStatus[COOLING_1.ordinal()] > 0 || stageStatus[COOLING_2.ordinal()] > 0 || stageStatus[COOLING_3.ordinal()] > 0
+                                || stageStatus[COOLING_4.ordinal()] > 0 || stageStatus[COOLING_5.ordinal()] > 0;
+    }
+    
+    @Override
+    public boolean isHeatingActive(){
+        return stageStatus[HEATING_1.ordinal()] > 0 || stageStatus[HEATING_2.ordinal()] > 0 || stageStatus[HEATING_3.ordinal()] > 0
+               || stageStatus[HEATING_4.ordinal()] > 0 || stageStatus[HEATING_5.ordinal()] > 0;
+    }
+    
     protected synchronized void updateSystemPoints() {
     
         stageStatus = new int[17];

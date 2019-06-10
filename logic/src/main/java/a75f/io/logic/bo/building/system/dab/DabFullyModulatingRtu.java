@@ -64,6 +64,16 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         return (getConfigVal("analog3 and output and enabled") > 0);
     }
     
+    @Override
+    public boolean isCoolingActive(){
+        return systemCoolingLoopOp > 0;
+    }
+    
+    @Override
+    public boolean isHeatingActive(){
+        return systemHeatingLoopOp > 0;
+    }
+    
     private synchronized void updateSystemPoints() {
         
         DabSystemController dabSystem = DabSystemController.getInstance();

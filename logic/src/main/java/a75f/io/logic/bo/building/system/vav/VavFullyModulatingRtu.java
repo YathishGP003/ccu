@@ -105,6 +105,16 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         return (getConfigVal("analog3 and output and enabled") > 0);
     }
     
+    @Override
+    public boolean isCoolingActive(){
+        return systemCoolingLoopOp > 0;
+    }
+    
+    @Override
+    public boolean isHeatingActive(){
+        return systemHeatingLoopOp > 0;
+    }
+    
     private synchronized void updateSystemPoints() {
         
         if (VavSystemController.getInstance().getSystemState() == COOLING)

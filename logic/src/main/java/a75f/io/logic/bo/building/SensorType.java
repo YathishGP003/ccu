@@ -45,7 +45,7 @@ public enum SensorType
             case NO:
                 return Port.SENSOR_NO;
             case VOC:
-                return Port.SENSOR_NO;
+                return Port.SENSOR_VOC;
             case PRESSURE:
                 return Port.SENSOR_PRESSURE;
             case OCCUPANCY:

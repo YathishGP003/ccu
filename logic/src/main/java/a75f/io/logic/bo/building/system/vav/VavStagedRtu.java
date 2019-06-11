@@ -151,6 +151,18 @@ public class VavStagedRtu extends VavSystemProfile
         return (heatingStages > 0);
     }
     
+    @Override
+    public boolean isCoolingActive(){
+        return stageStatus[COOLING_1.ordinal()] > 0 || stageStatus[COOLING_2.ordinal()] > 0 || stageStatus[COOLING_3.ordinal()] > 0
+                                || stageStatus[COOLING_4.ordinal()] > 0 || stageStatus[COOLING_5.ordinal()] > 0;
+    }
+    
+    @Override
+    public boolean isHeatingActive(){
+        return stageStatus[HEATING_1.ordinal()] > 0 || stageStatus[HEATING_2.ordinal()] > 0 || stageStatus[HEATING_3.ordinal()] > 0
+               || stageStatus[HEATING_4.ordinal()] > 0 || stageStatus[HEATING_5.ordinal()] > 0;
+    }
+    
     protected synchronized void updateSystemPoints() {
     
         stageStatus = new int[17];
@@ -297,13 +309,12 @@ public class VavStagedRtu extends VavSystemProfile
                         }
                         break;
                     case FAN_2:
-                        if (fanStages > 0 && systemFanLoopOp > 0)
-                        {
-                            relayState = 1;
+                        if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_VFD_RTU) {
+                            relayState =  (fanStages > 0 && (systemCoolingLoopOp > 0 || systemHeatingLoopOp > 0)) ? 1 :0;
                         }
-                        else
+                        else if (fanStages > 0 && systemFanLoopOp > 0)
                         {
-                            relayState = 0;
+                            relayState = (fanStages > 0 && systemFanLoopOp > 0) ? 1 : 0;
                         }
                         break;
                     case FAN_3:
@@ -336,7 +347,7 @@ public class VavStagedRtu extends VavSystemProfile
                         break;
                     case HUMIDIFIER:
                     case DEHUMIDIFIER:
-                        if (systemMode == SystemMode.OFF) {
+                        if (systemMode == SystemMode.OFF || ScheduleProcessJob.getSystemOccupancy() == Occupancy.UNOCCUPIED) {
                             relayState = 0;
                         } else
                         {

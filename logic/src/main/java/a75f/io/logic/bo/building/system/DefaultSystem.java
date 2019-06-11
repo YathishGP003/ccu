@@ -34,8 +34,8 @@ public class DefaultSystem extends SystemProfile
       addSystemEquip();
     }
     @Override
-    public void doSystemControl() {
-    
+    public void doSystemControl()
+    {
     }
     
     @Override
@@ -77,6 +77,16 @@ public class DefaultSystem extends SystemProfile
     
     @Override
     public boolean isHeatingAvailable() {
+        return false;
+    }
+    
+    @Override
+    public boolean isCoolingActive(){
+        return false;
+    }
+    
+    @Override
+    public boolean isHeatingActive(){
         return false;
     }
     

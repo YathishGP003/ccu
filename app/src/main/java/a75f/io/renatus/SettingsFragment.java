@@ -3,6 +3,7 @@ package a75f.io.renatus;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -109,7 +110,7 @@ public class SettingsFragment extends Fragment
 						break;
 					case 6:
 						getActivity().getSupportFragmentManager().beginTransaction()
-						             .replace(R.id.profileContainer, new DabAnalogRtuProfile()).commit();
+						             .replace(R.id.profileContainer, new DABFullyAHUProfile()).commit();
 						break;
 					case 7:
 						getActivity().getSupportFragmentManager().beginTransaction()

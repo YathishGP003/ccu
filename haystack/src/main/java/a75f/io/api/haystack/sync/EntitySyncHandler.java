@@ -40,11 +40,19 @@ public class EntitySyncHandler
     
     public boolean syncPending = false;
     public boolean syncProgress = false;//TODO- Revisit
-    public boolean syncScheduled = false;
+    
+    Timer mSyncTimer = new Timer();
+    TimerTask mSyncTimerTask = null;
+    
     
     public synchronized void sync() {
         syncProgress = true;
         Log.i(TAG, "syncPending: " + syncPending);
+        if (mSyncTimerTask != null) {
+            mSyncTimerTask.cancel();
+            mSyncTimerTask = null;
+        }
+        
         if (syncPending || isSyncNeeded())
         {
             if (siteAdapter.onSync() && floorAdapter.onSync() && zoneAdapter.onSync()
@@ -242,21 +250,18 @@ public class EntitySyncHandler
     
     //retry sync after 30 sec
     public void scheduleSync() {
-        if (syncScheduled) {
+        if (mSyncTimerTask != null) {
             return;
         }
-        syncScheduled = true;
-        Timer timer = new Timer();
-        TimerTask timerTask = new TimerTask() {
+        mSyncTimerTask  = new TimerTask() {
             public void run() {
-               CcuLog.i(TAG, "Entity Sync Scheduled");
-               syncScheduled = false;
-               if (!syncProgress)
-               {
-                   sync();
-               }
-            }
-        };
-        timer.schedule(timerTask, 30000);
+                CcuLog.i(TAG, "Entity Sync Scheduled");
+                if (!syncProgress)
+                {
+                    mSyncTimerTask = null;
+                    sync();
+                }
+            }};
+        mSyncTimer.schedule(mSyncTimerTask, 30000);
     }
 }

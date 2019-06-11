@@ -10,4 +10,37 @@ public enum Port
 	ANALOG_OUT_ONE, ANALOG_OUT_TWO, ANALOG_IN_ONE, ANALOG_IN_TWO,TH1_IN,TH2_IN,
 	DESIRED_TEMP, SENSOR_RT, SENSOR_RH, SENSOR_CO2, SENSOR_VOC, SENSOR_CO, SENSOR_NO, SENSOR_PRESSURE,
 	SENSOR_OCCUPANCY, SENSOR_ENERGY_METER, SENSOR_SOUND, SENSOR_CO2_EQUIVALENT, SENSOR_ILLUMINANCE, SENSOR_UVI;
+	
+	public String getPortSensor() {
+		switch (this)
+		{
+			case SENSOR_RH:
+				return "humidity";
+			case SENSOR_CO2:
+				return "co2";
+			case SENSOR_VOC:
+				return "voc";
+			case SENSOR_CO:
+				return "co";
+			case SENSOR_NO:
+				return "no";
+			case SENSOR_PRESSURE:
+				return "pressure";
+			case SENSOR_OCCUPANCY:
+				return "occupancy";
+			case SENSOR_ENERGY_METER:
+				return "emr";
+			case SENSOR_SOUND:
+				return "sound";
+			case SENSOR_CO2_EQUIVALENT:
+				return "co2_equivalent";
+			case SENSOR_ILLUMINANCE:
+				return "illuminance";
+			case SENSOR_UVI:
+				return "uvi";
+			default:
+				return name();
+		}
+		
+	}
 }

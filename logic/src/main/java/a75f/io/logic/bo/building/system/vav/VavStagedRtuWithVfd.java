@@ -8,15 +8,12 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
 import a75f.io.logic.bo.building.system.SystemEquip;
 import a75f.io.logic.bo.haystack.device.ControlMote;
-import a75f.io.logic.jobs.ScheduleProcessJob;
 
-import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
-import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
+import static a75f.io.logic.bo.building.hvac.Stage.FAN_1;
 
 /**
  * Created by samjithsadasivan on 2/18/19.
@@ -106,7 +103,7 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
     {
         super.updateSystemPoints();
         double signal = 0;
-        if (VavSystemController.getInstance().getSystemState() == COOLING) {
+        if (isCoolingActive()) {
     
             for (int i = 1; i < 8; i++)
             {
@@ -119,7 +116,7 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
                 }
             }
             
-        } else if (VavSystemController.getInstance().getSystemState() == HEATING) {
+        } else if (isHeatingActive()) {
             for (int i = 1; i < 8; i++)
             {
                 if (getConfigEnabled("relay" + i) > 0 && getCmdSignal("relay" + i) > 0)
@@ -130,7 +127,7 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
                     }
                 }
             }
-        } else if (ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED) {
+        } else if (stageStatus[FAN_1.ordinal()] > 0) {
             for (int i = 1; i < 8; i++)
             {
                 if (getConfigEnabled("relay" + i) > 0 && getCmdSignal("relay" + i) > 0)

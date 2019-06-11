@@ -37,6 +37,16 @@ public class VavBacnetRtu extends VavSystemProfile
     }
     
     @Override
+    public boolean isCoolingActive(){
+        return false;
+    }
+    
+    @Override
+    public boolean isHeatingActive(){
+        return false;
+    }
+    
+    @Override
     public ProfileType getProfileType() {
         return ProfileType.SYSTEM_VAV_BACNET_RTU;
     }

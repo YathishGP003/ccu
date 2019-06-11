@@ -10,6 +10,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.RawPoint;
 import a75f.io.device.serial.CcuToCmOverUsbDeviceTempAckMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
@@ -27,6 +28,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Sensor;
 import a75f.io.logic.bo.building.SensorType;
 import a75f.io.logic.bo.building.definitions.Port;
+import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
 import a75f.io.logic.tuners.TunerConstants;
@@ -101,62 +103,69 @@ public class Pulse
 						hayStack.writeHisValById(logPoint.get("id").toString(), ThermistorUtil.getThermistorValueToTemp(val * 10));
 						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : Thermistor2 "+ThermistorUtil.getThermistorValueToTemp(val * 10));
 						break;
-					case SENSOR_RH:
-						SmartNodeSensorReading_t[] sensorReadingsHumidity = smartNodeRegularUpdateMessage_t.update.sensorReadings;
-						for (SmartNodeSensorReading_t r : sensorReadingsHumidity) {
-							if (r.sensorType.get() == SensorType.HUMIDITY.ordinal()) {
-								val = r.sensorData.get();
-								break;
-							}
-						}
-						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-						hayStack.writeHisValById(logPoint.get("id").toString(), getHumidityConversion(val));
-						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : Humidity "+getHumidityConversion(val));
-						break;
-					case SENSOR_CO2:
-						SmartNodeSensorReading_t[] sensorReadingsCO2 = smartNodeRegularUpdateMessage_t.update.sensorReadings;
-						for (SmartNodeSensorReading_t r : sensorReadingsCO2) {
-							if (r.sensorType.get() == SensorType.CO2.ordinal()) {
-								val = r.sensorData.get();
-								break;
-							}
-						}
-						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-						hayStack.writeHisValById(logPoint.get("id").toString(), val);
-						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : CO2 "+val);
-						break;
-					case SENSOR_VOC:
-						SmartNodeSensorReading_t[] sensorReadingsVOC = smartNodeRegularUpdateMessage_t.update.sensorReadings;
-						for (SmartNodeSensorReading_t r : sensorReadingsVOC) {
-							if (r.sensorType.get() == SensorType.VOC.ordinal()) {
-								val = r.sensorData.get();
-								break;
-							}
-						}
-						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-						hayStack.writeHisValById(logPoint.get("id").toString(), val);
-						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : VOC "+val);
-						break;
-					case SENSOR_ENERGY_METER:
-						SmartNodeSensorReading_t[] sensorReadingsERM = smartNodeRegularUpdateMessage_t.update.sensorReadings;
-						int low = 0 ,high = 0;
-						for (SmartNodeSensorReading_t r : sensorReadingsERM) {
-							if (r.sensorType.get() == SensorType.ENERGY_METER_LOW.ordinal()) {
-								low = r.sensorData.get();
-							}else if (r.sensorType.get() == SensorType.ENERGY_METER_HIGH.ordinal()) {
-								high = r.sensorData.get();
-							}
-						}
-						val = (high << 12) | low ;
-						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-						hayStack.writeHisValById(logPoint.get("id").toString(), val);
-						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : EMR "+val);
-						break;
-					
 				}
 			}
 			
+			SmartNodeSensorReading_t[] sensorReadings = smartNodeRegularUpdateMessage_t.update.sensorReadings;
+			if (sensorReadings.length > 0) {
+				handleSensorEvents(sensorReadings, nodeAddr);
+			}
+			
 		}
+	}
+	
+	private static void handleSensorEvents(SmartNodeSensorReading_t[] sensorReadings, short addr) {
+		SmartNode node = new SmartNode(addr);
+		int emVal = 0;
+		for (SmartNodeSensorReading_t r : sensorReadings) {
+			SensorType t = SensorType.values()[r.sensorType.get()];
+			Port p = t.getSensorPort();
+			if (p == null) {
+				continue;
+			}
+			double val = r.sensorData.get();
+			RawPoint sp = node.getRawPoint(p);
+			if (sp == null) {
+				sp = node.addSensor(p);
+                CcuLog.d(L.TAG_CCU_DEVICE, " Sensor Added , type "+t+" port "+p);
+			}
+			CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : "+t+" : "+val);
+			switch (t) {
+				case HUMIDITY:
+					CCUHsApi.getInstance().writeHisValById(sp.getId(), val );
+					CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), getHumidityConversion(val));
+					break;
+				case CO2:
+				case CO:
+				case NO:
+				case VOC:
+				case PRESSURE:
+				case OCCUPANCY:
+				case SOUND:
+				case CO2_EQUIVALENT:
+				case ILLUMINANCE:
+				case UVI:
+					CCUHsApi.getInstance().writeHisValById(sp.getId(), val );
+					CCUHsApi.getInstance().writeHisValById(sp.getPointRef(),val);
+					break;
+				case ENERGY_METER_HIGH:
+					emVal = emVal > 0 ?  (emVal | (r.sensorData.get() << 12)) : r.sensorData.get();
+					break;
+				case ENERGY_METER_LOW:
+					emVal = emVal > 0 ? ((emVal << 12) | r.sensorData.get()) : r.sensorData.get();
+					break;
+			}
+		}
+		
+		if (emVal > 0) {
+			RawPoint sp = node.getRawPoint(Port.SENSOR_ENERGY_METER);
+			if (sp == null) {
+				sp = node.addSensor(Port.SENSOR_ENERGY_METER);
+			}
+			CCUHsApi.getInstance().writeHisValById(sp.getId(), (double)emVal );
+			CCUHsApi.getInstance().writeHisValById(sp.getPointRef(),(double)emVal);
+		}
+	
 	}
 	
 	public static Double getRoomTempConversion(Double temp) {
@@ -208,7 +217,6 @@ public class Pulse
 			throw new IllegalArgumentException();
 		}
 		ScheduleProcessJob.handleDesiredTempUpdate(new Point.Builder().setHashMap(coolingDtPoint).build(), true, coolingDesiredTemp);
-		//CCUHsApi.getInstance().pointWrite(HRef.copy(coolingDtPoint.get("id").toString()), HayStackConstants.DESIREDTEMP_OVERRIDE_LEVEL,"manual", HNum.make(coolingDesiredTemp), HNum.make(120*60*1000, "ms"));
 		try {
 		//TODO - Recheck this... Causing null pointer exception, every time when we change a set temp from biskit
 			CCUHsApi.getInstance().writeHisValById(coolingDtPoint.get("id").toString(), coolingDesiredTemp);
@@ -222,7 +230,6 @@ public class Pulse
 		}
 		ScheduleProcessJob.handleDesiredTempUpdate(new Point.Builder().setHashMap(heatinDtPoint).build(), true, heatingDesiredTemp);
 		
-		//CCUHsApi.getInstance().pointWrite(HRef.copy(heatinDtPoint.get("id").toString()), HayStackConstants.DESIREDTEMP_OVERRIDE_LEVEL,"manual", HNum.make(heatingDesiredTemp), HNum.make(120*60*1000, "ms"));
 		try{
 			CCUHsApi.getInstance().writeHisValById(heatinDtPoint.get("id").toString(), heatingDesiredTemp);
 		}catch (Exception e){
@@ -235,8 +242,6 @@ public class Pulse
 			throw new IllegalArgumentException();
 		}
 		ScheduleProcessJob.handleDesiredTempUpdate(new Point.Builder().setHashMap(singleDtPoint).build(), true, dt);
-		
-		//CCUHsApi.getInstance().pointWrite(HRef.copy(singleDtPoint.get("id").toString()), HayStackConstants.DESIREDTEMP_OVERRIDE_LEVEL,"manual", HNum.make(dt), HNum.make(120*60*1000, "ms"));
 		try {
 			CCUHsApi.getInstance().writeHisValById(singleDtPoint.get("id").toString(), dt);
 		}catch (Exception e){
@@ -269,7 +274,6 @@ public class Pulse
             throw new IllegalArgumentException();
         }
 	    ScheduleProcessJob.handleDesiredTempUpdate(new Point.Builder().setHashMap(coolingDtPoint).build(), true, coolingDesiredTemp);
-        //CCUHsApi.getInstance().pointWrite(HRef.copy(coolingDtPoint.get("id").toString()), HayStackConstants.DESIREDTEMP_OVERRIDE_LEVEL,"manual", HNum.make(coolingDesiredTemp), HNum.make(120*60*1000, "ms"));
         try{
             CCUHsApi.getInstance().writeHisValById(coolingDtPoint.get("id").toString(), coolingDesiredTemp);
         }catch (Exception e){
@@ -281,7 +285,6 @@ public class Pulse
             throw new IllegalArgumentException();
         }
 	    ScheduleProcessJob.handleDesiredTempUpdate(new Point.Builder().setHashMap(heatinDtPoint).build(), true, heatingDesiredTemp);
-        //CCUHsApi.getInstance().pointWrite(HRef.copy(heatinDtPoint.get("id").toString()), HayStackConstants.DESIREDTEMP_OVERRIDE_LEVEL,"manual", HNum.make(heatingDesiredTemp), HNum.make(120*60*1000, "ms"));
         try{
             CCUHsApi.getInstance().writeHisValById(heatinDtPoint.get("id").toString(), heatingDesiredTemp);
         }catch (Exception e){
@@ -293,7 +296,6 @@ public class Pulse
 			throw new IllegalArgumentException();
 		}
 	    ScheduleProcessJob.handleDesiredTempUpdate(new Point.Builder().setHashMap(singleDtPoint).build(), true, dt);
-		//CCUHsApi.getInstance().pointWrite(HRef.copy(singleDtPoint.get("id").toString()), HayStackConstants.DESIREDTEMP_OVERRIDE_LEVEL,"manual", HNum.make(dt), HNum.make(120*60*1000, "ms"));
 		try {
 		    CCUHsApi.getInstance().writeHisValById(singleDtPoint.get("id").toString(), dt);
         }catch (Exception e){
@@ -441,7 +443,7 @@ public class Pulse
 				HashMap logPoint = hayStack.read("point and id=="+phyPoint.get("pointRef"));
 				switch (Port.valueOf(phyPoint.get("port").toString())) {
 					case DESIRED_TEMP:
-						double curValue = hayStack.readDefaultValById(phyPoint.get("id").toString());
+						double curValue = hayStack.readHisValById(phyPoint.get("id").toString());
 						double desiredTemp = getDesredTempConversion(temp);
 						if (desiredTemp > 0 && (curValue != desiredTemp)) {
 							hayStack.writeHisValById(logPoint.get("id").toString(), desiredTemp);
@@ -475,7 +477,7 @@ public class Pulse
 				HashMap logPoint = hayStack.read("point and id=="+phyPoint.get("pointRef"));
 				switch (Port.valueOf(phyPoint.get("port").toString())) {
 					case DESIRED_TEMP:
-						double curValue = hayStack.readDefaultValById(phyPoint.get("id").toString());
+						double curValue = hayStack.readHisValById(phyPoint.get("id").toString());
 						double desiredTemp = getDesredTempConversion(temp);
 						if (desiredTemp > 0 && (curValue != desiredTemp)) {
 							hayStack.writeHisValById(logPoint.get("id").toString(), desiredTemp);

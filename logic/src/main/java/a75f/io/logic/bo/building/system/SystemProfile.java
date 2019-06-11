@@ -36,9 +36,15 @@ public abstract class SystemProfile
     
     public abstract void deleteSystemEquip();
     
+    //Is Cooling enabled in System Profile
     public abstract boolean isCoolingAvailable();
     
     public abstract boolean isHeatingAvailable();
+    
+    //Is Cooling stage/signal ON now
+    public abstract boolean isCoolingActive();
+    
+    public abstract boolean isHeatingActive();
     
     public abstract ProfileType getProfileType();
     

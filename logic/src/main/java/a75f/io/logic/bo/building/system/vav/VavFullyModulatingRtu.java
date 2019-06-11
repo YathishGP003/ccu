@@ -105,6 +105,16 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         return (getConfigVal("analog3 and output and enabled") > 0);
     }
     
+    @Override
+    public boolean isCoolingActive(){
+        return systemCoolingLoopOp > 0;
+    }
+    
+    @Override
+    public boolean isHeatingActive(){
+        return systemHeatingLoopOp > 0;
+    }
+    
     private synchronized void updateSystemPoints() {
         
         if (VavSystemController.getInstance().getSystemState() == COOLING)
@@ -236,7 +246,8 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         }
     
         SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("rtu and mode")];
-        if (getConfigVal("relay7 and output and enabled") > 0 && systemMode != SystemMode.OFF)
+        if (getConfigVal("relay7 and output and enabled") > 0 && systemMode != SystemMode.OFF
+                                                && ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED)
         {
             double humidity = VavSystemController.getInstance().getAverageSystemHumidity();
             double targetMinHumidity = TunerUtil.readSystemUserIntentVal("target and min and inside and humidity");

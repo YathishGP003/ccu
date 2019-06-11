@@ -31,7 +31,6 @@ import a75f.io.logic.tuners.TunerUtil;
 import static a75f.io.logic.L.TAG_CCU_JOB;
 import static a75f.io.logic.L.TAG_CCU_SCHEDULER;
 import static a75f.io.logic.bo.building.Occupancy.FORCED_OCCUPIED;
-import static a75f.io.logic.bo.building.Occupancy.OCCUPANCY_SENSING;
 import static a75f.io.logic.bo.building.Occupancy.OCCUPIED;
 import static a75f.io.logic.bo.building.Occupancy.PRECONDITIONING;
 import static a75f.io.logic.bo.building.Occupancy.UNOCCUPIED;

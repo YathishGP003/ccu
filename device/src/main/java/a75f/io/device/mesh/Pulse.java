@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
@@ -29,6 +30,7 @@ import a75f.io.logic.bo.building.Sensor;
 import a75f.io.logic.bo.building.SensorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.haystack.device.SmartNode;
+import a75f.io.logic.bo.haystack.device.SmartStat;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
 import a75f.io.logic.tuners.TunerConstants;

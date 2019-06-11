@@ -332,9 +332,9 @@ public class ScheduleProcessJob extends BaseJob {
         
         if (L.ccu().systemProfile.getSystemController().isEmergencyMode()) {
             if (L.ccu().systemProfile.getSystemController().getSystemState() == SystemController.State.HEATING) {
-                return "Building Limit Breach | Emergency Heating turned on";
+                return "Building Limit Breach | Emergency Heating turned ON";
             } else if (L.ccu().systemProfile.getSystemController().getSystemState() == SystemController.State.COOLING) {
-                return "Building Limit Breach | Emergency Cooling turned on";
+                return "Building Limit Breach | Emergency Cooling turned ON";
             }
         }
 
@@ -541,6 +541,9 @@ public class ScheduleProcessJob extends BaseJob {
             c = OCCUPIED;
         } else if (getTemporaryHoldExpiry(zoneId) > 0){
             c = FORCED_OCCUPIED;
+        }else if((cachedOccupied != null) && (cachedOccupied.isPreconditioning())) {
+            //handle preconditioning??
+			c = PRECONDITIONING;
         }
         
         return c;

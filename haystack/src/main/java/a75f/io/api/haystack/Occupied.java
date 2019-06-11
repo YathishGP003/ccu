@@ -48,6 +48,13 @@ public class Occupied {
         this.mOccupied = occupied;
     }
 
+    public boolean isPreconditioning(){
+        return mPrecondition;
+    }
+    public void setPreconditioning(boolean isPrecondition){
+        this.mPrecondition = isPrecondition;
+    }
+
     public Object getValue() {
         return mValue;
     }

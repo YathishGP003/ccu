@@ -29,7 +29,7 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
-import a75f.io.logic.a75f.io.logic.pubnub.PubNubHandler;
+import a75f.io.logic.pubnub.PubNubHandler;
 import a75f.io.logic.bo.building.CCUApplication;
 import a75f.io.logic.bo.building.Day;
 import a75f.io.logic.bo.building.NamedSchedule;

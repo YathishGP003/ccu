@@ -25,10 +25,13 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemController;
+import a75f.io.logic.tuners.StandaloneTunerUtil;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.L.TAG_CCU_JOB;
+import static a75f.io.logic.L.TAG_CCU_SCHEDULER;
 import static a75f.io.logic.bo.building.Occupancy.FORCED_OCCUPIED;
+import static a75f.io.logic.bo.building.Occupancy.OCCUPANCY_SENSING;
 import static a75f.io.logic.bo.building.Occupancy.OCCUPIED;
 import static a75f.io.logic.bo.building.Occupancy.PRECONDITIONING;
 import static a75f.io.logic.bo.building.Occupancy.UNOCCUPIED;
@@ -268,7 +271,7 @@ public class ScheduleProcessJob extends BaseJob {
         One exception is that the date the vacation ends needs to append when the vacation ends.
      */
 
-    public static String getZoneStatusString(String zoneId)
+    public static String getZoneStatusString(String zoneId,String equipId)
     {
 
         Occupied cachedOccupied = getOccupiedModeCache(zoneId);
@@ -305,7 +308,15 @@ public class ScheduleProcessJob extends BaseJob {
         
             } else
             {
-                return String.format("In Energy saving %s, changes to %.1f-%.1fF at %02d:%02d", "Unoccupied mode",
+                if(isZonePreconditioningActive(equipId,cachedOccupied)) {//Currently handled only for smartstat
+                    return String.format("In %s, changes to Energy saving range of %.1f-%.1fF at %02d:%02d", "Preconditioning",
+                            cachedOccupied.getHeatingVal() - cachedOccupied.getUnoccupiedZoneSetback(),
+                            cachedOccupied.getCoolingVal() + cachedOccupied.getUnoccupiedZoneSetback(),
+                            cachedOccupied.getNextOccupiedSchedule().getEthh(),
+                            cachedOccupied.getNextOccupiedSchedule().getEtmm());
+
+                }else
+                    return String.format("In Energy saving %s, changes to %.1f-%.1fF at %02d:%02d", "Unoccupied mode",
                         cachedOccupied.getHeatingVal(),
                         cachedOccupied.getCoolingVal(),
                         cachedOccupied.getNextOccupiedSchedule().getSthh(),
@@ -513,15 +524,14 @@ public class ScheduleProcessJob extends BaseJob {
     }
     
     public static void updateEquipScheduleStatus(Equip equip) {
-        Log.d(L.TAG_CCU_JOB, "updateEquipScheduleStatus "+equip.getDisplayName()+" "+getZoneStatusString(equip.getRoomRef()));
         ArrayList points = CCUHsApi.getInstance().readAll("point and scheduleStatus and equipRef == \""+equip.getId()+"\"");
         if (points != null && points.size() > 0)
         {
             String id = ((HashMap) points.get(0)).get("id").toString();
             String currentState = CCUHsApi.getInstance().readDefaultStrValById(id);
-            if (!currentState.equals(getZoneStatusString(equip.getRoomRef())))
+            if (!currentState.equals(getZoneStatusString(equip.getRoomRef(), equip.getId())))
             {
-                CCUHsApi.getInstance().writeDefaultValById(id, getZoneStatusString(equip.getRoomRef()));
+                CCUHsApi.getInstance().writeDefaultValById(id, getZoneStatusString(equip.getRoomRef(),equip.getId()));
                 CCUHsApi.getInstance().writeHisValById(id, (double) getZoneStatus(equip.getRoomRef()).ordinal());
             } else {
                 Log.d(L.TAG_CCU_JOB, " ScheduleStatus not changed for  "+equip.getDisplayName());
@@ -761,5 +771,37 @@ public class ScheduleProcessJob extends BaseJob {
         }
         return 0;
     }
-    
+
+    public static boolean isZonePreconditioningActive(String equipId, Occupied occu){
+
+        Equip equip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().readMapById(equipId)).build();
+        Log.d(TAG_CCU_SCHEDULER,"isZonePrecon = "+equip.getMarkers().toString()+","+equip.getMarkers().contains("smartstat"));
+        if(equip.getMarkers().contains("smartstat") ){
+            double currentTemp = CCUHsApi.getInstance().readHisValByQuery("zone and point and current and air and temp and equipRef == \""+equipId+"\"");
+            double desiredTemp = CCUHsApi.getInstance().readHisValByQuery("zone and point and desired and air and temp and average and equipRef == \""+equipId+"\"");
+            double tempDiff = currentTemp - desiredTemp;
+            double preconRate = CCUHsApi.getInstance().getPredictedPreconRate(equipId);
+            if (preconRate == 0) {
+                //TODO - if no specific equip id precond rate, get system wide precon rate
+                equipId = L.ccu().systemProfile.getSystemEquipRef();//get System default preconditioning rate
+                if (tempDiff > 0)
+                {
+                    preconRate = TunerUtil.readTunerValByQuery("cooling and precon and rate", equipId);
+                } else {
+                    tempDiff = desiredTemp - currentTemp;
+                    preconRate = TunerUtil.readTunerValByQuery("heating and precon and rate", equipId);
+                }
+            }
+            Log.d(TAG_CCU_SCHEDULER,"isZone in precon = "+preconRate+","+tempDiff +","+occu.getMillisecondsUntilNextChange()+","+currentTemp+","+desiredTemp);
+            if (tempDiff * preconRate * 60 * 1000 >= occu.getMillisecondsUntilNextChange())
+            {
+                //zone is in preconditioning which is like occupied
+                occu.setPreconditioning(true);
+                return true;
+            }else {
+                occu.setPreconditioning(false);
+            }
+        }
+        return false;
+    }
 }

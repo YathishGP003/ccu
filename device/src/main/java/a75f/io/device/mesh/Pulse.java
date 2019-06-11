@@ -367,45 +367,14 @@ public class Pulse
 						if(val > 0) {
 							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 							hayStack.writeHisValById(logPoint.get("id").toString(), getHumidityConversion(val));
-						}else {
-							SmartNodeSensorReading_t[] sensorReadingsHumidity = smartStatRegularUpdateMessage_t.update.sensorReadings;
-							for (SmartNodeSensorReading_t r : sensorReadingsHumidity) {
-								if (r.sensorType.get() == SensorType.HUMIDITY.ordinal()) {
-									val = r.sensorData.get();
-									break;
-								}
-							}
-
-							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-							hayStack.writeHisValById(logPoint.get("id").toString(), getHumidityConversion(val));
 						}
-						break;
-					case SENSOR_CO2:
-						val = 0;
-						SmartNodeSensorReading_t[] sensorReadingsCO2 = smartStatRegularUpdateMessage_t.update.sensorReadings;
-						for (SmartNodeSensorReading_t r : sensorReadingsCO2) {
-							if (r.sensorType.get() == SensorType.CO2.ordinal()) {
-								val = r.sensorData.get();
-								break;
-							}
-						}
-						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-						hayStack.writeHisValById(logPoint.get("id").toString(), val);
-						break;
-					case SENSOR_VOC:
-						val = 0;
-						SmartNodeSensorReading_t[] sensorReadingsVOC = smartStatRegularUpdateMessage_t.update.sensorReadings;
-						for (SmartNodeSensorReading_t r : sensorReadingsVOC) {
-							if (r.sensorType.get() == SensorType.CO2.ordinal()) {
-								val = r.sensorData.get();
-								break;
-							}
-						}
-
-						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-						hayStack.writeHisValById(logPoint.get("id").toString(), val);
+						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartStatUpdate : Humidity "+getHumidityConversion(val)+","+smartStatRegularUpdateMessage_t.update.sensorReadings);
 						break;
 				}
+			}
+			SmartNodeSensorReading_t[] sensorReadings = smartStatRegularUpdateMessage_t.update.sensorReadings;
+			if (sensorReadings.length > 0) {
+				handleSmartStatSensorEvents(sensorReadings, nodeAddr);
 			}
 
 			//Write Current temp point based on th2 enabled or not
@@ -530,6 +499,61 @@ public class Pulse
 		msg.smartNodeAddress.set(address);
 		MeshUtil.sendStructToCM(msg);
 
+
+	}
+
+
+	private static void handleSmartStatSensorEvents(SmartNodeSensorReading_t[] sensorReadings, short addr) {
+		SmartStat node = new SmartStat(addr);
+		int emVal = 0;
+		for (SmartNodeSensorReading_t r : sensorReadings) {
+			SensorType t = SensorType.values()[r.sensorType.get()];
+			Port p = t.getSensorPort();
+			if (p == null) {
+				continue;
+			}
+			double val = r.sensorData.get();
+			RawPoint sp = node.getRawPoint(p);
+			if (sp == null) {
+				sp = node.addSensor(p);
+				CcuLog.d(L.TAG_CCU_DEVICE, " Sensor Added , type "+t+" port "+p);
+			}
+			CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : "+t+" : "+val);
+			switch (t) {
+				case HUMIDITY:
+					CCUHsApi.getInstance().writeHisValById(sp.getId(), val );
+					CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), getHumidityConversion(val));
+					break;
+				case CO2:
+				case CO:
+				case NO:
+				case VOC:
+				case PRESSURE:
+				case OCCUPANCY:
+				case SOUND:
+				case CO2_EQUIVALENT:
+				case ILLUMINANCE:
+				case UVI:
+					CCUHsApi.getInstance().writeHisValById(sp.getId(), val );
+					CCUHsApi.getInstance().writeHisValById(sp.getPointRef(),val);
+					break;
+				case ENERGY_METER_HIGH:
+					emVal = emVal > 0 ?  (emVal | (r.sensorData.get() << 12)) : r.sensorData.get();
+					break;
+				case ENERGY_METER_LOW:
+					emVal = emVal > 0 ? ((emVal << 12) | r.sensorData.get()) : r.sensorData.get();
+					break;
+			}
+		}
+
+		if (emVal > 0) {
+			RawPoint sp = node.getRawPoint(Port.SENSOR_ENERGY_METER);
+			if (sp == null) {
+				sp = node.addSensor(Port.SENSOR_ENERGY_METER);
+			}
+			CCUHsApi.getInstance().writeHisValById(sp.getId(), (double)emVal );
+			CCUHsApi.getInstance().writeHisValById(sp.getPointRef(),(double)emVal);
+		}
 
 	}
 }

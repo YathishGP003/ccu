@@ -124,6 +124,113 @@ public class HeatPumpUnitEquip{
                 .setTz(tz)
                 .build();
         String vocId = CCUHsApi.getInstance().addPoint(voc);
+
+
+        Point occSensing = new Point.Builder()
+                .setDisplayName(equipDis+"-occupancySensor")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(room)
+                .setFloorRef(floor)
+                .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("occupancy").addMarker("sensor").addMarker("current").addMarker("his").addMarker("cur").addMarker("logical").addMarker("equipHis")
+                .setGroup(String.valueOf(nodeAddr))
+                .setTz(tz)
+                .build();
+        String occSensingId = CCUHsApi.getInstance().addPoint(occSensing);
+
+        Point sound = new Point.Builder()
+                .setDisplayName(equipDis+"-sound")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(room)
+                .setFloorRef(floor)
+                .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("cur")
+                .addMarker("air").addMarker("sound").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
+                .setGroup(String.valueOf(nodeAddr))
+                .setTz(tz)
+                .build();
+        String soundId = CCUHsApi.getInstance().addPoint(sound);
+        CCUHsApi.getInstance().writeHisValById(soundId, 0.0);
+
+        Point uvi = new Point.Builder()
+                .setDisplayName(equipDis+"-uvi")
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(room)
+                .setFloorRef(floor)
+                .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("cur")
+                .addMarker("air").addMarker("uvi").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
+                .setGroup(String.valueOf(nodeAddr))
+                .setTz(tz)
+                .build();
+        String uviId = CCUHsApi.getInstance().addPoint(uvi);
+
+
+        Point co = new Point.Builder()
+                .setDisplayName(equipDis+"-"+Port.SENSOR_CO.name())
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(room)
+                .setFloorRef(floor)
+                .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("cur")
+                .addMarker("air").addMarker("co").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
+                .setGroup(String.valueOf(nodeAddr))
+                .setTz(tz)
+                .build();
+        String coId = CCUHsApi.getInstance().addPoint(co);
+
+        Point co2Eq = new Point.Builder()
+                .setDisplayName(equipDis+"-"+Port.SENSOR_CO2_EQUIVALENT.name())
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(room)
+                .setFloorRef(floor)
+                .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("cur")
+                .addMarker("air").addMarker("co2Equivalent").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
+                .setGroup(String.valueOf(nodeAddr))
+                .setTz(tz)
+                .build();
+        String co2EqId = CCUHsApi.getInstance().addPoint(co2Eq);
+
+        Point no2 = new Point.Builder()
+                .setDisplayName(equipDis+"-"+Port.SENSOR_NO.name())
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(room)
+                .setFloorRef(floor)
+                .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("cur")
+                .addMarker("air").addMarker("no").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
+                .setGroup(String.valueOf(nodeAddr))
+                .setTz(tz)
+                .build();
+        String no2Id = CCUHsApi.getInstance().addPoint(no2);
+
+        Point ps = new Point.Builder()
+                .setDisplayName(equipDis+"-"+Port.SENSOR_PRESSURE.name())
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(room)
+                .setFloorRef(floor)
+                .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("cur")
+                .addMarker("air").addMarker("pressure").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
+                .setGroup(String.valueOf(nodeAddr))
+                .setTz(tz)
+                .build();
+        String psId = CCUHsApi.getInstance().addPoint(ps);
+
+        Point illu = new Point.Builder()
+                .setDisplayName(equipDis+"-"+Port.SENSOR_ILLUMINANCE.name())
+                .setEquipRef(equipRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(room)
+                .setFloorRef(floor)
+                .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("cur")
+                .addMarker("air").addMarker("illuminance").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
+                .setGroup(String.valueOf(nodeAddr))
+                .setTz(tz)
+                .build();
+        String illuId = CCUHsApi.getInstance().addPoint(illu);
+
         Point desiredTemp = new Point.Builder()
                 .setDisplayName(equipDis+"-desiredTemp")
                 .setEquipRef(equipRef)
@@ -315,7 +422,7 @@ public class HeatPumpUnitEquip{
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("scheduleStatus").addMarker(profile).addMarker("logical").addMarker("zone").addMarker("writable").addMarker("equipHis")
+                .addMarker("scheduleStatus").addMarker(profile).addMarker("logical").addMarker("zone").addMarker("writable").addMarker("equipHis").addMarker("his")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .setKind("string")
@@ -345,12 +452,17 @@ public class HeatPumpUnitEquip{
         device.th2In.setEnabled(config.enableThermistor2);
         device.currentTemp.setPointRef(ctID);
         device.currentTemp.setEnabled(true);
-        device.humidity.setPointRef(humidityId);
-        device.humidity.setEnabled(true);
-        device.co2.setPointRef(co2Id);
-        device.co2.setEnabled(true);
-        device.voc.setPointRef(vocId);
-        device.voc.setEnabled(true);
+		device.addSensor(Port.SENSOR_RH, humidityId);
+        device.addSensor(Port.SENSOR_CO2, co2Id);
+        device.addSensor(Port.SENSOR_VOC, vocId);
+		device.addSensor(Port.SENSOR_OCCUPANCY,occSensingId);
+		device.addSensor(Port.SENSOR_SOUND,soundId);
+		device.addSensor(Port.SENSOR_UVI,uviId);
+        device.addSensor(Port.SENSOR_CO,coId);
+        device.addSensor(Port.SENSOR_CO2_EQUIVALENT,co2EqId);
+        device.addSensor(Port.SENSOR_NO,no2Id);
+        device.addSensor(Port.SENSOR_ILLUMINANCE,illuId);
+        device.addSensor(Port.SENSOR_PRESSURE,psId);
         device.desiredTemp.setPointRef(dtId);
         device.desiredTemp.setEnabled(true);
         device.relay1.setPointRef(r1ID);

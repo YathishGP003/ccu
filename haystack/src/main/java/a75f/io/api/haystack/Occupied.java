@@ -6,6 +6,7 @@ import java.util.Objects;
 public class Occupied {
 
     private boolean mOccupied;
+    private boolean mPrecondition;
     private Object mValue;
     private Double mCoolingVal;
     private Double mHeatingVal;

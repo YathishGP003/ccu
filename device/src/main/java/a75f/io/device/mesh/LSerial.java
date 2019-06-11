@@ -3,7 +3,6 @@ package a75f.io.device.mesh;
 import android.os.Build;
 import android.content.Context;
 import android.content.Intent;
-import android.support.v4.content.LocalBroadcastManager;
 
 import org.javolution.io.Struct;
 
@@ -12,6 +11,7 @@ import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import a75f.io.api.haystack.Device;
 import a75f.io.device.DeviceConstants;
 import a75f.io.device.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSmartStatLocalControlsOverrideMessage_t;
@@ -123,13 +123,13 @@ public class LSerial
             }
 
             // Broadcast event so that external handlers can access it
-            Intent eventIntent = new Intent(DeviceConstants.IntentActions.LSERIAL_MESSAGE);
+            Intent eventIntent = new Intent(context, OTAUpdateService.class);
+            eventIntent.setAction(DeviceConstants.IntentActions.LSERIAL_MESSAGE);
             eventIntent.putExtra("eventType", messageType);
             eventIntent.putExtra("eventBytes", data);
 
             //LocalBroadcastManager.getInstance(context).sendBroadcast(eventIntent);
-            Intent foo = new Intent(context, OTAUpdateService.class);
-            context.startService(eventIntent);  //which?
+            context.startService(eventIntent);
         }
     }
 

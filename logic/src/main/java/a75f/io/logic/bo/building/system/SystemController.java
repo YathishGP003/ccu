@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.Occupied;
 import a75f.io.logic.L;
 import a75f.io.logic.tuners.TunerUtil;
 
@@ -69,4 +70,6 @@ public abstract class SystemController
     public boolean isEmergencyMode(){
         return emergencyMode;
     }
+    
+    public abstract SystemController.State getConditioningForecast(Occupied occupiedSchedule);
 }

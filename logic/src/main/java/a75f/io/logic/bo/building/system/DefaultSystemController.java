@@ -1,5 +1,9 @@
 package a75f.io.logic.bo.building.system;
 
+import a75f.io.api.haystack.Occupied;
+
+import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
+
 /**
  * Created by samjithsadasivan on 3/20/19.
  */
@@ -31,5 +35,10 @@ public class DefaultSystemController extends SystemController
     @Override
     public double getAverageSystemTemperature() {
         return 0;
+    }
+    
+    @Override
+    public SystemController.State getConditioningForecast(Occupied occupiedSchedule) {
+        return OFF;
     }
 }

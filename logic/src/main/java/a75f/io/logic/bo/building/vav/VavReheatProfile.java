@@ -12,6 +12,7 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Damper;
@@ -193,7 +194,7 @@ public class VavReheatProfile extends VavProfile
             boolean  enabledIAQControl = vavDevice.getConfigNumVal("enable and iaq") > 0 ;
             String zoneId = HSUtil.getZoneIdFromEquipId(vavEquip.getId());
             Occupied occ = ScheduleProcessJob.getOccupiedModeCache(zoneId);
-            boolean occupied = (occ == null ? false : occ.isOccupied());
+            boolean occupied = (occ == null ? false : occ.isOccupied()) || (ScheduleProcessJob.getSystemOccupancy() == Occupancy.PRECONDITIONING);
             Log.d(L.TAG_CCU_ZONE, "Zone occupaancy : "+occupied+" occ "+occ);
             //CO2 loop output from 0-50% modulates damper min position.
             if (enabledCO2Control && occupied && co2Loop.getLoopOutput(co2) > 0)

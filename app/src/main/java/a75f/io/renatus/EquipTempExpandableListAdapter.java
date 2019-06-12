@@ -106,9 +106,8 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
             Spinner ssHumiDifierSpinner = convertView.findViewById(R.id.ss_humidity_spinner);
             HashMap equipHashMap = CCUHsApi.getInstance().readMapById(equipId);
 
-
-            String zoneId         = Schedule.getZoneIdByEquipId(equipId);
-            String status         = ScheduleProcessJob.getZoneStatusString(zoneId);
+            String zoneId = Schedule.getZoneIdByEquipId(equipId);
+            String status = ScheduleProcessJob.getZoneStatusString(zoneId, equipId);
             String vacationStatus = ScheduleProcessJob.getVacationStateString(zoneId);
             vacationStatusTV.setText(vacationStatus);
             scheduleStatus.setText(status);
@@ -226,7 +225,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                 double ssTargetDehumidity = 45.0;
                 if(profileType.equals("smartstat_hpu"))
                     ssFanHighHumdOption = CCUHsApi.getInstance().readDefaultVal("point and zone and config and relay5 and type and equipRef == \"" + equipId + "\"");
-                else
+                else if(profileType.equals("smartstat_cpu"))
                     ssFanHighHumdOption = CCUHsApi.getInstance().readDefaultVal("point and zone and config and relay6 and type and equipRef == \"" + equipId + "\"");
 
                 if(ssFanHighHumdOption > 1.0) {

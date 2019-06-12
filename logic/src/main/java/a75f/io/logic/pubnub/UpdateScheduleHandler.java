@@ -1,4 +1,4 @@
-package a75f.io.logic.a75f.io.logic.pubnub;
+package a75f.io.logic.pubnub;
 
 import com.google.gson.JsonObject;
 
@@ -71,6 +71,4 @@ public class UpdateScheduleHandler
             ScheduleProcessJob.updateSchedules();
         }
     }
-        
-        
 }

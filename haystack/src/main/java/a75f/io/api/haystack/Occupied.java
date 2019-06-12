@@ -6,6 +6,7 @@ import java.util.Objects;
 public class Occupied {
 
     private boolean mOccupied;
+    private boolean mPrecondition;
     private Object mValue;
     private Double mCoolingVal;
     private Double mHeatingVal;
@@ -45,6 +46,13 @@ public class Occupied {
 
     public void setOccupied(boolean occupied) {
         this.mOccupied = occupied;
+    }
+
+    public boolean isPreconditioning(){
+        return mPrecondition;
+    }
+    public void setPreconditioning(boolean isPrecondition){
+        this.mPrecondition = isPrecondition;
     }
 
     public Object getValue() {

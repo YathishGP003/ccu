@@ -53,33 +53,6 @@ public class SettingsFragment extends Fragment
 			@Override
 			public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l)
 			{
-				/*if (currentFragment instanceof DefaultSystemProfile){
-					selectItem(5);
-				}
-				if (currentFragment instanceof VavStagedRtuProfile){
-					selectItem(5);
-				}
-				if (currentFragment instanceof VavAnalogRtuProfile){
-					selectItem(5);
-				}
-				if (currentFragment instanceof VavStagedRtuWithVfdProfile){
-					selectItem(5);
-				}
-				if (currentFragment instanceof VavHybridRtuProfile){
-					selectItem(5);
-				}
-				if (currentFragment instanceof DABStagedProfile){
-					selectItem(5);
-				}
-				if (currentFragment instanceof DABFullyAHUProfile){
-					selectItem(5);
-				}
-				if (currentFragment instanceof DABStagedRtuWithVfdProfile){
-					selectItem(5);
-				}
-				if (currentFragment instanceof DABHybridAhuProfile){
-					selectItem(5);
-				}*/
 				switch (i)
 				{
 					case 0:

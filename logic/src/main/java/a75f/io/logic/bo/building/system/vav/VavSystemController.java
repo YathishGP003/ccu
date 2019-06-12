@@ -10,6 +10,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -260,6 +261,26 @@ public class VavSystemController extends SystemController
     @Override
     public int getHeatingSignal() {
         return heatingSignal;
+    }
+    
+    @Override
+    public SystemController.State getConditioningForecast(Occupied occupiedSchedule) {
+        VavSystemProfile profile = (VavSystemProfile) L.ccu().systemProfile;
+        SystemMode systemMode = SystemMode.values()[(int)profile.getUserIntentVal("rtu and mode")];
+    
+        if ((systemMode == COOLONLY || systemMode == AUTO) && (getAverageSystemTemperature() > occupiedSchedule.getCoolingVal()))
+        {
+            return COOLING;
+        }
+        else if ((systemMode == HEATONLY || systemMode == AUTO) && (getAverageSystemTemperature() > occupiedSchedule.getCoolingVal()))
+        {
+            return HEATING;
+        }
+        else
+        {
+            return OFF;
+        }
+    
     }
     
     public boolean isAllZonesHeating() {

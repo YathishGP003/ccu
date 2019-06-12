@@ -17,7 +17,6 @@ import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.RawPoint;
-import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSmartStatMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
@@ -348,9 +347,7 @@ public class LSmartStat {
         controls.time.hours.set((byte)(curDate.get(Calendar.HOUR_OF_DAY) & 0xff));
         controls.time.minutes.set((byte)(curDate.get(Calendar.MINUTE) & 0xff));
     }
-
-
-
+    
     private static double getMaxUserTempLimits(String equipId, double deadband){
         double maxCool =  StandaloneTunerUtil.readTunerValByQuery("zone and cooling and user and limit and max",equipId);
         return maxCool- deadband;

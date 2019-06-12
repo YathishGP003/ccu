@@ -93,12 +93,22 @@ public abstract class SystemProfile
             case SYSTEM_VAV_STAGED_VFD_RTU:
             case SYSTEM_VAV_HYBRID_RTU:
                 return VavSystemController.getInstance();
+            case SYSTEM_DAB_ANALOG_RTU:
             case SYSTEM_DAB_STAGED_RTU:
+            case SYSTEM_DAB_STAGED_VFD_RTU:
                 return DabSystemController.getInstance();
             case SYSTEM_DEFAULT:
                 return DefaultSystemController.getInstance();
         }
         return DefaultSystemController.getInstance();
+    }
+    
+    public SystemController.State getConditioning() {
+        return getSystemController().getSystemState();
+    }
+    
+    public double getAverageTemp() {
+        return getSystemController().getAverageSystemTemperature();
     }
     
     public String getSystemEquipRef() {

@@ -10,6 +10,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -121,10 +122,10 @@ public class DabSystemController extends SystemController
                     zoneCount++;
                     //weightedAverageCoolingOnlyLoadSum += zoneCoolingLoad * zoneDynamicPriority;
                     //weightedAverageHeatingOnlyLoadSum += zoneHeatingLoad * zoneDynamicPriority;
-                    weightedAverageLoadSum = +(zoneCoolingLoad * zoneDynamicPriority) - (zoneHeatingLoad * zoneDynamicPriority);
+                    weightedAverageLoadSum = (zoneCoolingLoad * zoneDynamicPriority) - (zoneHeatingLoad * zoneDynamicPriority);
                     prioritySum += zoneDynamicPriority;
                     CcuLog.d(L.TAG_CCU_SYSTEM, q.getDisplayName() + " zoneDynamicPriority: " + zoneDynamicPriority + " zoneCoolingLoad: " + zoneCoolingLoad + " zoneHeatingLoad: " + zoneHeatingLoad);
-                    CcuLog.d(L.TAG_CCU_SYSTEM, q.getDisplayName() + " weightedAverageLoadSum:");
+                    CcuLog.d(L.TAG_CCU_SYSTEM, q.getDisplayName() + " weightedAverageLoadSum: "+weightedAverageLoadSum);
                 }
             }
             
@@ -136,8 +137,6 @@ public class DabSystemController extends SystemController
             return;
         }
         
-        //weightedAverageCoolingOnlyLoad = weightedAverageCoolingOnlyLoadSum / prioritySum;
-        //weightedAverageHeatingOnlyLoad = weightedAverageHeatingOnlyLoadSum / prioritySum;
         weightedAverageLoad = weightedAverageLoadSum / prioritySum;
         
         comfortIndex = (int)(totalCoolingLoad + totalHeatingLoad) /zoneCount;
@@ -153,10 +152,10 @@ public class DabSystemController extends SystemController
             weightedAverageLoadPostMLQSum += val;
         }
         weightedAverageLoadMA = weightedAverageLoadPostMLQSum/weightedAverageLoadPostMLQ.size();
-    
+        
         if ((systemState == COOLING || systemState == OFF) && buildingLimitMaxBreached("dab")) {
             CcuLog.d(L.TAG_CCU_SYSTEM, " Emergency COOLING Active");
-            emergencyMode = false;
+            emergencyMode = true;
             if (systemState != COOLING)
             {
                 systemState = COOLING;
@@ -199,7 +198,8 @@ public class DabSystemController extends SystemController
                 systemState = OFF;
             }
         }
-        
+    
+        CcuLog.d(L.TAG_CCU_SYSTEM, "weightedAverageLoadMA "+weightedAverageLoadMA+" systemState: "+systemState);
         profile.setSystemPoint("operating and mode", systemState.ordinal());
     
         weightedAverageCoolingLoadPostML = weightedAverageLoadPostML > 0 ? weightedAverageLoadPostML : 0;
@@ -219,7 +219,7 @@ public class DabSystemController extends SystemController
         }
         piController.dump();
         CcuLog.d(L.TAG_CCU_SYSTEM, "weightedAverageCoolingLoadPostML: "+weightedAverageCoolingLoadPostML+" weightedAverageHeatingLoadPostML: "
-                                   +weightedAverageHeatingLoadPostML +" systemState: "+systemState+" coolingSignal: "+coolingSignal+" heatingSignal: "+heatingSignal);
+                                   +weightedAverageHeatingLoadPostML+" coolingSignal: "+coolingSignal+" heatingSignal: "+heatingSignal);
         
         profile.setSystemPoint("moving and average and cooling and load",weightedAverageCoolingLoadPostML);
         profile.setSystemPoint("moving and average and heating and load",weightedAverageHeatingLoadPostML);
@@ -250,6 +250,25 @@ public class DabSystemController extends SystemController
             }
         }
         return true;
+    }
+    
+    public SystemController.State getConditioningForecast(Occupied occupiedSchedule) {
+        DabSystemProfile profile = (DabSystemProfile) L.ccu().systemProfile;
+        SystemMode systemMode = SystemMode.values()[(int)profile.getUserIntentVal("rtu and mode")];
+        
+        if ((systemMode == COOLONLY || systemMode == AUTO) && (getAverageSystemTemperature() > occupiedSchedule.getCoolingVal()))
+        {
+            return COOLING;
+        }
+        else if ((systemMode == HEATONLY || systemMode == AUTO) && (getAverageSystemTemperature() > occupiedSchedule.getCoolingVal()))
+        {
+            return HEATING;
+        }
+        else
+        {
+            return OFF;
+        }
+        
     }
     
     public boolean isAnyZoneCooling() {

@@ -23,9 +23,9 @@ public class DabStagedRtu extends SystemProfile
     
     @Override
     public void doSystemControl() {
-    
+        DabSystemController.getInstance().runDabSystemControlAlgo();
+        //updateSystemPoints();
     }
-    
     @Override
     public void addSystemEquip() {
     

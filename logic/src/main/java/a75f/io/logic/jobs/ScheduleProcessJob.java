@@ -204,7 +204,7 @@ public class ScheduleProcessJob extends BaseJob {
     private static void writePointsForEquip(Equip equip, Schedule equipSchedule, Schedule vacation) {
         if((equip.getMarkers().contains("vav") || equip.getMarkers().contains("dab")) && !equip.getMarkers().contains("system"))
         {
-            VAVScheduler.processEquip(equip, equipSchedule, vacation);
+            VAVScheduler.processEquip(equip, equipSchedule, vacation, systemOccupancy);
         }else if (equip.getMarkers().contains("pid")) {
             Occupied occ = equipSchedule.getCurrentValues();
             if (occ != null) {
@@ -282,6 +282,9 @@ public class ScheduleProcessJob extends BaseJob {
                 return "Empty Schedule";
             }
             return "Setting up..";
+        }
+        if (systemOccupancy == PRECONDITIONING) {
+            return "In Preconditioning ";
         }
         //{Current Mode}, Changes to Energy Saving Range of %.1f-%.1fF at %s
         if(cachedOccupied.isOccupied())
@@ -446,25 +449,23 @@ public class ScheduleProcessJob extends BaseJob {
         
         if (systemOccupancy == UNOCCUPIED)
         {
-            double waCoolingOnlyLoadMA = CCUHsApi.getInstance().readHisValByQuery("system and point and moving and average and cooling and load");
-            double waHeatingOnlyLoadMA = CCUHsApi.getInstance().readHisValByQuery("system and point and moving and average and heating and load");
-            
-            double preconDegree = Math.max(waCoolingOnlyLoadMA, waHeatingOnlyLoadMA);
+            double preconDegree = 0;// = Math.max(waCoolingOnlyLoadMA, waHeatingOnlyLoadMA);
             double preconRate = CCUHsApi.getInstance().getPredictedPreconRate(L.ccu().systemProfile.getSystemEquipRef());
-            if (preconRate == 0) {
-                //TODO - Revisit , as per vav logic
-                if (waCoolingOnlyLoadMA > 0)
+            if (preconRate == 0 && nextOccupied != null) {
+                if (L.ccu().systemProfile.getSystemController().getConditioningForecast(nextOccupied) == SystemController.State.COOLING)
                 {
                     preconRate = TunerUtil.readTunerValByQuery("cooling and precon and rate", L.ccu().systemProfile.getSystemEquipRef());
-                } else if (waHeatingOnlyLoadMA > 0){
+                    preconDegree = L.ccu().systemProfile.getAverageTemp() - nextOccupied.getCoolingVal();
+                } else if (L.ccu().systemProfile.getSystemController().getConditioningForecast(nextOccupied) == SystemController.State.HEATING){
                     preconRate = TunerUtil.readTunerValByQuery("heating and precon and rate", L.ccu().systemProfile.getSystemEquipRef());
+                    preconDegree = nextOccupied.getHeatingVal() - L.ccu().systemProfile.getAverageTemp();
                 }
             }
             if (preconDegree * preconRate * 60 * 1000 >= millisToOccupancy)
             {
                 systemOccupancy = PRECONDITIONING;
             }
-            CcuLog.d(L.TAG_CCU_SYSTEM, "preconRate : "+preconRate+" preconDegree: "+preconDegree);
+            CcuLog.d(L.TAG_CCU_JOB, "preconRate : "+preconRate+" preconDegree: "+preconDegree);
         }
     
         if (systemOccupancy == UNOCCUPIED && getSystemTemporaryHoldExpiry() > 0) {
@@ -474,7 +475,7 @@ public class ScheduleProcessJob extends BaseJob {
         CCUHsApi.getInstance().writeHisValByQuery("point and system and his and occupancy and status",(double)systemOccupancy.ordinal());
         CcuLog.d(TAG_CCU_JOB, "systemOccupancy status : " + systemOccupancy);
     }
-
+    
     public static Occupancy getSystemOccupancy() {
         return systemOccupancy == null ? UNOCCUPIED : systemOccupancy;
     }

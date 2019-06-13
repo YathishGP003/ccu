@@ -1,0 +1,54 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/startOtaTestBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Start a Test OTA Update"/>
+
+        <EditText
+            android:id="@+id/otaTestAddressText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="LW Mesh Address"
+            android:inputType="number"
+            android:text="" />
+
+        <EditText
+            android:id="@+id/otaTestNameStringText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:hint="Firmware Name String"
+            android:text="" />
+
+        <EditText
+            android:id="@+id/otaTestMajorVersionText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="number"
+            android:hint="Major Version"
+            android:text="" />
+
+        <EditText
+            android:id="@+id/otaTestMinorVersionText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="number"
+            android:hint="Minor Version"
+            android:text="" />
+
+    </LinearLayout>
+
+</FrameLayout>

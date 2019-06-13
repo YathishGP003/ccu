@@ -39,6 +39,9 @@ public class EngineeringPagerAdapter extends FragmentStatePagerAdapter
 			case 4:
 				fragment = BLETestFragment.newInstance();
 				break;
+			case 5:
+				fragment = OTAUpdateTestFragment.newInstance();
+				break;
 		}
 		return fragment;
 	}
@@ -46,7 +49,7 @@ public class EngineeringPagerAdapter extends FragmentStatePagerAdapter
 	@Override
 	public int getCount() {
 		// Show 2 total pages.
-		return 5;
+		return 6;
 	}
 	
 	@Override
@@ -62,6 +65,8 @@ public class EngineeringPagerAdapter extends FragmentStatePagerAdapter
 				return "Serial Messages";
 			case 4:
 				return "BLE Test";
+			case 5:
+				return "OTA Update Test";
 				
 		}
 		return null;

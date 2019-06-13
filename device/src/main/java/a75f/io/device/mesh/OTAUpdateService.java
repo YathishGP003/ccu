@@ -86,7 +86,7 @@ public class OTAUpdateService extends IntentService {
         super("OTAUpdateService");
     }
 
-    @Override
+    /*@Override
     public void onCreate() {
         super.onCreate();
 
@@ -94,14 +94,14 @@ public class OTAUpdateService extends IntentService {
         intentFilter.addAction(DeviceConstants.IntentActions.LSERIAL_MESSAGE);
 
         registerReceiver(receiveEventBroadcast, intentFilter);
-    }
+    }*/
 
-    @Override
+    /*@Override
     public void onDestroy() {
         super.onDestroy();
 
         unregisterReceiver(receiveEventBroadcast);
-    }
+    }*/
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {

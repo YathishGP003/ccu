@@ -867,6 +867,15 @@ public class HeatPumpUnitEquip{
         CCUHsApi.getInstance().writeHisValByQuery("point and air and voc and sensor and current and group == \""+nodeAddr+"\"", voc);
     }
 
+
+    public double getOccupancySensor()
+    {
+        return CCUHsApi.getInstance().readHisValByQuery("point and occupancy and sensor and current and group == \""+nodeAddr+"\"");
+    }
+    public void setOccupancySensor(double occupancySensor)
+    {
+        CCUHsApi.getInstance().writeHisValByQuery("point and occupancy and sensor and current and group == \""+nodeAddr+"\"", occupancySensor);
+    }
     public double getDesiredTemp()
     {
         ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and desired and average and sp and group == \""+nodeAddr+"\"");

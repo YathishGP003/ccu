@@ -68,6 +68,7 @@ public class BuildingTuners
         equipDis = siteDis+"-BuildingTuner";
         tz = siteMap.get("tz").toString();
         
+        addSettingTuners();
         addDefaultSystemTuners();
         addDefaultZoneTuners();
         addDefaultVavTuners();
@@ -75,6 +76,20 @@ public class BuildingTuners
         addDefaultStandaloneTuners();
         addDefaultDabTuners();
         
+    }
+    
+    public void addSettingTuners() {
+        Point forcedOccupiedTime = new Point.Builder()
+                                                  .setDisplayName(equipDis+"-"+"forcedOccupiedTime")
+                                                  .setSiteRef(siteRef)
+                                                  .setEquipRef(equipRef)
+                                                  .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
+                                                  .addMarker("system").addMarker("forced").addMarker("occupied").addMarker("time").addMarker("sp")
+                                                  .setTz(tz)
+                                                  .build();
+        String forcedOccupiedTimeId = hayStack.addPoint(forcedOccupiedTime);
+        hayStack.writePoint(forcedOccupiedTimeId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 120.0, 0);
+        hayStack.writeHisValById(forcedOccupiedTimeId, 120.0);
     }
     
     public void addDefaultSystemTuners() {

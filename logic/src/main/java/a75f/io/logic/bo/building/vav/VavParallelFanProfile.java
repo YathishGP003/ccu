@@ -83,6 +83,9 @@ public class VavParallelFanProfile extends VavProfile
                 if (!curStatus.equals("Zone Temp Dead"))
                 {
                     CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"", "Zone Temp Dead");
+                    vavDevice = vavDeviceMap.get(node);
+                    vavDevice.setDamperPos(vavDevice.getDamperLimit(state == HEATING ? "heating":"cooling", "min"));
+                    vavDevice.setReheatPos(0);
                 }
                 continue;
             }

@@ -174,18 +174,28 @@ public class VavSystemController extends SystemController
         if ((systemState == COOLING || systemState == OFF) && buildingLimitMaxBreached("vav")) {
             CcuLog.d(L.TAG_CCU_SYSTEM, " Emergency COOLING Active");
             emergencyMode = true;
-            if (systemState != COOLING)
-            {
-                systemState = COOLING;
-                piController.reset();
-            }
+            //if ((systemMode == COOLONLY || systemMode == AUTO) && weightedAverageCoolingOnlyLoadMA > 0)
+            //{
+                if (systemState != COOLING)
+                {
+                    systemState = COOLING;
+                    piController.reset();
+                }
+            //} else {
+            //    systemState = OFF;
+            //}
         } else if ((systemState == HEATING || systemState == OFF) && buildingLimitMinBreached("vav")) {
             CcuLog.d(L.TAG_CCU_SYSTEM, " Emergency HEATING Active");
             emergencyMode = true;
-            if (systemState != HEATING)
+            if ((systemMode == HEATONLY || systemMode == AUTO) && (weightedAverageCoolingOnlyLoadMA == 0 && weightedAverageHeatingOnlyLoadMA > 0))
             {
-                systemState = HEATING;
-                piController.reset();
+                if (systemState != HEATING)
+                {
+                    systemState = HEATING;
+                    piController.reset();
+                }
+            } else {
+                systemState = OFF;
             }
         } else
         {

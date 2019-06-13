@@ -7,6 +7,8 @@ public class Occupied {
 
     private boolean mOccupied;
     private boolean mPrecondition;
+    private boolean mOccupancySensing;
+    private boolean mForcedOccupied;
     private Object mValue;
     private Double mCoolingVal;
     private Double mHeatingVal;
@@ -55,6 +57,12 @@ public class Occupied {
         this.mPrecondition = isPrecondition;
     }
 
+    public boolean isForcedOccupied(){
+        return mForcedOccupied;
+    }
+    public void setForcedOccupied(boolean value){
+        this.mForcedOccupied = value;
+    }
     public Object getValue() {
         return mValue;
     }
@@ -116,6 +124,12 @@ public class Occupied {
     public double getHeatingDeadBand() { return mHeatingDeadband; }
     public double getCoolingDeadBand() { return mCoolingDeadband; }
 
+    public void setOccupancySensed(boolean isOccupancySensed){
+        this.mOccupancySensing = isOccupancySensed;
+    }
+    public boolean isOccupancySensed(){
+        return mOccupancySensing;
+    }
     public void setVacation(Schedule vacation)
     {
         this.vacation = vacation;

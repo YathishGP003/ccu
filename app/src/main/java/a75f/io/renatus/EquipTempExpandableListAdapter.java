@@ -46,7 +46,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
     private HashMap<String, String>       idMap;
     
     Schedule mSchedule = null;
-    int mScheduleType;
+    int mScheduleType = -1;
 
     public EquipTempExpandableListAdapter(Fragment fragment, List<String> expandableListTitle,
                                           HashMap<String, List<String>> expandableListDetail, HashMap idmap)
@@ -154,7 +154,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
                 {
-                    if (position == 0)
+                    if (position == 0 && (mScheduleType != -1))
                     {
                         if (mSchedule.isZoneSchedule())
                         {
@@ -168,7 +168,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                             mScheduleType = ScheduleType.BUILDING.ordinal();
                         }
 
-                    } else if (position == 1)
+                    } else if (position == 1 && (mScheduleType != -1))
                     {
                         if (mSchedule.isZoneSchedule() && mSchedule.getMarkers().contains("disabled"))
                         {

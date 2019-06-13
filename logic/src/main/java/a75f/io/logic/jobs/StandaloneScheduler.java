@@ -59,17 +59,15 @@ public class StandaloneScheduler {
         occ.setHeatingDeadBand(heatingDeadBand);
         occ.setCoolingDeadBand(coolingDeadBand);
         Occupancy occustatus = ScheduleProcessJob.getZoneStatus( equip.getRoomRef());
-        if( occustatus == Occupancy.PRECONDITIONING)
-            occ.setPreconditioning(true);
         if (occ != null && ScheduleProcessJob.putOccupiedModeCache(equip.getRoomRef(), occ)) {
             double avgTemp = (occ.getCoolingVal()+occ.getHeatingVal())/2.0;
             double deadbands = (occ.getCoolingVal() - occ.getHeatingVal()) / 2.0 ;
             occ.setCoolingDeadBand(deadbands);
             occ.setHeatingDeadBand(deadbands);
-            Double coolingTemp = (occ.isOccupied() || occ.isPreconditioning()) ? occ.getCoolingVal() : (occ.getCoolingVal() + occ.getUnoccupiedZoneSetback());
+            Double coolingTemp = (occ.isOccupied() || (occustatus == Occupancy.PRECONDITIONING) || (occustatus == Occupancy.FORCED_OCCUPIED))) ? occ.getCoolingVal() : (occ.getCoolingVal() + occ.getUnoccupiedZoneSetback());
             setDesiredTemp(equip, coolingTemp, "cooling");
 
-            Double heatingTemp = (occ.isOccupied() || occ.isPreconditioning())? occ.getHeatingVal() : (occ.getHeatingVal() - occ.getUnoccupiedZoneSetback());
+            Double heatingTemp = (occ.isOccupied() || (occustatus == Occupancy.PRECONDITIONING) || (occustatus == Occupancy.FORCED_OCCUPIED))? occ.getHeatingVal() : (occ.getHeatingVal() - occ.getUnoccupiedZoneSetback());
             setDesiredTemp(equip, heatingTemp, "heating");
             setDesiredTemp(equip,avgTemp,"average");
         }

@@ -31,6 +31,7 @@ import a75f.io.logic.tuners.TunerUtil;
 import static a75f.io.logic.L.TAG_CCU_JOB;
 import static a75f.io.logic.L.TAG_CCU_SCHEDULER;
 import static a75f.io.logic.bo.building.Occupancy.FORCED_OCCUPIED;
+import static a75f.io.logic.bo.building.Occupancy.OCCUPANCY_SENSING;
 import static a75f.io.logic.bo.building.Occupancy.OCCUPIED;
 import static a75f.io.logic.bo.building.Occupancy.PRECONDITIONING;
 import static a75f.io.logic.bo.building.Occupancy.UNOCCUPIED;
@@ -300,8 +301,10 @@ public class ScheduleProcessJob extends BaseJob {
             if (th > 0) {
                 DateTime et = new DateTime(th);
                 int min = et.getMinuteOfHour();
+                cachedOccupied.setForcedOccupied(true);
                 return String.format("In Temporary Hold | till %s", et.getHourOfDay()+":"+(min < 10 ? "0"+min : min));
             }
+            cachedOccupied.setForcedOccupied(false);
     
             if(cachedOccupied.getVacation() != null)
             {
@@ -553,7 +556,10 @@ public class ScheduleProcessJob extends BaseJob {
             c = FORCED_OCCUPIED;
         }else if((cachedOccupied != null) && (cachedOccupied.isPreconditioning())) {
             //handle preconditioning??
-			c = PRECONDITIONING;
+
+            c = PRECONDITIONING;
+        }else if((cachedOccupied != null) && cachedOccupied.isOccupancySensed()){
+            c = OCCUPANCY_SENSING;
         }
         
         return c;

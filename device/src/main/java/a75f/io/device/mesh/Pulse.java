@@ -255,7 +255,7 @@ public class Pulse
 
 	}
 
-    private static void updateSmartStatDesiredTemp(int node, Double dt) {
+    private static void updateSmartStatDesiredTemp(int node, Double dt, boolean sendAck) {
         HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \""+node+"\"");
         Equip q = new Equip.Builder().setHashMap(equipMap).build();
 
@@ -303,8 +303,10 @@ public class Pulse
         }catch (Exception e){
 		    e.printStackTrace();
         }
-		sendSmartStatControlMessage((short)node,q.getId());
-		sendSetTemperatureAck((short)node);
+        if(sendAck) {
+			sendSmartStatControlMessage((short) node, q.getId());
+			sendSetTemperatureAck((short) node);
+		}
 
 	}
 	
@@ -317,11 +319,13 @@ public class Pulse
 	public static void regularSmartStatUpdate(CmToCcuOverUsbSmartStatRegularUpdateMessage_t smartStatRegularUpdateMessage_t)
 	{
 		short nodeAddr = (short)smartStatRegularUpdateMessage_t.update.smartNodeAddress.get();
+		double occupancyDetected  = smartStatRegularUpdateMessage_t.update.occupancyDetected.get();
 		CCUHsApi hayStack = CCUHsApi.getInstance();
 		HashMap device = hayStack.read("device and addr == \""+nodeAddr+"\"");
 		if (device != null && device.size() > 0)
 		{
-			ArrayList<HashMap> phyPoints = hayStack.readAll("point and physical and sensor and deviceRef == \"" + device.get("id") + "\"");
+			Device deviceInfo = new Device.Builder().setHashMap(device).build();
+			ArrayList<HashMap> phyPoints = hayStack.readAll("point and physical and sensor and deviceRef == \"" + deviceInfo.getId() + "\"");
 
 			String logicalCurTempPoint = "";
 			double curTempVal = 0.0;
@@ -376,7 +380,7 @@ public class Pulse
 			}
 			SmartNodeSensorReading_t[] sensorReadings = smartStatRegularUpdateMessage_t.update.sensorReadings;
 			if (sensorReadings.length > 0) {
-				handleSmartStatSensorEvents(sensorReadings, nodeAddr);
+				handleSmartStatSensorEvents(sensorReadings, nodeAddr, deviceInfo, occupancyDetected );
 			}
 
 			//Write Current temp point based on th2 enabled or not
@@ -452,7 +456,7 @@ public class Pulse
 						double desiredTemp = getDesredTempConversion(temp);
 						if (desiredTemp > 0 && (curValue != desiredTemp)) {
 							hayStack.writeHisValById(logPoint.get("id").toString(), desiredTemp);
-							updateSmartStatDesiredTemp(nodeAddr, desiredTemp);
+							updateSmartStatDesiredTemp(nodeAddr, desiredTemp, true);
 						}
 						CcuLog.d(L.TAG_CCU_DEVICE, "updateSetTempFromSmartStat : desiredTemp " + desiredTemp+","+curValue);
 						break;
@@ -505,9 +509,10 @@ public class Pulse
 	}
 
 
-	private static void handleSmartStatSensorEvents(SmartNodeSensorReading_t[] sensorReadings, short addr) {
+	private static void handleSmartStatSensorEvents(SmartNodeSensorReading_t[] sensorReadings, short addr, Device device, double occupancyDetected) {
 		SmartStat node = new SmartStat(addr);
 		int emVal = 0;
+		boolean hasSensorOccupancy = false;
 		for (SmartNodeSensorReading_t r : sensorReadings) {
 			SensorType t = SensorType.values()[r.sensorType.get()];
 			Port p = t.getSensorPort();
@@ -531,13 +536,16 @@ public class Pulse
 				case NO:
 				case VOC:
 				case PRESSURE:
-				case OCCUPANCY:
 				case SOUND:
 				case CO2_EQUIVALENT:
 				case ILLUMINANCE:
 				case UVI:
 					CCUHsApi.getInstance().writeHisValById(sp.getId(), val );
 					CCUHsApi.getInstance().writeHisValById(sp.getPointRef(),val);
+					break;
+				case OCCUPANCY:
+					hasSensorOccupancy = true;
+					updateOccupancyStatus(sp,val, device,addr);
 					break;
 				case ENERGY_METER_HIGH:
 					emVal = emVal > 0 ?  (emVal | (r.sensorData.get() << 12)) : r.sensorData.get();
@@ -546,6 +554,13 @@ public class Pulse
 					emVal = emVal > 0 ? ((emVal << 12) | r.sensorData.get()) : r.sensorData.get();
 					break;
 			}
+		}
+		if( !hasSensorOccupancy){
+			RawPoint sp = node.getRawPoint(Port.SENSOR_OCCUPANCY);
+			if(sp == null)
+				sp = node.addSensor(Port.SENSOR_OCCUPANCY);
+
+			updateOccupancyStatus(sp,occupancyDetected, device,addr);
 		}
 
 		if (emVal > 0) {
@@ -557,5 +572,25 @@ public class Pulse
 			CCUHsApi.getInstance().writeHisValById(sp.getPointRef(),(double)emVal);
 		}
 
+	}
+
+	private static void updateOccupancyStatus(RawPoint sp, double val,Device device, short addr){
+
+		double occuEnabled =  CCUHsApi.getInstance().readDefaultVal("point and zone and config and standalone and enable and occupancy and group == \""+addr+"\"");
+		double curOccuStatus = CCUHsApi.getInstance().readHisValById(sp.getPointRef());
+		if((occuEnabled > 0) && (curOccuStatus != val) ) { //only if occupancy enabled
+			if(val > 0) {
+				Occupied occupied = ScheduleProcessJob.getOccupiedModeCache(device.getRoomRef());
+				if (occupied != null)
+					Log.d("Occupancy", "pulse occupancy sensor22=" + occupied.isOccupied() + "," + occupied.isPreconditioning());
+				if ((occupied != null) && !occupied.isOccupied() && !occupied.isPreconditioning()) {
+					//update desired temp for forced occupied
+					double dt = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and desired and average and sp and equipRef == \"" + device.getEquipRef() + "\"");
+					updateSmartStatDesiredTemp(addr, dt, false);
+				}
+			}
+			CCUHsApi.getInstance().writeHisValById(sp.getId(), val);
+			CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), val);
+		}
 	}
 }

@@ -111,11 +111,16 @@ public class ZoneFragmentTemp extends Fragment
             @Override
             public void onGroupExpand(int groupPosition) {
                 updateData();
+                for (int g = 0; g < expandableListAdapter.getGroupCount(); g++) {
+                    if (g != groupPosition) {
+                        expandableListView.collapseGroup(g);
+                    }
+                }
                 expandableListView.invalidateViews();
-                if (lastExpandedPosition != -1
+                /*if (lastExpandedPosition != -1
                     && groupPosition != lastExpandedPosition) {
                     expandableListView.collapseGroup(lastExpandedPosition);
-                }
+                }*/
                 lastExpandedPosition = groupPosition;
 
 

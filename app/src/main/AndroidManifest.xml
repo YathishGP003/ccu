@@ -84,6 +84,7 @@
             android:name=".RenatusLandingActivity" android:launchMode="singleTask"
             android:label="RenatusLandingActivity"
             android:alwaysRetainTaskState="true"
+            android:screenOrientation="sensorLandscape"
             android:theme="@style/RenatusAppTheme.NoActionBar">
 
 

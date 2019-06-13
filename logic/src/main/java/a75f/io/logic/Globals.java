@@ -43,6 +43,7 @@ import a75f.io.logic.bo.building.sshpu.HeatPumpUnitProfile;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.dab.DabFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
+import a75f.io.logic.bo.building.system.dab.DabStagedRtuWithVfd;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedHybridRtu;
 import a75f.io.logic.bo.building.system.vav.VavBacnetRtu;
 import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu;
@@ -368,44 +369,35 @@ public class Globals {
             CcuLog.d(L.TAG_CCU, "Load SystemEquip " + eq.getDisplayName() + " System profile " + eq.getProfile());
             switch (ProfileType.valueOf(eq.getProfile())) {
                 case SYSTEM_VAV_ANALOG_RTU:
-                    VavFullyModulatingRtu analogRtuProfile = new VavFullyModulatingRtu();
-                    analogRtuProfile.addSystemEquip();
-                    L.ccu().systemProfile = analogRtuProfile;
-
+                    L.ccu().systemProfile = new VavFullyModulatingRtu();
                     break;
                 case SYSTEM_VAV_STAGED_RTU:
-                    VavStagedRtu stagedRtuProfile = new VavStagedRtu();
-                    stagedRtuProfile.addSystemEquip();
-                    L.ccu().systemProfile = stagedRtuProfile;
+                    L.ccu().systemProfile = new VavStagedRtu();
                     break;
                 case SYSTEM_VAV_STAGED_VFD_RTU:
-                    VavStagedRtuWithVfd stagedVfdRtuProfile = new VavStagedRtuWithVfd();
-                    stagedVfdRtuProfile.addSystemEquip();
-                    L.ccu().systemProfile = stagedVfdRtuProfile;
+                    L.ccu().systemProfile = new VavStagedRtuWithVfd();
                     break;
                 case SYSTEM_VAV_HYBRID_RTU:
-                    VavAdvancedHybridRtu hybridRtuProfile = new VavAdvancedHybridRtu();
-                    hybridRtuProfile.addSystemEquip();
-                    L.ccu().systemProfile = hybridRtuProfile;
+                    L.ccu().systemProfile = new VavAdvancedHybridRtu();
                     break;
                 case SYSTEM_VAV_IE_RTU:
-                    VavIERtu ieRtuProfile = new VavIERtu();
-                    ieRtuProfile.addSystemEquip();
-                    L.ccu().systemProfile = ieRtuProfile;
+                    L.ccu().systemProfile = new VavIERtu();
                     break;
                 case SYSTEM_VAV_BACNET_RTU:
-                    VavBacnetRtu bacnetRtu = new VavBacnetRtu();
-                    //bacnetRtu.initTRSystem();
-                    L.ccu().systemProfile = bacnetRtu;
+                    L.ccu().systemProfile = new VavBacnetRtu();
                     break;
                 case SYSTEM_DAB_ANALOG_RTU:
-                    DabFullyModulatingRtu dabAnalogProfile = new DabFullyModulatingRtu();
-                    dabAnalogProfile.addSystemEquip();
-                    L.ccu().systemProfile = dabAnalogProfile;
+                    L.ccu().systemProfile = new DabFullyModulatingRtu();
                     break;
                 case SYSTEM_DAB_STAGED_RTU:
                     L.ccu().systemProfile = new DabStagedRtu();
                     break;
+                case SYSTEM_DAB_STAGED_VFD_RTU:
+                    L.ccu().systemProfile = new DabStagedRtuWithVfd();
+                    break;
+                /*case SYSTEM_DAB_HYBRID_RTU:
+                    L.ccu().systemProfile = new DabAdvancedHybridRtu();
+                    break;*/
                 default:
                     L.ccu().systemProfile = new DefaultSystem();
             }
@@ -414,6 +406,8 @@ public class Globals {
             L.ccu().systemProfile = new DefaultSystem();
 
         }
+        L.ccu().systemProfile.addSystemEquip();
+        
         for (Floor f : HSUtil.getFloors()) {
             for (Zone z : HSUtil.getZones(f.getId())) {
                 for (Equip eq : HSUtil.getEquips(z.getId())) {

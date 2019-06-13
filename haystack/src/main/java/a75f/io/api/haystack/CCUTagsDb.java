@@ -594,7 +594,8 @@ public class CCUTagsDb extends HServer {
                 .add("id", HRef.make(UUID.randomUUID().toString()))
                 .add("dis", f.getDisplayName())
                 .add("floor", HMarker.VAL)
-                .add("siteRef", f.getSiteRef());
+                .add("siteRef", f.getSiteRef())
+                .add("orientation",0.0);
 
         for (String m : f.getMarkers()) {
             b.add(m);

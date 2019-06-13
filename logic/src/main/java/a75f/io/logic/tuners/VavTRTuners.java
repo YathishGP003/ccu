@@ -10,7 +10,7 @@ import a75f.io.api.haystack.Tags;
 /**
  * Created by samjithsadasivan on 1/8/19.
  */
-
+//Refer to 75F-RP1455_Spec for initial values of all variables/tuners
 public class VavTRTuners
 {
     public static void addSatTRTunerPoints(String equipRef) {
@@ -29,8 +29,8 @@ public class VavTRTuners
                                              .setTz(tz)
                                              .build();
         String satSPInitId = hayStack.addPoint(satSPInit);
-        hayStack.writeDefaultValById(satSPInitId, 60.0 );
-        hayStack.writeHisValById(satSPInitId,60.0);
+        hayStack.writeDefaultValById(satSPInitId, 65.0 );
+        hayStack.writeHisValById(satSPInitId,65.0);
     
         Point satSPMin = new Point.Builder()
                                   .setDisplayName(equipDis+"-"+"satSPMin")
@@ -172,8 +172,8 @@ public class VavTRTuners
                                   .setTz(tz)
                                   .build();
         String staticPressureSPInitId = hayStack.addPoint(staticPressureSPInit);
-        hayStack.writeDefaultValById(staticPressureSPInitId, 0.5 );
-        hayStack.writeHisValById(staticPressureSPInitId,0.5);
+        hayStack.writeDefaultValById(staticPressureSPInitId, 0.1 );
+        hayStack.writeHisValById(staticPressureSPInitId,0.1);
         
         Point staticPressureSPMin = new Point.Builder()
                                  .setDisplayName(equipDis+"-"+"staticPressureSPMin")

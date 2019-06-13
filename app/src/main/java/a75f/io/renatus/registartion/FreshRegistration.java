@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
-
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
@@ -25,9 +24,8 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
-
-import java.util.ArrayList;
 
 import a75f.io.renatus.DABFullyAHUProfile;
 import a75f.io.renatus.DABHybridAhuProfile;
@@ -265,6 +263,16 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                     imageRefresh.startAnimation(animation);
                     mainWifiObj.startScan();
                 }
+            }
+        });
+
+        imageRefresh.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                Toast.makeText(v.getContext(), "Skip Wifi", Toast.LENGTH_LONG).show();
+                Log.e("WIFI", "Skip Wifi");
+                selectItem(3);
+                return false;
             }
         });
 

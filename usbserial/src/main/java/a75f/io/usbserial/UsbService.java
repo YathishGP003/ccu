@@ -13,7 +13,6 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -26,12 +25,7 @@ import com.felhr.usbserial.UsbSerialInterface;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.sql.Struct;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -42,11 +36,11 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class UsbService extends Service
 {
-	
+
 	public static final byte ESC_BYTE = (byte) 0xD9;
 	public static final byte SOF_BYTE = 0x00;
 	public static final byte EOF_BYTE = 0x03;
-	
+
 	public static final  String  ACTION_USB_READY                  =
 			"com.felhr.connectivityservices.USB_READY";
 	public static final  String  ACTION_USB_ATTACHED               =
@@ -90,7 +84,7 @@ public class UsbService extends Service
 	private UsbDeviceConnection connection;
 	private UsbSerialDevice     serialPort;
 	private boolean             serialPortConnected;
-	
+
 	;
 	/*
 	 * Different notifications from OS will be received here (USB attached, detached, permission responses...)
@@ -198,8 +192,8 @@ public class UsbService extends Service
 					}
 				}
 			};
-	
-	
+
+
 	private void parseBytes(byte[] inReg)
 	{
 		for (int nCount = 0; nCount < inReg.length; nCount++)
@@ -331,16 +325,16 @@ public class UsbService extends Service
 			}
 		}
 	}
-	
-	
+
+
 	private void messageToClients(byte[] data)
 	{
 		SerialAction serialAction = SerialAction.MESSAGE_FROM_SERIAL_PORT;
 		SerialEvent serialEvent = new SerialEvent(serialAction, data);
 		EventBus.getDefault().post(serialEvent);
 	}
-	
-	
+
+
 	/*
 	 * onCreate will be executed when service is started. It configures an IntentFilter to listen for
 	 * incoming Intents (USB ATTACHED, USB DETACHED...) and it tries to open a serial port.
@@ -357,23 +351,23 @@ public class UsbService extends Service
 
 		running.start();
 	}
-	
-	
+
+
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId)
 	{
 		return Service.START_NOT_STICKY;
 	}
-	
-	
+
+
 	@Override
 	public void onDestroy()
 	{
 		super.onDestroy();
 		UsbService.SERVICE_CONNECTED = false;
 	}
-	
-	
+
+
 	/* MUST READ about services
 	 * http://developer.android.com/guide/components/services.html
 	 * http://developer.android.com/guide/components/bound-services.html
@@ -383,8 +377,8 @@ public class UsbService extends Service
 	{
 		return binder;
 	}
-	
-	
+
+
 	private void setFilter()
 	{
 		IntentFilter filter = new IntentFilter();
@@ -393,8 +387,8 @@ public class UsbService extends Service
 		filter.addAction(ACTION_USB_ATTACHED);
 		registerReceiver(usbReceiver, filter);
 	}
-	
-	
+
+
 	private void findSerialPortDevice()
 	{
 		// This snippet will try to open the first encountered usb device connected, excluding usb root hubs
@@ -451,8 +445,8 @@ public class UsbService extends Service
 			sendBroadcast(intent);
 		}
 	}
-	
-	
+
+
 	private boolean grantRootPermissionToUSBDevice(UsbDevice device)
 	{
 		IBinder b = ServiceManager.getService(Context.USB_SERVICE);
@@ -470,8 +464,8 @@ public class UsbService extends Service
 		}
 		return false;
 	}
-	
-	
+
+
 	public ApplicationInfo getApplicationInfo()
 	{
 		PackageManager pm = getApplicationContext().getPackageManager();
@@ -486,8 +480,8 @@ public class UsbService extends Service
 		}
 		return ai;
 	}
-	
-	
+
+
 	/*
 	 * Request user permission. The response will be received in the BroadcastReceiver
 	 */
@@ -497,13 +491,13 @@ public class UsbService extends Service
 				PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
 		usbManager.requestPermission(device, mPendingIntent);
 	}
-	
-	
+
+
 	public void setDebug(boolean debug)
 	{
 		serialPort.debug(debug);
 	}
-	
+
 	/************************************************************************************************************************/
 
 	private final LinkedBlockingQueue<byte[]> messageQueue = new LinkedBlockingQueue<byte[]>();
@@ -517,8 +511,8 @@ public class UsbService extends Service
 			while (true) {
 				try {
 					if (!serialPortConnected) {
-						Log.i(TAG, "Serial Port is not connected sleeping");
-						sleep(500);
+
+						sleep(2000);
 						continue;
 					} else {
 						Log.i(TAG, "Serial Port is connected.");
@@ -583,8 +577,8 @@ public class UsbService extends Service
 			Log.i(TAG, "Serial is disconnected, message discarded");
 		}
 	}
-	
-	
+
+
 	public void setHandler(Handler mHandler)
 	{
 		this.mHandler = mHandler;
@@ -600,7 +594,7 @@ public class UsbService extends Service
 		PARSE_INIT, ESC_BYTE_RCVD, SOF_BYTE_RCVD, LEN_BYTE_RCVD, ESC_BYTE_IN_DATA_RCVD, CRC_RCVD,
 		ESC_BYTE_AS_END_OF_PACKET_RCVD, BAD_PACKET, DATA_AVAILABLE
 	}
-	
+
 	public class UsbBinder extends Binder
 	{
 		public UsbService getService()
@@ -608,7 +602,7 @@ public class UsbService extends Service
 			return UsbService.this;
 		}
 	}
-	
+
 	/*
 	 * A simple thread to open a serial port.
 	 * Although it should be a fast operation. moving usb operations away from UI thread is a good thing.

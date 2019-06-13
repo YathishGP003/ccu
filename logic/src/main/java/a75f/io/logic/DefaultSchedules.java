@@ -82,6 +82,10 @@ public class DefaultSchedules {
             localId = HRef.make(id);
         }
 
+        HDict hDict = new HDictBuilder()
+                .add("stdt", HDateTime.make(startDate.getMillis()))
+                .add("etdt", HDateTime.make(endDate.getMillis())).toDict();
+
         HDict defaultSchedule = new HDictBuilder()
                 .add("id", localId)
                 .add("temp")
@@ -90,8 +94,7 @@ public class DefaultSchedules {
                 .add("vacation")
                 .add("cooling")
                 .add("heating")
-                .add("stdt", HDateTime.make(startDate.getMillis()))
-                .add("etdt", HDateTime.make(endDate.getMillis()))
+                .add("range", hDict)
                 .add("dis", vacationName)
                 .add("siteRef", siteId)
                 .toDict();
@@ -110,7 +113,13 @@ public class DefaultSchedules {
         else {
             localId = HRef.make(id);
         }
-        
+
+
+        HDict hDict = new HDictBuilder()
+                .add("stdt", HDateTime.make(startDate.getMillis()))
+                .add("etdt", HDateTime.make(endDate.getMillis())).toDict();
+
+
         HDict defaultSchedule = new HDictBuilder()
                                         .add("id", localId)
                                         .add("temp")
@@ -119,8 +128,7 @@ public class DefaultSchedules {
                                         .add("vacation")
                                         .add("cooling")
                                         .add("heating")
-                                        .add("stdt", HDateTime.make(startDate.getMillis()))
-                                        .add("etdt", HDateTime.make(endDate.getMillis()))
+                                        .add("range", hDict)
                                         .add("dis", vacationName)
                                         .add("siteRef", siteId)
                                         .add("roomRef", HRef.copy(roomRef))

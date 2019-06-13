@@ -401,7 +401,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
                         FragmentDABConfiguration.this.closeAllBaseDialogFragments();
                         getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
                     }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 
             }
         });

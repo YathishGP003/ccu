@@ -38,10 +38,10 @@ import a75f.io.device.json.serializers.JsonSerializer;
 import a75f.io.device.serial.CcuToCmOverUsbSmartStatSettingsMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.device.serial.SmartStatProfileMap_t;
-import a75f.io.usbserial.SerialAction;
-import a75f.io.usbserial.SerialEvent;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.R;
+import a75f.io.usbserial.SerialAction;
+import a75f.io.usbserial.SerialEvent;
 import a75f.io.usbserial.UsbService;
 import butterknife.BindView;
 import butterknife.BindViews;
@@ -58,72 +58,72 @@ import static java.lang.Short.parseShort;
 public class SmartStatTestFragment extends BaseDialogFragment
 {
 	private static final String TAG = DialogFragment.class.getSimpleName();
-	
+
 	List<String> channels = Arrays.asList("Select Channel", "1000", "2000", "3000", "4000", "5000", "6000", "7000", "8000", "9000");
-	
+
 	List<String> profiles = Arrays.asList("Select Profile", "DAB", "LightingControl", "OAO", "SSE", "CustomControl");
-	
+
 	List<String> fanSpeed = Arrays.asList("Select Fan Speed", "Off", "Auto", "Low", "High");
-	
+
 	List<String> condMode = Arrays.asList("Select Conditioning Mode", "Off" ,"Auto", "Heating", "Cooling");
-	
-	
+
+
 	public static SmartStatTestFragment newInstance(){
 		return new SmartStatTestFragment();
 	}
-	
+
 	public SmartStatTestFragment(){
-		
+
 	}
-	
+
 	@BindView(R.id.roomName)
 	EditText roomName;
-	
+
 	@BindView(R.id.channelSpinner)
 	Spinner channelSpinner;
-	
+
 	@BindView(R.id.profileSpinner)
 	Spinner profileSpinner;
-	
+
 	@BindView(R.id.fanspeedSpinner)
 	Spinner fanspeedSpinner;
-	
+
 	@BindView(R.id.condModeSpinner)
 	Spinner condModeSpinner;
-	
+
 	@BindView(R.id.maxTemp)
 	EditText maxTemp;
-	
+
 	@BindView(R.id.minTemp)
 	EditText minTemp;
-	
+
 	@BindView(R.id.showCentigrade)
 	CheckBox showCentigrade;
-	
+
 	@BindView(R.id.occDetection)
 	CheckBox occDetection;
-	
+
 	@BindView(R.id.setTemp)
 	EditText setTemp;
-	
+
 	@BindViews({R.id.relay1, R.id.relay2, R.id.relay3, R.id.relay4, R.id.relay5, R.id.relay6})
 	List<Switch> relayList;
-	
+
 	@BindView(R.id.sendSeed)
 	Button sendSeedBtn;
-	
+
 	@BindView(R.id.sendSettings)
 	Button sendSettings;
-	
+
 	@BindView(R.id.sendControl)
 	Button sendControl;
-	
+
 	int channelSelection = 0;
 	int profileSlection = 0;
 	int fanspeedSelection = 0;
 	int condModeSelection = 0;
-	
-	
+
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 	                         Bundle savedInstanceState) {
@@ -131,9 +131,9 @@ public class SmartStatTestFragment extends BaseDialogFragment
 		View retVal = inflater.inflate(R.layout.fragment_smartstattest, container, false);
 		ButterKnife.bind(this, retVal);
 		return retVal;
-		
+
 	}
-	
+
 	@Override
 	public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
@@ -143,12 +143,12 @@ public class SmartStatTestFragment extends BaseDialogFragment
 		initFanspeedSpinner();
 		initCondModeSpinner();
 	}
-	
+
 	@Override
 	public void onStart()
 	{
 		super.onStart();
-		
+
 		EventBus.getDefault().register(this);
 		Dialog dialog = getDialog();
 		if (dialog != null)
@@ -157,20 +157,20 @@ public class SmartStatTestFragment extends BaseDialogFragment
 			int height = ViewGroup.LayoutParams.MATCH_PARENT;
 			dialog.getWindow().setLayout(width, height);
 		}
-		
+
 		dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
 	}
-	
-	
+
+
 	@Override
 	public void onStop()
 	{
 		super.onStop();
 		EventBus.getDefault().unregister(this);
 	}
-	
-	
-	
+
+
+
 	/*
    * Notifications from UsbService will be received here.
    */
@@ -204,20 +204,20 @@ public class SmartStatTestFragment extends BaseDialogFragment
 			usbService = ((UsbService.UsbBinder) arg1).getService();
 			usbService.setHandler(null);
 		}
-		
+
 		@Override
 		public void onServiceDisconnected(ComponentName arg0) {
 			usbService = null;
 		}
 	};
-	
+
 	@Override
 	public void onResume() {
 		super.onResume();
 		setFilters();  // Start listening notifications from UsbService
 		startService(UsbService.class, usbConnection, null); // Start UsbService(if it was not started before) and Bind it
 	}
-	
+
 	@Override
 	public String getIdString()
 	{
@@ -229,7 +229,7 @@ public class SmartStatTestFragment extends BaseDialogFragment
 		getActivity().unregisterReceiver(mUsbReceiver);
 		getActivity().unbindService(usbConnection);
 	}
-	
+
 	private void startService(Class<?> service, ServiceConnection serviceConnection, Bundle extras) {
 		if (!UsbService.SERVICE_CONNECTED) {
 			Intent startService = new Intent(getActivity(), service);
@@ -245,7 +245,7 @@ public class SmartStatTestFragment extends BaseDialogFragment
 		Intent bindingIntent = new Intent(this.getActivity(), service);
 		getActivity().bindService(bindingIntent, serviceConnection, Context.BIND_AUTO_CREATE);
 	}
-	
+
 	private void setFilters() {
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(UsbService.ACTION_USB_PERMISSION_GRANTED);
@@ -255,9 +255,9 @@ public class SmartStatTestFragment extends BaseDialogFragment
 		filter.addAction(UsbService.ACTION_USB_PERMISSION_NOT_GRANTED);
 		getActivity().registerReceiver(mUsbReceiver, filter);
 	}
-	
-	
-	
+
+
+
 	// Called in a separate thread
 	@Subscribe(threadMode = ThreadMode.MAIN)
 	public void onBLEEvent(SerialEvent event)
@@ -269,9 +269,9 @@ public class SmartStatTestFragment extends BaseDialogFragment
 			Log.i(TAG, "Data return size: " + data.length);
 		}
 	}
-	
+
 	private void initChannelSpinner() {
-		
+
 		ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this.getActivity(),
 				                                                           android.R.layout.simple_spinner_item, channels);
 		dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -283,17 +283,17 @@ public class SmartStatTestFragment extends BaseDialogFragment
 				//TODO: fixme
 				//Globals.getInstance().getSmartNode().setMeshAddress(Short.parseShort(channels.get(channelSelection)));
 			}
-			
+
 			@Override
 			public void onNothingSelected(AdapterView<?> parent) {
-				
+
 			}
 		});
-		
+
 	}
-	
+
 	private void initProfileSpinner() {
-		
+
 		ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this.getActivity(),
 				                                                           android.R.layout.simple_spinner_item, profiles);
 		dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -303,14 +303,14 @@ public class SmartStatTestFragment extends BaseDialogFragment
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 				profileSlection = position > 0 ? position -1 : 0;
 			}
-			
+
 			@Override
 			public void onNothingSelected(AdapterView<?> parent) {
-				
+
 			}
 		});
 	}
-	
+
 	private void initFanspeedSpinner() {
 		ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this.getActivity(),
 				                                                           android.R.layout.simple_spinner_item, fanSpeed);
@@ -321,15 +321,15 @@ public class SmartStatTestFragment extends BaseDialogFragment
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 				fanspeedSelection = position > 0 ? position -1 : 0;
 			}
-			
+
 			@Override
 			public void onNothingSelected(AdapterView<?> parent) {
-				
+
 			}
 		});
-		
+
 	}
-	
+
 	private void initCondModeSpinner() {
 		ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this.getActivity(),
 				                                                           android.R.layout.simple_spinner_item, condMode);
@@ -340,19 +340,19 @@ public class SmartStatTestFragment extends BaseDialogFragment
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 				condModeSelection = position > 0 ? position -1 : 0  ;
 			}
-			
+
 			@Override
 			public void onNothingSelected(AdapterView<?> parent) {
-				
+
 			}
 		});
-		
+
 	}
-	
-	
+
+
 	@OnClick(R.id.sendSeed)
 	public void sendSeed() {
-		
+
 		/*CcuToCmOverUsbDatabaseSeedSnMessage_t msg = new CcuToCmOverUsbDatabaseSeedSnMessage_t();
 		msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN);
 		msg.smartNodeAddress.set(Globals.getInstance().getSmartNode().getMeshAddress());
@@ -362,11 +362,11 @@ public class SmartStatTestFragment extends BaseDialogFragment
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		msg.controls.digitalOut1.set((short)1);
 		msg.controls.digitalOut2.set((short)1);*/
-		
-		
+
+
 		short maxT ,minT, setT;
 		try
 		{
@@ -380,7 +380,7 @@ public class SmartStatTestFragment extends BaseDialogFragment
 			setT = (short) 75;
 			Toast.makeText(SmartStatTestFragment.this.getContext(), "Temperature not set , default values are used", Toast.LENGTH_SHORT).show();
 		}
-		
+
 	/*-	Node sn = Globals.getInstance().getSmartNode();
 		CcuToCmOverUsbDatabaseSeedSmartStatMessage_t msg = new CcuToCmOverUsbDatabaseSeedSmartStatMessage_t();
 		msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SMART_STAT);
@@ -391,7 +391,7 @@ public class SmartStatTestFragment extends BaseDialogFragment
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		//settings
 		msg.settings.roomName.set(roomName.getText().toString());
 		msg.settings.profileBitmap.bitmap.set((short) (1 << profileSlection));
@@ -400,19 +400,19 @@ public class SmartStatTestFragment extends BaseDialogFragment
 		msg.settings.showCentigrade.set(showCentigrade.isChecked() == true ? (short)1 : (short) 0);
 		msg.settings.enableOccupancyDetection.set(occDetection.isChecked() == true ? (short)1 : (short)0);
 		msg.settings.enabledRelaysBitmap.bitmap.set((short)0xFF); //Enable all relays
-		
+
 		//controls
 		msg.controls.setTemperature.set(setT);
 		msg.controls.fanSpeed.set(SmartStatFanSpeed_t.values()[fanspeedSelection]);
 		msg.controls.conditioningMode.set(SmartStatConditioningMode_t.values()[condModeSelection]);
-		
+
 		msg.controls.relay1.set(((Switch)relayList.get(0)).isChecked() == true ? (short) 1: (short)0);
 		msg.controls.relay2.set(((Switch)relayList.get(1)).isChecked() == true ? (short) 1: (short)0);
 		msg.controls.relay3.set(((Switch)relayList.get(2)).isChecked() == true ? (short) 1: (short)0);
 		msg.controls.relay4.set(((Switch)relayList.get(3)).isChecked() == true ? (short) 1: (short)0);
 		msg.controls.relay5.set(((Switch)relayList.get(4)).isChecked() == true ? (short) 1: (short)0);
 		msg.controls.relay6.set(((Switch)relayList.get(5)).isChecked() == true ? (short) 1: (short)0);
-		
+
 		try
 		{
 			CcuLog.i(TAG, "CCuToCM: " + JsonSerializer.toJson(msg, true));
@@ -421,14 +421,14 @@ public class SmartStatTestFragment extends BaseDialogFragment
 		{
 			e.printStackTrace();
 		}
-		
+
 		if (usbService != null) {
 			usbService.write(msg.getOrderedBuffer());
 		}
 		*/
-		
+
 	}
-	
+
 	@OnClick(R.id.sendSettings)
 	public void sendSettings()
 	{
@@ -453,7 +453,7 @@ public class SmartStatTestFragment extends BaseDialogFragment
 		CcuToCmOverUsbSmartStatSettingsMessage_t msg = new CcuToCmOverUsbSmartStatSettingsMessage_t();
 		msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SMART_STAT_SETTINGS);
 		msg.address.set(6000/*sn.getMeshAddress()*/);
-		
+
 		msg.settings.roomName.set(roomName.getText().toString());
 		msg.settings.profileBitmap.set(SmartStatProfileMap_t.values()[1 << profileSlection]);//convetionalPackageUnit.set((short) (1 << profileSlection));
 		msg.settings.maxUserTemp.set(maxT);
@@ -473,11 +473,11 @@ public class SmartStatTestFragment extends BaseDialogFragment
 			usbService.write(msg.getOrderedBuffer());
 		}
 	}
-	
-	
+
+
 	@OnClick(R.id.sendControl)
 	public void sendControl() {
-		
+
 		/*
 		Node sn = Globals.getInstance().getSmartNode();
 		CcuToCmOverUsbSmartStatControlsMessage_t msg = new CcuToCmOverUsbSmartStatControlsMessage_t();
@@ -492,18 +492,18 @@ public class SmartStatTestFragment extends BaseDialogFragment
 			setT = (short)75;
 			Toast.makeText(SmartStatTestFragment.this.getContext(), "Temperature not set , default values are used", Toast.LENGTH_SHORT).show();
 		}
-		
+
 		msg.controls.setTemperature.set(setT);
 		msg.controls.fanSpeed.set(SmartStatFanSpeed_t.values()[fanspeedSelection]);
 		msg.controls.conditioningMode.set(SmartStatConditioningMode_t.values()[condModeSelection]);
-		
+
 		msg.controls.relay1.set(((Switch)relayList.get(0)).isChecked() == true ? (short) 1: (short)0);
 		msg.controls.relay2.set(((Switch)relayList.get(1)).isChecked() == true ? (short) 1: (short)0);
 		msg.controls.relay3.set(((Switch)relayList.get(2)).isChecked() == true ? (short) 1: (short)0);
 		msg.controls.relay4.set(((Switch)relayList.get(3)).isChecked() == true ? (short) 1: (short)0);
 		msg.controls.relay5.set(((Switch)relayList.get(4)).isChecked() == true ? (short) 1: (short)0);
 		msg.controls.relay6.set(((Switch)relayList.get(5)).isChecked() == true ? (short) 1: (short)0);
-		
+
 		try
 		{
 			CcuLog.i(TAG, "CCuToCM: " + JsonSerializer.toJson(msg, true));
@@ -512,7 +512,7 @@ public class SmartStatTestFragment extends BaseDialogFragment
 		{
 			e.printStackTrace();
 		}
-		
+
 		if (usbService != null) {
 			usbService.write(msg.getOrderedBuffer());
 		}

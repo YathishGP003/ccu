@@ -71,16 +71,6 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
         CCUHsApi.getInstance().syncEntityTree();
     }
     
-    @Override
-    public boolean isCoolingAvailable() {
-        return (coolingStages > 0 );
-    }
-    
-    @Override
-    public boolean isHeatingAvailable() {
-        return (heatingStages > 0);
-    }
-    
     public synchronized void updateSystemPoints()
     {
         super.updateSystemPoints();

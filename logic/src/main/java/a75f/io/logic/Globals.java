@@ -29,6 +29,7 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.bo.building.system.dab.DabAdvancedHybridRtu;
 import a75f.io.logic.pubnub.PubNubHandler;
 import a75f.io.logic.bo.building.CCUApplication;
 import a75f.io.logic.bo.building.Day;
@@ -395,9 +396,9 @@ public class Globals {
                 case SYSTEM_DAB_STAGED_VFD_RTU:
                     L.ccu().systemProfile = new DabStagedRtuWithVfd();
                     break;
-                /*case SYSTEM_DAB_HYBRID_RTU:
+                case SYSTEM_DAB_HYBRID_RTU:
                     L.ccu().systemProfile = new DabAdvancedHybridRtu();
-                    break;*/
+                    break;
                 default:
                     L.ccu().systemProfile = new DefaultSystem();
             }

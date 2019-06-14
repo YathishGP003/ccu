@@ -617,19 +617,15 @@
                             android:layout_height="40dp"
                             android:layout_marginLeft="34dp">
 
-
-                            <ToggleButton
+                            <Spinner
                                 android:id="@+id/ahuAnalog1Test"
-                                android:layout_width="wrap_content"
+                                android:layout_width="120dp"
                                 android:layout_height="wrap_content"
-                                android:background="@drawable/toggle_testselector"
-                                android:layout_centerHorizontal="true"
-                                android:checked="false"
-                                android:textAppearance="@style/text_toggleappearance"
-                                android:textColor="@drawable/toggle_textselector"
-                                android:textOff="OFF"
-                                android:textOn="ON" />
-
+                                android:layout_centerVertical="true"
+                                android:layout_marginLeft="86dp"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                android:entries="@array/hvac_stage_selector"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
                         </RelativeLayout>
 
 
@@ -691,17 +687,15 @@
                             android:layout_height="40dp"
                             android:layout_marginLeft="34dp">
 
-                            <ToggleButton
+                            <Spinner
                                 android:id="@+id/ahuAnalog2Test"
-                                android:layout_width="wrap_content"
+                                android:layout_width="120dp"
                                 android:layout_height="wrap_content"
-                                android:background="@drawable/toggle_testselector"
-                                android:layout_centerHorizontal="true"
-                                android:checked="false"
-                                android:textAppearance="@style/text_toggleappearance"
-                                android:textColor="@drawable/toggle_textselector"
-                                android:textOff="OFF"
-                                android:textOn="ON" />
+                                android:layout_centerVertical="true"
+                                android:layout_marginLeft="86dp"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                android:entries="@array/hvac_stage_selector"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
 
                         </RelativeLayout>
 
@@ -765,17 +759,15 @@
                             android:layout_marginLeft="34dp">
 
 
-                            <ToggleButton
+                            <Spinner
                                 android:id="@+id/ahuAnalog3Test"
-                                android:layout_width="wrap_content"
+                                android:layout_width="120dp"
                                 android:layout_height="wrap_content"
-                                android:background="@drawable/toggle_testselector"
-                                android:layout_centerHorizontal="true"
-                                android:checked="false"
-                                android:textAppearance="@style/text_toggleappearance"
-                                android:textColor="@drawable/toggle_textselector"
-                                android:textOff="OFF"
-                                android:textOn="ON" />
+                                android:layout_centerVertical="true"
+                                android:layout_marginLeft="86dp"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                android:entries="@array/hvac_stage_selector"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
 
                         </RelativeLayout>
 
@@ -837,17 +829,15 @@
                             android:layout_height="40dp"
                             android:layout_marginLeft="34dp">
 
-                            <ToggleButton
+                            <Spinner
                                 android:id="@+id/ahuAnalog4Test"
-                                android:layout_width="wrap_content"
+                                android:layout_width="120dp"
                                 android:layout_height="wrap_content"
-                                android:background="@drawable/toggle_testselector"
-                                android:layout_centerHorizontal="true"
-                                android:checked="false"
-                                android:textAppearance="@style/text_toggleappearance"
-                                android:textColor="@drawable/toggle_textselector"
-                                android:textOff="OFF"
-                                android:textOn="ON" />
+                                android:layout_centerVertical="true"
+                                android:layout_marginLeft="86dp"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                android:entries="@array/hvac_stage_selector"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
 
 
                         </RelativeLayout>

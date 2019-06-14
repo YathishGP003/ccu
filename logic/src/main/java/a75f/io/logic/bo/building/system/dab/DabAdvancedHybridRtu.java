@@ -1,4 +1,4 @@
-package a75f.io.logic.bo.building.system.vav;
+package a75f.io.logic.bo.building.system.dab;
 
 import java.util.HashMap;
 
@@ -9,7 +9,6 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.system.SystemEquip;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_1;
@@ -25,23 +24,19 @@ import static a75f.io.logic.bo.building.hvac.Stage.HEATING_5;
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
 
-/**
- * Created by samjithsadasivan on 2/11/19.
- */
-
-public class VavAdvancedHybridRtu extends VavStagedRtu
+public class DabAdvancedHybridRtu extends DabStagedRtu
 {
     private static final int ANALOG_SCALE = 10;
     
     @Override
     public String getProfileName()
     {
-        return "VAV Advanced Hybrid RTU";
+        return "DAB Advanced Hybrid AHU";
     }
     
     @Override
     public ProfileType getProfileType() {
-        return ProfileType.SYSTEM_VAV_HYBRID_RTU;
+        return ProfileType.SYSTEM_DAB_HYBRID_RTU;
     }
     
     @Override
@@ -49,11 +44,9 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap equip = hayStack.read("equip and system");
         if (equip != null && equip.size() > 0) {
-            if (!equip.get("profile").equals(ProfileType.SYSTEM_VAV_HYBRID_RTU.name())) {
+            if (!equip.get("profile").equals(ProfileType.SYSTEM_DAB_HYBRID_RTU.name())) {
                 hayStack.deleteEntityTree(equip.get("id").toString());
             } else {
-                initTRSystem();
-                sysEquip = new SystemEquip(equip.get("id").toString());
                 updateStagesSelected();
                 return;
             }
@@ -65,25 +58,24 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         Equip systemEquip= new Equip.Builder()
                                    .setSiteRef(siteRef)
                                    .setDisplayName(siteDis+"-SystemEquip")
-                                   .setProfile(ProfileType.SYSTEM_VAV_HYBRID_RTU.name())
-                                   .addMarker("equip").addMarker("system").addMarker("vav")
+                                   .setProfile(ProfileType.SYSTEM_DAB_HYBRID_RTU.name())
+                                   .addMarker("equip").addMarker("system").addMarker("dab")
                                    .addMarker("equipHis")
                                    .setTz(siteMap.get("tz").toString())
                                    .build();
         String equipRef = hayStack.addEquip(systemEquip);
+    
+        
         addSystemLoopOpPoints(equipRef);
         addUserIntentPoints(equipRef);
         addCmdPoints(equipRef);
         addConfigPoints(equipRef);
-        addTunerPoints(equipRef);
-        addVavSystemTuners(equipRef);
+        addDabSystemTuners(equipRef);
         
         addAnalogConfigPoints(equipRef);
         addAnalogCmdPoints(equipRef);
         updateAhuRef(equipRef);
-        sysEquip = new SystemEquip(equipRef);
         new ControlMote(siteRef);
-        initTRSystem();
         L.saveCCUState();
         CCUHsApi.getInstance().syncEntityTree();
         
@@ -94,9 +86,8 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         if (trSystem != null) {
             trSystem.processResetResponse();
         }
-        VavSystemController.getInstance().runVavSystemControlAlgo();
+        DabSystemController.getInstance().runDabSystemControlAlgo();
         updateSystemPoints();
-        setTrTargetVals();
     }
     
     @Override
@@ -121,7 +112,6 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
                || stageStatus[HEATING_4.ordinal()] > 0 || stageStatus[HEATING_5.ordinal()] > 0 || systemHeatingLoopOp > 0;
     }
     
-    
     public synchronized void updateSystemPoints() {
         super.updateSystemPoints();
         
@@ -132,8 +122,8 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
             analogMin = getConfigVal("analog1 and cooling and min");
             analogMax = getConfigVal("analog1 and cooling and max");
             CcuLog.d(L.TAG_CCU_SYSTEM, "analog1Min: " + analogMin + " analog1Max: " + analogMax + " systemCoolingLoopOp: " + systemCoolingLoopOp);
-    
-    
+            
+            
             if (analogMax > analogMin)
             {
                 signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (systemCoolingLoopOp/100)));
@@ -152,9 +142,9 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         {
             analogMin = getConfigVal("analog2 and fan and min");
             analogMax = getConfigVal("analog2 and fan and max");
-    
+            
             CcuLog.d(L.TAG_CCU_SYSTEM, "analog2Min: "+analogMin+" analog2Max: "+analogMax+" systemFanLoopOp: "+systemFanLoopOp);
-    
+            
             if (analogMax > analogMin)
             {
                 signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (systemFanLoopOp/100)));
@@ -173,7 +163,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         {
             analogMin = getConfigVal("analog3 and heating and min");
             analogMax = getConfigVal("analog3 and heating and max");
-    
+            
             CcuLog.d(L.TAG_CCU_SYSTEM, "analog3Min: "+analogMin+" analog3Max: "+analogMax+" systemHeatingLoopOp : "+systemHeatingLoopOp);
             if (analogMax > analogMin)
             {
@@ -191,7 +181,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         
         if (getConfigEnabled("analog4") > 0)
         {
-            if (VavSystemController.getInstance().getSystemState() == COOLING)
+            if (getSystemController().getSystemState() == COOLING)
             {
                 analogMin = getConfigVal("analog4 and cooling and min");
                 analogMax = getConfigVal("analog4 and cooling and max");
@@ -201,7 +191,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
                 } else {
                     signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * systemCoolingLoopOp/100));
                 }
-            } else if (VavSystemController.getInstance().getSystemState() == HEATING)
+            } else if (getSystemController().getSystemState() == HEATING)
             {
                 analogMin = getConfigVal("analog4 and heating and min");
                 analogMax = getConfigVal("analog4 and heating and max");
@@ -214,7 +204,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
             } else {
                 double coolingMin = getConfigVal("analog4 and cooling and min");
                 double heatingMin = getConfigVal("analog4 and heating and min");
-        
+                
                 signal = (int) (ANALOG_SCALE * (coolingMin + heatingMin) /2);
             }
             CcuLog.d(L.TAG_CCU_SYSTEM, "analogMin: "+analogMin+" analogMax: "+analogMax+" Composite: "+signal);
@@ -239,14 +229,14 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         } else {
             status.append(super.getStatusMessage());
         }
-    
+        
         return status.toString().equals("")? "OFF" : status.toString();
     }
     
     @Override
     public synchronized void deleteSystemEquip() {
         HashMap equip = CCUHsApi.getInstance().read("equip and system");
-        if (equip.get("profile").equals(ProfileType.SYSTEM_VAV_HYBRID_RTU.name())) {
+        if (equip.get("profile").equals(ProfileType.SYSTEM_DAB_HYBRID_RTU.name())) {
             CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
         }
     }
@@ -259,10 +249,10 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         String tz = siteMap.get("tz").toString();
         CCUHsApi hayStack = CCUHsApi.getInstance();
         Point analog1OutputEnabled = new Point.Builder().setDisplayName(equipDis + "-" + "analog1OutputEnabled")
-                                                         .setSiteRef(siteRef)
-                                                         .setEquipRef(equipref)
-                                                         .addMarker("system").addMarker("config").addMarker("analog1").addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
-                                                         .setTz(tz).build();
+                                                        .setSiteRef(siteRef)
+                                                        .setEquipRef(equipref)
+                                                        .addMarker("system").addMarker("config").addMarker("analog1").addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
+                                                        .setTz(tz).build();
         String analog1OutputEnabledId = hayStack.addPoint(analog1OutputEnabled);
         hayStack.writeDefaultValById(analog1OutputEnabledId, 0.0);
         Point analog2OutputEnabled = new Point.Builder().setDisplayName(equipDis + "-" + "analog2OutputEnabled")
@@ -285,55 +275,55 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
                                                         .setTz(tz).build();
         String analog4OutputEnabledId = hayStack.addPoint(analog4OutputEnabled);
         hayStack.writeDefaultValById(analog4OutputEnabledId, 0.0);
-    
+        
         Point analog1AtMinCooling = new Point.Builder()
-                                               .setDisplayName(equipDis+"-"+"analog1AtMinCooling")
-                                               .setSiteRef(siteRef)
-                                               .setEquipRef(equipref)
-                                               .addMarker("system").addMarker("config").addMarker("analog1")
-                                               .addMarker("min").addMarker("cooling").addMarker("writable").addMarker("sp")
-                                               .setUnit("V")
-                                               .setTz(tz)
-                                               .build();
+                                            .setDisplayName(equipDis+"-"+"analog1AtMinCooling")
+                                            .setSiteRef(siteRef)
+                                            .setEquipRef(equipref)
+                                            .addMarker("system").addMarker("config").addMarker("analog1")
+                                            .addMarker("min").addMarker("cooling").addMarker("writable").addMarker("sp")
+                                            .setUnit("V")
+                                            .setTz(tz)
+                                            .build();
         String analog1AtMinCoolingId = hayStack.addPoint(analog1AtMinCooling);
         hayStack.writeDefaultValById(analog1AtMinCoolingId, 2.0 );
-    
+        
         Point analog1AtMaxCooling = new Point.Builder()
-                                               .setDisplayName(equipDis+"-"+"analog1AtMaxCooling")
-                                               .setSiteRef(siteRef)
-                                               .setEquipRef(equipref)
-                                               .addMarker("system").addMarker("config").addMarker("analog1")
-                                               .addMarker("max").addMarker("cooling").addMarker("writable").addMarker("sp")
-                                               .setUnit("V")
-                                               .setTz(tz)
-                                               .build();
+                                            .setDisplayName(equipDis+"-"+"analog1AtMaxCooling")
+                                            .setSiteRef(siteRef)
+                                            .setEquipRef(equipref)
+                                            .addMarker("system").addMarker("config").addMarker("analog1")
+                                            .addMarker("max").addMarker("cooling").addMarker("writable").addMarker("sp")
+                                            .setUnit("V")
+                                            .setTz(tz)
+                                            .build();
         String analog1AtMaxCoolingId = hayStack.addPoint(analog1AtMaxCooling);
         hayStack.writeDefaultValById(analog1AtMaxCoolingId, 10.0 );
-    
+        
         Point analog2AtMinFan = new Point.Builder()
-                                                   .setDisplayName(equipDis+"-"+"analog2AtMinFan")
-                                                   .setSiteRef(siteRef)
-                                                   .setEquipRef(equipref)
-                                                   .addMarker("system").addMarker("config").addMarker("analog2")
-                                                   .addMarker("min").addMarker("fan").addMarker("writable").addMarker("sp")
-                                                   .setUnit("V")
-                                                   .setTz(tz)
-                                                   .build();
+                                        .setDisplayName(equipDis+"-"+"analog2AtMinFan")
+                                        .setSiteRef(siteRef)
+                                        .setEquipRef(equipref)
+                                        .addMarker("system").addMarker("config").addMarker("analog2")
+                                        .addMarker("min").addMarker("fan").addMarker("writable").addMarker("sp")
+                                        .setUnit("V")
+                                        .setTz(tz)
+                                        .build();
         String analog2AtMinFanId = hayStack.addPoint(analog2AtMinFan);
         hayStack.writeDefaultValById(analog2AtMinFanId, 2.0 );
-    
+        
         Point analog2AtMaxFan = new Point.Builder()
-                                                   .setDisplayName(equipDis+"-"+"analog2AtMaxFan")
-                                                   .setSiteRef(siteRef)
-                                                   .setEquipRef(equipref)
-                                                   .addMarker("system").addMarker("config").addMarker("analog2")
-                                                   .addMarker("max").addMarker("fan").addMarker("writable").addMarker("sp")
-                                                   .setUnit("V")
-                                                   .setTz(tz)
-                                                   .build();
+                                        .setDisplayName(equipDis+"-"+"analog2AtMaxFan")
+                                        .setSiteRef(siteRef)
+                                        .setEquipRef(equipref)
+                                        .addMarker("system").addMarker("config").addMarker("analog2")
+                                        .addMarker("max").addMarker("fan").addMarker("writable").addMarker("sp")
+                                        .setUnit("V")
+                                        .setTz(tz)
+                                        .build();
         String analog2AtMaxFanId = hayStack.addPoint(analog2AtMaxFan);
         hayStack.writeDefaultValById(analog2AtMaxFanId, 10.0 );
-    
+        
         Point analog3AtMinHeating = new Point.Builder()
                                             .setDisplayName(equipDis+"-"+"analog3AtMinHeating")
                                             .setSiteRef(siteRef)
@@ -345,7 +335,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
                                             .build();
         String analog3AtMinHeatingId = hayStack.addPoint(analog3AtMinHeating);
         hayStack.writeDefaultValById(analog3AtMinHeatingId, 2.0 );
-    
+        
         Point analog3AtMaxHeating = new Point.Builder()
                                             .setDisplayName(equipDis+"-"+"analog3AtMaxHeating")
                                             .setSiteRef(siteRef)
@@ -357,31 +347,31 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
                                             .build();
         String analog3AtMaxHeatingId = hayStack.addPoint(analog3AtMaxHeating);
         hayStack.writeDefaultValById(analog3AtMaxHeatingId, 10.0 );
-    
+        
         Point analog4AtMinCooling = new Point.Builder()
-                                        .setDisplayName(equipDis+"-"+"analog4AtMinCooling")
-                                        .setSiteRef(siteRef)
-                                        .setEquipRef(equipref)
-                                        .addMarker("system").addMarker("config").addMarker("analog4")
-                                        .addMarker("min").addMarker("cooling").addMarker("writable").addMarker("sp")
-                                        .setUnit("V")
-                                        .setTz(tz)
-                                        .build();
+                                            .setDisplayName(equipDis+"-"+"analog4AtMinCooling")
+                                            .setSiteRef(siteRef)
+                                            .setEquipRef(equipref)
+                                            .addMarker("system").addMarker("config").addMarker("analog4")
+                                            .addMarker("min").addMarker("cooling").addMarker("writable").addMarker("sp")
+                                            .setUnit("V")
+                                            .setTz(tz)
+                                            .build();
         String analog4AtMinCoolingId = hayStack.addPoint(analog4AtMinCooling);
         hayStack.writeDefaultValById(analog4AtMinCoolingId, 7.0 );
-    
+        
         Point analog4AtMaxCooling = new Point.Builder()
-                                        .setDisplayName(equipDis+"-"+"analog4AtMaxCooling")
-                                        .setSiteRef(siteRef)
-                                        .setEquipRef(equipref)
-                                        .addMarker("system").addMarker("config").addMarker("analog4")
-                                        .addMarker("max").addMarker("cooling").addMarker("writable").addMarker("sp")
-                                        .setUnit("V")
-                                        .setTz(tz)
-                                        .build();
+                                            .setDisplayName(equipDis+"-"+"analog4AtMaxCooling")
+                                            .setSiteRef(siteRef)
+                                            .setEquipRef(equipref)
+                                            .addMarker("system").addMarker("config").addMarker("analog4")
+                                            .addMarker("max").addMarker("cooling").addMarker("writable").addMarker("sp")
+                                            .setUnit("V")
+                                            .setTz(tz)
+                                            .build();
         String analog4AtMaxCoolingId = hayStack.addPoint(analog4AtMaxCooling);
         hayStack.writeDefaultValById(analog4AtMaxCoolingId, 10.0 );
-    
+        
         Point analog4AtMinHeating = new Point.Builder()
                                             .setDisplayName(equipDis+"-"+"analog4AtMinHeating")
                                             .setSiteRef(siteRef)
@@ -393,7 +383,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
                                             .build();
         String analog4AtMinHeatingId = hayStack.addPoint(analog4AtMinHeating);
         hayStack.writeDefaultValById(analog4AtMinHeatingId, 5.0 );
-    
+        
         Point analog4AtMaxHeating = new Point.Builder()
                                             .setDisplayName(equipDis+"-"+"analog4AtMaxHeating")
                                             .setSiteRef(siteRef)
@@ -455,4 +445,5 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
     public void setCmdSignal(String cmd, double val) {
         CCUHsApi.getInstance().writeHisValByQuery("point and system and cmd and "+cmd, val);
     }
+    
 }

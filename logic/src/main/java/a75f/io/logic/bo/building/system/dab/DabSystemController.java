@@ -215,7 +215,7 @@ public class DabSystemController extends SystemController
     
         weightedAverageCoolingLoadPostML = weightedAverageLoadPostML > 0 ? weightedAverageLoadPostML : 0;
     
-        weightedAverageHeatingLoadPostML = weightedAverageLoadPostML < 0 ? weightedAverageLoadPostML : 0;
+        weightedAverageHeatingLoadPostML = weightedAverageLoadPostML < 0 ? Math.abs(weightedAverageLoadPostML) : 0;
     
         piController.dump();
         if (systemState == COOLING) {

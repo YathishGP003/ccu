@@ -61,6 +61,8 @@
         <item>  0-20A Current Transformer </item>
         <item>  0-50A Current Transformer</item>
     </string-array>
+
+    <!--This should match the names returned by SystemProfile's getProfileName()-->
     <string-array name="system_profile_select">
         <item>  Default System Profile</item>
         <item>  VAV Staged RTU </item>

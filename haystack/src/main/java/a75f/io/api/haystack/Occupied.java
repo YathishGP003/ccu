@@ -9,17 +9,18 @@ public class Occupied {
     private boolean mPrecondition;
     private boolean mOccupancySensing;
     private boolean mForcedOccupied;
-    private Object mValue;
-    private Double mCoolingVal;
-    private Double mHeatingVal;
-    private long mMillisecondsUntilNextChange;
+    private boolean       mSystemZone;
+    private Object        mValue;
+    private Double        mCoolingVal;
+    private Double        mHeatingVal;
+    private long          mMillisecondsUntilNextChange;
     private Schedule.Days mCurrentlyOccupiedScheduleDay;
     private Schedule.Days mNextOccupiedScheduleDay;
-    private Double mHeatingDeadband;
-    private Double mCoolingDeadband;
-    private Schedule vacation;
-    private double unoccupiedZoneSetback;
-    private long temporaryHoldExpiry;
+    private Double        mHeatingDeadband;
+    private Double        mCoolingDeadband;
+    private Schedule      vacation;
+    private double        unoccupiedZoneSetback;
+    private long          temporaryHoldExpiry;
     
     @Override
     public boolean equals(Object o) {
@@ -63,6 +64,16 @@ public class Occupied {
     public void setForcedOccupied(boolean value){
         this.mForcedOccupied = value;
     }
+    
+    public boolean isSystemZone()
+    {
+        return mSystemZone;
+    }
+    public void setSystemZone(boolean mSystemZone)
+    {
+        this.mSystemZone = mSystemZone;
+    }
+    
     public Object getValue() {
         return mValue;
     }

@@ -26,7 +26,6 @@ android {
 }
 
 dependencies {
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
     testImplementation 'junit:junit:4.12'
     implementation 'org.greenrobot:eventbus:3.0.0'
 

@@ -674,7 +674,14 @@ public class Schedule extends Entity
                 } else if (pair.getKey().equals("roomRef"))
                 {
                     this.mRoomRef = schedule.getRef("roomRef").toString();
-                } else if (pair.getKey().equals("stdt"))
+                }
+                else if(pair.getKey().equals("range"))
+                {
+                    HDict range = (HDict) schedule.get("range");
+                    this.mStartDate = new DateTime(((HDateTime)range.get("stdt")).millisDefaultTZ());
+                    this.mEndDate = new DateTime(((HDateTime)range.get("etdt")).millisDefaultTZ());
+                }
+                else if (pair.getKey().equals("stdt"))
                 {
                     this.mStartDate = new DateTime(((HDateTime) schedule.get("stdt")).millisDefaultTZ());
                 } else if (pair.getKey().equals("etdt"))

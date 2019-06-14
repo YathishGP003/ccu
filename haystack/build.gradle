@@ -35,11 +35,7 @@ android {
 }
 
 dependencies {
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-    implementation 'javax.servlet:servlet-api:2.5'
     api 'com.google.code.gson:gson:2.8.2'
     api 'com.fasterxml.jackson.core:jackson-core:2.8.6'
     api 'com.fasterxml.jackson.core:jackson-annotations:2.8.6'

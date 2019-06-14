@@ -26,9 +26,12 @@ android {
     testOptions {
         unitTests.returnDefaultValues = true
     }
+    buildTypes {
+        release {
+        }
+    }
 }
 dependencies {
-    implementation fileTree(include: '*.jar', dir: '../libs')
     implementation 'joda-time:joda-time:2.9.9'
     // Optional -- UI testing with UI Automator
     implementation 'com.fasterxml.jackson.core:jackson-core:2.8.6'
@@ -37,7 +40,6 @@ dependencies {
     implementation project(':algos')
     testImplementation 'junit:junit:4.12'
     implementation project(path: ':usbserial')
-    implementation project(':haystack')
-    implementation project(':logic')
+    api project(':logic')
 }
 

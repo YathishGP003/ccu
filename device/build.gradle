@@ -38,6 +38,7 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.8.6'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.8.6'
     implementation project(':algos')
+    implementation project(':haystack')
     testImplementation 'junit:junit:4.12'
     implementation project(path: ':usbserial')
     api project(':logic')

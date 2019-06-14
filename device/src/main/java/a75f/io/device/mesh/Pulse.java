@@ -420,12 +420,11 @@ public class Pulse
 					case DESIRED_TEMP:
 						double curValue = hayStack.readHisValById(phyPoint.get("id").toString());
 						double desiredTemp = getDesredTempConversion(temp);
+						CcuLog.d(L.TAG_CCU_DEVICE, "updateSetTempFromDevice : desiredTemp " + desiredTemp+","+curValue);
 						if (desiredTemp > 0 && (curValue != desiredTemp)) {
 							hayStack.writeHisValById(logPoint.get("id").toString(), desiredTemp);
 							updateDesiredTemp(nodeAddr, desiredTemp);
 						}
-						CcuLog.d(L.TAG_CCU_DEVICE, "updateSetTempFromDevice : desiredTemp " + desiredTemp+","+curValue);
-
 					break;
 				}
 			}

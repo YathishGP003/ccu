@@ -25,7 +25,6 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemController;
-import a75f.io.logic.tuners.StandaloneTunerUtil;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.L.TAG_CCU_JOB;
@@ -617,8 +616,10 @@ public class ScheduleProcessJob extends BaseJob {
             
         }else if (occ!= null && !occ.isOccupied()) {
             
+            double forcedOccupiedMins = TunerUtil.readTunerValByQuery("forced and occupied and time");
+            
             if (manual) {
-                CCUHsApi.getInstance().pointWrite(HRef.copy(point.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, "manual", HNum.make(val) , HNum.make(2 * 60 * 60 * 1000, "ms"));
+                CCUHsApi.getInstance().pointWrite(HRef.copy(point.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, "manual", HNum.make(val) , HNum.make(forcedOccupiedMins * 60 * 1000, "ms"));
             } else
             {
                 HashMap overrideLevel = getAppOverride(point.getId());
@@ -627,7 +628,7 @@ public class ScheduleProcessJob extends BaseJob {
                     return;
                 }
                 double dur = Double.parseDouble(overrideLevel.get("duration").toString());
-                CCUHsApi.getInstance().pointWrite(HRef.copy(point.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, "ccu", HNum.make(Double.parseDouble(overrideLevel.get("val").toString())), HNum.make(dur == 0 ? 120 * 60 * 1000 : dur - System.currentTimeMillis(), "ms"));
+                CCUHsApi.getInstance().pointWrite(HRef.copy(point.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, "ccu", HNum.make(Double.parseDouble(overrideLevel.get("val").toString())), HNum.make(dur == 0 ? forcedOccupiedMins * 60 * 1000 : dur - System.currentTimeMillis(), "ms"));
                 //Write to level 9/10
                 ArrayList values = CCUHsApi.getInstance().readPoint(point.getId());
                 if (values != null && values.size() > 0)
@@ -641,7 +642,7 @@ public class ScheduleProcessJob extends BaseJob {
                             long d = (long) Double.parseDouble(valMap.get("duration").toString());
                             if (d == 0)
                             {
-                                CCUHsApi.getInstance().pointWrite(HRef.copy(point.getId()), l, "ccu", HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(dur == 0 ? 120 * 60 * 1000 : dur - System.currentTimeMillis(), "ms"));
+                                CCUHsApi.getInstance().pointWrite(HRef.copy(point.getId()), l, "ccu", HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(dur == 0 ? forcedOccupiedMins * 60 * 1000 : dur - System.currentTimeMillis(), "ms"));
                             }
                         }
                     }

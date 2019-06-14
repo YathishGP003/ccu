@@ -153,21 +153,32 @@ public class DabSystemController extends SystemController
         }
         weightedAverageLoadMA = weightedAverageLoadPostMLQSum/weightedAverageLoadPostMLQ.size();
         
-        if ((systemState == COOLING || systemState == OFF) && buildingLimitMaxBreached("dab")) {
+        if ((systemState != HEATING) && buildingLimitMaxBreached("dab")) {
             CcuLog.d(L.TAG_CCU_SYSTEM, " Emergency COOLING Active");
             emergencyMode = true;
-            if (systemState != COOLING)
+            if (systemMode == COOLONLY || systemMode == AUTO)
             {
-                systemState = COOLING;
-                piController.reset();
+                if (systemState != COOLING)
+                {
+                    systemState = COOLING;
+                    piController.reset();
+                }
+            } else {
+                systemState = OFF;
             }
-        } else if ((systemState == HEATING || systemState == OFF) && buildingLimitMinBreached("dab")) {
+            
+        } else if ((systemState != COOLING) && buildingLimitMinBreached("dab")) {
             CcuLog.d(L.TAG_CCU_SYSTEM, " Emergency HEATING Active");
             emergencyMode = true;
-            if (systemState != HEATING)
+            if (systemMode == HEATONLY || systemMode == AUTO)
             {
-                systemState = HEATING;
-                piController.reset();
+                if (systemState != HEATING)
+                {
+                    systemState = HEATING;
+                    piController.reset();
+                }
+            } else {
+                systemState = OFF;
             }
         } else
         {

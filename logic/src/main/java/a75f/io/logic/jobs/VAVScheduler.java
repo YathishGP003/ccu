@@ -43,6 +43,7 @@ public class VAVScheduler {
             occ.setOccupied(false);
 
         occ.setVacation(vacation);
+        occ.setSystemZone(true);
 
         double heatingDeadBand = TunerUtil.readTunerValByQuery("heating and deadband and base", equip.getId());
         double coolingDeadBand = TunerUtil.readTunerValByQuery("cooling and deadband and base", equip.getId());

@@ -432,7 +432,9 @@ public class ScheduleProcessJob extends BaseJob {
         if (systemOccupancy == UNOCCUPIED) {
             Occupied next = null;
             for (Occupied occ : occupiedHashMap.values()) {
-                //Log.d(TAG_CCU_JOB, " occ: "+occ.toString()+" getMillisecondsUntilNextChange "+occ.getMillisecondsUntilNextChange());
+                if (!occ.isSystemZone()) {
+                    continue;
+                }
                 if (millisToOccupancy == 0) {
                     millisToOccupancy = occ.getMillisecondsUntilNextChange();
                     next = occ;
@@ -442,20 +444,19 @@ public class ScheduleProcessJob extends BaseJob {
                 }
             }
             nextOccupied = next;
-            Log.d(TAG_CCU_JOB, " millisToOccupancy: "+millisToOccupancy);
+            Log.d(TAG_CCU_JOB, "millisToOccupancy: "+millisToOccupancy);
         } else {
             nextOccupied = null;
         }
     
         if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DEFAULT) {
-            //CCUHsApi.getInstance().writeHisValByQuery("point and system and his and occupancy and status",(double)systemOccupancy.ordinal());
             CcuLog.d(TAG_CCU_JOB, "systemOccupancy status : " + systemOccupancy);
             return;
         }
         
         if (systemOccupancy == UNOCCUPIED)
         {
-            double preconDegree = 0;// = Math.max(waCoolingOnlyLoadMA, waHeatingOnlyLoadMA);
+            double preconDegree = 0;
             double preconRate = CCUHsApi.getInstance().getPredictedPreconRate(L.ccu().systemProfile.getSystemEquipRef());
             if (preconRate == 0 && nextOccupied != null) {
                 if (L.ccu().systemProfile.getSystemController().getConditioningForecast(nextOccupied) == SystemController.State.COOLING)
@@ -540,7 +541,7 @@ public class ScheduleProcessJob extends BaseJob {
                 CCUHsApi.getInstance().writeDefaultValById(id, getZoneStatusString(equip.getRoomRef(),equip.getId()));
                 CCUHsApi.getInstance().writeHisValById(id, (double) getZoneStatus(equip.getRoomRef()).ordinal());
             } else {
-                Log.d(L.TAG_CCU_JOB, " ScheduleStatus not changed for  "+equip.getDisplayName());
+                Log.d(L.TAG_CCU_JOB, "ScheduleStatus not changed for  "+equip.getDisplayName());
             }
         }
         

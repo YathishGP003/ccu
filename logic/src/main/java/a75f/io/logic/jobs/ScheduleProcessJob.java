@@ -273,6 +273,9 @@ public class ScheduleProcessJob extends BaseJob {
     public static String getZoneStatusString(String zoneId,String equipId)
     {
 
+
+        Equip equip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().readMapById(equipId)).build();
+        boolean isZoneHasSmartStat = equip.getMarkers().contains("smartstat");
         Occupied cachedOccupied = getOccupiedModeCache(zoneId);
         if(cachedOccupied == null)
         {
@@ -283,7 +286,7 @@ public class ScheduleProcessJob extends BaseJob {
             }
             return "Setting up..";
         }
-        if (systemOccupancy == PRECONDITIONING) {
+        if ((systemOccupancy == PRECONDITIONING) && !isZoneHasSmartStat) {
             return "In Preconditioning ";
         }
         //{Current Mode}, Changes to Energy Saving Range of %.1f-%.1fF at %s
@@ -312,7 +315,7 @@ public class ScheduleProcessJob extends BaseJob {
         
             } else
             {
-                if(isZonePreconditioningActive(equipId,cachedOccupied)) {//Currently handled only for smartstat
+                if(isZonePreconditioningActive(equipId,cachedOccupied, isZoneHasSmartStat)) {//Currently handled only for smartstat
                     return String.format("In %s, changes to Energy saving range of %.1f-%.1fF at %02d:%02d", "Preconditioning",
                             cachedOccupied.getHeatingVal() - cachedOccupied.getUnoccupiedZoneSetback(),
                             cachedOccupied.getCoolingVal() + cachedOccupied.getUnoccupiedZoneSetback(),
@@ -463,7 +466,7 @@ public class ScheduleProcessJob extends BaseJob {
                     preconDegree = nextOccupied.getHeatingVal() - L.ccu().systemProfile.getAverageTemp();
                 }
             }
-            if (preconDegree * preconRate * 60 * 1000 >= millisToOccupancy)
+            if ( (preconDegree != 0) && (millisToOccupancy > 0) && (preconDegree * preconRate * 60 * 1000 >= millisToOccupancy))
             {
                 systemOccupancy = PRECONDITIONING;
             }
@@ -742,9 +745,6 @@ public class ScheduleProcessJob extends BaseJob {
                 }
             }
         }
-        if (thExpiry > 0) {
-            CcuLog.d(L.TAG_CCU_JOB, "thExpiry "+thExpiry);
-        }
         return thExpiry;
     }
     
@@ -779,11 +779,8 @@ public class ScheduleProcessJob extends BaseJob {
         return 0;
     }
 
-    public static boolean isZonePreconditioningActive(String equipId, Occupied occu){
-
-        Equip equip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().readMapById(equipId)).build();
-        Log.d(TAG_CCU_SCHEDULER,"isZonePrecon = "+equip.getMarkers().toString()+","+equip.getMarkers().contains("smartstat"));
-        if(equip.getMarkers().contains("smartstat") ){
+    public static boolean isZonePreconditioningActive(String equipId, Occupied occu, boolean isSmartStat){
+        if(isSmartStat){
             double currentTemp = CCUHsApi.getInstance().readHisValByQuery("zone and point and current and air and temp and equipRef == \""+equipId+"\"");
             double desiredTemp = CCUHsApi.getInstance().readHisValByQuery("zone and point and desired and air and temp and average and equipRef == \""+equipId+"\"");
             double tempDiff = currentTemp - desiredTemp;
@@ -793,14 +790,15 @@ public class ScheduleProcessJob extends BaseJob {
                 equipId = L.ccu().systemProfile.getSystemEquipRef();//get System default preconditioning rate
                 if (tempDiff > 0)
                 {
+                    tempDiff = currentTemp - occu.getCoolingVal();
                     preconRate = TunerUtil.readTunerValByQuery("cooling and precon and rate", equipId);
                 } else {
-                    tempDiff = desiredTemp - currentTemp;
+                    tempDiff = occu.getHeatingVal() - currentTemp;
                     preconRate = TunerUtil.readTunerValByQuery("heating and precon and rate", equipId);
                 }
             }
             Log.d(TAG_CCU_SCHEDULER,"isZone in precon = "+preconRate+","+tempDiff +","+occu.getMillisecondsUntilNextChange()+","+currentTemp+","+desiredTemp);
-            if (tempDiff * preconRate * 60 * 1000 >= occu.getMillisecondsUntilNextChange())
+            if ((occu.getMillisecondsUntilNextChange() > 0)&&  (tempDiff * preconRate * 60 * 1000 >= occu.getMillisecondsUntilNextChange()))
             {
                 //zone is in preconditioning which is like occupied
                 occu.setPreconditioning(true);

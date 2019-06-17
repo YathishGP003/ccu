@@ -401,6 +401,7 @@ public class Globals {
                     break;
                 default:
                     L.ccu().systemProfile = new DefaultSystem();
+                    break;
             }
         } else {
             CcuLog.d(L.TAG_CCU, "System Equip does not exist.Create Dafault System Profile");

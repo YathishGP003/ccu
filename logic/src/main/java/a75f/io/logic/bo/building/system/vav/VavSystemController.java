@@ -282,7 +282,7 @@ public class VavSystemController extends SystemController
         {
             return COOLING;
         }
-        else if ((systemMode == HEATONLY || systemMode == AUTO) && (getAverageSystemTemperature() > occupiedSchedule.getCoolingVal()))
+        else if ((systemMode == HEATONLY || systemMode == AUTO) && (getAverageSystemTemperature() < occupiedSchedule.getHeatingVal()))
         {
             return HEATING;
         }

@@ -6,7 +6,6 @@ import org.joda.time.DateTime;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -751,8 +750,7 @@ public class ScheduleProcessJob extends BaseJob {
         //Logging temporary hold expiry for debugging.
         if (thExpiry > 0)
         {
-            DateTime date = new DateTime(thExpiry);
-            Log.d(TAG_CCU_SCHEDULER, "thExpiry: "+DateFormat.getDateInstance().format(date));
+            Log.d(TAG_CCU_SCHEDULER, "thExpiry: "+thExpiry);
         }
         return thExpiry;
     }

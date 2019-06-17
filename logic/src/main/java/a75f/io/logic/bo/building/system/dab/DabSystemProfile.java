@@ -70,10 +70,13 @@ public abstract class DabSystemProfile extends SystemProfile
         CCUHsApi.getInstance().addPoint(averageHumidity);
         Point averageTemperature = new Point.Builder().setDisplayName(equipDis + "-" + "averageTemperature").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("average").addMarker("temp").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(averageTemperature);
-        Point weightedAverageCoolingLoadMA = new Point.Builder().setDisplayName(equipDis + "-" + "weightedAverageCoolingLoadMA").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("moving").addMarker("average").addMarker("cooling").addMarker("load").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
-        CCUHsApi.getInstance().addPoint(weightedAverageCoolingLoadMA);
-        Point weightedAverageHeatingLoadMA = new Point.Builder().setDisplayName(equipDis + "-" + "weightedAverageHeatingLoadMA").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("moving").addMarker("average").addMarker("heating").addMarker("load").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
-        CCUHsApi.getInstance().addPoint(weightedAverageHeatingLoadMA);
+        Point weightedAverageLoadMA = new Point.Builder().setDisplayName(equipDis + "-" + "weightedAverageLoadMA ").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("weighted").addMarker("average").addMarker("moving").addMarker("load").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
+        CCUHsApi.getInstance().addPoint(weightedAverageLoadMA);
+        
+        Point weightedAverageCoolingLoadPostML = new Point.Builder().setDisplayName(equipDis + "-" + "weightedAverageCoolingLoadPostML").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("weighted").addMarker("average").addMarker("cooling").addMarker("load").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
+        CCUHsApi.getInstance().addPoint(weightedAverageCoolingLoadPostML);
+        Point weightedAverageHeatingLoadPostML = new Point.Builder().setDisplayName(equipDis + "-" + "weightedAverageHeatingLoadPostML").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("weighted").addMarker("average").addMarker("heating").addMarker("load").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
+        CCUHsApi.getInstance().addPoint(weightedAverageHeatingLoadPostML);
     }
     
     public void setSystemPoint(String tags, double val)

@@ -68,18 +68,8 @@ public class Pulse
 						CcuLog.d(L.TAG_CCU_DEVICE, "regularSmartNodeUpdate : roomTemp " + getRoomTempConversion(val));
 						break;
 					case DESIRED_TEMP:
-						val = smartNodeRegularUpdateMessage_t.update.setTemperature.get();
-						double curValue = hayStack.readHisValById(phyPoint.get("id").toString());
-						if(curValue != val) {
-							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-							double desiredTemp = getDesredTempConversion(val);
-							if (desiredTemp > 0) {
-								hayStack.writeHisValById(logPoint.get("id").toString(), desiredTemp);
-								updateDesiredTemp(nodeAddr, desiredTemp);
-							}
-
-						}
-						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : desiredTemp "+val +","+curValue);
+						//TODO - Set temp needs to be updated only for CM_TO_CCU_OVER_USB_SN_SET_TEMPERATURE_UPDATE
+						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : desiredTemp "+smartNodeRegularUpdateMessage_t.update.setTemperature.get());
 						break;
 					case ANALOG_IN_ONE:
 						val = smartNodeRegularUpdateMessage_t.update.externalAnalogVoltageInput1.get();
@@ -219,24 +209,14 @@ public class Pulse
 			throw new IllegalArgumentException();
 		}
 		ScheduleProcessJob.handleDesiredTempUpdate(new Point.Builder().setHashMap(coolingDtPoint).build(), true, coolingDesiredTemp);
-		try {
-		//TODO - Recheck this... Causing null pointer exception, every time when we change a set temp from biskit
-			CCUHsApi.getInstance().writeHisValById(coolingDtPoint.get("id").toString(), coolingDesiredTemp);
-		}catch (Exception e){
-			e.printStackTrace();
-		}
+		CCUHsApi.getInstance().writeHisValById(coolingDtPoint.get("id").toString(), coolingDesiredTemp);
 
 		HashMap heatinDtPoint = CCUHsApi.getInstance().read("point and air and temp and desired and heating and sp and equipRef == \""+q.getId()+"\"");
 		if (heatinDtPoint == null || heatinDtPoint.size() == 0) {
 			throw new IllegalArgumentException();
 		}
 		ScheduleProcessJob.handleDesiredTempUpdate(new Point.Builder().setHashMap(heatinDtPoint).build(), true, heatingDesiredTemp);
-		
-		try{
-			CCUHsApi.getInstance().writeHisValById(heatinDtPoint.get("id").toString(), heatingDesiredTemp);
-		}catch (Exception e){
-			e.printStackTrace();
-		}
+		CCUHsApi.getInstance().writeHisValById(heatinDtPoint.get("id").toString(), heatingDesiredTemp);
 
 
 		HashMap singleDtPoint = CCUHsApi.getInstance().read("point and air and temp and desired and average and sp and equipRef == \""+q.getId()+"\"");
@@ -244,11 +224,7 @@ public class Pulse
 			throw new IllegalArgumentException();
 		}
 		ScheduleProcessJob.handleDesiredTempUpdate(new Point.Builder().setHashMap(singleDtPoint).build(), true, dt);
-		try {
-			CCUHsApi.getInstance().writeHisValById(singleDtPoint.get("id").toString(), dt);
-		}catch (Exception e){
-			e.printStackTrace();
-		}
+		CCUHsApi.getInstance().writeHisValById(singleDtPoint.get("id").toString(), dt);
 
 		sendSNControlMessage((short)node,q.getId());
 		sendSetTemperatureAck((short)node);
@@ -418,7 +394,8 @@ public class Pulse
 				HashMap logPoint = hayStack.read("point and id=="+phyPoint.get("pointRef"));
 				switch (Port.valueOf(phyPoint.get("port").toString())) {
 					case DESIRED_TEMP:
-						double curValue = hayStack.readHisValById(phyPoint.get("id").toString());
+						//Compare with what was sent out.
+						double curValue = LSmartNode.getDesiredTemp(nodeAddr);//hayStack.readHisValById(phyPoint.get("id").toString());
 						double desiredTemp = getDesredTempConversion(temp);
 						CcuLog.d(L.TAG_CCU_DEVICE, "updateSetTempFromDevice : desiredTemp " + desiredTemp+","+curValue);
 						if (desiredTemp > 0 && (curValue != desiredTemp)) {
@@ -451,7 +428,7 @@ public class Pulse
 				HashMap logPoint = hayStack.read("point and id=="+phyPoint.get("pointRef"));
 				switch (Port.valueOf(phyPoint.get("port").toString())) {
 					case DESIRED_TEMP:
-						double curValue = hayStack.readHisValById(phyPoint.get("id").toString());
+						double curValue = LSmartStat.getDesiredTemp(nodeAddr);//hayStack.readHisValById(phyPoint.get("id").toString());
 						double desiredTemp = getDesredTempConversion(temp);
 						if (desiredTemp > 0 && (curValue != desiredTemp)) {
 							hayStack.writeHisValById(logPoint.get("id").toString(), desiredTemp);

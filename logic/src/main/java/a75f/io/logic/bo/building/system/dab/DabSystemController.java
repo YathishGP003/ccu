@@ -54,20 +54,14 @@ public class DabSystemController extends SystemController
     double totalHeatingLoad = 0;
     int zoneCount = 0;
     
-    double weightedAverageCoolingOnlyLoadSum;
-    double weightedAverageHeatingOnlyLoadSum;
     double weightedAverageLoadSum;
     
-    double weightedAverageCoolingOnlyLoad;
-    double weightedAverageHeatingOnlyLoad;
     double weightedAverageLoad;
     double weightedAverageLoadPostML;
     
     double weightedAverageLoadMA;
     double weightedAverageCoolingLoadPostML ;
     double weightedAverageHeatingLoadPostML  ;
-    
-    //int systemOccupancy = 0;
     
     double averageSystemHumidity = 0;
     double averageSystemTemperature = 0;
@@ -144,7 +138,7 @@ public class DabSystemController extends SystemController
         profile.setSystemPoint("ci and running", comfortIndex);
     
         weightedAverageLoadPostML = weightedAverageLoad ;//+buildingLoadOffsetML
-        weightedAverageLoadPostMLQ.add(weightedAverageLoad);
+        weightedAverageLoadPostMLQ.add(weightedAverageLoadPostML);
         
         
         double weightedAverageLoadPostMLQSum = 0;
@@ -232,8 +226,9 @@ public class DabSystemController extends SystemController
         CcuLog.d(L.TAG_CCU_SYSTEM, "weightedAverageCoolingLoadPostML: "+weightedAverageCoolingLoadPostML+" weightedAverageHeatingLoadPostML: "
                                    +weightedAverageHeatingLoadPostML+" coolingSignal: "+coolingSignal+" heatingSignal: "+heatingSignal);
         
-        profile.setSystemPoint("moving and average and cooling and load",weightedAverageCoolingLoadPostML);
-        profile.setSystemPoint("moving and average and heating and load",weightedAverageHeatingLoadPostML);
+        profile.setSystemPoint("weighted and average and moving and load",weightedAverageLoadMA);
+        profile.setSystemPoint("weighted and average and cooling and load",weightedAverageCoolingLoadPostML);
+        profile.setSystemPoint("weighted and average and heating and load",weightedAverageHeatingLoadPostML);
     
         normalizeAirflow();
         adjustDamperForCumulativeTarget(profile.getSystemEquipRef());
@@ -271,7 +266,7 @@ public class DabSystemController extends SystemController
         {
             return COOLING;
         }
-        else if ((systemMode == HEATONLY || systemMode == AUTO) && (getAverageSystemTemperature() > occupiedSchedule.getCoolingVal()))
+        else if ((systemMode == HEATONLY || systemMode == AUTO) && (getAverageSystemTemperature() < occupiedSchedule.getHeatingVal()))
         {
             return HEATING;
         }

@@ -7,8 +7,11 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import a75f.io.api.haystack.HSUtil;
@@ -45,13 +48,24 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
         return f;
     }
     
-    @BindView(R.id.default_text_view)
-                                       TextView    defaultTextView;
+    @BindView(R.id.default_text_view)  TextView    defaultTextView;
     @BindView(R.id.deviceTypeSelection)RadioGroup  deviceTypeSelection;
     @BindView(R.id.smartNode)          RadioButton smartNode;
     @BindView(R.id.smartstat)          RadioButton smartstat;
     @BindView(R.id.hia)                RadioButton hia;
     @BindView(R.id.lpi)                RadioButton lpi;
+
+    @BindView(R.id.rl_smartnode)
+    RelativeLayout    rlSmartNode;
+    @BindView(R.id.rl_smartstat)
+    RelativeLayout    rlSmartStat;
+    @BindView(R.id.rl_wirelesstemp)
+    RelativeLayout    rlWTM;
+    @BindView(R.id.rl_ccu)
+    RelativeLayout    rlCCU;
+    @BindView(R.id.imageGoback)
+    ImageView imageGoback;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         // TODO Auto-generated method stub
@@ -67,8 +81,34 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
         ButterKnife.bind(this, view);
         defaultTextView.setText(HSUtil.getDis(mRoomName));
     }
-    
-    
+
+
+    @OnClick(R.id.imageGoback) void onGoBackClick() {
+        removeDialogFragment(ID);
+    }
+
+    @OnClick(R.id.rl_smartnode) void onSmartNodeClick() {
+        DialogSmartNodeProfiling wrmProfiling = DialogSmartNodeProfiling.newInstance(mNodeAddress, mRoomName, mFloorName);
+        showDialogFragment(wrmProfiling, DialogSmartNodeProfiling.ID);
+    }
+
+
+    @OnClick(R.id.rl_smartstat) void onSmartStatClick() {
+        DialogSmartStatProfiling smartStatProfiling = DialogSmartStatProfiling.newInstance(mNodeAddress, mRoomName, mFloorName);
+        showDialogFragment(smartStatProfiling, DialogSmartStatProfiling.ID);
+    }
+
+
+    @OnClick(R.id.rl_wirelesstemp) void onWTMClick() {
+        DialogWTMProfiling wtmProfiling = DialogWTMProfiling.newInstance(mNodeAddress, mRoomName, mFloorName);
+        showDialogFragment(wtmProfiling, DialogWTMProfiling.ID);
+    }
+
+    @OnClick(R.id.rl_ccu) void oCCUClick() {
+        DialogCCUProfiling ccuProfiling = DialogCCUProfiling.newInstance(mNodeAddress, mRoomName, mFloorName);
+        showDialogFragment(ccuProfiling, DialogCCUProfiling.ID);
+    }
+
     @OnClick(R.id.first_button) void onFirstButtonClick() {
         removeDialogFragment(ID);
     }
@@ -84,6 +124,7 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
         View view = inflater.inflate(R.layout.devicetypeselectiondialog, container, false);
+        getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         mNodeAddress = getArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR);
         mRoomName = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
         mFloorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
@@ -115,14 +156,13 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
     {
         super.onStart();
         Dialog dialog = getDialog();
-        
         if (dialog != null)
         {
             int width = ViewGroup.LayoutParams.MATCH_PARENT;
             int height = ViewGroup.LayoutParams.MATCH_PARENT;
             dialog.getWindow().setLayout(width, height);
         }
-        setTitle();
+        //setTitle();
     }
     
     private void setTitle() {

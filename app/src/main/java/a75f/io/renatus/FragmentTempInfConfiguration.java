@@ -1,0 +1,134 @@
+package a75f.io.renatus;
+
+import android.app.Dialog;
+import android.content.res.Resources;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.Button;
+import android.widget.NumberPicker;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.ToggleButton;
+
+import java.lang.reflect.Field;
+
+import a75f.io.logic.bo.building.NodeType;
+import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.plc.PlcProfile;
+import a75f.io.logic.bo.building.plc.PlcProfileConfiguration;
+import a75f.io.renatus.BASE.BaseDialogFragment;
+import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+/**
+ * Created by samjithsadasivan on 2/22/19.
+ */
+
+public class FragmentTempInfConfiguration extends BaseDialogFragment
+{
+    public static final String TAG = "PlcConfig";
+    public static final String ID = FragmentTempInfConfiguration.class.getSimpleName();
+
+
+    @BindView(R.id.zonePriority)
+    Spinner probe2TempSensor;
+
+    @BindView(R.id.temperatureOffset)
+    NumberPicker temperatureOffset;
+
+    @BindView(R.id.setBtn)
+    Button setButton;
+
+    private ProfileType             mProfileType;
+    private PlcProfile              mPlcProfile;
+    private PlcProfileConfiguration mProfileConfig;
+
+    private short    mSmartNodeAddress;
+    private NodeType mNodeType;
+
+    String floorRef;
+    String zoneRef;
+
+    @Override
+    public String getIdString()
+    {
+        return ID;
+    }
+
+    public FragmentTempInfConfiguration()
+    {
+    }
+    
+    public static FragmentTempInfConfiguration newInstance(short smartNodeAddress, String roomName, NodeType nodeType, String floorName)
+    {
+        FragmentTempInfConfiguration f = new FragmentTempInfConfiguration();
+        Bundle bundle = new Bundle();
+        bundle.putShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR, smartNodeAddress);
+        bundle.putString(FragmentCommonBundleArgs.ARG_NAME, roomName);
+        bundle.putString(FragmentCommonBundleArgs.FLOOR_NAME, floorName);
+        bundle.putString(FragmentCommonBundleArgs.NODE_TYPE, nodeType.toString());
+        f.setArguments(bundle);
+        return f;
+    }
+    
+    @Override
+    public void onStart()
+    {
+        super.onStart();
+        Dialog dialog = getDialog();
+        if (dialog != null) {
+            int width = 1165;//ViewGroup.LayoutParams.WRAP_CONTENT;
+            int height = ViewGroup.LayoutParams.WRAP_CONTENT;
+            dialog.getWindow().setLayout(width, height);
+        }
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
+    {
+        View view = inflater.inflate(R.layout.fragment_tempinf_config, container, false);
+        getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+        mSmartNodeAddress = getArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR);
+        zoneRef = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
+        floorRef = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
+        mNodeType = NodeType.valueOf(getArguments().getString(FragmentCommonBundleArgs.NODE_TYPE));
+        setDividerColor(temperatureOffset);
+        ButterKnife.bind(this, view);
+        return view;
+    }
+    
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+    }
+    private void setDividerColor(NumberPicker picker) {
+        Field[] numberPickerFields = NumberPicker.class.getDeclaredFields();
+        for (Field field : numberPickerFields) {
+            if (field.getName().equals("mSelectionDivider")) {
+                field.setAccessible(true);
+                try {
+                    field.set(picker, getResources().getDrawable(R.drawable.divider_np));
+                } catch (IllegalArgumentException e) {
+                    Log.v("NP", "Illegal Argument Exception");
+                    e.printStackTrace();
+                } catch (Resources.NotFoundException e) {
+                    Log.v("NP", "Resources NotFound");
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    Log.v("NP", "Illegal Access Exception");
+                    e.printStackTrace();
+                }
+                break;
+            }
+        }
+    }
+}

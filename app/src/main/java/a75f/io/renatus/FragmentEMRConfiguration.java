@@ -10,6 +10,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -65,10 +66,9 @@ public class FragmentEMRConfiguration extends BaseDialogFragment
     {
         super.onStart();
         Dialog dialog = getDialog();
-        if (dialog != null)
-        {
-            int width = ViewGroup.LayoutParams.WRAP_CONTENT;
-            int height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        if (dialog != null) {
+            int width = 1165;//ViewGroup.LayoutParams.WRAP_CONTENT;
+            int height = 672;//ViewGroup.LayoutParams.WRAP_CONTENT;
             dialog.getWindow().setLayout(width, height);
         }
         setTitle();
@@ -102,6 +102,7 @@ public class FragmentEMRConfiguration extends BaseDialogFragment
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
         View view = inflater.inflate(R.layout.fragment_emr_config, container, false);
+        getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         mSmartNodeAddress = getArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR);
         zoneRef = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
         floorRef = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);

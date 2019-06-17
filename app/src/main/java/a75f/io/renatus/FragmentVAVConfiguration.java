@@ -3,6 +3,7 @@ package a75f.io.renatus;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -12,6 +13,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -21,6 +23,7 @@ import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -77,9 +80,9 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
     NumberPicker minCoolingDamperPos;
     NumberPicker maxHeatingDamperPos;
     NumberPicker minHeatingDamperPos;
-    SwitchCompat enableOccupancyControl;
-    SwitchCompat enableCO2Control;
-    SwitchCompat enableIAQControl;
+    ToggleButton enableOccupancyControl;
+    ToggleButton enableCO2Control;
+    ToggleButton enableIAQControl;
     
     Damper mDamper;
     
@@ -132,13 +135,12 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
     {
         super.onStart();
         Dialog dialog = getDialog();
-        if (dialog != null)
-        {
-            int width = ViewGroup.LayoutParams.WRAP_CONTENT;
-            int height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        if (dialog != null) {
+            int width = 1165;//ViewGroup.LayoutParams.WRAP_CONTENT;
+            int height = 672;//ViewGroup.LayoutParams.WRAP_CONTENT;
             dialog.getWindow().setLayout(width, height);
         }
-        setTitle();
+        //setTitle();
     }
     
     private void setTitle() {
@@ -169,6 +171,7 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
         View view = inflater.inflate(R.layout.fragment_vav_config, container, false);
+        getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         mSmartNodeAddress = getArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR);
         zoneRef = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
         floorRef = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
@@ -210,10 +213,10 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         
         //fillDamperDetails();
         
-        damper1layout  = (LinearLayout)view.findViewById(R.id.damper1layout);
+        //damper1layout  = (LinearLayout)view.findViewById(R.id.damper1layout);
         //damperType.setSelection(mFSVData.getDamperType());
         //if(mFSVData.getDamperType() != 4)
-        damper1layout.setVisibility(View.VISIBLE);
+        //damper1layout.setVisibility(View.VISIBLE);
     
         damperSize = view.findViewById(R.id.damperSize);
         ArrayAdapter<CharSequence> damperSizeAdapter = ArrayAdapter.createFromResource(getActivity(),
@@ -296,8 +299,13 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         minHeatingDamperPos.setMaxValue(100);
         minHeatingDamperPos.setValue(40);
         minHeatingDamperPos.setWrapSelectorWheel(false);
-    
-    
+
+        setDividerColor(temperatureOffset);
+        setDividerColor(maxCoolingDamperPos);
+        setDividerColor(minCoolingDamperPos);
+        setDividerColor(maxHeatingDamperPos);
+        setDividerColor(minHeatingDamperPos);
+
         enableOccupancyControl = view.findViewById(R.id.enableOccupancyControl);
         enableCO2Control = view.findViewById(R.id.enableCO2Control);
         enableIAQControl = view.findViewById(R.id.enableIAQControl);
@@ -506,7 +514,28 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         L.ccu().zoneProfiles.add(mVavProfile);
         CcuLog.d(L.TAG_CCU_UI, "Set Vav Config: Profiles - "+L.ccu().zoneProfiles.size());
     }
-    
+
+    private void setDividerColor(NumberPicker picker) {
+        Field[] numberPickerFields = NumberPicker.class.getDeclaredFields();
+        for (Field field : numberPickerFields) {
+            if (field.getName().equals("mSelectionDivider")) {
+                field.setAccessible(true);
+                try {
+                    field.set(picker, getResources().getDrawable(R.drawable.divider_np));
+                } catch (IllegalArgumentException e) {
+                    Log.v("NP", "Illegal Argument Exception");
+                    e.printStackTrace();
+                } catch (Resources.NotFoundException e) {
+                    Log.v("NP", "Resources NotFound");
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    Log.v("NP", "Illegal Access Exception");
+                    e.printStackTrace();
+                }
+                break;
+            }
+        }
+    }
     private void setNumberPickerDividerColor(NumberPicker pk) {
         Class<?> numberPickerClass = null;
         try {
@@ -536,11 +565,11 @@ public class FragmentVAVConfiguration extends BaseDialogFragment implements Adap
         switch (parent.getId()){
             case R.id.damperType:
                 damperType.setSelection(position);
-                if(position == 4)
+                /*if(position == 4)
                     damper1layout.setVisibility(View.INVISIBLE);
                 else
                     damper1layout.setVisibility(View.VISIBLE);
-                damper1layout.invalidate();
+                damper1layout.invalidate();*/
                 break;
             /*case R.id.damperType2:
                 damper2Type.setSelection(position);

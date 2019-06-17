@@ -18,6 +18,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -76,6 +77,13 @@ public class FloorPlanFragment extends Fragment
 	@BindView(R.id.moduleList)
 	ListView    moduleListView;
 	Short[] smartNodeAddresses;
+
+	@BindView(R.id.lt_addfloor)
+	LinearLayout addFloorlt;
+	@BindView(R.id.lt_addzone)
+	LinearLayout    addZonelt;
+	@BindView(R.id.lt_addModule)
+	LinearLayout    addModulelt;
 	
 	ArrayList<Floor> floorList = new ArrayList();
 	ArrayList<Zone> roomList = new ArrayList();
@@ -203,7 +211,8 @@ public class FloorPlanFragment extends Fragment
 	private void updateFloors()
 	{
 		
-		mFloorListAdapter = new DataArrayAdapter<>(this.getActivity(), R.layout.listviewitem, floorList);
+		mFloorListAdapter = new DataArrayAdapter<>(this.getActivity(), R.layout.listviewitem,floorList);
+		//mFloorListAdapter = new DataArrayAdapter<>(this.getActivity(), R.id.textData,floorList);
 		floorListView.setAdapter(mFloorListAdapter);
 		enableFloorButton();
 		if (mFloorListAdapter.getCount() > 0)
@@ -221,7 +230,7 @@ public class FloorPlanFragment extends Fragment
 			{
 				mModuleListAdapter.clear();
 			}
-			disableRoomModule();
+			//disableRoomModule();
 		}
 	}
 	
@@ -239,6 +248,7 @@ public class FloorPlanFragment extends Fragment
 	//
 	private void enableRoomBtn()
 	{
+		addZonelt.setVisibility(View.VISIBLE);
 		addRoomBtn.setVisibility(View.VISIBLE);
 		addRoomEdit.setVisibility(View.INVISIBLE);
 	}
@@ -246,7 +256,8 @@ public class FloorPlanFragment extends Fragment
 	
 	private void updateRooms(ArrayList<Zone> zones)
 	{
-		mRoomListAdapter = new DataArrayAdapter<>(this.getActivity(), R.layout.listviewitem, zones);
+		mRoomListAdapter = new DataArrayAdapter<>(this.getActivity(), R.layout.listviewitem,zones);
+		//mRoomListAdapter = new DataArrayAdapter<>(this.getActivity(), R.id.textData,zones);
 		roomListView.setAdapter(mRoomListAdapter);
 		enableRoomBtn();
 		if (mRoomListAdapter.getCount() > 0)
@@ -278,13 +289,15 @@ public class FloorPlanFragment extends Fragment
 	
 	private void enableModueButton()
 	{
+		addModulelt.setVisibility(View.VISIBLE);
 		pairModuleBtn.setVisibility(View.VISIBLE);
 	}
 	
 	
 	private void disableModuButton()
 	{
-		pairModuleBtn.setVisibility(View.INVISIBLE);
+		//addModulelt.setVisibility(View.INVISIBLE);
+		//pairModuleBtn.setVisibility(View.INVISIBLE);
 	}
 	
 	
@@ -293,8 +306,8 @@ public class FloorPlanFragment extends Fragment
 		Log.d("CCU","Zone Selected "+zone.getDisplayName());
 			ArrayList<Equip> zoneEquips  = HSUtil.getEquips(zone.getId());
 			if(zoneEquips != null && (zoneEquips.size() > 0)) {
-				mModuleListAdapter =
-						new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(), R.layout.listviewitem, createAddressList(zoneEquips));
+				mModuleListAdapter = new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(), R.layout.listviewitem,createAddressList(zoneEquips));
+				//mModuleListAdapter = new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(), R.id.textData,createAddressList(zoneEquips));
 
 				getActivity().runOnUiThread(new Runnable() {
 					@Override
@@ -322,6 +335,7 @@ public class FloorPlanFragment extends Fragment
 	
 	private void enableFloorButton()
 	{
+		addFloorlt.setVisibility(View.VISIBLE);
 		addFloorBtn.setVisibility(View.VISIBLE);
 		addFloorEdit.setVisibility(View.INVISIBLE);
 	}
@@ -329,6 +343,10 @@ public class FloorPlanFragment extends Fragment
 	
 	private void disableRoomModule()
 	{
+		addFloorlt.setVisibility(View.INVISIBLE);
+		addZonelt.setVisibility(View.INVISIBLE);
+		addModulelt.setVisibility(View.INVISIBLE);
+
 		addRoomBtn.setVisibility(View.INVISIBLE);
 		addRoomEdit.setVisibility(View.INVISIBLE);
 		pairModuleBtn.setVisibility(View.INVISIBLE);
@@ -350,6 +368,7 @@ public class FloorPlanFragment extends Fragment
 	
 	private void enableFloorEdit()
 	{
+		addFloorlt.setVisibility(View.INVISIBLE);
 		addFloorBtn.setVisibility(View.INVISIBLE);
 		addFloorEdit.setVisibility(View.VISIBLE);
 	}
@@ -360,32 +379,35 @@ public class FloorPlanFragment extends Fragment
 	{
 		if (actionId == EditorInfo.IME_ACTION_DONE)
 		{
-			for (Floor f : HSUtil.getFloors() )
-			{
-				if (f.getDisplayName().equals(addFloorEdit.getText().toString()))
-					{
+			if(addFloorEdit.getText().toString().length() > 0) {
+				for (Floor f : HSUtil.getFloors()) {
+					if (f.getDisplayName().equals(addFloorEdit.getText().toString())) {
 						Toast.makeText(getActivity().getApplicationContext(), "Floor already exists : " + addRoomEdit.getText(), Toast.LENGTH_SHORT).show();
 						return true;
 					}
+				}
+
+				HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
+				Floor hsFloor = new Floor.Builder()
+						.setDisplayName(addFloorEdit.getText().toString())
+						.setSiteRef(siteMap.get("id").toString())
+						.build();
+				hsFloor.setId(CCUHsApi.getInstance().addFloor(hsFloor));
+				floorList.add(hsFloor);
+				Collections.sort(floorList, new FloorComparator());
+				updateFloors();
+				selectFloor(HSUtil.getFloors().size() - 1);
+
+				InputMethodManager mgr = (InputMethodManager) getActivity()
+						.getSystemService(Context.INPUT_METHOD_SERVICE);
+				mgr.hideSoftInputFromWindow(addFloorEdit.getWindowToken(), 0);
+				Toast.makeText(getActivity().getApplicationContext(),
+						"Floor " + addFloorEdit.getText() + " added", Toast.LENGTH_SHORT).show();
+				return true;
 			}
-			
-			HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
-			Floor hsFloor = new Floor.Builder()
-                                     .setDisplayName(addFloorEdit.getText().toString())
-                                     .setSiteRef(siteMap.get("id").toString())
-                                     .build();
-			hsFloor.setId(CCUHsApi.getInstance().addFloor(hsFloor));
-			floorList.add(hsFloor);
-			Collections.sort(floorList, new FloorComparator());
-			updateFloors();
-			selectFloor(HSUtil.getFloors().size()-1);
-			
-			InputMethodManager mgr = (InputMethodManager) getActivity()
-					                                              .getSystemService(Context.INPUT_METHOD_SERVICE);
-			mgr.hideSoftInputFromWindow(addFloorEdit.getWindowToken(), 0);
-			Toast.makeText(getActivity().getApplicationContext(),
-					"Floor " + addFloorEdit.getText() + " added", Toast.LENGTH_SHORT).show();
-			return true;
+			else {
+				Toast.makeText(getActivity().getApplicationContext(), "Floor cannot be empty", Toast.LENGTH_SHORT).show();
+			}
 		}
 		return false;
 	}
@@ -414,6 +436,7 @@ public class FloorPlanFragment extends Fragment
 	
 	private void enableRoomEdit()
 	{
+		addZonelt.setVisibility(View.INVISIBLE);
 		addRoomBtn.setVisibility(View.INVISIBLE);
 		addRoomEdit.setVisibility(View.VISIBLE);
 	}
@@ -434,41 +457,43 @@ public class FloorPlanFragment extends Fragment
 	{
 		if (actionId == EditorInfo.IME_ACTION_DONE)
 		{
-			for (Floor f : HSUtil.getFloors() )
-			{
-				for (Zone z : HSUtil.getZones(f.getId()))
-				{
-					if (z.getDisplayName().equals(addRoomEdit.getText().toString()))
-					{
-						Toast.makeText(getActivity().getApplicationContext(), "Zone already exists : " + addRoomEdit.getText(), Toast.LENGTH_SHORT).show();
-						return true;
+			if(addRoomEdit.getText().toString().length() > 0) {
+				for (Floor f : HSUtil.getFloors()) {
+					for (Zone z : HSUtil.getZones(f.getId())) {
+						if (z.getDisplayName().equals(addRoomEdit.getText().toString())) {
+							Toast.makeText(getActivity().getApplicationContext(), "Zone already exists : " + addRoomEdit.getText(), Toast.LENGTH_SHORT).show();
+							return true;
+						}
 					}
 				}
+
+				Toast.makeText(getActivity().getApplicationContext(),
+						"Room " + addRoomEdit.getText() + " added", Toast.LENGTH_SHORT).show();
+				Floor floor = floorList.get(mFloorListAdapter.getSelectedPostion());
+				HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
+
+				//Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
+
+				Zone hsZone = new Zone.Builder()
+						.setDisplayName(addRoomEdit.getText().toString())
+						.setFloorRef(floor.getId())
+						.setSiteRef(siteMap.get("id").toString())
+						.build();
+
+				hsZone.setId(CCUHsApi.getInstance().addZone(hsZone));
+				roomList.add(hsZone);
+				Collections.sort(roomList, new ZoneComparator());
+				updateRooms(roomList);
+				selectRoom(roomList.indexOf(hsZone));
+
+				InputMethodManager mgr = (InputMethodManager) getActivity()
+						.getSystemService(Context.INPUT_METHOD_SERVICE);
+				mgr.hideSoftInputFromWindow(addRoomEdit.getWindowToken(), 0);
+				return true;
 			}
-			
-			Toast.makeText(getActivity().getApplicationContext(),
-					"Room " + addRoomEdit.getText() + " added", Toast.LENGTH_SHORT).show();
-			Floor floor = floorList.get(mFloorListAdapter.getSelectedPostion());
-			HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
-
-			//Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
-
-			Zone hsZone = new Zone.Builder()
-                                   .setDisplayName(addRoomEdit.getText().toString())
-                                   .setFloorRef(floor.getId())
-                                   .setSiteRef(siteMap.get("id").toString())
-                                   .build();
-
-			hsZone.setId(CCUHsApi.getInstance().addZone(hsZone));
-			roomList.add(hsZone);
-			Collections.sort(roomList, new ZoneComparator());
-			updateRooms(roomList);
-			selectRoom(roomList.indexOf(hsZone));
-
-			InputMethodManager mgr = (InputMethodManager) getActivity()
-					                                              .getSystemService(Context.INPUT_METHOD_SERVICE);
-			mgr.hideSoftInputFromWindow(addRoomEdit.getWindowToken(), 0);
-			return true;
+			else {
+				Toast.makeText(getActivity().getApplicationContext(), "Room cannot be empty", Toast.LENGTH_SHORT).show();
+			}
 		}
 		return false;
 	}
@@ -496,8 +521,7 @@ public class FloorPlanFragment extends Fragment
 		}
 		ft.addToBackStack(null);
 		//TODO: no broadcast recievers
-		getActivity()
-				.registerReceiver(mPairingReceiver, new IntentFilter(ACTION_BLE_PAIRING_COMPLETED));
+		getActivity().registerReceiver(mPairingReceiver, new IntentFilter(ACTION_BLE_PAIRING_COMPLETED));
 		// Create and show the dialog.
 		dialogFragment.show(ft, id);
 	}

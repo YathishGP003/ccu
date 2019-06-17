@@ -7,8 +7,12 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import a75f.io.api.haystack.HSUtil;
@@ -21,6 +25,7 @@ import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import butterknife.Optional;
 
 /**
  * Created by ryant on 9/27/2017.
@@ -41,36 +46,69 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     
     @BindView(R.id.default_text_view)
     TextView    defaultTextView;
-    @BindView(R.id.wrmProfilingRadioGrp)
-    RadioGroup  wrmProfilingRadioGrp;
-    @BindView(R.id.dabModuleTypeRB)
-    RadioButton dabModuleTypeRB;
-    @BindView(R.id.vavModuleTypeRB)
-    RadioButton vavModuleTypeRB;
-    @BindView(R.id.lcmModuleTypeRB)
-    RadioButton lcmModuleTypeRB;
-    @BindView(R.id.sseModuleTypeRB)
-    RadioButton sseModuleTypeRB;
-    @BindView(R.id.piModuleTypeRB)
-    RadioButton piLoopModuleTypeRB;
-    @BindView(R.id.rmModuleTypeRB)
-    RadioButton rmModuleTypeRB;
-    @BindView(R.id.emrModuleTypeRB)
-    RadioButton emrModuleTypeRB;
-    @BindView(R.id.ccmModuleTypeRB)
-    RadioButton ccmModuleTypeRB;
-    @BindView(R.id.hwpModuleTypeRB)
-    RadioButton hwpModuleTypeRB;
-    
-    @BindView(R.id.vavUnitSelector)
-    RadioGroup vavUnitSelector;
-    @BindView(R.id.vavReheat)
-    RadioButton vavReheat;
-    @BindView(R.id.vavSeriesFan)
-    RadioButton vavSeriesFan;
-    @BindView(R.id.vavParallelFan)
-    RadioButton vavParallelFan;
-    
+
+    @Nullable
+    @BindView(R.id.rl_vav)
+    RelativeLayout rlVAV;
+
+    @Nullable
+    @BindView(R.id.rl_dab)
+    RelativeLayout rlDAB;
+
+    @Nullable
+    @BindView(R.id.rl_light)
+    RelativeLayout rlLight;
+
+    @Nullable
+    @BindView(R.id.rl_tempmonitor)
+    RelativeLayout rlTempMonitor;
+
+    @Nullable
+    @BindView(R.id.rl_cpc)
+    RelativeLayout rlCPC;
+
+    @Nullable
+    @BindView(R.id.rl_picontrol)
+    RelativeLayout rlPiControl;
+
+    @Nullable
+    @BindView(R.id.rl_energymeter)
+    RelativeLayout rlEnergyMeter;
+
+    @Nullable
+    @BindView(R.id.rl_iftt)
+    RelativeLayout rlIFTT;
+
+    @Nullable
+    @BindView(R.id.rl_vavNoFan)
+    RelativeLayout rlVAVNoFan;
+
+    @Nullable
+    @BindView(R.id.rl_vavSeriesFan)
+    RelativeLayout rlVAVSeriesFan;
+
+    @Nullable
+    @BindView(R.id.rl_vavParallelFan)
+    RelativeLayout rlVAVParallelFan;
+
+    @Nullable
+    @BindView(R.id.imageViewArrow)
+    ImageView imageViewArrow;
+
+    @Nullable
+    @BindView(R.id.ll_vavmods)
+    LinearLayout lt_VAVProfile;
+
+    @Nullable
+    @BindView(R.id.imageGoback)
+    ImageView imageGoback;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        // TODO Auto-generated method stub
+        super.onCreate(savedInstanceState);
+    }
+
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState)
     {
@@ -78,28 +116,127 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
         ButterKnife.bind(this, view);
         defaultTextView.setText(HSUtil.getDis(mRoomName));
     }
-    
-    @OnClick(R.id.first_button)
-    void onFirstButtonClick()
+
+    @Optional
+    @OnClick(R.id.imageGoback)
+    void onGoBackButtonClick()
     {
         removeDialogFragment(ID);
     }
+
+    @Optional
+    @OnClick(R.id.rl_vav)
+    void onVAVOnClick()
+    {
+        if(lt_VAVProfile.getVisibility() == View.VISIBLE)
+        {
+            lt_VAVProfile.setVisibility(View.GONE);
+            imageViewArrow.setRotation(0);
+        }else {
+            if (lt_VAVProfile.getVisibility() == View.GONE) {
+                lt_VAVProfile.setVisibility(View.VISIBLE);
+                imageViewArrow.setRotation(-90);
+            }
+        }
+    }
+
+    @Optional
+    @OnClick(R.id.rl_dab)
+    void onDABOnClick()
+    {
+        showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.DAB, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
+    }
+
+    @Optional
+    @OnClick(R.id.rl_light)
+    void onLightonClick()
+    {
+        //Not Yet Done
+        //showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.LIGHT, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
+    }
+
+    @Optional
+    @OnClick(R.id.rl_tempmonitor)
+    void onTempMonitorOnClick()
+    {
+        showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.TEMP_MONITOR, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
+    }
+
+    @Optional
+    @OnClick(R.id.rl_cpc)
+    void onCPCOnClick()
+    {
+
+    }
+
+    @Optional
+    @OnClick(R.id.rl_picontrol)
+    void onPiControlOnClick()
+    {
+        showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.PLC, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
+    }
+
+    @Optional
+    @OnClick(R.id.rl_energymeter)
+    void onEnergyMeterOnClick()
+    {
+        showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.EMR, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
+    }
+
+    @Optional
+    @OnClick(R.id.rl_iftt)
+    void onIFTTOnClick()
+    {
+        //Not Yet Done
+    }
+
+
+    @Optional
+    @OnClick(R.id.rl_vavNoFan)
+    void onVAVNoFanOnClick()
+    {
+        showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.VAV_REHEAT, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
+    }
+
+
+    @Optional
+    @OnClick(R.id.rl_vavSeriesFan)
+    void onVAVSeriesFanOnClick()
+    {
+        //Not Yet Done
+        //showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.VAV_SERIES_FAN, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
+    }
+
+    @Optional
+    @OnClick(R.id.rl_vavParallelFan)
+    void onVAVParallelFanOnClick()
+    {
+        //Not Yet Done
+        //showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.VAV_PARALLEL_FAN, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
+    }
+
+    /*@OnClick(R.id.first_button)
+    void onFirstButtonClick()
+    {
+        removeDialogFragment(ID);
+    }*/
     
-    @OnClick(R.id.second_button)
+   /* @OnClick(R.id.second_button)
     void onSecondButtonClick()
     {
         openBLEPairingInstructions();
-    }
+    }*/
     
-    @OnClick(R.id.vavModuleTypeRB)
+    /*@OnClick(R.id.vavModuleTypeRB)
     void onVavSelected() {
         vavUnitSelector.setVisibility(View.VISIBLE);
     }
-    
+    */
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
         View view = inflater.inflate(R.layout.wrm_module_selection, container, false);
+        getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         mNodeAddress = getArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR);
         mRoomName = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
         mFloorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
@@ -109,7 +246,7 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
         return view;
     }
     
-    private void openBLEPairingInstructions()
+   /* private void openBLEPairingInstructions()
     {
         if (lcmModuleTypeRB.isChecked())
         {
@@ -148,7 +285,7 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
             showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.EMR, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
         }
     }
-    
+    */
     @Override
     public void onStart()
     {

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:baselineAligned="false"
-    android:orientation="vertical" >
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:baselineAligned="false"
+	android:orientation="vertical" >
 	<TextView
 		android:layout_width="match_parent"
 		android:layout_height="73dp"
@@ -11,6 +11,7 @@
 		android:padding="5dp"
 		android:textColor="@color/black"
 		android:textSize="@dimen/text_medium_xlarge"
+		android:visibility="gone"
 		android:layout_marginRight="16dp"
 		android:id="@+id/moduleLagend"/>
 
@@ -21,150 +22,204 @@
 		android:baselineAligned="false"
 		android:orientation="horizontal">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="0.3"
-        android:orientation="vertical" android:divider="@drawable/vline">
-
-        <FrameLayout 
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-	        <TextView
-	            android:layout_width="match_parent"
-	            android:layout_height="wrap_content"
-	            android:text="+ Add Floor"
-	            android:textSize="34dp"
-	            android:clickable="true"
-	            android:id="@+id/addFloorBtn"
-	            android:textColor="#555"/>
-	        <EditText
-	            android:layout_width="match_parent"
-	            android:layout_height="wrap_content"
-	            android:text=""
-	            android:textSize="32dp"
-	            android:id="@+id/addFloorEdit"
-	            android:imeOptions="actionDone"
-	            android:inputType="text"/>
-        </FrameLayout>
-		<TextView
+		<LinearLayout
 			android:layout_width="match_parent"
-			android:layout_height="73dp"
-			android:text="Floors"
-			android:gravity="center_vertical"
-			android:background="@color/progress_gray"
-			android:textSize="30dp"
-			android:textColor="@color/accent"/>
-	    <ListView
-	        android:id="@+id/floorList"
-	        android:animateLayoutChanges="true"
-	        android:layout_width="match_parent"
-			android:overScrollMode="never"
-			android:listSelector="@drawable/selector"
-	        android:layout_height="wrap_content">
-	    </ListView>
-	</LinearLayout>
-	<LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="0.3"
-		android:orientation="vertical" >
+			android:layout_height="match_parent"
+			android:layout_weight="0.3"
+			android:orientation="vertical"
+			android:divider="@drawable/vline">
 
-
-
-		<FrameLayout
-            android:layout_width="match_parent"
-			android:layout_marginLeft="1dp"
-            android:layout_height="wrap_content">
+			<FrameLayout
+				android:layout_width="match_parent"
+				android:layout_height="60dp"
+				android:background="@color/bg_header">
+				<LinearLayout
+					android:id="@+id/lt_addfloor"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center_horizontal|center_vertical"
+					android:orientation="horizontal">
+					<TextView
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:text="@string/title_addfloor"
+						android:textAppearance="@style/title_black"
+						android:clickable="true"
+						android:id="@+id/addFloorBtn"
+						android:layout_gravity="center_vertical"/>
+					<ImageView
+						android:layout_width="21dp"
+						android:layout_height="21dp"
+						android:src="@drawable/ic_add"
+						android:layout_gravity="center_vertical"/>
+				</LinearLayout>
+				<EditText
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:text=""
+					android:textSize="32dp"
+					android:id="@+id/addFloorEdit"
+					android:imeOptions="actionDone"
+					android:inputType="text"/>
+			</FrameLayout>
 			<TextView
 				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:text="+ Add Zone"
-				android:textSize="34dp"
-				android:clickable="true"
-				android:id="@+id/addRoomBtn"
-				android:textColor="#555"/>
-
-			<EditText
-				android:id="@+id/addRoomEdit"
+				android:layout_height="73dp"
+				android:text="Floors"
+				android:visibility="gone"
+				android:gravity="center_vertical"
+				android:background="@color/progress_gray"
+				android:textSize="30dp"
+				android:textColor="@color/accent"/>
+			<ListView
+				android:id="@+id/floorList"
+				android:animateLayoutChanges="true"
 				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
+				android:overScrollMode="never"
 
-				android:imeOptions="actionDone"
-				android:inputType="text"
-				android:text=""
-				android:textSize="32dp" />
-
-
-		</FrameLayout>
-
-		<TextView
-			android:id="@+id/textView28"
+				android:layout_height="wrap_content">
+			</ListView>
+		</LinearLayout>
+		<View
+			android:layout_width="0.1dp"
+			android:layout_marginTop="60dp"
+			android:layout_height="match_parent"
+			android:background="@color/text_color"
+			android:alpha="0.1"/>
+		<LinearLayout
 			android:layout_width="match_parent"
-			android:layout_height="73dp"
-			android:gravity="center_vertical"
-			android:background="@color/progress_gray"
-			android:text="Rooms"
-			android:textColor="@color/accent"
-			android:textSize="30dp" />
+			android:layout_height="match_parent"
+			android:layout_weight="0.3"
+			android:orientation="vertical" >
 
-        <ListView
-	        android:id="@+id/roomList"
-	        android:animateLayoutChanges="true"
-	        android:layout_width="match_parent"
-			android:overScrollMode="never"
-			android:listSelector="@drawable/selector"
-	        android:layout_height="wrap_content">
-	    </ListView>
-	</LinearLayout>
-	<LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="0.3"
-		android:orientation="vertical" >
 
-		<FrameLayout
+
+			<FrameLayout
+				android:layout_width="match_parent"
+				android:layout_marginLeft="1dp"
+				android:layout_height="60dp"
+				android:background="@color/bg_header">
+				<LinearLayout
+					android:id="@+id/lt_addzone"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:orientation="horizontal"
+					android:layout_gravity="center_horizontal|center_vertical">
+					<TextView
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:text="@string/title_addzone"
+						android:textAppearance="@style/title_black"
+						android:clickable="true"
+						android:id="@+id/addRoomBtn"
+						android:layout_gravity="center_vertical"/>
+					<ImageView
+						android:layout_width="21dp"
+						android:layout_height="21dp"
+						android:src="@drawable/ic_add"
+						android:layout_gravity="center_vertical"/>
+				</LinearLayout>
+
+				<EditText
+					android:id="@+id/addRoomEdit"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+
+					android:imeOptions="actionDone"
+					android:inputType="text"
+					android:text=""
+					android:textSize="32dp" />
+
+
+			</FrameLayout>
+
+			<TextView
+				android:id="@+id/textView28"
+				android:layout_width="match_parent"
+				android:layout_height="73dp"
+				android:gravity="center_vertical"
+				android:background="@color/progress_gray"
+				android:text="Rooms"
+				android:visibility="gone"
+				android:textColor="@color/accent"
+				android:textSize="30dp" />
+
+			<ListView
+				android:id="@+id/roomList"
+				android:animateLayoutChanges="true"
+				android:layout_width="match_parent"
+				android:overScrollMode="never"
+
+				android:layout_height="wrap_content">
+			</ListView>
+		</LinearLayout>
+		<View
+			android:layout_width="0.1dp"
+			android:layout_height="match_parent"
+			android:background="@color/text_color"
+			android:layout_marginTop="60dp"
+			android:alpha="0.1"/>
+		<LinearLayout
 			android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-			android:layout_marginLeft="1dp">
-	        <TextView 
-	            android:layout_width="match_parent"
-	            android:layout_height="wrap_content"
-	            android:text="+ Pair Module" 
-	            android:textSize="34dp"
-	            android:clickable="true" 
-		        android:id="@+id/pairModuleBtn"
-		        android:textColor="#555"/>
-	        <EditText 
-	            android:layout_width="match_parent"
-	            android:layout_height="wrap_content"
-	            android:text="" 
-	            android:textSize="32dp"
-	            android:enabled="false"
+			android:layout_height="match_parent"
+			android:layout_weight="0.3"
+			android:orientation="vertical" >
 
-	            android:visibility="invisible"
-	            android:id="@+id/addModuleEdit"
-	            android:imeOptions="actionDone" 
-	            android:inputType="text"/>
-        </FrameLayout>
+			<FrameLayout
+				android:layout_width="match_parent"
+				android:layout_height="60dp"
+				android:layout_marginLeft="1dp"
+				android:background="@color/bg_header">
+				<LinearLayout
+					android:id="@+id/lt_addModule"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:orientation="horizontal"
+					android:layout_gravity="center_horizontal|center_vertical">
+					<TextView
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:text="@string/title_addmodule"
+						android:textAppearance="@style/title_black"
+						android:clickable="true"
+						android:id="@+id/pairModuleBtn"
+						android:layout_gravity="center_vertical"/>
+					<ImageView
+						android:layout_width="21dp"
+						android:layout_height="21dp"
+						android:src="@drawable/ic_add"
+						android:layout_gravity="center_vertical"/>
+				</LinearLayout>
 
-		<TextView
-			android:layout_width="match_parent"
-			android:layout_height="73dp"
-			android:text="Modules"
-			android:gravity="center_vertical"
-			android:textSize="30dp"
-			android:background="@color/progress_gray"
-			android:textColor="@color/accent"/>
+				<EditText
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:text=""
+					android:textSize="32dp"
+					android:enabled="false"
+					android:visibility="invisible"
+					android:id="@+id/addModuleEdit"
+					android:imeOptions="actionDone"
+					android:inputType="text"/>
+			</FrameLayout>
 
-	    <ListView
-	        android:id="@+id/moduleList"
-	        android:animateLayoutChanges="true"
-			android:overScrollMode="never"
-	        android:layout_width="match_parent"
-			android:listSelector="@drawable/selector"
-	        android:layout_height="wrap_content">
-	    </ListView>
-	</LinearLayout>
+			<TextView
+				android:layout_width="match_parent"
+				android:layout_height="73dp"
+				android:text="Modules"
+				android:gravity="center_vertical"
+				android:textSize="30dp"
+				android:visibility="gone"
+				android:background="@color/progress_gray"
+				android:textColor="@color/accent"/>
+
+			<ListView
+				android:id="@+id/moduleList"
+				android:animateLayoutChanges="true"
+				android:overScrollMode="never"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content">
+			</ListView>
+		</LinearLayout>
 	</LinearLayout>
 </LinearLayout>

@@ -64,5 +64,6 @@
     <color name="hint_textcolor">#99000000</color>
     <color name="input_textcolor">#B3000000</color>
     <color name="bg_lightblack">#4D000000</color>
+    <color name="bg_header">#F7F7F7</color>
 
 </resources>

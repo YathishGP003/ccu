@@ -12,6 +12,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -19,6 +20,7 @@ import android.widget.CompoundButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import java.util.ArrayList;
 
@@ -70,10 +72,10 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
     Spinner analogout1AtMaxSp;
     
     @BindView(R.id.analog2DynamicSp)
-    SwitchCompat analog2DynamicSP;
+    ToggleButton analog2DynamicSP;
     
     @BindView(R.id.zeroErrorAtMp)
-    SwitchCompat zeroErrorAtMP;
+    ToggleButton zeroErrorAtMP;
     
     @BindView(R.id.setBtn)
     Button setButton;
@@ -115,13 +117,12 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
     {
         super.onStart();
         Dialog dialog = getDialog();
-        if (dialog != null)
-        {
-            int width = ViewGroup.LayoutParams.WRAP_CONTENT;
-            int height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        if (dialog != null) {
+            int width = 1165;//ViewGroup.LayoutParams.WRAP_CONTENT;
+            int height = 672;//ViewGroup.LayoutParams.WRAP_CONTENT;
             dialog.getWindow().setLayout(width, height);
         }
-        setTitle();
+        //setTitle();
     }
     
     private void setTitle() {
@@ -152,6 +153,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
         View view = inflater.inflate(R.layout.fragment_plc_config, container, false);
+        getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         mSmartNodeAddress = getArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR);
         zoneRef = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
         floorRef = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);

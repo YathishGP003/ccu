@@ -1,38 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:layout_marginLeft="40dp"
-              android:layout_marginRight="40dp"
-              android:orientation="vertical">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="24dp"
-        android:text="This profile allows monitoring and graphing of energy usage via Modbus energy meter
-                      connected to the Smart Node. Please wire up the meter as shown below."
-        android:layout_gravity="center"
-        android:textSize="@dimen/text_large"/>
-
-    <ImageView
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:src="@drawable/enerfy_meter_orange"
-        android:layout_weight="1"/>
+        android:layout_height="wrap_content">
 
-    <Button
-        android:id="@+id/setBtn"
-        android:layout_marginTop="24dp"
-        android:layout_marginBottom="24dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="SET"
-        android:layout_gravity="right"
-        android:textStyle="bold"
-        android:textSize="20dp"
-        android:textColor="@color/orange_75f"
-        android:background="?android:attr/selectableItemBackground"
-        android:gravity="right"
-        android:padding="10dp"/>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <RelativeLayout
+                android:id="@+id/layoutHeader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp">
+
+
+                <TextView
+                    android:id="@+id/textTitleFragment"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerVertical="true"
+                    android:fontFamily="@font/lato_bold"
+                    android:text="@string/title_energymeter"
+                    android:textAllCaps="true"
+                    android:textColor="@color/orange_75f"
+                    android:textSize="33.5dp"
+                    android:textStyle="bold" />
+
+            </RelativeLayout>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:orientation="vertical"
+                android:layout_below="@+id/layoutHeader"
+                android:layout_marginTop="46dp"
+                android:paddingLeft="56dp"
+                android:paddingRight="56dp">
+
+                <TextView
+                    android:id="@+id/textInstruction"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:text="@string/label_eminstruction"
+                    android:gravity="center_horizontal"
+                    android:textAppearance="@style/title_normal" />
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="361dp" />
+
+            </LinearLayout>
+
+
+            <Button
+                android:id="@+id/setBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentBottom="true"
+                android:layout_marginRight="24dp"
+                android:layout_marginBottom="24dp"
+                android:background="@null"
+                android:button="@null"
+                android:fontFamily="@font/lato_regular"
+                android:text="@string/button_set"
+                android:textAllCaps="true"
+                android:textColor="@color/orange_75f"
+                android:textSize="19.5dp" />
+        </RelativeLayout>
+    </ScrollView>
 </LinearLayout>
+

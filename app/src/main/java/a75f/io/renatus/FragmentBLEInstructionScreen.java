@@ -202,6 +202,32 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
             }
         }
+        else if (mProfileType == ProfileType.TEMP_MONITOR)
+        {
+            if (L.isSimulation())
+            {
+                showDialogFragment(FragmentTempMonitorConfiguration.newInstance(mNodeAddress, mRoomName, mNodeType, mFloorName), FragmentHeatPumpConfiguration.ID);
+            }
+            else
+            {
+                Log.d("FragBleInstrScrn","CPU profile. device scan");
+                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.SMARTSTAT_HEAT_PUMP_UNIT);
+                showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
+            }
+        }
+        else if (mProfileType == ProfileType.TEMP_INFLUENCE)
+        {
+            if (L.isSimulation())
+            {
+                showDialogFragment(FragmentTempInfConfiguration.newInstance(mNodeAddress, mRoomName, mNodeType, mFloorName), FragmentHeatPumpConfiguration.ID);
+            }
+            else
+            {
+                Log.d("FragBleInstrScrn","CPU profile. device scan");
+                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.SMARTSTAT_HEAT_PUMP_UNIT);
+                showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
+            }
+        }
     }
     
     

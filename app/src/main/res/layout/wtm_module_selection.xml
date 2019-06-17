@@ -41,7 +41,7 @@
             android:layout_marginRight="180dp"
             android:layout_centerVertical="true"
             android:fontFamily="@font/lato_bold"
-            android:text="@string/title_smartstatmodule"
+            android:text="@string/title_wtmmodule"
             android:textAllCaps="true"
             android:textColor="@color/orange_75f"
             android:textSize="33.5dp"
@@ -51,7 +51,7 @@
     <LinearLayout
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="46dp"
         android:layout_width="match_parent"
         android:orientation="vertical">
 
@@ -74,9 +74,8 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-
                 <RelativeLayout
-                    android:id="@+id/rl_cpu"
+                    android:id="@+id/rl_tempmonitor"
                     android:layout_width="match_parent"
                     android:layout_height="92dp"
                     android:layout_marginLeft="180dp">
@@ -89,19 +88,18 @@
                         android:layout_centerVertical="true"
                         android:orientation="vertical">
                         <TextView
-                            android:id="@+id/textCPU"
+                            android:id="@+id/textTempMonitor"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="right"
-                            android:text="@string/title_cpu"
+                            android:text="@string/title_tempmonitor"
                             android:textAppearance="@style/title_normal"/>
 
                         <TextView
-                            android:id="@+id/textCPUdesc"
+                            android:id="@+id/textTempMonitordesc"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/desc_cpu"
-                            android:gravity="right"
+                            android:text="@string/desc_tempmonitor"
                             android:textAppearance="@style/text_label"/>
 
                     </LinearLayout>
@@ -122,7 +120,7 @@
                 </RelativeLayout>
 
                 <RelativeLayout
-                    android:id="@+id/rl_commercial"
+                    android:id="@+id/rl_tempinf"
                     android:layout_width="match_parent"
                     android:layout_height="92dp"
                     android:layout_marginLeft="180dp">
@@ -135,19 +133,19 @@
                         android:layout_centerVertical="true"
                         android:orientation="vertical">
                         <TextView
-                            android:id="@+id/textCommercial"
+                            android:id="@+id/textTempInf"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="right"
-                            android:text="@string/title_commercial"
+                            android:text="@string/title_tempinfluence"
                             android:textAppearance="@style/title_normal"/>
 
                         <TextView
-                            android:id="@+id/textLightdesc"
+                            android:id="@+id/textCPCdesc"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/desc_commercial"
-                            android:gravity="right"
+                            android:text="@string/desc_tempinfluence"
+                            android:gravity="right|center_vertical"
                             android:textAppearance="@style/text_label"/>
 
                     </LinearLayout>
@@ -167,143 +165,6 @@
                         android:layout_alignParentBottom="true"/>
                 </RelativeLayout>
 
-                <RelativeLayout
-                    android:id="@+id/rl_hpu"
-                    android:layout_width="match_parent"
-                    android:layout_height="92dp"
-                    android:layout_marginLeft="180dp">
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentRight="true"
-                        android:layout_marginRight="190dp"
-                        android:layout_centerVertical="true"
-                        android:orientation="vertical">
-                        <TextView
-                            android:id="@+id/textHPU"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="right"
-                            android:text="@string/title_hpu"
-                            android:textAppearance="@style/title_normal"/>
-
-                        <TextView
-                            android:id="@+id/textHPUdesc"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/desc_hpu"
-                            android:gravity="right"
-                            android:textAppearance="@style/text_label"/>
-
-                    </LinearLayout>
-                    <ImageView
-                        android:layout_width="12dp"
-                        android:layout_height="20dp"
-                        android:layout_marginRight="92dp"
-                        android:layout_alignParentRight="true"
-                        android:layout_centerVertical="true"
-                        android:src="@drawable/icon_arrowright"/>
-                    <View
-                        android:layout_width="517dp"
-                        android:layout_alignParentRight="true"
-                        android:layout_height="0.1dp"
-                        android:background="@color/text_color"
-                        android:alpha="0.37"
-                        android:layout_alignParentBottom="true"/>
-                </RelativeLayout>
-
-                <RelativeLayout
-                    android:id="@+id/rl_2pipe"
-                    android:layout_width="match_parent"
-                    android:layout_height="92dp"
-                    android:layout_marginLeft="180dp">
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentRight="true"
-                        android:layout_marginRight="190dp"
-                        android:layout_centerVertical="true"
-                        android:orientation="vertical">
-                        <TextView
-                            android:id="@+id/text2Pipe"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="right"
-                            android:text="@string/title_2pipe"
-                            android:textAppearance="@style/title_normal"/>
-
-                        <TextView
-                            android:id="@+id/text2Pipedesc"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/desc_2pipe"
-                            android:gravity="right"
-                            android:textAppearance="@style/text_label"/>
-
-                    </LinearLayout>
-                    <ImageView
-                        android:layout_width="12dp"
-                        android:layout_height="20dp"
-                        android:layout_marginRight="92dp"
-                        android:layout_alignParentRight="true"
-                        android:layout_centerVertical="true"
-                        android:src="@drawable/icon_arrowright"/>
-                    <View
-                        android:layout_width="517dp"
-                        android:layout_alignParentRight="true"
-                        android:layout_height="0.1dp"
-                        android:background="@color/text_color"
-                        android:alpha="0.37"
-                        android:layout_alignParentBottom="true"/>
-                </RelativeLayout>
-
-                <RelativeLayout
-                    android:id="@+id/rl_4pipe"
-                    android:layout_width="match_parent"
-                    android:layout_height="92dp"
-                    android:layout_marginLeft="180dp">
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentRight="true"
-                        android:layout_marginRight="190dp"
-                        android:layout_centerVertical="true"
-                        android:orientation="vertical">
-                        <TextView
-                            android:id="@+id/text4Pipe"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="right"
-                            android:text="@string/title_4pipe"
-                            android:textAppearance="@style/title_normal"/>
-
-                        <TextView
-                            android:id="@+id/text4Pipedesc"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/desc_4pipe"
-                            android:gravity="right"
-                            android:textAppearance="@style/text_label"/>
-
-                    </LinearLayout>
-                    <ImageView
-                        android:layout_width="12dp"
-                        android:layout_height="20dp"
-                        android:layout_marginRight="92dp"
-                        android:layout_alignParentRight="true"
-                        android:layout_centerVertical="true"
-                        android:src="@drawable/icon_arrowright"/>
-                    <View
-                        android:layout_width="517dp"
-                        android:layout_alignParentRight="true"
-                        android:layout_height="0.1dp"
-                        android:background="@color/text_color"
-                        android:alpha="0.37"
-                        android:layout_alignParentBottom="true"/>
-                </RelativeLayout>
             </LinearLayout>
 
             <!-- <RadioGroup

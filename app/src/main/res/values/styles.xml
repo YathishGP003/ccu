@@ -183,4 +183,25 @@
         <item name="android:fontFamily">@font/lato_regular</item>
         <item name="android:gravity">center_vertical</item>
     </style>
+
+    <style name="title_black" parent="@android:style/TextAppearance">
+        <item name="android:textSize">25sp</item>
+        <item name="android:textColor">@color/text_color</item>
+        <item name="android:fontFamily">@font/lato_black</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+
+    <style name="title_normal" parent="@android:style/TextAppearance">
+        <item name="android:textSize">25sp</item>
+        <item name="android:textColor">@color/text_color</item>
+        <item name="android:fontFamily">@font/lato_regular</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+
+    <style name="label_values" parent="@android:style/TextAppearance">
+        <item name="android:textSize">19.5sp</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:fontFamily">@font/lato_regular</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
 </resources>

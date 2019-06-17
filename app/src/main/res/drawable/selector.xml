@@ -1,27 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_pressed="true">
-        <color android:color="@color/progress_gray" />
+
+    <item android:drawable="@drawable/list_selector" android:state_pressed="true"/>
+    <item android:drawable="@drawable/list_selector" android:state_focused="true"/>
+    <item android:drawable="@drawable/list_selector" android:state_selected="true"/>
+    <item android:drawable="@drawable/list_selector" android:state_activated="true"/>
+    <item android:drawable="@drawable/list_selector" android:state_checked="true"/>
+
+  <!--  <item android:state_pressed="true">
+        <color android:color="@color/progress_color_orange" />
     </item>
     <item android:state_focused="true">
-        <color android:color="@color/progress_gray" />
+        <color android:color="@color/progress_color_orange" />
     </item>
     <item android:state_selected="true">
-        <color android:color="@color/progress_gray" />
+        <color android:color="@color/progress_color_orange" />
     </item>
     <item android:state_activated="true">
-        <color android:color="@color/progress_gray" />
+        <color android:color="@color/progress_color_orange" />
     </item>
     <item android:state_checked="true">
-        <color android:color="@color/progress_gray" android:layout_width="wrap_content" android:layout_height="wrap_content" />
-        
-    </item>
+        <color android:color="@color/progress_color_orange"
+            android:layout_width="wrap_content" android:layout_height="wrap_content" />
+    </item>-->
 
     <item android:state_checked="false">
-        <color android:color="@color/progress_gray" />
+        <color android:color="@color/white" />
     </item>
 
-    <item>
+    <item android:state_pressed="false">
         <color android:color="@color/transparent" />
     </item>
 </selector>

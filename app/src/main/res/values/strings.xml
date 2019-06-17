@@ -376,4 +376,112 @@
     <string name="button_finish">Finish</string>
 
 
+    <!--Floorplan Screen-->
+    <string name="title_addfloor">ADD FLOOR</string>
+    <string name="title_addzone">ADD ZONE</string>
+    <string name="title_addmodule">PAIR MODULE</string>
+
+    <!--Pairing Screen-->
+    <string name="title_sn">SN</string>
+    <string name="title_smartnode">Smart Node</string>
+    <string name="title_ss">SS</string>
+    <string name="title_smartstat">Smart Stat</string>
+    <string name="title_wtm">WTM</string>
+    <string name="title_wirelesstemp">Wireless Temperature Monitor</string>
+
+    <!--SMART NODE Module Screen-->
+    <string name="title_smartnodemodule">SMART NODE | SELECT MODULE TYPE</string>
+    <string name="title_vav">VAV with Reheat</string>
+    <string name="desc_vav">Control a VAV box for airflow and reheat valves/electric coils</string>
+    <string name="title_dab">Dynamic Airflow Balancing</string>
+    <string name="desc_dab">Control dampers in ductwork to provide granular airflow control</string>
+    <string name="title_lighting">Lighting</string>
+    <string name="desc_light">Control switched loads as well as modulate fixtures for dimming</string>
+    <string name="title_tempmonitor">Temperature Monitoring</string>
+    <string name="desc_tempmonitor">Temperature monitoring with customizable alert thresholds</string>
+    <string name="title_cpc">Central Plant Controller</string>
+    <string name="desc_cpc">Boiler,Pumps and Cooling Tower and related profiles </string>
+    <string name="title_picontrol">Pi Loop Controller</string>
+    <string name="desc_picontrol">Generic Pi Control for a range of applications with sensors connected via analog inputs</string>
+    <string name="title_energymeter">Energy Meter</string>
+    <string name="desc_energymeter">Hook up a Modbus energy meter to monitor electricity consumption</string>
+    <string name="title_iftt">IFTT</string>
+    <string name="desc_iftt">Flexible control of equipment based on custom rules. Please contact 75F support for creation of the rules </string>
+    <string name="vav_nofan">VAV Reheat - No fan</string>
+    <string name="desc_nofan">Control a VAV box with reheat having no fan</string>
+    <string name="vav_seriesfan">VAV Reheat - Series fan</string>
+    <string name="desc_seriesfan">Control a series fan powered VAV box</string>
+    <string name="vav_parallelfan">VAV Reheat - Parallel fan</string>
+    <string name="desc_parallelfan">Control a parallel fan powered VAV box</string>
+
+    <!--SMART STAT Module Screen-->
+    <string name="title_smartstatmodule">SMART STAT | SELECT MODULE TYPE</string>
+    <string name="title_cpu">Conventional Package Unit</string>
+    <string name="desc_cpu">Unitary equipment with 2 stages for Heating, Cooling and Fan\nUser can select Fan Low/High/Auto</string>
+    <string name="title_commercial">Commercial Package Unit</string>
+    <string name="desc_commercial">Unitary equipment with 2 stages for Heating, Cooling and Fan\nFan turns on during occupied time</string>
+    <string name="title_hpu">Heat Pump Unit</string>
+    <string name="desc_hpu">Compressor based Heating and Cooling\nReversing Valve determines operational mode</string>
+    <string name="title_2pipe">2 Pipe FCU</string>
+    <string name="desc_2pipe">A Coil fed by 1 pair of supply pipes provides heating or cooling\nThe correct mode is based on sensing supply water temperature</string>
+    <string name="title_4pipe">4 Pipe FCU</string>
+    <string name="desc_4pipe">A water coil fed by separate heating and cooling pipes\nAllows for independent heating/cooling modes</string>
+
+
+    <!--WTM Module Screen-->
+    <string name="title_wtmmodule">WTM | SELECT MODULE TYPE</string>
+    <string name="title_tempinfluence">Temperature Influencing</string>
+    <string name="desc_tempinfluence">Report temperature and humidity and use that for influencing central\nsystem control but not connect to terminal equipment or dampers</string>
+
+    <!--CCU Module Screen-->
+    <string name="title_ccumodule">CCU | SELECT MODULE TYPE</string>
+
+    <!--VAV REHEAT - NO FAN Screen-->
+    <string name="title_vavnofan">VAV REHEAT - NO FAN</string>
+    <string name="label_damper1type">Damper1 Type</string>
+    <string name="label_damper1size">Size</string>
+    <string name="label_damper1shape">Shape</string>
+    <string name="label_enableoccupance">Enable Occupancy Control</string>
+    <string name="label_reheattype">Reheat Type</string>
+    <string name="label_enableIAQ">Enable IAQ Control</string>
+    <string name="label_zonepriority">Zone Priority</string>
+    <string name="label_enableCO2">Enable CO2 Control</string>
+    <string name="label_tempoffset">Temperature\nOffset</string>
+    <string name="label_maxdampercoolpos">Max Damper Pos\nCooling</string>
+    <string name="label_mindampercoolpos">Min Damper Pos\nCooling</string>
+    <string name="label_maxdamperheatpos">Max Damper Pos\nHeating</string>
+    <string name="label_mindamperheatpos">Min Damper Pos\nHeating</string>
+
+
+    <!--DAB Screen-->
+    <string name="title_dabinput">DAB</string>
+    <string name="label_damper2type">Damper2 Type</string>
+
+
+    <!--PI LOOP CONTROLLER Screen-->
+    <string name="title_piloop">PI LOOP CONTROLLER</string>
+    <string name="label_analogin1">Analog-in1 Input Sensor</string>
+    <string name="label_thin1">TH-in1 Input Sensor</string>
+    <string name="label_useanalogin2">Use Analog-in2 for dynamic setpoint</string>
+    <string name="label_analogin2">Analog-in2 Input Sensor</string>
+    <string name="label_analogout1min">Analog-out1 at Min Output</string>
+    <string name="label_analogout1max">Analog-out1 at Max Output</string>
+    <string name="label_zeroerrormp">Expected Zero Error at Midpoint</string>
+    <string name="label_targetvalue">Target Value</string>
+    <string name="label_expectedError">Expected Error Range</string>
+    <string name="label_setpointsensor">Setpoint Sensor Offset</string>
+
+
+    <!--ENERGY METER SCREEN-->
+    <string name="label_eminstruction">This profile allows monitoring and graphing of energy usage via Modbus energy meter\nconnected to the Smart Node. Please wire up the meter as shown below.</string>
+
+    <!--TEMPERATURE MONITORING Screen-->
+    <string name="label_mainsensor">Main Temperature/Humidity Sensor</string>
+    <string name="label_p1tempsensor">Probe 1 Temperature Sensor </string>
+    <string name="label_p2tempsensor">Probe 2 Temperature Sensor</string>
+    <string name="label_maintempoffset">MAIN SENSOR\nTEMP OFFSET</string>
+
+    <!--TEMPERATURE INFLUENCING Screen-->
+    <string name="label_tempoffsetnp">TEMP OFFSET</string>
+
 </resources>

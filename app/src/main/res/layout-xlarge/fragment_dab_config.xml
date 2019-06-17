@@ -3,8 +3,436 @@
             android:id="@+id/damperscrollView"
             android:layout_width="match_parent"
             android:overScrollMode="never"
-            android:layout_height="wrap_content" >
-    <LinearLayout
+            android:layout_height="wrap_content"
+            xmlns:tools="http://schemas.android.com/tools">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <RelativeLayout
+                android:id="@+id/layoutHeader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp">
+
+
+                <TextView
+                    android:id="@+id/textTitleFragment"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerVertical="true"
+                    android:fontFamily="@font/lato_bold"
+                    android:text="@string/title_dabinput"
+                    android:textAllCaps="true"
+                    android:textColor="@color/orange_75f"
+                    android:textSize="33.5dp"
+                    android:textStyle="bold" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="36dp"
+                android:layout_marginRight="36dp"
+                android:orientation="horizontal"
+                android:layout_marginTop="40dp"
+                android:layout_gravity="center_horizontal"
+                android:paddingTop="20dp" >
+
+                <TextView
+                    android:id="@+id/textDamper1Type"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center_vertical"
+                    android:text="@string/label_damper1type"
+                    android:textAppearance="@style/title_normal" />
+
+                <Spinner
+                    android:id="@+id/damper1Type"
+                    android:layout_width="160dp"
+                    android:layout_height="40dp"
+                    android:layout_marginLeft="80dp"
+                    android:layout_toRightOf="@+id/textDamper1Type"
+                    android:layout_gravity="center_vertical"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:entries="@array/hvac_stage_selector"
+                    tools:listitem="@layout/spinner_dropdown_item"/>
+
+                <TextView
+                    android:id="@+id/textDamper1Size"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="82dp"
+                    android:layout_toRightOf="@+id/damper1Type"
+                    android:text="@string/label_damper1size"
+                    android:textAppearance="@style/title_normal" />
+
+
+                <Spinner
+                    android:id="@+id/damper1Size"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:minWidth="76dp"
+                    android:layout_marginLeft="46dp"
+                    android:layout_toRightOf="@+id/textDamper1Size"
+                    android:layout_gravity="center_vertical"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:entries="@array/hvac_stage_selector"
+                    tools:listitem="@layout/spinner_dropdown_item"/>
+                <TextView
+                    android:id="@+id/textdamper1Shape"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_marginLeft="136dp"
+                    android:layout_toRightOf="@+id/damper1Size"
+                    android:layout_gravity="center_vertical"
+                    android:text="@string/label_damper1shape"
+                    android:textAppearance="@style/title_normal"/>
+
+                <Spinner
+                    android:id="@+id/damper1Shape"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:minWidth="76dp"
+                    android:layout_marginLeft="46dp"
+                    android:layout_toRightOf="@+id/textdamper1Shape"
+                    android:layout_gravity="center_vertical"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:entries="@array/hvac_stage_selector"
+                    tools:listitem="@layout/spinner_dropdown_item"/>
+
+                <TextView
+                    android:id="@+id/textDamper2Type"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center_vertical"
+                    android:text="@string/label_damper2type"
+                    android:textAppearance="@style/title_normal"
+                    android:layout_below="@+id/damper1Shape"
+                    android:layout_alignLeft="@+id/textDamper1Type"
+                    android:layout_marginTop="36dp"/>
+
+                <Spinner
+                    android:id="@+id/damper2Type"
+                    android:layout_width="160dp"
+                    android:layout_height="40dp"
+                    android:layout_marginLeft="80dp"
+                    android:layout_toRightOf="@+id/textDamper2Type"
+                    android:layout_gravity="center_vertical"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:entries="@array/hvac_stage_selector"
+                    tools:listitem="@layout/spinner_dropdown_item"
+                    android:layout_below="@+id/damper1Shape"
+                    android:layout_alignRight="@+id/damper1Type"
+                    android:layout_marginTop="36dp"/>
+
+                <TextView
+                    android:id="@+id/textDamper2Size"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_toRightOf="@+id/damper2Type"
+                    android:text="@string/label_damper1size"
+                    android:textAppearance="@style/title_normal"
+                    android:layout_below="@+id/damper1Shape"
+                    android:layout_alignLeft="@+id/textDamper1Size"
+                    android:layout_marginTop="36dp"
+                    />
+
+
+                <Spinner
+                    android:id="@+id/damper2Size"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:minWidth="76dp"
+                    android:layout_toRightOf="@+id/textDamper1Size"
+                    android:layout_gravity="center_vertical"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:entries="@array/hvac_stage_selector"
+                    tools:listitem="@layout/spinner_dropdown_item"
+                    android:layout_below="@+id/damper1Shape"
+                    android:layout_alignLeft="@+id/damper1Size"
+                    android:layout_marginTop="36dp"/>
+                <TextView
+                    android:id="@+id/textdamper2Shape"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_toRightOf="@+id/damper2Size"
+                    android:layout_gravity="center_vertical"
+                    android:text="@string/label_damper1shape"
+                    android:textAppearance="@style/title_normal"
+                    android:layout_below="@+id/damper1Shape"
+                    android:layout_alignLeft="@+id/textdamper1Shape"
+                    android:layout_marginTop="36dp"/>
+
+                <Spinner
+                    android:id="@+id/damper2Shape"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:minWidth="76dp"
+                    android:layout_toRightOf="@+id/textdamper2Shape"
+                    android:layout_gravity="center_vertical"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:entries="@array/hvac_stage_selector"
+                    tools:listitem="@layout/spinner_dropdown_item"
+                    android:layout_below="@+id/damper1Shape"
+                    android:layout_alignLeft="@+id/damper1Shape"
+                    android:layout_marginTop="36dp"/>
+
+
+                <TextView
+                    android:id="@+id/textEnableIAQ"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:text="@string/label_enableIAQ"
+                    android:textAppearance="@style/title_normal"
+                    android:layout_marginTop="32dp"
+                    android:layout_alignLeft="@+id/textDamper2Type"
+                    android:layout_below="@+id/damper2Type"/>
+
+                <ToggleButton
+                    android:id="@+id/enableIAQControl"
+                    android:layout_width="46.12dp"
+                    android:layout_height="27.42dp"
+                    android:layout_gravity="center_vertical"
+                    android:background="@drawable/toggle_selector"
+                    android:checked="false"
+                    android:textOff=""
+                    android:textOn=""
+                    android:layout_alignRight="@id/damper2Type"
+                    android:layout_marginTop="35dp"
+                    android:layout_below="@+id/damper2Type"/>
+
+                <TextView
+                    android:id="@+id/textZonePriority"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="@string/label_zonepriority"
+                    android:textAppearance="@style/title_normal"
+                    android:layout_marginTop="34dp"
+                    android:layout_alignLeft="@+id/textDamper2Size"
+                    android:layout_below="@+id/damper2Shape"/>
+
+                <Spinner
+                    android:id="@+id/zonePriority"
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:minWidth="76dp"
+                    android:layout_gravity="center_vertical"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:entries="@array/hvac_stage_selector"
+                    tools:listitem="@layout/spinner_dropdown_item"
+                    android:layout_marginTop="34dp"
+                    android:layout_below="@+id/damper2Shape"
+                    android:layout_alignRight="@+id/damper2Shape"
+                    />
+
+                <TextView
+                    android:id="@+id/textEnableOccupancy"
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_alignLeft="@id/textZonePriority"
+                    android:layout_marginTop="32dp"
+                    android:layout_below="@+id/zonePriority"
+                    android:text="@string/label_enableoccupance"
+                    android:textAppearance="@style/title_normal"
+                    />
+
+                <ToggleButton
+                    android:id="@+id/enableOccupancyControl"
+                    android:layout_width="46.12dp"
+                    android:layout_height="27.42dp"
+                    android:layout_gravity="center_vertical"
+                    android:background="@drawable/toggle_selector"
+                    android:checked="false"
+                    android:textOff=""
+                    android:textOn=""
+                    android:layout_marginTop="35dp"
+                    android:layout_alignRight="@+id/zonePriority"
+                    android:layout_below="@+id/zonePriority"/>
+
+                <TextView
+                    android:id="@+id/textEnableCO2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:text="@string/label_enableCO2"
+                    android:textAppearance="@style/title_normal"
+                    android:layout_alignLeft="@+id/textEnableIAQ"
+                    android:layout_marginTop="32dp"
+                    android:layout_below="@+id/zonePriority"/>
+
+                <ToggleButton
+                    android:id="@+id/enableCO2Control"
+                    android:layout_width="46.12dp"
+                    android:layout_height="27.42dp"
+                    android:layout_gravity="center_vertical"
+                    android:background="@drawable/toggle_selector"
+                    android:checked="false"
+                    android:textOff=""
+                    android:textOn=""
+                    android:layout_alignLeft="@+id/enableIAQControl"
+                    android:layout_marginTop="35dp"
+                    android:layout_below="@+id/zonePriority"/>
+
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="42dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical" >
+
+                    <TextView
+                        android:id="@+id/textTempOffset"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:text="@string/label_tempoffset"
+                        android:gravity="center_vertical|center_horizontal"
+                        android:textAppearance="@style/label_values" />
+
+                    <NumberPicker
+                        android:id="@+id/temperatureOffset"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:textColor="#202020"
+                        android:textSize="30sp"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="42dp"
+                    android:orientation="vertical" >
+
+
+                    <TextView
+                        android:id="@+id/textMaxCool"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:text="@string/label_maxdampercoolpos"
+                        android:gravity="center_vertical|center_horizontal"
+                        android:textAppearance="@style/label_values" />
+
+                    <NumberPicker
+                        android:id="@+id/maxDamperPos"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:textSize="30sp"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="42dp"
+                    android:orientation="vertical" >
+
+                    <TextView
+                        android:id="@+id/textMinCool"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:text="@string/label_mindampercoolpos"
+                        android:gravity="center_vertical|center_horizontal"
+                        android:textAppearance="@style/label_values" />
+
+                    <NumberPicker
+                        android:id="@+id/minDamperPos"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:textSize="30sp"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="42dp"
+                    android:orientation="vertical" >
+                    <TextView
+                        android:id="@+id/textMaxHeat"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:text="@string/label_maxdamperheatpos"
+                        android:gravity="center_vertical|center_horizontal"
+                        android:textAppearance="@style/label_values" />
+
+
+                    <NumberPicker
+                        android:id="@+id/maxHeatingDamperPos"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:textSize="30sp"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="42dp"
+                    android:orientation="vertical" >
+
+                    <TextView
+                        android:id="@+id/textMinHeat"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:text="@string/label_mindamperheatpos"
+                        android:gravity="center_vertical|center_horizontal"
+                        android:textAppearance="@style/label_values" />
+
+                    <NumberPicker
+                        android:id="@+id/minHeatingDamperPos"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:textSize="30sp"/>
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/setBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginRight="24dp"
+            android:layout_marginBottom="95dp"
+            android:background="@null"
+            android:button="@null"
+            android:fontFamily="@font/lato_regular"
+            android:text="@string/button_set"
+            android:textAllCaps="true"
+            android:textColor="@color/orange_75f"
+            android:textSize="19.5dp" />
+
+    </RelativeLayout>
+    <!--<LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginRight="40dp"
@@ -374,5 +802,5 @@
             android:gravity="right"
             android:padding="10dp"/>
 
-    </LinearLayout>
+    </LinearLayout>-->
 </ScrollView>

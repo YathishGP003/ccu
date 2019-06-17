@@ -3,6 +3,7 @@ package a75f.io.renatus;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
@@ -14,6 +15,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -21,6 +23,7 @@ import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -76,9 +79,9 @@ public class FragmentDABConfiguration extends BaseDialogFragment
     NumberPicker minCoolingDamperPos;
     NumberPicker maxHeatingDamperPos;
     NumberPicker minHeatingDamperPos;
-    SwitchCompat enableOccupancyControl;
-    SwitchCompat enableCO2Control;
-    SwitchCompat enableIAQControl;
+    ToggleButton enableOccupancyControl;
+    ToggleButton enableCO2Control;
+    ToggleButton enableIAQControl;
     
     private ProfileType             mProfileType;
     private DabProfile              mDabProfile;
@@ -124,13 +127,12 @@ public class FragmentDABConfiguration extends BaseDialogFragment
     {
         super.onStart();
         Dialog dialog = getDialog();
-        if (dialog != null)
-        {
-            int width = ViewGroup.LayoutParams.WRAP_CONTENT;
-            int height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        if (dialog != null) {
+            int width = 1165;//ViewGroup.LayoutParams.WRAP_CONTENT;
+            int height = 672;//ViewGroup.LayoutParams.WRAP_CONTENT;
             dialog.getWindow().setLayout(width, height);
         }
-        setTitle();
+        //setTitle();
     }
     
     private void setTitle() {
@@ -180,6 +182,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
         View view = inflater.inflate(R.layout.fragment_dab_config, container, false);
+        getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         mSmartNodeAddress = getArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR);
         zoneRef = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
         floorRef = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
@@ -208,11 +211,11 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         }
         
         
-        damper1layout  = (LinearLayout)view.findViewById(R.id.damper1layout);
+      /*  damper1layout  = (LinearLayout)view.findViewById(R.id.damper1layout);
         damper1layout.setVisibility(View.VISIBLE);
     
         damper2layout  = (LinearLayout)view.findViewById(R.id.damper2layout);
-        damper2layout.setVisibility(View.VISIBLE);
+        damper2layout.setVisibility(View.VISIBLE);*/
         
         damper1Size = view.findViewById(R.id.damper1Size);
         ArrayAdapter<CharSequence> damperSizeAdapter = ArrayAdapter.createFromResource(getActivity(),
@@ -280,7 +283,13 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         minHeatingDamperPos.setValue(40);
         minHeatingDamperPos.setWrapSelectorWheel(false);
         
-        
+        setDividerColor(temperatureOffset);
+        setDividerColor(maxCoolingDamperPos);
+        setDividerColor(minCoolingDamperPos);
+        setDividerColor(maxHeatingDamperPos);
+        setDividerColor(minHeatingDamperPos);
+
+
         enableOccupancyControl = view.findViewById(R.id.enableOccupancyControl);
         enableCO2Control = view.findViewById(R.id.enableCO2Control);
         enableIAQControl = view.findViewById(R.id.enableIAQControl);
@@ -304,11 +313,11 @@ public class FragmentDABConfiguration extends BaseDialogFragment
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 damper1TypeSelected = DamperType.values()[position];
     
-                if(position == 4)
+              /*  if(position == 4)
                 damper1layout.setVisibility(View.INVISIBLE);
                 else
                 damper1layout.setVisibility(View.VISIBLE);
-                damper1layout.invalidate();
+                damper1layout.invalidate();*/
             }
             
             @Override
@@ -332,11 +341,11 @@ public class FragmentDABConfiguration extends BaseDialogFragment
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 damper2TypeSelected = DamperType.values()[position];
                 damper2Type.setSelection(position);
-                if(position == 4)
+               /* if(position == 4)
                     damper2layout.setVisibility(View.INVISIBLE);
                 else
                     damper2layout.setVisibility(View.VISIBLE);
-                damper2layout.invalidate();
+                damper2layout.invalidate();*/
             }
         
             @Override
@@ -451,7 +460,28 @@ public class FragmentDABConfiguration extends BaseDialogFragment
         L.ccu().zoneProfiles.add(mDabProfile);
         CcuLog.d(L.TAG_CCU_UI, "Set DAB Config: Profiles - "+L.ccu().zoneProfiles.size());
     }
-    
+
+    private void setDividerColor(NumberPicker picker) {
+        Field[] numberPickerFields = NumberPicker.class.getDeclaredFields();
+        for (Field field : numberPickerFields) {
+            if (field.getName().equals("mSelectionDivider")) {
+                field.setAccessible(true);
+                try {
+                    field.set(picker, getResources().getDrawable(R.drawable.divider_np));
+                } catch (IllegalArgumentException e) {
+                    Log.v("NP", "Illegal Argument Exception");
+                    e.printStackTrace();
+                } catch (Resources.NotFoundException e) {
+                    Log.v("NP", "Resources NotFound");
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    Log.v("NP", "Illegal Access Exception");
+                    e.printStackTrace();
+                }
+                break;
+            }
+        }
+    }
     private void setNumberPickerDividerColor(NumberPicker pk) {
         Class<?> numberPickerClass = null;
         try {

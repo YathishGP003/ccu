@@ -1,196 +1,307 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
-              android:orientation="vertical">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="20dp">
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-        <TextView
-            android:layout_width="300dp"
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <RelativeLayout
+                android:id="@+id/layoutHeader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp">
+
+
+                <TextView
+                    android:id="@+id/textTitleFragment"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerVertical="true"
+                    android:fontFamily="@font/lato_bold"
+                    android:text="@string/title_piloop"
+                    android:textAllCaps="true"
+                    android:textColor="@color/orange_75f"
+                    android:textSize="33.5dp"
+                    android:textStyle="bold" />
+
+            </RelativeLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center|left"
-            android:layout_marginBottom="10dp"
-            android:text="Analog-in1 Input Sensor"
-            android:textSize="@dimen/text_medium_xlarge" />
+            android:layout_weight="2"
+            android:orientation="horizontal"
+            android:layout_below="@+id/layoutHeader"
+            android:layout_marginTop="46dp"
+            android:paddingLeft="56dp"
+            android:paddingRight="56dp">
 
-        <Spinner
-            android:id="@+id/analog1InSensor"
-            android:layout_width="150dp"
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:id="@+id/textAnalogin1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_alignParentLeft="true"
+                        android:text="@string/label_analogin1"
+                        android:textAppearance="@style/title_normal" />
+
+                    <Spinner
+                        android:id="@+id/analog1InSensor"
+                        android:layout_width="160dp"
+                        android:layout_height="40dp"
+                        android:layout_alignParentRight="true"
+                        style="@style/Widget.AppCompat.Spinner.Underlined"
+                        android:entries="@array/hvac_stage_selector"
+                        tools:listitem="@layout/spinner_dropdown_item"/>
+                </RelativeLayout>
+
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="36dp">
+                    <TextView
+                        android:id="@+id/textTHin1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_alignParentLeft="true"
+                        android:text="@string/label_thin1"
+                        android:textAppearance="@style/title_normal" />
+
+                    <Spinner
+                        android:id="@+id/th1InSensor"
+                        android:layout_width="160dp"
+                        android:layout_height="40dp"
+                        android:layout_alignParentRight="true"
+                        style="@style/Widget.AppCompat.Spinner.Underlined"
+                        android:entries="@array/hvac_stage_selector"
+                        tools:listitem="@layout/spinner_dropdown_item"/>
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="36dp">
+                    <TextView
+                        android:id="@+id/textUseAnalog2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_alignParentLeft="true"
+                        android:text="@string/label_useanalogin2"
+                        android:textAppearance="@style/title_normal" />
+
+                    <ToggleButton
+                        android:id="@+id/analog2DynamicSp"
+                        android:layout_width="46.12dp"
+                        android:layout_height="27.42dp"
+                        android:layout_alignParentRight="true"
+                        android:background="@drawable/toggle_selector"
+                        android:checked="false"
+                        android:textOff=""
+                        android:textOn=""/>
+                </RelativeLayout>
+
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="36dp">
+                    <TextView
+                        android:id="@+id/textAnaglog2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_alignParentLeft="true"
+                        android:text="@string/label_analogin2"
+                        android:textAppearance="@style/title_normal" />
+
+                    <Spinner
+                        android:id="@+id/analog2InSensor"
+                        android:layout_width="160dp"
+                        android:layout_height="40dp"
+                        android:layout_alignParentRight="true"
+                        style="@style/Widget.AppCompat.Spinner.Underlined"
+                        android:entries="@array/hvac_stage_selector"
+                        tools:listitem="@layout/spinner_dropdown_item"/>
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="36dp">
+                    <TextView
+                        android:id="@+id/textAnalog1Min"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_alignParentLeft="true"
+                        android:text="@string/label_analogout1min"
+                        android:textAppearance="@style/title_normal" />
+
+                    <Spinner
+                        android:id="@+id/analogout1AtMin"
+                        android:layout_width="160dp"
+                        android:layout_height="40dp"
+                        android:layout_alignParentRight="true"
+                        style="@style/Widget.AppCompat.Spinner.Underlined"
+                        android:entries="@array/hvac_stage_selector"
+                        tools:listitem="@layout/spinner_dropdown_item"/>
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="36dp">
+                    <TextView
+                        android:id="@+id/textAnalog1Max"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_alignParentLeft="true"
+                        android:text="@string/label_analogout1max"
+                        android:textAppearance="@style/title_normal" />
+
+                    <Spinner
+                        android:id="@+id/analogout1AtMax"
+                        android:layout_width="160dp"
+                        android:layout_height="40dp"
+                        android:layout_alignParentRight="true"
+                        style="@style/Widget.AppCompat.Spinner.Underlined"
+                        android:entries="@array/hvac_stage_selector"
+                        tools:listitem="@layout/spinner_dropdown_item"/>
+                </RelativeLayout>
+
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="36dp">
+                    <TextView
+                        android:id="@+id/textZeroError"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_alignParentLeft="true"
+                        android:text="@string/label_zeroerrormp"
+                        android:textAppearance="@style/title_normal" />
+
+                    <ToggleButton
+                        android:id="@+id/zeroErrorAtMp"
+                        android:layout_width="46.12dp"
+                        android:layout_height="27.42dp"
+                        android:layout_alignParentRight="true"
+                        android:background="@drawable/toggle_selector"
+                        android:checked="false"
+                        android:textOff=""
+                        android:textOn=""/>
+                </RelativeLayout>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginLeft="56dp">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:id="@+id/textTargetValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_alignParentLeft="true"
+                        android:text="@string/label_targetvalue"
+                        android:textAppearance="@style/title_normal" />
+
+                    <Spinner
+                        android:id="@+id/targetVal"
+                        android:layout_width="160dp"
+                        android:layout_height="40dp"
+                        android:layout_alignParentRight="true"
+                        style="@style/Widget.AppCompat.Spinner.Underlined"
+                        android:entries="@array/hvac_stage_selector"
+                        tools:listitem="@layout/spinner_dropdown_item"/>
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="36dp">
+                    <TextView
+                        android:id="@+id/textErrorRange"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_alignParentLeft="true"
+                        android:text="@string/label_expectedError"
+                        android:textAppearance="@style/title_normal" />
+
+                    <Spinner
+                        android:id="@+id/errorRange"
+                        android:layout_width="160dp"
+                        android:layout_height="40dp"
+                        android:layout_alignParentRight="true"
+                        style="@style/Widget.AppCompat.Spinner.Underlined"
+                        android:entries="@array/hvac_stage_selector"
+                        tools:listitem="@layout/spinner_dropdown_item"/>
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="114dp">
+                    <TextView
+                        android:id="@+id/textSetpoint"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_alignParentLeft="true"
+                        android:text="@string/label_setpointsensor"
+                        android:textAppearance="@style/title_normal" />
+
+                    <Spinner
+                        android:id="@+id/sensorOffset"
+                        android:layout_width="160dp"
+                        android:layout_height="40dp"
+                        android:layout_alignParentRight="true"
+                        style="@style/Widget.AppCompat.Spinner.Underlined"
+                        android:entries="@array/hvac_stage_selector"
+                        tools:listitem="@layout/spinner_dropdown_item"/>
+                </RelativeLayout>
+            </LinearLayout>
+
+        </LinearLayout>
+
+
+        <Button
+            android:id="@+id/setBtn"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:layout_marginLeft="10dp"/>
-
-        <TextView
-            android:layout_width="250dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center|left"
-            android:layout_marginBottom="10dp"
-            android:text="Target Value"
-            android:gravity="right"
-            android:textSize="@dimen/text_medium_xlarge" />
-
-        <Spinner
-            android:id="@+id/targetVal"
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:layout_marginLeft="10dp"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="10dp">
-
-        <TextView
-            android:layout_width="300dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center|left"
-            android:layout_marginBottom="10dp"
-            android:text="TH-in1 Input Sensor"
-            android:textSize="@dimen/text_medium_xlarge" />
-
-        <Spinner
-            android:id="@+id/th1InSensor"
-            android:layout_width="150dp"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:layout_marginLeft="10dp"/>
-
-        <TextView
-            android:layout_width="250dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center|left"
-            android:layout_marginBottom="10dp"
-            android:text="Expected Error Range"
-            android:gravity="right"
-            android:textSize="@dimen/text_medium_xlarge" />
-
-        <Spinner
-            android:id="@+id/errorRange"
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:layout_marginLeft="10dp"/>
-    </LinearLayout>
-
-    <android.support.v7.widget.SwitchCompat
-        android:id="@+id/analog2DynamicSp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
-        android:layout_gravity="center_vertical"
-        android:text="Use Analog-in2 for dynamic setpoint             "
-        android:textSize="@dimen/text_medium_xlarge" />
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="10dp">
-
-        <TextView
-            android:layout_width="300dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center|left"
-            android:layout_marginBottom="10dp"
-            android:text="Analog-in2 Input Sensor"
-            android:textSize="@dimen/text_medium_xlarge" />
-
-        <Spinner
-            android:id="@+id/analog2InSensor"
-            android:layout_width="150dp"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:layout_marginLeft="10dp"/>
-
-        <TextView
-            android:layout_width="250dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center|left"
-            android:layout_marginBottom="10dp"
-            android:text="Set point sensor offset"
-            android:gravity="right"
-            android:textSize="@dimen/text_medium_xlarge" />
-
-        <Spinner
-            android:id="@+id/sensorOffset"
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:layout_marginLeft="10dp"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="10dp">
-
-        <TextView
-            android:layout_width="300dp"
-            android:layout_height="wrap_content"
-            android:layout_column="0"
-            android:layout_gravity="center|left"
-            android:layout_marginBottom="10dp"
-            android:text="Analog-out1 at Min Output"
-            android:textSize="@dimen/text_medium_xlarge" />
-
-        <Spinner
-            android:id="@+id/analogout1AtMin"
-            android:layout_width="150dp"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:layout_marginLeft="10dp"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="10dp">
-
-        <TextView
-            android:layout_width="300dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center|left"
-            android:layout_marginBottom="10dp"
-            android:text="Analog-out1 at Max Output"
-            android:textSize="@dimen/text_medium_xlarge" />
-
-        <Spinner
-            android:id="@+id/analogout1AtMax"
-            android:layout_width="150dp"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:layout_marginLeft="10dp"/>
-    </LinearLayout>
-
-    <android.support.v7.widget.SwitchCompat
-        android:id="@+id/zeroErrorAtMp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="10dp"
-        android:text="Expected Zero Error at Midpoint                     "
-        android:textSize="@dimen/text_medium_xlarge"/>
-
-    <Button
-        android:id="@+id/setBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Set"
-        android:layout_gravity="center"
-        android:layout_margin="20dp"/>
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginRight="24dp"
+            android:layout_marginBottom="24dp"
+            android:background="@null"
+            android:button="@null"
+            android:fontFamily="@font/lato_regular"
+            android:text="@string/button_set"
+            android:textAllCaps="true"
+            android:textColor="@color/orange_75f"
+            android:textSize="19.5dp" />
+        </RelativeLayout>
+    </ScrollView>
 </LinearLayout>
 

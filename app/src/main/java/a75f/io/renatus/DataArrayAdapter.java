@@ -2,10 +2,13 @@ package a75f.io.renatus;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,11 +22,13 @@ public class DataArrayAdapter<T> extends ArrayAdapter<T>
 	private boolean bMultiSelect       = false;
 	private int     nColor             = Color.argb(0x55, 0x00, 0x99, 0xcc);
 	private int     nMultiColor        = Color.argb(0x33, 0x00, 0x99, 0xcc);
-	
-	
-	public DataArrayAdapter(Context context, int textViewResourceId, List<T> objects)
+	private ArrayList<T> objects;
+
+
+	public DataArrayAdapter(Context context, int textViewResourceId, ArrayList<T> objects)
 	{
 		super(context, textViewResourceId, objects);
+		this.objects = objects;
 		// TODO Auto-generated constructor stub
 	}
 	
@@ -38,32 +43,45 @@ public class DataArrayAdapter<T> extends ArrayAdapter<T>
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent)
 	{
-		View v = super.getView(position, convertView, parent);
+		//convertView = super.getView(position, convertView, parent);
+		if(convertView == null){
+			convertView = LayoutInflater.from(getContext()).inflate(R.layout.listviewitem, parent, false);
+		}
+		TextView textView_Data = (TextView) convertView.findViewById(R.id.textData);
+		textView_Data.setText(objects.get(position).toString());
 		if (!bMultiSelect)
 		{
 			if (position == nSelectedPostion)
 			{
-				v.setBackgroundColor(getContext().getResources().getColor(R.color.orange_multi));
+				//v.setBackgroundColor(getContext().getResources().getColor(R.color.orange_multi));
+				convertView.setBackground(getContext().getResources().getDrawable(R.drawable.list_selector));
+				textView_Data.setTextColor(Color.WHITE);
 			}
 			//				v.setBackgroundDrawable(getContext().getResources().getDrawable(R.drawable.selector));
 			else
 			{
-				v.setBackgroundColor(Color.TRANSPARENT);
+				//v.setBackgroundColor(Color.TRANSPARENT);
+				textView_Data.setTextColor(getContext().getResources().getColor(R.color.text_color));
+				convertView.setBackgroundColor(Color.WHITE);
 			}
 		}
 		else
 		{
 			if (nSelectedPositions[position] == 1)
 			{
-				v.setBackgroundColor(getContext().getResources().getColor(R.color.selection_gray));
+				//v.setBackgroundColor(getContext().getResources().getColor(R.color.selection_gray));
+				textView_Data.setTextColor(getContext().getResources().getColor(R.color.text_color));
+				convertView.setBackgroundColor(getContext().getResources().getColor(R.color.selection_gray));
 			}
 			//        		v.setBackgroundColor(getContext().getResources().getColor(R.color.accent));
 			else
 			{
-				v.setBackgroundColor(Color.TRANSPARENT);
+				//v.setBackgroundColor(Color.TRANSPARENT);
+				textView_Data.setTextColor(getContext().getResources().getColor(R.color.text_color));
+				convertView.setBackgroundColor(Color.WHITE);
 			}
 		}
-		return v;
+		return convertView;
 	}
 	
 	

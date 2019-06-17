@@ -206,12 +206,12 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         {
             if (L.isSimulation())
             {
-                showDialogFragment(FragmentTempMonitorConfiguration.newInstance(mNodeAddress, mRoomName, mNodeType, mFloorName), FragmentHeatPumpConfiguration.ID);
+                showDialogFragment(FragmentTempMonitorConfiguration.newInstance(mNodeAddress, mRoomName, mNodeType, mFloorName), FragmentTempMonitorConfiguration.ID);
             }
             else
             {
-                Log.d("FragBleInstrScrn","CPU profile. device scan");
-                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.SMARTSTAT_HEAT_PUMP_UNIT);
+                Log.d("FragBleInstrScrn","TEmp Monitor profile. device scan");
+                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.TEMP_MONITOR);
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
             }
         }
@@ -219,12 +219,12 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         {
             if (L.isSimulation())
             {
-                showDialogFragment(FragmentTempInfConfiguration.newInstance(mNodeAddress, mRoomName, mNodeType, mFloorName), FragmentHeatPumpConfiguration.ID);
+                showDialogFragment(FragmentTempInfConfiguration.newInstance(mNodeAddress, mRoomName, mNodeType, mFloorName), FragmentTempInfConfiguration.ID);
             }
             else
             {
-                Log.d("FragBleInstrScrn","CPU profile. device scan");
-                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.SMARTSTAT_HEAT_PUMP_UNIT);
+                Log.d("FragBleInstrScrn","Temp influence profile. device scan");
+                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.TEMP_INFLUENCE);
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
             }
         }

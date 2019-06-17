@@ -122,7 +122,7 @@ public class LSerial
                 Pulse.updateSetTempFromSmartStat(fromBytes(data, CmToCcuOverUsbSmartStatLocalControlsOverrideMessage_t.class));
             }
 
-            // Broadcast event so that external handlers can access it
+            // Pass event to external handlers
             Intent eventIntent = new Intent(context, OTAUpdateService.class);
             eventIntent.setAction(DeviceConstants.IntentActions.LSERIAL_MESSAGE);
             eventIntent.putExtra("eventType", messageType);
@@ -325,6 +325,7 @@ public class LSerial
         //Only if the struct was wrote to serial should it be logged.
         if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
             DLog.LogdStructAsJson(struct);
+
         mUsbService.write(struct.getOrderedBuffer());
         return true;
     }

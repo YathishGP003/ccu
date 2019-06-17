@@ -17,5 +17,11 @@ public class FirmwareMetdata_t extends Struct
 	
 	public final Unsigned32 lengthInBytes = new Unsigned32(); /* The length of the new firmware in bytes */
 	
-	public final Unsigned8[] signature = new Unsigned8[MessageConstants.FIRMWARE_SIGNATURE_LENGTH]; /* The signature for the new firmware */
+	public final Unsigned8[] signature = array(new Unsigned8[MessageConstants.FIRMWARE_SIGNATURE_LENGTH]); /* The signature for the new firmware */
+
+	public void setSignature(byte[] signatureBytes) {
+		for(int i = 0; i < signatureBytes.length; i++) {
+			signature[i].set(signatureBytes[i]);
+		}
+	}
 }

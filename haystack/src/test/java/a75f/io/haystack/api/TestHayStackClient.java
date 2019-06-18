@@ -8,6 +8,7 @@ import org.projecthaystack.HGridBuilder;
 import org.projecthaystack.client.HClient;
 import org.projecthaystack.server.HStdOps;
 
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.sync.HttpUtil;
 
 /**
@@ -20,7 +21,7 @@ public class TestHayStackClient
     @Test
     public void testHaystackAPI(){
 
-        HClient hClient = new HClient(HttpUtil.HAYSTACK_URL, "testhaystack", "testpassword");
+        HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), "testhaystack", "testpassword");
 
         HDict hDict = new HDictBuilder().add("filter", "point").toDict();
         HGrid hGrid = hClient.call(HStdOps.read.name(), HGridBuilder.dictToGrid(hDict));

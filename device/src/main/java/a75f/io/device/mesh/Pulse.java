@@ -68,7 +68,7 @@ public class Pulse
 						CcuLog.d(L.TAG_CCU_DEVICE, "regularSmartNodeUpdate : roomTemp " + getRoomTempConversion(val));
 						break;
 					case DESIRED_TEMP:
-						//TODO - Set temp needs to be updated only for CM_TO_CCU_OVER_USB_SN_SET_TEMPERATURE_UPDATE
+						//Set temp needs to be updated only for CM_TO_CCU_OVER_USB_SN_SET_TEMPERATURE_UPDATE
 						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : desiredTemp "+smartNodeRegularUpdateMessage_t.update.setTemperature.get());
 						break;
 					case ANALOG_IN_ONE:

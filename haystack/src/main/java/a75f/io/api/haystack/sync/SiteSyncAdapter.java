@@ -32,7 +32,7 @@ public class SiteSyncAdapter extends EntitySyncAdapter
             ArrayList<HDict> entities = new ArrayList<>();
             entities.add(b.toDict());
             HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
-            String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
+            String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "addEntity", HZincWriter.gridToString(grid));
             CcuLog.i("CCU_HS_SYNC", "Response : "+response);
             if (response == null) {
                 return false;

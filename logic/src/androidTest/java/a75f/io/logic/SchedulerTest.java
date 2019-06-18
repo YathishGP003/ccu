@@ -1,19 +1,9 @@
 package a75f.io.logic;
 
-import android.content.Context;
-import android.support.test.runner.AndroidJUnit4;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
-import java.util.HashMap;
-
-import a75f.io.logic.bo.building.CCUApplication;
-
 /**
  * Created by samjithsadasivan on 9/11/17.
  */
+/*
 @RunWith(AndroidJUnit4.class)
 public class SchedulerTest
 {
@@ -58,7 +48,8 @@ public class SchedulerTest
     public void testCCUPreconfiguration()
     {
         //59c8ec3c8f57b7f96ed57ca5
-        /*DalContext.instantiate(context);
+        */
+/*DalContext.instantiate(context);
         final DataStore<CCUPreconfiguration> preconfigurationDataStore = DataStore
                                                                                  .collection(Constants.PRECONFIGURATION_NAME, CCUPreconfiguration.class, StoreType.CACHE, DalContext
                                                                                                                                                                                   .getSharedClient());
@@ -126,7 +117,9 @@ public class SchedulerTest
         catch (InterruptedException e)
         {
             e.printStackTrace();
-        }*/
+        }*//*
+
 
     }
 }
+*/

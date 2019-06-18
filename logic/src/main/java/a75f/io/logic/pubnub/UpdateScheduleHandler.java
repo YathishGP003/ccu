@@ -31,7 +31,7 @@ public class UpdateScheduleHandler
         String guid = msgObject.get("id").getAsString();
         HDictBuilder b = new HDictBuilder().add("id", HRef.copy(guid));
         HDict[] dictArr = {b.toDict()};
-        String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "read", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+        String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "read", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
         CcuLog.d(L.TAG_CCU_PUBNUB, "Read Schedule : " + response);
         HGrid sGrid = new HZincReader(response).readGrid();
         if (sGrid == null)

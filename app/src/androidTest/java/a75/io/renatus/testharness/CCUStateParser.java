@@ -22,7 +22,6 @@ import java.util.Iterator;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.sync.EntityPullHandler;
-import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.device.json.serializers.JsonSerializer;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -116,7 +115,7 @@ public class CCUStateParser
     
     public void pullHayStackDb(String siteId) {
         
-        HClient hClient = new HClient(HttpUtil.HAYSTACK_URL, "ryan", "ryan");
+        HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), "ryan", "ryan");
         HDict siteDict = new HDictBuilder().add("id", HRef.make(siteId)).toDict();
         HGrid siteGrid = hClient.call("read", HGridBuilder.dictToGrid(siteDict));
     

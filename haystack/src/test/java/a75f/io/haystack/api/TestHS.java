@@ -440,7 +440,7 @@ public class TestHS
     
     @Test
     public void testVirtualEquip() {
-        HClient hClient   = new HClient(HttpUtil.HAYSTACK_URL, HayStackConstants.USER, HayStackConstants.PASS);
+        HClient hClient   = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
     
         HDict hDict = new HDictBuilder().add("filter", "equip and virtual and ahuRef == @5c98342a24aa9a00f4c5d937").toDict();
         HGrid virtualEquip = hClient.call("read", HGridBuilder.dictToGrid(hDict));
@@ -474,7 +474,7 @@ public class TestHS
     
         HDictBuilder b = new HDictBuilder().add("id", HRef.copy(id));
         HDict[] dictArr  = {b.toDict()};
-        String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "read", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+        String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "read", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
         System.out.println("Response : " + response);
         HGrid sGrid =  new HZincReader(response).readGrid();
         if (sGrid == null) {

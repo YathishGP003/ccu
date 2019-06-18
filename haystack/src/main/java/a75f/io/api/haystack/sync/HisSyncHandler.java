@@ -99,7 +99,7 @@ public class HisSyncHandler
             {
                 i.dump();
             }
-            String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "hisWrite", HZincWriter.gridToString(itemGrid));
+            String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "hisWrite", HZincWriter.gridToString(itemGrid));
             CcuLog.d("CCU_HS","Response :\n"+response);
             if (response != null) {
                 for (HisItem item: hisItems)
@@ -161,8 +161,8 @@ public class HisSyncHandler
             
             if (tsData.size() > 0)
             {
-                String url = new InfluxDbUtil.URLBuilder().setProtocol(InfluxDbUtil.HTTP).setHost("renatus-influxiprvgkeeqfgys.centralus.cloudapp.azure.com").setPort(8086).setOp(InfluxDbUtil.WRITE).setDatabse("haystack").setUser("75f@75f.io").setPassword("7575").buildUrl();
-                InfluxDbUtil.writeData(url, CCUHsApi.getInstance().getGUID(equip.get("id").toString()).toString().replace("@","")
+                //String url = new InfluxDbUtil.URLBuilder().setProtocol(InfluxDbUtil.HTTP).setHost("renatus-influxiprvgkeeqfgys.centralus.cloudapp.azure.com").setPort(8086).setOp(InfluxDbUtil.WRITE).setDatabse("haystack").setUser("75f@75f.io").setPassword("7575").buildUrl();
+                InfluxDbUtil.writeData(CCUHsApi.getInstance().getInfluxUrl(), CCUHsApi.getInstance().getGUID(equip.get("id").toString()).toString().replace("@","")
                                                 , tsData, System.currentTimeMillis());
             }
         
@@ -210,8 +210,8 @@ public class HisSyncHandler
         
             if (tsData.size() > 0)
             {
-                String url = new InfluxDbUtil.URLBuilder().setProtocol(InfluxDbUtil.HTTP).setHost("renatus-influxiprvgkeeqfgys.centralus.cloudapp.azure.com").setPort(8086).setOp(InfluxDbUtil.WRITE).setDatabse("haystack").setUser("75f@75f.io").setPassword("7575").buildUrl();
-                InfluxDbUtil.writeData(url, CCUHsApi.getInstance().getGUID(device.get("id").toString()).toString().replace("@","")
+                //String url = new InfluxDbUtil.URLBuilder().setProtocol(InfluxDbUtil.HTTP).setHost("renatus-influxiprvgkeeqfgys.centralus.cloudapp.azure.com").setPort(8086).setOp(InfluxDbUtil.WRITE).setDatabse("haystack").setUser("75f@75f.io").setPassword("7575").buildUrl();
+                InfluxDbUtil.writeData(CCUHsApi.getInstance().getInfluxUrl(), CCUHsApi.getInstance().getGUID(device.get("id").toString()).toString().replace("@","")
                         , tsData, System.currentTimeMillis());
             }
         

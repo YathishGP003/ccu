@@ -79,7 +79,7 @@ public class PointSyncAdapter extends EntitySyncAdapter
             if (pointLUIDList.size() > 0)
             {
                 HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
-                String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
+                String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "addEntity", HZincWriter.gridToString(grid));
                 CcuLog.i("CCU_HS_SYNC", "Response: \n" + response);
                 if (response == null)
                 {
@@ -161,7 +161,7 @@ public class PointSyncAdapter extends EntitySyncAdapter
                                          .add("who", valMap.get("who").toString())
                                          .add("val", isDouble? HNum.make(val) : HStr.make(valMap.get("val").toString()));
                 HDict[] dictArr = {b.toDict()};
-                String r = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+                String r = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
                 CcuLog.d("CCU_HS","Response: \n" + r);
             }
         }

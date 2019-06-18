@@ -100,7 +100,7 @@ public class EntitySyncHandler
         
         
         HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
-        String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "removeEntity", HZincWriter.gridToString(grid));
+        String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "removeEntity", HZincWriter.gridToString(grid));
         if (response != null)
         {
             CCUHsApi.getInstance().tagsDb.removeIdMap.clear();
@@ -171,7 +171,7 @@ public class EntitySyncHandler
         if (hDIcts != null && hDIcts.size() > 0)
         {
             HGrid grid = HGridBuilder.dictsToGrid(hDIcts.toArray(new HDict[hDIcts.size()]));
-            String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
+            String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "addEntity", HZincWriter.gridToString(grid));
             CcuLog.i(TAG, "Response: \n" + response);
             if (response != null)
             {

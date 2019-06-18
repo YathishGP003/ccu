@@ -1,37 +1,11 @@
 package haystacktest.android.com.a75;
 
-import android.content.Context;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
-import android.util.Log;
-
-import junit.framework.Assert;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.projecthaystack.HDict;
-import org.projecthaystack.HDictBuilder;
-import org.projecthaystack.HGrid;
-import org.projecthaystack.HGridBuilder;
-import org.projecthaystack.HRef;
-import org.projecthaystack.client.HClient;
-
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
-import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.Site;
-import a75f.io.api.haystack.sync.HttpUtil;
-
-import static org.junit.Assert.assertEquals;
-
 /**
  * Instrumented test, which will execute on an Android device.
  *
  * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
  */
-@RunWith(AndroidJUnit4.class)
+/*@RunWith(AndroidJUnit4.class)
 public class SiteTest
 {
     @Test
@@ -56,10 +30,10 @@ public class SiteTest
     }
 
 
-    /**
+    *//**
      * Create a site
      * and query that the site exists locally.
-     */
+     *//*
     @Test
     public void addSite()
     {
@@ -102,7 +76,7 @@ public class SiteTest
     public void testGettingSite()
     {
 
-        HClient hClient = new HClient(HttpUtil.HAYSTACK_URL, "ryan", "ryan");
+        HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), "ryan", "ryan");
         HDict navIdDict = new HDictBuilder().add("navId", HRef.make("5be9af1c02743900e9e762f8")).toDict();
         HGrid hGrid = HGridBuilder.dictToGrid(navIdDict);
 
@@ -112,4 +86,4 @@ public class SiteTest
 
     }
 
-}
+}*/

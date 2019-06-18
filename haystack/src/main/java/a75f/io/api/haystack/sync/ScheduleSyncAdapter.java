@@ -53,7 +53,7 @@ public class ScheduleSyncAdapter extends EntitySyncAdapter
         if (scheduleLUIDList.size() > 0)
         {
             HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
-            String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
+            String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "addEntity", HZincWriter.gridToString(grid));
             CcuLog.i("CCU_HS_SYNC", "Response: \n" + response);
             if (response == null)
             {

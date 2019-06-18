@@ -634,7 +634,7 @@ public class TestRemoteHsSync
     {
 
         CCUHsApi api = new CCUHsApi();
-        HClient hClient = new HClient(HttpUtil.HAYSTACK_URL, "ryan", "ryan");
+        HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), "ryan", "ryan");
         HDict navIdDict = new HDictBuilder().add("navId", HRef.make("5cace9bebf7e6c00f5e23c62")).toDict();
         HGrid hGrid = HGridBuilder.dictToGrid(navIdDict);
         HGrid sync = hClient.call("sync", hGrid);
@@ -748,7 +748,7 @@ public class TestRemoteHsSync
         String id = "@5ca7c308bf7e6c00f5e22079";
         HDictBuilder b = new HDictBuilder().add("id", HRef.copy(id)).add("level", 1).add("who", "ccu").add("val", "Happy birthday");
         HDict[] dictArr  = {b.toDict()};
-        String  response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+        String  response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
         System.out.println(response);
     }
     
@@ -758,7 +758,7 @@ public class TestRemoteHsSync
         HDictBuilder b = new HDictBuilder().add("id", HRef.copy(id));
         HDict[] dictArr  = {b.toDict()};
         System.out.println(HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
-        String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+        String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
         System.out.println(response);
     
         HGrid pointGrid = new HZincReader(response).readGrid();
@@ -781,7 +781,7 @@ public class TestRemoteHsSync
     public void testGettingSchedules() {
         
             CCUHsApi api = new CCUHsApi();
-            HClient hClient = new HClient(HttpUtil.HAYSTACK_URL, "ryan", "ryan");
+            HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), "ryan", "ryan");
             HDict navIdDict = new HDictBuilder().add("navId", HRef.make("5cace9bebf7e6c00f5e23c62")).toDict();
             HGrid hGrid = HGridBuilder.dictToGrid(navIdDict);
             HGrid sync = hClient.call("sync", hGrid);

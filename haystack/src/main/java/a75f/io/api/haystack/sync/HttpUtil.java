@@ -23,8 +23,8 @@ public class HttpUtil
 {
 
     private static final String TAG = HttpUtil.class.getSimpleName();
-
-    public static final String HAYSTACK_URL = "https://renatusv2.azurewebsites.net/";
+    
+    //public static final String HAYSTACK_URL = "https://renatusv2.azurewebsites.net/";
 
     public static final String CLIENT_ID = "d7682439-ac41-408b-bf72-b89a98490bdf";
     public static final String TENANT_ID = "941d8a61-4be2-4622-8ace-ed8ee5696d99";

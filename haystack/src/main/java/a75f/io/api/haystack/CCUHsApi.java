@@ -1,6 +1,8 @@
 package a75f.io.api.haystack;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import org.projecthaystack.HDate;
@@ -32,6 +34,7 @@ import a75f.io.api.haystack.sync.EntityParser;
 import a75f.io.api.haystack.sync.EntitySyncHandler;
 import a75f.io.api.haystack.sync.HisSyncHandler;
 import a75f.io.api.haystack.sync.HttpUtil;
+import a75f.io.api.haystack.sync.InfluxDbUtil;
 import a75f.io.logger.CcuLog;
 
 /**
@@ -52,6 +55,11 @@ public class CCUHsApi
     public boolean testHarnessEnabled = false;
     
     public boolean unitTestingEnabled = false;
+    
+    Context cxt;
+    
+    String hayStackUrl = "";
+    String influxUrl = "";
 
     public static CCUHsApi getInstance()
     {
@@ -68,9 +76,10 @@ public class CCUHsApi
         {
             throw new IllegalStateException("Api instance already created , use getInstance()");
         }
+        cxt = c;
         hsClient = new AndroidHSClient();
         tagsDb = (CCUTagsDb) hsClient.db();
-        tagsDb.init(c);
+        tagsDb.init(cxt);
         instance = this;
         entitySyncHandler = new EntitySyncHandler();
         hisSyncHandler = new HisSyncHandler(this);
@@ -95,7 +104,48 @@ public class CCUHsApi
     {
         return hsClient;
     }
-
+    
+    public String getHSUrl() {
+        if (hayStackUrl.equals(""))
+        {
+            SharedPreferences sprefs = PreferenceManager.getDefaultSharedPreferences(cxt);
+            switch (sprefs.getString("SERVER_ENV", "")) {
+                case "QA":
+                    hayStackUrl = "https://renatusv2-qa.azurewebsites.net/";
+                    break;
+                case "DEV":
+                    hayStackUrl = "https://renatusv2-dev.azurewebsites.net/";
+                    break;
+                case "PROD":
+                default:
+                    hayStackUrl = "https://renatusv2.azurewebsites.net/";
+                 
+            }
+        }
+        
+        return hayStackUrl;
+    }
+    
+    public String getInfluxUrl() {
+        if (influxUrl.equals(""))
+        {
+            SharedPreferences sprefs = PreferenceManager.getDefaultSharedPreferences(cxt);
+            
+            switch (sprefs.getString("SERVER_ENV", "")) {
+                case "QA":
+                case "DEV":
+                    influxUrl = new InfluxDbUtil.URLBuilder().setProtocol(InfluxDbUtil.HTTP).setHost("influx.northcentralus.cloudapp.azure.com").setPort(8086).setOp(InfluxDbUtil.WRITE).setDatabse("haystack").setUser("ccu").setPassword("7575").buildUrl();
+                    break;
+                case "PROD":
+                default:
+                    influxUrl = new InfluxDbUtil.URLBuilder().setProtocol(InfluxDbUtil.HTTP).setHost("renatus-influxiprvgkeeqfgys.centralus.cloudapp.azure.com").setPort(8086).setOp(InfluxDbUtil.WRITE).setDatabse("haystack").setUser("75f@75f.io").setPassword("7575").buildUrl();
+            }
+        }
+    
+        return influxUrl;
+        
+    }
+    
     public synchronized void saveTagsData()
     {
         tagsDb.saveTags();
@@ -385,7 +435,7 @@ public class CCUHsApi
             }
             HDictBuilder b = new HDictBuilder().add("id", HRef.copy(guid)).add("level", level).add("who", who).add("val", val).add("duration", dur);
             HDict[] dictArr  = {b.toDict()};
-            String  response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+            String  response = HttpUtil.executePost(getHSUrl() + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
             CcuLog.d("CCU_HS", "Response: \n" + response);
         }
     }
@@ -496,7 +546,7 @@ public class CCUHsApi
     public HGrid readPointArrRemote(String id) {
         HDictBuilder b = new HDictBuilder().add("id", HRef.copy(id));
         HDict[] dictArr  = {b.toDict()};
-        String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+        String response = HttpUtil.executePost(getHSUrl() + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
         CcuLog.d("CCU_HS", "Response : "+response);
       
         return response == null ? null : new HZincReader(response).readGrid();
@@ -505,7 +555,7 @@ public class CCUHsApi
     public HGrid readByIdRemote(String id) {
         HDictBuilder b = new HDictBuilder().add("id", HRef.copy(id));
         HDict[] dictArr  = {b.toDict()};
-        String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "read", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+        String response = HttpUtil.executePost(getHSUrl() + "read", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
         CcuLog.d("CCU_HS", "Response : "+response);
         return response == null ? null : new HZincReader(response).readGrid();
     }
@@ -834,7 +884,7 @@ public class CCUHsApi
         tagsDb.idMap.put("@"+tagsDb.addSite(s), s.getId());
         Log.d("CCU_HS","Added Site "+s.getId());
     
-        HClient hClient = new HClient(HttpUtil.HAYSTACK_URL, HayStackConstants.USER, HayStackConstants.PASS);
+        HClient hClient = new HClient(getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict navIdDict = new HDictBuilder().add("navId", HRef.make(siteId)).toDict();
         HGrid hGrid = HGridBuilder.dictToGrid(navIdDict);
         HGrid syncData = hClient.call("sync", hGrid);
@@ -884,7 +934,7 @@ public class CCUHsApi
     public HGrid getRemoteSiteDetails(String siteId)
     {
         /* Sync a site*/
-        HClient hClient   = new HClient(HttpUtil.HAYSTACK_URL, HayStackConstants.USER, HayStackConstants.PASS);
+        HClient hClient   = new HClient(getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict   navIdDict = new HDictBuilder().add("navId", HRef.make(siteId)).toDict();
         HGrid   hGrid     = HGridBuilder.dictToGrid(navIdDict);
 
@@ -898,7 +948,7 @@ public class CCUHsApi
     public HGrid getRemoteSite(String siteId)
     {
         /* Sync a site*/
-        HClient hClient   = new HClient(HttpUtil.HAYSTACK_URL, HayStackConstants.USER, HayStackConstants.PASS);
+        HClient hClient   = new HClient(getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict   navIdDict = new HDictBuilder().add(HayStackConstants.ID, HRef.make(siteId)).toDict();
         HGrid   hGrid     = HGridBuilder.dictToGrid(navIdDict);
 
@@ -1110,7 +1160,7 @@ public class CCUHsApi
     }
     
     public double getPredictedPreconRate(String ahuRef) {
-        HClient hClient   = new HClient(HttpUtil.HAYSTACK_URL, HayStackConstants.USER, HayStackConstants.PASS);
+        HClient hClient   = new HClient(getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
     
         try
         {

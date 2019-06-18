@@ -21,7 +21,6 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
-import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.bo.haystack.device.SmartNode;
@@ -37,7 +36,7 @@ public class TestHayStack
     @Test
     public void testHaystackAPI(){
 
-        HClient hClient = new HClient(HttpUtil.HAYSTACK_URL, "testhaystack", "testpassword");
+        HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), "testhaystack", "testpassword");
 
         HDict hDict = new HDictBuilder().add("filter", "point").toDict();
         HGrid hGrid = hClient.call(HStdOps.read.name(), HGridBuilder.dictToGrid(hDict));

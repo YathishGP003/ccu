@@ -75,7 +75,7 @@ public class EquipSyncAdapter extends EntitySyncAdapter
         if (equipLUIDList.size() > 0)
         {
             HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
-            String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
+            String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "addEntity", HZincWriter.gridToString(grid));
             CcuLog.i("CCU_HS_SYNC", "Response: \n" + response);
             if (response == null)
             {
@@ -117,7 +117,7 @@ public class EquipSyncAdapter extends EntitySyncAdapter
         entities.add(HSUtil.mapToHDict(systemEquip));
     
         HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
-        String response = HttpUtil.executePost(HttpUtil.HAYSTACK_URL + "addEntity", HZincWriter.gridToString(grid));
+        String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "addEntity", HZincWriter.gridToString(grid));
         CcuLog.i("CCU_HS_SYNC", "Response: \n" + response);
         if (response == null)
         {

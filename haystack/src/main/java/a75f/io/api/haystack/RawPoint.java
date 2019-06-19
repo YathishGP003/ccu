@@ -265,7 +265,7 @@ public class RawPoint extends Entity
                 {
                     this.port = pair.getValue().toString();
                 }
-                else if (pair.getKey().equals("type"))
+                else if (pair.getKey().equals("analogType"))
                 {
                     this.type = pair.getValue().toString();
                 }

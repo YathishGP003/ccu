@@ -379,7 +379,7 @@ public class CCUTagsDb extends HServer {
                                      .add("roomRef",  q.getRoomRef() != null ? q.getRoomRef() : "SYSTEM")
                                      .add("floorRef", q.getFloorRef() != null ? q.getFloorRef() : "SYSTEM")
                                      .add("profile", q.getProfile())
-                                     .add("priority", q.getPriority())
+                                     .add("priorityLevel", q.getPriority())
                                      .add("tz",q.getTz())
                                      .add("group",q.getGroup());
         if (q.getAhuRef() != null) {
@@ -402,7 +402,7 @@ public class CCUTagsDb extends HServer {
                                      .add("roomRef",  q.getRoomRef())
                                      .add("floorRef", q.getFloorRef())
                                      .add("profile", q.getProfile())
-                                     .add("priority", q.getPriority())
+                                     .add("priorityLevel", q.getPriority())
                                      .add("tz",q.getTz())
                                      .add("group",q.getGroup());
     
@@ -474,7 +474,7 @@ public class CCUTagsDb extends HServer {
                 .add("siteRef", p.getSiteRef())
                 .add("pointRef", p.getPointRef())
                 .add("port", p.getPort())
-                .add("type", p.getType())
+                .add("analogType", p.getType())
                 .add("kind", p.getKind() == null ? "Number" : p.getKind())
                 .add("enabled",p.getEnabled() ? "true":"false")
                 .add("tz", p.getTz());
@@ -498,7 +498,7 @@ public class CCUTagsDb extends HServer {
                 .add("siteRef", p.getSiteRef())
                 .add("pointRef", p.getPointRef())
                 .add("port", p.getPort())
-                .add("type", p.getType())
+                .add("analogType", p.getType())
                 .add("kind", p.getKind() == null ? "Number" : p.getKind())
                 .add("enabled",p.getEnabled() ? "true":"false")
                 .add("tz", p.getTz());

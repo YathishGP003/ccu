@@ -1,10 +1,9 @@
 package a75f.io.device.mesh;
 
+import android.app.DownloadManager;
 import android.app.IntentService;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
+import android.net.Uri;
 import android.os.CountDownTimer;
 import android.os.Environment;
 import android.support.annotation.Nullable;
@@ -13,16 +12,10 @@ import android.util.Log;
 import com.google.common.io.Files;
 import com.google.gson.stream.JsonReader;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URL;
-import java.net.URLConnection;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -50,8 +43,7 @@ public class OTAUpdateService extends IntentService {
     public static final String METADATA_FILE_FORMAT = ".meta";
     public static final String BINARY_FILE_FORMAT = ".bin";
 
-    static final String DOWNLOAD_BASE_URL = "http://updates.75fahrenheit.com/";
-
+    private static final String DOWNLOAD_BASE_URL = "http://updates.75fahrenheit.com/";
     private static final File DOWNLOAD_DIR = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 
     //Update variables
@@ -61,11 +53,13 @@ public class OTAUpdateService extends IntentService {
     private static short mVersionMinor = -1;       //Minor version number (0-255)
 
     //Constant fields
-    private static String mVersion = ""; //initial smart node factory reset version
+    private static String mFilename = ""; //initial smart node factory reset version
     private static int mUpdateLength = -1;         //Firmware length (bytes)
     private static byte[] mFirmwareSignature = {}; //Firmware key
-    private static DeviceConstants.OTA_FIRMWARE_COMPONENT mFirmwareInfo;
+    private static FirmwareDeviceType_t mFirmwareDeviceType;
     private static int mLwMeshAddress = -1;
+
+    private static long mFileDownloadId = -1;
 
     private static boolean mUpdateInProgress = false;
     private static boolean mUpdateWaitingToComplete = false;
@@ -79,23 +73,6 @@ public class OTAUpdateService extends IntentService {
         super("OTAUpdateService");
     }
 
-    /*@Override
-    public void onCreate() {
-        super.onCreate();
-
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(DeviceConstants.IntentActions.LSERIAL_MESSAGE);
-
-        registerReceiver(receiveEventBroadcast, intentFilter);
-    }*/
-
-    /*@Override
-    public void onDestroy() {
-        super.onDestroy();
-
-        unregisterReceiver(receiveEventBroadcast);
-    }*/
-
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
         String action = intent.getAction();
@@ -107,6 +84,10 @@ public class OTAUpdateService extends IntentService {
         /* The service has been launched from a PubNub notification */
         else if(action.equals(DeviceConstants.IntentActions.PUBNUB_MESSAGE)) {
             parseParametersFromIntent(intent);
+        }
+        /* The service has been launched in response to a file download */
+        else if(action.equals(DownloadManager.ACTION_DOWNLOAD_COMPLETE)) {
+            handleFileDownloadComplete(intent);
         }
         /* The OTA update is in progress, and is being notified from the CM */
         else if(action.equals(DeviceConstants.IntentActions.LSERIAL_MESSAGE)) {
@@ -121,6 +102,26 @@ public class OTAUpdateService extends IntentService {
                 case CM_TO_CCU_OVER_USB_SN_REBOOT:
                     handleNodeReboot(eventBytes);
                     break;
+            }
+        }
+    }
+
+    public void handleFileDownloadComplete(Intent intent) {
+        long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
+
+        //check that the downloaded file is the one we've been waiting for
+        if(mFileDownloadId != -1 && mFileDownloadId == id) {
+            Log.d(TAG, "[DOWNLOAD] Finished downloading file in state: "+mMetadataIsDownloaded+", "+mBinaryIsDownloaded);
+
+            if (!mMetadataIsDownloaded) {
+                Log.d(TAG, "[DOWNLOAD] Metadata downloaded");
+                mMetadataIsDownloaded = true;
+                runMetadataCheck(DOWNLOAD_DIR, mVersionMajor, mVersionMinor, mFilename, mFirmwareDeviceType);
+
+            } else if (!mBinaryIsDownloaded) {
+                Log.d(TAG, "[DOWNLOAD] Binary downloaded");
+                mBinaryIsDownloaded = true;
+                runBinaryCheck(DOWNLOAD_DIR, mFilename, mFirmwareDeviceType);
             }
         }
     }
@@ -179,36 +180,6 @@ public class OTAUpdateService extends IntentService {
     }
 
     /**
-     * Starts downloading the binary file
-     */
-    void startBinaryDownload(String filename, DeviceConstants.OTA_FIRMWARE_COMPONENT firmware) {
-        Log.d(TAG, "[DOWNLOAD] Starting binary download");
-        switch (firmware){
-            case SMART_NODE:
-                new DownloadFileFromURL().execute((DOWNLOAD_BASE_URL + "sn_fw/" + filename + BINARY_FILE_FORMAT), filename.concat(BINARY_FILE_FORMAT));
-                break;
-            case ITM:
-                new DownloadFileFromURL().execute((DOWNLOAD_BASE_URL + "itm_fw/" + filename + BINARY_FILE_FORMAT), filename.concat(BINARY_FILE_FORMAT));
-                break;
-        }
-    }
-
-    /**
-     * Starts downloading the metadata file
-     */
-    void startMetadataDownload(String filename, DeviceConstants.OTA_FIRMWARE_COMPONENT firmware) {
-        Log.d(TAG, "[DOWNLOAD] Starting metadata download");
-        switch (firmware){
-            case SMART_NODE:
-                new DownloadFileFromURL().execute((DOWNLOAD_BASE_URL + "sn_fw/" + filename + METADATA_FILE_FORMAT), filename.concat(METADATA_FILE_FORMAT));
-                break;
-            case ITM:
-                new DownloadFileFromURL().execute((DOWNLOAD_BASE_URL + "itm_fw/" + filename + METADATA_FILE_FORMAT), filename.concat(METADATA_FILE_FORMAT));
-                break;
-        }
-    }
-
-    /**
      * Clears update variables
      */
     private void resetUpdate() {
@@ -232,7 +203,7 @@ public class OTAUpdateService extends IntentService {
         mLwMeshAddress = address;
         mVersionMajor = versionMajor;
         mVersionMinor = versionMinor;
-        //mVersion = "SmartNode_v"+mVersionMajor+"."+mVersionMinor;
+        //mFilename = "SmartNode_v"+mVersionMajor+"."+mVersionMinor;
     }
 
     /**
@@ -252,19 +223,24 @@ public class OTAUpdateService extends IntentService {
         mVersionMajor = (short) versionMajor;
         mVersionMinor = (short) versionMinor;
 
-        //mVersion = "SmartNode_v"+versionMajor+"."+versionMinor;
+        //mFilename = "SmartNode_v"+versionMajor+"."+versionMinor;
         if(firmwareInfo.startsWith("SmartNode_")) {
-            mVersion = firmwareInfo;
-            mFirmwareInfo = DeviceConstants.OTA_FIRMWARE_COMPONENT.SMART_NODE;
-            startUpdate(node, versionMajor, versionMinor, mVersion, DeviceConstants.OTA_FIRMWARE_COMPONENT.SMART_NODE);
+            mFilename = firmwareInfo;
+            mFirmwareDeviceType = FirmwareDeviceType_t.SMART_NODE_DEVICE_TYPE;
+            startUpdate(node, versionMajor, versionMinor, mFilename, FirmwareDeviceType_t.SMART_NODE_DEVICE_TYPE);
 
         }
         else if(firmwareInfo.startsWith("Itm_") || firmwareInfo.startsWith("itm_")) {
-            mVersion = firmwareInfo;
-            if(firmwareInfo.startsWith("Itm_"))
-                mVersion = firmwareInfo.replace("I","i");
-            mFirmwareInfo = DeviceConstants.OTA_FIRMWARE_COMPONENT.ITM;
-            startUpdate(node, versionMajor, versionMinor, mVersion, DeviceConstants.OTA_FIRMWARE_COMPONENT.ITM);
+            mFilename = firmwareInfo.replace("Itm_", "itm_");
+            mFirmwareDeviceType = FirmwareDeviceType_t.ITM_DEVICE_TYPE;
+            startUpdate(node, versionMajor, versionMinor, mFilename, FirmwareDeviceType_t.ITM_DEVICE_TYPE);
+        }
+    }
+
+    private void deleteAllFiles(){
+        for(File file:DOWNLOAD_DIR.listFiles()){
+            if(file.getName().startsWith("SmartNode_v") || file.getName().startsWith("Itm_v"))
+                file.delete();
         }
     }
 
@@ -275,7 +251,7 @@ public class OTAUpdateService extends IntentService {
      *
      * @param address The address of the Smart Node to be updated
      */
-    private void startUpdate(int address, int versionMajor, int versionMinor, String filename, DeviceConstants.OTA_FIRMWARE_COMPONENT firmware) {
+    private void startUpdate(int address, int versionMajor, int versionMinor, String filename, FirmwareDeviceType_t deviceType) {
         Log.d(TAG, "[VALIDATION] Validating update instructions="+filename);
         if (mUpdateInProgress) {
             Log.d(TAG, "[VALIDATION] Update already in progress");
@@ -316,7 +292,7 @@ public class OTAUpdateService extends IntentService {
         }
 
         if(deviceExists) {
-            runMetadataCheck(DOWNLOAD_DIR, versionMajor, versionMinor, filename, firmware);
+            runMetadataCheck(DOWNLOAD_DIR, versionMajor, versionMinor, filename, deviceType);
         }
     }
 
@@ -329,14 +305,14 @@ public class OTAUpdateService extends IntentService {
      * @param versionMajor The expected major version
      * @param versionMinor The expected minor version
      */
-    private void runMetadataCheck(File dir, int versionMajor, int versionMinor, String filename, DeviceConstants.OTA_FIRMWARE_COMPONENT firmware) {
-        Log.d(TAG, "[METADATA] Running metadata check="+mVersion+","+filename);
+    private void runMetadataCheck(File dir, int versionMajor, int versionMinor, String filename, FirmwareDeviceType_t deviceType) {
+        Log.d(TAG, "[METADATA] Running metadata check="+ mFilename +","+filename);
         File metadata = findMetadataFile(dir,filename);
 
         if (metadata == null) {
             Log.d(TAG, "[METADATA] File not found, downloading metadata");
             mMetadataIsDownloaded = false;
-            startMetadataDownload(filename,firmware);
+            startMetadataDownload(filename,deviceType);
             pauseUpdate();
             return;
         } else {
@@ -345,14 +321,14 @@ public class OTAUpdateService extends IntentService {
             if (!isExtracted || !versionMatches((short) versionMajor, (short) versionMinor) ) {
                 mMetadataIsDownloaded = false;
                 Log.d(TAG, "[STARTUP] Incorrect firmware metadata, downloading correct firmware.");
-                startMetadataDownload(filename, firmware);
+                startMetadataDownload(filename, deviceType);
                 pauseUpdate();
                 return;
             }
         }
 
         Log.d(TAG, "[METADATA] Metadata passed check, starting binary check");
-        runBinaryCheck(dir,filename,firmware);
+        runBinaryCheck(dir,filename,deviceType);
     }
 
     /**
@@ -362,13 +338,13 @@ public class OTAUpdateService extends IntentService {
      *
      * @param dir The directory to search for the binary file
      */
-    private void runBinaryCheck(File dir, String filename, DeviceConstants.OTA_FIRMWARE_COMPONENT firmware) {
-        Log.d(TAG, "[BINARY] Running binary check="+mVersion+","+filename);
+    private void runBinaryCheck(File dir, String filename, FirmwareDeviceType_t deviceType) {
+        Log.d(TAG, "[BINARY] Running binary check="+ mFilename +","+filename);
         File binary = findBinaryFile(dir, filename);
 
         if (binary == null) {
             Log.d(TAG, "[BINARY] Binary file not found, starting binary download");
-            startBinaryDownload(filename,firmware);
+            startBinaryDownload(filename,deviceType);
             //pauseUpdate();
             return;
         } else {
@@ -376,7 +352,7 @@ public class OTAUpdateService extends IntentService {
             if (binary.length() != mUpdateLength) {
                 mBinaryIsDownloaded = false;
                 Log.d(TAG, "[STARTUP] Incorrect firmware binary, downloading correct firmware.");
-                startBinaryDownload(filename,firmware);
+                startBinaryDownload(filename,deviceType);
                 return;
             }
         }
@@ -390,15 +366,67 @@ public class OTAUpdateService extends IntentService {
         mUpdateInProgress = true;
         mLastSentPacket = -1;
 
-        setUpdateFile(binary, firmware);
+        setUpdateFile(binary, deviceType);
     }
 
-    private void deleteAllFiles(){
-        for(File file:DOWNLOAD_DIR.listFiles()){
-            if(file.getName().startsWith("SmartNode_v") || file.getName().startsWith("Itm_v"))
-                file.delete();
+    /**
+     * Starts downloading the metadata file
+     */
+    void startMetadataDownload(String filename, FirmwareDeviceType_t deviceType) {
+        Log.d(TAG, "[DOWNLOAD] Starting metadata download");
+        String fileDirUrl = "";
+        String filePathSystem = DOWNLOAD_DIR.toString() + "/" + filename + METADATA_FILE_FORMAT;
+
+        switch (deviceType){
+            case SMART_NODE_DEVICE_TYPE:
+                fileDirUrl = "sn_fw/";
+                break;
+
+            case ITM_DEVICE_TYPE:
+                fileDirUrl = "itm_fw/";
+                break;
         }
+
+        String filePathUrl = DOWNLOAD_BASE_URL + fileDirUrl + filename + METADATA_FILE_FORMAT;
+
+        DownloadManager.Request downloadRequest = new DownloadManager.Request(Uri.parse(filePathUrl))
+                .setTitle(filename + METADATA_FILE_FORMAT)
+                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_HIDDEN)
+                .setDestinationUri(Uri.fromFile(new File(filePathSystem)));
+
+        DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+        mFileDownloadId = downloadManager.enqueue(downloadRequest);
     }
+
+    /**
+     * Starts downloading the binary file
+     */
+    void startBinaryDownload(String filename, FirmwareDeviceType_t deviceType) {
+        Log.d(TAG, "[DOWNLOAD] Starting binary download");
+        String fileDirUrl = "";
+        String filePathSystem = DOWNLOAD_DIR.toString() + "/" + filename + BINARY_FILE_FORMAT;
+
+        switch (deviceType){
+            case SMART_NODE_DEVICE_TYPE:
+                fileDirUrl = "sn_fw/";
+                break;
+
+            case ITM_DEVICE_TYPE:
+                fileDirUrl = "itm_fw/";
+                break;
+        }
+
+        String filePathUrl = DOWNLOAD_BASE_URL + fileDirUrl + filename + BINARY_FILE_FORMAT;
+
+        DownloadManager.Request downloadRequest = new DownloadManager.Request(Uri.parse(filePathUrl))
+                .setTitle(filename + BINARY_FILE_FORMAT)
+                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_HIDDEN)
+                .setDestinationUri(Uri.fromFile(new File(filePathSystem)));
+
+        DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+        mFileDownloadId = downloadManager.enqueue(downloadRequest);
+    }
+
     /**
      * Finds a metadata file, if it exists, in the specified directory
      *
@@ -472,19 +500,6 @@ public class OTAUpdateService extends IntentService {
 
         message.setPacket(packets.get(packetNumber));
 
-        /*
-        byte[] msgType = {(byte) MessageType.CCU_TO_CM_OVER_USB_FIRMWARE_PACKET.ordinal()};
-        byte[] address = Shorts.toByteArray((short) (lwMeshAddress));
-        byte x = address[0];
-        address[0] = address[1];
-        address[1] = x;
-        byte[] sequenceNumber = Shorts.toByteArray((short) packetNumber);
-        x = sequenceNumber[0];
-        sequenceNumber[0] = sequenceNumber[1];
-        sequenceNumber[1] = x;
-        byte[] packet = ByteArrayUtils.addBytes(msgType, address, sequenceNumber, packets.get(packetNumber));
-        */
-
         if (packetNumber > mLastSentPacket) {
             mLastSentPacket = packetNumber;
             if (BuildConfig.DEBUG) {
@@ -506,53 +521,18 @@ public class OTAUpdateService extends IntentService {
     /**
      * Sends the firmware metadata to the CM
      */
-    private void sendFirmwareMetadata(DeviceConstants.OTA_FIRMWARE_COMPONENT firmware) {
+    private void sendFirmwareMetadata(FirmwareDeviceType_t firmware) {
         CcuToCmOverUsbFirmwareMetadataMessage_t message = new CcuToCmOverUsbFirmwareMetadataMessage_t();
 
         message.messageType.set(MessageType.CCU_TO_CM_OVER_USB_FIRMWARE_METADATA);
         message.lwMeshAddress.set(mLwMeshAddress);
 
-        message.metadata.deviceType.set(FirmwareDeviceType_t.values()[firmware.ordinal()]); //this should allow firmware component type too
+        message.metadata.deviceType.set(firmware);
         message.metadata.majorVersion.set(mVersionMajor);
         message.metadata.minorVersion.set(mVersionMinor);
         message.metadata.lengthInBytes.set(mUpdateLength);
 
         message.metadata.setSignature(mFirmwareSignature);
-
-        /*
-        byte[] msgType = {(byte) MessageType.CCU_TO_CM_OVER_USB_FIRMWARE_METADATA.ordinal()};
-        byte[] address = Shorts.toByteArray((short) (mLwMeshAddress));
-        byte x = address[0];
-        address[0] = address[1];
-        address[1] = x;
-        byte[] device = {(byte) (DeviceConstants.OTA_FIRMWARE_COMPONENT.SMART_NODE.ordinal() & MASK_8)};
-        switch(firmware){
-            case SMART_NODE:
-                device = new byte[]{(byte) (DeviceConstants.OTA_FIRMWARE_COMPONENT.SMART_NODE.ordinal() & MASK_8)};
-                break;
-            case ITM:
-                device = new byte[]{(byte) (DeviceConstants.OTA_FIRMWARE_COMPONENT.ITM.ordinal() & MASK_8)};
-                break;
-            case SMART_STAT:
-                device = new byte[]{(byte) (DeviceConstants.OTA_FIRMWARE_COMPONENT.SMART_STAT.ordinal() & MASK_8)};
-                break;
-            case HIA:
-                device = new byte[]{(byte) (DeviceConstants.OTA_FIRMWARE_COMPONENT.HIA.ordinal() & MASK_8)};
-                break;
-        }
-        byte[] major = {(byte) (mVersionMajor & MASK_8)};
-        byte[] minor = {(byte) (mVersionMinor & MASK_8)};
-        byte[] length = Ints.toByteArray(mUpdateLength);
-        x = length[0];
-        byte y = length[1];
-        byte z = length[2];
-        length[0] = length[3];
-        length[1] = z;
-        length[2] = y;
-        length[3] = x;
-
-        byte[] packet = ByteArrayUtils.addBytes(msgType, address, device, major, minor, length, mFirmwareSignature);
-        */
 
         if (BuildConfig.DEBUG) {
             Log.d(TAG, "[METADATA] [SN:" + mLwMeshAddress + "] [DATA: " + ByteArrayUtils.byteArrayToHexString(message.getByteBuffer().array(), true) + "]");
@@ -666,7 +646,7 @@ public class OTAUpdateService extends IntentService {
      *
      * @param file The file to be processed
      */
-    private void setUpdateFile(File file, DeviceConstants.OTA_FIRMWARE_COMPONENT firmware) {
+    private void setUpdateFile(File file, FirmwareDeviceType_t deviceType) {
         Log.d(TAG, "{STARTUP] Moving binary file to RAM");
         packets = importFile(file, MessageConstants.FIRMWARE_UPDATE_PACKET_SIZE);
 
@@ -677,7 +657,7 @@ public class OTAUpdateService extends IntentService {
         }
 
         Log.d(TAG, "[STARTUP] Successfully moved binary file to RAM, sending metadata");
-        sendFirmwareMetadata(firmware);
+        sendFirmwareMetadata(deviceType);
     }
 
     /**
@@ -729,84 +709,6 @@ public class OTAUpdateService extends IntentService {
         Log.d(TAG, "[STARTUP] [Packets generated:" + rPackets.size() + "]");
 
         return rPackets;
-    }
-
-    private final BroadcastReceiver receiveEventBroadcast = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-
-            switch(action) {
-                case DeviceConstants.IntentActions.LSERIAL_MESSAGE:
-                    // do something
-                    break;
-            }
-        }
-    };
-
-    /**
-     * Downloads a file in the background given a URL
-     */
-    private class DownloadFileFromURL extends AsyncTask<String, String, String> {
-        private final int buffSize = 1024;
-        private final int port = 8192;
-
-        /**
-         * Sets up a URL connection and downloads a file given the URL and saves it to the file name
-         *
-         * @param fUrl furl[0] should be the URL to download from, fUrl[1] should be the name the file will have on the file system
-         * @return Nothing
-         */
-        @Override
-        protected String doInBackground(String... fUrl) {
-            Log.d(TAG, "[DOWNLOAD] [URL: " + fUrl[0] + "]" + " [FILENAME: " + fUrl[1] + "]"+","+mMetadataIsDownloaded+","+mBinaryIsDownloaded);
-
-            if (mMetadataIsDownloaded && mBinaryIsDownloaded) {
-                return null;
-            }
-
-            int count;
-            try {
-                URL url = new URL(fUrl[0]);
-                URLConnection connection = url.openConnection();
-                connection.connect();
-
-                InputStream input = new BufferedInputStream(url.openStream(), port);
-
-                OutputStream output = new FileOutputStream(DOWNLOAD_DIR.toString() + "/" + fUrl[1]);
-
-                byte[] data = new byte[buffSize];
-
-                while ((count = input.read(data)) != -1) {
-                    output.write(data, 0, count);
-                }
-
-                output.flush();
-                output.close();
-                input.close();
-
-            } catch (Exception e) {
-                Log.e(TAG, "[ERROR] " + "[ " + e.getMessage() + "]");
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
-            Log.d(TAG, "[DOWNLOAD] Completed="+mMetadataIsDownloaded+","+mBinaryIsDownloaded);
-
-            if (!mMetadataIsDownloaded) {
-                Log.d(TAG, "[DOWNLOAD] Metadata downloaded");
-                mMetadataIsDownloaded = true;
-                runMetadataCheck(DOWNLOAD_DIR, mVersionMajor, mVersionMinor, mVersion,mFirmwareInfo);
-            } else if (!mBinaryIsDownloaded) {
-                Log.d(TAG, "[DOWNLOAD] Binary downloaded");
-                mBinaryIsDownloaded = true;
-                runBinaryCheck(DOWNLOAD_DIR, mVersion,mFirmwareInfo);
-            }
-        }
     }
 
     private void timerForOtaNonResponse() {

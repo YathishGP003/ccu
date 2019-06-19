@@ -1,6 +1,7 @@
 package a75f.io.renatus;
 
 import android.app.Application;
+import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -21,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 import a75f.io.device.DeviceUpdateJob;
 import a75f.io.device.mesh.LSerial;
+import a75f.io.device.mesh.OTAUpdateService;
 import a75f.io.logic.Globals;
 import a75f.io.usbserial.SerialEvent;
 import a75f.io.usbserial.UsbService;
@@ -32,6 +34,17 @@ import a75f.io.usbserial.UsbService;
 
 public abstract class UtilityApplication extends Application
 {
+
+    private final BroadcastReceiver mDownloadReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Intent downloadIntent = new Intent(getApplicationContext(), OTAUpdateService.class);
+            downloadIntent.setAction(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+            downloadIntent.putExtras(intent);
+
+            startService(downloadIntent);
+        }
+    };
 
     private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver()
     {
@@ -91,7 +104,8 @@ public abstract class UtilityApplication extends Application
         super.onCreate();
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         Globals.getInstance().setApplicationContext(this);
-        setFilters();  // Start listening notifications from UsbService
+        setDownloadFilters();  // Start listening for notifications from DownloadManager
+        setUsbFilters();  // Start listening notifications from UsbService
         startService(UsbService.class, usbConnection, null); // Start UsbService(if it was not started before) and Bind it
         EventBus.getDefault().register(this);
         //disablePush();
@@ -110,7 +124,14 @@ public abstract class UtilityApplication extends Application
                 15, TimeUnit.SECONDS);
     }
 
-    private void setFilters()
+    private void setDownloadFilters()
+    {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+        registerReceiver(mDownloadReceiver, filter);
+    }
+
+    private void setUsbFilters()
     {
         IntentFilter filter = new IntentFilter();
         filter.addAction(UsbService.ACTION_USB_PERMISSION_GRANTED);
@@ -285,6 +306,7 @@ public abstract class UtilityApplication extends Application
     public void onTerminate()
     {
         EventBus.getDefault().unregister(this);
+        unregisterReceiver(mDownloadReceiver);
         unregisterReceiver(mUsbReceiver);
         unbindService(usbConnection);
         super.onTerminate();

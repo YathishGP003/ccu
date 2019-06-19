@@ -6,8 +6,6 @@ package a75f.io.device;
 
 public class DeviceConstants
 {
-    public enum OTA_FIRMWARE_COMPONENT {WTH, SMART_NODE, CM, ITM, SMART_STAT, HIA};
-
     public static final class IntentActions {
         public static final String LSERIAL_MESSAGE = "a75f.io.device.LSERIAL_MESSAGE";
         public static final String ACTIVITY_MESSAGE = "a75f.io.device.ACTIVITY_MESSAGE";

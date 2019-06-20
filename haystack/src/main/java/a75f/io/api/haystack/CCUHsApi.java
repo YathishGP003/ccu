@@ -1112,11 +1112,22 @@ public class CCUHsApi
         return schedules;
     }
 
-    public void addSchedule(String localId, HDict defaultSchedule)
+    public void addSchedule(String localId, HDict scheduleDict)
     {
-        tagsDb.addHDict(localId, defaultSchedule);
+        tagsDb.addHDict(localId, scheduleDict);
     }
-
+    
+    public void updateSchedule(String localId, HDict scheduleDict)
+    {
+        addSchedule(localId, scheduleDict);
+        
+        Log.i("CCH_HS", "updateScheduleDict: " + scheduleDict.toZinc());
+        if (tagsDb.idMap.get("@" +localId) != null)
+        {
+            tagsDb.updateIdMap.put("@" + localId, tagsDb.idMap.get("@" + localId));
+        }
+    }
+    
     public void updateSchedule(Schedule schedule)
     {
         addSchedule(schedule.getId(), schedule.getScheduleHDict());

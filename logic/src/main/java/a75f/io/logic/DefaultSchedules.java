@@ -1,5 +1,7 @@
 package a75f.io.logic;
 
+import android.util.Log;
+
 import org.joda.time.DateTime;
 import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDict;
@@ -42,7 +44,7 @@ public class DefaultSchedules {
                 .add("schedule")
                 .add("heating")
                 .add("cooling")
-                .add("dis", zone ? "Default Zone Schedule" : "Default Building Schedule")
+                .add("dis", zone ? "Zone Schedule" : "Building Schedule")
                 .add("days", hList)
                 .add("siteRef", siteId);
         
@@ -98,8 +100,13 @@ public class DefaultSchedules {
                 .add("dis", vacationName)
                 .add("siteRef", siteId)
                 .toDict();
-
-        CCUHsApi.getInstance().addSchedule(localId.toVal(), defaultSchedule);
+        Log.d("CCU_HS","upsertVacation: "+defaultSchedule.toZinc());
+        if (id == null)
+        {
+            CCUHsApi.getInstance().addSchedule(localId.toVal(), defaultSchedule);
+        } else {
+            CCUHsApi.getInstance().updateSchedule(localId.toVal(), defaultSchedule);
+        }
     }
     
     public static void upsertZoneVacation(String id, String vacationName, DateTime startDate, DateTime endDate, String roomRef)
@@ -133,7 +140,13 @@ public class DefaultSchedules {
                                         .add("siteRef", siteId)
                                         .add("roomRef", HRef.copy(roomRef))
                                         .toDict();
-        
-        CCUHsApi.getInstance().addSchedule(localId.toVal(), defaultSchedule);
+    
+        Log.d("CCU_HS","upsertZoneVacation: "+defaultSchedule.toZinc());
+        if (id == null)
+        {
+            CCUHsApi.getInstance().addSchedule(localId.toVal(), defaultSchedule);
+        } else {
+            CCUHsApi.getInstance().updateSchedule(localId.toVal(), defaultSchedule);
+        }
     }
 }

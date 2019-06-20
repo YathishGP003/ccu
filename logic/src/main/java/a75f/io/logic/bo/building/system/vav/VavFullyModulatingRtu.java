@@ -233,19 +233,18 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         }
         setCmdSignal("co2",signal);
         ControlMote.setAnalogOut("analog4", signal);
-        
-        if (getConfigVal("relay3 and output and enabled") > 0)
+    
+        SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("rtu and mode")];
+        if (getConfigVal("relay3 and output and enabled") > 0 && systemMode != SystemMode.OFF)
         {
             double staticPressuremOp = getStaticPressure() - SystemConstants.SP_CONFIG_MIN;
             signal = (ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED || staticPressuremOp > 0) ? 1 : 0;
             setCmdSignal("occupancy",signal * 100);
             ControlMote.setRelayState("relay3", signal );
-            
         } else {
             ControlMote.setRelayState("relay3", 0 );
         }
-    
-        SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("rtu and mode")];
+        
         if (getConfigVal("relay7 and output and enabled") > 0 && systemMode != SystemMode.OFF
                                                 && ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED)
         {

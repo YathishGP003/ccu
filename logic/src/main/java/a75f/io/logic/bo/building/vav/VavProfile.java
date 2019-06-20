@@ -366,8 +366,8 @@ public abstract class VavProfile extends ZoneProfile
         for (short nodeAddress : vavDeviceMap.keySet())
         {
             HashMap equip = CCUHsApi.getInstance().read("equip and group == \""+nodeAddress+"\"");
-            if (ZonePriority.valueOf(equip.get("priority").toString()).ordinal() > priority.ordinal()) {
-                priority = ZonePriority.valueOf(equip.get("priority").toString());
+            if (ZonePriority.valueOf(equip.get("priorityLevel").toString()).ordinal() > priority.ordinal()) {
+                priority = ZonePriority.valueOf(equip.get("priorityLevel").toString());
             }
         }
         return priority;

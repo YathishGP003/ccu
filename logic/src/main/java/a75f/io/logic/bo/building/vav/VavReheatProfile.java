@@ -188,7 +188,7 @@ public class VavReheatProfile extends VavProfile
                 }
             }
             
-            if (valveController.getControlVariable() == 0)
+            if (conditioning == SystemController.State.OFF || valveController.getControlVariable() == 0)
             {
                 valve.currentPosition = 0;
             }

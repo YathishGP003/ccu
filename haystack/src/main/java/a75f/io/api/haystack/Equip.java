@@ -211,7 +211,7 @@ public class Equip extends Entity
                 {
                     this.group = pair.getValue().toString();
                 }
-                else if(pair.getKey().equals("priority"))
+                else if(pair.getKey().equals("priorityLevel"))
                 {
                     this.priority = pair.getValue().toString();
                 }

@@ -42,7 +42,7 @@ public class PlcEquip
             equipRef = equip.get("id").toString();
         }
         plc = new GenericPIController();
-        plc.setMaxAllowedError(hayStack.readDefaultVal("point and proportional and range and equipRef == \""+equipRef+"\""));
+        plc.setMaxAllowedError(hayStack.readDefaultVal("point and prange and equipRef == \""+equipRef+"\""));
         plc.setIntegralGain(TunerUtil.readTunerValByQuery("pid and igain and equipRef == \""+equipRef+"\""));
         plc.setProportionalGain(TunerUtil.readTunerValByQuery("pid and pgain and equipRef == \""+equipRef+"\""));
         plc.setIntegralMaxTimeout((int)TunerUtil.readTunerValByQuery("pid and itimeout and equipRef == \""+equipRef+"\""));
@@ -133,7 +133,7 @@ public class PlcEquip
                                        .setRoomRef(roomRef)
                                        .setFloorRef(floorRef)
                                        .addMarker("config").addMarker("pid").addMarker("zone").addMarker("writable")
-                                       .addMarker("proportional").addMarker("range")
+                                       .addMarker("prange")
                                        .setGroup(String.valueOf(nodeAddr))
                                        .setTz(tz)
                                        .build();
@@ -314,7 +314,7 @@ public class PlcEquip
         p.analog1InputSensor = hayStack.readDefaultVal("point and config and analog1 and input and sensor and equipRef == \""+equipRef+"\"").intValue();
         p.th1InputSensor = hayStack.readDefaultVal("point and config and th1 and input and sensor and equipRef == \""+equipRef+"\"").intValue();
         p.pidTargetValue = hayStack.readDefaultVal("point and config and target and value and equipRef == \""+equipRef+"\"");
-        p.pidProportionalRange = hayStack.readDefaultVal("point and proportional and range and equipRef == \""+equipRef+"\"");
+        p.pidProportionalRange = hayStack.readDefaultVal("point and prange and equipRef == \""+equipRef+"\"");
         p.useAnalogIn2ForSetpoint = hayStack.readDefaultVal("point and config and enabled and analog2 and setpoint and equipRef == \""+equipRef+"\"") > 0;
         p.analog2InputSensor = hayStack.readDefaultVal("point and config and analog2 and input and sensor and equipRef == \""+equipRef+"\"").intValue();
     
@@ -336,7 +336,7 @@ public class PlcEquip
     
         hayStack.writeDefaultVal("point and config and target and value and equipRef == \""+equipRef+"\"", config.pidTargetValue);
         
-        hayStack.writeDefaultVal("point and config and proportional and range and equipRef == \""+equipRef+"\"", config.pidProportionalRange);
+        hayStack.writeDefaultVal("point and config and prange and equipRef == \""+equipRef+"\"", config.pidProportionalRange);
     
         hayStack.writeDefaultVal("point and config and enabled and analog2 and setpoint and equipRef == \""+equipRef+"\"", config.useAnalogIn2ForSetpoint ? 1.0 :0);
     

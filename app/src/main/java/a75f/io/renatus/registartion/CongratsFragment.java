@@ -152,7 +152,7 @@ public class CongratsFragment extends Fragment {
                                                 "<small><font color='#000000'>   Heating Stage 2 | "+"</font></small>"+"<font color='#E24301'> "+heatingStage2+"</font><br>"+
                                                 "<small><font color='#000000'>Humidifier | "+"</font></small>"+"<font color='#E24301'> "+humidifierStatus+"</font><br>"+
                                                 "<small><font color='#000000'>OAO | "+"</font></small>"+"<font color='#E24301'> "+oaoStatus+"</font><br>"+
-                                                "<small><font color='#000000'>Analog | "+"</font></small>"+"<font color='#E24301'> "+analogStatus+"</font><br>"
+                                                "<small><font color='#000000'>Analog | "+"</font></small>"+"<font color='#E24301'> "+analogStatus+"</font>"
         ));
         mComfortSelector.setText("Maximum Comfort");
 

@@ -72,11 +72,10 @@ public class SplashActivity extends Activity {
                                 finish();
                             } else if(prefs.getBoolean("REGISTRATION"))
                             {
-                               /* Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
-                                i.putExtra("viewpager_position", 20);
+                                /*Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
+                                i.putExtra("viewpager_position", 18);
                                 startActivity(i);
                                 finish();*/
-
                                 Intent i = new Intent(SplashActivity.this, RenatusLandingActivity.class);
                                 i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                 startActivity(i);

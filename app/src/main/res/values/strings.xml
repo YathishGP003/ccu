@@ -274,7 +274,7 @@
     <string name="gateway_ex">Example use cases are when we only use Zone/Terminal profiles that \n
         operate in standalone mode without any central plan equipment \n
         e.g. zones configured to be Hot water Mixing Pacakge, \n
-        Generic PI Controller,Standalone Conventional Package Unit etc.</string>
+        Generic PI Controller, Standalone Conventional Package Unit etc.</string>
 
 
 
@@ -483,5 +483,23 @@
 
     <!--TEMPERATURE INFLUENCING Screen-->
     <string name="label_tempoffsetnp">TEMP OFFSET</string>
+
+    <!--SYSTEM DEVICES AND OAO Screen-->
+    <string name="label_selectdevicetype">SELECT DEVICE TYPE</string>
+    <string name="label_systemdevice">SYSTEM DEVICES</string>
+    <string name="label_oao">OAO</string>
+    <string name="title_oao">OUTSIDE AIR OPTIMIZER (OAO)</string>
+    <string name="label_co2device">CO2 Device Type</string>
+    <string name="label_co2alert">CO2 Alert Threshold</string>
+    <string name="label_oaoanalog1">Outside Air Damper Type\n(Analog-out 1)</string>
+    <string name="label_oaoanalog2">Return Air Damper Type\n(Analog-out 2)</string>
+    <string name="label_co2threshold">CO2 Threshold (ppm)</string>
+    <string name="label_co2offset">CO2 Alert Offset Time</string>
+    <string name="label_currtrans">Curr Transformer\n(Analog-in 2)</string>
+
+    <!--PAIRING INSTRUCTION Screen-->
+    <string name="title_pairsn">SMART NODE | PAIRING INSTRUCTIONS</string>
+    <string name="title_pairss">SMART STAT | PAIRING INSTRUCTIONS</string>
+    <string name="button_pair">PAIR</string>
 
 </resources>

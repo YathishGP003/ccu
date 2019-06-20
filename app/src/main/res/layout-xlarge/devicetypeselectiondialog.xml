@@ -43,7 +43,7 @@
             android:layout_marginRight="190dp"
             android:layout_centerVertical="true"
             android:fontFamily="@font/lato_bold"
-            android:text="@string/title_systemprofile"
+            android:text="@string/label_selectdevicetype"
             android:textAllCaps="true"
             android:textColor="@color/orange_75f"
             android:textSize="33.5dp"

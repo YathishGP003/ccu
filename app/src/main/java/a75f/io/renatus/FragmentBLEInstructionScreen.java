@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -21,6 +22,7 @@ import a75f.io.renatus.ZONEPROFILE.LightingZoneProfileFragment;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import butterknife.Optional;
 
 import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.ARG_NAME;
 import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.ARG_PAIRING_ADDR;
@@ -44,8 +46,10 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
     
     String mRoomName;
     String mFloorName;
-    
-    
+
+    @BindView(R.id.imageGoback)
+    ImageView imageGoback;
+
     public static FragmentBLEInstructionScreen getInstance(short nodeAddress, String roomName,
                                                            String floorName,
                                                            ProfileType profileType,
@@ -61,21 +65,21 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         fds.setArguments(args);
         return fds;
     }
-    
-    
-    @OnClick(R.id.first_button)
-    void onFirstButtonClick()
+
+
+    @Optional
+    @OnClick(R.id.imageGoback)
+    void onGoBackButtonClick()
     {
         removeDialogFragment(ID);
     }
-    
-    
+
     @OnClick(R.id.second_button)
     void onSecondButtonClick()
     {
         openBLEPairing();
     }
-    
+
     
     private void openBLEPairing()
     {
@@ -236,6 +240,7 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
                              @Nullable Bundle savedInstanceState)
     {
         View view = inflater.inflate(R.layout.pairinginstructionscreen, container, false);
+        getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         mNodeAddress = getArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR);
         mRoomName = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
         mFloorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
@@ -253,10 +258,12 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         ButterKnife.bind(this, view);
         if (mNodeType == NodeType.SMART_NODE)
         {
-            pairinginstruct.setImageResource(R.drawable.pairinginstructionsn);
+            title.setText(getText(R.string.title_pairsn));
+            pairinginstruct.setImageResource(R.drawable.image_pairinginstructionsn);
         }
         else if (mNodeType == NodeType.SMART_STAT)
         {
+            title.setText(getText(R.string.title_pairss));
             pairinginstruct.setImageResource(R.drawable.pairinginstruct);
         }
     }

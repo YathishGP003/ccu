@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -20,6 +21,7 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -84,6 +86,11 @@ public class FloorPlanFragment extends Fragment
 	LinearLayout    addZonelt;
 	@BindView(R.id.lt_addModule)
 	LinearLayout    addModulelt;
+
+	@BindView(R.id.rl_systemdevice)
+	RelativeLayout rl_systemdevice;
+	@BindView(R.id.rl_oao)
+	RelativeLayout rl_oao;
 	
 	ArrayList<Floor> floorList = new ArrayList();
 	ArrayList<Zone> roomList = new ArrayList();
@@ -365,7 +372,54 @@ public class FloorPlanFragment extends Fragment
 		mgr.showSoftInput(addFloorEdit, InputMethodManager.SHOW_IMPLICIT);
 	}
 	
-	
+
+
+	@OnClick(R.id.rl_systemdevice)
+	public void systemDeviceOnClick()
+	{
+		rl_systemdevice.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
+		rl_oao.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
+		ArrayList<Equip> zoneEquips  = HSUtil.getEquips(getSelectedZone().getId());
+		if(zoneEquips.size() >0 && !zoneEquips.isEmpty())
+		{
+			mModuleListAdapter.setSelectedItem(-1);
+		}
+		roomList = HSUtil.getZones(getSelectedFloor().getId());
+		if(roomList.size() > 0)
+		{
+			mRoomListAdapter.setSelectedItem(-1);
+		}
+		if(floorList.size()>0) {
+			mFloorListAdapter.setSelectedItem(-1);
+		}
+		addZonelt.setEnabled(false);
+		addFloorBtn.setEnabled(false);
+		roomListView.setVisibility(View.GONE);
+	}
+
+
+
+	@OnClick(R.id.rl_oao)
+	public void oaoOnClick()
+	{
+		ArrayList<Equip> zoneEquips  = HSUtil.getEquips(getSelectedZone().getId());
+		if(zoneEquips.size() >0)
+		{
+			mModuleListAdapter.setSelectedItem(-1);
+		}
+		/*roomList = HSUtil.getZones(getSelectedFloor().getId());
+		if(roomList.size() > 0)
+		{
+			mRoomListAdapter.setSelectedItem(-1);
+		}
+		if(floorList.size()>0) {
+			mFloorListAdapter.setSelectedItem(-1);
+		}*/
+		addFloorBtn.setEnabled(false);
+		addZonelt.setEnabled(false);
+	}
+
+
 	private void enableFloorEdit()
 	{
 		addFloorlt.setVisibility(View.INVISIBLE);
@@ -502,10 +556,17 @@ public class FloorPlanFragment extends Fragment
 	public void startPairing()
 	{
 		short meshAddress = L.generateSmartNodeAddress();
-		/* Checks to see if emulated and doesn't popup BLE dialogs */
+		if(mFloorListAdapter.getSelectedPostion() == -1 && mRoomListAdapter.getSelectedPostion() ==-1)
+		{
+			DialogOAOProfile oaoProfiling = DialogOAOProfile.newInstance(meshAddress);
+			showDialogFragment(oaoProfiling, DialogOAOProfile.ID);
+		}
+		else {
+			/* Checks to see if emulated and doesn't popup BLE dialogs */
 
-		//This should be moved to pair button for select device type screen.
-		showDialogFragment(FragmentSelectDeviceType.newInstance(meshAddress, getSelectedZone().getId(), getSelectedFloor().getId()), FragmentSelectDeviceType.ID);
+			//This should be moved to pair button for select device type screen.
+			showDialogFragment(FragmentSelectDeviceType.newInstance(meshAddress, getSelectedZone().getId(), getSelectedFloor().getId()), FragmentSelectDeviceType.ID);
+		}
 		/*
 		*/
 	}
@@ -531,6 +592,11 @@ public class FloorPlanFragment extends Fragment
 	public void setFloorListView(AdapterView<?> parent, View view, int position, long id)
 	{
 		selectFloor(position);
+		rl_systemdevice.setBackgroundColor(Color.WHITE);
+		rl_oao.setBackgroundColor(Color.WHITE);
+		addFloorBtn.setEnabled(true);
+		addZonelt.setEnabled(true);
+		roomListView.setVisibility(View.VISIBLE);
 	}
 	
 	
@@ -538,6 +604,9 @@ public class FloorPlanFragment extends Fragment
 	public void setRoomListView(AdapterView<?> parent, View view, int position, long id)
 	{
 		selectRoom(position);
+
+		rl_systemdevice.setBackgroundColor(Color.WHITE);
+		rl_oao.setBackgroundColor(Color.WHITE);
 	}
 	
 	

@@ -27,6 +27,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import java.util.zip.GZIPInputStream;
+
 import a75f.io.renatus.DABFullyAHUProfile;
 import a75f.io.renatus.DABHybridAhuProfile;
 import a75f.io.renatus.DABStagedProfile;
@@ -696,7 +698,10 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                     .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
                     .commit();
 
-
+            ConstraintLayout.LayoutParams headerparams = (ConstraintLayout.LayoutParams) rl_Header.getLayoutParams();
+            headerparams.topMargin = 70;
+            headerparams.leftMargin = 0;
+            rl_Header.setLayoutParams(headerparams);
             verticalTabAdapter.setCurrentSelected(5);
 
             textView_title.setText(getText(R.string.title_systemprofile));
@@ -732,7 +737,10 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                     .commit();
 
 
-
+            ConstraintLayout.LayoutParams headerparams = (ConstraintLayout.LayoutParams) rl_Header.getLayoutParams();
+            headerparams.topMargin = 70;
+            headerparams.leftMargin = 0;
+            rl_Header.setLayoutParams(headerparams);
             verticalTabAdapter.setCurrentSelected(5);
 
             textView_title.setText(getText(R.string.title_systemprofile));
@@ -768,7 +776,10 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                     .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
                     .commit();
 
-
+            ConstraintLayout.LayoutParams headerparams = (ConstraintLayout.LayoutParams) rl_Header.getLayoutParams();
+            headerparams.topMargin = 70;
+            headerparams.leftMargin = 0;
+            rl_Header.setLayoutParams(headerparams);
 
             verticalTabAdapter.setCurrentSelected(5);
 
@@ -818,7 +829,10 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
             params.setMargins(0,0,560,0);
             textView_title.setLayoutParams(params);
-
+            ConstraintLayout.LayoutParams headerparams = (ConstraintLayout.LayoutParams) rl_Header.getLayoutParams();
+            headerparams.topMargin = 70;
+            headerparams.leftMargin = 0;
+            rl_Header.setLayoutParams(headerparams);
             ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
             paramsPager.topMargin = 146;
             paramsPager.leftMargin = 250;
@@ -853,7 +867,10 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
             params.setMargins(0,0,560,0);
             textView_title.setLayoutParams(params);
-
+            ConstraintLayout.LayoutParams headerparams = (ConstraintLayout.LayoutParams) rl_Header.getLayoutParams();
+            headerparams.topMargin = 70;
+            headerparams.leftMargin = 0;
+            rl_Header.setLayoutParams(headerparams);
             ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
             paramsPager.topMargin = 146;
             paramsPager.leftMargin = 250;
@@ -876,7 +893,10 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
 
             verticalTabAdapter.setCurrentSelected(5);
-
+            ConstraintLayout.LayoutParams headerparams = (ConstraintLayout.LayoutParams) rl_Header.getLayoutParams();
+            headerparams.topMargin = 70;
+            headerparams.leftMargin = 0;
+            rl_Header.setLayoutParams(headerparams);
             textView_title.setText(getText(R.string.title_systemprofile));
             textView_title.setVisibility(View.VISIBLE);
             spinnerSystemProile.setVisibility(View.VISIBLE);
@@ -909,7 +929,10 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                     .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
                     .commit();
 
-
+            ConstraintLayout.LayoutParams headerparams = (ConstraintLayout.LayoutParams) rl_Header.getLayoutParams();
+            headerparams.topMargin = 70;
+            headerparams.leftMargin = 0;
+            rl_Header.setLayoutParams(headerparams);
             verticalTabAdapter.setCurrentSelected(5);
 
             textView_title.setText(getText(R.string.title_systemprofile));
@@ -943,7 +966,10 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                     .replace(R.id.container, fragment)
                     .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
                     .commit();
-
+            ConstraintLayout.LayoutParams headerparams = (ConstraintLayout.LayoutParams) rl_Header.getLayoutParams();
+            headerparams.topMargin = 70;
+            headerparams.leftMargin = 0;
+            rl_Header.setLayoutParams(headerparams);
 
             verticalTabAdapter.setCurrentSelected(5);
 
@@ -979,6 +1005,10 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                     .setTransition(FragmentTransaction.TRANSIT_ENTER_MASK)
                     .commit();
 
+            ConstraintLayout.LayoutParams headerparams = (ConstraintLayout.LayoutParams) rl_Header.getLayoutParams();
+            headerparams.topMargin = 70;
+            headerparams.leftMargin = 0;
+            rl_Header.setLayoutParams(headerparams);
 
             verticalTabAdapter.setCurrentSelected(5);
 
@@ -1016,6 +1046,11 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
 
             showIcons(false);
+            ConstraintLayout.LayoutParams headerparams = (ConstraintLayout.LayoutParams) rl_Header.getLayoutParams();
+            headerparams.topMargin = 26;
+            headerparams.leftMargin = -40;
+            rl_Header.setLayoutParams(headerparams);
+
             rl_Header.setVisibility(View.VISIBLE);
             buttonNext.setVisibility(View.VISIBLE);
             textView_title.setVisibility(View.GONE);
@@ -1029,8 +1064,8 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             textView_title.setLayoutParams(params);
 
             ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
-            paramsPager.topMargin = -10;
-            paramsPager.leftMargin = 112;
+            paramsPager.topMargin = 10;
+            paramsPager.leftMargin = 56;
             paramsPager.bottomMargin = 0;
             paramsPager.rightMargin = 0;
             container.setLayoutParams(paramsPager);
@@ -1051,11 +1086,17 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
 
             showIcons(false);
+
+            ConstraintLayout.LayoutParams headerparams = (ConstraintLayout.LayoutParams) rl_Header.getLayoutParams();
+            headerparams.topMargin = 26;
+            headerparams.leftMargin = -40;
+            rl_Header.setLayoutParams(headerparams);
+
             rl_Header.setVisibility(View.VISIBLE);
             buttonNext.setVisibility(View.VISIBLE);
             textView_title.setVisibility(View.GONE);
+            imageView_Goback.setVisibility(View.GONE);
             spinnerSystemProile.setVisibility(View.GONE);
-            imageView_Goback.setVisibility(View.VISIBLE);
             toggleWifi.setVisibility(View.GONE);
             imageRefresh.setVisibility(View.GONE);
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -1102,7 +1143,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             textView_title.setLayoutParams(params);
 
             ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
-            paramsPager.topMargin = 126;
+            paramsPager.topMargin = 92;
             paramsPager.leftMargin = 116;
             paramsPager.bottomMargin = 24;
             paramsPager.rightMargin = 101;

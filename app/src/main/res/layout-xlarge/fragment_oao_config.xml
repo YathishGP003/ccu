@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/damperscrollView"
+    android:layout_width="match_parent"
+    android:overScrollMode="never"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="655dp"
+        android:padding="16dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <RelativeLayout
+                android:id="@+id/layoutHeader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp">
+
+
+                <TextView
+                    android:id="@+id/textTitleFragment"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerVertical="true"
+                    android:fontFamily="@font/lato_bold"
+                    android:text="@string/title_oao"
+                    android:textAllCaps="true"
+                    android:textColor="@color/orange_75f"
+                    android:textSize="33.5dp"
+                    android:textStyle="bold" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="72dp"
+                android:layout_marginRight="72dp"
+                android:orientation="horizontal"
+                android:layout_marginTop="48dp"
+                android:layout_gravity="center_horizontal"
+                android:paddingTop="20dp" >
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:weightSum="2"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginRight="42dp">
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <TextView
+                                android:id="@+id/textCO2device"
+                                android:layout_width="wrap_content"
+                                android:layout_height="40dp"
+                                android:layout_gravity="center_vertical"
+                                android:text="@string/label_co2device"
+                                android:layout_alignParentLeft="true"
+                                android:textAppearance="@style/title_normal" />
+
+                            <Spinner
+                                android:id="@+id/co2Devicetype"
+                                android:layout_width="160dp"
+                                android:layout_height="40dp"
+                                android:layout_alignParentRight="true"
+                                android:layout_gravity="center_vertical"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                android:entries="@array/hvac_stage_selector"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+
+
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="36dp">
+
+                            <TextView
+                                android:id="@+id/textCO2Alert"
+                                android:layout_width="wrap_content"
+                                android:layout_height="40dp"
+                                android:layout_gravity="center_vertical"
+                                android:text="@string/label_co2alert"
+                                android:layout_alignParentLeft="true"
+                                android:textAppearance="@style/title_normal" />
+
+                            <Spinner
+                                android:id="@+id/co2Alert"
+                                android:layout_width="160dp"
+                                android:layout_height="40dp"
+                                android:layout_alignParentRight="true"
+                                android:layout_gravity="center_vertical"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                android:entries="@array/hvac_stage_selector"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+
+
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="36dp">
+
+                            <TextView
+                                android:id="@+id/textCO2Analog1"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:text="@string/label_oaoanalog1"
+                                android:layout_alignParentLeft="true"
+                                android:textAppearance="@style/title_normal" />
+
+                            <Spinner
+                                android:id="@+id/co2Analog1"
+                                android:layout_width="160dp"
+                                android:layout_height="40dp"
+                                android:layout_alignParentRight="true"
+                                android:layout_gravity="center_vertical"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                android:entries="@array/hvac_stage_selector"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+
+
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="36dp">
+
+                            <TextView
+                                android:id="@+id/textCO2Analog2"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:text="@string/label_oaoanalog2"
+                                android:layout_alignParentLeft="true"
+                                android:textAppearance="@style/title_normal" />
+
+                            <Spinner
+                                android:id="@+id/co2Analog2"
+                                android:layout_width="160dp"
+                                android:layout_height="40dp"
+                                android:layout_alignParentRight="true"
+                                android:layout_gravity="center_vertical"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                android:entries="@array/hvac_stage_selector"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+
+
+                        </RelativeLayout>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginLeft="42dp">
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <TextView
+                                android:id="@+id/textCO2threshold"
+                                android:layout_width="wrap_content"
+                                android:layout_height="40dp"
+                                android:layout_gravity="center_vertical"
+                                android:text="@string/label_co2threshold"
+                                android:layout_alignParentLeft="true"
+                                android:textAppearance="@style/title_normal" />
+
+                            <Spinner
+                                android:id="@+id/co2Threshold"
+                                android:layout_width="160dp"
+                                android:layout_height="40dp"
+                                android:layout_alignParentRight="true"
+                                android:layout_gravity="center_vertical"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                android:entries="@array/hvac_stage_selector"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+
+
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="36dp">
+
+                            <TextView
+                                android:id="@+id/textCO2Offset"
+                                android:layout_width="wrap_content"
+                                android:layout_height="40dp"
+                                android:layout_gravity="center_vertical"
+                                android:text="@string/label_co2offset"
+                                android:layout_alignParentLeft="true"
+                                android:textAppearance="@style/title_normal" />
+
+                            <Spinner
+                                android:id="@+id/co2Offset"
+                                android:layout_width="160dp"
+                                android:layout_height="40dp"
+                                android:layout_alignParentRight="true"
+                                android:layout_gravity="center_vertical"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                android:entries="@array/hvac_stage_selector"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+
+
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="36dp">
+
+                            <TextView
+                                android:id="@+id/textCurrTrans"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:text="@string/label_currtrans"
+                                android:layout_alignParentLeft="true"
+                                android:textAppearance="@style/title_normal" />
+
+                            <Spinner
+                                android:id="@+id/currTransformer"
+                                android:layout_width="160dp"
+                                android:layout_height="40dp"
+                                android:layout_alignParentRight="true"
+                                android:layout_gravity="center_vertical"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                android:entries="@array/hvac_stage_selector"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+
+
+                        </RelativeLayout>
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </RelativeLayout>
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/setBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginRight="16dp"
+            android:layout_marginBottom="48dp"
+            android:background="@null"
+            android:button="@null"
+            android:fontFamily="@font/lato_regular"
+            android:text="@string/button_set"
+            android:textAllCaps="true"
+            android:textColor="@color/orange_75f"
+            android:textSize="19.5dp" />
+
+    </RelativeLayout>
+</ScrollView>

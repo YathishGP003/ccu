@@ -296,8 +296,8 @@ public class ConventionalUnitLogicalMap {
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("standalone").addMarker(profile).addMarker("equipHis")/*.addMarker("current")*/
-                .addMarker("air").addMarker("temp").addMarker("th2").addMarker("sensor").addMarker("his").addMarker("cur").addMarker("logical").addMarker("zone")
+                .addMarker("standalone").addMarker(profile)
+                .addMarker("air").addMarker("temp").addMarker("th2").addMarker("sensor").addMarker("logical").addMarker("zone")
                 .setGroup(String.valueOf(nodeAddr))
                 .setUnit("\u00B0F")
                 .setTz(tz)
@@ -944,17 +944,6 @@ public class ConventionalUnitLogicalMap {
     {
         CCUHsApi.getInstance().writeHisValByQuery("point and air and temp and sensor and th1 and standalone and group == \""+nodeAddr+"\"", dischargeTemp);
         this.dischargeTemp = dischargeTemp;
-    }
-
-    public double getSupplyAirTemp()
-    {
-        supplyAirTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and th2 and standalone and group == \""+nodeAddr+"\"");
-        return supplyAirTemp;
-    }
-    public void setSupplyAirTemp(double supplyAirTemp)
-    {
-        CCUHsApi.getInstance().writeHisValByQuery("point and air and temp and sensor and th2 and standalone and group == \""+nodeAddr+"\"", supplyAirTemp);
-        this.supplyAirTemp = supplyAirTemp;
     }
 
     public void setConfigNumVal(String tags,double val) {

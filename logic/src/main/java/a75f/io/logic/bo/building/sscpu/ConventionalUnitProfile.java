@@ -12,6 +12,7 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
+import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
@@ -138,7 +139,12 @@ public class ConventionalUnitProfile extends ZoneProfile {
                     fanSpeed = StandaloneFanSpeed.AUTO;
                 }
             }
-            cpuDevice.setProfilePoint("occupancy and status",occupied ? 1 : 0);
+
+            if(occuStatus != null){
+                cpuDevice.setProfilePoint("occupancy and status", occuStatus.isOccupied() ? Occupancy.OCCUPIED.ordinal() : (occuStatus.isPreconditioning() ? Occupancy.PRECONDITIONING.ordinal() : (occuStatus.isForcedOccupied() ? Occupancy.FORCED_OCCUPIED.ordinal() : 0)));
+            }else {
+                cpuDevice.setProfilePoint("occupancy and status", occupied ? 1 : 0);
+            }
             double targetThreshold = 25.0;
 
             switch (fanHighType){

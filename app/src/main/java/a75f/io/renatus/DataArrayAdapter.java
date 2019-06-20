@@ -51,10 +51,15 @@ public class DataArrayAdapter<T> extends ArrayAdapter<T>
 		textView_Data.setText(objects.get(position).toString());
 		if (!bMultiSelect)
 		{
+			if(position == -1)
+			{
+				convertView.setBackground(getContext().getResources().getDrawable(R.drawable.ic_listselector));
+				textView_Data.setTextColor(Color.WHITE);
+			}
 			if (position == nSelectedPostion)
 			{
 				//v.setBackgroundColor(getContext().getResources().getColor(R.color.orange_multi));
-				convertView.setBackground(getContext().getResources().getDrawable(R.drawable.list_selector));
+				convertView.setBackground(getContext().getResources().getDrawable(R.drawable.ic_listselector));
 				textView_Data.setTextColor(Color.WHITE);
 			}
 			//				v.setBackgroundDrawable(getContext().getResources().getDrawable(R.drawable.selector));

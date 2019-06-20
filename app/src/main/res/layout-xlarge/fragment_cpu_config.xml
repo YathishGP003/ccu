@@ -271,7 +271,7 @@
                     android:id="@+id/textAirflow"
                     android:layout_width="wrap_content"
                     android:layout_height="28.5dp"
-                    android:layout_marginTop="109dp"
+                    android:layout_marginTop="100dp"
                     android:textAppearance="@style/text_appearance"
                     android:text="@string/label_airflowtemp"/>
 

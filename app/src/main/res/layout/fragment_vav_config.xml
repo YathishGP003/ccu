@@ -144,8 +144,8 @@
                     android:text="@string/label_reheattype"
                     android:textAppearance="@style/title_normal"
                     android:layout_marginRight="172dp"
+                    android:layout_alignLeft="@+id/textDamperSize"
                     android:layout_marginTop="34dp"
-                    android:layout_toLeftOf="@+id/vavReheatType"
                     android:layout_below="@+id/textDamperType"/>
 
                 <Spinner

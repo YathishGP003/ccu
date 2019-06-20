@@ -172,6 +172,19 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		if (L.ccu().systemProfile instanceof DefaultSystem) {
 			systemModePicker.setEnabled(false);
 			sbComfortValue.setEnabled(false);
+
+			ArrayList<Double> zoroToHundred = new ArrayList<>();
+			for (double val = 0;  val <= 100.0; val++)
+			{
+				zoroToHundred.add(val);
+			}
+			humidityAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, zoroToHundred);
+			humidityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+			targetMinInsideHumidity.setAdapter(humidityAdapter);
+			targetMinInsideHumidity.setSelection(0);
+			targetMaxInsideHumidity.setAdapter(humidityAdapter);
+			targetMaxInsideHumidity.setSelection(0);
+
 			targetMaxInsideHumidity.setEnabled(false);
 			targetMinInsideHumidity.setEnabled(false);
 			tbCompHumidity.setEnabled(false);

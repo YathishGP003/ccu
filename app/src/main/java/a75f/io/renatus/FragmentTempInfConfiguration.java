@@ -100,7 +100,7 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
         zoneRef = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
         floorRef = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
         mNodeType = NodeType.valueOf(getArguments().getString(FragmentCommonBundleArgs.NODE_TYPE));
-        setDividerColor(temperatureOffset);
+
         ButterKnife.bind(this, view);
         return view;
     }
@@ -108,6 +108,7 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        setDividerColor(temperatureOffset);
 
     }
     private void setDividerColor(NumberPicker picker) {
@@ -131,4 +132,28 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
             }
         }
     }
+
+    private void setNumberPickerDividerColor(NumberPicker pk) {
+        Class<?> numberPickerClass = null;
+        try {
+            numberPickerClass = Class.forName("android.widget.NumberPicker");
+            Field selectionDivider = numberPickerClass.getDeclaredField("mSelectionDivider");
+            selectionDivider.setAccessible(true);
+            //if(!CCUUtils.isxlargedevice(getActivity())) {
+            selectionDivider.set(pk, getResources().getDrawable(R.drawable.line_959595));
+            //}else{
+            //   selectionDivider.set(pk, getResources().getDrawable(R.drawable.connect_192x48_orange));
+            //}
+
+        } catch (ClassNotFoundException e) {
+            Log.e("class not found",e.toString());
+        } catch (NoSuchFieldException e) {
+            Log.e("NoSuchFieldException",e.toString());
+        } catch (IllegalAccessException e) {
+            Log.e("IllegalAccessException",e.toString());
+        }catch (Exception e){
+            Log.e("dividerexception",e.getMessage().toString());
+        }
+    }
+
 }

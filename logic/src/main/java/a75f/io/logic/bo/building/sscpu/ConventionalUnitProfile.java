@@ -138,7 +138,12 @@ public class ConventionalUnitProfile extends ZoneProfile {
                     fanSpeed = StandaloneFanSpeed.AUTO;
                 }
             }
-            cpuDevice.setProfilePoint("occupancy and status",occupied ? 1 : 0);
+
+            if(occuStatus != null){
+                cpuDevice.setProfilePoint("occupancy and status", occuStatus.isOccupied() ? Occupancy.OCCUPIED.ordinal() : (occuStatus.isPreconditioning() ? Occupancy.PRECONDITIONING.ordinal() : (occuStatus.isForcedOccupied() ? Occupancy.FORCED_OCCUPIED.ordinal() : 0)));
+            }else {
+                cpuDevice.setProfilePoint("occupancy and status", occupied ? 1 : 0);
+            }
             double targetThreshold = 25.0;
 
             switch (fanHighType){

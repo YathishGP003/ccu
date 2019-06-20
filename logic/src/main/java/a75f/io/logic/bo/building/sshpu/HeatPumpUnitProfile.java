@@ -13,6 +13,7 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
+import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.ZoneTempState;
@@ -127,7 +128,11 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                     fanSpeed = StandaloneFanSpeed.AUTO;
                 }
             }
-            hpuDevice.setProfilePoint("occupancy and status", occupied ? 1 : 0);
+            if(occuStatus != null){
+                hpuDevice.setProfilePoint("occupancy and status", occuStatus.isOccupied() ? Occupancy.OCCUPIED.ordinal() : (occuStatus.isPreconditioning() ? Occupancy.PRECONDITIONING.ordinal() : (occuStatus.isForcedOccupied() ? Occupancy.FORCED_OCCUPIED.ordinal() : 0)));
+            }else {
+                hpuDevice.setProfilePoint("occupancy and status", occupied ? 1 : 0);
+            }
             Log.d(TAG, " smartstat hpu, updates =" + node+","+roomTemp+","+occupied+","+","+state);
 
             if((fanSpeed != OFF) ){

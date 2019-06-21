@@ -147,9 +147,10 @@ public class Schedule extends Entity
         return false;
     }
     
-    public Interval getOverLapInterval(Days day) {
+    public ArrayList<Interval> getOverLapInterval(Days day) {
         ArrayList<Interval> intervalsOfCurrent   = getScheduledIntervals(getDaysSorted());
         Interval intervalOfAddition = getScheduledInterval(day);
+        ArrayList<Interval> overLaps = new ArrayList<>();
         for (Interval current : intervalsOfCurrent)
         {
             boolean hasOverlap = intervalOfAddition.overlaps(current);
@@ -157,30 +158,22 @@ public class Schedule extends Entity
             {
                 if (current.getStart().minuteOfDay().get() < current.getEnd().minuteOfDay().get())
                 {
-                    if (intervalOfAddition.getEndMillis() < current.getStartMillis())
-                    {
-                        return new Interval(intervalOfAddition.getEndMillis(), current.getStartMillis());
-                    }
-                    else if (intervalOfAddition.getStartMillis()> current.getStartMillis() &&
-                                                intervalOfAddition.getStartMillis() < current.getEndMillis())
-                    {
-                        return new Interval(intervalOfAddition.getStartMillis(), current.getEndMillis());
-                    }
+                    overLaps.add(current.overlap(intervalOfAddition));
                 } else {
                     //Multi-day schedule
                     if (intervalOfAddition.getEndMillis() > current.getStartMillis() &&
                                                 intervalOfAddition.getStartMillis() < current.getStartMillis())
                     {
-                        return new Interval(current.getStartMillis(), intervalOfAddition.getEndMillis());
+                        overLaps.add(new Interval(current.getStartMillis(), intervalOfAddition.getEndMillis()));
                     }
                     else if (intervalOfAddition.getStartMillis() < current.getEndMillis())
                     {
-                        return new Interval(intervalOfAddition.getStartMillis(), current.getEndMillis());
+                        overLaps.add(new Interval(intervalOfAddition.getStartMillis(), current.getEndMillis()));
                     }
                 }
             }
         }
-        return null;
+        return overLaps;
     }
 
     private DateTime getTime()
@@ -678,8 +671,9 @@ public class Schedule extends Entity
                 else if(pair.getKey().equals("range"))
                 {
                     HDict range = (HDict) schedule.get("range");
-                    this.mStartDate = new DateTime(((HDateTime)range.get("stdt")).millisDefaultTZ());
-                    this.mEndDate = new DateTime(((HDateTime)range.get("etdt")).millisDefaultTZ());
+                    this.mStartDate = new DateTime((HDateTime.make(range.get("stdt").toString()).millisDefaultTZ()));
+                    this.mEndDate = new DateTime((HDateTime.make(range.get("etdt").toString()).millisDefaultTZ()));
+                    
                 }
                 else if (pair.getKey().equals("stdt"))
                 {
@@ -883,6 +877,29 @@ public class Schedule extends Entity
 
     public HDict getScheduleHDict()
     {
+        if (isVacation()) {
+    
+            //range,building,dis,vacation,id,heating,temp,siteRef,schedule,cooling
+            //{stdt:2019-07-04T05:00:00Z Rel etdt:2019-07-14T04:59:59Z Rel},M,"vaca1",M,@5d0bd3a5f987526c76b06132 "vaca1",M,M,@5d0ba7e5d099b1630edee18e,M,M
+            HDict hDict = new HDictBuilder()
+                                  .add("stdt", HDateTime.make(mStartDate.getMillis()))
+                                  .add("etdt", HDateTime.make(mEndDate.getMillis())).toDict();
+            
+            HDict vacationSchedule = new HDictBuilder()
+                                            .add("id", HRef.copy(getId()))
+                                            .add("temp")
+                                            .add("schedule")
+                                            .add("building")
+                                            .add("vacation")
+                                            .add("cooling")
+                                            .add("heating")
+                                            .add("range", hDict)
+                                            .add("dis", getDis())
+                                            .add("siteRef", HRef.copy(mSiteId))
+                                            .toDict();
+            return vacationSchedule;
+        }
+        
         HDict[] days = new HDict[getDays().size()];
 
         for (int i = 0; i < getDays().size(); i++)
@@ -927,6 +944,29 @@ public class Schedule extends Entity
     
     public HDict getZoneScheduleHDict(String roomRef)
     {
+        if (isVacation()) {
+            //range,building,dis,vacation,id,heating,temp,siteRef,schedule,cooling
+            //{stdt:2019-07-04T05:00:00Z Rel etdt:2019-07-14T04:59:59Z Rel},M,"vaca1",M,@5d0bd3a5f987526c76b06132 "vaca1",M,M,@5d0ba7e5d099b1630edee18e,M,M
+            HDict hDict = new HDictBuilder()
+                                  .add("stdt", HDateTime.make(mStartDate.getMillis()))
+                                  .add("etdt", HDateTime.make(mEndDate.getMillis())).toDict();
+        
+            HDict vacationSchedule = new HDictBuilder()
+                                             .add("id", HRef.copy(getId()))
+                                             .add("temp")
+                                             .add("schedule")
+                                             .add("zone")
+                                             .add("vacation")
+                                             .add("cooling")
+                                             .add("heating")
+                                             .add("range", hDict)
+                                             .add("dis", getDis())
+                                             .add("siteRef", HRef.copy(mSiteId))
+                                             .add("roomRef", HRef.copy(roomRef))
+                                             .toDict();
+            return vacationSchedule;
+        }
+        
         HDict[] days = new HDict[getDays().size()];
         
         for (int i = 0; i < getDays().size(); i++)

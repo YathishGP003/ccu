@@ -357,6 +357,7 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
                 }
                 loadVacations();
                 ScheduleProcessJob.updateSchedules();
+                CCUHsApi.getInstance().saveTagsData();
                 CCUHsApi.getInstance().syncEntityTree();
                 return false;
             }
@@ -449,8 +450,9 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
             
             StringBuilder overlapDays = new StringBuilder();
             for (Schedule.Days day : daysArrayList) {
-                Interval overlap = schedule.getOverLapInterval(day);
-                if (overlap != null) {
+                ArrayList<Interval> overlaps = schedule.getOverLapInterval(day);
+                for (Interval overlap : overlaps) {
+                    Log.d("CCU_UI"," overLap "+overlap);
                     overlapDays.append(getDayString(day)+"("+overlap.getStart().hourOfDay().get()+":"+(overlap.getStart().minuteOfHour().get() == 0 ? "00" : overlap.getStart().minuteOfHour().get())
                                        +" - " +overlap.getEnd().hourOfDay().get()+":"+(overlap.getEnd().minuteOfHour().get()  == 0 ? "00": overlap.getEnd().minuteOfHour().get())+ ") ");
                 }

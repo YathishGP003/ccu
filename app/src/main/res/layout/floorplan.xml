@@ -46,11 +46,13 @@
 						android:textAppearance="@style/title_black"
 						android:clickable="true"
 						android:id="@+id/addFloorBtn"
+						android:layout_marginLeft="20dp"
 						android:layout_gravity="center_vertical"/>
 					<ImageView
 						android:layout_width="21dp"
 						android:layout_height="21dp"
 						android:src="@drawable/ic_add"
+						android:layout_marginRight="20dp"
 						android:layout_gravity="center_vertical"/>
 				</LinearLayout>
 				<EditText
@@ -71,12 +73,40 @@
 				android:background="@color/progress_gray"
 				android:textSize="30dp"
 				android:textColor="@color/accent"/>
+
+			<RelativeLayout
+				android:id="@+id/rl_systemdevice"
+				android:layout_width="wrap_content"
+				android:layout_height="85dp"
+				android:background="@color/white">
+
+				<TextView
+					android:id="@+id/textSystemDevice"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:minHeight="42dp"
+					android:layout_centerVertical="true"
+					android:layout_centerHorizontal="true"
+					android:text="@string/label_systemdevice"
+					android:gravity="center_horizontal|center_vertical"
+					android:textAppearance="@style/label_black">
+				</TextView>
+
+				<View
+					android:layout_width="match_parent"
+					android:layout_height="0.1dp"
+					android:background="@color/text_color"
+					android:alpha="0.2"
+					android:layout_marginLeft="60dp"
+					android:layout_alignParentBottom="true" />
+			</RelativeLayout>
+
+
 			<ListView
 				android:id="@+id/floorList"
 				android:animateLayoutChanges="true"
 				android:layout_width="match_parent"
 				android:overScrollMode="never"
-
 				android:layout_height="wrap_content">
 			</ListView>
 		</LinearLayout>
@@ -112,12 +142,14 @@
 						android:textAppearance="@style/title_black"
 						android:clickable="true"
 						android:id="@+id/addRoomBtn"
+						android:layout_marginLeft="20dp"
 						android:layout_gravity="center_vertical"/>
 					<ImageView
 						android:layout_width="21dp"
 						android:layout_height="21dp"
 						android:src="@drawable/ic_add"
-						android:layout_gravity="center_vertical"/>
+						android:layout_gravity="center_vertical"
+						android:layout_marginRight="20dp"/>
 				</LinearLayout>
 
 				<EditText
@@ -143,6 +175,33 @@
 				android:visibility="gone"
 				android:textColor="@color/accent"
 				android:textSize="30dp" />
+
+			<RelativeLayout
+				android:id="@+id/rl_oao"
+				android:layout_width="wrap_content"
+				android:layout_height="85dp"
+				android:background="@color/white">
+
+				<TextView
+					android:id="@+id/textOAO"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:minHeight="42dp"
+					android:layout_centerVertical="true"
+					android:layout_centerHorizontal="true"
+					android:text="@string/label_oao"
+					android:gravity="center_horizontal|center_vertical"
+					android:textAppearance="@style/label_black">
+				</TextView>
+
+				<View
+					android:layout_width="match_parent"
+					android:layout_height="0.1dp"
+					android:background="@color/text_color"
+					android:alpha="0.2"
+					android:layout_marginLeft="60dp"
+					android:layout_alignParentBottom="true" />
+			</RelativeLayout>
 
 			<ListView
 				android:id="@+id/roomList"
@@ -183,11 +242,13 @@
 						android:textAppearance="@style/title_black"
 						android:clickable="true"
 						android:id="@+id/pairModuleBtn"
+						android:layout_marginLeft="20dp"
 						android:layout_gravity="center_vertical"/>
 					<ImageView
 						android:layout_width="21dp"
 						android:layout_height="21dp"
 						android:src="@drawable/ic_add"
+						android:layout_marginRight="20dp"
 						android:layout_gravity="center_vertical"/>
 				</LinearLayout>
 

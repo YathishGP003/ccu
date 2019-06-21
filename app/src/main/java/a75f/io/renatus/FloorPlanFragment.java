@@ -91,7 +91,12 @@ public class FloorPlanFragment extends Fragment
 	RelativeLayout rl_systemdevice;
 	@BindView(R.id.rl_oao)
 	RelativeLayout rl_oao;
-	
+
+	@BindView(R.id.textSystemDevice)
+	TextView textViewSystemDevice;
+	@BindView(R.id.textOAO)
+	TextView textViewOAO;
+
 	ArrayList<Floor> floorList = new ArrayList();
 	ArrayList<Zone> roomList = new ArrayList();
 	private final BroadcastReceiver mPairingReceiver = new BroadcastReceiver()
@@ -239,6 +244,11 @@ public class FloorPlanFragment extends Fragment
 			}
 			//disableRoomModule();
 		}
+
+		setSytemUnselection();
+		addFloorBtn.setEnabled(true);
+		addZonelt.setEnabled(true);
+
 	}
 	
 	
@@ -303,8 +313,8 @@ public class FloorPlanFragment extends Fragment
 	
 	private void disableModuButton()
 	{
-		//addModulelt.setVisibility(View.INVISIBLE);
-		//pairModuleBtn.setVisibility(View.INVISIBLE);
+		addModulelt.setVisibility(View.INVISIBLE);
+		pairModuleBtn.setVisibility(View.INVISIBLE);
 	}
 	
 	
@@ -371,30 +381,39 @@ public class FloorPlanFragment extends Fragment
 				(InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 		mgr.showSoftInput(addFloorEdit, InputMethodManager.SHOW_IMPLICIT);
 	}
+
+	@OnClick(R.id.lt_addfloor)
+	public void addFloorBtn()
+	{
+		enableFloorEdit();
+		addFloorEdit.setText("");
+		addFloorEdit.requestFocus();
+		InputMethodManager mgr =
+				(InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+		mgr.showSoftInput(addFloorEdit, InputMethodManager.SHOW_IMPLICIT);
+	}
 	
 
 
 	@OnClick(R.id.rl_systemdevice)
 	public void systemDeviceOnClick()
 	{
-		rl_systemdevice.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
-		rl_oao.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
-		ArrayList<Equip> zoneEquips  = HSUtil.getEquips(getSelectedZone().getId());
-		if(zoneEquips.size() >0 && !zoneEquips.isEmpty())
-		{
-			mModuleListAdapter.setSelectedItem(-1);
-		}
-		roomList = HSUtil.getZones(getSelectedFloor().getId());
-		if(roomList.size() > 0)
-		{
-			mRoomListAdapter.setSelectedItem(-1);
-		}
+
+		setSytemSelection();
 		if(floorList.size()>0) {
-			mFloorListAdapter.setSelectedItem(-1);
+			if(roomList.size()>0) {
+				ArrayList<Equip> zoneEquips = HSUtil.getEquips(getSelectedZone().getId());
+				if (zoneEquips.size() > 0 && !zoneEquips.isEmpty()) {
+					mModuleListAdapter.setSelectedItem(-1);
+				}
+				mRoomListAdapter.setSelectedItem(-1);
+			}
+			addZonelt.setEnabled(false);
 		}
-		addZonelt.setEnabled(false);
-		addFloorBtn.setEnabled(false);
-		roomListView.setVisibility(View.GONE);
+		mFloorListAdapter.setSelectedItem(-1);
+		rl_systemdevice.setEnabled(false);
+		rl_oao.setEnabled(false);
+		enableModueButton();
 	}
 
 
@@ -402,23 +421,44 @@ public class FloorPlanFragment extends Fragment
 	@OnClick(R.id.rl_oao)
 	public void oaoOnClick()
 	{
-		ArrayList<Equip> zoneEquips  = HSUtil.getEquips(getSelectedZone().getId());
-		if(zoneEquips.size() >0)
-		{
-			mModuleListAdapter.setSelectedItem(-1);
-		}
-		/*roomList = HSUtil.getZones(getSelectedFloor().getId());
-		if(roomList.size() > 0)
-		{
-			mRoomListAdapter.setSelectedItem(-1);
-		}
+		setSytemSelection();
 		if(floorList.size()>0) {
-			mFloorListAdapter.setSelectedItem(-1);
-		}*/
-		addFloorBtn.setEnabled(false);
-		addZonelt.setEnabled(false);
+			if(roomList.size() >0) {
+				ArrayList<Equip> zoneEquips = HSUtil.getEquips(getSelectedZone().getId());
+				if (zoneEquips.size() > 0) {
+					mModuleListAdapter.setSelectedItem(-1);
+				}
+				mRoomListAdapter.setSelectedItem(-1);
+				addFloorBtn.setEnabled(false);
+				addZonelt.setEnabled(false);
+			}
+		}
+		mFloorListAdapter.setSelectedItem(-1);
+		enableModueButton();
 	}
 
+	private void setSytemSelection()
+	{
+		rl_systemdevice.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
+		rl_oao.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
+		textViewSystemDevice.setTextColor(Color.WHITE);
+		textViewOAO.setTextColor(Color.WHITE);
+		rl_oao.setEnabled(false);
+		rl_systemdevice.setEnabled(false);
+		roomListView.setVisibility(View.GONE);
+		moduleListView.setVisibility(View.GONE);
+	}
+	private void setSytemUnselection()
+	{
+		rl_systemdevice.setBackgroundColor(Color.WHITE);
+		rl_oao.setBackgroundColor(Color.WHITE);
+		textViewSystemDevice.setTextColor(getContext().getResources().getColor(R.color.text_color));
+		textViewOAO.setTextColor(getContext().getResources().getColor(R.color.text_color));
+		rl_systemdevice.setEnabled(true);
+		rl_oao.setEnabled(true);
+		roomListView.setVisibility(View.VISIBLE);
+		moduleListView.setVisibility(View.VISIBLE);
+	}
 
 	private void enableFloorEdit()
 	{
@@ -475,7 +515,7 @@ public class FloorPlanFragment extends Fragment
 		}
 	}
 	
-	
+
 	@OnClick(R.id.addRoomBtn)
 	public void handleRoomBtn()
 	{
@@ -486,8 +526,21 @@ public class FloorPlanFragment extends Fragment
 				(InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 		mgr.showSoftInput(addRoomEdit, InputMethodManager.SHOW_IMPLICIT);
 	}
-	
-	
+
+
+
+	@OnClick(R.id.lt_addzone)
+	public void addRoomBtn()
+	{
+		enableRoomEdit();
+		addRoomEdit.setText("");
+		addRoomEdit.requestFocus();
+		InputMethodManager mgr =
+				(InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+		mgr.showSoftInput(addRoomEdit, InputMethodManager.SHOW_IMPLICIT);
+	}
+
+
 	private void enableRoomEdit()
 	{
 		addZonelt.setVisibility(View.INVISIBLE);
@@ -556,7 +609,7 @@ public class FloorPlanFragment extends Fragment
 	public void startPairing()
 	{
 		short meshAddress = L.generateSmartNodeAddress();
-		if(mFloorListAdapter.getSelectedPostion() == -1 && mRoomListAdapter.getSelectedPostion() ==-1)
+		if(mFloorListAdapter.getSelectedPostion() == -1)
 		{
 			DialogOAOProfile oaoProfiling = DialogOAOProfile.newInstance(meshAddress);
 			showDialogFragment(oaoProfiling, DialogOAOProfile.ID);
@@ -567,8 +620,6 @@ public class FloorPlanFragment extends Fragment
 			//This should be moved to pair button for select device type screen.
 			showDialogFragment(FragmentSelectDeviceType.newInstance(meshAddress, getSelectedZone().getId(), getSelectedFloor().getId()), FragmentSelectDeviceType.ID);
 		}
-		/*
-		*/
 	}
 	
 	
@@ -592,11 +643,7 @@ public class FloorPlanFragment extends Fragment
 	public void setFloorListView(AdapterView<?> parent, View view, int position, long id)
 	{
 		selectFloor(position);
-		rl_systemdevice.setBackgroundColor(Color.WHITE);
-		rl_oao.setBackgroundColor(Color.WHITE);
-		addFloorBtn.setEnabled(true);
-		addZonelt.setEnabled(true);
-		roomListView.setVisibility(View.VISIBLE);
+		setSytemUnselection();
 	}
 	
 	
@@ -604,9 +651,6 @@ public class FloorPlanFragment extends Fragment
 	public void setRoomListView(AdapterView<?> parent, View view, int position, long id)
 	{
 		selectRoom(position);
-
-		rl_systemdevice.setBackgroundColor(Color.WHITE);
-		rl_oao.setBackgroundColor(Color.WHITE);
 	}
 	
 	

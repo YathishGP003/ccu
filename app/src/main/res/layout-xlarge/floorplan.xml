@@ -46,11 +46,13 @@
 						android:textAppearance="@style/title_black"
 						android:clickable="true"
 						android:id="@+id/addFloorBtn"
+						android:layout_marginLeft="20dp"
 						android:layout_gravity="center_vertical"/>
 					<ImageView
 						android:layout_width="21dp"
 						android:layout_height="21dp"
 						android:src="@drawable/ic_add"
+						android:layout_marginRight="20dp"
 						android:layout_gravity="center_vertical"/>
 				</LinearLayout>
 				<EditText
@@ -140,12 +142,14 @@
 						android:textAppearance="@style/title_black"
 						android:clickable="true"
 						android:id="@+id/addRoomBtn"
+						android:layout_marginLeft="20dp"
 						android:layout_gravity="center_vertical"/>
 					<ImageView
 						android:layout_width="21dp"
 						android:layout_height="21dp"
 						android:src="@drawable/ic_add"
-						android:layout_gravity="center_vertical"/>
+						android:layout_gravity="center_vertical"
+						android:layout_marginRight="20dp"/>
 				</LinearLayout>
 
 				<EditText
@@ -238,11 +242,13 @@
 						android:textAppearance="@style/title_black"
 						android:clickable="true"
 						android:id="@+id/pairModuleBtn"
+						android:layout_marginLeft="20dp"
 						android:layout_gravity="center_vertical"/>
 					<ImageView
 						android:layout_width="21dp"
 						android:layout_height="21dp"
 						android:src="@drawable/ic_add"
+						android:layout_marginRight="20dp"
 						android:layout_gravity="center_vertical"/>
 				</LinearLayout>
 

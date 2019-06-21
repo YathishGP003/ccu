@@ -498,8 +498,8 @@
     <string name="label_currtrans">Curr Transformer\n(Analog-in 2)</string>
 
     <!--PAIRING INSTRUCTION Screen-->
-    <string name="title_pairsn">SMART NODE | PAIRING INSTRUCTIONS</string>
-    <string name="title_pairss">SMART STAT | PAIRING INSTRUCTIONS</string>
+    <string name="title_pairsn">SMART NODE | PAIRING STEPS </string>
+    <string name="title_pairss">SMART STAT | PAIRING STEPS </string>
     <string name="button_pair">PAIR</string>
 
 </resources>

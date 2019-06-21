@@ -147,9 +147,10 @@ public class Schedule extends Entity
         return false;
     }
     
-    public Interval getOverLapInterval(Days day) {
+    public ArrayList<Interval> getOverLapInterval(Days day) {
         ArrayList<Interval> intervalsOfCurrent   = getScheduledIntervals(getDaysSorted());
         Interval intervalOfAddition = getScheduledInterval(day);
+        ArrayList<Interval> overLaps = new ArrayList<>();
         for (Interval current : intervalsOfCurrent)
         {
             boolean hasOverlap = intervalOfAddition.overlaps(current);
@@ -157,30 +158,22 @@ public class Schedule extends Entity
             {
                 if (current.getStart().minuteOfDay().get() < current.getEnd().minuteOfDay().get())
                 {
-                    if (intervalOfAddition.getEndMillis() < current.getStartMillis())
-                    {
-                        return new Interval(intervalOfAddition.getEndMillis(), current.getStartMillis());
-                    }
-                    else if (intervalOfAddition.getStartMillis()> current.getStartMillis() &&
-                                                intervalOfAddition.getStartMillis() < current.getEndMillis())
-                    {
-                        return new Interval(intervalOfAddition.getStartMillis(), current.getEndMillis());
-                    }
+                    overLaps.add(current.overlap(intervalOfAddition));
                 } else {
                     //Multi-day schedule
                     if (intervalOfAddition.getEndMillis() > current.getStartMillis() &&
                                                 intervalOfAddition.getStartMillis() < current.getStartMillis())
                     {
-                        return new Interval(current.getStartMillis(), intervalOfAddition.getEndMillis());
+                        overLaps.add(new Interval(current.getStartMillis(), intervalOfAddition.getEndMillis()));
                     }
                     else if (intervalOfAddition.getStartMillis() < current.getEndMillis())
                     {
-                        return new Interval(intervalOfAddition.getStartMillis(), current.getEndMillis());
+                        overLaps.add(new Interval(intervalOfAddition.getStartMillis(), current.getEndMillis()));
                     }
                 }
             }
         }
-        return null;
+        return overLaps;
     }
 
     private DateTime getTime()

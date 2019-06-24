@@ -1,4 +1,4 @@
-package a75f.io.device.mesh;
+package a75f.io.renatus;
 
 import android.app.DownloadManager;
 import android.app.IntentService;
@@ -24,6 +24,7 @@ import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
+import a75f.io.device.mesh.MeshUtil;
 import a75f.io.device.serial.CcuToCmOverUsbFirmwareMetadataMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbFirmwarePacketMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbFirmwarePacketRequest_t;
@@ -116,6 +117,8 @@ public class OTAUpdateService extends IntentService {
 
         if(id != -1 && id == mMetadataDownloadId) {
             Log.d(TAG, "[DOWNLOAD] Metadata downloaded");
+
+            //TODO add a check to see if download failed
 
             runMetadataCheck(DOWNLOAD_DIR, mVersionMajor, mVersionMinor, mFilename, mFirmwareDeviceType);
         }

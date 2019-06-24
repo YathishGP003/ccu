@@ -23,7 +23,6 @@ import java.util.concurrent.TimeUnit;
 
 import a75f.io.device.DeviceUpdateJob;
 import a75f.io.device.mesh.LSerial;
-import a75f.io.device.mesh.OTAUpdateService;
 import a75f.io.logic.Globals;
 import a75f.io.usbserial.SerialEvent;
 import a75f.io.usbserial.UsbService;

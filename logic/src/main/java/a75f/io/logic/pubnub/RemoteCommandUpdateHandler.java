@@ -1,7 +1,8 @@
 package a75f.io.logic.pubnub;
 
-import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 import com.google.gson.JsonObject;
 
@@ -11,7 +12,7 @@ public class RemoteCommandUpdateHandler
 {
     public static String getCmd() { return "remoteCmdUpdate"; }
 
-    public static void handleMessage(JsonObject msgObject) {
+    public static void handleMessage(JsonObject msgObject, Context context) {
         String cmdType = msgObject.get("remoteCmdType").getAsString();
 
         if (cmdType.startsWith("ota_update")) {
@@ -19,12 +20,10 @@ public class RemoteCommandUpdateHandler
             String[] cmdParams = cmdType.split(" ");
 
             Intent otaUpdateIntent = new Intent(Globals.IntentActions.PUBNUB_MESSAGE);
-            //otaUpdateIntent.setComponent(new ComponentName("a75f.io.renatus",
-            //                                                "a75f.io.device.mesh.OTAUpdateService"));
             otaUpdateIntent.putExtra("lwMeshAddress", Integer.parseInt(cmdParams[1]));
             otaUpdateIntent.putExtra("firmwareVersion", cmdParams[2]);
 
-            //sendBroadcast(otaUpdateIntent);   //TODO how to get context here?
+            context.sendBroadcast(otaUpdateIntent);   //TODO how to get context here?
             //mApplicationContext.startService(otaUpdateIntent);
         }
     }

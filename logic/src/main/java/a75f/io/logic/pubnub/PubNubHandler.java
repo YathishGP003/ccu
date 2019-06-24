@@ -1,10 +1,12 @@
 package a75f.io.logic.pubnub;
 
+import android.content.Context;
+
 import com.google.gson.JsonObject;
 
 public class PubNubHandler
 {
-    public static void handleMessage(JsonObject msg){
+    public static void handleMessage(JsonObject msg, Context context){
         String cmd = msg.get("command") != null ? msg.get("command").getAsString(): "";
         
         if (cmd.equals(UpdatePointHandler.getCmd())) {
@@ -13,6 +15,8 @@ public class PubNubHandler
             SiteSyncHandler.handleMessage(msg);
         } else if (cmd.equals(UpdateScheduleHandler.getCmd())) {
             UpdateScheduleHandler.handleMessage(msg);
+        } else if (cmd.equals(RemoteCommandUpdateHandler.getCmd())) {
+            RemoteCommandUpdateHandler.handleMessage(msg, context);
         }
     }
 }

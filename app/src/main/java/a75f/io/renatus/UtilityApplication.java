@@ -10,7 +10,6 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatDelegate;
 import android.widget.Toast;
 
@@ -132,9 +131,7 @@ public abstract class UtilityApplication extends Application
         filter.addAction(Globals.IntentActions.PUBNUB_MESSAGE);
         filter.addAction(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
         filter.addAction(Globals.IntentActions.LSERIAL_MESSAGE);
-
         registerReceiver(mOtaUpdateEventReceiver, filter);
-        LocalBroadcastManager.getInstance(this).registerReceiver(mOtaUpdateEventReceiver, filter);
     }
 
     private void setUsbFilters()
@@ -312,11 +309,8 @@ public abstract class UtilityApplication extends Application
     public void onTerminate()
     {
         EventBus.getDefault().unregister(this);
-
         unregisterReceiver(mOtaUpdateEventReceiver);
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mOtaUpdateEventReceiver);
         unregisterReceiver(mUsbReceiver);
-
         unbindService(usbConnection);
         super.onTerminate();
     }

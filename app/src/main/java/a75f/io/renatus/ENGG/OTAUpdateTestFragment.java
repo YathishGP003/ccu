@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -61,7 +60,7 @@ public class OTAUpdateTestFragment extends Fragment {
         otaIntent.putExtra("lwMeshAddress", lwMeshAddress);
         otaIntent.putExtra("firmwareVersion", firmwareInfo);
 
-        LocalBroadcastManager.getInstance(activity).sendBroadcast(otaIntent);
+        activity.sendBroadcast(otaIntent);
         //activity.startService(otaIntent);
     }
 
@@ -71,7 +70,7 @@ public class OTAUpdateTestFragment extends Fragment {
 
         Intent otaIntent = new Intent(Globals.IntentActions.ACTIVITY_RESET);
 
-        LocalBroadcastManager.getInstance(activity).sendBroadcast(otaIntent);
+        activity.sendBroadcast(otaIntent);
         //activity.startService(otaIntent);
     }
 }

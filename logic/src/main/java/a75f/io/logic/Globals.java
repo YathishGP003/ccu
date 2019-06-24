@@ -70,10 +70,10 @@ import a75f.io.logic.jobs.ScheduleProcessJob;
  */
 public class Globals {
     public static final class IntentActions {
-        public static final String LSERIAL_MESSAGE = "a75f.io.device.LSERIAL_MESSAGE";
-        public static final String ACTIVITY_MESSAGE = "a75f.io.device.ACTIVITY_MESSAGE";
-        public static final String ACTIVITY_RESET = "a75f.io.device.ACTIVITY_RESET";
-        public static final String PUBNUB_MESSAGE = "a75f.io.device.PUBNUB_MESSAGE";
+        public static final String LSERIAL_MESSAGE = "a75f.io.intent.action.LSERIAL_MESSAGE";
+        public static final String ACTIVITY_MESSAGE = "a75f.io.intent.action.ACTIVITY_MESSAGE";
+        public static final String ACTIVITY_RESET = "a75f.io.intent.action.ACTIVITY_RESET";
+        public static final String PUBNUB_MESSAGE = "a75f.io.intent.action.PUBNUB_MESSAGE";
     }
 
     private static final int      NUMBER_OF_CYCLICAL_TASKS_RENATUS_REQUIRES = 10;
@@ -340,7 +340,7 @@ public class Globals {
                 
                 try
                 {
-                    PubNubHandler.handleMessage(message.getMessage().getAsJsonObject());
+                    PubNubHandler.handleMessage(message.getMessage().getAsJsonObject(), getApplicationContext());
                 } catch (NumberFormatException e) {
                     Log.d(L.TAG_CCU_PUBNUB, " Ignoring PubNub Message "+e.getMessage());
                 }

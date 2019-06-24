@@ -61,7 +61,6 @@ public class OTAUpdateTestFragment extends Fragment {
         otaIntent.putExtra("firmwareVersion", firmwareInfo);
 
         activity.sendBroadcast(otaIntent);
-        //activity.startService(otaIntent);
     }
 
     @OnClick(R.id.resetOtaTestBtn)
@@ -71,6 +70,5 @@ public class OTAUpdateTestFragment extends Fragment {
         Intent otaIntent = new Intent(Globals.IntentActions.ACTIVITY_RESET);
 
         activity.sendBroadcast(otaIntent);
-        //activity.startService(otaIntent);
     }
 }

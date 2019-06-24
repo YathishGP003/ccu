@@ -76,9 +76,13 @@ public class OTAUpdateService extends IntentService {
     protected void onHandleIntent(@Nullable Intent intent) {
         String action = intent.getAction();
 
+        if(action == null) {
+            return;
+        }
+
         /* The service has been launched from an activity */
         if(action.equals(Globals.IntentActions.ACTIVITY_MESSAGE)) {
-            parseParametersFromIntent(intent);
+            handleOtaUpdateStartRequest(intent);
         }
         /* An activity has requested the OTA update to end (for debugging) */
         if(action.equals(Globals.IntentActions.ACTIVITY_RESET)) {
@@ -89,7 +93,7 @@ public class OTAUpdateService extends IntentService {
         }
         /* The service has been launched from a PubNub notification */
         else if(action.equals(Globals.IntentActions.PUBNUB_MESSAGE)) {
-            parseParametersFromIntent(intent);
+            handleOtaUpdateStartRequest(intent);
         }
         /* The service has been launched in response to a file download */
         else if(action.equals(DownloadManager.ACTION_DOWNLOAD_COMPLETE)) {
@@ -146,7 +150,7 @@ public class OTAUpdateService extends IntentService {
     }
 
     private void handleNodeReboot(byte[] eventBytes) {
-        if(timer != null){
+        if(timer != null) {
             timer.cancel();
             isTimerStarted = false;
         }
@@ -182,42 +186,18 @@ public class OTAUpdateService extends IntentService {
     }
 
     /**
-     * Clears update variables
-     */
-    private void resetUpdate() {
-        mLwMeshAddress = -1;
-        mUpdateInProgress = false;
-        if(packets != null) packets.clear();
-        isTimerStarted = false;
-        mVersionMajor = -1;
-        mVersionMinor = -1;
-        mLastSentPacket = -1;
-        mUpdateLength = -1;
-        mFirmwareSignature = new byte[0];
-        Log.d(TAG, "[RESET] Resetting update status");
-    }
-
-    private void pauseUpdate() {
-        int address = mLwMeshAddress;
-        short versionMajor = mVersionMajor;
-        short versionMinor = mVersionMinor;
-
-        resetUpdate();
-
-        mLwMeshAddress = address;
-        mVersionMajor = versionMajor;
-        mVersionMinor = versionMinor;
-    }
-
-    /**
      * Takes an Intent and parses its extra data to determine what type of device is being
      * updated, and to what version
      *
      * @param intent The Intent which started this OTA update
      */
-    private void parseParametersFromIntent(Intent intent) {
+    private void handleOtaUpdateStartRequest(Intent intent) {
         int node = intent.getIntExtra("lwMeshAddress", -1);
         String firmwareVersion = intent.getStringExtra("firmwareVersion");
+
+        if(firmwareVersion == null) {
+            return;
+        }
 
         //TODO use regular expressions?
         String versionNumStr = firmwareVersion.split("_v")[1];                 // e.g. "SmartNode_v1.0" -> "1.0"
@@ -225,28 +205,19 @@ public class OTAUpdateService extends IntentService {
         int versionMajor = Integer.parseInt(versionNumStr.split("\\.")[0]);   // e.g. "1.0" -> 1
         int versionMinor = Integer.parseInt(versionNumStr.split("\\.")[1]);   // e.g. "1.0" -> 0
 
-        deleteAllFiles();   //TODO delete all files for this type of device only
-
         mVersionMajor = (short) versionMajor;
         mVersionMinor = (short) versionMinor;
 
         if(firmwareVersion.startsWith("SmartNode_")) {
             mFilename = firmwareVersion;
             mFirmwareDeviceType = FirmwareDeviceType_t.SMART_NODE_DEVICE_TYPE;
-            startUpdate(node, versionMajor, versionMinor, mFilename, FirmwareDeviceType_t.SMART_NODE_DEVICE_TYPE);
+            startUpdate(node, versionMajor, versionMinor, mFilename, mFirmwareDeviceType);
 
         }
         else if(firmwareVersion.startsWith("Itm_") || firmwareVersion.startsWith("itm_")) {
             mFilename = firmwareVersion.replace("Itm_", "itm_");
             mFirmwareDeviceType = FirmwareDeviceType_t.ITM_DEVICE_TYPE;
-            startUpdate(node, versionMajor, versionMinor, mFilename, FirmwareDeviceType_t.ITM_DEVICE_TYPE);
-        }
-    }
-
-    private void deleteAllFiles(){
-        for(File file:DOWNLOAD_DIR.listFiles()){
-            if(file.getName().startsWith("SmartNode_v") || file.getName().startsWith("itm_v"))
-                file.delete();
+            startUpdate(node, versionMajor, versionMinor, mFilename, mFirmwareDeviceType);
         }
     }
 
@@ -323,7 +294,6 @@ public class OTAUpdateService extends IntentService {
         if (metadata == null) {
             Log.d(TAG, "[METADATA] File not found, downloading metadata");
             mMetadataDownloadId = startFileDownload(filename, deviceType, METADATA_FILE_FORMAT);
-            pauseUpdate();
             return;
 
         } else {
@@ -332,7 +302,6 @@ public class OTAUpdateService extends IntentService {
             if (!isExtracted || !versionMatches( (short) versionMajor, (short) versionMinor) ) {
                 Log.d(TAG, "[METADATA] Incorrect firmware metadata, downloading correct metadata");
                 mMetadataDownloadId = startFileDownload(filename, deviceType, METADATA_FILE_FORMAT);
-                pauseUpdate();
                 return;
             }
         }
@@ -355,13 +324,12 @@ public class OTAUpdateService extends IntentService {
         if (binary == null) {
             Log.d(TAG, "[BINARY] File not found, downloading binary");
             mBinaryDownloadId = startFileDownload(filename, deviceType, BINARY_FILE_FORMAT);
-            //pauseUpdate();
             return;
 
         } else {
             Log.d(TAG, "[BINARY] Checking binary length="+binary.length()+","+mUpdateLength);
             if (binary.length() != mUpdateLength) {
-                Log.d(TAG, "[STARTUP] Incorrect firmware binary, downloading correct binary");
+                Log.d(TAG, "[BINARY] Incorrect firmware binary, downloading correct binary");
                 mMetadataDownloadId = startFileDownload(filename, deviceType, BINARY_FILE_FORMAT);
                 return;
             }
@@ -369,7 +337,7 @@ public class OTAUpdateService extends IntentService {
 
         Log.d(TAG, "[BINARY] Binary passed check");
 
-        Log.d(TAG, "[STARTUP] [SN:" + mLwMeshAddress + "]");
+        Log.d(TAG, "[STARTUP] Starting to update device with address " + mLwMeshAddress);
 
         //TODO notify something (PubNub?) that an update has started
 
@@ -435,84 +403,95 @@ public class OTAUpdateService extends IntentService {
     }
 
     /**
-     * Sends the corresponding packet over serial to the CM
-     *
-     * @param lwMeshAddress The address to send the update packet to
-     * @param packetNumber  The packet to send
+     * Deletes all firmware files for the specified device type in the specified directory
+     * @param dir        The directory where OTA update files are downloaded
+     * @param deviceType The type of device whose files are to be deleted
      */
-    private void sendPacket(int lwMeshAddress, int packetNumber) {
+    private void deleteFilesByDeviceType(File dir, FirmwareDeviceType_t deviceType){
+        for(File file : dir.listFiles()) {
+            switch(deviceType) {
+                case SMART_NODE_DEVICE_TYPE:
+                    if(file.getName().startsWith("SmartNode_v")) { file.delete(); }
+                    break;
 
-        if (lwMeshAddress != mLwMeshAddress) {
-            Log.d(TAG, "[UPDATE] [SN:" + mLwMeshAddress + "] WRONG ADDRESS " + lwMeshAddress);
-            return;
-        }
-        if (mUpdateWaitingToComplete && packetNumber == packets.size() /*- 2*/) {
-            Log.d(TAG, "[UPDATE] Received packet request while waiting for the update to complete");
-            return;
-        }
-        if (packetNumber < 0 || packetNumber > packets.size()) {
-            Log.d(TAG, "[UPDATE] [SN:" + mLwMeshAddress + "] INVALID PACKET " + packetNumber);
-            return;
-        }
-        if (!mUpdateWaitingToComplete && (packetNumber == (packets.size() - 1))) {
-            Log.d(TAG, "[UPDATE] Received request for final packet");
-            mUpdateWaitingToComplete = true;
-        }
+                case ITM_DEVICE_TYPE:
+                    if(file.getName().startsWith("itm_v")) { file.delete(); }
 
-        CcuToCmOverUsbFirmwarePacketMessage_t message = new CcuToCmOverUsbFirmwarePacketMessage_t();
-
-        message.messageType.set(MessageType.CCU_TO_CM_OVER_USB_FIRMWARE_PACKET);
-        message.lwMeshAddress.set(lwMeshAddress);
-        message.sequenceNumber.set(packetNumber);
-
-        message.setPacket(packets.get(packetNumber));
-
-        if (packetNumber > mLastSentPacket) {
-            mLastSentPacket = packetNumber;
-            if (BuildConfig.DEBUG) {
-                if (packetNumber % 100 == 0) {
-                    Log.d(TAG, "[UPDATE] [SN:" + lwMeshAddress + "]" + "PS:"+packets.size()+","+message.packet.length+","+message.sequenceNumber.get()+" [PN:" + mLastSentPacket
-                            + "] [DATA: " + ByteArrayUtils.byteArrayToHexString(packets.get(packetNumber), true) +  "]");
-                }
+                default:
+                    break;
             }
-        }
-
-        try {
-            MeshUtil.sendStructToCM(message);
-
-        } catch (Exception e) {
-            Log.e(TAG, "[UPDATE] [SN:" + lwMeshAddress + "] [PN:" + packetNumber + "] [FAILED]");
         }
     }
 
     /**
-     * Sends the firmware metadata to the CM
+     * Splits a byte array into arrays of a given length
      *
-     * @param firmware The type of device being updated
+     * @param file         A java.io.File to be converted into packets
+     * @param packetLength The length of the packets to be generated
+     * @return An ArrayList of byte arrays, each of length packetLength
      */
-    private void sendFirmwareMetadata(FirmwareDeviceType_t firmware) {
-        CcuToCmOverUsbFirmwareMetadataMessage_t message = new CcuToCmOverUsbFirmwareMetadataMessage_t();
-
-        message.messageType.set(MessageType.CCU_TO_CM_OVER_USB_FIRMWARE_METADATA);
-        message.lwMeshAddress.set(mLwMeshAddress);
-
-        message.metadata.deviceType.set(firmware);
-        message.metadata.majorVersion.set(mVersionMajor);
-        message.metadata.minorVersion.set(mVersionMinor);
-        message.metadata.lengthInBytes.set(mUpdateLength);
-
-        message.metadata.setSignature(mFirmwareSignature);
-
-        if (BuildConfig.DEBUG) {
-            Log.d(TAG, "[METADATA] [SN:" + mLwMeshAddress + "] [DATA: " + ByteArrayUtils.byteArrayToHexString(message.getByteBuffer().array(), true) + "]");
+    private ArrayList<byte[]> importFile(File file, int packetLength) {
+        if (file == null) {
+            return null;
         }
+
+        byte[] fileByteArray = new byte[(int) file.length()];
 
         try {
-            MeshUtil.sendStructToCM(message);
-            timerForOtaNonResponse();
-        } catch (Exception e) {
-            Log.e(TAG, "[METADATA] FAILED TO SEND");
+            fileByteArray = Files.toByteArray(file);
+        } catch (IOException e) {
+            Log.e(TAG, "[STARTUP] I/O exception while importing update file: " + e.getMessage());
+            e.printStackTrace();
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "[STARTUP] File is too large: " + e.getMessage());
+            e.printStackTrace();
         }
+
+        ArrayList<byte[]> rPackets = new ArrayList<>();
+        int len = fileByteArray.length;
+        int packetNum = len / packetLength;
+
+        if ((packetNum * packetLength) < len) {
+            Log.d(TAG, "[STARTUP] Added packet: " + packetNum + ", to " + (packetNum + 1) + "]");
+            packetNum++;
+        }
+
+        Log.d(TAG, "[STARTUP] File imported, number of packets: " + packetNum);
+
+        for (int i = 0; i < packetNum; i++) {
+            byte[] packet = new byte[packetLength];
+
+            if (len - packetLength * i > packetLength) {
+                System.arraycopy(fileByteArray, i * packetLength, packet, 0, packetLength);
+            } else {
+                System.arraycopy(fileByteArray, i * packetLength, packet, 0, len - packetLength * i);
+            }
+            rPackets.add(packet);
+        }
+
+        Log.d(TAG, "[STARTUP] Packets generated: " + rPackets.size());
+
+        return rPackets;
+    }
+
+    /**
+     * Loads a binary image into RAM and parses it into packets in preparation for an update
+     *
+     * @param file       The file to be loaded and processed
+     * @param deviceType The type of device being updated
+     */
+    private void setUpdateFile(File file, FirmwareDeviceType_t deviceType) {
+        Log.d(TAG, "[STARTUP] Moving binary file to RAM");
+        packets = importFile(file, MessageConstants.FIRMWARE_UPDATE_PACKET_SIZE);
+
+        if (packets == null) {
+            Log.d(TAG, "[STARTUP] Failed to move binary file to RAM");
+            resetUpdate();
+            return;
+        }
+
+        Log.d(TAG, "[STARTUP] Successfully moved binary file to RAM, sending metadata");
+        sendFirmwareMetadata(deviceType);
     }
 
     /**
@@ -575,6 +554,87 @@ public class OTAUpdateService extends IntentService {
     }
 
     /**
+     * Sends the firmware metadata to the CM
+     *
+     * @param firmware The type of device being updated
+     */
+    private void sendFirmwareMetadata(FirmwareDeviceType_t firmware) {
+        CcuToCmOverUsbFirmwareMetadataMessage_t message = new CcuToCmOverUsbFirmwareMetadataMessage_t();
+
+        message.messageType.set(MessageType.CCU_TO_CM_OVER_USB_FIRMWARE_METADATA);
+        message.lwMeshAddress.set(mLwMeshAddress);
+
+        message.metadata.deviceType.set(firmware);
+        message.metadata.majorVersion.set(mVersionMajor);
+        message.metadata.minorVersion.set(mVersionMinor);
+        message.metadata.lengthInBytes.set(mUpdateLength);
+
+        message.metadata.setSignature(mFirmwareSignature);
+
+        if (BuildConfig.DEBUG) {
+            Log.d(TAG, "[METADATA] [SN:" + mLwMeshAddress + "] [DATA: " + ByteArrayUtils.byteArrayToHexString(message.getByteBuffer().array(), true) + "]");
+        }
+
+        try {
+            //MeshUtil.sendStructToCM(message);
+            //timerForOtaNonResponse();
+        } catch (Exception e) {
+            Log.e(TAG, "[METADATA] FAILED TO SEND");
+        }
+    }
+
+    /**
+     * Sends the corresponding packet over serial to the CM
+     *
+     * @param lwMeshAddress The address to send the update packet to
+     * @param packetNumber  The packet to send
+     */
+    private void sendPacket(int lwMeshAddress, int packetNumber) {
+
+        if (lwMeshAddress != mLwMeshAddress) {
+            Log.d(TAG, "[UPDATE] [SN:" + mLwMeshAddress + "] WRONG ADDRESS " + lwMeshAddress);
+            return;
+        }
+        if (mUpdateWaitingToComplete && packetNumber == packets.size() /*- 2*/) {
+            Log.d(TAG, "[UPDATE] Received packet request while waiting for the update to complete");
+            return;
+        }
+        if (packetNumber < 0 || packetNumber > packets.size()) {
+            Log.d(TAG, "[UPDATE] [SN:" + mLwMeshAddress + "] INVALID PACKET " + packetNumber);
+            return;
+        }
+        if (!mUpdateWaitingToComplete && (packetNumber == (packets.size() - 1))) {
+            Log.d(TAG, "[UPDATE] Received request for final packet");
+            mUpdateWaitingToComplete = true;
+        }
+
+        CcuToCmOverUsbFirmwarePacketMessage_t message = new CcuToCmOverUsbFirmwarePacketMessage_t();
+
+        message.messageType.set(MessageType.CCU_TO_CM_OVER_USB_FIRMWARE_PACKET);
+        message.lwMeshAddress.set(lwMeshAddress);
+        message.sequenceNumber.set(packetNumber);
+
+        message.setPacket(packets.get(packetNumber));
+
+        if (packetNumber > mLastSentPacket) {
+            mLastSentPacket = packetNumber;
+            if (BuildConfig.DEBUG) {
+                if (packetNumber % 100 == 0) {
+                    Log.d(TAG, "[UPDATE] [SN:" + lwMeshAddress + "]" + "PS:"+packets.size()+","+message.packet.length+","+message.sequenceNumber.get()+" [PN:" + mLastSentPacket
+                            + "] [DATA: " + ByteArrayUtils.byteArrayToHexString(packets.get(packetNumber), true) +  "]");
+                }
+            }
+        }
+
+        try {
+            MeshUtil.sendStructToCM(message);
+
+        } catch (Exception e) {
+            Log.e(TAG, "[UPDATE] [SN:" + lwMeshAddress + "] [PN:" + packetNumber + "] [FAILED]");
+        }
+    }
+
+    /**
      * Checks if the given version matches the version that is being updated to
      *
      * @param major The major version
@@ -610,84 +670,34 @@ public class OTAUpdateService extends IntentService {
     }
 
     /**
-     * Loads a binary image into RAM and parses it into packets in preparation for an update
-     *
-     * @param file       The file to be loaded and processed
-     * @param deviceType The type of device being updated
+     * Clears update variables at the end of an OTA update
      */
-    private void setUpdateFile(File file, FirmwareDeviceType_t deviceType) {
-        Log.d(TAG, "[STARTUP] Moving binary file to RAM");
-        packets = importFile(file, MessageConstants.FIRMWARE_UPDATE_PACKET_SIZE);
+    private void resetUpdate() {
+        deleteFilesByDeviceType(DOWNLOAD_DIR, mFirmwareDeviceType);
 
-        if (packets == null) {
-            Log.d(TAG, "[STARTUP] Failed to move binary file to RAM");
-            resetUpdate();
-            return;
-        }
+        mLwMeshAddress = -1;
+        mUpdateInProgress = false;
+        if(packets != null) { packets.clear(); }
+        isTimerStarted = false;
+        mVersionMajor = -1;
+        mVersionMinor = -1;
+        mLastSentPacket = -1;
+        mUpdateLength = -1;
+        mFirmwareSignature = new byte[0];
 
-        Log.d(TAG, "[STARTUP] Successfully moved binary file to RAM, sending metadata");
-        sendFirmwareMetadata(deviceType);
-    }
-
-    /**
-     * Splits a byte array into arrays of a given length
-     *
-     * @param file         A Java.Io.File to be converted into packets
-     * @param packetLength The length of the packets to be generated
-     * @return An ArrayList of byte arrays, each of length packetLength
-     */
-    private ArrayList<byte[]> importFile(File file, int packetLength) {
-        if (file == null) {
-            return null;
-        }
-
-        byte[] fileByteArray = new byte[(int) file.length()];
-
-        try {
-            fileByteArray = Files.toByteArray(file);
-        } catch (IOException e) {
-            Log.e(TAG, "[I/O Exception while reading update file]" + e.getMessage());
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            Log.e(TAG, "[File is too large]" + e.getMessage());
-            e.printStackTrace();
-        }
-
-        ArrayList<byte[]> rPackets = new ArrayList<>();
-        int len = fileByteArray.length;
-        int packetNum = len / packetLength;
-
-        if ((packetNum * packetLength) < len) {
-            Log.d(TAG, "[STARTUP] [Added packet: " + packetNum + ", to " + (packetNum + 1) + "]");
-            packetNum++;
-        }
-
-        Log.d(TAG, "[STARTUP] [Number of packets:" + packetNum + "]");
-
-        for (int i = 0; i < packetNum; i++) {
-            byte[] packet = new byte[packetLength];
-
-            if (len - packetLength * i > packetLength) {
-                System.arraycopy(fileByteArray, i * packetLength, packet, 0, packetLength);
-            } else {
-                System.arraycopy(fileByteArray, i * packetLength, packet, 0, len - packetLength * i);
-            }
-            rPackets.add(packet);
-        }
-
-        Log.d(TAG, "[STARTUP] [Packets generated:" + rPackets.size() + "]");
-
-        return rPackets;
+        Log.d(TAG, "[RESET] Reset OTA update status");
     }
 
     private void timerForOtaNonResponse() {
         if (!isTimerStarted) {
             isTimerStarted = true;
+
             timer = new CountDownTimer(300000, 20000) {
 
                 @Override
                 public void onTick(long millisUntilFinished) {
-                    Log.d("OTA", "timerForOtaNotUpdate timer = " + millisUntilFinished + "," + (millisUntilFinished / 20000));
+                    Log.d(TAG, "[TIMER] Update will time out in " + (millisUntilFinished / 1000) +
+                                    "s, with " + (millisUntilFinished / 20000) + " more callbacks");
                 }
 
                 @Override
@@ -696,7 +706,7 @@ public class OTAUpdateService extends IntentService {
 
                     //TODO notify something (PubNub?) that an update has timed out
 
-                    if(timer != null )timer.cancel();
+                    if(timer != null ) { timer.cancel(); }
                     isTimerStarted = false;
                 }
             }.start();

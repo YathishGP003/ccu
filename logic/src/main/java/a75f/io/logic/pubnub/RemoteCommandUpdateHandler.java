@@ -23,8 +23,7 @@ public class RemoteCommandUpdateHandler
             otaUpdateIntent.putExtra("lwMeshAddress", Integer.parseInt(cmdParams[1]));
             otaUpdateIntent.putExtra("firmwareVersion", cmdParams[2]);
 
-            context.sendBroadcast(otaUpdateIntent);   //TODO how to get context here?
-            //mApplicationContext.startService(otaUpdateIntent);
+            context.sendBroadcast(otaUpdateIntent);
         }
     }
 }

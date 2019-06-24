@@ -24,7 +24,6 @@ import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
-import a75f.io.device.DeviceConstants;
 import a75f.io.device.serial.CcuToCmOverUsbFirmwareMetadataMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbFirmwarePacketMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbFirmwarePacketRequest_t;
@@ -33,6 +32,7 @@ import a75f.io.device.serial.MessageConstants;
 import a75f.io.device.serial.MessageType;
 import a75f.io.device.serial.SnRebootIndicationMessage_t;
 import a75f.io.logic.BuildConfig;
+import a75f.io.logic.Globals;
 import a75f.io.logic.bo.util.ByteArrayUtils;
 
 public class OTAUpdateService extends IntentService {
@@ -76,11 +76,18 @@ public class OTAUpdateService extends IntentService {
         String action = intent.getAction();
 
         /* The service has been launched from an activity */
-        if(action.equals(DeviceConstants.IntentActions.ACTIVITY_MESSAGE)) {
+        if(action.equals(Globals.IntentActions.ACTIVITY_MESSAGE)) {
             parseParametersFromIntent(intent);
         }
+        /* An activity has requested the OTA update to end (for debugging) */
+        if(action.equals(Globals.IntentActions.ACTIVITY_RESET)) {
+            mMetadataDownloadId = -1;
+            mBinaryDownloadId = -1;
+            if(isTimerStarted) { timer.cancel(); }
+            resetUpdate();
+        }
         /* The service has been launched from a PubNub notification */
-        else if(action.equals(DeviceConstants.IntentActions.PUBNUB_MESSAGE)) {
+        else if(action.equals(Globals.IntentActions.PUBNUB_MESSAGE)) {
             parseParametersFromIntent(intent);
         }
         /* The service has been launched in response to a file download */
@@ -88,7 +95,7 @@ public class OTAUpdateService extends IntentService {
             handleFileDownloadComplete(intent);
         }
         /* The OTA update is in progress, and is being notified from the CM */
-        else if(action.equals(DeviceConstants.IntentActions.LSERIAL_MESSAGE)) {
+        else if(action.equals(Globals.IntentActions.LSERIAL_MESSAGE)) {
             MessageType eventType = (MessageType) intent.getSerializableExtra("eventType");
             byte[] eventBytes = intent.getByteArrayExtra("eventBytes");
 
@@ -207,23 +214,27 @@ public class OTAUpdateService extends IntentService {
      */
     private void parseParametersFromIntent(Intent intent) {
         int node = intent.getIntExtra("lwMeshAddress", -1);
-        String firmwareInfo = intent.getStringExtra("firmwareInfo");
-        int versionMajor = intent.getIntExtra("versionMajor", -1);
-        int versionMinor = intent.getIntExtra("versionMinor", -1);
+        String firmwareVersion = intent.getStringExtra("firmwareVersion");
+
+        //TODO use regular expressions?
+        String versionNumStr = firmwareVersion.split("_v")[1];                 // e.g. "SmartNode_v1.0" -> "1.0"
+
+        int versionMajor = Integer.parseInt(versionNumStr.split("\\.")[0]);   // e.g. "1.0" -> 1
+        int versionMinor = Integer.parseInt(versionNumStr.split("\\.")[1]);   // e.g. "1.0" -> 0
 
         deleteAllFiles();   //TODO delete all files for this type of device only
 
         mVersionMajor = (short) versionMajor;
         mVersionMinor = (short) versionMinor;
 
-        if(firmwareInfo.startsWith("SmartNode_")) {
-            mFilename = firmwareInfo;
+        if(firmwareVersion.startsWith("SmartNode_")) {
+            mFilename = firmwareVersion;
             mFirmwareDeviceType = FirmwareDeviceType_t.SMART_NODE_DEVICE_TYPE;
             startUpdate(node, versionMajor, versionMinor, mFilename, FirmwareDeviceType_t.SMART_NODE_DEVICE_TYPE);
 
         }
-        else if(firmwareInfo.startsWith("Itm_") || firmwareInfo.startsWith("itm_")) {
-            mFilename = firmwareInfo.replace("Itm_", "itm_");
+        else if(firmwareVersion.startsWith("Itm_") || firmwareVersion.startsWith("itm_")) {
+            mFilename = firmwareVersion.replace("Itm_", "itm_");
             mFirmwareDeviceType = FirmwareDeviceType_t.ITM_DEVICE_TYPE;
             startUpdate(node, versionMajor, versionMinor, mFilename, FirmwareDeviceType_t.ITM_DEVICE_TYPE);
         }

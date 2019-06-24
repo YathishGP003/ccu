@@ -69,7 +69,12 @@ import a75f.io.logic.jobs.ScheduleProcessJob;
     This is used to keep track of global static associated with application context.
  */
 public class Globals {
-
+    public static final class IntentActions {
+        public static final String LSERIAL_MESSAGE = "a75f.io.device.LSERIAL_MESSAGE";
+        public static final String ACTIVITY_MESSAGE = "a75f.io.device.ACTIVITY_MESSAGE";
+        public static final String ACTIVITY_RESET = "a75f.io.device.ACTIVITY_RESET";
+        public static final String PUBNUB_MESSAGE = "a75f.io.device.PUBNUB_MESSAGE";
+    }
 
     private static final int      NUMBER_OF_CYCLICAL_TASKS_RENATUS_REQUIRES = 10;
     private static final int      TASK_SEPERATION                           = 15;

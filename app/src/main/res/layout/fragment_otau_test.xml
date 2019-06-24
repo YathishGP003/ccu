@@ -7,12 +7,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <Button
-            android:id="@+id/startOtaTestBtn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Start a Test OTA Update"/>
-
         <EditText
             android:id="@+id/otaTestAddressText"
             android:layout_width="wrap_content"
@@ -29,25 +23,25 @@
             android:ems="10"
             android:inputType="textPersonName"
             android:hint="Firmware Name String"
-            android:text="" />
+            android:text="SmartNode_v" />
 
-        <EditText
-            android:id="@+id/otaTestMajorVersionText"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ems="10"
-            android:inputType="number"
-            android:hint="Major Version"
-            android:text="" />
+            android:orientation="horizontal">
 
-        <EditText
-            android:id="@+id/otaTestMinorVersionText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:inputType="number"
-            android:hint="Minor Version"
-            android:text="" />
+            <Button
+                android:id="@+id/startOtaTestBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="Start a Test OTA Update" />
+
+            <Button
+                android:id="@+id/resetOtaTestBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="Reset in-progress OTA Update" />
+        </LinearLayout>
 
     </LinearLayout>
 

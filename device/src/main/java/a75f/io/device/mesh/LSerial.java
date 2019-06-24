@@ -3,6 +3,7 @@ package a75f.io.device.mesh;
 import android.os.Build;
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
 
 import org.javolution.io.Struct;
 
@@ -11,7 +12,6 @@ import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import a75f.io.api.haystack.Device;
 import a75f.io.device.DeviceConstants;
 import a75f.io.device.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSmartStatLocalControlsOverrideMessage_t;
@@ -20,6 +20,7 @@ import a75f.io.device.serial.CmToCcuOverUsbSnLocalControlsOverrideMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.device.serial.WrmOrCmRebootIndicationMessage_t;
+import a75f.io.logic.Globals;
 import a75f.io.usbserial.SerialAction;
 import a75f.io.usbserial.SerialEvent;
 import a75f.io.usbserial.UsbService;
@@ -123,13 +124,12 @@ public class LSerial
             }
 
             // Pass event to external handlers
-            Intent eventIntent = new Intent(context, OTAUpdateService.class);
-            eventIntent.setAction(DeviceConstants.IntentActions.LSERIAL_MESSAGE);
+            Intent eventIntent = new Intent(Globals.IntentActions.LSERIAL_MESSAGE);
             eventIntent.putExtra("eventType", messageType);
             eventIntent.putExtra("eventBytes", data);
 
-            //LocalBroadcastManager.getInstance(context).sendBroadcast(eventIntent);
-            context.startService(eventIntent);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(eventIntent);
+            //context.startService(eventIntent);
         }
     }
 

@@ -10,6 +10,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatDelegate;
 import android.widget.Toast;
 
@@ -35,14 +36,14 @@ import a75f.io.usbserial.UsbService;
 public abstract class UtilityApplication extends Application
 {
 
-    private final BroadcastReceiver mDownloadReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mOtaUpdateEventReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Intent downloadIntent = new Intent(getApplicationContext(), OTAUpdateService.class);
-            downloadIntent.setAction(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
-            downloadIntent.putExtras(intent);
+            Intent passIntent = new Intent(getApplicationContext(), OTAUpdateService.class);
+            passIntent.setAction(intent.getAction());
+            passIntent.putExtras(intent);
 
-            startService(downloadIntent);
+            startService(passIntent);
         }
     };
 
@@ -104,7 +105,7 @@ public abstract class UtilityApplication extends Application
         super.onCreate();
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         Globals.getInstance().setApplicationContext(this);
-        setDownloadFilters();  // Start listening for notifications from DownloadManager
+        setOtaUpdateEventFilters();  // Start listening for notifications from DownloadManager
         setUsbFilters();  // Start listening notifications from UsbService
         startService(UsbService.class, usbConnection, null); // Start UsbService(if it was not started before) and Bind it
         EventBus.getDefault().register(this);
@@ -124,11 +125,17 @@ public abstract class UtilityApplication extends Application
                 15, TimeUnit.SECONDS);
     }
 
-    private void setDownloadFilters()
+    private void setOtaUpdateEventFilters()
     {
         IntentFilter filter = new IntentFilter();
+        filter.addAction(Globals.IntentActions.ACTIVITY_MESSAGE);
+        filter.addAction(Globals.IntentActions.ACTIVITY_RESET);
+        filter.addAction(Globals.IntentActions.PUBNUB_MESSAGE);
         filter.addAction(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
-        registerReceiver(mDownloadReceiver, filter);
+        filter.addAction(Globals.IntentActions.LSERIAL_MESSAGE);
+
+        registerReceiver(mOtaUpdateEventReceiver, filter);
+        LocalBroadcastManager.getInstance(this).registerReceiver(mOtaUpdateEventReceiver, filter);
     }
 
     private void setUsbFilters()
@@ -306,8 +313,11 @@ public abstract class UtilityApplication extends Application
     public void onTerminate()
     {
         EventBus.getDefault().unregister(this);
-        unregisterReceiver(mDownloadReceiver);
+
+        unregisterReceiver(mOtaUpdateEventReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mOtaUpdateEventReceiver);
         unregisterReceiver(mUsbReceiver);
+
         unbindService(usbConnection);
         super.onTerminate();
     }

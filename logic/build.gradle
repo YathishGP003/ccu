@@ -61,5 +61,6 @@ dependencies {
 //    compile 'org.influxdb:influxdb-java:2.10'
     implementation 'com.pubnub:pubnub-gson:4.20.0'
     api 'com.google.guava:guava:26.0-android'
+    implementation 'com.android.support:localbroadcastmanager:28.0.0'
 
 }

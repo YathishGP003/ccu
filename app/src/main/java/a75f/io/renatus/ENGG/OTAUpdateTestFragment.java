@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,8 +13,7 @@ import android.widget.EditText;
 
 import org.javolution.annotations.Nullable;
 
-import a75f.io.device.DeviceConstants;
-import a75f.io.device.mesh.OTAUpdateService;
+import a75f.io.logic.Globals;
 import a75f.io.renatus.R;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -24,20 +23,17 @@ public class OTAUpdateTestFragment extends Fragment {
 
     public static OTAUpdateTestFragment newInstance() { return new OTAUpdateTestFragment(); }
 
-    @BindView(R.id.startOtaTestBtn)
-    Button startOtaTestBtn;
-
     @BindView(R.id.otaTestAddressText)
     EditText otaTestAddressText;
 
     @BindView(R.id.otaTestNameStringText)
     EditText otaTestNameStringText;
 
-    @BindView(R.id.otaTestMajorVersionText)
-    EditText otaTestMajorVersionText;
+    @BindView(R.id.startOtaTestBtn)
+    Button startOtaTestBtn;
 
-    @BindView(R.id.otaTestMinorVersionText)
-    EditText otaTestMinorVersionText;
+    @BindView(R.id.resetOtaTestBtn)
+    Button resetOtaTestBtn;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -60,16 +56,22 @@ public class OTAUpdateTestFragment extends Fragment {
 
         int lwMeshAddress = Integer.valueOf(otaTestAddressText.getText().toString());
         String firmwareInfo = otaTestNameStringText.getText().toString();
-        int versionMajor = Integer.valueOf(otaTestMajorVersionText.getText().toString());
-        int versionMinor = Integer.valueOf(otaTestMinorVersionText.getText().toString());
 
-        Intent otaIntent = new Intent(activity, OTAUpdateService.class);
-        otaIntent.setAction(DeviceConstants.IntentActions.ACTIVITY_MESSAGE);
+        Intent otaIntent = new Intent(Globals.IntentActions.ACTIVITY_MESSAGE);
         otaIntent.putExtra("lwMeshAddress", lwMeshAddress);
-        otaIntent.putExtra("firmwareInfo", firmwareInfo);
-        otaIntent.putExtra("versionMajor", versionMajor);
-        otaIntent.putExtra("versionMinor", versionMinor);
+        otaIntent.putExtra("firmwareVersion", firmwareInfo);
 
-        activity.startService(otaIntent);
+        LocalBroadcastManager.getInstance(activity).sendBroadcast(otaIntent);
+        //activity.startService(otaIntent);
+    }
+
+    @OnClick(R.id.resetOtaTestBtn)
+    public void handleResetOtaTest() {
+        Activity activity = getActivity();
+
+        Intent otaIntent = new Intent(Globals.IntentActions.ACTIVITY_RESET);
+
+        LocalBroadcastManager.getInstance(activity).sendBroadcast(otaIntent);
+        //activity.startService(otaIntent);
     }
 }

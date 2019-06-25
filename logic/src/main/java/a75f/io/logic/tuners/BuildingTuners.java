@@ -176,6 +176,19 @@ public class BuildingTuners
         String zoneTemperatureDeadLeewayId = hayStack.addPoint(zoneTemperatureDeadLeeway);
         hayStack.writePoint(zoneTemperatureDeadLeewayId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.ZONE_TEMP_DEAD_LEEWAY, 0);
         hayStack.writeHisValById(zoneTemperatureDeadLeewayId, TunerConstants.ZONE_TEMP_DEAD_LEEWAY);
+    
+        Point humidityCompensationOffset = new Point.Builder()
+                                                  .setDisplayName(equipDis+"-"+"humidityCompensationOffset")
+                                                  .setSiteRef(siteRef)
+                                                  .setEquipRef(equipRef)
+                                                  .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
+                                                  .addMarker("system").addMarker("humidity").addMarker("compensation").addMarker("offset").addMarker("sp")
+                                                  .setTz(tz)
+                                                  .build();
+        String humidityCompensationOffsetId = hayStack.addPoint(humidityCompensationOffset);
+        hayStack.writePoint(humidityCompensationOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 0.0, 0);
+        hayStack.writeHisValById(humidityCompensationOffsetId, 0.0);
+        
         
         
     }

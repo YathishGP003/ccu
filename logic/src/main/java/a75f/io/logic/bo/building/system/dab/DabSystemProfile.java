@@ -32,6 +32,7 @@ public abstract class DabSystemProfile extends SystemProfile
         addSystemLoopOpPoint("fan", siteRef, equipRef, equipDis, tz);
         addSystemLoopOpPoint("co2", siteRef, equipRef, equipDis, tz);
         addSystemPoints(siteRef, equipRef, equipDis, tz);
+        addDabSystemPoints(siteRef, equipRef, equipDis, tz);
     }
     
     private void addSystemLoopOpPoint(String loop, String siteRef, String equipref, String equipDis, String tz)
@@ -40,36 +41,8 @@ public abstract class DabSystemProfile extends SystemProfile
         CCUHsApi.getInstance().addPoint(relay1Op);
     }
     
-    private void addSystemPoints(String siteRef, String equipref, String equipDis, String tz)
+    private void addDabSystemPoints(String siteRef, String equipref, String equipDis, String tz)
     {
-        Point systemStatusMessage = new Point.Builder()
-                                           .setDisplayName(equipDis+"-StatusMessage")
-                                           .setEquipRef(equipref)
-                                           .setSiteRef(siteRef)
-                                           .addMarker("system").addMarker("status").addMarker("message").addMarker("writable")
-                                           .setTz(tz)
-                                           .setKind("string")
-                                           .build();
-        CCUHsApi.getInstance().addPoint(systemStatusMessage);
-        Point systemScheduleStatus = new Point.Builder()
-                                            .setDisplayName(equipDis+"-ScheduleStatus")
-                                            .setEquipRef(equipref)
-                                            .setSiteRef(siteRef)
-                                            .addMarker("system").addMarker("scheduleStatus").addMarker("writable")
-                                            .setTz(tz)
-                                            .setKind("string")
-                                            .build();
-        CCUHsApi.getInstance().addPoint(systemScheduleStatus);
-        Point systemOccupancy = new Point.Builder().setDisplayName(equipDis + "-" + "occupancy").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("occupancy").addMarker("status").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
-        CCUHsApi.getInstance().addPoint(systemOccupancy);
-        Point systemOperatingMode = new Point.Builder().setDisplayName(equipDis + "-" + "operatingMode").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("operating").addMarker("mode").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
-        CCUHsApi.getInstance().addPoint(systemOperatingMode);
-        Point ciRunning = new Point.Builder().setDisplayName(equipDis + "-" + "systemCI").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("ci").addMarker("running").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
-        CCUHsApi.getInstance().addPoint(ciRunning);
-        Point averageHumidity = new Point.Builder().setDisplayName(equipDis + "-" + "averageHumidity").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("average").addMarker("humidity").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
-        CCUHsApi.getInstance().addPoint(averageHumidity);
-        Point averageTemperature = new Point.Builder().setDisplayName(equipDis + "-" + "averageTemperature").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("average").addMarker("temp").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
-        CCUHsApi.getInstance().addPoint(averageTemperature);
         Point weightedAverageLoadMA = new Point.Builder().setDisplayName(equipDis + "-" + "weightedAverageLoadMA ").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("weighted").addMarker("average").addMarker("moving").addMarker("load").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(weightedAverageLoadMA);
         
@@ -106,7 +79,7 @@ public abstract class DabSystemProfile extends SystemProfile
             if (valMap.get("val") != null)
             {
                 hayStack.pointWrite(HRef.copy(targetCumulativeDamperId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(targetCumulativeDamperId, Double.parseDouble(valMap.get("val").toString()));
+                //hayStack.writeHisValById(targetCumulativeDamperId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
         hayStack.writeHisValById(targetCumulativeDamperId, HSUtil.getPriorityVal(targetCumulativeDamperId));
@@ -120,7 +93,7 @@ public abstract class DabSystemProfile extends SystemProfile
             if (valMap.get("val") != null)
             {
                 hayStack.pointWrite(HRef.copy(analogFanSpeedMultiplierId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(analogFanSpeedMultiplierId, Double.parseDouble(valMap.get("val").toString()));
+                //hayStack.writeHisValById(analogFanSpeedMultiplierId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
         hayStack.writeHisValById(analogFanSpeedMultiplierId, HSUtil.getPriorityVal(analogFanSpeedMultiplierId));
@@ -134,7 +107,7 @@ public abstract class DabSystemProfile extends SystemProfile
             if (valMap.get("val") != null)
             {
                 hayStack.pointWrite(HRef.copy(humidityHysteresisId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(humidityHysteresisId, Double.parseDouble(valMap.get("val").toString()));
+                //hayStack.writeHisValById(humidityHysteresisId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
         hayStack.writeHisValById(humidityHysteresisId, HSUtil.getPriorityVal(humidityHysteresisId));
@@ -148,11 +121,24 @@ public abstract class DabSystemProfile extends SystemProfile
             if (valMap.get("val") != null)
             {
                 hayStack.pointWrite(HRef.copy(relayDeactivationHysteresisId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
-                hayStack.writeHisValById(relayDeactivationHysteresisId, Double.parseDouble(valMap.get("val").toString()));
+                //hayStack.writeHisValById(relayDeactivationHysteresisId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
         hayStack.writeHisValById(relayDeactivationHysteresisId, HSUtil.getPriorityVal(relayDeactivationHysteresisId));
-        
+    
+        Point humidityCompensationOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "humidityCompensationOffset").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("humidity").addMarker("compensation").addMarker("offset").addMarker("sp").addMarker("equipHis").setTz(tz).build();
+        String humidityCompensationOffsetId = hayStack.addPoint(humidityCompensationOffset);
+        HashMap humidityCompensationOffsetPoint = hayStack.read("point and tuner and default and humidity and compensation and offset");
+        ArrayList<HashMap> humidityCompensationOffsetArr = hayStack.readPoint(humidityCompensationOffsetPoint.get("id").toString());
+        for (HashMap valMap : humidityCompensationOffsetArr)
+        {
+            if (valMap.get("val") != null)
+            {
+                hayStack.pointWrite(HRef.copy(humidityCompensationOffsetId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                //hayStack.writeHisValById(humidityCompensationOffsetId, Double.parseDouble(valMap.get("val").toString()));
+            }
+        }
+        hayStack.writeHisValById(humidityCompensationOffsetId, HSUtil.getPriorityVal(humidityCompensationOffsetId));
     }
     
     protected void addUserIntentPoints(String equipref)

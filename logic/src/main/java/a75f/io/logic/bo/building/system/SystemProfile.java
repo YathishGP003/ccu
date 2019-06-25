@@ -227,18 +227,72 @@ public abstract class SystemProfile
             }
         }
     }
-    public void updateGatewayRef(String systemEquipId) {
+    
+    public void updateGatewayRef(String systemEquipId)
+    {
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone");
-
         for (HashMap m : equips)
         {
             Equip q = new Equip.Builder().setHashMap(m)/*.setGatewayRef(systemEquipId)*/.build();
-            if(q.getMarkers().contains("dab") || q.getMarkers().contains("vav"))
+            if (q.getMarkers().contains("dab") || q.getMarkers().contains("vav"))
                 q.setAhuRef(systemEquipId);
             else q.setGatewayRef(systemEquipId);
             CCUHsApi.getInstance().updateEquip(q, q.getId());
         }
         CCUHsApi.getInstance().updateCCUahuRef(systemEquipId);
-
+    }
+    
+    public void addCMPoints(String siteRef, String equipref, String equipDis , String tz) {
+        Point cmAlive = new Point.Builder().setDisplayName(equipDis + "-" + "cmAlive").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("cm").addMarker("alive").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
+        CCUHsApi.getInstance().addPoint(cmAlive);
+        Point cmCurrentTemp = new Point.Builder().setDisplayName(equipDis + "-" + "cmCurrentTemp").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("cm").addMarker("current").addMarker("temp").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
+        CCUHsApi.getInstance().addPoint(cmCurrentTemp);
+        Point cmDesiredTemp = new Point.Builder().setDisplayName(equipDis + "-" + "cmDesiredTemp").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("cm").addMarker("desired").addMarker("temp").addMarker("writable").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
+        String cmDesiredTempId = CCUHsApi.getInstance().addPoint(cmDesiredTemp);
+        CCUHsApi.getInstance().writeDefaultValById(cmDesiredTempId, 0.0);
+    }
+    
+    //VAV & DAB System profile common points are added here.
+    public void addSystemPoints(String siteRef, String equipref, String equipDis, String tz) {
+        Point systemStatusMessage = new Point.Builder()
+                                            .setDisplayName(equipDis+"-StatusMessage")
+                                            .setEquipRef(equipref)
+                                            .setSiteRef(siteRef)
+                                            .addMarker("system").addMarker("status").addMarker("message").addMarker("writable")
+                                            .setTz(tz)
+                                            .setKind("string")
+                                            .build();
+        CCUHsApi.getInstance().addPoint(systemStatusMessage);
+        Point systemScheduleStatus = new Point.Builder()
+                                             .setDisplayName(equipDis+"-ScheduleStatus")
+                                             .setEquipRef(equipref)
+                                             .setSiteRef(siteRef)
+                                             .addMarker("system").addMarker("scheduleStatus").addMarker("writable")
+                                             .setTz(tz)
+                                             .setKind("string")
+                                             .build();
+        CCUHsApi.getInstance().addPoint(systemScheduleStatus);
+        Point systemOccupancy = new Point.Builder().setDisplayName(equipDis + "-" + "occupancy").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("occupancy").addMarker("status").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
+        CCUHsApi.getInstance().addPoint(systemOccupancy);
+        Point systemOperatingMode = new Point.Builder().setDisplayName(equipDis + "-" + "operatingMode").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("operating").addMarker("mode").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
+        CCUHsApi.getInstance().addPoint(systemOperatingMode);
+        Point ciRunning = new Point.Builder().setDisplayName(equipDis + "-" + "systemCI").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("ci").addMarker("running").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
+        CCUHsApi.getInstance().addPoint(ciRunning);
+        Point averageHumidity = new Point.Builder().setDisplayName(equipDis + "-" + "averageHumidity").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("average").addMarker("humidity").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
+        CCUHsApi.getInstance().addPoint(averageHumidity);
+        Point outsideHumidity = new Point.Builder().setDisplayName(equipDis + "-" + "outsideHumidity").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("outside").addMarker("humidity").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
+        CCUHsApi.getInstance().addPoint(outsideHumidity);
+        Point calculatedHumidity = new Point.Builder().setDisplayName(equipDis + "-" + "calculatedHumidity").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("calculated").addMarker("humidity").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
+        CCUHsApi.getInstance().addPoint(calculatedHumidity);
+        Point targetHumidity = new Point.Builder().setDisplayName(equipDis + "-" + "targetHumidity").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("target").addMarker("humidity").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
+        CCUHsApi.getInstance().addPoint(targetHumidity);
+        Point cmHumidity = new Point.Builder().setDisplayName(equipDis + "-" + "cmHumidity").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("cm").addMarker("humidity").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
+        CCUHsApi.getInstance().addPoint(cmHumidity);
+        Point averageTemperature = new Point.Builder().setDisplayName(equipDis + "-" + "averageTemperature").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("average").addMarker("temp").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
+        CCUHsApi.getInstance().addPoint(averageTemperature);
+        Point outsideTemperature = new Point.Builder().setDisplayName(equipDis + "-" + "outsideTemperature").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("outside").addMarker("temp").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
+        CCUHsApi.getInstance().addPoint(outsideTemperature);
+        
+        addCMPoints(siteRef, equipref, equipDis, tz);
     }
 }

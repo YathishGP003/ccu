@@ -39,6 +39,7 @@ public abstract class VavSystemProfile extends SystemProfile
         addSystemLoopOpPoint("fan", siteRef, equipRef, equipDis, tz);
         addSystemLoopOpPoint("co2", siteRef, equipRef, equipDis, tz);
         addSystemPoints(siteRef, equipRef, equipDis, tz);
+        addVavSystemPoints(siteRef, equipRef, equipDis, tz);
         addTrTargetPoints(siteRef,equipRef,equipDis,tz);
     }
     
@@ -48,36 +49,8 @@ public abstract class VavSystemProfile extends SystemProfile
         CCUHsApi.getInstance().addPoint(relay1Op);
     }
     
-    private void addSystemPoints(String siteRef, String equipref, String equipDis, String tz)
+    private void addVavSystemPoints(String siteRef, String equipref, String equipDis, String tz)
     {
-        Point equipStatusMessage = new Point.Builder()
-                                           .setDisplayName(equipDis+"-StatusMessage")
-                                           .setEquipRef(equipref)
-                                           .setSiteRef(siteRef)
-                                           .addMarker("system").addMarker("status").addMarker("message").addMarker("writable")
-                                           .setTz(tz)
-                                           .setKind("string")
-                                           .build();
-        CCUHsApi.getInstance().addPoint(equipStatusMessage);
-        Point equipScheduleStatus = new Point.Builder()
-                                            .setDisplayName(equipDis+"-ScheduleStatus")
-                                            .setEquipRef(equipref)
-                                            .setSiteRef(siteRef)
-                                            .addMarker("system").addMarker("scheduleStatus").addMarker("writable")
-                                            .setTz(tz)
-                                            .setKind("string")
-                                            .build();
-        CCUHsApi.getInstance().addPoint(equipScheduleStatus);
-        Point systemOccupancy = new Point.Builder().setDisplayName(equipDis + "-" + "occupancy").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("occupancy").addMarker("status").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
-        CCUHsApi.getInstance().addPoint(systemOccupancy);
-        Point systemOperatingMode = new Point.Builder().setDisplayName(equipDis + "-" + "operatingMode").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("operating").addMarker("mode").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
-        CCUHsApi.getInstance().addPoint(systemOperatingMode);
-        Point ciRunning = new Point.Builder().setDisplayName(equipDis + "-" + "systemCI").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("ci").addMarker("running").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
-        CCUHsApi.getInstance().addPoint(ciRunning);
-        Point averageHumidity = new Point.Builder().setDisplayName(equipDis + "-" + "averageHumidity").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("average").addMarker("humidity").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
-        CCUHsApi.getInstance().addPoint(averageHumidity);
-        Point averageTemperature = new Point.Builder().setDisplayName(equipDis + "-" + "averageTemperature").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("average").addMarker("temp").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
-        CCUHsApi.getInstance().addPoint(averageTemperature);
         Point weightedAverageCoolingLoadMA = new Point.Builder().setDisplayName(equipDis + "-" + "weightedAverageCoolingLoadMA").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("moving").addMarker("average").addMarker("cooling").addMarker("load").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(weightedAverageCoolingLoadMA);
         Point weightedAverageHeatingLoadMA = new Point.Builder().setDisplayName(equipDis + "-" + "weightedAverageHeatingLoadMA").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("moving").addMarker("average").addMarker("heating").addMarker("load").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
@@ -157,7 +130,20 @@ public abstract class VavSystemProfile extends SystemProfile
             }
         }
         hayStack.writeHisValById(relayDeactivationHysteresisId, HSUtil.getPriorityVal(relayDeactivationHysteresisId));
-        
+    
+        Point humidityCompensationOffset = new Point.Builder().setDisplayName(HSUtil.getDis(equipref) + "-" + "humidityCompensationOffset").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("humidity").addMarker("compensation").addMarker("offset").addMarker("sp").addMarker("equipHis").setTz(tz).build();
+        String humidityCompensationOffsetId = hayStack.addPoint(humidityCompensationOffset);
+        HashMap humidityCompensationOffsetPoint = hayStack.read("point and tuner and default and humidity and compensation and offset");
+        ArrayList<HashMap> humidityCompensationOffsetArr = hayStack.readPoint(humidityCompensationOffsetPoint.get("id").toString());
+        for (HashMap valMap : humidityCompensationOffsetArr)
+        {
+            if (valMap.get("val") != null)
+            {
+                hayStack.pointWrite(HRef.copy(humidityCompensationOffsetId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                //hayStack.writeHisValById(humidityCompensationOffsetId, Double.parseDouble(valMap.get("val").toString()));
+            }
+        }
+        hayStack.writeHisValById(humidityCompensationOffsetId, HSUtil.getPriorityVal(humidityCompensationOffsetId));
     }
     
     protected void addUserIntentPoints(String equipref)

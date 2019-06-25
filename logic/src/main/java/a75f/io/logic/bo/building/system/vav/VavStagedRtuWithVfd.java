@@ -10,7 +10,6 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
-import a75f.io.logic.bo.building.system.SystemEquip;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 
 import static a75f.io.logic.bo.building.hvac.Stage.FAN_1;
@@ -44,7 +43,7 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
             } else {
                 initTRSystem();
                 updateStagesSelected();
-                sysEquip = new SystemEquip(equip.get("id").toString());
+                //sysEquip = new SystemEquip(equip.get("id").toString());
                 return;
             }
         }
@@ -71,7 +70,7 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
         addAnalogConfigPoints(equipRef);
         addAnalogCmdPoints(equipRef);
         updateAhuRef(equipRef);
-        sysEquip = new SystemEquip(equipRef);
+        //sysEquip = new SystemEquip(equipRef);
         new ControlMote(siteRef);
         initTRSystem();
         L.saveCCUState();

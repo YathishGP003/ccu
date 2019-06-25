@@ -64,7 +64,8 @@ public class DefaultSystem extends SystemProfile
                                    .build();
         String equipRef = hayStack.addEquip(systemEquip);
         addSystemTuners();
-        updateAhuRef(equipRef);
+        //updateAhuRef(equipRef);
+        updateGatewayRef(equipRef);
         new ControlMote(siteRef);
         L.saveCCUState();
         CCUHsApi.getInstance().syncEntityTree();

@@ -119,6 +119,7 @@ public class EntitySyncHandler
         ref.add("floorRef");
         ref.add("roomRef");
         ref.add("ahuRef");
+        ref.add("gatewayRef");
         ref.add("scheduleRef");
         
     }

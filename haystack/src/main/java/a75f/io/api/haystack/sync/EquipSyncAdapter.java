@@ -69,6 +69,13 @@ public class EquipSyncAdapter extends EntitySyncAdapter
                     }
                     m.put("ahuRef", HRef.copy(guid));
                 }
+                if (m.get("gatewayRef") != null && CCUHsApi.getInstance().getGUID(m.get("gatewayRef").toString()) != null)
+                {
+                    String guid = CCUHsApi.getInstance().getGUID(m.get("gatewayRef").toString());
+                    if(guid == null)
+						return false;
+                    m.put("gatewayRef", HRef.copy(guid));
+                }
                 entities.add(HSUtil.mapToHDict(m));
             }
         }

@@ -275,7 +275,7 @@ public class SmartNode
         }
         
         HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
-        if (!point.get("type").equals(type))
+        if (!point.get("analogType").equals(type))
         {
             RawPoint p = new RawPoint.Builder().setHashMap(point).build();
             p.setType(type);

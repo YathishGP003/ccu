@@ -237,9 +237,10 @@ public class BLEProvisionService extends Service
      * callback.
      */
     public void disconnect() {
-        
-        
-        mBluetoothGatt.disconnect();
+        if (mBluetoothGatt != null)
+        {
+            mBluetoothGatt.disconnect();
+        }
     }
     
     /**
@@ -247,9 +248,6 @@ public class BLEProvisionService extends Service
      * released properly.
      */
     public void close() {
-        if (mBluetoothGatt == null) {
-            return;
-        }
         disconnect();
     }
     

@@ -75,7 +75,7 @@ public class BuildingTuners
         addDefaultPlcTuners();
         addDefaultStandaloneTuners();
         addDefaultDabTuners();
-        
+        OAOTuners.addDefaultTuners(equipDis, siteRef, equipRef, tz);
     }
     
     public void addSettingTuners() {
@@ -1688,5 +1688,4 @@ public class BuildingTuners
 
         CCUHsApi.getInstance().syncEntityTree();
     }
-
 }

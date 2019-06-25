@@ -77,7 +77,8 @@ public class PlcEquip
                                   .setFloorRef(floorRef)
                                   .setProfile(profileType.name())
                                   .addMarker("equip").addMarker("pid").addMarker("zone").addMarker("equipHis")
-                                  .setAhuRef(ahuRef)
+                                  /*.setAhuRef(ahuRef)*/
+								  .setGatewayRef(ahuRef)
                                   .setTz(tz)
                                   .setGroup(String.valueOf(nodeAddr)).build();
     

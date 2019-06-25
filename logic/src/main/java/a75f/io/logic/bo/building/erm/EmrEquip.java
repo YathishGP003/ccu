@@ -48,7 +48,7 @@ public class EmrEquip
                                      .setFloorRef(floorRef)
                                      .setProfile(profileType.name())
                                      .addMarker("equip").addMarker("emr").addMarker("zone")
-                                     .addMarker("equipHis").setAhuRef(ahuRef).setTz(tz).setGroup(String.valueOf(nodeAddr)).build();
+                                     .addMarker("equipHis").setGatewayRef(ahuRef).setTz(tz).setGroup(String.valueOf(nodeAddr)).build();
         equipRef = hayStack.addEquip(b);
     
         Point emrReading  = new Point.Builder()

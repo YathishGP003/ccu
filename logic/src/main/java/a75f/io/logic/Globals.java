@@ -365,6 +365,7 @@ public class Globals {
 
 
         HashMap equip = CCUHsApi.getInstance().read("equip and system");
+        boolean isDefaultSystem = false;
         if (equip != null && equip.size() > 0) {
             Equip eq = new Equip.Builder().setHashMap(equip).build();
             CcuLog.d(L.TAG_CCU, "Load SystemEquip " + eq.getDisplayName() + " System profile " + eq.getProfile());
@@ -401,14 +402,17 @@ public class Globals {
                     break;
                 default:
                     L.ccu().systemProfile = new DefaultSystem();
+                    isDefaultSystem = true;
                     break;
             }
         } else {
             CcuLog.d(L.TAG_CCU, "System Equip does not exist.Create Dafault System Profile");
             L.ccu().systemProfile = new DefaultSystem();
+            isDefaultSystem = true;
 
         }
-        L.ccu().systemProfile.addSystemEquip();
+        if(!isDefaultSystem)
+            L.ccu().systemProfile.addSystemEquip();
         
         for (Floor f : HSUtil.getFloors()) {
             for (Zone z : HSUtil.getZones(f.getId())) {

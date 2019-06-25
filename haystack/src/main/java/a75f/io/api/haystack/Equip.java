@@ -25,6 +25,15 @@ public class Equip extends Entity
         return ahuRef;
     }
     private String ahuRef;
+    public String getGatewayRef()
+    {
+        return gatewayRef;
+    }
+    public void setGatewayRef(String ahuRef)
+    {
+        this.gatewayRef = ahuRef;
+    }
+    private String gatewayRef;//only for default System profile, eg: zones with standalone equipments which doesnt relay on System
     private String group;
     public String getProfile()
     {
@@ -98,6 +107,12 @@ public class Equip extends Entity
             return this;
         }
         private String ahuRef;
+        public Builder setGatewayRef(String gatewayRef)
+        {
+            this.gatewayRef = gatewayRef;
+            return this;
+        }
+        private String gatewayRef;
         public Builder setTz(String tz)
         {
             this.tz = tz;
@@ -163,6 +178,7 @@ public class Equip extends Entity
             q.profile = this.profile;
             q.priority = this.priority;
             q.ahuRef = this.ahuRef;
+            q.gatewayRef = this.gatewayRef;
             q.id = this.id;
             q.tz = this.tz;
             return q;
@@ -202,6 +218,11 @@ public class Equip extends Entity
                 else if(pair.getKey().equals("ahuRef"))
                 {
                     this.ahuRef = pair.getValue().toString();
+                }
+                else if(pair.getKey().equals("gatewayRef"))
+                {
+                    
+                    this.gatewayRef = pair.getValue().toString();
                 }
                 else if(pair.getKey().equals("profile"))
                 {

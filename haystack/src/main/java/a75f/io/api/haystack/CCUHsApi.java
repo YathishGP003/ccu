@@ -996,6 +996,7 @@ public class CCUHsApi
         hDictBuilder.add("fmEmail", HStr.make(installerEmail));
         hDictBuilder.add("siteRef", getSiteId());
         hDictBuilder.add("createdDate", HDateTime.make(System.currentTimeMillis()).date);
+        hDictBuilder.add("gatewayRef", ahuRef);
         hDictBuilder.add("ahuRef", ahuRef);
         hDictBuilder.add("device");
         tagsDb.addHDict(localId, hDictBuilder.toDict());
@@ -1019,6 +1020,7 @@ public class CCUHsApi
         hDictBuilder.add("fmEmail", HStr.make(installerEmail));
         hDictBuilder.add("siteRef", getSiteId());
         hDictBuilder.add("createdDate", HDate.make(ccu.get("createdDate").toString()));
+        hDictBuilder.add("gatewayRef", ahuRef);
         hDictBuilder.add("ahuRef", ahuRef);
         hDictBuilder.add("device");
         tagsDb.addHDict(id.replace("@",""), hDictBuilder.toDict());
@@ -1047,6 +1049,7 @@ public class CCUHsApi
         hDictBuilder.add("fmEmail", HStr.make(ccu.get("fmEmail").toString()));
         hDictBuilder.add("siteRef", getSiteId());
         hDictBuilder.add("createdDate", HDate.make(ccu.get("createdDate").toString()));
+        hDictBuilder.add("gatewayRef", ahuRef);
         hDictBuilder.add("ahuRef", ahuRef);
         hDictBuilder.add("device");
         tagsDb.addHDict(id.replace("@",""), hDictBuilder.toDict());

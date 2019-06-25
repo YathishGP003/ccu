@@ -119,7 +119,10 @@ public abstract class SystemProfile
         
         for (HashMap m : equips)
         {
-            Equip q = new Equip.Builder().setHashMap(m).setAhuRef(systemEquipId).build();
+            Equip q = new Equip.Builder().setHashMap(m)/*.setAhuRef(systemEquipId)*/.build();
+            if(q.getMarkers().contains("dab") || q.getMarkers().contains("vav"))
+                q.setAhuRef(systemEquipId);
+            else q.setGatewayRef(systemEquipId);
             CCUHsApi.getInstance().updateEquip(q, q.getId());
         }
         
@@ -223,5 +226,19 @@ public abstract class SystemProfile
                 hayStack.writeHisValById(coolingPreconditioningRateId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
+    }
+    public void updateGatewayRef(String systemEquipId) {
+        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone");
+
+        for (HashMap m : equips)
+        {
+            Equip q = new Equip.Builder().setHashMap(m)/*.setGatewayRef(systemEquipId)*/.build();
+            if(q.getMarkers().contains("dab") || q.getMarkers().contains("vav"))
+                q.setAhuRef(systemEquipId);
+            else q.setGatewayRef(systemEquipId);
+            CCUHsApi.getInstance().updateEquip(q, q.getId());
+        }
+        CCUHsApi.getInstance().updateCCUahuRef(systemEquipId);
+
     }
 }

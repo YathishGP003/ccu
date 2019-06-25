@@ -385,6 +385,9 @@ public class CCUTagsDb extends HServer {
         if (q.getAhuRef() != null) {
             equip.add("ahuRef",q.getAhuRef());
         }
+        if(q.getGatewayRef() != null){
+            equip.add("gatewayRef",q.getGatewayRef());
+        }
         for (String m : q.getMarkers()) {
             equip.add(m);
         }
@@ -408,6 +411,9 @@ public class CCUTagsDb extends HServer {
     
         if (q.getAhuRef() != null) {
             equip.add("ahuRef",q.getAhuRef());
+        }
+		if(q.getGatewayRef() != null){
+            equip.add("gatewayRef",q.getGatewayRef());
         }
         for (String m : q.getMarkers()) {
             equip.add(m);

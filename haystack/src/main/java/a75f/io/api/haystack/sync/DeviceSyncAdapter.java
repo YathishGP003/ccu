@@ -71,6 +71,13 @@ public class DeviceSyncAdapter extends EntitySyncAdapter
                         return false;
                     }
                     m.put("ahuRef", HRef.copy(guid));
+                } 
+				if (m.get("gatewayRef") != null)
+                {
+					String guid = CCUHsApi.getInstance().getGUID(m.get("gatewayRef").toString());
+                    if(guid == null)
+						return false;
+                    m.put("gatewayRef", HRef.copy(guid));
                 }
                 entities.add(HSUtil.mapToHDict(m));
             }

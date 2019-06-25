@@ -60,7 +60,7 @@ public class HeatPumpUnitEquip{
                 .setProfile(profileType.name())
                 .setPriority(config.getPriority().name())
                 .addMarker("equip").addMarker("standalone").addMarker("equipHis").addMarker("smartstat").addMarker("zone")
-                .setAhuRef(gatewayRef)
+                .setGatewayRef(gatewayRef)
                 .setTz(tz)
                 .setGroup(String.valueOf(nodeAddr));
         b.setDisplayName(equipDis);

@@ -3,6 +3,7 @@ package a75f.io.renatus;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -171,7 +172,7 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
         switchExtTempSensor = (ToggleButton)view.findViewById(R.id.toogleCpuExtSensor);
         temperatureOffset = (NumberPicker) view.findViewById(R.id.temperatureOffset);
         fanHumiDSpinner = (Spinner)view.findViewById(R.id.spinnerCpuFanHigh);
-        setNumberPickerDividerColor(temperatureOffset);
+        setDividerColor(temperatureOffset);
         temperatureOffset.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         String[] nums = new String[TEMP_OFFSET_LIMIT * 2 + 1];//{"-4","-3","-2","-1","0","1","2","3","4"};
         for (int nNum = 0; nNum < TEMP_OFFSET_LIMIT * 2 + 1; nNum++)
@@ -330,6 +331,28 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
         }
         L.ccu().zoneProfiles.add(mCPUProfile);
         Log.d("CPUConfig", "Set Config: Profiles - "+L.ccu().zoneProfiles.size());
+    }
+
+    private void setDividerColor(NumberPicker picker) {
+        Field[] numberPickerFields = NumberPicker.class.getDeclaredFields();
+        for (Field field : numberPickerFields) {
+            if (field.getName().equals("mSelectionDivider")) {
+                field.setAccessible(true);
+                try {
+                    field.set(picker, getResources().getDrawable(R.drawable.divider_np));
+                } catch (IllegalArgumentException e) {
+                    Log.v("NP", "Illegal Argument Exception");
+                    e.printStackTrace();
+                } catch (Resources.NotFoundException e) {
+                    Log.v("NP", "Resources NotFound");
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    Log.v("NP", "Illegal Access Exception");
+                    e.printStackTrace();
+                }
+                break;
+            }
+        }
     }
     private void setNumberPickerDividerColor(NumberPicker pk) {
         Class<?> numberPickerClass = null;

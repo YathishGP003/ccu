@@ -123,6 +123,8 @@ public class StandaloneScheduler {
                     status = status +" Cooling 2 ON,";
                 else if(relayStages.containsKey("CoolingStage1"))
                     status = status + "Cooling 1 ON,";
+                else if(relayStages.containsKey("HeatingStage1")) //For Two PFCU alone
+                    status = "Heating ON,";
                 else
                     status = "Cooling OFF,";
 
@@ -143,7 +145,13 @@ public class StandaloneScheduler {
 
         if(temperatureState != ZoneTempState.FAN_OP_MODE_OFF) {
             if (status.equals("OFF ") && relayStages.size() > 0) status = "";
-            if (relayStages.containsKey("FanStage2") && relayStages.containsKey("FanStage1"))
+            if(relayStages.containsKey("FanStage3") && relayStages.containsKey("FanStage2") && relayStages.containsKey("FanStage1"))
+                status = status + " Fan 1,2&3 ON";
+            else if (relayStages.containsKey("FanStage3") && relayStages.containsKey("FanStage2"))
+                status = status + " Fan 2&3 ON";
+            else if (relayStages.containsKey("FanStage3") && relayStages.containsKey("FanStage1"))
+                status = status + " Fan 1&3 ON";
+           else if (relayStages.containsKey("FanStage2") && relayStages.containsKey("FanStage1"))
                 status = status + " Fan 1&2 ON";
             else if (relayStages.containsKey("Humidifier") && relayStages.containsKey("FanStage1"))
                 status = status + " Fan 1 ON, Humidifier ON";

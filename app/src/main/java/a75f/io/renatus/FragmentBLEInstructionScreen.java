@@ -232,6 +232,19 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
             }
         }
+        else if (mProfileType == ProfileType.SMARTSTAT_TWO_PIPE_FCU)
+        {
+            if (L.isSimulation())
+            {
+                showDialogFragment(Fragment2PipeFanCoilUnitConfig.newInstance(mNodeAddress, mRoomName, mNodeType, mFloorName,mProfileType), Fragment2PipeFanCoilUnitConfig.ID);
+            }
+            else
+            {
+                Log.d("FragBleInstrScrn","CPU profile. device scan");
+                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.SMARTSTAT_TWO_PIPE_FCU);
+                showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
+            }
+        }
     }
     
     

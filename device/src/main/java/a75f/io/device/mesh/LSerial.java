@@ -1,5 +1,7 @@
 package a75f.io.device.mesh;
 
+import android.os.Build;
+
 import org.javolution.io.Struct;
 
 import java.nio.ByteBuffer;
@@ -143,7 +145,8 @@ public class LSerial
         DLog.Logd("Data return size: " + data.length);
         //Log hexadecimal
         DLog.Logd("Incoming Hexadecimal: " + struct.toString());
-        DLog.LogdStructAsJson(struct);
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
+            DLog.LogdStructAsJson(struct);
         return struct;
     }
 
@@ -213,7 +216,8 @@ public class LSerial
         }
 
         //Only if the struct was wrote to serial should it be logged.
-        DLog.LogdStructAsJson(struct);
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
+            DLog.LogdStructAsJson(struct);
         mUsbService.write(struct.getOrderedBuffer());
         return true;
     }
@@ -243,7 +247,8 @@ public class LSerial
         }
 
         //Only if the struct was wrote to serial should it be logged.
-        DLog.LogdStructAsJson(struct);
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
+            DLog.LogdStructAsJson(struct);
         return false;
     }
     /***
@@ -270,7 +275,8 @@ public class LSerial
             return false;
         }
         //Only if the struct was wrote to serial should it be logged.
-        DLog.LogdStructAsJson(struct);
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
+            DLog.LogdStructAsJson(struct);
         mUsbService.write(struct.getOrderedBuffer());
         return true;
     }
@@ -299,7 +305,8 @@ public class LSerial
         }
 
         //Only if the struct was wrote to serial should it be logged.
-        DLog.LogdStructAsJson(struct);
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
+            DLog.LogdStructAsJson(struct);
         mUsbService.write(struct.getOrderedBuffer());
         return true;
     }

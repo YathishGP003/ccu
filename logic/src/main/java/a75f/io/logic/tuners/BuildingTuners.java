@@ -1583,6 +1583,33 @@ public class BuildingTuners
         addEquipZoneTuners(equipdis,equipref);
         addEquipZoneStandaloneTuners(equipdis,equipref);
     }
+    public void addTwoPipeFanEquipStandaloneTuners(String equipDis, String equipRef){
+        Point sa2PfcHeatingThreshold = new Point.Builder()
+                .setDisplayName(equipDis+"-2PipeFancoilHeatingThreshold")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .addMarker("tuner").addMarker("base").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("standalone").addMarker("heating").addMarker("threshold").addMarker("pfcu2").addMarker("sp")
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+        String sa2PfcHeatingThresholdId = hayStack.addPoint(sa2PfcHeatingThreshold);
+        hayStack.writePoint(sa2PfcHeatingThresholdId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_HEATING_THRESHOLD_2PFCU_DEFAULT, 0);
+        hayStack.writeHisValById(sa2PfcHeatingThresholdId, TunerConstants.STANDALONE_HEATING_THRESHOLD_2PFCU_DEFAULT);
+
+        Point sa2PfcCoolingThreshold = new Point.Builder()
+                .setDisplayName(equipDis+"-2PipeFancoilCoolingThreshold")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .addMarker("tuner").addMarker("base").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("standalone").addMarker("cooling").addMarker("threshold").addMarker("pfcu2").addMarker("sp")
+                .setUnit("\u00B0F")
+                .setTz(tz)
+                .build();
+        String sa2PfcCoolingThresholdId = hayStack.addPoint(sa2PfcCoolingThreshold);
+        hayStack.writePoint(sa2PfcCoolingThresholdId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_COOLING_THRESHOLD_2PFCU_DEFAULT, 0);
+        hayStack.writeHisValById(sa2PfcCoolingThresholdId, TunerConstants.STANDALONE_COOLING_THRESHOLD_2PFCU_DEFAULT);
+    }
     public void addDefaultStandaloneTuners()
     {
         Point saHeatingDeadBand = new Point.Builder()

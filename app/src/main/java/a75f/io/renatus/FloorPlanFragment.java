@@ -702,6 +702,10 @@ public class FloorPlanFragment extends Fragment
 					showDialogFragment(FragmentHeatPumpConfiguration
 							.newInstance(Short.parseShort(nodeAddr),zone.getDisplayName(),NodeType.SMART_STAT,floor.getDisplayName(),profile.getProfileType()),FragmentHeatPumpConfiguration.ID);
 					break;
+				case SMARTSTAT_TWO_PIPE_FCU:
+					showDialogFragment(Fragment2PipeFanCoilUnitConfig
+							.newInstance(Short.parseShort(nodeAddr),zone.getDisplayName(),NodeType.SMART_STAT,floor.getDisplayName(),profile.getProfileType()),Fragment2PipeFanCoilUnitConfig.ID);
+					break;
 
 			}
 		}else

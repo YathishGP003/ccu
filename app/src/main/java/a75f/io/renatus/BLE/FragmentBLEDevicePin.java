@@ -23,6 +23,7 @@ import org.javolution.annotations.Nullable;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import a75f.io.renatus.Fragment2PipeFanCoilUnitConfig;
 import a75f.io.renatus.FragmentCPUConfiguration;
 import a75f.io.renatus.FragmentHeatPumpConfiguration;
 import a75f.io.renatus.bluetooth.BLEAction;
@@ -385,6 +386,9 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                         break;
                     case SMARTSTAT_HEAT_PUMP_UNIT:
                         showDialogFragment(FragmentHeatPumpConfiguration.newInstance(mPairingAddress, mName, mNodeType, mFloorName, mProfileType), FragmentHeatPumpConfiguration.ID);
+                        break;
+                    case SMARTSTAT_TWO_PIPE_FCU:
+                        showDialogFragment(Fragment2PipeFanCoilUnitConfig.newInstance(mPairingAddress, mName, mNodeType, mFloorName, mProfileType), Fragment2PipeFanCoilUnitConfig.ID);
                         break;
                 }
                 

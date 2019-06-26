@@ -100,6 +100,7 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 				CCUHsApi.getInstance().deleteEntity(sZone.getId());
 			}
 			CCUHsApi.getInstance().deleteEntityTree(floor.getId());
+			CCUHsApi.getInstance().saveTagsData();
 			floorPlanActivity.refreshScreen();
 		}
 		new AsyncTask<String, Void, Void>() {

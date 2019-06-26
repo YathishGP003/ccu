@@ -439,20 +439,13 @@ public class TwoPipeFanCoilUnitEquip {
         CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
         //Create Physical points and map
         SmartStat device = new SmartStat(nodeAddr, siteRef, floor, room,equipRef,profile);
-        //TODO Need to set it for default if not enabled, currently set it as enabled //kumar
-
+        
         device.th1In.setPointRef(datID);
         device.th1In.setEnabled(config.enableThermistor1);
         device.th2In.setPointRef(eatID);
         device.th2In.setEnabled(config.enableThermistor2);
         device.currentTemp.setPointRef(ctID);
         device.currentTemp.setEnabled(true);
-       /* device.humidity.setPointRef(humidityId);
-        device.humidity.setEnabled(true);
-        device.co2.setPointRef(co2Id);
-        device.co2.setEnabled(true);
-        device.voc.setPointRef(vocId);
-        device.voc.setEnabled(true);*/
         device.addSensor(Port.SENSOR_RH,humidityId);
         device.addSensor(Port.SENSOR_CO2,co2Id);
         device.addSensor(Port.SENSOR_VOC,vocId);
@@ -1006,22 +999,5 @@ public class TwoPipeFanCoilUnitEquip {
         CCUHsApi.getInstance().writePoint(operationalModeId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_DEFAULT_OPERATIONAL_MODE, 0);
         CCUHsApi.getInstance().writeHisValById(operationalModeId, TunerConstants.STANDALONE_DEFAULT_OPERATIONAL_MODE);
 
-/*
-        Point targetDehumidifier = new Point.Builder()
-                .setDisplayName(equipDis + "-" + "targetDehumidifier")
-                .setSiteRef(siteRef).setEquipRef(equipref)
-                .addMarker("standalone").addMarker("userIntent").addMarker("writable").addMarker("target").addMarker("his").addMarker("equipHis")
-                .setTz(tz).addMarker("dehumidifier").addMarker("sp").build();
-        String targetDehumidifierId = CCUHsApi.getInstance().addPoint(targetDehumidifier);
-        CCUHsApi.getInstance().writePoint(targetDehumidifierId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_TARGET_DEHUMIDIFIER, 0);
-        CCUHsApi.getInstance().writeHisValById(targetDehumidifierId, TunerConstants.STANDALONE_TARGET_DEHUMIDIFIER);
-        Point targetHumidty = new Point.Builder()
-                .setDisplayName(equipDis + "-" + "targetHumidity")
-                .setSiteRef(siteRef).setEquipRef(equipref)
-                .addMarker("standalone").addMarker("userIntent").addMarker("writable").addMarker("target").addMarker("humidity").addMarker("sp")
-                .addMarker("his").addMarker("equipHis").setTz(tz).build();
-        String targetHumidtyId = CCUHsApi.getInstance().addPoint(targetHumidty);
-        CCUHsApi.getInstance().writePoint(targetHumidtyId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.STANDALONE_TARGET_HUMIDITY, 0);
-        CCUHsApi.getInstance().writeHisValById(targetHumidtyId, TunerConstants.STANDALONE_TARGET_HUMIDITY);*/
-    }
+	}
 }

@@ -260,40 +260,36 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
         if (getArguments() != null && getArguments().containsKey(PARAM_SCHEDULE_ID)) {
             mScheduleId = getArguments().getString(PARAM_SCHEDULE_ID);
             schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
-            Log.d("CCU_UI"," Loaded Zone Schedule "+mScheduleId);
         } else {
             schedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
-            Log.d("CCU_UI"," Loaded System Schedule ");
+            Log.d("CCU_UI"," Loaded System Schedule "+schedule.getScheduleHDict().toZinc());
         }
-
-
+        
         if(schedule != null && schedule.isZoneSchedule())
         {
             textViewScheduletitle.setText("Zone Schedule");
-            //mVacationLayout.setVisibility(View.GONE);
-            //textViewVacations.setVisibility(View.GONE);
-            //textViewaddVacations.setVisibility(View.GONE);
         }
         
         loadVacations();
-        
-
-
+        updateUI();
+    }
+    
+    private void updateUI() {
         schedule.populateIntersections();
-
+    
         SchedulerFragment.this.getActivity().runOnUiThread(() ->
-                                                           {
-                                                               hasTextViewChildren();
-
-                                                               ArrayList<Schedule.Days> days = schedule.getDays();
-                                                               for (int i = 0; i < days.size(); i++) {
-                                                                   Schedule.Days daysElement = days.get(i);
-                                                                   drawSchedule(i, daysElement.getCoolingVal(), daysElement.getHeatingVal(),
-                                                                           daysElement.getSthh(), daysElement.getEthh(),
-                                                                           daysElement.getStmm(), daysElement.getEtmm(),
-                                                                           DAYS.values()[daysElement.getDay()], daysElement.isIntersection());
-                                                               }
-                                                           });
+        {
+            hasTextViewChildren();
+        
+            ArrayList<Schedule.Days> days = schedule.getDays();
+            for (int i = 0; i < days.size(); i++) {
+                Schedule.Days daysElement = days.get(i);
+                drawSchedule(i, daysElement.getCoolingVal(), daysElement.getHeatingVal(),
+                        daysElement.getSthh(), daysElement.getEthh(),
+                        daysElement.getStmm(), daysElement.getEtmm(),
+                        DAYS.values()[daysElement.getDay()], daysElement.isIntersection());
+            }
+        });
     }
 
     private void hasTextViewChildren() {
@@ -355,9 +351,9 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
                 {
                     DefaultSchedules.upsertVacation(vacationId, vacationName, startDate, endDate);
                 }
+                CCUHsApi.getInstance().saveTagsData();
                 loadVacations();
                 ScheduleProcessJob.updateSchedules();
-                CCUHsApi.getInstance().saveTagsData();
                 CCUHsApi.getInstance().syncEntityTree();
                 return false;
             }
@@ -423,7 +419,8 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
         if (position != ManualSchedulerDialogFragment.NO_REPLACE) {
             remove = schedule.getDays().remove(position);
         }
-
+    
+        Log.d("CCU_UI"," onClickSave "+"startTime "+startTimeHour+":"+startTimeMinute+" endTime "+endTimeHour+":"+endTimeMinute);
 
         ArrayList<Schedule.Days> daysArrayList = new ArrayList<Schedule.Days>();
 
@@ -481,7 +478,7 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
                 CCUHsApi.getInstance().updateSchedule(schedule);
             }
             CCUHsApi.getInstance().syncEntityTree();
-            loadSchedule();
+            updateUI();
         }
     
         ScheduleProcessJob.updateSchedules();

@@ -358,11 +358,15 @@ public class Schedule extends Entity
                     .withSecondOfMinute(0).withMillisOfSecond(0).withDayOfWeek(
                             day.getDay() +
                                     1);
-
             Interval scheduledInterval = null;
             if (startDateTime.isAfter(endDateTime))
             {
-                scheduledInterval = new Interval(startDateTime, endDateTime.withDayOfWeek(DAYS.values()[day.getDay()].getNextDay().ordinal() + 1));
+                if (day.getDay() == DAYS.SUNDAY.ordinal()) {
+                    scheduledInterval = new Interval(startDateTime, endDateTime.withWeekOfWeekyear(startDateTime.getWeekOfWeekyear()+1)
+                                                                               .withDayOfWeek(DAYS.values()[day.getDay()].getNextDay().ordinal() + 1));
+                } else {
+                    scheduledInterval = new Interval(startDateTime, endDateTime.withDayOfWeek(DAYS.values()[day.getDay()].getNextDay().ordinal() + 1));
+                }
             } else
             {
                 scheduledInterval =

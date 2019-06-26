@@ -12,7 +12,6 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
-import a75f.io.logic.bo.building.system.SystemEquip;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.jobs.ScheduleProcessJob;
@@ -108,7 +107,7 @@ public class VavStagedRtu extends VavSystemProfile
             } else {
                 initTRSystem();
                 updateStagesSelected();
-                sysEquip = new SystemEquip(equip.get("id").toString());
+                //sysEquip = new SystemEquip(equip.get("id").toString());
                 return;
             }
         }
@@ -132,7 +131,7 @@ public class VavStagedRtu extends VavSystemProfile
         addTunerPoints(equipRef);
         addVavSystemTuners(equipRef);
         updateAhuRef(equipRef);
-        sysEquip = new SystemEquip(equipRef);
+        //sysEquip = new SystemEquip(equipRef);
         new ControlMote(siteRef);
         initTRSystem();
         L.saveCCUState();
@@ -600,7 +599,7 @@ public class VavStagedRtu extends VavSystemProfile
 
     }
     public void setConfigEnabled(String config, double val) {
-        sysEquip.setConfigEnabled(config, val);
+        //sysEquip.setConfigEnabled(config, val);
         CCUHsApi.getInstance().writeDefaultVal("point and system and config and output and enabled and "+config, val);
     }
     
@@ -613,7 +612,7 @@ public class VavStagedRtu extends VavSystemProfile
         return hayStack.readPointPriorityVal(configPoint.get("id").toString());
     }
     public void setConfigAssociation(String config, double val) {
-        sysEquip.setRelayOpAssociation(config, val);
+        //sysEquip.setRelayOpAssociation(config, val);
         HashMap cmd = CCUHsApi.getInstance().read("point and system and cmd and "+config);
         Stage updatedStage = Stage.values()[(int)val];
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);

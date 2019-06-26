@@ -175,13 +175,13 @@ public class Pulse
 		Sensor analogSensor;
 		try
 		{
-			int index = (int)Double.parseDouble(pp.get("type").toString());
+			int index = (int)Double.parseDouble(pp.get("analogType").toString());
 			analogSensor = Sensor.getSensorList().get(index);
 		}catch (NumberFormatException e) {
 			e.printStackTrace();
 			return val;
 		}
-		Log.d("regularSmartNode ","sensor type "+pp.get("type").toString()+" val "+val);
+		Log.d("regularSmartNode ","sensor type "+pp.get("analogType").toString()+" val "+val);
 		return analogSensor.minEngineeringValue +
 		                (analogSensor.maxEngineeringValue- analogSensor.minEngineeringValue) * val / (analogSensor.maxVoltage - analogSensor.minVoltage);
 		

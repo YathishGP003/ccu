@@ -44,8 +44,6 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
     @BindView(R.id.analog2Max) Spinner analog2Max;
     @BindView(R.id.analog3Min) Spinner analog3Min;
     @BindView(R.id.analog3Max) Spinner analog3Max;
-    @BindView(R.id.analog4Min) Spinner analog4Min;
-    @BindView(R.id.analog4Max) Spinner analog4Max;
 
     @BindView(R.id.toggleAnalog1) ToggleButton ahuAnalog1Tb;
     @BindView(R.id.toggleAnalog2) ToggleButton ahuAnalog2Tb;

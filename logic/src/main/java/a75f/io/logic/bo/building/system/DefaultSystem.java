@@ -58,14 +58,14 @@ public class DefaultSystem extends SystemProfile
                                    .setDisplayName(siteDis+"-SystemEquip")
                                    .setProfile(ProfileType.SYSTEM_DEFAULT.name())
                                    .addMarker("equip").addMarker("system").addMarker("default")
-                                   
                                    .addMarker("equipHis")
                                    .setTz(siteMap.get("tz").toString())
                                    .build();
         String equipRef = hayStack.addEquip(systemEquip);
         addSystemTuners();
-        //updateAhuRef(equipRef);
+        addCMPoints(siteRef, equipRef, siteDis+"-SystemEquip", siteMap.get("tz").toString());
         updateGatewayRef(equipRef);
+        updateAhuRef(equipRef);
         new ControlMote(siteRef);
         L.saveCCUState();
         CCUHsApi.getInstance().syncEntityTree();

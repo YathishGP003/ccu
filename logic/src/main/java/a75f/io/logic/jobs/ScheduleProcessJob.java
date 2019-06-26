@@ -410,11 +410,15 @@ public class ScheduleProcessJob extends BaseJob {
         systemOccupancy = UNOCCUPIED;
         
         if (systemVacation) {
+            double curOccupancy = CCUHsApi.getInstance().readHisValByQuery("point and system and his and occupancy and status");
             if (getSystemTemporaryHoldExpiry() > 0) {
                 systemOccupancy = FORCED_OCCUPIED;
-                CCUHsApi.getInstance().writeHisValByQuery("point and system and his and occupancy and status",(double)systemOccupancy.ordinal());
             }
-            Log.d(TAG_CCU_JOB, " In SystemVacation :system Occupancy : "+systemOccupancy);
+            if (curOccupancy != systemOccupancy.ordinal())
+            {
+                CCUHsApi.getInstance().writeHisValByQuery("point and system and his and occupancy and status", (double) systemOccupancy.ordinal());
+            }
+            Log.d(TAG_CCU_JOB, " In SystemVacation : systemOccupancy : "+systemOccupancy);
             return;
         }
         

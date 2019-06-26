@@ -77,8 +77,8 @@ public class MeshUpdateTest
                 
                 String port = opPoint.get("port").toString();
             
-                short mappedVal = (LSmartNode.isAnalog(port) ? LSmartNode.mapAnalogOut(opPoint.get("type").toString(), (short)logicalVal)
-                                           : LSmartNode.mapDigitalOut(opPoint.get("type").toString(), logicalVal > 0));
+                short mappedVal = (LSmartNode.isAnalog(port) ? LSmartNode.mapAnalogOut(opPoint.get("analogType").toString(), (short)logicalVal)
+                                           : LSmartNode.mapDigitalOut(opPoint.get("analogType").toString(), logicalVal > 0));
                 hayStack.writeDefaultValById(opPoint.get("id").toString(), (double)mappedVal);
             
                 LSmartNode.getSmartNodePort(controlsMessage_t.controls, port)

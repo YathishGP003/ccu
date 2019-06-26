@@ -238,7 +238,7 @@ public class CCUHsApi
 
     public void updateZone(Zone z, String id)
     {
-        tagsDb.updateZone(z);
+        tagsDb.updateZone(z, id);
         if (tagsDb.idMap.get(id) != null)
         {
             tagsDb.updateIdMap.put(id, tagsDb.idMap.get(id));

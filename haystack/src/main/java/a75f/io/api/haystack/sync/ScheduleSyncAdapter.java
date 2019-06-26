@@ -15,6 +15,7 @@ import java.util.Map;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Schedule;
 import a75f.io.logger.CcuLog;
 
 /**
@@ -66,14 +67,25 @@ public class ScheduleSyncAdapter extends EntitySyncAdapter
             while (it.hasNext())
             {
                 HRow row = (HRow) it.next();
-                String floorGUID = row.get("id").toString();
-                if (floorGUID != "")
+                String scheduleGUID = row.get("id").toString();
+                if (scheduleGUID != "")
                 {
-                    CCUHsApi.getInstance().putUIDMap(scheduleLUIDList.get(index++), floorGUID);
+                    String scheduleLuid = scheduleLUIDList.get(index++);
+                    CCUHsApi.getInstance().putUIDMap(scheduleLuid, scheduleGUID);
+                    markZoneUpdated(scheduleLuid);
                 }
             }
         }
     
         return true;
+    }
+    
+    //This is required to update the zone with scheduleRef
+    private void markZoneUpdated(String scheduleLuid) {
+        Schedule s = new Schedule.Builder().setHDict(CCUHsApi.getInstance().readHDictById(scheduleLuid)).build();
+        if (s.isZoneSchedule())
+        {
+            CCUHsApi.getInstance().tagsDb.updateIdMap.put(s.getRoomRef(), CCUHsApi.getInstance().tagsDb.idMap.get(s.getRoomRef()));
+        }
     }
 }

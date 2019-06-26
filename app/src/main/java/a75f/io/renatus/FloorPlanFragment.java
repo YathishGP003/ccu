@@ -37,6 +37,7 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.mesh.LSerial;
+import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZoneProfile;
@@ -586,8 +587,11 @@ public class FloorPlanFragment extends Fragment
 						.setFloorRef(floor.getId())
 						.setSiteRef(siteMap.get("id").toString())
 						.build();
-
-				hsZone.setId(CCUHsApi.getInstance().addZone(hsZone));
+				String zoneId = CCUHsApi.getInstance().addZone(hsZone);
+				hsZone.setId(zoneId);
+				hsZone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true, zoneId));
+				CCUHsApi.getInstance().updateZone(hsZone, zoneId);
+				CCUHsApi.getInstance().syncEntityTree();
 				roomList.add(hsZone);
 				Collections.sort(roomList, new ZoneComparator());
 				updateRooms(roomList);

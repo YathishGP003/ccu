@@ -27,6 +27,7 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logic.DefaultSchedules;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.StandaloneScheduler;
@@ -183,12 +184,14 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                             if (zone.hasSchedule())
                             {
                                 scheduleById = CCUHsApi.getInstance().getScheduleById(zone.getScheduleRef());
+                                Log.d(L.TAG_CCU_UI," scheduleType changed to ZoneSchedule : "+scheduleTypeId);
                                 scheduleById.setDisabled(false);
                                 CCUHsApi.getInstance().updateZoneSchedule(scheduleById, zone.getId());
 
 
                             } else if (!zone.hasSchedule())
                             {
+                                Log.d(L.TAG_CCU_UI," Zone does not have Schedule : Shouldn't happen");
                                 zone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true, zone.getId()));
                                 CCUHsApi.getInstance().updateZone(zone, zone.getId());
                                 scheduleById = CCUHsApi.getInstance().getScheduleById(zone.getScheduleRef());

@@ -65,7 +65,7 @@ public class DefaultSystem extends SystemProfile
         addSystemTuners();
         addCMPoints(siteRef, equipRef, siteDis+"-SystemEquip", siteMap.get("tz").toString());
         updateGatewayRef(equipRef);
-        updateAhuRef(equipRef);
+        //updateAhuRef(equipRef);
         new ControlMote(siteRef);
         L.saveCCUState();
         CCUHsApi.getInstance().syncEntityTree();

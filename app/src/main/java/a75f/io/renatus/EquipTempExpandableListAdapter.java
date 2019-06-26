@@ -260,6 +260,10 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                         }
                     });
                 }
+                if(profileType.equals("smartstat_pfc") ) {
+                    ArrayAdapter<String> fanMode2PfcuAdapter = new ArrayAdapter<String>(mFragment.getContext(), android.R.layout.simple_spinner_dropdown_item, mFragment.getResources().getStringArray(R.array.smartstat_2pfcu_fanmode));
+                    ssFanModeSpinner.setAdapter(fanMode2PfcuAdapter);
+                }
                 ssCondModeSpinner.setSelection((int)ssOperatingMode);
                 ssFanModeSpinner.setSelection((int)ssFanOpMode);
                 if(equipId != null ) {

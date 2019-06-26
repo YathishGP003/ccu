@@ -181,6 +181,10 @@ public class ZoneFragmentTemp extends Fragment
                             tunerList.add("smartstat_hpu"+ p.getId());
                             tunerMap.put("smartstat_hpu"+ p.getId(),p.getId());
                             break;
+                        case SMARTSTAT_TWO_PIPE_FCU:
+                            tunerList.add("smartstat_pfcu2"+ p.getId());
+                            tunerMap.put("smartstat_pfcu2"+ p.getId(),p.getId());
+                            break;
                     }
 
                     tunerMap.put(currTmep.get("dis").toString(), currTmep.get("id").toString());

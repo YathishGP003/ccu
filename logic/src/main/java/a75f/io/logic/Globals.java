@@ -30,6 +30,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.bo.building.system.dab.DabAdvancedHybridRtu;
+import a75f.io.logic.bo.building.ss2pfcu.TwoPipeFanCoilUnitProfile;
 import a75f.io.logic.pubnub.PubNubHandler;
 import a75f.io.logic.bo.building.CCUApplication;
 import a75f.io.logic.bo.building.Day;
@@ -458,6 +459,11 @@ public class Globals {
                             HeatPumpUnitProfile hpu = new HeatPumpUnitProfile();
                             hpu.addLogicalMap(Short.valueOf(eq.getGroup()), z.getId());
                             L.ccu().zoneProfiles.add(hpu);
+                            break;
+                        case SMARTSTAT_TWO_PIPE_FCU:
+                            TwoPipeFanCoilUnitProfile twoPfcu = new TwoPipeFanCoilUnitProfile();
+                            twoPfcu.addLogicalMap(Short.valueOf(eq.getGroup()), z.getId());
+                            L.ccu().zoneProfiles.add(twoPfcu);
                             break;
                             
                     }

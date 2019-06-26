@@ -302,7 +302,7 @@ public class Pulse
 		{
 			Device deviceInfo = new Device.Builder().setHashMap(device).build();
 			ArrayList<HashMap> phyPoints = hayStack.readAll("point and physical and sensor and deviceRef == \"" + deviceInfo.getId() + "\"");
-
+			boolean is2pfcu = deviceInfo.getMarkers().contains("pfcu2");
 			String logicalCurTempPoint = "";
 			double curTempVal = 0.0;
 			double th2TempVal = 0.0;
@@ -322,10 +322,13 @@ public class Pulse
 						break;
 					case TH2_IN:
 						val = smartStatRegularUpdateMessage_t.update.externalThermistorInput2.get();
-						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						isTh2Enabled = phyPoint.get("enabled").toString().equals("true");
-						if(isTh2Enabled)
+						if(isTh2Enabled && !is2pfcu)
 							th2TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
+						else if(isTh2Enabled && is2pfcu){
+							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+							hayStack.writeHisValById(logPoint.get("id").toString(), ThermistorUtil.getThermistorValueToTemp(val * 10));
+						}
 						else
 							hayStack.writeHisValById(logPoint.get("id").toString(), val * 10);
 						break;
@@ -358,9 +361,8 @@ public class Pulse
 			if (sensorReadings.length > 0) {
 				handleSmartStatSensorEvents(sensorReadings, nodeAddr, deviceInfo, occupancyDetected );
 			}
-
-			//Write Current temp point based on th2 enabled or not
-			if(isTh2Enabled && !logicalCurTempPoint.isEmpty())
+			//Write Current temp point based on th2 enabled or not, except for 2pfcu
+			if(isTh2Enabled && !logicalCurTempPoint.isEmpty() && !is2pfcu)
 				hayStack.writeHisValById(logicalCurTempPoint, th2TempVal);
 			else
 				hayStack.writeHisValById(logicalCurTempPoint, curTempVal);

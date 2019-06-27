@@ -61,6 +61,8 @@
         android:theme="@style/RenatusAppTheme">
 
         <service android:name=".bluetooth.BLEProvisionService"/>
+        <service android:name=".OTAUpdateHandlerService" />
+        <service android:name=".OTAUpdateService" />
         <service
             android:name="a75f.io.usbserial.UsbService"
             android:enabled="true">

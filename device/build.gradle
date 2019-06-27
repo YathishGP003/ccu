@@ -42,5 +42,6 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     implementation project(path: ':usbserial')
     api project(':logic')
+    implementation project(':haystack')
 }
 

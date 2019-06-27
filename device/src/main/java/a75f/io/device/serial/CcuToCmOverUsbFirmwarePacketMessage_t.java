@@ -24,4 +24,10 @@ public class CcuToCmOverUsbFirmwarePacketMessage_t extends Struct
 	{
 		return ByteOrder.LITTLE_ENDIAN;
 	}
+
+	public void setPacket(byte[] packetBytes) {
+		for(int i = 0; i < packetBytes.length; i++) {
+			packet[i].set(packetBytes[i]);
+		}
+	}
 }

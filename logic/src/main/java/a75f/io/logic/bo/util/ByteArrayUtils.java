@@ -17,6 +17,10 @@ public class ByteArrayUtils
 
     private static final String TAG = ByteArrayUtils.class.getSimpleName();
 
+    private static final char[] HEX_NUMERALS = "0123456789ABCDEF".toCharArray();
+    private static final int MASK_4 = 0xF;
+
+
     public static byte[] nullTerminateAndFillArrayToLengthFromString(String input, int size)
     {
         byte[] value = nullTerminateByteArray(input.getBytes(StandardCharsets.UTF_8));
@@ -111,5 +115,39 @@ public class ByteArrayUtils
         return bytesLe;
     }
 
+    /**
+     * Utility method to convert a hex string to a byte array
+     *
+     * @param s The string to be converted
+     * @return A byte array of the converted string
+     */
+    public static byte[] hexStringToByteArray(String s) {
+        int len = s.length();
+        byte[] data = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
+                    + Character.digit(s.charAt(i + 1), 16));
+        }
+        return data;
+    }
 
+    /**
+     * A utility method to convert a byte array to a hex string
+     * Based on the javax.xml implementation, with modifications
+     *
+     * @param data   The array to be converted
+     * @param spaces A flag for whether the output should have spaces between each byte
+     * @return A hex string of the converted byte array
+     */
+    public static String byteArrayToHexString(byte[] data, boolean spaces) {
+        StringBuilder r = new StringBuilder();
+        for (byte b : data) {
+            r.append(HEX_NUMERALS[(b >> 4) & MASK_4]);
+            r.append(HEX_NUMERALS[(b & MASK_4)]);
+            if (spaces) {
+                r.append(' ');
+            }
+        }
+        return r.toString();
+    }
 }

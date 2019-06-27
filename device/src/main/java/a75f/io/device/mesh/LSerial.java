@@ -1,6 +1,8 @@
 package a75f.io.device.mesh;
 
 import android.os.Build;
+import android.content.Context;
+import android.content.Intent;
 
 import org.javolution.io.Struct;
 
@@ -16,6 +18,7 @@ import a75f.io.device.serial.CmToCcuOverUsbSnLocalControlsOverrideMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.device.serial.WrmOrCmRebootIndicationMessage_t;
+import a75f.io.logic.Globals;
 import a75f.io.usbserial.SerialAction;
 import a75f.io.usbserial.SerialEvent;
 import a75f.io.usbserial.UsbService;
@@ -73,14 +76,16 @@ public class LSerial
     }
     /***
      * Handles all incoming messages from the CM.   It will parse them and
-     * determine where they should be sent.
+     * determine where they should be sent. It will also broadcast the events as an Intent
+     * so that any external handlers can receive them.
      *
      * Logs to logcat.
      *
+     * @param context The caller's Context, which will be used to broadcast the event to external handlers
      * @param event The serial event from the CM
      */
 
-    public static void handleSerialEvent(SerialEvent event)
+    public static void handleSerialEvent(Context context, SerialEvent event)
     {
         DLog.LogdSerial("Event Type: " + event.getSerialAction().name());
         if (event.getSerialAction() == SerialAction.MESSAGE_FROM_SERIAL_PORT)
@@ -104,14 +109,25 @@ public class LSerial
             {
                 DLog.LogdSerial("Event Type:updateSetTempFromSmartNode="+data.length+","+data.toString());
                 Pulse.updateSetTempFromSmartNode(fromBytes(data, CmToCcuOverUsbSnLocalControlsOverrideMessage_t.class));;
-            }else if(messageType == MessageType.FSV_REBOOT){
+            }
+            else if(messageType == MessageType.FSV_REBOOT)
+            {
                 DLog.LogdSerial("Event Type DEVICE_REBOOT:"+data.length+","+data.toString());
                 Pulse.rebootMessageFromCM(fromBytes(data, WrmOrCmRebootIndicationMessage_t.class));
-            }else if(messageType == MessageType.CM_TO_CCU_OVER_USB_SMART_STAT_LOCAL_CONTROLS_OVERRIDE){
+            }
+            else if(messageType == MessageType.CM_TO_CCU_OVER_USB_SMART_STAT_LOCAL_CONTROLS_OVERRIDE)
+            {
                 DLog.LogdSerial("Event Type:CM_TO_CCU_OVER_USB_SMART_STAT_LOCAL_CONTROLS_OVERRIDE="+data.length+","+data.toString());
                 Pulse.updateSetTempFromSmartStat(fromBytes(data, CmToCcuOverUsbSmartStatLocalControlsOverrideMessage_t.class));
-
             }
+
+            // Pass event to external handlers
+            Intent eventIntent = new Intent(Globals.IntentActions.LSERIAL_MESSAGE);
+            eventIntent.putExtra("eventType", messageType);
+            eventIntent.putExtra("eventBytes", data);
+
+            context.sendBroadcast(eventIntent);
+            //context.startService(eventIntent);
         }
     }
 
@@ -307,6 +323,7 @@ public class LSerial
         //Only if the struct was wrote to serial should it be logged.
         if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
             DLog.LogdStructAsJson(struct);
+
         mUsbService.write(struct.getOrderedBuffer());
         return true;
     }

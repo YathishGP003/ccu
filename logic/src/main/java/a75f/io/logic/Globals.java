@@ -69,7 +69,17 @@ import a75f.io.logic.jobs.ScheduleProcessJob;
     This is used to keep track of global static associated with application context.
  */
 public class Globals {
-
+    public static final class IntentActions {
+        public static final String LSERIAL_MESSAGE = "a75f.io.intent.action.LSERIAL_MESSAGE";
+        public static final String ACTIVITY_MESSAGE = "a75f.io.intent.action.ACTIVITY_MESSAGE";
+        public static final String ACTIVITY_RESET = "a75f.io.intent.action.ACTIVITY_RESET";
+        public static final String PUBNUB_MESSAGE = "a75f.io.intent.action.PUBNUB_MESSAGE";
+        public static final String OTA_UPDATE_START = "a75f.io.intent.action.OTA_UPDATE_START";
+        public static final String OTA_UPDATE_PACKAGE_REQ = "a75f.io.action.OTA_UPDATE_PACKAGE_REQ";
+        public static final String OTA_UPDATE_NODE_REBOOT = "a75f.io.action.OTA_UPDATE_NODE_REBOOT";
+        public static final String OTA_UPDATE_TIMED_OUT = "a75f.io.intent.action.OTA_UPDATE_TIMED_OUT";
+        public static final String OTA_UPDATE_COMPLETE = "a75f.io.intent.action.OTA_UPDATE_COMPLETE";
+    }
 
     private static final int      NUMBER_OF_CYCLICAL_TASKS_RENATUS_REQUIRES = 10;
     private static final int      TASK_SEPERATION                           = 15;
@@ -335,7 +345,7 @@ public class Globals {
                 
                 try
                 {
-                    PubNubHandler.handleMessage(message.getMessage().getAsJsonObject());
+                    PubNubHandler.handleMessage(message.getMessage().getAsJsonObject(), getApplicationContext());
                 } catch (NumberFormatException e) {
                     Log.d(L.TAG_CCU_PUBNUB, " Ignoring PubNub Message "+e.getMessage());
                 }

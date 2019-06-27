@@ -91,7 +91,8 @@ public abstract class UtilityApplication extends Application
         super.onCreate();
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         Globals.getInstance().setApplicationContext(this);
-        setFilters();  // Start listening notifications from UsbService
+        setUsbFilters();  // Start listening notifications from UsbService
+        startService(new Intent(this, OTAUpdateHandlerService.class));  // Start OTA update event + timer handler service
         startService(UsbService.class, usbConnection, null); // Start UsbService(if it was not started before) and Bind it
         EventBus.getDefault().register(this);
         //disablePush();
@@ -110,7 +111,7 @@ public abstract class UtilityApplication extends Application
                 15, TimeUnit.SECONDS);
     }
 
-    private void setFilters()
+    private void setUsbFilters()
     {
         IntentFilter filter = new IntentFilter();
         filter.addAction(UsbService.ACTION_USB_PERMISSION_GRANTED);
@@ -295,7 +296,7 @@ public abstract class UtilityApplication extends Application
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void onSerialEvent(SerialEvent event)
     {
-        LSerial.handleSerialEvent(event);
+        LSerial.handleSerialEvent(this, event);
     }
 
 

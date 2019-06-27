@@ -1,0 +1,684 @@
+package a75f.io.renatus;
+
+import android.app.DownloadManager;
+import android.app.IntentService;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.CountDownTimer;
+import android.os.Environment;
+import android.support.annotation.Nullable;
+import android.util.Log;
+
+import com.google.common.io.Files;
+import com.google.gson.stream.JsonReader;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.ArrayList;
+
+import a75f.io.api.haystack.Device;
+import a75f.io.api.haystack.Floor;
+import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Zone;
+import a75f.io.device.mesh.MeshUtil;
+import a75f.io.device.serial.CcuToCmOverUsbFirmwareMetadataMessage_t;
+import a75f.io.device.serial.CcuToCmOverUsbFirmwarePacketMessage_t;
+import a75f.io.device.serial.CmToCcuOverUsbFirmwarePacketRequest_t;
+import a75f.io.device.serial.FirmwareDeviceType_t;
+import a75f.io.device.serial.MessageConstants;
+import a75f.io.device.serial.MessageType;
+import a75f.io.device.serial.SnRebootIndicationMessage_t;
+import a75f.io.logic.BuildConfig;
+import a75f.io.logic.Globals;
+import a75f.io.logic.bo.util.ByteArrayUtils;
+
+public class OTAUpdateService extends IntentService {
+
+    //Constants
+    static final String TAG = "OTAUpdateService";
+
+    public static final String METADATA_FILE_FORMAT = ".meta";
+    public static final String BINARY_FILE_FORMAT = ".bin";
+
+    private static final String DOWNLOAD_BASE_URL = "http://updates.75fahrenheit.com/";
+    private static final File DOWNLOAD_DIR = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+
+    //Update variables
+    private static int mLastSentPacket = -1;
+    private static ArrayList<byte[]> packets;      //Where the decomposed binary is stored in memory
+    private static short mVersionMajor = -1;
+    private static short mVersionMinor = -1;
+
+    private static String mFilename = "";
+    private static int mUpdateLength = -1;         //Binary length (bytes)
+    private static byte[] mFirmwareSignature = {};
+    private static FirmwareDeviceType_t mFirmwareDeviceType;
+    private static int mLwMeshAddress = -1;
+
+    private static long mMetadataDownloadId = -1;
+    private static long mBinaryDownloadId = -1;
+
+    private static boolean mUpdateInProgress = false;
+    private static boolean mUpdateWaitingToComplete = false;
+
+    public OTAUpdateService() {
+        super("OTAUpdateService");
+    }
+
+    @Override
+    protected void onHandleIntent(@Nullable Intent intent) {
+        String action = intent.getAction();
+
+        if(action == null) {
+            return;
+        }
+
+        /* The service has been launched from an activity */
+        if(action.equals(Globals.IntentActions.ACTIVITY_MESSAGE)) {
+            handleOtaUpdateStartRequest(intent);
+        }
+        /* An activity has requested the OTA update to end (for debugging) */
+        if(action.equals(Globals.IntentActions.ACTIVITY_RESET)) {
+            resetUpdate();
+        }
+        /* The service has been launched from a PubNub notification */
+        else if(action.equals(Globals.IntentActions.PUBNUB_MESSAGE)) {
+            handleOtaUpdateStartRequest(intent);
+        }
+        /* The service has been launched in response to a file download */
+        else if(action.equals(DownloadManager.ACTION_DOWNLOAD_COMPLETE)) {
+            handleFileDownloadComplete(intent);
+        }
+        /* The service has been launched in response to OTA update timeout */
+        else if(action.equals(Globals.IntentActions.OTA_UPDATE_TIMED_OUT)) {
+            resetUpdate();
+        }
+        /* The OTA update is in progress, and is being notified from the CM */
+        else if(action.equals(Globals.IntentActions.LSERIAL_MESSAGE)) {
+            MessageType eventType = (MessageType) intent.getSerializableExtra("eventType");
+            byte[] eventBytes = intent.getByteArrayExtra("eventBytes");
+
+            switch(eventType) {
+                case CM_TO_CCU_OVER_USB_FIRMWARE_PACKET_REQUEST:
+                    handlePacketRequest(eventBytes);
+                    break;
+
+                case CM_TO_CCU_OVER_USB_SN_REBOOT:
+                    handleNodeReboot(eventBytes);
+                    break;
+            }
+        }
+    }
+
+    private void handleFileDownloadComplete(Intent intent) {
+        long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
+
+        if(id != -1 && id == mMetadataDownloadId) {
+            Log.d(TAG, "[DOWNLOAD] Metadata downloaded");
+
+            //TODO add a check to see if download failed
+
+            runMetadataCheck(DOWNLOAD_DIR, mVersionMajor, mVersionMinor, mFilename, mFirmwareDeviceType);
+        }
+
+        else if(id != -1 && id == mBinaryDownloadId) {
+            Log.d(TAG, "[DOWNLOAD] Binary downloaded");
+
+            runBinaryCheck(DOWNLOAD_DIR, mFilename, mFirmwareDeviceType);
+        }
+    }
+
+    private void handlePacketRequest(byte[] eventBytes) {
+        sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_PACKAGE_REQ));
+
+        CmToCcuOverUsbFirmwarePacketRequest_t msg = new CmToCcuOverUsbFirmwarePacketRequest_t();
+        msg.setByteBuffer(ByteBuffer.wrap(eventBytes).order(ByteOrder.LITTLE_ENDIAN), 0);
+
+        Log.d(TAG, "[UPDATE] CM asks for packet " + msg.sequenceNumber.get() + " of "
+                + (mUpdateLength / MessageConstants.FIRMWARE_UPDATE_PACKET_SIZE) );
+
+        sendPacket(msg.lwMeshAddress.get(), msg.sequenceNumber.get());
+    }
+
+    private void handleNodeReboot(byte[] eventBytes) {
+        sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_NODE_REBOOT));
+
+        SnRebootIndicationMessage_t msg = new SnRebootIndicationMessage_t();
+        msg.setByteBuffer(ByteBuffer.wrap(eventBytes).order(ByteOrder.LITTLE_ENDIAN), 0);
+
+        if ( (msg.smartNodeAddress.get() == mLwMeshAddress) && mUpdateInProgress) {
+            short versionMajor = msg.smartNodeMajorFirmwareVersion.get();
+            short versionMinor = msg.smartNodeMinorFirmwareVersion.get();
+
+            //TODO notify something (PubNub?) that an update has completed
+
+            if (mUpdateWaitingToComplete && versionMatches(versionMajor, versionMinor)) {
+                Log.d(TAG, "[UPDATE] [SUCCESSFUL]"
+                        + " [SN:" + mLwMeshAddress + "]"
+                        + " [PACKETS:" + mLastSentPacket
+                        + "] Updated to target: " + versionMajor + "." + versionMinor);
+
+                resetUpdate();
+
+            } else {
+                Log.d(TAG, "[UPDATE] [FAILED]"
+                        + " [SN:" + mLwMeshAddress + "]"
+                        + " [PACKETS:" + mLastSentPacket + "]"
+                        + " [TARGET: " + mVersionMajor
+                        + "." + mVersionMinor
+                        + "] [ACTUAL: " + versionMajor + "." + versionMinor + "]");
+
+                resetUpdate();
+            }
+        }
+    }
+
+    /**
+     * Takes an Intent and parses its extra data to determine what type of device is being
+     * updated, and to what version
+     *
+     * @param intent The Intent which started this OTA update
+     */
+    private void handleOtaUpdateStartRequest(Intent intent) {
+        int node = intent.getIntExtra("lwMeshAddress", -1);
+        String firmwareVersion = intent.getStringExtra("firmwareVersion");
+
+        if(firmwareVersion == null) {
+            return;
+        }
+
+        //TODO use regular expressions?
+        String versionNumStr = firmwareVersion.split("_v")[1];                 // e.g. "SmartNode_v1.0" -> "1.0"
+
+        int versionMajor = Integer.parseInt(versionNumStr.split("\\.")[0]);   // e.g. "1.0" -> 1
+        int versionMinor = Integer.parseInt(versionNumStr.split("\\.")[1]);   // e.g. "1.0" -> 0
+
+        mVersionMajor = (short) versionMajor;
+        mVersionMinor = (short) versionMinor;
+
+        if(firmwareVersion.startsWith("SmartNode_")) {
+            mFilename = firmwareVersion;
+            mFirmwareDeviceType = FirmwareDeviceType_t.SMART_NODE_DEVICE_TYPE;
+            startUpdate(node, versionMajor, versionMinor, mFilename, mFirmwareDeviceType);
+
+        }
+        else if(firmwareVersion.startsWith("Itm_") || firmwareVersion.startsWith("itm_")) {
+            mFilename = firmwareVersion.replace("Itm_", "itm_");
+            mFirmwareDeviceType = FirmwareDeviceType_t.ITM_DEVICE_TYPE;
+            startUpdate(node, versionMajor, versionMinor, mFilename, mFirmwareDeviceType);
+        }
+    }
+
+    /**
+     * Starts an OTA update for the specified device, to the specified version
+     * Fails if the address is invalid, if there is currently an update in progress, or if the files
+     * do not exist
+     *
+     * @param address      The address of the device to be updated
+     * @param versionMajor The major version of the new firmware
+     * @param versionMinor The minor version of the new firmware
+     * @param filename     The literal name of the firmware file, with no extension
+     * @param deviceType   The type of device being updated
+     */
+    private void startUpdate(int address, int versionMajor, int versionMinor, String filename, FirmwareDeviceType_t deviceType) {
+        Log.d(TAG, "[VALIDATION] Validating update instructions="+filename);
+        if (mUpdateInProgress) {
+            Log.d(TAG, "[VALIDATION] Update already in progress");
+            return;
+        }
+
+        if (address < 0) {
+            Log.d(TAG, "[VALIDATION] Invalid address: " + address);
+            resetUpdate();
+            return;
+        }
+
+        if (!validVersion((short) versionMajor, (short) versionMinor)) {
+            Log.d(TAG, "[VALIDATION] Invalid version: " + versionMajor + "." + versionMinor);
+            resetUpdate();
+            return;
+        }
+
+        Log.d(TAG, "[VALIDATION] Valid address and version");
+
+        mLwMeshAddress = address;
+
+        //determine which device is being updated
+        //TODO: faster way to iterate over devices?
+        boolean deviceExists = false;
+        for(Floor floor : HSUtil.getFloors()) {
+            for(Zone zone : HSUtil.getZones(floor.getId())) {
+                for(Device device : HSUtil.getDevices(zone.getId())) {
+                    if(Integer.valueOf(device.getAddr()) == address) {
+                        deviceExists = true;
+                    }
+                    if(deviceExists) break;
+                }
+                if(deviceExists) break;
+            }
+            if(deviceExists) break;
+        }
+
+        if(deviceExists) {
+            runMetadataCheck(DOWNLOAD_DIR, versionMajor, versionMinor, filename, deviceType);
+            sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_START));
+        } else {
+            Log.d(TAG, "[VALIDATION] Could not find a device with address " + address);
+        }
+    }
+
+    /**
+     * Checks if a metadata file is present, and if it matches the requested version number.
+     * Starts a download task for the new metadata file if those conditions aren't met
+     * Moves on to checking the binary file if they are
+     *
+     * @param dir          The directory to search
+     * @param versionMajor The expected major version
+     * @param versionMinor The expected minor version
+     */
+    private void runMetadataCheck(File dir, int versionMajor, int versionMinor, String filename, FirmwareDeviceType_t deviceType) {
+        Log.d(TAG, "[METADATA] Running metadata check="+ mFilename +","+filename);
+        File metadata = findFile(dir, filename, METADATA_FILE_FORMAT);
+
+        if (metadata == null) {
+            Log.d(TAG, "[METADATA] File not found, downloading metadata");
+            mMetadataDownloadId = startFileDownload(filename, deviceType, METADATA_FILE_FORMAT);
+            return;
+
+        } else {
+            Log.d(TAG, "[METADATA] Extracting firmware metadata");
+            boolean isExtracted = extractFirmwareMetadata(metadata);
+            if (!isExtracted || !versionMatches( (short) versionMajor, (short) versionMinor) ) {
+                Log.d(TAG, "[METADATA] Incorrect firmware metadata, downloading correct metadata");
+                mMetadataDownloadId = startFileDownload(filename, deviceType, METADATA_FILE_FORMAT);
+                return;
+            }
+        }
+
+        Log.d(TAG, "[METADATA] Metadata passed check, starting binary check");
+        runBinaryCheck(dir, filename, deviceType);
+    }
+
+    /**
+     * Checks if the binary file is present, and if it matches the metadata
+     * If those conditions aren't met, downloads new binary file
+     * If they are met, continues to moving the binary file into RAM
+     *
+     * @param dir The directory to search for the binary file
+     */
+    private void runBinaryCheck(File dir, String filename, FirmwareDeviceType_t deviceType) {
+        Log.d(TAG, "[BINARY] Running binary check="+ mFilename +","+filename);
+        File binary = findFile(dir, filename, BINARY_FILE_FORMAT);
+
+        if (binary == null) {
+            Log.d(TAG, "[BINARY] File not found, downloading binary");
+            mBinaryDownloadId = startFileDownload(filename, deviceType, BINARY_FILE_FORMAT);
+            return;
+
+        } else {
+            Log.d(TAG, "[BINARY] Checking binary length="+binary.length()+","+mUpdateLength);
+            if (binary.length() != mUpdateLength) {
+                Log.d(TAG, "[BINARY] Incorrect firmware binary, downloading correct binary");
+                mMetadataDownloadId = startFileDownload(filename, deviceType, BINARY_FILE_FORMAT);
+                return;
+            }
+        }
+
+        Log.d(TAG, "[BINARY] Binary passed check");
+
+        Log.d(TAG, "[STARTUP] Starting to update device with address " + mLwMeshAddress);
+
+        //TODO notify something (PubNub?) that an update has started
+
+        mUpdateInProgress = true;
+        mLastSentPacket = -1;
+
+        setUpdateFile(binary, deviceType);
+    }
+
+    /**
+     * Starts downloading the specified file
+     *
+     * @param filename   The file name
+     * @param deviceType The type of device this file is targeting
+     * @param fileFormat The file extension type (e.g. ".meta" or ".bin")
+     * @return The DownloadManager ID for this file
+     */
+    private long startFileDownload(String filename, FirmwareDeviceType_t deviceType, String fileFormat) {
+        Log.d(TAG, "[DOWNLOAD] Starting download of file " + filename + fileFormat);
+        String fileDirUrl = "";
+        String filePathSystem = DOWNLOAD_DIR.toString() + "/" + filename + fileFormat;
+
+        switch (deviceType){
+            case SMART_NODE_DEVICE_TYPE:
+                fileDirUrl = "sn_fw/";
+                break;
+
+            case ITM_DEVICE_TYPE:
+                fileDirUrl = "itm_fw/";
+                break;
+        }
+
+        String filePathUrl = DOWNLOAD_BASE_URL + fileDirUrl + filename + fileFormat;
+
+        DownloadManager.Request downloadRequest = new DownloadManager.Request(Uri.parse(filePathUrl))
+                .setTitle(filename + fileFormat)
+                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_HIDDEN)
+                .setDestinationUri(Uri.fromFile(new File(filePathSystem)));
+
+        DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+        return downloadManager.enqueue(downloadRequest);
+    }
+
+    /**
+     * Finds a file (if it exists) in the specified directory
+     *
+     * @param dir The directory to search
+     * @return The file, if found, or null, if not
+     */
+    private File findFile(File dir, final String fileName, String fileFormat) {
+        try {
+            for(File file : dir.listFiles()) {
+                Log.d(TAG,"Compare files: " + file.getName() + ", " + fileName);
+                if(file.getName().startsWith(fileName) && file.getName().endsWith(fileFormat))
+                    return file;
+            }
+            return null;
+
+        } catch (ArrayIndexOutOfBoundsException e) {
+            Log.e(TAG, "[STARTUP] File not found in " + dir);
+            return null;
+        }
+    }
+
+    /**
+     * Deletes all firmware files for the specified device type in the specified directory
+     * @param dir        The directory where OTA update files are downloaded
+     * @param deviceType The type of device whose files are to be deleted
+     */
+    private void deleteFilesByDeviceType(File dir, FirmwareDeviceType_t deviceType){
+        for(File file : dir.listFiles()) {
+            switch(deviceType) {
+                case SMART_NODE_DEVICE_TYPE:
+                    if(file.getName().startsWith("SmartNode_v")) { file.delete(); }
+                    break;
+
+                case ITM_DEVICE_TYPE:
+                    if(file.getName().startsWith("itm_v")) { file.delete(); }
+
+                default:
+                    break;
+            }
+        }
+    }
+
+    /**
+     * Splits a byte array into arrays of a given length
+     *
+     * @param file         A java.io.File to be converted into packets
+     * @param packetLength The length of the packets to be generated
+     * @return An ArrayList of byte arrays, each of length packetLength
+     */
+    private ArrayList<byte[]> importFile(File file, int packetLength) {
+        if (file == null) {
+            return null;
+        }
+
+        byte[] fileByteArray = new byte[(int) file.length()];
+
+        try {
+            fileByteArray = Files.toByteArray(file);
+        } catch (IOException e) {
+            Log.e(TAG, "[STARTUP] I/O exception while importing update file: " + e.getMessage());
+            e.printStackTrace();
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "[STARTUP] File is too large: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        ArrayList<byte[]> rPackets = new ArrayList<>();
+        int len = fileByteArray.length;
+        int packetNum = len / packetLength;
+
+        if ((packetNum * packetLength) < len) {
+            Log.d(TAG, "[STARTUP] Added packet: " + packetNum + ", to " + (packetNum + 1) + "]");
+            packetNum++;
+        }
+
+        Log.d(TAG, "[STARTUP] File imported, number of packets: " + packetNum);
+
+        for (int i = 0; i < packetNum; i++) {
+            byte[] packet = new byte[packetLength];
+
+            if (len - packetLength * i > packetLength) {
+                System.arraycopy(fileByteArray, i * packetLength, packet, 0, packetLength);
+            } else {
+                System.arraycopy(fileByteArray, i * packetLength, packet, 0, len - packetLength * i);
+            }
+            rPackets.add(packet);
+        }
+
+        Log.d(TAG, "[STARTUP] Packets generated: " + rPackets.size());
+
+        return rPackets;
+    }
+
+    /**
+     * Loads a binary image into RAM and parses it into packets in preparation for an update
+     *
+     * @param file       The file to be loaded and processed
+     * @param deviceType The type of device being updated
+     */
+    private void setUpdateFile(File file, FirmwareDeviceType_t deviceType) {
+        Log.d(TAG, "[STARTUP] Moving binary file to RAM");
+        packets = importFile(file, MessageConstants.FIRMWARE_UPDATE_PACKET_SIZE);
+
+        if (packets == null) {
+            Log.d(TAG, "[STARTUP] Failed to move binary file to RAM");
+            resetUpdate();
+            return;
+        }
+
+        Log.d(TAG, "[STARTUP] Successfully moved binary file to RAM, sending metadata");
+        sendFirmwareMetadata(deviceType);
+    }
+
+    /**
+     * Extracts the firmware metadata from the json ".meta" file
+     *
+     * @param json The json file with the information
+     * @return Whether the extraction was successful or not
+     */
+    private boolean extractFirmwareMetadata(File json) {
+        try {
+            JsonReader reader = new JsonReader(new FileReader(json));
+
+            reader.beginObject();
+
+            while (reader.hasNext()) {
+                String name = reader.nextName();
+                switch (name) {
+                    case "deviceType":
+                        //Currently does not store device type, as we know it's a smart node
+                        reader.nextInt();
+                        break;
+                    case "versionMajor":
+                        mVersionMajor = (short) reader.nextInt();
+                        break;
+                    case "versionMinor":
+                        mVersionMinor = (short) reader.nextInt();
+                        break;
+                    case "updateLength":
+                        mUpdateLength = reader.nextInt();
+                        break;
+                    case "firmwareSignature":
+                        String firmwareUpdateString = reader.nextString();
+                        mFirmwareSignature = ByteArrayUtils.hexStringToByteArray(firmwareUpdateString);
+                        break;
+                    default:
+                        reader.skipValue();
+                }
+            }
+
+            reader.endObject();
+            reader.close();
+
+        } catch (FileNotFoundException e) {
+            Log.e(TAG, "[METADATA] Unable to parse file: File Not Found");
+            json.delete();
+            return false;
+        } catch (IOException e) {
+            json.delete();
+            Log.e(TAG, "[METADATA] Unable to parse file: IO Error");
+            return false;
+        }
+
+        if (BuildConfig.DEBUG) {
+            Log.d(TAG, "[METADATA] [SN:" + mLwMeshAddress
+                    + "] [VER:" + mVersionMajor + "." + mVersionMinor
+                    + "] [LEN:" + mUpdateLength
+                    + "] [SIG:" + ByteArrayUtils.byteArrayToHexString(mFirmwareSignature, true) + "]");
+        }
+        return true;
+    }
+
+    /**
+     * Sends the firmware metadata to the CM
+     *
+     * @param firmware The type of device being updated
+     */
+    private void sendFirmwareMetadata(FirmwareDeviceType_t firmware) {
+        CcuToCmOverUsbFirmwareMetadataMessage_t message = new CcuToCmOverUsbFirmwareMetadataMessage_t();
+
+        message.messageType.set(MessageType.CCU_TO_CM_OVER_USB_FIRMWARE_METADATA);
+        message.lwMeshAddress.set(mLwMeshAddress);
+
+        message.metadata.deviceType.set(firmware);
+        message.metadata.majorVersion.set(mVersionMajor);
+        message.metadata.minorVersion.set(mVersionMinor);
+        message.metadata.lengthInBytes.set(mUpdateLength);
+
+        message.metadata.setSignature(mFirmwareSignature);
+
+        if (BuildConfig.DEBUG) {
+            Log.d(TAG, "[METADATA] [SN:" + mLwMeshAddress + "] [DATA: " + ByteArrayUtils.byteArrayToHexString(message.getByteBuffer().array(), true) + "]");
+        }
+
+        try {
+            MeshUtil.sendStructToCM(message);
+        } catch (Exception e) {
+            Log.e(TAG, "[METADATA] FAILED TO SEND");
+        }
+    }
+
+    /**
+     * Sends the corresponding packet over serial to the CM
+     *
+     * @param lwMeshAddress The address to send the update packet to
+     * @param packetNumber  The packet to send
+     */
+    private void sendPacket(int lwMeshAddress, int packetNumber) {
+
+        if (lwMeshAddress != mLwMeshAddress) {
+            Log.d(TAG, "[UPDATE] Received packet request from address " + lwMeshAddress + ", instead of " + mLwMeshAddress);
+            return;
+        }
+        if (mUpdateWaitingToComplete && packetNumber == packets.size() /*- 2*/) {
+            Log.d(TAG, "[UPDATE] Received packet request while waiting for the update to complete");
+            return;
+        }
+        if (packetNumber < 0 || packetNumber > packets.size()) {
+            Log.d(TAG, "[UPDATE] [SN:" + mLwMeshAddress + "] INVALID PACKET " + packetNumber);
+            return;
+        }
+        if (!mUpdateWaitingToComplete && (packetNumber == (packets.size() - 1))) {
+            Log.d(TAG, "[UPDATE] Received request for final packet");
+            mUpdateWaitingToComplete = true;
+        }
+
+        CcuToCmOverUsbFirmwarePacketMessage_t message = new CcuToCmOverUsbFirmwarePacketMessage_t();
+
+        message.messageType.set(MessageType.CCU_TO_CM_OVER_USB_FIRMWARE_PACKET);
+        message.lwMeshAddress.set(lwMeshAddress);
+        message.sequenceNumber.set(packetNumber);
+
+        message.setPacket(packets.get(packetNumber));
+
+        if (packetNumber > mLastSentPacket) {
+            mLastSentPacket = packetNumber;
+            if (BuildConfig.DEBUG) {
+                if (packetNumber % 100 == 0) {
+                    Log.d(TAG, "[UPDATE] [SN:" + lwMeshAddress + "]" + "PS:"+packets.size()+","+message.packet.length+","+message.sequenceNumber.get()+" [PN:" + mLastSentPacket
+                            + "] [DATA: " + ByteArrayUtils.byteArrayToHexString(packets.get(packetNumber), true) +  "]");
+                }
+            }
+        }
+
+        try {
+            MeshUtil.sendStructToCM(message);
+
+        } catch (Exception e) {
+            Log.e(TAG, "[UPDATE] [SN:" + lwMeshAddress + "] [PN:" + packetNumber + "] [FAILED]");
+        }
+    }
+
+    /**
+     * Checks if the given version matches the version that is being updated to
+     *
+     * @param major The major version
+     * @param minor The minor version
+     * @return Whether the major and minor versions match the update
+     */
+    private boolean versionMatches(short major, short minor) {
+        if (major != mVersionMajor) {
+            return false;
+        } else if (minor != mVersionMinor) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Checks if the specified version is valid
+     *
+     * @param major The major version
+     * @param minor The minor version
+     * @return True if it is a valid version, false if not
+     */
+    private boolean validVersion(short major, short minor) {
+        if (major < 0) {
+            return false;
+        }
+
+        if (minor < 0) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Clears update variables at the end of an OTA update
+     */
+    private void resetUpdate() {
+        deleteFilesByDeviceType(DOWNLOAD_DIR, mFirmwareDeviceType);
+
+        mMetadataDownloadId = -1;
+        mBinaryDownloadId = -1;
+        mLwMeshAddress = -1;
+        mUpdateInProgress = false;
+        mUpdateWaitingToComplete = false;
+        if(packets != null) { packets.clear(); }
+        mVersionMajor = -1;
+        mVersionMinor = -1;
+        mLastSentPacket = -1;
+        mUpdateLength = -1;
+        mFirmwareSignature = new byte[0];
+
+        Log.d(TAG, "[RESET] Reset OTA update status");
+    }
+}

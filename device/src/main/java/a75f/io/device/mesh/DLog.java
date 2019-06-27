@@ -35,13 +35,16 @@ public class DLog
 			try
 			{
 				structString = JsonSerializer.toJson(struct, true);
+				CcuLog.d(L.TAG_CCU_SERIAL, structString);
 			}
 			catch (IOException e)
 			{
 				e.printStackTrace();
 			}
-			//Log.d(UPDATED_STRUCT, structString);
-		CcuLog.d(L.TAG_CCU_SERIAL, structString);
+			catch (NullPointerException e)
+			{
+				e.printStackTrace();
+			}
 		//}
 	}
 	

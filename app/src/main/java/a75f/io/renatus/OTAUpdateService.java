@@ -65,9 +65,6 @@ public class OTAUpdateService extends IntentService {
     private static boolean mUpdateInProgress = false;
     private static boolean mUpdateWaitingToComplete = false;
 
-    private static boolean isTimerStarted = false;
-    private static CountDownTimer timer;
-
     public OTAUpdateService() {
         super("OTAUpdateService");
     }
@@ -86,9 +83,6 @@ public class OTAUpdateService extends IntentService {
         }
         /* An activity has requested the OTA update to end (for debugging) */
         if(action.equals(Globals.IntentActions.ACTIVITY_RESET)) {
-            mMetadataDownloadId = -1;
-            mBinaryDownloadId = -1;
-            if(isTimerStarted) { timer.cancel(); }
             resetUpdate();
         }
         /* The service has been launched from a PubNub notification */
@@ -98,6 +92,10 @@ public class OTAUpdateService extends IntentService {
         /* The service has been launched in response to a file download */
         else if(action.equals(DownloadManager.ACTION_DOWNLOAD_COMPLETE)) {
             handleFileDownloadComplete(intent);
+        }
+        /* The service has been launched in response to OTA update timeout */
+        else if(action.equals(Globals.IntentActions.OTA_UPDATE_TIMED_OUT)) {
+            resetUpdate();
         }
         /* The OTA update is in progress, and is being notified from the CM */
         else if(action.equals(Globals.IntentActions.LSERIAL_MESSAGE)) {
@@ -135,10 +133,7 @@ public class OTAUpdateService extends IntentService {
     }
 
     private void handlePacketRequest(byte[] eventBytes) {
-        if(timer != null){
-            timer.cancel();
-            isTimerStarted = false;
-        }
+        sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_PACKAGE_REQ));
 
         CmToCcuOverUsbFirmwarePacketRequest_t msg = new CmToCcuOverUsbFirmwarePacketRequest_t();
         msg.setByteBuffer(ByteBuffer.wrap(eventBytes).order(ByteOrder.LITTLE_ENDIAN), 0);
@@ -150,10 +145,7 @@ public class OTAUpdateService extends IntentService {
     }
 
     private void handleNodeReboot(byte[] eventBytes) {
-        if(timer != null) {
-            timer.cancel();
-            isTimerStarted = false;
-        }
+        sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_NODE_REBOOT));
 
         SnRebootIndicationMessage_t msg = new SnRebootIndicationMessage_t();
         msg.setByteBuffer(ByteBuffer.wrap(eventBytes).order(ByteOrder.LITTLE_ENDIAN), 0);
@@ -273,6 +265,7 @@ public class OTAUpdateService extends IntentService {
 
         if(deviceExists) {
             runMetadataCheck(DOWNLOAD_DIR, versionMajor, versionMinor, filename, deviceType);
+            sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_START));
         } else {
             Log.d(TAG, "[VALIDATION] Could not find a device with address " + address);
         }
@@ -576,8 +569,7 @@ public class OTAUpdateService extends IntentService {
         }
 
         try {
-            //MeshUtil.sendStructToCM(message);
-            //timerForOtaNonResponse();
+            MeshUtil.sendStructToCM(message);
         } catch (Exception e) {
             Log.e(TAG, "[METADATA] FAILED TO SEND");
         }
@@ -592,7 +584,7 @@ public class OTAUpdateService extends IntentService {
     private void sendPacket(int lwMeshAddress, int packetNumber) {
 
         if (lwMeshAddress != mLwMeshAddress) {
-            Log.d(TAG, "[UPDATE] [SN:" + mLwMeshAddress + "] WRONG ADDRESS " + lwMeshAddress);
+            Log.d(TAG, "[UPDATE] Received packet request from address " + lwMeshAddress + ", instead of " + mLwMeshAddress);
             return;
         }
         if (mUpdateWaitingToComplete && packetNumber == packets.size() /*- 2*/) {
@@ -675,10 +667,12 @@ public class OTAUpdateService extends IntentService {
     private void resetUpdate() {
         deleteFilesByDeviceType(DOWNLOAD_DIR, mFirmwareDeviceType);
 
+        mMetadataDownloadId = -1;
+        mBinaryDownloadId = -1;
         mLwMeshAddress = -1;
         mUpdateInProgress = false;
+        mUpdateWaitingToComplete = false;
         if(packets != null) { packets.clear(); }
-        isTimerStarted = false;
         mVersionMajor = -1;
         mVersionMinor = -1;
         mLastSentPacket = -1;
@@ -686,30 +680,5 @@ public class OTAUpdateService extends IntentService {
         mFirmwareSignature = new byte[0];
 
         Log.d(TAG, "[RESET] Reset OTA update status");
-    }
-
-    private void timerForOtaNonResponse() {
-        if (!isTimerStarted) {
-            isTimerStarted = true;
-
-            timer = new CountDownTimer(300000, 20000) {
-
-                @Override
-                public void onTick(long millisUntilFinished) {
-                    Log.d(TAG, "[TIMER] Update will time out in " + (millisUntilFinished / 1000) +
-                                    "s, with " + (millisUntilFinished / 20000) + " more callbacks");
-                }
-
-                @Override
-                public void onFinish() {
-                    resetUpdate();
-
-                    //TODO notify something (PubNub?) that an update has timed out
-
-                    if(timer != null ) { timer.cancel(); }
-                    isTimerStarted = false;
-                }
-            }.start();
-        }
     }
 }

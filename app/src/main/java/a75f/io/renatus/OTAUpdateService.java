@@ -4,7 +4,6 @@ import android.app.DownloadManager;
 import android.app.IntentService;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.CountDownTimer;
 import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -133,7 +132,7 @@ public class OTAUpdateService extends IntentService {
     }
 
     private void handlePacketRequest(byte[] eventBytes) {
-        sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_PACKAGE_REQ));
+        sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_PACKET_REQ));
 
         CmToCcuOverUsbFirmwarePacketRequest_t msg = new CmToCcuOverUsbFirmwarePacketRequest_t();
         msg.setByteBuffer(ByteBuffer.wrap(eventBytes).order(ByteOrder.LITTLE_ENDIAN), 0);

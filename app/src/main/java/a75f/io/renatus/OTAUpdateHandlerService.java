@@ -33,7 +33,7 @@ public class OTAUpdateHandlerService extends Service {
                     break;
 
                 case Globals.IntentActions.ACTIVITY_RESET:
-                case Globals.IntentActions.OTA_UPDATE_PACKAGE_REQ:
+                case Globals.IntentActions.OTA_UPDATE_PACKET_REQ:
                 case Globals.IntentActions.OTA_UPDATE_NODE_REBOOT:
                 case Globals.IntentActions.OTA_UPDATE_COMPLETE:
                     stopOtaUpdateTimeoutTimer();
@@ -70,6 +70,8 @@ public class OTAUpdateHandlerService extends Service {
         filter.addAction(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
         filter.addAction(Globals.IntentActions.LSERIAL_MESSAGE);
         filter.addAction(Globals.IntentActions.OTA_UPDATE_START);
+        filter.addAction(Globals.IntentActions.OTA_UPDATE_PACKET_REQ);
+        filter.addAction(Globals.IntentActions.OTA_UPDATE_NODE_REBOOT);
         filter.addAction(Globals.IntentActions.OTA_UPDATE_TIMED_OUT);
         filter.addAction(Globals.IntentActions.OTA_UPDATE_COMPLETE);
 

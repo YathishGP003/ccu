@@ -1,6 +1,6 @@
 #!/bin/bash
 set -x #echo on
-echo "test"
+echo "test1"
 VERSION_VAR="$(cat VERSION)"
 VERSIONID="$(cat VERSIONID)"
 echo "$VERSION_VAR"

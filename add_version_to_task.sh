@@ -1,6 +1,6 @@
 #!/bin/bash
 set -x #echo on
-echo "test bug test https://team75f.atlassian.net/browse/RENATUS-518 test additional forgot dev  in progress"
+echo "test bug test https://team75f.atlassian.net/browse/RENATUS-518 test  additional forgot dev  in progress"
 VERSION_VAR="$(cat VERSION)"
 VERSIONID="$(cat VERSIONID)"
 echo "$VERSION_VAR"

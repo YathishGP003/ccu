@@ -7,7 +7,7 @@ for FILE1 in "$@"
 do
 		curl --request PUT \
 			--url https://team75f.atlassian.net/rest/api/2/issue/$FILE1 \
-			--header 'authorization: Basic Z2l0bGFiOkF5bmdheW42IQ==' \
+			--user ryan2@75f.io:BIpmwOmMfLbTbevVzNqjF5B1 \
 			--header 'cache-control: no-cache' \
 			--header 'content-type: application/json' \
 			--header 'postman-token: 63adb46d-c489-19c0-8709-cc8c1267c6de' \

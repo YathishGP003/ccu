@@ -877,6 +877,15 @@ public class Schedule extends Entity
         {
             this.mIntersection = mIntersection;
         }
+        
+        @Override
+        public String toString() {
+            StringBuilder str = new StringBuilder();
+            str.append(" mDay "+mDay);
+            str.append(" Time "+mSthh+":"+mStmm+" - "+mEthh+":"+mEtmm);
+            str.append(" curVal "+mVal+" heatingVal "+mHeatingVal+" coolingVal "+mCoolingVal);
+            return str.toString();
+        }
     }
 
     public HDict getScheduleHDict()

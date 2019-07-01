@@ -525,6 +525,9 @@ public class VavSystemController extends SystemController
         ArrayList<HashMap> vavEquips = hayStack.readAll("equip and vav and zone");
         double maxDamperPos = 0;
         for (HashMap m : vavEquips) {
+            if (isZoneDead(new Equip.Builder().setHashMap(m).build())) {
+                continue;
+            }
             HashMap damper = hayStack.read("point and damper and base and cmd and equipRef == \""+m.get("id").toString()+"\"");
             double damperPos = hayStack.readHisValById(damper.get("id").toString());
             if ( damperPos >= maxDamperPos) {
@@ -540,6 +543,9 @@ public class VavSystemController extends SystemController
         
     
         for (HashMap m : vavEquips) {
+            if (isZoneDead(new Equip.Builder().setHashMap(m).build())) {
+                continue;
+            }
             HashMap damper = hayStack.read("point and damper and base and cmd and equipRef == \""+m.get("id").toString()+"\"");
             double damperPos = hayStack.readHisValById(damper.get("id").toString());
             int normalizedDamperPos = (int) (damperPos + damperPos * targetPercent/100);

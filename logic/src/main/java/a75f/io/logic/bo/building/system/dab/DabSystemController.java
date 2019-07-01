@@ -446,6 +446,9 @@ public class DabSystemController extends SystemController
         ArrayList<HashMap> dabEquips = hayStack.readAll("equip and dab and zone");
         double maxDamperPos = 0;
         for (HashMap m : dabEquips) {
+            if (isZoneDead(new Equip.Builder().setHashMap(m).build())) {
+                continue;
+            }
             HashMap damper = hayStack.read("point and damper and base and cmd and equipRef == \""+m.get("id").toString()+"\"");
             double damperPos = hayStack.readHisValById(damper.get("id").toString());
             if ( damperPos >= maxDamperPos) {
@@ -461,13 +464,16 @@ public class DabSystemController extends SystemController
         
         
         for (HashMap m : dabEquips) {
+            if (isZoneDead(new Equip.Builder().setHashMap(m).build())) {
+                continue;
+            }
             //Primary and secondary have the same base damper opening now.
             HashMap damper = hayStack.read("point and damper and base and cmd and equipRef == \""+m.get("id").toString()+"\"");
             double damperPos = hayStack.readHisValById(damper.get("id").toString());
             int normalizedDamperPos = (int) (damperPos + damperPos * targetPercent/100);
             HashMap normalizedPrimaryDamper = hayStack.read("point and damper and normalized and primary and cmd and equipRef == \""+m.get("id").toString()+"\"");
             HashMap normalizedSecondaryamper = hayStack.read("point and damper and normalized and secondary and cmd and equipRef == \""+m.get("id").toString()+"\"");
-            CcuLog.d(L.TAG_CCU_SYSTEM,"normalizeAirflow"+" Equip: "+m.get("dis")+",damperPos :"+damperPos+" targetPercent: "+targetPercent+" normalizedDamperPos: "+normalizedDamperPos);
+            CcuLog.d(L.TAG_CCU_SYSTEM,"normalizeAirflow"+" Equip: "+m.get("dis")+" ,damperPos :"+damperPos+" targetPercent: "+targetPercent+" normalizedDamperPos: "+normalizedDamperPos);
             hayStack.writeHisValById(normalizedPrimaryDamper.get("id").toString(), (double)normalizedDamperPos);
             hayStack.writeHisValById(normalizedSecondaryamper.get("id").toString(), (double)normalizedDamperPos);
         }

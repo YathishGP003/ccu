@@ -68,7 +68,9 @@ public class VavReheatProfile extends VavProfile
                 {
                     CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"", "Zone Temp Dead");
                     VAVLogicalMap vavDevice = vavDeviceMap.get(node);
-                    vavDevice.setDamperPos(vavDevice.getDamperLimit(state == HEATING ? "heating":"cooling", "min"));
+                    double damperMin = vavDevice.getDamperLimit(state == HEATING ? "heating":"cooling", "min");
+                    double damperMax = vavDevice.getDamperLimit(state == HEATING ? "heating":"cooling", "max");
+                    vavDevice.setDamperPos((damperMin+damperMax)/2);
                     vavDevice.setReheatPos(0);
                 }
                 continue;

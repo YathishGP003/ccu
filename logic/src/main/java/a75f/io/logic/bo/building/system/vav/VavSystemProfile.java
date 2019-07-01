@@ -23,9 +23,6 @@ import a75f.io.logic.tuners.TunerConstants;
 
 public abstract class VavSystemProfile extends SystemProfile
 {
-    public double systemCoolingLoopOp;
-    public double systemHeatingLoopOp;
-    public double systemFanLoopOp;
     
     public void addSystemLoopOpPoints(String equipRef)
     {

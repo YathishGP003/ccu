@@ -12,6 +12,8 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
+import a75f.io.logic.bo.building.system.SystemConstants;
+import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.jobs.ScheduleProcessJob;
@@ -196,11 +198,14 @@ public class VavStagedRtu extends VavSystemProfile
         } else {
             systemFanLoopOp = 0;
         }
+    
+        systemCo2LoopOp = VavSystemController.getInstance().getSystemState() == SystemController.State.OFF
+                                  ? 0 : (SystemConstants.CO2_CONFIG_MAX - getSystemCO2()) * 100 / 200 ;
         
         setSystemLoopOp("cooling", systemCoolingLoopOp);
         setSystemLoopOp("heating", systemHeatingLoopOp);
         setSystemLoopOp("fan", systemFanLoopOp);
-        
+        setSystemLoopOp("co2", systemCo2LoopOp);
         
         updateStagesSelected();
     

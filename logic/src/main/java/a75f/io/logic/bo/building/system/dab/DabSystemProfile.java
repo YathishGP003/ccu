@@ -16,9 +16,6 @@ import a75f.io.logic.tuners.TunerConstants;
 
 public abstract class DabSystemProfile extends SystemProfile
 {
-    public double systemCoolingLoopOp;
-    public double systemHeatingLoopOp;
-    public double systemFanLoopOp;
     
     public void addSystemLoopOpPoints(String equipRef)
     {
@@ -204,5 +201,10 @@ public abstract class DabSystemProfile extends SystemProfile
             throw new IllegalArgumentException();
         }
         hayStack.writePoint(id, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", val, 0);
+    }
+    
+    @Override
+    public double getCo2LoopOp() {
+        return DabSystemController.getInstance().getWACo2LoopOp();
     }
 }

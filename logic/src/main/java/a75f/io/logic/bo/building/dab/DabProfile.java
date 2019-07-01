@@ -206,4 +206,8 @@ public class DabProfile extends ZoneProfile
         d.maxPosition = (int)dabEquip.getDamperLimit(state == HEATING ? "heating":"cooling", "max");
         d.iaqCompensatedMinPos = d.minPosition;
     }
+    
+    public double getCo2LoopOp() {
+        return dabEquip.getCo2Loop().getLoopOutput();
+    }
 }

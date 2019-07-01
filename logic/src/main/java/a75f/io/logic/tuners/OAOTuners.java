@@ -104,7 +104,7 @@ public class OAOTuners
                                                       .setSiteRef(siteRef)
                                                       .setEquipRef(equipRef)
                                                       .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his").addMarker("equipHis")
-                                                      .addMarker("outside").addMarker("damper").addMarker("mat").addMarker("minimum")
+                                                      .addMarker("outside").addMarker("damper").addMarker("mat").addMarker("min")
                                                       .setTz(tz)
                                                       .build();
         String outsideDamperMixedAirMinimumId = hayStack.addPoint(outsideDamperMixedAirMinimum);
@@ -276,7 +276,7 @@ public class OAOTuners
                                                     .setTz(tz)
                                                     .build();
         String outsideDamperMixedAirMinimumId = hayStack.addPoint(outsideDamperMixedAirMinimum);
-        HashMap outsideDamperMixedAirMinimumPoint = hayStack.read("point and tuner and default and oao and outside and damper and mat and minimum");
+        HashMap outsideDamperMixedAirMinimumPoint = hayStack.read("point and tuner and default and oao and outside and damper and mat and min");
         ArrayList<HashMap> outsideDamperMixedAirMinimumPointArr = hayStack.readPoint(outsideDamperMixedAirMinimumPoint.get("id").toString());
         for (HashMap valMap : outsideDamperMixedAirMinimumPointArr) {
             if (valMap.get("val") != null)

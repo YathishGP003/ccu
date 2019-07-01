@@ -6,7 +6,11 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logic.bo.building.NodeType;
+import a75f.io.logic.bo.building.Output;
+import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.tuners.OAOTuners;
 
 public class OAOEquip
@@ -21,6 +25,17 @@ public class OAOEquip
         profileType = type;
         nodeAddr = node;
     }
+    
+    public void init() {
+        HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \"" + nodeAddr + "\"");
+        if (equipMap != null && equipMap.size() > 0)
+        {
+            equipRef = equipMap.get("id").toString();
+        } else {
+            throw new IllegalStateException("Equip should be created before init");
+        }
+    }
+    
     
     public void createEntities(OAOProfileConfiguration config, String floorRef, String roomRef)
     {
@@ -48,7 +63,7 @@ public class OAOEquip
                                    .setSiteRef(siteRef)
                                    .setRoomRef(roomRef)
                                    .setFloorRef(floorRef)
-                                   .addMarker("oao").addMarker("inside").addMarker("enthalpy").addMarker("his").addMarker("equipHis")
+                                   .addMarker("oao").addMarker("inside").addMarker("enthalpy").addMarker("his").addMarker("equipHis").addMarker("sp")
                                    .setGroup(String.valueOf(nodeAddr))
                                    .setTz(tz)
                                    .build();
@@ -60,7 +75,7 @@ public class OAOEquip
                                        .setSiteRef(siteRef)
                                        .setRoomRef(roomRef)
                                        .setFloorRef(floorRef)
-                                       .addMarker("oao").addMarker("outside").addMarker("enthalpy").addMarker("his").addMarker("equipHis")
+                                       .addMarker("oao").addMarker("outside").addMarker("enthalpy").addMarker("his").addMarker("equipHis").addMarker("sp")
                                        .setGroup(String.valueOf(nodeAddr))
                                        .setTz(tz)
                                        .build();
@@ -72,7 +87,7 @@ public class OAOEquip
                                         .setSiteRef(siteRef)
                                         .setRoomRef(roomRef)
                                         .setFloorRef(floorRef)
-                                        .addMarker("oao").addMarker("economizing").addMarker("available").addMarker("his").addMarker("equipHis")
+                                        .addMarker("oao").addMarker("economizing").addMarker("available").addMarker("his").addMarker("equipHis").addMarker("sp")
                                         .setGroup(String.valueOf(nodeAddr))
                                         .setTz(tz)
                                         .build();
@@ -84,7 +99,7 @@ public class OAOEquip
                                              .setSiteRef(siteRef)
                                              .setRoomRef(roomRef)
                                              .setFloorRef(floorRef)
-                                             .addMarker("oao").addMarker("economizing").addMarker("loop").addMarker("output").addMarker("his").addMarker("equipHis")
+                                             .addMarker("oao").addMarker("economizing").addMarker("loop").addMarker("output").addMarker("his").addMarker("equipHis").addMarker("sp")
                                              .setGroup(String.valueOf(nodeAddr))
                                              .setTz(tz)
                                              .build();
@@ -96,7 +111,7 @@ public class OAOEquip
                                              .setSiteRef(siteRef)
                                              .setRoomRef(roomRef)
                                              .setFloorRef(floorRef)
-                                             .addMarker("oao").addMarker("outside").addMarker("air").addMarker("calculated").addMarker("min").addMarker("damper").addMarker("his").addMarker("equipHis")
+                                             .addMarker("oao").addMarker("outside").addMarker("air").addMarker("calculated").addMarker("min").addMarker("damper").addMarker("his").addMarker("equipHis").addMarker("sp")
                                              .setGroup(String.valueOf(nodeAddr))
                                              .setTz(tz)
                                              .build();
@@ -108,7 +123,7 @@ public class OAOEquip
                                               .setSiteRef(siteRef)
                                               .setRoomRef(roomRef)
                                               .setFloorRef(floorRef)
-                                              .addMarker("oao").addMarker("outside").addMarker("air").addMarker("loop").addMarker("output").addMarker("intermediate").addMarker("his").addMarker("equipHis")
+                                              .addMarker("oao").addMarker("outside").addMarker("air").addMarker("loop").addMarker("output").addMarker("intermediate").addMarker("his").addMarker("equipHis").addMarker("sp")
                                               .setGroup(String.valueOf(nodeAddr))
                                               .setTz(tz)
                                               .build();
@@ -120,12 +135,188 @@ public class OAOEquip
                                              .setSiteRef(siteRef)
                                              .setRoomRef(roomRef)
                                              .setFloorRef(floorRef)
-                                             .addMarker("oao").addMarker("outside").addMarker("air").addMarker("loop").addMarker("output").addMarker("final").addMarker("his").addMarker("equipHis")
+                                             .addMarker("oao").addMarker("outside").addMarker("air").addMarker("loop").addMarker("output").addMarker("final").addMarker("his").addMarker("equipHis").addMarker("sp")
                                              .setGroup(String.valueOf(nodeAddr))
                                              .setTz(tz)
                                              .build();
         String outsideAirFinalLoopOutputId = hayStack.addPoint(outsideAirFinalLoopOutput);
+    
+    
+        Point returnAirCO2 = new Point.Builder()
+                                              .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-returnAirCO2")
+                                              .setEquipRef(equipRef)
+                                              .setSiteRef(siteRef)
+                                              .setRoomRef(roomRef)
+                                              .setFloorRef(floorRef)
+                                              .addMarker("oao").addMarker("return").addMarker("air").addMarker("co2").addMarker("sensor").addMarker("his").addMarker("equipHis").addMarker("sp")
+                                              .setGroup(String.valueOf(nodeAddr))
+                                              .setTz(tz)
+                                              .build();
+        String returnAirCO2Id = hayStack.addPoint(returnAirCO2);
+    
+        Point rtuCurrentTransformer = new Point.Builder()
+                                     .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-rtuCurrentTransformer")
+                                     .setEquipRef(equipRef)
+                                     .setSiteRef(siteRef)
+                                     .setRoomRef(roomRef)
+                                     .setFloorRef(floorRef)
+                                     .addMarker("oao").addMarker("rtu").addMarker("current").addMarker("transformer").addMarker("sensor").addMarker("his").addMarker("equipHis")
+                                     .setGroup(String.valueOf(nodeAddr))
+                                     .setTz(tz)
+                                     .build();
+        String rtuCurrentTransformerId = hayStack.addPoint(rtuCurrentTransformer);
+    
+        Point outsideAirTemperature = new Point.Builder()
+                                     .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-outsideAirTemperature")
+                                     .setEquipRef(equipRef)
+                                     .setSiteRef(siteRef)
+                                     .setRoomRef(roomRef)
+                                     .setFloorRef(floorRef)
+                                     .addMarker("oao").addMarker("outside").addMarker("air").addMarker("temp").addMarker("sensor").addMarker("his").addMarker("equipHis")
+                                     .setGroup(String.valueOf(nodeAddr))
+                                     .setTz(tz)
+                                     .build();
+        String outsideAirTemperatureId = hayStack.addPoint(outsideAirTemperature);
+    
+        Point supplyAirTemperature = new Point.Builder()
+                                              .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-supplyAirTemperature")
+                                              .setEquipRef(equipRef)
+                                              .setSiteRef(siteRef)
+                                              .setRoomRef(roomRef)
+                                              .setFloorRef(floorRef)
+                                              .addMarker("oao").addMarker("supply").addMarker("air").addMarker("temp").addMarker("sensor").addMarker("his").addMarker("equipHis")
+                                              .setGroup(String.valueOf(nodeAddr))
+                                              .setTz(tz)
+                                              .build();
+        String supplyAirTemperatureId = hayStack.addPoint(supplyAirTemperature);
+    
+        Point mixedAirTemperature = new Point.Builder()
+                                             .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-mixedAirTemperature")
+                                             .setEquipRef(equipRef)
+                                             .setSiteRef(siteRef)
+                                             .setRoomRef(roomRef)
+                                             .setFloorRef(floorRef)
+                                             .addMarker("oao").addMarker("mixed").addMarker("air").addMarker("temp").addMarker("sensor").addMarker("his").addMarker("equipHis")
+                                             .setGroup(String.valueOf(nodeAddr))
+                                             .setTz(tz)
+                                             .build();
+        String mixedAirTemperatureId = hayStack.addPoint(mixedAirTemperature);
+    
+        Point mixedAirHumidity = new Point.Builder()
+                                            .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-mixedAirHumidity")
+                                            .setEquipRef(equipRef)
+                                            .setSiteRef(siteRef)
+                                            .setRoomRef(roomRef)
+                                            .setFloorRef(floorRef)
+                                            .addMarker("oao").addMarker("mixed").addMarker("air").addMarker("humidity").addMarker("sensor").addMarker("his").addMarker("equipHis")
+                                            .setGroup(String.valueOf(nodeAddr))
+                                            .setTz(tz)
+                                            .build();
+        String mixedAirHumidityId = hayStack.addPoint(mixedAirHumidity);
+    
+        Point outsideAirDamper = new Point.Builder()
+                                         .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-outsideAirDamper")
+                                         .setEquipRef(equipRef)
+                                         .setSiteRef(siteRef)
+                                         .setRoomRef(roomRef)
+                                         .setFloorRef(floorRef)
+                                         .addMarker("oao").addMarker("outside").addMarker("air").addMarker("damper").addMarker("cmd").addMarker("his").addMarker("equipHis")
+                                         .setGroup(String.valueOf(nodeAddr))
+                                         .setTz(tz)
+                                         .build();
+        String outsideAirDamperId = hayStack.addPoint(outsideAirDamper);
+        Point returnAirDamper = new Point.Builder()
+                                         .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-returnAirDamper")
+                                         .setEquipRef(equipRef)
+                                         .setSiteRef(siteRef)
+                                         .setRoomRef(roomRef)
+                                         .setFloorRef(floorRef)
+                                         .addMarker("oao").addMarker("return").addMarker("air").addMarker("damper").addMarker("cmd").addMarker("his").addMarker("equipHis")
+                                         .setGroup(String.valueOf(nodeAddr))
+                                         .setTz(tz)
+                                         .build();
+        String returnAirDamperId = hayStack.addPoint(returnAirDamper);
+    
+        Point exhaustFanStage1 = new Point.Builder()
+                                        .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-exhaustFanStage1")
+                                        .setEquipRef(equipRef)
+                                        .setSiteRef(siteRef)
+                                        .setRoomRef(roomRef)
+                                        .setFloorRef(floorRef)
+                                        .addMarker("oao").addMarker("exhaust").addMarker("fan").addMarker("stage1").addMarker("cmd").addMarker("his").addMarker("equipHis")
+                                        .setGroup(String.valueOf(nodeAddr))
+                                        .setTz(tz)
+                                        .build();
+        String exhaustFanStage1Id = hayStack.addPoint(exhaustFanStage1);
+        Point exhaustFanStage2 = new Point.Builder()
+                                         .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-exhaustFanStage2")
+                                         .setEquipRef(equipRef)
+                                         .setSiteRef(siteRef)
+                                         .setRoomRef(roomRef)
+                                         .setFloorRef(floorRef)
+                                         .addMarker("oao").addMarker("exhaust").addMarker("fan").addMarker("stage2").addMarker("cmd").addMarker("his").addMarker("equipHis")
+                                         .setGroup(String.valueOf(nodeAddr))
+                                         .setTz(tz)
+                                         .build();
+        String exhaustFanStage2Id = hayStack.addPoint(exhaustFanStage2);
+    
+    
+        SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
+        /*device.currentTemp.setPointRef(ctID);
+        device.currentTemp.setEnabled(true);
+        device.desiredTemp.setPointRef(dtId);
+        device.desiredTemp.setEnabled(true);
+    */
+        for (Output op : config.getOutputs()) {
+            switch (op.getPort()) {
+                case ANALOG_OUT_ONE:
+                    device.analog1Out.setType(op.getAnalogActuatorType());
+                    break;
+                case ANALOG_OUT_TWO:
+                    device.analog1Out.setType(op.getAnalogActuatorType());
+                    break;
+            }
+        }
+    
+        device.analog1In.setPointRef(returnAirCO2Id);
+        device.analog1In.setEnabled(true);
+        device.analog2In.setPointRef(rtuCurrentTransformerId);
+        device.analog2In.setEnabled(true);
+    
+        device.th1In.setPointRef(outsideAirTemperatureId);
+        device.th1In.setEnabled(true);
+        device.th2In.setPointRef(supplyAirTemperatureId);
+        device.th2In.setEnabled(true);
         
+        device.analog1Out.setEnabled(config.isOpConfigured(Port.ANALOG_OUT_ONE));
+        device.analog1Out.setPointRef(outsideAirDamperId);
+        device.analog1Out.setType(config.outsideDamperAtMinDrive+"-"+config.outsideDamperAtMaxDrive);
+        device.analog2Out.setEnabled(config.isOpConfigured(Port.ANALOG_OUT_TWO));
+        device.analog2Out.setPointRef(returnAirDamperId);
+        device.analog1Out.setType(config.returnDamperAtMinDrive+"-"+config.returnDamperAtMaxDrive);
+        
+        device.relay1.setEnabled(config.isOpConfigured(Port.RELAY_ONE));
+        device.relay1.setPointRef(exhaustFanStage1Id);
+        device.relay2.setEnabled(config.isOpConfigured(Port.RELAY_TWO));
+        device.relay2.setPointRef(exhaustFanStage2Id);
+    
+        device.addSensor(Port.SENSOR_RT, mixedAirTemperatureId);
+        device.addSensor(Port.SENSOR_RH, mixedAirHumidityId);
+        //device.addSensor(Port.SENSOR_VOC, vocId);
+    
+        device.addPointsToDb();
+        
+        //init
+        hayStack.writeDefaultValById(returnAirCO2Id,0.0);
+        hayStack.writeDefaultValById(rtuCurrentTransformerId,0.0);
+        hayStack.writeDefaultValById(outsideAirTemperatureId,0.0);
+        hayStack.writeDefaultValById(supplyAirTemperatureId,0.0);
+        hayStack.writeDefaultValById(mixedAirTemperatureId,0.0);
+        hayStack.writeDefaultValById(mixedAirHumidityId,0.0);
+        hayStack.writeDefaultValById(outsideAirDamperId,0.0);
+        hayStack.writeDefaultValById(returnAirDamperId,0.0);
+        hayStack.writeDefaultValById(exhaustFanStage1Id,0.0);
+        hayStack.writeDefaultValById(exhaustFanStage2Id,0.0);
     }
     
     public void createConfigPoints(OAOProfileConfiguration config, String equipRef)
@@ -244,6 +435,80 @@ public class OAOEquip
                                                          .setTz(tz).build();
         String usePerRoomCO2SensingId = CCUHsApi.getInstance().addPoint(usePerRoomCO2Sensing );
         hayStack.writeDefaultValById(usePerRoomCO2SensingId, config.usePerRoomCO2Sensing ? 1.0 :0);
+    }
+    
+    public double getHisVal(String tags) {
+        return hayStack.readHisValByQuery("point and oao and "+tags+" and group == \""+nodeAddr+'\"');
+    }
+    
+    public OAOProfileConfiguration getProfileConfiguration() {
+        OAOProfileConfiguration config = new OAOProfileConfiguration();
+      
+        config.outsideDamperAtMinDrive = getConfigNumVal("outside and damper and min and drive");
+        config.outsideDamperAtMaxDrive = getConfigNumVal("outside and damper and max and drive");
+        config.returnDamperAtMinDrive =  getConfigNumVal("return and damper and min and drive");
+        config.returnDamperAtMinDrive =  getConfigNumVal("return and damper and max and drive");
+        config.outsideDamperMinOpen = getConfigNumVal("outside and damper and min and open");
+        config.returnDamperMinOpen = getConfigNumVal("return and damper and min and open");
+        
+        config.exhaustFanStage1Threshold = getConfigNumVal("exhaust and fan and stage1 and threshold") ;
+        config.exhaustFanStage2Threshold = getConfigNumVal("exhaust and fan and stage2 and threshold") ;
+        config.currentTranformerType = getConfigNumVal("current and transformer and type") ;
+        config.co2Threshold = getConfigNumVal("co2 and threshold");
+        config.exhaustFanHysteresis = getConfigNumVal("exhaust and fan and hysteresis");
+        config.usePerRoomCO2Sensing = getConfigNumVal("room and co2 and sensing") > 0? true : false;
+        
+        config.setNodeType(NodeType.SMART_NODE);
+        
+        
+        /*RawPoint a1 = SmartNode.getPhysicalPoint(nodeAddr, Port.ANALOG_OUT_ONE.toString());
+        if (a1 != null && a1.getEnabled()) {
+            Output analogOne = new Output();
+            analogOne.setAddress((short)nodeAddr);
+            analogOne.setPort(Port.ANALOG_OUT_ONE);
+            analogOne.mOutputAnalogActuatorType = OutputAnalogActuatorType.getEnum(a1.getType());
+            config.getOutputs().add(analogOne);
+        }
+        
+        RawPoint a2 = SmartNode.getPhysicalPoint(nodeAddr, Port.ANALOG_OUT_TWO.toString());
+        if (a2 != null && a2.getEnabled()) {
+            Output analogTwo = new Output();
+            analogTwo.setAddress((short)nodeAddr);
+            analogTwo.setPort(Port.ANALOG_OUT_TWO);
+            analogTwo.mOutputAnalogActuatorType = OutputAnalogActuatorType.getEnum(a2.getType());
+            config.getOutputs().add(analogTwo);
+        }*/
+        
+        return config;
+    }
+    
+    public void update(OAOProfileConfiguration config) {
+        /*for (Output op : config.getOutputs()) {
+            switch (op.getPort()) {
+                case ANALOG_OUT_ONE:
+                    CcuLog.d(L.TAG_CCU_ZONE, " Update analog" + op.getPort() + " type " + op.getAnalogActuatorType());
+                    SmartNode.updatePhysicalPointType(nodeAddr, op.getPort().toString(), op.getAnalogActuatorType());
+                    break;
+                case ANALOG_OUT_TWO:
+                    CcuLog.d(L.TAG_CCU_ZONE, " Update analog" + op.getPort() + " type " + op.getAnalogActuatorType());
+                    SmartNode.updatePhysicalPointType(nodeAddr, op.getPort().toString(), op.getAnalogActuatorType());
+                    break;
+            }
+        }*/
+        
+        setConfigNumVal("outside and damper and min and drive", config.outsideDamperAtMinDrive);
+        setConfigNumVal("outside and damper and max and drive", config.outsideDamperAtMaxDrive);
+        setConfigNumVal("return and damper and min and drive", config.returnDamperAtMinDrive);
+        setConfigNumVal("return and damper and max and drive", config.returnDamperAtMaxDrive);
+        setConfigNumVal("outside and damper and min and open", config.outsideDamperMinOpen);
+        setConfigNumVal("return and damper and min and open", config.returnDamperMinOpen);
+        setConfigNumVal("exhaust and fan and stage1 and threshold", config.exhaustFanStage1Threshold);
+        setConfigNumVal("exhaust and fan and stage2 and threshold", config.exhaustFanStage2Threshold);
+        setConfigNumVal("current and transformer and type", config.currentTranformerType);
+        setConfigNumVal("co2 and threshold", config.co2Threshold);
+        setConfigNumVal("exhaust and fan and hysteresis", config.exhaustFanHysteresis);
+        setConfigNumVal("room and co2 and sensing", config.usePerRoomCO2Sensing? 1:0);
+        
     }
     
     public void setConfigNumVal(String tags,double val) {

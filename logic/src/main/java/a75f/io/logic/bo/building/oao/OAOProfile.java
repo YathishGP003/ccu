@@ -3,6 +3,12 @@ package a75f.io.logic.bo.building.oao;
 import android.util.Log;
 
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.BaseProfileConfiguration;
+import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.system.SystemController;
+import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
+import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
+import a75f.io.logic.tuners.TunerUtil;
 
 /*
 *  OAO Combines both System profile and Zone Profile behaviours.
@@ -12,10 +18,112 @@ public class OAOProfile
 {
     public static boolean economizingAvailable = false;
     
-    public void calculateOADamper() {
+    double economizingLoopOutput;
+    double outsideAirCalculatedMinDamper;
+    double outsideAirLoopOutput;
+    double outsideAirFinalLoopOutput;
+    double returnAirFinalOutput;
+    
+    OAOEquip oaoEquip;
+    
+    public void addOaoEquip(short addr, OAOProfileConfiguration config, String floorRef, String roomRef) {
+        oaoEquip = new OAOEquip(getProfileType(), addr);
+        oaoEquip.createEntities(config, floorRef, roomRef);
+        oaoEquip.init();
+    }
+    
+    public void addDabEquip(short addr) {
+        oaoEquip = new OAOEquip(getProfileType(), addr);
+        oaoEquip.init();
+    }
+    
+    public void updateOaoEquip(OAOProfileConfiguration config) {
+        oaoEquip.update(config);
+    }
+    
+    //@Override
+    public ProfileType getProfileType()
+    {
+        return ProfileType.OAO;
+    }
+    
+    //@Override
+    public BaseProfileConfiguration getProfileConfiguration(short address)
+    {
+        return oaoEquip.getProfileConfiguration();
+    }
+    
+    public void updateOAOPoints() {
+        
+        doEconomizing();
+        doDcvControl();
+    
+        outsideAirLoopOutput = Math.max(economizingLoopOutput, outsideAirCalculatedMinDamper);
+        
+        double outsideDamperMatTarget = TunerUtil.readTunerValByQuery("oao and outside and damper and mat and target",oaoEquip.equipRef);
+        double outsideDamperMatMin = TunerUtil.readTunerValByQuery("oao and outside and damper and mat and min",oaoEquip.equipRef);
+    
+        double matTemp  = oaoEquip.getHisVal("mixed and air and temp and sensor");
+    
+        outsideAirFinalLoopOutput = outsideAirLoopOutput -
+                                        outsideAirLoopOutput * ((outsideDamperMatTarget - matTemp)/(outsideDamperMatTarget - outsideDamperMatMin));
+    
+        returnAirFinalOutput = 100 - outsideAirFinalLoopOutput;
+    
+        oaoEquip.setConfigNumVal("outside and air and damper and cmd", outsideAirFinalLoopOutput);
+        oaoEquip.setConfigNumVal("return and air and damper and cmd", returnAirFinalOutput);
+    }
+    
+    public void doEconomizing() {
         double insideEnthalpy = getAirEnthalpy(L.ccu().systemProfile.getSystemController().getAverageSystemTemperature(),
                                     L.ccu().systemProfile.getSystemController().getAverageSystemHumidity());
-                                    
+    
+    
+        double enthalpyDuctCompensationOffset = TunerUtil.readTunerValByQuery("oao and enthalpy and duct and compensation and offset",oaoEquip.equipRef);
+    
+        double outsideEnthalpy = getAirEnthalpy(71, 94); //TODO-
+    
+        double economizingToMainCoolingLoopMap = TunerUtil.readTunerValByQuery("oao and economizing and main and cooling and loop and map", oaoEquip.equipRef);
+        if (L.ccu().systemProfile.getSystemController().getSystemState() == SystemController.State.COOLING
+                                && (insideEnthalpy > outsideEnthalpy + enthalpyDuctCompensationOffset)) {
+            economizingAvailable = true;
+            
+            if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_ANALOG_RTU ||
+                                L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_ANALOG_RTU) {
+                economizingLoopOutput = Math.min(L.ccu().systemProfile.getCoolingLoopOp() * 100 / economizingToMainCoolingLoopMap ,100);
+            }else if (L.ccu().systemProfile instanceof VavStagedRtu) {
+                //VavStagedProfile
+                VavStagedRtu profile = (VavStagedRtu) L.ccu().systemProfile;
+                economizingLoopOutput = Math.min(profile.getCoolingLoopOp() * 100 /(profile.coolingStages + 1), 100);
+            }else if (L.ccu().systemProfile instanceof DabStagedRtu) {
+                //DabStagedProfile
+                DabStagedRtu profile = (DabStagedRtu) L.ccu().systemProfile;
+                economizingLoopOutput = Math.min(profile.getCoolingLoopOp() * 100 /(profile.coolingStages + 1), 100);
+            }
+        } else {
+            economizingAvailable = false;
+        }
+    }
+    
+    public void doDcvControl() {
+        double dcvCalculatedMinDamper = 0;
+        boolean usePerRoomCO2Sensing = oaoEquip.getConfigNumVal("room and co2 and sensing") > 0? true : false;
+        if (usePerRoomCO2Sensing)
+        {
+            dcvCalculatedMinDamper = L.ccu().systemProfile.getCo2LoopOp();
+            
+        } else {
+            double returnAirCO2  = oaoEquip.getHisVal("return and air and co2 and sensor");
+            double co2Threshold = oaoEquip.getConfigNumVal("co2 and threshodl");
+            double co2DamperOpeningRate = TunerUtil.readTunerValByQuery("oao and co2 and damper and opening and rate",oaoEquip.equipRef);
+            
+            if (returnAirCO2 > co2Threshold) {
+                dcvCalculatedMinDamper = (returnAirCO2 - co2Threshold)/co2DamperOpeningRate;
+            }
+        }
+    
+        double outsideDamperMinOpen = TunerUtil.readTunerValByQuery("oao and outside and damper and min and open");
+        outsideAirCalculatedMinDamper = outsideDamperMinOpen + dcvCalculatedMinDamper;
     }
     
     

@@ -422,15 +422,22 @@ public class ScheduleProcessJob extends BaseJob {
             return;
         }
         
+        Occupied curr = null;
         for (Occupied occ : occupiedHashMap.values()) {
             if (occ.isOccupied())
             {
                 systemOccupancy = OCCUPIED;
-                currOccupied = occ;
-                break;
+                Schedule.Days occDay = occ.getCurrentlyOccupiedSchedule();
+                if (curr == null || occDay.getEthh() > curr.getCurrentlyOccupiedSchedule().getEthh()
+                            || (occDay.getEthh() == curr.getCurrentlyOccupiedSchedule().getEthh() && occDay.getEtmm() > curr.getCurrentlyOccupiedSchedule().getEtmm()) )
+                {
+                    Log.d(TAG_CCU_JOB, " Occupied Schedule "+occ.getCurrentlyOccupiedSchedule().toString());
+                    curr = occ;
+                }
             }
         }
-
+        currOccupied = curr;
+        
         long millisToOccupancy = 0;
         if (systemOccupancy == UNOCCUPIED) {
             Occupied next = null;

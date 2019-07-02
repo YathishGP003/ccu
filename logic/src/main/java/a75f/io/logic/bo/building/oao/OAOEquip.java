@@ -300,6 +300,7 @@ public class OAOEquip
         device.relay2.setEnabled(config.isOpConfigured(Port.RELAY_TWO));
         device.relay2.setPointRef(exhaustFanStage2Id);
     
+        //device.currentTemp.setPointRef(mixedAirTemperatureId);
         device.addSensor(Port.SENSOR_RT, mixedAirTemperatureId);
         device.addSensor(Port.SENSOR_RH, mixedAirHumidityId);
         //device.addSensor(Port.SENSOR_VOC, vocId);

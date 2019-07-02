@@ -32,7 +32,7 @@ public class OAOProfile
         oaoEquip.init();
     }
     
-    public void addDabEquip(short addr) {
+    public void addOaoEquip(short addr) {
         oaoEquip = new OAOEquip(getProfileType(), addr);
         oaoEquip.init();
     }
@@ -53,7 +53,7 @@ public class OAOProfile
         return oaoEquip.getProfileConfiguration();
     }
     
-    public void updateOAOPoints() {
+    public void doOAO() {
         
         doEconomizing();
         doDcvControl();
@@ -72,6 +72,18 @@ public class OAOProfile
     
         oaoEquip.setConfigNumVal("outside and air and damper and cmd", outsideAirFinalLoopOutput);
         oaoEquip.setConfigNumVal("return and air and damper and cmd", returnAirFinalOutput);
+        
+        if (outsideAirFinalLoopOutput > oaoEquip.getConfigNumVal("config and exhaust and fan and stage1 and threshold")) {
+            oaoEquip.setConfigNumVal("cmd and exhaust and fan and stage1",1);
+        } else {
+            oaoEquip.setConfigNumVal("cmd and exhaust and fan and stage1",0);
+        }
+    
+        if (outsideAirFinalLoopOutput > oaoEquip.getConfigNumVal("config and exhaust and fan and stage2 and threshold")) {
+            oaoEquip.setConfigNumVal("cmd and exhaust and fan and stage2",1);
+        } else {
+            oaoEquip.setConfigNumVal("cmd and exhaust and fan and stage2",0);
+        }
     }
     
     public void doEconomizing() {

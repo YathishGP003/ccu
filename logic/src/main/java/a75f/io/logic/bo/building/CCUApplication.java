@@ -1,7 +1,5 @@
 package a75f.io.logic.bo.building;
 
-import android.util.ArraySet;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
@@ -10,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import a75f.io.logic.bo.building.oao.OAOProfile;
 import a75f.io.logic.bo.building.system.SystemProfile;
 
 /**
@@ -62,6 +61,7 @@ public class CCUApplication
     
     public SystemProfile    systemProfile = null;
     public Set<ZoneProfile> zoneProfiles  = new HashSet<>();
+    public OAOProfile oaoProfile = null;
     
     public Site defaultSite = null;
     

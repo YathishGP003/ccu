@@ -47,6 +47,9 @@ public class OTAUpdateService extends IntentService {
     private static final File DOWNLOAD_DIR = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 
     //Update variables
+    private static ArrayList<Integer> mLwMeshAddresses;
+    private static int mCurrentLwMeshAddress;
+
     private static int mLastSentPacket = -1;
     private static ArrayList<byte[]> packets;      //Where the decomposed binary is stored in memory
     private static short mVersionMajor = -1;
@@ -56,7 +59,6 @@ public class OTAUpdateService extends IntentService {
     private static int mUpdateLength = -1;         //Binary length (bytes)
     private static byte[] mFirmwareSignature = {};
     private static FirmwareDeviceType_t mFirmwareDeviceType;
-    private static int mLwMeshAddress = -1;
 
     private static long mMetadataDownloadId = -1;
     private static long mBinaryDownloadId = -1;
@@ -82,7 +84,8 @@ public class OTAUpdateService extends IntentService {
         }
         /* An activity has requested the OTA update to end (for debugging) */
         if(action.equals(Globals.IntentActions.ACTIVITY_RESET)) {
-            resetUpdate();
+            resetUpdateVariables();
+            completeUpdate();
         }
         /* The service has been launched from a PubNub notification */
         else if(action.equals(Globals.IntentActions.PUBNUB_MESSAGE)) {
@@ -94,7 +97,8 @@ public class OTAUpdateService extends IntentService {
         }
         /* The service has been launched in response to OTA update timeout */
         else if(action.equals(Globals.IntentActions.OTA_UPDATE_TIMED_OUT)) {
-            resetUpdate();
+            resetUpdateVariables();
+            completeUpdate();
         }
         /* The OTA update is in progress, and is being notified from the CM */
         else if(action.equals(Globals.IntentActions.LSERIAL_MESSAGE)) {
@@ -149,7 +153,7 @@ public class OTAUpdateService extends IntentService {
         SnRebootIndicationMessage_t msg = new SnRebootIndicationMessage_t();
         msg.setByteBuffer(ByteBuffer.wrap(eventBytes).order(ByteOrder.LITTLE_ENDIAN), 0);
 
-        if ( (msg.smartNodeAddress.get() == mLwMeshAddress) && mUpdateInProgress) {
+        if ( (msg.smartNodeAddress.get() == mCurrentLwMeshAddress) && mUpdateInProgress) {
             short versionMajor = msg.smartNodeMajorFirmwareVersion.get();
             short versionMinor = msg.smartNodeMinorFirmwareVersion.get();
 
@@ -157,21 +161,21 @@ public class OTAUpdateService extends IntentService {
 
             if (mUpdateWaitingToComplete && versionMatches(versionMajor, versionMinor)) {
                 Log.d(TAG, "[UPDATE] [SUCCESSFUL]"
-                        + " [SN:" + mLwMeshAddress + "]"
+                        + " [SN:" + mCurrentLwMeshAddress + "]"
                         + " [PACKETS:" + mLastSentPacket
                         + "] Updated to target: " + versionMajor + "." + versionMinor);
 
-                resetUpdate();
+                moveUpdateToNextNode();
 
             } else {
                 Log.d(TAG, "[UPDATE] [FAILED]"
-                        + " [SN:" + mLwMeshAddress + "]"
+                        + " [SN:" + mCurrentLwMeshAddress + "]"
                         + " [PACKETS:" + mLastSentPacket + "]"
                         + " [TARGET: " + mVersionMajor
                         + "." + mVersionMinor
                         + "] [ACTUAL: " + versionMajor + "." + versionMinor + "]");
 
-                resetUpdate();
+                moveUpdateToNextNode();
             }
         }
     }
@@ -183,32 +187,38 @@ public class OTAUpdateService extends IntentService {
      * @param intent The Intent which started this OTA update
      */
     private void handleOtaUpdateStartRequest(Intent intent) {
-        int node = intent.getIntExtra("lwMeshAddress", -1);
+        String nodeRegex = intent.getStringExtra("lwMeshAddress");
         String firmwareVersion = intent.getStringExtra("firmwareVersion");
 
         if(firmwareVersion == null) {
             return;
         }
 
-        //TODO use regular expressions?
-        String versionNumStr = firmwareVersion.split("_v")[1];                 // e.g. "SmartNode_v1.0" -> "1.0"
+        try {
+            String versionNumStr = firmwareVersion.split("_v")[1];                 // e.g. "SmartNode_v1.0" -> "1.0"
 
-        int versionMajor = Integer.parseInt(versionNumStr.split("\\.")[0]);   // e.g. "1.0" -> 1
-        int versionMinor = Integer.parseInt(versionNumStr.split("\\.")[1]);   // e.g. "1.0" -> 0
+            int versionMajor = Integer.parseInt(versionNumStr.split("\\.")[0]);   // e.g. "1.0" -> 1
+            int versionMinor = Integer.parseInt(versionNumStr.split("\\.")[1]);   // e.g. "1.0" -> 0
 
-        mVersionMajor = (short) versionMajor;
-        mVersionMinor = (short) versionMinor;
+            mVersionMajor = (short) versionMajor;
+            mVersionMinor = (short) versionMinor;
+
+        } catch(NullPointerException e) {
+            // Version parsing failed
+            e.printStackTrace();
+            return;
+        }
 
         if(firmwareVersion.startsWith("SmartNode_")) {
             mFilename = firmwareVersion;
             mFirmwareDeviceType = FirmwareDeviceType_t.SMART_NODE_DEVICE_TYPE;
-            startUpdate(node, versionMajor, versionMinor, mFilename, mFirmwareDeviceType);
+            startUpdate(nodeRegex, mVersionMajor, mVersionMinor, mFilename, mFirmwareDeviceType);
 
         }
         else if(firmwareVersion.startsWith("Itm_") || firmwareVersion.startsWith("itm_")) {
             mFilename = firmwareVersion.replace("Itm_", "itm_");
             mFirmwareDeviceType = FirmwareDeviceType_t.ITM_DEVICE_TYPE;
-            startUpdate(node, versionMajor, versionMinor, mFilename, mFirmwareDeviceType);
+            startUpdate(nodeRegex, mVersionMajor, mVersionMinor, mFilename, mFirmwareDeviceType);
         }
     }
 
@@ -217,34 +227,39 @@ public class OTAUpdateService extends IntentService {
      * Fails if the address is invalid, if there is currently an update in progress, or if the files
      * do not exist
      *
-     * @param address      The address of the device to be updated
+     * @param addressRegex The address of the device to be updated
      * @param versionMajor The major version of the new firmware
      * @param versionMinor The minor version of the new firmware
      * @param filename     The literal name of the firmware file, with no extension
      * @param deviceType   The type of device being updated
      */
-    private void startUpdate(int address, int versionMajor, int versionMinor, String filename, FirmwareDeviceType_t deviceType) {
+    private void startUpdate(String addressRegex, int versionMajor, int versionMinor, String filename, FirmwareDeviceType_t deviceType) {
         Log.d(TAG, "[VALIDATION] Validating update instructions="+filename);
         if (mUpdateInProgress) {
             Log.d(TAG, "[VALIDATION] Update already in progress");
             return;
         }
 
-        if (address < 0) {
-            Log.d(TAG, "[VALIDATION] Invalid address: " + address);
-            resetUpdate();
+        if (addressRegex.matches("[^0-9?]")) {  //contains characters other than 0-9 and "?" wildcard
+            Log.d(TAG, "[VALIDATION] Address regex contains invalid characters: " + addressRegex);
+            resetUpdateVariables();
             return;
         }
 
         if (!validVersion((short) versionMajor, (short) versionMinor)) {
             Log.d(TAG, "[VALIDATION] Invalid version: " + versionMajor + "." + versionMinor);
-            resetUpdate();
+            resetUpdateVariables();
             return;
         }
 
         Log.d(TAG, "[VALIDATION] Valid address and version");
 
-        mLwMeshAddress = address;
+        //convert "?" wildcards to Java digit wildcards
+        addressRegex = addressRegex.replace("?", "\\d");
+
+        if(mLwMeshAddresses == null) {
+            mLwMeshAddresses = new ArrayList<>();
+        }
 
         //determine which device is being updated
         //TODO: faster way to iterate over devices?
@@ -252,7 +267,8 @@ public class OTAUpdateService extends IntentService {
         for(Floor floor : HSUtil.getFloors()) {
             for(Zone zone : HSUtil.getZones(floor.getId())) {
                 for(Device device : HSUtil.getDevices(zone.getId())) {
-                    if(Integer.valueOf(device.getAddr()) == address) {
+                    if(device.getAddr().matches(addressRegex)) {
+                        mLwMeshAddresses.add(Integer.parseInt(device.getAddr()));
                         deviceExists = true;
                     }
                     if(deviceExists) break;
@@ -262,11 +278,15 @@ public class OTAUpdateService extends IntentService {
             if(deviceExists) break;
         }
 
+        for(int addr : mLwMeshAddresses) {
+            Log.d(TAG, "[VALIDATION] Regex returned address: " + addr);
+        }
+
         if(deviceExists) {
-            runMetadataCheck(DOWNLOAD_DIR, versionMajor, versionMinor, filename, deviceType);
+            moveUpdateToNextNode();
             sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_START));
         } else {
-            Log.d(TAG, "[VALIDATION] Could not find a device with address " + address);
+            Log.d(TAG, "[VALIDATION] Could not find any devices with address regex: " + addressRegex);
         }
     }
 
@@ -329,7 +349,7 @@ public class OTAUpdateService extends IntentService {
 
         Log.d(TAG, "[BINARY] Binary passed check");
 
-        Log.d(TAG, "[STARTUP] Starting to update device with address " + mLwMeshAddress);
+        Log.d(TAG, "[STARTUP] Starting to update device with address " + mCurrentLwMeshAddress);
 
         //TODO notify something (PubNub?) that an update has started
 
@@ -478,7 +498,7 @@ public class OTAUpdateService extends IntentService {
 
         if (packets == null) {
             Log.d(TAG, "[STARTUP] Failed to move binary file to RAM");
-            resetUpdate();
+            resetUpdateVariables();
             return;
         }
 
@@ -537,7 +557,7 @@ public class OTAUpdateService extends IntentService {
         }
 
         if (BuildConfig.DEBUG) {
-            Log.d(TAG, "[METADATA] [SN:" + mLwMeshAddress
+            Log.d(TAG, "[METADATA] [SN:" + mCurrentLwMeshAddress
                     + "] [VER:" + mVersionMajor + "." + mVersionMinor
                     + "] [LEN:" + mUpdateLength
                     + "] [SIG:" + ByteArrayUtils.byteArrayToHexString(mFirmwareSignature, true) + "]");
@@ -554,7 +574,7 @@ public class OTAUpdateService extends IntentService {
         CcuToCmOverUsbFirmwareMetadataMessage_t message = new CcuToCmOverUsbFirmwareMetadataMessage_t();
 
         message.messageType.set(MessageType.CCU_TO_CM_OVER_USB_FIRMWARE_METADATA);
-        message.lwMeshAddress.set(mLwMeshAddress);
+        message.lwMeshAddress.set(mCurrentLwMeshAddress);
 
         message.metadata.deviceType.set(firmware);
         message.metadata.majorVersion.set(mVersionMajor);
@@ -564,7 +584,7 @@ public class OTAUpdateService extends IntentService {
         message.metadata.setSignature(mFirmwareSignature);
 
         if (BuildConfig.DEBUG) {
-            Log.d(TAG, "[METADATA] [SN:" + mLwMeshAddress + "] [DATA: " + ByteArrayUtils.byteArrayToHexString(message.getByteBuffer().array(), true) + "]");
+            Log.d(TAG, "[METADATA] [SN:" + mCurrentLwMeshAddress + "] [DATA: " + ByteArrayUtils.byteArrayToHexString(message.getByteBuffer().array(), true) + "]");
         }
 
         try {
@@ -582,8 +602,8 @@ public class OTAUpdateService extends IntentService {
      */
     private void sendPacket(int lwMeshAddress, int packetNumber) {
 
-        if (lwMeshAddress != mLwMeshAddress) {
-            Log.d(TAG, "[UPDATE] Received packet request from address " + lwMeshAddress + ", instead of " + mLwMeshAddress);
+        if (lwMeshAddress != mCurrentLwMeshAddress) {
+            Log.d(TAG, "[UPDATE] Received packet request from address " + lwMeshAddress + ", instead of " + mCurrentLwMeshAddress);
             return;
         }
         if (mUpdateWaitingToComplete && packetNumber == packets.size() /*- 2*/) {
@@ -591,7 +611,7 @@ public class OTAUpdateService extends IntentService {
             return;
         }
         if (packetNumber < 0 || packetNumber > packets.size()) {
-            Log.d(TAG, "[UPDATE] [SN:" + mLwMeshAddress + "] INVALID PACKET " + packetNumber);
+            Log.d(TAG, "[UPDATE] [SN:" + mCurrentLwMeshAddress + "] INVALID PACKET " + packetNumber);
             return;
         }
         if (!mUpdateWaitingToComplete && (packetNumber == (packets.size() - 1))) {
@@ -649,35 +669,62 @@ public class OTAUpdateService extends IntentService {
      * @return True if it is a valid version, false if not
      */
     private boolean validVersion(short major, short minor) {
-        if (major < 0) {
-            return false;
+        return (major > 0) && (minor > 0);
+    }
+
+    private void moveUpdateToNextNode() {
+        resetUpdateVariables();
+
+        if(mLwMeshAddresses.isEmpty()) {
+            completeUpdate();
+            return;
         }
 
-        if (minor < 0) {
-            return false;
-        }
+        mCurrentLwMeshAddress = mLwMeshAddresses.get(0);
+        mLwMeshAddresses.remove(0);
 
-        return true;
+        //TODO: mFIlename is not actually storing the file name. Java immutable strings?
+        Log.d(TAG, "ok wut: " + mVersionMinor + " " + mVersionMinor + " " + mFilename + " " + mFirmwareDeviceType);
+
+        runMetadataCheck(DOWNLOAD_DIR, mVersionMajor, mVersionMinor, mFilename, mFirmwareDeviceType);
     }
 
     /**
-     * Clears update variables at the end of an OTA update
+     * Clears update variables
      */
-    private void resetUpdate() {
-        deleteFilesByDeviceType(DOWNLOAD_DIR, mFirmwareDeviceType);
+    private void resetUpdateVariables() {
+        mCurrentLwMeshAddress = -1;
+
+        mLastSentPacket = -1;
+
+        mFilename = "";
+        mUpdateLength = -1;
 
         mMetadataDownloadId = -1;
         mBinaryDownloadId = -1;
-        mLwMeshAddress = -1;
-        mUpdateInProgress = false;
+
         mUpdateWaitingToComplete = false;
-        if(packets != null) { packets.clear(); }
-        mVersionMajor = -1;
-        mVersionMinor = -1;
-        mLastSentPacket = -1;
-        mUpdateLength = -1;
-        mFirmwareSignature = new byte[0];
 
         Log.d(TAG, "[RESET] Reset OTA update status");
+    }
+
+    /**
+     *
+     */
+    private void completeUpdate() {
+        deleteFilesByDeviceType(DOWNLOAD_DIR, mFirmwareDeviceType);
+
+        mVersionMajor = -1;
+        mVersionMinor = -1;
+
+        mFilename = "";
+        mUpdateLength = -1;
+
+        mMetadataDownloadId = -1;
+        mBinaryDownloadId = -1;
+
+        mUpdateInProgress = false;
+
+        Log.d(TAG, "[RESET] No nodes remain, OTA update is complete");
     }
 }

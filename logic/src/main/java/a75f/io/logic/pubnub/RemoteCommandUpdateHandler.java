@@ -17,13 +17,19 @@ public class RemoteCommandUpdateHandler
 
         if (cmdType.startsWith("ota_update")) {
             //format is "ota_update 1234 SmartNode_v1.0"
-            String[] cmdParams = cmdType.split(" ");
+            try {
+                String[] cmdParams = cmdType.split(" ");
 
-            Intent otaUpdateIntent = new Intent(Globals.IntentActions.PUBNUB_MESSAGE);
-            otaUpdateIntent.putExtra("lwMeshAddress", Integer.parseInt(cmdParams[1]));
-            otaUpdateIntent.putExtra("firmwareVersion", cmdParams[2]);
+                Intent otaUpdateIntent = new Intent(Globals.IntentActions.PUBNUB_MESSAGE);
+                otaUpdateIntent.putExtra("lwMeshAddress", cmdParams[1]);
+                otaUpdateIntent.putExtra("firmwareVersion", cmdParams[2]);
 
-            context.sendBroadcast(otaUpdateIntent);
+                context.sendBroadcast(otaUpdateIntent);
+
+            } catch(NullPointerException e) {
+                // Command parsing failed
+                e.printStackTrace();
+            }
         }
     }
 }

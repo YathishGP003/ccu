@@ -308,16 +308,18 @@ public class OAOEquip
         device.addPointsToDb();
         
         //init
-        hayStack.writeDefaultValById(returnAirCO2Id,0.0);
-        hayStack.writeDefaultValById(rtuCurrentTransformerId,0.0);
-        hayStack.writeDefaultValById(outsideAirTemperatureId,0.0);
-        hayStack.writeDefaultValById(supplyAirTemperatureId,0.0);
-        hayStack.writeDefaultValById(mixedAirTemperatureId,0.0);
-        hayStack.writeDefaultValById(mixedAirHumidityId,0.0);
-        hayStack.writeDefaultValById(outsideAirDamperId,0.0);
-        hayStack.writeDefaultValById(returnAirDamperId,0.0);
-        hayStack.writeDefaultValById(exhaustFanStage1Id,0.0);
-        hayStack.writeDefaultValById(exhaustFanStage2Id,0.0);
+        hayStack.writeHisValById(returnAirCO2Id,0.0);
+        hayStack.writeHisValById(rtuCurrentTransformerId,0.0);
+        hayStack.writeHisValById(outsideAirTemperatureId,0.0);
+        hayStack.writeHisValById(supplyAirTemperatureId,0.0);
+        hayStack.writeHisValById(mixedAirTemperatureId,0.0);
+        hayStack.writeHisValById(mixedAirHumidityId,0.0);
+        hayStack.writeHisValById(outsideAirDamperId,0.0);
+        hayStack.writeHisValById(returnAirDamperId,0.0);
+        hayStack.writeHisValById(exhaustFanStage1Id,0.0);
+        hayStack.writeHisValById(exhaustFanStage2Id,0.0);
+    
+        CCUHsApi.getInstance().syncEntityTree();
     }
     
     public void createConfigPoints(OAOProfileConfiguration config, String equipRef)

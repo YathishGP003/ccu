@@ -41,13 +41,11 @@ public class OAOProfile
         oaoEquip.update(config);
     }
     
-    //@Override
     public ProfileType getProfileType()
     {
         return ProfileType.OAO;
     }
     
-    //@Override
     public BaseProfileConfiguration getProfileConfiguration(short address)
     {
         return oaoEquip.getProfileConfiguration();

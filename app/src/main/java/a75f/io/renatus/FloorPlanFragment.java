@@ -117,7 +117,12 @@ public class FloorPlanFragment extends Fragment
 							if(LSerial.getInstance().isConnected()) //If usb connected and pairing done then reseed
 								LSerial.getInstance().setResetSeedMessage(true);
 							try{
-								updateModules(getSelectedZone());
+								if (mRoomListAdapter == null || mRoomListAdapter.getSelectedPostion() == -1) {
+									updateOAOModule();
+								}else
+								{
+									updateModules(getSelectedZone());
+								}
 								//Crash here because of activity null while moving to other fragment and return back here after edit config
 								if((getActivity() != null) && (mPairingReceiver != null))
 								getActivity().unregisterReceiver(mPairingReceiver);
@@ -319,23 +324,48 @@ public class FloorPlanFragment extends Fragment
 	}
 	
 	
+	private boolean updateOAOModule() {
+		ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and oao");
+		ArrayList<Equip> equipList = new ArrayList<>();
+		for (HashMap m : equips)
+		{
+			equipList.add(new Equip.Builder().setHashMap(m).build());
+		}
+		
+		if(equipList != null && (equipList.size() > 0)) {
+			Log.d("CCU","Show OAO Equip ");
+			mModuleListAdapter = new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(), R.layout.listviewitem,createAddressList(equipList));
+			getActivity().runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					moduleListView.setAdapter(mModuleListAdapter);
+				}
+			});
+			return true;
+		} else {
+			moduleListView.setAdapter(null);
+			Log.d("CCU","Show Equip does not exist ");
+			return false;
+		}
+		
+	}
 	private void updateModules(Zone zone)
 	{
 		Log.d("CCU","Zone Selected "+zone.getDisplayName());
-			ArrayList<Equip> zoneEquips  = HSUtil.getEquips(zone.getId());
-			if(zoneEquips != null && (zoneEquips.size() > 0)) {
-				mModuleListAdapter = new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(), R.layout.listviewitem,createAddressList(zoneEquips));
-				//mModuleListAdapter = new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(), R.id.textData,createAddressList(zoneEquips));
+		ArrayList<Equip> zoneEquips  = HSUtil.getEquips(zone.getId());
+		if(zoneEquips != null && (zoneEquips.size() > 0)) {
+			mModuleListAdapter = new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(), R.layout.listviewitem,createAddressList(zoneEquips));
+			//mModuleListAdapter = new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(), R.id.textData,createAddressList(zoneEquips));
 
-				getActivity().runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						moduleListView.setAdapter(mModuleListAdapter);
-					}
-				});
-			} else {
-				moduleListView.setAdapter(null);
-			}
+			getActivity().runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					moduleListView.setAdapter(mModuleListAdapter);
+				}
+			});
+		} else {
+			moduleListView.setAdapter(null);
+		}
 	}
 	
 	private ArrayList<String> createAddressList(ArrayList<Equip> equips)
@@ -435,7 +465,12 @@ public class FloorPlanFragment extends Fragment
 			}
 		}
 		mFloorListAdapter.setSelectedItem(-1);
-		enableModueButton();
+		if (updateOAOModule())
+		{
+			moduleListView.setVisibility(View.VISIBLE);
+		} else {
+			enableModueButton();
+		}
 	}
 
 	private void setSytemSelection()
@@ -615,7 +650,7 @@ public class FloorPlanFragment extends Fragment
 		short meshAddress = L.generateSmartNodeAddress();
 		if(mFloorListAdapter.getSelectedPostion() == -1)
 		{
-			DialogOAOProfile oaoProfiling = DialogOAOProfile.newInstance(meshAddress);
+			DialogOAOProfile oaoProfiling = DialogOAOProfile.newInstance(meshAddress, "SYSTEM", "SYSTEM");
 			showDialogFragment(oaoProfiling, DialogOAOProfile.ID);
 		}
 		else {
@@ -667,9 +702,16 @@ public class FloorPlanFragment extends Fragment
 	
 	private void selectModule(int position)
 	{
+		String nodeAddr = mModuleListAdapter.getItem(position);
+		if (mRoomListAdapter == null || mRoomListAdapter.getSelectedPostion() == -1)
+		{
+			DialogOAOProfile oaoProfiling = DialogOAOProfile.newInstance(Short.parseShort(nodeAddr), "SYSTEM", "SYSTEM");
+			showDialogFragment(oaoProfiling, DialogOAOProfile.ID);
+			return;
+		}
 		Floor floor = getSelectedFloor();
 		Zone zone = getSelectedZone();
-		String nodeAddr = mModuleListAdapter.getItem(position);
+		
 		
 		ZoneProfile profile = L.getProfile(Short.parseShort(nodeAddr));
 		if(profile != null) {

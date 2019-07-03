@@ -17,6 +17,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
+import a75f.io.logic.bo.building.dab.DabProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
@@ -66,6 +67,7 @@ public class DabSystemController extends SystemController
     double averageSystemHumidity = 0;
     double averageSystemTemperature = 0;
     
+    double co2LoopOpWA = 0;
     private DabSystemController()
     {
         piController = new ControlLoop();
@@ -85,12 +87,14 @@ public class DabSystemController extends SystemController
         CcuLog.d(L.TAG_CCU_SYSTEM, "runDabSystemControlAlgo -> ciDesired: " + ciDesired + " systemMode: " + systemMode);
     
         weightedAverageCoolingLoadPostML = weightedAverageHeatingLoadPostML = weightedAverageLoadSum = 0;
-        
+        totalCoolingLoad = totalHeatingLoad = zoneCount = 0;
         updateSystemHumidity();
         updateSystemTemperature();
         
         profile.setSystemPoint("average and humidity", averageSystemHumidity);
         profile.setSystemPoint("average and temp", averageSystemTemperature);
+        
+        double co2LoopWASum = 0;
         
         for (Floor f: HSUtil.getFloors())
         {
@@ -114,24 +118,26 @@ public class DabSystemController extends SystemController
                     totalCoolingLoad += zoneCoolingLoad;
                     totalHeatingLoad += zoneHeatingLoad;
                     zoneCount++;
-                    //weightedAverageCoolingOnlyLoadSum += zoneCoolingLoad * zoneDynamicPriority;
-                    //weightedAverageHeatingOnlyLoadSum += zoneHeatingLoad * zoneDynamicPriority;
+                    
                     weightedAverageLoadSum = (zoneCoolingLoad * zoneDynamicPriority) - (zoneHeatingLoad * zoneDynamicPriority);
                     prioritySum += zoneDynamicPriority;
+                    co2LoopWASum += (getEquipCo2LoopOp(q.getId()) * zoneDynamicPriority);
                     CcuLog.d(L.TAG_CCU_SYSTEM, q.getDisplayName() + " zoneDynamicPriority: " + zoneDynamicPriority + " zoneCoolingLoad: " + zoneCoolingLoad + " zoneHeatingLoad: " + zoneHeatingLoad);
-                    CcuLog.d(L.TAG_CCU_SYSTEM, q.getDisplayName() + " weightedAverageLoadSum: "+weightedAverageLoadSum);
+                    CcuLog.d(L.TAG_CCU_SYSTEM, q.getDisplayName() + " weightedAverageLoadSum: "+weightedAverageLoadSum+" co2LoopWASum "+co2LoopWASum);
                 }
             }
             
         }
         
-        if (prioritySum == 0) {
+        if (prioritySum == 0 || zoneCount == 0) {
             CcuLog.d(L.TAG_CCU_SYSTEM, "No valid temperature, Skip DabSystemControlAlgo");
             systemState = OFF;
+            reset();
             return;
         }
         
         weightedAverageLoad = weightedAverageLoadSum / prioritySum;
+        co2LoopOpWA = co2LoopWASum/prioritySum;
         
         comfortIndex = (int)(totalCoolingLoad + totalHeatingLoad) /zoneCount;
         
@@ -204,7 +210,7 @@ public class DabSystemController extends SystemController
             }
         }
     
-        CcuLog.d(L.TAG_CCU_SYSTEM, "weightedAverageLoadMA "+weightedAverageLoadMA+" systemState: "+systemState);
+        CcuLog.d(L.TAG_CCU_SYSTEM, "weightedAverageLoadMA "+weightedAverageLoadMA+" co2LoopOpWA "+co2LoopOpWA+" systemState: "+systemState);
         profile.setSystemPoint("operating and mode", systemState.ordinal());
     
         weightedAverageCoolingLoadPostML = weightedAverageLoadPostML > 0 ? weightedAverageLoadPostML : 0;
@@ -339,6 +345,22 @@ public class DabSystemController extends SystemController
         return p.val * Math.pow(zonePriorityMultiplier, (zoneLoad/zonePrioritySpread) > 10 ? 10 : (zoneLoad/zonePrioritySpread));
     }
     
+    public double getEquipCo2LoopOp(String equipRef){
+        for (ZoneProfile f : L.ccu().zoneProfiles) {
+            Equip q = f.getEquip();
+            if (q.getMarkers().contains("dab"))
+            {
+                double enabledCO2Control = CCUHsApi.getInstance().readDefaultVal("point and config and dab and enable and co2 and equipRef == \"" + q.getId() + "\"");
+                if (q.getId().equals(equipRef) && enabledCO2Control > 0)
+                {
+                    DabProfile d = (DabProfile) f;
+                    return d.getCo2LoopOp();
+                }
+            }
+        }
+        return 0;
+    }
+    
     public void updateSystemHumidity() {
         //Average across zones or from proxy zone.
         double humiditySum = 0;
@@ -395,6 +417,10 @@ public class DabSystemController extends SystemController
     @Override
     public double getAverageSystemTemperature() {
         return averageSystemTemperature;
+    }
+    
+    public double getWACo2LoopOp() {
+        return co2LoopOpWA;
     }
     
     /*public double getDynamicPriority(double zoneLoad, String zoneRef) {
@@ -458,6 +484,7 @@ public class DabSystemController extends SystemController
         
         if (maxDamperPos == 0) {
             CcuLog.d(L.TAG_CCU_SYSTEM," Abort normalizeAirflow : maxDamperPos = "+maxDamperPos);
+            return;
         }
         
         double targetPercent = (100 - maxDamperPos) * 100/ maxDamperPos ;
@@ -560,4 +587,13 @@ public class DabSystemController extends SystemController
     public double getStatus(String nodeAddr) {
         return CCUHsApi.getInstance().readHisValByQuery("point and status and his and group == \""+nodeAddr+"\"");
     }
+    
+    @Override
+    public void reset(){
+        weightedAverageLoadPostMLQ.clear();
+        piController.reset();
+        heatingSignal = 0;
+        coolingSignal = 0;
+    }
 }
+

@@ -565,8 +565,8 @@ public class CCUTagsDb extends HServer {
                 .add("addr", d.getAddr())
                 .add("siteRef", d.getSiteRef())
                 .add("equipRef", d.getEquipRef())
-                .add("roomRef", d.getRoomRef())
-                .add("floorRef", d.getFloorRef());
+                .add("roomRef", d.getRoomRef() != null ? d.getRoomRef() : "SYSTEM")
+                .add("floorRef", d.getFloorRef() != null ? d.getFloorRef() : "SYSTEM");
 
         for (String m : d.getMarkers()) {
             b.add(m);

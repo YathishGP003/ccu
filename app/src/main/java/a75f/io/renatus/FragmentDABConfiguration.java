@@ -9,7 +9,6 @@ import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.SwitchCompat;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -206,7 +205,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
             CcuLog.d(L.TAG_CCU_UI,  "Get DABConfig: ");
             mProfileConfig = (DabProfileConfiguration) mDabProfile.getProfileConfiguration(mSmartNodeAddress);
         } else {
-            CcuLog.d(L.TAG_CCU_UI, "Create Vav Profile: ");
+            CcuLog.d(L.TAG_CCU_UI, "Create DABProfile: ");
             mDabProfile = new DabProfile();
         }
         

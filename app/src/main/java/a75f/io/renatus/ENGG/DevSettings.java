@@ -27,6 +27,8 @@ import java.util.Date;
 import java.util.Locale;
 
 import a75f.io.logic.Globals;
+import a75f.io.logic.L;
+import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.renatus.R;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -45,6 +47,9 @@ public class DevSettings extends Fragment
     
     @BindView(R.id.logCaptureBtn)
     Button logCaptureBtn;
+    
+    @BindView(R.id.resetAppBtn)
+    Button resetAppBtn;
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -108,6 +113,20 @@ public class DevSettings extends Fragment
                 });
     
                 alert.show();
+            }
+        });
+    
+        resetAppBtn.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                L.ccu().systemProfile.reset();
+                for (ZoneProfile p : L.ccu().zoneProfiles) {
+                    p.reset();
+                }
+                L.ccu().zoneProfiles.clear();
+                Globals.getInstance().loadEquipProfiles();
             }
         });
     

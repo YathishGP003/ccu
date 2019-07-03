@@ -213,9 +213,9 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         setCmdSignal("fan", signal);
         ControlMote.setAnalogOut("analog2", signal);
         
-        double systemCO2LoopOp = VavSystemController.getInstance().getSystemState() == SystemController.State.OFF
+        systemCo2LoopOp = VavSystemController.getInstance().getSystemState() == SystemController.State.OFF
                                          ? 0 :(SystemConstants.CO2_CONFIG_MAX - getSystemCO2()) * 100 / 200 ;
-        setSystemLoopOp("co2", systemCO2LoopOp);
+        setSystemLoopOp("co2", systemCo2LoopOp);
         if (getConfigVal("analog4 and output and enabled") > 0)
         {
             analogMin = getConfigVal("analog4 and co2 and min");
@@ -223,9 +223,9 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             CcuLog.d(L.TAG_CCU_SYSTEM,"analog4Min: "+analogMin+" analog4Max: "+analogMax+" CO2: "+getSystemCO2());
             if (analogMax > analogMin)
             {
-                signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * systemCO2LoopOp/100));
+                signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * systemCo2LoopOp/100));
             } else {
-                signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * systemCO2LoopOp/100));
+                signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * systemCo2LoopOp/100));
             }
         } else {
             signal = 0;

@@ -32,6 +32,11 @@ public abstract class SystemProfile
     public SystemEquip sysEquip;
     private String equipRef = null;
     
+    public double systemCoolingLoopOp;
+    public double systemHeatingLoopOp;
+    public double systemFanLoopOp;
+    public double systemCo2LoopOp;
+    
     public abstract void doSystemControl();
     
     public abstract void addSystemEquip();
@@ -86,6 +91,22 @@ public abstract class SystemProfile
     
     public int getAnalog4Out() {
         return 0;
+    }
+    
+    public double getCoolingLoopOp()
+    {
+        return systemCoolingLoopOp;
+    }
+    public double getHeatingLoopOp()
+    {
+        return systemHeatingLoopOp;
+    }
+    public double getFanLoopOp()
+    {
+        return systemFanLoopOp;
+    }
+    public double getCo2LoopOp() {
+        return systemCo2LoopOp;
     }
     
     public SystemController getSystemController() {
@@ -294,5 +315,9 @@ public abstract class SystemProfile
         CCUHsApi.getInstance().addPoint(outsideTemperature);
         
         addCMPoints(siteRef, equipref, equipDis, tz);
+    }
+    
+    public void reset() {
+    
     }
 }

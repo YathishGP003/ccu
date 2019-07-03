@@ -128,13 +128,7 @@ public class PointSyncAdapter extends EntitySyncAdapter
     
     private boolean isWritable(String id) {
         Point p = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(id)).build();
-        
-        for (String marker : p.getMarkers()) {
-            if (marker.equals("writable")) {
-                return true;
-            }
-        }
-        return false;
+        return p.getMarkers().contains("writable");
     }
     
     private void writeValRemote(String luid, String guid) {

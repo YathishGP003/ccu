@@ -111,6 +111,8 @@ public class DabProfile extends ZoneProfile
                 double damperMax = dabEquip.getDamperLimit(state == HEATING ? "heating":"cooling", "max");
                 dabEquip.setDamperPos((damperMin+damperMax)/2, "primary");
                 dabEquip.setDamperPos((damperMin+damperMax)/2, "secondary");
+                dabEquip.setNormalizedDamperPos((damperMin+damperMax)/2, "primary");
+                dabEquip.setNormalizedDamperPos((damperMin+damperMax)/2, "secondary");
             }
             return;
         }
@@ -205,5 +207,17 @@ public class DabProfile extends ZoneProfile
         d.minPosition = (int)dabEquip.getDamperLimit(state == HEATING ? "heating":"cooling", "min");
         d.maxPosition = (int)dabEquip.getDamperLimit(state == HEATING ? "heating":"cooling", "max");
         d.iaqCompensatedMinPos = d.minPosition;
+    }
+    
+    public double getCo2LoopOp() {
+        return dabEquip.getCo2Loop().getLoopOutput();
+    }
+    
+    @Override
+    public void reset(){
+        double damperMin = dabEquip.getDamperLimit(state == HEATING ? "heating":"cooling", "min");
+        dabEquip.setDamperPos(damperMin, "primary");
+        dabEquip.setDamperPos(damperMin, "secondary");
+        dabEquip.setCurrentTemp(0);
     }
 }

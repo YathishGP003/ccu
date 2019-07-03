@@ -54,6 +54,11 @@ public class BuildingProcessJob extends BaseJob
             }
 
             L.ccu().systemProfile.doSystemControl();
+            
+            if (L.ccu().oaoProfile != null) {
+                L.ccu().oaoProfile.doOAO();
+            }
+            
             L.saveCCUState();
 
             new Thread() {

@@ -486,7 +486,7 @@ public class Globals {
         HashMap oaoEquip = CCUHsApi.getInstance().read("equip and oao");
         if (oaoEquip != null && oaoEquip.size() > 0)
         {
-            CcuLog.d(L.TAG_CCU, "System Equip does not exist.Create Dafault System Profile");
+            CcuLog.d(L.TAG_CCU, "Create Dafault OAO Profile");
             OAOProfile oao = new OAOProfile();
             oao.addOaoEquip(Short.parseShort(oaoEquip.get("group").toString()));
             L.ccu().oaoProfile = oao;

@@ -207,4 +207,9 @@ public abstract class DabSystemProfile extends SystemProfile
     public double getCo2LoopOp() {
         return DabSystemController.getInstance().getWACo2LoopOp();
     }
+    
+    @Override
+    public void reset() {
+        getSystemController().reset();
+    }
 }

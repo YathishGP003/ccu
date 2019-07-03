@@ -162,5 +162,8 @@ public abstract class ZoneProfile extends Schedulable
         }
         return false;
     }
+    
+    public void reset(){
+    }
 }
 

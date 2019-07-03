@@ -59,7 +59,7 @@ public class CCUApplication
     private HashMap<String, NamedSchedule> mLCMNamedSchedules = new HashMap<>();
     
     
-    public SystemProfile    systemProfile = null;
+    public SystemProfile   systemProfile = null;
     public Set<ZoneProfile> zoneProfiles  = new HashSet<>();
     public OAOProfile oaoProfile = null;
     

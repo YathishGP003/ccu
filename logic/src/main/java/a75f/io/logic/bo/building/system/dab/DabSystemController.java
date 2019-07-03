@@ -87,7 +87,7 @@ public class DabSystemController extends SystemController
         CcuLog.d(L.TAG_CCU_SYSTEM, "runDabSystemControlAlgo -> ciDesired: " + ciDesired + " systemMode: " + systemMode);
     
         weightedAverageCoolingLoadPostML = weightedAverageHeatingLoadPostML = weightedAverageLoadSum = 0;
-        
+        totalCoolingLoad = totalHeatingLoad = zoneCount = 0;
         updateSystemHumidity();
         updateSystemTemperature();
         
@@ -129,9 +129,10 @@ public class DabSystemController extends SystemController
             
         }
         
-        if (prioritySum == 0) {
+        if (prioritySum == 0 || zoneCount == 0) {
             CcuLog.d(L.TAG_CCU_SYSTEM, "No valid temperature, Skip DabSystemControlAlgo");
             systemState = OFF;
+            reset();
             return;
         }
         
@@ -347,11 +348,14 @@ public class DabSystemController extends SystemController
     public double getEquipCo2LoopOp(String equipRef){
         for (ZoneProfile f : L.ccu().zoneProfiles) {
             Equip q = f.getEquip();
-            double enabledCO2Control = CCUHsApi.getInstance()
-                                                .readDefaultVal("point and config and dab and enable and co2 and equipRef == \""+q.getId()+"\"");
-            if (q.getId().equals(equipRef) && enabledCO2Control > 0) {
-                DabProfile d = (DabProfile) f;
-                return d.getCo2LoopOp();
+            if (q.getMarkers().contains("dab"))
+            {
+                double enabledCO2Control = CCUHsApi.getInstance().readDefaultVal("point and config and dab and enable and co2 and equipRef == \"" + q.getId() + "\"");
+                if (q.getId().equals(equipRef) && enabledCO2Control > 0)
+                {
+                    DabProfile d = (DabProfile) f;
+                    return d.getCo2LoopOp();
+                }
             }
         }
         return 0;
@@ -582,4 +586,13 @@ public class DabSystemController extends SystemController
     public double getStatus(String nodeAddr) {
         return CCUHsApi.getInstance().readHisValByQuery("point and status and his and group == \""+nodeAddr+"\"");
     }
+    
+    @Override
+    public void reset(){
+        weightedAverageLoadPostMLQ.clear();
+        piController.reset();
+        heatingSignal = 0;
+        coolingSignal = 0;
+    }
 }
+

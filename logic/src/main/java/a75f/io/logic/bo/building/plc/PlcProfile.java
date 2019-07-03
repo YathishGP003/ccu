@@ -88,4 +88,10 @@ public class PlcProfile extends ZoneProfile
         Log.d(L.TAG_CCU_ZONE, "PlcProfile, pv: "+pv+", tv: "+tv+", cv: "+cv);
     }
     
+    @Override
+    public void reset(){
+        plcEquip.setControlVariable(0);
+        plcEquip.setProcessVariable(0);
+    }
+    
 }

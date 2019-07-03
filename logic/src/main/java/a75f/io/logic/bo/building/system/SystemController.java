@@ -72,4 +72,8 @@ public abstract class SystemController
     }
     
     public abstract SystemController.State getConditioningForecast(Occupied occupiedSchedule);
+    
+    public void reset() {
+    
+    }
 }

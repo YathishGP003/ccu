@@ -218,5 +218,9 @@ public abstract class VavSystemProfile extends SystemProfile
     }
     
     
+    @Override
+    public void reset() {
+        getSystemController().reset();
+    }
     
 }

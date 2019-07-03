@@ -210,4 +210,12 @@ public class DabProfile extends ZoneProfile
     public double getCo2LoopOp() {
         return dabEquip.getCo2Loop().getLoopOutput();
     }
+    
+    @Override
+    public void reset(){
+        double damperMin = dabEquip.getDamperLimit(state == HEATING ? "heating":"cooling", "min");
+        dabEquip.setDamperPos(damperMin, "primary");
+        dabEquip.setDamperPos(damperMin, "secondary");
+        dabEquip.setCurrentTemp(0);
+    }
 }

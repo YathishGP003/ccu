@@ -98,7 +98,7 @@ public class VavSystemController extends SystemController
         CcuLog.d(L.TAG_CCU_SYSTEM, "runVavSystemControlAlgo -> ciDesired: " + ciDesired + " systemMode: " + systemMode);
     
         weightedAverageCoolingOnlyLoadSum = weightedAverageHeatingOnlyLoadSum = weightedAverageLoadSum = 0;
-        //systemOccupancy = 0;
+        totalCoolingLoad = totalHeatingLoad = zoneCount = 0;
         
         updateSystemHumidity();
         updateSystemTemperature();
@@ -141,6 +141,7 @@ public class VavSystemController extends SystemController
         if (prioritySum == 0) {
             CcuLog.d(L.TAG_CCU_SYSTEM, "No valid temperature, Skip VavSystemControlAlgo");
             systemState = OFF;
+            reset();
             return;
         }
         
@@ -236,6 +237,7 @@ public class VavSystemController extends SystemController
         } else {
             coolingSignal = 0;
             heatingSignal = 0;
+            piController.reset();
         }
         piController.dump();
         CcuLog.d(L.TAG_CCU_SYSTEM, "weightedAverageCoolingOnlyLoadMA: "+weightedAverageCoolingOnlyLoadMA+" weightedAverageHeatingOnlyLoadMA: "
@@ -626,5 +628,14 @@ public class VavSystemController extends SystemController
     
     public double getStatus(String nodeAddr) {
         return CCUHsApi.getInstance().readHisValByQuery("point and status and his and group == \""+nodeAddr+"\"");
+    }
+    
+    @Override
+    public void reset(){
+        weightedAverageCoolingOnlyLoadMAQueue.clear();
+        weightedAverageHeatingOnlyLoadMAQueue.clear();
+        piController.reset();
+        heatingSignal = 0;
+        coolingSignal = 0;
     }
 }

@@ -516,4 +516,15 @@ public abstract class VavProfile extends ZoneProfile
         return hwstResetListener;
     }
     
+    @Override
+    public void reset(){
+        for (short node : vavDeviceMap.keySet())
+        {
+            vavDeviceMap.get(node).setCurrentTemp(0);
+            vavDeviceMap.get(node).setDamperPos(vavDeviceMap.get(node).getDamperLimit(state == HEATING ? "heating":"cooling", "min"));
+            vavDeviceMap.get(node).setReheatPos(0);
+           
+        }
+    }
+    
 }

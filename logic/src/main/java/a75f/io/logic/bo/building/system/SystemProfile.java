@@ -316,4 +316,8 @@ public abstract class SystemProfile
         
         addCMPoints(siteRef, equipref, equipDis, tz);
     }
+    
+    public void reset() {
+    
+    }
 }

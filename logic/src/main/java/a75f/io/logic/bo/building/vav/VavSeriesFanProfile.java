@@ -91,6 +91,7 @@ public class VavSeriesFanProfile extends VavProfile
                     double damperMin = vavDevice.getDamperLimit(state == HEATING ? "heating":"cooling", "min");
                     double damperMax = vavDevice.getDamperLimit(state == HEATING ? "heating":"cooling", "max");
                     vavDevice.setDamperPos((damperMin+damperMax)/2);
+                    vavDevice.setNormalizedDamperPos((damperMin+damperMax)/2);
                     vavDevice.setReheatPos(0);
                 }
                 continue;

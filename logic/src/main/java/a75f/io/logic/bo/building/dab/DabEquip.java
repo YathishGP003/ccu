@@ -302,6 +302,34 @@ public class DabEquip
                                           .build();
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
         CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
+    
+        Point supplyAirTemp1 = new Point.Builder()
+                                    .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-supplyAirTemp1")
+                                    .setEquipRef(equipRef)
+                                    .setSiteRef(siteRef)
+                                    .setRoomRef(roomRef)
+                                    .setFloorRef(floorRef)
+                                    .addMarker("zone").addMarker("dab")
+                                    .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("supply").addMarker("primary").addMarker("his").addMarker("logical").addMarker("equipHis")
+                                    .setGroup(String.valueOf(nodeAddr))
+                                    .setUnit("\u00B0F")
+                                    .setTz(tz)
+                                    .build();
+        String sat1Id = CCUHsApi.getInstance().addPoint(supplyAirTemp1);
+    
+        Point supplyAirTemp2 = new Point.Builder()
+                                       .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-supplyAirTemp2")
+                                       .setEquipRef(equipRef)
+                                       .setSiteRef(siteRef)
+                                       .setRoomRef(roomRef)
+                                       .setFloorRef(floorRef)
+                                       .addMarker("zone").addMarker("dab")
+                                       .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("supply").addMarker("secondary").addMarker("his").addMarker("logical").addMarker("equipHis")
+                                       .setGroup(String.valueOf(nodeAddr))
+                                       .setUnit("\u00B0F")
+                                       .setTz(tz)
+                                       .build();
+        String sat2Id = CCUHsApi.getInstance().addPoint(supplyAirTemp2);
         
         SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
         device.currentTemp.setPointRef(ctID);

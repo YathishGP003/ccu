@@ -111,6 +111,8 @@ public class DabProfile extends ZoneProfile
                 double damperMax = dabEquip.getDamperLimit(state == HEATING ? "heating":"cooling", "max");
                 dabEquip.setDamperPos((damperMin+damperMax)/2, "primary");
                 dabEquip.setDamperPos((damperMin+damperMax)/2, "secondary");
+                dabEquip.setNormalizedDamperPos((damperMin+damperMax)/2, "primary");
+                dabEquip.setNormalizedDamperPos((damperMin+damperMax)/2, "secondary");
             }
             return;
         }

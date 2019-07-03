@@ -484,6 +484,7 @@ public class DabSystemController extends SystemController
         
         if (maxDamperPos == 0) {
             CcuLog.d(L.TAG_CCU_SYSTEM," Abort normalizeAirflow : maxDamperPos = "+maxDamperPos);
+            return;
         }
         
         double targetPercent = (100 - maxDamperPos) * 100/ maxDamperPos ;

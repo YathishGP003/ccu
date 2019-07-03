@@ -1107,6 +1107,11 @@ public class VAVLogicalMap
         this.vavUnit.vavDamper.currentPosition = (int)damperPos;
     }
     
+    public void setNormalizedDamperPos(double damperPos)
+    {
+        CCUHsApi.getInstance().writeHisValByQuery("point and damper and normalized and cmd and group == \""+nodeAddr+"\"", damperPos);
+    }
+    
     public double getReheatPos()
     {
         Double damperpos = CCUHsApi.getInstance().readHisValByQuery("point and reheat and cmd and group == \""+nodeAddr+"\"");

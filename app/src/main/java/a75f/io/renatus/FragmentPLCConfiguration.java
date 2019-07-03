@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.SwitchCompat;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -212,6 +211,8 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                 targetValSp.invalidate();
                 if (mProfileConfig != null) {
                     targetValSp.setSelection(targetValAdapter.getPosition(mProfileConfig.pidTargetValue), false);
+                } else {
+                    targetValSp.setSelection(targetValAdapter.getPosition(5.0), false);
                 }
                 th1InSensorSp.setSelection(0, false);
                 
@@ -246,6 +247,8 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                 targetValSp.invalidate();
                 if (mProfileConfig != null) {
                     targetValSp.setSelection(targetValAdapter.getPosition(mProfileConfig.pidTargetValue), false);
+                } else {
+                    targetValSp.setSelection(targetValAdapter.getPosition(5.0), false);
                 }
                 analog1InSensorSp.setSelection(0, false);
             }
@@ -365,11 +368,13 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                 targetValSp.setEnabled(false);
             }
         } else {
-            analogout1AtMaxSp.setSelection(analogAdapter.getPosition(10));
-            analog1InSensorSp.setSelection(1);
+            analogout1AtMaxSp.setSelection(analogAdapter.getPosition(10), false);
+            analog1InSensorSp.setSelection(1, false);
             th1InSensorSp.setSelection(0,false);
             analog2InSensorSp.setEnabled(false);
             sensorOffsetSp.setEnabled(false);
+            targetValSp.setSelection(targetValAdapter.getPosition(5.0), false);
+            errorRangeSp.setSelection(errRangeAdapter.getPosition(2.0), false);
         }
     
         setButton.setOnClickListener(new View.OnClickListener()

@@ -151,54 +151,27 @@ public class DabStagedRtu extends DabSystemProfile
                 switch (stage)
                 {
                     case COOLING_1:
-                        if (coolingStages > 0 && systemCoolingLoopOp > 0)
-                        {
-                            relayState = 1;
-                        }
-                        else
-                        {
-                            relayState = 0;
-                        }
-                        break;
                     case COOLING_2:
                     case COOLING_3:
                     case COOLING_4:
                     case COOLING_5:
                         currState = getCmdSignal("relay" + i);
-                        stageThreshold = 100 * stage.ordinal() / coolingStages;
+                        if (L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable()) {
+                            stageThreshold = 100 * (stage.ordinal() +1) / (coolingStages + 1);
+                        } else
+                        {
+                            stageThreshold = 100 * stage.ordinal() / coolingStages;
+                        }
                         if (currState == 0)
                         {
-                            if (coolingStages > 0 && systemCoolingLoopOp > stageThreshold)
-                            {
-                                relayState = 1;
-                            }
-                            else
-                            {
-                                relayState = 0;
-                            }
+                            relayState = systemCoolingLoopOp > stageThreshold ? 1 : 0;
                         }
                         else
                         {
-                            if (coolingStages > 0 && systemCoolingLoopOp >= (stageThreshold - relayDeactHysteresis))
-                            {
-                                relayState = 1;
-                            }
-                            else
-                            {
-                                relayState = 0;
-                            }
+                            relayState = systemCoolingLoopOp >= Math.max(stageThreshold - relayDeactHysteresis ,0 ) ? 1 :0;
                         }
                         break;
                     case HEATING_1:
-                        if (heatingStages > 0 && systemHeatingLoopOp > 0)
-                        {
-                            relayState = 1;
-                        }
-                        else
-                        {
-                            relayState = 0;
-                        }
-                        break;
                     case HEATING_2:
                     case HEATING_3:
                     case HEATING_4:
@@ -207,31 +180,18 @@ public class DabStagedRtu extends DabSystemProfile
                         stageThreshold = 100 * (stage.ordinal() - HEATING_1.ordinal()) / heatingStages;
                         if (currState == 0)
                         {
-                            if (heatingStages > 0 && systemHeatingLoopOp > stageThreshold)
-                            {
-                                relayState = 1;
-                            }
-                            else
-                            {
-                                relayState = 0;
-                            }
+                            relayState = systemHeatingLoopOp > stageThreshold ? 1 : 0;
                         }
                         else
                         {
-                            if (heatingStages > 0 && systemHeatingLoopOp >= (stageThreshold - relayDeactHysteresis))
-                            {
-                                relayState = 1;
-                            }
-                            else
-                            {
-                                relayState = 0;
-                            }
+                            relayState = systemHeatingLoopOp >= Math.max(stageThreshold - relayDeactHysteresis, 0) ? 1: 0;
+                            
                         }
                         break;
                     case FAN_1:
-                        if ((fanStages > 0 && systemMode != SystemMode.OFF && (ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED
+                        if ((systemMode != SystemMode.OFF && (ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED
                                                                                || getSystemController().getSystemState() != OFF))
-                            || (fanStages > 0 && systemFanLoopOp > 0)) {
+                            ||  systemFanLoopOp > 0) {
                             relayState = 1;
                         } else {
                             relayState = 0;
@@ -239,11 +199,11 @@ public class DabStagedRtu extends DabSystemProfile
                         break;
                     case FAN_2:
                         if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_VFD_RTU) {
-                            relayState =  (fanStages > 0 && (systemCoolingLoopOp > 0 || systemHeatingLoopOp > 0)) ? 1 :0;
+                            relayState =  (systemCoolingLoopOp > 0 || systemHeatingLoopOp > 0) ? 1 :0;
                         }
-                        else if (fanStages > 0 && systemFanLoopOp > 0)
+                        else
                         {
-                            relayState = (fanStages > 0 && systemFanLoopOp > 0) ? 1 : 0;
+                            relayState = systemFanLoopOp > 0 ? 1 : 0;
                         }
                         break;
                     case FAN_3:
@@ -253,25 +213,11 @@ public class DabStagedRtu extends DabSystemProfile
                         stageThreshold = 100 * (stage.ordinal() - FAN_2.ordinal()) / (fanStages - 1);
                         if (currState == 0)
                         {
-                            if (fanStages > 0 && systemFanLoopOp >= stageThreshold)
-                            {
-                                relayState = 1;
-                            }
-                            else
-                            {
-                                relayState = 0;
-                            }
+                            relayState = systemFanLoopOp >= stageThreshold ? 1: 0;
                         }
                         else
                         {
-                            if (fanStages > 0 && systemFanLoopOp >= (stageThreshold - relayDeactHysteresis))
-                            {
-                                relayState = 1;
-                            }
-                            else
-                            {
-                                relayState = 0;
-                            }
+                            relayState = systemFanLoopOp >= (stageThreshold - relayDeactHysteresis) ? 1 : 0;
                         }
                         break;
                     case HUMIDIFIER:

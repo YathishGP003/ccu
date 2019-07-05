@@ -16,6 +16,7 @@ import a75f.io.logic.tuners.TunerUtil;
 * */
 public class OAOProfile
 {
+    
     public static boolean economizingAvailable = false;
     
     double economizingLoopOutput;
@@ -25,6 +26,15 @@ public class OAOProfile
     double returnAirFinalOutput;
     
     OAOEquip oaoEquip;
+    
+    public boolean isEconomizingAvailable()
+    {
+        return economizingAvailable;
+    }
+    public void setEconomizingAvailable(boolean economizingAvailable)
+    {
+        economizingAvailable = economizingAvailable;
+    }
     
     public void addOaoEquip(short addr, OAOProfileConfiguration config, String floorRef, String roomRef) {
         oaoEquip = new OAOEquip(getProfileType(), addr);

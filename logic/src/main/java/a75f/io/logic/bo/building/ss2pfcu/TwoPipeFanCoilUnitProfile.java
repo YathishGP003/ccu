@@ -145,14 +145,14 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
                         }
                         break;
                     case COOL_ONLY:
-                        if(supplyWaterTempTh2 < coolingThreshold){
+                        if((supplyWaterTempTh2 < coolingThreshold) && (roomTemp > averageDesiredTemp)){
                             twoPipeFCUCoolOnlyMode(twoPfcuEquip.getId(),node,roomTemp,occuStatus,fanSpeed);
                         }else {
                             fanOperationalModes(twoPfcuEquip.getId(),fanSpeed,node,occupied,opMode,roomTemp);
                         }
                         break;
                     case HEAT_ONLY:
-                        if(supplyWaterTempTh2 > heatingThreshold){
+                        if((supplyWaterTempTh2 > heatingThreshold) && (roomTemp < averageDesiredTemp)){
                             twoPipeFCUHeatOnlyMode(twoPfcuEquip.getId(),node,roomTemp,occuStatus,fanSpeed);
                         }else {
                             fanOperationalModes(twoPfcuEquip.getId(),fanSpeed,node,occupied,opMode, roomTemp);

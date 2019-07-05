@@ -103,7 +103,7 @@ public class DabSystemController extends SystemController
                 for (Equip q : HSUtil.getEquips(z.getId()))
                 {
                     
-                    if (q.getMarkers().contains("dab") == false || isZoneDead(q))
+                    if (q.getMarkers().contains("dab") == false || isZoneDead(q) || !hasTemp(q))
                     {
                         continue;
                     }
@@ -409,6 +409,15 @@ public class DabSystemController extends SystemController
         try
         {
             return CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and equipRef == \"" + q.getId() + "\"").equals("Zone Temp Dead");
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
+    public boolean hasTemp(Equip q) {
+        try
+        {
+            return CCUHsApi.getInstance().readHisValByQuery("point and current and temp and equipRef == \"" + q.getId() + "\"") > 0;
         } catch (Exception e) {
             return false;
         }

@@ -119,7 +119,7 @@ public class DabSystemController extends SystemController
                     totalHeatingLoad += zoneHeatingLoad;
                     zoneCount++;
                     
-                    weightedAverageLoadSum = (zoneCoolingLoad * zoneDynamicPriority) - (zoneHeatingLoad * zoneDynamicPriority);
+                    weightedAverageLoadSum += (zoneCoolingLoad * zoneDynamicPriority) - (zoneHeatingLoad * zoneDynamicPriority);
                     prioritySum += zoneDynamicPriority;
                     co2LoopWASum += (getEquipCo2LoopOp(q.getId()) * zoneDynamicPriority);
                     CcuLog.d(L.TAG_CCU_SYSTEM, q.getDisplayName() + " zoneDynamicPriority: " + zoneDynamicPriority + " zoneCoolingLoad: " + zoneCoolingLoad + " zoneHeatingLoad: " + zoneHeatingLoad);

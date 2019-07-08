@@ -14,6 +14,8 @@ import a75f.io.logic.Globals;
 
 public class OTAUpdateHandlerService extends Service {
 
+    private static String TAG = "OTAUpdateHandlerService";
+
     private boolean mIsTimerStarted = false;
     private CountDownTimer mTimeoutTimer;
 
@@ -86,13 +88,13 @@ public class OTAUpdateHandlerService extends Service {
 
                 @Override
                 public void onTick(long millisUntilFinished) {
-                    Log.d(OTAUpdateService.TAG, "[TIMER] Update will time out in " +
+                    Log.d(TAG, "[TIMER] Update will time out in " +
                             Math.ceil(millisUntilFinished / 1000) + "s");
                 }
 
                 @Override
                 public void onFinish() {
-                    Log.d(OTAUpdateService.TAG, "[TIMER] Update timed out, resetting");
+                    Log.d(TAG, "[TIMER] Update timed out, resetting");
                     stopOtaUpdateTimeoutTimer();
 
                     sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_TIMED_OUT));

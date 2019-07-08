@@ -38,10 +38,10 @@ import a75f.io.logic.bo.util.ByteArrayUtils;
 public class OTAUpdateService extends IntentService {
 
     //Constants
-    static final String TAG = "OTAUpdateService";
-
     public static final String METADATA_FILE_FORMAT = ".meta";
     public static final String BINARY_FILE_FORMAT = ".bin";
+
+    private static final String TAG = "OTAUpdateService";
 
     private static final String DOWNLOAD_BASE_URL = "http://updates.75fahrenheit.com/";
     private static final File DOWNLOAD_DIR = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
@@ -265,15 +265,16 @@ public class OTAUpdateService extends IntentService {
         for(Floor floor : HSUtil.getFloors()) {
             for(Zone zone : HSUtil.getZones(floor.getId())) {
                 for(Device device : HSUtil.getDevices(zone.getId())) {
-                    if(device.getAddr().matches(addressRegex)) {
-                        mLwMeshAddresses.add(Integer.parseInt(device.getAddr()));
-                        deviceExists = true;
+
+                    if(device.getAddr().matches(addressRegex) &&
+                        device.getMarkers().contains( deviceType.getHsMarkerName() )) {
+                            mLwMeshAddresses.add(Integer.parseInt(device.getAddr()));
+                            deviceExists = true;
                     }
-                    if(deviceExists) break;
+
                 }
-                if(deviceExists) break;
             }
-            if(deviceExists) break;
+        }
         }
 
         for(int addr : mLwMeshAddresses) {
@@ -412,16 +413,8 @@ public class OTAUpdateService extends IntentService {
      */
     private void deleteFilesByDeviceType(File dir, FirmwareDeviceType_t deviceType){
         for(File file : dir.listFiles()) {
-            switch(deviceType) {
-                case SMART_NODE_DEVICE_TYPE:
-                    if(file.getName().startsWith("SmartNode_v")) { file.delete(); }
-                    break;
-
-                case ITM_DEVICE_TYPE:
-                    if(file.getName().startsWith("itm_v")) { file.delete(); }
-
-                default:
-                    break;
+            if(file.getName().startsWith(deviceType.getUpdateFileName() + "_v")) {
+                file.delete();
             }
         }
     }
@@ -630,7 +623,6 @@ public class OTAUpdateService extends IntentService {
 
         try {
             MeshUtil.sendStructToCM(message);
-
         } catch (Exception e) {
             Log.e(TAG, "[UPDATE] [SN:" + lwMeshAddress + "] [PN:" + packetNumber + "] [FAILED]");
         }

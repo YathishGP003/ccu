@@ -209,6 +209,8 @@ public class ScheduleProcessJob extends BaseJob {
             Occupied occ = equipSchedule.getCurrentValues();
             if (occ != null) {
                 ScheduleProcessJob.putOccupiedModeCache(equip.getRoomRef(), occ);
+            } else {
+                ScheduleProcessJob.occupiedHashMap.remove(equip.getRoomRef());
             }
         }
 		if( !equip.getMarkers().contains("system") && equip.getMarkers().contains("standalone"))
@@ -443,6 +445,11 @@ public class ScheduleProcessJob extends BaseJob {
             Occupied next = null;
             for (Occupied occ : occupiedHashMap.values()) {
                 if (!occ.isSystemZone()) {
+                    if (next == null)
+                    {
+                        //Required when the CCU only has non-system equips like PID.
+                        next = occ;
+                    }
                     continue;
                 }
                 if (millisToOccupancy == 0) {
@@ -458,7 +465,7 @@ public class ScheduleProcessJob extends BaseJob {
         } else {
             nextOccupied = null;
         }
-    
+        
         if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DEFAULT) {
             CcuLog.d(TAG_CCU_JOB, "systemOccupancy status : " + systemOccupancy);
             return;

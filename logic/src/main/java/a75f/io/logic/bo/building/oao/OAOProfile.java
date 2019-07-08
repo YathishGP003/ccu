@@ -2,6 +2,7 @@ package a75f.io.logic.bo.building.oao;
 
 import android.util.Log;
 
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -33,7 +34,7 @@ public class OAOProfile
     }
     public void setEconomizingAvailable(boolean economizingAvailable)
     {
-        economizingAvailable = economizingAvailable;
+        this.economizingAvailable = economizingAvailable;
     }
     
     public void addOaoEquip(short addr, OAOProfileConfiguration config, String floorRef, String roomRef) {
@@ -65,7 +66,7 @@ public class OAOProfile
         
         doEconomizing();
         doDcvControl();
-    
+        
         outsideAirLoopOutput = Math.max(economizingLoopOutput, outsideAirCalculatedMinDamper);
         
         double outsideDamperMatTarget = TunerUtil.readTunerValByQuery("oao and outside and damper and mat and target",oaoEquip.equipRef);
@@ -78,6 +79,9 @@ public class OAOProfile
     
         returnAirFinalOutput = 100 - outsideAirFinalLoopOutput;
     
+        Log.d(L.TAG_CCU_OAO," economizingLoopOutput "+economizingLoopOutput+" outsideAirCalculatedMinDamper "+outsideAirCalculatedMinDamper
+                                            +" outsideAirFinalLoopOutput "+outsideAirFinalLoopOutput);
+        
         oaoEquip.setConfigNumVal("outside and air and damper and cmd", outsideAirFinalLoopOutput);
         oaoEquip.setConfigNumVal("return and air and damper and cmd", returnAirFinalOutput);
         
@@ -95,19 +99,33 @@ public class OAOProfile
     }
     
     public void doEconomizing() {
+        
+        double externalTemp , externalHumidity;
+        try {
+            externalTemp = CCUHsApi.getInstance().getExternalTemp();
+            externalHumidity = CCUHsApi.getInstance().getExternalHumidity();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.d(L.TAG_CCU_OAO," Failed to read external Temp or Humidity , Disable Economizing");
+            setEconomizingAvailable(false);
+            return;
+        }
         double insideEnthalpy = getAirEnthalpy(L.ccu().systemProfile.getSystemController().getAverageSystemTemperature(),
                                     L.ccu().systemProfile.getSystemController().getAverageSystemHumidity());
     
     
         double enthalpyDuctCompensationOffset = TunerUtil.readTunerValByQuery("oao and enthalpy and duct and compensation and offset",oaoEquip.equipRef);
     
-        double outsideEnthalpy = getAirEnthalpy(71, 94); //TODO-
+        double outsideEnthalpy = getAirEnthalpy(externalTemp, externalHumidity);
     
         double economizingToMainCoolingLoopMap = TunerUtil.readTunerValByQuery("oao and economizing and main and cooling and loop and map", oaoEquip.equipRef);
+    
+        Log.d(L.TAG_CCU_OAO," insideEnthalpy "+insideEnthalpy+", outsideEnthalpy "+outsideEnthalpy);
+        
         if (L.ccu().systemProfile.getSystemController().getSystemState() == SystemController.State.COOLING
                                 && (insideEnthalpy > outsideEnthalpy + enthalpyDuctCompensationOffset)) {
-            economizingAvailable = true;
             
+            setEconomizingAvailable(true);
             if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_ANALOG_RTU ||
                                 L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_ANALOG_RTU) {
                 economizingLoopOutput = Math.min(L.ccu().systemProfile.getCoolingLoopOp() * 100 / economizingToMainCoolingLoopMap ,100);
@@ -121,7 +139,7 @@ public class OAOProfile
                 economizingLoopOutput = Math.min(profile.getCoolingLoopOp() * 100 /(profile.coolingStages + 1), 100);
             }
         } else {
-            economizingAvailable = false;
+            setEconomizingAvailable(false);
         }
     }
     
@@ -174,7 +192,6 @@ public class OAOProfile
         double A = 0.007468 * Math.pow(averageTemp,2) - 0.4344 * averageTemp + 11.1769;
         double B = 0.2372 * averageTemp + 0.1230;
         double H = A * averageHumidity + B;
-        Log.d("CCU_OAO", String.format("Enthalpy %f %f %f", averageTemp, averageHumidity, H));
         return H;
     }
     

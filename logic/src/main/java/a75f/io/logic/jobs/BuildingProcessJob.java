@@ -52,12 +52,12 @@ public class BuildingProcessJob extends BaseJob
                     Globals.getInstance().registerSiteToPubNub(siteGUID);
                 }
             }
-
-            L.ccu().systemProfile.doSystemControl();
-            
+    
             if (L.ccu().oaoProfile != null) {
                 L.ccu().oaoProfile.doOAO();
             }
+            
+            L.ccu().systemProfile.doSystemControl();
             
             L.saveCCUState();
 

@@ -60,6 +60,9 @@ public class CCUHsApi
     
     String hayStackUrl = "";
     String influxUrl = "";
+    
+    HRef tempWeatherRef = null;
+    HRef humidityWeatherRef = null;
 
     public static CCUHsApi getInstance()
     {
@@ -1204,4 +1207,67 @@ public class CCUHsApi
         
         return 0;
     }
+    
+    public double getExternalTemp() {
+    
+        HClient hClient = new HClient(getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+        if (tempWeatherRef == null)
+        {
+            HDict navIdDict = new HDictBuilder().add(HayStackConstants.ID, HRef.copy(getGUID(getSiteId().toString()))).toDict();
+            HGrid hGrid = HGridBuilder.dictToGrid(navIdDict);
+            HGrid site = hClient.call(HStdOps.read.name(), hGrid);
+            HDict tDict = new HDictBuilder().add("filter", "weatherPoint and air and temp and weatherRef == " + site.row(0).get("weatherRef")).toDict();
+            HGrid weatherPoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
+            weatherPoint.dump();
+            if (weatherPoint != null && weatherPoint.numRows() > 0)
+            {
+                tempWeatherRef = weatherPoint.row(0).getRef("id");
+            }
+        }
+        HGrid hisGrid = hClient.hisRead(tempWeatherRef, "current");
+        hisGrid.dump();
+        if (hisGrid != null && hisGrid.numRows() > 0)
+        {
+            HRow r = hisGrid.row(hisGrid.numRows() - 1);
+            HDateTime date = (HDateTime) r.get("ts");
+            double tempVal = Double.parseDouble(r.get("val").toString());
+            System.out.println(date+" External Temp: "+tempVal);
+            return tempVal;
+        
+        }
+        return 0;
+    }
+    
+    //In percentage
+    public double getExternalHumidity() {
+        
+        HClient hClient = new HClient(getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+        if (humidityWeatherRef == null)
+        {
+            HDict navIdDict = new HDictBuilder().add(HayStackConstants.ID, HRef.copy(getGUID(getSiteId().toString()))).toDict();
+            HGrid hGrid = HGridBuilder.dictToGrid(navIdDict);
+            HGrid site = hClient.call(HStdOps.read.name(), hGrid);
+            HDict tDict = new HDictBuilder().add("filter", "weatherPoint and humidity and weatherRef == " + site.row(0).get("weatherRef")).toDict();
+            HGrid weatherPoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
+            weatherPoint.dump();
+            if (weatherPoint != null && weatherPoint.numRows() > 0)
+            {
+                humidityWeatherRef = weatherPoint.row(0).getRef("id");
+            }
+        }
+        HGrid hisGrid = hClient.hisRead(humidityWeatherRef, "current");
+        hisGrid.dump();
+        if (hisGrid != null && hisGrid.numRows() > 0)
+        {
+            HRow r = hisGrid.row(hisGrid.numRows() - 1);
+            HDateTime date = (HDateTime) r.get("ts");
+            double humidityVal = Double.parseDouble(r.get("val").toString());
+            System.out.println(date+" External Humidity: "+humidityVal);
+            return 100 * humidityVal;
+        
+        }
+        return 0;
+    }
+    
+    
 }

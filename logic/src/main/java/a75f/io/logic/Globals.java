@@ -29,6 +29,10 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.bo.building.ss4pfcu.FourPipeFanCoilUnitProfile;
+import a75f.io.logic.bo.building.system.dab.DabAdvancedHybridRtu;
+import a75f.io.logic.bo.building.ss2pfcu.TwoPipeFanCoilUnitProfile;
+import a75f.io.logic.pubnub.PubNubHandler;
 import a75f.io.logic.bo.building.CCUApplication;
 import a75f.io.logic.bo.building.Day;
 import a75f.io.logic.bo.building.NamedSchedule;
@@ -38,11 +42,9 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.erm.EmrProfile;
 import a75f.io.logic.bo.building.oao.OAOProfile;
 import a75f.io.logic.bo.building.plc.PlcProfile;
-import a75f.io.logic.bo.building.ss2pfcu.TwoPipeFanCoilUnitProfile;
 import a75f.io.logic.bo.building.sscpu.ConventionalUnitProfile;
 import a75f.io.logic.bo.building.sshpu.HeatPumpUnitProfile;
 import a75f.io.logic.bo.building.system.DefaultSystem;
-import a75f.io.logic.bo.building.system.dab.DabAdvancedHybridRtu;
 import a75f.io.logic.bo.building.system.dab.DabFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtuWithVfd;
@@ -59,7 +61,6 @@ import a75f.io.logic.jobs.BuildingProcessJob;
 import a75f.io.logic.jobs.PrintProcessJob;
 import a75f.io.logic.jobs.PrintProcessJobTwo;
 import a75f.io.logic.jobs.ScheduleProcessJob;
-import a75f.io.logic.pubnub.PubNubHandler;
 
 /**
  * Created by rmatt isOn 7/19/2017.
@@ -475,6 +476,11 @@ public class Globals {
                             TwoPipeFanCoilUnitProfile twoPfcu = new TwoPipeFanCoilUnitProfile();
                             twoPfcu.addLogicalMap(Short.valueOf(eq.getGroup()), z.getId());
                             L.ccu().zoneProfiles.add(twoPfcu);
+                            break;
+                        case SMARTSTAT_FOUR_PIPE_FCU:
+                            FourPipeFanCoilUnitProfile fourPfcu = new FourPipeFanCoilUnitProfile();
+                            fourPfcu.addLogicalMap(Short.valueOf(eq.getGroup()), z.getId());
+                            L.ccu().zoneProfiles.add(fourPfcu);
                             break;
                             
                     }

@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:elevation="12dp"
+    android:background="@drawable/border_dialog">
+
+
+    <TextView
+        android:id="@+id/textFourPFCU"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:fontFamily="@font/lato_bold"
+        android:text="@string/_4_pipe_fancoil_unit"
+        android:textAllCaps="true"
+        android:textColor="@color/orange_75f"
+        android:textSize="33.5dp"
+        android:textStyle="bold" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="70dp"
+        android:layout_below="@+id/textFourPFCU">
+        <RelativeLayout
+            android:id="@+id/rlPassFields"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+
+            <TextView
+                android:id="@+id/textEnable"
+                android:layout_width="wrap_content"
+                android:layout_height="24dp"
+                android:text="@string/title_enable"
+                android:textSize="19.5dp"
+                android:textColor="@color/black"
+                android:alpha="0.6"
+                android:fontFamily="@font/lato_regular"
+                android:layout_marginLeft="282dp"/>
+
+
+            <TextView
+                android:id="@+id/textTestSignal"
+                android:layout_width="wrap_content"
+                android:layout_height="24dp"
+                android:text="@string/title_testsignal"
+                android:textSize="19.5dp"
+                android:textColor="@color/black"
+                android:alpha="0.6"
+                android:fontFamily="@font/lato_regular"
+                android:layout_toRightOf="@+id/textEnable"
+                android:layout_marginLeft="284dp"/>
+
+            <TextView
+                android:id="@+id/textTempOffset"
+                android:layout_width="wrap_content"
+                android:layout_height="24dp"
+                android:layout_marginLeft="145dp"
+                android:layout_toRightOf="@+id/textTestSignal"
+                android:alpha="0.6"
+                android:fontFamily="@font/lato_regular"
+                android:text="@string/title_offset"
+                android:textColor="@color/black"
+                android:textSize="19.5dp" />
+
+
+            <NumberPicker
+                android:id="@+id/temperatureOffset"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginRight="25dp"
+                android:layout_below="@+id/textTempOffset"
+                android:layout_alignLeft="@+id/textTempOffset"
+                android:layout_alignRight="@+id/textTempOffset"
+                android:gravity="center_vertical|center_horizontal"
+                android:minWidth="77dp"
+                android:theme="@style/DefaultNumberPickerTheme" />
+
+            <ImageView
+                android:id="@+id/imageHPInput"
+                android:layout_width="250dp"
+                android:layout_height="535dp"
+                android:layout_below="@+id/textEnable"
+                android:layout_marginTop="32dp"
+                android:src="@drawable/input_2pipe" />
+            <LinearLayout
+                android:id="@+id/lt_toggles"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="30dp"
+                android:layout_marginLeft="10dp"
+                android:layout_toRightOf="@+id/imageHPInput"
+                android:layout_below="@+id/textEnable">
+
+                <ToggleButton
+                    android:id="@+id/toggleFanMed4pfcu"
+                    android:layout_width="46.12dp"
+                    android:layout_height="27.42dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:background="@drawable/toggle_selector"
+                    android:checked="false"
+                    android:textOff=""
+                    android:textOn="" />
+
+                <ToggleButton
+                    android:id="@+id/toggleFanHigh4pfcu"
+                    android:layout_width="46.12dp"
+                    android:layout_height="27.42dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginTop="35dp"
+                    android:background="@drawable/toggle_selector"
+                    android:checked="false"
+                    android:textOff=""
+                    android:textOn="" />
+
+                <ToggleButton
+                    android:id="@+id/toggleFanLow4pfcu"
+                    android:layout_width="46.12dp"
+                    android:layout_height="27.42dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginTop="36.5dp"
+                    android:background="@drawable/toggle_selector"
+                    android:checked="false"
+                    android:textOff=""
+                    android:textOn="" />
+
+                <ToggleButton
+                    android:id="@+id/toggleHeat4pfcu"
+                    android:layout_width="46.12dp"
+                    android:layout_height="27.42dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginTop="35dp"
+                    android:background="@drawable/toggle_selector"
+                    android:checked="false"
+                    android:textOff=""
+                    android:textOn="" />
+
+                <ToggleButton
+                    android:id="@+id/toggleCool4pfcu"
+                    android:layout_width="46.12dp"
+                    android:layout_height="27.42dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginTop="35dp"
+                    android:background="@drawable/toggle_selector"
+                    android:checked="false"
+                    android:textOff=""
+                    android:textOn="" />
+
+                <ToggleButton
+                    android:id="@+id/toggleAirflow"
+                    android:layout_width="46.12dp"
+                    android:layout_height="27.42dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginTop="72dp"
+                    android:background="@drawable/toggle_selector"
+                    android:checked="false"
+                    android:textOff=""
+                    android:textOn="" />
+
+                <ToggleButton
+                    android:id="@+id/toogleExtSensor4pfcu"
+                    android:layout_width="46.12dp"
+                    android:layout_height="27.42dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginTop="32dp"
+                    android:background="@drawable/toggle_selector"
+                    android:checked="false"
+                    android:textOff=""
+                    android:textOn="" />
+
+                <ToggleButton
+                    android:id="@+id/toggleOccupancy4pfcu"
+                    android:layout_width="46.12dp"
+                    android:layout_height="27.42dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginTop="32dp"
+                    android:background="@drawable/toggle_selector"
+                    android:checked="false"
+                    android:textOff=""
+                    android:textOn="" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/lt_enableLabel"
+                android:layout_width="325dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/textEnable"
+                android:layout_marginLeft="15dp"
+                android:layout_marginTop="30dp"
+                android:layout_toRightOf="@+id/lt_toggles"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textFanMed2pfcu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="28.5dp"
+                    android:text="@string/label_fanmedium"
+                    android:textAppearance="@style/text_appearance" />
+
+                <TextView
+                    android:id="@+id/textFanHigh2pfcu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="28.5dp"
+                    android:layout_marginTop="32dp"
+                    android:text="@string/label_fanhigh"
+                    android:textAppearance="@style/text_appearance" />
+
+                <TextView
+                    android:id="@+id/textFanLow2pfcu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="28.5dp"
+                    android:layout_marginTop="33.5dp"
+                    android:text="@string/label_fanlow"
+                    android:textAppearance="@style/text_appearance" />
+
+                <TextView
+                    android:id="@+id/textAuxHeat"
+                    android:layout_width="322dp"
+                    android:layout_height="28.5dp"
+                    android:layout_marginTop="32dp"
+                    android:text="@string/label_wv_heating"
+                    android:textAppearance="@style/text_appearance" />
+
+                <TextView
+                    android:id="@+id/text2pfcuWaterValve"
+                    android:layout_width="322dp"
+                    android:layout_height="28.5dp"
+                    android:layout_marginTop="38dp"
+                    android:text="@string/label_wv_cooling"
+                    android:textAppearance="@style/text_appearance" />
+
+                <TextView
+                    android:id="@+id/textAirflow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="28.5dp"
+                    android:layout_marginTop="69dp"
+                    android:text="@string/label_airflowtemp"
+                    android:textAppearance="@style/text_appearance" />
+
+                <TextView
+                    android:id="@+id/textOccupancy"
+                    android:layout_width="322dp"
+                    android:layout_height="28.5dp"
+                    android:layout_marginTop="30dp"
+                    android:text="@string/label_extsensor"
+                    android:textAppearance="@style/text_appearance" />
+
+                <TextView
+                    android:id="@+id/textExtSensor"
+                    android:layout_width="wrap_content"
+                    android:layout_height="28.5dp"
+                    android:layout_marginTop="30dp"
+                    android:text="@string/label_enableoccup"
+                    android:textAppearance="@style/text_appearance" />
+
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:id="@+id/lt_testSignal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="23dp"
+                android:layout_alignLeft="@+id/textTestSignal"
+                android:layout_alignRight="@+id/textTestSignal"
+                android:layout_below="@+id/textEnable">
+
+                <ToggleButton
+                    android:id="@+id/test2pfcuRelay1"
+                    android:layout_width="60dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center_horizontal"
+                    android:background="@drawable/toggle_testselector"
+                    android:checked="false"
+                    android:textAppearance="@style/text_toggleappearance"
+                    android:textColor="@drawable/toggle_textselector"
+                    android:textOff="OFF"
+                    android:textOn="ON" />
+
+                <ToggleButton
+                    android:id="@+id/test2pfcuRelay2"
+                    android:layout_width="60dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="24dp"
+                    android:background="@drawable/toggle_testselector"
+                    android:checked="false"
+                    android:textAppearance="@style/text_toggleappearance"
+                    android:textColor="@drawable/toggle_textselector"
+                    android:textOff="OFF"
+                    android:textOn="ON" />
+
+                <ToggleButton
+                    android:id="@+id/test2pfcuRelay3"
+                    android:layout_width="60dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="24dp"
+                    android:background="@drawable/toggle_testselector"
+                    android:checked="false"
+                    android:textAppearance="@style/text_toggleappearance"
+                    android:textColor="@drawable/toggle_textselector"
+                    android:textOff="OFF"
+                    android:textOn="ON" />
+
+                <ToggleButton
+                    android:id="@+id/test2pfcuRelay4"
+                    android:layout_width="60dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="24dp"
+                    android:background="@drawable/toggle_testselector"
+                    android:checked="false"
+                    android:textAppearance="@style/text_toggleappearance"
+                    android:textColor="@drawable/toggle_textselector"
+                    android:textOff="OFF"
+                    android:textOn="ON" />
+
+                <ToggleButton
+                    android:id="@+id/test2pfcuRelay6"
+                    android:layout_width="60dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="24dp"
+                    android:background="@drawable/toggle_testselector"
+                    android:checked="false"
+                    android:textAppearance="@style/text_toggleappearance"
+                    android:textColor="@drawable/toggle_textselector"
+                    android:textOff="OFF"
+                    android:textOn="ON" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/set4PfcuBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentBottom="true"
+                android:layout_marginRight="24dp"
+                android:layout_marginBottom="150dp"
+                android:background="@null"
+                android:button="@null"
+                android:fontFamily="@font/lato_regular"
+                android:text="@string/button_set"
+                android:textAllCaps="true"
+                android:textColor="@color/orange_75f"
+                android:textSize="19.5dp" />
+        </RelativeLayout>
+    </ScrollView>
+
+</RelativeLayout>

@@ -346,6 +346,8 @@
     <string name="label_fanlow">Fan Low Speed</string>
     <string name="label_fanmedium">Fan Medium Speed</string>
     <string name="label_watervalve">Water Valve</string>
+    <string name="label_wv_heating">Water Valve- Energize in Heating</string>
+    <string name="label_wv_cooling">Water Valve- Energize in Cooling</string>
     <string name="label_auxheat">Aux Heating Stage 1</string>
     <string name="label_fanhigh">Fan High Speed</string>
     <string name="label_pumpchange">Heat Pump Changeover</string>

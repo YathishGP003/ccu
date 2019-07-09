@@ -62,6 +62,14 @@ public class OAOProfile
         return oaoEquip.getProfileConfiguration();
     }
     
+    public int getNodeAddress() {
+        return oaoEquip.nodeAddr;
+    }
+    
+    public String getEquipRef() {
+        return oaoEquip.equipRef;
+    }
+    
     public void doOAO() {
         
         doEconomizing();
@@ -160,7 +168,7 @@ public class OAOProfile
             }
         }
     
-        double outsideDamperMinOpen = TunerUtil.readTunerValByQuery("oao and outside and damper and min and open");
+        double outsideDamperMinOpen = oaoEquip.getConfigNumVal("oao and outside and damper and min and open");
         outsideAirCalculatedMinDamper = outsideDamperMinOpen + dcvCalculatedMinDamper;
     }
     

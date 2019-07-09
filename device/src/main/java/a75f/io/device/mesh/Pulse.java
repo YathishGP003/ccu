@@ -173,6 +173,8 @@ public class Pulse
 	public static Double getAnalogConversion(HashMap pp, HashMap lp, Double val) {
 		val = val/1000;
 		Sensor analogSensor;
+		//If the analogType of physical point is set to one of the sensor types (Sensor.getSensorList) , corresponding sensor's
+		//conversion formula is applied. Otherwise the input value that is already divided by 1000 is just returned.
 		try
 		{
 			int index = (int)Double.parseDouble(pp.get("analogType").toString());

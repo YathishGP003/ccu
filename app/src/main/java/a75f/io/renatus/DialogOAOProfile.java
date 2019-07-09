@@ -207,6 +207,8 @@ public class DialogOAOProfile extends BaseDialogFragment
         oaoConfig.returnDamperAtMinDrive = 2;
         oaoConfig.returnDamperAtMaxDrive = 10;
         
+        oaoConfig.currentTranformerType = 7;//CT 0-10 Amps
+        
         if (mProfileConfig == null) {
             mProfile.addOaoEquip(mSmartNodeAddress, oaoConfig, floorRef, zoneRef );
         } else {

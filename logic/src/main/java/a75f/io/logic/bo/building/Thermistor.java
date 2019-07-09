@@ -26,6 +26,7 @@ public class Thermistor
     public static List<Thermistor> getThermistorList() {
         ArrayList<Thermistor> thermistors = new ArrayList<>();
         thermistors.add(new Thermistor("10K type 2 probe","\u00B0F","20K probe lookup table",1));
+        thermistors.add(new Thermistor("Generic 1-100kohms","\u00B0F","20K probe lookup table",1));
         
         return thermistors;
     }

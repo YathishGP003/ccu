@@ -1589,7 +1589,7 @@ public class BuildingTuners
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("base").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .addMarker("standalone").addMarker("heating").addMarker("threshold").addMarker("pfcu2").addMarker("sp")
+                .addMarker("standalone").addMarker("heating").addMarker("threshold").addMarker("pipe2").addMarker("fcu").addMarker("sp")
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
@@ -1602,7 +1602,7 @@ public class BuildingTuners
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef)
                 .addMarker("tuner").addMarker("base").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .addMarker("standalone").addMarker("cooling").addMarker("threshold").addMarker("pfcu2").addMarker("sp")
+                .addMarker("standalone").addMarker("cooling").addMarker("threshold").addMarker("pipe2").addMarker("fcu").addMarker("sp")
                 .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();

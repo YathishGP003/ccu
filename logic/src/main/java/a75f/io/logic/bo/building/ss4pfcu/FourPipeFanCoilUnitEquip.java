@@ -52,7 +52,7 @@ public class FourPipeFanCoilUnitEquip  {
         String siteDis = (String) siteMap.get("dis");
         String tz = siteMap.get("tz").toString();
         String equipDis = siteDis+"-4PFCU-"+nodeAddr;
-        String profile = "pfcu4";
+        String profile = "pipe4";
         String gatewayRef = null;
         HashMap systemEquip = CCUHsApi.getInstance().read("equip and system");
         if (systemEquip != null && systemEquip.size() > 0) {
@@ -69,6 +69,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setTz(tz)
                 .setGroup(String.valueOf(nodeAddr));
         b.setDisplayName(equipDis);
+        b.addMarker("fcu");
         b.addMarker(profile);
 
         String equipRef = CCUHsApi.getInstance().addEquip(b.build());
@@ -84,7 +85,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("cur")
+                .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("fcu").addMarker("cur")
                 .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
                 .setUnit("\u00B0F")
@@ -99,7 +100,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("cur")
+                .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("fcu").addMarker("cur")
                 .addMarker("air").addMarker("humidity").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
@@ -113,7 +114,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("cur")
+                .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("fcu").addMarker("cur")
                 .addMarker("air").addMarker("co2").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
@@ -127,7 +128,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("cur")
+                .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("fcu").addMarker("cur")
                 .addMarker("air").addMarker("voc").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
@@ -141,7 +142,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("cur")
+                .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("fcu").addMarker("cur")
                 .addMarker("air").addMarker("sound").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
@@ -154,7 +155,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("cur")
+                .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("fcu").addMarker("cur")
                 .addMarker("air").addMarker("uvi").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
@@ -167,7 +168,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("cur")
+                .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("fcu").addMarker("cur")
                 .addMarker("air").addMarker("co").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
@@ -180,7 +181,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("cur")
+                .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("fcu").addMarker("cur")
                 .addMarker("air").addMarker("co2Equivalent").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
@@ -193,7 +194,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("cur")
+                .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("fcu").addMarker("cur")
                 .addMarker("air").addMarker("no").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
@@ -206,7 +207,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("cur")
+                .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("fcu").addMarker("cur")
                 .addMarker("air").addMarker("pressure").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
@@ -219,7 +220,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("cur")
+                .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("fcu").addMarker("cur")
                 .addMarker("air").addMarker("illuminance").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
@@ -232,7 +233,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("occupancy").addMarker("sensor").addMarker("current").addMarker("his").addMarker("cur").addMarker("logical").addMarker("equipHis")
+                .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("fcu").addMarker("occupancy").addMarker("sensor").addMarker("current").addMarker("his").addMarker("cur").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
@@ -244,7 +245,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setRoomRef(room)
                 .setFloorRef(floor)
                 .addMarker("zone").addMarker("air").addMarker("temp").addMarker("desired").addMarker("standalone").addMarker("average")
-                .addMarker("sp").addMarker("writable").addMarker("his").addMarker("equipHis").addMarker("userIntent").addMarker(profile)
+                .addMarker("sp").addMarker("writable").addMarker("his").addMarker("equipHis").addMarker("userIntent").addMarker(profile).addMarker("fcu")
                 .setGroup(String.valueOf(nodeAddr))
                 .setUnit("\u00B0F")
                 .setTz(tz)
@@ -258,7 +259,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setRoomRef(room)
                 .setFloorRef(floor)
                 .addMarker("zone").addMarker("air").addMarker("temp").addMarker("desired").addMarker("standalone").addMarker("cooling")
-                .addMarker("sp").addMarker("writable").addMarker("his").addMarker("equipHis").addMarker("userIntent").addMarker(profile)
+                .addMarker("sp").addMarker("writable").addMarker("his").addMarker("equipHis").addMarker("userIntent").addMarker(profile).addMarker("fcu")
                 .setGroup(String.valueOf(nodeAddr))
                 .setUnit("\u00B0F")
                 .setTz(tz)
@@ -272,7 +273,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setRoomRef(room)
                 .setFloorRef(floor)
                 .addMarker("zone").addMarker("air").addMarker("temp").addMarker("desired").addMarker("standalone").addMarker("heating")
-                .addMarker("sp").addMarker("writable").addMarker("his").addMarker("equipHis").addMarker("userIntent").addMarker(profile)
+                .addMarker("sp").addMarker("writable").addMarker("his").addMarker("equipHis").addMarker("userIntent").addMarker(profile).addMarker("fcu")
                 .setGroup(String.valueOf(nodeAddr))
                 .setUnit("\u00B0F")
                 .setTz(tz)
@@ -285,7 +286,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("standalone").addMarker(profile).addMarker("equipHis").addMarker("cur")
+                .addMarker("standalone").addMarker(profile).addMarker("fcu").addMarker("equipHis").addMarker("cur")
                 .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("th1").addMarker("his").addMarker("logical").addMarker("zone")
                 .setGroup(String.valueOf(nodeAddr))
                 .setUnit("\u00B0F")
@@ -301,7 +302,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("standalone").addMarker(profile)
+                .addMarker("standalone").addMarker(profile).addMarker("fcu")
                 .addMarker("air").addMarker("temp").addMarker("th2").addMarker("sensor").addMarker("logical").addMarker("zone")
                 .setGroup(String.valueOf(nodeAddr))
                 .setUnit("\u00B0F")
@@ -317,7 +318,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setRoomRef(room)
                 .setFloorRef(floor)
                 .addMarker("standalone").addMarker("fan").addMarker("medium").addMarker("his").addMarker("zone")
-                .addMarker("logical").addMarker(profile).addMarker("equipHis").addMarker("cmd")
+                .addMarker("logical").addMarker(profile).addMarker("fcu").addMarker("equipHis").addMarker("cmd")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
@@ -330,7 +331,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setRoomRef(room)
                 .setFloorRef(floor)
                 .addMarker("standalone").addMarker("fan").addMarker("high").addMarker("his").addMarker("zone")
-                .addMarker("logical").addMarker(profile).addMarker("equipHis").addMarker("cmd")
+                .addMarker("logical").addMarker(profile).addMarker("fcu").addMarker("equipHis").addMarker("cmd")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
@@ -343,7 +344,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setRoomRef(room)
                 .setFloorRef(floor)
                 .addMarker("standalone").addMarker("water").addMarker("valve").addMarker("heating").addMarker("his").addMarker("zone")
-                .addMarker("logical").addMarker(profile).addMarker("equipHis").addMarker("cmd")
+                .addMarker("logical").addMarker(profile).addMarker("fcu").addMarker("equipHis").addMarker("cmd")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
@@ -356,7 +357,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setRoomRef(room)
                 .setFloorRef(floor)
                 .addMarker("standalone").addMarker("water").addMarker("valve").addMarker("cooling").addMarker("his").addMarker("zone")
-                .addMarker("logical").addMarker(profile).addMarker("equipHis").addMarker("cmd")
+                .addMarker("logical").addMarker(profile).addMarker("fcu").addMarker("equipHis").addMarker("cmd")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
@@ -369,7 +370,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setRoomRef(room)
                 .setFloorRef(floor)
                 .addMarker("standalone").addMarker("fan").addMarker("low").addMarker("his").addMarker("zone")
-                .addMarker("logical").addMarker(profile).addMarker("equipHis").addMarker("cmd")
+                .addMarker("logical").addMarker(profile).addMarker("fcu").addMarker("equipHis").addMarker("cmd")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
@@ -380,7 +381,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("standalone").addMarker("zone").addMarker("logical").addMarker(profile).addMarker("cmd")
+                .addMarker("standalone").addMarker("zone").addMarker("logical").addMarker(profile).addMarker("fcu").addMarker("cmd")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
@@ -391,7 +392,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("status").addMarker("his").addMarker("zone").addMarker("equipHis").addMarker(profile)
+                .addMarker("status").addMarker("his").addMarker("zone").addMarker("equipHis").addMarker(profile).addMarker("fcu")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
@@ -403,7 +404,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("status").addMarker("message").addMarker(profile).addMarker("writable").addMarker("zone").addMarker("equipHis")
+                .addMarker("status").addMarker("message").addMarker(profile).addMarker("fcu").addMarker("writable").addMarker("zone").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .setKind("string")
@@ -415,7 +416,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("scheduleStatus").addMarker(profile).addMarker("logical").addMarker("zone").addMarker("writable").addMarker("equipHis").addMarker("his")
+                .addMarker("scheduleStatus").addMarker(profile).addMarker("fcu").addMarker("logical").addMarker("zone").addMarker("writable").addMarker("equipHis").addMarker("his")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .setKind("string")
@@ -428,7 +429,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("zone").addMarker("scheduleType").addMarker("writable").addMarker("zone").addMarker("equipHis").addMarker("his").addMarker(profile)
+                .addMarker("zone").addMarker("scheduleType").addMarker("writable").addMarker("zone").addMarker("equipHis").addMarker("his").addMarker(profile).addMarker("fcu")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
@@ -502,7 +503,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setEquipRef(equipref)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("standalone").addMarker("occupancy").addMarker("status").addMarker("his").addMarker("equipHis").addMarker("sp").addMarker("zone").addMarker("pfcu4")
+                .addMarker("standalone").addMarker("occupancy").addMarker("status").addMarker("his").addMarker("equipHis").addMarker("sp").addMarker("zone").addMarker("fcu").addMarker("pipe4")
                 .setTz(tz)
                 .build();
         CCUHsApi.getInstance().addPoint(twoPfcuOccupancy);
@@ -513,7 +514,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setEquipRef(equipref)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("standalone").addMarker("temp").addMarker("conditioning").addMarker("mode").addMarker("his").addMarker("equipHis").addMarker("sp").addMarker("zone").addMarker("pfcu4")
+                .addMarker("standalone").addMarker("temp").addMarker("conditioning").addMarker("mode").addMarker("his").addMarker("equipHis").addMarker("sp").addMarker("zone").addMarker("fcu").addMarker("pipe4")
                 .setTz(tz)
                 .build();
         CCUHsApi.getInstance().addPoint(twoPfcuConditioningMode);
@@ -530,7 +531,7 @@ public class FourPipeFanCoilUnitEquip  {
         String siteDis = (String) siteMap.get("dis");
         String equipDis = siteDis+"-4PFCU-"+nodeAddr;
         String tz = siteMap.get("tz").toString();
-        String profile = "pfcu4";
+        String profile = "pipe4";
         Point enableOccupancyControl = new Point.Builder()
                 .setDisplayName(equipDis + "-enableOccupancyControl")
                 .setEquipRef(equipRef)
@@ -538,7 +539,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setFloorRef(floor)
                 .setRoomRef(room)
                 .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone")
-                .addMarker("enable").addMarker("occupancy").addMarker("control").addMarker("sp").addMarker(profile)
+                .addMarker("enable").addMarker("occupancy").addMarker("control").addMarker("sp").addMarker(profile).addMarker("fcu").addMarker("fcu")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
@@ -552,7 +553,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setFloorRef(floor)
                 .setRoomRef(room)
                 .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone")
-                .addMarker("temperature").addMarker("offset").addMarker("sp").addMarker(profile)
+                .addMarker("temperature").addMarker("offset").addMarker("sp").addMarker(profile).addMarker("fcu")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
@@ -565,7 +566,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setSiteRef(siteRef)
                 .setFloorRef(floor)
                 .setRoomRef(room)
-                .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone").addMarker("sp").addMarker("enable").addMarker(profile).addMarker("th1")
+                .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone").addMarker("sp").addMarker("enable").addMarker(profile).addMarker("fcu").addMarker("th1")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
@@ -592,7 +593,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setFloorRef(floor)
                 .setRoomRef(room)
                 .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone")
-                .addMarker("relay1").addMarker("sp").addMarker("enable").addMarker(profile)
+                .addMarker("relay1").addMarker("sp").addMarker("enable").addMarker(profile).addMarker("fcu")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
@@ -606,7 +607,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setFloorRef(floor)
                 .setRoomRef(room)
                 .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone")
-                .addMarker("relay2").addMarker("sp").addMarker("enable").addMarker(profile)
+                .addMarker("relay2").addMarker("sp").addMarker("enable").addMarker(profile).addMarker("fcu")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
@@ -620,7 +621,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setFloorRef(floor)
                 .setRoomRef(room)
                 .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone")
-                .addMarker("relay3").addMarker("sp").addMarker("enable").addMarker(profile)
+                .addMarker("relay3").addMarker("sp").addMarker("enable").addMarker(profile).addMarker("fcu")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
@@ -634,7 +635,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setFloorRef(floor)
                 .setRoomRef(room)
                 .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone")
-                .addMarker("relay4").addMarker("sp").addMarker("enable").addMarker(profile)
+                .addMarker("relay4").addMarker("sp").addMarker("enable").addMarker(profile).addMarker("fcu")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
@@ -647,7 +648,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setFloorRef(floor)
                 .setRoomRef(room)
                 .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone")
-                .addMarker("relay5").addMarker("sp").addMarker("enable").addMarker(profile)
+                .addMarker("relay5").addMarker("sp").addMarker("enable").addMarker(profile).addMarker("fcu")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
@@ -660,7 +661,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setFloorRef(floor)
                 .setRoomRef(room)
                 .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone")
-                .addMarker("relay6").addMarker("sp").addMarker("enable").addMarker(profile)
+                .addMarker("relay6").addMarker("sp").addMarker("enable").addMarker(profile).addMarker("fcu")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
@@ -917,11 +918,11 @@ public class FourPipeFanCoilUnitEquip  {
     }
 
     public void setConfigNumVal(String tags,double val) {
-        CCUHsApi.getInstance().writeDefaultVal("point and zone and config and standalone and pfcu4 and "+tags+" and group == \""+nodeAddr+"\"", val);
+        CCUHsApi.getInstance().writeDefaultVal("point and zone and config and standalone and fcu and pipe4 and "+tags+" and group == \""+nodeAddr+"\"", val);
     }
 
     public double getConfigNumVal(String tags) {
-        return CCUHsApi.getInstance().readDefaultVal("point and zone and config and standalone and pfcu4 and "+tags+" and group == \""+nodeAddr+"\"");
+        return CCUHsApi.getInstance().readDefaultVal("point and zone and config and standalone and fcu and pipe4 and "+tags+" and group == \""+nodeAddr+"\"");
     }
     public double getStatus() {
         return CCUHsApi.getInstance().readHisValByQuery("point and status and his and group == \""+nodeAddr+"\"");
@@ -957,7 +958,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setFloorRef(floor)
                 .setRoomRef(room)
                 .addMarker("standalone").addMarker("userIntent").addMarker("writable").addMarker("fan").addMarker("operation").addMarker("mode").addMarker("his").addMarker("equipHis")
-                .addMarker("pfcu4").addMarker("zone")
+                .addMarker("fcu").addMarker("pipe4").addMarker("zone")
                 .setTz(tz)
                 .build();
         String fanOpModeId = CCUHsApi.getInstance().addPoint(fanOpMode);
@@ -971,7 +972,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setRoomRef(room)
                 .setEquipRef(equipref)
                 .addMarker("standalone").addMarker("userIntent").addMarker("writable").addMarker("operation").addMarker("mode").addMarker("zone").addMarker("his").addMarker("equipHis")
-                .addMarker("pfcu4").addMarker("temp")
+                .addMarker("pipe4").addMarker("fcu").addMarker("temp")
                 .setTz(tz)
                 .build();
         String operationalModeId = CCUHsApi.getInstance().addPoint(operationalMode);

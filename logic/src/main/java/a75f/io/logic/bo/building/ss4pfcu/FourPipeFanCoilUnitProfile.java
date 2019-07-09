@@ -272,11 +272,11 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
     }
 
     public double getCmdSignal(String cmd, short node) {
-        return CCUHsApi.getInstance().readHisValByQuery("point and standalone and pfcu4 and cmd and his and " + cmd + " and group == \"" + node + "\"");
+        return CCUHsApi.getInstance().readHisValByQuery("point and standalone and fcu and pipe4 and cmd and his and " + cmd + " and group == \"" + node + "\"");
     }
 
     public void setCmdSignal(String cmd, double val, short node) {
-        CCUHsApi.getInstance().writeHisValByQuery("point and standalone and pfcu4 and cmd and his and " + cmd + " and group == \"" + node + "\"", val);
+        CCUHsApi.getInstance().writeHisValByQuery("point and standalone and fcu and pipe4 and cmd and his and " + cmd + " and group == \"" + node + "\"", val);
     }
 
     public double getOperationalModes(String cmd, String equipRef) {

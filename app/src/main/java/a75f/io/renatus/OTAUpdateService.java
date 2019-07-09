@@ -186,12 +186,15 @@ public class OTAUpdateService extends IntentService {
      * @param intent The Intent which started this OTA update
      */
     private void handleOtaUpdateStartRequest(Intent intent) {
-        String nodeRegex = intent.getStringExtra("lwMeshAddress");
+        String nodeAddressStr = intent.getStringExtra("lwMeshAddress");
         String firmwareVersion = intent.getStringExtra("firmwareVersion");
+        String cmdLevel = intent.getStringExtra("cmdLevel");
 
-        if(firmwareVersion == null) {
+        if(nodeAddressStr == null || firmwareVersion == null) {
             return;
         }
+
+        int nodeAddress = Integer.parseInt(nodeAddressStr);
 
         try {
             String versionNumStr = firmwareVersion.split("_v")[1];                 // e.g. "SmartNode_v1.0" -> "1.0"
@@ -210,12 +213,11 @@ public class OTAUpdateService extends IntentService {
 
         if(firmwareVersion.startsWith("SmartNode_")) {
             mFirmwareDeviceType = FirmwareDeviceType_t.SMART_NODE_DEVICE_TYPE;
-            startUpdate(nodeRegex, mVersionMajor, mVersionMinor, mFirmwareDeviceType);
-
+            startUpdate(nodeAddress, cmdLevel, mVersionMajor, mVersionMinor, mFirmwareDeviceType);
         }
         else if(firmwareVersion.startsWith("Itm_") || firmwareVersion.startsWith("itm_")) {
             mFirmwareDeviceType = FirmwareDeviceType_t.ITM_DEVICE_TYPE;
-            startUpdate(nodeRegex, mVersionMajor, mVersionMinor, mFirmwareDeviceType);
+            startUpdate(nodeAddress, cmdLevel, mVersionMajor, mVersionMinor, mFirmwareDeviceType);
         }
     }
 
@@ -224,12 +226,12 @@ public class OTAUpdateService extends IntentService {
      * Fails if the address is invalid, if there is currently an update in progress, or if the files
      * do not exist
      *
-     * @param addressRegex The address of the device to be updated
+     * @param address      The address of the device to be updated
      * @param versionMajor The major version of the new firmware
      * @param versionMinor The minor version of the new firmware
      * @param deviceType   The type of device being updated
      */
-    private void startUpdate(String addressRegex, int versionMajor, int versionMinor, FirmwareDeviceType_t deviceType) {
+    private void startUpdate(int address, String updateLevel, int versionMajor, int versionMinor, FirmwareDeviceType_t deviceType) {
         String filename = makeFileName(versionMajor, versionMinor, deviceType);
 
         Log.d(TAG, "[VALIDATION] Validating update instructions: " + filename);
@@ -238,8 +240,8 @@ public class OTAUpdateService extends IntentService {
             return;
         }
 
-        if (addressRegex.matches("[^0-9?]")) {  //contains characters other than 0-9 and "?" wildcard
-            Log.d(TAG, "[VALIDATION] Address regex contains invalid characters: " + addressRegex);
+        if (!(address > 0)) {
+            Log.d(TAG, "[VALIDATION] Address " + address + " is invalid");
             resetUpdateVariables();
             return;
         }
@@ -252,41 +254,56 @@ public class OTAUpdateService extends IntentService {
 
         Log.d(TAG, "[VALIDATION] Valid address and version");
 
-        //convert "?" wildcards to Java digit wildcards
-        addressRegex = addressRegex.replace("?", "\\d");
-
         if(mLwMeshAddresses == null) {
             mLwMeshAddresses = new ArrayList<>();
         }
 
-        //determine which device is being updated
-        //TODO: faster way to iterate over devices?
-        boolean deviceExists = false;
-        for(Floor floor : HSUtil.getFloors()) {
-            for(Zone zone : HSUtil.getZones(floor.getId())) {
-                for(Device device : HSUtil.getDevices(zone.getId())) {
+        //determine how many devices are going to be updated
+        switch(updateLevel) {
+            case "site":
+            case "system":
+                //update everything
+                for(Floor floor : HSUtil.getFloors()) {
+                    for(Zone zone : HSUtil.getZones(floor.getId())) {
+                        for(Device device : HSUtil.getDevices(zone.getId())) {
 
-                    if(device.getAddr().matches(addressRegex) &&
-                        device.getMarkers().contains( deviceType.getHsMarkerName() )) {
-                            mLwMeshAddresses.add(Integer.parseInt(device.getAddr()));
-                            deviceExists = true;
+                            if(device.getMarkers().contains( deviceType.getHsMarkerName() )) {
+                                Log.d(TAG, "[VALIDATION] Adding device " + device.getAddr() + " to update");
+                                mLwMeshAddresses.add(Integer.parseInt(device.getAddr()));
+                            }
+
+                        }
                     }
-
                 }
-            }
-        }
+                break;
+
+            case "zone":
+                //update all nodes in the same zone as the specified node
+                Device d = HSUtil.getDevice((short) address);
+                for(Device device : HSUtil.getDevices(d.getRoomRef())) {
+
+                    if(device.getMarkers().contains( deviceType.getHsMarkerName() )) {
+                        Log.d(TAG, "[VALIDATION] Adding device " + device.getAddr() + " to update");
+                        mLwMeshAddresses.add(Integer.parseInt(device.getAddr()));
+                    }
+                }
+                break;
+
+            case "equip":
+                //update just the one node
+                Log.d(TAG, "[VALIDATION] Adding device " + address + " to update");
+                mLwMeshAddresses.add(address);
+                break;
         }
 
-        for(int addr : mLwMeshAddresses) {
-            Log.d(TAG, "[VALIDATION] Regex returned address: " + addr);
+        if(mLwMeshAddresses.isEmpty()) {
+            Log.d(TAG, "[VALIDATION] Could not find device " + address + " at level " + updateLevel);
+            resetUpdateVariables();
+            return;
         }
 
-        if(deviceExists) {
-            moveUpdateToNextNode();
-            sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_START));
-        } else {
-            Log.d(TAG, "[VALIDATION] Could not find any devices with address regex: " + addressRegex);
-        }
+        moveUpdateToNextNode();
+        sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_START));
     }
 
     /**

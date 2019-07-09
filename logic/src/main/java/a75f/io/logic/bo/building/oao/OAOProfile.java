@@ -124,7 +124,7 @@ public class OAOProfile
             
         } else {
             double returnAirCO2  = oaoEquip.getHisVal("return and air and co2 and sensor");
-            double co2Threshold = oaoEquip.getConfigNumVal("co2 and threshodl");
+            double co2Threshold = oaoEquip.getConfigNumVal("co2 and threshold");
             double co2DamperOpeningRate = TunerUtil.readTunerValByQuery("oao and co2 and damper and opening and rate",oaoEquip.equipRef);
             
             if (returnAirCO2 > co2Threshold) {

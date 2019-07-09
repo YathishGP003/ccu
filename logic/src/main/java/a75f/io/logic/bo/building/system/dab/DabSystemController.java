@@ -235,9 +235,21 @@ public class DabSystemController extends SystemController
         profile.setSystemPoint("weighted and average and moving and load",weightedAverageLoadMA);
         profile.setSystemPoint("weighted and average and cooling and load",weightedAverageCoolingLoadPostML);
         profile.setSystemPoint("weighted and average and heating and load",weightedAverageHeatingLoadPostML);
-    
-        normalizeAirflow();
-        adjustDamperForCumulativeTarget(profile.getSystemEquipRef());
+        
+        if (systemState != OFF)
+        {
+            normalizeAirflow();
+            adjustDamperForCumulativeTarget(profile.getSystemEquipRef());
+        } else {
+            CCUHsApi hayStack = CCUHsApi.getInstance();
+            ArrayList<HashMap> dabEquips = hayStack.readAll("equip and dab and zone");
+            for (HashMap m : dabEquips) {
+                HashMap damper = hayStack.read("point and damper and base and cmd and equipRef == \""+m.get("id").toString()+"\"");
+                double damperPos = hayStack.readHisValById(damper.get("id").toString());
+                HashMap normalizedDamper = hayStack.read("point and damper and normalized and cmd and equipRef == \""+m.get("id").toString()+"\"");
+                hayStack.writeHisValById(normalizedDamper.get("id").toString(), damperPos);
+            }
+        }
         
         setDamperLimits();
         

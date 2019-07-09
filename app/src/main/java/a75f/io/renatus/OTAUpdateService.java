@@ -290,6 +290,7 @@ public class OTAUpdateService extends IntentService {
                 break;
 
             case "equip":
+            default:
                 //update just the one node
                 Log.d(TAG, "[VALIDATION] Adding device " + address + " to update");
                 mLwMeshAddresses.add(address);

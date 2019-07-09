@@ -16,6 +16,15 @@
     <string name="title_activity_test">Test</string>
 
 
+    <string name="ota_test_level_select_prompt">Select update level:</string>
+    <string-array name="ota_test_level_select">
+        <item>equip</item>
+        <item>zone</item>
+        <item>system</item>
+        <item>site</item>
+    </string-array>
+
+
     <!--bluetooth error messages-->
     <string name="ble_not_supported">BLE Not Supported</string>
     <string name="error_bluetooth_not_supported">Bluetooth not supported.</string>

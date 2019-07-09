@@ -163,11 +163,11 @@ public class LSmartStat {
                 settings_t.profileBitmap.set(SmartStatProfileMap_t.HEAT_PUMP_UNIT);
                 settings_t.otherBitMaps.heatPumpUnitChangeOverB.set((short)(getHeatPumpChangeOverType(address) < 2 ? 0 : 1));
                 break;
-            case "pfcu2":
+            case "pipe2":
                 settings_t.profileBitmap.set(SmartStatProfileMap_t.PIPE_FAN_COIL_UNI_2);
                 settings_t.otherBitMaps.heatPumpUnitChangeOverB.set((short)0);
                 break;
-            case "pfcu4":
+            case "pipe4":
                 settings_t.profileBitmap.set(SmartStatProfileMap_t.PIPE_FAN_COIL_UNIT_4);
                 settings_t.otherBitMaps.heatPumpUnitChangeOverB.set((short)0);
                 break;

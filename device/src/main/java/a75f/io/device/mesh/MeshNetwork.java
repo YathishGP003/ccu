@@ -83,10 +83,10 @@ public class MeshNetwork extends DeviceNetwork
                                 String profile = "cpu";
                                 if(d.getMarkers().contains("hpu"))
                                     profile = "hpu";
-                                else if(d.getMarkers().contains("pfcu2"))
-                                    profile = "pfcu2";
-                                else if(d.getMarkers().contains("pfcu4"))
-                                    profile = "pfcu4";
+                                else if(d.getMarkers().contains("pipe2"))
+                                    profile = "pipe2";
+                                else if(d.getMarkers().contains("pipe4"))
+                                    profile = "pipe4";
                                 if(bSeedMessage) {
                                     CcuLog.d(L.TAG_CCU_DEVICE,"=================NOW SENDING SS SEEDS====================="+zone.getId());
                                         CcuToCmOverUsbDatabaseSeedSmartStatMessage_t seedSSMessage = LSmartStat.getSeedMessage(zone,Short.parseShort(d.getAddr()),d.getEquipRef(),profile);

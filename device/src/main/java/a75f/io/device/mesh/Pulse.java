@@ -302,7 +302,7 @@ public class Pulse
 		{
 			Device deviceInfo = new Device.Builder().setHashMap(device).build();
 			ArrayList<HashMap> phyPoints = hayStack.readAll("point and physical and sensor and deviceRef == \"" + deviceInfo.getId() + "\"");
-			boolean is2pfcu = deviceInfo.getMarkers().contains("pfcu2");
+			boolean is2pfcu = deviceInfo.getMarkers().contains("pipe2");
 			String logicalCurTempPoint = "";
 			double curTempVal = 0.0;
 			double th2TempVal = 0.0;

@@ -283,11 +283,11 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
     }
 
     public double getCmdSignal(String cmd, short node) {
-        return CCUHsApi.getInstance().readHisValByQuery("point and standalone and pfcu2 and cmd and his and " + cmd + " and group == \"" + node + "\"");
+        return CCUHsApi.getInstance().readHisValByQuery("point and standalone and pipe2 and fcu and cmd and his and " + cmd + " and group == \"" + node + "\"");
     }
 
     public void setCmdSignal(String cmd, double val, short node) {
-        CCUHsApi.getInstance().writeHisValByQuery("point and standalone and pfcu2 and cmd and his and " + cmd + " and group == \"" + node + "\"", val);
+        CCUHsApi.getInstance().writeHisValByQuery("point and standalone and pipe2 and fcu and cmd and his and " + cmd + " and group == \"" + node + "\"", val);
     }
 
     public double getOperationalModes(String cmd, String equipRef) {
@@ -357,7 +357,7 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
         }
 
         if(isWaterValveEnabled){
-            double waterVal = getCmdSignal("pfcu2 and water and valve", addr);
+            double waterVal = getCmdSignal("pipe2 and fcu and water and valve", addr);
             switch (opMode) {
                 case AUTO:
                     if( occupied || (!occupied && ((roomTemp > setTempCooling) || ( (roomTemp > 0) && (roomTemp < setTempHeating)))) ){
@@ -365,47 +365,47 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
                         fcuPeriodicWaterValveCheck(addr, false);
                     }else if((twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer() != 0) && (waterVal > 0)&& (((System.currentTimeMillis() - twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer())/60000) > 3) ) {
                         Log.d("FCU","fcuPeriodicWaterCheck AUTO fanmode="+addr+","+twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer()+","+((System.currentTimeMillis() - twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer())/60000)+","+((System.currentTimeMillis() - twoPfcuDeviceMap.get(addr).getWaterValveLastOnTime())/60000));
-                        setCmdSignal("pfcu2 and water and valve", 0, addr);
+                        setCmdSignal("pipe2 and fcu and water and valve", 0, addr);
                         twoPfcuDeviceMap.get(addr).setWaterValvePeriodicTimer(0);
                     }else if((twoPfcuDeviceMap.get(addr).getWaterValveLastOnTime() != 0) && (waterVal > 0) && (((System.currentTimeMillis() - twoPfcuDeviceMap.get(addr).getWaterValveLastOnTime())/60000) < 50)){
-                        setCmdSignal("pfcu2 and water and valve", 0, addr);
+                        setCmdSignal("pipe2 and fcu and water and valve", 0, addr);
                     }
                     break;
                 case COOL_ONLY:
                     if (supplyWaterTempTh2 > heatingThreshold) {
                         if (waterVal > 0)
-                            setCmdSignal("pfcu2 and water and valve", 0, addr);
+                            setCmdSignal("pipe2 and fcu and water and valve", 0, addr);
                     } else {
                         if( occupied || (!occupied && ((roomTemp > setTempCooling) || ( (roomTemp > 0) && (roomTemp < setTempHeating)))) ){
                             // run periodic water valve check 2 mins on and 5 mins OFF
                             fcuPeriodicWaterValveCheck(addr, false);
                         }else if((twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer() != 0) && (waterVal > 0)&& (((System.currentTimeMillis() - twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer())/60000) > 3) ) {
-                            setCmdSignal("pfcu2 and water and valve", 0, addr);
+                            setCmdSignal("pipe2 and fcu and water and valve", 0, addr);
                             twoPfcuDeviceMap.get(addr).setWaterValvePeriodicTimer(0);
                         }else if((twoPfcuDeviceMap.get(addr).getWaterValveLastOnTime() != 0) && (waterVal > 0) && (((System.currentTimeMillis() - twoPfcuDeviceMap.get(addr).getWaterValveLastOnTime())/60000) < 50)){
-                            setCmdSignal("pfcu2 and water and valve", 0, addr);
+                            setCmdSignal("pipe2 and fcu and water and valve", 0, addr);
                         }
                     }
                     break;
                 case HEAT_ONLY:
                     if (supplyWaterTempTh2 < coolingThreshold) {
                         if (waterVal > 0)
-                            setCmdSignal("pfcu2 and water and valve", 0, addr);
+                            setCmdSignal("pipe2 and fcu and water and valve", 0, addr);
                     } else {
                         if( occupied || (!occupied && ((roomTemp > setTempCooling) || ( (roomTemp > 0) && (roomTemp < setTempHeating)))) ){
                             // run periodic water valve check 2 mins on and 5 mins OFF
                             fcuPeriodicWaterValveCheck(addr, false);
                         }else if((twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer() != 0) && (waterVal > 0)&& (((System.currentTimeMillis() - twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer())/60000) > 3) ) {
-                            setCmdSignal("pfcu2 and water and valve", 0, addr);
+                            setCmdSignal("pipe2 and fcu and water and valve", 0, addr);
                             twoPfcuDeviceMap.get(addr).setWaterValvePeriodicTimer(0);
                         }else if((twoPfcuDeviceMap.get(addr).getWaterValveLastOnTime() != 0) && (waterVal > 0) && (((System.currentTimeMillis() - twoPfcuDeviceMap.get(addr).getWaterValveLastOnTime())/60000) < 50)){
-                            setCmdSignal("pfcu2 and water and valve", 0, addr);
+                            setCmdSignal("pipe2 and fcu and water and valve", 0, addr);
                         }
                     }
                     break;
                 case OFF:
                     if (waterVal > 0)
-                        setCmdSignal("pfcu2 and water and valve", 0, addr);
+                        setCmdSignal("pipe2 and fcu and water and valve", 0, addr);
                     break;
             }
         }
@@ -534,12 +534,12 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
             if(roomTemp >= setTempCooling){
                 relayStates.put("CoolingStage1",1);
                 twoPfcuDeviceMap.get(addr).setWaterValveLastOnTime(System.currentTimeMillis());
-                setCmdSignal("pfcu2 and water and valve",1.0,addr);
+                setCmdSignal("pipe2 and fcu and water and valve",1.0,addr);
             }else if(roomTemp <= (setTempCooling - hysteresis) /*&& (twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer() == 0)*/){
-                if(getCmdSignal("pfcu2 and water and valve",addr) > 0)
-                    setCmdSignal("pfcu2 and water and valve",0,addr);
+                if(getCmdSignal("pipe2 and fcu and water and valve",addr) > 0)
+                    setCmdSignal("pipe2 and fcu and water and valve",0,addr);
             }else {
-                if(getCmdSignal("pfcu2 and water and valve",addr) > 0)
+                if(getCmdSignal("pipe2 and fcu and water and valve",addr) > 0)
                     relayStates.put("CoolingStage1",1);
             }
         }
@@ -664,12 +664,12 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
             if(roomTemp <= setTempHeating){
                 twoPfcuDeviceMap.get(addr).setWaterValveLastOnTime(System.currentTimeMillis());
                 relayStates.put("HeatingStage1",1);
-                setCmdSignal("pfcu2 and water and valve",1.0,addr);
+                setCmdSignal("pipe2 and fcu and water and valve",1.0,addr);
             }else if(roomTemp >= (setTempHeating + hysteresis) /*&& (twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer() == 0)*/){ //Todo check for periodic timer == 0
-                if(getCmdSignal("pfcu2 and water and valve",addr) > 0)
-                    setCmdSignal("pfcu2 and water and valve",0,addr);
+                if(getCmdSignal("pipe2 and fcu and water and valve",addr) > 0)
+                    setCmdSignal("pipe2 and fcu and water and valve",0,addr);
             }else {
-                if(getCmdSignal("pfcu2 and water and valve",addr) > 0)
+                if(getCmdSignal("pipe2 and fcu and water and valve",addr) > 0)
                     relayStates.put("HeatingStage1",1);
             }
         }
@@ -682,8 +682,8 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
     private void updateThresholdsForTwoPipe(String equipId){
         try {
 
-            heatingThreshold = CCUHsApi.getInstance().readHisValByQuery("point and tuner and heating and threshold and pfcu2 and equipRef == \"" + equipId + "\"");
-            coolingThreshold = CCUHsApi.getInstance().readHisValByQuery("point and tuner and cooling and threshold and pfcu2 and equipRef == \"" + equipId + "\"");
+            heatingThreshold = CCUHsApi.getInstance().readHisValByQuery("point and tuner and heating and threshold and pipe2 and fcu and equipRef == \"" + equipId + "\"");
+            coolingThreshold = CCUHsApi.getInstance().readHisValByQuery("point and tuner and cooling and threshold and pipe2 and fcu and equipRef == \"" + equipId + "\"");
         }catch (Exception e){
             heatingThreshold = 85;
             coolingThreshold = 65;
@@ -693,16 +693,18 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
     private boolean fcuPeriodicWaterValveCheck(short addr, boolean isHourlyCheck){
         Log.d("FCU","fcuPeriodicWaterCheck="+addr+","+isHourlyCheck+","+twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer()+","+((System.currentTimeMillis() - twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer())/60000)+","+((System.currentTimeMillis() - twoPfcuDeviceMap.get(addr).getWaterValveLastOnTime())/60000));
         if((twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer() == 0) ||(((System.currentTimeMillis() - twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer())/60000) < 2)){ //ON for two mins
-            if((getCmdSignal("pfcu2 and water and valve",addr) < 1.0) || ( twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer() == 0)) {
-                setCmdSignal("pfcu2 and water and valve", 1.0, addr);
+            if((getCmdSignal("pipe2 and fcu and water and valve",addr) < 1.0) || ( twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer() == 0)) {
+                setCmdSignal("pipe2 and fcu and water and valve", 1.0, addr);
                 twoPfcuDeviceMap.get(addr).setWaterValvePeriodicTimer(System.currentTimeMillis());
                 if(!isHourlyCheck)
                     twoPfcuDeviceMap.get(addr).setWaterValveLastOnTime(System.currentTimeMillis());
                 return true;
             }
         }else if(!isHourlyCheck && (((System.currentTimeMillis() - twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer())/60000) < 7)){//OFF for 5 mins
-            setCmdSignal("pfcu2 and water and valve", 0, addr);
-			return true;
+            //if(getCmdSignal("pfcu2 and water and valve",addr) > 0) {
+                setCmdSignal("pipe2 and fcu and water and valve", 0, addr);
+                return true;
+            //}
         }else
             twoPfcuDeviceMap.get(addr).setWaterValvePeriodicTimer(0);
         return false;
@@ -716,8 +718,8 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
                 }else {
                     twoPfcuDeviceMap.get(addr).setWaterValveLastOnTime(System.currentTimeMillis());
                     twoPfcuDeviceMap.get(addr).setWaterValvePeriodicTimer(0);
-                    if(getCmdSignal("pfcu2 and water and valve",addr) > 0)
-                        setCmdSignal("pfcu2 and water and valve",0,addr);
+                    if(getCmdSignal("pipe2 and fcu and water and valve",addr) > 0)
+                        setCmdSignal("pipe2 and fcu and water and valve",0,addr);
                 }
 
             }

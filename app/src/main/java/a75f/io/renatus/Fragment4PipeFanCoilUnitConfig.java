@@ -350,8 +350,12 @@ public class Fragment4PipeFanCoilUnitConfig extends BaseDialogFragment implement
             case R.id.toggleFanLow4pfcu:
                 if(switchFanLowG.isChecked()){
                     switchFanMediumY1.setEnabled(true);
-                    switchFanHighY2.setEnabled(false);
-                    switchFanHighY2.setChecked(false);
+                    if(switchFanMediumY1.isChecked()){
+                        switchFanHighY2.setEnabled(true);
+                    }else {
+                        switchFanHighY2.setEnabled(false);
+                        switchFanHighY2.setChecked(false);
+                    }
                 }else {
                     switchFanMediumY1.setEnabled(false);
                     switchFanMediumY1.setChecked(false);

@@ -172,11 +172,6 @@ public class OAOProfile
         outsideAirCalculatedMinDamper = outsideDamperMinOpen + dcvCalculatedMinDamper;
     }
     
-    
-    
-    
-    
-    
     public static double getAirEnthalpy(double averageTemp, double averageHumidity) {
 	/*	10 REM ENTHALPY CALCULATION
 		20 REM Assumes standard atmospheric pressure (14.7 psi), see line 110
@@ -200,6 +195,8 @@ public class OAOProfile
         double A = 0.007468 * Math.pow(averageTemp,2) - 0.4344 * averageTemp + 11.1769;
         double B = 0.2372 * averageTemp + 0.1230;
         double H = A * averageHumidity + B;
+    
+        Log.d(L.TAG_CCU_OAO, "averageTemp "+averageTemp+" averageHumidity "+averageHumidity+" Enthalpy "+H);
         return H;
     }
     

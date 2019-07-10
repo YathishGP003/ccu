@@ -1,7 +1,5 @@
 package a75f.io.logic.pubnub;
 
-import android.util.Log;
-
 import com.google.gson.JsonObject;
 
 import org.projecthaystack.HGrid;
@@ -41,6 +39,8 @@ public class UpdatePointHandler
                 CcuLog.d(L.TAG_CCU_PUBNUB, "Failed to read remote point point : " + guid);
                 return;
             }
+            //CcuLog.d(L.TAG_CCU_PUBNUB+ " REMOTE ARRAY: ", HZincWriter.gridToString(pointGrid));
+            CCUHsApi.getInstance().deletePointArray(luid);
             Iterator it = pointGrid.iterator();
             while (it.hasNext())
             {
@@ -49,12 +49,14 @@ public class UpdatePointHandler
                 double val = Double.parseDouble(r.get("val").toString());
                 String who = r.get("who").toString();
                 double duration = Double.parseDouble(r.get("dur").toString());
-                double dur = duration - System.currentTimeMillis();
+                //If duration shows it has already expired, then just write 1ms to force-expire it locally.
+                double dur = (duration == 0 ? 0 : (duration - System.currentTimeMillis() ) > 0 ? (duration - System.currentTimeMillis()) : 1);
                 CcuLog.d(L.TAG_CCU_PUBNUB, "Remote point:  level " + level + " val " + val + " who " + who + " duration "+duration+" dur "+dur);
-                //If dur shows it is already expired, then just write 1ms to force-expire it locally.
-                CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(luid), (int) level, who, HNum.make(val), HNum.make(duration == 0 ? 0 :
-                                                                                                                                                       (dur < 0 ? 1 : duration - System.currentTimeMillis())));
+                CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(luid), (int) level, who, HNum.make(val), HNum.make(dur));
             }
+            
+            //CcuLog.d(L.TAG_CCU_PUBNUB+" LOCAL ARRAY: ", HZincWriter.gridToString(CCUHsApi.getInstance().readPointGrid(luid)));
+    
             Point p = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(luid)).build();
             ArrayList values = CCUHsApi.getInstance().readPoint(luid);
             if (values != null && values.size() > 0)
@@ -64,8 +66,9 @@ public class UpdatePointHandler
                     HashMap valMap = ((HashMap) values.get(l - 1));
                     if (valMap.get("val") != null)
                     {
-                        Log.d(L.TAG_CCU_PUBNUB, "Updated point " + p.getDisplayName() + " , level: " + l + " , val :" + Double.parseDouble(valMap.get("val").toString())
-                                         + " duration " + valMap.get("duration"));
+                        Double duration = Double.parseDouble(valMap.get("duration").toString());
+                        CcuLog.d(L.TAG_CCU_PUBNUB, "Updated point " + p.getDisplayName() + " , level: " + l + " , val :" + Double.parseDouble(valMap.get("val").toString())
+                                         + " duration " + (duration > 0 ? duration - System.currentTimeMillis() : duration));
                     }
                 }
             }

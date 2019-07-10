@@ -810,6 +810,10 @@ public class CCUTagsDb extends HServer {
         array.duration[level-1] = dur.val > 0 ? System.currentTimeMillis() + dur.millis() : 0;
     }
 
+    public void deletePointArray(HRef id) {
+        writeArrays.remove(id.toVal());
+    }
+    
     public HDict getConfig() {
         if (!tagsMap.containsKey("config")) {
             HDict hDict = new HDictBuilder().add("nosync").add("localconfig").toDict();

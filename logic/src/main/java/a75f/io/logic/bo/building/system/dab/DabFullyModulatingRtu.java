@@ -169,17 +169,17 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         {
             ControlMote.setAnalogOut("analog2", signal);
         }
-        
-        
-        if (getConfigVal("relay3 and output and enabled") > 0)
+    
+    
+        SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("rtu and mode")];
+        if (getConfigVal("relay3 and output and enabled") > 0 && systemMode != SystemMode.OFF)
         {
             signal = (ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED || systemFanLoopOp > 0) ? 1 : 0;
             setCmdSignal("occupancy",signal * 100);
             ControlMote.setRelayState("relay3", signal );
             
         }
-    
-        SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("rtu and mode")];
+        
         if (getConfigVal("relay7 and output and enabled") > 0 && systemMode != SystemMode.OFF
                                                                     && ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED)
         {

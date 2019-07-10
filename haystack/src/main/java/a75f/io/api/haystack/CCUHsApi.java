@@ -546,6 +546,10 @@ public class CCUHsApi
         return rowList;
     }
     
+    public HGrid readPointGrid(String id) {
+        return hsClient.pointWriteArray(HRef.copy(id));
+    }
+    
     public HGrid readPointArrRemote(String id) {
         HDictBuilder b = new HDictBuilder().add("id", HRef.copy(id));
         HDict[] dictArr  = {b.toDict()};
@@ -1267,6 +1271,10 @@ public class CCUHsApi
         
         }
         return 0;
+    }
+    
+    public void deletePointArray(String id) {
+        tagsDb.deletePointArray(HRef.copy(id));
     }
     
     

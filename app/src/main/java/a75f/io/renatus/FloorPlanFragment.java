@@ -703,7 +703,7 @@ public class FloorPlanFragment extends Fragment
 	private void selectModule(int position)
 	{
 		String nodeAddr = mModuleListAdapter.getItem(position);
-		if (mRoomListAdapter == null || mRoomListAdapter.getSelectedPostion() == -1)
+		if (((mFloorListAdapter.getSelectedPostion() == -1) && (mRoomListAdapter.getSelectedPostion() != -1))|| (mRoomListAdapter == null || mRoomListAdapter.getSelectedPostion() == -1) )
 		{
 			DialogOAOProfile oaoProfiling = DialogOAOProfile.newInstance(Short.parseShort(nodeAddr), "SYSTEM", "SYSTEM");
 			showDialogFragment(oaoProfiling, DialogOAOProfile.ID);

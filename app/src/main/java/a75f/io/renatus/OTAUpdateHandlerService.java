@@ -14,6 +14,8 @@ import a75f.io.logic.Globals;
 
 public class OTAUpdateHandlerService extends Service {
 
+    private static String TAG = "OTAUpdateHandlerService";
+
     private boolean mIsTimerStarted = false;
     private CountDownTimer mTimeoutTimer;
 
@@ -33,7 +35,7 @@ public class OTAUpdateHandlerService extends Service {
                     break;
 
                 case Globals.IntentActions.ACTIVITY_RESET:
-                case Globals.IntentActions.OTA_UPDATE_PACKAGE_REQ:
+                case Globals.IntentActions.OTA_UPDATE_PACKET_REQ:
                 case Globals.IntentActions.OTA_UPDATE_NODE_REBOOT:
                 case Globals.IntentActions.OTA_UPDATE_COMPLETE:
                     stopOtaUpdateTimeoutTimer();
@@ -70,6 +72,8 @@ public class OTAUpdateHandlerService extends Service {
         filter.addAction(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
         filter.addAction(Globals.IntentActions.LSERIAL_MESSAGE);
         filter.addAction(Globals.IntentActions.OTA_UPDATE_START);
+        filter.addAction(Globals.IntentActions.OTA_UPDATE_PACKET_REQ);
+        filter.addAction(Globals.IntentActions.OTA_UPDATE_NODE_REBOOT);
         filter.addAction(Globals.IntentActions.OTA_UPDATE_TIMED_OUT);
         filter.addAction(Globals.IntentActions.OTA_UPDATE_COMPLETE);
 
@@ -84,13 +88,13 @@ public class OTAUpdateHandlerService extends Service {
 
                 @Override
                 public void onTick(long millisUntilFinished) {
-                    Log.d(OTAUpdateService.TAG, "[TIMER] Update will time out in " +
+                    Log.d(TAG, "[TIMER] Update will time out in " +
                             Math.ceil(millisUntilFinished / 1000) + "s");
                 }
 
                 @Override
                 public void onFinish() {
-                    Log.d(OTAUpdateService.TAG, "[TIMER] Update timed out, resetting");
+                    Log.d(TAG, "[TIMER] Update timed out, resetting");
                     stopOtaUpdateTimeoutTimer();
 
                     sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_TIMED_OUT));

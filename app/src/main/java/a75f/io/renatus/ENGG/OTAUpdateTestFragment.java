@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 
 import org.javolution.annotations.Nullable;
 
@@ -27,6 +28,9 @@ public class OTAUpdateTestFragment extends Fragment {
 
     @BindView(R.id.otaTestNameStringText)
     EditText otaTestNameStringText;
+
+    @BindView(R.id.otaTestLevelSelect)
+    Spinner otaTestLevelSelect;
 
     @BindView(R.id.startOtaTestBtn)
     Button startOtaTestBtn;
@@ -53,12 +57,14 @@ public class OTAUpdateTestFragment extends Fragment {
     public void handleStartOtaTest() {
         Activity activity = getActivity();
 
-        int lwMeshAddress = Integer.valueOf(otaTestAddressText.getText().toString());
+        String lwMeshAddress = otaTestAddressText.getText().toString();
         String firmwareInfo = otaTestNameStringText.getText().toString();
+        String cmdLevel = otaTestLevelSelect.getSelectedItem().toString();
 
         Intent otaIntent = new Intent(Globals.IntentActions.ACTIVITY_MESSAGE);
         otaIntent.putExtra("lwMeshAddress", lwMeshAddress);
         otaIntent.putExtra("firmwareVersion", firmwareInfo);
+        otaIntent.putExtra("cmdLevel", cmdLevel);
 
         activity.sendBroadcast(otaIntent);
     }

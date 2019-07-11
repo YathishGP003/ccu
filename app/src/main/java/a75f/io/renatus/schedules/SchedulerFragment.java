@@ -375,15 +375,15 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
 
     ImageButton.OnClickListener mDeleteOnClickListener = v ->  {
             String id = v.getTag().toString();
-            CCUHsApi.getInstance().deleteEntity(id);
+            CCUHsApi.getInstance().deleteEntity("@"+id);
+            CCUHsApi.getInstance().syncEntityTree();
             loadVacations();
             ScheduleProcessJob.updateSchedules();
-            CCUHsApi.getInstance().syncEntityTree();
     };
 
 
     private void loadVacations() {
-    
+        
         ArrayList<Schedule> vacations;
         if (schedule.isZoneSchedule()) {
             vacations = CCUHsApi.getInstance().getZoneSchedule(schedule.getRoomRef(), true);
@@ -391,6 +391,7 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
         {
             vacations = CCUHsApi.getInstance().getSystemSchedule(true);
         }
+        
         if(vacations != null) {
             mVacationAdapter = new VacationAdapter(vacations, mEditOnClickListener, mDeleteOnClickListener);
             mVacationRecycler.setAdapter(mVacationAdapter);

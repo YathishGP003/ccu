@@ -72,9 +72,7 @@ public class EntitySyncHandler
             CcuLog.i(TAG, "RemoveIDMap : "+CCUHsApi.getInstance().tagsDb.removeIdMap);
             doSyncRemoveIds();
         }
-    
-        CcuLog.i(TAG, "UpdateIDMap : "+CCUHsApi.getInstance().tagsDb.updateIdMap);
-    
+        
         if (CCUHsApi.getInstance().tagsDb.updateIdMap.size() > 0) {
             CcuLog.i(TAG, "UpdateIDMap : "+CCUHsApi.getInstance().tagsDb.updateIdMap);
             doSyncUpdateEntities();

@@ -1,6 +1,5 @@
 package a75f.io.device.mesh;
 
-import android.util.Log;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
@@ -23,6 +22,7 @@ import static a75f.io.device.mesh.MeshUtil.checkDuplicateStruct;
 import static a75f.io.device.mesh.MeshUtil.sendStruct;
 import static a75f.io.device.mesh.MeshUtil.sendStructToCM;
 import static a75f.io.device.mesh.MeshUtil.sendStructToNodes;
+import static a75f.io.logic.L.ccu;
 
 /**
  * Created by samjithsadasivan on 9/19/18.
@@ -111,6 +111,33 @@ public class MeshNetwork extends DeviceNetwork
                     }
                 }
             }
+    
+            if (ccu().oaoProfile != null)
+            {
+                if (bSeedMessage)
+                {
+                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING OAO SN SEED Message =====================");
+                    CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = LSmartNode.getSeedMessage(new Zone.Builder().setDisplayName("OAO").build(),
+                            (short)L.ccu().oaoProfile.getNodeAddress(), ccu().oaoProfile.getEquipRef());
+                    sendStructToCM(seedMessage);
+                }
+                else
+                {
+                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING OAO SN Settings=====================");
+                    CcuToCmOverUsbSnSettingsMessage_t settingsMessage = LSmartNode.getSettingsMessage(new Zone.Builder().setDisplayName("OAO").build()
+                                                                                , (short)L.ccu().oaoProfile.getNodeAddress(), ccu().oaoProfile.getEquipRef());
+                    sendStruct((short) settingsMessage.smartNodeAddress.get(), settingsMessage);
+                    CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING SN CONTROLS=====================");
+                    CcuToCmOverUsbSnControlsMessage_t controlsMessage = LSmartNode.getControlMessage(new Zone.Builder().setDisplayName("OAO").build()
+                                                                                , (short)L.ccu().oaoProfile.getNodeAddress(), ccu().oaoProfile.getEquipRef());
+                    //Check duplicated without current time and then append time to control package.
+                    if (!checkDuplicateStruct((short) controlsMessage.smartNodeAddress.get(), controlsMessage))
+                    {
+                        controlsMessage = LSmartNode.getCurrentTimeForControlMessage(controlsMessage);
+                        sendStructToNodes(controlsMessage);
+                    }
+                }
+            }
             
         }
         catch (Exception e)
@@ -130,7 +157,7 @@ public class MeshNetwork extends DeviceNetwork
             return;
         }
         
-        if (L.ccu().systemProfile == null) {
+        if (ccu().systemProfile == null) {
             CcuLog.d(L.TAG_CCU_DEVICE, "MeshNetwork SendSystemControl : Abort , No system profile");
             return;
         }

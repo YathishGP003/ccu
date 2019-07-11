@@ -206,6 +206,10 @@ public class DialogOAOProfile extends BaseDialogFragment
         oaoConfig.outsideDamperAtMaxDrive = 10;
         oaoConfig.returnDamperAtMinDrive = 2;
         oaoConfig.returnDamperAtMaxDrive = 10;
+        oaoConfig.co2Threshold = 800;
+        oaoConfig.exhaustFanStage1Threshold = 50;
+        oaoConfig.exhaustFanStage2Threshold = 90;
+        oaoConfig.currentTranformerType = 7;//CT 0-10 Amps
         
         if (mProfileConfig == null) {
             mProfile.addOaoEquip(mSmartNodeAddress, oaoConfig, floorRef, zoneRef );

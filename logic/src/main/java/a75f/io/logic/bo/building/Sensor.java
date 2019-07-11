@@ -39,7 +39,9 @@ public class Sensor
         sensors.add(new Sensor("CO2","ppm",0,10,0,2000,10.0));
         sensors.add(new Sensor("CO","ppm",0,10,0,100,1.0));
         sensors.add(new Sensor("NO2","ppm",0,10,0,5,0.1));
-    
+        sensors.add(new Sensor("CT 0-10 Amps","amps",0,10,0,10,0.1));
+        sensors.add(new Sensor("CT 0-20 Amps","amps",0,10,0,20,0.1));
+        sensors.add(new Sensor("CT 0-50 Amps","amps",0,10,0,50,0.1));
         return sensors;
     }
 }

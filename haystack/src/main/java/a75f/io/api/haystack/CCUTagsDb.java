@@ -810,6 +810,10 @@ public class CCUTagsDb extends HServer {
         array.duration[level-1] = dur.val > 0 ? System.currentTimeMillis() + dur.millis() : 0;
     }
 
+    public void deletePointArray(HRef id) {
+        writeArrays.remove(id.toVal());
+    }
+    
     public HDict getConfig() {
         if (!tagsMap.containsKey("config")) {
             HDict hDict = new HDictBuilder().add("nosync").add("localconfig").toDict();
@@ -938,5 +942,14 @@ public class CCUTagsDb extends HServer {
         List<HisItem>  hisItems = hisQuery.build().find();
         hisItems.remove(hisItems.size()-1);
         hisBox.remove(hisItems);
+    }
+    
+    public void removeAllHisItems(HRef id) {
+        HDict entity = readById(id);
+        
+        QueryBuilder<HisItem> hisQuery = hisBox.query();
+        hisQuery.equal(HisItem_.rec, entity.get("id").toString())
+                .order(HisItem_.date);
+        hisBox.remove(hisQuery.build().find());
     }
 }

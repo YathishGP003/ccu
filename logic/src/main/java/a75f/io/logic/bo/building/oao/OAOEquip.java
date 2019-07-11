@@ -6,6 +6,8 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.definitions.Port;
@@ -267,7 +269,7 @@ public class OAOEquip
         device.desiredTemp.setPointRef(dtId);
         device.desiredTemp.setEnabled(true);
     */
-        for (Output op : config.getOutputs()) {
+        /*for (Output op : config.getOutputs()) {
             switch (op.getPort()) {
                 case ANALOG_OUT_ONE:
                     device.analog1Out.setType(op.getAnalogActuatorType());
@@ -276,12 +278,14 @@ public class OAOEquip
                     device.analog1Out.setType(op.getAnalogActuatorType());
                     break;
             }
-        }
+        }*/
     
         device.analog1In.setPointRef(returnAirCO2Id);
         device.analog1In.setEnabled(true);
+        device.analog1In.setType("4");//TODO - Hard coding to CO2 sensor type.
         device.analog2In.setPointRef(rtuCurrentTransformerId);
         device.analog2In.setEnabled(true);
+        device.analog2In.setType(String.valueOf(config.currentTranformerType));
     
         device.th1In.setPointRef(outsideAirTemperatureId);
         device.th1In.setEnabled(true);
@@ -443,6 +447,10 @@ public class OAOEquip
         return hayStack.readHisValByQuery("point and oao and "+tags+" and group == \""+nodeAddr+'\"');
     }
     
+    public void setHisVal(String tags, double val) {
+        hayStack.writeHisValByQuery("point and oao and "+tags+" and group == \""+nodeAddr+'\"', val);
+    }
+    
     public OAOProfileConfiguration getProfileConfiguration() {
         OAOProfileConfiguration config = new OAOProfileConfiguration();
       
@@ -468,6 +476,7 @@ public class OAOEquip
             Output analogOne = new Output();
             analogOne.setAddress((short)nodeAddr);
             analogOne.setPort(Port.ANALOG_OUT_ONE);
+            Log.d("CCU_OAO", " a1.getType "+a1.getType());
             analogOne.mOutputAnalogActuatorType = OutputAnalogActuatorType.getEnum(a1.getType());
             config.getOutputs().add(analogOne);
         }
@@ -479,24 +488,46 @@ public class OAOEquip
             analogTwo.setPort(Port.ANALOG_OUT_TWO);
             analogTwo.mOutputAnalogActuatorType = OutputAnalogActuatorType.getEnum(a2.getType());
             config.getOutputs().add(analogTwo);
+        }
+    
+        RawPoint r1 = SmartNode.getPhysicalPoint(nodeAddr, Port.RELAY_ONE.toString());
+        if (r1 != null && r1.getEnabled()) {
+            Output relay1 = new Output();
+            relay1.setAddress((short)nodeAddr);
+            relay1.setPort(Port.RELAY_ONE);
+            relay1.mOutputRelayActuatorType = OutputRelayActuatorType.getEnum(r1.getType());
+            config.getOutputs().add(relay1);
+        }
+    
+        RawPoint r2 = SmartNode.getPhysicalPoint(nodeAddr, Port.RELAY_TWO.toString());
+        if (r2 != null && r2.getEnabled()) {
+            Output relay2 = new Output();
+            relay2.setAddress((short)nodeAddr);
+            relay2.setPort(Port.RELAY_TWO);
+            relay2.mOutputRelayActuatorType = OutputRelayActuatorType.getEnum(r2.getType());
+            config.getOutputs().add(relay2);
         }*/
         
         return config;
     }
     
     public void update(OAOProfileConfiguration config) {
-        /*for (Output op : config.getOutputs()) {
+        for (Output op : config.getOutputs()) {
             switch (op.getPort()) {
                 case ANALOG_OUT_ONE:
-                    CcuLog.d(L.TAG_CCU_ZONE, " Update analog" + op.getPort() + " type " + op.getAnalogActuatorType());
-                    SmartNode.updatePhysicalPointType(nodeAddr, op.getPort().toString(), op.getAnalogActuatorType());
-                    break;
                 case ANALOG_OUT_TWO:
                     CcuLog.d(L.TAG_CCU_ZONE, " Update analog" + op.getPort() + " type " + op.getAnalogActuatorType());
                     SmartNode.updatePhysicalPointType(nodeAddr, op.getPort().toString(), op.getAnalogActuatorType());
                     break;
+                case RELAY_ONE:
+                case RELAY_TWO:
+                    SmartNode.updatePhysicalPointType(nodeAddr, op.getPort().toString(), op.getRelayActuatorType());
+                    break;
             }
-        }*/
+        }
+    
+        SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_IN_ONE.name(), "4");
+        SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_IN_TWO.name(), String.valueOf(config.currentTranformerType));
         
         setConfigNumVal("outside and damper and min and drive", config.outsideDamperAtMinDrive);
         setConfigNumVal("outside and damper and max and drive", config.outsideDamperAtMaxDrive);

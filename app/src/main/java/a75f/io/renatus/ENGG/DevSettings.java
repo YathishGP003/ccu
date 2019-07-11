@@ -7,6 +7,7 @@ import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +27,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneProfile;
@@ -50,6 +52,9 @@ public class DevSettings extends Fragment
     
     @BindView(R.id.resetAppBtn)
     Button resetAppBtn;
+    
+    @BindView(R.id.deleteHis)
+    Button deleteHis;
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -121,12 +126,30 @@ public class DevSettings extends Fragment
             @Override
             public void onClick(View view)
             {
+                Log.d("CCU"," ResetAppState ");
                 L.ccu().systemProfile.reset();
                 for (ZoneProfile p : L.ccu().zoneProfiles) {
                     p.reset();
                 }
                 L.ccu().zoneProfiles.clear();
                 Globals.getInstance().loadEquipProfiles();
+            }
+        });
+        
+        deleteHis.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                Log.d("CCU"," deleteHis data ");
+                new Thread()
+                {
+                    @Override
+                    public void run()
+                    {
+                        CCUHsApi.getInstance().deleteHistory();
+                    }
+                }.start();
             }
         });
     

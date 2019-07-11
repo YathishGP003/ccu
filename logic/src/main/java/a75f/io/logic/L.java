@@ -29,6 +29,7 @@ public class L
     public static final String TAG_CCU_SYSTEM = "CCU_SYSTEM";
     public static final String TAG_CCU_JOB = "CCU_JOB";
     public static final String TAG_CCU_HS = "CCU_HS";
+    public static final String TAG_CCU_OAO = "CCU_OAO";
     public static final String TAG_CCU_DEVICE = "CCU_DEVICE";
     public static final String TAG_CCU_SERIAL = "CCU_SERIAL";
     public static final String TAG_CCU_SCHEDULER = "CCU_SCHEDULER";

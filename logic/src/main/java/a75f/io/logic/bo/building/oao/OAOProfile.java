@@ -2,6 +2,7 @@ package a75f.io.logic.bo.building.oao;
 
 import android.util.Log;
 
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -16,6 +17,7 @@ import a75f.io.logic.tuners.TunerUtil;
 * */
 public class OAOProfile
 {
+    
     public static boolean economizingAvailable = false;
     
     double economizingLoopOutput;
@@ -25,6 +27,15 @@ public class OAOProfile
     double returnAirFinalOutput;
     
     OAOEquip oaoEquip;
+    
+    public boolean isEconomizingAvailable()
+    {
+        return economizingAvailable;
+    }
+    public void setEconomizingAvailable(boolean economizingAvailable)
+    {
+        this.economizingAvailable = economizingAvailable;
+    }
     
     public void addOaoEquip(short addr, OAOProfileConfiguration config, String floorRef, String roomRef) {
         oaoEquip = new OAOEquip(getProfileType(), addr);
@@ -51,53 +62,80 @@ public class OAOProfile
         return oaoEquip.getProfileConfiguration();
     }
     
+    public int getNodeAddress() {
+        return oaoEquip.nodeAddr;
+    }
+    
+    public String getEquipRef() {
+        return oaoEquip.equipRef;
+    }
+    
     public void doOAO() {
         
         doEconomizing();
         doDcvControl();
-    
+        
         outsideAirLoopOutput = Math.max(economizingLoopOutput, outsideAirCalculatedMinDamper);
         
         double outsideDamperMatTarget = TunerUtil.readTunerValByQuery("oao and outside and damper and mat and target",oaoEquip.equipRef);
-        double outsideDamperMatMin = TunerUtil.readTunerValByQuery("oao and outside and damper and mat and min",oaoEquip.equipRef);
+        double outsideDamperMatMin = TunerUtil.readTunerValByQuery("oao and outside and damper and mat and minimum",oaoEquip.equipRef);
     
         double matTemp  = oaoEquip.getHisVal("mixed and air and temp and sensor");
     
+        Log.d(L.TAG_CCU_OAO," outsideDamperMatTarget "+outsideDamperMatTarget+" outsideDamperMatMin "+outsideDamperMatMin
+                            +" matTemp "+matTemp);
         outsideAirFinalLoopOutput = outsideAirLoopOutput -
                                         outsideAirLoopOutput * ((outsideDamperMatTarget - matTemp)/(outsideDamperMatTarget - outsideDamperMatMin));
     
         returnAirFinalOutput = 100 - outsideAirFinalLoopOutput;
     
-        oaoEquip.setConfigNumVal("outside and air and damper and cmd", outsideAirFinalLoopOutput);
-        oaoEquip.setConfigNumVal("return and air and damper and cmd", returnAirFinalOutput);
+        Log.d(L.TAG_CCU_OAO," economizingLoopOutput "+economizingLoopOutput+" outsideAirCalculatedMinDamper "+outsideAirCalculatedMinDamper
+                                            +" outsideAirFinalLoopOutput "+outsideAirFinalLoopOutput);
+        
+        oaoEquip.setHisVal("outside and air and damper and cmd", outsideAirFinalLoopOutput);
+        oaoEquip.setHisVal("return and air and damper and cmd", returnAirFinalOutput);
         
         if (outsideAirFinalLoopOutput > oaoEquip.getConfigNumVal("config and exhaust and fan and stage1 and threshold")) {
-            oaoEquip.setConfigNumVal("cmd and exhaust and fan and stage1",1);
+            oaoEquip.setHisVal("cmd and exhaust and fan and stage1",1);
         } else {
-            oaoEquip.setConfigNumVal("cmd and exhaust and fan and stage1",0);
+            oaoEquip.setHisVal("cmd and exhaust and fan and stage1",0);
         }
     
         if (outsideAirFinalLoopOutput > oaoEquip.getConfigNumVal("config and exhaust and fan and stage2 and threshold")) {
-            oaoEquip.setConfigNumVal("cmd and exhaust and fan and stage2",1);
+            oaoEquip.setHisVal("cmd and exhaust and fan and stage2",1);
         } else {
-            oaoEquip.setConfigNumVal("cmd and exhaust and fan and stage2",0);
+            oaoEquip.setHisVal("cmd and exhaust and fan and stage2",0);
         }
     }
     
     public void doEconomizing() {
+        
+        double externalTemp , externalHumidity;
+        try {
+            externalTemp = CCUHsApi.getInstance().getExternalTemp();
+            externalHumidity = CCUHsApi.getInstance().getExternalHumidity();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.d(L.TAG_CCU_OAO," Failed to read external Temp or Humidity , Disable Economizing");
+            setEconomizingAvailable(false);
+            return;
+        }
         double insideEnthalpy = getAirEnthalpy(L.ccu().systemProfile.getSystemController().getAverageSystemTemperature(),
                                     L.ccu().systemProfile.getSystemController().getAverageSystemHumidity());
     
     
         double enthalpyDuctCompensationOffset = TunerUtil.readTunerValByQuery("oao and enthalpy and duct and compensation and offset",oaoEquip.equipRef);
     
-        double outsideEnthalpy = getAirEnthalpy(71, 94); //TODO-
+        double outsideEnthalpy = getAirEnthalpy(externalTemp, externalHumidity);
     
         double economizingToMainCoolingLoopMap = TunerUtil.readTunerValByQuery("oao and economizing and main and cooling and loop and map", oaoEquip.equipRef);
+    
+        Log.d(L.TAG_CCU_OAO," insideEnthalpy "+insideEnthalpy+", outsideEnthalpy "+outsideEnthalpy);
+        
         if (L.ccu().systemProfile.getSystemController().getSystemState() == SystemController.State.COOLING
                                 && (insideEnthalpy > outsideEnthalpy + enthalpyDuctCompensationOffset)) {
-            economizingAvailable = true;
             
+            setEconomizingAvailable(true);
             if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_ANALOG_RTU ||
                                 L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_ANALOG_RTU) {
                 economizingLoopOutput = Math.min(L.ccu().systemProfile.getCoolingLoopOp() * 100 / economizingToMainCoolingLoopMap ,100);
@@ -111,7 +149,8 @@ public class OAOProfile
                 economizingLoopOutput = Math.min(profile.getCoolingLoopOp() * 100 /(profile.coolingStages + 1), 100);
             }
         } else {
-            economizingAvailable = false;
+            setEconomizingAvailable(false);
+            economizingLoopOutput = 0;
         }
     }
     
@@ -121,6 +160,7 @@ public class OAOProfile
         if (usePerRoomCO2Sensing)
         {
             dcvCalculatedMinDamper = L.ccu().systemProfile.getCo2LoopOp();
+            Log.d(L.TAG_CCU_OAO,"usePerRoomCO2Sensing dcvCalculatedMinDamper "+dcvCalculatedMinDamper);
             
         } else {
             double returnAirCO2  = oaoEquip.getHisVal("return and air and co2 and sensor");
@@ -130,16 +170,12 @@ public class OAOProfile
             if (returnAirCO2 > co2Threshold) {
                 dcvCalculatedMinDamper = (returnAirCO2 - co2Threshold)/co2DamperOpeningRate;
             }
+            Log.d(L.TAG_CCU_OAO," dcvCalculatedMinDamper "+dcvCalculatedMinDamper+" returnAirCO2 "+returnAirCO2+" co2Threshold "+co2Threshold);
         }
     
-        double outsideDamperMinOpen = TunerUtil.readTunerValByQuery("oao and outside and damper and min and open");
+        double outsideDamperMinOpen = oaoEquip.getConfigNumVal("oao and outside and damper and min and open");
         outsideAirCalculatedMinDamper = outsideDamperMinOpen + dcvCalculatedMinDamper;
     }
-    
-    
-    
-    
-    
     
     public static double getAirEnthalpy(double averageTemp, double averageHumidity) {
 	/*	10 REM ENTHALPY CALCULATION
@@ -164,7 +200,8 @@ public class OAOProfile
         double A = 0.007468 * Math.pow(averageTemp,2) - 0.4344 * averageTemp + 11.1769;
         double B = 0.2372 * averageTemp + 0.1230;
         double H = A * averageHumidity + B;
-        Log.d("CCU_OAO", String.format("Enthalpy %f %f %f", averageTemp, averageHumidity, H));
+    
+        Log.d(L.TAG_CCU_OAO, "averageTemp "+averageTemp+" averageHumidity "+averageHumidity+" Enthalpy "+H);
         return H;
     }
     

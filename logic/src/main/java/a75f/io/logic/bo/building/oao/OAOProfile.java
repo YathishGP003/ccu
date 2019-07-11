@@ -78,10 +78,12 @@ public class OAOProfile
         outsideAirLoopOutput = Math.max(economizingLoopOutput, outsideAirCalculatedMinDamper);
         
         double outsideDamperMatTarget = TunerUtil.readTunerValByQuery("oao and outside and damper and mat and target",oaoEquip.equipRef);
-        double outsideDamperMatMin = TunerUtil.readTunerValByQuery("oao and outside and damper and mat and min",oaoEquip.equipRef);
+        double outsideDamperMatMin = TunerUtil.readTunerValByQuery("oao and outside and damper and mat and minimum",oaoEquip.equipRef);
     
         double matTemp  = oaoEquip.getHisVal("mixed and air and temp and sensor");
     
+        Log.d(L.TAG_CCU_OAO," outsideDamperMatTarget "+outsideDamperMatTarget+" outsideDamperMatMin "+outsideDamperMatMin
+                            +" matTemp "+matTemp);
         outsideAirFinalLoopOutput = outsideAirLoopOutput -
                                         outsideAirLoopOutput * ((outsideDamperMatTarget - matTemp)/(outsideDamperMatTarget - outsideDamperMatMin));
     
@@ -90,19 +92,19 @@ public class OAOProfile
         Log.d(L.TAG_CCU_OAO," economizingLoopOutput "+economizingLoopOutput+" outsideAirCalculatedMinDamper "+outsideAirCalculatedMinDamper
                                             +" outsideAirFinalLoopOutput "+outsideAirFinalLoopOutput);
         
-        oaoEquip.setConfigNumVal("outside and air and damper and cmd", outsideAirFinalLoopOutput);
-        oaoEquip.setConfigNumVal("return and air and damper and cmd", returnAirFinalOutput);
+        oaoEquip.setHisVal("outside and air and damper and cmd", outsideAirFinalLoopOutput);
+        oaoEquip.setHisVal("return and air and damper and cmd", returnAirFinalOutput);
         
         if (outsideAirFinalLoopOutput > oaoEquip.getConfigNumVal("config and exhaust and fan and stage1 and threshold")) {
-            oaoEquip.setConfigNumVal("cmd and exhaust and fan and stage1",1);
+            oaoEquip.setHisVal("cmd and exhaust and fan and stage1",1);
         } else {
-            oaoEquip.setConfigNumVal("cmd and exhaust and fan and stage1",0);
+            oaoEquip.setHisVal("cmd and exhaust and fan and stage1",0);
         }
     
         if (outsideAirFinalLoopOutput > oaoEquip.getConfigNumVal("config and exhaust and fan and stage2 and threshold")) {
-            oaoEquip.setConfigNumVal("cmd and exhaust and fan and stage2",1);
+            oaoEquip.setHisVal("cmd and exhaust and fan and stage2",1);
         } else {
-            oaoEquip.setConfigNumVal("cmd and exhaust and fan and stage2",0);
+            oaoEquip.setHisVal("cmd and exhaust and fan and stage2",0);
         }
     }
     
@@ -148,6 +150,7 @@ public class OAOProfile
             }
         } else {
             setEconomizingAvailable(false);
+            economizingLoopOutput = 0;
         }
     }
     
@@ -157,6 +160,7 @@ public class OAOProfile
         if (usePerRoomCO2Sensing)
         {
             dcvCalculatedMinDamper = L.ccu().systemProfile.getCo2LoopOp();
+            Log.d(L.TAG_CCU_OAO,"usePerRoomCO2Sensing dcvCalculatedMinDamper "+dcvCalculatedMinDamper);
             
         } else {
             double returnAirCO2  = oaoEquip.getHisVal("return and air and co2 and sensor");
@@ -166,6 +170,7 @@ public class OAOProfile
             if (returnAirCO2 > co2Threshold) {
                 dcvCalculatedMinDamper = (returnAirCO2 - co2Threshold)/co2DamperOpeningRate;
             }
+            Log.d(L.TAG_CCU_OAO," dcvCalculatedMinDamper "+dcvCalculatedMinDamper+" returnAirCO2 "+returnAirCO2+" co2Threshold "+co2Threshold);
         }
     
         double outsideDamperMinOpen = oaoEquip.getConfigNumVal("oao and outside and damper and min and open");

@@ -217,6 +217,10 @@ public abstract class VavSystemProfile extends SystemProfile
         CCUHsApi.getInstance().writeHisValByQuery("point and system and tr and target and his and staticPressure", trSystem.spTRProcessor.getSetPoint());
     }
     
+    @Override
+    public double getCo2LoopOp() {
+        return systemCo2LoopOp;
+    }
     
     @Override
     public void reset() {

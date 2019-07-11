@@ -171,7 +171,7 @@ public class Pulse
 	}
 	
 	public static Double getAnalogConversion(HashMap pp, HashMap lp, Double val) {
-		val = val/1000;
+		double analogVal = val/1000;
 		Sensor analogSensor;
 		//If the analogType of physical point is set to one of the sensor types (Sensor.getSensorList) , corresponding sensor's
 		//conversion formula is applied. Otherwise the input value that is already divided by 1000 is just returned.
@@ -181,11 +181,11 @@ public class Pulse
 			analogSensor = Sensor.getSensorList().get(index);
 		}catch (NumberFormatException e) {
 			e.printStackTrace();
-			return val;
+			return analogVal;
 		}
-		Log.d("regularSmartNode ","sensor type "+pp.get("analogType").toString()+" val "+val);
+		Log.d("regularSmartNode ","sensor type "+pp.get("analogType").toString()+" val "+analogVal);
 		return analogSensor.minEngineeringValue +
-		                (analogSensor.maxEngineeringValue- analogSensor.minEngineeringValue) * val / (analogSensor.maxVoltage - analogSensor.minVoltage);
+		                (analogSensor.maxEngineeringValue- analogSensor.minEngineeringValue) * analogVal / (analogSensor.maxVoltage - analogSensor.minVoltage);
 		
 	}
 	

@@ -943,4 +943,13 @@ public class CCUTagsDb extends HServer {
         hisItems.remove(hisItems.size()-1);
         hisBox.remove(hisItems);
     }
+    
+    public void removeAllHisItems(HRef id) {
+        HDict entity = readById(id);
+        
+        QueryBuilder<HisItem> hisQuery = hisBox.query();
+        hisQuery.equal(HisItem_.rec, entity.get("id").toString())
+                .order(HisItem_.date);
+        hisBox.remove(hisQuery.build().find());
+    }
 }

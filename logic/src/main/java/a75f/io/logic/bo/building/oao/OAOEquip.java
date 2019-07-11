@@ -269,7 +269,7 @@ public class OAOEquip
         device.desiredTemp.setPointRef(dtId);
         device.desiredTemp.setEnabled(true);
     */
-        for (Output op : config.getOutputs()) {
+        /*for (Output op : config.getOutputs()) {
             switch (op.getPort()) {
                 case ANALOG_OUT_ONE:
                     device.analog1Out.setType(op.getAnalogActuatorType());
@@ -278,7 +278,7 @@ public class OAOEquip
                     device.analog1Out.setType(op.getAnalogActuatorType());
                     break;
             }
-        }
+        }*/
     
         device.analog1In.setPointRef(returnAirCO2Id);
         device.analog1In.setEnabled(true);
@@ -445,6 +445,10 @@ public class OAOEquip
     
     public double getHisVal(String tags) {
         return hayStack.readHisValByQuery("point and oao and "+tags+" and group == \""+nodeAddr+'\"');
+    }
+    
+    public void setHisVal(String tags, double val) {
+        hayStack.writeHisValByQuery("point and oao and "+tags+" and group == \""+nodeAddr+'\"', val);
     }
     
     public OAOProfileConfiguration getProfileConfiguration() {

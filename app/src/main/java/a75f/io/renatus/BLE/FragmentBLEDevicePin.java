@@ -26,6 +26,7 @@ import java.util.TimerTask;
 import a75f.io.renatus.Fragment2PipeFanCoilUnitConfig;
 import a75f.io.renatus.Fragment4PipeFanCoilUnitConfig;
 import a75f.io.renatus.FragmentCPUConfiguration;
+import a75f.io.renatus.FragmentDABConfiguration;
 import a75f.io.renatus.FragmentHeatPumpConfiguration;
 import a75f.io.renatus.bluetooth.BLEAction;
 import a75f.io.renatus.bluetooth.BLEProvisionService;
@@ -381,6 +382,10 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                     case VAV_PARALLEL_FAN:
                         showDialogFragment(FragmentVAVConfiguration
                                                    .newInstance(mPairingAddress, mName, mNodeType, mFloorName, mProfileType), FragmentVAVConfiguration.ID);
+                        break;
+                    case DAB:
+                        showDialogFragment(FragmentDABConfiguration
+                                                   .newInstance(mPairingAddress, mName, mNodeType, mFloorName, mProfileType), FragmentDABConfiguration.ID);
                         break;
                     case SMARTSTAT_CONVENTIONAL_PACK_UNIT:
                         showDialogFragment(FragmentCPUConfiguration.newInstance(mPairingAddress, mName, mNodeType, mFloorName, mProfileType), FragmentCPUConfiguration.ID);

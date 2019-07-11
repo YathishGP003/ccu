@@ -95,15 +95,18 @@ public class OAOProfile
         oaoEquip.setHisVal("outside and air and damper and cmd", outsideAirFinalLoopOutput);
         oaoEquip.setHisVal("return and air and damper and cmd", returnAirFinalOutput);
         
-        if (outsideAirFinalLoopOutput > oaoEquip.getConfigNumVal("config and exhaust and fan and stage1 and threshold")) {
+        double exhaustFanHysteresis = oaoEquip.getConfigNumVal("config and exhaust and fan and hysteresis");
+        double exhaustFanStage1Threshold = oaoEquip.getConfigNumVal("config and exhaust and fan and stage1 and threshold");
+        double exhaustFanStage2Threshold = oaoEquip.getConfigNumVal("config and exhaust and fan and stage2 and threshold");
+        if (outsideAirFinalLoopOutput > exhaustFanStage1Threshold) {
             oaoEquip.setHisVal("cmd and exhaust and fan and stage1",1);
-        } else {
+        } else if (outsideAirFinalLoopOutput < (exhaustFanStage1Threshold - exhaustFanHysteresis)){
             oaoEquip.setHisVal("cmd and exhaust and fan and stage1",0);
         }
     
-        if (outsideAirFinalLoopOutput > oaoEquip.getConfigNumVal("config and exhaust and fan and stage2 and threshold")) {
+        if (outsideAirFinalLoopOutput > exhaustFanStage2Threshold) {
             oaoEquip.setHisVal("cmd and exhaust and fan and stage2",1);
-        } else {
+        } else if (outsideAirFinalLoopOutput < (exhaustFanStage2Threshold - exhaustFanHysteresis)) {
             oaoEquip.setHisVal("cmd and exhaust and fan and stage2",0);
         }
     }

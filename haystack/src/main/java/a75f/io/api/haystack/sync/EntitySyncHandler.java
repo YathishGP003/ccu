@@ -72,9 +72,7 @@ public class EntitySyncHandler
             CcuLog.i(TAG, "RemoveIDMap : "+CCUHsApi.getInstance().tagsDb.removeIdMap);
             doSyncRemoveIds();
         }
-    
-        CcuLog.i(TAG, "UpdateIDMap : "+CCUHsApi.getInstance().tagsDb.updateIdMap);
-    
+        
         if (CCUHsApi.getInstance().tagsDb.updateIdMap.size() > 0) {
             CcuLog.i(TAG, "UpdateIDMap : "+CCUHsApi.getInstance().tagsDb.updateIdMap);
             doSyncUpdateEntities();
@@ -139,7 +137,11 @@ public class EntitySyncHandler
             HDictBuilder builder = new HDictBuilder();
             builder.add(entity);
             builder.add("id", HRef.copy(CCUHsApi.getInstance().getGUID(luid)));
-            updateRefs(entity, builder);
+            if (!updateRefs(entity, builder)) {
+                scheduleSync();
+                return;
+            }
+            
             entities.add(builder.toDict());
         }
 
@@ -148,23 +150,23 @@ public class EntitySyncHandler
 
     }
 
-    public static void updateRefs(HDict entity, HDictBuilder builder) {
+    public boolean updateRefs(HDict entity, HDictBuilder builder) {
         Iterator<String> iterator = ref.iterator();
         while(iterator.hasNext())
         {
             String hRef = iterator.next();
             if (entity.has(hRef))
             {
-                Log.e("sync", "Update Refs, hRef " + hRef + " : " + entity.toZinc());
-
                 String guid = CCUHsApi.getInstance().getGUID(entity.get(hRef) instanceof HRef ? ((HRef) entity.get(hRef)).toCode()
                         : entity.getStr(hRef));
-                if (guid != null)
-                {
-                    builder.add(hRef, HRef.copy(guid));
+                if (guid == null) {
+                    Log.d(TAG," Entity not synced for "+hRef +" : "+entity.toZinc());
+                    return false;
                 }
+                builder.add(hRef, HRef.copy(guid));
             }
         }
+        return true;
     }
 
     private void updateEntities(ArrayList<HDict> hDIcts)
@@ -176,7 +178,7 @@ public class EntitySyncHandler
             CcuLog.i(TAG, "Response: \n" + response);
             if (response != null)
             {
-                CcuLog.i("CCU", "Updated Entities: "+CCUHsApi.getInstance().tagsDb.updateIdMap);
+                CcuLog.i(TAG, "Updated Entities: "+CCUHsApi.getInstance().tagsDb.updateIdMap);
                 CCUHsApi.getInstance().tagsDb.updateIdMap.clear();
             }
         }

@@ -47,7 +47,7 @@ public class UpdateScheduleHandler
             if (luid != null && luid != "")
             {
                 Schedule s = new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build();
-                s.setId(luid);
+                s.setId(luid.replace("@",""));
                 s.setmSiteId(CCUHsApi.getInstance().getSiteId().toString());
                 s.setRoomRef(CCUHsApi.getInstance().getLUID(s.getRoomRef()));
                 if (s.getMarkers().contains("building"))

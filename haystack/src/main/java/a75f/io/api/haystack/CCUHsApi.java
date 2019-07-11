@@ -1090,7 +1090,7 @@ public class CCUHsApi
             filter = "schedule and building and vacation";
 
         HGrid scheduleHGrid = tagsDb.readAll(filter);
-
+        
         for (int i = 0; i < scheduleHGrid.numRows(); i++)
         {
             schedules.add(new Schedule.Builder().setHDict(scheduleHGrid.row(i)).build());
@@ -1150,6 +1150,7 @@ public class CCUHsApi
     
     public void updateZoneSchedule(Schedule schedule, String zoneId)
     {
+        
         addSchedule(schedule.getId(), schedule.getZoneScheduleHDict(zoneId));
         
         Log.i("CCU_HS", "updateZoneSchedule: " + schedule.getZoneScheduleHDict(zoneId).toZinc());
@@ -1161,7 +1162,7 @@ public class CCUHsApi
     
     public void updateScheduleNoSync(Schedule schedule, String zoneId) {
         addSchedule(schedule.getId(), (zoneId == null ? schedule.getScheduleHDict() : schedule.getZoneScheduleHDict(zoneId)));
-        Log.i("CCU_HS", "updateSchedule: " + (zoneId == null ? schedule.getScheduleHDict().toZinc(): schedule.getZoneScheduleHDict(zoneId).toZinc()));
+        Log.i("CCU_HS", "updateSchedule: "+schedule.getId()+" " + (zoneId == null ? schedule.getScheduleHDict().toZinc(): schedule.getZoneScheduleHDict(zoneId).toZinc()));
     }
     
     public Schedule getScheduleById(String scheduleRef)

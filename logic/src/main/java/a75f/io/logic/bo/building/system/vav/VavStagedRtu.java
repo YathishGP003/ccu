@@ -243,7 +243,7 @@ public class VavStagedRtu extends VavSystemProfile
                         }
                         else
                         {
-                            relayState = systemCoolingLoopOp >= Math.max(stageThreshold - relayDeactHysteresis ,0 ) ? 1 :0;
+                            relayState = systemCoolingLoopOp > Math.max(stageThreshold - relayDeactHysteresis ,0 ) ? 1 :0;
                         }
                         break;
                     case HEATING_1:
@@ -259,7 +259,7 @@ public class VavStagedRtu extends VavSystemProfile
                         }
                         else
                         {
-                            relayState = systemHeatingLoopOp >= Math.max(stageThreshold - relayDeactHysteresis, 0) ? 1: 0;
+                            relayState = systemHeatingLoopOp > Math.max(stageThreshold - relayDeactHysteresis, 0) ? 1: 0;
         
                         }
                         break;
@@ -292,7 +292,7 @@ public class VavStagedRtu extends VavSystemProfile
                         }
                         else
                         {
-                            relayState = systemFanLoopOp >= (stageThreshold - relayDeactHysteresis) ? 1 : 0;
+                            relayState = systemFanLoopOp > (stageThreshold - relayDeactHysteresis) ? 1 : 0;
                         }
                         break;
                     case HUMIDIFIER:

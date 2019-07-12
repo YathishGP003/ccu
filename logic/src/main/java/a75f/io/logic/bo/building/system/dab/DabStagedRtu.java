@@ -168,7 +168,7 @@ public class DabStagedRtu extends DabSystemProfile
                         }
                         else
                         {
-                            relayState = systemCoolingLoopOp >= Math.max(stageThreshold - relayDeactHysteresis ,0 ) ? 1 :0;
+                            relayState = systemCoolingLoopOp > Math.max(stageThreshold - relayDeactHysteresis ,0 ) ? 1 :0;
                         }
                         break;
                     case HEATING_1:
@@ -184,7 +184,7 @@ public class DabStagedRtu extends DabSystemProfile
                         }
                         else
                         {
-                            relayState = systemHeatingLoopOp >= Math.max(stageThreshold - relayDeactHysteresis, 0) ? 1: 0;
+                            relayState = systemHeatingLoopOp > Math.max(stageThreshold - relayDeactHysteresis, 0) ? 1: 0;
                             
                         }
                         break;
@@ -217,7 +217,7 @@ public class DabStagedRtu extends DabSystemProfile
                         }
                         else
                         {
-                            relayState = systemFanLoopOp >= (stageThreshold - relayDeactHysteresis) ? 1 : 0;
+                            relayState = systemFanLoopOp > (stageThreshold - relayDeactHysteresis) ? 1 : 0;
                         }
                         break;
                     case HUMIDIFIER:

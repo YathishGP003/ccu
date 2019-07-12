@@ -163,7 +163,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         {
             analogMin = getConfigVal("analog3 and heating and min");
             analogMax = getConfigVal("analog3 and heating and max");
-            CcuLog.d(L.TAG_CCU_SYSTEM, "analog3Min: "+analogMin+" analog3Max: "+analogMax+" Heating : "+VavSystemController.getInstance().getHeatingSignal());
+            CcuLog.d(L.TAG_CCU_SYSTEM, "analog3Min: "+analogMin+" analog3Max: "+analogMax+" HeatingSignal : "+VavSystemController.getInstance().getHeatingSignal());
             if (analogMax > analogMin)
             {
                 signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (systemHeatingLoopOp / 100)));
@@ -191,7 +191,9 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         } else {
             systemFanLoopOp = 0;
         }
+        systemFanLoopOp = Math.min(systemFanLoopOp, 100);
         setSystemLoopOp("fan", systemFanLoopOp);
+        
         if (getConfigVal("analog2 and output and enabled") > 0)
         {
             analogMin = getConfigVal("analog2 and staticPressure and min");
@@ -238,11 +240,11 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         {
             double staticPressuremOp = getStaticPressure() - SystemConstants.SP_CONFIG_MIN;
             signal = (ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED || staticPressuremOp > 0) ? 1 : 0;
-            setCmdSignal("occupancy",signal * 100);
-            ControlMote.setRelayState("relay3", signal );
         } else {
-            ControlMote.setRelayState("relay3", 0 );
+            signal = 0;
         }
+        setCmdSignal("occupancy",signal * 100);
+        ControlMote.setRelayState("relay3", signal );
         
         if (getConfigVal("relay7 and output and enabled") > 0 && systemMode != SystemMode.OFF
                                                 && ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED)

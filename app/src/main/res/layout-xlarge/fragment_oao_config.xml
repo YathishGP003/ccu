@@ -66,22 +66,21 @@
                             android:layout_height="wrap_content">
 
                             <TextView
-                                android:id="@+id/textCO2device"
+                                android:id="@+id/textOADamperAtMin"
                                 android:layout_width="wrap_content"
                                 android:layout_height="40dp"
                                 android:layout_gravity="center_vertical"
-                                android:text="@string/label_co2device"
+                                android:text="@string/label_oadamper_at_min"
                                 android:layout_alignParentLeft="true"
                                 android:textAppearance="@style/title_normal" />
 
                             <Spinner
-                                android:id="@+id/co2Devicetype"
-                                android:layout_width="160dp"
+                                android:id="@+id/oaDamperAtMin"
+                                android:layout_width="wrap_content"
                                 android:layout_height="40dp"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
-                                android:entries="@array/hvac_stage_selector"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
 
 
@@ -93,22 +92,21 @@
                             android:layout_marginTop="36dp">
 
                             <TextView
-                                android:id="@+id/textCO2Alert"
+                                android:id="@+id/textRetDamperMin"
                                 android:layout_width="wrap_content"
                                 android:layout_height="40dp"
                                 android:layout_gravity="center_vertical"
-                                android:text="@string/label_co2alert"
+                                android:text="@string/label_return_damper_at_min"
                                 android:layout_alignParentLeft="true"
                                 android:textAppearance="@style/title_normal" />
 
                             <Spinner
-                                android:id="@+id/co2Alert"
-                                android:layout_width="160dp"
+                                android:id="@+id/returnDamperAtMin"
+                                android:layout_width="wrap_content"
                                 android:layout_height="40dp"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
-                                android:entries="@array/hvac_stage_selector"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
 
 
@@ -120,22 +118,21 @@
                             android:layout_marginTop="36dp">
 
                             <TextView
-                                android:id="@+id/textCO2Analog1"
+                                android:id="@+id/textOAMinOpen"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
-                                android:text="@string/label_oaoanalog1"
+                                android:text="@string/label_oadamper_min_open"
                                 android:layout_alignParentLeft="true"
                                 android:textAppearance="@style/title_normal" />
 
                             <Spinner
-                                android:id="@+id/co2Analog1"
-                                android:layout_width="160dp"
+                                android:id="@+id/oaDamperMinOpen"
+                                android:layout_width="wrap_content"
                                 android:layout_height="40dp"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
-                                android:entries="@array/hvac_stage_selector"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
 
 
@@ -147,22 +144,73 @@
                             android:layout_marginTop="36dp">
 
                             <TextView
-                                android:id="@+id/textCO2Analog2"
+                                android:id="@+id/textExFanStage1"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
-                                android:text="@string/label_oaoanalog2"
+                                android:text="@string/label_exfan_stage1_threshold"
                                 android:layout_alignParentLeft="true"
                                 android:textAppearance="@style/title_normal" />
 
                             <Spinner
-                                android:id="@+id/co2Analog2"
-                                android:layout_width="160dp"
+                                android:id="@+id/exFanStage1Threshold"
+                                android:layout_width="wrap_content"
                                 android:layout_height="40dp"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
-                                android:entries="@array/hvac_stage_selector"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+
+
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="36dp">
+
+                            <TextView
+                                android:id="@+id/textCurrTransType"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:text="@string/label_current_transformer_type"
+                                android:layout_alignParentLeft="true"
+                                android:textAppearance="@style/title_normal" />
+
+                            <Spinner
+                                android:id="@+id/currentTransformerType"
+                                android:layout_width="wrap_content"
+                                android:layout_height="40dp"
+                                android:layout_alignParentRight="true"
+                                android:layout_gravity="center_vertical"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+
+
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="36dp">
+
+                            <TextView
+                                android:id="@+id/textExFanHyst"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:text="@string/label_exfan_hysteresis"
+                                android:layout_alignParentLeft="true"
+                                android:textAppearance="@style/title_normal" />
+
+                            <Spinner
+                                android:id="@+id/exFanHysteresis"
+                                android:layout_width="wrap_content"
+                                android:layout_height="40dp"
+                                android:layout_alignParentRight="true"
+                                android:layout_gravity="center_vertical"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
 
 
@@ -182,9 +230,113 @@
                             android:layout_height="wrap_content">
 
                             <TextView
-                                android:id="@+id/textCO2threshold"
+                                android:id="@+id/textOADamperAtMax"
                                 android:layout_width="wrap_content"
                                 android:layout_height="40dp"
+                                android:layout_gravity="center_vertical"
+                                android:text="@string/label_oadamper_at_max"
+                                android:layout_alignParentLeft="true"
+                                android:textAppearance="@style/title_normal" />
+
+                            <Spinner
+                                android:id="@+id/oaDamperAtMax"
+                                android:layout_width="wrap_content"
+                                android:layout_height="40dp"
+                                android:layout_alignParentRight="true"
+                                android:layout_gravity="center_vertical"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+
+
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="36dp">
+
+                            <TextView
+                                android:id="@+id/textRetDamperMax"
+                                android:layout_width="wrap_content"
+                                android:layout_height="40dp"
+                                android:layout_gravity="center_vertical"
+                                android:text="@string/label_return_damper_at_max"
+                                android:layout_alignParentLeft="true"
+                                android:textAppearance="@style/title_normal" />
+
+                            <Spinner
+                                android:id="@+id/returnDamperAtMax"
+                                android:layout_width="wrap_content"
+                                android:layout_height="40dp"
+                                android:layout_alignParentRight="true"
+                                android:layout_gravity="center_vertical"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+
+
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="36dp">
+
+                            <TextView
+                                android:id="@+id/textReturnMinOpen"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:text="@string/label_return_damper_min_open"
+                                android:layout_alignParentLeft="true"
+                                android:textAppearance="@style/title_normal" />
+
+                            <Spinner
+                                android:id="@+id/returnDamperMinOpen"
+                                android:layout_width="wrap_content"
+                                android:layout_height="40dp"
+                                android:layout_alignParentRight="true"
+                                android:layout_gravity="center_vertical"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+
+
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="36dp">
+
+                            <TextView
+                                android:id="@+id/textExFanStage2"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:text="@string/label_exfan_stage2_threshold"
+                                android:layout_alignParentLeft="true"
+                                android:textAppearance="@style/title_normal" />
+
+                            <Spinner
+                                android:id="@+id/exFanStage2Threshold"
+                                android:layout_width="wrap_content"
+                                android:layout_height="40dp"
+                                android:layout_alignParentRight="true"
+                                android:layout_gravity="center_vertical"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                tools:listitem="@layout/spinner_dropdown_item"/>
+
+
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="36dp">
+
+                            <TextView
+                                android:id="@+id/textCO2Threshold"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
                                 android:text="@string/label_co2threshold"
                                 android:layout_alignParentLeft="true"
@@ -192,39 +344,11 @@
 
                             <Spinner
                                 android:id="@+id/co2Threshold"
-                                android:layout_width="160dp"
-                                android:layout_height="40dp"
-                                android:layout_alignParentRight="true"
-                                android:layout_gravity="center_vertical"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
-                                android:entries="@array/hvac_stage_selector"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
-
-
-                        </RelativeLayout>
-
-                        <RelativeLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="36dp">
-
-                            <TextView
-                                android:id="@+id/textCO2Offset"
                                 android:layout_width="wrap_content"
                                 android:layout_height="40dp"
-                                android:layout_gravity="center_vertical"
-                                android:text="@string/label_co2offset"
-                                android:layout_alignParentLeft="true"
-                                android:textAppearance="@style/title_normal" />
-
-                            <Spinner
-                                android:id="@+id/co2Offset"
-                                android:layout_width="160dp"
-                                android:layout_height="40dp"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
-                                android:entries="@array/hvac_stage_selector"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
 
 
@@ -236,23 +360,25 @@
                             android:layout_marginTop="36dp">
 
                             <TextView
-                                android:id="@+id/textCurrTrans"
+                                android:id="@+id/textRoomCo2Sensing"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
-                                android:text="@string/label_currtrans"
+                                android:text="@string/label_use_room_co2_sensing"
                                 android:layout_alignParentLeft="true"
                                 android:textAppearance="@style/title_normal" />
 
-                            <Spinner
-                                android:id="@+id/currTransformer"
-                                android:layout_width="160dp"
-                                android:layout_height="40dp"
+                            <ToggleButton
+                                android:id="@+id/roomCO2Sensing"
+                                android:layout_width="46.12dp"
+                                android:layout_height="27.42dp"
                                 android:layout_alignParentRight="true"
-                                android:layout_gravity="center_vertical"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
-                                android:entries="@array/hvac_stage_selector"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
+                                android:layout_centerVertical="true"
+                                android:layout_marginLeft="10dp"
+                                android:background="@drawable/toggle_selector"
+                                android:checked="false"
+                                android:textOff=""
+                                android:textOn="" />
 
 
                         </RelativeLayout>

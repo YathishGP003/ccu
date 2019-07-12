@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical">
+
     <ScrollView
         android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:overScrollMode="never"
-        android:scrollbars="none"
-        android:layout_height="match_parent">
+        android:scrollbars="none">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -16,17 +17,18 @@
 
             <ImageView
                 android:id="@+id/imageRTUInput"
-                android:layout_marginTop="72dp"
                 android:layout_width="254dp"
                 android:layout_height="472dp"
                 android:layout_alignParentLeft="true"
-                android:src="@drawable/input_vav_rtu"/>
+                android:layout_marginTop="65dp"
+                android:src="@drawable/input_vav_rtu" />
+
             <LinearLayout
                 android:id="@+id/lt_inputs"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_toRightOf="@+id/imageRTUInput">
+                android:layout_toRightOf="@+id/imageRTUInput"
+                android:orientation="vertical">
 
                 <TableLayout
                     android:id="@+id/vavStagedRtu"
@@ -47,31 +49,29 @@
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center_horizontal"
                             android:text="@string/title_enable"
-                            android:textAppearance="@style/text_label"
-                            android:gravity="center_horizontal"
-                            android:layout_weight="1"
-                            />
+                            android:textAppearance="@style/text_label" />
 
                         <TextView
                             android:layout_width="0dp"
-                            android:layout_weight="1"
                             android:layout_height="wrap_content"
+                            android:layout_marginLeft="34dp"
+                            android:layout_weight="1"
+                            android:gravity="center_horizontal"
                             android:text="@string/title_mapping"
-                            android:textAppearance="@style/text_label"
-                            android:gravity="center_horizontal"
-                            android:layout_marginLeft="34dp"
-                            />
+                            android:textAppearance="@style/text_label" />
 
 
                         <TextView
                             android:layout_width="0dp"
-                            android:layout_weight="1"
                             android:layout_height="wrap_content"
                             android:layout_marginLeft="34dp"
-                            android:text="@string/title_testsignal"
+                            android:layout_weight="1"
                             android:gravity="center_horizontal"
-                            android:textAppearance="@style/text_label"/>
+                            android:text="@string/title_testsignal"
+                            android:textAppearance="@style/text_label" />
 
                     </TableRow>
 
@@ -81,7 +81,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="26dp">
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
                             android:layout_weight="1">
@@ -101,56 +101,61 @@
                             <TextView
                                 android:id="@+id/textCompStage1"
                                 android:layout_width="wrap_content"
-                                android:layout_toRightOf="@+id/toggleRelay1"
-                                android:layout_marginLeft="20dp"
                                 android:layout_height="wrap_content"
                                 android:layout_centerVertical="true"
-                                android:textAppearance="@style/text_appearance"
-                                android:text="@string/label_relay1"/>
-                        </RelativeLayout>
-                        <RelativeLayout
+                                android:layout_marginLeft="20dp"
+                                android:layout_toRightOf="@+id/toggleRelay1"
+                                android:text="@string/label_relay1"
+                                android:textAppearance="@style/text_appearance" />
+                        </LinearLayout>
+
+                        <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_weight="1"
                             android:layout_height="40dp"
-                            android:layout_marginLeft="34dp">
+                            android:layout_marginLeft="34dp"
+                            android:layout_weight="1"
+                            android:gravity="center">
+
                             <Spinner
                                 android:id="@+id/relay1Spinner"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:layout_width="202dp"
                                 android:layout_height="wrap_content"
                                 android:layout_centerHorizontal="true"
                                 android:layout_centerVertical="true"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:entries="@array/hvac_stage_selector"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
-                        </RelativeLayout>
+                                tools:listitem="@layout/spinner_dropdown_item" />
+                        </LinearLayout>
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_weight="1"
                             android:layout_height="40dp"
-                            android:layout_marginLeft="34dp">
+                            android:layout_marginLeft="34dp"
+                            android:layout_weight="1"
+                            android:gravity="center">
+
                             <ToggleButton
                                 android:id="@+id/relay1Test"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:background="@drawable/toggle_testselector"
                                 android:layout_centerHorizontal="true"
                                 android:layout_centerVertical="true"
+                                android:background="@drawable/toggle_testselector"
                                 android:checked="false"
                                 android:textAppearance="@style/text_toggleappearance"
                                 android:textColor="@drawable/toggle_textselector"
                                 android:textOff="OFF"
                                 android:textOn="ON" />
-                        </RelativeLayout>
+                        </LinearLayout>
                     </TableRow>
 
                     <TableRow
                         android:id="@+id/tableRow2"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="24dp" >
+                        android:layout_marginTop="24dp">
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
                             android:layout_weight="1">
@@ -170,56 +175,61 @@
                             <TextView
                                 android:id="@+id/textCompStage2"
                                 android:layout_width="wrap_content"
-                                android:layout_toRightOf="@+id/toggleRelay2"
-                                android:layout_marginLeft="20dp"
                                 android:layout_height="wrap_content"
                                 android:layout_centerVertical="true"
-                                android:textAppearance="@style/text_appearance"
-                                android:text="@string/label_relay2"/>
-                        </RelativeLayout>
-                        <RelativeLayout
+                                android:layout_marginLeft="20dp"
+                                android:layout_toRightOf="@+id/toggleRelay2"
+                                android:text="@string/label_relay2"
+                                android:textAppearance="@style/text_appearance" />
+                        </LinearLayout>
+
+                        <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_weight="1"
                             android:layout_height="40dp"
-                            android:layout_marginLeft="34dp">
+                            android:layout_marginLeft="34dp"
+                            android:layout_weight="1"
+                            android:gravity="center">
+
                             <Spinner
                                 android:id="@+id/relay2Spinner"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:layout_width="202dp"
                                 android:layout_height="wrap_content"
                                 android:layout_centerHorizontal="true"
                                 android:layout_centerVertical="true"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:entries="@array/hvac_stage_selector"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
-                        </RelativeLayout>
+                                tools:listitem="@layout/spinner_dropdown_item" />
+                        </LinearLayout>
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_weight="1"
                             android:layout_height="40dp"
-                            android:layout_marginLeft="34dp">
+                            android:layout_marginLeft="34dp"
+                            android:layout_weight="1"
+                            android:gravity="center">
+
                             <ToggleButton
                                 android:id="@+id/relay2Test"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:background="@drawable/toggle_testselector"
                                 android:layout_centerHorizontal="true"
                                 android:layout_centerVertical="true"
+                                android:background="@drawable/toggle_testselector"
                                 android:checked="false"
                                 android:textAppearance="@style/text_toggleappearance"
                                 android:textColor="@drawable/toggle_textselector"
                                 android:textOff="OFF"
                                 android:textOn="ON" />
-                        </RelativeLayout>
+                        </LinearLayout>
                     </TableRow>
 
                     <TableRow
                         android:id="@+id/tableRow3"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="24dp" >
+                        android:layout_marginTop="24dp">
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
                             android:layout_weight="1">
@@ -239,46 +249,51 @@
                             <TextView
                                 android:id="@+id/textCompStage3"
                                 android:layout_width="wrap_content"
-                                android:layout_toRightOf="@+id/toggleRelay3"
-                                android:layout_marginLeft="20dp"
                                 android:layout_height="wrap_content"
                                 android:layout_centerVertical="true"
-                                android:textAppearance="@style/text_appearance"
-                                android:text="@string/label_relay3"/>
-                        </RelativeLayout>
-                        <RelativeLayout
+                                android:layout_marginLeft="20dp"
+                                android:layout_toRightOf="@+id/toggleRelay3"
+                                android:text="@string/label_relay3"
+                                android:textAppearance="@style/text_appearance" />
+                        </LinearLayout>
+
+                        <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_weight="1"
                             android:layout_height="40dp"
-                            android:layout_marginLeft="34dp">
+                            android:layout_marginLeft="34dp"
+                            android:layout_weight="1"
+                            android:gravity="center">
+
                             <Spinner
                                 android:id="@+id/relay3Spinner"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:layout_width="202dp"
                                 android:layout_height="wrap_content"
                                 android:layout_centerHorizontal="true"
                                 android:layout_centerVertical="true"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:entries="@array/hvac_stage_selector"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
-                        </RelativeLayout>
+                                tools:listitem="@layout/spinner_dropdown_item" />
+                        </LinearLayout>
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_weight="1"
                             android:layout_height="40dp"
-                            android:layout_marginLeft="34dp">
+                            android:layout_marginLeft="34dp"
+                            android:layout_weight="1"
+                            android:gravity="center">
+
                             <ToggleButton
                                 android:id="@+id/relay3Test"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:background="@drawable/toggle_testselector"
                                 android:layout_centerHorizontal="true"
+                                android:background="@drawable/toggle_testselector"
                                 android:checked="false"
                                 android:textAppearance="@style/text_toggleappearance"
                                 android:textColor="@drawable/toggle_textselector"
                                 android:textOff="OFF"
                                 android:textOn="ON" />
-                        </RelativeLayout>
+                        </LinearLayout>
 
                     </TableRow>
 
@@ -286,9 +301,9 @@
                         android:id="@+id/tableRow4"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="24dp" >
+                        android:layout_marginTop="24dp">
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
                             android:layout_weight="1">
@@ -308,46 +323,51 @@
                             <TextView
                                 android:id="@+id/textCompStage4"
                                 android:layout_width="wrap_content"
-                                android:layout_toRightOf="@+id/toggleRelay4"
-                                android:layout_marginLeft="20dp"
                                 android:layout_height="wrap_content"
                                 android:layout_centerVertical="true"
-                                android:textAppearance="@style/text_appearance"
-                                android:text="@string/label_relay4"/>
-                        </RelativeLayout>
-                        <RelativeLayout
+                                android:layout_marginLeft="20dp"
+                                android:layout_toRightOf="@+id/toggleRelay4"
+                                android:text="@string/label_relay4"
+                                android:textAppearance="@style/text_appearance" />
+                        </LinearLayout>
+
+                        <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_weight="1"
                             android:layout_height="40dp"
-                            android:layout_marginLeft="34dp">
+                            android:layout_marginLeft="34dp"
+                            android:layout_weight="1"
+                            android:gravity="center">
+
                             <Spinner
                                 android:id="@+id/relay4Spinner"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:layout_width="202dp"
                                 android:layout_height="wrap_content"
                                 android:layout_centerHorizontal="true"
                                 android:layout_centerVertical="true"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:entries="@array/hvac_stage_selector"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
-                        </RelativeLayout>
+                                tools:listitem="@layout/spinner_dropdown_item" />
+                        </LinearLayout>
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_weight="1"
                             android:layout_height="40dp"
-                            android:layout_marginLeft="34dp">
+                            android:layout_marginLeft="34dp"
+                            android:layout_weight="1"
+                            android:gravity="center">
+
                             <ToggleButton
                                 android:id="@+id/relay4Test"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:background="@drawable/toggle_testselector"
                                 android:layout_centerHorizontal="true"
+                                android:background="@drawable/toggle_testselector"
                                 android:checked="false"
                                 android:textAppearance="@style/text_toggleappearance"
                                 android:textColor="@drawable/toggle_textselector"
                                 android:textOff="OFF"
                                 android:textOn="ON" />
-                        </RelativeLayout>
+                        </LinearLayout>
 
                     </TableRow>
 
@@ -355,9 +375,9 @@
                         android:id="@+id/tableRow5"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="24dp" >
+                        android:layout_marginTop="24dp">
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
                             android:layout_weight="1">
@@ -377,46 +397,51 @@
                             <TextView
                                 android:id="@+id/textCompStage5"
                                 android:layout_width="wrap_content"
-                                android:layout_toRightOf="@+id/toggleRelay5"
-                                android:layout_marginLeft="20dp"
                                 android:layout_height="wrap_content"
                                 android:layout_centerVertical="true"
-                                android:textAppearance="@style/text_appearance"
-                                android:text="@string/label_relay5"/>
-                        </RelativeLayout>
-                        <RelativeLayout
+                                android:layout_marginLeft="20dp"
+                                android:layout_toRightOf="@+id/toggleRelay5"
+                                android:text="@string/label_relay5"
+                                android:textAppearance="@style/text_appearance" />
+                        </LinearLayout>
+
+                        <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_weight="1"
                             android:layout_height="40dp"
-                            android:layout_marginLeft="34dp">
+                            android:layout_marginLeft="34dp"
+                            android:layout_weight="1"
+                            android:gravity="center">
+
                             <Spinner
                                 android:id="@+id/relay5Spinner"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:layout_width="202dp"
                                 android:layout_height="wrap_content"
                                 android:layout_centerHorizontal="true"
                                 android:layout_centerVertical="true"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:entries="@array/hvac_stage_selector"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
-                        </RelativeLayout>
+                                tools:listitem="@layout/spinner_dropdown_item" />
+                        </LinearLayout>
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_weight="1"
                             android:layout_height="40dp"
-                            android:layout_marginLeft="34dp">
+                            android:layout_marginLeft="34dp"
+                            android:layout_weight="1"
+                            android:gravity="center">
+
                             <ToggleButton
                                 android:id="@+id/relay5Test"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:background="@drawable/toggle_testselector"
                                 android:layout_centerHorizontal="true"
+                                android:background="@drawable/toggle_testselector"
                                 android:checked="false"
                                 android:textAppearance="@style/text_toggleappearance"
                                 android:textColor="@drawable/toggle_textselector"
                                 android:textOff="OFF"
                                 android:textOn="ON" />
-                        </RelativeLayout>
+                        </LinearLayout>
 
 
                     </TableRow>
@@ -425,9 +450,9 @@
                         android:id="@+id/tableRow6"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="24dp" >
+                        android:layout_marginTop="24dp">
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
                             android:layout_weight="1">
@@ -447,46 +472,51 @@
                             <TextView
                                 android:id="@+id/textCompStage6"
                                 android:layout_width="wrap_content"
-                                android:layout_toRightOf="@+id/toggleRelay6"
-                                android:layout_marginLeft="20dp"
                                 android:layout_height="wrap_content"
                                 android:layout_centerVertical="true"
-                                android:textAppearance="@style/text_appearance"
-                                android:text="@string/label_relay6"/>
-                        </RelativeLayout>
-                        <RelativeLayout
+                                android:layout_marginLeft="20dp"
+                                android:layout_toRightOf="@+id/toggleRelay6"
+                                android:text="@string/label_relay6"
+                                android:textAppearance="@style/text_appearance" />
+                        </LinearLayout>
+
+                        <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_weight="1"
                             android:layout_height="40dp"
-                            android:layout_marginLeft="34dp">
+                            android:layout_marginLeft="34dp"
+                            android:layout_weight="1"
+                            android:gravity="center">
+
                             <Spinner
                                 android:id="@+id/relay6Spinner"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:layout_width="202dp"
                                 android:layout_height="wrap_content"
-                                android:layout_centerVertical="true"
                                 android:layout_centerHorizontal="true"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                android:layout_centerVertical="true"
                                 android:entries="@array/hvac_stage_selector"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
-                        </RelativeLayout>
+                                tools:listitem="@layout/spinner_dropdown_item" />
+                        </LinearLayout>
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_weight="1"
                             android:layout_height="40dp"
-                            android:layout_marginLeft="34dp">
+                            android:layout_marginLeft="34dp"
+                            android:layout_weight="1"
+                            android:gravity="center">
+
                             <ToggleButton
                                 android:id="@+id/relay6Test"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:background="@drawable/toggle_testselector"
                                 android:layout_centerHorizontal="true"
+                                android:background="@drawable/toggle_testselector"
                                 android:checked="false"
                                 android:textAppearance="@style/text_toggleappearance"
                                 android:textColor="@drawable/toggle_textselector"
                                 android:textOff="OFF"
                                 android:textOn="ON" />
-                        </RelativeLayout>
+                        </LinearLayout>
 
 
                     </TableRow>
@@ -495,9 +525,9 @@
                         android:id="@+id/tableRow7"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_marginTop="24dp" >
+                        android:layout_marginTop="24dp">
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
                             android:layout_weight="1">
@@ -517,57 +547,62 @@
                             <TextView
                                 android:id="@+id/textCompStage7"
                                 android:layout_width="wrap_content"
-                                android:layout_toRightOf="@+id/toggleRelay7"
-                                android:layout_marginLeft="20dp"
                                 android:layout_height="wrap_content"
                                 android:layout_centerVertical="true"
-                                android:textAppearance="@style/text_appearance"
-                                android:text="@string/label_relay7"/>
-                        </RelativeLayout>
-                        <RelativeLayout
+                                android:layout_marginLeft="20dp"
+                                android:layout_toRightOf="@+id/toggleRelay7"
+                                android:text="@string/label_relay7"
+                                android:textAppearance="@style/text_appearance" />
+                        </LinearLayout>
+
+                        <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_weight="1"
                             android:layout_height="40dp"
-                            android:layout_marginLeft="34dp">
+                            android:layout_marginLeft="34dp"
+                            android:layout_weight="1"
+                            android:gravity="center">
+
                             <Spinner
                                 android:id="@+id/relay7Spinner"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:layout_width="202dp"
                                 android:layout_height="wrap_content"
-                                android:layout_centerVertical="true"
                                 android:layout_centerHorizontal="true"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                android:layout_centerVertical="true"
                                 android:entries="@array/hvac_stage_selector"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
-                        </RelativeLayout>
+                                tools:listitem="@layout/spinner_dropdown_item" />
+                        </LinearLayout>
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_weight="1"
                             android:layout_height="40dp"
-                            android:layout_marginLeft="34dp">
+                            android:layout_marginLeft="34dp"
+                            android:layout_weight="1"
+                            android:gravity="center">
+
                             <ToggleButton
                                 android:id="@+id/relay7Test"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:background="@drawable/toggle_testselector"
                                 android:layout_centerHorizontal="true"
+                                android:background="@drawable/toggle_testselector"
                                 android:checked="false"
                                 android:textAppearance="@style/text_toggleappearance"
                                 android:textColor="@drawable/toggle_textselector"
                                 android:textOff="OFF"
                                 android:textOn="ON" />
-                        </RelativeLayout>
-
+                        </LinearLayout>
 
                     </TableRow>
                 </TableLayout>
             </LinearLayout>
+
             <Button
                 android:id="@+id/buttonNext"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
                 android:layout_below="@+id/lt_inputs"
+                android:layout_alignParentRight="true"
                 android:layout_marginTop="20dp"
                 android:layout_marginRight="30dp"
                 android:background="@null"

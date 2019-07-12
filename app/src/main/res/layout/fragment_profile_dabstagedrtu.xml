@@ -81,7 +81,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="26dp">
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
                             android:layout_weight="1">
@@ -107,10 +107,11 @@
                                 android:layout_centerVertical="true"
                                 android:textAppearance="@style/text_appearance"
                                 android:text="@string/label_relay1"/>
-                        </RelativeLayout>
-                        <RelativeLayout
+                        </LinearLayout>
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_weight="1"
+                            android:gravity="center"
                             android:layout_height="40dp"
                             android:layout_marginLeft="34dp">
                             <Spinner
@@ -122,12 +123,13 @@
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:entries="@array/hvac_stage_selector"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
-                        </RelativeLayout>
+                        </LinearLayout>
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_weight="1"
                             android:layout_height="40dp"
+                            android:gravity="center"
                             android:layout_marginLeft="34dp">
                             <ToggleButton
                                 android:id="@+id/relay1Test"
@@ -141,7 +143,7 @@
                                 android:textColor="@drawable/toggle_textselector"
                                 android:textOff="OFF"
                                 android:textOn="ON" />
-                        </RelativeLayout>
+                        </LinearLayout>
                     </TableRow>
 
                     <TableRow
@@ -150,7 +152,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="24dp" >
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
                             android:layout_weight="1">
@@ -176,10 +178,11 @@
                                 android:layout_centerVertical="true"
                                 android:textAppearance="@style/text_appearance"
                                 android:text="@string/label_relay2"/>
-                        </RelativeLayout>
-                        <RelativeLayout
+                        </LinearLayout>
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_weight="1"
+                            android:gravity="center"
                             android:layout_height="40dp"
                             android:layout_marginLeft="34dp">
                             <Spinner
@@ -191,12 +194,13 @@
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:entries="@array/hvac_stage_selector"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
-                        </RelativeLayout>
+                        </LinearLayout>
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_weight="1"
                             android:layout_height="40dp"
+                            android:gravity="center"
                             android:layout_marginLeft="34dp">
                             <ToggleButton
                                 android:id="@+id/relay2Test"
@@ -210,7 +214,7 @@
                                 android:textColor="@drawable/toggle_textselector"
                                 android:textOff="OFF"
                                 android:textOn="ON" />
-                        </RelativeLayout>
+                        </LinearLayout>
                     </TableRow>
 
                     <TableRow
@@ -219,7 +223,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="24dp" >
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
                             android:layout_weight="1">
@@ -245,11 +249,12 @@
                                 android:layout_centerVertical="true"
                                 android:textAppearance="@style/text_appearance"
                                 android:text="@string/label_relay3"/>
-                        </RelativeLayout>
-                        <RelativeLayout
+                        </LinearLayout>
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_weight="1"
                             android:layout_height="40dp"
+                            android:gravity="center"
                             android:layout_marginLeft="34dp">
                             <Spinner
                                 android:id="@+id/relay3Spinner"
@@ -260,12 +265,13 @@
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:entries="@array/hvac_stage_selector"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
-                        </RelativeLayout>
+                        </LinearLayout>
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_weight="1"
                             android:layout_height="40dp"
+                            android:gravity="center"
                             android:layout_marginLeft="34dp">
                             <ToggleButton
                                 android:id="@+id/relay3Test"
@@ -278,7 +284,7 @@
                                 android:textColor="@drawable/toggle_textselector"
                                 android:textOff="OFF"
                                 android:textOn="ON" />
-                        </RelativeLayout>
+                        </LinearLayout>
 
                     </TableRow>
 
@@ -288,7 +294,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="24dp" >
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
                             android:layout_weight="1">
@@ -314,10 +320,11 @@
                                 android:layout_centerVertical="true"
                                 android:textAppearance="@style/text_appearance"
                                 android:text="@string/label_relay4"/>
-                        </RelativeLayout>
-                        <RelativeLayout
+                        </LinearLayout>
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_weight="1"
+                            android:gravity="center"
                             android:layout_height="40dp"
                             android:layout_marginLeft="34dp">
                             <Spinner
@@ -329,12 +336,13 @@
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:entries="@array/hvac_stage_selector"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
-                        </RelativeLayout>
+                        </LinearLayout>
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_weight="1"
                             android:layout_height="40dp"
+                            android:gravity="center"
                             android:layout_marginLeft="34dp">
                             <ToggleButton
                                 android:id="@+id/relay4Test"
@@ -347,7 +355,7 @@
                                 android:textColor="@drawable/toggle_textselector"
                                 android:textOff="OFF"
                                 android:textOn="ON" />
-                        </RelativeLayout>
+                        </LinearLayout>
 
                     </TableRow>
 
@@ -357,7 +365,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="24dp" >
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
                             android:layout_weight="1">
@@ -383,11 +391,12 @@
                                 android:layout_centerVertical="true"
                                 android:textAppearance="@style/text_appearance"
                                 android:text="@string/label_relay5"/>
-                        </RelativeLayout>
-                        <RelativeLayout
+                        </LinearLayout>
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_weight="1"
                             android:layout_height="40dp"
+                            android:gravity="center"
                             android:layout_marginLeft="34dp">
                             <Spinner
                                 android:id="@+id/relay5Spinner"
@@ -398,12 +407,13 @@
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:entries="@array/hvac_stage_selector"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
-                        </RelativeLayout>
+                        </LinearLayout>
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_weight="1"
                             android:layout_height="40dp"
+                            android:gravity="center"
                             android:layout_marginLeft="34dp">
                             <ToggleButton
                                 android:id="@+id/relay5Test"
@@ -416,7 +426,7 @@
                                 android:textColor="@drawable/toggle_textselector"
                                 android:textOff="OFF"
                                 android:textOn="ON" />
-                        </RelativeLayout>
+                        </LinearLayout>
 
 
                     </TableRow>
@@ -427,7 +437,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="24dp" >
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
                             android:layout_weight="1">
@@ -453,11 +463,12 @@
                                 android:layout_centerVertical="true"
                                 android:textAppearance="@style/text_appearance"
                                 android:text="@string/label_relay6"/>
-                        </RelativeLayout>
-                        <RelativeLayout
+                        </LinearLayout>
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_weight="1"
                             android:layout_height="40dp"
+                            android:gravity="center"
                             android:layout_marginLeft="34dp">
                             <Spinner
                                 android:id="@+id/relay6Spinner"
@@ -468,12 +479,13 @@
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:entries="@array/hvac_stage_selector"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
-                        </RelativeLayout>
+                        </LinearLayout>
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_weight="1"
                             android:layout_height="40dp"
+                            android:gravity="center"
                             android:layout_marginLeft="34dp">
                             <ToggleButton
                                 android:id="@+id/relay6Test"
@@ -486,7 +498,7 @@
                                 android:textColor="@drawable/toggle_textselector"
                                 android:textOff="OFF"
                                 android:textOn="ON" />
-                        </RelativeLayout>
+                        </LinearLayout>
 
 
                     </TableRow>
@@ -497,7 +509,7 @@
                         android:layout_height="match_parent"
                         android:layout_marginTop="24dp">
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
                             android:layout_weight="1">
@@ -523,11 +535,12 @@
                                 android:layout_centerVertical="true"
                                 android:textAppearance="@style/text_appearance"
                                 android:text="@string/label_relay7"/>
-                        </RelativeLayout>
-                        <RelativeLayout
+                        </LinearLayout>
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_weight="1"
                             android:layout_height="40dp"
+                            android:gravity="center"
                             android:layout_marginLeft="34dp">
                             <Spinner
                                 android:id="@+id/relay7Spinner"
@@ -538,12 +551,13 @@
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:entries="@array/hvac_stage_selector"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
-                        </RelativeLayout>
+                        </LinearLayout>
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_weight="1"
                             android:layout_height="40dp"
+                            android:gravity="center"
                             android:layout_marginLeft="34dp">
                             <ToggleButton
                                 android:id="@+id/relay7Test"
@@ -556,7 +570,7 @@
                                 android:textColor="@drawable/toggle_textselector"
                                 android:textOff="OFF"
                                 android:textOn="ON" />
-                        </RelativeLayout>
+                        </LinearLayout>
 
 
                     </TableRow>

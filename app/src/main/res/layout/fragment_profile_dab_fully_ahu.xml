@@ -50,7 +50,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="38dp">
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
                             android:layout_weight="1">
@@ -62,7 +62,6 @@
                                 android:layout_alignParentLeft="true"
                                 android:layout_centerVertical="true"
                                 android:layout_marginLeft="10dp"
-                                android:layout_marginTop="10dp"
                                 android:background="@drawable/toggle_selector"
                                 android:checked="false"
                                 android:textOff=""
@@ -78,28 +77,27 @@
                                 android:layout_toRightOf="@+id/toggleAnalog1"
                                 android:text="@string/label_analog1"
                                 android:textAppearance="@style/text_appearance" />
-                        </RelativeLayout>
+                        </LinearLayout>
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
+                            android:gravity="center"
                             android:layout_marginLeft="34dp"
                             android:layout_weight="1">
 
                             <TextView
                                 android:layout_width="129dp"
                                 android:layout_height="wrap_content"
-                                android:layout_centerHorizontal="true"
-                                android:layout_centerVertical="true"
-                                android:layout_weight="1"
                                 android:text="@string/label_cooling"
                                 android:textAppearance="@style/text_label" />
-                        </RelativeLayout>
+                        </LinearLayout>
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
                             android:layout_marginLeft="34dp"
+                            android:gravity="center"
                             android:layout_weight="1">
 
                             <Spinner
@@ -111,7 +109,7 @@
                                 android:layout_centerVertical="true"
                                 android:entries="@array/hvac_stage_selector"
                                 tools:listitem="@layout/spinner_dropdown_item" />
-                        </RelativeLayout>
+                        </LinearLayout>
                     </TableRow>
 
                     <TableRow
@@ -120,7 +118,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="22dp">
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
                             android:layout_weight="1">
@@ -146,11 +144,12 @@
                                 android:layout_toRightOf="@+id/toggleAnalog2"
                                 android:text="@string/label_analog2"
                                 android:textAppearance="@style/text_appearance" />
-                        </RelativeLayout>
+                        </LinearLayout>
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
+                            android:gravity="center"
                             android:layout_marginLeft="34dp"
                             android:layout_weight="1">
 
@@ -161,11 +160,12 @@
                                 android:layout_centerVertical="true"
                                 android:text="@string/label_fanspeed"
                                 android:textAppearance="@style/text_label" />
-                        </RelativeLayout>
+                        </LinearLayout>
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
+                            android:gravity="center"
                             android:layout_marginLeft="34dp"
                             android:layout_weight="1">
 
@@ -178,7 +178,7 @@
                                 android:layout_centerVertical="true"
                                 android:entries="@array/hvac_stage_selector"
                                 tools:listitem="@layout/spinner_dropdown_item" />
-                        </RelativeLayout>
+                        </LinearLayout>
                     </TableRow>
 
                     <TableRow
@@ -187,7 +187,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="22dp">
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
                             android:layout_weight="1">
@@ -213,11 +213,12 @@
                                 android:layout_toRightOf="@+id/toggleAnalog3"
                                 android:text="@string/label_analog3"
                                 android:textAppearance="@style/text_appearance" />
-                        </RelativeLayout>
+                        </LinearLayout>
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
+                            android:gravity="center"
                             android:layout_marginLeft="34dp"
                             android:layout_weight="1">
 
@@ -228,11 +229,12 @@
                                 android:layout_centerVertical="true"
                                 android:text="@string/label_heating"
                                 android:textAppearance="@style/text_label" />
-                        </RelativeLayout>
+                        </LinearLayout>
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
+                            android:gravity="center"
                             android:layout_marginLeft="34dp"
                             android:layout_weight="1">
 
@@ -245,7 +247,7 @@
                                 android:layout_centerVertical="true"
                                 android:entries="@array/hvac_stage_selector"
                                 tools:listitem="@layout/spinner_dropdown_item" />
-                        </RelativeLayout>
+                        </LinearLayout>
 
                     </TableRow>
 
@@ -255,7 +257,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="22dp">
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
                             android:layout_weight="1">
@@ -281,12 +283,13 @@
                                 android:layout_toRightOf="@+id/toggleRelay3"
                                 android:text="@string/label_relay3"
                                 android:textAppearance="@style/text_appearance" />
-                        </RelativeLayout>
+                        </LinearLayout>
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
                             android:layout_marginLeft="34dp"
+                            android:gravity="center"
                             android:layout_weight="1">
 
                             <TextView
@@ -296,12 +299,13 @@
                                 android:layout_centerVertical="true"
                                 android:text="@string/label_fanenable"
                                 android:textAppearance="@style/text_label" />
-                        </RelativeLayout>
+                        </LinearLayout>
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
                             android:layout_marginLeft="34dp"
+                            android:gravity="center"
                             android:layout_weight="1">
 
                             <ToggleButton
@@ -315,7 +319,7 @@
                                 android:textColor="@drawable/toggle_textselector"
                                 android:textOff="OFF"
                                 android:textOn="ON" />
-                        </RelativeLayout>
+                        </LinearLayout>
 
 
                     </TableRow>
@@ -326,7 +330,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="22dp">
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
                             android:layout_weight="1">
@@ -352,12 +356,13 @@
                                 android:layout_toRightOf="@+id/toggleRelay7"
                                 android:text="@string/label_relay7"
                                 android:textAppearance="@style/text_appearance" />
-                        </RelativeLayout>
+                        </LinearLayout>
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
                             android:layout_marginLeft="34dp"
+                            android:gravity="center"
                             android:layout_weight="1">
 
                             <Spinner
@@ -369,12 +374,13 @@
                                 android:layout_centerVertical="true"
                                 android:entries="@array/hvac_stage_selector"
                                 tools:listitem="@layout/spinner_dropdown_item" />
-                        </RelativeLayout>
+                        </LinearLayout>
 
-                        <RelativeLayout
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
                             android:layout_marginLeft="34dp"
+                            android:gravity="center"
                             android:layout_weight="1">
 
                             <ToggleButton
@@ -388,7 +394,7 @@
                                 android:textColor="@drawable/toggle_textselector"
                                 android:textOff="OFF"
                                 android:textOn="ON" />
-                        </RelativeLayout>
+                        </LinearLayout>
                     </TableRow>
                 </TableLayout>
             </LinearLayout>

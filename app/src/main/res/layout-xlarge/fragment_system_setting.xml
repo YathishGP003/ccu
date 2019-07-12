@@ -166,7 +166,7 @@
 
                     <Spinner
                         android:id="@+id/targetMinInsideHumidity"
-                        android:layout_width="74dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="42dp"
                         android:layout_gravity="center_vertical"
@@ -202,7 +202,7 @@
 
                     <Spinner
                         android:id="@+id/targetMaxInsideHumidity"
-                        android:layout_width="74dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="42dp"
                         android:layout_gravity="center_vertical"

@@ -50,6 +50,7 @@ public class OAOProfile
     
     public void updateOaoEquip(OAOProfileConfiguration config) {
         oaoEquip.update(config);
+        oaoEquip.init();
     }
     
     public ProfileType getProfileType()

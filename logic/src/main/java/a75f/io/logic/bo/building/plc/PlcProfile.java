@@ -34,6 +34,7 @@ public class PlcProfile extends ZoneProfile
     
     public void updatePlcEquip(PlcProfileConfiguration config) {
         plcEquip.update(config);
+        plcEquip.init();
     }
     
     @Override

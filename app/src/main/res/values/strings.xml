@@ -502,12 +502,23 @@
     <string name="label_systemdevice">SYSTEM DEVICES</string>
     <string name="label_oao">OAO</string>
     <string name="title_oao">OUTSIDE AIR OPTIMIZER (OAO)</string>
+    <string name="label_oadamper_at_min">Outside Damper at Min Drive (V)</string>
+    <string name="label_oadamper_at_max">Outside Damper at Max Drive (V)</string>
+    <string name="label_return_damper_at_min">Return Damper at Min Drive (V)</string>
+    <string name="label_return_damper_at_max">Return Damper at Min Drive (V)</string>
+    <string name="label_oadamper_min_open">Outside Damper Min Open (%)</string>
+    <string name="label_return_damper_min_open">Return Damper Min Open (%)</string>
+    <string name="label_exfan_stage1_threshold">Exhaust Fan Stage 1 Threshold (%)</string>
+    <string name="label_exfan_stage2_threshold">Exhaust Fan Stage 2 Threshold (%)</string>
     <string name="label_co2device">CO2 Device Type</string>
     <string name="label_co2alert">CO2 Alert Threshold</string>
+    <string name="label_exfan_hysteresis">Exhaust Fan Hysteresis (%)</string>
+    <string name="label_use_room_co2_sensing">Use Per Room CO2 Sensing</string>
     <string name="label_oaoanalog1">Outside Air Damper Type\n(Analog-out 1)</string>
     <string name="label_oaoanalog2">Return Air Damper Type\n(Analog-out 2)</string>
     <string name="label_co2threshold">CO2 Threshold (ppm)</string>
     <string name="label_co2offset">CO2 Alert Offset Time</string>
+    <string name="label_current_transformer_type">Current Transformer Type</string>
     <string name="label_currtrans">Curr Transformer\n(Analog-in 2)</string>
 
     <!--PAIRING INSTRUCTION Screen-->

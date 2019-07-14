@@ -11,8 +11,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.ToggleButton;
+
+import java.util.ArrayList;
 
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -24,6 +29,7 @@ import a75f.io.logic.bo.building.oao.OAOProfile;
 import a75f.io.logic.bo.building.oao.OAOProfileConfiguration;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType.TwoToTenV;
@@ -45,6 +51,21 @@ public class DialogOAOProfile extends BaseDialogFragment
     
     String floorRef;
     String zoneRef;
+    
+    static int CT_INDEX_START = 8;
+    
+    @BindView(R.id.oaDamperAtMin)         Spinner oaDamperAtMin;
+    @BindView(R.id.returnDamperAtMin)     Spinner returnDamperAtMin;
+    @BindView(R.id.oaDamperMinOpen)       Spinner      oaDamperMinOpen;
+    @BindView(R.id.exFanStage1Threshold)  Spinner      exFanStage1Threshold;
+    @BindView(R.id.currentTransformerType)Spinner      currentTransformerType;
+    @BindView(R.id.exFanHysteresis)       Spinner      exFanHysteresis;
+    @BindView(R.id.oaDamperAtMax)         Spinner      oaDamperAtMax;
+    @BindView(R.id.returnDamperAtMax)     Spinner      returnDamperAtMax;
+    @BindView(R.id.returnDamperMinOpen)   Spinner      returnDamperMinOpen;
+    @BindView(R.id.exFanStage2Threshold)  Spinner      exFanStage2Threshold;
+    @BindView(R.id.co2Threshold)          Spinner      co2Threshold;
+    @BindView(R.id.roomCO2Sensing)        ToggleButton roomCO2Sensing;
 
     public DialogOAOProfile()
     {
@@ -123,21 +144,7 @@ public class DialogOAOProfile extends BaseDialogFragment
         setButton = view.findViewById(R.id.setBtn);
         
         mProfile = L.ccu().oaoProfile;
-    
-        if (mProfile != null) {
-            CcuLog.d(L.TAG_CCU_UI,  "Get OAOProfile: ");
-            mProfileConfig = (OAOProfileConfiguration) mProfile.getProfileConfiguration(mSmartNodeAddress);
-        } else {
-            CcuLog.d(L.TAG_CCU_UI, "Create OAOProfile: ");
-            mProfile = new OAOProfile();
-        }
-    
-        if (mProfileConfig != null) {
-            //init
-        }
-    
-    
-    
+        
         setButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
@@ -172,6 +179,77 @@ public class DialogOAOProfile extends BaseDialogFragment
             
             }
         });
+    
+        ArrayList<Integer> voltsArray = new ArrayList<>();
+        for (int val = 0; val <= 10; val++) {
+            voltsArray.add(val);
+        }
+        ArrayAdapter<Integer> voltsAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, voltsArray);
+        oaDamperAtMin.setAdapter(voltsAdapter);
+        returnDamperAtMin.setAdapter(voltsAdapter);
+        oaDamperAtMax.setAdapter(voltsAdapter);
+        returnDamperAtMax.setAdapter(voltsAdapter);
+    
+        ArrayList<Integer> percentArray = new ArrayList<>();
+        for (int val = 0; val <= 100; val++) {
+            percentArray.add(val);
+        }
+        ArrayAdapter<Integer> percentAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, percentArray);
+        oaDamperMinOpen.setAdapter(percentAdapter);
+        returnDamperMinOpen.setAdapter(percentAdapter);
+        exFanStage1Threshold.setAdapter(percentAdapter);
+        exFanStage2Threshold.setAdapter(percentAdapter);
+        exFanHysteresis.setAdapter(percentAdapter);
+    
+        ArrayList<Integer> co2Array = new ArrayList<>();
+        for (int val = 0; val <= 2000; val+=10) {
+            co2Array.add(val);
+        }
+        ArrayAdapter<Integer> co2Adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, co2Array);
+        co2Threshold.setAdapter(co2Adapter);
+    
+    
+        ArrayList<String> ctArr = new ArrayList<>();
+        ctArr.add("0-10 (A)");
+        ctArr.add("0-20 (A)");
+        ctArr.add("0-50 (A)");
+        ArrayAdapter<String> ctAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, ctArr);
+        currentTransformerType.setAdapter(ctAdapter);
+        
+        if (mProfile != null) {
+            CcuLog.d(L.TAG_CCU_UI,  "Get OAOProfile: ");
+            mProfileConfig = (OAOProfileConfiguration) mProfile.getProfileConfiguration(mSmartNodeAddress);
+        } else {
+            CcuLog.d(L.TAG_CCU_UI, "Create OAOProfile: ");
+            mProfile = new OAOProfile();
+        }
+    
+        if (mProfileConfig != null) {
+            oaDamperAtMin.setSelection((int)mProfileConfig.outsideDamperAtMinDrive);
+            oaDamperAtMax.setSelection((int)mProfileConfig.outsideDamperAtMaxDrive);
+            returnDamperAtMin.setSelection((int)mProfileConfig.returnDamperAtMinDrive);
+            returnDamperAtMax.setSelection((int)mProfileConfig.returnDamperAtMaxDrive);
+            oaDamperMinOpen.setSelection((int)mProfileConfig.outsideDamperMinOpen);
+            returnDamperMinOpen.setSelection((int)mProfileConfig.returnDamperMinOpen);
+            exFanStage1Threshold.setSelection((int)mProfileConfig.exhaustFanStage1Threshold);
+            exFanStage2Threshold.setSelection((int)mProfileConfig.exhaustFanStage2Threshold);
+            exFanHysteresis.setSelection((int)mProfileConfig.exhaustFanHysteresis);
+            co2Threshold.setSelection(co2Adapter.getPosition((int)mProfileConfig.co2Threshold));
+            currentTransformerType.setSelection((int)mProfileConfig.currentTranformerType-CT_INDEX_START);
+            roomCO2Sensing.setChecked(mProfileConfig.usePerRoomCO2Sensing);
+        } else {
+            oaDamperAtMin.setSelection(2);
+            oaDamperAtMax.setSelection(10);
+            returnDamperAtMin.setSelection(2);
+            returnDamperAtMax.setSelection(10);
+            oaDamperMinOpen.setSelection(0);
+            returnDamperMinOpen.setSelection(0);
+            exFanStage1Threshold.setSelection(50);
+            exFanStage2Threshold.setSelection(90);
+            exFanHysteresis.setSelection(5);
+            co2Threshold.setSelection(co2Adapter.getPosition(1000));
+            currentTransformerType.setSelection(1);
+        }
     }
     
     private void setUpOAOProfile() {
@@ -202,15 +280,16 @@ public class DialogOAOProfile extends BaseDialogFragment
         relay2Op.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyClose;
         oaoConfig.getOutputs().add(relay2Op);
         
-        oaoConfig.outsideDamperAtMinDrive = 2;
-        oaoConfig.outsideDamperAtMaxDrive = 10;
-        oaoConfig.returnDamperAtMinDrive = 2;
-        oaoConfig.returnDamperAtMaxDrive = 10;
-        oaoConfig.co2Threshold = 800;
-        oaoConfig.exhaustFanStage1Threshold = 50;
-        oaoConfig.exhaustFanStage2Threshold = 90;
-        oaoConfig.currentTranformerType = 7;//CT 0-10 Amps
-        
+        oaoConfig.outsideDamperAtMinDrive = Double.parseDouble(oaDamperAtMin.getSelectedItem().toString());
+        oaoConfig.outsideDamperAtMaxDrive = Double.parseDouble(oaDamperAtMax.getSelectedItem().toString());
+        oaoConfig.returnDamperAtMinDrive = Double.parseDouble(returnDamperAtMin.getSelectedItem().toString());
+        oaoConfig.returnDamperAtMaxDrive = Double.parseDouble(returnDamperAtMax.getSelectedItem().toString());
+        oaoConfig.co2Threshold = Double.parseDouble(co2Threshold.getSelectedItem().toString());
+        oaoConfig.exhaustFanStage1Threshold = Double.parseDouble(exFanStage1Threshold.getSelectedItem().toString());
+        oaoConfig.exhaustFanStage2Threshold = Double.parseDouble(exFanStage2Threshold.getSelectedItem().toString());
+        oaoConfig.exhaustFanHysteresis = Double.parseDouble(exFanHysteresis.getSelectedItem().toString());
+        oaoConfig.currentTranformerType = CT_INDEX_START + currentTransformerType.getSelectedItemPosition();//TODO- Sensor offset
+        oaoConfig.usePerRoomCO2Sensing = roomCO2Sensing.isChecked();
         if (mProfileConfig == null) {
             mProfile.addOaoEquip(mSmartNodeAddress, oaoConfig, floorRef, zoneRef );
         } else {

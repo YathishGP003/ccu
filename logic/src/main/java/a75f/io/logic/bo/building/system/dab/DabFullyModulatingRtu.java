@@ -75,6 +75,9 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     }
     
     private synchronized void updateSystemPoints() {
+    
+        int signal = 0;
+        double analogMin, analogMax;
         
         DabSystemController dabSystem = DabSystemController.getInstance();
         if (dabSystem.getSystemState() == COOLING)
@@ -83,31 +86,27 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         } else {
             systemCoolingLoopOp = 0;
         }
-        
-        double analogMin = getConfigVal("analog1 and cooling and min");
-        double analogMax = getConfigVal("analog1 and cooling and max");
-        CcuLog.d(L.TAG_CCU_SYSTEM, "analog1Min: "+analogMin+" analog1Max: "+analogMax+" Cooling : "+systemCoolingLoopOp);
-        
-        int signal = 0;
-        if (analogMax > analogMin)
-        {
-            signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (systemCoolingLoopOp/100)));
-        }
-        else
-        {
-            signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemCoolingLoopOp/100)));
-        }
-        
         setSystemLoopOp("cooling", systemCoolingLoopOp);
-        setCmdSignal("cooling",signal);
+        
         if (getConfigVal("analog1 and output and enabled") > 0)
         {
-            ControlMote.setAnalogOut("analog1", signal);
+            analogMin = getConfigVal("analog1 and cooling and min");
+            analogMax = getConfigVal("analog1 and cooling and max");
+            CcuLog.d(L.TAG_CCU_SYSTEM, "analog1Min: "+analogMin+" analog1Max: "+analogMax+" systemCoolingLoop : "+systemCoolingLoopOp);
+            if (analogMax > analogMin)
+            {
+                signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (systemCoolingLoopOp/100)));
+            }
+            else
+            {
+                signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemCoolingLoopOp/100)));
+            }
+            
+        } else {
+            signal = 0;
         }
-        
-        
-        analogMin = getConfigVal("analog3 and heating and min");
-        analogMax = getConfigVal("analog3 and heating and max");
+        setCmdSignal("cooling",signal);
+        ControlMote.setAnalogOut("analog1", signal);
         
         if (dabSystem.getSystemState() == HEATING)
         {
@@ -115,70 +114,83 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         } else {
             systemHeatingLoopOp = 0;
         }
-    
-        CcuLog.d(L.TAG_CCU_SYSTEM, "analog3Min: "+analogMin+" analog3Max: "+analogMax+" Heating : "+systemHeatingLoopOp);
-        
-        if (analogMax > analogMin)
-        {
-            signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (systemHeatingLoopOp / 100)));
-        }
-        else
-        {
-            signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemHeatingLoopOp / 100)));
-        }
-        
         setSystemLoopOp("heating", systemHeatingLoopOp);
-        setCmdSignal("heating", signal);
+        
         if (getConfigVal("analog3 and output and enabled") > 0)
         {
-            ControlMote.setAnalogOut("analog3", signal);
+            analogMin = getConfigVal("analog3 and heating and min");
+            analogMax = getConfigVal("analog3 and heating and max");
+    
+            CcuLog.d(L.TAG_CCU_SYSTEM, "analog3Min: "+analogMin+" analog3Max: "+analogMax+" systemHeatingLoop : "+systemHeatingLoopOp);
+    
+            if (analogMax > analogMin)
+            {
+                signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (systemHeatingLoopOp / 100)));
+            }
+            else
+            {
+                signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemHeatingLoopOp / 100)));
+            }
+        } else {
+            signal = 0;
         }
+        setCmdSignal("heating", signal);
+        ControlMote.setAnalogOut("analog3", signal);
         
         double analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier", getSystemEquipRef());
     
         
         if (dabSystem.getSystemState() == COOLING)
         {
-            systemFanLoopOp = (int) (dabSystem.getCoolingSignal() * analogFanSpeedMultiplier);
+            //When the system is economizing we need to ramp up the fan faster to take advantage of the free cooling. In such a case
+            //systemFanLoopOutput = systemCoolingLoopOutput * 100/economizingToMainCoolingLoopMap
+            if (L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable()) {
+                double economizingToMainCoolingLoopMap = TunerUtil.readTunerValByQuery("oao and economizing and main and cooling and loop and map",
+                                                                L.ccu().oaoProfile.getEquipRef());
+    
+                systemFanLoopOp = dabSystem.getCoolingSignal() * 100/economizingToMainCoolingLoopMap ;
+            } else {
+                systemFanLoopOp = (int) (dabSystem.getCoolingSignal() * analogFanSpeedMultiplier);
+            }
         } else if (dabSystem.getSystemState() == HEATING){
             systemFanLoopOp = (int) (dabSystem.getHeatingSignal() * analogFanSpeedMultiplier);
         } else {
             systemFanLoopOp = 0;
         }
-        
-        //TODO:
-        //When the system is economizing we need to ramp up the fan faster to take advantage of the free cooling. In such a case
-        //systemFanLoopOutput = systemCoolingLoopOutput * 100/economizingToMainCoolingLoopMap
-        
-        analogMin = getConfigVal("analog2 and fan and min");
-        analogMax = getConfigVal("analog2 and fan and max");
-        
-        CcuLog.d(L.TAG_CCU_SYSTEM, "analogMin: "+analogMin+" analogMax: "+analogMax+" systemFanLoopOp: "+systemFanLoopOp);
-        
-        if (analogMax > analogMin)
-        {
-            signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (systemFanLoopOp/100)));
-        }
-        else
-        {
-            signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemFanLoopOp/100)));
-        }
+        systemFanLoopOp = Math.min(systemFanLoopOp, 100);
         setSystemLoopOp("fan", systemFanLoopOp);
-        setCmdSignal("fan", signal);
+        
         if (getConfigVal("analog2 and output and enabled") > 0)
         {
-            ControlMote.setAnalogOut("analog2", signal);
-        }
+            analogMin = getConfigVal("analog2 and fan and min");
+            analogMax = getConfigVal("analog2 and fan and max");
     
+            CcuLog.d(L.TAG_CCU_SYSTEM, "analogMin: "+analogMin+" analogMax: "+analogMax+" systemFanLoopOp: "+systemFanLoopOp);
+    
+            if (analogMax > analogMin)
+            {
+                signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (systemFanLoopOp/100)));
+            }
+            else
+            {
+                signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemFanLoopOp/100)));
+            }
+            
+        } else {
+            signal = 0;
+        }
+        setCmdSignal("fan", signal);
+        ControlMote.setAnalogOut("analog2", signal);
     
         SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("rtu and mode")];
         if (getConfigVal("relay3 and output and enabled") > 0 && systemMode != SystemMode.OFF)
         {
             signal = (ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED || systemFanLoopOp > 0) ? 1 : 0;
-            setCmdSignal("occupancy",signal * 100);
-            ControlMote.setRelayState("relay3", signal );
-            
+        }else {
+            signal = 0;
         }
+        setCmdSignal("occupancy",signal * 100);
+        ControlMote.setRelayState("relay3", signal);
         
         if (getConfigVal("relay7 and output and enabled") > 0 && systemMode != SystemMode.OFF
                                                                     && ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED)

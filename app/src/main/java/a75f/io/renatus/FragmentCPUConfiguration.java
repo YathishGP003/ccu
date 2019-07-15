@@ -7,18 +7,16 @@ import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.SwitchCompat;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.NumberPicker;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import java.lang.reflect.Field;
@@ -39,7 +37,6 @@ import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.sscpu.ConventionalUnitConfiguration;
 import a75f.io.logic.bo.building.sscpu.ConventionalUnitProfile;
-import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import butterknife.BindView;
@@ -52,7 +49,7 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
     String floorRef;
     String roomRef;
     private ProfileType mProfileType;
-    private short    mSmartNodeAddress;
+    private short mSmartNodeAddress;
     private NodeType mNodeType;
     private ConventionalUnitProfile mCPUProfile;
     private ConventionalUnitConfiguration mProfileConfig;
@@ -60,17 +57,23 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
 
     ToggleButton switchThermistor1;
     ToggleButton switchCoolingY1;
-    @BindView(R.id.testCpuRelay1)ToggleButton testCoolingY1;
+    @BindView(R.id.testCpuRelay1)
+    ToggleButton testCoolingY1;
     ToggleButton switchCoolingY2;
-    @BindView(R.id.testCpuRelay2)ToggleButton testCoolingY2;
+    @BindView(R.id.testCpuRelay2)
+    ToggleButton testCoolingY2;
     ToggleButton switchFanLowG;
-    @BindView(R.id.testCpuRelay3)ToggleButton testFanLowG;
+    @BindView(R.id.testCpuRelay3)
+    ToggleButton testFanLowG;
     ToggleButton switchHeatingW1;
-    @BindView(R.id.testCpuRelay4)ToggleButton testHeatingW1;
+    @BindView(R.id.testCpuRelay4)
+    ToggleButton testHeatingW1;
     ToggleButton switchHeatingW2;
-    @BindView(R.id.testCpuRelay5)ToggleButton testHeatingW2;
+    @BindView(R.id.testCpuRelay5)
+    ToggleButton testHeatingW2;
     ToggleButton switchFanHighOb;
-    @BindView(R.id.testCpuRelay6)ToggleButton testFanHighOb;
+    @BindView(R.id.testCpuRelay6)
+    ToggleButton testFanHighOb;
     ToggleButton switchOccSensor;
     ToggleButton switchExtTempSensor;
     Button setButton;
@@ -78,12 +81,10 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
     NumberPicker temperatureOffset;
     Spinner fanHumiDSpinner;
 
-    public FragmentCPUConfiguration()
-    {
+    public FragmentCPUConfiguration() {
     }
 
-    public static FragmentCPUConfiguration newInstance(short smartNodeAddress, String roomName, NodeType nodeType, String floorName, ProfileType profileType)
-    {
+    public static FragmentCPUConfiguration newInstance(short smartNodeAddress, String roomName, NodeType nodeType, String floorName, ProfileType profileType) {
         FragmentCPUConfiguration f = new FragmentCPUConfiguration();
         Bundle bundle = new Bundle();
         bundle.putShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR, smartNodeAddress);
@@ -96,19 +97,16 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
     }
 
     @Override
-    public String getIdString()
-    {
+    public String getIdString() {
         return ID;
     }
 
 
     @Override
-    public void onStart()
-    {
+    public void onStart() {
         super.onStart();
         Dialog dialog = getDialog();
-        if (dialog != null)
-        {
+        if (dialog != null) {
             int width = 1165;//ViewGroup.LayoutParams.WRAP_CONTENT;
             int height = 720;//ViewGroup.LayoutParams.WRAP_CONTENT;
             dialog.getWindow().setLayout(width, height);
@@ -134,8 +132,7 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
-    {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         View view = inflater.inflate(R.layout.fragment_cpu_config, container, false);
         mSmartNodeAddress = getArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR);
@@ -148,8 +145,7 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
-    {
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
 
         mCPUProfile = (ConventionalUnitProfile) L.getProfile(mSmartNodeAddress);
 
@@ -162,16 +158,16 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
 
         }
 
-        switchCoolingY1 = (ToggleButton)view.findViewById(R.id.toggleCoolStage1);
-        switchCoolingY2 = (ToggleButton)view.findViewById(R.id.toggleCoolStage2);
-        switchHeatingW1 = (ToggleButton)view.findViewById(R.id.toggleHeatStage1);
-        switchHeatingW2 = (ToggleButton)view.findViewById(R.id.toggleHeatStage2);
-        switchFanLowG = (ToggleButton)view.findViewById(R.id.toggleCpuFanLow);
-        switchFanHighOb = (ToggleButton)view.findViewById(R.id.toggleCpuFanHigh);
-        switchThermistor1 = (ToggleButton)view.findViewById(R.id.toggleCpuAirflow);
-        switchExtTempSensor = (ToggleButton)view.findViewById(R.id.toogleCpuExtSensor);
+        switchCoolingY1 = (ToggleButton) view.findViewById(R.id.toggleCoolStage1);
+        switchCoolingY2 = (ToggleButton) view.findViewById(R.id.toggleCoolStage2);
+        switchHeatingW1 = (ToggleButton) view.findViewById(R.id.toggleHeatStage1);
+        switchHeatingW2 = (ToggleButton) view.findViewById(R.id.toggleHeatStage2);
+        switchFanLowG = (ToggleButton) view.findViewById(R.id.toggleCpuFanLow);
+        switchFanHighOb = (ToggleButton) view.findViewById(R.id.toggleCpuFanHigh);
+        switchThermistor1 = (ToggleButton) view.findViewById(R.id.toggleCpuAirflow);
+        switchExtTempSensor = (ToggleButton) view.findViewById(R.id.toogleCpuExtSensor);
         temperatureOffset = (NumberPicker) view.findViewById(R.id.temperatureOffset);
-        fanHumiDSpinner = (Spinner)view.findViewById(R.id.spinnerCpuFanHigh);
+        fanHumiDSpinner = (Spinner) view.findViewById(R.id.spinnerCpuFanHigh);
         setDividerColor(temperatureOffset);
         temperatureOffset.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         String[] nums = new String[TEMP_OFFSET_LIMIT * 2 + 1];//{"-4","-3","-2","-1","0","1","2","3","4"};
@@ -183,6 +179,11 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
         temperatureOffset.setValue(TEMP_OFFSET_LIMIT);
         temperatureOffset.setWrapSelectorWheel(false);
 
+        ArrayAdapter<CharSequence> fanTypeAdapter = ArrayAdapter.createFromResource(
+                getActivity(), R.array.smartstat_relay_fanHumiD, R.layout.spinner_cpu_configure_item);
+        fanTypeAdapter.setDropDownViewResource(R.layout.spinner_cpu_configure_item);
+        fanHumiDSpinner.setAdapter(fanTypeAdapter);
+
 
         switchOccSensor = view.findViewById(R.id.toggleCpuOccupancy);
 
@@ -191,12 +192,12 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
 
         if (mProfileConfig != null) {
             switchOccSensor.setChecked(mProfileConfig.enableOccupancyControl);
-            int offsetIndex = (int)mProfileConfig.temperatureOffset+TEMP_OFFSET_LIMIT;
+            int offsetIndex = (int) mProfileConfig.temperatureOffset + TEMP_OFFSET_LIMIT;
             temperatureOffset.setValue(offsetIndex);
             switchExtTempSensor.setChecked(mProfileConfig.enableThermistor2);
             switchThermistor1.setChecked(mProfileConfig.enableThermistor1);
-            if(mProfileConfig.getOutputs().size() > 0) {
-                for(Output output : mProfileConfig.getOutputs()) {
+            if (mProfileConfig.getOutputs().size() > 0) {
+                for (Output output : mProfileConfig.getOutputs()) {
                     switch (output.getPort()) {
                         case RELAY_ONE:
                             switchCoolingY1.setChecked(mProfileConfig.isOpConfigured(output.getPort()));
@@ -222,7 +223,7 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
 
             fanHumiDSpinner.setSelection(mProfileConfig.relay6Type - 1);
         }
-        setButton.setOnClickListener(new View.OnClickListener(){
+        setButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
@@ -239,7 +240,7 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
                     }
 
                     @Override
-                    protected Void doInBackground( final String ... params ) {
+                    protected Void doInBackground(final String... params) {
                         setupCPUZoneProfile();
                         L.saveCCUState();
 
@@ -247,7 +248,7 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
                     }
 
                     @Override
-                    protected void onPostExecute( final Void result ) {
+                    protected void onPostExecute(final Void result) {
                         progressDlg.dismiss();
                         FragmentCPUConfiguration.this.closeAllBaseDialogFragments();
                         getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
@@ -268,10 +269,10 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
         cpuConfig.temperatureOffset = temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
         cpuConfig.enableThermistor1 = switchThermistor1.isChecked();
         cpuConfig.enableThermistor2 = switchExtTempSensor.isChecked();
-        cpuConfig.relay6Type = fanHumiDSpinner.getSelectedItemPosition()+1;
+        cpuConfig.relay6Type = fanHumiDSpinner.getSelectedItemPosition() + 1;
 
 
-        if(switchCoolingY1.isChecked()) {
+        if (switchCoolingY1.isChecked()) {
             Output relay1Op = new Output();
             relay1Op.setAddress(mSmartNodeAddress);
             relay1Op.setPort(Port.RELAY_ONE);
@@ -279,7 +280,7 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
             cpuConfig.getOutputs().add(relay1Op);
         }
         cpuConfig.enableRelay1 = switchCoolingY1.isChecked();
-        if(switchCoolingY2.isChecked()){
+        if (switchCoolingY2.isChecked()) {
             Output relay2Op = new Output();
             relay2Op.setAddress(mSmartNodeAddress);
             relay2Op.setPort(Port.RELAY_TWO);
@@ -287,7 +288,7 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
             cpuConfig.getOutputs().add(relay2Op);
         }
         cpuConfig.enableRelay2 = switchCoolingY2.isChecked();
-        if(switchFanLowG.isChecked()) {
+        if (switchFanLowG.isChecked()) {
             Output relay3Op = new Output();
             relay3Op.setAddress(mSmartNodeAddress);
             relay3Op.setPort(Port.RELAY_THREE);
@@ -296,7 +297,7 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
         }
 
         cpuConfig.enableRelay3 = switchFanLowG.isChecked();
-        if(switchHeatingW1.isChecked()){
+        if (switchHeatingW1.isChecked()) {
             Output relay4Op = new Output();
             relay4Op.setAddress(mSmartNodeAddress);
             relay4Op.setPort(Port.RELAY_FOUR);
@@ -305,7 +306,7 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
         }
 
         cpuConfig.enableRelay4 = switchHeatingW1.isChecked();
-        if(switchHeatingW2.isChecked()) {
+        if (switchHeatingW2.isChecked()) {
             Output relay5Op = new Output();
             relay5Op.setAddress(mSmartNodeAddress);
             relay5Op.setPort(Port.RELAY_FIVE);
@@ -313,7 +314,7 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
             cpuConfig.getOutputs().add(relay5Op);
         }
         cpuConfig.enableRelay5 = switchHeatingW2.isChecked();
-        if(switchFanHighOb.isChecked()){
+        if (switchFanHighOb.isChecked()) {
             Output relay6Op = new Output();
             relay6Op.setAddress(mSmartNodeAddress);
             relay6Op.setPort(Port.RELAY_SIX);
@@ -325,12 +326,11 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
         mCPUProfile.getProfileConfiguration().put(mSmartNodeAddress, cpuConfig);
         if (mProfileConfig == null) {
             mCPUProfile.addLogicalMapAndPoints(mSmartNodeAddress, cpuConfig, floorRef, roomRef);
-        } else
-        {
-            mCPUProfile.updateLogicalMapAndPoints(mSmartNodeAddress, cpuConfig,roomRef);
+        } else {
+            mCPUProfile.updateLogicalMapAndPoints(mSmartNodeAddress, cpuConfig, roomRef);
         }
         L.ccu().zoneProfiles.add(mCPUProfile);
-        Log.d("CPUConfig", "Set Config: Profiles - "+L.ccu().zoneProfiles.size());
+        Log.d("CPUConfig", "Set Config: Profiles - " + L.ccu().zoneProfiles.size());
     }
 
     private void setDividerColor(NumberPicker picker) {
@@ -354,6 +354,7 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
             }
         }
     }
+
     private void setNumberPickerDividerColor(NumberPicker pk) {
         Class<?> numberPickerClass = null;
         try {
@@ -367,21 +368,20 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
             //}
 
         } catch (ClassNotFoundException e) {
-            Log.e("class not found",e.toString());
+            Log.e("class not found", e.toString());
         } catch (NoSuchFieldException e) {
-            Log.e("NoSuchFieldException",e.toString());
+            Log.e("NoSuchFieldException", e.toString());
         } catch (IllegalAccessException e) {
-            Log.e("IllegalAccessException",e.toString());
-        }catch (Exception e){
-            Log.e("dividerexception",e.getMessage().toString());
+            Log.e("IllegalAccessException", e.toString());
+        } catch (Exception e) {
+            Log.e("dividerexception", e.getMessage().toString());
         }
     }
 
     @Override
-    @OnCheckedChanged({R.id.testCpuRelay1,R.id.testCpuRelay2,R.id.testCpuRelay3,R.id.testCpuRelay4,R.id.testCpuRelay5,R.id.testCpuRelay6})
+    @OnCheckedChanged({R.id.testCpuRelay1, R.id.testCpuRelay2, R.id.testCpuRelay3, R.id.testCpuRelay4, R.id.testCpuRelay5, R.id.testCpuRelay6})
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        switch (buttonView.getId())
-        {
+        switch (buttonView.getId()) {
             case R.id.testCpuRelay1:
                 sendRelayActivationTestSignal();
                 break;
@@ -407,20 +407,20 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
         CcuToCmOverUsbSmartStatControlsMessage_t msg = new CcuToCmOverUsbSmartStatControlsMessage_t();
         msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SMART_STAT_CONTROLS);
         msg.address.set(mSmartNodeAddress);
-        msg.controls.setTemperature.set((short)(getDesiredTemp(mSmartNodeAddress)*2));
+        msg.controls.setTemperature.set((short) (getDesiredTemp(mSmartNodeAddress) * 2));
         msg.controls.conditioningMode.set(SmartStatConditioningMode_t.CONDITIONING_MODE_AUTO);
         msg.controls.fanSpeed.set(SmartStatFanSpeed_t.FAN_SPEED_AUTO);
-        msg.controls.relay1.set((short)(testCoolingY1.isChecked() ? 1 : 0));
-        msg.controls.relay2.set((short)(testCoolingY2.isChecked() ? 1 : 0));
-        msg.controls.relay3.set((short)(testFanLowG.isChecked() ? 1 : 0));
-        msg.controls.relay4.set((short)(testHeatingW1.isChecked() ? 1 : 0));
-        msg.controls.relay5.set((short)(testHeatingW2.isChecked() ? 1 : 0));
-        msg.controls.relay6.set((short)(testFanHighOb.isChecked() ? 1 : 0));
+        msg.controls.relay1.set((short) (testCoolingY1.isChecked() ? 1 : 0));
+        msg.controls.relay2.set((short) (testCoolingY2.isChecked() ? 1 : 0));
+        msg.controls.relay3.set((short) (testFanLowG.isChecked() ? 1 : 0));
+        msg.controls.relay4.set((short) (testHeatingW1.isChecked() ? 1 : 0));
+        msg.controls.relay5.set((short) (testHeatingW2.isChecked() ? 1 : 0));
+        msg.controls.relay6.set((short) (testFanHighOb.isChecked() ? 1 : 0));
         MeshUtil.sendStructToCM(msg);
     }
-    public static double getDesiredTemp(short node)
-    {
-        HashMap point = CCUHsApi.getInstance().read("point and air and temp and desired and average and sp and group == \""+node+"\"");
+
+    public static double getDesiredTemp(short node) {
+        HashMap point = CCUHsApi.getInstance().read("point and air and temp and desired and average and sp and group == \"" + node + "\"");
         if (point == null || point.size() == 0) {
             Log.d("HPU", " Desired Temp point does not exist for equip , sending 0");
             return 72;

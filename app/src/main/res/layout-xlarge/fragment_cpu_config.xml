@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:elevation="12dp"
-    android:background="@drawable/border_dialog">
+    android:background="@drawable/border_dialog"
+    android:elevation="12dp">
 
 
     <TextView
@@ -19,14 +16,15 @@
         android:textAllCaps="true"
         android:textColor="@color/orange_75f"
         android:textSize="33.5dp"
-        android:textStyle="bold"/>
+        android:textStyle="bold" />
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_below="@+id/textHeatPump"
         android:layout_marginLeft="70dp"
-        android:layout_below="@+id/textHeatPump">
+        android:layout_marginTop="20dp">
+
         <RelativeLayout
             android:id="@+id/rlPassFields"
             android:layout_width="match_parent"
@@ -37,49 +35,49 @@
                 android:id="@+id/textEnable"
                 android:layout_width="wrap_content"
                 android:layout_height="24dp"
-                android:text="@string/title_enable"
-                android:textSize="19.5dp"
-                android:textColor="@color/black"
+                android:layout_marginLeft="282dp"
                 android:alpha="0.6"
                 android:fontFamily="@font/lato_regular"
-                android:layout_marginLeft="282dp"/>
+                android:text="@string/title_enable"
+                android:textColor="@color/black"
+                android:textSize="19.5dp" />
 
 
             <TextView
                 android:id="@+id/textTestSignal"
                 android:layout_width="wrap_content"
                 android:layout_height="24dp"
-                android:text="@string/title_testsignal"
-                android:textSize="19.5dp"
-                android:textColor="@color/black"
+                android:layout_marginLeft="284dp"
+                android:layout_toRightOf="@+id/textEnable"
                 android:alpha="0.6"
                 android:fontFamily="@font/lato_regular"
-                android:layout_toRightOf="@+id/textEnable"
-                android:layout_marginLeft="284dp"/>
+                android:text="@string/title_testsignal"
+                android:textColor="@color/black"
+                android:textSize="19.5dp" />
 
             <TextView
                 android:id="@+id/textTempOffset"
                 android:layout_width="137dp"
                 android:layout_height="24dp"
-                android:text="@string/title_offset"
-                android:textSize="19.5dp"
-                android:textColor="@color/black"
+                android:layout_marginLeft="145dp"
+                android:layout_toRightOf="@+id/textTestSignal"
                 android:alpha="0.6"
                 android:fontFamily="@font/lato_regular"
-                android:layout_toRightOf="@+id/textTestSignal"
-                android:layout_marginLeft="145dp"/>
+                android:text="@string/title_offset"
+                android:textColor="@color/black"
+                android:textSize="19.5dp" />
 
 
             <NumberPicker
                 android:id="@+id/temperatureOffset"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="30dp"
-                android:layout_marginLeft="25dp"
-                android:layout_marginRight="25dp"
                 android:layout_below="@+id/textTempOffset"
                 android:layout_alignLeft="@+id/textTempOffset"
                 android:layout_alignRight="@+id/textTempOffset"
+                android:layout_marginLeft="25dp"
+                android:layout_marginTop="30dp"
+                android:layout_marginRight="25dp"
                 android:gravity="center_vertical|center_horizontal"
                 android:minWidth="77dp"
                 android:theme="@style/DefaultNumberPickerTheme" />
@@ -91,15 +89,16 @@
                 android:layout_below="@+id/textEnable"
                 android:layout_marginTop="32dp"
                 android:src="@drawable/input_heatpump1" />
+
             <LinearLayout
                 android:id="@+id/lt_toggles"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="30dp"
+                android:layout_below="@+id/textEnable"
                 android:layout_marginLeft="10dp"
+                android:layout_marginTop="30dp"
                 android:layout_toRightOf="@+id/imageHPInput"
-                android:layout_below="@+id/textEnable">
+                android:orientation="vertical">
 
                 <ToggleButton
                     android:id="@+id/toggleCoolStage1"
@@ -213,11 +212,11 @@
                 android:id="@+id/lt_enableLabel"
                 android:layout_width="291dp"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="30dp"
+                android:layout_below="@+id/textEnable"
                 android:layout_marginLeft="15dp"
+                android:layout_marginTop="30dp"
                 android:layout_toRightOf="@+id/lt_toggles"
-                android:layout_below="@+id/textEnable">
+                android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/textCoolStage1"
@@ -233,13 +232,14 @@
                     android:layout_marginTop="32dp"
                     android:text="@string/label_cpucoolstage2"
                     android:textAppearance="@style/text_appearance" />
+
                 <TextView
                     android:id="@+id/textFanLow"
                     android:layout_width="wrap_content"
                     android:layout_height="28.5dp"
                     android:layout_marginTop="33.5dp"
-                    android:textAppearance="@style/text_appearance"
-                    android:text="@string/label_fanlow"/>
+                    android:text="@string/label_fanlow"
+                    android:textAppearance="@style/text_appearance" />
 
                 <TextView
                     android:id="@+id/textHeatStage1"
@@ -259,12 +259,11 @@
 
                 <android.support.v7.widget.AppCompatSpinner
                     android:id="@+id/spinnerCpuFanHigh"
-                    android:layout_width="224dp"
-                    android:layout_height="29dp"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginTop="35dp"
-                    android:layout_marginRight="42dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="25dp"
                     android:entries="@array/smartstat_relay_fanHumiD"
+                    android:gravity="start"
                     android:spinnerMode="dropdown" />
 
                 <TextView
@@ -272,23 +271,24 @@
                     android:layout_width="wrap_content"
                     android:layout_height="28.5dp"
                     android:layout_marginTop="100dp"
-                    android:textAppearance="@style/text_appearance"
-                    android:text="@string/label_airflowtemp"/>
+                    android:text="@string/label_airflowtemp"
+                    android:textAppearance="@style/text_appearance" />
 
                 <TextView
                     android:id="@+id/textExtSensor"
                     android:layout_width="wrap_content"
                     android:layout_height="28.5dp"
                     android:layout_marginTop="30dp"
-                    android:textAppearance="@style/text_appearance"
-                    android:text="@string/label_extsensor"/>
+                    android:text="@string/label_extsensor"
+                    android:textAppearance="@style/text_appearance" />
+
                 <TextView
                     android:id="@+id/textOccupancy"
                     android:layout_width="wrap_content"
                     android:layout_height="28.5dp"
                     android:layout_marginTop="30dp"
-                    android:textAppearance="@style/text_appearance"
-                    android:text="@string/label_enableoccup"/>
+                    android:text="@string/label_enableoccup"
+                    android:textAppearance="@style/text_appearance" />
 
             </LinearLayout>
 
@@ -297,11 +297,11 @@
                 android:id="@+id/lt_testSignal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="23dp"
+                android:layout_below="@+id/textEnable"
                 android:layout_alignLeft="@+id/textTestSignal"
                 android:layout_alignRight="@+id/textTestSignal"
-                android:layout_below="@+id/textEnable">
+                android:layout_marginTop="23dp"
+                android:orientation="vertical">
 
                 <ToggleButton
                     android:id="@+id/testCpuRelay1"
@@ -380,8 +380,6 @@
                     android:textOff="OFF"
                     android:textOn="ON" />
             </LinearLayout>
-
-
 
 
             <Button

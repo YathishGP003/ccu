@@ -259,10 +259,9 @@
 
                 <android.support.v7.widget.AppCompatSpinner
                     android:id="@+id/spinnerCpuFanHigh"
-                    android:layout_width="224dp"
-                    android:layout_height="29dp"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginTop="35dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30dp"
                     android:layout_marginRight="42dp"
                     android:entries="@array/smartstat_relay_fanHumiD"
                     android:spinnerMode="dropdown" />

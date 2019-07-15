@@ -20,7 +20,7 @@
                 android:layout_width="248dp"
                 android:layout_height="321dp"
                 android:layout_alignParentLeft="true"
-                android:layout_marginTop="36.5dp"
+                android:layout_marginTop="55dp"
                 android:src="@drawable/input_dab_fullyahu" />
 
             <LinearLayout
@@ -44,7 +44,36 @@
                         android:id="@+id/genericRTUHeader"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="2dp">`</TableRow>
+                        android:layout_marginBottom="2dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center_horizontal"
+                            android:text="@string/title_enable"
+                            android:textAppearance="@style/text_label" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="34dp"
+                            android:layout_weight="1"
+                            android:gravity="center_horizontal"
+                            android:text="@string/title_mapping"
+                            android:textAppearance="@style/text_label" />
+
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="34dp"
+                            android:layout_weight="1"
+                            android:gravity="center_horizontal"
+                            android:text="@string/title_testsignal"
+                            android:textAppearance="@style/text_label" />
+
+                    </TableRow>
 
                     <TableRow
                         android:id="@+id/tableRow1"
@@ -370,7 +399,7 @@
                             <Spinner
                                 android:id="@+id/relay7Spinner"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
-                                android:layout_width="129dp"
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_centerHorizontal="true"
                                 android:layout_centerVertical="true"

@@ -18,7 +18,7 @@
                 android:id="@+id/imageRTUInput"
                 android:layout_width="250dp"
                 android:layout_height="384dp"
-                android:layout_marginTop="36.5dp"
+                android:layout_marginTop="35dp"
                 android:layout_alignParentLeft="true"
                 android:src="@drawable/input_vavanalog"/>
             <LinearLayout
@@ -418,7 +418,7 @@
                             android:layout_marginLeft="34dp">
                             <Spinner
                                 android:id="@+id/relay7Spinner"
-                                android:layout_width="129dp"
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:entries="@array/hvac_stage_selector"

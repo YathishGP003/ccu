@@ -13,6 +13,7 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -95,8 +96,10 @@ public class UsbService extends Service
 		@Override
 		public void onReceive(Context arg0, Intent arg1)
 		{
+			Log.d("UsbService.java","OnReceive == "+arg1.getAction()+","+serialPortConnected);
 			if (arg1.getAction().equals(ACTION_USB_PERMISSION))
 			{
+				Log.d("UsbService.java","OnReceive == "+arg1.getExtras().getBoolean(UsbManager.EXTRA_PERMISSION_GRANTED));
 				boolean granted = arg1.getExtras().getBoolean(UsbManager.EXTRA_PERMISSION_GRANTED);
 				if (granted) // User accepted our USB connection. Try to open the device as a serial port
 				{
@@ -107,6 +110,7 @@ public class UsbService extends Service
 				}
 				else // User not accepted our USB connection. Send an Intent to the Main Activity
 				{
+					Log.d("UsbService.java","USB PERMISSION NOT GRANTED == "+arg1.getAction());
 					Intent intent = new Intent(ACTION_USB_PERMISSION_NOT_GRANTED);
 					arg0.sendBroadcast(intent);
 				}
@@ -393,6 +397,7 @@ public class UsbService extends Service
 	{
 		// This snippet will try to open the first encountered usb device connected, excluding usb root hubs
 		HashMap<String, UsbDevice> usbDevices = usbManager.getDeviceList();
+		Log.d("USB","findSerialPortDevce="+usbDevices.size());
 		if (!usbDevices.isEmpty())
 		{
 			boolean keep = true;
@@ -511,7 +516,7 @@ public class UsbService extends Service
 			while (true) {
 				try {
 					if (!serialPortConnected) {
-
+						Log.i(TAG, "Serial Port is not connected sleeping");
 						sleep(2000);
 						continue;
 					} else {

@@ -931,17 +931,33 @@ public class CCUTagsDb extends HServer {
         return hisQuery.build().find();
     }
     
-    //Delete all the hisItem except most recent.
+    public List<HisItem> getHisItems(HRef id, int offset, int limit) {
+        
+        HDict entity = readById(id);
+        
+        QueryBuilder<HisItem> hisQuery = hisBox.query();
+        hisQuery.equal(HisItem_.rec, entity.get("id").toString())
+                .order(HisItem_.date);
+        
+        return hisQuery.build().find(offset, limit);
+    }
+    
+    //Delete all the hisItem except most recent 60 mins.
     public void removeHisItems(HRef id) {
         HDict entity = readById(id);
     
         QueryBuilder<HisItem> hisQuery = hisBox.query();
         hisQuery.equal(HisItem_.rec, entity.get("id").toString())
+                .less(HisItem_.date, System.currentTimeMillis() - 60*60*1000)
                 .order(HisItem_.date);
         
+        //Leave one hisItem to make sure his data is not empty if there was no more recent entries
         List<HisItem>  hisItems = hisQuery.build().find();
-        hisItems.remove(hisItems.size()-1);
-        hisBox.remove(hisItems);
+        if (hisItems.size() > 1)
+        {
+            hisItems.remove(hisItems.size() - 1);
+            hisBox.remove(hisItems);
+        }
     }
     
     public void removeAllHisItems(HRef id) {

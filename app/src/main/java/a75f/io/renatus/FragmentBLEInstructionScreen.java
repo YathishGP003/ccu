@@ -180,6 +180,20 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
             }
         }
+        else if (mProfileType == ProfileType.OAO)
+        {
+            if (L.isSimulation())
+            {
+                showDialogFragment(DialogOAOProfile
+                                           .newInstance(mNodeAddress, "SYSTEM", "SYSTEM"), DialogOAOProfile.ID);
+            }
+            else
+            {
+                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan
+                                                                .getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.OAO);
+                showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
+            }
+        }
         else if (mProfileType == ProfileType.SMARTSTAT_CONVENTIONAL_PACK_UNIT)
         {
             if (L.isSimulation())

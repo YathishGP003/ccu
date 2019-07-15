@@ -199,11 +199,11 @@ public class HisSyncHandler
                 HisItem sItem = hisItems.get(hisItems.size()-1);//TODO - Writing just the recent his val?
                 tsData.put( pointGUID.replace("@",""), String.valueOf(sItem.getVal()));
             
-                /*for (HisItem item: hisItems)
+                for (HisItem item: hisItems)
                 {
                     item.setSyncStatus(true);
                 }
-                hayStack.tagsDb.setHisItemSyncStatus(hisItems);*/
+                hayStack.tagsDb.setHisItemSyncStatus(hisItems);
                 hayStack.tagsDb.removeHisItems(HRef.copy(pointID));
             
             }

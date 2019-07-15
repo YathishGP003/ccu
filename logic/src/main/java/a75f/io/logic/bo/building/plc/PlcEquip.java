@@ -255,6 +255,20 @@ public class PlcEquip
         String controlVariableId  = hayStack.addPoint(controlVariable );
         hayStack.writeHisValById(controlVariableId, 0.0);
     
+        Point equipStatusMessage = new Point.Builder()
+                                           .setDisplayName(equipDis+"-equipStatusMessage")
+                                           .setEquipRef(equipRef)
+                                           .setSiteRef(siteRef)
+                                           .setRoomRef(roomRef)
+                                           .setFloorRef(floorRef)
+                                           .addMarker("status").addMarker("message").addMarker("pid").addMarker("writable").addMarker("logical").addMarker("zone").addMarker("equipHis")
+                                           .setGroup(String.valueOf(nodeAddr))
+                                           .setTz(tz)
+                                           .setKind("string")
+                                           .build();
+        String equipStatusMessageLd = CCUHsApi.getInstance().addPoint(equipStatusMessage);
+        hayStack.writeDefaultValById(equipStatusMessageLd, "Output Loop Signal is 0%");
+    
         Point setpointVariable  = new Point.Builder()
                                          .setDisplayName(equipDis+"-setpointVariable")
                                          .setEquipRef(equipRef)
@@ -275,7 +289,7 @@ public class PlcEquip
                                           .setSiteRef(siteRef)
                                           .setRoomRef(roomRef)
                                           .setFloorRef(floorRef)
-                                          .addMarker("zone").addMarker("pid").addMarker("scheduleType").addMarker("writable").addMarker("zone").addMarker("equipHis")
+                                          .addMarker("zone").addMarker("pid").addMarker("scheduleType").addMarker("writable").addMarker("equipHis")
                                           .setGroup(String.valueOf(nodeAddr))
                                           .setTz(tz)
                                           .build();
@@ -410,6 +424,11 @@ public class PlcEquip
         
     }
     
+    public void setEquipStatus(int signal)
+    {
+        hayStack.writeDefaultVal("point and equip and status and message and equipRef == \""+equipRef+"\"", "Output Loop Signal is "+signal+"%");
+        
+    }
     public double getTargetValue() {
         return targetValue;
     }

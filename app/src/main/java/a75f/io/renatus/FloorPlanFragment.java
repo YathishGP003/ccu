@@ -41,6 +41,7 @@ import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZoneProfile;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -650,8 +651,14 @@ public class FloorPlanFragment extends Fragment
 		short meshAddress = L.generateSmartNodeAddress();
 		if(mFloorListAdapter.getSelectedPostion() == -1)
 		{
-			DialogOAOProfile oaoProfiling = DialogOAOProfile.newInstance(meshAddress, "SYSTEM", "SYSTEM");
-			showDialogFragment(oaoProfiling, DialogOAOProfile.ID);
+			if (L.ccu().oaoProfile != null) {
+				Toast.makeText(getActivity(),"OAO Module already paired",Toast.LENGTH_LONG).show();
+			} else
+			{
+				showDialogFragment(FragmentBLEInstructionScreen.getInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.OAO, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
+				//DialogOAOProfile oaoProfiling = DialogOAOProfile.newInstance(Short.parseShort(nodeAddr), "SYSTEM", "SYSTEM");
+				//showDialogFragment(oaoProfiling, DialogOAOProfile.ID);
+			}
 		}
 		else {
 			/* Checks to see if emulated and doesn't popup BLE dialogs */

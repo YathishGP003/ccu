@@ -295,6 +295,9 @@ public class L
     
     public static void removeHSDeviceEntities(Short node) {
         CCUHsApi hsApi = CCUHsApi.getInstance();
+        if (L.ccu().oaoProfile != null && L.ccu().oaoProfile.getNodeAddress() == node) {
+            L.ccu().oaoProfile = null;
+        }
         HashMap equip = hsApi.read("equip and group == \""+node+"\"");
         if (equip.get("id") != null)
         {

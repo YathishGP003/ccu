@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -1271,6 +1272,10 @@ public class CCUHsApi
         
         }
         return 0;
+    }
+    
+    public List<HisItem> getHisItems(String id, int offset, int limit) {
+        return tagsDb.getHisItems(HRef.copy(id), offset, limit);
     }
     
     public void deletePointArray(String id) {

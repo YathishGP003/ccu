@@ -27,8 +27,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import java.util.zip.GZIPInputStream;
-
 import a75f.io.renatus.DABFullyAHUProfile;
 import a75f.io.renatus.DABHybridAhuProfile;
 import a75f.io.renatus.DABStagedProfile;
@@ -53,14 +51,14 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
     ImageView imageView_logo;
 
     //Header Components
-    RelativeLayout  rl_Header;
-    TextView        textView_title;
-    ImageView       imageView_Goback;
-    Spinner         spinnerSystemProile;
-    ImageView       imageRefresh;
-    ToggleButton    toggleWifi;
-    Button          buttonNext;
-    Prefs           prefs;
+    RelativeLayout rl_Header;
+    TextView textView_title;
+    ImageView imageView_Goback;
+    Spinner spinnerSystemProile;
+    ImageView imageRefresh;
+    ToggleButton toggleWifi;
+    Button buttonNext;
+    Prefs prefs;
     //Wifi On-Off
     WifiManager mainWifiObj;
     int NO_OF_SCREENS = 21;
@@ -117,7 +115,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         toggleWifi = (ToggleButton) findViewById(R.id.toggleWifi);
 
         showIcons(false);
-        verticalTabAdapter = new VerticalTabAdapter(this,menu_icons, listView_icons, this,0);
+        verticalTabAdapter = new VerticalTabAdapter(this, menu_icons, listView_icons, this, 0);
         //pageAdapter = new RegistrationAdapter(this,getSupportFragmentManager(), NO_OF_SCREENS);
         //pager.setAdapter(pageAdapter);
         listView_icons.setAdapter(verticalTabAdapter);
@@ -127,7 +125,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
         int position = 0;
         Bundle extras = getIntent().getExtras();
-        if(extras != null) {
+        if (extras != null) {
             position = extras.getInt("viewpager_position");
         }
 
@@ -143,114 +141,103 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
                 // TODO Auto-generated method stub
                 //selectItem(1);
-                if (currentFragment instanceof WifiFragment){
+                if (currentFragment instanceof WifiFragment) {
                     selectItem(1);
                 }
-                if (currentFragment instanceof CreateNewSite){
+                if (currentFragment instanceof CreateNewSite) {
                     selectItem(1);
                 }
-                if (currentFragment instanceof InstallerOptions){
+                if (currentFragment instanceof InstallerOptions) {
                     String installType = prefs.getString("INSTALL_TYPE");
-                    if(installType.equals("OFFLINE"))
-                    {
+                    if (installType.equals("OFFLINE")) {
                         selectItem(1);
-                    }else
-                    {
+                    } else {
                         selectItem(3);
                     }
                 }
-                if (currentFragment instanceof Security){
+                if (currentFragment instanceof Security) {
                     selectItem(4);
                 }
-                if (currentFragment instanceof AddtoExisting){
+                if (currentFragment instanceof AddtoExisting) {
                     selectItem(1);
                 }
-                if (currentFragment instanceof PreConfigCCU){
+                if (currentFragment instanceof PreConfigCCU) {
                     selectItem(1);
                 }
-                if (currentFragment instanceof ReplaceCCU){
+                if (currentFragment instanceof ReplaceCCU) {
                     selectItem(1);
                 }
-                if (currentFragment instanceof DefaultSystemProfile){
+                if (currentFragment instanceof DefaultSystemProfile) {
                     selectItem(5);
                 }
-                if (currentFragment instanceof VavStagedRtuProfile){
+                if (currentFragment instanceof VavStagedRtuProfile) {
                     selectItem(5);
                 }
-                if (currentFragment instanceof VavAnalogRtuProfile){
+                if (currentFragment instanceof VavAnalogRtuProfile) {
                     selectItem(5);
                 }
-                if (currentFragment instanceof VavStagedRtuWithVfdProfile){
+                if (currentFragment instanceof VavStagedRtuWithVfdProfile) {
                     selectItem(5);
                 }
-                if (currentFragment instanceof VavHybridRtuProfile){
+                if (currentFragment instanceof VavHybridRtuProfile) {
                     selectItem(5);
                 }
-                if (currentFragment instanceof DABStagedProfile){
+                if (currentFragment instanceof DABStagedProfile) {
                     selectItem(5);
                 }
-                if (currentFragment instanceof DABFullyAHUProfile){
+                if (currentFragment instanceof DABFullyAHUProfile) {
                     selectItem(5);
                 }
-                if (currentFragment instanceof DABStagedRtuWithVfdProfile){
+                if (currentFragment instanceof DABStagedRtuWithVfdProfile) {
                     selectItem(5);
                 }
-                if (currentFragment instanceof DABHybridAhuProfile){
+                if (currentFragment instanceof DABHybridAhuProfile) {
                     selectItem(5);
                 }
-                if (currentFragment instanceof FloorPlanFragment){
+                if (currentFragment instanceof FloorPlanFragment) {
 
                     //selectItem(9);
 
                     String profileType = prefs.getString("PROFILE");
-                    if(profileType.equals("DEFAULT"))
-                    {
+                    if (profileType.equals("DEFAULT")) {
                         spinnerSystemProile.setSelection(0);
                         selectItem(9);
                     }
-                    if(profileType.equals("VAV_STAGED_RTU"))
-                    {
+                    if (profileType.equals("VAV_STAGED_RTU")) {
                         spinnerSystemProile.setSelection(1);
                         selectItem(10);
                     }
-                    if(profileType.equals("VAV_FULLY_MODULATING"))
-                    {
+                    if (profileType.equals("VAV_FULLY_MODULATING")) {
                         spinnerSystemProile.setSelection(2);
                         selectItem(11);
                     }
-                    if(profileType.equals("VAV_STAGED_RTU_VFD"))
-                    {
+                    if (profileType.equals("VAV_STAGED_RTU_VFD")) {
                         spinnerSystemProile.setSelection(3);
                         selectItem(12);
                     }
-                    if(profileType.equals("VAV_HYBRID_RTU"))
-                    {
+                    if (profileType.equals("VAV_HYBRID_RTU")) {
                         spinnerSystemProile.setSelection(4);
                         selectItem(13);
                     }
-                    if(profileType.equals("DAB_STAGED_RTU"))
-                    {
+                    if (profileType.equals("DAB_STAGED_RTU")) {
                         spinnerSystemProile.setSelection(5);
                         selectItem(14);
                     }
-                    if(profileType.equals("DAB_FULLY_MODULATING"))
-                    {
+                    if (profileType.equals("DAB_FULLY_MODULATING")) {
                         spinnerSystemProile.setSelection(6);
                         selectItem(15);
                     }
-                    if(profileType.equals("DAB_STAGED_RTU_VFD"))
-                    {
+                    if (profileType.equals("DAB_STAGED_RTU_VFD")) {
                         spinnerSystemProile.setSelection(7);
                         selectItem(16);
                     }
-                    if(profileType.equals("DAB_HYBRID_RTU"))
-                    {
+                    if (profileType.equals("DAB_HYBRID_RTU")) {
                         spinnerSystemProile.setSelection(8);
                         selectItem(17);
                     }
 
                 }
-                if (currentFragment instanceof SystemFragment){
+                if (currentFragment instanceof SystemFragment) {
                     selectItem(18);
                 }
             }
@@ -259,7 +246,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         imageRefresh.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // TODO Auto-generated method stub
-                if(mainWifiObj.isWifiEnabled()) {
+                if (mainWifiObj.isWifiEnabled()) {
                     animation.setRepeatCount(0);
                     animation.setDuration(1200);
                     imageRefresh.startAnimation(animation);
@@ -283,14 +270,14 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                 // TODO Auto-generated method stub
                 FragmentManager fragmentManager = getSupportFragmentManager();
                 Fragment currentFragment = fragmentManager.findFragmentById(R.id.container);
-                if (currentFragment instanceof FloorPlanFragment){
+                if (currentFragment instanceof FloorPlanFragment) {
                     selectItem(19);
                 }
-                if (currentFragment instanceof SystemFragment){
+                if (currentFragment instanceof SystemFragment) {
                     selectItem(20);
                 }
-                if (currentFragment instanceof CongratsFragment){
-                    prefs.setBoolean("REGISTRATION",true);
+                if (currentFragment instanceof CongratsFragment) {
+                    prefs.setBoolean("REGISTRATION", true);
                     Intent i = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
                     i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(i);
@@ -322,43 +309,55 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    mainWifiObj = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-                    if (isChecked) { if (!mainWifiObj.isWifiEnabled()) {
-                            animation.setDuration(2000);
-                            imageRefresh.startAnimation(animation);
-                            mainWifiObj = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-                            mainWifiObj.setWifiEnabled(true);
-                        }
-                    } else {
-                        if (mainWifiObj.isWifiEnabled()) {
-                            mainWifiObj = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-                            mainWifiObj.setWifiEnabled(false);
-                        }
+                mainWifiObj = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                if (isChecked) {
+                    if (!mainWifiObj.isWifiEnabled()) {
+                        animation.setDuration(2000);
+                        imageRefresh.startAnimation(animation);
+                        mainWifiObj = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                        mainWifiObj.setWifiEnabled(true);
+                        imageRefresh.setEnabled(true);
+                        imageRefresh.setImageResource(R.drawable.ic_refresh);
+                    }
+                } else {
+                    if (mainWifiObj.isWifiEnabled()) {
+                        mainWifiObj = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                        mainWifiObj.setWifiEnabled(false);
+                        imageRefresh.setEnabled(false);
+                        imageRefresh.setImageResource(R.drawable.ic_refresh_disable);
                     }
                 }
+            }
         });
 
-        spinnerSystemProile.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
-        {
+        spinnerSystemProile.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                if(position==0) {
+                if (position == 0) {
                     selectItem(9);
-                }if(position==1) {
+                }
+                if (position == 1) {
                     selectItem(10);
-                }if(position==2) {
+                }
+                if (position == 2) {
                     selectItem(11);
-                }if(position==3) {
+                }
+                if (position == 3) {
                     selectItem(12);
-                }if(position==4) {
+                }
+                if (position == 4) {
                     selectItem(13);
-                }if(position==5) {
+                }
+                if (position == 5) {
                     selectItem(14);
-                }if(position==6) {
+                }
+                if (position == 6) {
                     selectItem(15);
-                }if(position==7) {
+                }
+                if (position == 7) {
                     selectItem(16);
-                }if(position==8) {
+                }
+                if (position == 8) {
                     selectItem(17);
                 }
 
@@ -375,15 +374,13 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         selectItem(position);
     }
 
-    public void showIcons(boolean showIcons)
-    {
-        if(!showIcons) {
+    public void showIcons(boolean showIcons) {
+        if (!showIcons) {
             listView_icons.setVisibility(View.INVISIBLE);
             imageView_logo.setVisibility(View.INVISIBLE);
             rl_Header.setVisibility(View.GONE);
             buttonNext.setVisibility(View.GONE);
-        }
-        else {
+        } else {
             buttonNext.setVisibility(View.GONE);
             listView_icons.setVisibility(View.VISIBLE);
             imageView_logo.setVisibility(View.VISIBLE);
@@ -391,14 +388,15 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         }
     }
 
-    public void setRl_Header(String title, int position)
-    {
+    public void setRl_Header(String title, int position) {
 
 
     }
-     public void setToggleWifi(boolean status)
-    {
+
+    public void setToggleWifi(boolean status) {
         toggleWifi.setChecked(status);
+        if (status) imageRefresh.setImageResource(R.drawable.ic_refresh);
+        else imageRefresh.setImageResource(R.drawable.ic_refresh_disable);
     }
 
 
@@ -410,8 +408,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         selectItem(from);
     }*/
 
-    public void Switch(int position)
-    {
+    public void Switch(int position) {
         selectItem(position);
     }
 
@@ -420,20 +417,18 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         Fragment fragment = null;
         FragmentManager fragmentManager = getSupportFragmentManager();
 
-        if(position==0)
-        {
+        if (position == 0) {
             showIcons(false);
-        }
-        else {
+        } else {
             showIcons(true);
         }
         //pageAdapter = new RegistrationAdapter(this,getSupportFragmentManager(), NO_OF_SCREENS);
         //pager.setAdapter(pageAdapter);
         //pager.setCurrentItem(position, true);
 
-        Log.i("Tab","Position:"+position);
+        Log.i("Tab", "Position:" + position);
 
-        if(position == 0) {
+        if (position == 0) {
             fragment = new StartCCUFragment();
             fragmentManager.beginTransaction()
                     .replace(R.id.container, fragment)
@@ -449,7 +444,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
         }
 
-        if(position == 1) {
+        if (position == 1) {
             fragment = new InstallTypeFragment();
             fragmentManager.beginTransaction()
                     .replace(R.id.container, fragment)
@@ -468,7 +463,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-            params.setMargins(0,0,178,0);
+            params.setMargins(0, 0, 178, 0);
             textView_title.setLayoutParams(params);
 
             ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
@@ -479,7 +474,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             container.setLayoutParams(paramsPager);
 
         }
-        if(position == 2) {
+        if (position == 2) {
 
             fragment = new WifiFragment();
             fragmentManager.beginTransaction()
@@ -497,7 +492,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             imageRefresh.setVisibility(View.VISIBLE);
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-            params.setMargins(0,0,333,0);
+            params.setMargins(0, 0, 333, 0);
             textView_title.setLayoutParams(params);
 
             ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
@@ -507,7 +502,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             paramsPager.rightMargin = 0;
             container.setLayoutParams(paramsPager);
         }
-        if(position == 3) {
+        if (position == 3) {
 
             fragment = new CreateNewSite();
             fragmentManager.beginTransaction()
@@ -526,7 +521,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             imageRefresh.setVisibility(View.GONE);
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-            params.setMargins(0,0,312,0);
+            params.setMargins(0, 0, 312, 0);
             textView_title.setLayoutParams(params);
 
             ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
@@ -536,7 +531,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             paramsPager.rightMargin = 0;
             container.setLayoutParams(paramsPager);
         }
-        if(position == 4) {
+        if (position == 4) {
 
 
             fragment = new InstallerOptions();
@@ -556,7 +551,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             imageRefresh.setVisibility(View.GONE);
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-            params.setMargins(0,0,603,0);
+            params.setMargins(0, 0, 603, 0);
             textView_title.setLayoutParams(params);
 
             ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
@@ -566,7 +561,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             paramsPager.rightMargin = 0;
             container.setLayoutParams(paramsPager);
         }
-        if(position == 5) {
+        if (position == 5) {
 
             fragment = new Security();
             fragmentManager.beginTransaction()
@@ -586,7 +581,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             imageRefresh.setVisibility(View.GONE);
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-            params.setMargins(0,0,776,0);
+            params.setMargins(0, 0, 776, 0);
             textView_title.setLayoutParams(params);
 
             ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
@@ -596,7 +591,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             paramsPager.rightMargin = 0;
             container.setLayoutParams(paramsPager);
         }
-        if(position == 6) {
+        if (position == 6) {
 
             fragment = new AddtoExisting();
             fragmentManager.beginTransaction()
@@ -616,7 +611,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             imageRefresh.setVisibility(View.GONE);
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-            params.setMargins(0,0,260,0);
+            params.setMargins(0, 0, 260, 0);
             textView_title.setLayoutParams(params);
 
             ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
@@ -626,7 +621,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             paramsPager.rightMargin = 0;
             container.setLayoutParams(paramsPager);
         }
-        if(position == 7) {
+        if (position == 7) {
 
             fragment = new PreConfigCCU();
             fragmentManager.beginTransaction()
@@ -645,7 +640,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             imageRefresh.setVisibility(View.GONE);
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-            params.setMargins(0,0,260,0);
+            params.setMargins(0, 0, 260, 0);
             textView_title.setLayoutParams(params);
 
             ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
@@ -655,7 +650,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             paramsPager.rightMargin = 92;
             container.setLayoutParams(paramsPager);
         }
-        if(position == 8) {
+        if (position == 8) {
 
             fragment = new ReplaceCCU();
             fragmentManager.beginTransaction()
@@ -675,7 +670,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             imageRefresh.setVisibility(View.GONE);
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-            params.setMargins(0,0,240,0);
+            params.setMargins(0, 0, 240, 0);
             textView_title.setLayoutParams(params);
 
             ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
@@ -685,7 +680,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             paramsPager.rightMargin = 90;
             container.setLayoutParams(paramsPager);
         }
-        if(position == 9) {
+        if (position == 9) {
 
 
             fragment = new DefaultSystemProfile();
@@ -713,7 +708,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             imageRefresh.setVisibility(View.GONE);
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-            params.setMargins(0,0,560,0);
+            params.setMargins(0, 0, 560, 0);
             textView_title.setLayoutParams(params);
 
             ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
@@ -723,7 +718,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             paramsPager.rightMargin = 82;
             container.setLayoutParams(paramsPager);
         }
-        if(position == 10) {
+        if (position == 10) {
 
             fragment = new VavStagedRtuProfile();
 
@@ -752,7 +747,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             imageRefresh.setVisibility(View.GONE);
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-            params.setMargins(0,0,560,0);
+            params.setMargins(0, 0, 560, 0);
             textView_title.setLayoutParams(params);
 
             ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
@@ -762,7 +757,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             paramsPager.rightMargin = 26;
             container.setLayoutParams(paramsPager);
         }
-        if(position == 11) {
+        if (position == 11) {
 
 
             fragment = new VavAnalogRtuProfile();
@@ -792,7 +787,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             imageRefresh.setVisibility(View.GONE);
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-            params.setMargins(0,0,560,0);
+            params.setMargins(0, 0, 560, 0);
             textView_title.setLayoutParams(params);
 
             ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
@@ -802,7 +797,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             paramsPager.rightMargin = 26;
             container.setLayoutParams(paramsPager);
         }
-        if(position == 12) {
+        if (position == 12) {
 
             fragment = new VavStagedRtuWithVfdProfile();
 
@@ -827,7 +822,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             imageRefresh.setVisibility(View.GONE);
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-            params.setMargins(0,0,560,0);
+            params.setMargins(0, 0, 560, 0);
             textView_title.setLayoutParams(params);
             ConstraintLayout.LayoutParams headerparams = (ConstraintLayout.LayoutParams) rl_Header.getLayoutParams();
             headerparams.topMargin = 70;
@@ -840,7 +835,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             paramsPager.rightMargin = 26;
             container.setLayoutParams(paramsPager);
         }
-        if(position == 13) {
+        if (position == 13) {
 
             fragment = new VavHybridRtuProfile();
 
@@ -865,7 +860,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             imageRefresh.setVisibility(View.GONE);
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-            params.setMargins(0,0,560,0);
+            params.setMargins(0, 0, 560, 0);
             textView_title.setLayoutParams(params);
             ConstraintLayout.LayoutParams headerparams = (ConstraintLayout.LayoutParams) rl_Header.getLayoutParams();
             headerparams.topMargin = 70;
@@ -878,7 +873,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             paramsPager.rightMargin = 26;
             container.setLayoutParams(paramsPager);
         }
-        if(position == 14) {
+        if (position == 14) {
 
             fragment = new DABStagedProfile();
 
@@ -906,7 +901,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             imageRefresh.setVisibility(View.GONE);
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-            params.setMargins(0,0,560,0);
+            params.setMargins(0, 0, 560, 0);
             textView_title.setLayoutParams(params);
 
             ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
@@ -916,7 +911,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             paramsPager.rightMargin = 26;
             container.setLayoutParams(paramsPager);
         }
-        if(position == 15) {
+        if (position == 15) {
 
             fragment = new DABFullyAHUProfile();
 
@@ -944,7 +939,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             imageRefresh.setVisibility(View.GONE);
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-            params.setMargins(0,0,560,0);
+            params.setMargins(0, 0, 560, 0);
             textView_title.setLayoutParams(params);
 
             ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
@@ -954,7 +949,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             paramsPager.rightMargin = 26;
             container.setLayoutParams(paramsPager);
         }
-        if(position == 16) {
+        if (position == 16) {
 
             fragment = new DABStagedRtuWithVfdProfile();
 
@@ -982,7 +977,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             imageRefresh.setVisibility(View.GONE);
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-            params.setMargins(0,0,560,0);
+            params.setMargins(0, 0, 560, 0);
             textView_title.setLayoutParams(params);
 
             ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
@@ -992,7 +987,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             paramsPager.rightMargin = 26;
             container.setLayoutParams(paramsPager);
         }
-        if(position == 17) {
+        if (position == 17) {
 
             fragment = new DABHybridAhuProfile();
 
@@ -1021,7 +1016,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             imageRefresh.setVisibility(View.GONE);
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-            params.setMargins(0,0,560,0);
+            params.setMargins(0, 0, 560, 0);
             textView_title.setLayoutParams(params);
 
             ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
@@ -1031,7 +1026,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             paramsPager.rightMargin = 26;
             container.setLayoutParams(paramsPager);
         }
-        if(position == 18) {
+        if (position == 18) {
 
             fragment = new FloorPlanFragment();
 
@@ -1060,7 +1055,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             imageRefresh.setVisibility(View.GONE);
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-            params.setMargins(0,0,560,0);
+            params.setMargins(0, 0, 560, 0);
             textView_title.setLayoutParams(params);
 
             ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
@@ -1070,7 +1065,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             paramsPager.rightMargin = 0;
             container.setLayoutParams(paramsPager);
         }
-        if(position == 19) {
+        if (position == 19) {
 
 
             fragment = new SystemFragment();
@@ -1101,14 +1096,13 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             imageRefresh.setVisibility(View.GONE);
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-            params.setMargins(0,0,560,0);
+            params.setMargins(0, 0, 560, 0);
             textView_title.setLayoutParams(params);
 
             TypedValue tv = new TypedValue();
             int actionBarHeight = 0;
-            if (getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true))
-            {
-                actionBarHeight = TypedValue.complexToDimensionPixelSize(tv.data,getResources().getDisplayMetrics());
+            if (getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
+                actionBarHeight = TypedValue.complexToDimensionPixelSize(tv.data, getResources().getDisplayMetrics());
             }
 
             ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();
@@ -1118,7 +1112,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             paramsPager.rightMargin = 0;
             container.setLayoutParams(paramsPager);
         }
-        if(position == 20) {
+        if (position == 20) {
 
             fragment = new CongratsFragment();
             fragmentManager.beginTransaction()
@@ -1139,7 +1133,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             imageRefresh.setVisibility(View.GONE);
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-            params.setMargins(0,0,465,0);
+            params.setMargins(0, 0, 465, 0);
             textView_title.setLayoutParams(params);
 
             ConstraintLayout.LayoutParams paramsPager = (ConstraintLayout.LayoutParams) container.getLayoutParams();

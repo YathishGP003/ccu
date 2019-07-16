@@ -72,24 +72,34 @@ public class UpdatePointHandler
                     }
                 }
             }
-        
-            if (p.getMarkers().contains("his"))
-            {
-                CCUHsApi.getInstance().writeHisValById(luid, CCUHsApi.getInstance().readPointPriorityVal(luid));
+
+            try {
+                Thread.sleep(100);
+                updatePoints(p,luid);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-        
-            if (p.getMarkers().contains("desired"))
-            {
-                ScheduleProcessJob.handleDesiredTempUpdate(p, false, 0);
-            }
-        
-            if (p.getMarkers().contains("scheduleType")) {
-                ScheduleProcessJob.handleScheduleTypeUpdate(p);
-            }
+
         }
         else
         {
             CcuLog.d(L.TAG_CCU_PUBNUB, "Received for invalid local point : " + luid);
+        }
+    }
+
+    private static void updatePoints(Point p, String luid){
+        if (p.getMarkers().contains("his"))
+        {
+            CCUHsApi.getInstance().writeHisValById(luid, CCUHsApi.getInstance().readPointPriorityVal(luid));
+        }
+
+        if (p.getMarkers().contains("desired"))
+        {
+            ScheduleProcessJob.handleDesiredTempUpdate(p, false, 0);
+        }
+
+        if (p.getMarkers().contains("scheduleType")) {
+            ScheduleProcessJob.handleScheduleTypeUpdate(p);
         }
     }
 }

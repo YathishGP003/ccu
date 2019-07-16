@@ -33,12 +33,13 @@ import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.renatus.util.Prefs;
 
 /**
  * Created by samjithsadasivan isOn 8/7/17.
  */
 
-public class SystemFragment extends Fragment implements AdapterView.OnItemSelectedListener//, CCUHsApi.SystemDataInterface
+public class SystemFragment extends Fragment implements AdapterView.OnItemSelectedListener, CCUHsApi.SystemDataInterface
 {
 	private static final String TAG = "SystemFragment";
 	SeekBar  sbComfortValue;
@@ -70,6 +71,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	
 	ArrayList<String> modesAvailable = new ArrayList<>();
 	ArrayAdapter<Double> humidityAdapter;
+	Prefs prefs;
 	public SystemFragment()
 	{
 	}
@@ -89,8 +91,10 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	public void onResume() {
 		// TODO Auto-generated method stub
 		super.onResume();
-		//fetchPoints();
-		//CCUHsApi.setSystemDataInterface(this);
+		fetchPoints();
+		if(prefs.getBoolean("REGISTRATION")) {
+			CCUHsApi.setSystemDataInterface(this);
+		}
 	}
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -103,7 +107,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	@Override
 	public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
 	{
-		
+		prefs = new Prefs(getActivity());
 		ccuName = view.findViewById(R.id.ccuName);
 		HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
 		ccuName.setText(ccu.get("dis").toString());
@@ -274,27 +278,27 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 	public void fetchPoints()
 	{
-		getActivity().runOnUiThread(new Runnable() {
+		if(getActivity() != null) {
+			getActivity().runOnUiThread(new Runnable() {
 
-			@Override
-			public void run() {
+				@Override
+				public void run() {
+					systemModePicker.setValue((int) TunerUtil.readSystemUserIntentVal("rtu and mode"));
+					String status = L.ccu().systemProfile.getStatusMessage();
+					equipmentStatus.setText(status.equals("") ? "OFF" : status);
+					occupancyStatus.setText(ScheduleProcessJob.getSystemStatusString());
+					tbCompHumidity.setChecked(TunerUtil.readSystemUserIntentVal("compensate and humidity") > 0);
+					tbDemandResponse.setChecked(TunerUtil.readSystemUserIntentVal("demand and response") > 0);
+					sbComfortValue.setProgress(5 - (int) TunerUtil.readSystemUserIntentVal("desired and ci"));
 
-				systemModePicker.setValue((int)TunerUtil.readSystemUserIntentVal("rtu and mode"));
-				String status = L.ccu().systemProfile.getStatusMessage();
-				equipmentStatus.setText(status.equals("") ? "OFF":status);
-				occupancyStatus.setText(ScheduleProcessJob.getSystemStatusString());
-				tbCompHumidity.setChecked(TunerUtil.readSystemUserIntentVal("compensate and humidity") > 0);
-				tbDemandResponse.setChecked(TunerUtil.readSystemUserIntentVal("demand and response") > 0);
-				sbComfortValue.setProgress(5 - (int)TunerUtil.readSystemUserIntentVal("desired and ci"));
-
-				targetMaxInsideHumidity.setSelection(humidityAdapter
-						.getPosition(TunerUtil.readSystemUserIntentVal("target and max and inside and humidity")), false);
-				targetMinInsideHumidity.setSelection(humidityAdapter
-						.getPosition(TunerUtil.readSystemUserIntentVal("target and min and inside and humidity")), false);
-
-			}
-		});
-
+					targetMaxInsideHumidity.setSelection(humidityAdapter
+							.getPosition(TunerUtil.readSystemUserIntentVal("target and max and inside and humidity")), false);
+					targetMinInsideHumidity.setSelection(humidityAdapter
+							.getPosition(TunerUtil.readSystemUserIntentVal("target and min and inside and humidity")), false);
+				}
+			});
+		}
+		
 	}
 	@Override
 	public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,

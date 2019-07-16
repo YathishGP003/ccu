@@ -119,18 +119,6 @@ public class OAOEquip
                                              .build();
         hayStack.addPoint(outsideAirCalculatedMinDamper);
         
-        Point outsideAirLoopOutput = new Point.Builder()
-                                              .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-outsideAirLoopOutput")
-                                              .setEquipRef(equipRef)
-                                              .setSiteRef(siteRef)
-                                              .setRoomRef(roomRef)
-                                              .setFloorRef(floorRef)
-                                              .addMarker("oao").addMarker("outside").addMarker("air").addMarker("loop").addMarker("output").addMarker("intermediate").addMarker("his").addMarker("equipHis").addMarker("sp")
-                                              .setGroup(String.valueOf(nodeAddr))
-                                              .setTz(tz)
-                                              .build();
-        hayStack.addPoint(outsideAirLoopOutput);
-    
         Point outsideAirFinalLoopOutput = new Point.Builder()
                                              .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-outsideAirFinalLoopOutput")
                                              .setEquipRef(equipRef)

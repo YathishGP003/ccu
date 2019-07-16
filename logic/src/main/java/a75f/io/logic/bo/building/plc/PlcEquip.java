@@ -382,10 +382,12 @@ public class PlcEquip
             SmartNode.setPointEnabled(nodeAddr, Port.ANALOG_IN_ONE.name(), true);
             SmartNode.setPointEnabled(nodeAddr, Port.TH1_IN.name(), false);
             SmartNode.updatePhysicalPointRef(nodeAddr, Port.ANALOG_IN_ONE.name(), pv.get("id").toString());
+            SmartNode.updatePhysicalPointRef(nodeAddr, Port.TH1_IN.name(), null);
             SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_IN_ONE.name(), String.valueOf(config.analog1InputSensor-1));
         } else if (config.th1InputSensor> 0){
             SmartNode.setPointEnabled(nodeAddr, Port.ANALOG_IN_ONE.name(), false);
             SmartNode.setPointEnabled(nodeAddr, Port.TH1_IN.name(), true);
+            SmartNode.updatePhysicalPointRef(nodeAddr, Port.ANALOG_IN_ONE.name(), null);
             SmartNode.updatePhysicalPointRef(nodeAddr, Port.TH1_IN.name(), pv.get("id").toString());
             SmartNode.updatePhysicalPointType(nodeAddr, Port.TH1_IN.name(), String.valueOf(config.th1InputSensor-1));
         }

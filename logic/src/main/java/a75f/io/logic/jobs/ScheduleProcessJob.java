@@ -476,13 +476,18 @@ public class ScheduleProcessJob extends BaseJob {
             double preconDegree = 0;
             double preconRate = CCUHsApi.getInstance().getPredictedPreconRate(L.ccu().systemProfile.getSystemEquipRef());
             if (preconRate == 0 && nextOccupied != null) {
-                if (L.ccu().systemProfile.getSystemController().getConditioningForecast(nextOccupied) == SystemController.State.COOLING)
+                if (L.ccu().systemProfile.getAverageTemp() > 0)
                 {
-                    preconRate = TunerUtil.readTunerValByQuery("cooling and precon and rate", L.ccu().systemProfile.getSystemEquipRef());
-                    preconDegree = L.ccu().systemProfile.getAverageTemp() - nextOccupied.getCoolingVal();
-                } else if (L.ccu().systemProfile.getSystemController().getConditioningForecast(nextOccupied) == SystemController.State.HEATING){
-                    preconRate = TunerUtil.readTunerValByQuery("heating and precon and rate", L.ccu().systemProfile.getSystemEquipRef());
-                    preconDegree = nextOccupied.getHeatingVal() - L.ccu().systemProfile.getAverageTemp();
+                    if (L.ccu().systemProfile.getSystemController().getConditioningForecast(nextOccupied) == SystemController.State.COOLING)
+                    {
+                        preconRate = TunerUtil.readTunerValByQuery("cooling and precon and rate", L.ccu().systemProfile.getSystemEquipRef());
+                        preconDegree = L.ccu().systemProfile.getAverageTemp() - nextOccupied.getCoolingVal();
+                    }
+                    else if (L.ccu().systemProfile.getSystemController().getConditioningForecast(nextOccupied) == SystemController.State.HEATING)
+                    {
+                        preconRate = TunerUtil.readTunerValByQuery("heating and precon and rate", L.ccu().systemProfile.getSystemEquipRef());
+                        preconDegree = nextOccupied.getHeatingVal() - L.ccu().systemProfile.getAverageTemp();
+                    }
                 }
             }
             if ( (preconDegree != 0) && (millisToOccupancy > 0) && (preconDegree * preconRate * 60 * 1000 >= millisToOccupancy))

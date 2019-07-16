@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -263,6 +264,79 @@ public class TestHS
         System.out.println("###########"+i.getDate()+" : "+i.getVal());
         
         i.dump();
+    }
+    
+    @Test
+    public void testHisDelete() {
+        CCUHsApi hayStack = new CCUHsApi();
+        int nodeAddr = 7000;
+        
+        Site s = new Site.Builder()
+                         .setDisplayName("Site")
+                         .addMarker("site")
+                         .setGeoCity("Burnsville")
+                         .setGeoState("MN")
+                         .setTz("Chicago")
+                         .setArea(1000).build();
+        hayStack.addSite(s);
+        
+        HashMap siteMap = hayStack.read(Tags.SITE);
+        String siteRef = (String) siteMap.get(Tags.ID);
+        String siteDis = (String) siteMap.get("dis");
+        
+        Equip v = new Equip.Builder()
+                          .setSiteRef(siteRef)
+                          .setDisplayName(siteDis+"-VAV-"+nodeAddr)
+                          .setRoomRef("room")
+                          .setFloorRef("floor")
+                          .addMarker("equip")
+                          .addMarker("vav")
+                          .setGroup(String.valueOf(nodeAddr))
+                          .build();
+        String equipRef = hayStack.addEquip(v);
+        
+        Point testPoint = new Point.Builder()
+                                  .setDisplayName(siteDis+"AHU-"+nodeAddr+"-TestTemp")
+                                  .setEquipRef(equipRef)
+                                  .setSiteRef(siteRef)
+                                  .setRoomRef("room")
+                                  .setFloorRef("floor")
+                                  .addMarker("discharge")
+                                  .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("his")
+                                  .setGroup(String.valueOf(nodeAddr))
+                                  .setTz("Chicago")
+                                  .setUnit("\u00B0F")
+                                  .build();
+        
+        String id1 = CCUHsApi.getInstance().addPoint(testPoint);
+        
+        
+        
+        ArrayList<HisItem> hislist1 = new ArrayList<>();
+       
+        Date now = new Date();
+        
+        hislist1.add(new HisItem(id1, now, 75.0));
+        hislist1.add(new HisItem(id1, new Date(now.getTime() + 300000), 73.0));
+        hislist1.add(new HisItem(id1, new Date(now.getTime() - 2 * 60 * 60 * 10000), 200.0));
+        hislist1.add(new HisItem(id1, new Date(now.getTime() - 2 * 60 * 60 * 10000), 300.0));
+        
+        hayStack.hisWrite(hislist1);
+        
+        
+        List<HisItem> res = hayStack.tagsDb.getAllHisItems(HRef.copy(id1));
+        
+        for (HisItem h : res) {
+           System.out.println(h.getDate()+" "+h.getVal());
+        }
+        
+        System.out.println("Remove his data");
+        hayStack.tagsDb.removeHisItems(HRef.copy(id1));
+        List<HisItem> res1 = hayStack.tagsDb.getHisItems(HRef.copy(id1), 0, 2);
+    
+        for (HisItem h : res1) {
+            System.out.println(h.getDate()+" "+h.getVal());
+        }
     }
     
     @Test

@@ -65,10 +65,62 @@ public class EmrEquip
         String emrReadingId  = hayStack.addPoint(emrReading );
         hayStack.writeHisValById(emrReadingId, 0.0);
     
+        Point currentRate  = new Point.Builder()
+                                    .setDisplayName(equipDis+"-currentRate")
+                                    .setEquipRef(equipRef)
+                                    .setSiteRef(siteRef)
+                                    .setRoomRef(roomRef)
+                                    .setFloorRef(floorRef)
+                                    .addMarker("sp").addMarker("emr").addMarker("zone").addMarker("his")
+                                    .addMarker("current").addMarker("rate").addMarker("logical").addMarker("equipHis").addMarker("sp")
+                                    .setGroup(String.valueOf(nodeAddr))
+                                    .setTz(tz)
+                                    .build();
+        String currentRateId  = hayStack.addPoint(currentRate );
+        hayStack.writeHisValById(currentRateId, 0.0);
+    
+        Point equipStatusMessage = new Point.Builder()
+                                           .setDisplayName(equipDis+"-equipStatusMessage")
+                                           .setEquipRef(equipRef)
+                                           .setSiteRef(siteRef)
+                                           .setRoomRef(roomRef)
+                                           .setFloorRef(floorRef)
+                                           .addMarker("status").addMarker("message").addMarker("pid").addMarker("writable").addMarker("logical").addMarker("zone").addMarker("equipHis")
+                                           .setGroup(String.valueOf(nodeAddr))
+                                           .setTz(tz)
+                                           .setKind("string")
+                                           .build();
+        String equipStatusMessageLd = CCUHsApi.getInstance().addPoint(equipStatusMessage);
+        hayStack.writeDefaultValById(equipStatusMessageLd, "Output Loop Signal is 0%");
+    
+        Point equipScheduleType = new Point.Builder()
+                                          .setDisplayName(equipDis+"-scheduleType")
+                                          .setEquipRef(equipRef)
+                                          .setSiteRef(siteRef)
+                                          .setRoomRef(roomRef)
+                                          .setFloorRef(floorRef)
+                                          .addMarker("zone").addMarker("emr").addMarker("scheduleType").addMarker("writable").addMarker("equipHis")
+                                          .setGroup(String.valueOf(nodeAddr))
+                                          .setTz(tz)
+                                          .build();
+        String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
+        CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
+    
         SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
         device.addPointsToDb();
         
         device.addSensor(Port.SENSOR_ENERGY_METER, emrReadingId);
         hayStack.syncEntityTree();
+    }
+    
+    public void setEquipStatus(String status)
+    {
+        hayStack.writeDefaultVal("point and status and message and equipRef == \""+equipRef+"\"", status);
+        
+    }
+    
+    public void setHisVal(String query, double val)
+    {
+        hayStack.writeHisValByQuery( query+" and equipRef == \""+equipRef+"\"", val);
     }
 }

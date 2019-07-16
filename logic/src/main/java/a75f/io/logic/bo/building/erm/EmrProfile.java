@@ -4,10 +4,12 @@ import android.util.Log;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HisItem;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.ZoneProfile;
@@ -56,6 +58,24 @@ public class EmrProfile extends ZoneProfile
     
     @Override
     public void updateZonePoints() {
-        Log.d(L.TAG_CCU_ZONE, "EmrProfile, Do Nothing !");
+        HashMap emrPoint = CCUHsApi.getInstance().read("sensor and emr and equipRef == \""+emrEquip.equipRef+"\"");
+        List<HisItem> hisItems = CCUHsApi.getInstance().getHisItems(emrPoint.get("id").toString(), 0 ,2);
+        
+        if (hisItems.size() < 2) {
+            Log.d(L.TAG_CCU_ZONE, "EmrProfile, Only one Reading !");
+        }
+        HisItem reading1 = hisItems.get(0);
+        HisItem reading2 = hisItems.get(1);
+        
+        int timeDiffMins = (int) (reading1.getDate().getTime() - reading2.getDate().getTime())/60*1000;
+        double readingDiff = 100 * (reading1.getVal() - reading2.getVal());
+        
+        double ratekWh = (60 * readingDiff) / (timeDiffMins * 1000);
+        
+        emrEquip.setHisVal("current and rate", ratekWh);
+        emrEquip.setEquipStatus("Total Energy Consumed "+reading1.getVal()+" kWh "+" Current Rate "+ratekWh+"KW");
+    
+        Log.d(L.TAG_CCU_ZONE, "EmrProfile, Total Energy Consumed "+reading1.getVal()+" currentRate "+ratekWh);
+        
     }
 }

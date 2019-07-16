@@ -35,39 +35,37 @@ import java.util.Set;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.Prefs;
 
-public class WifiFragment extends Fragment /*implements InstallType */
-{
+public class WifiFragment extends Fragment /*implements InstallType */ {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-    private static final int    WAIT_TIME  = 2000;
-    private              String TAG        = "Wifi Fragment";
+    private static final int WAIT_TIME = 2000;
+    private String TAG = "Wifi Fragment";
 
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-    ImageView                   imageGoback;
-    RecyclerView                recyclerWifi;
-    WifiManager                 mainWifiObj;
+    ImageView imageGoback;
+    RecyclerView recyclerWifi;
+    WifiManager mainWifiObj;
     HashMap<String, ScanResult> distinctNetworks;
-    List<ScanResult>            results;
-    List<String>                wifinetworks;
-    WifiListAdapter             wifiListAdapter;
-    ImageView                   imageRefresh;
-    ToggleButton                toggleWifi;
-    ProgressBar                 progressbar;
-    Context                     mContext;
-    Handler                     mHandler;
-    Runnable                    mRunable;
-    TextView                    mTurnonwifi;
+    List<ScanResult> results;
+    List<String> wifinetworks;
+    WifiListAdapter wifiListAdapter;
+    ImageView imageRefresh;
+    ToggleButton toggleWifi;
+    ProgressBar progressbar;
+    Context mContext;
+    Handler mHandler;
+    Runnable mRunable;
+    TextView mTurnonwifi;
     private SwitchFragment switchFragment;
-    int    goToNext     = 0;
-    Prefs  prefs;
+    int goToNext = 0;
+    Prefs prefs;
     String INSTALL_TYPE = "";
 
-    public WifiFragment()
-    {
+    public WifiFragment() {
         // Required empty public constructor
     }
 
@@ -80,10 +78,9 @@ public class WifiFragment extends Fragment /*implements InstallType */
      * @return A new instance of fragment StartCCUFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static WifiFragment newInstance(String param1, String param2)
-    {
+    public static WifiFragment newInstance(String param1, String param2) {
         WifiFragment fragment = new WifiFragment();
-        Bundle       args     = new Bundle();
+        Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
 
@@ -91,11 +88,9 @@ public class WifiFragment extends Fragment /*implements InstallType */
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null)
-        {
+        if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
@@ -104,8 +99,7 @@ public class WifiFragment extends Fragment /*implements InstallType */
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState)
-    {
+                             Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_wifi, container, false);
         imageGoback = (ImageView) rootView.findViewById(R.id.imageGoback);
@@ -118,21 +112,21 @@ public class WifiFragment extends Fragment /*implements InstallType */
         rootView.findViewById(R.id.textConnectWifi).setClickable(true);
 
         rootView.findViewById(R.id.textConnectWifi).setOnClickListener(new View.OnClickListener() {
-                                                                           @Override
-                                                                           public void onClick(View v) {
-                                                                                Log.i(TAG, "click connect wifi");
-                                                                                switchFragment.Switch(3);
-                                                                           }
-                                                                       });
-                progressbar.setVisibility(View.GONE);
+            @Override
+            public void onClick(View v) {
+                Log.i(TAG, "click connect wifi");
+                switchFragment.Switch(3);
+            }
+        });
+        progressbar.setVisibility(View.GONE);
         mTurnonwifi.setVisibility(View.GONE);
 
         imageRefresh.setOnLongClickListener(v ->
-                                            {
-                                                System.out.println("Image Refresh 2");
-                                                switchFragment.Switch(3);
-                                                return false;
-                                            });
+        {
+            System.out.println("Image Refresh 2");
+            switchFragment.Switch(3);
+            return false;
+        });
 
         mContext = getContext().getApplicationContext();
 
@@ -147,11 +141,9 @@ public class WifiFragment extends Fragment /*implements InstallType */
         animation.setDuration(1200);
         //imageRefresh.setAnimation(animation);
 
-        imageGoback.setOnClickListener(new View.OnClickListener()
-        {
+        imageGoback.setOnClickListener(new View.OnClickListener() {
 
-            public void onClick(View v)
-            {
+            public void onClick(View v) {
                 mHandler.removeCallbacks(mRunable);
                 // TODO Auto-generated method stub
                 //((FreshRegistration)getActivity()).selectItem(1);
@@ -159,13 +151,10 @@ public class WifiFragment extends Fragment /*implements InstallType */
             }
         });
 
-        imageRefresh.setOnClickListener(new View.OnClickListener()
-        {
-            public void onClick(View v)
-            {
+        imageRefresh.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
                 // TODO Auto-generated method stub
-                if (mainWifiObj.isWifiEnabled())
-                {
+                if (mainWifiObj.isWifiEnabled()) {
                     animation.setRepeatCount(0);
                     animation.setDuration(1200);
                     imageRefresh.startAnimation(animation);
@@ -183,27 +172,27 @@ public class WifiFragment extends Fragment /*implements InstallType */
         filterWifi.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         filterWifi.addAction(WifiManager.ACTION_PICK_WIFI_NETWORK);
 
-        mContext.registerReceiver(new BroadcastReceiver()
-        {
+        mContext.registerReceiver(new BroadcastReceiver() {
             @Override
-            public void onReceive(Context c, Intent intent)
-            {
-                if (getUserVisibleHint())
-                {
+            public void onReceive(Context c, Intent intent) {
+                if (getUserVisibleHint()) {
                     final String action = intent.getAction();
                     results = mainWifiObj.getScanResults();
                     Log.i(TAG, "Scan Result Action:" + action + " Result:" + results.toString());
-                    if (action.equals("android.net.wifi.STATE_CHANGE") || action.equals("android.net.wifi.WIFI_STATE_CHANGED"))
-                    {
+                    if (action.equals("android.net.wifi.STATE_CHANGE") || action.equals("android.net.wifi.WIFI_STATE_CHANGED")) {
                         //toggleWifi.setChecked(mainWifiObj.isWifiEnabled());
-                        if (mainWifiObj.isWifiEnabled())
-                        {
+                        if (mainWifiObj.isWifiEnabled()) {
                             mTurnonwifi.setVisibility(View.GONE);
                             toggleWifi.setChecked(true);
-                        } else
-                        {
+                            imageRefresh.setEnabled(true);
+                            imageRefresh.setImageResource(R.drawable.ic_refresh);
+                            recyclerWifi.setVisibility(View.VISIBLE);
+                        } else {
                             toggleWifi.setChecked(false);
                             mTurnonwifi.setVisibility(View.VISIBLE);
+                            imageRefresh.setEnabled(false);
+                            imageRefresh.setImageResource(R.drawable.ic_refresh_disable);
+                            recyclerWifi.setVisibility(View.GONE);
                         }
                     }
                     showScanResult();
@@ -211,40 +200,39 @@ public class WifiFragment extends Fragment /*implements InstallType */
             }
         }, filterWifi);
 
-        toggleWifi.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
-        {
+        toggleWifi.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
-            {
-                if (getUserVisibleHint())
-                {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (getUserVisibleHint()) {
 
                     mainWifiObj = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
-                    if (isChecked)
-                    {
+                    if (isChecked) {
                         progressbar.setVisibility(View.VISIBLE);
-                        if (!mainWifiObj.isWifiEnabled())
-                        {
+                        if (!mainWifiObj.isWifiEnabled()) {
+                            imageRefresh.setEnabled(true);
+                            imageRefresh.setImageResource(R.drawable.ic_refresh);
                             animation.setDuration(2000);
                             imageRefresh.startAnimation(animation);
                             mainWifiObj = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
                             mainWifiObj.setWifiEnabled(true);
                         }
-                    } else
-                    {
+                    } else {
                         mHandler.removeCallbacks(mRunable);
-                        if (mainWifiObj.isWifiEnabled())
-                        {
+                        if (mainWifiObj.isWifiEnabled()) {
                             mainWifiObj = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
                             mainWifiObj.setWifiEnabled(false);
                         }
                         progressbar.setVisibility(View.GONE);
                         mTurnonwifi.setVisibility(View.GONE);
+                        imageRefresh.setEnabled(true);
+                        imageRefresh.setImageResource(R.drawable.ic_refresh);
                     }
-                    if (!mainWifiObj.isWifiEnabled())
-                    {
+                    if (!mainWifiObj.isWifiEnabled()) {
                         mTurnonwifi.setVisibility(View.VISIBLE);
+                        recyclerWifi.setAdapter(null);
+                        imageRefresh.setEnabled(false);
+                        imageRefresh.setImageResource(R.drawable.ic_refresh_disable);
                     }
                 }
             }
@@ -253,11 +241,9 @@ public class WifiFragment extends Fragment /*implements InstallType */
 
         //toggleWifi.setChecked(mainWifiObj.isWifiEnabled());
         ((FreshRegistration) getActivity()).setToggleWifi(mainWifiObj.isWifiEnabled());
-        if (mainWifiObj.isWifiEnabled())
-        {
+        if (mainWifiObj.isWifiEnabled()) {
             mainWifiObj.startScan();
-        } else
-        {
+        } else {
             mTurnonwifi.setVisibility(View.VISIBLE);
         }
         return rootView;
@@ -277,21 +263,15 @@ public class WifiFragment extends Fragment /*implements InstallType */
         }
     }*/
 
-    public void showScanResult()
-    {
-        try
-        {
+    public void showScanResult() {
+        try {
             ((FreshRegistration) getActivity()).setToggleWifi(mainWifiObj.isWifiEnabled());
             distinctNetworks = new HashMap<String, ScanResult>();
-            for (int i = 0; i < results.size(); i++)
-            {
-                if (!distinctNetworks.containsKey(results.get(i)))
-                {
+            for (int i = 0; i < results.size(); i++) {
+                if (!distinctNetworks.containsKey(results.get(i))) {
                     distinctNetworks.put(results.get(i).SSID, results.get(i));
-                } else
-                {
-                    if (WifiManager.compareSignalLevel(results.get(i).level, distinctNetworks.get(results.get(i).SSID).level) > 0)
-                    {
+                } else {
+                    if (WifiManager.compareSignalLevel(results.get(i).level, distinctNetworks.get(results.get(i).SSID).level) > 0) {
                         distinctNetworks.put(results.get(i).SSID, results.get(i));
                     }
                 }
@@ -301,20 +281,16 @@ public class WifiFragment extends Fragment /*implements InstallType */
 
             wifinetworks = new ArrayList<>(wifiset);
             ConnectivityManager connManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo         networkInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-            if (networkInfo.isConnected())
-            {
-                final WifiManager wifiManager    = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
-                final WifiInfo    connectionInfo = wifiManager.getConnectionInfo();
-                for (int j = 0; j < wifinetworks.size(); j++)
-                {
+            NetworkInfo networkInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+            if (networkInfo.isConnected()) {
+                final WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+                final WifiInfo connectionInfo = wifiManager.getConnectionInfo();
+                for (int j = 0; j < wifinetworks.size(); j++) {
                     String ssid_scanned = wifinetworks.get(j);
                     ssid_scanned = String.format("\"%s\"", ssid_scanned);
                     Log.i(TAG, "ssid connected:" + connectionInfo.getSSID() + " scanned:" + ssid_scanned);
-                    if (j != 0)
-                    {
-                        if (connectionInfo.getSSID().equals(ssid_scanned))
-                        {
+                    if (j != 0) {
+                        if (connectionInfo.getSSID().equals(ssid_scanned)) {
                             String temp = wifinetworks.get(0);
                             wifinetworks.set(0, wifinetworks.get(j));
                             wifinetworks.set(j, temp);
@@ -322,71 +298,56 @@ public class WifiFragment extends Fragment /*implements InstallType */
                     }
                 }
 
-                mRunable = new Runnable()
-                {
+                /*mRunable = new Runnable() {
                     @Override
-                    public void run()
-                    {
+                    public void run() {
                         ConnectivityManager connManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-                        NetworkInfo         networkInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-                        if (networkInfo.isConnected())
-                        {
+                        NetworkInfo networkInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+                        if (networkInfo.isConnected()) {
                             //Toast.makeText(getActivity(), "Wifi Connected", Toast.LENGTH_SHORT).show();
                             //((FreshRegistration)getActivity()).selectItem(3);
                             //((FreshRegistration)getActivity().getApplicationContext()).selectItem(goToNext);
                             Log.i(TAG, "goto:" + goToNext);
-                            if (INSTALL_TYPE.equals("CREATENEW"))
-                            {
+                            if (INSTALL_TYPE.equals("CREATENEW")) {
                                 switchFragment.Switch(3);
                             }
-                            if (INSTALL_TYPE.equals("ADDCCU"))
-                            {
+                            if (INSTALL_TYPE.equals("ADDCCU")) {
                                 switchFragment.Switch(6);
                             }
-                            if (INSTALL_TYPE.equals("PRECONFIGCCU"))
-                            {
+                            if (INSTALL_TYPE.equals("PRECONFIGCCU")) {
                                 switchFragment.Switch(7);
                             }
-                            if (INSTALL_TYPE.equals("REPLACECCU"))
-                            {
+                            if (INSTALL_TYPE.equals("REPLACECCU")) {
                                 switchFragment.Switch(8);
                             }
                         }
                     }
                 };
-                mHandler.postDelayed(mRunable, WAIT_TIME);
+                mHandler.postDelayed(mRunable, WAIT_TIME);*/
             }
             wifiListAdapter = new WifiListAdapter(getContext(), wifinetworks);
             recyclerWifi.setAdapter(wifiListAdapter);
             wifiListAdapter.notifyDataSetChanged();
-            if (progressbar.isShown())
-            {
+            if (progressbar.isShown()) {
                 progressbar.setVisibility(View.GONE);
             }
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
 
         }
     }
 
     @Override
-    public void onAttach(Context context)
-    {
-        try
-        {
+    public void onAttach(Context context) {
+        try {
             switchFragment = (SwitchFragment) context;
-        }
-        catch (ClassCastException e)
-        {
+        } catch (ClassCastException e) {
             e.printStackTrace();
         }
         super.onAttach(context);
     }
 
     @Override
-    public void onDetach()
-    {
+    public void onDetach() {
         super.onDetach();
     }
 }

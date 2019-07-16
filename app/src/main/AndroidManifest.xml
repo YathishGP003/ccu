@@ -3,48 +3,53 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="a75f.io.renatus">
 
-    <uses-feature android:name="android.hardware.usb.host"/>
+    <uses-feature android:name="android.hardware.usb.host" />
     <uses-feature
         android:name="android.hardware.bluetooth_le"
-        android:required="true"/>
-    <uses-feature android:name="android.hardware.camera"/>
+        android:required="true" />
+    <uses-feature android:name="android.hardware.camera" />
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.READ_LOGS"
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission
+        android:name="android.permission.READ_LOGS"
         tools:ignore="ProtectedPermissions" />
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION"/>
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
-    <uses-permission android:name="android.permission.ACCESS_SUPERUSER"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_CALENDAR"/>
-    <uses-permission android:name="android.permission.WRITE_CALENDAR"/>
-    <uses-permission android:name="android.permission.CAMERA"/>
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <uses-permission android:name="android.permission.BLUETOOTH"/>
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
-    <uses-permission android:name="android.permission.SET_TIME_ZONE"
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_SUPERUSER" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_CALENDAR" />
+    <uses-permission android:name="android.permission.WRITE_CALENDAR" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission
+        android:name="android.permission.SET_TIME_ZONE"
         tools:ignore="ProtectedPermissions" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.SET_TIME_ZONE"
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission
+        android:name="android.permission.SET_TIME_ZONE"
         tools:ignore="ProtectedPermissions" />
-    <uses-permission android:name = "android.permission.READ_LOGS"
+    <uses-permission
+        android:name="android.permission.READ_LOGS"
         tools:ignore="ProtectedPermissions" />
 
-    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
     <permission
         android:name="a75f.io.renatus..permission.C2D_MESSAGE"
-        android:protectionLevel="signature"/>
+        android:protectionLevel="signature" />
 
-    <uses-permission android:name="a75f.io.renatus.permission.C2D_MESSAGE"/>
+    <uses-permission android:name="a75f.io.renatus.permission.C2D_MESSAGE" />
 
 
-    <uses-permission android:name="android.permission.SET_TIME"
+    <uses-permission
+        android:name="android.permission.SET_TIME"
         tools:ignore="ProtectedPermissions" />
     <uses-permission
         android:name="android.permission.MANAGE_USB"
@@ -55,37 +60,39 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:persistent="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:persistent="true"
         android:theme="@style/RenatusAppTheme">
 
-        <service android:name=".bluetooth.BLEProvisionService"/>
+        <service android:name=".bluetooth.BLEProvisionService" />
         <service android:name=".OTAUpdateHandlerService" />
         <service android:name=".OTAUpdateService" />
         <service
             android:name="a75f.io.usbserial.UsbService"
-            android:enabled="true">
-        </service>
+            android:enabled="true"></service>
         <!-- TODO we don't want this and shouldn't need it, we should monitor the USB connection, not kick the application whenever it restarts -->
 
         <activity
-            android:name=".SplashActivity" android:launchMode="singleTask"
+            android:name=".SplashActivity"
+            android:launchMode="singleTask"
             android:theme="@style/RenatusAppTheme.NoActionBar">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-<activity android:name=".registartion.FreshRegistration"
-            android:theme="@style/RenatusAppTheme.NoActionBar">
-        </activity>
+        <activity
+            android:name=".registartion.FreshRegistration"
+            android:screenOrientation="sensorLandscape"
+            android:theme="@style/RenatusAppTheme.NoActionBar"></activity>
 
         <activity
-            android:name=".RenatusLandingActivity" android:launchMode="singleTask"
-            android:label="RenatusLandingActivity"
+            android:name=".RenatusLandingActivity"
             android:alwaysRetainTaskState="true"
+            android:label="RenatusLandingActivity"
+            android:launchMode="singleTask"
             android:screenOrientation="sensorLandscape"
             android:theme="@style/RenatusAppTheme.NoActionBar">
 
@@ -94,27 +101,24 @@
 
         <activity
             android:name=".ENGG.RenatusEngineeringActivity"
-            android:theme="@style/RenatusAppTheme.NoActionBar">
-        </activity>
+            android:theme="@style/RenatusAppTheme.NoActionBar"></activity>
 
         <activity
             android:name=".RegisterGatherSiteDetails"
 
-            android:theme="@style/RenatusAppTheme.NoActionBar">
-        </activity>
+            android:theme="@style/RenatusAppTheme.NoActionBar"></activity>
 
 
         <activity
             android:name=".RegisterGatherDetails"
-            android:theme="@style/RenatusAppTheme.NoActionBar">
-        </activity>
+            android:theme="@style/RenatusAppTheme.NoActionBar"></activity>
 
         <activity
             android:name=".RegisterGatherCCUDetails"
-            android:theme="@style/RenatusAppTheme.NoActionBar">
-        </activity>
+            android:theme="@style/RenatusAppTheme.NoActionBar"></activity>
 
-        <activity android:name=".CCUSettings"
+        <activity
+            android:name=".CCUSettings"
             android:theme="@style/RenatusAppTheme.NoActionBar">
 
         </activity>
@@ -122,7 +126,7 @@
 
         <meta-data
             android:name="io.fabric.ApiKey"
-            android:value="a3eaad5c6571007c20544f5e3ead9179ddcdb218"/>
+            android:value="a3eaad5c6571007c20544f5e3ead9179ddcdb218" />
     </application>
 
 </manifest>

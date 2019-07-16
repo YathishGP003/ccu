@@ -1091,7 +1091,6 @@ public class CCUHsApi
             filter = "schedule and building and vacation";
 
         HGrid scheduleHGrid = tagsDb.readAll(filter);
-        
         for (int i = 0; i < scheduleHGrid.numRows(); i++)
         {
             schedules.add(new Schedule.Builder().setHDict(scheduleHGrid.row(i)).build());
@@ -1172,7 +1171,7 @@ public class CCUHsApi
             return null;
         
         HDict hDict = tagsDb.readById(HRef.copy(scheduleRef));
-        Log.d("CCU_HS", " getScheduleById " +hDict.toZinc() );
+        //Log.d("CCU_HS", " getScheduleById " +hDict.toZinc() );
         return new Schedule.Builder().setHDict(hDict).build();
     }
 
@@ -1236,7 +1235,7 @@ public class CCUHsApi
             HRow r = hisGrid.row(hisGrid.numRows() - 1);
             HDateTime date = (HDateTime) r.get("ts");
             double tempVal = Double.parseDouble(r.get("val").toString());
-            System.out.println(date+" External Temp: "+tempVal);
+            Log.d("CCU_OAO",date+" External Temp: "+tempVal);
             return tempVal;
         
         }
@@ -1267,7 +1266,7 @@ public class CCUHsApi
             HRow r = hisGrid.row(hisGrid.numRows() - 1);
             HDateTime date = (HDateTime) r.get("ts");
             double humidityVal = Double.parseDouble(r.get("val").toString());
-            System.out.println(date+" External Humidity: "+humidityVal);
+            Log.d("CCU_OAO",date+" External Humidity: "+humidityVal);
             return 100 * humidityVal;
         
         }

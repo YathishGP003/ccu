@@ -1,7 +1,6 @@
 package a75f.io.renatus.registartion;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -30,8 +29,6 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.renatus.R;
-import a75f.io.renatus.RegisterGatherCCUDetails;
-import a75f.io.renatus.RenatusLandingActivity;
 import a75f.io.renatus.util.Prefs;
 
 import static a75f.io.logic.L.ccu;
@@ -46,14 +43,14 @@ public class InstallerOptions extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    ImageView           imageGoback;
-    Button              mNext;
-    Context             mContext;
-    Spinner             mAddressBandSpinner;
+    ImageView imageGoback;
+    Button mNext;
+    Context mContext;
+    Spinner mAddressBandSpinner;
     HGrid mCCUS;
     HGrid mSite;
-    String              mSiteId;
-    String              addressBandSelected = "1000";
+    String mSiteId;
+    String addressBandSelected = "1000";
     Prefs prefs;
     String localSiteID;
     String CCU_ID = "";
@@ -101,7 +98,7 @@ public class InstallerOptions extends Fragment {
         mContext = getContext().getApplicationContext();
 
         prefs = new Prefs(mContext);
-        CCU_ID  = prefs.getString("CCU_ID");
+        CCU_ID = prefs.getString("CCU_ID");
 
         imageGoback = rootView.findViewById(R.id.imageGoback);
         mAddressBandSpinner = rootView.findViewById(R.id.spinnerAddress);
@@ -109,8 +106,7 @@ public class InstallerOptions extends Fragment {
 
         ArrayList<String> addressBand = new ArrayList<>();
         //addressBand.add("Select SmartNode Address Band");
-        for (int addr = 1000; addr <= 9900; addr+=100)
-        {
+        for (int addr = 1000; addr <= 9900; addr += 100) {
             addressBand.add(String.valueOf(addr));
         }
 
@@ -121,40 +117,33 @@ public class InstallerOptions extends Fragment {
 
 
         HashMap ccu = CCUHsApi.getInstance().read("ccu");
-            //if ccu exists
-            if(ccu.size() >0)
-            {
-                for(String addBand : addressBand)
-                {
-                    //Short addB = L.ccu().getSmartNodeAddressBand();
-                    String addB = String.valueOf(L.ccu().getSmartNodeAddressBand());
-                    if(addBand.equals(addB))
-                    {
-                        mAddressBandSpinner.setSelection(analogAdapter.getPosition(addBand));
-                        break;
-                    }
+        //if ccu exists
+        if (ccu.size() > 0) {
+            for (String addBand : addressBand) {
+                //Short addB = L.ccu().getSmartNodeAddressBand();
+                String addB = String.valueOf(L.ccu().getSmartNodeAddressBand());
+                if (addBand.equals(addB)) {
+                    mAddressBandSpinner.setSelection(analogAdapter.getPosition(addBand));
+                    break;
                 }
             }
-            else{
-                ccu().setSmartNodeAddressBand((short)1000);
-            }
+        } else {
+            ccu().setSmartNodeAddressBand((short) 1000);
+        }
 
-        mAddressBandSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
-        {
+        mAddressBandSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l)
-            {
-                Log.d("CCU","AddressBandSelected : "+mAddressBandSpinner.getSelectedItem());
-                if (i > 0)
-                {
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                Log.d("CCU", "AddressBandSelected : " + mAddressBandSpinner.getSelectedItem());
+                if (i > 0) {
                     addressBandSelected = mAddressBandSpinner.getSelectedItem().toString();
                     L.ccu().setSmartNodeAddressBand(Short.parseShort(addressBandSelected));
                 }
 
             }
+
             @Override
-            public void onNothingSelected(AdapterView<?> adapterView)
-            {
+            public void onNothingSelected(AdapterView<?> adapterView) {
             }
         });
 
@@ -167,15 +156,18 @@ public class InstallerOptions extends Fragment {
 
         mNext.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                if (ccu.size() == 0) {
+                    return;
+                }
                 String ccuId = ccu.get("id").toString();
-                ccuId = ccuId.replace("@","");
+                ccuId = ccuId.replace("@", "");
                 String ccuName = ccu.get("dis").toString();
                 CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(ccuId));
                 HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
                 SettingPoint snBand = new SettingPoint.Builder()
                         .setDeviceRef(ccuId)
                         .setSiteRef(siteMap.get("id").toString())
-                        .setDisplayName(ccuName+"-smartNodeBand")
+                        .setDisplayName(ccuName + "-smartNodeBand")
                         .addMarker("snband").addMarker("sp").setVal(addressBandSelected).build();
                 CCUHsApi.getInstance().addPoint(snBand);
                 // TODO Auto-generated method stub
@@ -208,12 +200,12 @@ public class InstallerOptions extends Fragment {
     }
     /* This site never existed we are creating a new orphaned site. */
 
-  /*  private void goTonext() {
-        //Intent i = new Intent(mContext, RegisterGatherCCUDetails.class);
-        //startActivity(i);
-        ((FreshRegistration)getActivity()).selectItem(5);
-    }
-*/
+    /*  private void goTonext() {
+          //Intent i = new Intent(mContext, RegisterGatherCCUDetails.class);
+          //startActivity(i);
+          ((FreshRegistration)getActivity()).selectItem(5);
+      }
+  */
     private void goTonext() {
         new AsyncTask<Void, Void, Void>() {
             @Override
@@ -225,7 +217,7 @@ public class InstallerOptions extends Fragment {
             @Override
             protected Void doInBackground(Void... voids) {
 
-                if(!Globals.getInstance().siteAlreadyCreated()) {
+                if (!Globals.getInstance().siteAlreadyCreated()) {
                     BuildingTuners.getInstance();
                     DefaultSchedules.generateDefaultSchedule(false, null);
                 }
@@ -242,9 +234,9 @@ public class InstallerOptions extends Fragment {
             protected void onPostExecute(Void nul) {
                 super.onPostExecute(nul);
                 //hideProgressDialog();
-                prefs.setBoolean("PROFILE_SETUP",false);
-                prefs.setBoolean("CCU_SETUP",true);
-                ((FreshRegistration)getActivity()).selectItem(5);
+                prefs.setBoolean("PROFILE_SETUP", false);
+                prefs.setBoolean("CCU_SETUP", true);
+                ((FreshRegistration) getActivity()).selectItem(5);
 
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);

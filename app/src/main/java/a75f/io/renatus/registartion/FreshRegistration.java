@@ -3,6 +3,8 @@ package a75f.io.renatus.registartion;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
@@ -145,7 +147,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                     selectItem(1);
                 }
                 if (currentFragment instanceof CreateNewSite) {
-                    selectItem(1);
+                    selectItem(2);
                 }
                 if (currentFragment instanceof InstallerOptions) {
                     String installType = prefs.getString("INSTALL_TYPE");
@@ -276,6 +278,30 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                 if (currentFragment instanceof SystemFragment) {
                     selectItem(20);
                 }
+                if (currentFragment instanceof WifiFragment) {
+                    String INSTALL_TYPE = prefs.getString("INSTALL_TYPE");
+                    ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+                    NetworkInfo networkInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+                    if (networkInfo.isConnected()) {
+                        switch (INSTALL_TYPE) {
+                            case "CREATENEW":
+                                selectItem(3);
+                                break;
+                            case "ADDCCU":
+                                selectItem(6);
+                                break;
+                            case "PRECONFIGCCU":
+                                selectItem(7);
+                                break;
+                            case "REPLACECCU":
+                                selectItem(8);
+                                break;
+                            default:
+                                Toast.makeText(FreshRegistration.this, "Please connect to internet to continue!", Toast.LENGTH_LONG).show();
+                                break;
+                        }
+                    }
+                }
                 if (currentFragment instanceof CongratsFragment) {
                     prefs.setBoolean("REGISTRATION", true);
                     Intent i = new Intent(FreshRegistration.this, RenatusLandingActivity.class);
@@ -303,7 +329,11 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             }
         });
 
-        mainWifiObj = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        mainWifiObj = (WifiManager)
+
+                getApplicationContext().
+
+                        getSystemService(Context.WIFI_SERVICE);
 
         toggleWifi.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
@@ -332,7 +362,8 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
         spinnerSystemProile.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView,
+                                       int position, long id) {
                 if (position == 0) {
                     selectItem(9);
                 }
@@ -369,6 +400,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             }
 
         });
+
         //showIcons(true);
         //pager.setCurrentItem(position);
         selectItem(position);
@@ -488,7 +520,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             spinnerSystemProile.setVisibility(View.GONE);
             imageView_Goback.setVisibility(View.VISIBLE);
             toggleWifi.setVisibility(View.VISIBLE);
-            buttonNext.setVisibility(View.GONE);
+            buttonNext.setVisibility(View.VISIBLE);
             imageRefresh.setVisibility(View.VISIBLE);
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);

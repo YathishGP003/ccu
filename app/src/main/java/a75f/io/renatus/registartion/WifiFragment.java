@@ -298,7 +298,7 @@ public class WifiFragment extends Fragment /*implements InstallType */ {
                     }
                 }
 
-                mRunable = new Runnable() {
+                /*mRunable = new Runnable() {
                     @Override
                     public void run() {
                         ConnectivityManager connManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -323,7 +323,7 @@ public class WifiFragment extends Fragment /*implements InstallType */ {
                         }
                     }
                 };
-                mHandler.postDelayed(mRunable, WAIT_TIME);
+                mHandler.postDelayed(mRunable, WAIT_TIME);*/
             }
             wifiListAdapter = new WifiListAdapter(getContext(), wifinetworks);
             recyclerWifi.setAdapter(wifiListAdapter);

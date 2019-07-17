@@ -292,6 +292,8 @@ public class Globals {
 
 
                 if (status.getCategory() == PNStatusCategory.PNUnexpectedDisconnectCategory) {
+                    CcuLog.d(L.TAG_CCU, "pubnub PNUnexpectedDisconnectCategory ");
+                    pubnub.reconnect();
                     // This event happens when radio / connectivity is lost
                 } else if (status.getCategory() == PNStatusCategory.PNConnectedCategory) {
 
@@ -328,6 +330,10 @@ public class Globals {
 
                     // Handle messsage decryption error. Probably client configured to
                     // encrypt messages and on live data feed it received plain text.
+                }else if(status.getCategory() == PNStatusCategory.PNTimeoutCategory){
+
+                    CcuLog.d(L.TAG_CCU, "pubnub  PNTimeoutCategory ");
+                    pubnub.reconnect();
                 }
             }
 

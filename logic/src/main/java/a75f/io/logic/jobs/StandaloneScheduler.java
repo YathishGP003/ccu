@@ -102,7 +102,7 @@ public class StandaloneScheduler {
                 status = "RF Signal dead ";
                 break;
             case TEMP_DEAD:
-                status = "Zone temp dead ";
+                status = "Zone Temp Dead ";
                 break;
             case EMERGENCY:
                 status = "Emergency ";
@@ -143,7 +143,7 @@ public class StandaloneScheduler {
                 break;
         }
 
-        if((temperatureState != ZoneTempState.FAN_OP_MODE_OFF) || (temperatureState != ZoneTempState.TEMP_DEAD)) {
+        if((temperatureState != ZoneTempState.FAN_OP_MODE_OFF) && (temperatureState != ZoneTempState.TEMP_DEAD)) {
             if (status.equals("OFF ") && relayStages.size() > 0) status = "";
             if(relayStages.containsKey("FanStage3") && relayStages.containsKey("FanStage2") && relayStages.containsKey("FanStage1"))
                 status = status + " Fan 1,2&3 ON";

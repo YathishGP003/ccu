@@ -1,9 +1,7 @@
 package a75f.io.renatus;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
-import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -112,6 +110,7 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
                     @Override
                     protected void onPreExecute() {
                         progressDlg.setMessage("Loading System Profile");
+                        progressDlg.setCancelable(false);
                         progressDlg.show();
                         super.onPreExecute();
                     }

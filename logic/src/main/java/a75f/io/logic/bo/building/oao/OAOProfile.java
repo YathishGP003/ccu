@@ -88,11 +88,15 @@ public class OAOProfile
         outsideAirFinalLoopOutput = outsideAirLoopOutput -
                                         outsideAirLoopOutput * ((outsideDamperMatTarget - matTemp)/(outsideDamperMatTarget - outsideDamperMatMin));
     
+        outsideAirFinalLoopOutput = Math.max(outsideAirFinalLoopOutput , 0);
+        outsideAirFinalLoopOutput = Math.min(outsideAirFinalLoopOutput , 100);
+        
         returnAirFinalOutput = 100 - outsideAirFinalLoopOutput;
     
         Log.d(L.TAG_CCU_OAO," economizingLoopOutput "+economizingLoopOutput+" outsideAirCalculatedMinDamper "+outsideAirCalculatedMinDamper
                                             +" outsideAirFinalLoopOutput "+outsideAirFinalLoopOutput);
-        
+    
+        oaoEquip.setHisVal("outside and air and final and loop", outsideAirFinalLoopOutput);
         oaoEquip.setHisVal("outside and air and damper and cmd", outsideAirFinalLoopOutput);
         oaoEquip.setHisVal("return and air and damper and cmd", returnAirFinalOutput);
         
@@ -122,6 +126,8 @@ public class OAOProfile
             e.printStackTrace();
             Log.d(L.TAG_CCU_OAO," Failed to read external Temp or Humidity , Disable Economizing");
             setEconomizingAvailable(false);
+            oaoEquip.setHisVal("economizing and available", 0);
+            oaoEquip.setHisVal("economizing and loop and output", 0);
             return;
         }
         double insideEnthalpy = getAirEnthalpy(L.ccu().systemProfile.getSystemController().getAverageSystemTemperature(),
@@ -156,6 +162,8 @@ public class OAOProfile
             setEconomizingAvailable(false);
             economizingLoopOutput = 0;
         }
+        oaoEquip.setHisVal("economizing and available", economizingAvailable?1:0);
+        oaoEquip.setHisVal("economizing and loop and output", economizingLoopOutput);
     }
     
     public void doDcvControl() {
@@ -179,6 +187,7 @@ public class OAOProfile
     
         double outsideDamperMinOpen = oaoEquip.getConfigNumVal("oao and outside and damper and min and open");
         outsideAirCalculatedMinDamper = outsideDamperMinOpen + dcvCalculatedMinDamper;
+        oaoEquip.setHisVal("outside and air and calculated and min and damper", economizingLoopOutput);
     }
     
     public static double getAirEnthalpy(double averageTemp, double averageHumidity) {

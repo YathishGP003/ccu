@@ -113,6 +113,7 @@ public class DABStagedProfile extends Fragment implements AdapterView.OnItemSele
                 @Override
                 protected void onPreExecute() {
                     progressDlg.setMessage("Loading System Profile");
+                    progressDlg.setCancelable(false);
                     progressDlg.show();
                     super.onPreExecute();
                 }

@@ -14,7 +14,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.Spinner;
 import android.widget.ToggleButton;
@@ -135,6 +134,7 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
                     @Override
                     protected void onPreExecute() {
                         progressDlg.setMessage("Loading System Profile");
+                        progressDlg.setCancelable(false);
                         progressDlg.show();
                         super.onPreExecute();
                     }

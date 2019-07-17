@@ -95,11 +95,14 @@ public class Schedule extends Entity
             }
         }
     
-        CcuLog.d("Schedule", " Zone Schedule does not exist:  get Building Schedule");
+        CcuLog.d("Schedule", " Zone Schedule disabled:  get Building Schedule");
         ArrayList<Schedule> retVal = CCUHsApi.getInstance().getSystemSchedule(vacation);
-        if (retVal != null && retVal.size() > 0)
+        if (retVal != null && retVal.size() > 0) {
+            CcuLog.d("Schedule", "Building Schedule:  "+retVal.get(0).toString());
             return retVal.get(0);
-
+    
+        }
+        
         return null;
     }
 
@@ -335,8 +338,28 @@ public class Schedule extends Entity
     {
         return mDays;
     }
-
-
+    
+    public String toString() {
+        StringBuilder b = new StringBuilder();
+        b.append(mDis).append(" ");
+        if (isVacation()) {
+            b.append(mStartDate.toString()+" - "+mEndDate.toString());
+        }else
+        {
+            for (Days d : mDays)
+            {
+                b.append(d.toString()+" ");
+            }
+            for (String m :mMarkers ) {
+                b.append(m+" ");
+            }
+        }
+        
+        return b.toString();
+    }
+    
+    
+    
     private ArrayList<Interval> getScheduledIntervals(ArrayList<Days> daysSorted)
     {
         ArrayList<Interval> intervals = new ArrayList<Interval>();
@@ -816,7 +839,7 @@ public class Schedule extends Entity
         {
             this.mSunset = sunset;
         }
-
+        
         public static ArrayList<Days> parse(HList value)
         {
             ArrayList<Days> days = new ArrayList<Days>();
@@ -881,9 +904,9 @@ public class Schedule extends Entity
         @Override
         public String toString() {
             StringBuilder str = new StringBuilder();
-            str.append(" mDay "+mDay);
+            str.append(" { mDay "+mDay);
             str.append(" Time "+mSthh+":"+mStmm+" - "+mEthh+":"+mEtmm);
-            str.append(" curVal "+mVal+" heatingVal "+mHeatingVal+" coolingVal "+mCoolingVal);
+            str.append(" heatingVal "+mHeatingVal+" coolingVal "+mCoolingVal+" } ");
             return str.toString();
         }
     }

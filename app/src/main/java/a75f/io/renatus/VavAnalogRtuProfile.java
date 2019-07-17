@@ -114,6 +114,7 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 					@Override
 					protected void onPreExecute() {
 						progressDlg.setMessage("Loading System Profile");
+						progressDlg.setCancelable(false);
 						progressDlg.show();
 						super.onPreExecute();
 					}

@@ -107,6 +107,7 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
                 @Override
                 protected void onPreExecute() {
                     progressDlg.setMessage("Loading System Profile");
+                    progressDlg.setCancelable(false);
                     progressDlg.show();
                     super.onPreExecute();
                 }

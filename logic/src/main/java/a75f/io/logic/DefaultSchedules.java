@@ -50,6 +50,7 @@ public class DefaultSchedules {
         
         if (zoneId != null) {
             defaultSchedule.add("roomRef", HRef.copy(zoneId));
+            defaultSchedule.add("disabled");// Zone schedule to be disabled by default
         }
         
 

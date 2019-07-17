@@ -24,6 +24,7 @@ import a75f.io.logic.BaseJob;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.tuners.TunerUtil;
 
@@ -748,7 +749,17 @@ public class ScheduleProcessJob extends BaseJob {
     }
     
     public static void handleScheduleTypeUpdate(Point p){
+        
         CcuLog.d(L.TAG_CCU_JOB, "handleScheduleTypeUpdate for "+p.getDisplayName());
+        Zone zone = new Zone.Builder().setHashMap(CCUHsApi.getInstance().readMapById(p.getRoomRef())).build();
+        Schedule schedule = CCUHsApi.getInstance().getScheduleById(zone.getScheduleRef());
+        
+        if (CCUHsApi.getInstance().readDefaultValById(p.getId()) == ScheduleType.ZONE.ordinal()) {
+            schedule.setDisabled(false);
+        } else {
+            schedule.setDisabled(true);
+        }
+        
         HashMap coolDT = CCUHsApi.getInstance().read("point and desired and cooling and temp and equipRef == \""+p.getEquipRef()+"\"");
         clearOverrides(coolDT.get("id").toString());
         HashMap heatDT = CCUHsApi.getInstance().read("point and desired and heating and temp and equipRef == \""+p.getEquipRef()+"\"");

@@ -63,7 +63,10 @@ public class UpdateScheduleHandler
             {
                 //New schedule/vacation added by apps.
                 HDictBuilder sDict = new HDictBuilder().add(r).add("siteRef", CCUHsApi.getInstance().getSiteId().toString());
-                sDict.add("roomRef",CCUHsApi.getInstance().getLUID(sDict.get("roomRef").toString()));
+                if (sDict.get("roomRef") != null)
+                {
+                    sDict.add("roomRef", CCUHsApi.getInstance().getLUID(sDict.get("roomRef").toString()));
+                }
                 luid = UUID.randomUUID().toString();
                 CCUHsApi.getInstance().addSchedule(luid, sDict.toDict() );
                 CCUHsApi.getInstance().putUIDMap(luid, "@"+guid) ;

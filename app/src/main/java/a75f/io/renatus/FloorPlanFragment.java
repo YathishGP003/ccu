@@ -118,7 +118,7 @@ public class FloorPlanFragment extends Fragment
 							if(LSerial.getInstance().isConnected()) //If usb connected and pairing done then reseed
 								LSerial.getInstance().setResetSeedMessage(true);
 							try{
-								if (mRoomListAdapter == null || mRoomListAdapter.getSelectedPostion() == -1) {
+								if (mFloorListAdapter.getSelectedPostion() == -1) {
 									updateOAOModule();
 								}else
 								{
@@ -334,25 +334,27 @@ public class FloorPlanFragment extends Fragment
 		}
 		
 		if(equipList != null && (equipList.size() > 0)) {
-			Log.d("CCU","Show OAO Equip ");
+			Log.d(L.TAG_CCU_UI,"Show OAO Equip ");
 			mModuleListAdapter = new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(), R.layout.listviewitem,createAddressList(equipList));
 			getActivity().runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
 					moduleListView.setAdapter(mModuleListAdapter);
+					moduleListView.setVisibility(View.VISIBLE);
 				}
+				
 			});
 			return true;
 		} else {
 			moduleListView.setAdapter(null);
-			Log.d("CCU","Show Equip does not exist ");
+			Log.d(L.TAG_CCU_UI,"OAO Equip does not exist ");
 			return false;
 		}
 		
 	}
 	private void updateModules(Zone zone)
 	{
-		Log.d("CCU","Zone Selected "+zone.getDisplayName());
+		Log.d(L.TAG_CCU_UI,"Zone Selected "+zone.getDisplayName());
 		ArrayList<Equip> zoneEquips  = HSUtil.getEquips(zone.getId());
 		if(zoneEquips != null && (zoneEquips.size() > 0)) {
 			mModuleListAdapter = new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(), R.layout.listviewitem,createAddressList(zoneEquips));

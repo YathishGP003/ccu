@@ -4,9 +4,7 @@ import com.google.gson.JsonObject;
 
 public class SiteSyncHandler
 {
-    public static String getCmd() {
-        return "sync";
-    }
+    public static final String CMD = "sync";
     
     public static void handleMessage(JsonObject msgObject) {
     

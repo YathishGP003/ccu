@@ -1,8 +1,11 @@
 package a75.io.logic;
 
 import com.google.common.collect.EvictingQueue;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import com.pubnub.api.PNConfiguration;
 import com.pubnub.api.PubNub;
 import com.pubnub.api.callbacks.PNCallback;
@@ -25,6 +28,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -32,6 +36,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 
 import a75f.io.logic.InfluxDbUtil;
@@ -332,5 +337,38 @@ public class UnitTest
         EvictingQueue<Double> q = EvictingQueue.create(15);
         q.add(5.0);
         System.out.println(q.size());
+    
+        String arr = "{\"command\":\"removeEntity\",\"ids\":\"[{\\\"val\\\":\\\"5d30927029109d14c64a87d5\\\"},{\\\"val\\\":\\\"5d30927029109d14c64a87d1\\\"},{\\\"val\\\":\\\"5d30927229109d14c64a8800\\\"}]\"}";
+    
+        Gson gsonBuilder = new GsonBuilder().setPrettyPrinting()
+                                                      .disableHtmlEscaping()
+                                                      .create();
+        HashMap m = gsonBuilder.fromJson(arr, HashMap.class);
+        
+        System.out.println(m);
+        //JsonElement j = gsonBuilder.toJsonTree(m.get("ids"));
+        Type listType = new TypeToken<List<HashMap<String, String>>>() {
+        }.getType();
+        List<HashMap<String, String>> j= gsonBuilder.fromJson(m.get("ids").toString(), listType);
+        System.out.println(j.toString());
+        
+        for (HashMap s : j) {
+            System.out.println(s.get("val"));
+        }
+        
+        /*JsonArray ids = j.getAsJsonArray();
+        try
+        {
+            Iterator it = ids.iterator();
+            while (it.hasNext())
+            {
+                JSONObject guidObject = (JSONObject) it.next();
+                String guid = guidObject.getString("val");
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
+        }*/
     }
+    
+    
 }

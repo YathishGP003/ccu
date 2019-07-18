@@ -19,9 +19,7 @@ import a75f.io.logic.jobs.ScheduleProcessJob;
 
 public class UpdatePointHandler
 {
-    public static String getCmd() {
-        return"updatePoint";
-    }
+    public static final String CMD = "updatePoint";
     
     public static void handleMessage(JsonObject msgObject) {
         String src = msgObject.get("who").getAsString();

@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import a75f.io.api.haystack.sync.EntityParser;
 import a75f.io.api.haystack.sync.EntitySyncHandler;
@@ -1303,6 +1304,10 @@ public class CCUHsApi
         {
             tagsDb.removeAllHisItems(HRef.copy(m.get("id").toString()));
         }
+    }
+    
+    public ConcurrentHashMap<String, String> getIDMap() {
+        return tagsDb.idMap ;
     }
     
     

@@ -183,7 +183,7 @@ public class Pulse
 			e.printStackTrace();
 			return analogVal;
 		}
-		Log.d("regularSmartNode ","sensor type "+pp.get("analogType").toString()+" val "+analogVal);
+		Log.d(L.TAG_CCU_DEVICE,"Sensor input : type "+pp.get("analogType").toString()+" val "+analogVal);
 		return analogSensor.minEngineeringValue +
 		                (analogSensor.maxEngineeringValue- analogSensor.minEngineeringValue) * analogVal / (analogSensor.maxVoltage - analogSensor.minVoltage);
 		

@@ -13,6 +13,7 @@ import java.util.Iterator;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
+import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.RawPoint;
@@ -124,10 +125,14 @@ public class LSmartNode
                             RawPoint p = new RawPoint.Builder().setHashMap(opPoint).build();
                             HashMap logicalOpPoint = hayStack.read("point and id == " + p.getPointRef());
                             double logicalVal = hayStack.readHisValById(logicalOpPoint.get("id").toString());
-                            
-                            //TODO - Assuming Relay1 & Relay 2 are enabled for staged out put.
-                            short mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) : mapDigitalOut(p.getType(),
-                                            p.getPort().equals(RELAY_TWO) ? logicalVal > 50 : logicalVal > 0));
+                            short mappedVal = 0;
+                            if (isEquipType("vav", node))
+                            {
+                                //IN case of vav , relay-2 maps to stage-2
+                                mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) : mapDigitalOut(p.getType(), p.getPort().equals(RELAY_TWO) ? logicalVal > 50 : logicalVal > 0));
+                            } else {
+                                mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) : mapDigitalOut(p.getType(), logicalVal > 0));
+                            }
                             hayStack.writeHisValById(p.getId(), (double) mappedVal);
                             
                             if (isAnalog(p.getPort()) && p.getType().equals(PULSE) && logicalVal > 0) {
@@ -253,10 +258,15 @@ public class LSmartNode
                     RawPoint p = new RawPoint.Builder().setHashMap(opPoint).build();
                     HashMap logicalOpPoint = hayStack.read("point and id == " + p.getPointRef());
                     double logicalVal = hayStack.readHisValById(logicalOpPoint.get("id").toString());
-
-                    //TODO - Assuming Relay1 & Relay 2 are enabled for staged out put.
-                    short mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) : mapDigitalOut(p.getType(),
-                            p.getPort().equals(RELAY_TWO) ? logicalVal > 50 : logicalVal > 0));
+    
+                    short mappedVal = 0;
+                    if (isEquipType("vav", node))
+                    {
+                        //In case of vav , relay-2 maps to stage-2
+                        mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) : mapDigitalOut(p.getType(), p.getPort().equals(RELAY_TWO) ? logicalVal > 50 : logicalVal > 0));
+                    } else {
+                        mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) : mapDigitalOut(p.getType(), logicalVal > 0));
+                    }
                     hayStack.writeHisValById(p.getId(), (double) mappedVal);
 
                     if (isAnalog(p.getPort()) && p.getType().equals(PULSE) && logicalVal > 0) {
@@ -472,6 +482,11 @@ public class LSmartNode
     
     public static double getConfigNumVal(String tags, short nodeAddr) {
         return CCUHsApi.getInstance().readDefaultVal("point and zone and config and "+tags+" and group == \""+nodeAddr+"\"");
+    }
+    
+    public static boolean isEquipType(String type, short nodeAddr) {
+        Equip q = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group ==\""+nodeAddr+"\"")).build();
+        return q.getMarkers().contains(type);
     }
     
     /********************************END SEED MESSAGES**************************************/

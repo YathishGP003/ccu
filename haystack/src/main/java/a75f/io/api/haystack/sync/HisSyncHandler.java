@@ -137,8 +137,10 @@ public class HisSyncHandler
                 String pointGUID = CCUHsApi.getInstance().getGUID(pointID);
                 if (pointGUID == null) {
                     CcuLog.d("CCU_HS","Skip hisSync; point does not have GUID "+pointID);
-                    HDict point = hayStack.hsClient.readById(HRef.copy(pointID));
-                    CcuLog.d("CCU_HS",""+point);
+                    if(pointID != null) {
+                        HDict point = hayStack.hsClient.readById(HRef.copy(pointID));
+                        CcuLog.d("CCU_HS", "" + point);
+                    }
                     entitySyncRequired = true;
                     continue;
         
@@ -185,8 +187,10 @@ public class HisSyncHandler
                 String pointGUID = CCUHsApi.getInstance().getGUID(pointID);
                 if (pointGUID == null) {
                     CcuLog.d("CCU_HS","Skip hisSync; point does not have GUID "+pointID);
-                    HDict point = hayStack.hsClient.readById(HRef.copy(pointID));
-                    CcuLog.d("CCU_HS", ""+point);
+                    if(pointID != null) { //Crash because Floor is deleted and corresponding points also deleted
+                        HDict point = hayStack.hsClient.readById(HRef.copy(pointID));
+                        CcuLog.d("CCU_HS", "" + point);
+                    }
                     entitySyncRequired = true;
                     continue;
                 

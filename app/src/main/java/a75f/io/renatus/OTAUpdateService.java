@@ -3,6 +3,7 @@ package a75f.io.renatus;
 import android.app.DownloadManager;
 import android.app.IntentService;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
 import android.support.annotation.Nullable;
@@ -117,17 +118,39 @@ public class OTAUpdateService extends IntentService {
     }
 
     private void handleFileDownloadComplete(Intent intent) {
+        DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
         long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
 
-        if(id != -1 && id == mMetadataDownloadId) {
-            Log.d(TAG, "[DOWNLOAD] Metadata downloaded");
+        if(id == -1) {
+            return;
+        }
 
-            //TODO add a check to see if download failed
+        Cursor c = downloadManager.query(new DownloadManager.Query().setFilterById(id));
+        c.moveToFirst();
+
+        int status = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS));
+        if(status != DownloadManager.STATUS_SUCCESSFUL) {
+            int reason = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_REASON));
+            c.close();
+
+            Log.d(TAG, "[DOWNLOAD] Download failed, reason: " + reason);
+
+            //TODO retry a couple of times, depending on error
+
+            resetUpdateVariables();
+            completeUpdate();
+            return;
+        }
+
+        c.close();
+
+        if(id == mMetadataDownloadId) {
+            Log.d(TAG, "[DOWNLOAD] Metadata downloaded");
 
             runMetadataCheck(DOWNLOAD_DIR, mVersionMajor, mVersionMinor, mFirmwareDeviceType);
         }
 
-        else if(id != -1 && id == mBinaryDownloadId) {
+        else if(id == mBinaryDownloadId) {
             Log.d(TAG, "[DOWNLOAD] Binary downloaded");
 
             runBinaryCheck(DOWNLOAD_DIR, mVersionMajor, mVersionMinor, mFirmwareDeviceType);
@@ -430,10 +453,14 @@ public class OTAUpdateService extends IntentService {
      * @param deviceType The type of device whose files are to be deleted
      */
     private void deleteFilesByDeviceType(File dir, FirmwareDeviceType_t deviceType){
-        for(File file : dir.listFiles()) {
-            if(file.getName().startsWith(deviceType.getUpdateFileName() + "_v")) {
-                file.delete();
+        try {
+            for (File file : dir.listFiles()) {
+                if (file.getName().startsWith(deviceType.getUpdateFileName() + "_v")) {
+                    file.delete();
+                }
             }
+        } catch(NullPointerException e) {
+            e.printStackTrace();
         }
     }
 
@@ -524,7 +551,8 @@ public class OTAUpdateService extends IntentService {
                 String name = reader.nextName();
                 switch (name) {
                     case "deviceType":
-                        //Currently does not store device type, as we know it's a smart node
+                        //Not particularly useful, since we need to know the device type before
+                        //  downloading the firmware, to select between /sn_fw, /itm_fw, etc.
                         reader.nextInt();
                         break;
                     case "versionMajor":
@@ -670,7 +698,7 @@ public class OTAUpdateService extends IntentService {
      * @return True if it is a valid version, false if not
      */
     private boolean validVersion(short major, short minor) {
-        return (major > 0) && (minor > 0);
+        return (major >= 0) && (minor >= 0);
     }
 
     private String makeFileName(int versionMajor, int versionMinor, FirmwareDeviceType_t deviceType) {
@@ -724,6 +752,9 @@ public class OTAUpdateService extends IntentService {
         mBinaryDownloadId = -1;
 
         mUpdateInProgress = false;
+
+        Intent completeIntent = new Intent(Globals.IntentActions.OTA_UPDATE_COMPLETE);
+        sendBroadcast(completeIntent);
 
         Log.d(TAG, "[RESET] No nodes remain, OTA update is complete");
     }

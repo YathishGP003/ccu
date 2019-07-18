@@ -83,11 +83,16 @@ public class OAOProfile
     
         double matTemp  = oaoEquip.getHisVal("mixed and air and temp and sensor");
     
-        Log.d(L.TAG_CCU_OAO," outsideDamperMatTarget "+outsideDamperMatTarget+" outsideDamperMatMin "+outsideDamperMatMin
+        Log.d(L.TAG_CCU_OAO,"outsideAirLoopOutput "+outsideAirLoopOutput+" outsideDamperMatTarget "+outsideDamperMatTarget+" outsideDamperMatMin "+outsideDamperMatMin
                             +" matTemp "+matTemp);
-        outsideAirFinalLoopOutput = outsideAirLoopOutput -
+        
+        if (matTemp < outsideDamperMatTarget && matTemp > outsideDamperMatMin) {
+            outsideAirFinalLoopOutput = outsideAirLoopOutput -
                                         outsideAirLoopOutput * ((outsideDamperMatTarget - matTemp)/(outsideDamperMatTarget - outsideDamperMatMin));
-    
+        } else {
+            outsideAirFinalLoopOutput = outsideAirLoopOutput;
+        }
+        
         outsideAirFinalLoopOutput = Math.max(outsideAirFinalLoopOutput , 0);
         outsideAirFinalLoopOutput = Math.min(outsideAirFinalLoopOutput , 100);
         
@@ -126,6 +131,8 @@ public class OAOProfile
             e.printStackTrace();
             Log.d(L.TAG_CCU_OAO," Failed to read external Temp or Humidity , Disable Economizing");
             setEconomizingAvailable(false);
+            oaoEquip.setHisVal("inside and enthalpy", 0);
+            oaoEquip.setHisVal("outside and enthalpy", 0);
             oaoEquip.setHisVal("economizing and available", 0);
             oaoEquip.setHisVal("economizing and loop and output", 0);
             return;
@@ -141,6 +148,9 @@ public class OAOProfile
         double economizingToMainCoolingLoopMap = TunerUtil.readTunerValByQuery("oao and economizing and main and cooling and loop and map", oaoEquip.equipRef);
     
         Log.d(L.TAG_CCU_OAO," insideEnthalpy "+insideEnthalpy+", outsideEnthalpy "+outsideEnthalpy);
+    
+        oaoEquip.setHisVal("inside and enthalpy", insideEnthalpy);
+        oaoEquip.setHisVal("outside and enthalpy", outsideEnthalpy);
         
         if (L.ccu().systemProfile.getSystemController().getSystemState() == SystemController.State.COOLING
                                 && (insideEnthalpy > outsideEnthalpy + enthalpyDuctCompensationOffset)) {
@@ -187,7 +197,7 @@ public class OAOProfile
     
         double outsideDamperMinOpen = oaoEquip.getConfigNumVal("oao and outside and damper and min and open");
         outsideAirCalculatedMinDamper = outsideDamperMinOpen + dcvCalculatedMinDamper;
-        oaoEquip.setHisVal("outside and air and calculated and min and damper", economizingLoopOutput);
+        oaoEquip.setHisVal("outside and air and calculated and min and damper", outsideAirCalculatedMinDamper);
     }
     
     public static double getAirEnthalpy(double averageTemp, double averageHumidity) {

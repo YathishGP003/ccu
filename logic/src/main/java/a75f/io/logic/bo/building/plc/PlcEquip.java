@@ -428,7 +428,7 @@ public class PlcEquip
     
     public void setEquipStatus(int signal)
     {
-        hayStack.writeDefaultVal("point and equip and status and message and equipRef == \""+equipRef+"\"", "Output Loop Signal is "+signal+"%");
+        hayStack.writeDefaultVal("point and status and message and equipRef == \""+equipRef+"\"", "Output Loop Signal is "+signal+"%");
         
     }
     public double getTargetValue() {

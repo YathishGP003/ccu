@@ -6,10 +6,8 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
-import a75f.io.logger.CcuLog;
-import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
-import a75f.io.logic.bo.building.Output;
+import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.haystack.device.SmartNode;
@@ -270,7 +268,7 @@ public class OAOEquip
     
         device.analog1In.setPointRef(returnAirCO2Id);
         device.analog1In.setEnabled(true);
-        device.analog1In.setType("4");//TODO - Hard coding to CO2 sensor type.
+        device.analog1In.setType("5");//TODO - Hard coding to CO2 sensor type.
         device.analog2In.setPointRef(rtuCurrentTransformerId);
         device.analog2In.setEnabled(true);
         device.analog2In.setType(String.valueOf(config.currentTranformerType));
@@ -289,8 +287,10 @@ public class OAOEquip
         
         device.relay1.setEnabled(config.isOpConfigured(Port.RELAY_ONE));
         device.relay1.setPointRef(exhaustFanStage1Id);
+        device.relay1.setType(OutputRelayActuatorType.NormallyClose.displayName);
         device.relay2.setEnabled(config.isOpConfigured(Port.RELAY_TWO));
         device.relay2.setPointRef(exhaustFanStage2Id);
+        device.relay2.setType(OutputRelayActuatorType.NormallyClose.displayName);
     
         device.currentTemp.setPointRef(mixedAirTemperatureId);
         device.addSensor(Port.SENSOR_RH, mixedAirHumidityId);
@@ -445,7 +445,7 @@ public class OAOEquip
         config.outsideDamperAtMinDrive = getConfigNumVal("outside and damper and min and drive");
         config.outsideDamperAtMaxDrive = getConfigNumVal("outside and damper and max and drive");
         config.returnDamperAtMinDrive =  getConfigNumVal("return and damper and min and drive");
-        config.returnDamperAtMinDrive =  getConfigNumVal("return and damper and max and drive");
+        config.returnDamperAtMaxDrive =  getConfigNumVal("return and damper and max and drive");
         config.outsideDamperMinOpen = getConfigNumVal("outside and damper and min and open");
         config.returnDamperMinOpen = getConfigNumVal("return and damper and min and open");
         
@@ -500,7 +500,7 @@ public class OAOEquip
     }
     
     public void update(OAOProfileConfiguration config) {
-        for (Output op : config.getOutputs()) {
+        /*for (Output op : config.getOutputs()) {
             switch (op.getPort()) {
                 case ANALOG_OUT_ONE:
                 case ANALOG_OUT_TWO:
@@ -512,7 +512,10 @@ public class OAOEquip
                     SmartNode.updatePhysicalPointType(nodeAddr, op.getPort().toString(), op.getRelayActuatorType());
                     break;
             }
-        }
+        }*/
+    
+        SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_OUT_ONE.name(), config.outsideDamperAtMinDrive+"-"+config.outsideDamperAtMaxDrive);
+        SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_OUT_TWO.name(), config.returnDamperAtMinDrive+"-"+config.returnDamperAtMaxDrive);
     
         SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_IN_ONE.name(), "4");
         SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_IN_TWO.name(), String.valueOf(config.currentTranformerType));

@@ -505,7 +505,7 @@
     <string name="label_oadamper_at_min">Outside Damper at Min Drive (V)</string>
     <string name="label_oadamper_at_max">Outside Damper at Max Drive (V)</string>
     <string name="label_return_damper_at_min">Return Damper at Min Drive (V)</string>
-    <string name="label_return_damper_at_max">Return Damper at Min Drive (V)</string>
+    <string name="label_return_damper_at_max">Return Damper at Max Drive (V)</string>
     <string name="label_oadamper_min_open">Outside Damper Min Open (%)</string>
     <string name="label_return_damper_min_open">Return Damper Min Open (%)</string>
     <string name="label_exfan_stage1_threshold">Exhaust Fan Stage 1 Threshold (%)</string>

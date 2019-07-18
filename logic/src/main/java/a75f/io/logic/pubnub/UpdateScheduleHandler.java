@@ -23,9 +23,8 @@ import a75f.io.logic.jobs.ScheduleProcessJob;
 
 public class UpdateScheduleHandler
 {
-    public static String getCmd() {
-        return "updateSchedule";
-    }
+    public static final String CMD = "updateSchedule";
+    
     public static void handleMessage(JsonObject msgObject)
     {
         String guid = msgObject.get("id").getAsString();
@@ -62,13 +61,18 @@ public class UpdateScheduleHandler
             else
             {
                 //New schedule/vacation added by apps.
-                HDictBuilder sDict = new HDictBuilder().add(r).add("siteRef", CCUHsApi.getInstance().getSiteId().toString());
-                if (sDict.get("roomRef") != null)
-                {
-                    sDict.add("roomRef", CCUHsApi.getInstance().getLUID(sDict.get("roomRef").toString()));
-                }
+                Schedule s = new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build();
+                s.setmSiteId(CCUHsApi.getInstance().getSiteId().toString());
                 luid = UUID.randomUUID().toString();
-                CCUHsApi.getInstance().addSchedule(luid, sDict.toDict() );
+                if (s.getRoomRef() != null)
+                {
+                    String lroomRef = CCUHsApi.getInstance().getLUID(s.getRoomRef());
+                    s.setRoomRef(lroomRef);
+                    CCUHsApi.getInstance().addSchedule(luid, s.getZoneScheduleHDict(lroomRef));
+                } else {
+                    CCUHsApi.getInstance().addSchedule(luid, s.getScheduleHDict());
+                }
+                
                 CCUHsApi.getInstance().putUIDMap(luid, "@"+guid) ;
             }
             ScheduleProcessJob.updateSchedules();

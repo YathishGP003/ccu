@@ -2,7 +2,6 @@ package a75f.io.logic.pubnub;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 
 import com.google.gson.JsonObject;
 
@@ -10,8 +9,8 @@ import a75f.io.logic.Globals;
 
 public class RemoteCommandUpdateHandler
 {
-    public static String getCmd() { return "remoteCmdUpdate"; }
-
+    public static final String CMD = "remoteCmdUpdate";
+    
     public static void handleMessage(JsonObject msgObject, Context context) {
         String cmdType = msgObject.get("remoteCmdType").getAsString();
         String cmdLevel = msgObject.get("level").getAsString();

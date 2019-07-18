@@ -82,7 +82,7 @@ public class ScheduleSyncAdapter extends EntitySyncAdapter
     
     //This is required to update the zone with scheduleRef
     private void markZoneUpdated(String scheduleLuid) {
-        Schedule s = new Schedule.Builder().setHDict(CCUHsApi.getInstance().readHDictById(scheduleLuid)).build();
+        Schedule s = CCUHsApi.getInstance().getScheduleById(scheduleLuid);
         if (s.isZoneSchedule() && s.getRoomRef() != null && s.getRoomRef() != "")
         {
             CCUHsApi.getInstance().tagsDb.updateIdMap.put(s.getRoomRef(), CCUHsApi.getInstance().tagsDb.idMap.get(s.getRoomRef()));

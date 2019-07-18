@@ -198,7 +198,8 @@ public class VavStagedRtu extends VavSystemProfile
         } else {
             systemFanLoopOp = 0;
         }
-    
+        systemFanLoopOp = Math.min(systemFanLoopOp, 100);
+        
         systemCo2LoopOp = VavSystemController.getInstance().getSystemState() == SystemController.State.OFF
                                   ? 0 : (SystemConstants.CO2_CONFIG_MAX - getSystemCO2()) * 100 / 200 ;
         

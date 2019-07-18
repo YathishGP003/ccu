@@ -126,6 +126,7 @@ public class DabStagedRtu extends DabSystemProfile
         } else {
             systemFanLoopOp = 0;
         }
+        systemFanLoopOp = Math.min(systemFanLoopOp, 100);
         
         setSystemLoopOp("cooling", systemCoolingLoopOp);
         setSystemLoopOp("heating", systemHeatingLoopOp);

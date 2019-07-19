@@ -145,8 +145,8 @@
         <item>  Dehumidifier </item>
     </string-array>
     <string-array name="smartstat_relay_hp_changeover">
-        <item>  O - Energize</item>
-        <item>  B - Energize</item>
+        <item>  O - Energize in heating</item>
+        <item>  B - Energize in cooling</item>
     </string-array>
     <string-array name="schedulePORT">
         <item>   LCM Zone Schedule</item>

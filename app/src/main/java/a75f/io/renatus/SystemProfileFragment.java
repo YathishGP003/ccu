@@ -71,6 +71,7 @@ public class SystemProfileFragment extends Fragment {
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 if (!isFreshRegister) {
                     ((TextView) adapterView.getChildAt(0)).setTextColor(getResources().getColor(R.color.accent));
+                    ((TextView) adapterView.getChildAt(0)).setTextSize(18);
                 }
                 switch (i) {
                     case 0:

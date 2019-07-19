@@ -183,6 +183,15 @@ public class InstallerOptions extends Fragment {
             }
         });
 
+        if (!isFreshRegister){
+            ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and oao");
+            if (equips != null && equips.size()>0){
+                mAddressBandSpinner.setEnabled(false);
+            } else {
+                mAddressBandSpinner.setEnabled(true);
+            }
+        }
+
         return rootView;
     }
 

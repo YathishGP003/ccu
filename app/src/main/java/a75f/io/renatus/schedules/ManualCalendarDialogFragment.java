@@ -15,7 +15,6 @@ import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 
 import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 
 import java.util.List;
 
@@ -75,17 +74,19 @@ public class ManualCalendarDialogFragment extends DialogFragment implements View
 
         if (mStartDate != null && mEndDate != null)
         {
-            mCalendarView.selectRange(CalendarDay.from(mStartDate.getYear(), mStartDate.getMonthOfYear(), mStartDate.getDayOfMonth()),
-                                      CalendarDay.from(mEndDate.getYear(), mEndDate.getMonthOfYear(), mEndDate.getDayOfMonth()));
+            CalendarDay startDay = CalendarDay.from(mStartDate.getYear(), mStartDate.getMonthOfYear(), mStartDate.getDayOfMonth());
+            CalendarDay endDay = CalendarDay.from(mEndDate.getYear(), mEndDate.getMonthOfYear(), mEndDate.getDayOfMonth());
+            mCalendarView.selectRange(startDay, endDay);
             DateTime today = new DateTime();
             if (mStartDate.dayOfYear().get() < today.dayOfYear().get() && mEndDate.dayOfYear().get() < today.dayOfYear().get() ) {
-                mCalendarView.state().edit().setMinimumDate(CalendarDay.from(mStartDate.getYear(), mStartDate.getMonthOfYear(), mStartDate.getDayOfMonth())).commit();
-                mCalendarView.state().edit().setMaximumDate(CalendarDay.from(mEndDate.getYear(), mEndDate.getMonthOfYear(), mEndDate.getDayOfMonth())).commit();
+                mCalendarView.state().edit().setMinimumDate(startDay).commit();
+                mCalendarView.state().edit().setMaximumDate(endDay).commit();
             } else if (mStartDate.dayOfYear().get() < today.dayOfYear().get()) {
-                mCalendarView.state().edit().setMinimumDate(CalendarDay.from(mStartDate.getYear(), mStartDate.getMonthOfYear(), mStartDate.getDayOfMonth())).commit();
+                mCalendarView.state().edit().setMinimumDate(startDay).commit();
             } else {
                 mCalendarView.state().edit().setMinimumDate(CalendarDay.today()).commit();
             }
+            mCalendarView.setCurrentDate(startDay, true);
             
         } else
         {

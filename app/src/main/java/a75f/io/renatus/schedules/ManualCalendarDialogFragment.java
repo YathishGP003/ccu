@@ -16,8 +16,11 @@ import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 
 import org.joda.time.DateTime;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Schedule;
 import a75f.io.renatus.R;
 
 public class ManualCalendarDialogFragment extends DialogFragment implements View.OnClickListener
@@ -30,6 +33,8 @@ public class ManualCalendarDialogFragment extends DialogFragment implements View
     private Button               mButtonCancel;
     private String               mVacationName;
     private String               mId;
+    
+    private Schedule schedule;
 
 
     public ManualCalendarDialogFragment() {}
@@ -45,13 +50,14 @@ public class ManualCalendarDialogFragment extends DialogFragment implements View
     private ManualCalendarDialogListener mListener;
 
     @SuppressLint("ValidFragment")
-    public ManualCalendarDialogFragment(String id, String name, DateTime startDate, DateTime endDate, ManualCalendarDialogListener mListener)
+    public ManualCalendarDialogFragment(Schedule schedule, String id, String name, DateTime startDate, DateTime endDate, ManualCalendarDialogListener mListener)
     {
         this.mListener = mListener;
         this.mStartDate = startDate;
         this.mEndDate = endDate;
         this.mId = id;
         this.mVacationName = name;
+        this.schedule = schedule;
     }
 
     @Override
@@ -175,6 +181,45 @@ public class ManualCalendarDialogFragment extends DialogFragment implements View
         {
             Toast.makeText(this.getContext(), "Please select a calendar item", Toast.LENGTH_SHORT).show();
             return false;
+        }
+    
+        ArrayList<Schedule> vacations;
+        if (schedule.isZoneSchedule()) {
+            vacations = CCUHsApi.getInstance().getZoneSchedule(schedule.getRoomRef(), true);
+            for (Schedule v : vacations) {
+                if (!v.getId().equals(mId))
+                {
+                    if (v.getDis().equals((mVacationNameEditText.getText().toString().trim())))
+                    {
+                        Toast.makeText(this.getContext(), "Vacation " + v.getDis() + " already exists", Toast.LENGTH_SHORT).show();
+                        return false;
+                    }
+                    if (v.getStartDate().getYear() == mCalendarView.getSelectedDates().get(0).getYear() && v.getStartDate().getMonthOfYear() == mCalendarView.getSelectedDates().get(0).getMonth() && v.getStartDate().getDayOfMonth() == mCalendarView.getSelectedDates().get(0).getDay())
+                    {
+                        Toast.makeText(this.getContext(), "Two or more vacations cannot have the same start date", Toast.LENGTH_SHORT).show();
+                        return false;
+                    }
+                }
+            }
+        } else
+        {
+            vacations = CCUHsApi.getInstance().getSystemSchedule(true);
+            for (Schedule v : vacations)
+            {
+                if (!v.getId().equals(mId))
+                {
+                    if (v.getDis().equals((mVacationNameEditText.getText().toString().trim())))
+                    {
+                        Toast.makeText(this.getContext(), "Vacation " + v.getDis() + " already exists", Toast.LENGTH_SHORT).show();
+                        return false;
+                    }
+                    if (v.getStartDate().getYear() == mCalendarView.getSelectedDates().get(0).getYear() && v.getStartDate().getMonthOfYear() == mCalendarView.getSelectedDates().get(0).getMonth() && v.getStartDate().getDayOfMonth() == mCalendarView.getSelectedDates().get(0).getDay())
+                    {
+                        Toast.makeText(this.getContext(), "Two or more vacations cannot have the same start date", Toast.LENGTH_SHORT).show();
+                        return false;
+                    }
+                }
+            }
         }
 
         return true;

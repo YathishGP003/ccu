@@ -337,7 +337,7 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
             ft.remove(vacationFragment);
         }
 
-        ManualCalendarDialogFragment calendarDialogFragment = new ManualCalendarDialogFragment(vacationSchedule != null ? vacationSchedule.getId() : null,
+        ManualCalendarDialogFragment calendarDialogFragment = new ManualCalendarDialogFragment(schedule, vacationSchedule != null ? vacationSchedule.getId() : null,
                 vacationSchedule != null ? vacationSchedule.getDis() : null,
                 vacationSchedule != null ? vacationSchedule.getStartDate() : null, vacationSchedule != null ? vacationSchedule.getEndDate() : null,
                 new ManualCalendarDialogFragment.ManualCalendarDialogListener() {

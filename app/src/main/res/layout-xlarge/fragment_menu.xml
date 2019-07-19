@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#103F51B5"
+    android:orientation="vertical">
+
+
+    <LinearLayout
+        android:id="@+id/lil_account"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="16dp">
+
+        <ImageView
+            android:id="@+id/icon_account"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginRight="16dp"
+            android:tint="@color/black"
+            app:srcCompat="@drawable/ic_account" />
+
+        <TextView
+            android:id="@+id/text_Account"
+            style="@style/text_appearance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="Account" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/lil_security"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="16dp">
+
+        <ImageView
+            android:id="@+id/icon_security"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginRight="16dp"
+            android:tint="@color/black"
+            app:srcCompat="@drawable/ic_security" />
+
+        <TextView
+            android:id="@+id/text_security"
+            style="@style/text_appearance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="Security" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/lil_wifi"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="16dp">
+
+        <ImageView
+            android:id="@+id/icon_wifi"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginRight="16dp"
+            android:tint="@color/black"
+            app:srcCompat="@drawable/ic_wifi_svg" />
+
+        <TextView
+            android:id="@+id/text_wifi"
+            style="@style/text_appearance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="WiFiSettings"
+            android:textColor="@android:color/black" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/lil_installer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="16dp">
+
+        <ImageView
+            android:id="@+id/icon_installer"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginRight="16dp"
+            android:tint="@color/black"
+            app:srcCompat="@drawable/ic_installer_operation" />
+
+        <TextView
+            android:id="@+id/text_installer"
+            style="@style/text_appearance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="Installer Operations" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/lil_system_profile"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="16dp">
+
+        <ImageView
+            android:id="@+id/icon_system_profile"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginRight="16dp"
+            android:tint="@color/black"
+            app:srcCompat="@drawable/ic_system_profile" />
+
+        <TextView
+            android:id="@+id/text_system_profile"
+            style="@style/text_appearance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="System Profile" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/lil_temporary_override"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="16dp">
+
+        <ImageView
+            android:id="@+id/icon_temporary_override"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginRight="16dp"
+            android:tint="@color/black"
+            app:srcCompat="@drawable/ic_temp_override" />
+
+        <TextView
+            android:id="@+id/text_temporary_override"
+            style="@style/text_appearance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="Temporary Override" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/lil_about"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="16dp">
+
+        <ImageView
+            android:id="@+id/icon_about"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginRight="16dp"
+            app:srcCompat="@drawable/ic_about" />
+
+        <TextView
+            android:id="@+id/text_about"
+            style="@style/text_appearance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="About" />
+
+    </LinearLayout>
+
+    <ListView
+        android:id="@android:id/list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:divider="@null"
+        android:visibility="gone" />
+
+</LinearLayout>

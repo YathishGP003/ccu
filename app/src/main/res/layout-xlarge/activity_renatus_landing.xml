@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout  xmlns:android="http://schemas.android.com/apk/res/android"
-               xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    >
+    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -12,39 +11,47 @@
         android:background="?attr/colorPrimary"
         android:orientation="horizontal">
 
-    <ImageButton
-        android:id="@+id/logo"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:scaleType="fitCenter"
-        android:adjustViewBounds="true"
-        android:paddingStart="4dp"
-        android:paddingEnd="4dp"
-        android:background="@color/grey_select"
-        android:src="@drawable/x75f_new"/>
+        <ImageView
+            android:id="@+id/menuToggle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:padding="8dp"
+            android:visibility="gone"
+            app:srcCompat="@drawable/ic_menu" />
 
-   <android.support.design.widget.TabLayout
-        android:id="@+id/tabs"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        app:tabMode="fixed"
-        app:tabGravity="fill"
-        style="@style/RenatusTabStyle"
-        />
-        
-    <Space
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_weight="1"/>
+        <ImageButton
+            android:id="@+id/logo"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:adjustViewBounds="true"
+            android:background="@color/grey_select"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/x75f_new" />
 
-    <ImageButton
-        android:id="@+id/pageSwitchButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:layout_gravity="right|center"
-        android:background="@color/grey_select"
-        app:srcCompat="@drawable/setting"/>
+        <android.support.design.widget.TabLayout
+            android:id="@+id/tabs"
+            style="@style/RenatusTabStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            app:tabGravity="fill"
+            app:tabMode="fixed" />
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <ImageButton
+            android:id="@+id/pageSwitchButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right|center"
+            android:background="@color/grey_select"
+            android:padding="16dp"
+            app:srcCompat="@drawable/setting" />
 
     </LinearLayout>
 
@@ -53,6 +60,6 @@
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
 </LinearLayout>

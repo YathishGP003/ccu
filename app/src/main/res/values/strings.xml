@@ -140,13 +140,13 @@
         <item>  HIGH</item>
     </string-array>
     <string-array name="smartstat_relay_fanHumiD">
-        <item>  FAN HIGH SPEED </item>
-        <item>  HUMIDIFIER </item>
-        <item>  DEHUMIDIFIER </item>
+        <item>  Fan High Speed </item>
+        <item>  Humidifier </item>
+        <item>  Dehumidifier </item>
     </string-array>
     <string-array name="smartstat_relay_hp_changeover">
-        <item>  O - ENERGIZE IN COOLING</item>
-        <item>  B - ENERGIZE IN HEATING</item>
+        <item>  O - Energize</item>
+        <item>  B - Energize</item>
     </string-array>
     <string-array name="schedulePORT">
         <item>   LCM Zone Schedule</item>
@@ -508,8 +508,8 @@
     <string name="label_return_damper_at_max">Return Damper at Min Drive (V)</string>
     <string name="label_oadamper_min_open">Outside Damper Min Open (%)</string>
     <string name="label_return_damper_min_open">Return Damper Min Open (%)</string>
-    <string name="label_exfan_stage1_threshold">Exhaust Fan Stage 1 Threshold (%)</string>
-    <string name="label_exfan_stage2_threshold">Exhaust Fan Stage 2 Threshold (%)</string>
+    <string name="label_exfan_stage1_threshold">Exhaust Fan Stage 1 \nThreshold (%)</string>
+    <string name="label_exfan_stage2_threshold">Exhaust Fan Stage 2 \nThreshold (%)</string>
     <string name="label_co2device">CO2 Device Type</string>
     <string name="label_co2alert">CO2 Alert Threshold</string>
     <string name="label_exfan_hysteresis">Exhaust Fan Hysteresis (%)</string>
@@ -525,5 +525,14 @@
     <string name="title_pairsn">SMART NODE | PAIRING STEPS </string>
     <string name="title_pairss">SMART STAT | PAIRING STEPS </string>
     <string name="button_pair">PAIR</string>
+
+    <string name="title_serial_number">Serial Number</string>
+    <string name="title_ccu_version">CCU Version</string>
+    <string name="title_update_install">Check for Updates and Install</string>
+    <string name="title_backup">Backup CCU Configuration</string>
+    <string name="title_restore">Restore CCU Configuration</string>
+    <string name="title_edit">EDIT</string>
+    <string name="title_save">SAVE</string>
+    <string name="title_unregister">UNREGISTER</string>
 
 </resources>

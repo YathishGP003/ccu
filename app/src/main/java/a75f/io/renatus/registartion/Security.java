@@ -72,6 +72,7 @@ public class Security extends Fragment {
     String systemPassword;
     String buildingPassword;
     String setupPassword;
+    private boolean isFreshRegister;
     public Security() {
         // Required empty public constructor
     }
@@ -113,6 +114,7 @@ public class Security extends Fragment {
 
         mContext = getContext().getApplicationContext();
         prefs = new Prefs(mContext);
+        isFreshRegister = getActivity() instanceof FreshRegistration;
 
 
         zonePassword = prefs.getString(getString(R.string.ZONE_SETTINGS_PASSWORD_KEY));
@@ -306,6 +308,8 @@ public class Security extends Fragment {
                 goTonext();
             }
         });
+
+        if (isFreshRegister)  mNext.setVisibility(View.VISIBLE); else mNext.setVisibility(View.GONE);
 
 
         return rootView;

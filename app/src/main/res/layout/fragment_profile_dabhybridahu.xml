@@ -18,7 +18,7 @@
             <ImageView
                 android:id="@+id/imageRTUInput"
                 android:layout_width="253dp"
-                android:layout_height="642.2dp"
+                android:layout_height="680dp"
                 android:layout_alignParentLeft="true"
                 android:layout_marginTop="72dp"
                 android:src="@drawable/input_vav_hybrid" />
@@ -79,7 +79,7 @@
                         android:id="@+id/tableRow1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="26dp">
+                        android:layout_marginTop="40dp">
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -111,7 +111,7 @@
 
                         <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_height="40dp"
+                            android:layout_height="41.5dp"
                             android:layout_marginLeft="34dp"
                             android:layout_weight="1"
                             android:gravity="center">
@@ -185,7 +185,7 @@
 
                         <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_height="40dp"
+                            android:layout_height="41.5dp"
                             android:layout_marginLeft="34dp"
                             android:layout_weight="1"
                             android:gravity="center">
@@ -259,7 +259,7 @@
 
                         <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_height="40dp"
+                            android:layout_height="41.5dp"
                             android:layout_marginLeft="34dp"
                             android:layout_weight="1"
                             android:gravity="center">
@@ -333,7 +333,7 @@
 
                         <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_height="40dp"
+                            android:layout_height="41.5dp"
                             android:layout_marginLeft="34dp"
                             android:layout_weight="1"
                             android:gravity="center">
@@ -407,7 +407,7 @@
 
                         <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_height="40dp"
+                            android:layout_height="41.5dp"
                             android:layout_marginLeft="34dp"
                             android:layout_weight="1"
                             android:gravity="center">
@@ -482,7 +482,7 @@
 
                         <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_height="40dp"
+                            android:layout_height="41.5dp"
                             android:layout_marginLeft="34dp"
                             android:layout_weight="1"
                             android:gravity="center">
@@ -558,7 +558,7 @@
 
                         <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_height="40dp"
+                            android:layout_height="41.5dp"
                             android:layout_marginLeft="34dp"
                             android:layout_weight="1"
                             android:gravity="center">
@@ -907,7 +907,7 @@
                             android:id="@+id/ahuAnalog1Min"
                             style="@style/Widget.AppCompat.Spinner.Underlined"
                             android:layout_width="120dp"
-                            android:layout_height="wrap_content"
+                            android:layout_height="41.5dp"
                             android:layout_gravity="center"
                             android:layout_marginLeft="54dp"
                             android:entries="@array/hvac_stage_selector"
@@ -934,7 +934,7 @@
                             android:id="@+id/ahuAnalog1Max"
                             style="@style/Widget.AppCompat.Spinner.Underlined"
                             android:layout_width="120dp"
-                            android:layout_height="wrap_content"
+                            android:layout_height="41.5dp"
                             android:layout_gravity="center"
                             android:layout_marginRight="54dp"
                             android:entries="@array/hvac_stage_selector"
@@ -966,7 +966,7 @@
                             android:id="@+id/ahuAnalog2Min"
                             style="@style/Widget.AppCompat.Spinner.Underlined"
                             android:layout_width="120dp"
-                            android:layout_height="wrap_content"
+                            android:layout_height="41.5dp"
                             android:layout_gravity="center"
                             android:layout_marginLeft="54dp"
                             android:entries="@array/hvac_stage_selector"
@@ -992,7 +992,7 @@
                             android:id="@+id/ahuAnalog2Max"
                             style="@style/Widget.AppCompat.Spinner.Underlined"
                             android:layout_width="120dp"
-                            android:layout_height="wrap_content"
+                            android:layout_height="41.5dp"
                             android:layout_gravity="center"
                             android:layout_marginRight="54dp"
                             android:entries="@array/hvac_stage_selector"
@@ -1025,7 +1025,7 @@
                             android:id="@+id/ahuAnalog3Min"
                             style="@style/Widget.AppCompat.Spinner.Underlined"
                             android:layout_width="120dp"
-                            android:layout_height="wrap_content"
+                            android:layout_height="41.5dp"
                             android:layout_gravity="center"
                             android:layout_marginLeft="54dp"
                             android:entries="@array/hvac_stage_selector"
@@ -1051,7 +1051,7 @@
                             android:id="@+id/ahuAnalog3Max"
                             style="@style/Widget.AppCompat.Spinner.Underlined"
                             android:layout_width="120dp"
-                            android:layout_height="wrap_content"
+                            android:layout_height="41.5dp"
                             android:layout_gravity="center"
                             android:layout_marginRight="54dp"
                             android:entries="@array/hvac_stage_selector"
@@ -1083,7 +1083,7 @@
                             android:id="@+id/ahuAnalog4MinCooling"
                             style="@style/Widget.AppCompat.Spinner.Underlined"
                             android:layout_width="120dp"
-                            android:layout_height="wrap_content"
+                            android:layout_height="41.5dp"
                             android:layout_gravity="center"
                             android:layout_marginLeft="54dp"
                             android:entries="@array/hvac_stage_selector"
@@ -1109,7 +1109,7 @@
                             android:id="@+id/ahuAnalog4MaxCooling"
                             style="@style/Widget.AppCompat.Spinner.Underlined"
                             android:layout_width="120dp"
-                            android:layout_height="wrap_content"
+                            android:layout_height="41.5dp"
                             android:layout_gravity="center"
                             android:layout_marginRight="54dp"
                             android:entries="@array/hvac_stage_selector"
@@ -1143,7 +1143,7 @@
                             android:id="@+id/ahuAnalog4MinHeating"
                             style="@style/Widget.AppCompat.Spinner.Underlined"
                             android:layout_width="120dp"
-                            android:layout_height="wrap_content"
+                            android:layout_height="41.5dp"
                             android:layout_gravity="center"
                             android:layout_marginLeft="54dp"
                             android:entries="@array/hvac_stage_selector"
@@ -1170,7 +1170,7 @@
                             android:id="@+id/ahuAnalog4MaxHeating"
                             style="@style/Widget.AppCompat.Spinner.Underlined"
                             android:layout_width="120dp"
-                            android:layout_height="wrap_content"
+                            android:layout_height="41.5dp"
                             android:layout_gravity="center"
                             android:layout_marginRight="54dp"
                             android:entries="@array/hvac_stage_selector"

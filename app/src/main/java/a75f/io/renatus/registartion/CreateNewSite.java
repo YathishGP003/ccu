@@ -18,6 +18,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -47,41 +48,45 @@ public class CreateNewSite extends Fragment {
     private String mParam2;
 
     HGrid mCCUS;
-    ImageView            imageGoback;
+    ImageView imageGoback;
 
     TextInputLayout mTextInputSitename;
-    EditText             mSiteName;
+    EditText mSiteName;
 
-    Spinner              mTimeZoneSelector;
-    TextView             mTextTimeZone;
+    Spinner mTimeZoneSelector;
+    TextView mTextTimeZone;
     ArrayAdapter<String> timeZoneAdapter;
 
     TextInputLayout mTextInputStreetAdd;
-    EditText             mStreetAdd;
+    EditText mStreetAdd;
 
     TextInputLayout mTextInputCity;
-    EditText             mSiteCity;
+    EditText mSiteCity;
 
     TextInputLayout mTextInputState;
-    EditText             mSiteState;
+    EditText mSiteState;
 
     TextInputLayout mTextInputCountry;
-    EditText             mSiteCountry;
+    EditText mSiteCountry;
 
     TextInputLayout mTextInputZip;
-    EditText             mSiteZip;
+    EditText mSiteZip;
 
     TextInputLayout mTextInputCCU;
-    EditText             mSiteCCU;
+    EditText mSiteCCU;
 
     TextInputLayout mTextInputEmail;
-    EditText             mSiteEmailId;
+    EditText mSiteEmailId;
 
-    Button              mNext;
-    Context             mContext;
-    String              addressBandSelected = "1000";
+    Button mNext;
+    TextView btnEditSite;
+    TextView btnUnregisterSite;
+    Context mContext;
+    LinearLayout btnSetting;
+    String addressBandSelected = "1000";
     Prefs prefs;
     HGrid mSite;
+    private boolean isFreshRegister;
     private static final String TAG = CreateNewSite.class.getSimpleName();
 
     public CreateNewSite() {
@@ -124,6 +129,12 @@ public class CreateNewSite extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_createnewsite, container, false);
 
         mContext = getContext().getApplicationContext();
+        isFreshRegister = getActivity() instanceof FreshRegistration;
+
+        if (!isFreshRegister) {
+            ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) rootView.getLayoutParams();
+            p.setMargins(50, 50, 0, 0);
+        }
 
         prefs = new Prefs(mContext);
 
@@ -160,17 +171,28 @@ public class CreateNewSite extends Fragment {
         mSiteEmailId = rootView.findViewById(R.id.editFacilityEmail);
 
         mNext = rootView.findViewById(R.id.buttonNext);
+        btnSetting = rootView.findViewById(R.id.btnSetting);
+        btnEditSite = rootView.findViewById(R.id.btnEditSite);
+        btnUnregisterSite = rootView.findViewById(R.id.btnUnregisterSite);
 
+        if (isFreshRegister) {
+            mNext.setVisibility(View.VISIBLE);
+            btnSetting.setVisibility(View.GONE);
+        } else {
+            mNext.setVisibility(View.GONE);
+            btnSetting.setVisibility(View.VISIBLE);
+            enableViews(false);
+        }
         populateAndUpdateTimeZone();
 
-        mSiteName.setHint(Html.fromHtml("<small><font color='#E24301'>"+getString(R.string.mandatory)+" "+"</font><?small>"+"<big><font color='#99000000'>"+getString(R.string.input_sitename)+"</font></big>"));
-        mStreetAdd.setHint(Html.fromHtml("<small><font color='#E24301'>"+getString(R.string.mandatory)+" "+"</font><?small>"+"<big><font color='#99000000'>"+getString(R.string.input_streetadd)+"</font></big>"));
-        mSiteCity.setHint(Html.fromHtml("<small><font color='#E24301'>"+getString(R.string.mandatory)+" "+"</font><?small>"+"<big><font color='#99000000'>"+getString(R.string.input_city)+"</font></big>"));
-        mSiteState.setHint(Html.fromHtml("<small><font color='#E24301'>"+getString(R.string.mandatory)+" "+"</font><?small>"+"<big><font color='#99000000'>"+getString(R.string.input_state)+"</font></big>"));
-        mSiteCountry.setHint(Html.fromHtml("<small><font color='#E24301'>"+getString(R.string.mandatory)+" "+"</font><?small>"+"<big><font color='#99000000'>"+getString(R.string.input_country)+"</font></big>"));
-        mSiteZip.setHint(Html.fromHtml("<small><font color='#E24301'>"+getString(R.string.mandatory)+" "+"</font><?small>"+"<big><font color='#99000000'>"+getString(R.string.input_zip)+"</font></big>"));
-        mSiteCCU.setHint(Html.fromHtml("<small><font color='#E24301'>"+getString(R.string.mandatory)+" "+"</font><?small>"+"<big><font color='#99000000'>"+getString(R.string.input_ccuname)+"</font></big>"));
-        mSiteEmailId.setHint(Html.fromHtml("<small><font color='#E24301'>"+getString(R.string.mandatory)+" "+"</font><?small>"+"<big><font color='#99000000'>"+getString(R.string.input_facilityemail)+"</font></big>"));
+        mSiteName.setHint(Html.fromHtml("<small><font color='#E24301'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_sitename) + "</font></big>"));
+        mStreetAdd.setHint(Html.fromHtml("<small><font color='#E24301'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_streetadd) + "</font></big>"));
+        mSiteCity.setHint(Html.fromHtml("<small><font color='#E24301'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_city) + "</font></big>"));
+        mSiteState.setHint(Html.fromHtml("<small><font color='#E24301'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_state) + "</font></big>"));
+        mSiteCountry.setHint(Html.fromHtml("<small><font color='#E24301'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_country) + "</font></big>"));
+        mSiteZip.setHint(Html.fromHtml("<small><font color='#E24301'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_zip) + "</font></big>"));
+        mSiteCCU.setHint(Html.fromHtml("<small><font color='#E24301'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_ccuname) + "</font></big>"));
+        mSiteEmailId.setHint(Html.fromHtml("<small><font color='#E24301'>" + getString(R.string.mandatory) + " " + "</font><?small>" + "<big><font color='#99000000'>" + getString(R.string.input_facilityemail) + "</font></big>"));
 
 
         mTextInputSitename.setHintEnabled(true);
@@ -207,7 +229,7 @@ public class CreateNewSite extends Fragment {
         mNext.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // TODO Auto-generated method stub
-                int[] mandotaryIds = new int []
+                int[] mandotaryIds = new int[]
                         {
                                 R.id.editSitename,
                                 R.id.editStreetAdd,
@@ -218,8 +240,7 @@ public class CreateNewSite extends Fragment {
                                 R.id.editCCU,
                                 R.id.editFacilityEmail,
                         };
-                if(!validateEditText(mandotaryIds))
-                {
+                if (!validateEditText(mandotaryIds)) {
                     String siteName = mSiteName.getText().toString();
                     String siteCity = mSiteCity.getText().toString();
                     String siteZip = mSiteZip.getText().toString();
@@ -230,21 +251,17 @@ public class CreateNewSite extends Fragment {
                     String installerEmail = mSiteEmailId.getText().toString();
                     String ccuName = mSiteCCU.getText().toString();
 
-                    if(site.size() > 0)
-                    {
+                    if (site.size() > 0) {
                         String siteId = site.get("id").toString();
-                        updateSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry,siteId);
-                    }
-                    else {
+                        updateSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, siteId);
+                    } else {
                         saveSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry);
                     }
 
-                    if(ccu.size() > 0)
-                    {
-                        String ahuRef =ccu.get("ahuRef").toString();
-                        CCUHsApi.getInstance().updateCCU(ccuName, installerEmail,ahuRef);
-                    }
-                    else {
+                    if (ccu.size() > 0) {
+                        String ahuRef = ccu.get("ahuRef").toString();
+                        CCUHsApi.getInstance().updateCCU(ccuName, installerEmail, ahuRef);
+                    } else {
                         String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail);
                         CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
                     }
@@ -253,9 +270,55 @@ public class CreateNewSite extends Fragment {
             }
         });
 
+        btnEditSite.setOnClickListener(view -> {
+            if (btnEditSite.getText().toString().equals(getResources().getString(R.string.title_edit))) {
+                enableViews(true);
+                btnEditSite.setText(getResources().getString(R.string.title_save));
+            } else {
+                enableViews(false);
+                btnEditSite.setText(getResources().getString(R.string.title_edit));
+                int[] mandotaryIds = new int[]
+                        {
+                                R.id.editSitename,
+                                R.id.editStreetAdd,
+                                R.id.editCity,
+                                R.id.editState,
+                                R.id.editCountry,
+                                R.id.editZip,
+                                R.id.editCCU,
+                                R.id.editFacilityEmail,
+                        };
+                if (!validateEditText(mandotaryIds)) {
+                    String siteName = mSiteName.getText().toString();
+                    String siteCity = mSiteCity.getText().toString();
+                    String siteZip = mSiteZip.getText().toString();
+                    String siteAddress = mStreetAdd.getText().toString();
+                    String siteState = mSiteState.getText().toString();
+                    String siteCountry = mSiteCountry.getText().toString();
 
-        if(site.size()>0)
-        {
+                    String installerEmail = mSiteEmailId.getText().toString();
+                    String ccuName = mSiteCCU.getText().toString();
+
+                    if (site.size() > 0) {
+                        String siteId = site.get("id").toString();
+                        updateSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, siteId);
+                    } else {
+                        saveSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry);
+                    }
+
+                    if (ccu.size() > 0) {
+                        String ahuRef = ccu.get("ahuRef").toString();
+                        CCUHsApi.getInstance().updateCCU(ccuName, installerEmail, ahuRef);
+                    } else {
+                        String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail);
+                        CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
+                    }
+                }
+            }
+        });
+
+
+        if (site.size() > 0) {
             //if Site Exists
             String siteName = site.get("dis").toString();
             String siteAdd = site.get("geoAddr").toString();
@@ -273,16 +336,13 @@ public class CreateNewSite extends Fragment {
             mSiteZip.setText(siteZipCode);
 
             String[] tzIds = TimeZone.getAvailableIDs();
-            for(String timeZone : tzIds)
-            {
-                if(timeZone.contains(siteTz))
-                {
+            for (String timeZone : tzIds) {
+                if (timeZone.contains(siteTz)) {
                     mTimeZoneSelector.setSelection(timeZoneAdapter.getPosition(timeZone));
                     break;
                 }
             }
-            if(ccu.size()>0)
-            {
+            if (ccu.size() > 0) {
                 //if CCU Exists
                 String ccuName = ccu.get("dis").toString();
                 String ccuFmEmail = ccu.get("fmEmail").toString();
@@ -294,14 +354,28 @@ public class CreateNewSite extends Fragment {
         return rootView;
     }
 
+    /**
+     * @param isEnable boolean to set views
+     */
+    private void enableViews(boolean isEnable) {
+        mSiteName.setEnabled(isEnable);
+        mTimeZoneSelector.setEnabled(isEnable);
+        mStreetAdd.setEnabled(isEnable);
+        mSiteCity.setEnabled(isEnable);
+        mSiteState.setEnabled(isEnable);
+        mSiteCountry.setEnabled(isEnable);
+        mSiteZip.setEnabled(isEnable);
+        mSiteCCU.setEnabled(isEnable);
+        mSiteEmailId.setEnabled(isEnable);
+    }
 
-    private void populateAndUpdateTimeZone()
-    {
+
+    private void populateAndUpdateTimeZone() {
 
         String[] tzIds = TimeZone.getAvailableIDs();
-        Log.i("timeZones","time:"+tzIds.toString());
+        Log.i("timeZones", "time:" + tzIds.toString());
 
-        timeZoneAdapter = new ArrayAdapter <String> (mContext, R.layout.spinner_item,tzIds);
+        timeZoneAdapter = new ArrayAdapter<String>(mContext, R.layout.spinner_item, tzIds);
         timeZoneAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         mTimeZoneSelector.setAdapter(timeZoneAdapter);
         mTimeZoneSelector.setSelection(timeZoneAdapter.getPosition(TimeZone.getDefault().getID()));
@@ -313,101 +387,95 @@ public class CreateNewSite extends Fragment {
     private class EditTextWatcher implements TextWatcher {
 
         private View view;
+
         private EditTextWatcher(View view) {
             this.view = view;
         }
 
-        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
-        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        }
+
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        }
 
         public void afterTextChanged(Editable editable) {
             String text = editable.toString();
-            switch(view.getId()){
+            switch (view.getId()) {
                 case R.id.editSitename:
-                    if(mSiteName.getText().length() > 0) {
+                    if (mSiteName.getText().length() > 0) {
                         mTextInputSitename.setErrorEnabled(true);
                         mTextInputSitename.setError(getString(R.string.input_sitename));
                         mSiteName.setError(null);
-                    }
-                    else{
+                    } else {
                         mTextInputSitename.setError(getString(R.string.hint_sitename));
                     }
 
                 case R.id.editStreetAdd:
-                    if(mStreetAdd.getText().length() > 0) {
+                    if (mStreetAdd.getText().length() > 0) {
                         mTextInputStreetAdd.setErrorEnabled(true);
-                        mTextInputStreetAdd.setError(" "+getString(R.string.input_streetadd));
+                        mTextInputStreetAdd.setError(" " + getString(R.string.input_streetadd));
                         mStreetAdd.setError(null);
-                    }
-                    else{
+                    } else {
                         mTextInputStreetAdd.setError("");
                     }
 
                 case R.id.editCity:
-                    if(mSiteCity.getText().length() > 0) {
+                    if (mSiteCity.getText().length() > 0) {
                         mTextInputCity.setErrorEnabled(true);
                         mTextInputCity.setError(getString(R.string.input_city));
                         mSiteCity.setError(null);
-                    }
-                    else{
+                    } else {
                         mTextInputCity.setError("");
                     }
 
                 case R.id.editState:
-                    if(mSiteState.getText().length() > 0) {
+                    if (mSiteState.getText().length() > 0) {
                         mTextInputState.setErrorEnabled(true);
                         mTextInputState.setError(getString(R.string.input_state));
                         mSiteState.setError(null);
-                    }
-                    else{
+                    } else {
                         mTextInputState.setError("");
                     }
 
                 case R.id.editCountry:
-                    if(mSiteCountry.getText().length() > 0) {
+                    if (mSiteCountry.getText().length() > 0) {
                         mTextInputCountry.setErrorEnabled(true);
                         mTextInputCountry.setError(getString(R.string.input_country));
                         mSiteCountry.setError(null);
-                    }
-                    else{
+                    } else {
                         mTextInputCountry.setError("");
                     }
 
                 case R.id.editZip:
-                    if(mSiteZip.getText().length() > 0) {
+                    if (mSiteZip.getText().length() > 0) {
                         mTextInputZip.setErrorEnabled(true);
                         mTextInputZip.setError(getString(R.string.input_zip));
                         mSiteZip.setError(null);
-                    }
-                    else{
+                    } else {
                         mTextInputZip.setError("");
                     }
 
                 case R.id.editCCU:
-                    if(mSiteCCU.getText().length() > 0) {
+                    if (mSiteCCU.getText().length() > 0) {
                         mTextInputCCU.setErrorEnabled(true);
                         mTextInputCCU.setError(getString(R.string.input_ccuname));
                         mSiteCCU.setError(null);
-                    }
-                    else{
+                    } else {
                         mTextInputCCU.setError("");
                     }
 
                 case R.id.editFacilityEmail:
-                    if(mSiteEmailId.getText().length() > 0) {
+                    if (mSiteEmailId.getText().length() > 0) {
                         mTextInputEmail.setErrorEnabled(true);
                         mTextInputEmail.setError(getString(R.string.input_facilityemail));
                         mSiteEmailId.setError(null);
                         String emailID = mSiteEmailId.getText().toString();
-                        if(Patterns.EMAIL_ADDRESS.matcher(emailID).matches())
-                        {
+                        if (Patterns.EMAIL_ADDRESS.matcher(emailID).matches()) {
 
-                        }else
-                        {
+                        } else {
                             mSiteEmailId.setError("Invalid Email Address");
                         }
-                    }
-                    else{
+                    } else {
                         mTextInputEmail.setError("");
                         mSiteEmailId.setError(null);
                     }
@@ -416,16 +484,13 @@ public class CreateNewSite extends Fragment {
     }
 
 
-    public boolean validateEditText(int[] ids)
-    {
+    public boolean validateEditText(int[] ids) {
         boolean isEmpty = false;
 
-        for(int id: ids)
-        {
-            EditText et = (EditText)getView().findViewById(id);
+        for (int id : ids) {
+            EditText et = (EditText) getView().findViewById(id);
 
-            if(TextUtils.isEmpty(et.getText().toString()))
-            {
+            if (TextUtils.isEmpty(et.getText().toString())) {
                 et.setError("Must enter Value");
                 isEmpty = true;
             }
@@ -445,11 +510,11 @@ public class CreateNewSite extends Fragment {
     }
     /* This site never existed we are creating a new orphaned site. */
 
-    public String saveSite(String siteName, String siteCity, String siteZip, String geoAddress, String siteState,String siteCountry) {
+    public String saveSite(String siteName, String siteCity, String siteZip, String geoAddress, String siteState, String siteCountry) {
         HashMap site = CCUHsApi.getInstance().read("site");
 
         String tzID = mTimeZoneSelector.getSelectedItem().toString();
-        AlarmManager am = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
+        AlarmManager am = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         am.setTimeZone(tzID);
 
         Site s75f = new Site.Builder()
@@ -476,15 +541,14 @@ public class CreateNewSite extends Fragment {
         L.ccu().systemProfile = new DefaultSystem();
         ccuHsApi.saveTagsData();
 
-        prefs.setString("SITE_ID",localSiteId);
+        prefs.setString("SITE_ID", localSiteId);
         return localSiteId;
     }
 
-    public void updateSite(String siteName, String siteCity, String siteZip, String geoAddress, String siteState,String siteCountry, String siteId)
-    {
+    public void updateSite(String siteName, String siteCity, String siteZip, String geoAddress, String siteState, String siteCountry, String siteId) {
 
         String tzID = mTimeZoneSelector.getSelectedItem().toString();
-        AlarmManager am = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
+        AlarmManager am = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         am.setTimeZone(tzID);
 
         Site s75f = new Site.Builder()
@@ -500,7 +564,7 @@ public class CreateNewSite extends Fragment {
                 .setArea(10000).build();
 
         CCUHsApi ccuHsApi = CCUHsApi.getInstance();
-        ccuHsApi.updateSite(s75f,siteId);
+        ccuHsApi.updateSite(s75f, siteId);
         BuildingTuners.getInstance();
         ccuHsApi.log();
         L.ccu().systemProfile = new DefaultSystem();
@@ -511,8 +575,8 @@ public class CreateNewSite extends Fragment {
     private void goTonext() {
         //Intent i = new Intent(mContext, RegisterGatherCCUDetails.class);
         //startActivity(i);
-        prefs.setBoolean("CCU_SETUP",false);
-        ((FreshRegistration)getActivity()).selectItem(4);
+        prefs.setBoolean("CCU_SETUP", false);
+        ((FreshRegistration) getActivity()).selectItem(4);
     }
 
 }

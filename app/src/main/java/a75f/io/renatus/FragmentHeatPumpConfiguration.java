@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.NumberPicker;
@@ -179,6 +180,16 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
         temperatureOffset.setMaxValue(TEMP_OFFSET_LIMIT * 2);
         temperatureOffset.setValue(TEMP_OFFSET_LIMIT);
         temperatureOffset.setWrapSelectorWheel(false);
+
+        ArrayAdapter<CharSequence> fanTypeAdapter = ArrayAdapter.createFromResource(
+                getActivity(), R.array.smartstat_relay_fanHumiD, R.layout.spinner_cpu_configure_item);
+        fanTypeAdapter.setDropDownViewResource(R.layout.spinner_cpu_configure_item);
+        fanHumiDSpinner.setAdapter(fanTypeAdapter);
+
+        ArrayAdapter<CharSequence> hpChangeOverType = ArrayAdapter.createFromResource(
+                getActivity(), R.array.smartstat_relay_hp_changeover, R.layout.spinner_cpu_configure_item);
+        hpChangeOverType.setDropDownViewResource(R.layout.spinner_cpu_configure_item);
+        hpChangeOverTypeSpinner.setAdapter(hpChangeOverType);
 
 
         switchOccSensor = view.findViewById(R.id.toggleOccupancy);

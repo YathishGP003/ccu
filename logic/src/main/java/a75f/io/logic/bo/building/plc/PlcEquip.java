@@ -214,7 +214,7 @@ public class PlcEquip
         hayStack.writeDefaultValById(setpointSensorOffsetId, (double)config.setpointSensorOffset);
     
         Point expectZeroErrorAtMidpoint  = new Point.Builder()
-                                             .setDisplayName(equipDis+"-setpointSensorOffset")
+                                             .setDisplayName(equipDis+"-expectZeroErrorAtMidpoint")
                                              .setEquipRef(equipRef)
                                              .setSiteRef(siteRef)
                                              .setRoomRef(roomRef)

@@ -54,6 +54,7 @@ public class InstallerOptions extends Fragment {
     Prefs prefs;
     String localSiteID;
     String CCU_ID = "";
+    private boolean isFreshRegister;
 
     private static final String TAG = InstallerOptions.class.getSimpleName();
 
@@ -98,7 +99,13 @@ public class InstallerOptions extends Fragment {
         mContext = getContext().getApplicationContext();
 
         prefs = new Prefs(mContext);
+        isFreshRegister = getActivity() instanceof FreshRegistration;
         CCU_ID = prefs.getString("CCU_ID");
+
+        if (!isFreshRegister) {
+            ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) rootView.getLayoutParams();
+            p.setMargins(50, 0, 0, 0);
+        }
 
         imageGoback = rootView.findViewById(R.id.imageGoback);
         mAddressBandSpinner = rootView.findViewById(R.id.spinnerAddress);
@@ -153,7 +160,8 @@ public class InstallerOptions extends Fragment {
                 ((FreshRegistration)getActivity()).selectItem(3);
             }
         });*/
-
+        if (isFreshRegister) mNext.setVisibility(View.VISIBLE);
+        else mNext.setVisibility(View.GONE);
         mNext.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (ccu.size() == 0) {
@@ -174,6 +182,15 @@ public class InstallerOptions extends Fragment {
                 goTonext();
             }
         });
+
+        if (!isFreshRegister){
+            ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and oao");
+            if (equips != null && equips.size()>0){
+                mAddressBandSpinner.setEnabled(false);
+            } else {
+                mAddressBandSpinner.setEnabled(true);
+            }
+        }
 
         return rootView;
     }

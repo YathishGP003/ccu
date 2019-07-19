@@ -24,6 +24,7 @@ import android.view.animation.RotateAnimation;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -60,10 +61,12 @@ public class WifiFragment extends Fragment /*implements InstallType */ {
     Handler mHandler;
     Runnable mRunable;
     TextView mTurnonwifi;
+    RelativeLayout layoutConnectWifi;
     private SwitchFragment switchFragment;
     int goToNext = 0;
     Prefs prefs;
     String INSTALL_TYPE = "";
+    private boolean isFreshRegister;
 
     public WifiFragment() {
         // Required empty public constructor
@@ -102,7 +105,9 @@ public class WifiFragment extends Fragment /*implements InstallType */ {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_wifi, container, false);
+        isFreshRegister = getActivity() instanceof FreshRegistration;
         imageGoback = (ImageView) rootView.findViewById(R.id.imageGoback);
+        layoutConnectWifi =  rootView.findViewById(R.id.layoutConnectWifi);
         imageRefresh = (ImageView) rootView.findViewById(R.id.imageRefresh);
         toggleWifi = (ToggleButton) rootView.findViewById(R.id.toggleWifi);
         recyclerWifi = (RecyclerView) rootView.findViewById(R.id.recyclerWifi);
@@ -129,6 +134,7 @@ public class WifiFragment extends Fragment /*implements InstallType */ {
         });
 
         mContext = getContext().getApplicationContext();
+        if (!isFreshRegister) layoutConnectWifi.setVisibility(View.VISIBLE); else layoutConnectWifi.setVisibility(View.GONE);
 
         prefs = new Prefs(mContext);
         INSTALL_TYPE = prefs.getString("INSTALL_TYPE");
@@ -240,7 +246,9 @@ public class WifiFragment extends Fragment /*implements InstallType */ {
 
 
         //toggleWifi.setChecked(mainWifiObj.isWifiEnabled());
-        ((FreshRegistration) getActivity()).setToggleWifi(mainWifiObj.isWifiEnabled());
+        if (isFreshRegister) {
+            ((FreshRegistration) getActivity()).setToggleWifi(mainWifiObj.isWifiEnabled());
+        }
         if (mainWifiObj.isWifiEnabled()) {
             mainWifiObj.startScan();
         } else {
@@ -265,7 +273,9 @@ public class WifiFragment extends Fragment /*implements InstallType */ {
 
     public void showScanResult() {
         try {
-            ((FreshRegistration) getActivity()).setToggleWifi(mainWifiObj.isWifiEnabled());
+            if (isFreshRegister) {
+                ((FreshRegistration) getActivity()).setToggleWifi(mainWifiObj.isWifiEnabled());
+            }
             distinctNetworks = new HashMap<String, ScanResult>();
             for (int i = 0; i < results.size(); i++) {
                 if (!distinctNetworks.containsKey(results.get(i))) {

@@ -427,8 +427,13 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
     public void setToggleWifi(boolean status) {
         toggleWifi.setChecked(status);
-        if (status) imageRefresh.setImageResource(R.drawable.ic_refresh);
-        else imageRefresh.setImageResource(R.drawable.ic_refresh_disable);
+        if (status) {
+            buttonNext.setVisibility(View.VISIBLE);
+            imageRefresh.setImageResource(R.drawable.ic_refresh);
+        } else {
+            buttonNext.setVisibility(View.GONE);
+            imageRefresh.setImageResource(R.drawable.ic_refresh_disable);
+        }
     }
 
 

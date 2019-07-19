@@ -18,7 +18,7 @@
             <ImageView
                 android:id="@+id/imageRTUInput"
                 android:layout_width="253dp"
-                android:layout_height="642.2dp"
+                android:layout_height="650dp"
                 android:layout_alignParentLeft="true"
                 android:layout_marginTop="72dp"
                 android:src="@drawable/input_vav_hybrid" />
@@ -111,7 +111,7 @@
 
                         <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_height="40dp"
+                            android:layout_height="41.5dp"
                             android:layout_marginLeft="34dp"
                             android:layout_weight="1"
                             android:gravity="center">
@@ -185,7 +185,7 @@
 
                         <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_height="40dp"
+                            android:layout_height="41.5dp"
                             android:layout_marginLeft="34dp"
                             android:layout_weight="1"
                             android:gravity="center">
@@ -259,7 +259,7 @@
 
                         <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_height="40dp"
+                            android:layout_height="41.5dp"
                             android:layout_marginLeft="34dp"
                             android:layout_weight="1"
                             android:gravity="center">
@@ -333,7 +333,7 @@
 
                         <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_height="40dp"
+                            android:layout_height="41.5dp"
                             android:layout_marginLeft="34dp"
                             android:layout_weight="1"
                             android:gravity="center">
@@ -407,7 +407,7 @@
 
                         <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_height="40dp"
+                            android:layout_height="41.5dp"
                             android:layout_marginLeft="34dp"
                             android:layout_weight="1"
                             android:gravity="center">
@@ -482,7 +482,7 @@
 
                         <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_height="40dp"
+                            android:layout_height="41.5dp"
                             android:layout_marginLeft="34dp"
                             android:layout_weight="1"
                             android:gravity="center">
@@ -558,7 +558,7 @@
 
                         <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_height="40dp"
+                            android:layout_height="41.5dp"
                             android:layout_marginLeft="34dp"
                             android:layout_weight="1"
                             android:gravity="center">

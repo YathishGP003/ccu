@@ -15,6 +15,8 @@
         android:fontFamily="@font/lato_bold"
         android:text="@string/_2_pipe_fancoil_unit"
         android:textAllCaps="true"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="30dp"
         android:textColor="@color/orange_75f"
         android:textSize="33.5dp"
         android:textStyle="bold" />

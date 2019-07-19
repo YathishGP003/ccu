@@ -18,9 +18,9 @@
                 android:id="@+id/imageRTUInput"
                 android:layout_marginTop="72dp"
                 android:layout_width="253dp"
-                android:layout_height="416dp"
+                android:layout_height="472dp"
                 android:layout_alignParentLeft="true"
-                android:src="@drawable/input_dab_rtu"/>
+                android:src="@drawable/input_vav_rtu"/>
             <LinearLayout
                 android:id="@+id/lt_inputs"
                 android:layout_width="wrap_content"
@@ -111,7 +111,7 @@
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_weight="1"
-                            android:layout_height="40dp"
+                            android:layout_height="wrap_content"
                             android:gravity="center"
                             android:layout_marginLeft="34dp">
                             <Spinner
@@ -182,7 +182,7 @@
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_weight="1"
-                            android:layout_height="40dp"
+                            android:layout_height="wrap_content"
                             android:gravity="center"
                             android:layout_marginLeft="34dp">
                             <Spinner
@@ -253,7 +253,7 @@
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_weight="1"
-                            android:layout_height="40dp"
+                            android:layout_height="wrap_content"
                             android:gravity="center"
                             android:layout_marginLeft="34dp">
                             <Spinner
@@ -324,7 +324,7 @@
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_weight="1"
-                            android:layout_height="40dp"
+                            android:layout_height="wrap_content"
                             android:gravity="center"
                             android:layout_marginLeft="34dp">
                             <Spinner
@@ -395,7 +395,7 @@
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_weight="1"
-                            android:layout_height="40dp"
+                            android:layout_height="wrap_content"
                             android:gravity="center"
                             android:layout_marginLeft="34dp">
                             <Spinner
@@ -467,7 +467,7 @@
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_weight="1"
-                            android:layout_height="40dp"
+                            android:layout_height="wrap_content"
                             android:gravity="center"
                             android:layout_marginLeft="34dp">
                             <Spinner
@@ -540,7 +540,7 @@
                             android:layout_width="0dp"
                             android:layout_weight="1"
                             android:gravity="center"
-                            android:layout_height="40dp"
+                            android:layout_height="wrap_content"
                             android:layout_marginLeft="34dp">
                             <Spinner
                                 android:id="@+id/relay7Spinner"

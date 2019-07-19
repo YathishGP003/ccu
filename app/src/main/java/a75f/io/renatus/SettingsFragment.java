@@ -1,132 +1,258 @@
 package a75f.io.renatus;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.widget.SlidingPaneLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Spinner;
+import android.widget.FrameLayout;
 
-import a75f.io.logic.L;
+import a75f.io.renatus.registartion.CreateNewSite;
+import a75f.io.renatus.registartion.InstallerOptions;
+import a75f.io.renatus.registartion.Security;
+import a75f.io.renatus.registartion.WifiFragment;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
- * Created by samjithsadasivan isOn 8/7/17.
+ * Created by mahesh isOn 17/7/19.
  */
+public class SettingsFragment extends Fragment {
 
-public class SettingsFragment extends Fragment
-{
-	@BindView(R.id.hvacEquipSelect)
-	Spinner spSystemProfile;
-	
-	public SettingsFragment()
-	{
-	}
-	
-	public static SettingsFragment newInstance()
-	{
-		return new SettingsFragment();
-	}
-	
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-	                         Bundle savedInstanceState)
-	{
-		View rootView = inflater.inflate(R.layout.fragment_profile_selector, container, false);
-		ButterKnife.bind(this, rootView);
-		return rootView;
-	}
-	
-	@Override
-	public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
-	{
-		ArrayAdapter<CharSequence> systemProfileSelectorAdapter = ArrayAdapter.createFromResource(this.getActivity(), R.array.system_profile_select, R.layout.spinner_dropdown_item);
-		systemProfileSelectorAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-		spSystemProfile.setAdapter(systemProfileSelectorAdapter);
-		spSystemProfile.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
-		{
-			@Override
-			public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l)
-			{
-				switch (i)
-				{
-					case 0:
-						getActivity().getSupportFragmentManager().beginTransaction()
-						             .replace(R.id.profileContainer, new DefaultSystemProfile()).commit();
-						break;
-					
-					case 1:
-						getActivity().getSupportFragmentManager().beginTransaction()
-						             .replace(R.id.profileContainer, new VavStagedRtuProfile()).commit();
-						break;
-					
-					case 2:
-						getActivity().getSupportFragmentManager().beginTransaction()
-						             .replace(R.id.profileContainer, new VavAnalogRtuProfile()).commit();
-						break;
-					case 3:
-						getActivity().getSupportFragmentManager().beginTransaction()
-						             .replace(R.id.profileContainer, new VavStagedRtuWithVfdProfile()).commit();
-						break;
-					case 4:
-						getActivity().getSupportFragmentManager().beginTransaction()
-						             .replace(R.id.profileContainer, new VavHybridRtuProfile()).commit();
-						break;
-					case 5:
-						getActivity().getSupportFragmentManager().beginTransaction()
-						             .replace(R.id.profileContainer, new DABStagedProfile()).commit();
-						break;
-					case 6:
-						getActivity().getSupportFragmentManager().beginTransaction()
-						             .replace(R.id.profileContainer, new DABFullyAHUProfile()).commit();
-						break;
-					case 7:
-						getActivity().getSupportFragmentManager().beginTransaction()
-						             .replace(R.id.profileContainer, new DABStagedRtuWithVfdProfile()).commit();
-						break;
-					case 8:
-						getActivity().getSupportFragmentManager().beginTransaction()
-						             .replace(R.id.profileContainer, new DABHybridAhuProfile()).commit();
-						break;
-					/*case 0:
-						getActivity().getSupportFragmentManager().beginTransaction()
-						             .replace(R.id.profileContainer, new DefaultSystemProfile()).commit();
-						break;
+    //
+    @BindView(R.id.flContent)
+    FrameLayout flContent;
 
-					case 1:
-						getActivity().getSupportFragmentManager().beginTransaction()
-						             .replace(R.id.profileContainer, new VavAnalogRtuProfile()).commit();
-						break;
+    public static SlidingPaneLayout slidingPane;
+    //
+    Fragment fragment = null;
+    Class fragmentClass;
+    public static Handler SettingFragmentHandler;
+    private boolean isTransactionSafe;
+    private boolean isTransactionPending;
 
-					case 2:
-						getActivity().getSupportFragmentManager().beginTransaction()
-						             .replace(R.id.profileContainer, new VavStagedRtuProfile()).commit();
-						break;
-					case 3:
-						getActivity().getSupportFragmentManager().beginTransaction()
-						             .replace(R.id.profileContainer, new VavStagedRtuWithVfdProfile()).commit();
-						break;
-					case 4:
-						getActivity().getSupportFragmentManager().beginTransaction()
-						             .replace(R.id.profileContainer, new VavHybridRtuProfile()).commit();
-						break;
-					case 5:
-						getActivity().getSupportFragmentManager().beginTransaction()
-						             .replace(R.id.profileContainer, new DabAnalogRtuProfile()).commit();
-						break;
-*/
-				}
-			}
-			@Override
-			public void onNothingSelected(AdapterView<?> adapterView)
-			{
-			}
-		});
-		spSystemProfile.setSelection(L.ccu().systemProfile != null ?
-				            systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0 );
-	}
+    public SettingsFragment() {
+
+    }
+
+    public static SettingsFragment newInstance() {
+        return new SettingsFragment();
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+
+        View rootView = inflater.inflate(R.layout.fragment_settings, container, false);
+        ButterKnife.bind(this, rootView);
+
+        return rootView;
+    }
+
+    @SuppressLint("HandlerLeak")
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+
+        slidingPane = view.findViewById(R.id.sliding_pane);
+        slidingPane.setSliderFadeColor(getResources().getColor(android.R.color.transparent));
+
+        fragmentClass = CreateNewSite.class;
+        try {
+            fragment = (Fragment) fragmentClass.newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
+        transaction.replace(R.id.flContent, fragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
+
+        navigationHandler();
+    }
+
+    @SuppressLint("HandlerLeak")
+
+    /*
+     * handle page selection using handler
+     */
+    private void navigationHandler() {
+        SettingFragmentHandler = new Handler() {
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                switch (msg.what) {
+                    case 0: {
+
+                        if (isTransactionSafe) {
+                            fragmentClass = CreateNewSite.class;
+                            try {
+                                fragment = (Fragment) fragmentClass.newInstance();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                            FragmentTransaction transaction = fragmentManager.beginTransaction();
+                            transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
+                            transaction.replace(R.id.flContent, fragment);
+                            transaction.addToBackStack(null);
+                            transaction.commit();
+                        } else {
+                            isTransactionPending = true;
+                        }
+                        break;
+                    }
+                    case 1: {
+
+                        if (isTransactionSafe) {
+                            fragmentClass = Security.class;
+                            try {
+                                fragment = (Fragment) fragmentClass.newInstance();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                            FragmentTransaction transaction = fragmentManager.beginTransaction();
+                            transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
+                            transaction.replace(R.id.flContent, fragment);
+                            transaction.addToBackStack(null);
+                            transaction.commit();
+                        } else {
+                            isTransactionPending = true;
+                        }
+                        break;
+                    }
+                    case 2: {
+                        if (isTransactionSafe) {
+                            fragmentClass = WifiFragment.class;
+                            try {
+                                fragment = (Fragment) fragmentClass.newInstance();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                            FragmentTransaction transaction = fragmentManager.beginTransaction();
+                            transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
+                            transaction.replace(R.id.flContent, fragment);
+                            transaction.addToBackStack(null);
+                            transaction.commit();
+                        } else {
+                            isTransactionPending = true;
+                        }
+                        break;
+                    }
+                    case 3: {
+                        if (isTransactionSafe) {
+                            fragmentClass = InstallerOptions.class;
+                            try {
+                                fragment = (Fragment) fragmentClass.newInstance();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                            FragmentTransaction transaction = fragmentManager.beginTransaction();
+                            transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
+                            transaction.replace(R.id.flContent, fragment);
+                            transaction.addToBackStack(null);
+                            transaction.commit();
+                        } else {
+                            isTransactionPending = true;
+                        }
+                        break;
+                    }
+                    case 4: {
+                        if (isTransactionSafe) {
+                            fragmentClass = SystemProfileFragment.class;
+                            try {
+                                fragment = (Fragment) fragmentClass.newInstance();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                            FragmentTransaction transaction = fragmentManager.beginTransaction();
+                            transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
+                            transaction.replace(R.id.flContent, fragment);
+                            transaction.addToBackStack(null);
+                            transaction.commit();
+                        } else {
+                            isTransactionPending = true;
+                        }
+                        break;
+                    }
+                    case 5: {
+                        if (isTransactionSafe) {
+                            fragmentClass = TempOverrideFragment.class;
+                            try {
+                                fragment = (Fragment) fragmentClass.newInstance();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                            FragmentTransaction transaction = fragmentManager.beginTransaction();
+                            transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
+                            transaction.replace(R.id.flContent, fragment);
+                            transaction.addToBackStack(null);
+                            transaction.commit();
+                        } else {
+                            isTransactionPending = true;
+                        }
+                        break;
+                    }
+                    case 6:
+                        if (isTransactionSafe) {
+                            fragmentClass = AboutFragment.class;
+                            try {
+                                fragment = (Fragment) fragmentClass.newInstance();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                            FragmentTransaction transaction = fragmentManager.beginTransaction();
+                            transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
+                            transaction.replace(R.id.flContent, fragment);
+                            transaction.addToBackStack(null);
+                            transaction.commit();
+                        } else {
+                            isTransactionPending = true;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+        };
+    }
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        isTransactionSafe = true;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        isTransactionSafe = false;
+    }
+
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
 }

@@ -107,6 +107,9 @@ public class CongratsFragment extends Fragment {
         ButterKnife.bind(this, rootView);
         mContext = getContext().getApplicationContext();
 
+        ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) rootView.getLayoutParams();
+        p.setMargins(0, 0, 0, 80);
+
         HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
         HashMap site = CCUHsApi.getInstance().read("site");
 

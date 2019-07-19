@@ -10,19 +10,20 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 
 import a75f.io.logic.L;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.renatus.ENGG.RenatusEngineeringActivity;
 
-public class RenatusLandingActivity extends AppCompatActivity
-{
+public class RenatusLandingActivity extends AppCompatActivity {
 
-    private static final String  TAG         = RenatusLandingActivity.class.getSimpleName();
+    private static final String TAG = RenatusLandingActivity.class.getSimpleName();
     //TODO - refactor
-    public               boolean settingView = false;
+    public boolean settingView = false;
     ImageButton pageSwitchButton;
     ImageButton setupButton;
+    ImageView menuToggle;
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -32,45 +33,46 @@ public class RenatusLandingActivity extends AppCompatActivity
      * {@link android.support.v4.app.FragmentStatePagerAdapter}.
      */
     private SettingsPagerAdapter mSettingPagerAdapter;
-    private StatusPagerAdapter   mStatusPagerAdapter;
+    private StatusPagerAdapter mStatusPagerAdapter;
     /**
      * The {@link ViewPager} that will host the section contents.
      */
-    private ViewPager            mViewPager;
-    private TabLayout            mTabLayout;
+    private ViewPager mViewPager;
+    private TabLayout mTabLayout;
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (!isFinishing())
-        {
+        if (!isFinishing()) {
             setContentView(R.layout.activity_renatus_landing);
-
             mSettingPagerAdapter = new SettingsPagerAdapter(getSupportFragmentManager());
             mStatusPagerAdapter = new StatusPagerAdapter(getSupportFragmentManager());
 
-
+            menuToggle = findViewById(R.id.menuToggle);
             mViewPager = findViewById(R.id.container);
             mTabLayout = findViewById(R.id.tabs);
             mTabLayout.setTabMode(TabLayout.MODE_SCROLLABLE);
+
             pageSwitchButton = findViewById(R.id.pageSwitchButton);
-            pageSwitchButton.setOnClickListener(new View.OnClickListener()
-            {
+            pageSwitchButton.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View view)
-                {
+                public void onClick(View view) {
                     setViewPager();
                 }
             });
+            menuToggle.setOnClickListener(view -> {
+                if (SettingsFragment.slidingPane.isOpen()) {
+                    SettingsFragment.slidingPane.closePane();
+                } else {
+                    SettingsFragment.slidingPane.openPane();
+                }
+            });
             setupButton = (ImageButton) findViewById(R.id.logo);
-            setupButton.setOnClickListener(new View.OnClickListener()
-            {
+            setupButton.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View view)
-                {
+                public void onClick(View view) {
 /*				if (settingView == true && mTabLayout.getSelectedTabPosition() == 0)
                 {
 					DefaultFragment.getInstance().show(getSupportFragmentManager(), "setup");
@@ -87,11 +89,9 @@ public class RenatusLandingActivity extends AppCompatActivity
                     //				}
                 }
             });
-            setupButton.setOnLongClickListener(new View.OnLongClickListener()
-            {
+            setupButton.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
-                public boolean onLongClick(View view)
-                {
+                public boolean onLongClick(View view) {
                     startActivity(new Intent(view.getContext(), RenatusEngineeringActivity.class));
                     return true;
                 }
@@ -101,43 +101,54 @@ public class RenatusLandingActivity extends AppCompatActivity
         }
     }
 
-    public void setViewPager()
-    {
-        if (settingView == true)
-        {
+    public void setViewPager() {
+        menuToggle.setVisibility(View.GONE);
+        if (settingView == true) {
 
             mViewPager.setAdapter(mStatusPagerAdapter);
-            mTabLayout.post(new Runnable()
-            {
+            mTabLayout.post(new Runnable() {
                 @Override
-                public void run()
-                {
+                public void run() {
                     mTabLayout.setupWithViewPager(mViewPager, true);
                 }
             });
             settingView = false;
             pageSwitchButton.setImageResource(R.drawable.setting);
-        }
-        else
-        {
+        } else {
             mViewPager.setAdapter(mSettingPagerAdapter);
-            mTabLayout.post(new Runnable()
-            {
+            mTabLayout.post(new Runnable() {
                 @Override
-                public void run()
-                {
+                public void run() {
                     mTabLayout.setupWithViewPager(mViewPager, true);
                 }
             });
             settingView = true;
             pageSwitchButton.setImageResource(R.drawable.status);
         }
+
+
+        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int i, float v, int i1) {
+
+            }
+
+            @Override
+            public void onPageSelected(int i) {
+                if (settingView && i == 1) menuToggle.setVisibility(View.VISIBLE);
+                else menuToggle.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int i) {
+
+            }
+        });
     }
 
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
+    public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_renatus_landing, menu);
         return true;
@@ -145,15 +156,13 @@ public class RenatusLandingActivity extends AppCompatActivity
 
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
+    public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks isOn the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings)
-        {
+        if (id == R.id.action_settings) {
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -161,11 +170,10 @@ public class RenatusLandingActivity extends AppCompatActivity
 
 
     @Override
-    public void onPause()
-    {
+    public void onPause() {
         super.onPause();
     }
-    
+
     @Override
     public void onDestroy() {
         super.onDestroy();

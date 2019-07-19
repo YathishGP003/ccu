@@ -151,7 +151,7 @@
                 <Spinner
                     android:id="@+id/vavReheatType"
                     android:layout_width="wrap_content"
-                    android:layout_height="30dp"
+                    android:layout_height="40dp"
                     android:minWidth="76dp"
                     android:layout_gravity="center_vertical"
                     style="@style/Widget.AppCompat.Spinner.Underlined"
@@ -201,7 +201,7 @@
                 <Spinner
                     android:id="@+id/zonePriority"
                     android:layout_width="wrap_content"
-                    android:layout_height="30dp"
+                    android:layout_height="40dp"
                     android:minWidth="76dp"
                     android:layout_gravity="center_vertical"
                     style="@style/Widget.AppCompat.Spinner.Underlined"

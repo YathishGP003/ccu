@@ -3,11 +3,67 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        style="@style/text_appearance"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="10dp"
+        android:orientation="vertical">
+
+        <TableLayout
+            android:id="@+id/temp_override_table"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TableRow
+                android:id="@+id/headerRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="8dp">
+
+                <TextView
+                    style="@style/text_appearance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="30dp"
+                    android:text="@string/title_io_parameters" />
+
+                <TextView
+                    style="@style/text_appearance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="100dp"
+                    android:text="@string/title_input_value" />
+
+                <TextView
+                    style="@style/text_appearance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="100dp"
+                    android:text="@string/title_input_value" />
+
+                <TextView
+                    style="@style/text_appearance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="100dp"
+                    android:text="@string/title_calculated_output" />
+
+                <TextView
+                    style="@style/text_appearance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="100dp"
+                    android:text="@string/title_override_value" />
+            </TableRow>
+
+        </TableLayout>
+    </LinearLayout>
+
+    <TextView
+        style="@style/text_appearance"
+        android:layout_width="wrap_content"
         android:layout_centerInParent="true"
-        android:gravity="center"
-        android:text="Temporary Override comes here" />
+        android:layout_height="wrap_content"
+        android:text="Temporary Override comes here"/>
 </RelativeLayout>

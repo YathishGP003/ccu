@@ -535,4 +535,10 @@
     <string name="title_save">SAVE</string>
     <string name="title_unregister">UNREGISTER</string>
 
+    <!--Temperature override Screen-->
+    <string name="title_io_parameters">I/O \nParameters</string>
+    <string name="title_input_value">Input Value</string>
+    <string name="title_calculated_output">Calculated Output \nValue</string>
+    <string name="title_override_value">Override Value</string>
+
 </resources>

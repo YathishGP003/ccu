@@ -396,7 +396,9 @@ public class VavStagedRtu extends VavSystemProfile
             status.append((stageStatus[HEATING_4.ordinal()] > 0) ? ",4" : "");
             status.append((stageStatus[HEATING_5.ordinal()] > 0) ? ",5 ON" : " ON");
         }
-    
+        if (systemCoolingLoopOp > 0 && L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable()) {
+            status.insert(0, "Free Cooling Used | ");
+        }
     
         return status.toString().equals("")? "System OFF" : status.toString();
     }

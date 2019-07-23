@@ -296,12 +296,13 @@ public class DabEquip
                                           .setSiteRef(siteRef)
                                           .setRoomRef(roomRef)
                                           .setFloorRef(floorRef)
-                                          .addMarker("zone").addMarker("dab").addMarker("scheduleType").addMarker("writable").addMarker("zone").addMarker("equipHis")
+                                          .addMarker("zone").addMarker("dab").addMarker("scheduleType").addMarker("writable").addMarker("his").addMarker("equipHis")
                                           .setGroup(String.valueOf(nodeAddr))
                                           .setTz(tz)
                                           .build();
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
         CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
+        CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, 0.0);
     
         Point supplyAirTemp1 = new Point.Builder()
                                     .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-supplyAirTemp1")

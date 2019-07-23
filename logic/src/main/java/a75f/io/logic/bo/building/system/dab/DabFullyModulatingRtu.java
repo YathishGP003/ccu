@@ -241,7 +241,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         setSystemPoint("operating and mode", dabSystem.systemState.ordinal());
         String systemStatus = (dabSystem.systemState == OFF) ? "System OFF " : getStatusMessage();
         String scheduleStatus = ScheduleProcessJob.getSystemStatusString();
-        CcuLog.d(L.TAG_CCU_SYSTEM, "StatusMessage: "+systemStatus);
+        CcuLog.d(L.TAG_CCU_SYSTEM, "systemStatusMessage: "+systemStatus);
         CcuLog.d(L.TAG_CCU_SYSTEM, "ScheduleStatus: " +scheduleStatus);
         if (!CCUHsApi.getInstance().readDefaultStrVal("system and status and message").equals(systemStatus))
         {
@@ -259,6 +259,10 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         status.append(systemFanLoopOp > 0 ? " Fan ON ":"");
         status.append(systemCoolingLoopOp > 0 ? " | Cooling ON ":"");
         status.append(systemHeatingLoopOp > 0 ? " | Heating ON ":"");
+    
+        if (systemCoolingLoopOp > 0 && L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable()) {
+            status.insert(0, "Free Cooling Used |");
+        }
         
         return status.toString();
     }
@@ -282,7 +286,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                    .setSiteRef(siteRef)
                                    .setDisplayName(siteDis+"-SystemEquip")
                                    .setProfile(ProfileType.SYSTEM_DAB_ANALOG_RTU.name())
-                                   .addMarker("equip").addMarker("system").addMarker("vav")
+                                   .addMarker("equip").addMarker("system").addMarker("dab")
                                    .addMarker("equipHis")
                                    .setTz(siteMap.get("tz").toString())
                                    .build();

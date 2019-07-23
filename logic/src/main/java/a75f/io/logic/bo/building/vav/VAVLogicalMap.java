@@ -534,12 +534,13 @@ public class VAVLogicalMap
                                            .setSiteRef(siteRef)
                                            .setRoomRef(room)
                                            .setFloorRef(floor)
-                                           .addMarker("zone").addMarker("vav").addMarker("scheduleType").addMarker("writable").addMarker("zone").addMarker("equipHis")
+                                           .addMarker("zone").addMarker("vav").addMarker("scheduleType").addMarker("writable").addMarker("his").addMarker("equipHis")
                                            .setGroup(String.valueOf(nodeAddr))
                                            .setTz(tz)
                                            .build();
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
         CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
+        CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, 0.0);
         
         //Create Physical points and map
         SmartNode device = new SmartNode(nodeAddr, siteRef, floor, room, equipRef);

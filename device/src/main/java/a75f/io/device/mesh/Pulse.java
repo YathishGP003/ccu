@@ -321,6 +321,7 @@ public class Pulse
 						curTempVal = getRoomTempConversion(val);
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						logicalCurTempPoint =  logPoint.get("id").toString();
+						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartStatUpdate : currentTemp "+curTempVal);
 						break;
 					case TH2_IN:
 						val = smartStatRegularUpdateMessage_t.update.externalThermistorInput2.get();

@@ -17,6 +17,8 @@ public class Sensor
     public double maxEngineeringValue;//: 10
     public double incrementEgineeringValue;//: 0.1
     
+    public static ArrayList<Sensor> sensors = null;
+    
     public Sensor(String name, String unit, double minV, double maxV, double minEngVal, double maxEngVal, double incVal ) {
         this.sensorName = name;
         this.engineeringUnit = unit;
@@ -30,7 +32,10 @@ public class Sensor
     
     
     public static List<Sensor> getSensorList() {
-        ArrayList<Sensor> sensors = new ArrayList<>();
+        if (sensors != null) {
+            return sensors;
+        }
+        sensors = new ArrayList<>();
         
         sensors.add(new Sensor("Generic 0-10","V", 0, 10,0,10,0.1));
         sensors.add(new Sensor("0-2 in. Pressure Sensor","inches wc",0,10,0,2,0.1));
@@ -44,5 +49,22 @@ public class Sensor
         sensors.add(new Sensor("CT 0-20 Amps","amps",0,10,0,20,0.1));
         sensors.add(new Sensor("CT 0-50 Amps","amps",0,10,0,50,0.1));
         return sensors;
+    }
+    
+    public int getSensorIndex(String name) {
+        for (Sensor s : getSensorList()) {
+            if (s.sensorName.contains(name)) {
+                return sensors.indexOf(s);
+            }
+        }
+        return -1;
+    }
+    
+    public boolean equals(Object o) {
+        if(!(o instanceof Sensor))
+        {
+            return false;
+        }
+        return ((Sensor)o).sensorName.equals(this.sensorName);
     }
 }

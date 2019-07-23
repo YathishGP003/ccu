@@ -313,6 +313,10 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         status.append(systemFanLoopOp > 0 ? " Fan ON ":"");
         status.append(systemCoolingLoopOp > 0 ? " | Cooling ON ":"");
         status.append(systemHeatingLoopOp > 0 ? " | Heating ON ":"");
+        
+        if (systemCoolingLoopOp > 0 && L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable()) {
+            status.insert(0, "Free Cooling Used |");
+        }
     
         return status.toString().equals("")? "System OFF" : status.toString();
     }

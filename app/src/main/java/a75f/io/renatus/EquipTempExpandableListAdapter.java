@@ -386,6 +386,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
             @Override
             protected Void doInBackground( final String ... params ) {
                 CCUHsApi.getInstance().writeDefaultValById(id, (double)schedule.ordinal());
+                CCUHsApi.getInstance().writeHisValById(id, (double)schedule.ordinal());
                 ScheduleProcessJob.handleScheduleTypeUpdate(new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(id)).build());
                 return null;
             }

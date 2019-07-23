@@ -289,7 +289,7 @@ public class PlcEquip
                                           .setSiteRef(siteRef)
                                           .setRoomRef(roomRef)
                                           .setFloorRef(floorRef)
-                                          .addMarker("zone").addMarker("pid").addMarker("scheduleType").addMarker("writable").addMarker("equipHis")
+                                          .addMarker("zone").addMarker("pid").addMarker("scheduleType").addMarker("writable").addMarker("his").addMarker("equipHis")
                                           .setGroup(String.valueOf(nodeAddr))
                                           .setTz(tz)
                                           .build();

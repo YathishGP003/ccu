@@ -20,7 +20,7 @@
                 android:layout_width="253dp"
                 android:layout_height="680dp"
                 android:layout_alignParentLeft="true"
-                android:layout_marginTop="72dp"
+                android:layout_marginTop="75dp"
                 android:src="@drawable/input_vav_hybrid" />
 
             <LinearLayout
@@ -79,7 +79,7 @@
                         android:id="@+id/tableRow1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="40dp">
+                        android:layout_marginTop="30dp">
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -153,7 +153,7 @@
                         android:id="@+id/tableRow2"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="24dp">
+                        android:layout_marginTop="20dp">
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -227,7 +227,7 @@
                         android:id="@+id/tableRow3"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="24dp">
+                        android:layout_marginTop="20dp">
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -301,7 +301,7 @@
                         android:id="@+id/tableRow4"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="24dp">
+                        android:layout_marginTop="20dp">
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -375,7 +375,7 @@
                         android:id="@+id/tableRow5"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="24dp">
+                        android:layout_marginTop="20dp">
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -450,7 +450,7 @@
                         android:id="@+id/tableRow6"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="24dp">
+                        android:layout_marginTop="20dp">
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -525,8 +525,8 @@
                         android:id="@+id/tableRow7"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_marginTop="24dp"
-                        android:visibility="gone">
+                        android:layout_marginTop="20dp"
+                        android:visibility="visible">
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -601,7 +601,7 @@
                         android:id="@+id/tableRow8"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_marginTop="24dp">
+                        android:layout_marginTop="20dp">
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -615,6 +615,7 @@
                                 android:layout_alignParentLeft="true"
                                 android:layout_centerVertical="true"
                                 android:layout_marginLeft="10dp"
+                                android:layout_gravity="center_vertical"
                                 android:background="@drawable/toggle_selector"
                                 android:checked="false"
                                 android:textOff=""
@@ -626,6 +627,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_centerVertical="true"
                                 android:layout_marginLeft="20dp"
+                                android:layout_gravity="center_vertical"
                                 android:layout_toRightOf="@+id/toggleAnalog1"
                                 android:text="@string/label_analog1"
                                 android:textAppearance="@style/text_appearance" />
@@ -642,6 +644,7 @@
                                 android:layout_width="202dp"
                                 android:layout_height="wrap_content"
                                 android:text="@string/label_cooling"
+                                android:layout_gravity="center_vertical"
                                 android:textAppearance="@style/text_label" />
                         </LinearLayout>
 
@@ -657,6 +660,7 @@
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:layout_width="120dp"
                                 android:layout_height="wrap_content"
+                                android:layout_gravity="center"
                                 android:entries="@array/hvac_stage_selector"
                                 tools:listitem="@layout/spinner_dropdown_item" />
                         </LinearLayout>
@@ -669,7 +673,7 @@
                         android:id="@+id/tableRow9"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_marginTop="24dp">
+                        android:layout_marginTop="20dp">
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -682,6 +686,7 @@
                                 android:layout_height="27.42dp"
                                 android:layout_alignParentLeft="true"
                                 android:layout_centerVertical="true"
+                                android:layout_gravity="center_vertical"
                                 android:layout_marginLeft="10dp"
                                 android:background="@drawable/toggle_selector"
                                 android:checked="false"
@@ -694,6 +699,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_centerVertical="true"
                                 android:layout_marginLeft="20dp"
+                                android:layout_gravity="center_vertical"
                                 android:layout_toRightOf="@+id/toggleAnalog2"
                                 android:text="@string/label_fanspeed"
                                 android:textAppearance="@style/text_appearance" />
@@ -711,6 +717,7 @@
                                 android:layout_width="202dp"
                                 android:layout_height="wrap_content"
                                 android:text="@string/label_fanspeed"
+                                android:layout_gravity="center_vertical"
                                 android:textAppearance="@style/text_label" />
                         </LinearLayout>
 
@@ -725,6 +732,7 @@
                                 android:id="@+id/ahuAnalog2Test"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:layout_width="120dp"
+                                android:layout_gravity="center_vertical"
                                 android:layout_height="wrap_content"
                                 android:entries="@array/hvac_stage_selector"
                                 tools:listitem="@layout/spinner_dropdown_item" />
@@ -739,7 +747,7 @@
                         android:id="@+id/tableRow10"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_marginTop="24dp">
+                        android:layout_marginTop="20dp">
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -750,6 +758,7 @@
                                 android:id="@+id/toggleAnalog3"
                                 android:layout_width="46.12dp"
                                 android:layout_height="27.42dp"
+                                android:layout_gravity="center_vertical"
                                 android:layout_alignParentLeft="true"
                                 android:layout_centerVertical="true"
                                 android:layout_marginLeft="10dp"
@@ -764,6 +773,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_centerVertical="true"
                                 android:layout_marginLeft="20dp"
+                                android:layout_gravity="center_vertical"
                                 android:layout_toRightOf="@+id/toggleAnalog3"
                                 android:text="@string/label_analog3"
                                 android:textAppearance="@style/text_appearance" />
@@ -780,6 +790,7 @@
                                 android:layout_width="202dp"
                                 android:layout_height="wrap_content"
                                 android:text="@string/label_heating"
+                                android:layout_gravity="center_vertical"
                                 android:textAppearance="@style/text_label" />
                         </LinearLayout>
 
@@ -796,6 +807,7 @@
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:layout_width="120dp"
                                 android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
                                 android:entries="@array/hvac_stage_selector"
                                 tools:listitem="@layout/spinner_dropdown_item" />
 
@@ -808,7 +820,7 @@
                         android:id="@+id/tableRow11"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_marginTop="24dp">
+                        android:layout_marginTop="20dp">
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -820,6 +832,7 @@
                                 android:layout_width="46.12dp"
                                 android:layout_height="27.42dp"
                                 android:layout_marginLeft="10dp"
+                                android:layout_gravity="center_vertical"
                                 android:background="@drawable/toggle_selector"
                                 android:checked="false"
                                 android:textOff=""
@@ -831,6 +844,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_centerVertical="true"
                                 android:layout_marginLeft="20dp"
+                                android:layout_gravity="center_vertical"
                                 android:layout_toRightOf="@+id/toggleAnalog4"
                                 android:text="@string/label_analog4"
                                 android:textAppearance="@style/text_appearance" />
@@ -847,6 +861,7 @@
                                 android:layout_width="202dp"
                                 android:layout_height="wrap_content"
                                 android:text="@string/label_composite"
+                                android:layout_gravity="center_vertical"
                                 android:textAppearance="@style/text_label" />
                         </LinearLayout>
 
@@ -861,6 +876,7 @@
                                 android:id="@+id/ahuAnalog4Test"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:layout_width="120dp"
+                                android:layout_gravity="center_vertical"
                                 android:layout_height="wrap_content"
                                 android:entries="@array/hvac_stage_selector"
                                 tools:listitem="@layout/spinner_dropdown_item" />

@@ -27,7 +27,9 @@ import a75f.io.renatus.Fragment2PipeFanCoilUnitConfig;
 import a75f.io.renatus.Fragment4PipeFanCoilUnitConfig;
 import a75f.io.renatus.FragmentCPUConfiguration;
 import a75f.io.renatus.FragmentDABConfiguration;
+import a75f.io.renatus.FragmentEMRConfiguration;
 import a75f.io.renatus.FragmentHeatPumpConfiguration;
+import a75f.io.renatus.FragmentPLCConfiguration;
 import a75f.io.renatus.bluetooth.BLEAction;
 import a75f.io.renatus.bluetooth.BLEProvisionService;
 import a75f.io.device.ble.BLERoomName;
@@ -386,6 +388,14 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                     case DAB:
                         showDialogFragment(FragmentDABConfiguration
                                                    .newInstance(mPairingAddress, mName, mNodeType, mFloorName, mProfileType), FragmentDABConfiguration.ID);
+                        break;
+                    case PLC:
+                        showDialogFragment(FragmentPLCConfiguration
+                                .newInstance(mPairingAddress, mName, mNodeType, mFloorName), FragmentPLCConfiguration.ID);
+                        break;
+                    case EMR:
+                        showDialogFragment(FragmentEMRConfiguration
+                                .newInstance(mPairingAddress, mName, mNodeType, mFloorName), FragmentEMRConfiguration.ID);
                         break;
                     case SMARTSTAT_CONVENTIONAL_PACK_UNIT:
                         showDialogFragment(FragmentCPUConfiguration.newInstance(mPairingAddress, mName, mNodeType, mFloorName, mProfileType), FragmentCPUConfiguration.ID);

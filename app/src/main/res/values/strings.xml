@@ -29,9 +29,9 @@
     <string name="ble_not_supported">BLE Not Supported</string>
     <string name="error_bluetooth_not_supported">Bluetooth not supported.</string>
     <string name="gatt_connect_failed">Pairing Failed. Could not connect gatt.</string>
-    <string name="sn_pairing_error">SmartNode Pairing could not be done. Please try again!</string>
-    <string name="sn_bond_error">SmartNode is already Bonded. Please reset smartnode and unpair from bluetooth paired devices and try again.</string>
-    <string name="ble_no_devices_found_warning">No devices found.  (Please have smart node in advertisement mode and be within range)</string>
+    <string name="sn_pairing_error">SmartNode/SmartStat Pairing could not be done. Please try again!</string>
+    <string name="sn_bond_error">SmartNode/SmartStat is already Bonded. Please reset smartnode and unpair from bluetooth paired devices and try again.</string>
+    <string name="ble_no_devices_found_warning">No devices found.  (Please have smart devices in advertisement mode and be within range)</string>
     <string name="scan_dialog_title">Scanning for 75F devices</string>
     <string name="unable_to_bluetooth">Unable to initialize bluetooth!</string>
     <string name="ok">ok</string>
@@ -75,9 +75,9 @@
     <string-array name="system_profile_select">
         <item>  Default System Profile</item>
         <item>  VAV Staged RTU </item>
-        <item>  VAV Fully Modulating RTU </item>
+        <item>  VAV Fully Modulating AHU </item>
         <item>  VAV Staged RTU with VFD Fan</item>
-        <item>  VAV Advanced Hybrid RTU </item>
+        <item>  VAV Advanced Hybrid AHU</item>
         <!--<item>  VAV IE RTU </item>
         <item>  VAV Bacnet RTU </item>-->
         <item>  DAB Staged RTU </item>

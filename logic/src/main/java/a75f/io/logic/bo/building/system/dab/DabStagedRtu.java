@@ -414,9 +414,9 @@ public class DabStagedRtu extends DabSystemProfile
         String tz = siteMap.get("tz").toString();
         addCmdPoint(COOLING_1.displayName,"relay1", equipDis, siteRef, equipref, tz);
         addCmdPoint(COOLING_2.displayName,"relay2", equipDis, siteRef, equipref, tz);
-        addCmdPoint(HEATING_1.displayName,"relay3", equipDis, siteRef, equipref, tz);
-        addCmdPoint(HEATING_2.displayName,"relay4", equipDis, siteRef, equipref, tz);
-        addCmdPoint(FAN_1.displayName,"relay5", equipDis, siteRef, equipref, tz);
+        addCmdPoint(FAN_1.displayName,"relay3", equipDis, siteRef, equipref, tz);
+        addCmdPoint(HEATING_1.displayName,"relay4", equipDis, siteRef, equipref, tz);
+        addCmdPoint(HEATING_2.displayName,"relay5", equipDis, siteRef, equipref, tz);
         addCmdPoint(FAN_2.displayName,"relay6", equipDis, siteRef, equipref, tz);
         addCmdPoint(HUMIDIFIER.displayName,"relay7", equipDis, siteRef, equipref, tz);
     }
@@ -454,9 +454,9 @@ public class DabStagedRtu extends DabSystemProfile
         addConfigPointEnabled("relay7", equipDis, siteRef, equipref, tz);
         addConfigPointAssociation("relay1", equipDis, siteRef, equipref, tz, Stage.COOLING_1);
         addConfigPointAssociation("relay2", equipDis, siteRef, equipref, tz, COOLING_2);
-        addConfigPointAssociation("relay3", equipDis, siteRef, equipref, tz, Stage.HEATING_1);
-        addConfigPointAssociation("relay4", equipDis, siteRef, equipref, tz, HEATING_2);
-        addConfigPointAssociation("relay5", equipDis, siteRef, equipref, tz, Stage.FAN_1);
+        addConfigPointAssociation("relay3", equipDis, siteRef, equipref, tz, FAN_1);
+        addConfigPointAssociation("relay4", equipDis, siteRef, equipref, tz, HEATING_1);
+        addConfigPointAssociation("relay5", equipDis, siteRef, equipref, tz, HEATING_2);
         addConfigPointAssociation("relay6", equipDis, siteRef, equipref, tz, FAN_2);
         addConfigPointAssociation("relay7", equipDis, siteRef, equipref, tz, Stage.HUMIDIFIER);
         

@@ -486,7 +486,20 @@ public class FloorPlanFragment extends Fragment
 		rl_systemdevice.setEnabled(false);
 		roomListView.setVisibility(View.GONE);
 		moduleListView.setVisibility(View.GONE);
+		addZonelt.setEnabled(false);
+		addRoomBtn.setEnabled(false);
+		closeAddZoneEditViews();
 	}
+
+	private void closeAddZoneEditViews() {
+		addZonelt.setVisibility(View.VISIBLE);
+		addRoomEdit.setVisibility(View.INVISIBLE);
+
+		InputMethodManager mgr =
+				(InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+		mgr.hideSoftInputFromWindow(addRoomEdit.getWindowToken(), 0);
+	}
+
 	private void setSytemUnselection()
 	{
 		rl_systemdevice.setBackgroundColor(Color.WHITE);
@@ -497,6 +510,8 @@ public class FloorPlanFragment extends Fragment
 		rl_oao.setEnabled(true);
 		roomListView.setVisibility(View.VISIBLE);
 		moduleListView.setVisibility(View.VISIBLE);
+		addZonelt.setEnabled(true);
+		addRoomBtn.setEnabled(true);
 	}
 
 	private void enableFloorEdit()

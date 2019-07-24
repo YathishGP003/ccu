@@ -93,7 +93,7 @@ public class SettingsFragment extends Fragment {
                 switch (msg.what) {
                     case 0: {
 
-                        if (isTransactionSafe) {
+                        if (isTransactionSafe && !(fragment instanceof CreateNewSite)) {
                             fragmentClass = CreateNewSite.class;
                             try {
                                 fragment = (Fragment) fragmentClass.newInstance();
@@ -113,7 +113,7 @@ public class SettingsFragment extends Fragment {
                     }
                     case 1: {
 
-                        if (isTransactionSafe) {
+                        if (isTransactionSafe && !(fragment instanceof Security)) {
                             fragmentClass = Security.class;
                             try {
                                 fragment = (Fragment) fragmentClass.newInstance();
@@ -132,7 +132,7 @@ public class SettingsFragment extends Fragment {
                         break;
                     }
                     case 2: {
-                        if (isTransactionSafe) {
+                        if (isTransactionSafe && !(fragment instanceof WifiFragment)) {
                             fragmentClass = WifiFragment.class;
                             try {
                                 fragment = (Fragment) fragmentClass.newInstance();
@@ -151,7 +151,7 @@ public class SettingsFragment extends Fragment {
                         break;
                     }
                     case 3: {
-                        if (isTransactionSafe) {
+                        if (isTransactionSafe && !(fragment instanceof InstallerOptions)) {
                             fragmentClass = InstallerOptions.class;
                             try {
                                 fragment = (Fragment) fragmentClass.newInstance();
@@ -170,7 +170,7 @@ public class SettingsFragment extends Fragment {
                         break;
                     }
                     case 4: {
-                        if (isTransactionSafe) {
+                        if (isTransactionSafe && !(fragment instanceof SystemProfileFragment)) {
                             fragmentClass = SystemProfileFragment.class;
                             try {
                                 fragment = (Fragment) fragmentClass.newInstance();
@@ -189,7 +189,7 @@ public class SettingsFragment extends Fragment {
                         break;
                     }
                     case 5: {
-                        if (isTransactionSafe) {
+                        if (isTransactionSafe && !(fragment instanceof TempOverrideFragment)) {
                             fragmentClass = TempOverrideFragment.class;
                             try {
                                 fragment = (Fragment) fragmentClass.newInstance();
@@ -208,7 +208,7 @@ public class SettingsFragment extends Fragment {
                         break;
                     }
                     case 6:
-                        if (isTransactionSafe) {
+                        if (isTransactionSafe && !(fragment instanceof AboutFragment)) {
                             fragmentClass = AboutFragment.class;
                             try {
                                 fragment = (Fragment) fragmentClass.newInstance();

@@ -22,7 +22,7 @@ import butterknife.ButterKnife;
  */
 
 public class SystemProfileFragment extends Fragment {
-    @BindView(R.id.hvacEquipSelect)
+    @BindView(R.id.spinnerSystemProfile)
     Spinner spSystemProfile;
 
     @BindView(R.id.txt_header)
@@ -72,6 +72,7 @@ public class SystemProfileFragment extends Fragment {
                 if (!isFreshRegister) {
                     ((TextView) adapterView.getChildAt(0)).setTextColor(getResources().getColor(R.color.accent));
                     ((TextView) adapterView.getChildAt(0)).setTextSize(18);
+                    spSystemProfile.getLayoutParams().width = 320;
                 }
                 switch (i) {
                     case 0:

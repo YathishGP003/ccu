@@ -75,9 +75,9 @@
     <string-array name="system_profile_select">
         <item>  Default System Profile</item>
         <item>  VAV Staged RTU </item>
-        <item>  VAV Fully Modulating RTU </item>
+        <item>  VAV Fully Modulating AHU </item>
         <item>  VAV Staged RTU with VFD Fan</item>
-        <item>  VAV Advanced Hybrid RTU </item>
+        <item>  VAV Advanced Hybrid AHU</item>
         <!--<item>  VAV IE RTU </item>
         <item>  VAV Bacnet RTU </item>-->
         <item>  DAB Staged RTU </item>

@@ -91,7 +91,7 @@ public class OAOEquip
                                         .setGroup(String.valueOf(nodeAddr))
                                         .setTz(tz)
                                         .build();
-        hayStack.addPoint(economizingAvailable);
+        String economizingAvailableId = hayStack.addPoint(economizingAvailable);
     
         Point economizingLoopOutput = new Point.Builder()
                                              .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-economizingLoopOutput")
@@ -309,6 +309,7 @@ public class OAOEquip
         hayStack.writeHisValById(returnAirDamperId,0.0);
         hayStack.writeHisValById(exhaustFanStage1Id,0.0);
         hayStack.writeHisValById(exhaustFanStage2Id,0.0);
+        hayStack.writeHisValById(economizingAvailableId, 0.0);
     
         CCUHsApi.getInstance().syncEntityTree();
     }

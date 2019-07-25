@@ -154,8 +154,11 @@ public class Pulse
 			if (sp == null) {
 				sp = node.addSensor(Port.SENSOR_ENERGY_METER);
 			}
-			CCUHsApi.getInstance().writeHisValById(sp.getId(), (double)emVal );
-			CCUHsApi.getInstance().writeHisValById(sp.getPointRef(),(double)emVal);
+			if (emVal != CCUHsApi.getInstance().readHisValById(sp.getId()))
+			{
+				CCUHsApi.getInstance().writeHisValById(sp.getId(), (double) emVal);
+				CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), (double) emVal);
+			}
 		}
 	
 	}

@@ -63,7 +63,7 @@ public class EmrEquip
                                           .setTz(tz)
                                           .build();
         String emrReadingId  = hayStack.addPoint(emrReading );
-        hayStack.writeHisValById(emrReadingId, 0.0);
+        
     
         Point currentRate  = new Point.Builder()
                                     .setDisplayName(equipDis+"-currentRate")
@@ -85,7 +85,7 @@ public class EmrEquip
                                            .setSiteRef(siteRef)
                                            .setRoomRef(roomRef)
                                            .setFloorRef(floorRef)
-                                           .addMarker("status").addMarker("message").addMarker("pid").addMarker("writable").addMarker("logical").addMarker("zone").addMarker("his").addMarker("equipHis")
+                                           .addMarker("status").addMarker("message").addMarker("emr").addMarker("writable").addMarker("logical").addMarker("zone").addMarker("his").addMarker("equipHis")
                                            .setGroup(String.valueOf(nodeAddr))
                                            .setTz(tz)
                                            .setKind("string")

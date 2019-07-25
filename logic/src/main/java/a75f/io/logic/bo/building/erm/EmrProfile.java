@@ -27,6 +27,7 @@ public class EmrProfile extends ZoneProfile
     
     public void addEmrEquip(short addr) {
         emrEquip = new EmrEquip(getProfileType(), addr);
+        emrEquip.init();
     }
     
     @Override
@@ -63,18 +64,25 @@ public class EmrProfile extends ZoneProfile
         
         if (hisItems.size() < 2) {
             Log.d(L.TAG_CCU_ZONE, "EmrProfile, Only one Reading !");
+            return;
         }
         HisItem reading1 = hisItems.get(0);
         HisItem reading2 = hisItems.get(1);
         
-        int timeDiffMins = (int) (reading1.getDate().getTime() - reading2.getDate().getTime())/60*1000;
+        for (HisItem h : hisItems) {
+            Log.d(L.TAG_CCU_ZONE, "EmrProfile, "+h.getDate()+" "+h.getVal());
+        }
+        
+        int timeDiffMins = (int) (reading1.getDate().getTime() - reading2.getDate().getTime())/(60*1000);
         double readingDiff = 100 * (reading1.getVal() - reading2.getVal());
         
         double ratekWh = (60 * readingDiff) / (timeDiffMins * 1000);
         
+        ratekWh = Math.round(ratekWh * 100)/100;
+        
         emrEquip.setHisVal("current and rate", ratekWh);
         emrEquip.setEquipStatus("Total Energy Consumed "+reading1.getVal()+" kWh "+" Current Rate "+ratekWh+"KW");
-    
+        
         Log.d(L.TAG_CCU_ZONE, "EmrProfile, Total Energy Consumed "+reading1.getVal()+" currentRate "+ratekWh);
         
     }

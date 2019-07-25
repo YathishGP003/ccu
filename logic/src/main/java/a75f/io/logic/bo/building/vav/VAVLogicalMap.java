@@ -502,6 +502,7 @@ public class VAVLogicalMap
                                   .setTz(tz)
                                   .build();
         String equipStatusId = CCUHsApi.getInstance().addPoint(equipStatus);
+        CCUHsApi.getInstance().writeHisValById(equipStatusId, 0.0);
     
         Point equipStatusMessage = new Point.Builder()
                                     .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-equipStatusMessage")
@@ -527,6 +528,19 @@ public class VAVLogicalMap
                                     .setKind("string")
                                     .build();
         String equipScheduleStatusId = CCUHsApi.getInstance().addPoint(equipScheduleStatus);
+    
+        Point occupancy = new Point.Builder()
+                                    .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-occupancy")
+                                    .setEquipRef(equipRef)
+                                    .setSiteRef(siteRef)
+                                    .setRoomRef(room)
+                                    .setFloorRef(floor)
+                                    .addMarker("vav").addMarker("occupancy").addMarker("status").addMarker("zone").addMarker("writable").addMarker("his").addMarker("equipHis")
+                                    .setGroup(String.valueOf(nodeAddr))
+                                    .setTz(tz)
+                                    .build();
+        String occupancyId = CCUHsApi.getInstance().addPoint(occupancy);
+        CCUHsApi.getInstance().writeHisValById(occupancyId, 0.0);
     
         Point equipScheduleType = new Point.Builder()
                                            .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-scheduleType")
@@ -672,12 +686,13 @@ public class VAVLogicalMap
                                    .setRoomRef(room)
                                    .setFloorRef(floor)
                                    .addMarker("config").addMarker("vav").addMarker("writable").addMarker("zone")
-                                   .addMarker("enable").addMarker("occupancy").addMarker("control").addMarker("sp")
+                                   .addMarker("enable").addMarker("occupancy").addMarker("control").addMarker("sp").addMarker("his").addMarker("equipHis")
                                    .setGroup(String.valueOf(nodeAddr))
                                    .setTz(tz)
                                    .build();
         String enableOccupancyControlId = CCUHsApi.getInstance().addPoint(enableOccupancyControl);
         CCUHsApi.getInstance().writeDefaultValById(enableOccupancyControlId, config.enableOccupancyControl == true ? 1.0 :0);
+        CCUHsApi.getInstance().writeHisValById(enableOccupancyControlId, config.enableOccupancyControl == true ? 1.0 :0);
     
         Point enableCO2Control = new Point.Builder()
                                                .setDisplayName(equipDis+"-enableCO2Control")
@@ -686,12 +701,13 @@ public class VAVLogicalMap
                                                .setRoomRef(room)
                                                .setFloorRef(floor)
                                                .addMarker("config").addMarker("vav").addMarker("writable").addMarker("zone")
-                                               .addMarker("enable").addMarker("co2").addMarker("control").addMarker("sp")
+                                               .addMarker("enable").addMarker("co2").addMarker("control").addMarker("sp").addMarker("his").addMarker("equipHis")
                                                .setGroup(String.valueOf(nodeAddr))
                                                .setTz(tz)
                                                .build();
         String enableCO2ControlId = CCUHsApi.getInstance().addPoint(enableCO2Control);
         CCUHsApi.getInstance().writeDefaultValById(enableCO2ControlId, config.enableCO2Control == true ? 1.0 :0);
+        CCUHsApi.getInstance().writeHisValById(enableCO2ControlId, config.enableCO2Control == true ? 1.0 :0);
     
         Point enableIAQControl = new Point.Builder()
                                                .setDisplayName(equipDis+"-enableIAQControl")
@@ -700,12 +716,13 @@ public class VAVLogicalMap
                                                .setRoomRef(room)
                                                .setFloorRef(floor)
                                                .addMarker("config").addMarker("vav").addMarker("writable").addMarker("zone")
-                                               .addMarker("enable").addMarker("iaq").addMarker("control").addMarker("sp")
+                                               .addMarker("enable").addMarker("iaq").addMarker("control").addMarker("sp").addMarker("his").addMarker("equipHis")
                                                .setGroup(String.valueOf(nodeAddr))
                                                .setTz(tz)
                                                .build();
         String enableIAQControlId = CCUHsApi.getInstance().addPoint(enableIAQControl);
         CCUHsApi.getInstance().writeDefaultValById(enableIAQControlId, config.enableIAQControl == true ? 1.0 :0);
+        CCUHsApi.getInstance().writeHisValById(enableIAQControlId, config.enableIAQControl == true ? 1.0 :0);
     
         Point zonePriority = new Point.Builder()
                                          .setDisplayName(equipDis+"-zonePriority")

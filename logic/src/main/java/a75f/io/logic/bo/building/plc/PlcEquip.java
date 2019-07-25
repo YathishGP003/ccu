@@ -234,7 +234,7 @@ public class PlcEquip
                                            .setRoomRef(roomRef)
                                            .setFloorRef(floorRef)
                                            .addMarker("sp").addMarker("pid").addMarker("zone").addMarker("his").addMarker("cur").addMarker("logical").addMarker("equipHis")
-                                           .addMarker("process").addMarker("variable")
+                                           .addMarker("process").addMarker("variable").addMarker("equipHis")
                                            .setGroup(String.valueOf(nodeAddr))
                                            .setTz(tz)
                                            .build();
@@ -248,7 +248,7 @@ public class PlcEquip
                                          .setRoomRef(roomRef)
                                          .setFloorRef(floorRef)
                                          .addMarker("sp").addMarker("pid").addMarker("zone").addMarker("his").addMarker("logical").addMarker("equipHis")
-                                         .addMarker("control").addMarker("variable")
+                                         .addMarker("control").addMarker("variable").addMarker("equipHis")
                                          .setGroup(String.valueOf(nodeAddr))
                                          .setTz(tz)
                                          .build();
@@ -261,7 +261,7 @@ public class PlcEquip
                                            .setSiteRef(siteRef)
                                            .setRoomRef(roomRef)
                                            .setFloorRef(floorRef)
-                                           .addMarker("status").addMarker("message").addMarker("pid").addMarker("writable").addMarker("logical").addMarker("zone").addMarker("equipHis")
+                                           .addMarker("status").addMarker("message").addMarker("pid").addMarker("writable").addMarker("logical").addMarker("zone").addMarker("his").addMarker("equipHis")
                                            .setGroup(String.valueOf(nodeAddr))
                                            .setTz(tz)
                                            .setKind("string")

@@ -155,12 +155,12 @@ public class EntitySyncHandler
         while(iterator.hasNext())
         {
             String hRef = iterator.next();
-            if (entity.has(hRef))
+            if (entity.has(hRef) && !entity.get(hRef).toString().equals("SYSTEM"))
             {
                 String guid = CCUHsApi.getInstance().getGUID(entity.get(hRef) instanceof HRef ? ((HRef) entity.get(hRef)).toCode()
                         : entity.getStr(hRef));
                 if (guid == null) {
-                    Log.d(TAG," Entity not synced for "+hRef +" : "+entity.toZinc());
+                    Log.d(TAG,"Entity not synced for "+hRef +" : "+entity.toZinc());
                     return false;
                 }
                 builder.add(hRef, HRef.copy(guid));

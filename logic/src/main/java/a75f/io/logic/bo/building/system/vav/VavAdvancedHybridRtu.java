@@ -35,7 +35,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
     @Override
     public String getProfileName()
     {
-        return "VAV Advanced Hybrid RTU";
+        return "VAV Advanced Hybrid AHU";
     }
     
     @Override

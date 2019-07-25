@@ -25,6 +25,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
+import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.tuners.TunerUtil;
 
@@ -337,6 +338,8 @@ public class ScheduleProcessJob extends BaseJob {
 
     public static String getSystemStatusString() {
 
+        if(L.ccu().systemProfile instanceof DefaultSystem)
+            return "No Central equipment connected.";
         if(systemOccupancy == null)
         {
             return "Setting up..";

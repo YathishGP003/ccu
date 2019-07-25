@@ -34,8 +34,18 @@ public class DefaultSystem extends SystemProfile
       addSystemEquip();
     }
     @Override
-    public void doSystemControl()
-    {
+    public void doSystemControl() {
+        //update default points for apps and portals to consume
+        String systemStatus = getStatusMessage();
+        String scheduleStatus =  "No Central equipment is connected.";
+        if (!CCUHsApi.getInstance().readDefaultStrVal("system and status and message").equals(systemStatus))
+        {
+            CCUHsApi.getInstance().writeDefaultVal("system and status and message", systemStatus);
+        }
+        if (!CCUHsApi.getInstance().readDefaultStrVal("system and scheduleStatus").equals(scheduleStatus))
+        {
+            CCUHsApi.getInstance().writeDefaultVal("system and scheduleStatus", scheduleStatus);
+        }
     }
     
     @Override
@@ -66,6 +76,7 @@ public class DefaultSystem extends SystemProfile
         addCMPoints(siteRef, equipRef, siteDis+"-SystemEquip", siteMap.get("tz").toString());
         updateGatewayRef(equipRef);
         //updateAhuRef(equipRef);
+
         new ControlMote(siteRef);
         L.saveCCUState();
         CCUHsApi.getInstance().syncEntityTree();
@@ -102,7 +113,7 @@ public class DefaultSystem extends SystemProfile
     @Override
     public String getStatusMessage()
     {
-        return "";
+        return "System is in gateway mode.";
     }
     
 }

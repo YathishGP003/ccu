@@ -76,7 +76,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
     }
     
     public String getProfileName() {
-        return "VAV Fully Modulating RTU";
+        return "VAV Fully Modulating AHU";
     }
     
     @Override

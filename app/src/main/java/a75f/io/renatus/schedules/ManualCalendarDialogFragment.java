@@ -189,7 +189,7 @@ public class ManualCalendarDialogFragment extends DialogFragment implements View
             for (Schedule v : vacations) {
                 if (!v.getId().equals(mId))
                 {
-                    if (v.getDis().equals((mVacationNameEditText.getText().toString().trim())))
+                    if (v.getDis().equalsIgnoreCase((mVacationNameEditText.getText().toString().trim())))
                     {
                         Toast.makeText(this.getContext(), "Vacation " + v.getDis() + " already exists", Toast.LENGTH_SHORT).show();
                         return false;
@@ -208,7 +208,7 @@ public class ManualCalendarDialogFragment extends DialogFragment implements View
             {
                 if (!v.getId().equals(mId))
                 {
-                    if (v.getDis().equals((mVacationNameEditText.getText().toString().trim())))
+                    if (v.getDis().equalsIgnoreCase((mVacationNameEditText.getText().toString().trim())))
                     {
                         Toast.makeText(this.getContext(), "Vacation " + v.getDis() + " already exists", Toast.LENGTH_SHORT).show();
                         return false;

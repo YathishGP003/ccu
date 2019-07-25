@@ -310,12 +310,14 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			case R.id.targetMaxInsideHumidity:
 				if (maxHumiditySpinnerReady)
 				{
+					maxHumiditySpinnerReady = false;
 					setUserIntentBackground("target and max and inside and humidity", val);
 				}
 				break;
 			case R.id.targetMinInsideHumidity:
 				if (minHumiditySpinnerReady)
 				{
+					minHumiditySpinnerReady = false;
 					setUserIntentBackground("target and min and inside and humidity", val);
 				}
 				break;

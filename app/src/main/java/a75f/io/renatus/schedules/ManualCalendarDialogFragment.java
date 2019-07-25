@@ -5,14 +5,19 @@ import android.app.Dialog;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
+import com.prolificinteractive.materialcalendarview.OnMonthChangedListener;
 
 import org.joda.time.DateTime;
 
@@ -22,6 +27,7 @@ import java.util.List;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.renatus.R;
+import a75f.io.renatus.views.RangeDecorator;
 
 public class ManualCalendarDialogFragment extends DialogFragment implements View.OnClickListener
 {
@@ -31,9 +37,10 @@ public class ManualCalendarDialogFragment extends DialogFragment implements View
     private MaterialCalendarView mCalendarView;
     private Button               mButtonSave;
     private Button               mButtonCancel;
+    private ImageView            clearText;
     private String               mVacationName;
     private String               mId;
-    
+
     private Schedule schedule;
 
 
@@ -69,9 +76,11 @@ public class ManualCalendarDialogFragment extends DialogFragment implements View
         View           view     = inflater.inflate(R.layout.fragment_vacation_calendar, null);
         mCalendarView = view.findViewById(R.id.calendarView);
         mVacationNameEditText = view.findViewById(R.id.editText_vacationName);
+        clearText = view.findViewById(R.id.clearText);
 
         mButtonSave = view.findViewById(R.id.buttonSaveTwo);
         mButtonCancel = view.findViewById(R.id.buttonCancelTwo);
+        clearText.setOnClickListener(this);
 
         if (mVacationName != null)
         {
@@ -106,6 +115,38 @@ public class ManualCalendarDialogFragment extends DialogFragment implements View
                                        });
 
         mButtonCancel.setOnClickListener(view12 -> dismiss());
+        mVacationNameEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                if (charSequence.length()>0) clearText.setVisibility(View.VISIBLE); else clearText.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
+        mCalendarView.setOnDateChangedListener((calendarView, date, selected) -> calendarView.removeDecorators());
+        mCalendarView.setOnRangeSelectedListener((calendarView, dates) -> {
+            RangeDecorator rangeDecorator = new RangeDecorator(getActivity(),R.drawable.square_background,dates);
+            calendarView.addDecorator(rangeDecorator);
+
+            List<CalendarDay> startDate = new ArrayList<>();
+            startDate.add(dates.get(0));
+            RangeDecorator rangeDecorator1 = new RangeDecorator(getActivity(),R.drawable.left_circle_orange,startDate);
+            calendarView.addDecorator(rangeDecorator1);
+
+            List<CalendarDay> endDate = new ArrayList<>();
+            endDate.add(dates.get(dates.size()-1));
+            RangeDecorator rangeDecorator2 = new RangeDecorator(getActivity(),R.drawable.right_circle_orange,endDate);
+            calendarView.addDecorator(rangeDecorator2);
+
+        });
 
         AlertDialog builder = new AlertDialog.Builder(getActivity(), R.style.NewDialogStyle)
                 .setView(view)
@@ -132,6 +173,11 @@ public class ManualCalendarDialogFragment extends DialogFragment implements View
                 break;
             case R.id.buttonCancel:
                 dismiss();
+                break;
+            case R.id.clearText:
+                if (!TextUtils.isEmpty(mVacationNameEditText.getText())){
+                    mVacationNameEditText.setText("");
+                }
                 break;
         }
     }

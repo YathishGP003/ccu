@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="wrap_content"
-    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:orientation="vertical"
     android:padding="20dp">
 
-
+<RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
     <EditText
         android:id="@+id/editText_vacationName"
         android:layout_width="match_parent"
@@ -19,33 +20,34 @@
         android:hint="Vacation Name"
         android:inputType="textPersonName" />
 
+    <ImageView
+        android:id="@+id/clearText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:padding="8dp"
+        android:visibility="gone"
+        android:layout_centerInParent="true"
+        android:src="@drawable/icon_close"/>
+</RelativeLayout>
 
     <com.prolificinteractive.materialcalendarview.MaterialCalendarView xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/calendarView"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="300dp"
-        app:mcv_selectionColor="@color/orange_75f"
+        android:layout_gravity="center"
+        app:mcv_selectionColor="@color/accent"
         app:mcv_selectionMode="range"
         app:mcv_showOtherDates="all"
-
+        app:mcv_headerTextAppearance="@style/month_text_appearance"
         />
+
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end"
         android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/buttonSaveTwo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:background="@null"
-            android:fontFamily="@font/lato_regular"
-            android:text="SAVE"
-            android:textColor="@color/orange_75f"
-            android:textSize="20dp" />
 
         <Button
             android:id="@+id/buttonCancelTwo"
@@ -55,6 +57,16 @@
             android:background="@null"
             android:fontFamily="@font/lato_regular"
             android:text="CANCEL"
+            android:textColor="@color/orange_75f"
+            android:textSize="20dp" />
+        <Button
+            android:id="@+id/buttonSaveTwo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:background="@null"
+            android:fontFamily="@font/lato_regular"
+            android:text="SAVE"
             android:textColor="@color/orange_75f"
             android:textSize="20dp" />
 

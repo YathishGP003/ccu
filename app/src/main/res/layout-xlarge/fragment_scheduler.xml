@@ -675,7 +675,9 @@
                 android:textSize="28sp"
                 android:enabled="true"
                 android:fontFamily="@font/lato_bold"
-                android:text="Add Vacations"
+                android:text="Add Vacation"
+                android:drawablePadding="12dp"
+                android:drawableEnd="@drawable/ic_add"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/constraintLt_Scheduler" />

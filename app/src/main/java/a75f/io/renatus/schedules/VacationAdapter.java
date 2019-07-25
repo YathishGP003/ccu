@@ -8,7 +8,12 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import a75f.io.api.haystack.Schedule;
 import a75f.io.renatus.R;
@@ -19,6 +24,9 @@ public class VacationAdapter extends RecyclerView.Adapter<VacationAdapter.ViewHo
     private List<Schedule>              mSchedules;
     private ImageButton.OnClickListener mEditOnClickListener;
     private ImageButton.OnClickListener mDeleteOnClickListener;
+    private DateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+    private DateFormat outputFormat = new SimpleDateFormat("dd MMM yy", Locale.getDefault());
+
 
     public VacationAdapter(List<Schedule> schedules, ImageButton.OnClickListener editOnClickListener, ImageButton.OnClickListener deleteOnClickListener)
     {
@@ -45,8 +53,14 @@ public class VacationAdapter extends RecyclerView.Adapter<VacationAdapter.ViewHo
         Schedule schedule = mSchedules.get(position);
 
         viewHolder.mVacationName.setText(schedule.getDis());
-        viewHolder.mEndDate.setText(schedule.getEndDateString());
-        viewHolder.mStartDate.setText(schedule.getStartDateString());
+        try {
+            Date startDate  = inputFormat.parse(schedule.getStartDateString());
+            Date endDate  = inputFormat.parse(schedule.getEndDateString());
+            viewHolder.mEndDate.setText(outputFormat.format(endDate));
+            viewHolder.mStartDate.setText(outputFormat.format(startDate));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
 
     }
 

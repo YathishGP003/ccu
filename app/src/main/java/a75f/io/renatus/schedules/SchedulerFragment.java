@@ -44,19 +44,6 @@ import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.renatus.R;
 import a75f.io.renatus.schedules.ManualSchedulerDialogFragment.ManualScheduleDialogListener;
 import a75f.io.renatus.util.FontManager;
-
-
-/***
- *
- * Add method to add new schedules - done
- * Add method to edit a schedule - done
- * Add method to edit a vacation - IP
- * Add validation - done
- * Add UI to edit zone based schedules
- * Get Tuners from haystack for dead bands
- * Speak with Shilpa about where requirements end for this task
- *
- */
 public class SchedulerFragment extends Fragment implements ManualScheduleDialogListener {
 
     private static final String PARAM_SCHEDULE_ID = "PARAM_SCHEDULE_ID";

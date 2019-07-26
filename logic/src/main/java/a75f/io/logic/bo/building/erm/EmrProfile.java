@@ -1,7 +1,5 @@
 package a75f.io.logic.bo.building.erm;
 
-import android.util.Log;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -10,6 +8,7 @@ import java.util.Set;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HisItem;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.ZoneProfile;
@@ -63,14 +62,14 @@ public class EmrProfile extends ZoneProfile
         List<HisItem> hisItems = CCUHsApi.getInstance().getHisItems(emrPoint.get("id").toString(), 0 ,2);
         
         if (hisItems.size() < 2) {
-            Log.d(L.TAG_CCU_ZONE, "EmrProfile, Only one Reading !");
+            CcuLog.d(L.TAG_CCU_ZONE, "EmrProfile, Only one Reading !");
             return;
         }
         HisItem reading1 = hisItems.get(0);
         HisItem reading2 = hisItems.get(1);
         
         for (HisItem h : hisItems) {
-            Log.d(L.TAG_CCU_ZONE, "EmrProfile, "+h.getDate()+" "+h.getVal());
+            CcuLog.d(L.TAG_CCU_ZONE, "EmrProfile, "+h.getDate()+" "+h.getVal());
         }
         
         int timeDiffMins = (int) (reading1.getDate().getTime() - reading2.getDate().getTime())/(60*1000);
@@ -82,8 +81,8 @@ public class EmrProfile extends ZoneProfile
         
         emrEquip.setHisVal("current and rate", ratekWh);
         emrEquip.setEquipStatus("Total Energy Consumed "+reading1.getVal()+" kWh "+" Current Rate "+ratekWh+"KW");
-        
-        Log.d(L.TAG_CCU_ZONE, "EmrProfile, Total Energy Consumed "+reading1.getVal()+" currentRate "+ratekWh);
+    
+        CcuLog.d(L.TAG_CCU_ZONE, "EmrProfile, Total Energy Consumed "+reading1.getVal()+" currentRate "+ratekWh);
         
     }
 }

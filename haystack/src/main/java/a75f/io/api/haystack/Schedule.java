@@ -141,10 +141,23 @@ public class Schedule extends Entity
                 boolean hasOverlap = additions.overlaps(current);
                 if (hasOverlap)
                 {
-                    Log.d("CCU_UI"," hasOverlap "+" additions "+additions.toString()+" current "+current);
+                    Log.d("CCU_UI"," hasOverlap "+" additions "+additions+" current "+current);
                     return true;
                 }
+                //If current day is monday , it could conflict with next week's multi-day sunday schedule.
+                if (current.getStart().getDayOfWeek() == 7
+                        && additions.getStart().getDayOfWeek() == 1) {
+                    DateTime start = new DateTime(additions.getStartMillis()+ 7*24*60*60*1000);
+                    DateTime end = new DateTime(additions.getEndMillis()+ 7*24*60*60*1000);
+                    additions = new Interval(start, end);
+                    hasOverlap = current.overlaps(additions);
+                    if (hasOverlap) {
+                        return true;
+                    }
+                }
+                
             }
+            
         }
 
         return false;
@@ -157,6 +170,7 @@ public class Schedule extends Entity
         for (Interval current : intervalsOfCurrent)
         {
             boolean hasOverlap = intervalOfAddition.overlaps(current);
+            Log.d("CCU_UI"," Current "+current+" new "+intervalOfAddition+" overlaps "+hasOverlap);
             if (hasOverlap)
             {
                 if (current.getStart().minuteOfDay().get() < current.getEnd().minuteOfDay().get())
@@ -173,6 +187,18 @@ public class Schedule extends Entity
                     {
                         overLaps.add(new Interval(intervalOfAddition.getStartMillis(), current.getEndMillis()));
                     }
+                }
+            }
+    
+            //If current day is monday , it could conflict with next week's multi-day sunday schedule.
+            if (current.getStart().getDayOfWeek() == 7
+                && intervalOfAddition.getStart().getDayOfWeek() == 1) {
+                DateTime start = new DateTime(intervalOfAddition.getStartMillis()+ 7*24*60*60*1000);
+                DateTime end = new DateTime(intervalOfAddition.getEndMillis()+ 7*24*60*60*1000);
+                Interval addition = new Interval(start, end);
+                hasOverlap = current.overlaps(addition);
+                if (hasOverlap) {
+                    overLaps.add(current.overlap(addition));
                 }
             }
         }

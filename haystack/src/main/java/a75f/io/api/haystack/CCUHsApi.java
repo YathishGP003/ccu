@@ -1287,6 +1287,13 @@ public class CCUHsApi
         return 0;
     }
     
+    /**
+     *  Get N Number of most recent his entries
+     * @param id
+     * @param offset
+     * @param limit
+     * @return
+     */
     public List<HisItem> getHisItems(String id, int offset, int limit) {
         return tagsDb.getHisItems(HRef.copy(id), offset, limit);
     }

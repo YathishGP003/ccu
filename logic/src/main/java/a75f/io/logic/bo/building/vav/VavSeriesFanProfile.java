@@ -90,8 +90,9 @@ public class VavSeriesFanProfile extends VavProfile
                     vavDevice = vavDeviceMap.get(node);
                     double damperMin = vavDevice.getDamperLimit(state == HEATING ? "heating":"cooling", "min");
                     double damperMax = vavDevice.getDamperLimit(state == HEATING ? "heating":"cooling", "max");
-                    vavDevice.setDamperPos((damperMin+damperMax)/2);
-                    vavDevice.setNormalizedDamperPos((damperMin+damperMax)/2);
+                    double damperPos = (L.ccu().systemProfile.getSystemController().getSystemState() == SystemController.State.OFF) ? damperMin : (damperMax+damperMin)/2;
+                    vavDevice.setDamperPos(damperPos);
+                    vavDevice.setNormalizedDamperPos(damperPos);
                     vavDevice.setReheatPos(0);
                 }
                 continue;

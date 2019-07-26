@@ -29,6 +29,8 @@ import a75f.io.logger.CcuLog;
 
 public class HisSyncHandler
 {
+    private static final String TAG = "CCU_HS_SYNC";
+    
     CCUHsApi hayStack;
     HashMap<String, String> tsData;
     
@@ -67,9 +69,9 @@ public class HisSyncHandler
             //TODO- send all points in single call?
             String pointID = m.get("id").toString();
             if (CCUHsApi.getInstance().getGUID(pointID) == null) {
-                CcuLog.d("CCU_HS"," Point does not have GUID "+pointID);
+                CcuLog.d(TAG," Point does not have GUID "+pointID);
                 HDict point = hayStack.hsClient.readById(HRef.copy(pointID));
-                CcuLog.d("CCU_HS", ""+point);
+                CcuLog.d(TAG, ""+point);
                 entitySyncRequired = true;
                 continue;
             
@@ -80,7 +82,7 @@ public class HisSyncHandler
             }
         
             HDict point = hayStack.hsClient.readById(HRef.copy(pointID));
-            CcuLog.d("CCU_HS",""+point);
+            CcuLog.d(TAG,""+point);
             boolean isBool = ((HStr) point.get("kind")).val.equals("Bool");
             ArrayList acc = new ArrayList();
             for (HisItem item : hisItems)
@@ -100,7 +102,7 @@ public class HisSyncHandler
                 i.dump();
             }
             String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "hisWrite", HZincWriter.gridToString(itemGrid));
-            CcuLog.d("CCU_HS","Response :\n"+response);
+            CcuLog.d(TAG,"Response :\n"+response);
             if (response != null) {
                 for (HisItem item: hisItems)
                 {
@@ -122,7 +124,7 @@ public class HisSyncHandler
         
         ArrayList<HashMap> equips = hayStack.readAll("equip");
         for (HashMap equip : equips) {
-            CcuLog.d("CCU_HS"," sendHisToInflux Equip "+equip.get("dis"));
+            CcuLog.d(TAG," sendHisToInflux Equip "+equip.get("dis"));
             ArrayList<HashMap> points = hayStack.readAll("point and his and equipRef == \""+equip.get("id")+"\"");
             if (CCUHsApi.getInstance().getGUID(equip.get("id").toString()) == null) {
                 entitySyncRequired = true;
@@ -136,27 +138,38 @@ public class HisSyncHandler
                 String pointID = m.get("id").toString();
                 String pointGUID = CCUHsApi.getInstance().getGUID(pointID);
                 if (pointGUID == null) {
-                    CcuLog.d("CCU_HS","Skip hisSync; point does not have GUID "+pointID);
+                    CcuLog.d(TAG,"Skip hisSync; point does not have GUID "+pointID);
                     if(pointID != null) {
                         HDict point = hayStack.hsClient.readById(HRef.copy(pointID));
-                        CcuLog.d("CCU_HS", "" + point);
+                        CcuLog.d(TAG, "" + point);
                     }
                     entitySyncRequired = true;
                     continue;
         
                 }
-                ArrayList<HisItem> hisItems = (ArrayList<HisItem>) hayStack.tagsDb.getUnSyncedHisItems(HRef.copy(pointID));
+                
+                
+                /*ArrayList<HisItem> hisItems = (ArrayList<HisItem>) hayStack.tagsDb.getUnSyncedHisItems(HRef.copy(pointID));
                 if (hisItems.size() == 0) {
                     continue;
                 }
     
-                HisItem sItem = hisItems.get(hisItems.size()-1);//TODO - Writing just the recent his val?
+                HisItem sItem = hisItems.get(hisItems.size()-1); //Writing just the recent val?
                 tsData.put( pointGUID.replace("@",""), String.valueOf(sItem.getVal()));
-                /*for (HisItem item: hisItems)
+                for (HisItem item: hisItems)
                 {
                     item.setSyncStatus(true);
                 }
                 hayStack.tagsDb.setHisItemSyncStatus(hisItems);*/
+    
+                //Write recent his val for all points even if it was not updated.
+                HisItem hisVal = hayStack.tagsDb.getLastHisItem(HRef.copy(pointID));
+                if (hisVal == null) {
+                    CcuLog.d(TAG, "His val not found : "+m.get("dis"));
+                    continue;
+                }
+                tsData.put( pointGUID.replace("@",""), String.valueOf(hisVal.getVal()));
+                
                 hayStack.tagsDb.removeHisItems(HRef.copy(pointID));
             
             }
@@ -186,10 +199,10 @@ public class HisSyncHandler
                 String pointID = m.get("id").toString();
                 String pointGUID = CCUHsApi.getInstance().getGUID(pointID);
                 if (pointGUID == null) {
-                    CcuLog.d("CCU_HS","Skip hisSync; point does not have GUID "+pointID);
+                    CcuLog.d(TAG,"Skip hisSync; point does not have GUID "+pointID);
                     if(pointID != null) { //Crash because Floor is deleted and corresponding points also deleted
                         HDict point = hayStack.hsClient.readById(HRef.copy(pointID));
-                        CcuLog.d("CCU_HS", "" + point);
+                        CcuLog.d(TAG, "" + point);
                     }
                     entitySyncRequired = true;
                     continue;
@@ -244,9 +257,9 @@ public class HisSyncHandler
             {
                 String pointID = m.get("id").toString();
                 if (CCUHsApi.getInstance().getGUID(pointID) == null) {
-                    CcuLog.d("CCU_HS"," Point does not have GUID "+pointID);
+                    CcuLog.d(TAG," Point does not have GUID "+pointID);
                     HDict point = hayStack.hsClient.readById(HRef.copy(pointID));
-                    CcuLog.d("CCU_HS",""+point);
+                    CcuLog.d(TAG,""+point);
                     continue;
                 
                 }
@@ -256,7 +269,7 @@ public class HisSyncHandler
                 }
     
                 HDict point = hayStack.hsClient.readById(HRef.copy(pointID));
-                CcuLog.d("CCU_HS", ""+point);
+                CcuLog.d(TAG, ""+point);
                 boolean isBool = ((HStr) point.get("kind")).val.equals("Bool");
                 ArrayList acc = new ArrayList();
                 for (HisItem item : hisItems)
@@ -287,7 +300,7 @@ public class HisSyncHandler
                         }
                     }
     
-                    CcuLog.d("CCU_HS","Write influx point "+measurement.toString());
+                    CcuLog.d(TAG,"Write influx point "+measurement.toString());
                     //batchPointsBuilder.point(measurement.build());
                 }
                 for (HisItem item: hisItems)

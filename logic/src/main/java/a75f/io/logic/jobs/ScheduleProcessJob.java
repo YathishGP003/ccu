@@ -570,6 +570,12 @@ public class ScheduleProcessJob extends BaseJob {
                 Log.d(L.TAG_CCU_JOB, "ScheduleStatus not changed for  "+equip.getDisplayName());
             }
         }
+    
+        ArrayList occ = CCUHsApi.getInstance().readAll("point and occupancy and status and equipRef == \""+equip.getId()+"\"");
+        if (occ != null && occ.size() > 0) {
+            String id = ((HashMap) points.get(0)).get("id").toString();
+            CCUHsApi.getInstance().writeHisValById(id, (double) getZoneStatus(equip.getRoomRef()).ordinal());
+        }
         
     }
     

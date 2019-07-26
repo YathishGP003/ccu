@@ -109,10 +109,12 @@ public class DabProfile extends ZoneProfile
     
                 double damperMin = dabEquip.getDamperLimit(state == HEATING ? "heating":"cooling", "min");
                 double damperMax = dabEquip.getDamperLimit(state == HEATING ? "heating":"cooling", "max");
-                dabEquip.setDamperPos((damperMin+damperMax)/2, "primary");
-                dabEquip.setDamperPos((damperMin+damperMax)/2, "secondary");
-                dabEquip.setNormalizedDamperPos((damperMin+damperMax)/2, "primary");
-                dabEquip.setNormalizedDamperPos((damperMin+damperMax)/2, "secondary");
+                
+                double damperPos = (L.ccu().systemProfile.getSystemController().getSystemState() == SystemController.State.OFF) ? damperMin : (damperMax+damperMin)/2;
+                dabEquip.setDamperPos(damperPos, "primary");
+                dabEquip.setDamperPos(damperPos, "secondary");
+                dabEquip.setNormalizedDamperPos(damperPos, "primary");
+                dabEquip.setNormalizedDamperPos(damperPos, "secondary");
             }
             return;
         }

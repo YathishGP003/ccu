@@ -913,6 +913,17 @@ public class CCUTagsDb extends HServer {
 
         return hisQuery.build().find();
     }
+    
+    public HisItem getLastHisItem(HRef id) {
+        
+        HDict entity = readById(id);
+        
+        QueryBuilder<HisItem> hisQuery = hisBox.query();
+        hisQuery.equal(HisItem_.rec, entity.get("id").toString())
+                .order(HisItem_.date);
+        List<HisItem>  hisItems = hisQuery.build().find();
+        return hisItems.size() > 0 ? hisItems.get(0) : null;
+    }
 
     public void setHisItemSyncStatus(ArrayList<HisItem> hisItems) {
         for (HisItem item : hisItems) {
@@ -937,8 +948,7 @@ public class CCUTagsDb extends HServer {
         
         QueryBuilder<HisItem> hisQuery = hisBox.query();
         hisQuery.equal(HisItem_.rec, entity.get("id").toString())
-                .order(HisItem_.date);
-        
+                .orderDesc(HisItem_.date);
         return hisQuery.build().find(offset, limit);
     }
     

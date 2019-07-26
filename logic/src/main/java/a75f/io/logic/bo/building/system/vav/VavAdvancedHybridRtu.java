@@ -229,9 +229,19 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
     @Override
     public String getStatusMessage(){
         StringBuilder status = new StringBuilder();
-        status.append(systemFanLoopOp > 0 ? " Fan ON ":"");
-        status.append(systemCoolingLoopOp > 0 ? "| Cooling ON ":"");
-        status.append(systemHeatingLoopOp > 0 ? "| Heating ON ":"");
+    
+        if (getConfigEnabled("analog2") > 0)
+        {
+            status.append(systemFanLoopOp > 0 ? " Fan ON " : "");
+        }
+        if (getConfigEnabled("analog1") > 0)
+        {
+            status.append(systemCoolingLoopOp > 0 ? "| Cooling ON " : "");
+        }
+        if (getConfigEnabled("analog3") > 0)
+        {
+            status.append(systemHeatingLoopOp > 0 ? "| Heating ON " : "");
+        }
         
         if (!status.toString().equals("")) {
             status.insert(0, super.getStatusMessage()+" ; Analog ");

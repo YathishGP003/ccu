@@ -317,6 +317,7 @@ public class DabEquip
                                     .setTz(tz)
                                     .build();
         String sat1Id = CCUHsApi.getInstance().addPoint(supplyAirTemp1);
+        CCUHsApi.getInstance().writeHisValById(sat1Id, 0.0);
     
         Point supplyAirTemp2 = new Point.Builder()
                                        .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-supplyAirTemp2")
@@ -331,6 +332,20 @@ public class DabEquip
                                        .setTz(tz)
                                        .build();
         String sat2Id = CCUHsApi.getInstance().addPoint(supplyAirTemp2);
+        CCUHsApi.getInstance().writeHisValById(sat2Id, 0.0);
+    
+        Point occupancy = new Point.Builder()
+                                  .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-occupancy")
+                                  .setEquipRef(equipRef)
+                                  .setSiteRef(siteRef)
+                                  .setRoomRef(roomRef)
+                                  .setFloorRef(floorRef)
+                                  .addMarker("dab").addMarker("occupancy").addMarker("status").addMarker("zone").addMarker("writable").addMarker("his").addMarker("equipHis")
+                                  .setGroup(String.valueOf(nodeAddr))
+                                  .setTz(tz)
+                                  .build();
+        String occupancyId = CCUHsApi.getInstance().addPoint(occupancy);
+        CCUHsApi.getInstance().writeHisValById(occupancyId, 0.0);
         
         SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
         device.currentTemp.setPointRef(ctID);
@@ -465,43 +480,46 @@ public class DabEquip
                                                .setEquipRef(equipRef)
                                                .setSiteRef(siteRef)
                                                .addMarker("config").addMarker("dab").addMarker("writable").addMarker("zone")
-                                               .addMarker("enable").addMarker("occupancy").addMarker("control").addMarker("sp")
+                                               .addMarker("enable").addMarker("occupancy").addMarker("control").addMarker("his").addMarker("equipHis").addMarker("sp")
                                                .setGroup(String.valueOf(nodeAddr))
                                                .setTz(tz)
                                                .build();
         String enableOccupancyControlId = CCUHsApi.getInstance().addPoint(enableOccupancyControl);
         CCUHsApi.getInstance().writeDefaultValById(enableOccupancyControlId, config.enableOccupancyControl == true ? 1.0 :0);
+        CCUHsApi.getInstance().writeHisValById(enableOccupancyControlId, config.enableOccupancyControl == true ? 1.0 :0);
         
         Point enableCO2Control = new Point.Builder()
                                          .setDisplayName(equipDis+"-enableCO2Control")
                                          .setEquipRef(equipRef)
                                          .setSiteRef(siteRef)
                                          .addMarker("config").addMarker("dab").addMarker("writable").addMarker("zone")
-                                         .addMarker("enable").addMarker("co2").addMarker("control").addMarker("sp")
+                                         .addMarker("enable").addMarker("co2").addMarker("control").addMarker("sp").addMarker("his").addMarker("equipHis")
                                          .setGroup(String.valueOf(nodeAddr))
                                          .setTz(tz)
                                          .build();
         String enableCO2ControlId = CCUHsApi.getInstance().addPoint(enableCO2Control);
         CCUHsApi.getInstance().writeDefaultValById(enableCO2ControlId, config.enableCO2Control == true ? 1.0 :0);
+        CCUHsApi.getInstance().writeHisValById(enableCO2ControlId, config.enableCO2Control == true ? 1.0 :0);
         
         Point enableIAQControl = new Point.Builder()
                                          .setDisplayName(equipDis+"-enableIAQControl")
                                          .setEquipRef(equipRef)
                                          .setSiteRef(siteRef)
                                          .addMarker("config").addMarker("dab").addMarker("writable").addMarker("zone")
-                                         .addMarker("enable").addMarker("iaq").addMarker("control").addMarker("sp")
+                                         .addMarker("enable").addMarker("iaq").addMarker("control").addMarker("sp").addMarker("his").addMarker("equipHis")
                                          .setGroup(String.valueOf(nodeAddr))
                                          .setTz(tz)
                                          .build();
         String enableIAQControlId = CCUHsApi.getInstance().addPoint(enableIAQControl);
         CCUHsApi.getInstance().writeDefaultValById(enableIAQControlId, config.enableIAQControl == true ? 1.0 :0);
+        CCUHsApi.getInstance().writeHisValById(enableIAQControlId, config.enableIAQControl == true ? 1.0 :0);
         
         Point zonePriority = new Point.Builder()
                                      .setDisplayName(equipDis+"-zonePriority")
                                      .setEquipRef(equipRef)
                                      .setSiteRef(siteRef)
                                      .addMarker("config").addMarker("dab").addMarker("writable").addMarker("zone")
-                                     .addMarker("priority").addMarker("sp").addMarker("his")
+                                     .addMarker("priority").addMarker("sp").addMarker("his").addMarker("equipHis")
                                      .setGroup(String.valueOf(nodeAddr))
                                      .setTz(tz)
                                      .build();
@@ -526,7 +544,7 @@ public class DabEquip
                                          .setEquipRef(equipRef)
                                          .setSiteRef(siteRef)
                                          .addMarker("config").addMarker("dab").addMarker("damper").addMarker("min").addMarker("cooling").addMarker("pos")
-                                         .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
+                                         .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his").addMarker("equipHis")
                                          .setGroup(String.valueOf(nodeAddr))
                                          .setTz(tz)
                                          .build();
@@ -539,7 +557,7 @@ public class DabEquip
                                          .setEquipRef(equipRef)
                                          .setSiteRef(siteRef)
                                          .addMarker("config").addMarker("dab").addMarker("damper").addMarker("max").addMarker("cooling").addMarker("pos")
-                                         .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
+                                         .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his").addMarker("equipHis")
                                          .setGroup(String.valueOf(nodeAddr))
                                          .setTz(tz)
                                          .build();
@@ -553,7 +571,7 @@ public class DabEquip
                                          .setEquipRef(equipRef)
                                          .setSiteRef(siteRef)
                                          .addMarker("config").addMarker("dab").addMarker("damper").addMarker("min").addMarker("heating").addMarker("pos")
-                                         .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
+                                         .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his").addMarker("equipHis")
                                          .setGroup(String.valueOf(nodeAddr))
                                          .setTz(tz)
                                          .build();
@@ -566,7 +584,7 @@ public class DabEquip
                                          .setEquipRef(equipRef)
                                          .setSiteRef(siteRef)
                                          .addMarker("config").addMarker("dab").addMarker("damper").addMarker("max").addMarker("heating").addMarker("pos")
-                                         .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
+                                         .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his").addMarker("equipHis")
                                          .setGroup(String.valueOf(nodeAddr))
                                          .setTz(tz)
                                          .build();

@@ -362,25 +362,13 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
                 setConfigEnabledBackground("analog4", isChecked ? 1 : 0);
                 break;
             case R.id.relay1Test:
-                sendRelayActivationTestSignal((short) (relay1Test.isChecked() ? 1: 0));
-                break;
             case R.id.relay2Test:
-                sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 1 : 0));
-                break;
             case R.id.relay3Test:
-                sendRelayActivationTestSignal((short)(relay3Test.isChecked() ? 1 << 2 : 0));
-                break;
             case R.id.relay4Test:
-                sendRelayActivationTestSignal((short)(relay4Test.isChecked() ? 1 << 3 : 0));
-                break;
             case R.id.relay5Test:
-                sendRelayActivationTestSignal((short)(relay5Test.isChecked() ? 1 << 4 : 0));
-                break;
             case R.id.relay6Test:
-                sendRelayActivationTestSignal((short)(relay5Test.isChecked() ? 1 << 5 : 0));
-                break;
             case R.id.relay7Test:
-                sendRelayActivationTestSignal((short)(relay6Test.isChecked() ? 1 << 6 : 0));
+                sendAnalogRelayTestSignal();
                 break;
         }
     }
@@ -465,16 +453,10 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
                 setConfigBackground("analog4 and heating and max", TunerConstants.SYSTEM_BUILDING_VAL_LEVEL, Double.parseDouble(arg0.getSelectedItem().toString()));
                 break;
             case R.id.ahuAnalog1Test:
-                sendAnalog1OutTestSignal(Double.parseDouble(arg0.getSelectedItem().toString()));
-                break;
             case R.id.ahuAnalog2Test:
-                sendAnalog2OutTestSignal(Double.parseDouble(arg0.getSelectedItem().toString()));
-                break;
             case R.id.ahuAnalog3Test:
-                sendAnalog3OutTestSignal(Double.parseDouble(arg0.getSelectedItem().toString()));
-                break;
             case R.id.ahuAnalog4Test:
-                sendAnalog4OutTestSignal(Double.parseDouble(arg0.getSelectedItem().toString()));
+                sendAnalogRelayTestSignal();
                 break;
         }
     }
@@ -585,74 +567,38 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
     }
     
-    public void sendRelayActivationTestSignal(short val) {
-        CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
-        msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
-        msg.relayBitmap.set(val);
-        MeshUtil.sendStructToCM(msg);
-    }
-    
-    public void sendAnalog1OutTestSignal(double val) {
-        double analogMin = systemProfile.getConfigVal("analog1 and cooling and min");
-        double analogMax = systemProfile.getConfigVal("analog1 and cooling and max");
+    public void sendAnalogRelayTestSignal() {
         
         CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
         msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
+    
+        msg.analog0.set(getAnalogVal(systemProfile.getConfigVal("analog1 and cooling and min"), systemProfile.getConfigVal("analog1 and cooling and max"),
+                Double.parseDouble(ahuAnalog1Test.getSelectedItem().toString())));
+    
+        msg.analog1.set(getAnalogVal(systemProfile.getConfigVal("analog2 and fan and min"), systemProfile.getConfigVal("analog2 and fan and max"),
+                Double.parseDouble(ahuAnalog2Test.getSelectedItem().toString())));
+    
+        msg.analog2.set(getAnalogVal(systemProfile.getConfigVal("analog3 and heating and min"), systemProfile.getConfigVal("analog3 and heating and max"),
+                Double.parseDouble(ahuAnalog3Test.getSelectedItem().toString())));
+    
+        msg.analog3.set((short)(Double.parseDouble(ahuAnalog4Test.getSelectedItem().toString())));
         
-        short signal;
-        if (analogMax > analogMin)
-        {
-            signal = (short) (10 * (analogMin + (analogMax - analogMin) * val/100));
-        } else {
-            signal = (short) (10 * (analogMin - (analogMin - analogMax) * val/100));
-        }
-        msg.analog0.set(signal);
+        short relayStatus = (short) ((relay1Test.isChecked() ? 1 : 0)
+                                     | (relay2Test.isChecked() ? 1 << 1 : 0)
+                                     | (relay3Test.isChecked() ? 1 << 2 : 0)
+                                     | (relay4Test.isChecked() ? 1 << 3 : 0)
+                                     | (relay5Test.isChecked() ? 1 << 4 : 0)
+                                     | (relay6Test.isChecked() ? 1 << 5 : 0)
+                                     | (relay7Test.isChecked() ? 1 << 6 : 0));
+    
+        msg.relayBitmap.set(relayStatus);
+        
         MeshUtil.sendStructToCM(msg);
     }
     
-    public void sendAnalog2OutTestSignal(double val) {
-        double analogMin = systemProfile.getConfigVal("analog2 and fan and min");
-        double analogMax = systemProfile.getConfigVal("analog2 and fan and max");
-        
-        CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
-        msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
-        
-        short signal;
-        if (analogMax > analogMin)
-        {
-            signal = (short) (10 * (analogMin + (analogMax - analogMin) * val/100));
-        } else {
-            signal = (short) (10 * (analogMin - (analogMin - analogMax) * val/100));
-        }
-        msg.analog1.set(signal);
-        MeshUtil.sendStructToCM(msg);
-    }
     
-    public void sendAnalog3OutTestSignal(double val) {
-        double analogMin = systemProfile.getConfigVal("analog3 and heating and min");
-        double analogMax = systemProfile.getConfigVal("analog3 and heating and max");
-        
-        CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
-        msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
-        
-        short signal;
-        if (analogMax > analogMin)
-        {
-            signal = (short) (10 * (analogMin + (analogMax - analogMin) * val/100));
-        } else {
-            signal = (short) (10 * (analogMin - (analogMin - analogMax) * val/100));
-        }
-        msg.analog2.set(signal);
-        MeshUtil.sendStructToCM(msg);
+    short getAnalogVal(double min, double max, double val) {
+        return max > min ? (short) (10 * (min + (max - min) * val/100)) : (short) (10 * (min - (min - max) * val/100));
     }
-    
-    public void sendAnalog4OutTestSignal(double val) {
-        
-        CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
-        msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
-        msg.analog3.set((short) val);
-        MeshUtil.sendStructToCM(msg);
-    }
-    
 }
 

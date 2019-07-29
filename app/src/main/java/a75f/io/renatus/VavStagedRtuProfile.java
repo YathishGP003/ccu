@@ -252,25 +252,13 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
                 break;
 
             case R.id.relay1Test:
-                sendRelayActivationTestSignal((short) (relay1Test.isChecked() ? 1: 0));
-                break;
             case R.id.relay2Test:
-                sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 1 : 0));
-                break;
             case R.id.relay3Test:
-                sendRelayActivationTestSignal((short)(relay3Test.isChecked() ? 1 << 2 : 0));
-                break;
             case R.id.relay4Test:
-                sendRelayActivationTestSignal((short)(relay4Test.isChecked() ? 1 << 3 : 0));
-                break;
             case R.id.relay5Test:
-                sendRelayActivationTestSignal((short)(relay5Test.isChecked() ? 1 << 4 : 0));
-                break;
             case R.id.relay6Test:
-                sendRelayActivationTestSignal((short)(relay6Test.isChecked() ? 1 << 5 : 0));
-                break;
             case R.id.relay7Test:
-                sendRelayActivationTestSignal((short)(relay7Test.isChecked() ? 1 << 6 : 0));
+                sendRelayActivationTestSignal();
                 break;
 
         }
@@ -413,11 +401,19 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
     }
 
-    public void sendRelayActivationTestSignal(short val) {
-        Log.d(L.TAG_CCU_UI, "sendRelayActivationTestSignal val : "+val);
+    public void sendRelayActivationTestSignal() {
+        
         CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
         msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
-        msg.relayBitmap.set(val);
+        short relayStatus = (short) ((relay1Test.isChecked() ? 1 : 0)
+                                     | (relay2Test.isChecked() ? 1 << 1 : 0)
+                                     | (relay3Test.isChecked() ? 1 << 2 : 0)
+                                     | (relay4Test.isChecked() ? 1 << 3 : 0)
+                                     | (relay5Test.isChecked() ? 1 << 4 : 0)
+                                     | (relay6Test.isChecked() ? 1 << 5 : 0)
+                                     | (relay7Test.isChecked() ? 1 << 6 : 0));
+        
+        msg.relayBitmap.set(relayStatus);
         MeshUtil.sendStructToCM(msg);
     }
 }

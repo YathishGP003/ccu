@@ -3,6 +3,7 @@ package a75f.io.renatus;
 import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -67,6 +68,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	
 	ArrayList<String> modesAvailable = new ArrayList<>();
 	ArrayAdapter<Double> humidityAdapter;
+	
 	Prefs prefs;
 	public SystemFragment()
 	{
@@ -138,9 +140,19 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		systemModePicker.setOnScrollListener(new NumberPicker.OnScrollListener() {
 			@Override
 			public void onScrollStateChange(NumberPicker numberPicker, int scrollState) {
-				if (systemModePicker.getValue() != TunerUtil.readSystemUserIntentVal("rtu and mode")) {
-					int newMode = systemModePicker.getValue();
-					setUserIntentBackground("rtu and mode", SystemMode.getEnum(modesAvailable.get(newMode)).ordinal() );
+				if (scrollState == SCROLL_STATE_IDLE) {
+					//Adding a dealy of 100ms as instant invocation of getVal() returns old value at times.
+					new Handler().postDelayed(new Runnable()
+					{
+						@Override
+						public void run()
+						{
+							if (numberPicker.getValue() != TunerUtil.readSystemUserIntentVal("rtu and mode"))
+							{
+								setUserIntentBackground("rtu and mode", SystemMode.getEnum(modesAvailable.get(numberPicker.getValue())).ordinal());
+							}
+						}
+					}, 100);
 				}
 			}
 		});

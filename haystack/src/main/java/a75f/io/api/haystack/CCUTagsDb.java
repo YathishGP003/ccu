@@ -920,8 +920,8 @@ public class CCUTagsDb extends HServer {
         
         QueryBuilder<HisItem> hisQuery = hisBox.query();
         hisQuery.equal(HisItem_.rec, entity.get("id").toString())
-                .order(HisItem_.date);
-        List<HisItem>  hisItems = hisQuery.build().find();
+                .orderDesc(HisItem_.date);
+        List<HisItem>  hisItems = hisQuery.build().find(0,1);
         return hisItems.size() > 0 ? hisItems.get(0) : null;
     }
 

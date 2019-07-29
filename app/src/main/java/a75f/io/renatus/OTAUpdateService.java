@@ -28,6 +28,7 @@ import a75f.io.device.mesh.MeshUtil;
 import a75f.io.device.serial.CcuToCmOverUsbFirmwareMetadataMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbFirmwarePacketMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbFirmwarePacketRequest_t;
+import a75f.io.device.serial.CmToCcuOverUsbFirmwareUpdateAckMessage_t;
 import a75f.io.device.serial.FirmwareDeviceType_t;
 import a75f.io.device.serial.MessageConstants;
 import a75f.io.device.serial.MessageType;
@@ -83,7 +84,7 @@ public class OTAUpdateService extends IntentService {
             handleOtaUpdateStartRequest(intent);
         }
         /* An activity has requested the OTA update to end (for debugging) */
-        if(action.equals(Globals.IntentActions.ACTIVITY_RESET)) {
+        else if(action.equals(Globals.IntentActions.ACTIVITY_RESET)) {
             resetUpdateVariables();
             completeUpdate();
         }
@@ -106,6 +107,10 @@ public class OTAUpdateService extends IntentService {
             byte[] eventBytes = intent.getByteArrayExtra("eventBytes");
 
             switch(eventType) {
+                case CM_TO_CCU_OVER_USB_FIRMWARE_UPDATE_ACK:
+                    handleOtaUpdateAck(eventBytes);
+                    break;
+
                 case CM_TO_CCU_OVER_USB_FIRMWARE_PACKET_REQUEST:
                     handlePacketRequest(eventBytes);
                     break;
@@ -157,6 +162,14 @@ public class OTAUpdateService extends IntentService {
         }
     }
 
+    private void handleOtaUpdateAck(byte[] eventBytes) {
+        CmToCcuOverUsbFirmwareUpdateAckMessage_t msg = new CmToCcuOverUsbFirmwareUpdateAckMessage_t();
+        msg.setByteBuffer(ByteBuffer.wrap(eventBytes).order(ByteOrder.LITTLE_ENDIAN), 0);
+
+        Log.d(TAG, "[UPDATE] CM has acknowledged update");
+        sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_CM_ACK));
+    }
+
     private void handlePacketRequest(byte[] eventBytes) {
         sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_PACKET_REQ));
 
@@ -170,12 +183,12 @@ public class OTAUpdateService extends IntentService {
     }
 
     private void handleNodeReboot(byte[] eventBytes) {
-        sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_NODE_REBOOT));
-
         SnRebootIndicationMessage_t msg = new SnRebootIndicationMessage_t();
         msg.setByteBuffer(ByteBuffer.wrap(eventBytes).order(ByteOrder.LITTLE_ENDIAN), 0);
 
         if ( (msg.smartNodeAddress.get() == mCurrentLwMeshAddress) && mUpdateInProgress) {
+            sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_NODE_REBOOT));
+
             short versionMajor = msg.smartNodeMajorFirmwareVersion.get();
             short versionMinor = msg.smartNodeMinorFirmwareVersion.get();
 
@@ -641,7 +654,7 @@ public class OTAUpdateService extends IntentService {
             return;
         }
         if (packetNumber < 0 || packetNumber > packets.size()) {
-            Log.d(TAG, "[UPDATE] [SN:" + mCurrentLwMeshAddress + "] INVALID PACKET " + packetNumber);
+            Log.d(TAG, "[UPDATE] Received request for invalid packet: " + packetNumber);
             return;
         }
         if (!mUpdateWaitingToComplete && (packetNumber == (packets.size() - 1))) {

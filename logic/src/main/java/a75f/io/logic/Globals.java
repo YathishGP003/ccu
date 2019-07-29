@@ -77,6 +77,7 @@ public class Globals {
         public static final String ACTIVITY_RESET = "a75f.io.intent.action.ACTIVITY_RESET";
         public static final String PUBNUB_MESSAGE = "a75f.io.intent.action.PUBNUB_MESSAGE";
         public static final String OTA_UPDATE_START = "a75f.io.intent.action.OTA_UPDATE_START";
+        public static final String OTA_UPDATE_CM_ACK = "a75f.io.intent.action.OTA_UPDATE_CM_ACK";
         public static final String OTA_UPDATE_PACKET_REQ = "a75f.io.action.OTA_UPDATE_PACKET_REQ";
         public static final String OTA_UPDATE_NODE_REBOOT = "a75f.io.action.OTA_UPDATE_NODE_REBOOT";
         public static final String OTA_UPDATE_TIMED_OUT = "a75f.io.intent.action.OTA_UPDATE_TIMED_OUT";

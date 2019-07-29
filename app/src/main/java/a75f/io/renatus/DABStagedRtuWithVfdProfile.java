@@ -327,26 +327,13 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
                 setConfigEnabledBackground("analog2",analog2Tb.isChecked() ? 1: 0);
                 break;
             case R.id.relay1Test:
-                sendRelayActivationTestSignal((short) (relay1Test.isChecked() ? 1: 0));
-                break;
             case R.id.relay2Test:
-                sendRelayActivationTestSignal((short)(relay2Test.isChecked() ? 1 << 1 : 0));
-                break;
             case R.id.relay3Test:
-                sendRelayActivationTestSignal((short)(relay3Test.isChecked() ? 1 << 2 : 0));
-                break;
             case R.id.relay4Test:
-                sendRelayActivationTestSignal((short)(relay4Test.isChecked() ? 1 << 3 : 0));
-                break;
             case R.id.relay5Test:
-                sendRelayActivationTestSignal((short)(relay5Test.isChecked() ? 1 << 4 : 0));
-                break;
             case R.id.relay6Test:
-                sendRelayActivationTestSignal((short)(relay6Test.isChecked() ? 1 << 5 : 0));
-                break;
             case R.id.relay7Test:
-                sendRelayActivationTestSignal((short)(relay7Test.isChecked() ? 1 << 6 : 0));
-                break;
+                sendRelayActivationTestSignal();
             
         }
         updateAnalogOptions();
@@ -408,9 +395,9 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
                     updateAnalogOptions();
                 }
                 break;
-           /* case R.id.analog2TestSpinner:
-                sendAnalog2OutTestSignal(Double.parseDouble(arg0.getSelectedItem().toString()));
-                break;*/
+           case R.id.fanspeedSpinner:
+                sendRelayActivationTestSignal();
+                break;
             case R.id.analog2Economizer:
                 setConfigBackground("analog2 and economizer", Double.parseDouble(arg0.getSelectedItem().toString()));
                 break;
@@ -549,17 +536,19 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
     }
     
-    public void sendRelayActivationTestSignal(short val) {
+    public void sendRelayActivationTestSignal() {
         CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
         msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
-        msg.relayBitmap.set(val);
-        MeshUtil.sendStructToCM(msg);
-    }
-    
-    public void sendAnalog2OutTestSignal(double val) {
-        CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
-        msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
-        msg.analog2.set((short)(val * 10));
+        short relayStatus = (short) ((relay1Test.isChecked() ? 1 : 0)
+                                     | (relay2Test.isChecked() ? 1 << 1 : 0)
+                                     | (relay3Test.isChecked() ? 1 << 2 : 0)
+                                     | (relay4Test.isChecked() ? 1 << 3 : 0)
+                                     | (relay5Test.isChecked() ? 1 << 4 : 0)
+                                     | (relay6Test.isChecked() ? 1 << 5 : 0)
+                                     | (relay7Test.isChecked() ? 1 << 6 : 0));
+        
+        msg.relayBitmap.set(relayStatus);
+        msg.analog1.set((short)(10 * Double.parseDouble(analog2TestSpinner.getSelectedItem().toString())));
         MeshUtil.sendStructToCM(msg);
     }
 }

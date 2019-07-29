@@ -166,8 +166,10 @@ public class OTAUpdateService extends IntentService {
         CmToCcuOverUsbFirmwareUpdateAckMessage_t msg = new CmToCcuOverUsbFirmwareUpdateAckMessage_t();
         msg.setByteBuffer(ByteBuffer.wrap(eventBytes).order(ByteOrder.LITTLE_ENDIAN), 0);
 
-        Log.d(TAG, "[UPDATE] CM has acknowledged update");
-        sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_CM_ACK));
+        if(msg.lwMeshAddress.get() == mCurrentLwMeshAddress) {
+            Log.d(TAG, "[UPDATE] CM has acknowledged update");
+            sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_CM_ACK));
+        }
     }
 
     private void handlePacketRequest(byte[] eventBytes) {

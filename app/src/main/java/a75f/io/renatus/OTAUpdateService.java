@@ -36,6 +36,7 @@ import a75f.io.device.serial.SnRebootIndicationMessage_t;
 import a75f.io.logic.BuildConfig;
 import a75f.io.logic.Globals;
 import a75f.io.logic.bo.util.ByteArrayUtils;
+import a75f.io.usbserial.UsbService;
 
 public class OTAUpdateService extends IntentService {
 
@@ -91,6 +92,11 @@ public class OTAUpdateService extends IntentService {
         /* The service has been launched from a PubNub notification */
         else if(action.equals(Globals.IntentActions.PUBNUB_MESSAGE)) {
             handleOtaUpdateStartRequest(intent);
+        }
+        /* The service has been launched in response to a CM disconnect */
+        else if(action.equals(UsbService.ACTION_USB_DETACHED)) {
+            resetUpdateVariables();
+            completeUpdate();
         }
         /* The service has been launched in response to a file download */
         else if(action.equals(DownloadManager.ACTION_DOWNLOAD_COMPLETE)) {

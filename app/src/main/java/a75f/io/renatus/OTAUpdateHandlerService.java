@@ -11,6 +11,7 @@ import android.os.IBinder;
 import android.util.Log;
 
 import a75f.io.logic.Globals;
+import a75f.io.usbserial.UsbService;
 
 public class OTAUpdateHandlerService extends Service {
 
@@ -38,6 +39,7 @@ public class OTAUpdateHandlerService extends Service {
                     break;
 
                 case Globals.IntentActions.ACTIVITY_RESET:
+                case UsbService.ACTION_USB_DETACHED:
                 case Globals.IntentActions.OTA_UPDATE_CM_ACK:
                 case Globals.IntentActions.OTA_UPDATE_PACKET_REQ:
                 case Globals.IntentActions.OTA_UPDATE_NODE_REBOOT:
@@ -73,6 +75,7 @@ public class OTAUpdateHandlerService extends Service {
         filter.addAction(Globals.IntentActions.ACTIVITY_MESSAGE);
         filter.addAction(Globals.IntentActions.ACTIVITY_RESET);
         filter.addAction(Globals.IntentActions.PUBNUB_MESSAGE);
+        filter.addAction(UsbService.ACTION_USB_DETACHED);
         filter.addAction(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
         filter.addAction(Globals.IntentActions.LSERIAL_MESSAGE);
         filter.addAction(Globals.IntentActions.OTA_UPDATE_START);

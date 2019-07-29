@@ -11,10 +11,14 @@ import android.os.IBinder;
 import android.util.Log;
 
 import a75f.io.logic.Globals;
+import a75f.io.usbserial.UsbService;
 
 public class OTAUpdateHandlerService extends Service {
 
     private static String TAG = "OTAUpdateHandlerService";
+
+    private static int FIVE_MINUTES_MS = 300000;
+    private static int TWENTY_SECONDS_MS = 20000;
 
     private boolean mIsTimerStarted = false;
     private CountDownTimer mTimeoutTimer;
@@ -35,6 +39,8 @@ public class OTAUpdateHandlerService extends Service {
                     break;
 
                 case Globals.IntentActions.ACTIVITY_RESET:
+                case UsbService.ACTION_USB_DETACHED:
+                case Globals.IntentActions.OTA_UPDATE_CM_ACK:
                 case Globals.IntentActions.OTA_UPDATE_PACKET_REQ:
                 case Globals.IntentActions.OTA_UPDATE_NODE_REBOOT:
                 case Globals.IntentActions.OTA_UPDATE_COMPLETE:
@@ -69,9 +75,11 @@ public class OTAUpdateHandlerService extends Service {
         filter.addAction(Globals.IntentActions.ACTIVITY_MESSAGE);
         filter.addAction(Globals.IntentActions.ACTIVITY_RESET);
         filter.addAction(Globals.IntentActions.PUBNUB_MESSAGE);
+        filter.addAction(UsbService.ACTION_USB_DETACHED);
         filter.addAction(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
         filter.addAction(Globals.IntentActions.LSERIAL_MESSAGE);
         filter.addAction(Globals.IntentActions.OTA_UPDATE_START);
+        filter.addAction(Globals.IntentActions.OTA_UPDATE_CM_ACK);
         filter.addAction(Globals.IntentActions.OTA_UPDATE_PACKET_REQ);
         filter.addAction(Globals.IntentActions.OTA_UPDATE_NODE_REBOOT);
         filter.addAction(Globals.IntentActions.OTA_UPDATE_TIMED_OUT);
@@ -84,7 +92,7 @@ public class OTAUpdateHandlerService extends Service {
         if (!mIsTimerStarted) {
             mIsTimerStarted = true;
 
-            mTimeoutTimer = new CountDownTimer(300000, 20000) {
+            mTimeoutTimer = new CountDownTimer(FIVE_MINUTES_MS, TWENTY_SECONDS_MS) {
 
                 @Override
                 public void onTick(long millisUntilFinished) {

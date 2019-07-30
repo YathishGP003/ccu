@@ -274,7 +274,7 @@ public abstract class SystemProfile
     }
     
     
-    public void addSystemPoints(String siteRef, String equipref, String equipDis, String tz)
+    public void addDefaultSystemPoints(String siteRef, String equipref, String equipDis, String tz)
     {
         Point systemStatusMessage = new Point.Builder().setDisplayName(equipDis + "-StatusMessage").setEquipRef(equipref).setSiteRef(siteRef).addMarker("system").addMarker("status").addMarker("message").addMarker("writable").setTz(tz).setKind("string").build();
         CCUHsApi.getInstance().addPoint(systemStatusMessage);
@@ -284,7 +284,7 @@ public abstract class SystemProfile
     
     //VAV & DAB System profile common points are added here.
     public void addRTUSystemPoints(String siteRef, String equipref, String equipDis, String tz) {
-        addSystemPoints(siteRef, equipref, equipDis, tz);
+        addDefaultSystemPoints(siteRef, equipref, equipDis, tz);
         Point systemStatusMessage = new Point.Builder()
                                             .setDisplayName(equipDis+"-StatusMessage")
                                             .setEquipRef(equipref)

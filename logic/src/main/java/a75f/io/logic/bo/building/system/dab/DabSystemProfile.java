@@ -28,7 +28,7 @@ public abstract class DabSystemProfile extends SystemProfile
         addSystemLoopOpPoint("heating", siteRef, equipRef, equipDis, tz);
         addSystemLoopOpPoint("fan", siteRef, equipRef, equipDis, tz);
         addSystemLoopOpPoint("co2", siteRef, equipRef, equipDis, tz);
-        addSystemPoints(siteRef, equipRef, equipDis, tz);
+        addRTUSystemPoints(siteRef, equipRef, equipDis, tz);
         addDabSystemPoints(siteRef, equipRef, equipDis, tz);
     }
     

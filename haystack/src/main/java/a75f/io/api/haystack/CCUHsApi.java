@@ -739,6 +739,15 @@ public class CCUHsApi
             tagsDb.removeIdMap.put(id, tagsDb.idMap.remove(id));
         }
     }
+    
+    //Removes entity , but the operation is not synced to backend
+    public void removeEntity(String id) {
+        tagsDb.tagsMap.remove(id.replace("@", ""));
+    }
+    
+    public void removeId(String id) {
+        tagsDb.removeIdMap.remove(id.replace("@", ""));
+    }
 
     public void deleteWritableArray(String id)
     {
@@ -839,6 +848,18 @@ public class CCUHsApi
     public String getLUID(String guid)
     {
         for (Map.Entry<String, String> entry : tagsDb.idMap.entrySet())
+        {
+            if (entry.getValue().equals(guid))
+            {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
+    
+    public String getRemoveMapLUID(String guid)
+    {
+        for (Map.Entry<String, String> entry : tagsDb.removeIdMap.entrySet())
         {
             if (entry.getValue().equals(guid))
             {
@@ -1166,7 +1187,7 @@ public class CCUHsApi
     
     public void updateScheduleNoSync(Schedule schedule, String zoneId) {
         addSchedule(schedule.getId(), (zoneId == null ? schedule.getScheduleHDict() : schedule.getZoneScheduleHDict(zoneId)));
-        Log.i("CCU_HS", "updateSchedule: "+schedule.getId()+" " + (zoneId == null ? schedule.getScheduleHDict().toZinc(): schedule.getZoneScheduleHDict(zoneId).toZinc()));
+        Log.i("CCU_HS", "updateScheduleNoSync: "+schedule.getId()+" " + (zoneId == null ? schedule.getScheduleHDict().toZinc(): schedule.getZoneScheduleHDict(zoneId).toZinc()));
     }
     
     public Schedule getScheduleById(String scheduleRef)

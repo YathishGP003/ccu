@@ -35,7 +35,7 @@ public class UpdateScheduleHandler
         HGrid sGrid = new HZincReader(response).readGrid();
         if (sGrid == null)
         {
-            CcuLog.d(L.TAG_CCU_PUBNUB, "PubNub Failed to read remote schedule : " + guid);
+            CcuLog.d(L.TAG_CCU_PUBNUB, "Failed to read remote schedule : " + guid);
             return;
         }
         Iterator it = sGrid.iterator();
@@ -64,6 +64,7 @@ public class UpdateScheduleHandler
                 Schedule s = new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build();
                 s.setmSiteId(CCUHsApi.getInstance().getSiteId().toString());
                 luid = UUID.randomUUID().toString();
+                s.setId(luid);
                 if (s.getRoomRef() != null)
                 {
                     String lroomRef = CCUHsApi.getInstance().getLUID(s.getRoomRef());
@@ -73,7 +74,7 @@ public class UpdateScheduleHandler
                     CCUHsApi.getInstance().addSchedule(luid, s.getScheduleHDict());
                 }
                 
-                CCUHsApi.getInstance().putUIDMap(luid, "@"+guid) ;
+                CCUHsApi.getInstance().putUIDMap("@"+luid, "@"+guid) ;
             }
             ScheduleProcessJob.updateSchedules();
         }

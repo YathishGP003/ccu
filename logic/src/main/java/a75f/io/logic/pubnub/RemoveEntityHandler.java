@@ -34,10 +34,12 @@ public class RemoveEntityHandler
             for (HashMap id : idList) {
                 String guid = id.get("val").toString();
                 String luid = CCUHsApi.getInstance().getLUID("@" + guid);
-                if (luid != null && CCUHsApi.getInstance().getIDMap().get(luid) != null)
+                if (luid != null)
                 {
-                    CCUHsApi.getInstance().deleteEntity(luid);
+                    CCUHsApi.getInstance().removeEntity(luid);
         
+                } else if(CCUHsApi.getInstance().getRemoveMapLUID("@" + guid) != null) {
+                    CCUHsApi.getInstance().removeId(CCUHsApi.getInstance().getRemoveMapLUID("@" + guid));
                 }
             }
         }catch (Exception e) {

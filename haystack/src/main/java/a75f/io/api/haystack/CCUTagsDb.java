@@ -952,7 +952,7 @@ public class CCUTagsDb extends HServer {
         return hisQuery.build().find(offset, limit);
     }
     
-    //Delete all the hisItem except most recent 60 mins.
+    //Delete all the hisItem entries older than 24 hrs.
     public void removeHisItems(HRef id) {
         HDict entity = readById(id);
     

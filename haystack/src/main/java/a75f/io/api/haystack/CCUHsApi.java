@@ -1166,7 +1166,7 @@ public class CCUHsApi
     
     public void updateScheduleNoSync(Schedule schedule, String zoneId) {
         addSchedule(schedule.getId(), (zoneId == null ? schedule.getScheduleHDict() : schedule.getZoneScheduleHDict(zoneId)));
-        Log.i("CCU_HS", "updateSchedule: "+schedule.getId()+" " + (zoneId == null ? schedule.getScheduleHDict().toZinc(): schedule.getZoneScheduleHDict(zoneId).toZinc()));
+        Log.i("CCU_HS", "updateScheduleNoSync: "+schedule.getId()+" " + (zoneId == null ? schedule.getScheduleHDict().toZinc(): schedule.getZoneScheduleHDict(zoneId).toZinc()));
     }
     
     public Schedule getScheduleById(String scheduleRef)

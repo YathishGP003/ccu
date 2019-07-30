@@ -35,7 +35,7 @@ public abstract class VavSystemProfile extends SystemProfile
         addSystemLoopOpPoint("heating", siteRef, equipRef, equipDis, tz);
         addSystemLoopOpPoint("fan", siteRef, equipRef, equipDis, tz);
         addSystemLoopOpPoint("co2", siteRef, equipRef, equipDis, tz);
-        addSystemPoints(siteRef, equipRef, equipDis, tz);
+        addRTUSystemPoints(siteRef, equipRef, equipDis, tz);
         addVavSystemPoints(siteRef, equipRef, equipDis, tz);
         addTrTargetPoints(siteRef,equipRef,equipDis,tz);
     }

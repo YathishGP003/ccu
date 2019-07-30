@@ -273,8 +273,18 @@ public abstract class SystemProfile
         CCUHsApi.getInstance().writeDefaultValById(cmDesiredTempId, 0.0);
     }
     
+    
+    public void addSystemPoints(String siteRef, String equipref, String equipDis, String tz)
+    {
+        Point systemStatusMessage = new Point.Builder().setDisplayName(equipDis + "-StatusMessage").setEquipRef(equipref).setSiteRef(siteRef).addMarker("system").addMarker("status").addMarker("message").addMarker("writable").setTz(tz).setKind("string").build();
+        CCUHsApi.getInstance().addPoint(systemStatusMessage);
+        Point systemScheduleStatus = new Point.Builder().setDisplayName(equipDis + "-ScheduleStatus").setEquipRef(equipref).setSiteRef(siteRef).addMarker("system").addMarker("scheduleStatus").addMarker("writable").setTz(tz).setKind("string").build();
+        CCUHsApi.getInstance().addPoint(systemScheduleStatus);
+    }
+    
     //VAV & DAB System profile common points are added here.
-    public void addSystemPoints(String siteRef, String equipref, String equipDis, String tz) {
+    public void addRTUSystemPoints(String siteRef, String equipref, String equipDis, String tz) {
+        addSystemPoints(siteRef, equipref, equipDis, tz);
         Point systemStatusMessage = new Point.Builder()
                                             .setDisplayName(equipDis+"-StatusMessage")
                                             .setEquipRef(equipref)

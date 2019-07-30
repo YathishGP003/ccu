@@ -43,6 +43,7 @@ public abstract class UtilityApplication extends Application
                 case UsbService.ACTION_USB_PERMISSION_GRANTED: // USB PERMISSION GRANTED
 
                     NotificationHandler.setCMConnectionStatus(true);
+                    LSerial.getInstance().setResetSeedMessage(true);
                     Toast.makeText(context, "USB Ready", Toast.LENGTH_SHORT).show();
                     // DeviceUpdateJobOld.scheduleJob();
                     break;

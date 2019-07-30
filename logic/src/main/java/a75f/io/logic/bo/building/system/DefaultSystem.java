@@ -8,6 +8,7 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -72,6 +73,7 @@ public class DefaultSystem extends SystemProfile
                                    .setTz(siteMap.get("tz").toString())
                                    .build();
         String equipRef = hayStack.addEquip(systemEquip);
+        addDefaultSystemPoints(siteRef, equipRef, siteDis+"-SystemEquip", siteMap.get("tz").toString());
         addSystemTuners();
         addCMPoints(siteRef, equipRef, siteDis+"-SystemEquip", siteMap.get("tz").toString());
         updateGatewayRef(equipRef);
@@ -115,5 +117,26 @@ public class DefaultSystem extends SystemProfile
     {
         return "System is in gateway mode.";
     }
-    
+
+    private void addDefaultSystemPoints(String siteRef, String equipref, String equipDis, String tz){
+
+        Point systemStatusMessage = new Point.Builder()
+                .setDisplayName(equipDis+"-StatusMessage")
+                .setEquipRef(equipref)
+                .setSiteRef(siteRef)
+                .addMarker("system").addMarker("status").addMarker("message").addMarker("writable")
+                .setTz(tz)
+                .setKind("string")
+                .build();
+        CCUHsApi.getInstance().addPoint(systemStatusMessage);
+        Point systemScheduleStatus = new Point.Builder()
+                .setDisplayName(equipDis+"-ScheduleStatus")
+                .setEquipRef(equipref)
+                .setSiteRef(siteRef)
+                .addMarker("system").addMarker("scheduleStatus").addMarker("writable")
+                .setTz(tz)
+                .setKind("string")
+                .build();
+        CCUHsApi.getInstance().addPoint(systemScheduleStatus);
+    }
 }

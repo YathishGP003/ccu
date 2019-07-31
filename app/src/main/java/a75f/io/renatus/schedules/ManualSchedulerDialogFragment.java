@@ -284,14 +284,12 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
                                               return;
                                           }
 
-                                          if(mDay == null)
-                                              mListener.onClickSave(NO_REPLACE, Double.parseDouble(mCoolingTempET.getText().toString()),
+                                          if ( !mListener.onClickSave(mDay == null ? NO_REPLACE : mPosition, Double.parseDouble(mCoolingTempET.getText().toString()),
                                                                     Double.parseDouble(mHeatingTempET.getText().toString()),
-                                                                    startHour, endHour, startMinutes, endMinutes, days);
-                                          else
-                                              mListener.onClickSave(mPosition, Double.parseDouble(mCoolingTempET.getText().toString()),
-                                                                    Double.parseDouble(mHeatingTempET.getText().toString()),
-                                                                    startHour, endHour, startMinutes, endMinutes, days);
+                                                                    startHour, endHour, startMinutes, endMinutes, days)) {
+                                              return;
+                                          }
+                                         
                                           dismiss();
                                       });
 

@@ -455,6 +455,7 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
             
             AlertDialog alert = builder.create();
             alert.show();
+            return false;
             
         } else {
             schedule.getDays().addAll(daysArrayList);

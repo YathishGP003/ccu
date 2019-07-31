@@ -160,7 +160,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                         if (mSchedule.isZoneSchedule())
                         {
                             mSchedule.setDisabled(true);
-                            CCUHsApi.getInstance().updateSchedule(mSchedule);
+                            CCUHsApi.getInstance().updateZoneSchedule(mSchedule, zoneId);
                         }
                         scheduleImageButton.setVisibility(View.GONE);
                         
@@ -168,6 +168,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                             setScheduleType(scheduleTypeId, ScheduleType.BUILDING);
                             mScheduleType = ScheduleType.BUILDING.ordinal();
                         }
+                        CCUHsApi.getInstance().scheduleSync();
 
                     } else if (position == 1 && (mScheduleType != -1))
                     {
@@ -187,18 +188,16 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                                 Log.d(L.TAG_CCU_UI," scheduleType changed to ZoneSchedule : "+scheduleTypeId);
                                 scheduleById.setDisabled(false);
                                 CCUHsApi.getInstance().updateZoneSchedule(scheduleById, zone.getId());
-
-
                             } else if (!zone.hasSchedule())
                             {
                                 Log.d(L.TAG_CCU_UI," Zone does not have Schedule : Shouldn't happen");
                                 zone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true, zone.getId()));
                                 CCUHsApi.getInstance().updateZone(zone, zone.getId());
                                 scheduleById = CCUHsApi.getInstance().getScheduleById(zone.getScheduleRef());
-                                CCUHsApi.getInstance().syncEntityTree();
                             }
                             scheduleImageButton.setTag(scheduleById.getId());
                             scheduleImageButton.setVisibility(View.VISIBLE);
+                            CCUHsApi.getInstance().scheduleSync();
                         }
                         if (mScheduleType != ScheduleType.ZONE.ordinal()) {
                             setScheduleType(scheduleTypeId, ScheduleType.ZONE);

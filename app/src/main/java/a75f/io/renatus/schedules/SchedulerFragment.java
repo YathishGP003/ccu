@@ -508,7 +508,7 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
         Typeface typeface = Typeface.createFromAsset(getActivity().getAssets(), "fonts/lato_regular.ttf");
 
 
-        if (startTimeHH > endTimeHH) {
+        if (startTimeHH > endTimeHH || (startTimeHH == endTimeHH && startTimeMM > endTimeMM)) {
             drawScheduleBlock(position, strminTemp, strmaxTemp, typeface, startTimeHH,
                     24, startTimeMM, 0,
                     getTextViewFromDay(day), false, true, intersection);

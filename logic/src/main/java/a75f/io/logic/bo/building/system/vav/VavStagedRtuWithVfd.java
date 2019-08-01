@@ -102,42 +102,50 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
     {
         super.updateSystemPoints();
         double signal = 0;
-        if (isCoolingActive()) {
-    
-            for (int i = 1; i < 8; i++)
+        if (getConfigEnabled("analog2") > 0)
+        {
+            if (isCoolingActive())
             {
-                if (getConfigEnabled("relay" + i) > 0 && getCmdSignal("relay" + i) > 0)
+                for (int i = 1; i < 8; i++)
                 {
-                    int val = (int) getConfigAssociation("relay" + i);
-                    if ( val <= Stage.COOLING_5.ordinal())  {
-                        signal = getConfigVal("analog2 and cooling and stage"+(val+1));
+                    if (getConfigEnabled("relay" + i) > 0 && getCmdSignal("relay" + i) > 0)
+                    {
+                        int val = (int) getConfigAssociation("relay" + i);
+                        if (val <= Stage.COOLING_5.ordinal())
+                        {
+                            signal = getConfigVal("analog2 and cooling and stage" + (val + 1));
+                        }
                     }
                 }
             }
-            
-        } else if (isHeatingActive()) {
-            for (int i = 1; i < 8; i++)
+            else if (isHeatingActive())
             {
-                if (getConfigEnabled("relay" + i) > 0 && getCmdSignal("relay" + i) > 0)
+                for (int i = 1; i < 8; i++)
                 {
-                    int val = (int) getConfigAssociation("relay" + i);
-                    if ( val >= Stage.HEATING_1.ordinal() && val <= Stage.HEATING_5.ordinal())  {
-                        signal = getConfigVal("analog2 and heating and stage"+(val - Stage.HEATING_1.ordinal() + 1));
+                    if (getConfigEnabled("relay" + i) > 0 && getCmdSignal("relay" + i) > 0)
+                    {
+                        int val = (int) getConfigAssociation("relay" + i);
+                        if (val >= Stage.HEATING_1.ordinal() && val <= Stage.HEATING_5.ordinal())
+                        {
+                            signal = getConfigVal("analog2 and heating and stage" + (val - Stage.HEATING_1.ordinal() + 1));
+                        }
                     }
                 }
             }
-        } else if (stageStatus[FAN_1.ordinal()] > 0) {
-            for (int i = 1; i < 8; i++)
+            else if (stageStatus[FAN_1.ordinal()] > 0)
             {
-                if (getConfigEnabled("relay" + i) > 0 && getCmdSignal("relay" + i) > 0)
+                for (int i = 1; i < 8; i++)
                 {
-                    int val = (int) getConfigAssociation("relay" + i);
-                    if ( val == Stage.FAN_1.ordinal())  {
-                        signal = getConfigVal("analog2 and recirculate");
+                    if (getConfigEnabled("relay" + i) > 0 && getCmdSignal("relay" + i) > 0)
+                    {
+                        int val = (int) getConfigAssociation("relay" + i);
+                        if (val == Stage.FAN_1.ordinal())
+                        {
+                            signal = getConfigVal("analog2 and recirculate");
+                        }
                     }
                 }
             }
-            
         }
         setCmdSignal("analog2",10*signal);
         ControlMote.setAnalogOut("analog2", 10 * signal);

@@ -206,7 +206,7 @@ public class PlcEquip
                                            .setRoomRef(roomRef)
                                            .setFloorRef(floorRef)
                                            .addMarker("config").addMarker("pid").addMarker("zone").addMarker("writable")
-                                           .addMarker("setpoint").addMarker("sensor").addMarker("offset")
+                                           .addMarker("setpoint").addMarker("sensor").addMarker("offset").addMarker("his").addMarker("equipHis")
                                            .setGroup(String.valueOf(nodeAddr))
                                            .setTz(tz)
                                            .build();

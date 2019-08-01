@@ -304,35 +304,35 @@ public class DabEquip
         CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
         CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, 0.0);
     
-        Point supplyAirTemp1 = new Point.Builder()
-                                    .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-supplyAirTemp1")
+        Point dischargeAirTemp1 = new Point.Builder()
+                                    .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-dischargeAirTemp1")
                                     .setEquipRef(equipRef)
                                     .setSiteRef(siteRef)
                                     .setRoomRef(roomRef)
                                     .setFloorRef(floorRef)
                                     .addMarker("zone").addMarker("dab")
-                                    .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("supply").addMarker("primary").addMarker("his").addMarker("logical").addMarker("equipHis")
+                                    .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("discharge").addMarker("primary").addMarker("his").addMarker("logical").addMarker("equipHis")
                                     .setGroup(String.valueOf(nodeAddr))
                                     .setUnit("\u00B0F")
                                     .setTz(tz)
                                     .build();
-        String sat1Id = CCUHsApi.getInstance().addPoint(supplyAirTemp1);
-        CCUHsApi.getInstance().writeHisValById(sat1Id, 0.0);
+        String dat1Id = CCUHsApi.getInstance().addPoint(dischargeAirTemp1);
+        CCUHsApi.getInstance().writeHisValById(dat1Id, 0.0);
     
-        Point supplyAirTemp2 = new Point.Builder()
-                                       .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-supplyAirTemp2")
+        Point dischargeAirTemp2 = new Point.Builder()
+                                       .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-dischargeAirTemp2")
                                        .setEquipRef(equipRef)
                                        .setSiteRef(siteRef)
                                        .setRoomRef(roomRef)
                                        .setFloorRef(floorRef)
                                        .addMarker("zone").addMarker("dab")
-                                       .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("supply").addMarker("secondary").addMarker("his").addMarker("logical").addMarker("equipHis")
+                                       .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("discharge").addMarker("secondary").addMarker("his").addMarker("logical").addMarker("equipHis")
                                        .setGroup(String.valueOf(nodeAddr))
                                        .setUnit("\u00B0F")
                                        .setTz(tz)
                                        .build();
-        String sat2Id = CCUHsApi.getInstance().addPoint(supplyAirTemp2);
-        CCUHsApi.getInstance().writeHisValById(sat2Id, 0.0);
+        String dat2Id = CCUHsApi.getInstance().addPoint(dischargeAirTemp2);
+        CCUHsApi.getInstance().writeHisValById(dat2Id, 0.0);
     
         Point occupancy = new Point.Builder()
                                   .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-occupancy")
@@ -352,6 +352,10 @@ public class DabEquip
         device.currentTemp.setEnabled(true);
         device.desiredTemp.setPointRef(dtId);
         device.desiredTemp.setEnabled(true);
+        device.th1In.setPointRef(dat1Id);
+        device.th1In.setEnabled(true);
+        device.th2In.setPointRef(dat2Id);
+        device.th2In.setEnabled(true);
         
         for (Output op : config.getOutputs()) {
             switch (op.getPort()) {

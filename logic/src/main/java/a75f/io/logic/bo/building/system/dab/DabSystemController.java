@@ -409,7 +409,7 @@ public class DabSystemController extends SystemController
         for (HashMap q : dabEquips)
         {
             double tempVal = hayStack.readHisValByQuery("point and air and temp and sensor and current and equipRef == \""+q.get("id")+"\"");
-            if (!isZoneDead(new Equip.Builder().setHashMap(q).build())) {
+            if (!isZoneDead(new Equip.Builder().setHashMap(q).build()) && tempVal > 0) {
                 tempSum += tempVal;
                 tempZones++;
             }

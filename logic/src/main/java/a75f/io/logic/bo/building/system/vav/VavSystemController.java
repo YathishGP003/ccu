@@ -473,8 +473,8 @@ public class VavSystemController extends SystemController
         
         for (HashMap q : vavEquips)
         {
-            if (!isZoneDead(new Equip.Builder().setHashMap(q).build())) {
-                double tempVal = hayStack.readHisValByQuery("point and air and temp and sensor and current and equipRef == \""+q.get("id")+"\"");
+            double tempVal = hayStack.readHisValByQuery("point and air and temp and sensor and current and equipRef == \""+q.get("id")+"\"");
+            if (!isZoneDead(new Equip.Builder().setHashMap(q).build()) && tempVal > 0) {
                 tempSum += tempVal;
                 tempZones++;
             }

@@ -666,14 +666,22 @@ public class DabEquip
         setConfigNumVal("damper and shape and secondary",config.damper2Shape);
         
         setConfigNumVal("enable and occupancy",config.enableOccupancyControl == true ? 1.0 : 0);
+        setHisVal("enable and occupancy",config.enableOccupancyControl == true ? 1.0 : 0);
         setConfigNumVal("enable and co2",config.enableCO2Control == true ? 1.0 : 0);
-        setConfigNumVal("enable and iaq",config.enableCO2Control == true ? 1.0 : 0);
+        setHisVal("enable and co2",config.enableCO2Control == true ? 1.0 : 0);
+        setConfigNumVal("enable and co2",config.enableCO2Control == true ? 1.0 : 0);
+        setHisVal("enable and co2",config.enableCO2Control == true ? 1.0 : 0);
         setConfigNumVal("priority",config.getPriority().ordinal());
+        setHisVal("priority",config.getPriority().ordinal());
         setConfigNumVal("temperature and offset",config.temperaturOffset);
         setDamperLimit("cooling","min",config.minDamperCooling);
+        setHisVal("cooling and min and damper and pos",config.minDamperCooling);
         setDamperLimit("cooling","max",config.maxDamperCooling);
+        setHisVal("cooling and max and damper and pos",config.maxDamperCooling);
         setDamperLimit("heating","min",config.minDamperHeating);
+        setHisVal("heating and min and damper and pos",config.minDamperHeating);
         setDamperLimit("heating","max",config.maxDamperHeating);
+        setHisVal("heating and max and damper and pos",config.maxDamperHeating);
     }
     
     public void setConfigNumVal(String tags,double val) {
@@ -682,6 +690,10 @@ public class DabEquip
     
     public double getConfigNumVal(String tags) {
         return CCUHsApi.getInstance().readDefaultVal("point and zone and config and dab and "+tags+" and group == \""+nodeAddr+"\"");
+    }
+    
+    public void setHisVal(String tags,double val) {
+        CCUHsApi.getInstance().writeDefaultVal("point and zone and config and dab and "+tags+" and group == \""+nodeAddr+"\"", val);
     }
     
     public double getCurrentTemp()

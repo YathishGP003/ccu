@@ -211,7 +211,8 @@ public class PlcEquip
                                            .setTz(tz)
                                            .build();
         String setpointSensorOffsetId = hayStack.addPoint(setpointSensorOffset);
-        hayStack.writeDefaultValById(setpointSensorOffsetId, (double)config.setpointSensorOffset);
+        hayStack.writeDefaultValById(setpointSensorOffsetId, config.setpointSensorOffset);
+        hayStack.writeHisValById(setpointSensorOffsetId, config.setpointSensorOffset);
     
         Point expectZeroErrorAtMidpoint  = new Point.Builder()
                                              .setDisplayName(equipDis+"-expectZeroErrorAtMidpoint")
@@ -358,6 +359,7 @@ public class PlcEquip
         hayStack.writeDefaultVal("point and config and analog2 and input and sensor and equipRef == \""+equipRef+"\"", (double)config.analog2InputSensor);
     
         hayStack.writeDefaultVal("point and config and setpoint and sensor and offset and equipRef == \""+equipRef+"\"", config.setpointSensorOffset);
+        hayStack.writeHisValByQuery("point and config and setpoint and sensor and offset and equipRef == \""+equipRef+"\"", config.setpointSensorOffset);
     
         hayStack.writeDefaultVal("point and config and analog1 and min and output and equipRef == \""+equipRef+"\"", config.analog1AtMinOutput);
     

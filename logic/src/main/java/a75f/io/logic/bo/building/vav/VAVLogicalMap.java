@@ -731,7 +731,7 @@ public class VAVLogicalMap
                                          .setRoomRef(room)
                                          .setFloorRef(floor)
                                          .addMarker("config").addMarker("vav").addMarker("writable").addMarker("zone")
-                                         .addMarker("priority").addMarker("userIntent").addMarker("sp").addMarker("his")
+                                         .addMarker("priority").addMarker("userIntent").addMarker("sp").addMarker("his").addMarker("equipHis")
                                          .setGroup(String.valueOf(nodeAddr))
                                          .setTz(tz)
                                          .build();
@@ -760,7 +760,7 @@ public class VAVLogicalMap
                                          .setRoomRef(room)
                                          .setFloorRef(floor)
                                          .addMarker("config").addMarker("vav").addMarker("damper").addMarker("min").addMarker("cooling").addMarker("pos")
-                                         .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
+                                         .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his").addMarker("equipHis")
                                          .setGroup(String.valueOf(nodeAddr))
                                          .setTz(tz)
                                          .build();
@@ -775,7 +775,7 @@ public class VAVLogicalMap
                                          .setRoomRef(room)
                                          .setFloorRef(floor)
                                          .addMarker("config").addMarker("vav").addMarker("damper").addMarker("max").addMarker("cooling").addMarker("pos")
-                                         .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
+                                         .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his").addMarker("equipHis")
                                          .setGroup(String.valueOf(nodeAddr))
                                          .setTz(tz)
                                          .build();
@@ -790,7 +790,7 @@ public class VAVLogicalMap
                                          .setRoomRef(room)
                                          .setFloorRef(floor)
                                          .addMarker("config").addMarker("vav").addMarker("damper").addMarker("min").addMarker("heating").addMarker("pos")
-                                         .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
+                                         .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his").addMarker("equipHis")
                                          .setGroup(String.valueOf(nodeAddr))
                                          .setTz(tz)
                                          .build();
@@ -805,7 +805,7 @@ public class VAVLogicalMap
                                          .setRoomRef(room)
                                          .setFloorRef(floor)
                                          .addMarker("config").addMarker("vav").addMarker("damper").addMarker("max").addMarker("heating").addMarker("pos")
-                                         .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his")
+                                         .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his").addMarker("equipHis")
                                          .setGroup(String.valueOf(nodeAddr))
                                          .setTz(tz)
                                          .build();
@@ -855,14 +855,26 @@ public class VAVLogicalMap
         setConfigNumVal("damper and shape",config.damperShape);
         setConfigNumVal("reheat and type",config.reheatType);
         setConfigNumVal("enable and occupancy",config.enableOccupancyControl == true ? 1.0 : 0);
+        setHisVal("enable and occupancy",config.enableOccupancyControl == true ? 1.0 : 0);
         setConfigNumVal("enable and co2",config.enableCO2Control == true ? 1.0 : 0);
+        setHisVal("enable and co2",config.enableCO2Control == true ? 1.0 : 0);
         setConfigNumVal("enable and iaq",config.enableIAQControl == true ? 1.0 : 0);
+        setHisVal("enable and iaq",config.enableIAQControl == true ? 1.0 : 0);
         setConfigNumVal("priority",config.getPriority().ordinal());
+        setHisVal("priority",config.getPriority().ordinal());
         setConfigNumVal("temperature and offset",config.temperaturOffset);
         setDamperLimit("cooling","min",config.minDamperCooling);
+        setHisVal("cooling and min and damper and pos",config.minDamperCooling);
         setDamperLimit("cooling","max",config.maxDamperCooling);
+        setHisVal("cooling and max and damper and pos",config.maxDamperCooling);
         setDamperLimit("heating","min",config.minDamperHeating);
+        setHisVal("heating and min and damper and pos",config.minDamperHeating);
         setDamperLimit("heating","max",config.maxDamperHeating);
+        setHisVal("heating and mac and damper and pos",config.maxDamperHeating);
+    }
+    
+    public void setHisVal(String tags,double val) {
+        CCUHsApi.getInstance().writeDefaultVal("point and zone and config and vav and "+tags+" and group == \""+nodeAddr+"\"", val);
     }
     
     public void deleteHaystackPoints() {

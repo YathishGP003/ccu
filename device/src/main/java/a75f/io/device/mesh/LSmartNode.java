@@ -277,7 +277,7 @@ public class LSmartNode
                         controls_t.damperPosition.set((short)logicalVal);
                         mappedVal = 0;
                     }
-                    Log.d(TAG_CCU_DEVICE, " Set " + p.getPort() + " type " + p.getType() + " logicalVal: " + logicalVal + " mappedVal " + mappedVal);
+                    Log.d(TAG_CCU_DEVICE, "Set "+logicalOpPoint.get("dis") +" "+ p.getPort() + " type " + p.getType() + " logicalVal: " + logicalVal + " mappedVal " + mappedVal);
                     LSmartNode.getSmartNodePort(controls_t, p.getPort()).set(mappedVal);
 
                 }

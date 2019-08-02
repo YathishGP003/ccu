@@ -196,9 +196,6 @@ public class DabProfile extends ZoneProfile
         dabEquip.setDamperPos(damper.currentPosition, "primary");
         dabEquip.setDamperPos(damper.currentPosition, "secondary");
         
-        dabEquip.setNormalizedDamperPos(damper.currentPosition, "primary");
-        dabEquip.setNormalizedDamperPos(damper.currentPosition, "secondary");
-    
         dabEquip.setStatus(state.ordinal(), DabSystemController.getInstance().isEmergencyMode() && (state == HEATING ? buildingLimitMinBreached()
                                                     : state == COOLING ? buildingLimitMaxBreached() : false));
         CcuLog.d(L.TAG_CCU_ZONE, "System STATE :" + DabSystemController.getInstance().getSystemState() + " ZoneState : " + getState() + " ,CV: " + damperOpController.getControlVariable() + " ,damper:" + damper.currentPosition);

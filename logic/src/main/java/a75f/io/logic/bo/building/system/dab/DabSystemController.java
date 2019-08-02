@@ -1,5 +1,7 @@
 package a75f.io.logic.bo.building.system.dab;
 
+import android.util.Log;
+
 import com.google.common.collect.EvictingQueue;
 
 import java.util.ArrayList;
@@ -246,8 +248,10 @@ public class DabSystemController extends SystemController
             for (HashMap m : dabEquips) {
                 HashMap damper = hayStack.read("point and damper and base and cmd and equipRef == \""+m.get("id").toString()+"\"");
                 double damperPos = hayStack.readHisValById(damper.get("id").toString());
-                HashMap normalizedDamper = hayStack.read("point and damper and normalized and cmd and equipRef == \""+m.get("id").toString()+"\"");
-                hayStack.writeHisValById(normalizedDamper.get("id").toString(), damperPos);
+                HashMap normalizedPrimaryDamper = hayStack.read("point and damper and normalized and primary and cmd and equipRef == \""+m.get("id").toString()+"\"");
+                HashMap normalizedSecondaryamper = hayStack.read("point and damper and normalized and secondary and cmd and equipRef == \""+m.get("id").toString()+"\"");
+                hayStack.writeHisValById(normalizedPrimaryDamper.get("id").toString(), damperPos);
+                hayStack.writeHisValById(normalizedSecondaryamper.get("id").toString(), damperPos);
             }
         }
         
@@ -513,6 +517,7 @@ public class DabSystemController extends SystemController
         
         for (HashMap m : dabEquips) {
             if (isZoneDead(new Equip.Builder().setHashMap(m).build())) {
+                Log.d("CCU_SYSTEM","Skip Normalize, Equip Dead "+m.toString());
                 continue;
             }
             //Primary and secondary have the same base damper opening now.

@@ -91,7 +91,23 @@ public class ManualCalendarDialogFragment extends DialogFragment implements View
         {
             CalendarDay startDay = CalendarDay.from(mStartDate.getYear(), mStartDate.getMonthOfYear(), mStartDate.getDayOfMonth());
             CalendarDay endDay = CalendarDay.from(mEndDate.getYear(), mEndDate.getMonthOfYear(), mEndDate.getDayOfMonth());
+
             mCalendarView.selectRange(startDay, endDay);
+            List<CalendarDay> dates = mCalendarView.getSelectedDates();
+            mCalendarView.removeDecorators();
+            RangeDecorator rangeDecorator = new RangeDecorator(getActivity(),R.drawable.square_background,dates);
+            mCalendarView.addDecorator(rangeDecorator);
+
+            List<CalendarDay> startDate = new ArrayList<>();
+            startDate.add(dates.get(0));
+            RangeDecorator rangeDecorator1 = new RangeDecorator(getActivity(),R.drawable.left_circle_orange,startDate);
+            mCalendarView.addDecorator(rangeDecorator1);
+
+            List<CalendarDay> endDate = new ArrayList<>();
+            endDate.add(dates.get(dates.size()-1));
+            RangeDecorator rangeDecorator2 = new RangeDecorator(getActivity(),R.drawable.right_circle_orange,endDate);
+            mCalendarView.addDecorator(rangeDecorator2);
+
             DateTime today = new DateTime();
             if (mStartDate.dayOfYear().get() < today.dayOfYear().get() && mEndDate.dayOfYear().get() < today.dayOfYear().get() ) {
                 mCalendarView.state().edit().setMinimumDate(startDay).commit();
@@ -115,22 +131,6 @@ public class ManualCalendarDialogFragment extends DialogFragment implements View
                                        });
 
         mButtonCancel.setOnClickListener(view12 -> dismiss());
-        mVacationNameEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (charSequence.length()>0) clearText.setVisibility(View.VISIBLE); else clearText.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-            }
-        });
         mCalendarView.setOnDateChangedListener((calendarView, date, selected) -> calendarView.removeDecorators());
         mCalendarView.setOnRangeSelectedListener((calendarView, dates) -> {
             RangeDecorator rangeDecorator = new RangeDecorator(getActivity(),R.drawable.square_background,dates);

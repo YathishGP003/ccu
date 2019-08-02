@@ -91,6 +91,7 @@
                                 android:layout_width="46.12dp"
                                 android:layout_height="27.42dp"
                                 android:layout_marginStart="10dp"
+                                android:layout_gravity="center_vertical"
                                 android:background="@drawable/toggle_selector"
                                 android:checked="false"
                                 android:textOff=""
@@ -101,6 +102,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="20dp"
+                                android:layout_gravity="center_vertical"
                                 android:text="@string/label_analog1"
                                 android:textAppearance="@style/text_appearance" />
                         </LinearLayout>
@@ -115,7 +117,7 @@
                             <TextView
                                 android:layout_width="129dp"
                                 android:layout_height="wrap_content"
-                                android:layout_gravity="center"
+                                android:layout_gravity="center_vertical"
                                 android:text="@string/label_cooling"
                                 android:textAppearance="@style/text_label" />
                         </LinearLayout>
@@ -130,6 +132,7 @@
                                 android:id="@+id/analog1Spinner"
                                 android:layout_width="120dp"
                                 android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:entries="@array/hvac_stage_selector"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
@@ -154,6 +157,7 @@
                                 android:layout_marginStart="10dp"
                                 android:background="@drawable/toggle_selector"
                                 android:checked="false"
+                                android:layout_gravity="center_vertical"
                                 android:textOff=""
                                 android:textOn="" />
 
@@ -162,6 +166,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_marginLeft="20dp"
                                 android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
                                 android:textAppearance="@style/text_appearance"
                                 android:text="@string/label_analog2"/>
                         </LinearLayout>
@@ -175,6 +180,7 @@
                                 android:layout_width="129dp"
                                 android:layout_height="wrap_content"
                                 android:text="@string/label_fanspeed"
+                                android:layout_gravity="center_vertical"
                                 android:textAppearance="@style/text_label"
                                 />
                         </LinearLayout>
@@ -189,6 +195,7 @@
                                 android:id="@+id/analog2Spinner"
                                 android:layout_width="120dp"
                                 android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:entries="@array/hvac_stage_selector"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
@@ -213,6 +220,7 @@
                                 android:layout_marginLeft="10dp"
                                 android:background="@drawable/toggle_selector"
                                 android:checked="false"
+                                android:layout_gravity="center_vertical"
                                 android:textOff=""
                                 android:textOn="" />
 
@@ -221,6 +229,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_marginLeft="20dp"
                                 android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
                                 android:textAppearance="@style/text_appearance"
                                 android:text="@string/label_analog3"/>
                         </LinearLayout>
@@ -234,6 +243,7 @@
                                 android:layout_width="129dp"
                                 android:layout_height="wrap_content"
                                 android:text="@string/label_heating"
+                                android:layout_gravity="center_vertical"
                                 android:textAppearance="@style/text_label"
                                 />
                         </LinearLayout>
@@ -248,6 +258,7 @@
                                 android:id="@+id/analog3Spinner"
                                 android:layout_width="120dp"
                                 android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:entries="@array/hvac_stage_selector"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
@@ -273,6 +284,7 @@
                                 android:layout_marginLeft="10dp"
                                 android:background="@drawable/toggle_selector"
                                 android:checked="false"
+                                android:layout_gravity="center_vertical"
                                 android:textOff=""
                                 android:textOn="" />
 
@@ -280,6 +292,7 @@
                                 android:id="@+id/textCompStage4"
                                 android:layout_width="wrap_content"
                                 android:layout_marginLeft="20dp"
+                                android:layout_gravity="center_vertical"
                                 android:layout_height="wrap_content"
                                 android:textAppearance="@style/text_appearance"
                                 android:text="@string/label_analog4"/>
@@ -294,6 +307,7 @@
                                 android:layout_width="129dp"
                                 android:layout_height="wrap_content"
                                 android:text="@string/label_outsideair"
+                                android:layout_gravity="center_vertical"
                                 android:textAppearance="@style/text_label"
                                 />
                         </LinearLayout>
@@ -310,6 +324,7 @@
                                 android:layout_height="wrap_content"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:entries="@array/hvac_stage_selector"
+                                android:layout_gravity="center_vertical"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
                         </LinearLayout>
 
@@ -333,6 +348,7 @@
                                 android:layout_marginLeft="10dp"
                                 android:background="@drawable/toggle_selector"
                                 android:checked="false"
+                                android:layout_gravity="center_vertical"
                                 android:textOff=""
                                 android:textOn="" />
 
@@ -342,6 +358,7 @@
                                 android:layout_marginLeft="20dp"
                                 android:layout_height="wrap_content"
                                 android:textAppearance="@style/text_appearance"
+                                android:layout_gravity="center_vertical"
                                 android:text="@string/label_relay3"/>
                         </LinearLayout>
                         <LinearLayout
@@ -354,6 +371,7 @@
                                 android:layout_width="129dp"
                                 android:layout_height="wrap_content"
                                 android:text="@string/label_fanenable"
+                                android:layout_gravity="center_vertical"
                                 android:textAppearance="@style/text_label"
                                 />
                         </LinearLayout>
@@ -372,6 +390,7 @@
                                 android:layout_marginBottom="0dp"
                                 android:background="@drawable/toggle_testselector"
                                 android:checked="false"
+                                android:layout_gravity="center_vertical"
                                 android:textAppearance="@style/text_toggleappearance"
                                 android:textColor="@drawable/toggle_textselector"
                                 android:textOff="OFF"
@@ -397,6 +416,7 @@
                                 android:layout_width="46.12dp"
                                 android:layout_height="27.42dp"
                                 android:layout_marginLeft="10dp"
+                                android:layout_gravity="center_vertical"
                                 android:background="@drawable/toggle_selector"
                                 android:checked="false"
                                 android:textOff=""
@@ -408,6 +428,7 @@
                                 android:layout_marginLeft="20dp"
                                 android:layout_height="wrap_content"
                                 android:textAppearance="@style/text_appearance"
+                                android:layout_gravity="center_vertical"
                                 android:text="@string/label_relay7"/>
                         </LinearLayout>
                         <LinearLayout
@@ -422,6 +443,7 @@
                                 android:layout_height="wrap_content"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
                                 android:entries="@array/hvac_stage_selector"
+                                android:layout_gravity="center_vertical"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
                         </LinearLayout>
 
@@ -437,6 +459,7 @@
                                 android:layout_height="wrap_content"
                                 android:background="@drawable/toggle_testselector"
                                 android:checked="false"
+                                android:layout_gravity="center_vertical"
                                 android:textAppearance="@style/text_toggleappearance"
                                 android:textColor="@drawable/toggle_textselector"
                                 android:textOff="OFF"

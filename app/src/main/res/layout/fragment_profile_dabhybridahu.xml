@@ -20,7 +20,7 @@
                 android:layout_width="253dp"
                 android:layout_height="680dp"
                 android:layout_alignParentLeft="true"
-                android:layout_marginTop="75dp"
+                android:layout_marginTop="72dp"
                 android:src="@drawable/input_vav_hybrid" />
 
             <LinearLayout
@@ -79,7 +79,7 @@
                         android:id="@+id/tableRow1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="30dp">
+                        android:layout_marginTop="28dp">
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -701,7 +701,7 @@
                                 android:layout_marginLeft="20dp"
                                 android:layout_gravity="center_vertical"
                                 android:layout_toRightOf="@+id/toggleAnalog2"
-                                android:text="@string/label_fanspeed"
+                                android:text="@string/label_analog2"
                                 android:textAppearance="@style/text_appearance" />
                         </LinearLayout>
 
@@ -747,7 +747,7 @@
                         android:id="@+id/tableRow10"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_marginTop="20dp">
+                        android:layout_marginTop="18dp">
 
                         <LinearLayout
                             android:layout_width="0dp"

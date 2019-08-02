@@ -240,7 +240,7 @@ public class CreateNewSite extends Fragment {
                                 R.id.editCCU,
                                 R.id.editFacilityEmail,
                         };
-                if (!validateEditText(mandotaryIds)) {
+                if (!validateEditText(mandotaryIds) && Patterns.EMAIL_ADDRESS.matcher(mSiteEmailId.getText().toString()).matches()) {
                     String siteName = mSiteName.getText().toString();
                     String siteCity = mSiteCity.getText().toString();
                     String siteZip = mSiteZip.getText().toString();

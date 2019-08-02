@@ -4,18 +4,16 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
-    android:orientation="vertical"
-    android:padding="20dp">
+    android:orientation="vertical">
 
-<RelativeLayout
+    <RelativeLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
     <EditText
         android:id="@+id/editText_vacationName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
+       android:layout_margin="8dp"
         android:ems="10"
         android:hint="Vacation Name"
         android:inputType="textPersonName" />
@@ -26,7 +24,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:padding="8dp"
-        android:visibility="gone"
         android:layout_centerInParent="true"
         android:src="@drawable/icon_close"/>
 </RelativeLayout>
@@ -34,7 +31,7 @@
     <com.prolificinteractive.materialcalendarview.MaterialCalendarView xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/calendarView"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
+        android:layout_height="350dp"
         android:layout_gravity="center"
         app:mcv_selectionColor="@color/accent"
         app:mcv_selectionMode="range"
@@ -47,6 +44,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end"
+        android:layout_marginTop="20dp"
         android:orientation="horizontal">
 
         <Button
@@ -59,6 +57,14 @@
             android:text="CANCEL"
             android:textColor="@color/orange_75f"
             android:textSize="20dp" />
+
+        <View android:layout_width="0.01dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="40dp"
+            android:layout_marginEnd="40dp"
+            android:layout_gravity="center_vertical"
+            android:background="@color/line_greycolor"/>
+
         <Button
             android:id="@+id/buttonSaveTwo"
             android:layout_width="wrap_content"

@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.ToggleButton;
 
@@ -59,6 +60,8 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
     @BindView(R.id.relay5Test)ToggleButton relay5Test;
     @BindView(R.id.relay6Test)ToggleButton relay6Test;
     @BindView(R.id.relay7Test)ToggleButton relay7Test;
+    @BindView(R.id.imageRTUInput)
+    ImageView imageView;
 
     @BindView(R.id.buttonNext)
     Button mNext;

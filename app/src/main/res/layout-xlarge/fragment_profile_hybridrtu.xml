@@ -18,9 +18,9 @@
             <ImageView
                 android:id="@+id/imageRTUInput"
                 android:layout_width="253dp"
-                android:layout_height="650dp"
+                android:layout_height="654dp"
                 android:layout_alignParentLeft="true"
-                android:layout_marginTop="75dp"
+                android:layout_marginTop="73dp"
                 android:src="@drawable/input_vav_hybrid" />
 
             <LinearLayout
@@ -705,7 +705,7 @@
                                 android:layout_marginLeft="20dp"
                                 android:layout_gravity="center_vertical"
                                 android:layout_toRightOf="@+id/toggleAnalog2"
-                                android:text="@string/label_fanspeed"
+                                android:text="@string/label_analog2"
                                 android:textAppearance="@style/text_appearance" />
                         </LinearLayout>
 

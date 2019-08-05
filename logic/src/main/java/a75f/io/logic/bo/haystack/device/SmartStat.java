@@ -53,6 +53,10 @@ public class SmartStat {
         siteRef = site;
         floorRef = floor;
         roomRef = room;
+    
+        HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
+        tz = siteMap.get("tz").toString();
+    
         createPoints();
     }
 	public SmartStat(int address) {

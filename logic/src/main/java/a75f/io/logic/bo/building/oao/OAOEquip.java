@@ -166,6 +166,18 @@ public class OAOEquip
                                      .build();
         String outsideAirTemperatureId = hayStack.addPoint(outsideAirTemperature);
     
+        Point outsideAirHumidity = new Point.Builder()
+                                              .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-outsideHumidity")
+                                              .setEquipRef(equipRef)
+                                              .setSiteRef(siteRef)
+                                              .setRoomRef(roomRef)
+                                              .setFloorRef(floorRef)
+                                              .addMarker("oao").addMarker("outside").addMarker("air").addMarker("humidity").addMarker("sensor").addMarker("his").addMarker("equipHis")
+                                              .setGroup(String.valueOf(nodeAddr))
+                                              .setTz(tz)
+                                              .build();
+        String outsideAirHumidityId = hayStack.addPoint(outsideAirHumidity);
+    
         Point supplyAirTemperature = new Point.Builder()
                                               .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-supplyAirTemperature")
                                               .setEquipRef(equipRef)
@@ -250,22 +262,6 @@ public class OAOEquip
     
     
         SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
-        /*device.currentTemp.setPointRef(ctID);
-        device.currentTemp.setEnabled(true);
-        device.desiredTemp.setPointRef(dtId);
-        device.desiredTemp.setEnabled(true);
-    */
-        /*for (Output op : config.getOutputs()) {
-            switch (op.getPort()) {
-                case ANALOG_OUT_ONE:
-                    device.analog1Out.setType(op.getAnalogActuatorType());
-                    break;
-                case ANALOG_OUT_TWO:
-                    device.analog1Out.setType(op.getAnalogActuatorType());
-                    break;
-            }
-        }*/
-    
         device.analog1In.setPointRef(returnAirCO2Id);
         device.analog1In.setEnabled(true);
         device.analog1In.setType("5");//TODO - Hard coding to CO2 sensor type.
@@ -310,6 +306,7 @@ public class OAOEquip
         hayStack.writeHisValById(exhaustFanStage1Id,0.0);
         hayStack.writeHisValById(exhaustFanStage2Id,0.0);
         hayStack.writeHisValById(economizingAvailableId, 0.0);
+        hayStack.writeHisValById(outsideAirHumidityId, 0.0);
     
         CCUHsApi.getInstance().syncEntityTree();
     }

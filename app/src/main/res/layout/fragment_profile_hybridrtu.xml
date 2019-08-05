@@ -644,7 +644,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginLeft="20dp"
                                 android:layout_gravity="center_vertical"
-                                android:text="@string/label_fanspeed"
+                                android:text="@string/label_analog2"
                                 android:textAppearance="@style/text_appearance" />
                         </LinearLayout>
 

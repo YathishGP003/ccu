@@ -5,8 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
-    android:orientation="vertical"
-    android:padding="20dp">
+    android:orientation="vertical">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -30,8 +29,7 @@
             android:layout_alignParentEnd="true"
             android:layout_centerInParent="true"
             android:padding="8dp"
-            android:src="@drawable/icon_close"
-            android:visibility="gone" />
+            android:src="@drawable/icon_close" />
 
 
     </RelativeLayout>
@@ -51,6 +49,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end"
+        android:layout_marginTop="20dp"
         android:orientation="horizontal">
 
         <Button
@@ -64,6 +63,12 @@
             android:textColor="@color/orange_75f"
             android:textSize="20dp" />
 
+        <View android:layout_width="0.01dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="40dp"
+            android:layout_marginEnd="40dp"
+            android:layout_gravity="center_vertical"
+            android:background="@color/line_greycolor"/>
 
         <Button
             android:id="@+id/buttonSaveTwo"

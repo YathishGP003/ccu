@@ -145,6 +145,12 @@ public class Globals {
         return getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                 .getBoolean("biskit_mode", false);
     }
+    
+    public boolean isTestMode()
+    {
+        return Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                      .getBoolean("test_mode", false);
+    }
 
 
     public Context getApplicationContext() {

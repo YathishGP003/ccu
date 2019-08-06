@@ -11,9 +11,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.ToggleButton;
 
 import java.io.BufferedReader;
@@ -24,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
@@ -38,7 +43,7 @@ import butterknife.ButterKnife;
         /**
   * Created by samjithsadasivan on 12/18/18.
   */
-public class DevSettings extends Fragment
+public class DevSettings extends Fragment implements AdapterView.OnItemSelectedListener
 {
     public static DevSettings newInstance(){
         return new DevSettings();
@@ -55,6 +60,20 @@ public class DevSettings extends Fragment
     
     @BindView(R.id.deleteHis)
     Button deleteHis;
+    
+    @BindView(R.id.testModBtn)
+    ToggleButton testModBtn;
+    
+    @BindView(R.id.testModLayout)
+    LinearLayout testModLayout;
+    
+    @BindView(R.id.outsideTemp)
+    Spinner outsideTemp;
+    
+    @BindView(R.id.outsideHumidity)
+    Spinner outsideHumidity;
+    
+    LinearLayout testParams;
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -153,7 +172,60 @@ public class DevSettings extends Fragment
             }
         });
     
-       
+        testModBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+        {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b)
+            {
+                Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                       .edit().putBoolean("test_mode", b).apply();
+                testModLayout.setVisibility(b?View.VISIBLE :View.INVISIBLE);
+            }
+        });
+        testModBtn.setChecked(Globals.getInstance().isTestMode());
+        testModLayout.setVisibility(Globals.getInstance().isTestMode()?View.VISIBLE :View.INVISIBLE);
+    
+        ArrayList<Integer> zoroToHundred = new ArrayList<>();
+        for (int val = 0;  val <= 100; val++)
+        {
+            zoroToHundred.add(val);
+        }
+        ArrayAdapter<Integer> zeroToHundredDataAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
+        zeroToHundredDataAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        outsideTemp.setAdapter(zeroToHundredDataAdapter);
+        outsideTemp.setOnItemSelectedListener(this);
+        outsideTemp.setSelection(zeroToHundredDataAdapter.getPosition(Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                                                                             .getInt("outside_temp", 0)));
+        outsideHumidity.setAdapter(zeroToHundredDataAdapter);
+        outsideHumidity.setOnItemSelectedListener(this);
+        outsideHumidity.setSelection(zeroToHundredDataAdapter.getPosition(Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                                                                             .getInt("outside_humidity", 0)));
+    }
+    
+    @Override
+    public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,
+                               long arg3)
+    {
+        switch (arg0.getId())
+        {
+            case R.id.outsideTemp:
+                Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                       .edit().putInt("outside_temp", Integer.parseInt(outsideTemp.getSelectedItem().toString())).apply();
+                break;
+    
+            case R.id.outsideHumidity:
+                Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                       .edit().putInt("outside_humidity", Integer.parseInt(outsideHumidity.getSelectedItem().toString())).apply();
+                break;
+               
+            
+        }
+    }
+    
+    @Override
+    public void onNothingSelected(AdapterView<?> arg0) {
+        // TODO Auto-generated method stub
+        
     }
     
     
@@ -161,7 +233,7 @@ public class DevSettings extends Fragment
     {
         try
         {
-            Process process = Runtime.getRuntime().exec("logcat -v threadtime -d");
+            Process process = Runtime.getRuntime().exec("logcat -v threadtime -d | grep CCU");
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             StringBuilder log = new StringBuilder();
             String line;
@@ -170,9 +242,6 @@ public class DevSettings extends Fragment
                 log.append(line);
                 log.append("\n");
             }
-            
-            //Convert log to string
-            final String logString = new String(log.toString());
             
             //Create txt file in SD Card
             File sdCard = Environment.getExternalStorageDirectory();
@@ -190,7 +259,7 @@ public class DevSettings extends Fragment
             OutputStreamWriter osw = new OutputStreamWriter(fout);
             
             //Writing the string to file
-            osw.write(logString);
+            osw.write(log.toString());
             osw.flush();
             osw.close();
         }

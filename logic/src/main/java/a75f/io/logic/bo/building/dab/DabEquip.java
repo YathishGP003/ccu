@@ -106,7 +106,7 @@ public class DabEquip
                                   .setTz(tz)
                                   .setGroup(String.valueOf(nodeAddr));
         equipRef = CCUHsApi.getInstance().addEquip(b.build());
-        BuildingTuners.getInstance().addEquipDabTuners(siteDis + "-DAB-" + nodeAddr, equipRef);
+        BuildingTuners.getInstance().addEquipDabTuners(siteDis + "-DAB-" + nodeAddr, equipRef, roomRef, floorRef);
         createDabConfigPoints(config, equipRef);
     
         Point damper1Pos = new Point.Builder()

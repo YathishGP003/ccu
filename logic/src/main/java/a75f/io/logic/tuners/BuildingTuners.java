@@ -15,7 +15,6 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 
 /**
  * Created by samjithsadasivan on 10/5/18.
@@ -503,11 +502,13 @@ public class BuildingTuners
         
     }
     
-    public void addEquipZoneTuners(String equipdis, String equipref) {
+    public void addEquipZoneTuners(String equipdis, String equipref, String roomRef, String floorRef) {
         Point unoccupiedZoneSetback = new Point.Builder()
                                            .setDisplayName(equipdis+"-"+"unoccupiedZoneSetback")
                                            .setSiteRef(siteRef)
                                            .setEquipRef(equipref)
+                                           .setRoomRef(roomRef)
+                                           .setFloorRef(floorRef)
                                            .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("equipHis")
                                            .addMarker("zone").addMarker("unoccupied").addMarker("setback").addMarker("sp")
                                            .setTz(tz)
@@ -528,6 +529,8 @@ public class BuildingTuners
                                               .setDisplayName(equipdis+"-"+"heatingUserLimitMin")
                                               .setSiteRef(siteRef)
                                               .setEquipRef(equipref)
+                                              .setRoomRef(roomRef)
+                                              .setFloorRef(floorRef)
                                               .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("equipHis")
                                               .addMarker("zone").addMarker("heating").addMarker("user").addMarker("limit").addMarker("min").addMarker("sp")
                                               .setTz(tz)
@@ -548,6 +551,8 @@ public class BuildingTuners
                                             .setDisplayName(equipdis+"-"+"heatingUserLimitMax")
                                             .setSiteRef(siteRef)
                                             .setEquipRef(equipref)
+                                            .setRoomRef(roomRef)
+                                            .setFloorRef(floorRef)
                                             .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("equipHis")
                                             .addMarker("zone").addMarker("heating").addMarker("user").addMarker("limit").addMarker("max").addMarker("sp")
                                             .setTz(tz)
@@ -568,6 +573,8 @@ public class BuildingTuners
                                             .setDisplayName(equipdis+"-"+"coolingUserLimitMin")
                                             .setSiteRef(siteRef)
                                             .setEquipRef(equipref)
+                                            .setRoomRef(roomRef)
+                                            .setFloorRef(floorRef)
                                             .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("equipHis")
                                             .addMarker("zone").addMarker("cooling").addMarker("user").addMarker("limit").addMarker("min").addMarker("sp")
                                             .setTz(tz)
@@ -588,6 +595,8 @@ public class BuildingTuners
                                             .setDisplayName(equipdis+"-"+"coolingUserLimitMax")
                                             .setSiteRef(siteRef)
                                             .setEquipRef(equipref)
+                                            .setRoomRef(roomRef)
+                                            .setFloorRef(floorRef)
                                             .addMarker("tuner").addMarker("writable").addMarker("his").addMarker("equipHis")
                                             .addMarker("zone").addMarker("cooling").addMarker("user").addMarker("limit").addMarker("max").addMarker("sp")
                                             .setTz(tz)
@@ -605,16 +614,18 @@ public class BuildingTuners
         hayStack.writeHisValById(coolingUserLimitMaxId, HSUtil.getPriorityVal(coolingUserLimitMaxId));
     }
     
-    public void addVavEquipTuners(String equipdis, String equipref, VavProfileConfiguration config) {
+    public void addVavEquipTuners(String equipdis, String equipref, String roomRef, String floorRef) {
     
         Log.d("CCU","addVavEquipTuners for "+equipdis);
     
-        addEquipZoneTuners(equipdis, equipref);
+        addEquipZoneTuners(equipdis, equipref, roomRef, floorRef);
         
         Point zonePrioritySpread = new Point.Builder()
                                   .setDisplayName(equipdis+"-"+"zonePrioritySpread")
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipref)
+                                  .setRoomRef(roomRef)
+                                  .setFloorRef(floorRef)
                                   .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("equipHis")
                                   .addMarker("zone").addMarker("priority").addMarker("spread").addMarker("sp")
                                   .setTz(tz)
@@ -635,6 +646,8 @@ public class BuildingTuners
                                            .setDisplayName(equipdis+"-"+"zonePriorityMultiplier")
                                            .setSiteRef(siteRef)
                                            .setEquipRef(equipref)
+                                           .setRoomRef(roomRef)
+                                           .setFloorRef(floorRef)
                                            .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("equipHis")
                                            .addMarker("zone").addMarker("priority").addMarker("multiplier").addMarker("sp")
                                            .setTz(tz)
@@ -655,6 +668,8 @@ public class BuildingTuners
                                   .setDisplayName(equipdis+"-"+"coolingDeadband")
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipref)
+                                  .setRoomRef(roomRef)
+                                  .setFloorRef(floorRef)
                                   .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("equipHis")
                                   .addMarker("cooling").addMarker("deadband").addMarker("base").addMarker("sp")
                                   .setTz(tz)
@@ -676,6 +691,8 @@ public class BuildingTuners
                                   .setDisplayName(equipdis+"-"+"coolingDeadbandMultiplier")
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipref)
+                                  .setRoomRef(roomRef)
+                                  .setFloorRef(floorRef)
                                   .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("equipHis")
                                   .addMarker("cooling").addMarker("deadband").addMarker("multiplier").addMarker("sp")
                                   .setTz(tz)
@@ -696,6 +713,8 @@ public class BuildingTuners
                                   .setDisplayName(equipdis+"-"+"heatingDeadband")
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipref)
+                                  .setRoomRef(roomRef)
+                                  .setFloorRef(floorRef)
                                   .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("equipHis")
                                   .addMarker("heating").addMarker("deadband").addMarker("base").addMarker("sp")
                                   .setTz(tz)
@@ -716,6 +735,8 @@ public class BuildingTuners
                                   .setDisplayName(equipdis+"-"+"heatingDeadbandMultiplier")
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipref)
+                                  .setRoomRef(roomRef)
+                                  .setFloorRef(floorRef)
                                   .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("equipHis")
                                   .addMarker("heating").addMarker("deadband").addMarker("multiplier").addMarker("sp")
                                   .setTz(tz)
@@ -735,6 +756,8 @@ public class BuildingTuners
                                  .setDisplayName(equipdis+"-"+"proportionalKFactor")
                                  .setSiteRef(siteRef)
                                  .setEquipRef(equipref)
+                                 .setRoomRef(roomRef)
+                                 .setFloorRef(floorRef)
                                  .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("equipHis")
                                  .addMarker("pgain").addMarker("sp")
                                  .setTz(tz)
@@ -754,6 +777,8 @@ public class BuildingTuners
                                      .setDisplayName(equipdis+"-"+"integralKFactor")
                                      .setSiteRef(siteRef)
                                      .setEquipRef(equipref)
+                                     .setRoomRef(roomRef)
+                                     .setFloorRef(floorRef)
                                      .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("equipHis")
                                      .addMarker("igain").addMarker("sp")
                                      .setTz(tz)
@@ -773,6 +798,8 @@ public class BuildingTuners
                                    .setDisplayName(equipdis+"-"+"temperatureProportionalRange")
                                    .setSiteRef(siteRef)
                                    .setEquipRef(equipref)
+                                   .setRoomRef(roomRef)
+                                   .setFloorRef(floorRef)
                                    .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("equipHis")
                                    .addMarker("pspread").addMarker("sp")
                                    .setTz(tz)
@@ -792,6 +819,8 @@ public class BuildingTuners
                                         .setDisplayName(equipdis+"-"+"temperatureIntegralTime")
                                         .setSiteRef(siteRef)
                                         .setEquipRef(equipref)
+                                        .setRoomRef(roomRef)
+                                        .setFloorRef(floorRef)
                                         .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("equipHis")
                                         .addMarker("itimeout").addMarker("sp")
                                         .setTz(tz)
@@ -811,6 +840,8 @@ public class BuildingTuners
                                         .setDisplayName(equipdis+"-"+"valveActuationStartDamperPosDuringSysHeating")
                                         .setSiteRef(siteRef)
                                         .setEquipRef(equipref)
+                                        .setRoomRef(roomRef)
+                                        .setFloorRef(floorRef)
                                         .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("equipHis")
                                         .addMarker("valve").addMarker("start").addMarker("damper").addMarker("sp")
                                         .setTz(tz)
@@ -830,6 +861,8 @@ public class BuildingTuners
                                       .setDisplayName(equipdis+"-"+"zoneCO2Target")
                                       .setSiteRef(siteRef)
                                       .setEquipRef(equipref)
+                                      .setRoomRef(roomRef)
+                                      .setFloorRef(floorRef)
                                       .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("equipHis")
                                       .addMarker("zone").addMarker("co2").addMarker("target").addMarker("sp")
                                       .setTz(tz)
@@ -849,6 +882,8 @@ public class BuildingTuners
                                          .setDisplayName(equipdis+"-"+"zoneCO2Threshold")
                                          .setSiteRef(siteRef)
                                          .setEquipRef(equipref)
+                                         .setRoomRef(roomRef)
+                                         .setFloorRef(floorRef)
                                          .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("equipHis")
                                          .addMarker("zone").addMarker("co2").addMarker("threshold").addMarker("sp")
                                          .setTz(tz)
@@ -868,6 +903,8 @@ public class BuildingTuners
                                          .setDisplayName(equipdis+"-"+"zoneVOCTarget")
                                          .setSiteRef(siteRef)
                                          .setEquipRef(equipref)
+                                         .setRoomRef(roomRef)
+                                         .setFloorRef(floorRef)
                                          .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("sp").addMarker("equipHis")
                                          .addMarker("zone").addMarker("voc").addMarker("target")
                                          .setTz(tz)
@@ -887,6 +924,8 @@ public class BuildingTuners
                                         .setDisplayName(equipdis+"-"+"zoneVOCThreshold")
                                         .setSiteRef(siteRef)
                                         .setEquipRef(equipref)
+                                        .setRoomRef(roomRef)
+                                        .setFloorRef(floorRef)
                                         .addMarker("tuner").addMarker("vav").addMarker("writable").addMarker("his").addMarker("equipHis")
                                         .addMarker("zone").addMarker("voc").addMarker("threshold").addMarker("sp")
                                         .setTz(tz)
@@ -942,7 +981,7 @@ public class BuildingTuners
         hayStack.writeHisValById(iTimeoutId, TunerConstants.VAV_INTEGRAL_TIMEOUT);
     }
     
-    public void addPlcEquipTuners(String equipdis, String equipref){
+    public void addPlcEquipTuners(String equipdis, String equipref, String roomRef, String floorRef){
         
         //addEquipZoneTuners(equipdis, equipref);
         
@@ -950,6 +989,8 @@ public class BuildingTuners
                                  .setDisplayName(equipdis+"-"+"proportionalKFactor")
                                  .setSiteRef(siteRef)
                                  .setEquipRef(equipref)
+                                 .setRoomRef(roomRef)
+                                 .setFloorRef(floorRef)
                                  .addMarker("tuner").addMarker("pid").addMarker("writable").addMarker("his").addMarker("equipHis")
                                  .addMarker("pgain").addMarker("sp")
                                  .setTz(tz)
@@ -969,6 +1010,8 @@ public class BuildingTuners
                                      .setDisplayName(equipdis+"-"+"integralKFactor")
                                      .setSiteRef(siteRef)
                                      .setEquipRef(equipref)
+                                     .setRoomRef(roomRef)
+                                     .setFloorRef(floorRef)
                                      .addMarker("tuner").addMarker("pid").addMarker("writable").addMarker("his").addMarker("equipHis")
                                      .addMarker("igain").addMarker("sp")
                                      .setTz(tz)
@@ -988,6 +1031,8 @@ public class BuildingTuners
                                         .setDisplayName(equipdis+"-"+"pidIntegralTime")
                                         .setSiteRef(siteRef)
                                         .setEquipRef(equipref)
+                                        .setRoomRef(roomRef)
+                                        .setFloorRef(floorRef)
                                         .addMarker("tuner").addMarker("pid").addMarker("writable").addMarker("his").addMarker("equipHis")
                                         .addMarker("itimeout").addMarker("sp")
                                         .setTz(tz)
@@ -1237,15 +1282,17 @@ public class BuildingTuners
         
     }
     
-    public void addEquipDabTuners(String equipdis, String equipref) {
+    public void addEquipDabTuners(String equipdis, String equipref, String roomRef, String floorRef) {
         Log.d("CCU","addEquipDabTuners for "+equipdis);
     
-        addEquipZoneTuners(equipdis, equipref);
+        addEquipZoneTuners(equipdis, equipref, roomRef, floorRef);
         
         Point zonePrioritySpread = new Point.Builder()
                                            .setDisplayName(equipdis+"-"+"zonePrioritySpread")
                                            .setSiteRef(siteRef)
                                            .setEquipRef(equipref)
+                                           .setRoomRef(roomRef)
+                                           .setFloorRef(floorRef)
                                            .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis")
                                            .addMarker("zone").addMarker("priority").addMarker("spread").addMarker("sp")
                                            .setTz(tz)
@@ -1266,6 +1313,8 @@ public class BuildingTuners
                                                .setDisplayName(equipdis+"-"+"zonePriorityMultiplier")
                                                .setSiteRef(siteRef)
                                                .setEquipRef(equipref)
+                                               .setRoomRef(roomRef)
+                                               .setFloorRef(floorRef)
                                                .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                .addMarker("zone").addMarker("priority").addMarker("multiplier").addMarker("sp")
                                                .setTz(tz)
@@ -1286,6 +1335,8 @@ public class BuildingTuners
                                   .setDisplayName(equipdis+"-"+"coolingDeadband")
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipref)
+                                  .setRoomRef(roomRef)
+                                  .setFloorRef(floorRef)
                                   .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis")
                                   .addMarker("cooling").addMarker("deadband").addMarker("base").addMarker("sp")
                                   .setTz(tz)
@@ -1307,6 +1358,8 @@ public class BuildingTuners
                                             .setDisplayName(equipdis+"-"+"coolingDeadbandMultiplier")
                                             .setSiteRef(siteRef)
                                             .setEquipRef(equipref)
+                                            .setRoomRef(roomRef)
+                                            .setFloorRef(floorRef)
                                             .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis")
                                             .addMarker("cooling").addMarker("deadband").addMarker("multiplier").addMarker("sp")
                                             .setTz(tz)
@@ -1327,6 +1380,8 @@ public class BuildingTuners
                                   .setDisplayName(equipdis+"-"+"heatingDeadband")
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipref)
+                                  .setRoomRef(roomRef)
+                                  .setFloorRef(floorRef)
                                   .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis")
                                   .addMarker("heating").addMarker("deadband").addMarker("base").addMarker("sp")
                                   .setTz(tz)
@@ -1347,6 +1402,8 @@ public class BuildingTuners
                                             .setDisplayName(equipdis+"-"+"heatingDeadbandMultiplier")
                                             .setSiteRef(siteRef)
                                             .setEquipRef(equipref)
+                                            .setRoomRef(roomRef)
+                                            .setFloorRef(floorRef)
                                             .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis")
                                             .addMarker("heating").addMarker("deadband").addMarker("multiplier").addMarker("sp")
                                             .setTz(tz)
@@ -1366,6 +1423,8 @@ public class BuildingTuners
                                  .setDisplayName(equipdis+"-"+"proportionalKFactor")
                                  .setSiteRef(siteRef)
                                  .setEquipRef(equipref)
+                                 .setRoomRef(roomRef)
+                                 .setFloorRef(floorRef)
                                  .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis")
                                  .addMarker("pgain").addMarker("sp")
                                  .setTz(tz)
@@ -1385,6 +1444,8 @@ public class BuildingTuners
                                      .setDisplayName(equipdis+"-"+"integralKFactor")
                                      .setSiteRef(siteRef)
                                      .setEquipRef(equipref)
+                                     .setRoomRef(roomRef)
+                                     .setFloorRef(floorRef)
                                      .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis")
                                      .addMarker("igain").addMarker("sp")
                                      .setTz(tz)
@@ -1404,6 +1465,8 @@ public class BuildingTuners
                                    .setDisplayName(equipdis+"-"+"temperatureProportionalRange")
                                    .setSiteRef(siteRef)
                                    .setEquipRef(equipref)
+                                   .setRoomRef(roomRef)
+                                   .setFloorRef(floorRef)
                                    .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis")
                                    .addMarker("pspread").addMarker("sp")
                                    .setTz(tz)
@@ -1423,6 +1486,8 @@ public class BuildingTuners
                                         .setDisplayName(equipdis+"-"+"temperatureIntegralTime")
                                         .setSiteRef(siteRef)
                                         .setEquipRef(equipref)
+                                        .setRoomRef(roomRef)
+                                        .setFloorRef(floorRef)
                                         .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis")
                                         .addMarker("itimeout").addMarker("sp")
                                         .setTz(tz)
@@ -1442,6 +1507,8 @@ public class BuildingTuners
                                       .setDisplayName(equipdis+"-"+"zoneCO2Target")
                                       .setSiteRef(siteRef)
                                       .setEquipRef(equipref)
+                                      .setRoomRef(roomRef)
+                                      .setFloorRef(floorRef)
                                       .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis")
                                       .addMarker("zone").addMarker("co2").addMarker("target").addMarker("sp")
                                       .setTz(tz)
@@ -1461,6 +1528,8 @@ public class BuildingTuners
                                          .setDisplayName(equipdis+"-"+"zoneCO2Threshold")
                                          .setSiteRef(siteRef)
                                          .setEquipRef(equipref)
+                                         .setRoomRef(roomRef)
+                                         .setFloorRef(floorRef)
                                          .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis")
                                          .addMarker("zone").addMarker("co2").addMarker("threshold").addMarker("sp")
                                          .setTz(tz)
@@ -1480,6 +1549,8 @@ public class BuildingTuners
                                       .setDisplayName(equipdis+"-"+"zoneVOCTarget")
                                       .setSiteRef(siteRef)
                                       .setEquipRef(equipref)
+                                      .setRoomRef(roomRef)
+                                      .setFloorRef(floorRef)
                                       .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("sp").addMarker("equipHis")
                                       .addMarker("zone").addMarker("voc").addMarker("target")
                                       .setTz(tz)
@@ -1499,6 +1570,8 @@ public class BuildingTuners
                                          .setDisplayName(equipdis+"-"+"zoneVOCThreshold")
                                          .setSiteRef(siteRef)
                                          .setEquipRef(equipref)
+                                         .setRoomRef(roomRef)
+                                         .setFloorRef(floorRef)
                                          .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his").addMarker("equipHis")
                                          .addMarker("zone").addMarker("voc").addMarker("threshold").addMarker("sp")
                                          .setTz(tz)
@@ -1516,11 +1589,13 @@ public class BuildingTuners
     
     }
 
-    public void addEquipZoneStandaloneTuners(String equipdis, String equipref) {
+    public void addEquipZoneStandaloneTuners(String equipdis, String equipref, String roomRef, String floorRef) {
         Point saHeatingDeadBand = new Point.Builder()
                 .setDisplayName(equipdis+"-"+"standaloneHeatingDeadband")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
                 .addMarker("tuner").addMarker("base").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("standalone").addMarker("heating").addMarker("deadband").addMarker("sp")
                 .setUnit("\u00B0F")
@@ -1541,6 +1616,8 @@ public class BuildingTuners
                 .setDisplayName(equipdis+"-"+"standaloneCoolingDeadband")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
                 .addMarker("tuner").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("cooling").addMarker("deadband").addMarker("sp")
                 .setUnit("\u00B0F")
@@ -1562,6 +1639,8 @@ public class BuildingTuners
                 .setDisplayName(equipdis+"-"+"standaloneStage1Hysteresis")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
                 .addMarker("tuner").addMarker("base").addMarker("standalone").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("stage1").addMarker("hysteresis").addMarker("sp")
                 .setTz(tz)
@@ -1579,15 +1658,17 @@ public class BuildingTuners
         hayStack.writeHisValById(saStage1HysteresisId, HSUtil.getPriorityVal(saStage1HysteresisId));
         
     }
-    public void addEquipStandaloneTuners(String equipdis, String equipref){
-        addEquipZoneTuners(equipdis,equipref);
-        addEquipZoneStandaloneTuners(equipdis,equipref);
+    public void addEquipStandaloneTuners(String equipdis, String equipref, String roomRef, String floorRef){
+        addEquipZoneTuners(equipdis,equipref, roomRef, floorRef);
+        addEquipZoneStandaloneTuners(equipdis,equipref, roomRef, floorRef);
     }
-    public void addTwoPipeFanEquipStandaloneTuners(String equipDis, String equipRef){
+    public void addTwoPipeFanEquipStandaloneTuners(String equipDis, String equipRef, String roomRef, String floorRef){
         Point sa2PfcHeatingThreshold = new Point.Builder()
                 .setDisplayName(equipDis+"-2PipeFancoilHeatingThreshold")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
                 .addMarker("tuner").addMarker("base").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("standalone").addMarker("heating").addMarker("threshold").addMarker("pipe2").addMarker("fcu").addMarker("sp")
                 .setUnit("\u00B0F")
@@ -1601,6 +1682,8 @@ public class BuildingTuners
                 .setDisplayName(equipDis+"-2PipeFancoilCoolingThreshold")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
                 .addMarker("tuner").addMarker("base").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .addMarker("standalone").addMarker("cooling").addMarker("threshold").addMarker("pipe2").addMarker("fcu").addMarker("sp")
                 .setUnit("\u00B0F")

@@ -67,7 +67,7 @@ public class HeatPumpUnitEquip{
         b.addMarker(profile);
         String equipRef = CCUHsApi.getInstance().addEquip(b.build());
 
-        BuildingTuners.getInstance().addEquipStandaloneTuners(siteDis+"-HPU-"+nodeAddr, equipRef);
+        BuildingTuners.getInstance().addEquipStandaloneTuners(siteDis+"-HPU-"+nodeAddr, equipRef, room, floor);
 
         createHeatPumpConfigPoints(config, equipRef,floor,room);
 

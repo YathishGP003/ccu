@@ -34,11 +34,14 @@ import org.joda.time.DateTime;
 import org.joda.time.Interval;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.DAYS;
 import a75f.io.api.haystack.MockTime;
 import a75f.io.api.haystack.Schedule;
+import a75f.io.api.haystack.Zone;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.renatus.R;
@@ -401,14 +404,32 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
                 break;
         }
     }
-
+    
+    private void showDialog(int id, int position, ArrayList<Schedule.Days> days) {
+        
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        
+        switch (id) {
+            case ID_DIALOG_SCHEDULE:
+                Fragment scheduleFragment = getFragmentManager().findFragmentByTag("popup");
+                if (scheduleFragment != null) {
+                    ft.remove(scheduleFragment);
+                }
+                ManualSchedulerDialogFragment newFragment = new ManualSchedulerDialogFragment(this, position, days);
+                newFragment.show(ft, "popup");
+                break;
+        }
+    }
+    Schedule.Days removeEntry = null;
     public boolean onClickSave(int position, double coolingTemp, double heatingTemp, int startTimeHour, int endTimeHour, int startTimeMinute, int endTimeMinute, ArrayList<DAYS> days) {
-        Schedule.Days remove = null;
+        
         if (position != ManualSchedulerDialogFragment.NO_REPLACE) {
-            remove = schedule.getDays().remove(position);
+            removeEntry = schedule.getDays().remove(position);
+        } else {
+            removeEntry = null;
         }
     
-        Log.d("CCU_UI"," onClickSave "+"startTime "+startTimeHour+":"+startTimeMinute+" endTime "+endTimeHour+":"+endTimeMinute);
+        Log.d("CCU_UI"," onClickSave "+"startTime "+startTimeHour+":"+startTimeMinute+" endTime "+endTimeHour+":"+endTimeMinute+" removeEntry "+removeEntry);
 
         ArrayList<Schedule.Days> daysArrayList = new ArrayList<Schedule.Days>();
 
@@ -427,11 +448,83 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
                 daysArrayList.add(dayBO);
                 }
         }
+        
+        HashMap<String, ArrayList<Interval>> spillsMap = days == null ? getScheduleSpills(removeEntry):
+                                                                              getScheduleSpills(daysArrayList);
+        if (spillsMap.size() > 0) {
+            if (schedule.isZoneSchedule()) {
+    
+                StringBuilder spillZones = new StringBuilder();
+                for (String zone : spillsMap.keySet())
+                {
+                    for (Interval i : spillsMap.get(zone))
+                    {
+                        //Log.d("CCU_UI"," spill Interval "+i);
+                        spillZones.append(getDayString(i.getStart().getDayOfWeek())+" (" + i.getStart().hourOfDay().get() + ":" + (i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get()) + " - " + i.getEnd().hourOfDay().get() + ":" + (i.getEnd().minuteOfHour().get() == 0 ? "00" : i.getEnd().minuteOfHour().get()) + ") \n");
+                    }
+                }
+                
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setMessage("Zone Schedule edited/created is outside building schedule currently set. " +
+                                   "Proceed with updating zone schedules to be within the building schedule \n"+spillZones)
+                       .setCancelable(false)
+                       .setTitle("Schedule Errors")
+                       .setIcon(android.R.drawable.ic_dialog_alert)
+                       .setNegativeButton("Discard", new DialogInterface.OnClickListener() {
+                           public void onClick(DialogInterface dialog, int id) {
+                           }
+                       })
+                       .setPositiveButton("Re-Edit", new DialogInterface.OnClickListener() {
+                           public void onClick(DialogInterface dialog, int id) {
+                              showDialog(ID_DIALOG_SCHEDULE, position, daysArrayList);
+                           }
+                       });
+    
+                AlertDialog alert = builder.create();
+                alert.show();
+            } else if (schedule.isBuildingSchedule()) {
+    
+                StringBuilder spillZones = new StringBuilder();
+                for (String zone : spillsMap.keySet())
+                {
+                    for (Interval i : spillsMap.get(zone))
+                    {
+                        //Log.d("CCU_UI"," spill Interval "+i);
+                        spillZones.append("Zone " + zone+" (" + i.getStart().hourOfDay().get() + ":" + (i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get()) + " - " + i.getEnd().hourOfDay().get() + ":" + (i.getEnd().minuteOfHour().get() == 0 ? "00" : i.getEnd().minuteOfHour().get()) + ") \n");
+                    }
+                }
+                
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setMessage("Zone Schedule for below zone(s) is outside updated building schedule.\n"+(spillZones.equals("") ?"":"The Schedule is outside by \n"+spillZones.toString()))
+                       .setCancelable(false)
+                       .setTitle("Schedule Errors")
+                       .setIcon(android.R.drawable.ic_dialog_alert)
+                       .setNegativeButton("Discard", new DialogInterface.OnClickListener() {
+                           public void onClick(DialogInterface dialog, int id) {
+                           }
+                       })
+                       .setPositiveButton("Re-Edit", new DialogInterface.OnClickListener() {
+                           public void onClick(DialogInterface dialog, int id) {
+                               if (removeEntry != null)
+                               {
+                                   schedule.getDays().add(position, removeEntry);
+                               }
+                               showDialog(ID_DIALOG_SCHEDULE, position, daysArrayList);
+                           }
+                       });
+    
+                AlertDialog alert = builder.create();
+                alert.show();
+            }
+            return true;
+            
+        }
+        
 
         boolean intersection = schedule.checkIntersection(daysArrayList);
         if (intersection) {
-            if (remove != null)
-                schedule.getDays().add(position, remove);
+            if (removeEntry != null)
+                schedule.getDays().add(position, removeEntry);
             
             StringBuilder overlapDays = new StringBuilder();
             for (Schedule.Days day : daysArrayList) {
@@ -473,6 +566,160 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
         ScheduleProcessJob.updateSchedules();
 
         return true;
+    }
+    
+    private HashMap<String,ArrayList<Interval>> getScheduleSpills(Schedule.Days d) {
+        ArrayList<Schedule.Days> removeDayList = new ArrayList<>();
+        for (Schedule.Days sd : schedule.getDays()) {
+            if (sd.getDay() == d.getDay()) {
+                removeDayList.add(sd);
+            }
+        }
+        return getScheduleSpills(removeDayList);
+    }
+    private HashMap<String,ArrayList<Interval>> getScheduleSpills(ArrayList<Schedule.Days> daysArrayList) {
+        ArrayList<Interval> intervalSpills = new ArrayList<>();
+        HashMap<String,ArrayList<Interval>> spillsMap = new HashMap<>();
+        if (schedule.isZoneSchedule()) {
+            Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
+            
+            ArrayList<Interval> systemIntervals = systemSchedule.getMergedIntervals(daysArrayList);
+    
+            for (Interval v : systemIntervals)
+            {
+                CcuLog.d("CCU_UI", "Merged System interval "+v);
+            }
+            
+            ArrayList<Interval> zoneIntervals = schedule.getScheduledIntervals(daysArrayList);
+            
+            for(Interval z : zoneIntervals) {
+                boolean add = true;
+                for (Interval s: systemIntervals) {
+                    if (s.contains(z)) {
+                        add = false;
+                        break;
+                    } else if (s.overlaps(z)) {
+                        if (z.getStartMillis() < s.getStartMillis()) {
+                            intervalSpills.add(new Interval(z.getStartMillis(), s.getStartMillis()));
+                        } else if (z.getEndMillis() > s.getEndMillis()) {
+                            intervalSpills.add(new Interval(s.getEndMillis(), z.getEndMillis()));
+                        }
+                        add = false;
+                        continue;
+                    }
+                }
+                if (add)
+                {
+                    intervalSpills.add(z);
+                    CcuLog.d("CCU_UI", " Zone Interval not contained "+z);
+                }
+                
+            }
+            if (intervalSpills.size() > 0)
+            {
+                spillsMap.put("system", intervalSpills);
+            }
+            
+        } else if (schedule.isBuildingSchedule()) {
+            ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone");
+            
+            for (HashMap m : equips) {
+                Schedule zoneSchedule = Schedule.getScheduleByEquipId(m.get("id").toString());
+                if (zoneSchedule.getMarkers().contains("disabled")) {
+                    continue;
+                }
+                ArrayList<Interval> zoneIntervals = zoneSchedule.getMergedIntervals(daysArrayList);
+    
+                for (Interval v : zoneIntervals)
+                {
+                    CcuLog.d("CCU_UI", "Merged Zone interval "+v);
+                }
+    
+                ArrayList<Interval> systemIntervals = schedule.getScheduledIntervals(daysArrayList);
+    
+                for (Interval v : systemIntervals)
+                {
+                    CcuLog.d("CCU_UI", "System intervals "+v);
+                }
+                
+                for (Interval s: systemIntervals) {
+                    for (Interval z : zoneIntervals) {
+                        if (s.contains(z) || (s.getStart().getDayOfWeek() != z.getStart().getDayOfWeek())
+                                || (s.getStartMillis() > z.getEndMillis())) {
+                            continue;
+                        } else if (s.overlaps(z)) {
+                            if (z.getStartMillis() < s.getStartMillis()) {
+                                intervalSpills.add(new Interval(z.getStartMillis(), s.getStartMillis()));
+                            } else if (z.getEndMillis() > s.getEndMillis()) {
+                                intervalSpills.add(new Interval(s.getEndMillis(), z.getEndMillis()));
+                            }
+                            continue;
+                        } else {
+                            intervalSpills.add(z);
+                        }
+                    }
+                    
+                }
+                CcuLog.d("CCU_UI","Check schedule spills : Equip "+m);
+                Zone z = new Zone.Builder().setHashMap(CCUHsApi.getInstance().readMapById(m.get("roomRef").toString())).build();
+                if (intervalSpills.size() > 0)
+                {
+                    spillsMap.put(z.getDisplayName(), intervalSpills);
+                }
+                for (Interval v : intervalSpills)
+                {
+                    CcuLog.d("CCU_UI", "Spilled System interval "+v);
+                }
+                
+            }
+        }
+        return spillsMap;
+    }
+    
+    private void forceTrimZoneSchedules(ArrayList<Schedule.Days> daysArrayList) {
+        Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
+        
+        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone");
+        for (HashMap m : equips)
+        {
+            Schedule zoneSchedule = Schedule.getScheduleByEquipId(m.get("id").toString());
+            if (zoneSchedule.getMarkers().contains("disabled"))
+            {
+                continue;
+            }
+            
+            for (Schedule.Days d : zoneSchedule.getDays()) {
+                Schedule.Days ssDay = systemSchedule.getDay(d);
+                if (ssDay != null && d.getEthh() > ssDay.getEthh()) {
+                    d.setSthh(ssDay.getSthh());
+                }
+                if (ssDay != null && d.getEthh() == ssDay.getEthh() && d.getEtmm() > ssDay.getEtmm()) {
+                    d.setStmm(ssDay.getStmm());
+                }
+            }
+            
+            CCUHsApi.getInstance().updateZoneSchedule(zoneSchedule, zoneSchedule.getRoomRef());
+        }
+    }
+    
+    private String getDayString(int day) {
+        switch (day) {
+            case 1:
+                return "Mo";
+            case 2:
+                return "Tu";
+            case 3:
+                return "We";
+            case 4:
+                return "Th";
+            case 5:
+                return "Fr";
+            case 6:
+                return "Sa";
+            case 7:
+                return "Su";
+        }
+        return "";
     }
     
     private String getDayString(Schedule.Days day) {

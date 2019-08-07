@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Stack;
 
 import a75f.io.logger.CcuLog;
 
@@ -31,7 +32,7 @@ import a75f.io.logger.CcuLog;
  */
 public class Schedule extends Entity
 {
-    public boolean isSiteSchedule()
+    public boolean isBuildingSchedule()
     {
         return getMarkers().contains("building");
     }
@@ -204,7 +205,41 @@ public class Schedule extends Entity
         }
         return overLaps;
     }
-
+    
+    public ArrayList<Interval> getMergedIntervals(ArrayList<Days> daysSorted) {
+    
+        ArrayList<Interval> intervals   = getScheduledIntervalsForDays(daysSorted);
+        Collections.sort(intervals, new Comparator<Interval>() {
+                    public int compare(Interval p1, Interval p2) {
+                        return Long.compare(p1.getStartMillis(), p2.getStartMillis());
+                    }
+                }
+                        );
+        
+        Stack<Interval> stack=new Stack<>();
+        if (intervals.size() > 0)
+        {
+            stack.push(intervals.get(0));
+            for (int i = 1; i < intervals.size(); i++)
+            {
+                Interval top = stack.peek();
+                Interval interval = intervals.get(i);
+                if (top.getEndMillis() < interval.getStartMillis())
+                {
+                    stack.push(interval);
+                }
+                else if (top.getEndMillis() < interval.getEndMillis())
+                {
+                    Interval t = new Interval(top.getStartMillis(), interval.getEndMillis());
+                    stack.pop();
+                    stack.push(t);
+                }
+            }
+        }
+        return new ArrayList<>(stack);
+        
+    }
+    
     private DateTime getTime()
     {
         return new DateTime(MockTime.getInstance().getMockTime());
@@ -365,6 +400,16 @@ public class Schedule extends Entity
         return mDays;
     }
     
+    public Days getDay(Days day)
+    {
+        for (Days d : mDays) {
+            if (d.mDay == day.mDay) {
+                return d;
+            }
+        }
+        return null;
+    }
+    
     public String toString() {
         StringBuilder b = new StringBuilder();
         b.append(mDis).append(" ");
@@ -385,8 +430,32 @@ public class Schedule extends Entity
     }
     
     
+    //Get existing intervals for selected days
+    public ArrayList<Interval> getScheduledIntervalsForDays(ArrayList<Days> daysSorted) {
+        ArrayList<Interval> daysIntervals = new ArrayList<Interval>();
+        ArrayList<Interval> allIntervals = getScheduledIntervals(getDaysSorted());
+        for (Interval i : allIntervals)
+        {
+            for (Days d : daysSorted)
+            {
+                if (d.mDay == i.getStart().getDayOfWeek()-1) {
+                    daysIntervals.add(i);
+                } else if (d.mDay == i.getEnd().getDayOfWeek()-1) {
+                    long now = MockTime.getInstance().getMockTime();
+                    DateTime startTime = new DateTime(now)
+                                                   .withHourOfDay(0)
+                                                   .withMinuteOfHour(0)
+                                                   .withSecondOfMinute(0).withMillisOfSecond(0).withDayOfWeek(i.getEnd().getDayOfWeek());
+                    daysIntervals.add(i.toInterval().withStartMillis(startTime.getMillis()));
+                }
+                
+                
+            }
+        }
+        return daysIntervals;
+    }
     
-    private ArrayList<Interval> getScheduledIntervals(ArrayList<Days> daysSorted)
+    public ArrayList<Interval> getScheduledIntervals(ArrayList<Days> daysSorted)
     {
         ArrayList<Interval> intervals = new ArrayList<Interval>();
 

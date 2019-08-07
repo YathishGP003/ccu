@@ -1,5 +1,7 @@
 package a75f.io.logic.pubnub;
 
+import android.util.Log;
+
 import com.google.gson.JsonObject;
 
 import org.projecthaystack.HGrid;
@@ -89,15 +91,46 @@ public class UpdatePointHandler
         if (p.getMarkers().contains("his"))
         {
             CCUHsApi.getInstance().writeHisValById(luid, CCUHsApi.getInstance().readPointPriorityVal(luid));
+            if (zoneDataInterface != null) {
+                Log.i("PubNub","Zone Data Received Refresh");
+                zoneDataInterface.refreshScreen(luid);
+            }
+            if (systemDataInterface != null) {
+                Log.i("PubNub","System Data Received Refresh");
+                systemDataInterface.refreshScreen(luid);
+            }
         }
 
         if (p.getMarkers().contains("desired"))
         {
             ScheduleProcessJob.handleDesiredTempUpdate(p, false, 0);
+            if (zoneDataInterface != null) {
+                Log.i("PubNub","Zone Data Received Refresh");
+                zoneDataInterface.refreshScreen(luid);
+            }
         }
 
         if (p.getMarkers().contains("scheduleType")) {
             ScheduleProcessJob.handleScheduleTypeUpdate(p);
+            if (zoneDataInterface != null) {
+                Log.i("PubNub","Zone Data Received Refresh");
+                zoneDataInterface.refreshScreen(luid);
+            }
         }
     }
+
+
+    public interface ZoneDataInterface {
+        void refreshScreen(String id);
+    }
+
+    private static ZoneDataInterface zoneDataInterface = null;
+    public static void setZoneDataInterface(ZoneDataInterface in) { zoneDataInterface = in; }
+
+    public interface SystemDataInterface {
+        void refreshScreen(String id);
+    }
+
+    private static SystemDataInterface systemDataInterface = null;
+    public static void setSystemDataInterface(SystemDataInterface in) { systemDataInterface = in; }
 }

@@ -30,7 +30,8 @@ public class StatusPagerAdapter extends FragmentStatePagerAdapter
 				fragment = DashboardFragment.newInstance();
 				break;
 			case 1:
-				fragment = ZoneFragmentTemp.newInstance();
+				//fragment = ZoneFragmentTemp.newInstance();
+				fragment = ZoneFragmentNew.newInstance();
 				break;
 			case 2:
 				//fragment = SystemFragment_bkp.newInstance();

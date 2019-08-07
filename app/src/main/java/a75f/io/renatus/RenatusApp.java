@@ -16,15 +16,19 @@ public class RenatusApp extends UtilityApplication
 {
 
 	private static final String    TAG           = RenatusApp.class.getSimpleName();
-
+	static Context mContext = null;
 
 	@Override
 	public void onCreate()
 	{
 		super.onCreate();
-		Fabric.with(this, new Crashlytics());
+		mContext = getApplicationContext();
+		//Fabric.with(this, new Crashlytics());
 	}
 
+	public static Context getAppContext() {
+		return mContext;
+	}
 
 	@Override
 	protected void attachBaseContext(Context base)

@@ -65,5 +65,7 @@
     <color name="input_textcolor">#B3000000</color>
     <color name="bg_lightblack">#4D000000</color>
     <color name="bg_header">#F7F7F7</color>
-
+    <color name="line_border">#1F000000</color>
+    <color name="zoneselection_gray">#F0F0F0</color>
+    <color name="spinner_divider">#99707070</color>
 </resources>

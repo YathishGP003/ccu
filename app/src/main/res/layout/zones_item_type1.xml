@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:weightSum="2">
+
+        <LinearLayout
+            android:id="@+id/lt_column1"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_marginLeft="56dp"
+            android:layout_marginTop="20dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/text_point1label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Damper : "
+                android:textAppearance="@style/title_normal"/>
+
+            <TextView
+                android:id="@+id/text_point1value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" 40% Open "
+                android:textAppearance="@style/label_grey"/>
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/lt_column2"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_marginTop="20dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/text_point2label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Reheat Coil : "
+                android:textAppearance="@style/title_normal"/>
+
+            <TextView
+                android:id="@+id/text_point2value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" 45% Open "
+                android:textAppearance="@style/label_grey"/>
+        </LinearLayout>
+</LinearLayout>

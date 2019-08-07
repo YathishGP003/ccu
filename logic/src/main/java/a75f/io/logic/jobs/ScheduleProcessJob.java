@@ -14,6 +14,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
+import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.MockTime;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Point;
@@ -570,15 +571,330 @@ public class ScheduleProcessJob extends BaseJob {
                 Log.d(L.TAG_CCU_JOB, "ScheduleStatus not changed for  "+equip.getDisplayName());
             }
         }
-    
+
         ArrayList occ = CCUHsApi.getInstance().readAll("point and occupancy and status and equipRef == \""+equip.getId()+"\"");
         if (occ != null && occ.size() > 0) {
             String id = ((HashMap) points.get(0)).get("id").toString();
             CCUHsApi.getInstance().writeHisValById(id, (double) getZoneStatus(equip.getRoomRef()).ordinal());
         }
-        
     }
-    
+
+    public static HashMap getDABEquipPoints(String equipID) {
+
+        HashMap dabPoints = new HashMap();
+        dabPoints.put("Profile","DAB");
+        String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and equipRef == \""+equipID+"\"");
+        double damperPosPoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and damper and base and equipRef == \""+equipID+"\"");
+        double dischargePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and discharge and air and temp and equipRef == \""+equipID+"\"");
+        if (equipStatusPoint.length() > 0)
+        {
+            dabPoints.put("Status",equipStatusPoint);
+        }else{
+            dabPoints.put("Status","OFF");
+        }
+        if (damperPosPoint > 0)
+        {
+            dabPoints.put("Damper",damperPosPoint+"% Open");
+        }else{
+            dabPoints.put("Damper",0+"% Open");
+        }
+        if (dischargePoint  > 0)
+        {
+
+            dabPoints.put("Discharge Airflow",dischargePoint+" \u2109");
+        }else{
+            dabPoints.put("Discharge Airflow",0+" \u2109");
+        }
+        return dabPoints;
+    }
+
+
+    public static HashMap getVAVEquipPoints(String equipID) {
+        HashMap vavPoints = new HashMap();
+
+
+        vavPoints.put("Profile","VAV Reheat - No Fan");
+        String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and equipRef == \""+equipID+"\"");
+        double damperPosPoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and damper and base and equipRef == \""+equipID+"\"");
+        double reheatPoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and reheat and base and equipRef == \""+equipID+"\"");
+        double supplyAirPoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and entering and air and temp and equipRef == \""+equipID+"\"");
+        double dischargePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and discharge and air and temp and equipRef == \""+equipID+"\"");
+        if (equipStatusPoint.length() > 0)
+        {
+            vavPoints.put("Status",equipStatusPoint);
+        }else{
+            vavPoints.put("Status","OFF");
+        }
+        if (damperPosPoint > 0)
+        {
+            vavPoints.put("Damper",damperPosPoint+"% Open");
+        }else{
+            vavPoints.put("Damper",0+"% Open");
+        }
+        if (reheatPoint  > 0)
+        {
+            vavPoints.put("Reheat Coil",reheatPoint+"% Open");
+        }else{
+            vavPoints.put("Reheat Coil",0);
+        }
+        if (supplyAirPoint > 0)
+        {
+            vavPoints.put("Supply Airfow",supplyAirPoint+" \u2109");
+        }else{
+            vavPoints.put("Supply Airfow",0+" \u2109");
+        }
+        if (dischargePoint > 0)
+        {
+            vavPoints.put("Discharge Airflow",dischargePoint+" \u2109");
+        }else{
+            vavPoints.put("Discharge Airflow",0+" \u2109");
+        }
+        return vavPoints;
+    }
+
+
+
+    public static HashMap get2PFCUEquipPoints(String equipID) {
+        HashMap p2FCUPoints = new HashMap();
+
+
+        p2FCUPoints.put("Profile","Smartstat - 2 Pipe FCU");
+        String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and equipRef == \""+equipID+"\"");
+        double fanopModePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and fan and mode and operation and equipRef == \""+equipID+"\"");
+        double operationModePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and temp and mode and operation and equipRef == \""+equipID+"\"");
+
+        if (equipStatusPoint.length() > 0)
+        {
+            p2FCUPoints.put("Status",equipStatusPoint);
+            //vavPoints.add(status);
+        }else{
+            p2FCUPoints.put("Status","OFF");
+        }
+        if (fanopModePoint > 0)
+        {
+            p2FCUPoints.put("Fan Mode",fanopModePoint);
+            //vavPoints.add(dampPos+"% Open");
+        }else{
+            p2FCUPoints.put("Fan Mode",0);
+            //vavPoints.add(0);
+        }
+        if (operationModePoint > 0)
+        {
+            p2FCUPoints.put("Conditioning Mode",operationModePoint);
+        }else{
+            p2FCUPoints.put("Conditioning Mode",0);
+        }
+        return p2FCUPoints;
+    }
+
+
+    public static HashMap get4PFCUEquipPoints(String equipID) {
+        HashMap p2FCUPoints = new HashMap();
+
+
+
+        p2FCUPoints.put("Profile","Smartstat - 4 Pipe FCU");
+        String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and equipRef == \""+equipID+"\"");
+        double fanopModePoint = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and fan and mode and operation and equipRef == \""+equipID+"\"");
+        double operationModePoint = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and temp and mode and operation and equipRef == \""+equipID+"\"");
+
+        if (equipStatusPoint.length() > 0)
+        {
+            p2FCUPoints.put("Status",equipStatusPoint);
+            //vavPoints.add(status);
+        }else{
+            p2FCUPoints.put("Status","OFF");
+        }
+        if (fanopModePoint > 0)
+        {
+            p2FCUPoints.put("Fan Mode",fanopModePoint);
+            //vavPoints.add(dampPos+"% Open");
+        }else{
+            p2FCUPoints.put("Fan Mode",0);
+            //vavPoints.add(0);
+        }
+        if (operationModePoint > 0)
+        {
+            p2FCUPoints.put("Conditioning Mode",operationModePoint);
+        }else{
+            p2FCUPoints.put("Conditioning Mode",0);
+        }
+        return p2FCUPoints;
+    }
+
+     public static HashMap getCPUEquipPoints(String equipID) {
+            HashMap cpuPoints = new HashMap();
+
+                    cpuPoints.put("Profile","Smartstat - Convention Package Unit");
+            ArrayList equipStatusPoint = CCUHsApi.getInstance().readAll("point and status and message and equipRef == \""+equipID+"\"");
+            double fanopModePoint = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and fan and mode and operation and equipRef == \""+equipID+"\"");
+            double operationModePoint = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and temp and mode and operation and equipRef == \""+equipID+"\"");
+            double fanHighHumdOption = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and config and relay6 and type and equipRef == \"" + equipID + "\"");
+            double targetHumidity = 0;
+            if (equipStatusPoint != null && equipStatusPoint.size() > 0)
+            {
+                String id = ((HashMap) equipStatusPoint.get(0)).get("id").toString();
+                String status = CCUHsApi.getInstance().readDefaultStrValById(id);
+                cpuPoints.put("Status",status);
+            }else{
+                cpuPoints.put("Status","OFF");
+            }
+            if (fanopModePoint > 0)
+            {
+                cpuPoints.put("Fan Mode",fanopModePoint);
+            }else{
+                cpuPoints.put("Fan Mode",0);
+            }
+            if (operationModePoint > 0)
+            {
+                cpuPoints.put("Conditioning Mode",operationModePoint);
+            }else{
+                cpuPoints.put("Conditioning Mode",0);
+            }
+            if(fanHighHumdOption > 0){
+                cpuPoints.put("Fan High Humidity",fanHighHumdOption);
+                if(fanHighHumdOption == 2.0) {
+                    targetHumidity = CCUHsApi.getInstance().readDefaultVal("point and standalone and target and humidity and his and equipRef == \"" + equipID + "\"");
+                    cpuPoints.put("Target Humidity",targetHumidity);
+                }else {
+                    targetHumidity = CCUHsApi.getInstance().readDefaultVal("point and standalone and target and dehumidifier and his and equipRef == \"" + equipID + "\"");
+                    cpuPoints.put("Target Dehumidity",targetHumidity);
+                }
+            }else{
+                cpuPoints.put("Fan High Humidity",0);
+            }
+            return cpuPoints;
+    }
+
+    public static HashMap getHPUEquipPoints(String equipID) {
+        HashMap cpuPoints = new HashMap();
+
+
+
+        cpuPoints.put("Profile","Smartstat - Heat Pump Unit");
+        ArrayList equipStatusPoint = CCUHsApi.getInstance().readAll("point and status and message and equipRef == \""+equipID+"\"");
+        double fanopModePoint = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and fan and mode and operation and equipRef == \""+equipID+"\"");
+        double operationModePoint = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and temp and mode and operation and equipRef == \""+equipID+"\"");
+        double fanHighHumdOption = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and config and relay5 and type and equipRef == \"" + equipID + "\"");
+        double targetHumidity = 0;
+        if (equipStatusPoint != null && equipStatusPoint.size() > 0)
+        {
+            String id = ((HashMap) equipStatusPoint.get(0)).get("id").toString();
+            String status = CCUHsApi.getInstance().readDefaultStrValById(id);
+            cpuPoints.put("Status",status);
+            cpuPoints.put("StatusTag",id);
+            //vavPoints.add(status);
+        }else{
+            cpuPoints.put("Status","OFF");
+        }if (fanopModePoint > 0)
+        {
+            cpuPoints.put("Fan Mode",fanopModePoint);
+        }else{
+            cpuPoints.put("Fan Mode",0);
+        }
+        if (operationModePoint > 0)
+        {
+            cpuPoints.put("Conditioning Mode",operationModePoint);
+        }else{
+            cpuPoints.put("Conditioning Mode",0);
+        }
+        if(fanHighHumdOption > 0){
+            cpuPoints.put("Fan High Humidity",fanHighHumdOption);
+            if(fanHighHumdOption == 2.0) {
+                targetHumidity = CCUHsApi.getInstance().readDefaultVal("point and standalone and target and humidity and his and equipRef == \"" + equipID + "\"");
+                cpuPoints.put("Target Humidity",targetHumidity);
+            }else {
+                targetHumidity = CCUHsApi.getInstance().readDefaultVal("point and standalone and target and dehumidifier and his and equipRef == \"" + equipID + "\"");
+                cpuPoints.put("Target Dehumidity",targetHumidity);
+            }
+        }else{
+            cpuPoints.put("Fan High Humidity",0);
+        }
+        return cpuPoints;
+    }
+
+
+    public static HashMap getEMEquipPoints(String equipID) {
+        HashMap emPoints = new HashMap();
+
+        emPoints.put("Profile","Energy Meter");
+        ArrayList equipStatusPoint = CCUHsApi.getInstance().readAll("point and status and message and equipRef == \""+equipID+"\"");
+        ArrayList currentRate = CCUHsApi.getInstance().readAll("point and emr and rate and equipRef == \""+equipID+"\"");
+        double energyReading = CCUHsApi.getInstance().readHisValByQuery("point and emr and sensor and equipRef == \""+equipID+"\"");
+
+        if (equipStatusPoint != null && equipStatusPoint.size() > 0)
+        {
+            String id = ((HashMap) equipStatusPoint.get(0)).get("id").toString();
+            String status = CCUHsApi.getInstance().readDefaultStrValById(id);
+            emPoints.put("Status",status);
+        }else{
+            emPoints.put("Status","OFF");
+        }
+        if (currentRate != null && currentRate.size() > 0)
+        {
+            String id = ((HashMap) currentRate.get(0)).get("id").toString();
+            HisItem currentRateHis = CCUHsApi.getInstance().curRead(id);
+            double currentRateVal = currentRateHis.getVal();
+            emPoints.put("Current Rate",currentRateVal);
+        }else{
+            emPoints.put("Current Rate",0);
+        }
+        if (energyReading > 0)
+        {
+            emPoints.put("Energy Reading",energyReading);
+        }else{
+            emPoints.put("Energy Reading",0);
+        }
+
+        return emPoints;
+    }
+
+
+    public static HashMap getPiEquipPoints(String equipID) {
+        HashMap plcPoints = new HashMap();
+
+        plcPoints.put("Profile","Pi Loop Controller");
+        ArrayList equipStatusPoint = CCUHsApi.getInstance().readAll("point and status and message and equipRef == \""+equipID+"\"");
+        ArrayList inputValue = CCUHsApi.getInstance().readAll("point and process and logical and variable and equipRef == \""+equipID+"\"");
+        ArrayList offsetValue = CCUHsApi.getInstance().readAll("point and setpoint and sensor and offset and equipRef == \""+equipID+"\"");
+        ArrayList targetValue = CCUHsApi.getInstance().readAll("point and zone and pid and target and config and value and equipRef == \""+equipID+"\"");
+        ArrayList piSensorValue = CCUHsApi.getInstance().readAll("point and analog1 and config and input and sensor and equipRef == \""+equipID+"\"");
+
+        if (equipStatusPoint != null && equipStatusPoint.size() > 0)
+        {
+            String id = ((HashMap) equipStatusPoint.get(0)).get("id").toString();
+            String status = CCUHsApi.getInstance().readDefaultStrValById(id);
+            plcPoints.put("Status",status);
+        }else{
+            plcPoints.put("Status","OFF");
+        }
+        if (inputValue != null && inputValue.size() > 0)
+        {
+            String id = ((HashMap) inputValue.get(0)).get("id").toString();
+            double inputVal = CCUHsApi.getInstance().readHisValById(id);
+            plcPoints.put("Input Value",inputVal);
+        }
+        if (offsetValue != null && offsetValue.size() > 0)
+        {
+            String id = ((HashMap) offsetValue.get(0)).get("id").toString();
+            double offsetVal = CCUHsApi.getInstance().readHisValById(id);
+            plcPoints.put("Offset Value",offsetVal);
+        }
+        if (targetValue != null && targetValue.size() > 0)
+        {
+            String id = ((HashMap) targetValue.get(0)).get("id").toString();
+            double targetVal = CCUHsApi.getInstance().readHisValById(id);
+            plcPoints.put("Target Value",targetVal);
+        }
+        if (piSensorValue != null && piSensorValue.size() > 0)
+        {
+            String id = ((HashMap) piSensorValue.get(0)).get("id").toString();
+            double piSensorVal = CCUHsApi.getInstance().readHisValById(id);
+            plcPoints.put("Pi Sensor Value",piSensorVal);
+        }
+        return plcPoints;
+    }
+
     public static Occupancy getZoneStatus(String zoneId)
     {
         

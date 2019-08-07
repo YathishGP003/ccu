@@ -45,3 +45,9 @@ proguard/
 Thumbs.db
 
 .idea
+create_version.sh
+add_version_to_task.sh
+deploy.sh
+bulk_add_version_to_task.sh
+build.sh
+bump_silent.sh

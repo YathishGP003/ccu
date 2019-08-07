@@ -1,0 +1,3 @@
+[submodule "ci-setup"]
+	path = ci-setup
+	url = https://gitlab.com/75f/apps/lightsaber/ci-setup.git

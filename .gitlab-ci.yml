@@ -1,63 +1,59 @@
-before_script:
-  - whoami
-  - sudo chmod +x ./add_version_to_task.sh
-  - sudo chmod +x ./bulk_add_version_to_task.sh
-  - sudo chmod +x ./create_version.sh
-  - sudo chmod +x ./bump_silent.sh
-  - export ANDROID_HOME=~/android-sdk-linux
-  - export PATH=$PATH:~/android-sdk-linux/platform-tools
-  - sudo chmod +x ./gradlew
-  - eval $(ssh-agent -s)
-  - mkdir -p ~/.ssh
-  - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
-
-
-stages:
-  - build
-  - deploy
-  - release
-
-build:
-  stage: build
-  script:
-    - echo "Testing checking CI local"
-    - ./gradlew assembleDevRelease
-    - echo "Testing checking CI local"
-  except:
-    - tags
-    - schedules
-
-
-deploy:
-    stage: deploy
-    script:
-     - echo "Deploying from tag"
-
-     - ./gradlew assembleDevRelease
-     - ./gradlew assembleProdRelease
-     - echo "Uploading dev & prod releases to SCP server"
-     - sshpass -p '65e7cd01' scp -rv  app/build/outputs/apk/dev/release/* dsingh@updates.75fahrenheit.com:/home/dsingh/webapps/updates
-     - sshpass -p '65e7cd01' scp -rv  app/build/outputs/apk/prod/release/* dsingh@updates.75fahrenheit.com:/home/dsingh/webapps/updates
-     - echo "Adding version to Jira in unreleased state"
-     - ./create_version.sh
-     - echo "Done creating version"
-     - echo "Adding Version to tasks in this build, transitioning the checkins to ready to test, setting the version to released."
-     - ./bulk_add_version_to_task.sh
-
-    only:
-     - tags
-    except:
-     - schedules
-
-
-
-
-release:on-schedule:
-  stage: release
-  script:
-    - echo "Bump silent"
-    - ./bump_silent.sh
-  only:
-    - schedules
-    - manual
-
+    before_script:
+      - whoami
+      - git submodule add --force https://ryan75f:Ayngayn6!@gitlab.com/75f/apps/lightsaber/ci-setup.git
+      - cd ci-setup
+      - git reset --hard && git checkout master && git pull
+      - ls -al
+      - cd ..
+      - rm -f setup.py
+      - touch setup.py
+      - cat ci-setup/setup.py >> setup.py
+      - rm -f setup.py
+      - touch setup.py
+      - cat ci-setup/setup.py >> setup.py
+      - git submodule --quiet deinit --force --all
+      - rm -rf ci-setup
+      - ls -al
+      - python setup.py
+      - chmod +x ./build.sh
+      - chmod +x ./add_version_to_task.sh
+      - chmod +x ./bulk_add_version_to_task.sh
+      - chmod +x ./create_version.sh    
+      - chmod +x ./bump_silent.sh
+      - chmod +x ./deploy.sh
+    stages:
+      - build
+      - deploy
+      - release
+    
+    build:
+      stage: build
+      script:
+        - ./build.sh
+      except:
+        - tags
+        - schedules
+    
+    
+    deploy:
+        stage: deploy
+        script:
+         - echo "Deploying from tag"
+         - ./build.sh
+         - ./deploy.sh
+         - ./create_version.sh
+         - ./bulk_add_version_to_task.sh
+        only:
+         - tags
+        except:
+         - schedules
+    
+    release:on-schedule:
+      stage: release
+      script:
+        - echo "Bump silent"
+        - ./bump_silent.sh
+      only:
+        - schedules
+        - manual
+        

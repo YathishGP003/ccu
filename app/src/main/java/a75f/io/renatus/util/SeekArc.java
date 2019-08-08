@@ -1399,7 +1399,6 @@ public class SeekArc extends View
     public void setCurrentTemp(float CurrentTemp)
     {
         this.mCurrentTemp = CurrentTemp;
-        Log.i("CurrentTemp","CurrentTemp:"+CurrentTemp+" Updated to Arc");
         invalidate();
     }
 

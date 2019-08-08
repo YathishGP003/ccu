@@ -382,7 +382,7 @@ public class Pulse
 					currentTempInterface.updateTemperature(th2TempVal, nodeAddr);
 				}
 			}
-			else {
+			else if(!logicalCurTempPoint.isEmpty()){
 				hayStack.writeHisValById(logicalCurTempPoint, curTempVal);
 				if (currentTempInterface != null) {
 					currentTempInterface.updateTemperature(curTempVal, nodeAddr);

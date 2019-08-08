@@ -1,13 +1,16 @@
 package a75f.io.renatus.registartion;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -30,6 +33,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.Prefs;
+import a75f.io.renatus.views.MasterControl.MasterControlView;
 
 import static a75f.io.logic.L.ccu;
 
@@ -44,6 +48,7 @@ public class InstallerOptions extends Fragment {
     private String mParam2;
 
     ImageView imageGoback;
+    ImageView imageTemp;
     Button mNext;
     Context mContext;
     Spinner mAddressBandSpinner;
@@ -110,6 +115,7 @@ public class InstallerOptions extends Fragment {
         imageGoback = rootView.findViewById(R.id.imageGoback);
         mAddressBandSpinner = rootView.findViewById(R.id.spinnerAddress);
         mNext = rootView.findViewById(R.id.buttonNext);
+        imageTemp = rootView.findViewById(R.id.imageTemp);
 
         ArrayList<String> addressBand = new ArrayList<>();
         //addressBand.add("Select SmartNode Address Band");
@@ -192,7 +198,27 @@ public class InstallerOptions extends Fragment {
             }
         }
 
+        imageTemp.setOnClickListener(view -> {
+            openMasterControllerDialog();
+        });
+
         return rootView;
+    }
+
+    //custom dialog to control building temperature
+    private void openMasterControllerDialog() {
+        if (isAdded()) {
+            final Dialog dialog = new Dialog(getActivity());
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            dialog.setCancelable(false);
+            dialog.setContentView(R.layout.dialog_master_control);
+            MasterControlView masterControlView = dialog.findViewById(R.id.masterControlView);
+
+            dialog.findViewById(R.id.btnCancel).setOnClickListener(view -> dialog.dismiss());
+            dialog.findViewById(R.id.btnClose).setOnClickListener(view -> dialog.dismiss());
+
+            dialog.show();
+        }
     }
 
 

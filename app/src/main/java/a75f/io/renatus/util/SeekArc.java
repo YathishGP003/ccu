@@ -25,6 +25,7 @@ import android.view.MotionEvent;
 import android.view.View;
 
 
+import java.text.DecimalFormat;
 import java.util.HashMap;
 
 import a75f.io.renatus.R;
@@ -707,7 +708,8 @@ public class SeekArc extends View
         System.out.println("Heating Angle: " + mCoolingTemp);
         if ((mCoolingTemp - (mHeatingDeadBand + mCoolingDeadBand)) < getHeatingDesiredTemp())
         {
-            setHeatingDesiredTemp(roundToHalf(mCoolingTemp) - (mHeatingDeadBand + mCoolingDeadBand));
+            //setHeatingDesiredTemp(roundToHalf(mCoolingTemp) - (mHeatingDeadBand + mCoolingDeadBand));
+            setHeatingDesiredTemp(mCoolingTemp - (mHeatingDeadBand + mCoolingDeadBand));
         }
     }
 
@@ -739,7 +741,8 @@ public class SeekArc extends View
     {
         if ((mHeatingTemp + (mHeatingDeadBand + mCoolingDeadBand)) > getCoolingDesiredTemp())
         {
-            setCoolingDesiredTemp(roundToHalf(mHeatingTemp) + (mHeatingDeadBand + mCoolingDeadBand));
+            //setCoolingDesiredTemp(roundToHalf(mHeatingTemp) + (mHeatingDeadBand + mCoolingDeadBand));
+            setCoolingDesiredTemp(mHeatingTemp + (mHeatingDeadBand + mCoolingDeadBand));
         }
     }
 
@@ -786,7 +789,23 @@ public class SeekArc extends View
 
     private float getTemperature(float angle)
     {
-        return getBuildingLowerTempLimit() + (getBuildingUpperTempLimit() - getBuildingLowerTempLimit()) * ((angle - 30.0f) / 300.0f);
+        float angleProgress = roundToHalf( getBuildingLowerTempLimit() + (getBuildingUpperTempLimit() - getBuildingLowerTempLimit()) * ((angle - 30.0f) / 300.0f));
+
+//Format to represent the angle progress for 0.5 degree increment
+        DecimalFormat decimalFormat = new DecimalFormat();
+        decimalFormat.applyPattern("##.#");
+
+        angleProgress = Float.parseFloat(decimalFormat.format(angleProgress));
+        float d = angleProgress - (long) angleProgress;
+        if (d == 0.5) {
+
+            angleProgress = (float) (Math.round(angleProgress) - 0.5);
+        } else if (d > 0.1 && d < 0.5) {
+            angleProgress = (float) (Math.round(angleProgress) + 0.5);
+        } else {
+            angleProgress = Math.round(angleProgress);
+        }
+        return angleProgress;
     }
 
     private void drawSemiArc(Canvas canvas, boolean detailedView)

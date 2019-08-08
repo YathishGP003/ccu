@@ -683,9 +683,9 @@ public class CCUHsApi
     public synchronized void writeHisValById(String id, Double val)
     {
         hsClient.hisWrite(HRef.copy(id), new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), HNum.make(val))});
-        if (systemDataInterface != null) {
+       /* if (systemDataInterface != null) {
             systemDataInterface.refreshScreen();
-        }
+        }*/
     }
 
     public synchronized void writeHisValByQuery(String query, Double val)
@@ -1235,16 +1235,6 @@ public class CCUHsApi
         }
         
         return 0;
-    }
-
-    public interface SystemDataInterface {
-        void refreshScreen();
-    }
-
-    private static SystemDataInterface systemDataInterface = null;
-
-    public static void setSystemDataInterface(SystemDataInterface in) {
-        systemDataInterface = in;
     }
 
     public double getExternalTemp() {

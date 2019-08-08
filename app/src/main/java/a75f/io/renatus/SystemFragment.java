@@ -29,6 +29,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.pubnub.UpdatePointHandler;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.util.Prefs;
 
@@ -36,7 +37,7 @@ import a75f.io.renatus.util.Prefs;
  * Created by samjithsadasivan isOn 8/7/17.
  */
 
-public class SystemFragment extends Fragment implements AdapterView.OnItemSelectedListener, CCUHsApi.SystemDataInterface
+public class SystemFragment extends Fragment implements AdapterView.OnItemSelectedListener, UpdatePointHandler.SystemDataInterface
 {
 	private static final String TAG = "SystemFragment";
 	SeekBar  sbComfortValue;
@@ -80,10 +81,11 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		return new SystemFragment();
 	}
 
-	public void refreshScreen()
+	public void refreshScreen(String id)
 	{
 		if (!(L.ccu().systemProfile instanceof DefaultSystem))
 		{
+			//Log.i("PubNub","Updated Point:"+id);
 			fetchPoints();
 		}
 	}
@@ -92,9 +94,33 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	public void onResume() {
 		// TODO Auto-generated method stub
 		super.onResume();
-		fetchPoints();
-		if(prefs.getBoolean("REGISTRATION")) {
-			CCUHsApi.setSystemDataInterface(this);
+		if(getUserVisibleHint()) {
+            fetchPoints();
+            if (prefs.getBoolean("REGISTRATION")) {
+                //CCUHsApi.setSystemDataInterface(this);
+                UpdatePointHandler.setSystemDataInterface(this);
+                //UpdatePointHandler.setZoneDataInterface(this);
+            }
+        }
+	}
+
+	@Override
+	public void onPause() {
+		super.onPause();
+		if (prefs.getBoolean("REGISTRATION")) {
+			//CCUHsApi.setSystemDataInterface(this);
+			UpdatePointHandler.setSystemDataInterface(null);
+			//UpdatePointHandler.setZoneDataInterface(this);
+		}
+	}
+
+	@Override
+	public void setUserVisibleHint(boolean isVisibleToUser) {
+		super.setUserVisibleHint(isVisibleToUser);
+		if(isVisibleToUser) {
+			UpdatePointHandler.setSystemDataInterface(this);
+		} else {
+			UpdatePointHandler.setSystemDataInterface(null);
 		}
 	}
 	@Override

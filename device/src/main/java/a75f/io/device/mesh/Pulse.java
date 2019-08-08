@@ -31,7 +31,9 @@ import a75f.io.logic.bo.building.SensorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.haystack.device.SmartStat;
+import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.pubnub.UpdatePointHandler;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
@@ -63,8 +65,12 @@ public class Pulse
 				switch (Port.valueOf(phyPoint.get("port").toString())){
 					case SENSOR_RT:
 						val = smartNodeRegularUpdateMessage_t.update.roomTemperature.get();
+						double curTempVal = getRoomTempConversion(val);
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-						hayStack.writeHisValById(logPoint.get("id").toString(), getRoomTempConversion(val));
+						hayStack.writeHisValById(logPoint.get("id").toString(), curTempVal);
+						if (currentTempInterface != null) {
+							currentTempInterface.updateTemperature(curTempVal, nodeAddr);
+						}
 						CcuLog.d(L.TAG_CCU_DEVICE, "regularSmartNodeUpdate : roomTemp " + getRoomTempConversion(val));
 						break;
 					case DESIRED_TEMP:
@@ -329,8 +335,10 @@ public class Pulse
 					case TH2_IN:
 						val = smartStatRegularUpdateMessage_t.update.externalThermistorInput2.get();
 						isTh2Enabled = phyPoint.get("enabled").toString().equals("true");
-						if(isTh2Enabled && !is2pfcu)
+						if(isTh2Enabled && !is2pfcu){
 							th2TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
+							th2TempVal = CCUUtils.roundTo2Decimal(th2TempVal);
+							}
 						else if(isTh2Enabled && is2pfcu){
 							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 							hayStack.writeHisValById(logPoint.get("id").toString(), ThermistorUtil.getThermistorValueToTemp(val * 10));
@@ -368,11 +376,18 @@ public class Pulse
 				handleSmartStatSensorEvents(sensorReadings, nodeAddr, deviceInfo, occupancyDetected );
 			}
 			//Write Current temp point based on th2 enabled or not, except for 2pfcu
-			if(isTh2Enabled && !logicalCurTempPoint.isEmpty() && !is2pfcu)
+			if(isTh2Enabled && !logicalCurTempPoint.isEmpty() && !is2pfcu) {
 				hayStack.writeHisValById(logicalCurTempPoint, th2TempVal);
-			else
+				if (currentTempInterface != null) {
+					currentTempInterface.updateTemperature(th2TempVal, nodeAddr);
+				}
+			}
+			else {
 				hayStack.writeHisValById(logicalCurTempPoint, curTempVal);
-
+				if (currentTempInterface != null) {
+					currentTempInterface.updateTemperature(curTempVal, nodeAddr);
+				}
+			}
 		}
 	}
 
@@ -577,4 +592,12 @@ public class Pulse
 			CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), val);
 		}
 	}
+
+
+	public interface CurrentTempInterface {
+		void updateTemperature(double currentTemp, short nodeAddress);
+	}
+
+	private static CurrentTempInterface currentTempInterface = null;
+	public static void setCurrentTempInterface(CurrentTempInterface in) { currentTempInterface = in; }
 }

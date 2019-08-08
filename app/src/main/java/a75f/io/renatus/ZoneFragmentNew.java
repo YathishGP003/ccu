@@ -1,0 +1,2002 @@
+package a75f.io.renatus;
+
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Handler;
+import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.text.method.DigitsKeyListener;
+import android.text.method.KeyListener;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.TranslateAnimation;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ExpandableListAdapter;
+import android.widget.ExpandableListView;
+import android.widget.GridLayout;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.ScrollView;
+import android.widget.Spinner;
+import android.widget.TableLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.zip.Inflater;
+
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.Floor;
+import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.Schedule;
+import a75f.io.api.haystack.Zone;
+import a75f.io.device.mesh.Pulse;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.DefaultSchedules;
+import a75f.io.logic.L;
+import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.definitions.ScheduleType;
+import a75f.io.logic.bo.building.system.DefaultSystem;
+import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.jobs.StandaloneScheduler;
+import a75f.io.logic.pubnub.UpdatePointHandler;
+import a75f.io.logic.pubnub.UpdateScheduleHandler;
+import a75f.io.renatus.schedules.SchedulerFragment;
+import a75f.io.renatus.util.GridItem;
+import a75f.io.renatus.util.SeekArc;
+
+public class ZoneFragmentNew extends Fragment implements UpdatePointHandler.ZoneDataInterface, Pulse.CurrentTempInterface
+{
+    ExpandableListView            expandableListView;
+    ExpandableListAdapter         expandableListAdapter;
+    List<String>                  expandableListTitle;
+    HashMap<String, List<String>> expandableListDetail;
+
+
+    HashMap<String, String> tunerMap = new HashMap();
+    int lastExpandedPosition;
+
+    ImageView floorMenu;
+    public DrawerLayout mDrawerLayout;
+    public LinearLayout drawer_screen;
+    public ListView lvFloorList;
+    public ArrayList<Floor> floorList = new ArrayList();
+    public DataArrayAdapter<Floor> mFloorListAdapter;
+    ArrayList<Zone> roomList = new ArrayList();
+
+    private RelativeLayout weather_data = null;
+    private TextView place;
+    private TextView temperature;
+    private TextView weather_condition;
+    private ImageView weather_icon;
+    private TextView maxmintemp;
+    private TextView note;
+    private boolean isWeatherWidget = false;
+    private Runnable weatherUpdate;
+    private Handler weatherUpdateHandler;
+    public RecyclerView recyclerView;
+    GridLayout gridlayout;
+    TableLayout tableLayout;
+    private Animation in = null;
+    private Animation inleft = null;
+
+    ImageView imag;
+    boolean imageOn = false;
+    int selectedView = 0;
+    int clickedView = -1;
+    ArrayList<View> gridItems = new ArrayList<>();
+    ArrayList<LinearLayout> tableRows = new ArrayList<>();
+    int numRows = 0;
+    int columnCount = 4;
+    int rowcount = 0;
+    GridItem gridItemSelected = new GridItem();
+    View parentRootView;
+    Schedule mSchedule = null;
+    int mScheduleType = -1;
+    ScrollView scrollViewParent;
+    Equip equipment;
+
+    boolean zoneOpen = false;
+    SeekArc seekArcOpen;
+    ImageView imageEquipOpen;
+    View zonePointsOpen;
+    Equip equipOpen;
+    View titleOpen;
+    View statusOpen;
+    View type1Open;
+    View type2Open;
+    HashMap pointsOpen = new HashMap();
+    ArrayList<SeekArc> seekArcArrayList = new ArrayList<>();
+    boolean isFromPubNub = false;
+    ArrayList<HashMap> openZoneMap;
+    public ZoneFragmentNew()
+    {
+    }
+    
+    public static ZoneFragmentNew newInstance()
+    {
+        return new ZoneFragmentNew();
+    }
+    
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState)
+    {
+        View rootView = inflater.inflate(R.layout.fragment_zones, container, false);
+        parentRootView = rootView.findViewById(R.id.zone_fragment_temp);
+        return rootView;
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
+    {
+        expandableListView = view.findViewById(R.id.expandableListView);
+        mDrawerLayout = view.findViewById(R.id.drawer_layout);
+        drawer_screen = view.findViewById(R.id.drawer_screen);
+        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        lvFloorList = view.findViewById(R.id.floorList);
+
+        weather_data = (RelativeLayout) getView().findViewById(R.id.weather_data);
+        place = (TextView) getView().findViewById(R.id.place);
+        temperature = (TextView) getView().findViewById(R.id.temperature);
+        weather_condition = (TextView) getView().findViewById(R.id.weather_condition);
+        weather_icon = (ImageView) getView().findViewById(R.id.weather_icon);
+        maxmintemp = (TextView) getView().findViewById(R.id.maxmintemp);
+        note = (TextView) getView().findViewById(R.id.note);
+
+        scrollViewParent = view.findViewById(R.id.scrollView_zones);
+        tableLayout = (TableLayout) view.findViewById( R.id.tableRoot );
+        gridlayout = (GridLayout) view.findViewById(R.id.gridview);
+        recyclerView = (RecyclerView)view.findViewById(R.id.recyclerEquip);
+
+        recyclerView.setVisibility(View.GONE);
+        recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 4));
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+
+        in = AnimationUtils.makeInAnimation(getActivity(), false);
+        inleft = AnimationUtils.makeInAnimation(getActivity(), true);
+        in.setDuration(400);
+        inleft.setDuration(400);
+
+        //recyclerView.setHasFixedSize(true);
+        expandableListDetail = new HashMap<>();
+
+        floorList = HSUtil.getFloors();
+        Collections.sort(floorList, new FloorComparator());
+
+        mFloorListAdapter = new DataArrayAdapter<Floor>(getActivity(), R.layout.listviewitem,floorList);
+        lvFloorList.setAdapter(mFloorListAdapter);
+        loadGrid(parentRootView);
+
+        floorMenu = (ImageView) view.findViewById(R.id.floorMenu);
+        floorMenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                openFloor();
+            }
+        });
+
+        lvFloorList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                selectFloor(position);
+            }
+        });
+    }
+
+    public void refreshScreen(String id)
+    {
+        //Log.i("PubNub","Refresh Triggered");
+        if(getActivity() != null) {
+            if(zoneOpen) {
+                //Log.i("PubNub","Zone Point Updating:"+id+" Points:"+pointsOpen.toString());
+                //if(pointsOpen.containsKey(id)) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            //Log.i("PubNub", "Zone Open:" + zoneOpen);
+                                updateTemperatureBasedZones(seekArcOpen, zonePointsOpen, equipOpen, getLayoutInflater(), id);
+                                tableLayout.invalidate();
+                        }
+                    });
+                //}
+                }
+        }
+    }
+
+    public void updateTemperature(double currentTemp, short nodeAddress){
+        if(getActivity() != null) {
+            int i;
+            for (i = 0; i < seekArcArrayList.size(); i++) {
+                //Log.i("CurrentTemp", "CurrentTemp:" + currentTemp + " Node:" + nodeAddress);
+                GridItem gridItem = (GridItem) seekArcArrayList.get(i).getTag();
+                if (gridItem.getNodeAddress() == nodeAddress) {
+                    SeekArc tempSeekArc = seekArcArrayList.get(i);
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            //Log.i("CurrentTemp", "CurrentTemp:" + currentTemp + " Grid Node:" + gridItem.getNodeAddress() + " Arc:" + tempSeekArc.getId());
+                            tempSeekArc.setCurrentTemp((float) currentTemp);
+                        }
+                    });
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onStart()
+    {
+        super.onStart();
+        lvFloorList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+    }
+
+    public void UpdateWeatherData() {
+        if (WeatherDataDownloadService.getMinTemperature() != 0.0 && WeatherDataDownloadService.getMaxTemperature() != 0.0) {
+            temperature.setText(String.format("%.0f", WeatherDataDownloadService.getTemperature()));
+            maxmintemp.setText(String.format("%.0f", WeatherDataDownloadService.getMaxTemperature()) + "\n" + String.format("%.0f", WeatherDataDownloadService.getMinTemperature()));
+            note.setText("Humidity : "+WeatherDataDownloadService.getHumidity()+"\n"+"Precipitation : "+WeatherDataDownloadService.getPrecipitation());
+            SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext());
+            String address = spDefaultPrefs.getString("address", "");
+            String city = spDefaultPrefs.getString("city", "");
+            String country = spDefaultPrefs.getString("country", "");
+            if (address.isEmpty()) {
+                place.setText(city + ", " + country);
+            } else {
+                //Address format could be City,State-ZIP,Country or State-ZIP,Country otherwise default to installer data
+                String[] addrArray = address.split(",");
+                if (addrArray != null && addrArray.length >= 3) {
+                    place.setText(addrArray[0] + ", " + addrArray[2]);
+                } else if (addrArray != null && addrArray.length == 2) {
+                    place.setText(address);
+                } else {
+                    place.setText(city + ", " + country);
+                }
+            }
+
+            weather_condition.setText(WeatherDataDownloadService.getSummary());
+            String weather_icon_string = WeatherDataDownloadService.getIcon().toString().replaceAll("-", "");
+            Context context = weather_icon.getContext();
+            int id = context.getResources().getIdentifier(weather_icon_string, "drawable", context.getPackageName());
+            weather_icon.setImageResource(id);
+
+            /*weather_appear.setColorFilter(context.getResources().getColor(R.color.accent), PorterDuff.Mode.MULTIPLY);
+            weather_appear.setImageResource(id);*/
+        }
+    }
+
+    private void selectFloor(int position)
+    {
+        mFloorListAdapter.setSelectedItem(position);
+        roomList = HSUtil.getZones(floorList.get(position).getId());
+        closeFloor();
+        //updateData();
+        showWeather();
+        clickedView = -1;
+        loadGrid(parentRootView);
+        expandableListView.invalidateViews();
+    }
+
+
+    public void openFloor()
+    {
+        try {
+            mDrawerLayout.openDrawer(drawer_screen);
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (mDrawerLayout != null && !mDrawerLayout.isShown()) {
+                mDrawerLayout.openDrawer(drawer_screen);
+            }
+        }
+    }
+
+    public void closeFloor()
+    {
+        try {
+            mDrawerLayout.closeDrawer(drawer_screen);
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (mDrawerLayout != null && mDrawerLayout.isShown()) {
+                mDrawerLayout.closeDrawer(drawer_screen);
+            }
+        }
+    }
+
+    private void loadGrid(View rootView){
+        rowcount = 0;
+        if(floorList.size()>0) {
+            ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone and roomRef and floorRef == \"" + floorList.get(mFloorListAdapter.getSelectedPostion()).getId() + "\"");
+            ArrayList<HashMap> roomMap = CCUHsApi.getInstance().readAll("room and floorRef == \"" + floorList.get(mFloorListAdapter.getSelectedPostion()).getId() + "\"");
+
+            HashMap<String, ArrayList<HashMap>> zoneData = new HashMap<String, ArrayList<HashMap>>();
+            for (HashMap zoneModel : equips) {
+                if (zoneData.containsKey(zoneModel.get("roomRef").toString())) {
+                    ArrayList<HashMap> exisiting = zoneData.get(zoneModel.get("roomRef").toString());
+                    exisiting.add(zoneModel);
+                    zoneData.put(zoneModel.get("roomRef").toString(), exisiting);
+                } else {
+                    ArrayList<HashMap> newData = new ArrayList<HashMap>();
+                    newData.add(zoneModel);
+                    zoneData.put(zoneModel.get("roomRef").toString(), newData);
+                }
+            }
+            Log.i("ZonesMap", "Size:" + zoneData.size() + " Data:" + zoneData);
+
+            imag = new ImageView(getActivity());
+            tableLayout.removeAllViews();
+            gridItems.clear();
+            tableRows.clear();
+            String[] itemNames = getResources().getStringArray(R.array.sse_action_type);
+            LinearLayout rowLayout = null;
+            numRows = (zoneData.size() / columnCount);
+            if (zoneData.size() % columnCount != 0)
+                numRows++;
+
+            Button[] buttons = new Button[itemNames.length];
+            if (numRows > 0) {
+                LinearLayout[] tablerowLayout = new LinearLayout[numRows];
+                for (int j = 0; j < numRows; j++) {
+                    rowLayout = new LinearLayout(getActivity());
+                    tableRows.add(rowLayout);
+                }
+                tablerowLayout[0] = new LinearLayout(tableLayout.getContext());
+
+
+                int i = 0;
+                for (ArrayList<HashMap> equipZones : zoneData.values()) {
+                    String zoneTitle = "";
+                    LayoutInflater inflater = LayoutInflater.from(getContext());
+                    View arcViewParent = null;
+                    for (int m = 0; m < roomMap.size(); m++) {
+                        String roomRef = equipZones.get(0).get("roomRef").toString();
+                        String roomRef_Room = roomMap.get(m).get("id").toString();
+                        //Log.i("RoomData","roomRef:"+roomRef+" roomMap:"+roomRef_Room);
+                        if (roomRef_Room.equals(roomRef)) {
+                            zoneTitle = roomMap.get(m).get("dis").toString();
+                            break;
+                        }
+                    }
+                    String profileType = "";
+
+                    String profileVAV = "VAV";
+                    String profileDAB = "DAB";
+                    String profileSmartStat = "SMARTSTAT";
+                    String profileEM = "EMR";
+                    String profilePLC = "PLC";
+                    String profileTempMonitor = "TEMP_MONITOR";
+                    String profileTempInfluence = "TEMP_INFLUENCE";
+
+                    //Log.e("RoomData","ProfileType:"+profileType);
+                    boolean tempModule = false;
+                    boolean nontempModule = false;
+                    for (HashMap equipTypes : equipZones) {
+                        profileType = equipTypes.get("profile").toString();
+                        Log.e("RoomData", "ProfileType:" + profileType);
+                        if (profileType.contains(profileVAV) || profileType.contains(profileDAB) || profileType.contains(profileSmartStat)) {
+                            tempModule = true;
+                            Log.e("RoomData", "Load SmartNode ProfileType:" + profileType);
+                        }
+                        if (profileType.contains(profileEM)||profileType.contains(profilePLC) || profileType.contains(profileTempMonitor) || profileType.contains(profileTempInfluence)) {
+                            nontempModule = true;
+                            Log.e("RoomData", "Load SmartStat ProfileType:" + profileType);
+                        }
+                    }
+
+                    if (tempModule) {
+                        Log.e("RoomData", "Load Temperature Based View");
+                        viewTemperatureBasedZone(inflater, rootView, equipZones, zoneTitle, i, tablerowLayout);
+                    }
+                    if (!tempModule && nontempModule) {
+                        Log.e("RoomData", "Load Non Temperature Based View");
+                        viewNonTemperatureBasedZone(inflater, rootView, equipZones, zoneTitle, i, tablerowLayout);
+                        //arcViewParent = inflater.inflate(R.layout.zones_item_smartstat, (ViewGroup) rootView, false);
+                    }
+                    i++;
+                }
+
+            }
+        }
+    }
+
+    private void viewTemperatureBasedZone(LayoutInflater inflater, View rootView, ArrayList<HashMap> zoneMap,String zoneTitle, int gridPosition, LinearLayout[] tablerowLayout)
+    {
+
+        Log.i("ProfileTypes","Points:"+zoneMap.toString());
+        Equip p = new Equip.Builder().setHashMap(zoneMap.get(0)).build();
+
+        String equipId = p.getId();
+
+        int i = gridPosition;
+        View arcView = null;
+        arcView = inflater.inflate(R.layout.zones_item, (ViewGroup) rootView, false);
+        View zoneDetails = inflater.inflate(R.layout.zones_item_details, null);
+        //RecyclerView recyclerViewPoints = zoneDetails.findViewById(R.id.recyclerViewProfilePoints);
+        LinearLayout linearLayoutZonePoints  = zoneDetails.findViewById(R.id.lt_profilepoints);
+        TextView    scheduleStatus      = zoneDetails.findViewById(R.id.schedule_status_tv);
+        Spinner scheduleSpinner     = zoneDetails.findViewById(R.id.schedule_spinner);
+        ImageButton scheduleImageButton = zoneDetails.findViewById(R.id.schedule_edit_button);
+        TextView vacationStatusTV = zoneDetails.findViewById(R.id.vacation_status);
+
+
+        ArrayAdapter<CharSequence> scheduleAdapter = ArrayAdapter.createFromResource(
+                getActivity(), R.array.schedule, R.layout.spinner_zone_item);
+        scheduleAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+        scheduleSpinner.setAdapter(scheduleAdapter);
+
+        String zoneId = Schedule.getZoneIdByEquipId(equipId);
+        String status = ScheduleProcessJob.getZoneStatusString(zoneId, equipId);
+        String vacationStatus = ScheduleProcessJob.getVacationStateString(zoneId);
+        Log.i("ZonePoints","zoneId:"+zoneId+" status:"+status+" vacationstatus:"+vacationStatus);
+
+        vacationStatusTV.setText(vacationStatus);
+        scheduleStatus.setText(status);
+        String scheduleTypeId = CCUHsApi.getInstance().readId("point and scheduleType and equipRef == \""+equipId+"\"");
+        mScheduleType = (int)CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId);
+
+        mSchedule = Schedule.getScheduleByEquipId(equipId);
+
+        scheduleImageButton.setTag(mSchedule.getId());
+        scheduleImageButton.setOnClickListener(v ->
+        {
+            SchedulerFragment schedulerFragment    = SchedulerFragment.newInstance((String) v.getTag());
+            FragmentManager childFragmentManager = getFragmentManager();
+            childFragmentManager.beginTransaction()
+                    .add(R.id.zone_fragment_temp, schedulerFragment)
+                    .addToBackStack("schedule").commit();
+
+            schedulerFragment.setOnExitListener(() -> {
+                Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
+                mSchedule = Schedule.getScheduleByEquipId(equipId);
+                ScheduleProcessJob.updateSchedules();
+
+
+            });
+        });
+        scheduleSpinner.setSelection(mScheduleType);
+        if (mSchedule.isZoneSchedule())
+        {
+            scheduleImageButton.setVisibility(View.VISIBLE);
+        } else if (mSchedule.isNamedSchedule())
+        {
+            scheduleImageButton.setVisibility(View.VISIBLE);
+        } else
+        {
+            scheduleImageButton.setVisibility(View.GONE);
+        }
+
+
+        scheduleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+        {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+            {
+                if (position == 0 && (mScheduleType != -1))
+                {
+                    if (mSchedule.isZoneSchedule())
+                    {
+                        mSchedule.setDisabled(true);
+                        CCUHsApi.getInstance().updateZoneSchedule(mSchedule,zoneId);
+                    }
+                    scheduleImageButton.setVisibility(View.GONE);
+
+                    if (mScheduleType != ScheduleType.BUILDING.ordinal()) {
+                        setScheduleType(scheduleTypeId, ScheduleType.BUILDING);
+                        mScheduleType = ScheduleType.BUILDING.ordinal();
+                    }
+
+                    CCUHsApi.getInstance().scheduleSync();
+                } else if (position == 1 && (mScheduleType != -1))
+                {
+                    if (mSchedule.isZoneSchedule() && mSchedule.getMarkers().contains("disabled"))
+                    {
+                        mSchedule.setDisabled(false);
+                        CCUHsApi.getInstance().updateZoneSchedule(mSchedule, zoneId);
+                        scheduleImageButton.setTag(mSchedule.getId());
+                    } else
+                    {
+
+                        Zone     zone         = Schedule.getZoneforEquipId(equipId);
+                        Schedule scheduleById = null;
+                        if (zone.hasSchedule())
+                        {
+                            scheduleById = CCUHsApi.getInstance().getScheduleById(zone.getScheduleRef());
+                            Log.d(L.TAG_CCU_UI," scheduleType changed to ZoneSchedule : "+scheduleTypeId);
+                            scheduleById.setDisabled(false);
+                            CCUHsApi.getInstance().updateZoneSchedule(scheduleById, zone.getId());
+
+
+                        } else if (!zone.hasSchedule())
+                        {
+                            Log.d(L.TAG_CCU_UI," Zone does not have Schedule : Shouldn't happen");
+                            zone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true, zone.getId()));
+                            CCUHsApi.getInstance().updateZone(zone, zone.getId());
+                            scheduleById = CCUHsApi.getInstance().getScheduleById(zone.getScheduleRef());
+                            //CCUHsApi.getInstance().syncEntityTree();
+                        }
+                        scheduleImageButton.setTag(scheduleById.getId());
+                        scheduleImageButton.setVisibility(View.VISIBLE);
+                        CCUHsApi.getInstance().scheduleSync();
+                    }
+                    if (mScheduleType != ScheduleType.ZONE.ordinal()) {
+                        setScheduleType(scheduleTypeId, ScheduleType.ZONE);
+                        mScheduleType = ScheduleType.ZONE.ordinal();
+                    }
+                } else
+                {
+                    //list named schedules
+                }
+                mSchedule = Schedule.getScheduleByEquipId(equipId);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent)
+            {
+
+            }
+        });
+
+        GridItem gridItemObj = new GridItem();
+        gridItemObj.setGridID(i);
+        gridItemObj.setGridItem("Temp");
+        gridItemObj.setNodeAddress(Short.valueOf(p.getGroup()));
+        arcView.setClickable(true);
+        arcView.setTag(gridItemObj);
+        arcView.setId(i);
+        SeekArc seekArc = arcView.findViewById(R.id.seekArc);
+        seekArc.setTag(gridItemObj);
+        //seekArc.setOnTemperatureChangeListener(SeekArcMemShare.onTemperatureChangeListener);
+        TextView textEquipment = arcView.findViewById(R.id.textEquipment);
+        textEquipment.setText(zoneTitle);
+
+        seekArc.scaletoNormal(250, 210);
+
+        HashMap currTmep = CCUHsApi.getInstance().read("point and air and temp and sensor and current and equipRef == \"" + p.getId() + "\"");
+        HashMap coolDT = CCUHsApi.getInstance().read("point and air and temp and desired and cooling and sp and equipRef == \"" + p.getId() + "\"");
+        HashMap heatDT = CCUHsApi.getInstance().read("point and air and temp and desired and heating and sp and equipRef == \"" + p.getId() + "\"");
+        HashMap coolUL = CCUHsApi.getInstance().read("point and limit and max and cooling and user and equipRef == \"" + p.getId() + "\"");
+        HashMap heatUL = CCUHsApi.getInstance().read("point and limit and max and heating and user and equipRef == \"" + p.getId() + "\"");
+        HashMap coolLL = CCUHsApi.getInstance().read("point and limit and min and cooling and user and equipRef == \"" + p.getId() + "\"");
+        HashMap heatLL = CCUHsApi.getInstance().read("point and limit and min and heating and user and equipRef == \"" + p.getId() + "\"");
+        HashMap heatDB = CCUHsApi.getInstance().read("point and heating and deadband and sp and equipRef == \"" + p.getId() + "\"");
+        HashMap coolDB = CCUHsApi.getInstance().read("point and cooling and deadband and sp and equipRef == \"" + p.getId() + "\"");
+        HashMap buildingMin = CCUHsApi.getInstance().read("building and limit and min and equipRef == \"" + L.ccu().systemProfile.getSystemEquipRef() + "\"");
+        HashMap buildingMax = CCUHsApi.getInstance().read("building and limit and max and equipRef == \"" + L.ccu().systemProfile.getSystemEquipRef() + "\"");
+
+        float pointcurrTmep = (float)getPointVal(currTmep.get("id").toString());
+        if(pointcurrTmep == 0)
+        {
+            pointcurrTmep = 72;
+        }
+        float pointcoolDT = (float)getPointVal(coolDT.get("id").toString());
+        float pointheatDT = (float)getPointVal(heatDT.get("id").toString());
+        float pointcoolUL = (float)getPointVal(coolUL.get("id").toString());
+        float pointheatUL = (float)getPointVal(heatUL.get("id").toString());
+        float pointcoolLL = (float)getPointVal(coolLL.get("id").toString());
+        float pointheatLL = (float)getPointVal(heatLL.get("id").toString());
+        float pointbuildingMin = (float)getPointVal(buildingMin.get("id").toString());
+        float pointbuildingMax = (float)getPointVal(buildingMax.get("id").toString());
+        float pointheatDB = (float)getPointVal(heatDB.get("id").toString());
+        float pointcoolDB = (float)getPointVal(coolDB.get("id").toString());
+
+        seekArc.setData(false, pointbuildingMin, pointbuildingMax, pointheatUL, pointheatLL, pointcoolLL, pointcoolUL, pointheatDT, pointcoolDT, pointcurrTmep, pointheatDB, pointcoolDB);
+        seekArc.setDetailedView(false);
+        LinearLayout.LayoutParams rowLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+
+        Log.i("EachzoneData","Data:"+zoneMap);
+        arcView.setPadding(48,64,0,0);
+        try {
+            tablerowLayout[rowcount].addView(arcView, rowLayoutParams);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (((i + 1) % columnCount == 0) && (i != 0)) {
+            try {
+                tableLayout.addView(tablerowLayout[rowcount++]);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if (rowcount < numRows)
+                tablerowLayout[rowcount] = new LinearLayout(tableLayout.getContext());
+        }
+        if (rowcount < numRows) {
+            try {
+                tableLayout.addView(tablerowLayout[rowcount]);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        seekArcArrayList.add(seekArc);
+        seekArc.setOnTemperatureChangeListener(new SeekArc.OnTemperatureChangeListener() {
+            @Override
+            public void onTemperatureChange(SeekArc seekArc, float coolingDesiredTemp, float heatingDesiredTemp) {
+
+                Log.i("ZonePoints","cooldt:"+coolDT.get("id").toString()+" value:"+Double.parseDouble(Float.valueOf(coolingDesiredTemp).toString()));
+                Log.i("ZonePoints","heatdt:"+heatDT.get("id").toString()+" value:"+Double.parseDouble(Float.valueOf(heatingDesiredTemp).toString()));
+                setPointVal(coolDT.get("id").toString(),Double.parseDouble(Float.valueOf(coolingDesiredTemp).toString()));
+                setPointVal(heatDT.get("id").toString(),Double.parseDouble(Float.valueOf(heatingDesiredTemp).toString()));
+
+            }
+        });
+
+        seekArc.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                GridItem gridItemNew = (GridItem) v.getTag();
+                boolean isExpanded = false;
+                int clickedItemRow =0;
+                int clickposition = gridItemNew.getGridID();
+                if (clickedView != -1) {
+                    if (clickposition != clickedView) {
+                        int newRowCount = 0;
+                        int tableRowCount = tableLayout.getChildCount();
+                        if (tableLayout.getChildCount() > 1) {
+                            boolean viewFound = false;
+                            for (int row = 0; row < tableRowCount; row++) {
+                                View rowView = tableLayout.getChildAt(row);
+                                LinearLayout tableRow = (LinearLayout) rowView;
+                                int cellCount = tableRow.getChildCount();
+                                for (int j = 0; j < cellCount; j++) {
+                                    RelativeLayout gridItem = (RelativeLayout) tableRow.getChildAt(j);
+                                    GridItem viewTag = (GridItem) gridItem.getTag();
+                                    if (viewTag.getGridID() == clickedView) {
+                                        if(viewTag.getGridItem().equals("Temp")) {
+                                            SeekArc seekArcExpanded = (SeekArc) gridItem.findViewById(R.id.seekArc);
+                                            TextView textViewzone = (TextView) gridItem.findViewById(R.id.textEquipment);
+                                            textViewzone.setTextAppearance(getActivity(), R.style.label_black);
+                                            textViewzone.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
+                                            tableLayout.removeViewAt(row + 1);
+                                            seekArcExpanded.setDetailedView(false);
+                                            seekArcExpanded.setBackgroundColor(getResources().getColor(R.color.white));
+                                            seekArcExpanded.scaletoNormal(250, 210);
+                                            gridItem.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
+                                        }else {
+                                            TextView textViewzone = (TextView) gridItem.findViewById(R.id.textEquipment);
+                                            textViewzone.setTextAppearance(getActivity(),R.style.label_black);
+                                            textViewzone.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
+                                            tableLayout.removeViewAt(row + 1);
+                                            ImageView imageViewExpanded = gridItem.findViewById(R.id.imageView);
+                                            ScaleImageToNormal(250,210,imageViewExpanded);
+                                            gridItem.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
+                                        }
+
+                                        isExpanded = false;
+                                        imageOn = false;
+                                        viewFound = true;
+                                        break;
+                                    }
+                                }
+                                if (viewFound) {
+                                    clickedItemRow = row;
+                                    break;
+                                }
+                            }
+
+                            zoneOpen = true;
+                            seekArcOpen = seekArc;
+                            zonePointsOpen = zoneDetails;
+                            equipOpen = p;
+                            openZoneMap = zoneMap;
+                            clickedView = gridItemNew.getGridID();
+                            v.setBackgroundColor(getActivity().getResources().getColor(R.color.zoneselection_gray));
+                            int index = clickedView / columnCount + 1;
+                            seekArc.setDetailedView(true);
+                            //seekArc.setOnTemperatureChangeListener(SeekArcMemShare.onTemperatureChangeListener);
+                            seekArc.scaletoNormalBig(250, 210);
+                            imageOn = true;
+                            selectedView = seekArc.getId();
+                            scrollViewParent.scrollTo(0,seekArc.getTop());
+                            //scrollViewParent.scrollTo(0,seekArc.getTop());
+                            try {
+                                textEquipment.setTextAppearance(getActivity(),R.style.label_orange);
+                                textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
+                                zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
+                                tableLayout.addView(zoneDetails, index);
+
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            isExpanded = true;
+                        }
+                    } else if (clickposition == clickedView) {
+                        v.setBackgroundColor(getResources().getColor(R.color.white));
+                        textEquipment.setTextAppearance(getActivity(),R.style.label_black);
+                        textEquipment.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
+                        tableLayout.removeView(zoneDetails);
+                        imageOn = false;
+                        seekArc.setDetailedView(false);
+                        seekArc.scaletoNormal(250, 210);
+                        showWeather();
+                        clickedView = -1;
+                        isExpanded = false;
+                    }
+                } else {
+                    zoneOpen = true;
+                    seekArcOpen = seekArc;
+                    zonePointsOpen = zoneDetails;
+                    equipOpen = p;
+                    openZoneMap = zoneMap;
+                    clickedView = gridItemNew.getGridID();
+                    seekArc.setClickable(true);
+                    v.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
+                    int index = clickedView / columnCount + 1;
+                    seekArc.setDetailedView(true);
+                    //seekArc.setOnTemperatureChangeListener(SeekArcMemShare.onTemperatureChangeListener);
+                    seekArc.scaletoNormalBig(250, 210);
+                    hideWeather();
+                    imageOn = true;
+                    selectedView = seekArc.getId();
+                    scrollViewParent.scrollTo(0,seekArc.getTop());
+                    try {
+                        textEquipment.setTextAppearance(getActivity(),R.style.label_orange);
+                        textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
+                        zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
+                        tableLayout.addView(zoneDetails, index);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    isExpanded = true;
+                }
+
+                if(isExpanded) {
+                    linearLayoutZonePoints.removeAllViews();
+                    {
+                        for(int k=0;k<zoneMap.size();k++)
+                        {
+                            Equip p = new Equip.Builder().setHashMap(zoneMap.get(k)).build();
+                            if (p.getProfile().startsWith("DAB")) {
+                                HashMap dabPoints = ScheduleProcessJob.getDABEquipPoints(p.getId());
+                                Log.i("PointsValue", "DAB Points:" + dabPoints.toString());
+                                loadDABPointsUI(dabPoints, inflater, linearLayoutZonePoints, p.getGroup());
+                            }
+                            if (p.getProfile().startsWith("VAV")) {
+                                HashMap vavPoints = ScheduleProcessJob.getVAVEquipPoints(p.getId());
+                                Log.i("PointsValue", "VAV Points:" + vavPoints.toString());
+                                loadVAVPointsUI(vavPoints, inflater, linearLayoutZonePoints, p.getGroup());
+                            }
+                            if (p.getProfile().startsWith("SMARTSTAT_TWO_PIPE_FCU")) {
+                                HashMap p2FCUPoints = ScheduleProcessJob.get2PFCUEquipPoints(p.getId());
+                                Log.i("PointsValue", "2PFCU Points:" + p2FCUPoints.toString());
+                                loadSS2PFCUPointsUI(p2FCUPoints, inflater, linearLayoutZonePoints, equipId, false, p.getGroup());
+
+                            }
+                            if (p.getProfile().startsWith("SMARTSTAT_FOUR_PIPE_FCU")) {
+                                HashMap p4FCUPoints = ScheduleProcessJob.get4PFCUEquipPoints(p.getId());
+                                Log.i("PointsValue", "4PFCU Points:" + p4FCUPoints.toString());
+                                loadSS4PFCUPointsUI(p4FCUPoints, inflater, linearLayoutZonePoints, equipId, false, p.getGroup());
+                            }
+                            if (p.getProfile().startsWith("SMARTSTAT_CONVENTIONAL_PACK_UNIT")) {
+                                HashMap cpuEquipPoints = ScheduleProcessJob.getCPUEquipPoints(p.getId());
+                                Log.i("PointsValue", "CPU Points:" + cpuEquipPoints.toString());
+                                loadSSCPUPointsUI(cpuEquipPoints, inflater, linearLayoutZonePoints, equipId, false, p.getGroup());
+                            }
+                            if (p.getProfile().startsWith("SMARTSTAT_HEAT_PUMP_UNIT")) {
+                                HashMap hpuEquipPoints = ScheduleProcessJob.getHPUEquipPoints(p.getId());
+                                Log.i("PointsValue", "HPU Points:" + hpuEquipPoints.toString());
+                                loadSSHPUPointsUI(hpuEquipPoints, inflater, linearLayoutZonePoints, equipId, false, p.getGroup());
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        //return view;
+    }
+
+
+    private void updateTemperatureBasedZones(SeekArc seekArcOpen, View zonePointsOpen, Equip equipOpen, LayoutInflater inflater, String id)
+    {
+        Equip p = equipOpen;
+        View zoneDetails = zonePointsOpen;
+        SeekArc seekArc = seekArcOpen;
+        String equipId = p.getId();
+
+        LinearLayout linearLayoutZonePoints  = zoneDetails.findViewById(R.id.lt_profilepoints);
+        TextView    scheduleStatus      = zoneDetails.findViewById(R.id.schedule_status_tv);
+        Spinner scheduleSpinner     = zoneDetails.findViewById(R.id.schedule_spinner);
+        ImageButton scheduleImageButton = zoneDetails.findViewById(R.id.schedule_edit_button);
+        TextView vacationStatusTV = zoneDetails.findViewById(R.id.vacation_status);
+
+
+        ArrayAdapter<CharSequence> scheduleAdapter = ArrayAdapter.createFromResource(
+                getActivity(), R.array.schedule, R.layout.spinner_zone_item);
+        scheduleAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+        scheduleSpinner.setAdapter(scheduleAdapter);
+
+        String zoneId = Schedule.getZoneIdByEquipId(equipId);
+        String status = ScheduleProcessJob.getZoneStatusString(zoneId, equipId);
+        String vacationStatus = ScheduleProcessJob.getVacationStateString(zoneId);
+        Log.i("ZonePoints","zoneId:"+zoneId+" status:"+status+" vacationstatus:"+vacationStatus);
+
+        vacationStatusTV.setText(vacationStatus);
+        scheduleStatus.setText(status);
+        String scheduleTypeId = CCUHsApi.getInstance().readId("point and scheduleType and equipRef == \""+equipId+"\"");
+        mScheduleType = (int)CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId);
+
+        mSchedule = Schedule.getScheduleByEquipId(equipId);
+
+        scheduleImageButton.setTag(mSchedule.getId());
+        scheduleImageButton.setOnClickListener(v ->
+        {
+            SchedulerFragment schedulerFragment    = SchedulerFragment.newInstance((String) v.getTag());
+            FragmentManager childFragmentManager = getFragmentManager();
+            childFragmentManager.beginTransaction()
+                    .add(R.id.zone_fragment_temp, schedulerFragment)
+                    .addToBackStack("schedule").commit();
+
+            schedulerFragment.setOnExitListener(() -> {
+                Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
+                mSchedule = Schedule.getScheduleByEquipId(equipId);
+                ScheduleProcessJob.updateSchedules();
+
+
+            });
+        });
+        scheduleSpinner.setSelection(mScheduleType);
+        if (mSchedule.isZoneSchedule())
+        {
+            scheduleImageButton.setVisibility(View.VISIBLE);
+        } else if (mSchedule.isNamedSchedule())
+        {
+            scheduleImageButton.setVisibility(View.VISIBLE);
+        } else
+        {
+            scheduleImageButton.setVisibility(View.GONE);
+        }
+
+
+        scheduleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+        {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+            {
+                if (position == 0 && (mScheduleType != -1))
+                {
+                    if (mSchedule.isZoneSchedule())
+                    {
+                        mSchedule.setDisabled(true);
+                        CCUHsApi.getInstance().updateZoneSchedule(mSchedule,zoneId);
+                    }
+                    scheduleImageButton.setVisibility(View.GONE);
+
+                    if (mScheduleType != ScheduleType.BUILDING.ordinal()) {
+                        setScheduleType(scheduleTypeId, ScheduleType.BUILDING);
+                        mScheduleType = ScheduleType.BUILDING.ordinal();
+                    }
+
+                    CCUHsApi.getInstance().scheduleSync();
+                } else if (position == 1 && (mScheduleType != -1))
+                {
+                    if (mSchedule.isZoneSchedule() && mSchedule.getMarkers().contains("disabled"))
+                    {
+                        mSchedule.setDisabled(false);
+                        CCUHsApi.getInstance().updateZoneSchedule(mSchedule, zoneId);
+                        scheduleImageButton.setTag(mSchedule.getId());
+                    } else
+                    {
+
+                        Zone     zone         = Schedule.getZoneforEquipId(equipId);
+                        Schedule scheduleById = null;
+                        if (zone.hasSchedule())
+                        {
+                            scheduleById = CCUHsApi.getInstance().getScheduleById(zone.getScheduleRef());
+                            Log.d(L.TAG_CCU_UI," scheduleType changed to ZoneSchedule : "+scheduleTypeId);
+                            scheduleById.setDisabled(false);
+                            CCUHsApi.getInstance().updateZoneSchedule(scheduleById, zone.getId());
+                        } else if (!zone.hasSchedule())
+                        {
+                            Log.d(L.TAG_CCU_UI," Zone does not have Schedule : Shouldn't happen");
+                            zone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true, zone.getId()));
+                            CCUHsApi.getInstance().updateZone(zone, zone.getId());
+                            scheduleById = CCUHsApi.getInstance().getScheduleById(zone.getScheduleRef());
+                            //CCUHsApi.getInstance().syncEntityTree();
+                        }
+                        scheduleImageButton.setTag(scheduleById.getId());
+                        scheduleImageButton.setVisibility(View.VISIBLE);
+                        CCUHsApi.getInstance().scheduleSync();
+                    }
+                    if (mScheduleType != ScheduleType.ZONE.ordinal()) {
+                        setScheduleType(scheduleTypeId, ScheduleType.ZONE);
+                        mScheduleType = ScheduleType.ZONE.ordinal();
+                    }
+                } else
+                {
+                    //list named schedules
+                }
+                mSchedule = Schedule.getScheduleByEquipId(equipId);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent)
+            {
+
+            }
+        });
+
+        double pointcurrTmep = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" + p.getId() + "\"");
+        HashMap buildingMin = CCUHsApi.getInstance().read("building and limit and min and equipRef == \"" + L.ccu().systemProfile.getSystemEquipRef() + "\"");
+        HashMap buildingMax = CCUHsApi.getInstance().read("building and limit and max and equipRef == \"" + L.ccu().systemProfile.getSystemEquipRef() + "\"");
+        if(pointcurrTmep == 0)
+        {
+            pointcurrTmep = 72;
+        }
+        double pointheatDT = CCUHsApi.getInstance().readPointPriorityValByQuery("point and air and temp and desired and heating and sp and equipRef == \"" + p.getId() + "\"");
+        double pointcoolDT = CCUHsApi.getInstance().readPointPriorityValByQuery("point and air and temp and desired and cooling and sp and equipRef == \"" + p.getId() + "\"");
+        double pointcoolUL = CCUHsApi.getInstance().readPointPriorityValByQuery("point and limit and max and cooling and user and equipRef == \"" + p.getId() + "\"");
+        double pointheatUL = CCUHsApi.getInstance().readPointPriorityValByQuery("point and limit and max and heating and user and equipRef == \"" + p.getId() + "\"");
+        double pointcoolLL = CCUHsApi.getInstance().readPointPriorityValByQuery("point and limit and min and cooling and user and equipRef == \"" + p.getId() + "\"");
+        double pointheatLL = CCUHsApi.getInstance().readPointPriorityValByQuery("point and limit and min and heating and user and equipRef == \"" + p.getId() + "\"");
+        double pointheatDB = CCUHsApi.getInstance().readPointPriorityValByQuery("point and heating and deadband and sp and equipRef == \"" + p.getId() + "\"");
+        double pointcoolDB = CCUHsApi.getInstance().readPointPriorityValByQuery("point and cooling and deadband and sp and equipRef == \"" + p.getId() + "\"");
+
+        float pointbuildingMin = (float)getPointVal(buildingMin.get("id").toString());
+        float pointbuildingMax = (float)getPointVal(buildingMax.get("id").toString());
+
+        if(!seekArc.isDetailedView())
+        {
+            seekArc.setData(false, pointbuildingMin, pointbuildingMax, (float)pointheatUL, (float)pointheatLL, (float)pointcoolLL, (float)pointcoolUL, (float)pointheatDT, (float) pointcoolDT, (float)pointcurrTmep, (float)pointheatDB, (float)pointcoolDB);
+        }else {
+            seekArc.setData(true, pointbuildingMin, pointbuildingMax, (float)pointheatUL, (float)pointheatLL, (float)pointcoolLL, (float)pointcoolUL, (float)pointheatDT, (float) pointcoolDT, (float)pointcurrTmep, (float)pointheatDB, (float)pointcoolDB);
+        }
+
+        linearLayoutZonePoints.removeAllViews();
+        for(int k=0;k<openZoneMap.size();k++) {
+            Equip updatedEquip = new Equip.Builder().setHashMap(openZoneMap.get(k)).build();
+            if (updatedEquip.getProfile().startsWith("DAB")) {
+                HashMap dabPoints = ScheduleProcessJob.getDABEquipPoints(updatedEquip.getId());
+                Log.i("PointsValue", "DAB Points:" + dabPoints.toString());
+                loadDABPointsUI(dabPoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
+            }
+            if (updatedEquip.getProfile().startsWith("VAV")) {
+                HashMap vavPoints = ScheduleProcessJob.getVAVEquipPoints(updatedEquip.getId());
+                Log.i("PointsValue", "VAV Points:" + vavPoints.toString());
+                loadVAVPointsUI(vavPoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
+            }
+            if (updatedEquip.getProfile().startsWith("SMARTSTAT_TWO_PIPE_FCU")) {
+                HashMap p2FCUPoints = ScheduleProcessJob.get2PFCUEquipPoints(updatedEquip.getId());
+                Log.i("PointsValue", "2PFCU Points:" + p2FCUPoints.toString());
+                loadSS2PFCUPointsUI(p2FCUPoints, inflater, linearLayoutZonePoints, equipId, true, updatedEquip.getGroup());
+
+            }
+            if (updatedEquip.getProfile().startsWith("SMARTSTAT_FOUR_PIPE_FCU")) {
+                HashMap p4FCUPoints = ScheduleProcessJob.get4PFCUEquipPoints(updatedEquip.getId());
+                Log.i("PointsValue", "4PFCU Points:" + p4FCUPoints.toString());
+                loadSS4PFCUPointsUI(p4FCUPoints, inflater, linearLayoutZonePoints, equipId, true, updatedEquip.getGroup());
+            }
+            if (updatedEquip.getProfile().startsWith("SMARTSTAT_CONVENTIONAL_PACK_UNIT")) {
+                HashMap cpuEquipPoints = ScheduleProcessJob.getCPUEquipPoints(updatedEquip.getId());
+                Log.i("PointsValue", "CPU Points:" + cpuEquipPoints.toString());
+                loadSSCPUPointsUI(cpuEquipPoints, inflater, linearLayoutZonePoints, equipId, true, updatedEquip.getGroup());
+            }
+            if (updatedEquip.getProfile().startsWith("SMARTSTAT_HEAT_PUMP_UNIT")) {
+                HashMap hpuEquipPoints = ScheduleProcessJob.getHPUEquipPoints(updatedEquip.getId());
+                Log.i("PointsValue", "HPU Points:" + hpuEquipPoints.toString());
+                loadSSHPUPointsUI(hpuEquipPoints, inflater, linearLayoutZonePoints, equipId, true, updatedEquip.getGroup());
+            }
+        }
+    }
+
+
+    private void viewNonTemperatureBasedZone(LayoutInflater inflater, View rootView, ArrayList<HashMap> zoneMap,String zoneTitle, int gridPosition, LinearLayout[] tablerowLayout)
+    {
+        Log.i("ProfileTypes","Points:"+zoneMap.toString());
+        Equip p = new Equip.Builder().setHashMap(zoneMap.get(0)).build();
+
+        String equipId = p.getId();
+
+        int i = gridPosition;
+        View arcView = null;
+        arcView = inflater.inflate(R.layout.zones_item_nontemp, (ViewGroup) rootView, false);
+        View zoneDetails = inflater.inflate(R.layout.zones_item_details, null);
+        LinearLayout linearLayoutZonePoints  = zoneDetails.findViewById(R.id.lt_profilepoints);
+        GridItem gridItemObj = new GridItem();
+        gridItemObj.setGridID(i);
+        gridItemObj.setGridItem("NonTemp");
+        arcView.setClickable(true);
+        arcView.setTag(gridItemObj);
+        arcView.setId(i);
+        Log.i("EachzoneData","Data:"+zoneMap);
+        ImageView imageView = arcView.findViewById(R.id.imageView);
+        imageView.setTag(gridItemObj);
+        ScaleImageToNormal(250,210,imageView);
+        TextView textEquipment = arcView.findViewById(R.id.textEquipment);
+        textEquipment.setText(zoneTitle);
+        LinearLayout.LayoutParams rowLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        arcView.setPadding(48,56,0,0);
+        try {
+            tablerowLayout[rowcount].addView(arcView, rowLayoutParams);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (((i + 1) % columnCount == 0) && (i != 0)) {
+            try {
+                tableLayout.addView(tablerowLayout[rowcount++]);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if (rowcount < numRows)
+                tablerowLayout[rowcount] = new LinearLayout(tableLayout.getContext());
+        }
+        if (rowcount < numRows) {
+            try {
+                tableLayout.addView(tablerowLayout[rowcount]);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        HashMap zoneEquips = zoneMap.get(0);
+        if((zoneEquips.get("profile").toString()).contains("PLC"))
+        {
+            imageView.setImageResource(R.drawable.ic_zone_piloop);
+            imageView.setPadding(36,36,36,36);
+        }if((zoneEquips.get("profile").toString()).contains("TEMP_MONITOR"))
+        {
+            imageView.setImageResource(R.drawable.ic_zone_tempmonitor);
+            imageView.setPadding(36,36,36,36);
+        }if((zoneEquips.get("profile").toString()).contains("TEMP_INFLUENCE"))
+        {
+            imageView.setImageResource(R.drawable.ic_zone_tempmonitor);
+            imageView.setPadding(36,36,36,36);
+        }if((zoneEquips.get("profile").toString()).contains("EMR"))
+        {
+            imageView.setImageResource(R.drawable.ic_zone_em);
+            imageView.setPadding(36,36,36,36);
+        }
+
+
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boolean isExpanded = false;
+                GridItem gridItemNew = (GridItem) v.getTag();
+                int clickposition = gridItemNew.getGridID();
+                if (clickedView != -1) {
+                    if (clickposition != clickedView) {
+                        int newRowCount = 0;
+                        int tableRowCount = tableLayout.getChildCount();
+                        if (tableLayout.getChildCount() > 1) {
+                            boolean viewFound = false;
+                            for (int row = 0; row < tableRowCount; row++) {
+                                View rowView = tableLayout.getChildAt(row);
+                                LinearLayout tableRow = (LinearLayout) rowView;
+                                int cellCount = tableRow.getChildCount();
+                                for (int j = 0; j < cellCount; j++) {
+                                    RelativeLayout gridItem = (RelativeLayout) tableRow.getChildAt(j);
+                                    GridItem viewTag = (GridItem) gridItem.getTag();
+                                    if (viewTag.getGridID() == clickedView) {
+                                        if(viewTag.getGridItem().equals("NonTemp")) {
+                                            TextView textViewzone = (TextView) gridItem.findViewById(R.id.textEquipment);
+                                            textViewzone.setTextAppearance(getActivity(),R.style.label_black);
+                                            textViewzone.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
+                                            tableLayout.removeViewAt(row + 1);
+                                            ImageView imageViewExpanded = gridItem.findViewById(R.id.imageView);
+                                            ScaleImageToNormal(250,210,imageViewExpanded);
+                                            gridItem.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
+                                        }else{
+                                            SeekArc seekArcExpanded = (SeekArc) gridItem.findViewById(R.id.seekArc);
+                                            TextView textViewzone = (TextView) gridItem.findViewById(R.id.textEquipment);
+                                            textViewzone.setTextAppearance(getActivity(),R.style.label_black);
+                                            textViewzone.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
+                                            tableLayout.removeViewAt(row + 1);
+                                            seekArcExpanded.setDetailedView(false);
+                                            seekArcExpanded.setBackgroundColor(getResources().getColor(R.color.white));
+                                            seekArcExpanded.scaletoNormal(250, 210);
+                                            gridItem.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
+                                            }
+                                        isExpanded = false;
+                                        imageOn = false;
+                                        viewFound = true;
+                                        break;
+                                    }
+                                }
+                                if (viewFound) {
+                                    break;
+                                }
+                            }
+                            clickedView = gridItemNew.getGridID();
+                            v.setBackgroundColor(getActivity().getResources().getColor(R.color.zoneselection_gray));
+                            int index = clickedView / columnCount + 1;
+                            ScaleImageToBig(250,210,imageView);
+                            imageOn = true;
+                            try {
+                                textEquipment.setTextAppearance(getActivity(),R.style.label_orange);
+                                textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
+                                zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
+                                tableLayout.addView(zoneDetails, index);
+
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    } else if (clickposition == clickedView) {
+                        v.setBackgroundColor(getResources().getColor(R.color.white));
+                        textEquipment.setTextAppearance(getActivity(),R.style.label_black);
+                        textEquipment.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
+                        tableLayout.removeView(zoneDetails);
+                        imageOn = false;
+                        ScaleImageToNormal(250,210,imageView);
+                        showWeather();
+                        clickedView = -1;
+                        isExpanded = false;
+                    }
+                } else {
+                    clickedView = gridItemNew.getGridID();
+                    v.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
+                    int index = clickedView / columnCount + 1;
+                    ScaleImageToBig(250,210,imageView);
+                    hideWeather();
+                    imageOn = true;
+                    isExpanded = true;
+                    try {
+                        textEquipment.setTextAppearance(getActivity(),R.style.label_orange);
+                        textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
+                        zoneDetails.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
+                        tableLayout.addView(zoneDetails, index);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                if(isExpanded) {
+                    linearLayoutZonePoints.removeAllViews();
+                    if (p.getProfile().startsWith("EMR")) {
+                        LinearLayout ll_status  = zoneDetails.findViewById(R.id.lt_status);
+                        LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
+                        ll_status.setVisibility(View.GONE);
+                        ll_schedule.setVisibility(View.GONE);
+                        HashMap emPoints = ScheduleProcessJob.getEMEquipPoints(p.getId());
+                        Log.i("PointsValue", "EM Points:" + emPoints.toString());
+                        loadEMPointsUI(emPoints, inflater, linearLayoutZonePoints,p.getGroup());
+                    } if (p.getProfile().startsWith("PLC")) {
+                        LinearLayout ll_status  = zoneDetails.findViewById(R.id.lt_status);
+                        LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
+                        ll_status.setVisibility(View.GONE);
+                        ll_schedule.setVisibility(View.GONE);
+                        HashMap plcPoints = ScheduleProcessJob.getPiEquipPoints(p.getId());
+                        Log.i("PointsValue", "PiLoop Points:" + plcPoints.toString());
+                        loadPLCPointsUI(plcPoints, inflater, linearLayoutZonePoints,p.getGroup());
+                    }
+                }
+            }
+        });
+    }
+
+    public void loadVAVPointsUI(HashMap vavPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints,String nodeAddress)
+    {
+        View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
+        View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
+        View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
+        View viewPointRow2 = inflater.inflate(R.layout.zones_item_type1, null);
+
+        TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
+        TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+
+        TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
+        TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
+        TextView textViewLabel3 = viewPointRow2.findViewById(R.id.text_point1label);
+        TextView textViewLabel4 = viewPointRow2.findViewById(R.id.text_point2label);
+
+        TextView textViewValue1 = viewPointRow1.findViewById(R.id.text_point1value);
+        TextView textViewValue2 = viewPointRow1.findViewById(R.id.text_point2value);
+        TextView textViewValue3 = viewPointRow2.findViewById(R.id.text_point1value);
+        TextView textViewValue4 = viewPointRow2.findViewById(R.id.text_point2value);
+
+        textViewTitle.setText(vavPoints.get("Profile").toString()+" ("+nodeAddress+")");
+        textViewStatus.setText(vavPoints.get("Status").toString());
+        textViewLabel1.setText("Damper : ");
+        textViewValue1.setText(vavPoints.get("Damper").toString());
+        textViewLabel2.setText("Reheat Coil : ");
+        textViewValue2.setText(vavPoints.get("Reheat Coil").toString());
+        textViewLabel3.setText("Supply Airfow : ");
+        textViewValue3.setText(vavPoints.get("Supply Airfow").toString());
+        textViewLabel4.setText("Discharge Airfow : ");
+        textViewValue4.setText(vavPoints.get("Discharge Airflow").toString());
+
+        linearLayoutZonePoints.addView(viewTitle);
+        linearLayoutZonePoints.addView(viewStatus);
+        linearLayoutZonePoints.addView(viewPointRow1);
+        viewPointRow2.setPadding(0,0,0,40);
+        linearLayoutZonePoints.addView(viewPointRow2);
+    }
+
+    public void loadDABPointsUI(HashMap dabPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress)
+    {
+        View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
+        View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
+        View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
+
+        TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
+        TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+        TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
+        TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
+        TextView textViewValue1 = viewPointRow1.findViewById(R.id.text_point1value);
+        TextView textViewValue2 = viewPointRow1.findViewById(R.id.text_point2value);
+
+        textViewTitle.setText(dabPoints.get("Profile").toString()+" ("+nodeAddress+")");
+        textViewStatus.setText(dabPoints.get("Status").toString());
+        textViewLabel1.setText("Damper : ");
+        textViewLabel2.setText("Discharge Airflow : ");
+        textViewValue1.setText(dabPoints.get("Damper").toString());
+        textViewValue2.setText(dabPoints.get("Discharge Airflow").toString());
+
+        linearLayoutZonePoints.addView(viewTitle);
+        linearLayoutZonePoints.addView(viewStatus);
+        viewPointRow1.setPadding(0,0,0,40);
+        linearLayoutZonePoints.addView(viewPointRow1);
+    }
+
+    public void loadSSCPUPointsUI(HashMap cpuEquipPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String equipId, boolean isPubNub, String nodeAddress)
+    {
+
+        View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
+        View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
+        View viewPointRow1 = inflater.inflate(R.layout.zones_item_type2, null);
+
+        TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
+        TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+
+        TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
+        TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
+
+        Spinner spinnerValue1 = viewPointRow1.findViewById(R.id.spinnerValue1);
+        Spinner spinnerValue2 = viewPointRow1.findViewById(R.id.spinnerValue2);
+
+
+        ArrayAdapter<CharSequence> conModeAdapter = ArrayAdapter.createFromResource(
+                getActivity(), R.array.smartstat_conditionmode, R.layout.spinner_zone_item);
+        conModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+        spinnerValue1.setAdapter(conModeAdapter);
+
+        ArrayAdapter<CharSequence> fanModeAdapter = ArrayAdapter.createFromResource(
+                getActivity(), R.array.smartstat_fanmode, R.layout.spinner_zone_item);
+        fanModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+        spinnerValue2.setAdapter(fanModeAdapter);
+
+        textViewTitle.setText(cpuEquipPoints.get("Profile").toString()+" ("+nodeAddress+")");
+        textViewStatus.setText(cpuEquipPoints.get("Status").toString());
+        textViewLabel1.setText("Conditioning Mode : ");
+        textViewLabel2.setText("Fan Mode : ");
+
+        int conditionMode = 0;
+        int fanMode = 0;
+        try {
+            conditionMode = (int)((double)cpuEquipPoints.get("Conditioning Mode"));
+            fanMode = (int)((double)cpuEquipPoints.get("Fan Mode"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        spinnerValue1.setSelection(conditionMode);
+        spinnerValue2.setSelection(fanMode);
+
+        linearLayoutZonePoints.addView(viewTitle);
+        linearLayoutZonePoints.addView(viewStatus);
+
+        double fanHighHumdOption = (double)cpuEquipPoints.get("Fan High Humidity");
+        double targetHumidity = 0;
+        double targetDeHumidity = 0;
+        if(fanHighHumdOption > 1.0)
+        {
+            View viewPointRow2 = inflater.inflate(R.layout.zones_item_type2, null);
+
+            TextView textViewLabel3 = viewPointRow2.findViewById(R.id.text_point1label);
+            Spinner spinnerValue3 = viewPointRow2.findViewById(R.id.spinnerValue1);
+            TextView textViewLabel4 = viewPointRow2.findViewById(R.id.text_point2label);
+            textViewLabel4.setVisibility(View.GONE);
+            Spinner spinnerValue4 = viewPointRow2.findViewById(R.id.spinnerValue2);
+            spinnerValue4.setVisibility(View.GONE);
+
+
+            ArrayList<Integer> arrayHumdityTargetList = new ArrayList<Integer>();
+            for (int pos = 1; pos <= 100; pos++)
+                arrayHumdityTargetList.add(pos);
+
+            ArrayAdapter<Integer> humidityTargetAdapter = new ArrayAdapter<Integer>(getActivity(),R.layout.spinner_zone_item,arrayHumdityTargetList);
+            humidityTargetAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+            spinnerValue3.setAdapter(humidityTargetAdapter);
+
+            if(fanHighHumdOption == 2.0) {
+                textViewLabel3.setText("Target Humidity : ");
+                targetHumidity = (double)cpuEquipPoints.get("Target Humidity");
+                spinnerValue3.setSelection((int)targetHumidity -1);
+            }else {
+                textViewLabel3.setText("Target Dehumidify : ");
+                targetDeHumidity = (double)cpuEquipPoints.get("Target Dehumidity");
+                spinnerValue3.setSelection((int)targetDeHumidity - 1);
+            }
+
+            linearLayoutZonePoints.addView(viewPointRow2);
+        }
+
+
+        linearLayoutZonePoints.addView(viewPointRow1);
+        viewPointRow1.setPadding(0,0,0,40);
+        try {
+            linearLayoutZonePoints.addView(viewPointRow1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        int tempConditionMode = conditionMode;
+        int tempFanMode = fanMode;
+        isFromPubNub = isPubNub;
+        spinnerValue1.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if(isFromPubNub) {
+                    if (tempConditionMode != position) {
+                        StandaloneScheduler.updateOperationalPoints(equipId, "temp and operation and mode", position);
+                    }
+                    isFromPubNub = false;
+                }else {
+                    StandaloneScheduler.updateOperationalPoints(equipId, "temp and operation and mode", position);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+        spinnerValue2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if(isFromPubNub) {
+                    if (tempFanMode != position) {
+                        StandaloneScheduler.updateOperationalPoints(equipId, "fan and operation and mode", position);
+                    }
+                    isFromPubNub = false;
+                }else {
+                    StandaloneScheduler.updateOperationalPoints(equipId, "fan and operation and mode", position);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+    }
+    public void loadSSHPUPointsUI(HashMap hpuEquipPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String equipId, boolean isPubNub, String nodeAddress)
+    {
+        //Log.i("PubNub","UI Update for Zone Points");
+        View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
+        View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
+        View viewPointRow1 = inflater.inflate(R.layout.zones_item_type2, null);
+
+        TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
+        TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+
+        TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
+        TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
+
+        Spinner spinnerValue1 = viewPointRow1.findViewById(R.id.spinnerValue1);
+        Spinner spinnerValue2 = viewPointRow1.findViewById(R.id.spinnerValue2);
+
+        ArrayAdapter<CharSequence> conModeAdapter = ArrayAdapter.createFromResource(
+                getActivity(), R.array.smartstat_conditionmode, R.layout.spinner_zone_item);
+        conModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+        spinnerValue1.setAdapter(conModeAdapter);
+
+        ArrayAdapter<CharSequence> fanModeAdapter = ArrayAdapter.createFromResource(
+                getActivity(), R.array.smartstat_fanmode, R.layout.spinner_zone_item);
+        fanModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+        spinnerValue2.setAdapter(fanModeAdapter);
+
+        textViewTitle.setText(hpuEquipPoints.get("Profile").toString()+" ("+nodeAddress+")");
+        textViewStatus.setText(hpuEquipPoints.get("Status").toString());
+        textViewLabel1.setText("Conditioning Mode : ");
+        textViewLabel2.setText("Fan Mode : ");
+
+        pointsOpen.put(hpuEquipPoints.get("StatusTag"),"StatusTag");
+        pointsOpen.put(hpuEquipPoints.get("FanModeTag"),"FanModeTag");
+        pointsOpen.put(hpuEquipPoints.get("ConditionModeTag"),"ConditionModeTag");
+
+        int conditionMode = 0;
+        int fanMode = 0;
+        try {
+            conditionMode = (int)(double)(hpuEquipPoints.get("Conditioning Mode"));
+            fanMode = (int)(double)(hpuEquipPoints.get("Fan Mode"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        spinnerValue1.setSelection(conditionMode);
+        spinnerValue2.setSelection(fanMode);
+
+        linearLayoutZonePoints.addView(viewTitle);
+        linearLayoutZonePoints.addView(viewStatus);
+
+        double fanHighHumdOption = (double)hpuEquipPoints.get("Fan High Humidity");
+        double targetHumidity = 0;
+        double targetDeHumidity = 0;
+        if(fanHighHumdOption > 1.0)
+        {
+            View viewPointRow2 = inflater.inflate(R.layout.zones_item_type2, null);
+
+            TextView textViewLabel3 = viewPointRow2.findViewById(R.id.text_point1label);
+            Spinner spinnerValue3 = viewPointRow2.findViewById(R.id.spinnerValue1);
+            TextView textViewLabel4 = viewPointRow2.findViewById(R.id.text_point2label);
+            textViewLabel4.setVisibility(View.GONE);
+            Spinner spinnerValue4 = viewPointRow2.findViewById(R.id.spinnerValue2);
+            spinnerValue4.setVisibility(View.GONE);
+
+
+            ArrayList<Integer> arrayHumdityTargetList = new ArrayList<Integer>();
+            for (int pos = 1; pos <= 100; pos++)
+                arrayHumdityTargetList.add(pos);
+
+            ArrayAdapter<Integer> humidityTargetAdapter = new ArrayAdapter<Integer>(getActivity(),R.layout.spinner_zone_item,arrayHumdityTargetList);
+            humidityTargetAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+            spinnerValue3.setAdapter(humidityTargetAdapter);
+
+            if(fanHighHumdOption == 2.0) {
+                textViewLabel3.setText("Target Humidity : ");
+                targetHumidity = (double)hpuEquipPoints.get("Target Humidity");
+                spinnerValue3.setSelection((int)targetHumidity -1);
+            }else {
+                textViewLabel3.setText("Target Dehumidify : ");
+                targetDeHumidity = (double)hpuEquipPoints.get("Target Dehumidity");
+                spinnerValue3.setSelection((int)targetDeHumidity - 1);
+            }
+
+            linearLayoutZonePoints.addView(viewPointRow2);
+        }
+
+
+        linearLayoutZonePoints.addView(viewPointRow1);
+        viewPointRow1.setPadding(0,0,0,40);
+        try {
+            linearLayoutZonePoints.addView(viewPointRow1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        int tempConditionMode = conditionMode;
+        int tempfanMode = fanMode;
+        isFromPubNub = isPubNub;
+        spinnerValue1.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                try {
+                    if(isFromPubNub) {
+                        if (tempConditionMode != position) {
+                            Log.i("PubNub", "conditionMode:" + tempConditionMode + " position:" + position);
+                            StandaloneScheduler.updateOperationalPoints(equipId, "temp and operation and mode", position);
+                        }
+                        isFromPubNub = false;
+                    }else{
+                        StandaloneScheduler.updateOperationalPoints(equipId, "temp and operation and mode", position);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        spinnerValue2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                try {
+                    if(isFromPubNub) {
+                        if(tempfanMode!= position) {
+                            Log.i("PubNub","fanMode:"+tempfanMode+" position:"+position);
+                            StandaloneScheduler.updateOperationalPoints(equipId, "fan and operation and mode", position);
+                        }
+                        isFromPubNub = false;
+                    }
+                    else {
+                        StandaloneScheduler.updateOperationalPoints(equipId, "fan and operation and mode", position);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+    }
+    public void loadSS2PFCUPointsUI(HashMap p2FCUPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String equipId, boolean isPubNub, String nodeAddress)
+    {
+        View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
+        View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
+        View viewPointRow1 = inflater.inflate(R.layout.zones_item_type2, null);
+
+        TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
+        TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+
+        TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
+        TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
+
+        Spinner spinnerValue1 = viewPointRow1.findViewById(R.id.spinnerValue1);
+        Spinner spinnerValue2 = viewPointRow1.findViewById(R.id.spinnerValue2);
+
+
+        ArrayAdapter<CharSequence> conModeAdapter = ArrayAdapter.createFromResource(
+                getActivity(), R.array.smartstat_conditionmode, R.layout.spinner_zone_item);
+        conModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+        spinnerValue1.setAdapter(conModeAdapter);
+
+        ArrayAdapter<CharSequence> fanModeAdapter = ArrayAdapter.createFromResource(
+                getActivity(), R.array.smartstat_2pfcu_fanmode, R.layout.spinner_zone_item);
+        fanModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+        spinnerValue2.setAdapter(fanModeAdapter);
+
+        textViewTitle.setText(p2FCUPoints.get("Profile").toString()+" ("+nodeAddress+")");
+        textViewStatus.setText(p2FCUPoints.get("Status").toString());
+        textViewLabel1.setText("Conditioning Mode : ");
+        textViewLabel2.setText("Fan Mode : ");
+
+        int conditionMode = 0;
+        int fanMode = 0;
+        try {
+            conditionMode = (int)((double)p2FCUPoints.get("Conditioning Mode"));
+            fanMode = (int)((double)p2FCUPoints.get("Fan Mode"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        spinnerValue1.setSelection(conditionMode);
+        spinnerValue2.setSelection(fanMode);
+
+        linearLayoutZonePoints.addView(viewTitle);
+        linearLayoutZonePoints.addView(viewStatus);
+        linearLayoutZonePoints.addView(viewPointRow1);
+        viewPointRow1.setPadding(0,0,0,40);
+        try {
+            linearLayoutZonePoints.addView(viewPointRow1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        int tempConditionMode = conditionMode;
+        int tempfanMode = fanMode;
+        isFromPubNub = isPubNub;
+        spinnerValue1.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if(isFromPubNub){
+                    if(tempConditionMode != position) {
+                    StandaloneScheduler.updateOperationalPoints(equipId, "temp and operation and mode", position);
+                    }
+                    isFromPubNub = false;
+                }else{
+                    StandaloneScheduler.updateOperationalPoints(equipId, "temp and operation and mode", position);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+        spinnerValue2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if(isFromPubNub) {
+                    if(tempfanMode != position) {
+                        StandaloneScheduler.updateOperationalPoints(equipId, "fan and operation and mode", position);
+                    }
+                    isFromPubNub = false;
+                }else {
+                    StandaloneScheduler.updateOperationalPoints(equipId, "fan and operation and mode", position);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+    }
+
+    public void loadSS4PFCUPointsUI(HashMap p4FCUPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String equipId, boolean isPubNub, String nodeAddress)
+    {
+        //boolean isFromPubNub = isPubNub;
+        View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
+        View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
+        View viewPointRow1 = inflater.inflate(R.layout.zones_item_type2, null);
+
+        TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
+        TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+
+        TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
+        TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
+
+        Spinner spinnerValue1 = viewPointRow1.findViewById(R.id.spinnerValue1);
+        Spinner spinnerValue2 = viewPointRow1.findViewById(R.id.spinnerValue2);
+
+
+        ArrayAdapter<CharSequence> conModeAdapter = ArrayAdapter.createFromResource(
+                getActivity(), R.array.smartstat_conditionmode, R.layout.spinner_zone_item);
+        conModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+        spinnerValue1.setAdapter(conModeAdapter);
+
+        ArrayAdapter<CharSequence> fanModeAdapter = ArrayAdapter.createFromResource(
+                getActivity(), R.array.smartstat_2pfcu_fanmode, R.layout.spinner_zone_item);
+        fanModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+        spinnerValue2.setAdapter(fanModeAdapter);
+
+        textViewTitle.setText(p4FCUPoints.get("Profile").toString()+" ("+nodeAddress+")");
+        textViewStatus.setText(p4FCUPoints.get("Status").toString());
+        textViewLabel1.setText("Conditioning Mode : ");
+        textViewLabel2.setText("Fan Mode : ");
+
+        int conditionMode = 0;
+        int fanMode = 0;
+        try {
+            conditionMode = (int)((double)p4FCUPoints.get("Conditioning Mode"));
+            fanMode = (int)((double)p4FCUPoints.get("Fan Mode"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        spinnerValue1.setSelection(conditionMode);
+        spinnerValue2.setSelection(fanMode);
+
+        linearLayoutZonePoints.addView(viewTitle);
+        linearLayoutZonePoints.addView(viewStatus);
+        linearLayoutZonePoints.addView(viewPointRow1);
+        viewPointRow1.setPadding(0,0,0,40);
+        try {
+            linearLayoutZonePoints.addView(viewPointRow1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        int tempConditionMode = conditionMode;
+        int tempFanMode = fanMode;
+        isFromPubNub = isPubNub;
+        spinnerValue1.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if(isFromPubNub)
+                {
+                    if(tempConditionMode != position) {
+                        StandaloneScheduler.updateOperationalPoints(equipId, "temp and operation and mode", position);
+                    }
+                    isFromPubNub = false;
+                }
+                else{
+                    StandaloneScheduler.updateOperationalPoints(equipId, "temp and operation and mode", position);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+        spinnerValue2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if(isFromPubNub) {
+                    if (tempFanMode != position) {
+                        StandaloneScheduler.updateOperationalPoints(equipId, "fan and operation and mode", position);
+                    }
+                    isFromPubNub = false;
+                }else {
+                    StandaloneScheduler.updateOperationalPoints(equipId, "fan and operation and mode", position);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+    }
+
+
+    public void loadEMPointsUI(HashMap p4FCUPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress)
+    {
+        View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
+        View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
+
+        TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
+        TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+
+        textViewTitle.setText(p4FCUPoints.get("Profile").toString()+" ("+nodeAddress+")");
+        textViewStatus.setText(p4FCUPoints.get("Status").toString());
+        viewStatus.setPadding(0,0,0,40);
+        try {
+            linearLayoutZonePoints.addView(viewTitle);
+            linearLayoutZonePoints.addView(viewStatus);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void loadPLCPointsUI(HashMap plcPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress)
+    {
+        View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
+        View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
+        View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
+        View viewPointRow2 = inflater.inflate(R.layout.zones_item_type1, null);
+
+        TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
+        TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+
+        TextView labelInputAir = viewPointRow1.findViewById(R.id.text_point1label);
+        TextView labelTarget = viewPointRow1.findViewById(R.id.text_point2label);
+        TextView labelOffsetAir = viewPointRow2.findViewById(R.id.text_point1label);
+        TextView label2 = viewPointRow2.findViewById(R.id.text_point2label);
+
+        TextView textViewInputAir = viewPointRow1.findViewById(R.id.text_point1value);
+        TextView textViewTargetAir = viewPointRow1.findViewById(R.id.text_point2value);
+        TextView textViewOffsetAir = viewPointRow2.findViewById(R.id.text_point1value);
+        TextView value2 = viewPointRow2.findViewById(R.id.text_point2value);
+
+        label2.setVisibility(View.GONE);
+        value2.setVisibility(View.GONE);
+
+        textViewTitle.setText(plcPoints.get("Profile").toString()+" ("+nodeAddress+")");
+        textViewStatus.setText(plcPoints.get("Status").toString());
+
+        labelInputAir.setText("Input Airflow : ");
+        labelTarget.setText("Target Airflow : ");
+        labelOffsetAir.setText("Offset Airflow : ");
+
+        textViewInputAir.setText(plcPoints.get("Input Value").toString());
+        textViewTargetAir.setText(plcPoints.get("Offset Value").toString());
+        textViewOffsetAir.setText(plcPoints.get("Target Value").toString());
+
+        viewPointRow2.setPadding(0,0,0,40);
+        try {
+            linearLayoutZonePoints.addView(viewTitle);
+            linearLayoutZonePoints.addView(viewStatus);
+            linearLayoutZonePoints.addView(viewPointRow1);
+            linearLayoutZonePoints.addView(viewPointRow2);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void updateSSHPUPointsUI(String id, LinearLayout linearLayoutZonePoints)
+    {
+
+        TextView textViewTitle = linearLayoutZonePoints.findViewById(R.id.textProfile);
+        TextView textViewStatus = linearLayoutZonePoints.findViewById(R.id.text_status);
+
+        TextView textViewLabel1 = linearLayoutZonePoints.findViewById(R.id.text_point1label);
+        TextView textViewLabel2 = linearLayoutZonePoints.findViewById(R.id.text_point2label);
+
+        Spinner spinnerValue1 = linearLayoutZonePoints.findViewById(R.id.spinnerValue1);
+        Spinner spinnerValue2 = linearLayoutZonePoints.findViewById(R.id.spinnerValue2);
+    }
+
+
+    public static double getPointVal(String id) {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        Point p = new Point.Builder().setHashMap(hayStack.readMapById(id)).build();
+        for (String marker : p.getMarkers())
+        {
+            if (marker.equals("writable"))
+            {
+                ArrayList values = hayStack.readPoint(id);
+                if (values != null && values.size() > 0)
+                {
+                    for (int l = 1; l <= values.size(); l++)
+                    {
+                        HashMap valMap = ((HashMap) values.get(l - 1));
+                        System.out.println(valMap);
+                        if (valMap.get("val") != null)
+                        {
+                            return Double.parseDouble(valMap.get("val").toString());
+                        }
+                    }
+                }
+            }
+        }
+    
+        for (String marker : p.getMarkers())
+        {
+            if (marker.equals("his"))
+            {
+                return hayStack.readHisValById(p.getId());
+            }
+        }
+        return 0;
+    }
+    
+    public void setPointVal(String id, double val) {
+        new AsyncTask<String, Void, Void>() {
+            @Override
+            protected Void doInBackground( final String ... params ) {
+    
+                CCUHsApi hayStack = CCUHsApi.getInstance();
+                Point p = new Point.Builder().setHashMap(hayStack.readMapById(id)).build();
+                if (p.getMarkers().contains("writable"))
+                {
+                    CcuLog.d(L.TAG_CCU_UI, "Set Writbale Val "+p.getDisplayName()+": " +val);
+                    //CCUHsApi.getInstance().pointWrite(HRef.copy(id), TunerConstants.MANUAL_OVERRIDE_VAL_LEVEL, "manual", HNum.make(val) , HNum.make(2 * 60 * 60 * 1000, "ms"));
+                    ScheduleProcessJob.handleDesiredTempUpdate(p, true, val);
+    
+                }
+    
+                if (p.getMarkers().contains("his"))
+                {
+                    CcuLog.d(L.TAG_CCU_UI, "Set His Val "+id+": " +val);
+                    hayStack.writeHisValById(id, val);
+                }
+                return null;
+            }
+            
+            @Override
+            protected void onPostExecute( final Void result ) {
+                // continue what you are doing...
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+    }
+
+
+    @Override
+    public void onResume() {
+        // TODO Auto-generated method stub
+        super.onResume();
+        if(getUserVisibleHint()) {
+            UpdatePointHandler.setZoneDataInterface(this);
+            Pulse.setCurrentTempInterface(this);
+            //UpdateScheduleHandler.setPointDataInterface(this);
+            weatherUpdateHandler = new Handler();
+            weatherUpdate = new Runnable() {
+                @Override
+                public void run() {
+                    if (weatherUpdateHandler != null && getActivity() != null) {
+                        if (weather_data.getVisibility() == View.VISIBLE) {
+                            Log.e("weather", "update");
+                            UpdateWeatherData();
+                        }
+                        weatherUpdateHandler.postDelayed(weatherUpdate, 15 * 60000);
+                    }
+                }
+            };
+
+            weatherUpdate.run();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        UpdatePointHandler.setZoneDataInterface(null);
+        Pulse.setCurrentTempInterface(null);
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if(isVisibleToUser) {
+            UpdatePointHandler.setZoneDataInterface(this);
+            Pulse.setCurrentTempInterface(this);
+        } else {
+
+            UpdatePointHandler.setZoneDataInterface(null);
+            Pulse.setCurrentTempInterface(null);
+        }
+    }
+
+    class FloorComparator implements Comparator<Floor>
+    {
+        @Override
+        public int compare(Floor a, Floor b) {
+            return a.getDisplayName().compareToIgnoreCase(b.getDisplayName());
+        }
+    }
+
+    public void ScaleImageToNormal(int height,int width, ImageView imageView)
+    {
+        int endHeight = (int) (height / 1.35);
+        int endWidth = (int) (width / 1.35);
+        imageView.getLayoutParams().height = endHeight;
+        imageView.getLayoutParams().width = endWidth;
+        imageView.setPadding(36,36,36,36);
+    }
+
+    public void ScaleImageToBig(int height, int width, ImageView imageView)
+    {
+        int endHeight = (int) (height * 1.35);
+        int endWidth = (int) (width * 1.35);
+        imageView.getLayoutParams().height = endHeight;
+        imageView.getLayoutParams().width = endWidth;
+        imageView.setPadding(36,36,36,36);
+    }
+    public void showWeather() {
+        //if (isWeatherWidget) {
+            weather_data.setVisibility(View.VISIBLE);
+            //mod = 3;
+            //weather_appear.setVisibility(View.GONE);
+            //weather_data.startAnimation(inleft);
+        TranslateAnimation animate = new TranslateAnimation(-weather_data.getWidth(),0,0,0);
+        animate.setDuration(400);
+        animate.setFillAfter(true);
+        weather_data.startAnimation(animate);
+        //}
+    }
+
+    public void hideWeather() {
+        //if (isWeatherWidget) {
+            //mod = 4;
+            //weather_appear.setVisibility(View.VISIBLE);
+            TranslateAnimation animate = new TranslateAnimation(0,-weather_data.getWidth()+5,0,0);
+            animate.setDuration(400);
+            animate.setFillAfter(true);
+            weather_data.startAnimation(animate);
+            //recyclerView.startAnimation(animate);
+            //recyclerView.startAnimation(in);
+            //gridlayout.startAnimation(in);
+            tableLayout.startAnimation(in);
+            //tableLayout.setVisibility(View.VISIBLE);
+            weather_data.setVisibility(View.GONE);
+            //weather_data.setVisibility(View.VISIBLE);
+
+        //}
+    }
+
+    public boolean isWeatherShown(){
+        boolean isShown = false;
+        if(weather_data.getVisibility() == View.VISIBLE)
+        {
+            isShown = true;
+        }
+        else
+        {
+            isShown = false;
+        }
+        return isShown;
+    }
+
+    private void setScheduleType(String id, ScheduleType schedule) {
+        new AsyncTask<String, Void, Void>() {
+            @Override
+            protected Void doInBackground( final String ... params ) {
+                CCUHsApi.getInstance().writeDefaultValById(id, (double)schedule.ordinal());
+                ScheduleProcessJob.handleScheduleTypeUpdate(new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(id)).build());
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute( final Void result ) {
+                // continue what you are doing...
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+    }
+}

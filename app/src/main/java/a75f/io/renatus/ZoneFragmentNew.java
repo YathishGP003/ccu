@@ -213,7 +213,6 @@ public class ZoneFragmentNew extends Fragment implements UpdatePointHandler.Zone
 
     public void refreshScreen(String id)
     {
-        //Log.i("PubNub","Refresh Triggered");
         if(getActivity() != null) {
             if(zoneOpen) {
                 //Log.i("PubNub","Zone Point Updating:"+id+" Points:"+pointsOpen.toString());
@@ -221,7 +220,6 @@ public class ZoneFragmentNew extends Fragment implements UpdatePointHandler.Zone
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            //Log.i("PubNub", "Zone Open:" + zoneOpen);
                                 updateTemperatureBasedZones(seekArcOpen, zonePointsOpen, equipOpen, getLayoutInflater(), id);
                                 tableLayout.invalidate();
                         }
@@ -286,9 +284,6 @@ public class ZoneFragmentNew extends Fragment implements UpdatePointHandler.Zone
             Context context = weather_icon.getContext();
             int id = context.getResources().getIdentifier(weather_icon_string, "drawable", context.getPackageName());
             weather_icon.setImageResource(id);
-
-            /*weather_appear.setColorFilter(context.getResources().getColor(R.color.accent), PorterDuff.Mode.MULTIPLY);
-            weather_appear.setImageResource(id);*/
         }
     }
 

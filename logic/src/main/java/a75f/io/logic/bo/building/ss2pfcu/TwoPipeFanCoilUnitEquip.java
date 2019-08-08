@@ -443,7 +443,7 @@ public class TwoPipeFanCoilUnitEquip {
         device.th1In.setPointRef(datID);
         device.th1In.setEnabled(config.enableThermistor1);
         device.th2In.setPointRef(eatID);
-        device.th2In.setEnabled(config.enableThermistor2);
+        device.th2In.setEnabled(true);
         device.currentTemp.setPointRef(ctID);
         device.currentTemp.setEnabled(true);
         device.addSensor(Port.SENSOR_RH,humidityId);
@@ -585,7 +585,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .setTz(tz)
                 .build();
         String enableexternal10KProbeTh2Id = CCUHsApi.getInstance().addPoint(external10KProbeTh2);
-        CCUHsApi.getInstance().writeDefaultValById(enableexternal10KProbeTh2Id, (double)(config.enableThermistor2 == true? 1.0 : 0));
+        CCUHsApi.getInstance().writeDefaultValById(enableexternal10KProbeTh2Id, 1.0);
 
         Point enableRelay1 = new Point.Builder()
                 .setDisplayName(equipDis+"-enableFanMedium")
@@ -681,7 +681,7 @@ public class TwoPipeFanCoilUnitEquip {
         setConfigNumVal("enable and occupancy",config.enableOccupancyControl == true ? 1.0 : 0);
         setConfigNumVal("temperature and offset",config.temperatureOffset);
         setConfigNumVal("enable and th1",config.enableThermistor1 == true ? 1.0 : 0);
-        setConfigNumVal("enable and th2",config.enableThermistor2 == true ? 1.0 : 0);
+        setConfigNumVal("enable and th2",1.0);
 
     }
 
@@ -716,7 +716,7 @@ public class TwoPipeFanCoilUnitEquip {
         setConfigNumVal("enable and occupancy",config.enableOccupancyControl == true ? 1.0 : 0);
         setConfigNumVal("temperature and offset",config.temperatureOffset);
         setConfigNumVal("enable and th1",config.enableThermistor1 == true ? 1.0 : 0);
-        setConfigNumVal("enable and th2",config.enableThermistor2 == true ? 1.0 : 0);
+        setConfigNumVal("enable and th2",1.0);
     }
 
 
@@ -726,7 +726,7 @@ public class TwoPipeFanCoilUnitEquip {
         config.enableOccupancyControl = getConfigNumVal("enable and occupancy") > 0 ? true : false ;
         config.temperatureOffset = getConfigNumVal("temperature and offset");
         config.enableThermistor1 = getConfigNumVal("enable and th1") >  0 ? true : false;
-        config.enableThermistor2 = getConfigNumVal("enable and th2") > 0 ? true : false;
+        config.enableThermistor2 = true;
         config.setNodeType(NodeType.SMART_STAT);
 
 

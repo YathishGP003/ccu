@@ -180,7 +180,7 @@ public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implement
             switchOccSensor.setChecked(mProfileConfig.enableOccupancyControl);
             int offsetIndex = (int) mProfileConfig.temperatureOffset + TEMP_OFFSET_LIMIT;
             temperatureOffset.setValue(offsetIndex);
-            switchExtTempSensor.setChecked(mProfileConfig.enableThermistor2);
+            //switchExtTempSensor.setChecked(mProfileConfig.enableThermistor2);
             switchThermistor1.setChecked(mProfileConfig.enableThermistor1);
             if (mProfileConfig.getOutputs().size() > 0) {
                 for (Output output : mProfileConfig.getOutputs()) {

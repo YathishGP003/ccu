@@ -25,6 +25,9 @@ public class VAVScheduler {
 
     private static final String TAG = "VAVScheduler";
     boolean occupied; // determined by schedule
+    static double coolingDesiredTemp = 74.0;
+    static double heatingDesiredTemp = 70.0;
+    static double averageDesiredTemp = 72.0;
     
     public static Occupied processEquip(Equip equip, Schedule equipSchedule, Schedule vacation, Occupancy systemOcc) {
 
@@ -59,11 +62,21 @@ public class VAVScheduler {
             occ.setCoolingDeadBand(deadbands);
             occ.setHeatingDeadBand(deadbands);
             Double coolingTemp = (occ.isOccupied() || systemOcc == Occupancy.PRECONDITIONING) ? occ.getCoolingVal() : (occ.getCoolingVal() + occ.getUnoccupiedZoneSetback());
-            setDesiredTemp(equip, coolingTemp, "cooling");
+            if(coolingTemp != coolingDesiredTemp) {
+                coolingDesiredTemp = coolingTemp;
+                setDesiredTemp(equip, coolingTemp, "cooling");
+            }
 
             Double heatingTemp = (occ.isOccupied() || systemOcc == Occupancy.PRECONDITIONING) ? occ.getHeatingVal() : (occ.getHeatingVal() - occ.getUnoccupiedZoneSetback());
-            setDesiredTemp(equip, heatingTemp, "heating");
-            setDesiredTemp(equip,avgTemp,"average");
+            if(heatingTemp != heatingDesiredTemp) {
+                heatingDesiredTemp = heatingTemp;
+                setDesiredTemp(equip, heatingTemp, "heating");
+            }
+
+            if(avgTemp != averageDesiredTemp) {
+                averageDesiredTemp = avgTemp;
+                setDesiredTemp(equip, avgTemp, "average");
+            }
         }
 
         return occ;

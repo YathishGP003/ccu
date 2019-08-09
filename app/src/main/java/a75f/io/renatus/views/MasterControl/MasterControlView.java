@@ -1,10 +1,12 @@
 package a75f.io.renatus.views.MasterControl;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
@@ -22,15 +24,24 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
 import a75f.io.logic.L;
+import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.renatus.R;
+import a75f.io.renatus.registartion.InstallerOptions;
 
 
-public class MasterControlView extends LinearLayout {
+public class MasterControlView extends LinearLayout{
 
     private static final int ANGLE_WIDTH = 2;
     HorizontalScrollView mHorizontalScrollView;
     MasterControl masterControl;
+    HashMap coolUL;
+    HashMap heatUL;
+    HashMap coolLL;
+    HashMap heatLL;
+    HashMap buildingMin;
+    HashMap buildingMax;
 
     public MasterControlView(Context context) {
         super(context);
@@ -64,7 +75,6 @@ public class MasterControlView extends LinearLayout {
     private int mImagePadding = 25;
 
     private void add() {
-
         DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
 
         int angleWH = (int) (ANGLE_WIDTH * displayMetrics.density);
@@ -118,20 +128,65 @@ public class MasterControlView extends LinearLayout {
         arrowRightImageButton.setOnClickListener(v -> mHorizontalScrollView.arrowScroll(View.FOCUS_RIGHT));
 
         updateData();
-
     }
 
     private void updateData() {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap equip = hayStack.read("equip and system");
-        HashMap coolUL = CCUHsApi.getInstance().read("point and limit and max and cooling and user and equipRef == \"" + equip.get("id").toString() + "\"");
-        HashMap heatUL = CCUHsApi.getInstance().read("point and limit and max and heating and user and equipRef == \"" + equip.get("id").toString() + "\"");
-        HashMap coolLL = CCUHsApi.getInstance().read("point and limit and min and cooling and user and equipRef == \"" + equip.get("id").toString() + "\"");
-        HashMap heatLL = CCUHsApi.getInstance().read("point and limit and min and heating and user and equipRef == \"" + equip.get("id").toString() + "\"");
-        HashMap buildingMin = CCUHsApi.getInstance().read("building and limit and min and equipRef == \"" + L.ccu().systemProfile.getSystemEquipRef() + "\"");
-        HashMap buildingMax = CCUHsApi.getInstance().read("building and limit and max and equipRef == \"" + L.ccu().systemProfile.getSystemEquipRef() + "\"");
+        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip");
 
-        Log.d("Mahesh", " building limit  " + coolUL + " " + heatUL + " " + coolLL + " " + heatLL +" "+buildingMin+" "+buildingMax);
+        for (HashMap m : equips) {
+            Equip p = new Equip.Builder().setHashMap(m).build();
+
+            if (p.getDisplayName().contains("BuildingTuner")){
+                coolUL = CCUHsApi.getInstance().read("point and limit and max and cooling and user and equipRef == \"" + p.getId() + "\"");
+                heatUL = CCUHsApi.getInstance().read("point and limit and max and heating and user and equipRef == \"" + p.getId() + "\"");
+                coolLL = CCUHsApi.getInstance().read("point and limit and min and cooling and user and equipRef == \"" + p.getId() + "\"");
+                heatLL = CCUHsApi.getInstance().read("point and limit and min and heating and user and equipRef == \"" + p.getId() + "\"");
+                buildingMin = CCUHsApi.getInstance().read("building and limit and min and equipRef == \"" + p.getId() + "\"");
+                buildingMax = CCUHsApi.getInstance().read("building and limit and max and equipRef == \"" + p.getId() + "\"");
+            }
+        }
+
+        masterControl.setData((float) getTuner(heatLL.get("id").toString()), (float) getTuner(heatUL.get("id").toString()), (float) getTuner(coolLL.get("id").toString()), (float) getTuner(coolUL.get("id").toString()), (float) getTuner(buildingMin.get("id").toString()), (float) getTuner(buildingMax.get("id").toString()));
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    public void setTuner(){
+        float coolTempUL = masterControl.getUpperCoolingTemp();
+        float coolTempLL = masterControl.getLowerCoolingTemp();
+        float heatTempUL = masterControl.getUpperHeatingTemp();
+        float heatTempLL = masterControl.getLowerHeatingTemp();
+        float buildingTempUL = masterControl.getUpperBuildingTemp();
+        float buildingTempLL = masterControl.getLowerBuildingTemp();
+
+        new AsyncTask<String, Void, Void>() {
+            @Override
+            protected Void doInBackground( final String ... params ) {
+                CCUHsApi.getInstance().writePoint(coolUL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", (double)coolTempUL, 0);
+                CCUHsApi.getInstance().writeHisValById(coolUL.get("id").toString(), (double)coolTempUL);
+
+                CCUHsApi.getInstance().writePoint(coolLL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", (double)coolTempLL, 0);
+                CCUHsApi.getInstance().writeHisValById(coolLL.get("id").toString(), (double)coolTempLL);
+
+                CCUHsApi.getInstance().writePoint(heatUL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", (double)heatTempUL, 0);
+                CCUHsApi.getInstance().writeHisValById(heatUL.get("id").toString(), (double)heatTempUL);
+
+                CCUHsApi.getInstance().writePoint(heatLL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", (double)heatTempLL, 0);
+                CCUHsApi.getInstance().writeHisValById(heatLL.get("id").toString(), (double)heatTempLL);
+
+                CCUHsApi.getInstance().writePoint(buildingMax.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", (double)buildingTempUL, 0);
+                CCUHsApi.getInstance().writeHisValById(buildingMax.get("id").toString(), (double)buildingTempUL);
+
+                CCUHsApi.getInstance().writePoint(buildingMin.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", (double)buildingTempLL, 0);
+                CCUHsApi.getInstance().writeHisValById(buildingMin.get("id").toString(), (double)buildingTempLL);
+
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute( final Void result ) {
+                // continue what you are doing...
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
     }
 
     public static double getTuner(String id) {

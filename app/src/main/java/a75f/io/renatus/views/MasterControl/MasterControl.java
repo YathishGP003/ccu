@@ -36,6 +36,9 @@ public class MasterControl extends View {
     public static final float SETTLED_BUILDING_LIMITS_H = 90;
     public static final float SETTLED_ENERGY_SAVINGS_LIMITS_H = 55;
 
+   /* public static final float SETTLED_ENERGY_SAVINGS_LIMITS_L = 55;
+    public static final float SETTLED_ENERGY_SAVINGS_LIMITS_R = 80;*/
+
     private Paint mLinePaint;
     private Paint mDelimeterPaint;
     private Paint mDebugTextPaint;
@@ -64,8 +67,8 @@ public class MasterControl extends View {
     private int mHitBoxPadding = 0;
 
     //
-    private float lowerHeatingTemp = 65;
-    private float upperHeatingTemp = 70;
+    private float lowerHeatingTemp = 70;
+    private float upperHeatingTemp = 65;
     private float lowerCoolingTemp = 70;
     private float upperCoolingTemp = 75;
     private float lowerBuildingTemp = 55;
@@ -185,11 +188,11 @@ public class MasterControl extends View {
 
                     Log.i("Movement", "Temps: " + getTempForPX((int) event.getX()));
                     if (mSelected == MasterControlState.LOWER_COOLING_LIMIT) {
-                        if (getTempForPX((int) event.getX()) >= temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()] && getTempForPX((int) event.getX()) <= temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()]) {
+                        if (getTempForPX((int) event.getX()) >= temps[MasterControlState.LOWER_HEATING_LIMIT.ordinal()] && getTempForPX((int) event.getX()) <= temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()]) {
                             getParent().requestDisallowInterceptTouchEvent(true);
                             temps[mSelected.ordinal()] = getTempForPX((int) event.getX());
                         } else {
-                            mSelected =  MasterControlState.UPPER_COOLING_LIMIT;
+                            mSelected = MasterControlState.UPPER_COOLING_LIMIT;
                         }
                     } else if (mSelected == MasterControlState.UPPER_COOLING_LIMIT) {
                         if (getTempForPX((int) event.getX()) >= temps[MasterControlState.LOWER_COOLING_LIMIT.ordinal()] && getTempForPX((int) event.getX()) <= upperCoolingTemp) {
@@ -197,19 +200,19 @@ public class MasterControl extends View {
                             temps[mSelected.ordinal()] = getTempForPX((int) event.getX());
                         }
                     } else if (mSelected == MasterControlState.LOWER_HEATING_LIMIT) {
-                        if (getTempForPX((int) event.getX()) <= temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()] && getTempForPX((int) event.getX()) >= lowerHeatingTemp) {
+                        if (getTempForPX((int) event.getX()) >= temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()] && getTempForPX((int) event.getX()) <= temps[MasterControlState.LOWER_COOLING_LIMIT.ordinal()]) {
                             getParent().requestDisallowInterceptTouchEvent(true);
                             temps[mSelected.ordinal()] = getTempForPX((int) event.getX());
-                        } else  {
-                            mSelected =  MasterControlState.UPPER_HEATING_LIMIT;
+                        } else {
+                            mSelected = MasterControlState.UPPER_HEATING_LIMIT;
                         }
                     } else if (mSelected == MasterControlState.UPPER_HEATING_LIMIT) {
-                        if (getTempForPX((int) event.getX()) <= temps[MasterControlState.LOWER_COOLING_LIMIT.ordinal()] && getTempForPX((int) event.getX()) >= temps[MasterControlState.LOWER_HEATING_LIMIT.ordinal()]) {
+                        if (getTempForPX((int) event.getX()) <= temps[MasterControlState.LOWER_HEATING_LIMIT.ordinal()] && getTempForPX((int) event.getX()) >= upperHeatingTemp) {
                             getParent().requestDisallowInterceptTouchEvent(true);
                             temps[mSelected.ordinal()] = getTempForPX((int) event.getX());
                         }
                     } else if (mSelected == MasterControlState.LOWER_BUILDING_LIMIT) {
-                        if (getTempForPX((int) event.getX()) <= ((lowerHeatingTemp - mSetBack) - mZoneDifferential)) {
+                        if (getTempForPX((int) event.getX()) <= ((upperHeatingTemp - mSetBack) - mZoneDifferential)) {
                             getParent().requestDisallowInterceptTouchEvent(true);
                             temps[mSelected.ordinal()] = getTempForPX((int) event.getX());
                         }
@@ -225,6 +228,7 @@ public class MasterControl extends View {
                 break;
             case MotionEvent.ACTION_UP:
                 mSelected = MasterControlState.NONE;
+                invalidate();
                 break;
         }
 
@@ -246,7 +250,16 @@ public class MasterControl extends View {
         temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()] = upperCoolingTemp;
         temps[MasterControlState.LOWER_BUILDING_LIMIT.ordinal()] = lowerBuildingTemp;
         temps[MasterControlState.UPPER_BUILDING_LIMIT.ordinal()] = upperBuildingTemp;
+
+        this.lowerHeatingTemp = lowerHeatingTemp;
+        this.upperHeatingTemp = upperHeatingTemp;
+        this.lowerCoolingTemp = lowerCoolingTemp;
+        this.upperCoolingTemp = upperCoolingTemp;
+        this.lowerBuildingTemp = lowerBuildingTemp;
+        this.upperBuildingTemp = upperBuildingTemp;
+
         mDataSet = true;
+        invalidate();
     }
 
     private void init() {
@@ -345,7 +358,7 @@ public class MasterControl extends View {
 
 
         mDebugBoxesPaint = new Paint();
-        mDebugBoxesPaint.setColor(Color.MAGENTA);
+        mDebugBoxesPaint.setColor(Color.TRANSPARENT);
         mDebugBoxesPaint.setAntiAlias(true);
         mDebugBoxesPaint.setStyle(Paint.Style.STROKE);
         mDebugBoxesPaint.setStrokeWidth(2.0f);
@@ -442,16 +455,16 @@ public class MasterControl extends View {
                         Color.parseColor("#5E231f20"));
             }
 
-            if (temps[MasterControlState.LOWER_HEATING_LIMIT.ordinal()] == lowerHeatingTemp) {
-                drawArrowText(canvas, "5\u00B0 SETBACK", mEnergySavingsSpacing - 18, (temps[MasterControlState.LOWER_HEATING_LIMIT.ordinal()] - mSetBack),
-                        lowerHeatingTemp,
+            if (temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()] == upperHeatingTemp) {
+                drawArrowText(canvas, "5\u00B0 SETBACK", mEnergySavingsSpacing - 18, (temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()] - mSetBack),
+                        upperHeatingTemp,
                         Color.parseColor("#5E000000"),
                         Color.RED);
             }
 
-            if (temps[MasterControlState.LOWER_HEATING_LIMIT.ordinal()] == lowerHeatingTemp && temps[MasterControlState.LOWER_BUILDING_LIMIT.ordinal()] == (getEnergySavingLowerLimit() - mZoneDifferential)) {
+            if (temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()] == upperHeatingTemp && temps[MasterControlState.LOWER_BUILDING_LIMIT.ordinal()] == (getEnergySavingLowerLimit() - mZoneDifferential)) {
                 drawArrowDiffText(canvas, "BUILDING\nZONE\nDIFFERENTIAL", mEnergySavingsSpacing - 18, temps[MasterControlState.LOWER_BUILDING_LIMIT.ordinal()],
-                        lowerHeatingTemp - mSetBack,
+                        upperHeatingTemp - mSetBack,
                         Color.parseColor("#5E000000"),
                         Color.RED);
             }
@@ -464,7 +477,7 @@ public class MasterControl extends View {
             }
 
             drawArrowText(canvas, "ENERGY SAVINGS RANGE", mEnergySavingsSpacing + 30,
-                    lowerHeatingTemp - mSetBack, upperCoolingTemp + mSetBack,
+                    upperHeatingTemp - mSetBack, upperCoolingTemp + mSetBack,
                     Color.parseColor("#5E000000"),
                     Color.parseColor("#5E231f20"));
 
@@ -476,20 +489,38 @@ public class MasterControl extends View {
                     temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()], mCoolingBarDisplacement,
                     Color.parseColor("#8392c9"));
             drawBuildingLimitCircles(canvas);
+            drawBuildingLimitCircle(canvas, MasterControlState.LOWER_COOLING_LIMIT);
+            drawBuildingLimitCircle(canvas, MasterControlState.UPPER_COOLING_LIMIT);
+            drawBuildingLimitCircle(canvas, MasterControlState.LOWER_HEATING_LIMIT);
+            drawBuildingLimitCircle(canvas, MasterControlState.UPPER_HEATING_LIMIT);
 
-            drawSliderIcon(canvas,
-                    Direction.UP, mCoolingBarDisplacement - mPaddingBetweenCoolingBarAndSliderIcon, MasterControlState.LOWER_COOLING_LIMIT);
+            if (mSelected == MasterControlState.LOWER_COOLING_LIMIT) {
+                drawSliderIcon(canvas,
+                        Direction.UP, mCoolingBarDisplacement - mPaddingBetweenCoolingBarAndSliderIcon, MasterControlState.LOWER_COOLING_LIMIT);
+            }
 
-            drawSliderIcon(canvas,
-                    Direction.DOWN, mHeatingBarDisplacement - mPaddingBetweenCoolingBarAndSliderIcon, MasterControlState.LOWER_HEATING_LIMIT);
+            if (mSelected == MasterControlState.LOWER_HEATING_LIMIT) {
+                drawSliderIcon(canvas,
+                        Direction.DOWN, mHeatingBarDisplacement - mPaddingBetweenCoolingBarAndSliderIcon, MasterControlState.LOWER_HEATING_LIMIT);
+            }
 
-            drawSliderIcon(canvas,
-                    Direction.UP, mCoolingBarDisplacement - mPaddingBetweenCoolingBarAndSliderIcon, MasterControlState.UPPER_COOLING_LIMIT);
+            if (mSelected == MasterControlState.UPPER_COOLING_LIMIT) {
+                drawSliderIcon(canvas,
+                        Direction.UP, mCoolingBarDisplacement - mPaddingBetweenCoolingBarAndSliderIcon, MasterControlState.UPPER_COOLING_LIMIT);
+            }
 
-            drawSliderIcon(canvas,
-                    Direction.DOWN, mHeatingBarDisplacement - mPaddingBetweenCoolingBarAndSliderIcon, MasterControlState.UPPER_HEATING_LIMIT);
+            if (mSelected == MasterControlState.UPPER_HEATING_LIMIT) {
+                drawSliderIcon(canvas,
+                        Direction.DOWN, mHeatingBarDisplacement - mPaddingBetweenCoolingBarAndSliderIcon, MasterControlState.UPPER_HEATING_LIMIT);
+            }
 
-            drawSliderIcon(canvas, Direction.UP, -mPaddingBetweenCoolingBarAndSliderIcon, MasterControlState.UPPER_BUILDING_LIMIT);
+            if (mSelected == MasterControlState.UPPER_BUILDING_LIMIT) {
+                drawSliderIcon(canvas, Direction.UP, -mPaddingBetweenCoolingBarAndSliderIcon, MasterControlState.UPPER_BUILDING_LIMIT);
+            }
+
+            if (mSelected == MasterControlState.LOWER_BUILDING_LIMIT) {
+                drawSliderIcon(canvas, Direction.UP, -mPaddingBetweenCoolingBarAndSliderIcon, MasterControlState.LOWER_BUILDING_LIMIT);
+            }
         }
     }
 
@@ -543,11 +574,21 @@ public class MasterControl extends View {
     private void drawBuildingLimitCircle(Canvas canvas, MasterControlState controlState) {
         float temp = temps[controlState.ordinal()];
         mTempPaint.setColor(Color.parseColor("#231f20"));
-        int xLoc = getPXForTemp(temp);
-        int yLoc = getTempLineYLocation();
 
-        canvas.drawCircle(xLoc, yLoc,
-                mBuildingLimitCircleRadius, mTempPaint);
+        int topPadding = 0;
+        if (controlState == MasterControlState.LOWER_COOLING_LIMIT || controlState == MasterControlState.UPPER_COOLING_LIMIT) {
+            topPadding = -20;
+        } else if (controlState == MasterControlState.LOWER_HEATING_LIMIT || controlState == MasterControlState.UPPER_HEATING_LIMIT) {
+            topPadding = 20;
+        }
+
+        int xLoc = getPXForTemp(temp);
+        int yLoc = getTempLineYLocation() + topPadding;
+
+        if (controlState == MasterControlState.LOWER_BUILDING_LIMIT || controlState == MasterControlState.UPPER_BUILDING_LIMIT) {
+            canvas.drawCircle(xLoc, yLoc,
+                    mBuildingLimitCircleRadius, mTempPaint);
+        }
 
         matrix.reset();
         hitBoxes[controlState.ordinal()].set(0, 0, bitmaps[controlState.ordinal()].getWidth() - 10,
@@ -562,15 +603,38 @@ public class MasterControl extends View {
 
         matrix.mapRect(hitBoxes[controlState.ordinal()]);
         canvas.drawRect(hitBoxes[controlState.ordinal()], mDebugBoxesPaint);
-
     }
 
     private float getEnergySavingLowerLimit() {
-        return temps[MasterControlState.LOWER_HEATING_LIMIT.ordinal()] - mSetBack;
+        return temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()] - mSetBack;
     }
 
     private float getEnergySavingUpperLimit() {
         return temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()] + mSetBack;
+    }
+
+    public float getLowerHeatingTemp() {
+        return temps[MasterControlState.LOWER_HEATING_LIMIT.ordinal()];
+    }
+
+    public float getUpperHeatingTemp() {
+        return temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()];
+    }
+
+    public float getLowerCoolingTemp() {
+        return temps[MasterControlState.LOWER_COOLING_LIMIT.ordinal()];
+    }
+
+    public float getUpperCoolingTemp() {
+        return temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()];
+    }
+
+    public float getLowerBuildingTemp() {
+        return temps[MasterControlState.LOWER_BUILDING_LIMIT.ordinal()];
+    }
+
+    public float getUpperBuildingTemp() {
+        return temps[MasterControlState.UPPER_BUILDING_LIMIT.ordinal()];
     }
 
     //yValue distance from center line
@@ -640,7 +704,7 @@ public class MasterControl extends View {
 
             mDebugTextPaint.setTextSize(mArrowTextSize);
             mDebugTextPaint.getTextBounds(temp, 0, temp.length(), bounds);
-            canvas.drawText(temp, getPXForTemp(i), getTempLineYLocation() + mEnergySavingsSpacing, mDebugTextPaint);
+            canvas.drawText(temp, getPXForTemp(i) - mSetBack, getTempLineYLocation() + mEnergySavingsSpacing, mDebugTextPaint);
 
         }
     }

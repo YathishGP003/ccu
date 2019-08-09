@@ -1,5 +1,6 @@
 package a75f.io.renatus.registartion;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.AsyncTask;
@@ -208,6 +209,7 @@ public class InstallerOptions extends Fragment {
     //custom dialog to control building temperature
     private void openMasterControllerDialog() {
         if (isAdded()) {
+
             final Dialog dialog = new Dialog(getActivity());
             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
             dialog.setCancelable(false);
@@ -216,6 +218,12 @@ public class InstallerOptions extends Fragment {
 
             dialog.findViewById(R.id.btnCancel).setOnClickListener(view -> dialog.dismiss());
             dialog.findViewById(R.id.btnClose).setOnClickListener(view -> dialog.dismiss());
+
+            dialog.findViewById(R.id.btnSet).setOnClickListener(view -> {
+                masterControlView.setTuner();
+
+                dialog.dismiss();
+            });
 
             dialog.show();
         }

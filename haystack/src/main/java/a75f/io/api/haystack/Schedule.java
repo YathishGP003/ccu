@@ -206,6 +206,9 @@ public class Schedule extends Entity
         return overLaps;
     }
     
+    public ArrayList<Interval> getMergedIntervals() {
+        return getMergedIntervals(getDaysSorted());
+    }
     public ArrayList<Interval> getMergedIntervals(ArrayList<Days> daysSorted) {
     
         ArrayList<Interval> intervals   = getScheduledIntervalsForDays(daysSorted);
@@ -414,12 +417,12 @@ public class Schedule extends Entity
         StringBuilder b = new StringBuilder();
         b.append(mDis).append(" ");
         if (isVacation()) {
-            b.append(mStartDate.toString()+" - "+mEndDate.toString());
+            b.append(mStartDate.toString()+"-"+mEndDate.toString());
         }else
         {
             for (Days d : mDays)
             {
-                b.append(d.toString()+" ");
+                b.append(d.toString());
             }
             for (String m :mMarkers ) {
                 b.append(m+" ");
@@ -428,7 +431,6 @@ public class Schedule extends Entity
         
         return b.toString();
     }
-    
     
     //Get existing intervals for selected days
     public ArrayList<Interval> getScheduledIntervalsForDays(ArrayList<Days> daysSorted) {
@@ -446,13 +448,38 @@ public class Schedule extends Entity
                                                    .withHourOfDay(0)
                                                    .withMinuteOfHour(0)
                                                    .withSecondOfMinute(0).withMillisOfSecond(0).withDayOfWeek(i.getEnd().getDayOfWeek());
-                    daysIntervals.add(i.toInterval().withStartMillis(startTime.getMillis()));
+                    if (d.mDay == DAYS.MONDAY.ordinal()) {
+                        DateTime endTime = new DateTime(now).withHourOfDay(i.getEnd().getHourOfDay())
+                                                            .withMinuteOfHour(i.getEnd().getMinuteOfHour())
+                                                            .withSecondOfMinute(i.getEnd().getSecondOfMinute())
+                                                            .withMillisOfSecond(i.getEnd().getMillisOfSecond()).withDayOfWeek(d.mDay+1);
+                        daysIntervals.add(i.toInterval().withStartMillis(startTime.getMillis()).withEndMillis(endTime.getMillis()));
+                    }else
+                    {
+                        daysIntervals.add(i.toInterval().withStartMillis(startTime.getMillis()));
+                    }
+                }else if (d.mDay == DAYS.SUNDAY.ordinal() &&((d.getSthh()*60 + d.getStmm()) > (d.getEthh()*60+d.getEtmm()))
+                                                    && i.getStart().getDayOfWeek() == 1) {
+                    if (i.getEnd().getMinuteOfDay() < (d.getEthh()*60+d.getEtmm()))
+                    {
+                        daysIntervals.add(i);
+                    }else if (i.getStart().getMinuteOfDay() < (d.getEthh()*60+d.getEtmm()) ){
+                        DateTime endTime = i.getEnd().withHourOfDay(d.getEthh()).withMinuteOfHour(d.getEtmm());
+                        daysIntervals.add(i.toInterval().withEndMillis(endTime.getMillis()));
+                    }
                 }
                 
                 
             }
         }
+        for(Interval i : daysIntervals) {
+            Log.d("CCU_UI", "Scheduled interval for days"+i);
+        }
         return daysIntervals;
+    }
+    
+    public ArrayList<Interval> getScheduledIntervals() {
+        return getScheduledIntervals(getDaysSorted());
     }
     
     public ArrayList<Interval> getScheduledIntervals(ArrayList<Days> daysSorted)
@@ -498,7 +525,7 @@ public class Schedule extends Entity
         return intervals;
     }
     
-    private Interval getScheduledInterval(Days day)
+    public Interval getScheduledInterval(Days day)
     {
         
         long now = MockTime.getInstance().getMockTime();
@@ -811,7 +838,24 @@ public class Schedule extends Entity
             return this;
         }
     }
-
+    
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        
+        Schedule s = (Schedule) o;
+        if (this.mDays.size() !=  s.mDays.size()) return false;
+        
+        for(Days day : this.mDays) {
+            if (s.getDay(day).equals(day)) return false;
+        }
+        
+        if (!this.getMarkers().equals(s.getMarkers())) return false;
+        
+        return true;
+    }
 
     public static class Days
     {
@@ -999,9 +1043,9 @@ public class Schedule extends Entity
         @Override
         public String toString() {
             StringBuilder str = new StringBuilder();
-            str.append(" { mDay "+mDay);
+            str.append(" {mDay: "+mDay);
             str.append(" Time "+mSthh+":"+mStmm+" - "+mEthh+":"+mEtmm);
-            str.append(" heatingVal "+mHeatingVal+" coolingVal "+mCoolingVal+" } ");
+            str.append(" heatingVal "+mHeatingVal+" coolingVal "+mCoolingVal+"}");
             return str.toString();
         }
     }

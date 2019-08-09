@@ -3,6 +3,7 @@ package a75.io.bo.haystack;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -102,5 +103,23 @@ public class MeshUpdateTest
     @Test
     public void testThermistor() {
         System.out.println(ThermistorUtil.getThermistorValueToTemp(14000));
+    }
+    
+    @Test
+    public void testNum() {
+        double val = 4095 * 4095 ;
+        System.out.println(val);
+        BigDecimal value = new BigDecimal(val);
+        System.out.println(value.toString());
+    
+        int emVal = 0;
+        int emr = 4095 ;
+        emVal = emVal > 0 ?  (emVal | ((emr << 12) &0xFFF)) : emr;
+    
+        System.out.println(emVal);
+        emr = 4095;
+        emVal = emVal > 0 ? (((emVal << 12)&0xFFF) | (emr &0xFFF)) : emr;
+    
+        System.out.println(emVal);
     }
 }

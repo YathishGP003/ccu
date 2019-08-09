@@ -1,6 +1,9 @@
 package a75f.io.renatus;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
@@ -18,6 +21,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.joda.time.Interval;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,11 +31,13 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Zone;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.StandaloneScheduler;
+import a75f.io.renatus.schedules.ScheduleUtil;
 import a75f.io.renatus.schedules.SchedulerFragment;
 
 import static a75f.io.renatus.ZoneFragmentTemp.getPointVal;
@@ -48,14 +55,17 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
     
     Schedule mSchedule = null;
     int mScheduleType = -1;
+    
+    Activity mActivity = null;
 
     public EquipTempExpandableListAdapter(Fragment fragment, List<String> expandableListTitle,
-                                          HashMap<String, List<String>> expandableListDetail, HashMap idmap)
+                                          HashMap<String, List<String>> expandableListDetail, HashMap idmap, Activity activity)
     {
         this.mFragment = fragment;
         this.expandableListTitle = expandableListTitle;
         this.expandableListDetail = expandableListDetail;
         this.idMap = idmap;
+        this.mActivity = activity;
     }
 
     @Override
@@ -187,7 +197,10 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                                 scheduleById = CCUHsApi.getInstance().getScheduleById(zone.getScheduleRef());
                                 Log.d(L.TAG_CCU_UI," scheduleType changed to ZoneSchedule : "+scheduleTypeId);
                                 scheduleById.setDisabled(false);
-                                CCUHsApi.getInstance().updateZoneSchedule(scheduleById, zone.getId());
+                                if (checkContainment(scheduleById))
+                                {
+                                    CCUHsApi.getInstance().updateZoneSchedule(scheduleById, zone.getId());
+                                }
                             } else if (!zone.hasSchedule())
                             {
                                 Log.d(L.TAG_CCU_UI," Zone does not have Schedule : Shouldn't happen");
@@ -303,6 +316,96 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
         }
 
         return convertView;
+    }
+    
+    private void alignZoneSchedule(Schedule zoneSchedule) {
+        Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
+        zoneSchedule.getDays().clear();
+        for (Schedule.Days d : systemSchedule.getDays()) {
+            zoneSchedule.getDays().add(d);
+        }
+    }
+    
+    private boolean checkContainment(Schedule zoneSchedule) {
+        Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
+        ArrayList<Interval> intervalSpills = new ArrayList<>();
+        ArrayList<Interval> systemIntervals = systemSchedule.getMergedIntervals();
+    
+        for (Interval v : systemIntervals)
+        {
+            CcuLog.d("CCU_UI", "Merged System interval " + v);
+        }
+    
+        ArrayList<Interval> zoneIntervals = zoneSchedule.getScheduledIntervals();
+    
+        for(Interval z : zoneIntervals) {
+            boolean add = true;
+            for (Interval s: systemIntervals) {
+                if (s.contains(z)) {
+                    add = false;
+                    break;
+                } else if (s.overlaps(z)) {
+                    if (z.getStartMillis() < s.getStartMillis()) {
+                        intervalSpills.add(new Interval(z.getStartMillis(), s.getStartMillis()));
+                    } else if (z.getEndMillis() > s.getEndMillis()) {
+                        intervalSpills.add(new Interval(s.getEndMillis(), z.getEndMillis()));
+                    }
+                    add = false;
+                }
+            }
+            if (add)
+            {
+                intervalSpills.add(z);
+                CcuLog.d("CCU_UI", " Zone Interval not contained "+z);
+            }
+        
+        }
+        
+        
+        if (intervalSpills.size() > 0) {
+            StringBuilder spillZones = new StringBuilder();
+            for (Interval i : intervalSpills)
+            {
+                spillZones.append(ScheduleUtil.getDayString(i.getStart().getDayOfWeek()) + " (" + i.getStart().hourOfDay().get() + ":" + (i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get()) + " - " + i.getEnd().hourOfDay().get() + ":" + (i.getEnd().minuteOfHour().get() == 0 ? "00" : i.getEnd().minuteOfHour().get()) + ") \n");
+            }
+    
+            AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
+            builder.setMessage("Zone Schedule is outside building schedule currently set. " +
+                               "Proceed with trimming the zone schedules to be within the building schedule \n"+spillZones)
+                   .setCancelable(false)
+                   .setTitle("Schedule Errors")
+                   .setIcon(android.R.drawable.ic_dialog_alert)
+                   .setNegativeButton("Edit", new DialogInterface.OnClickListener() {
+                       public void onClick(DialogInterface dialog, int id) {
+                           SchedulerFragment schedulerFragment    = SchedulerFragment.newInstance(zoneSchedule.getId());
+                           FragmentManager   childFragmentManager = mFragment.getFragmentManager();
+                           childFragmentManager.beginTransaction()
+                                               .add(R.id.zone_fragment_temp, schedulerFragment)
+                                               .addToBackStack("schedule").commit();
+    
+                           schedulerFragment.setOnExitListener(() -> {
+                               mSchedule = CCUHsApi.getInstance().getScheduleById(zoneSchedule.getId());
+                               if (checkContainment(mSchedule))
+                               {
+                                   ScheduleProcessJob.updateSchedules();
+                               }
+                           });
+                       }
+                   })
+                   .setPositiveButton("Force-Trim", new DialogInterface.OnClickListener() {
+                       public void onClick(DialogInterface dialog, int id) {
+                           HashMap<String, ArrayList<Interval>> spillsMap = new HashMap<>();
+                           spillsMap.put(zoneSchedule.getRoomRef(), intervalSpills);
+                           ScheduleUtil.trimZoneSchedules(spillsMap);
+                       }
+                   });
+    
+            AlertDialog alert = builder.create();
+            alert.show();
+            return false;
+        } else {
+            return true;
+        }
     }
 
     @Override

@@ -1,5 +1,6 @@
 package a75f.io.renatus;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -11,7 +12,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -42,6 +42,8 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.joda.time.Interval;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -67,6 +69,7 @@ import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.pubnub.UpdatePointHandler;
 import a75f.io.logic.pubnub.UpdateScheduleHandler;
+import a75f.io.renatus.schedules.ScheduleUtil;
 import a75f.io.renatus.schedules.SchedulerFragment;
 import a75f.io.renatus.util.GridItem;
 import a75f.io.renatus.util.SeekArc;
@@ -524,9 +527,8 @@ public class ZoneFragmentNew extends Fragment implements UpdatePointHandler.Zone
                             scheduleById = CCUHsApi.getInstance().getScheduleById(zone.getScheduleRef());
                             Log.d(L.TAG_CCU_UI," scheduleType changed to ZoneSchedule : "+scheduleTypeId);
                             scheduleById.setDisabled(false);
+                            checkContainment(scheduleById);
                             CCUHsApi.getInstance().updateZoneSchedule(scheduleById, zone.getId());
-
-
                         } else if (!zone.hasSchedule())
                         {
                             Log.d(L.TAG_CCU_UI," Zone does not have Schedule : Shouldn't happen");
@@ -904,6 +906,7 @@ public class ZoneFragmentNew extends Fragment implements UpdatePointHandler.Zone
                             scheduleById = CCUHsApi.getInstance().getScheduleById(zone.getScheduleRef());
                             Log.d(L.TAG_CCU_UI," scheduleType changed to ZoneSchedule : "+scheduleTypeId);
                             scheduleById.setDisabled(false);
+                            checkContainment(scheduleById);
                             CCUHsApi.getInstance().updateZoneSchedule(scheduleById, zone.getId());
                         } else if (!zone.hasSchedule())
                         {
@@ -1994,4 +1997,89 @@ public class ZoneFragmentNew extends Fragment implements UpdatePointHandler.Zone
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
     }
+    
+    
+    private boolean checkContainment(Schedule zoneSchedule) {
+        Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
+        ArrayList<Interval> intervalSpills = new ArrayList<>();
+        ArrayList<Interval> systemIntervals = systemSchedule.getMergedIntervals();
+        
+        for (Interval v : systemIntervals)
+        {
+            CcuLog.d("CCU_UI", "Merged System interval " + v);
+        }
+        
+        ArrayList<Interval> zoneIntervals = zoneSchedule.getScheduledIntervals();
+        
+        for(Interval z : zoneIntervals) {
+            boolean add = true;
+            for (Interval s: systemIntervals) {
+                if (s.contains(z)) {
+                    add = false;
+                    break;
+                } else if (s.overlaps(z)) {
+                    if (z.getStartMillis() < s.getStartMillis()) {
+                        intervalSpills.add(new Interval(z.getStartMillis(), s.getStartMillis()));
+                    } else if (z.getEndMillis() > s.getEndMillis()) {
+                        intervalSpills.add(new Interval(s.getEndMillis(), z.getEndMillis()));
+                    }
+                    add = false;
+                }
+            }
+            if (add)
+            {
+                intervalSpills.add(z);
+                CcuLog.d("CCU_UI", " Zone Interval not contained "+z);
+            }
+            
+        }
+        
+        
+        if (intervalSpills.size() > 0) {
+            StringBuilder spillZones = new StringBuilder();
+            for (Interval i : intervalSpills)
+            {
+                spillZones.append(ScheduleUtil.getDayString(i.getStart().getDayOfWeek()) + " (" + i.getStart().hourOfDay().get() + ":" + (i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get()) + " - " + i.getEnd().hourOfDay().get() + ":" + (i.getEnd().minuteOfHour().get() == 0 ? "00" : i.getEnd().minuteOfHour().get()) + ") \n");
+            }
+            
+            android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getActivity());
+            builder.setMessage("Zone Schedule is outside building schedule currently set. " +
+                               "Proceed with trimming the zone schedules to be within the building schedule \n"+spillZones)
+                   .setCancelable(false)
+                   .setTitle("Schedule Errors")
+                   .setIcon(android.R.drawable.ic_dialog_alert)
+                   .setNegativeButton("Edit", new DialogInterface.OnClickListener() {
+                       public void onClick(DialogInterface dialog, int id) {
+                           SchedulerFragment schedulerFragment    = SchedulerFragment.newInstance(zoneSchedule.getId());
+                           FragmentManager   childFragmentManager = getFragmentManager();
+                           childFragmentManager.beginTransaction()
+                                               .add(R.id.zone_fragment_temp, schedulerFragment)
+                                               .addToBackStack("schedule").commit();
+                    
+                           schedulerFragment.setOnExitListener(() -> {
+                               mSchedule = CCUHsApi.getInstance().getScheduleById(zoneSchedule.getId());
+                               if (checkContainment(mSchedule))
+                               {
+                                   ScheduleProcessJob.updateSchedules();
+                               }
+                           });
+                       }
+                   })
+                   .setPositiveButton("Force-Trim", new DialogInterface.OnClickListener() {
+                       public void onClick(DialogInterface dialog, int id) {
+                           HashMap<String, ArrayList<Interval>> spillsMap = new HashMap<>();
+                           spillsMap.put(zoneSchedule.getRoomRef(), intervalSpills);
+                           ScheduleUtil.trimZoneSchedules(spillsMap);
+                           CCUHsApi.getInstance().scheduleSync();
+                       }
+                   });
+            
+            AlertDialog alert = builder.create();
+            alert.show();
+            return false;
+        } else {
+            return true;
+        }
+    }
+    
 }

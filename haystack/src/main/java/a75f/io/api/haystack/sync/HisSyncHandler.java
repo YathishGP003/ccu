@@ -42,17 +42,17 @@ public class HisSyncHandler
     
     public synchronized void doSync() {
     
-        CcuLog.d("CCU_HS", "doHisSync ->");
+        CcuLog.d(TAG, "doHisSync ->");
         //sendHisToHaystack();
         sendHisToInflux();
         //sendHisToInfluxBatched();
         
         if (entitySyncRequired) {
-            CcuLog.d("CCU_HS","doHisSync : entitySyncRequired");
+            CcuLog.d(TAG,"doHisSync : entitySyncRequired");
             CCUHsApi.getInstance().syncEntityTree();
             entitySyncRequired = false;
         }
-        CcuLog.d("CCU_HS","<- doHisSync");
+        CcuLog.d(TAG,"<- doHisSync");
         
     }
     

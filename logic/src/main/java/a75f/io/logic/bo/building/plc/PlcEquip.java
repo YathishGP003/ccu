@@ -83,7 +83,7 @@ public class PlcEquip
                                   .setGroup(String.valueOf(nodeAddr)).build();
     
         equipRef = hayStack.addEquip(b);
-        BuildingTuners.getInstance().addPlcEquipTuners(siteDis + "-PID-" + nodeAddr, equipRef);
+        BuildingTuners.getInstance().addPlcEquipTuners(siteDis + "-PID-" + nodeAddr, equipRef, roomRef, floorRef);
     
         Point analog1InputSensor = new Point.Builder()
                                    .setDisplayName(equipDis+"-analog1InputSensor")

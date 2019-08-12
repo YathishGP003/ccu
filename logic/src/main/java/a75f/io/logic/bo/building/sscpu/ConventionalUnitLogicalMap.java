@@ -70,7 +70,7 @@ public class ConventionalUnitLogicalMap {
             b.addMarker("cpu");
             profile = "cpu";
         String equipRef = CCUHsApi.getInstance().addEquip(b.build());
-        BuildingTuners.getInstance().addEquipStandaloneTuners(siteDis+"-CPU-"+nodeAddr, equipRef);
+        BuildingTuners.getInstance().addEquipStandaloneTuners(siteDis+"-CPU-"+nodeAddr, equipRef, room, floor);
 
         createConventionalConfigPoints(config, equipRef,floor,room);
 

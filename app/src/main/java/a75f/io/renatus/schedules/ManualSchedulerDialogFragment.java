@@ -31,6 +31,7 @@ import a75f.io.renatus.util.TimeUtils;
 public class ManualSchedulerDialogFragment extends DialogFragment {
 
     private Schedule.Days mDay;
+    private ArrayList<Schedule.Days> mDays;
     public static int NO_REPLACE = -1;
     private int mPosition;
 
@@ -52,7 +53,13 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
         this.mDay = day;
         this.mListener = mListener;
     }
-
+    
+    public ManualSchedulerDialogFragment(ManualScheduleDialogListener mListener, int position, ArrayList<Schedule.Days> days) {
+        this.mPosition = position;
+        //this.mDay = days.get(0);
+        this.mListener = mListener;
+        this.mDays = days;
+    }
 
     EditText mCoolingTempET;
     EditText mHeatingTempET;
@@ -305,6 +312,14 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
             checkDays(mDay);
             checkTime(mDay);
             checkTemp(mDay);
+        }
+        
+        if (mDays != null) {
+            for(Schedule.Days d : mDays) {
+                checkDays(d);
+            }
+            checkTemp(mDays.get(0));
+            checkTime(mDays.get(0));
         }
 
         return builder;

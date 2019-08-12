@@ -13,7 +13,6 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
-import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
@@ -74,8 +73,8 @@ public class TwoPipeFanCoilUnitEquip {
 
         String equipRef = CCUHsApi.getInstance().addEquip(b.build());
 
-        BuildingTuners.getInstance().addEquipStandaloneTuners(siteDis+"-2PFCU-"+nodeAddr, equipRef);
-        BuildingTuners.getInstance().addTwoPipeFanEquipStandaloneTuners(siteDis+"-2PFCU-"+nodeAddr, equipRef);
+        BuildingTuners.getInstance().addEquipStandaloneTuners(siteDis+"-2PFCU-"+nodeAddr, equipRef, room, floor);
+        BuildingTuners.getInstance().addTwoPipeFanEquipStandaloneTuners(siteDis+"-2PFCU-"+nodeAddr, equipRef, room, floor);
 
         createTwoPipeConfigPoints(config, equipRef,floor,room);
 

@@ -65,7 +65,7 @@ public class ZoneFragmentTemp extends Fragment
         expandableListDetail = new HashMap<>();
         updateData();
         expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
-        expandableListAdapter = new EquipTempExpandableListAdapter(ZoneFragmentTemp.this, expandableListTitle, expandableListDetail, tunerMap);
+        expandableListAdapter = new EquipTempExpandableListAdapter(ZoneFragmentTemp.this, expandableListTitle, expandableListDetail, tunerMap, getActivity());
         expandableListView.setAdapter(expandableListAdapter);
         expandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override

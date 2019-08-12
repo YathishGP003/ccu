@@ -1,3 +1,7 @@
+    variables:
+      GIT_STRATEGY: clone
+    
+    
     before_script:
       - whoami
       - git submodule add --force https://ryan75f:Ayngayn6!@gitlab.com/75f/apps/lightsaber/ci-setup.git

@@ -28,6 +28,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemController;
+import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.L.TAG_CCU_JOB;
@@ -73,7 +74,7 @@ public class ScheduleProcessJob extends BaseJob {
     
     private static Schedule activeSystemVacation = null;
     private static Occupied activeZoneVacation = null;
-
+    private static ZoneDataInterface scheduleDataInterface = null;
     public static Occupied getOccupiedModeCache(String id) {
         if(!occupiedHashMap.containsKey(id))
         {
@@ -165,7 +166,8 @@ public class ScheduleProcessJob extends BaseJob {
                 }
             
                 //If building vacation is not active, check zone vacations.
-                if (activeSystemVacation == null ) {
+                if (activeSystemVacation == null )
+                {
                     ArrayList<Schedule> activeZoneVacationSchedules = CCUHsApi.getInstance().getZoneSchedule(equip.getRoomRef(),true);
                     Schedule activeZoneVacationSchedule = getActiveVacation(activeZoneVacationSchedules);
                     Log.d(L.TAG_CCU_JOB, "Equip "+equip.getDisplayName()+" activeZoneVacationSchedules "+activeZoneVacationSchedules.size()+" activeSystemVacation "+activeSystemVacation);
@@ -567,6 +569,10 @@ public class ScheduleProcessJob extends BaseJob {
             {
                 CCUHsApi.getInstance().writeDefaultValById(id, getZoneStatusString(equip.getRoomRef(),equip.getId()));
                 CCUHsApi.getInstance().writeHisValById(id, (double) getZoneStatus(equip.getRoomRef()).ordinal());
+                if(scheduleDataInterface !=null){
+                    String zoneId = Schedule.getZoneIdByEquipId(equip.getId());
+                    scheduleDataInterface.refreshScreenbySchedule(equip.getGroup(),equip.getId(),zoneId);
+                }
             } else {
                 Log.d(L.TAG_CCU_JOB, "ScheduleStatus not changed for  "+equip.getDisplayName());
             }
@@ -1175,4 +1181,6 @@ public class ScheduleProcessJob extends BaseJob {
         }
         return false;
     }
+
+    public static void setScheduleDataInterface(ZoneDataInterface in) { scheduleDataInterface = in; }
 }

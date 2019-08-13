@@ -44,6 +44,7 @@ import android.widget.Toast;
 
 import org.joda.time.Interval;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -67,14 +68,16 @@ import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.StandaloneScheduler;
+import a75f.io.logic.jobs.VAVScheduler;
 import a75f.io.logic.pubnub.UpdatePointHandler;
 import a75f.io.logic.pubnub.UpdateScheduleHandler;
 import a75f.io.renatus.schedules.ScheduleUtil;
 import a75f.io.renatus.schedules.SchedulerFragment;
 import a75f.io.renatus.util.GridItem;
 import a75f.io.renatus.util.SeekArc;
+import a75f.io.logic.pubnub.ZoneDataInterface;
 
-public class ZoneFragmentNew extends Fragment implements UpdatePointHandler.ZoneDataInterface, Pulse.CurrentTempInterface
+public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 {
     ExpandableListView            expandableListView;
     ExpandableListAdapter         expandableListAdapter;
@@ -136,6 +139,8 @@ public class ZoneFragmentNew extends Fragment implements UpdatePointHandler.Zone
     View type2Open;
     HashMap pointsOpen = new HashMap();
     ArrayList<SeekArc> seekArcArrayList = new ArrayList<>();
+    ArrayList<TextView> statusTextArrayList = new ArrayList<>();
+    ArrayList<View> zoneStatusArrayList = new ArrayList<>();
     boolean isFromPubNub = false;
     ArrayList<HashMap> openZoneMap;
     public ZoneFragmentNew()
@@ -223,12 +228,79 @@ public class ZoneFragmentNew extends Fragment implements UpdatePointHandler.Zone
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                                updateTemperatureBasedZones(seekArcOpen, zonePointsOpen, equipOpen, getLayoutInflater(), id);
+                                updateTemperatureBasedZones(seekArcOpen, zonePointsOpen, equipOpen, getLayoutInflater());
                                 tableLayout.invalidate();
                         }
                     });
                 //}
                 }
+        }
+    }
+
+    public void refreshTemp(String nodeAddress, String equipId)
+    {
+        if(getActivity() != null) {
+            int i;
+            for (i = 0; i < seekArcArrayList.size(); i++) {
+                GridItem gridItem = (GridItem) seekArcArrayList.get(i).getTag();
+                if (gridItem.getNodeAddress() == Short.valueOf(nodeAddress)) {
+                    SeekArc tempSeekArc = seekArcArrayList.get(i);
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            double pointheatDT = CCUHsApi.getInstance().readPointPriorityValByQuery("point and air and temp and desired and heating and sp and equipRef == \"" + equipId + "\"");
+                            double pointcoolDT = CCUHsApi.getInstance().readPointPriorityValByQuery("point and air and temp and desired and cooling and sp and equipRef == \"" + equipId + "\"");
+                            tempSeekArc.setCoolingDesiredTemp((float)pointcoolDT);
+                            tempSeekArc.setHeatingDesiredTemp((float)pointheatDT);
+                        }
+                    });
+                }
+            }
+        }
+    }
+    public void refreshScreenbyVAV(String nodeAddress,String equipId)
+    {
+        if(getActivity() != null) {
+            int i;
+            for (i = 0; i < seekArcArrayList.size(); i++) {
+                GridItem gridItem = (GridItem) seekArcArrayList.get(i).getTag();
+                if (gridItem.getNodeAddress() == Short.valueOf(nodeAddress)) {
+                    SeekArc tempSeekArc = seekArcArrayList.get(i);
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            double pointheatDT = CCUHsApi.getInstance().readPointPriorityValByQuery("point and air and temp and desired and heating and sp and equipRef == \"" + equipId + "\"");
+                            double pointcoolDT = CCUHsApi.getInstance().readPointPriorityValByQuery("point and air and temp and desired and cooling and sp and equipRef == \"" + equipId + "\"");
+                            tempSeekArc.setCoolingDesiredTemp((float)pointcoolDT);
+                            tempSeekArc.setHeatingDesiredTemp((float)pointheatDT);
+                        }
+                    });
+                }
+            }
+        }
+    }
+
+    public void refreshScreenbySchedule(String nodeAddress, String equipId, String zoneId){
+        if(getActivity() != null) {
+            int i;
+            for (i = 0; i < zoneStatusArrayList.size(); i++) {
+                GridItem gridItem = (GridItem) zoneStatusArrayList.get(i).getTag();
+                if (gridItem.getNodeAddress() == Short.valueOf(nodeAddress)) {
+                    View tempZoneDetails = zoneStatusArrayList.get(i);
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            String status = ScheduleProcessJob.getZoneStatusString(zoneId, equipId);
+                            String vacationStatus = ScheduleProcessJob.getVacationStateString(zoneId);
+                            TextView scheduleStatus = tempZoneDetails.findViewById(R.id.schedule_status_tv);
+                            //Spinner scheduleSpinner = tempZoneDetails.findViewById(R.id.schedule_spinner);
+                            TextView vacationStatusTV = tempZoneDetails.findViewById(R.id.vacation_status);
+                            vacationStatusTV.setText(vacationStatus);
+                            scheduleStatus.setText(status);
+                        }
+                    });
+                }
+            }
         }
     }
 
@@ -263,7 +335,12 @@ public class ZoneFragmentNew extends Fragment implements UpdatePointHandler.Zone
         if (WeatherDataDownloadService.getMinTemperature() != 0.0 && WeatherDataDownloadService.getMaxTemperature() != 0.0) {
             temperature.setText(String.format("%.0f", WeatherDataDownloadService.getTemperature()));
             maxmintemp.setText(String.format("%.0f", WeatherDataDownloadService.getMaxTemperature()) + "\n" + String.format("%.0f", WeatherDataDownloadService.getMinTemperature()));
-            note.setText("Humidity : "+WeatherDataDownloadService.getHumidity()+"\n"+"Precipitation : "+WeatherDataDownloadService.getPrecipitation());
+            DecimalFormat df = new DecimalFormat("#.##");
+            double weatherPercipitation = WeatherDataDownloadService.getPrecipitation();
+            double weatherHumidity = WeatherDataDownloadService.getHumidity();
+            weatherHumidity = weatherHumidity * 100;
+            weatherPercipitation = Double.valueOf(df.format(weatherPercipitation));
+            note.setText("Humidity : "+weatherHumidity+"%"+"\n"+"Precipitation : "+weatherPercipitation);
             SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext());
             String address = spDefaultPrefs.getString("address", "");
             String city = spDefaultPrefs.getString("city", "");
@@ -568,6 +645,8 @@ public class ZoneFragmentNew extends Fragment implements UpdatePointHandler.Zone
         arcView.setId(i);
         SeekArc seekArc = arcView.findViewById(R.id.seekArc);
         seekArc.setTag(gridItemObj);
+        scheduleStatus.setTag(gridItemObj);
+        zoneDetails.setTag(gridItemObj);
         //seekArc.setOnTemperatureChangeListener(SeekArcMemShare.onTemperatureChangeListener);
         TextView textEquipment = arcView.findViewById(R.id.textEquipment);
         textEquipment.setText(zoneTitle);
@@ -631,6 +710,8 @@ public class ZoneFragmentNew extends Fragment implements UpdatePointHandler.Zone
         }
 
         seekArcArrayList.add(seekArc);
+        statusTextArrayList.add(scheduleStatus);
+        zoneStatusArrayList.add(zoneDetails);
         seekArc.setOnTemperatureChangeListener(new SeekArc.OnTemperatureChangeListener() {
             @Override
             public void onTemperatureChange(SeekArc seekArc, float coolingDesiredTemp, float heatingDesiredTemp) {
@@ -808,7 +889,7 @@ public class ZoneFragmentNew extends Fragment implements UpdatePointHandler.Zone
     }
 
 
-    private void updateTemperatureBasedZones(SeekArc seekArcOpen, View zonePointsOpen, Equip equipOpen, LayoutInflater inflater, String id)
+    private void updateTemperatureBasedZones(SeekArc seekArcOpen, View zonePointsOpen, Equip equipOpen, LayoutInflater inflater)
     {
         Equip p = equipOpen;
         View zoneDetails = zonePointsOpen;
@@ -1870,33 +1951,38 @@ public class ZoneFragmentNew extends Fragment implements UpdatePointHandler.Zone
     public void onResume() {
         // TODO Auto-generated method stub
         super.onResume();
-        if(getUserVisibleHint()) {
+        if(getUserVisibleHint())
+        {
             UpdatePointHandler.setZoneDataInterface(this);
             Pulse.setCurrentTempInterface(this);
-            //UpdateScheduleHandler.setPointDataInterface(this);
-            weatherUpdateHandler = new Handler();
-            weatherUpdate = new Runnable() {
-                @Override
-                public void run() {
-                    if (weatherUpdateHandler != null && getActivity() != null) {
-                        if (weather_data.getVisibility() == View.VISIBLE) {
-                            Log.e("weather", "update");
-                            UpdateWeatherData();
-                        }
-                        weatherUpdateHandler.postDelayed(weatherUpdate, 15 * 60000);
+            ScheduleProcessJob.setScheduleDataInterface(this);
+            StandaloneScheduler.setSchedulerDataInterface(this);
+            VAVScheduler.setVAVDataInterface(this);
+        }
+        weatherUpdateHandler = new Handler();
+        weatherUpdate = new Runnable() {
+            @Override
+            public void run() {
+                if (weatherUpdateHandler != null && getActivity() != null) {
+                    if (weather_data.getVisibility() == View.VISIBLE) {
+                        Log.e("weather", "update");
+                        UpdateWeatherData();
                     }
+                    weatherUpdateHandler.postDelayed(weatherUpdate, 15 * 60000);
                 }
-            };
+            }
+        };
 
             weatherUpdate.run();
         }
-    }
-
     @Override
     public void onPause() {
         super.onPause();
         UpdatePointHandler.setZoneDataInterface(null);
         Pulse.setCurrentTempInterface(null);
+        ScheduleProcessJob.setScheduleDataInterface(null);
+        StandaloneScheduler.setSchedulerDataInterface(null);
+        VAVScheduler.setVAVDataInterface(null);
     }
 
     @Override
@@ -1905,10 +1991,16 @@ public class ZoneFragmentNew extends Fragment implements UpdatePointHandler.Zone
         if(isVisibleToUser) {
             UpdatePointHandler.setZoneDataInterface(this);
             Pulse.setCurrentTempInterface(this);
+            ScheduleProcessJob.setScheduleDataInterface(this);
+            StandaloneScheduler.setSchedulerDataInterface(this);
+            VAVScheduler.setVAVDataInterface(this);
         } else {
 
             UpdatePointHandler.setZoneDataInterface(null);
             Pulse.setCurrentTempInterface(null);
+            ScheduleProcessJob.setScheduleDataInterface(null);
+            StandaloneScheduler.setSchedulerDataInterface(null);
+            VAVScheduler.setVAVDataInterface(null);
         }
     }
 

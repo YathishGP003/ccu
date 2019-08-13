@@ -30,6 +30,7 @@ import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.pubnub.UpdatePointHandler;
+import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.util.Prefs;
 
@@ -37,7 +38,7 @@ import a75f.io.renatus.util.Prefs;
  * Created by samjithsadasivan isOn 8/7/17.
  */
 
-public class SystemFragment extends Fragment implements AdapterView.OnItemSelectedListener, UpdatePointHandler.SystemDataInterface
+public class SystemFragment extends Fragment implements AdapterView.OnItemSelectedListener, ZoneDataInterface
 {
 	private static final String TAG = "SystemFragment";
 	SeekBar  sbComfortValue;
@@ -89,7 +90,10 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			fetchPoints();
 		}
 	}
-
+	public void refreshTemp(String nodeAddress, String equipId){}
+	public void refreshScreenbyVAV(String nodeAddress,String equipId){}
+	public void refreshScreenbySchedule(String nodeAddress, String equipId, String zoneId){}
+	public void updateTemperature(double currentTemp, short nodeAddress){}
 	@Override
 	public void onResume() {
 		// TODO Auto-generated method stub

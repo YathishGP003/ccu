@@ -16,6 +16,7 @@ import a75f.io.api.haystack.Schedule;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Occupancy;
+import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.TunerUtil;
 
 public class VAVScheduler {
@@ -28,7 +29,7 @@ public class VAVScheduler {
     static double coolingDesiredTemp = 74.0;
     static double heatingDesiredTemp = 70.0;
     static double averageDesiredTemp = 72.0;
-    
+    private static ZoneDataInterface vavDataInterface = null;
     public static Occupied processEquip(Equip equip, Schedule equipSchedule, Schedule vacation, Occupancy systemOcc) {
 
 
@@ -55,7 +56,7 @@ public class VAVScheduler {
         occ.setHeatingDeadBand(heatingDeadBand);
         occ.setCoolingDeadBand(coolingDeadBand);
         occ.setUnoccupiedZoneSetback(setback);
-        
+        boolean schdeulerUpdated = false;
         if (occ != null && ScheduleProcessJob.putOccupiedModeCache(equip.getRoomRef(), occ)) {
             double avgTemp = (occ.getCoolingVal()+occ.getHeatingVal())/2.0;
             double deadbands = (occ.getCoolingVal() - occ.getHeatingVal()) / 2.0 ;
@@ -65,17 +66,25 @@ public class VAVScheduler {
             if(coolingTemp != coolingDesiredTemp) {
                 coolingDesiredTemp = coolingTemp;
                 setDesiredTemp(equip, coolingTemp, "cooling");
+                schdeulerUpdated = true;
             }
 
             Double heatingTemp = (occ.isOccupied() || systemOcc == Occupancy.PRECONDITIONING) ? occ.getHeatingVal() : (occ.getHeatingVal() - occ.getUnoccupiedZoneSetback());
             if(heatingTemp != heatingDesiredTemp) {
                 heatingDesiredTemp = heatingTemp;
                 setDesiredTemp(equip, heatingTemp, "heating");
+                schdeulerUpdated = true;
             }
 
             if(avgTemp != averageDesiredTemp) {
                 averageDesiredTemp = avgTemp;
                 setDesiredTemp(equip, avgTemp, "average");
+                schdeulerUpdated = true;
+            }
+            if(schdeulerUpdated){
+                if(vavDataInterface != null) {
+                    vavDataInterface.refreshScreenbyVAV(equip.getGroup(), equip.getId());
+                }
             }
         }
 
@@ -98,6 +107,7 @@ public class VAVScheduler {
         CCUHsApi.getInstance().pointWrite(HRef.make(id.replace("@","")), 8, "Scheduler", desiredTemp != null ? HNum.make(desiredTemp) : HNum.make(0), HNum.make(0));
         CCUHsApi.getInstance().writeHisValById(id, HSUtil.getPriorityVal(id));
     }
-    
+
+    public static void setVAVDataInterface(ZoneDataInterface in) { vavDataInterface = in; }
     
 }

@@ -61,7 +61,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/weather_icon"
                 android:layout_alignParentRight="true"
-                android:layout_marginRight="72dp"
+                android:layout_marginRight="65dp"
                 android:text="71"
                 android:textColor="@color/white"
                 android:textSize="93sp"
@@ -72,10 +72,9 @@
                 android:layout_height="wrap_content"
                 android:layout_alignTop="@+id/temperature"
                 android:layout_alignParentRight="true"
-                android:layout_marginRight="45dp"
+                android:layout_marginRight="35dp"
                 android:layout_below="@+id/weather_icon"
-                android:drawableLeft="@drawable/degree"
-                android:text="F"
+                android:text="°F"
                 android:textColor="@color/white"
                 android:textSize="32sp"
                 android:layout_marginTop="10dp"
@@ -88,6 +87,7 @@
                 android:layout_alignLeft="@+id/place"
                 android:layout_below="@+id/place"
                 android:text="Sunny"
+                android:layout_marginTop="3dp"
                 android:textColor="@color/white"
                 android:textSize="19.5sp"
                 android:fontFamily="@font/lato_light"/>
@@ -99,11 +99,12 @@
                 android:layout_toLeftOf="@id/temperature"
                 android:layout_alignTop="@+id/temperature"
                 android:layout_alignBottom="@+id/temperature"
-                android:layout_marginRight="10dp"
                 android:gravity="center_vertical"
                 android:text="77\n63"
                 android:textColor="@color/white"
-                android:textSize="40sp"
+                android:textSize="39sp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
                 android:fontFamily="@font/lato_light"/>
 
             <TextView
@@ -113,14 +114,11 @@
                 android:layout_alignParentRight="true"
                 android:layout_alignLeft="@id/temperature"
                 android:layout_below="@+id/maxmintemp"
-                android:layout_marginBottom="10dp"
-                android:layout_marginRight="27dp"
-                android:ellipsize="end"
-                android:maxLines="3"
-                android:text="Humid and warmer with times of sun and clouds . "
                 android:textColor="@color/white"
-                android:textSize="19sp" />
-
+                android:layout_marginBottom="10dp"
+                android:layout_marginRight="15dp"
+                android:textSize="19sp"
+                android:fontFamily="@font/lato_light"/>
 
         </RelativeLayout>
 

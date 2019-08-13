@@ -34,6 +34,7 @@ import a75f.io.logic.bo.haystack.device.SmartStat;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.pubnub.UpdatePointHandler;
+import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
@@ -47,6 +48,7 @@ import static a75f.io.device.mesh.MeshUtil.sendStructToNodes;
 
 public class Pulse
 {
+	private static ZoneDataInterface currentTempInterface = null;
 	public static void regularSNUpdate(CmToCcuOverUsbSnRegularUpdateMessage_t smartNodeRegularUpdateMessage_t)
 	{
 		short nodeAddr = (short)smartNodeRegularUpdateMessage_t.update.smartNodeAddress.get();
@@ -593,11 +595,5 @@ public class Pulse
 		}
 	}
 
-
-	public interface CurrentTempInterface {
-		void updateTemperature(double currentTemp, short nodeAddress);
-	}
-
-	private static CurrentTempInterface currentTempInterface = null;
-	public static void setCurrentTempInterface(CurrentTempInterface in) { currentTempInterface = in; }
+	public static void setCurrentTempInterface(ZoneDataInterface in) { currentTempInterface = in; }
 }

@@ -22,6 +22,7 @@ import a75f.io.logic.jobs.ScheduleProcessJob;
 public class UpdatePointHandler
 {
     public static final String CMD = "updatePoint";
+    private static ZoneDataInterface zoneDataInterface = null;
     
     public static void handleMessage(JsonObject msgObject) {
         String src = msgObject.get("who").getAsString();
@@ -95,10 +96,10 @@ public class UpdatePointHandler
                 Log.i("PubNub","Zone Data Received Refresh");
                 zoneDataInterface.refreshScreen(luid);
             }
-            if (systemDataInterface != null) {
+            /*if (systemDataInterface != null) {
                 Log.i("PubNub","System Data Received Refresh");
                 systemDataInterface.refreshScreen(luid);
-            }
+            }*/
         }
 
         if (p.getMarkers().contains("desired"))
@@ -119,18 +120,6 @@ public class UpdatePointHandler
         }
     }
 
-
-    public interface ZoneDataInterface {
-        void refreshScreen(String id);
-    }
-
-    private static ZoneDataInterface zoneDataInterface = null;
     public static void setZoneDataInterface(ZoneDataInterface in) { zoneDataInterface = in; }
-
-    public interface SystemDataInterface {
-        void refreshScreen(String id);
-    }
-
-    private static SystemDataInterface systemDataInterface = null;
-    public static void setSystemDataInterface(SystemDataInterface in) { systemDataInterface = in; }
+    public static void setSystemDataInterface(ZoneDataInterface in) { zoneDataInterface = in; }
 }

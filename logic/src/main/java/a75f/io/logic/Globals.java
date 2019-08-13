@@ -22,6 +22,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import a75f.io.alerts.AlertProcessJob;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
@@ -92,6 +93,8 @@ public class Globals {
     //HeartBeatJob mHeartBeatJob;
     BuildingProcessJob mProcessJob = new BuildingProcessJob();
     ScheduleProcessJob mScheduleProcessJob = new ScheduleProcessJob();
+    
+    AlertProcessJob mAlertProcessJob;
 
     PrintProcessJob mPrintProcessJob = new PrintProcessJob();
     PrintProcessJobTwo mPrintProcessJobTwo = new PrintProcessJobTwo();
@@ -207,7 +210,8 @@ public class Globals {
         mScheduleProcessJob.scheduleJob("Schedule Process Job", DEFAULT_HEARTBEAT_INTERVAL,
                 TASK_SEPERATION +15, TASK_SERERATION_TIMEUNIT);
     
-    
+        mAlertProcessJob = new AlertProcessJob(mApplicationContext);
+        getScheduledThreadPool().scheduleAtFixedRate(mAlertProcessJob.getJobRunnable(), TASK_SEPERATION +30, DEFAULT_HEARTBEAT_INTERVAL, TASK_SERERATION_TIMEUNIT );
     
     }
 

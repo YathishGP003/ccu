@@ -7,6 +7,8 @@ import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.Map;
 
+import io.objectbox.Box;
+import io.objectbox.BoxStore;
 /**
  * Created by samjithsadasivan on 4/24/18.
  */
@@ -24,6 +26,8 @@ public class AlertProcessor
     
     AlertParser parser;
     
+    private BoxStore     boxStore;
+    private Box<Alert> alertBox;
     AlertProcessor() {
         
         alertList = new ArrayList<>();

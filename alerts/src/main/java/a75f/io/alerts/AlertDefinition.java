@@ -7,7 +7,8 @@ package a75f.io.alerts;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.ArrayList;
-import java.util.Map;
+
+import a75f.io.api.haystack.Alert;
 /**
  * The format for alerts defined in json.
  */
@@ -44,20 +45,25 @@ import java.util.Map;
  *               }
  *      }
  */
-@JsonIgnoreProperties({"offsetCount"})
+@JsonIgnoreProperties({"offsetCount","id"})
 public class AlertDefinition
 {
+    
     public ArrayList<Conditional> conditionals;
-    public String offset;
-    public Alert alert;
+    public String                 offset;
+    public Alert                  alert;
     
     //Not required for definition, used for processing.
     public int offsetCount;
     
-    public boolean evaluate(Map<String,Object> tsData) {
+    public AlertDefinition(){
+    
+    }
+    
+    public boolean evaluate() {
         boolean alertStatus = true;
         for (Conditional c : conditionals) {
-            alertStatus = alertStatus && c.evaluate(tsData);
+            alertStatus = alertStatus && c.evaluate();
             if (alertStatus == false) {
                 return false;
             }

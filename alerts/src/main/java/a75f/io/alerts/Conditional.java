@@ -2,8 +2,7 @@ package a75f.io.alerts;
 
 import com.udojava.evalex.Expression;
 
-import java.util.Map;
-
+import a75f.io.api.haystack.CCUHsApi;
 /**
  * Created by samjithsadasivan on 4/27/18.
  */
@@ -22,15 +21,12 @@ public class Conditional
     
     String condition;
     
-    boolean evaluate(Map<String,Object> tsData) {
+    boolean evaluate() {
         if (key.isEmpty() || value.isEmpty() || condition.isEmpty()) {
             throw new IllegalArgumentException("Invalid Conditional");
         }
-        
-        if (tsData.get(key) == null) {
-            throw new IllegalStateException("Invalid Key");
-        }
-        Expression expression = new Expression(String.valueOf(tsData.get(key)) + " "+condition+" " + value);
+        double hisVal = CCUHsApi.getInstance().readHisValByQuery(key);
+        Expression expression = new Expression(hisVal+ " "+condition+" " + value);
         return expression.eval().intValue() > 0;
     }
     

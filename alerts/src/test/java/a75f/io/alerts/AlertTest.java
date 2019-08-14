@@ -7,6 +7,8 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import a75f.io.api.haystack.Alert;
+
 /**
  * Created by samjithsadasivan on 4/23/18.
  */
@@ -14,7 +16,7 @@ import java.util.HashMap;
 public class AlertTest
 {
     
-    public static final String TEST_ALERTS = "[\n" + "    {\n" + "      \"conditionals\":[\n" + "        {\n" + "          \"key\" : \"Battery\",\n" + "          \"value\" : \"80\",\n" + "          \"condition\" :\"<=\"\n" + "        },\n" + "        {\n" + "          \"key\" : \"Battery\",\n" + "          \"value\" : \"50\",\n" + "          \"condition\" :\">\"\n" + "        },\n" + "        {\n" + "          \"key\" : \"Charging\",\n" + "          \"value\" : \"==\",\n" + "          \"condition\" :\"false\"\n" + "        }\n" + "\n" + "      ],\n" + "      \"offset\": \"0\",\n" + "      \"alert\": {\n" + "        \"mAlertType\": \"BATTERY_LEVEL_WARN\",\n" + "        \"mTitle\": \"Battery level low on CCU [Warn]\",\n" + "        \"mMessage\": \"The battery level of your CCU [%s] has dropped below 75%% and is not charging.Please check that the tablet is secured to it's mount. if it is plugged in, please contact 75F support.\",\n" + "        \"mNotificationMsg\": \"The battery level of your CCU has dropped below 75% and is not charging.Please check that the tablet is secured to it's mount. If it is plugged in, please contact 75F support.\",\n" + "        \"mSeverity\": \"WARN\",\n" + "        \"mEnabled\": \"true\"\n" + "      }\n" + "    },\n" + "    {\n" + "    \"conditionals\":[\n" + "      {\n" + "        \"key\" : \"Battery\",\n" + "        \"value\" : \"50\",\n" + "        \"condition\" :\"<=\"\n" + "      },\n" + "      {\n" + "        \"key\" : \"Battery\",\n" + "        \"value\" : \"20\",\n" + "        \"condition\" :\">\"\n" + "      },\n" + "      {\n" + "        \"key\" : \"Charging\",\n" + "        \"value\" : \"==\",\n" + "        \"condition\" :\"false\"\n" + "      }\n" + "\n" + "    ],\n" + "    \"offset\": \"0\",\n" + "    \"alert\": {\n" + "      \"mAlertType\": \"BATTERY_LEVEL_ERROR\",\n" + "      \"mTitle\": \"Battery level low on CCU [Error]\",\n" + "      \"mMessage\": \"The battery level of your CCU [%s] has dropped below 50%% and is not charging.Please check that the tablet is secured to it's mount. if it is plugged in, please contact 75F support.\",\n" + "      \"mNotificationMsg\": \"The battery level of your CCU has dropped below 50% and is not charging.Please check that the tablet is secured to it's mount. If it is plugged in, please contact 75F support.\",\n" + "      \"mSeverity\": \"ERROR\",\n" + "      \"mEnabled\": \"true\"\n" + "    }\n" + "    },\n" + "  {\n" + "    \"conditionals\":[\n" + "      {\n" + "        \"key\" : \"Battery\",\n" + "        \"value\" : \"20\",\n" + "        \"condition\" :\"<=\"\n" + "      }\n" + "    ],\n" + "    \"offset\": \"0\",\n" + "    \"alert\": {\n" + "      \"mAlertType\": \"BATTERY_LEVEL_FATAL\",\n" + "      \"mTitle\": \"Battery level low on CCU [Fatal]\",\n" + "      \"mMessage\": \"The battery level of your CCU [%s] has dropped below 20%% and is not charging.Please check that the tablet is secured to it's mount. if it is plugged in, please contact 75F support.\",\n" + "      \"mNotificationMsg\": \"The battery level of your CCU has dropped below 20% and is not charging.Please check that the tablet is secured to it's mount. If it is plugged in, please contact 75F support.\",\n" + "      \"mSeverity\": \"FATAL\",\n" + "      \"mEnabled\": \"true\"\n" + "    }\n" + "  }\n" + "  ]\n" + "\n";
+    public static final String TEST_ALERTS = "[\n" + "    {\n" + "      \"conditionals\":[\n" + "        {\n" + "          \"key\" : \"Battery\",\n" + "          \"value\" : \"80\",\n" + "          \"condition\" :\"<=\"\n" + "        },\n" + "        {\n" + "          \"key\" : \"Battery\",\n" + "          \"value\" : \"50\",\n" + "          \"condition\" :\">\"\n" + "        },\n" + "        {\n" + "          \"key\" : \"Charging\",\n" + "          \"value\" : \"==\",\n" + "          \"condition\" :\"false\"\n" + "        }\n" + "\n" + "      ],\n" + "      \"offset\": \"0\",\n" + "      \"alert\": {\n" + "        \"mAlertType\": \"BATTERY_LEVEL_WARN\",\n" + "        \"mTitle\": \"Battery level low on CCU [Warn]\",\n" + "        \"mMessage\": \"The battery level of your CCU [%s] has dropped below 75%% and is not charging.Please check that the tablet is secured to it's mount. if it is plugged in, please contact 75F support.\",\n" + "        \"mNotificationMsg\": \"The battery level of your CCU has dropped below 75% and is not charging.Please check that the tablet is secured to it's mount. If it is plugged in, please contact 75F support.\",\n" + "        \"mSeverity\": \"0\",\n" + "        \"mEnabled\": \"true\"\n" + "      }\n" + "    },\n" + "    {\n" + "    \"conditionals\":[\n" + "      {\n" + "        \"key\" : \"Battery\",\n" + "        \"value\" : \"50\",\n" + "        \"condition\" :\"<=\"\n" + "      },\n" + "      {\n" + "        \"key\" : \"Battery\",\n" + "        \"value\" : \"20\",\n" + "        \"condition\" :\">\"\n" + "      },\n" + "      {\n" + "        \"key\" : \"Charging\",\n" + "        \"value\" : \"==\",\n" + "        \"condition\" :\"false\"\n" + "      }\n" + "\n" + "    ],\n" + "    \"offset\": \"0\",\n" + "    \"alert\": {\n" + "      \"mAlertType\": \"BATTERY_LEVEL_ERROR\",\n" + "      \"mTitle\": \"Battery level low on CCU [Error]\",\n" + "      \"mMessage\": \"The battery level of your CCU [%s] has dropped below 50%% and is not charging.Please check that the tablet is secured to it's mount. if it is plugged in, please contact 75F support.\",\n" + "      \"mNotificationMsg\": \"The battery level of your CCU has dropped below 50% and is not charging.Please check that the tablet is secured to it's mount. If it is plugged in, please contact 75F support.\",\n" + "      \"mSeverity\": \"1\",\n" + "      \"mEnabled\": \"true\"\n" + "    }\n" + "    },\n" + "  {\n" + "    \"conditionals\":[\n" + "      {\n" + "        \"key\" : \"Battery\",\n" + "        \"value\" : \"20\",\n" + "        \"condition\" :\"<=\"\n" + "      }\n" + "    ],\n" + "    \"offset\": \"0\",\n" + "    \"alert\": {\n" + "      \"mAlertType\": \"BATTERY_LEVEL_FATAL\",\n" + "      \"mTitle\": \"Battery level low on CCU [Fatal]\",\n" + "      \"mMessage\": \"The battery level of your CCU [%s] has dropped below 20%% and is not charging.Please check that the tablet is secured to it's mount. if it is plugged in, please contact 75F support.\",\n" + "      \"mNotificationMsg\": \"The battery level of your CCU has dropped below 20% and is not charging.Please check that the tablet is secured to it's mount. If it is plugged in, please contact 75F support.\",\n" + "      \"mSeverity\": \"0\",\n" + "      \"mEnabled\": \"true\"\n" + "    }\n" + "  }\n" + "  ]\n" + "\n";
     
     @Test
     public void addAlertDefTest() {
@@ -30,35 +32,24 @@ public class AlertTest
         conditionals.add(c);
         
         Alert a = new Alert();
-        a.setAlertType("TEST_ALERT");
-        a.setTitle("Test Alert");
-        a.setMessage("This is a test alert");
-        a.setNotificationMsg("This is a test alert");
+        a.mAlertType = "TEST_ALERT";
+        a.mTitle = "Test Alert";
+        a.mMessage = "This is a test alert";
+        a.mNotificationMsg = "This is a test alert";
         
         
         df.alert = a;
         df.offset = "0";
         
-        AlertManager m = AlertManager.getInstance();
-        m.clearAlertDefinitions();
-        m.addAlertDefinition(df);
-        m.clearAlerts();
-    
-        HashMap<String, Object>  tsData = new HashMap<>();
-        tsData.put("X",5);
+        AlertProcessor p = new AlertProcessor(TEST_ALERTS);
+        //m.clearAlertDefinitions();
+        p.addAlertDefinition(df);
+        //p.clearAlerts();
         
-        m.processAlerts(tsData);
-        Assert.assertEquals(0, m.getAllAlerts().size());
         
-        tsData.put("X",100);
-        m.processAlerts(tsData);
-        Assert.assertEquals(1, m.getAllAlerts().size());
-        Assert.assertEquals(1, m.getActiveAlerts().size());
-    
-        tsData.put("X",1);
-        m.processAlerts(tsData);
-        Assert.assertEquals(1, m.getAllAlerts().size());
-        Assert.assertEquals(0, m.getActiveAlerts().size());
+        for (AlertDefinition d : p.getAlertDefinitions()) {
+            System.out.println(d.alert.mAlertType);
+        }
         
     }
     
@@ -77,8 +68,8 @@ public class AlertTest
         tsData.put("Charging",false);
         
         System.out.println("Battery = 60");
-        AlertManager m = AlertManager.getInstance();
-        m.clearAlertDefinitions();
+        AlertManager m = AlertManager.getInstance(null);
+        //m.clearAlertDefinitions();
         m.addAlertDefinitions(TEST_ALERTS);
         m.processAlerts(tsData);
         Assert.assertEquals(1 ,m.getAllAlerts().size());
@@ -86,7 +77,7 @@ public class AlertTest
         
         
         for (Alert a : m.getAllAlerts()) {
-            System.out.println(a.getTitle()+" ,fixed :"+a.isFixed);
+            System.out.println(a.mTitle+" ,fixed :"+a.isFixed);
         }
         tsData.put("Battery",45);
         tsData.put("Charging",false);
@@ -98,7 +89,7 @@ public class AlertTest
         Assert.assertEquals(1 ,m.getActiveAlerts().size());
         
         for (Alert a : m.getAllAlerts()) {
-            System.out.println(a.getTitle()+" ,fixed :"+a.isFixed);
+            System.out.println(a.mTitle+" ,fixed :"+a.isFixed);
         }
     
         tsData.put("Battery",15);
@@ -109,7 +100,7 @@ public class AlertTest
         Assert.assertEquals(1 ,m.getActiveAlerts().size());
     
         for (Alert a : m.getAllAlerts()) {
-            System.out.println(a.getTitle()+" ,fixed :"+a.isFixed);
+            System.out.println(a.mTitle+" ,fixed :"+a.isFixed);
         }
         
         
@@ -122,8 +113,8 @@ public class AlertTest
         tsData.put("Charging",false);
     
         
-        AlertManager m = AlertManager.getInstance();
-        m.clearAlertDefinitions();
+        AlertManager m = AlertManager.getInstance(null);
+        //m.clearAlertDefinitions();
         m.clearAlerts();
         m.addAlertDefinitions(TEST_ALERTS);
         m.processAlerts(tsData);
@@ -132,7 +123,7 @@ public class AlertTest
     
     
         for (Alert a : m.getAllAlerts()) {
-            System.out.println(a.getTitle()+" ,fixed :"+a.isFixed);
+            System.out.println(a.mTitle+" ,fixed :"+a.isFixed);
         }
         tsData.put("Battery",90);
         tsData.put("Charging",true);
@@ -141,6 +132,40 @@ public class AlertTest
         m.processAlerts(tsData);
         Assert.assertEquals(0 ,m.getActiveAlerts().size());
     }
+    
+    @Test
+    public void addAlertTest() {
+        Alert a = new Alert();
+        a.mAlertType = "TEST_ALERT_A";
+        a.mTitle = "Test Alert";
+        a.mMessage = "This is a test alert";
+        a.mNotificationMsg = "This is a test alert";
+    
+        Alert b = new Alert();
+        b.mAlertType = "TEST_ALERT_B";
+        b.mTitle = "Test Alert";
+        b.mMessage = "This is a test alert";
+        b.mNotificationMsg = "This is a test alert";
+        
+        AlertProcessor p = new AlertProcessor(TEST_ALERTS);
+        p.addAlert(a);
+        p.addAlert(b);
+        
+        for (Alert a1 : p.getActiveAlerts()) {
+            System.out.println(a1.toString());
+            
+            if (a1.mAlertType.equals("TEST_ALERT_A")) {
+                System.out.println(" Fix "+a.toString());
+                p.fixAlert(a1);
+            }
+        }
+    
+        for (Alert a1 : p.getAllAlerts()) {
+            System.out.println(a1.toString());
+        }
+        
+    }
+    
     
     /**
      * Alert should be generated after 5 invocation of processAlert(). During app context processAlert
@@ -159,16 +184,16 @@ public class AlertTest
         conditionals.add(c);
     
         Alert a = new Alert();
-        a.setAlertType("TEST_ALERT");
-        a.setTitle("Test Alert");
-        a.setMessage("This is a test alert");
-        a.setNotificationMsg("This is a test alert");
+        a.mAlertType = "TEST_ALERT";
+        a.mTitle = "Test Alert";
+        a.mMessage = "This is a test alert";
+        a.mNotificationMsg = "This is a test alert";
     
     
         df.alert = a;
         df.offset = "5";
     
-        AlertManager m = AlertManager.getInstance();
+        AlertManager m = AlertManager.getInstance(null);
         m.addAlertDefinition(df);
         m.clearAlerts();
     
@@ -188,7 +213,6 @@ public class AlertTest
         
         
     }
-    
     
     
 }

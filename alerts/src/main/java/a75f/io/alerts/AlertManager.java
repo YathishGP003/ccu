@@ -5,6 +5,7 @@ import android.content.Context;
 import java.util.List;
 import java.util.Map;
 
+import a75f.io.api.haystack.Alert;
 /**
  * Created by samjithsadasivan on 4/24/18.
  */
@@ -31,13 +32,13 @@ public class AlertManager
     
     AlertProcessor processor;
     
-    private AlertManager() {
-        processor = new AlertProcessor();
+    private AlertManager(Context c) {
+        processor = new AlertProcessor(c);
     }
     
-    public static AlertManager getInstance() {
+    public static AlertManager getInstance(Context c) {
         if (mInstance == null) {
-            mInstance = new AlertManager();
+            mInstance = new AlertManager(c);
         }
         return mInstance;
     }
@@ -52,7 +53,7 @@ public class AlertManager
      */
     public void addAlertDefinition(AlertDefinition aDef) {
         alertsDefinied = true;
-        processor.alertDefinitions.add(aDef);
+        //processor.alertDefinitions.add(aDef);
     }
     
     /**
@@ -60,7 +61,7 @@ public class AlertManager
      */
     public void addAlertDefinitions(String alerts) {
         alertsDefinied = true;
-        processor.updateAlertDefinitions(alerts);
+        //processor.updateAlertDefinitions(alerts);
         processor.clearAlerts();
     }
     
@@ -70,7 +71,7 @@ public class AlertManager
      */
     public void readAlertDefinitions() {
         alertsDefinied = true;
-        processor.updateAlertDefinitions(mContext);
+        //processor.updateAlertDefinitions(mContext);
         processor.clearAlerts();
     
     }
@@ -81,6 +82,10 @@ public class AlertManager
         }
         processor.runProcess(timeSeriesMap);
         return processor.getAllAlerts();
+    }
+    
+    public void processAlerts() {
+        processor.runProcess();
     }
     
     public List<Alert> getActiveAlerts() {
@@ -95,7 +100,11 @@ public class AlertManager
         processor.clearAlerts();
     }
     
-    public void clearAlertDefinitions() {
+    /*public void clearAlertDefinitions() {
         processor.alertDefinitions.clear();
+    }*/
+    
+    public List<AlertDefinition> getAlertDefinitions() {
+        return processor.getAlertDefinitions();
     }
 }

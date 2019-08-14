@@ -1,0 +1,129 @@
+package a75f.io.api.haystack;
+
+import io.objectbox.annotation.Entity;
+import io.objectbox.annotation.Id;
+
+/**
+ * Created by samjithsadasivan on 4/23/18.
+ */
+
+//TODO- To be moved to alerts project once object issue with multiple modules is sorted out.
+@Entity
+public class Alert
+{
+    @Id
+    public long id;
+    public String mAlertType;
+    public String mTitle; //Short message
+    public String mMessage; //Details
+    public String mNotificationMsg; //Tooltip info message
+    
+    public int mSeverity;
+    public boolean       mEnabled;
+    
+    public long startTime;
+    public long endTime;
+    public boolean  isFixed;
+    public int alertCount;
+    
+    public String alertId;
+    public long getId()
+    {
+        return id;
+    }
+    public void setId(long id)
+    {
+        this.id = id;
+    }
+    public String getmAlertType()
+    {
+        return mAlertType;
+    }
+    public void setmAlertType(String mAlertType)
+    {
+        this.mAlertType = mAlertType;
+    }
+    public String getmTitle()
+    {
+        return mTitle;
+    }
+    public void setmTitle(String mTitle)
+    {
+        this.mTitle = mTitle;
+    }
+    public String getmMessage()
+    {
+        return mMessage;
+    }
+    public void setmMessage(String mMessage)
+    {
+        this.mMessage = mMessage;
+    }
+    public String getmNotificationMsg()
+    {
+        return mNotificationMsg;
+    }
+    public void setmNotificationMsg(String mNotificationMsg)
+    {
+        this.mNotificationMsg = mNotificationMsg;
+    }
+    public int getmSeverity()
+    {
+        return mSeverity;
+    }
+    public void setmSeverity(int mSeverity)
+    {
+        this.mSeverity = mSeverity;
+    }
+    public boolean ismEnabled()
+    {
+        return mEnabled;
+    }
+    public void setmEnabled(boolean mEnabled)
+    {
+        this.mEnabled = mEnabled;
+    }
+    public long getStartTime()
+    {
+        return startTime;
+    }
+    public void setStartTime(long startTime)
+    {
+        this.startTime = startTime;
+    }
+    public long getEndTime()
+    {
+        return endTime;
+    }
+    public void setEndTime(long endTime)
+    {
+        this.endTime = endTime;
+    }
+    public boolean isFixed()
+    {
+        return isFixed;
+    }
+    public void setFixed(boolean fixed)
+    {
+        isFixed = fixed;
+    }
+    public int getAlertCount()
+    {
+        return alertCount;
+    }
+    public void setAlertCount(int alertCount)
+    {
+        this.alertCount = alertCount;
+    }
+    public String getAlertId()
+    {
+        return alertId;
+    }
+    public void setAlertId(String alertId)
+    {
+        this.alertId = alertId;
+    }
+    public Alert(){
+    }
+}
+

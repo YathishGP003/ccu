@@ -1389,7 +1389,7 @@ public class SeekArc extends View
         if (mCoolingDesiredTemp == coolingDesiredTemp)
             return;
         this.mCoolingDesiredTemp = coolingDesiredTemp;
-        mOnTemperatureChangeListener.onTemperatureChange(this, getCoolingDesiredTemp(), getHeatingDesiredTemp(),isDeadbandCorrection);
+        mOnTemperatureChangeListener.onTemperatureChange(this, getCoolingDesiredTemp(), getHeatingDesiredTemp(),syncToHaystack);
         invalidate();
     }
 

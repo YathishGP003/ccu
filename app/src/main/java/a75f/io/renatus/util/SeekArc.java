@@ -224,7 +224,7 @@ public class SeekArc extends View
 
     public interface OnTemperatureChangeListener
     {
-        void onTemperatureChange(SeekArc seekArc, float coolingDesiredTemp, float heatingDesiredTemp);
+        void onTemperatureChange(SeekArc seekArc, float coolingDesiredTemp, float heatingDesiredTemp, boolean syncToHaystack);
     }
 
     RectF mCoolingTargetRect;
@@ -709,7 +709,7 @@ public class SeekArc extends View
         if ((mCoolingTemp - (mHeatingDeadBand + mCoolingDeadBand)) < getHeatingDesiredTemp())
         {
             //setHeatingDesiredTemp(roundToHalf(mCoolingTemp) - (mHeatingDeadBand + mCoolingDeadBand));
-            setHeatingDesiredTemp(mCoolingTemp - (mHeatingDeadBand + mCoolingDeadBand));
+            setHeatingDesiredTemp(mCoolingTemp - (mHeatingDeadBand + mCoolingDeadBand),false);
         }
     }
 
@@ -742,7 +742,7 @@ public class SeekArc extends View
         if ((mHeatingTemp + (mHeatingDeadBand + mCoolingDeadBand)) > getCoolingDesiredTemp())
         {
             //setCoolingDesiredTemp(roundToHalf(mHeatingTemp) + (mHeatingDeadBand + mCoolingDeadBand));
-            setCoolingDesiredTemp(mHeatingTemp + (mHeatingDeadBand + mCoolingDeadBand));
+            setCoolingDesiredTemp(mHeatingTemp + (mHeatingDeadBand + mCoolingDeadBand),false);
         }
     }
 
@@ -1129,10 +1129,11 @@ public class SeekArc extends View
 
                 if (inCoolingSelectionMode)
                 {
-                    setCoolingDesiredTemp(roundToHalf(getCoolingModeTempTemperature()));
-                } else if (inHeatingSelectionMode)
+                    setCoolingDesiredTemp(roundToHalf(getCoolingModeTempTemperature()),true);
+                }
+                if (inHeatingSelectionMode)
                 {
-                    setHeatingDesiredTemp(roundToHalf(getHeatingModeTempTemperature()));
+                    setHeatingDesiredTemp(roundToHalf(getHeatingModeTempTemperature()),true);
                 }
 
 
@@ -1383,13 +1384,12 @@ public class SeekArc extends View
         return mCoolingDesiredTemp;
     }
 
-    public void setCoolingDesiredTemp(float coolingDesiredTemp)
+    public void setCoolingDesiredTemp(float coolingDesiredTemp,boolean syncToHaystack)
     {
         if (mCoolingDesiredTemp == coolingDesiredTemp)
             return;
-
         this.mCoolingDesiredTemp = coolingDesiredTemp;
-        mOnTemperatureChangeListener.onTemperatureChange(this, getCoolingDesiredTemp(), getHeatingDesiredTemp());
+        mOnTemperatureChangeListener.onTemperatureChange(this, getCoolingDesiredTemp(), getHeatingDesiredTemp(),isDeadbandCorrection);
         invalidate();
     }
 
@@ -1399,13 +1399,13 @@ public class SeekArc extends View
         return mHeatingDesiredTemp;
     }
 
-    public void setHeatingDesiredTemp(float heatingDesiredTemp)
+    public void setHeatingDesiredTemp(float heatingDesiredTemp, boolean syncToHaystack)
     {
         if (mHeatingDesiredTemp == heatingDesiredTemp)
             return;
 
         this.mHeatingDesiredTemp = heatingDesiredTemp;
-        mOnTemperatureChangeListener.onTemperatureChange(this, getCoolingDesiredTemp(), getHeatingDesiredTemp());
+        mOnTemperatureChangeListener.onTemperatureChange(this, getCoolingDesiredTemp(), getHeatingDesiredTemp(),syncToHaystack);
         invalidate();
     }
 

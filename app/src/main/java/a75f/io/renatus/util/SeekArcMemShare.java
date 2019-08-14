@@ -8,7 +8,7 @@ public class SeekArcMemShare
     public static SeekArc.OnTemperatureChangeListener onTemperatureChangeListener = new SeekArc.OnTemperatureChangeListener()
     {
         @Override
-        public void onTemperatureChange(SeekArc seekArc, float coolingDesiredTemp, float heatingDesiredTemp)
+        public void onTemperatureChange(SeekArc seekArc, float coolingDesiredTemp, float heatingDesiredTemp, boolean syncToHaystack)
         {
             //String seekArcId = (String) seekArc.getTag();
             //Log.i("SEEKARC", "ID: " + seekArcId + " coolingDesired: " + coolingDesiredTemp + " heatingDesired: " + heatingDesiredTemp);

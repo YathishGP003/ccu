@@ -1373,8 +1373,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             e.printStackTrace();
         }
 
-        spinnerValue1.setSelection(conditionMode);
-        spinnerValue2.setSelection(fanMode);
+        spinnerValue1.setSelection(conditionMode,false);
+        spinnerValue2.setSelection(fanMode,false);
 
         linearLayoutZonePoints.addView(viewTitle);
         linearLayoutZonePoints.addView(viewStatus);
@@ -1509,8 +1509,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             e.printStackTrace();
         }
 
-        spinnerValue1.setSelection(conditionMode);
-        spinnerValue2.setSelection(fanMode);
+        spinnerValue1.setSelection(conditionMode,false);
+        spinnerValue2.setSelection(fanMode,false);
 
         linearLayoutZonePoints.addView(viewTitle);
         linearLayoutZonePoints.addView(viewStatus);
@@ -1653,8 +1653,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             e.printStackTrace();
         }
 
-        spinnerValue1.setSelection(conditionMode);
-        spinnerValue2.setSelection(fanMode);
+        spinnerValue1.setSelection(conditionMode,false);
+        spinnerValue2.setSelection(fanMode,false);
 
         linearLayoutZonePoints.addView(viewTitle);
         linearLayoutZonePoints.addView(viewStatus);
@@ -1747,8 +1747,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             e.printStackTrace();
         }
 
-        spinnerValue1.setSelection(conditionMode);
-        spinnerValue2.setSelection(fanMode);
+        spinnerValue1.setSelection(conditionMode,false);
+        spinnerValue2.setSelection(fanMode,false);
 
         linearLayoutZonePoints.addView(viewTitle);
         linearLayoutZonePoints.addView(viewStatus);

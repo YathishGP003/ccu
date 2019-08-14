@@ -108,102 +108,82 @@ public class UpdateScheduleHandler
         ArrayList<HashMap> zones = CCUHsApi.getInstance().readAll("room");
         for (HashMap m : zones)
         {
-            ArrayList<Interval> intervalSpills = new ArrayList<>();
-            Schedule zoneSchedule = CCUHsApi.getInstance().getScheduleById(m.get("scheduleRef").toString());
-            CcuLog.d(L.TAG_CCU_PUBNUB, "Zone " + m + " " + zoneSchedule.toString());
-            if (zoneSchedule.getMarkers().contains("disabled"))
-            {
-                continue;
-            }
-            ArrayList<Interval> zoneIntervals = zoneSchedule.getScheduledIntervals();
-            for (Interval v : zoneIntervals)
-            {
-                CcuLog.d(L.TAG_CCU_PUBNUB, "Zone interval " + v);
-            }
-            ArrayList<Interval> systemIntervals = buildingSchedule.getMergedIntervals();
-            ArrayList<Interval> splitSchedules = new ArrayList<>();
-            for (Interval v : systemIntervals)
-            {
-                //Multiday schedule starting on sunday has monday segment falling in the next week.Split and realign that.
-                if (v.getStart().getDayOfWeek() == 7 && v.getEnd().getDayOfWeek() == 1)
-                {
-                    long now = MockTime.getInstance().getMockTime();
-                    DateTime startTime = new DateTime(now).withHourOfDay(0).withMinuteOfHour(0).withSecondOfMinute(0).withMillisOfSecond(0).withDayOfWeek(1);
-                    DateTime endTime = new DateTime(now).withHourOfDay(v.getEnd().getHourOfDay()).withMinuteOfHour(v.getEnd().getMinuteOfHour()).withSecondOfMinute(v.getEnd().getSecondOfMinute()).withMillisOfSecond(v.getEnd().getMillisOfSecond()).withDayOfWeek(1);
-                    splitSchedules.add(new Interval(startTime, endTime));
+            if(m.containsKey("scheduleRef")) {
+                ArrayList<Interval> intervalSpills = new ArrayList<>();
+                Schedule zoneSchedule = CCUHsApi.getInstance().getScheduleById(m.get("scheduleRef").toString());
+                CcuLog.d(L.TAG_CCU_PUBNUB, "Zone " + m + " " + zoneSchedule.toString());
+                if (zoneSchedule.getMarkers().contains("disabled")) {
+                    continue;
                 }
-            }
-            systemIntervals.addAll(splitSchedules);
-            for (Interval v : systemIntervals)
-            {
-                CcuLog.d(L.TAG_CCU_PUBNUB, "Merged System interval " + v);
-            }
-            for (Interval z : zoneIntervals)
-            {
-                boolean contains = false;
-                for (Interval s : systemIntervals)
-                {
-                    if (s.contains(z))
-                    {
-                        contains = true;
-                        break;
+                ArrayList<Interval> zoneIntervals = zoneSchedule.getScheduledIntervals();
+                for (Interval v : zoneIntervals) {
+                    CcuLog.d(L.TAG_CCU_PUBNUB, "Zone interval " + v);
+                }
+                ArrayList<Interval> systemIntervals = buildingSchedule.getMergedIntervals();
+                ArrayList<Interval> splitSchedules = new ArrayList<>();
+                for (Interval v : systemIntervals) {
+                    //Multiday schedule starting on sunday has monday segment falling in the next week.Split and realign that.
+                    if (v.getStart().getDayOfWeek() == 7 && v.getEnd().getDayOfWeek() == 1) {
+                        long now = MockTime.getInstance().getMockTime();
+                        DateTime startTime = new DateTime(now).withHourOfDay(0).withMinuteOfHour(0).withSecondOfMinute(0).withMillisOfSecond(0).withDayOfWeek(1);
+                        DateTime endTime = new DateTime(now).withHourOfDay(v.getEnd().getHourOfDay()).withMinuteOfHour(v.getEnd().getMinuteOfHour()).withSecondOfMinute(v.getEnd().getSecondOfMinute()).withMillisOfSecond(v.getEnd().getMillisOfSecond()).withDayOfWeek(1);
+                        splitSchedules.add(new Interval(startTime, endTime));
                     }
                 }
-                if (!contains)
-                {
-                    for (Interval s : systemIntervals)
-                    {
-                        if (s.overlaps(z))
-                        {
-                            if (z.getStartMillis() < s.getStartMillis())
-                            {
-                                intervalSpills.add(new Interval(z.getStartMillis(), s.getStartMillis()));
-                            }
-                            else if (z.getEndMillis() > s.getEndMillis())
-                            {
-                                intervalSpills.add(new Interval(s.getEndMillis(), z.getEndMillis()));
-                            }
+                systemIntervals.addAll(splitSchedules);
+                for (Interval v : systemIntervals) {
+                    CcuLog.d(L.TAG_CCU_PUBNUB, "Merged System interval " + v);
+                }
+                for (Interval z : zoneIntervals) {
+                    boolean contains = false;
+                    for (Interval s : systemIntervals) {
+                        if (s.contains(z)) {
                             contains = true;
                             break;
                         }
                     }
+                    if (!contains) {
+                        for (Interval s : systemIntervals) {
+                            if (s.overlaps(z)) {
+                                if (z.getStartMillis() < s.getStartMillis()) {
+                                    intervalSpills.add(new Interval(z.getStartMillis(), s.getStartMillis()));
+                                } else if (z.getEndMillis() > s.getEndMillis()) {
+                                    intervalSpills.add(new Interval(s.getEndMillis(), z.getEndMillis()));
+                                }
+                                contains = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!contains) {
+                        intervalSpills.add(z);
+                        CcuLog.d(L.TAG_CCU_PUBNUB, " Zone Interval not contained " + z);
+                    }
                 }
-                if (!contains)
-                {
-                    intervalSpills.add(z);
-                    CcuLog.d(L.TAG_CCU_PUBNUB, " Zone Interval not contained " + z);
+                Iterator daysIterator = zoneSchedule.getDays().iterator();
+                while (daysIterator.hasNext()) {
+                    Schedule.Days d = (Schedule.Days) daysIterator.next();
+                    Interval i = zoneSchedule.getScheduledInterval(d);
+                    for (Interval spill : intervalSpills) {
+                        if (!i.contains(spill)) {
+                            continue;
+                        }
+                        if (spill.getStartMillis() <= i.getStartMillis() && spill.getEndMillis() >= i.getEndMillis()) {
+                            daysIterator.remove();
+                            continue;
+                        }
+                        if (spill.getStartMillis() <= i.getStartMillis()) {
+                            d.setSthh(spill.getEnd().getHourOfDay());
+                            d.setStmm(spill.getEnd().getMinuteOfHour());
+                        } else if (i.getEndMillis() >= spill.getStartMillis()) {
+                            d.setEthh(spill.getStart().getHourOfDay());
+                            d.setEtmm(spill.getStart().getMinuteOfHour());
+                        }
+                    }
                 }
+                Log.d(L.TAG_CCU_PUBNUB, "Trimmed Zone Schedule " + zoneSchedule.toString());
+                CCUHsApi.getInstance().updateZoneSchedule(zoneSchedule, zoneSchedule.getRoomRef());
             }
-            Iterator daysIterator = zoneSchedule.getDays().iterator();
-            while (daysIterator.hasNext())
-            {
-                Schedule.Days d = (Schedule.Days) daysIterator.next();
-                Interval i = zoneSchedule.getScheduledInterval(d);
-                for (Interval spill : intervalSpills)
-                {
-                    if (!i.contains(spill))
-                    {
-                        continue;
-                    }
-                    if (spill.getStartMillis() <= i.getStartMillis() && spill.getEndMillis() >= i.getEndMillis())
-                    {
-                        daysIterator.remove();
-                        continue;
-                    }
-                    if (spill.getStartMillis() <= i.getStartMillis())
-                    {
-                        d.setSthh(spill.getEnd().getHourOfDay());
-                        d.setStmm(spill.getEnd().getMinuteOfHour());
-                    }
-                    else if (i.getEndMillis() >= spill.getStartMillis())
-                    {
-                        d.setEthh(spill.getStart().getHourOfDay());
-                        d.setEtmm(spill.getStart().getMinuteOfHour());
-                    }
-                }
-            }
-            Log.d(L.TAG_CCU_PUBNUB, "Trimmed Zone Schedule " + zoneSchedule.toString());
-            CCUHsApi.getInstance().updateZoneSchedule(zoneSchedule, zoneSchedule.getRoomRef());
         }
     }
 }

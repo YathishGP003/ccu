@@ -42,6 +42,9 @@ public class EngineeringPagerAdapter extends FragmentStatePagerAdapter
 			case 5:
 				fragment = OTAUpdateTestFragment.newInstance();
 				break;
+			case 6:
+				fragment = UpdateRenatusVersion.newInstance();
+				break;
 		}
 		return fragment;
 	}
@@ -49,7 +52,7 @@ public class EngineeringPagerAdapter extends FragmentStatePagerAdapter
 	@Override
 	public int getCount() {
 		// Show 2 total pages.
-		return 6;
+		return 7;
 	}
 	
 	@Override
@@ -58,7 +61,7 @@ public class EngineeringPagerAdapter extends FragmentStatePagerAdapter
 			case 0:
 				return "Dev Settings";
 			case 1:
-				return "CcuLog View";
+				return "CcuLog";
 			case 2:
 				return "Field Test";
 			case 3:
@@ -66,7 +69,9 @@ public class EngineeringPagerAdapter extends FragmentStatePagerAdapter
 			case 4:
 				return "BLE Test";
 			case 5:
-				return "OTA Update Test";
+				return "OTA Update";
+			case 6:
+				return "Install Update";
 				
 		}
 		return null;

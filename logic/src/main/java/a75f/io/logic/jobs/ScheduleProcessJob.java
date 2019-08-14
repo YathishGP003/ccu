@@ -75,6 +75,7 @@ public class ScheduleProcessJob extends BaseJob {
     private static Schedule activeSystemVacation = null;
     private static Occupied activeZoneVacation = null;
     private static ZoneDataInterface scheduleDataInterface = null;
+    private static ZoneDataInterface zoneDataInterface = null;
     public static Occupied getOccupiedModeCache(String id) {
         if(!occupiedHashMap.containsKey(id))
         {
@@ -560,6 +561,7 @@ public class ScheduleProcessJob extends BaseJob {
     }
     
     public static void updateEquipScheduleStatus(Equip equip) {
+        Occupancy zoneOccupancy = getZoneStatus(equip);
         ArrayList points = CCUHsApi.getInstance().readAll("point and scheduleStatus and equipRef == \""+equip.getId()+"\"");
         if (points != null && points.size() > 0)
         {
@@ -568,7 +570,7 @@ public class ScheduleProcessJob extends BaseJob {
             if (!currentState.equals(getZoneStatusString(equip.getRoomRef(), equip.getId())))
             {
                 CCUHsApi.getInstance().writeDefaultValById(id, getZoneStatusString(equip.getRoomRef(),equip.getId()));
-                CCUHsApi.getInstance().writeHisValById(id, (double) getZoneStatus(equip.getRoomRef()).ordinal());
+                CCUHsApi.getInstance().writeHisValById(id, (double) zoneOccupancy.ordinal());
                 if(scheduleDataInterface !=null){
                     String zoneId = Schedule.getZoneIdByEquipId(equip.getId());
                     scheduleDataInterface.refreshScreenbySchedule(equip.getGroup(),equip.getId(),zoneId);
@@ -581,7 +583,7 @@ public class ScheduleProcessJob extends BaseJob {
         ArrayList occ = CCUHsApi.getInstance().readAll("point and occupancy and status and equipRef == \""+equip.getId()+"\"");
         if (occ != null && occ.size() > 0) {
             String id = ((HashMap) points.get(0)).get("id").toString();
-            CCUHsApi.getInstance().writeHisValById(id, (double) getZoneStatus(equip.getRoomRef()).ordinal());
+            CCUHsApi.getInstance().writeHisValById(id, (double) zoneOccupancy.ordinal());
         }
     }
 
@@ -901,16 +903,17 @@ public class ScheduleProcessJob extends BaseJob {
         return plcPoints;
     }
 
-    public static Occupancy getZoneStatus(String zoneId)
+
+    public static Occupancy getZoneStatus(Equip equip)
     {
         
-        Occupied cachedOccupied = getOccupiedModeCache(zoneId);
+        Occupied cachedOccupied = getOccupiedModeCache(equip.getRoomRef());
         Occupancy c = UNOCCUPIED;
         
         if (cachedOccupied != null && cachedOccupied.isOccupied())
         {
             c = OCCUPIED;
-        } else if (getTemporaryHoldExpiry(zoneId) > 0){
+        } else if (getTemporaryHoldExpiry(equip.getRoomRef()) > 0){
             c = FORCED_OCCUPIED;
         }else if((cachedOccupied != null) && (cachedOccupied.isPreconditioning())) {
             //handle preconditioning??
@@ -918,6 +921,12 @@ public class ScheduleProcessJob extends BaseJob {
             c = PRECONDITIONING;
         }else if((cachedOccupied != null) && cachedOccupied.isOccupancySensed()){
             c = OCCUPANCY_SENSING;
+        }
+        if((zoneDataInterface != null) && (cachedOccupied != null)){
+            Log.d("Scheduler","updateZoneOccupancy==>>"+cachedOccupied.isForcedOccupied()+","+cachedOccupied.isOccupied()+","+cachedOccupied.isPreconditioning());
+            double coolVal = (c == UNOCCUPIED ? cachedOccupied.getCoolingVal() + cachedOccupied.getUnoccupiedZoneSetback() : cachedOccupied.getCoolingVal());
+            double heatVal = (c== UNOCCUPIED ? cachedOccupied.getHeatingVal() - cachedOccupied.getUnoccupiedZoneSetback() : cachedOccupied.getHeatingVal());
+            zoneDataInterface.refreshDesiredTemp(equip.getGroup(), String.valueOf(coolVal),String.valueOf(heatVal));
         }
         
         return c;
@@ -1183,4 +1192,7 @@ public class ScheduleProcessJob extends BaseJob {
     }
 
     public static void setScheduleDataInterface(ZoneDataInterface in) { scheduleDataInterface = in; }
+    public static void setZoneDataInterface(ZoneDataInterface in){
+        zoneDataInterface = in;
+    }
 }

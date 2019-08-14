@@ -681,86 +681,77 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
             
             for (HashMap m : zones) {
                 ArrayList<Interval> intervalSpills = new ArrayList<>();
-                Schedule zoneSchedule = CCUHsApi.getInstance().getScheduleById(m.get("scheduleRef").toString());
-                CcuLog.d(L.TAG_CCU_UI, "Zone "+m+" "+zoneSchedule.toString());
-                if (zoneSchedule.getMarkers().contains("disabled")) {
-                    continue;
-                }
-                
-                ArrayList<Interval> zoneIntervals = zoneSchedule.getScheduledIntervals();
-    
-                for (Interval v : zoneIntervals)
-                {
-                    CcuLog.d(L.TAG_CCU_UI, "Zone interval "+v);
-                }
-    
-                ArrayList<Interval> systemIntervals = schedule.getMergedIntervals();
-                if (daysArrayList != null)
-                {
-                    systemIntervals.addAll(schedule.getScheduledIntervals(daysArrayList));
-                }
-                ArrayList<Interval> splitSchedules = new ArrayList<>();
-                for (Interval v : systemIntervals)
-                {
-                    if (v.getStart().getDayOfWeek() == 7 && v.getEnd().getDayOfWeek() == 1) {
-                        long now = MockTime.getInstance().getMockTime();
-                        DateTime startTime = new DateTime(now)
-                                                     .withHourOfDay(0)
-                                                     .withMinuteOfHour(0)
-                                                     .withSecondOfMinute(0).withMillisOfSecond(0).withDayOfWeek(1);
-            
-                        DateTime endTime = new DateTime(now).withHourOfDay(v.getEnd().getHourOfDay())
-                                                            .withMinuteOfHour(v.getEnd().getMinuteOfHour())
-                                                            .withSecondOfMinute(v.getEnd().getSecondOfMinute())
-                                                            .withMillisOfSecond(v.getEnd().getMillisOfSecond()).withDayOfWeek(1);
-                        splitSchedules.add(new Interval(startTime,endTime));
+                if(m.containsKey("scheduleRef")) {
+                    Schedule zoneSchedule = CCUHsApi.getInstance().getScheduleById(m.get("scheduleRef").toString());
+                    CcuLog.d(L.TAG_CCU_UI, "Zone " + m + " " + zoneSchedule.toString());
+                    if (zoneSchedule.getMarkers().contains("disabled")) {
+                        continue;
                     }
-                }
-                systemIntervals.addAll(splitSchedules);
-                for (Interval v : systemIntervals) {
-                    CcuLog.d(L.TAG_CCU_UI, "Merged System interval "+v);
-                }
-    
-                for(Interval z : zoneIntervals) {
-                    boolean contains = false;
-                    for (Interval s: systemIntervals) {
-                        if (s.contains(z)) {
-                            contains = true;
-                            break;
+
+                    ArrayList<Interval> zoneIntervals = zoneSchedule.getScheduledIntervals();
+
+                    for (Interval v : zoneIntervals) {
+                        CcuLog.d(L.TAG_CCU_UI, "Zone interval " + v);
+                    }
+
+                    ArrayList<Interval> systemIntervals = schedule.getMergedIntervals();
+                    if (daysArrayList != null) {
+                        systemIntervals.addAll(schedule.getScheduledIntervals(daysArrayList));
+                    }
+                    ArrayList<Interval> splitSchedules = new ArrayList<>();
+                    for (Interval v : systemIntervals) {
+                        if (v.getStart().getDayOfWeek() == 7 && v.getEnd().getDayOfWeek() == 1) {
+                            long now = MockTime.getInstance().getMockTime();
+                            DateTime startTime = new DateTime(now)
+                                    .withHourOfDay(0)
+                                    .withMinuteOfHour(0)
+                                    .withSecondOfMinute(0).withMillisOfSecond(0).withDayOfWeek(1);
+
+                            DateTime endTime = new DateTime(now).withHourOfDay(v.getEnd().getHourOfDay())
+                                    .withMinuteOfHour(v.getEnd().getMinuteOfHour())
+                                    .withSecondOfMinute(v.getEnd().getSecondOfMinute())
+                                    .withMillisOfSecond(v.getEnd().getMillisOfSecond()).withDayOfWeek(1);
+                            splitSchedules.add(new Interval(startTime, endTime));
                         }
                     }
-    
-                    if (!contains)
-                    {
-                        for (Interval s : systemIntervals)
-                        {
-                            if (s.overlaps(z))
-                            {
-                                if (z.getStartMillis() < s.getStartMillis())
-                                {
-                                    intervalSpills.add(new Interval(z.getStartMillis(), s.getStartMillis()));
-                                }
-                                else if (z.getEndMillis() > s.getEndMillis())
-                                {
-                                    intervalSpills.add(new Interval(s.getEndMillis(), z.getEndMillis()));
-                                }
+                    systemIntervals.addAll(splitSchedules);
+                    for (Interval v : systemIntervals) {
+                        CcuLog.d(L.TAG_CCU_UI, "Merged System interval " + v);
+                    }
+
+                    for (Interval z : zoneIntervals) {
+                        boolean contains = false;
+                        for (Interval s : systemIntervals) {
+                            if (s.contains(z)) {
                                 contains = true;
                                 break;
                             }
                         }
+
+                        if (!contains) {
+                            for (Interval s : systemIntervals) {
+                                if (s.overlaps(z)) {
+                                    if (z.getStartMillis() < s.getStartMillis()) {
+                                        intervalSpills.add(new Interval(z.getStartMillis(), s.getStartMillis()));
+                                    } else if (z.getEndMillis() > s.getEndMillis()) {
+                                        intervalSpills.add(new Interval(s.getEndMillis(), z.getEndMillis()));
+                                    }
+                                    contains = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (!contains) {
+                            intervalSpills.add(z);
+                            CcuLog.d(L.TAG_CCU_UI, " Zone Interval not contained " + z);
+                        }
+
                     }
-                    
-                    if (!contains)
-                    {
-                        intervalSpills.add(z);
-                        CcuLog.d(L.TAG_CCU_UI, " Zone Interval not contained "+z);
+
+                    if (intervalSpills.size() > 0) {
+                        spillsMap.put(m.get("id").toString(), intervalSpills);
                     }
-        
-                }
-                
-                if (intervalSpills.size() > 0)
-                {
-                    spillsMap.put(m.get("id").toString(), intervalSpills);
                 }
             }
         }

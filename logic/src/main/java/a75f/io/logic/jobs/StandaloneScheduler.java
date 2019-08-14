@@ -1,6 +1,8 @@
 package a75f.io.logic.jobs;
 
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import org.projecthaystack.HNum;
@@ -17,10 +19,8 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.ZoneTempState;
-import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
@@ -33,12 +33,7 @@ public class StandaloneScheduler {
     static HashMap<String, String> standaloneStatus = new HashMap<String, String>();
 
     private static final String TAG = "SAScheduler";
-    static double coolingDesiredTemp = 74.0;
-    static double heatingDesiredTemp = 70.0;
-    static double averageDesiredTemp = 72.0;
-
-    private static ZoneDataInterface scheduleDataInterface = null;
-    public static Occupied processEquip(Equip equip, Schedule equipSchedule, Schedule vacation) {
+    public static Occupied processEquip( Equip equip, Schedule equipSchedule, Schedule vacation) {
 
 
         Log.i(TAG, "Equip: " + equip);
@@ -62,37 +57,16 @@ public class StandaloneScheduler {
         occ.setUnoccupiedZoneSetback(setback);
         occ.setHeatingDeadBand(heatingDeadBand);
         occ.setCoolingDeadBand(coolingDeadBand);
-        boolean schdeulerUpdated = false;
-        Occupancy occustatus = ScheduleProcessJob.getZoneStatus( equip.getRoomRef());
         if (occ != null && ScheduleProcessJob.putOccupiedModeCache(equip.getRoomRef(), occ)) {
             double avgTemp = (occ.getCoolingVal()+occ.getHeatingVal())/2.0;
             double deadbands = (occ.getCoolingVal() - occ.getHeatingVal()) / 2.0 ;
             occ.setCoolingDeadBand(deadbands);
             occ.setHeatingDeadBand(deadbands);
-            Double coolingTemp = (occ.isOccupied() || (occustatus == Occupancy.PRECONDITIONING) || (occustatus == Occupancy.FORCED_OCCUPIED)) ? occ.getCoolingVal() : (occ.getCoolingVal() + occ.getUnoccupiedZoneSetback());
-            if(coolingTemp != coolingDesiredTemp) {
-                coolingDesiredTemp = coolingTemp;
-                setDesiredTemp(equip, coolingTemp, "cooling");
-                schdeulerUpdated = true;
-            }
-
-            Double heatingTemp = (occ.isOccupied() || (occustatus == Occupancy.PRECONDITIONING) || (occustatus == Occupancy.FORCED_OCCUPIED))? occ.getHeatingVal() : (occ.getHeatingVal() - occ.getUnoccupiedZoneSetback());
-            if(heatingTemp != heatingDesiredTemp) {
-                heatingDesiredTemp = heatingTemp;
-                setDesiredTemp(equip, heatingTemp, "heating");
-                schdeulerUpdated = true;
-            }
-            if(avgTemp != averageDesiredTemp) {
-                averageDesiredTemp = avgTemp;
-                setDesiredTemp(equip, avgTemp, "average");
-                schdeulerUpdated = true;
-            }
-            if(schdeulerUpdated)
-            {
-                if(scheduleDataInterface != null) {
-                    scheduleDataInterface.refreshTemp(equip.getGroup(),equip.getId());
-                }
-            }
+            Double coolingTemp = ((occ.isOccupied() || occ.isPreconditioning() || occ.isForcedOccupied()) ? occ.getCoolingVal() : (occ.getCoolingVal() + occ.getUnoccupiedZoneSetback()));
+            setDesiredTemp(equip, coolingTemp, "cooling");
+            Double heatingTemp = (occ.isOccupied() || occ.isPreconditioning() || occ.isForcedOccupied())? occ.getHeatingVal() : (occ.getHeatingVal() - occ.getUnoccupiedZoneSetback());
+            setDesiredTemp(equip, heatingTemp, "heating");
+            setDesiredTemp(equip, avgTemp, "average");
         }
 
         return occ;
@@ -100,12 +74,12 @@ public class StandaloneScheduler {
 
 
     public static void setDesiredTemp(Equip equip, Double desiredTemp, String flag) {
-        CcuLog.d(L.TAG_CCU_SCHEDULER, "Equip: " + equip.getId() + " Temp: " + desiredTemp + " Flag: " + flag);
+        //CcuLog.d(L.TAG_CCU_SCHEDULER, "Equip: " + equip.getId() + " Temp: " + desiredTemp + " Flag: " + flag);
         ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and " + flag + " and desired and sp and equipRef == \"" + equip.getId() + "\"");
         if (points == null || points.size() == 0) {
             return; //Equip might have been deleted.
         }
-        String id = ((HashMap) points.get(0)).get("id").toString();
+        final String id = ((HashMap) points.get(0)).get("id").toString();
         if (HSUtil.getPriorityLevelVal(id,8) == desiredTemp) {
             CcuLog.d(L.TAG_CCU_SCHEDULER, flag+"DesiredTemp not changed : Skip PointWrite");
             return;
@@ -115,7 +89,13 @@ public class StandaloneScheduler {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        CCUHsApi.getInstance().writeHisValById(id, HSUtil.getPriorityVal(id));
+
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                CCUHsApi.getInstance().writeHisValById(id, HSUtil.getPriorityVal(id));
+            }
+        },100);
     }
 
     public static void updateSmartStatStatus(String equipId, ZoneState state, HashMap<String,Integer> relayStages, ZoneTempState temperatureState){
@@ -248,6 +228,5 @@ public class StandaloneScheduler {
         CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and equipRef == \""+equipId+"\"", status);
 
     }
-    public static void setSchedulerDataInterface(ZoneDataInterface in) { scheduleDataInterface = in; }
 
 }

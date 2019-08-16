@@ -27,6 +27,9 @@ public class PubNubHandler
             case RemoteCommandUpdateHandler.CMD:
                 RemoteCommandUpdateHandler.handleMessage(msg, context);
                 break;
+            case AlertDefinitionHandler.CMD:
+                AlertDefinitionHandler.handleMessage(msg);
+                break;
             default:
                 CcuLog.d(L.TAG_CCU_PUBNUB, "UnSupported PubNub Command Received"+cmd);
                 

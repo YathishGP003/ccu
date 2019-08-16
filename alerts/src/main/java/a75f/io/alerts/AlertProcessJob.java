@@ -34,7 +34,7 @@ public class AlertProcessJob
         CcuLog.d("CCU_ALERTS", "AlertProcessJob -> ");
         HashMap site = CCUHsApi.getInstance().read("site");
         if (site == null || site.size() == 0) {
-            CcuLog.d("","No Site Registered ! <-AlertProcessJob ");
+            CcuLog.d("CCU_ALERTS","No Site Registered ! <-AlertProcessJob ");
             return;
         }
         AlertManager.getInstance(mContext).processAlerts();

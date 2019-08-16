@@ -33,16 +33,12 @@
     },
     {
       "id": "2:6756934624209419492",
-      "lastPropertyId": "12:1795213841195798585",
+      "lastPropertyId": "13:3554938844371872188",
       "name": "Alert",
       "properties": [
         {
           "id": "1:1266283906766086815",
           "name": "id"
-        },
-        {
-          "id": "2:3031198001266913739",
-          "name": "mAlertType"
         },
         {
           "id": "3:4972674601855791834",
@@ -57,7 +53,7 @@
           "name": "mNotificationMsg"
         },
         {
-          "id": "6:1293464738840167985",
+          "id": "6:8256445436889612611",
           "name": "mSeverity"
         },
         {
@@ -83,6 +79,10 @@
         {
           "id": "12:1795213841195798585",
           "name": "alertId"
+        },
+        {
+          "id": "13:3554938844371872188",
+          "name": "ref"
         }
       ],
       "relations": []
@@ -96,7 +96,9 @@
   "modelVersionParserMinimum": 4,
   "retiredEntityUids": [],
   "retiredIndexUids": [],
-  "retiredPropertyUids": [],
+  "retiredPropertyUids": [
+    3031198001266913739
+  ],
   "retiredRelationUids": [],
   "version": 1
 }

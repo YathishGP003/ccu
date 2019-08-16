@@ -1,0 +1,45 @@
+
+  [{
+    "conditionals":[
+      {
+        "order" : "1",
+        "key" : "status and his",
+        "value" : "3",
+        "condition" :"=="
+      }
+    ],
+    "offset": "0",
+    "alert": {
+      "mTitle": "Zone Temperature Dead",
+      "mMessage": "Equip #equipname1 is reporting a invalid temperature. It is marked dead",
+      "mNotificationMsg": "Equip #equipname1 is reporting a invalid temperature. It is marked dead",
+      "mSeverity": "FATAL",
+      "mEnabled": "true"
+    }
+  },
+    {
+      "conditionals":[
+        {
+          "order" : "1",
+          "key" : "co2 and sensor and his",
+          "value" : "1000",
+          "condition" :">"
+        }
+      ],
+      "offset": "15",
+      "alert": {
+        "mTitle": "CO2 Above Threshold",
+        "mMessage": "#equipname1 CO2 level of #pointval1 above the threshold of #condval1 for 15 minutes",
+        "mNotificationMsg": "#equipname1 CO2 level of #pointval1 above the threshold of #condval1 for 15 minutes",
+        "mSeverity": "WARN",
+        "mEnabled": "true"
+      }
+    }
+  ]
+
+
+
+
+
+
+

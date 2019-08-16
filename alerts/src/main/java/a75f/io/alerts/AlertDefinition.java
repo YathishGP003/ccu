@@ -4,8 +4,6 @@ package a75f.io.alerts;
  * Created by samjithsadasivan on 4/23/18.
  */
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import java.util.ArrayList;
 
 import a75f.io.api.haystack.Alert;
@@ -16,36 +14,39 @@ import a75f.io.api.haystack.Alert;
 /**
  * A sample definition
  *
- *     {
- *      "conditionals":[
- *          {
- *          "key" : "Battery",
- *          "value" : "75",
- *          "condition" :"<="
- *          },
- *          {
- *          "key" : "Battery",
- *          "value" : "50",
- *          "condition" :">"
- *          },
- *          {
- *          "key" : "Charging",
- *          "value" : "==",
- *          "condition" :"false"
- *          }
- *     ],
- *      "offset": "0",
- *      "alert": {
- *                  "mAlertType": "BATTERY_LEVEL_WARN",
- *                  "mTitle": "Battery level low on CCU [Warn]",
- *                  "mMessage": "The battery level of your CCU [%s] has dropped below 75%% and is not charging.Please check that the tablet is secured to it's mount. if it is plugged in, please contact 75F support.",
- *                  "mNotificationMsg": "The battery level of your CCU has dropped below 75% and is not charging.Please check that the tablet is secured to it's mount. If it is plugged in, please contact 75F support.",
- *                  "mSeverity": "WARN",
- *                  "mEnabled": "true"
- *               }
- *      }
+    [
+        {
+            "conditionals":[
+                             {
+                             "order" : "1",
+                             "key" : “current and temp and his“,
+                             "value" : “80”,
+                             "condition" :”>”
+                             },
+                             {
+                             "order" : "2",
+                             "operator" : "&&"
+                             },
+                             {
+                             "order" : "3",
+                             "key" : "current and temp and his“,
+                             "value" : “100”,
+                             "condition": "<"
+                             }
+                            ],
+             "offset": "0",
+             "alert": {
+             
+                         "mTitle": “Temperature breach detected“,
+                         "mMessage": "Equip #equipname1 is reporting a temperature of #pointval1 which is greater than  #condval1 and less than #condval3”,
+                         "mNotificationMsg": "Equip #equipname1 is reporting a temperature of #pointval1 which is greater than  #condval1 and less than #condval3",
+                         "mSeverity": “WARN”,
+                         "mEnabled": "true"
+                         }
+        }
+    ]
  */
-@JsonIgnoreProperties({"offsetCount","id"})
+
 public class AlertDefinition
 {
     
@@ -53,21 +54,50 @@ public class AlertDefinition
     public String                 offset;
     public Alert                  alert;
     
-    //Not required for definition, used for processing.
-    public int offsetCount;
-    
     public AlertDefinition(){
     
     }
-    
-    public boolean evaluate() {
-        boolean alertStatus = true;
+    //Evaluate conditionals for any entity.
+    public void evaluate() {
         for (Conditional c : conditionals) {
-            alertStatus = alertStatus && c.evaluate();
-            if (alertStatus == false) {
-                return false;
+            if (c.operator == null)
+            {
+                c.evaluate();
             }
         }
-        return true;
+    }
+    
+    //Evaluate conditionals for an equip
+    public boolean evaluate(String equipId) {
+        boolean alertStatus = true;
+        for (Conditional c : conditionals) {
+            if (c.operator == null)
+            {
+                c.evaluate(equipId);
+            }
+        }
+    
+        for (int i = 0; i < conditionals.size(); i+=2) {
+            if (i == 0) {
+                alertStatus =conditionals.get(0).status;
+                continue;
+            }
+            if (conditionals.get(i-1).operator.contains("&&")) {
+                alertStatus &= conditionals.get(i).status;
+            } else if (conditionals.get(i-1).operator.contains("||")) {
+                alertStatus |= conditionals.get(i).status;
+            }
+        }
+        return alertStatus;
+    }
+    
+    @Override
+    public String toString() {
+        StringBuilder b = new StringBuilder();
+        b.append("AlertDefinition, Title: "+alert.mTitle+" Message "+alert.mMessage);
+        for (Conditional c : conditionals) {
+            b.append("{"+c.toString()+"} ");
+        }
+        return b.toString();
     }
 }

@@ -167,6 +167,7 @@ public class Pulse
 				CCUHsApi.getInstance().writeHisValById(sp.getId(), (double) emVal);
 				CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), (double) emVal);
 			}
+			CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : EMR "+emVal);
 		}
 	
 	}

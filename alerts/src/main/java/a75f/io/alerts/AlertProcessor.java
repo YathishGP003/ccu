@@ -2,19 +2,23 @@ package a75f.io.alerts;
 
 import android.content.Context;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 
 import org.joda.time.DateTime;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import a75f.io.api.haystack.Alert;
 import a75f.io.api.haystack.Alert_;
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.MyObjectBox;
+import a75f.io.logger.CcuLog;
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
 import io.objectbox.DebugFlags;
@@ -34,6 +38,7 @@ public class AlertProcessor
     ArrayList<Alert> activeAlertList;
     ArrayList<AlertDefinition> predefinedAlerts;
     
+    ArrayList<AlertDefinition> customAlerts = new ArrayList<>();
     AlertParser parser;
     
     Context mContext;
@@ -47,6 +52,9 @@ public class AlertProcessor
     private static final String PREFS_ALERT_DEFS = "ccu_alerts";
     private static final String PREFS_ALERTS_CUSTOM = "custom_alerts";
     
+    HashMap<String, Integer> offsetCounter = new HashMap<>();
+    HashSet<String> activeAlertRefs ;
+    
     AlertProcessor(Context c) {
         mContext = c;
     
@@ -54,14 +62,15 @@ public class AlertProcessor
         {
             boxStore.close();
         }
-        boxStore = MyObjectBox.builder().androidContext(c).build();
+        boxStore = CCUHsApi.getInstance().tagsDb.getBoxStore();//MyObjectBox.builder().androidContext(c).build();
         alertBox = boxStore.boxFor(Alert.class);
         alertList = new ArrayList<>();
         activeAlertList = new ArrayList<>();
-        predefinedAlerts = parser.parseAllAlerts(c);
         parser = new AlertParser();
+        predefinedAlerts = parser.parseAllAlerts(c);
     }
     
+    //For Unit testing
     AlertProcessor(String alertDef) {
         if (boxStore == null)
         {
@@ -79,40 +88,114 @@ public class AlertProcessor
         predefinedAlerts = parser.parseAlertsString(alertDef);
     }
     
-    public void runProcess() {
+    public void processAlerts() {
+        CcuLog.d("CCU_ALERTS", "processAlerts ");
+        activeAlertRefs = new HashSet<>();
         for (AlertDefinition def : getAlertDefinitions()) {
-        
-            if (def.evaluate()) {
-                if (Integer.parseInt(def.offset.trim()) == 0) {
-                    addAlert(AlertBuilder.build(def));
-                }else if (Integer.parseInt(def.offset.trim()) <= ++def.offsetCount ) {
-                    def.offsetCount = 0;
-                    addAlert(AlertBuilder.build(def));
+            if (!def.alert.ismEnabled()) {
+                continue;
+            }
+            
+            if (isZoneAlert(def)) {
+                CcuLog.d("CCU_ALERTS", "processAlerts: Check equips for  "+def.toString());
+                ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("zone and equip");
+                for (HashMap eq : equips) {
+                    if (def.evaluate(eq.get("id").toString())) {
+                        activeAlertRefs.add(def.alert.mTitle+eq.get("id"));
+                        if (alertActive(def.alert,eq.get("id").toString())){
+                            continue;
+                        }
+                        if (Integer.parseInt(def.offset) > 0) {
+                            int offset = 0;
+                            if (offsetCounter.get(def.alert.mTitle+eq.get("id")) != null)
+                            {
+                                offset = offsetCounter.get(def.alert.mTitle + eq.get("id"));
+                            }
+                            
+                            if (offset++ >= Integer.parseInt(def.offset)) {
+                                addAlert(AlertBuilder.build(def, AlertFormatter.getFormattedMessage(def),eq.get("id").toString()));
+                                CcuLog.d("CCU_ALERTS", "Equip "+eq.get("dis")+" addAlert "+def.toString());
+                            } else
+                            {
+                                CcuLog.d("CCU_ALERTS", "Equip "+eq.get("dis") + " offset " +offset);
+                            }
+                            offsetCounter.put(def.alert.mTitle + eq.get("id"), offset);
+                        } else {
+                            addAlert(AlertBuilder.build(def, AlertFormatter.getFormattedMessage(def), eq.get("id").toString()));
+                        }
+                        
+                    }
                 }
             } else {
-                def.offsetCount = 0;
-                //fixAlert(def.alert.getAlertType());
+                CcuLog.d("CCU_ALERTS", "processAlerts: Find points for "+def.toString());
+                def.evaluate();
+                ArrayList<String> pointList = null;
+                for (int i = 0; i < def.conditionals.size(); i+=2) {
+                    if (i == 0) {
+                        pointList = def.conditionals.get(0).trueList;
+                        continue;
+                    }
+                    if (def.conditionals.get(i-1).operator.contains("&&")) {
+                        pointList.retainAll(def.conditionals.get(i).trueList);
+                    } else if (def.conditionals.get(i-1).operator.contains("||")) {
+                        pointList.addAll(def.conditionals.get(i).trueList);
+                    }
+                }
+                for(String point : pointList) {
+                    if (!alertActive(def.alert, point))
+                    {
+                        HashMap p = CCUHsApi.getInstance().readMapById(point);
+                        if (Integer.parseInt(def.offset) > 0) {
+                            int offset = 0;
+                            if (offsetCounter.get(def.alert.mTitle+p.get("id")) != null)
+                            {
+                                offset = offsetCounter.get(def.alert.mTitle + p.get("id"));
+                            }
+                            if (offset++ >= Integer.parseInt(def.offset)) {
+                                addAlert(AlertBuilder.build(def, AlertFormatter.getFormattedMessage(def), point));
+                                CcuLog.d("CCU_ALERTS", "Point " + p.get("dis") + " addAlert " + def.toString());
+                            } else
+                            {
+                                CcuLog.d("CCU_ALERTS", "Point "+p.get("dis") + " offset " +offset);
+                            }
+                        } else {
+                            addAlert(AlertBuilder.build(def, AlertFormatter.getFormattedMessage(def), point));
+                        }
+                    }
+                    activeAlertRefs.add(def.alert.mTitle+point);
+                }
             }
+        }
+        
+        //Fix alerts which are no more active
+        for (Alert  a : getActiveAlerts()) {
+            if (!activeAlertRefs.contains(a.mTitle+a.ref)) {
+                fixAlert(a);
+            }
+        }
+        
+        for (Alert a : getActiveAlerts()) {
+            CcuLog.d("CCU_ALERTS"," Active Alert "+a.toString());
         }
     }
     
-    public void runProcess(Map<String,Object> tsData) {
-        
-        /*for (AlertDefinition def : predefinedAlerts) {
-            
-            if (def.evaluate(tsData)) {
-                if (Integer.parseInt(def.offset.trim()) == 0) {
-                    addAlert(AlertBuilder.build(def));
-                }else if (Integer.parseInt(def.offset.trim()) <= ++def.offsetCount ) {
-                    def.offsetCount = 0;
-                    addAlert(AlertBuilder.build(def));
-                }
-            } else {
-                def.offsetCount = 0;
-                fixAlert(def.alert.getAlertType());
+    public boolean isZoneAlert(AlertDefinition ad) {
+        for (Conditional d : ad.conditionals) {
+            if (d.operator != null ) continue;
+            if (d.key.contains("zone")) {
+                return true;
             }
-        }*/
+        }
+        return false;
+    }
     
+    public boolean alertActive(Alert a, String ref) {
+        for (Alert b : getActiveAlerts()) {
+            if (b.mMessage.equals(a.mMessage) && b.ref.equals(ref)) {
+                return true;
+            }
+        }
+        return false;
     }
     
     public ArrayList<AlertDefinition> getAlertDefinitions(){
@@ -123,32 +206,33 @@ public class AlertProcessor
     }
     
     public List<AlertDefinition> getCustomAlertDefinitions() {
-        String alerts = mContext.getSharedPreferences(PREFS_ALERT_DEFS, Context.MODE_PRIVATE).getString(PREFS_ALERTS_CUSTOM, null);
-        return parser.parseAlertsString(alerts);
+        if (customAlerts.size() == 0)
+        {
+            String alerts = mContext.getSharedPreferences(PREFS_ALERT_DEFS, Context.MODE_PRIVATE).getString(PREFS_ALERTS_CUSTOM, null);
+            if (alerts != null) {
+                customAlerts = parser.parseAlertsString(alerts);
+            }
+        }
+        return customAlerts;
     }
     
     public void updateCustomAlertDefinitions(List<AlertDefinition> aList) {
-        List<AlertDefinition> customAlerts = getCustomAlertDefinitions();
+        Iterator iterator = customAlerts.iterator();
+        for (AlertDefinition d : aList) {
+            while(iterator.hasNext()) {
+                AlertDefinition a = (AlertDefinition) iterator.next();
+                if (a.alert.mTitle.equals(d.alert.mTitle)) {
+                    iterator.remove();
+                }
+            }
+        }
         customAlerts.addAll(aList);
-        
-        try
-        {
-            ObjectMapper mapper = new ObjectMapper();
-            String jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(this);
-            saveCustomAlertDefinitions(jsonString);
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
+        saveCustomAlertDefinitions(new Gson().toJson(customAlerts));
     }
     
     public void saveCustomAlertDefinitions(String alerts) {
+        CcuLog.d("CCU_ALERTS", "Save Custom Alerts "+alerts);
         mContext.getSharedPreferences(PREFS_ALERT_DEFS, Context.MODE_PRIVATE).edit().putString(PREFS_ALERTS_CUSTOM, alerts).apply();
-    }
-    
-    public void addAlertDefinition(AlertDefinition d) {
-        //alertDefBox.put(d);
     }
     
     public List<Alert> getActiveAlerts(){
@@ -166,16 +250,21 @@ public class AlertProcessor
         return alertQuery.build().find();
     }
     
-    public List<Alert> getAllAlerts(String type){
+    public List<Alert> getAllAlerts(String message){
         QueryBuilder<Alert> alertQuery = alertBox.query();
-        alertQuery.equal(Alert_.mAlertType, type)
+        alertQuery.equal(Alert_.mMessage, message)
                   .orderDesc(Alert_.startTime);
         
         return alertQuery.build().find();
     }
     
     public void addAlert(Alert alert) {
-        alert.setStartTime((new DateTime()).getMillis());
+        //Need to handle equip level alerts
+        for (Alert a : getActiveAlerts()) {
+            if (a.mTitle.equals(alert.mTitle)) {
+                return;
+            }
+        }
         alertBox.put(alert);
     }
     
@@ -203,6 +292,13 @@ public class AlertProcessor
     public void updateAlertDefinitions(AlertDefinition d) {
         alertDefinitions.add(d);
     }*/
+    
+    public void addAlertDefinition(List<AlertDefinition> list) {
+        updateCustomAlertDefinitions(list);
+    }
+    public void addAlertDefinition(AlertDefinition alert) {
+        updateCustomAlertDefinitions(Arrays.asList(alert));
+    }
     
     public void clearAlerts() {
         alertList.clear();

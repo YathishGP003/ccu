@@ -12,15 +12,6 @@ import a75f.io.api.haystack.Alert;
 
 /**
  * AlertManager provides APIs to process and access alerts.
- * It is implemented as a singleton and modules using it should pass Context via init method before calling other apis.
- * Then invoke processAlerts passing a map of time-series keys and values.
- *
- * Sample usage
- * --------------
- *  AlertManager m = AlertManager.getInstance();
- *  m.init(appContext);
- *  m.processAlerts(tsMap);
- *
  */
 
 public class AlertManager
@@ -49,14 +40,6 @@ public class AlertManager
     }
     
     /**
-     * Add a new alert definition at runtime
-     */
-    public void addAlertDefinition(AlertDefinition aDef) {
-        alertsDefinied = true;
-        //processor.alertDefinitions.add(aDef);
-    }
-    
-    /**
      * Add list of json alert definitions as string
      */
     public void addAlertDefinitions(String alerts) {
@@ -80,12 +63,12 @@ public class AlertManager
         if (alertsDefinied != true) {
             throw new IllegalStateException("AlertManager not initialized");
         }
-        processor.runProcess(timeSeriesMap);
+        //processor.runProcess(timeSeriesMap);
         return processor.getAllAlerts();
     }
     
     public void processAlerts() {
-        processor.runProcess();
+        processor.processAlerts();
     }
     
     public List<Alert> getActiveAlerts() {
@@ -107,4 +90,16 @@ public class AlertManager
     public List<AlertDefinition> getAlertDefinitions() {
         return processor.getAlertDefinitions();
     }
+    
+    public void addAlertDefinition(List<AlertDefinition> list) {
+        processor.addAlertDefinition(list);
+    }
+    
+    public void fixAlert(Alert a) {
+        processor.fixAlert(a);
+    }
+    public void addAlertDefinition(AlertDefinition alert) {
+        processor.addAlertDefinition(alert);
+    }
 }
+

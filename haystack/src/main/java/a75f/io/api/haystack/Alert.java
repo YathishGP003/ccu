@@ -1,24 +1,26 @@
 package a75f.io.api.haystack;
 
+import io.objectbox.annotation.Convert;
 import io.objectbox.annotation.Entity;
 import io.objectbox.annotation.Id;
+import io.objectbox.converter.PropertyConverter;
 
 /**
  * Created by samjithsadasivan on 4/23/18.
  */
-
-//TODO- To be moved to alerts project once object issue with multiple modules is sorted out.
+//TODO- Object box entities require to be in the same android module.
+//TODO- Have a data module to have all entities
 @Entity
 public class Alert
 {
     @Id
     public long id;
-    public String mAlertType;
     public String mTitle; //Short message
     public String mMessage; //Details
     public String mNotificationMsg; //Tooltip info message
     
-    public int mSeverity;
+    @Convert(converter = SeverityConverter.class, dbType = Integer.class)
+    public AlertSeverity mSeverity;
     public boolean       mEnabled;
     
     public long startTime;
@@ -27,6 +29,9 @@ public class Alert
     public int alertCount;
     
     public String alertId;
+    
+    public String ref;
+    
     public long getId()
     {
         return id;
@@ -35,14 +40,7 @@ public class Alert
     {
         this.id = id;
     }
-    public String getmAlertType()
-    {
-        return mAlertType;
-    }
-    public void setmAlertType(String mAlertType)
-    {
-        this.mAlertType = mAlertType;
-    }
+    
     public String getmTitle()
     {
         return mTitle;
@@ -67,11 +65,11 @@ public class Alert
     {
         this.mNotificationMsg = mNotificationMsg;
     }
-    public int getmSeverity()
+    public AlertSeverity getmSeverity()
     {
         return mSeverity;
     }
-    public void setmSeverity(int mSeverity)
+    public void setmSeverity(AlertSeverity mSeverity)
     {
         this.mSeverity = mSeverity;
     }
@@ -123,7 +121,39 @@ public class Alert
     {
         this.alertId = alertId;
     }
+    
+    @Override
+    public String toString() {
+        return ref+" "+getmMessage();
+    }
     public Alert(){
+    }
+    
+    public enum AlertSeverity
+    {
+        FATAL,
+        ERROR,
+        WARN,
+        INFO,
+        INTERNAL_FATAL,
+        INTERNAL_ERROR,
+        INTERNAL_WARN,
+        INTERNAL_INFO
+    }
+    
+    public static class SeverityConverter implements PropertyConverter<AlertSeverity, Integer> {
+        @Override
+        public AlertSeverity convertToEntityProperty(Integer databaseValue) {
+            if (databaseValue == null) {
+                return null;
+            }
+            return AlertSeverity.values()[databaseValue];
+        }
+        
+        @Override
+        public Integer convertToDatabaseValue(AlertSeverity entityProperty) {
+            return entityProperty.ordinal();
+        }
     }
 }
 

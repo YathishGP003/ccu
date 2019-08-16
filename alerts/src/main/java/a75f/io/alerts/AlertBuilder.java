@@ -17,10 +17,21 @@ public class AlertBuilder
         alert.setAlertId(UUID.randomUUID().toString());
         alert.setStartTime(GregorianCalendar.getInstance().getTimeInMillis());
         alert.setmTitle(def.alert.mTitle);
-        alert.setmAlertType(def.alert.mAlertType);
         alert.setmMessage(def.alert.mMessage);
         alert.setmNotificationMsg(def.alert.mNotificationMsg);
         alert.setmSeverity(def.alert.mSeverity);
+        return alert;
+    }
+    
+    public static Alert build(AlertDefinition def, String message, String id) {
+        Alert alert = new Alert();
+        alert.setAlertId(UUID.randomUUID().toString());
+        alert.setStartTime(GregorianCalendar.getInstance().getTimeInMillis());
+        alert.setmTitle(def.alert.mTitle);
+        alert.setmMessage(message);
+        alert.setmNotificationMsg(message);
+        alert.setmSeverity(def.alert.mSeverity);
+        alert.ref = id;
         return alert;
     }
 }

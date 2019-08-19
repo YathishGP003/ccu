@@ -36,8 +36,7 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
     private ArrayList<Schedule.Days> mDays;
     public static int NO_REPLACE = -1;
     private int mPosition;
-    private double coolValue = 74.0;
-    private double heatValue = 70.0;
+    private Schedule mSchedule;
 
     public interface ManualScheduleDialogListener {
         boolean onClickSave(int position, double minTemp, double maxTemp, int startTimeHour, int endTimeHour, int startTimeMinute, int endTimeMinute,
@@ -48,21 +47,24 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
 
     private ManualScheduleDialogListener mListener;
 
-    public ManualSchedulerDialogFragment(ManualScheduleDialogListener mListener) {
+    public ManualSchedulerDialogFragment(ManualScheduleDialogListener mListener,Schedule schedule) {
         this.mListener = mListener;
+        this.mSchedule = schedule;
     }
 
-    public ManualSchedulerDialogFragment(ManualScheduleDialogListener mListener, int position, Schedule.Days day) {
+    public ManualSchedulerDialogFragment(ManualScheduleDialogListener mListener, int position, Schedule.Days day,Schedule schedule) {
         this.mPosition = position;
         this.mDay = day;
         this.mListener = mListener;
+        this.mSchedule = schedule;
     }
 
-    public ManualSchedulerDialogFragment(ManualScheduleDialogListener mListener, int position, ArrayList<Schedule.Days> days) {
+    public ManualSchedulerDialogFragment(ManualScheduleDialogListener mListener, int position, ArrayList<Schedule.Days> days,Schedule schedule) {
         this.mPosition = position;
         //this.mDay = days.get(0);
         this.mListener = mListener;
         this.mDays = days;
+        this.mSchedule = schedule;
     }
 
     NumberPicker npStartTime;
@@ -99,6 +101,7 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
 
         ImageButton deleteButton = view.findViewById(R.id.buttonDelete);
         rangeSeekBarView = view.findViewById(R.id.rangeSeekBar);
+        rangeSeekBarView.setZoneSchedule(mSchedule);
 
 
         if (mDay == null) {

@@ -9,6 +9,9 @@ import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 
+/**
+ * Created by mahesh on 15-08-2019.
+ */
 public class BitmapUtil {
     public static Bitmap drawableToBitmap(Drawable drawable) {
         if (drawable instanceof BitmapDrawable) {

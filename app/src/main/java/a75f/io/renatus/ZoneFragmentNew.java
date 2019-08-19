@@ -669,7 +669,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         seekArc.setDetailedView(false);
         LinearLayout.LayoutParams rowLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
 
-        Log.i("EachzoneData","Data:"+zoneMap);
+        Log.i("EachzoneData","Data:"+zoneMap+","+pointheatDB+","+pointcoolDB);
         arcView.setPadding(48,64,0,0);
         try {
             tablerowLayout[rowcount].addView(arcView, rowLayoutParams);

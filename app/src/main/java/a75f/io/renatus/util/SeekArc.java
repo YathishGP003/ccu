@@ -452,13 +452,13 @@ public class SeekArc extends View
                            mArcRadius - mScaledICCTDrawable, mSmallThumbPaint);
 
 
-            if (getCurrentTemp() < getHeatingDesiredTemp())
+            if ((getCurrentTemp() > 0) && (getCurrentTemp() < getHeatingDesiredTemp()))
             {
                 int prevColor = mInbetweenPaint.getColor();
                 mInbetweenPaint.setColor(Color.parseColor("#e24301"));
                 drawArcBetween(canvas, mCurrentTemp, mHeatingDesiredTemp, mInbetweenPaint);
                 mInbetweenPaint.setColor(prevColor);
-            } else if (getCurrentTemp() > getCoolingDesiredTemp())
+            } else if ((getCurrentTemp() > 0) && (getCurrentTemp() > getCoolingDesiredTemp()))
             {
 
                 int prevColor = mInbetweenPaint.getColor();

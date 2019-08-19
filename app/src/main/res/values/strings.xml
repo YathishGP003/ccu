@@ -541,4 +541,7 @@
     <string name="title_calculated_output">Calculated Output \nValue</string>
     <string name="title_override_value">Override Value</string>
 
+    <string name="txt_alert_delete_schedule">Are you sure you want to delete the current schedule?</string>
+    <string name="txt_proceed">PROCEED</string>
+
 </resources>

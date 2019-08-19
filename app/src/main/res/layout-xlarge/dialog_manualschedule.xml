@@ -1,265 +1,253 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:app="http://schemas.android.com/apk/res-auto"
-	xmlns:tools="http://schemas.android.com/tools"
-	android:layout_width="match_parent"
-	android:layout_height="match_parent"
-	android:padding="32dp">
-	<ScrollView
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		app:layout_constraintLeft_toLeftOf="parent"
-		app:layout_constraintRight_toRightOf="parent">
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="32dp">
 
-		<android.support.constraint.ConstraintLayout
-			android:layout_width="match_parent"
-			android:layout_height="match_parent">
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent">
 
-
-			<ImageButton
-				android:id="@+id/buttonDelete"
-				android:layout_width="wrap_content"
-				android:layout_height="48dp"
-				android:background="@android:color/transparent"
-				app:layout_constraintEnd_toEndOf="parent"
-				app:layout_constraintTop_toTopOf="parent"
-				app:srcCompat="@android:drawable/ic_menu_delete" />
-
-			<TextView
-				android:id="@+id/textViewDesiredTemp"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="Desired Temperature"
-				android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
-				app:layout_constraintBottom_toBottomOf="@+id/buttonDelete"
-				app:layout_constraintLeft_toLeftOf="parent"
-				app:layout_constraintTop_toTopOf="parent" />
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
 
-			<EditText
-				android:id="@+id/coolingTemp"
-				android:layout_width="221dp"
-				android:layout_height="wrap_content"
-				android:ems="10"
-				android:text="74"
-				android:inputType="numberDecimal"
-				app:layout_constraintRight_toRightOf="parent"
-				app:layout_constraintTop_toBottomOf="@+id/textViewDesiredTemp" />
+            <ImageButton
+                android:id="@+id/buttonDelete"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:background="@android:color/transparent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@android:drawable/ic_menu_delete" />
 
-			<EditText
-				android:id="@+id/heatingTemp"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:ems="10"
-				android:text="70"
-				android:inputType="numberDecimal"
-				app:layout_constraintTop_toBottomOf="@+id/textViewDesiredTemp"
-				app:layout_constraintLeft_toLeftOf="parent"/>
+            <TextView
+                android:id="@+id/textViewDesiredTemp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Desired Temperature"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+                app:layout_constraintBottom_toBottomOf="@+id/buttonDelete"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-			<!--<View-->
-				<!--android:id="@+id/viewPlaceHolder"-->
-				<!--android:layout_width="match_parent"-->
-				<!--android:layout_height="60dp"-->
-				<!--android:layout_marginTop="8dp"-->
-				<!--app:layout_constraintTop_toBottomOf="@+id/textViewDesiredTemp"-->
-				<!--tools:layout_editor_absoluteX="0dp" />-->
+            <!--<View-->
+            <!--android:id="@+id/viewPlaceHolder"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="60dp"-->
+            <!--android:layout_marginTop="8dp"-->
+            <!--app:layout_constraintTop_toBottomOf="@+id/textViewDesiredTemp"-->
+            <!--tools:layout_editor_absoluteX="0dp" />-->
 
-			<TextView
-				android:id="@+id/textViewSetSchedule"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_marginTop="10dp"
-				android:text="Set Schedule"
-				android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
-				app:layout_constraintLeft_toLeftOf="parent"
-				app:layout_constraintTop_toBottomOf="@+id/heatingTemp" />
+            <a75f.io.renatus.views.RangeBarView
+                android:id="@+id/rangeSeekBar"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_centerInParent="true"
+                android:layout_gravity="center"
+                android:layout_marginTop="20dp"
+                android:gravity="center"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewDesiredTemp" />
 
-			<LinearLayout
-				android:id="@+id/ltNumberPicker"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_marginTop="10dp"
-				app:layout_constraintEnd_toEndOf="parent"
-				app:layout_constraintStart_toStartOf="parent"
-				app:layout_constraintTop_toBottomOf="@+id/textViewSetSchedule">
+            <TextView
+                android:id="@+id/textViewSetSchedule"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="Set Schedule"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/rangeSeekBar" />
 
-				<NumberPicker
-					android:id="@+id/np1"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:gravity="center_vertical|center_horizontal"
-					android:minWidth="150dp"
-					android:theme="@style/DefaultNumberPickerTheme" />
+            <LinearLayout
+                android:id="@+id/ltNumberPicker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewSetSchedule">
 
-				<TextView
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:layout_gravity="center_vertical"
-					android:layout_marginLeft="50dp"
-					android:layout_marginRight="50dp"
-					android:text="TO"
-					android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium" />
+                <NumberPicker
+                    android:id="@+id/np1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical|center_horizontal"
+                    android:minWidth="150dp"
+                    android:theme="@style/DefaultNumberPickerTheme" />
 
-				<NumberPicker
-					android:id="@+id/np2"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:gravity="center_vertical|center_horizontal"
-					android:minWidth="150dp"
-					android:theme="@style/DefaultNumberPickerTheme" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="50dp"
+                    android:layout_marginRight="50dp"
+                    android:text="TO"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium" />
 
-			</LinearLayout>
+                <NumberPicker
+                    android:id="@+id/np2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical|center_horizontal"
+                    android:minWidth="150dp"
+                    android:theme="@style/DefaultNumberPickerTheme" />
 
-			<TextView
-				android:id="@+id/textViewAppliesto"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_marginTop="10dp"
-				android:text="Applies To"
-				android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
-				app:layout_constraintLeft_toLeftOf="parent"
-				app:layout_constraintTop_toBottomOf="@+id/ltNumberPicker" />
+            </LinearLayout>
 
-			<LinearLayout
-				android:id="@+id/radioGrp"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:orientation="horizontal"
-				android:padding="8dp"
-				app:layout_constraintEnd_toEndOf="parent"
-				app:layout_constraintStart_toStartOf="parent"
-				app:layout_constraintTop_toBottomOf="@+id/textViewAppliesto">
+            <TextView
+                android:id="@+id/textViewAppliesto"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="Applies To"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/ltNumberPicker" />
 
-				<CheckBox
-					android:id="@+id/checkBoxMon"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:button="@null"
-					android:gravity="center"
-					android:minWidth="36dp"
-					android:minHeight="36dp"
-					android:padding="5dp"
-					android:text="M"
-					android:textSize="20dp"
-					android:textStyle="bold" />
+            <LinearLayout
+                android:id="@+id/radioGrp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewAppliesto">
 
-				<CheckBox
-					android:id="@+id/checkBoxTue"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:layout_marginLeft="24dp"
-					android:button="@null"
-					android:gravity="center"
-					android:minWidth="36dp"
-					android:minHeight="36dp"
-					android:padding="5dp"
-					android:text="T"
-					android:textSize="20dp"
-					android:textStyle="bold" />
+                <CheckBox
+                    android:id="@+id/checkBoxMon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:gravity="center"
+                    android:minWidth="36dp"
+                    android:minHeight="36dp"
+                    android:padding="5dp"
+                    android:text="M"
+                    android:textSize="20dp"
+                    android:textStyle="bold" />
 
-				<CheckBox
-					android:id="@+id/checkBoxWed"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:layout_marginLeft="24dp"
-					android:button="@null"
-					android:gravity="center"
-					android:minWidth="36dp"
-					android:minHeight="36dp"
-					android:padding="5dp"
-					android:text="W"
-					android:textSize="20dp"
-					android:textStyle="bold" />
+                <CheckBox
+                    android:id="@+id/checkBoxTue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="24dp"
+                    android:button="@null"
+                    android:gravity="center"
+                    android:minWidth="36dp"
+                    android:minHeight="36dp"
+                    android:padding="5dp"
+                    android:text="T"
+                    android:textSize="20dp"
+                    android:textStyle="bold" />
 
-				<CheckBox
-					android:id="@+id/checkBoxThu"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:layout_marginLeft="24dp"
-					android:button="@null"
-					android:gravity="center"
-					android:minWidth="36dp"
-					android:minHeight="36dp"
-					android:padding="5dp"
-					android:text="Th"
-					android:textSize="20dp"
-					android:textStyle="bold" />
+                <CheckBox
+                    android:id="@+id/checkBoxWed"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="24dp"
+                    android:button="@null"
+                    android:gravity="center"
+                    android:minWidth="36dp"
+                    android:minHeight="36dp"
+                    android:padding="5dp"
+                    android:text="W"
+                    android:textSize="20dp"
+                    android:textStyle="bold" />
 
-				<CheckBox
-					android:id="@+id/checkBoxFri"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:layout_marginLeft="24dp"
-					android:button="@null"
-					android:gravity="center"
-					android:minWidth="36dp"
-					android:minHeight="36dp"
-					android:padding="5dp"
-					android:text="F"
-					android:textSize="20dp"
-					android:textStyle="bold" />
+                <CheckBox
+                    android:id="@+id/checkBoxThu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="24dp"
+                    android:button="@null"
+                    android:gravity="center"
+                    android:minWidth="36dp"
+                    android:minHeight="36dp"
+                    android:padding="5dp"
+                    android:text="Th"
+                    android:textSize="20dp"
+                    android:textStyle="bold" />
 
-				<CheckBox
-					android:id="@+id/checkBoxSat"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:layout_marginLeft="24dp"
-					android:button="@null"
-					android:gravity="center"
-					android:minWidth="36dp"
-					android:minHeight="36dp"
-					android:padding="5dp"
-					android:text="Sa"
-					android:textSize="20dp"
-					android:textStyle="bold" />
+                <CheckBox
+                    android:id="@+id/checkBoxFri"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="24dp"
+                    android:button="@null"
+                    android:gravity="center"
+                    android:minWidth="36dp"
+                    android:minHeight="36dp"
+                    android:padding="5dp"
+                    android:text="F"
+                    android:textSize="20dp"
+                    android:textStyle="bold" />
 
-				<CheckBox
-					android:id="@+id/checkBoxSun"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:layout_marginLeft="24dp"
-					android:button="@null"
-					android:gravity="center"
-					android:minWidth="36dp"
-					android:minHeight="36dp"
-					android:padding="5dp"
-					android:text="Su"
-					android:textSize="20dp"
-					android:textStyle="bold" />
-			</LinearLayout>
+                <CheckBox
+                    android:id="@+id/checkBoxSat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="24dp"
+                    android:button="@null"
+                    android:gravity="center"
+                    android:minWidth="36dp"
+                    android:minHeight="36dp"
+                    android:padding="5dp"
+                    android:text="Sa"
+                    android:textSize="20dp"
+                    android:textStyle="bold" />
 
-
-			<Button
-				android:id="@+id/buttonSave"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_marginTop="24dp"
-				android:background="@null"
-				android:fontFamily="@font/lato_regular"
-				android:text="SAVE"
-				android:textColor="@color/orange_75f"
-				android:textSize="20dp"
-				app:layout_constraintRight_toRightOf="parent"
-				app:layout_constraintTop_toBottomOf="@+id/radioGrp" />
-
-			<Button
-				android:id="@+id/buttonCancel"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_marginTop="24dp"
-				android:layout_marginRight="50dp"
-				android:background="@null"
-				android:fontFamily="@font/lato_regular"
-				android:text="CANCEL"
-				android:textColor="@color/orange_75f"
-				android:textSize="20dp"
-				app:layout_constraintRight_toLeftOf="@+id/buttonSave"
-				app:layout_constraintRight_toRightOf="parent"
-				app:layout_constraintTop_toBottomOf="@+id/radioGrp" />
+                <CheckBox
+                    android:id="@+id/checkBoxSun"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="24dp"
+                    android:button="@null"
+                    android:gravity="center"
+                    android:minWidth="36dp"
+                    android:minHeight="36dp"
+                    android:padding="5dp"
+                    android:text="Su"
+                    android:textSize="20dp"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
 
+            <Button
+                android:id="@+id/buttonSave"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:background="@null"
+                android:fontFamily="@font/lato_regular"
+                android:text="SAVE"
+                android:textColor="@color/orange_75f"
+                android:textSize="20dp"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/radioGrp" />
 
-		</android.support.constraint.ConstraintLayout>
-	</ScrollView>
+            <Button
+                android:id="@+id/buttonCancel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:layout_marginRight="50dp"
+                android:background="@null"
+                android:fontFamily="@font/lato_regular"
+                android:text="CANCEL"
+                android:textColor="@color/orange_75f"
+                android:textSize="20dp"
+                app:layout_constraintRight_toLeftOf="@+id/buttonSave"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/radioGrp" />
+
+
+        </android.support.constraint.ConstraintLayout>
+    </ScrollView>
 </android.support.constraint.ConstraintLayout>

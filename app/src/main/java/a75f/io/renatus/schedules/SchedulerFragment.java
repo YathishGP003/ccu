@@ -301,7 +301,7 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
                 if (prev != null) {
                     ft.remove(prev);
                 }
-                ManualSchedulerDialogFragment newFragment = new ManualSchedulerDialogFragment(this);
+                ManualSchedulerDialogFragment newFragment = new ManualSchedulerDialogFragment(this, schedule);
                 newFragment.show(ft, "popup");
                 break;
 
@@ -400,7 +400,7 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
                 if (scheduleFragment != null) {
                     ft.remove(scheduleFragment);
                 }
-                ManualSchedulerDialogFragment newFragment = new ManualSchedulerDialogFragment(this, position, day);
+                ManualSchedulerDialogFragment newFragment = new ManualSchedulerDialogFragment(this, position, day,schedule);
                 newFragment.show(ft, "popup");
                 break;
         }
@@ -416,7 +416,7 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
                 if (scheduleFragment != null) {
                     ft.remove(scheduleFragment);
                 }
-                ManualSchedulerDialogFragment newFragment = new ManualSchedulerDialogFragment(this, position, days);
+                ManualSchedulerDialogFragment newFragment = new ManualSchedulerDialogFragment(this, position, days,schedule);
                 newFragment.show(ft, "popup");
                 break;
         }

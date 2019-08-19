@@ -644,8 +644,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         HashMap heatUL = CCUHsApi.getInstance().read("point and limit and max and heating and user and equipRef == \"" + p.getId() + "\"");
         HashMap coolLL = CCUHsApi.getInstance().read("point and limit and min and cooling and user and equipRef == \"" + p.getId() + "\"");
         HashMap heatLL = CCUHsApi.getInstance().read("point and limit and min and heating and user and equipRef == \"" + p.getId() + "\"");
-        HashMap heatDB = CCUHsApi.getInstance().read("point and heating and deadband and sp and equipRef == \"" + p.getId() + "\"");
-        HashMap coolDB = CCUHsApi.getInstance().read("point and cooling and deadband and sp and equipRef == \"" + p.getId() + "\"");
+        HashMap heatDB = CCUHsApi.getInstance().read("point and heating and deadband and base and equipRef == \"" + p.getId() + "\"");
+        HashMap coolDB = CCUHsApi.getInstance().read("point and cooling and deadband and base and equipRef == \"" + p.getId() + "\"");
         HashMap buildingMin = CCUHsApi.getInstance().read("building and limit and min and equipRef == \"" + L.ccu().systemProfile.getSystemEquipRef() + "\"");
         HashMap buildingMax = CCUHsApi.getInstance().read("building and limit and max and equipRef == \"" + L.ccu().systemProfile.getSystemEquipRef() + "\"");
 
@@ -1017,8 +1017,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         double pointheatUL = CCUHsApi.getInstance().readPointPriorityValByQuery("point and limit and max and heating and user and equipRef == \"" + p.getId() + "\"");
         double pointcoolLL = CCUHsApi.getInstance().readPointPriorityValByQuery("point and limit and min and cooling and user and equipRef == \"" + p.getId() + "\"");
         double pointheatLL = CCUHsApi.getInstance().readPointPriorityValByQuery("point and limit and min and heating and user and equipRef == \"" + p.getId() + "\"");
-        double pointheatDB = CCUHsApi.getInstance().readPointPriorityValByQuery("point and heating and deadband and sp and equipRef == \"" + p.getId() + "\"");
-        double pointcoolDB = CCUHsApi.getInstance().readPointPriorityValByQuery("point and cooling and deadband and sp and equipRef == \"" + p.getId() + "\"");
+        double pointheatDB = CCUHsApi.getInstance().readPointPriorityValByQuery("point and heating and deadband and base and equipRef == \"" + p.getId() + "\"");
+        double pointcoolDB = CCUHsApi.getInstance().readPointPriorityValByQuery("point and cooling and deadband and base and equipRef == \"" + p.getId() + "\"");
 
         float pointbuildingMin = (float)getPointVal(buildingMin.get("id").toString());
         float pointbuildingMax = (float)getPointVal(buildingMax.get("id").toString());

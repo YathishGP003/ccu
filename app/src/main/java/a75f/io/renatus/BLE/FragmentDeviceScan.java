@@ -58,20 +58,19 @@ public class FragmentDeviceScan extends BaseDialogFragment
         @Override
         public void onLeScan(final BluetoothDevice device, int rssi, byte[] scanRecord)
         {
-            getActivity().runOnUiThread(new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    if (device != null && device.getName() != null &&
-                        (device.getName().equalsIgnoreCase(SerialConsts.SMART_NODE_NAME) ||
-                         device.getName().equalsIgnoreCase(SerialConsts.SMART_STAT_NAME)))
-                    {
-                        mLeDeviceListAdapter.addDevice(device);
-                        mLeDeviceListAdapter.notifyDataSetChanged();
+            if(getActivity() != null) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (device != null && device.getName() != null &&
+                                (device.getName().equalsIgnoreCase(SerialConsts.SMART_NODE_NAME) ||
+                                        device.getName().equalsIgnoreCase(SerialConsts.SMART_STAT_NAME))) {
+                            mLeDeviceListAdapter.addDevice(device);
+                            mLeDeviceListAdapter.notifyDataSetChanged();
+                        }
                     }
-                }
-            });
+                });
+            }
         }
     };
     private NodeType mNodeType;

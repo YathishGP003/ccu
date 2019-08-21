@@ -188,6 +188,37 @@ public class ScheduleProcessJob extends BaseJob {
         updateSystemOccupancy();
     }
 
+    public static void processZoneEquipSchedule(Equip equip){
+        if(equip != null) {
+
+            Log.d(L.TAG_CCU_JOB, " Equip "+equip.getDisplayName());
+
+            Schedule equipSchedule = Schedule.getScheduleForZone(equip.getRoomRef().replace("@", ""), false);
+
+            if(equipSchedule == null)
+            {
+                CcuLog.d(L.TAG_CCU_JOB,"<- *no schedule*");
+                return;
+            }
+
+            //If building vacation is not active, check zone vacations.
+            if (activeSystemVacation == null )
+            {
+                ArrayList<Schedule> activeZoneVacationSchedules = CCUHsApi.getInstance().getZoneSchedule(equip.getRoomRef(),true);
+                Schedule activeZoneVacationSchedule = getActiveVacation(activeZoneVacationSchedules);
+                Log.d(L.TAG_CCU_JOB, "Equip "+equip.getDisplayName()+" activeZoneVacationSchedules "+activeZoneVacationSchedules.size()+" activeSystemVacation "+activeSystemVacation);
+                writePointsForEquip(equip, equipSchedule, activeZoneVacationSchedule);
+            } else
+            {
+                writePointsForEquip(equip, equipSchedule, activeSystemVacation);
+            }
+            updateEquipScheduleStatus(equip);
+
+        }
+
+        systemVacation = activeSystemVacation != null || isAllZonesInVacation();
+        updateSystemOccupancy();
+    }
     private static Schedule getActiveVacation(ArrayList<Schedule> activeVacationSchedules)
     {
 
@@ -208,7 +239,7 @@ public class ScheduleProcessJob extends BaseJob {
     }
 
     private static void writePointsForEquip(Equip equip, Schedule equipSchedule, Schedule vacation) {
-        if((equip.getMarkers().contains("vav") || equip.getMarkers().contains("dab")) && !equip.getMarkers().contains("system"))
+        if((equip.getMarkers().contains("vav") || equip.getMarkers().contains("dab") || equip.getMarkers().contains("ti")) && !equip.getMarkers().contains("system"))
         {
             VAVScheduler.processEquip(equip, equipSchedule, vacation, systemOccupancy);
         }else if (equip.getMarkers().contains("pid")) {
@@ -559,7 +590,18 @@ public class ScheduleProcessJob extends BaseJob {
         }.start();
         
     }
-    
+    public static void updateSchedules(final Equip equip) {
+        CcuLog.d(TAG_CCU_JOB,"updateSchedules ->"+equip.getDisplayName());
+
+        new Thread() {
+            @Override
+            public void run() {
+                processZoneEquipSchedule(equip);
+                CcuLog.d(TAG_CCU_JOB,"<- updateSchedules for equip done"+equip.getDisplayName());
+            }
+        }.start();
+
+    }
     public static void updateEquipScheduleStatus(Equip equip) {
         Occupancy zoneOccupancy = getZoneStatus(equip);
         ArrayList points = CCUHsApi.getInstance().readAll("point and scheduleStatus and equipRef == \""+equip.getId()+"\"");

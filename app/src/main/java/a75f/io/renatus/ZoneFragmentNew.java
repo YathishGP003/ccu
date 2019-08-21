@@ -242,24 +242,26 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         }
     }
 
-    public void refreshDesiredTemp(String nodeAddress,String pointcoolDT, String pointheatDT)
+    public void refreshDesiredTemp(String nodeAddress,String pointcoolDT1, String pointheatDT1)
     {
         if(getActivity() != null) {
             int i;
+            double pointheatDT = CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and heating and group == \"" + nodeAddress + "\"");
+            double pointcoolDT = CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and cooling and group == \"" + nodeAddress + "\"");
             for (i = 0; i < seekArcArrayList.size(); i++) {
                 GridItem gridItem = (GridItem) seekArcArrayList.get(i).getTag();
                 if (gridItem.getNodeAddress() == Short.valueOf(nodeAddress)) {
                     SeekArc tempSeekArc = seekArcArrayList.get(i);
 
-                    float coolDt = Float.parseFloat(pointcoolDT);
-                    float heatDt = Float.parseFloat(pointheatDT);
-                    if((tempSeekArc.getCoolingDesiredTemp() != coolDt) || (tempSeekArc.getHeatingDesiredTemp() != heatDt)) {
+                    //float coolDt = Float.parseFloat(pointcoolDT);
+                    //float heatDt = Float.parseFloat(pointheatDT);
+                    if((tempSeekArc.getCoolingDesiredTemp() != pointcoolDT) || (tempSeekArc.getHeatingDesiredTemp() != pointheatDT)) {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 Log.d("Scheduler", "refreshDesiredTemp22 =" + pointcoolDT + "," + pointheatDT + "," + nodeAddress);
-                                tempSeekArc.setCoolingDesiredTemp(coolDt, false);
-                                tempSeekArc.setHeatingDesiredTemp(heatDt, false);
+                                tempSeekArc.setCoolingDesiredTemp((float)pointcoolDT, false);
+                                tempSeekArc.setHeatingDesiredTemp((float)pointheatDT, false);
                                 tempSeekArc.invalidate();
                             }
                         });
@@ -581,12 +583,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             schedulerFragment.setOnExitListener(() -> {
                 Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
                 mSchedule = Schedule.getScheduleByEquipId(equipId);
-                ScheduleProcessJob.updateSchedules();
+                ScheduleProcessJob.updateSchedules(equipOpen);
 
 
             });
         });
-        scheduleSpinner.setSelection(mScheduleType);
+        scheduleSpinner.setSelection(mScheduleType,false);
         if (mSchedule.isZoneSchedule())
         {
             scheduleImageButton.setVisibility(View.VISIBLE);
@@ -724,11 +726,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             zoneCurrentTemp = (float) zoneGrid.getZoneCurrentTemp();
         }else{
             zoneCurrentTemp = pointcurrTmep;
-        }*/
+        }
         if(zoneCurrentTemp == 0 || zoneCurrentTemp == Float.NaN)
         {
             zoneCurrentTemp = 72;
-        }
+        }*/
         Log.i("EachzoneData","CurrentTemp:"+zoneCurrentTemp+" FloorName:"+floorName+" ZoneName:"+zoneTitle);
         seekArc.setData(false, pointbuildingMin, pointbuildingMax, pointheatUL, pointheatLL, pointcoolLL, pointcoolUL, pointheatDT, pointcoolDT, zoneCurrentTemp, pointheatDB, pointcoolDB);
         //seekArc.setData(false, pointbuildingMin, pointbuildingMax, pointheatUL, pointheatLL, pointcoolLL, pointcoolUL, pointheatDT, pointcoolDT, pointcurrTmep, pointheatDB, pointcoolDB);
@@ -986,12 +988,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             schedulerFragment.setOnExitListener(() -> {
                 Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
                 mSchedule = Schedule.getScheduleByEquipId(equipId);
-                ScheduleProcessJob.updateSchedules();
+                ScheduleProcessJob.updateSchedules(equipOpen);
 
 
             });
         });
-        scheduleSpinner.setSelection(mScheduleType);
+        scheduleSpinner.setSelection(mScheduleType,false);
         if (mSchedule.isZoneSchedule())
         {
             scheduleImageButton.setVisibility(View.VISIBLE);
@@ -1991,33 +1993,20 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
     }
     
     public void setPointVal(String id, double val) {
-        new AsyncTask<String, Void, Void>() {
-            @Override
-            protected Void doInBackground( final String ... params ) {
-    
-                CCUHsApi hayStack = CCUHsApi.getInstance();
-                Point p = new Point.Builder().setHashMap(hayStack.readMapById(id)).build();
-                if (p.getMarkers().contains("writable"))
-                {
-                    CcuLog.d(L.TAG_CCU_UI, "Set Writbale Val "+p.getDisplayName()+": " +val);
-                    //CCUHsApi.getInstance().pointWrite(HRef.copy(id), TunerConstants.MANUAL_OVERRIDE_VAL_LEVEL, "manual", HNum.make(val) , HNum.make(2 * 60 * 60 * 1000, "ms"));
-                    ScheduleProcessJob.handleDesiredTempUpdate(p, true, val);
-    
-                }
-    
-                if (p.getMarkers().contains("his"))
-                {
-                    CcuLog.d(L.TAG_CCU_UI, "Set His Val "+id+": " +val);
-                    hayStack.writeHisValById(id, val);
-                }
-                return null;
-            }
-            
-            @Override
-            protected void onPostExecute( final Void result ) {
-                // continue what you are doing...
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        Point p = new Point.Builder().setHashMap(hayStack.readMapById(id)).build();
+        if (p.getMarkers().contains("writable"))
+        {
+            CcuLog.d(L.TAG_CCU_UI, "Set Writbale Val "+p.getDisplayName()+": " +val);
+            ScheduleProcessJob.handleDesiredTempUpdate(p, true, val);
+
+        }
+
+        if (p.getMarkers().contains("his"))
+        {
+            CcuLog.d(L.TAG_CCU_UI, "Set His Val "+id+": " +val);
+            hayStack.writeHisValById(id, val);
+        }
     }
 
 

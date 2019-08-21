@@ -9,6 +9,8 @@ import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
+import a75f.io.logic.bo.building.definitions.Port;
 
 /**
  * Created by samjithsadasivan on 12/6/18.
@@ -18,6 +20,19 @@ public class ControlMote
 {
     private Site   site;
     private String deviceRef;
+    int smartNodeAddress;
+
+    public RawPoint analog1In;
+    public RawPoint analog2In;
+    public RawPoint th1In;
+    public RawPoint th2In;
+    public RawPoint currentTemp;
+    public String siteRef;
+    public String floorRef;
+    public String roomRef;
+    public String equipRef;
+
+    String tz;
     public ControlMote(String siteRef) {
         
         HashMap device = CCUHsApi.getInstance().read("device and cm");
@@ -36,7 +51,41 @@ public class ControlMote
         deviceRef = CCUHsApi.getInstance().addDevice(d);
         createPoints();
     }
-    
+	//For CCU as a zone part
+    public ControlMote(int address, String site, String floor, String room, String equipRef) {
+        Device d = new Device.Builder()
+                .setDisplayName("CCU-"+address)
+                .addMarker("network").addMarker("node").addMarker("ccu").addMarker("equipHis")
+                .setAddr(address)
+                .setSiteRef(site)
+                .setFloorRef(floor)
+                .setEquipRef(equipRef)
+                .setRoomRef(room)
+                .build();
+        deviceRef = CCUHsApi.getInstance().addDevice(d);
+        smartNodeAddress = address;
+        siteRef = site;
+        floorRef = floor;
+        roomRef = room;
+
+        HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
+        tz = siteMap.get("tz").toString();
+
+        createCcuAsZonePoints();
+    }
+    public ControlMote(int address) {
+        HashMap device = CCUHsApi.getInstance().read("device and addr == \""+address+"\"");
+        Device d = new Device.Builder().setHashMap(device).build();
+
+        deviceRef = d.getId();
+        smartNodeAddress = Integer.parseInt(d.getAddr());
+        siteRef = d.getSiteRef();
+        floorRef = d.getFloorRef();
+        roomRef = d.getRoomRef();
+        equipRef = d.getEquipRef();
+        HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
+        tz = siteMap.get("tz").toString();
+    }
     public void createPoints() {
         addRelayStatePoint("relay1");
         addRelayStatePoint("relay2");
@@ -67,7 +116,70 @@ public class ControlMote
         setAnalogOut("analog3",0);
         setAnalogOut("analog4",0);
     }
-    
+
+//For CCU as a zone part
+    public void createCcuAsZonePoints(){
+
+        currentTemp = new RawPoint.Builder()
+                .setDisplayName("currentTemp-"+smartNodeAddress)
+                .setDeviceRef(deviceRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("sensor").addMarker("his")
+                .setPort(Port.SENSOR_RT.toString())
+                .setTz(tz)
+                .build();
+
+        analog1In = new RawPoint.Builder()
+                .setDisplayName("Analog1In-"+smartNodeAddress)
+                .setDeviceRef(deviceRef)
+                .setSiteRef(siteRef)
+                .setPort(Port.ANALOG_IN_ONE.toString())
+                .setType(OutputAnalogActuatorType.ZeroToTenV.displayName)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("sensor").addMarker("his")
+                .setTz(tz)
+                .build();
+
+
+        analog2In = new RawPoint.Builder()
+                .setDisplayName("Analog2In-"+smartNodeAddress)
+                .setDeviceRef(deviceRef)
+                .setSiteRef(siteRef)
+                .setPort(Port.ANALOG_IN_TWO.toString())
+                .setType(OutputAnalogActuatorType.ZeroToTenV.displayName)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("sensor").addMarker("his")
+                .setTz(tz)
+                .build();
+
+        th1In = new RawPoint.Builder()
+                .setDisplayName("Th1In-"+smartNodeAddress)
+                .setDeviceRef(deviceRef)
+                .setSiteRef(siteRef)
+                .setType("0")
+                .setPort(Port.TH1_IN.toString())
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("sensor").addMarker("his")
+                .setTz(tz)
+                .build();
+
+        th2In = new RawPoint.Builder()
+                .setDisplayName("Th2In-"+smartNodeAddress)
+                .setDeviceRef(deviceRef)
+                .setSiteRef(siteRef)
+                .setType("0")
+                .setPort(Port.TH2_IN.toString())
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("sensor").addMarker("his")
+                .setTz(tz)
+                .build();
+    }
     public void resetAllOp(){
         for (int i = 1; i <= 8; i++)
         {
@@ -120,5 +232,32 @@ public class ControlMote
     {
         CCUHsApi.getInstance().writeHisValByQuery("point and his and system and state and "+relay, val);
     }
-    
+    public void addSensor(Port p, String pointRef) {
+        RawPoint sensor = new RawPoint.Builder()
+                .setDisplayName(p.toString()+"-"+smartNodeAddress)
+                .setDeviceRef(deviceRef)
+                .setSiteRef(siteRef)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .setPointRef(pointRef)
+                .setEnabled(true)
+                .addMarker("sensor").addMarker("his")
+                .setPort(p.toString())
+                .setTz(tz)
+                .build();
+        CCUHsApi.getInstance().addPoint(sensor);
+    }
+    public RawPoint getRawPoint(Port p) {
+        HashMap sensorPoint = CCUHsApi.getInstance().read("point and sensor and physical and deviceRef == \""+deviceRef+"\""
+                +" and port == \""+p.toString()+"\"");
+        return sensorPoint.size() > 0 ? new RawPoint.Builder().setHashMap(sensorPoint).build() : null;
+    }
+
+    public void addPointsToDb() {
+        CCUHsApi.getInstance().addPoint(analog1In);
+        CCUHsApi.getInstance().addPoint(analog2In);
+        CCUHsApi.getInstance().addPoint(th1In);
+        CCUHsApi.getInstance().addPoint(th2In);
+        CCUHsApi.getInstance().addPoint(currentTemp);
+    }
 }

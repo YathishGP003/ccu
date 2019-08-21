@@ -19,13 +19,13 @@ public class CmToCcuOverUsbCmRegularUpdateMessage_t extends Struct
 	
 	public final Unsigned8 humidity = new Unsigned8(); // percent
 	
+	public final Unsigned16 thermistor1 = new Unsigned16(); // external voltage sense in mv units
+	
+	public final Unsigned16 thermistor2 = new Unsigned16(); // external voltage sense in mv units
+	
 	public final Unsigned16 analogSense1 = new Unsigned16(); // external voltage sense in mv units
 	
 	public final Unsigned16 analogSense2 = new Unsigned16(); // external voltage sense in mv units
-	
-	public final Unsigned16 analogSense3 = new Unsigned16(); // external voltage sense in mv units
-	
-	public final Unsigned16 analogSense4 = new Unsigned16(); // external voltage sense in mv units
 	
 	public final Unsigned8 relayBitmap = new Unsigned8(); // digital out for HVAC activation
 	

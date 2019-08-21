@@ -489,7 +489,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     for (HashMap equipTypes : equipZones) {
                         profileType = equipTypes.get("profile").toString();
                         Log.e("RoomData", "ProfileType:" + profileType);
-                        if (profileType.contains(profileVAV) || profileType.contains(profileDAB) || profileType.contains(profileSmartStat)) {
+                        if (profileType.contains(profileVAV) || profileType.contains(profileDAB) || profileType.contains(profileSmartStat) || profileType.contains(profileTempInfluence)) {
                             tempModule = true;
                             Log.e("RoomData", "Load SmartNode ProfileType:" + profileType);
                         }
@@ -718,26 +718,16 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         float pointcoolDB = (float)getPointVal(coolDB.get("id").toString());
 
         String floorName = floorList.get(mFloorListAdapter.getSelectedPostion()).getDisplayName();
-        //Zone currentFloor = (Schedule.getZoneforEquipId(equipId));
-        //a75f.io.logic.bo.building.Zone zoneGrid = new a75f.io.logic.bo.building.Zone(zoneTitle,currentFloor.getFloorRef(),"");
-        float zoneCurrentTemp = 0;
-        zoneCurrentTemp = (float)currentAverageTemp;
-        /*if(zoneGrid != null) {
-            zoneCurrentTemp = (float) zoneGrid.getZoneCurrentTemp();
-        }else{
-            zoneCurrentTemp = pointcurrTmep;
-        }
+        float zoneCurrentTemp = (float)currentAverageTemp;
         if(zoneCurrentTemp == 0 || zoneCurrentTemp == Float.NaN)
         {
-            zoneCurrentTemp = 72;
-        }*/
-        Log.i("EachzoneData","CurrentTemp:"+zoneCurrentTemp+" FloorName:"+floorName+" ZoneName:"+zoneTitle);
+            zoneCurrentTemp = 0.0;
+        }
+        Log.i("EachzoneData","CurrentTemp:"+zoneCurrentTemp+" FloorName:"+floorName+" ZoneName:"+zoneTitle+","+pointheatDB+","+pointcoolDB);
         seekArc.setData(false, pointbuildingMin, pointbuildingMax, pointheatUL, pointheatLL, pointcoolLL, pointcoolUL, pointheatDT, pointcoolDT, zoneCurrentTemp, pointheatDB, pointcoolDB);
-        //seekArc.setData(false, pointbuildingMin, pointbuildingMax, pointheatUL, pointheatLL, pointcoolLL, pointcoolUL, pointheatDT, pointcoolDT, pointcurrTmep, pointheatDB, pointcoolDB);
         seekArc.setDetailedView(false);
         LinearLayout.LayoutParams rowLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
 
-        Log.i("EachzoneData","Data:"+zoneMap+","+pointheatDB+","+pointcoolDB);
         arcView.setPadding(48,64,0,0);
         try {
             tablerowLayout[rowcount].addView(arcView, rowLayoutParams);

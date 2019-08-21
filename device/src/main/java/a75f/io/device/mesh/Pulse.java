@@ -174,6 +174,13 @@ public class Pulse
 	public static Double getRoomTempConversion(Double temp) {
 		return temp/10.0;
 	}
+
+	public static Double getCMRoomTempConversion(Double temp, double tempOffset) {
+		return (temp+tempOffset)/10.0;
+	}
+	public static Double getAnalogConversion(Double val) {
+		return val/10.0;
+	}
 	public static Double getHumidityConversion(Double h) {
 		return h/10.0;
 	}
@@ -299,9 +306,88 @@ public class Pulse
 
 	}
 	
-	public static void regularCMUpdate(CmToCcuOverUsbCmRegularUpdateMessage_t cmRegularUpdateMessage_t)
-	{
-		CcuLog.d(L.TAG_CCU_DEVICE,"Regualar cm update pulse" + DLog.objectNullString((cmRegularUpdateMessage_t)));
+	public static void regularCMUpdate(CmToCcuOverUsbCmRegularUpdateMessage_t cmRegularUpdateMessage_t) {
+		CCUHsApi hayStack = CCUHsApi.getInstance();
+		String addr = String.valueOf(L.ccu().getSmartNodeAddressBand()).substring(0,2).concat("99");
+		HashMap device = hayStack.read("device and addr == \""+Short.parseShort(addr)+"\"");
+		if (device != null && device.size() > 0) {
+			Device deviceInfo = new Device.Builder().setHashMap(device).build();
+			ArrayList<HashMap> phyPoints = hayStack.readAll("point and physical and sensor and deviceRef == \"" + deviceInfo.getId() + "\"");
+			String logicalCurTempPoint = "";
+			double curTempVal = 0.0;
+			double th2TempVal = 0.0;
+			boolean isTh2Enabled = false;
+			for (HashMap phyPoint : phyPoints) {
+				if (phyPoint.get("pointRef") == null || phyPoint.get("pointRef") == "") {
+					continue;
+				}
+				HashMap logPoint = hayStack.read("point and id==" + phyPoint.get("pointRef"));
+				double val;
+				switch (Port.valueOf(phyPoint.get("port").toString())) {
+					case SENSOR_RT:
+						val = cmRegularUpdateMessage_t.roomTemperature.get();
+						double tempOffset = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and config and ti and temperature and offset and equipRef == \"" + deviceInfo.getEquipRef() + "\"");
+						curTempVal = getCMRoomTempConversion(val,tempOffset);
+						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+						logicalCurTempPoint = logPoint.get("id").toString();
+						CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : currentTemp " + curTempVal+","+tempOffset);
+						break;
+					case TH2_IN:
+						val = cmRegularUpdateMessage_t.thermistor2.get();
+						isTh2Enabled = phyPoint.get("enabled").toString().equals("true");
+						if (isTh2Enabled) {
+							th2TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
+							th2TempVal = CCUUtils.roundTo2Decimal(th2TempVal);
+						}else {
+							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+							hayStack.writeHisValById(logPoint.get("id").toString(), ThermistorUtil.getThermistorValueToTemp(val * 10));
+						}// else
+							//hayStack.writeHisValById(logPoint.get("id").toString(), val * 10);
+						CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Thermistor2 " + th2TempVal + "," + (val * 10) + "," + logicalCurTempPoint + "," + isTh2Enabled);
+						break;
+					case ANALOG_IN_ONE:
+						val = cmRegularUpdateMessage_t.analogSense1.get();
+						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+						hayStack.writeHisValById(logPoint.get("id").toString(), getAnalogConversion(phyPoint, logPoint, val));
+						CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : analog1In " + getAnalogConversion(phyPoint, logPoint, val));
+						break;
+					case ANALOG_IN_TWO:
+						val = cmRegularUpdateMessage_t.analogSense2.get();
+						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+						hayStack.writeHisValById(logPoint.get("id").toString(), getAnalogConversion(phyPoint, logPoint, val));
+						CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : analog2In " + getAnalogConversion(phyPoint, logPoint, val));
+						break;
+					case TH1_IN:
+						val = cmRegularUpdateMessage_t.thermistor1.get();
+						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+						hayStack.writeHisValById(logPoint.get("id").toString(), ThermistorUtil.getThermistorValueToTemp(val * 10));
+						CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Thermistor1 " + ThermistorUtil.getThermistorValueToTemp(val * 10));
+						break;
+					case SENSOR_RH:
+						val = cmRegularUpdateMessage_t.humidity.get();
+						if (val > 0) {
+							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+							hayStack.writeHisValById(logPoint.get("id").toString(), getHumidityConversion(val));
+						}
+						CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Humidity " + getHumidityConversion(val));
+						break;
+				}
+			}
+			//Write Current temp point based on th2 enabled or not,
+			if (isTh2Enabled && !logicalCurTempPoint.isEmpty()) {
+				hayStack.writeHisValById(logicalCurTempPoint, th2TempVal);
+				if (currentTempInterface != null) {
+					Log.i("PubNub", "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + deviceInfo.getAddr() + " currentTempVal:" + curTempVal);
+					currentTempInterface.updateTemperature(th2TempVal, Short.parseShort(deviceInfo.getAddr()));
+				}
+			} else if (!logicalCurTempPoint.isEmpty()) {
+				hayStack.writeHisValById(logicalCurTempPoint, curTempVal);
+				if (currentTempInterface != null) {
+					Log.i("PubNub", "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + deviceInfo.getAddr() + " currentTempVal:" + curTempVal);
+					currentTempInterface.updateTemperature(curTempVal, Short.parseShort(deviceInfo.getAddr()));
+				}
+			}
+		}
 	}
 
 

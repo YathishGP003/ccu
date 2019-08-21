@@ -782,6 +782,10 @@ public class FloorPlanFragment extends Fragment
 					showDialogFragment(Fragment4PipeFanCoilUnitConfig
 							.newInstance(Short.parseShort(nodeAddr),zone.getDisplayName(),NodeType.SMART_STAT,floor.getDisplayName(),profile.getProfileType()),Fragment4PipeFanCoilUnitConfig.ID);
 					break;
+				case TEMP_INFLUENCE:
+					showDialogFragment(FragmentTempInfConfiguration
+							.newInstance(Short.parseShort(nodeAddr),zone.getDisplayName(), NodeType.CONTROL_MOTE, floor.getDisplayName()), FragmentTempInfConfiguration.ID);
+					break;
 
 			}
 		}else

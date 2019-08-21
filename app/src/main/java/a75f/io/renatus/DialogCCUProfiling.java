@@ -81,9 +81,9 @@ public class DialogCCUProfiling extends BaseDialogFragment
 
     @Optional
     @OnClick(R.id.rl_tempinf)
-    void onTempMonitorOnClick()
+    void onTempInfluenceOnClick()
     {
-        showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.TEMP_INFLUENCE, NodeType.SMART_STAT), FragmentBLEInstructionScreen.ID);
+        showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.TEMP_INFLUENCE, NodeType.CONTROL_MOTE), FragmentBLEInstructionScreen.ID);
     }
 
     @Override

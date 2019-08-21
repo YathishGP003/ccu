@@ -1588,7 +1588,229 @@ public class BuildingTuners
         hayStack.writeHisValById(zoneVOCThresholdId, HSUtil.getPriorityVal(zoneVOCThresholdId));
     
     }
+    public void addEquipTiTuners(String equipdis, String equipref, String roomRef, String floorRef) {
+        Log.d("CCU","addEquipTiTuners for "+equipdis);
 
+        addEquipZoneTuners(equipdis, equipref, roomRef, floorRef);
+
+        Point zonePrioritySpread = new Point.Builder()
+                .setDisplayName(equipdis+"-"+"zonePrioritySpread")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("tuner").addMarker("ti").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("zone").addMarker("priority").addMarker("spread").addMarker("sp")
+                .setTz(tz)
+                .build();
+        String zonePrioritySpreadId = hayStack.addPoint(zonePrioritySpread);
+        HashMap zonePrioritySpreadPoint = hayStack.read("point and tuner and default and dab and zone and priority and spread");
+        ArrayList<HashMap> zonePrioritySpreadPointArr = hayStack.readPoint(zonePrioritySpreadPoint.get("id").toString());
+        for (HashMap valMap : zonePrioritySpreadPointArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.pointWrite(HRef.copy(zonePrioritySpreadId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(zonePrioritySpreadId, HSUtil.getPriorityVal(zonePrioritySpreadId));
+
+        Point zonePriorityMultiplier = new Point.Builder()
+                .setDisplayName(equipdis+"-"+"zonePriorityMultiplier")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("tuner").addMarker("ti").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("zone").addMarker("priority").addMarker("multiplier").addMarker("sp")
+                .setTz(tz)
+                .build();
+        String zonePriorityMultiplierId = hayStack.addPoint(zonePriorityMultiplier);
+        HashMap zonePriorityMultiplierPoint = hayStack.read("point and tuner and default and dab and zone and priority and multiplier");
+        ArrayList<HashMap> zonePrioritySpreadMultiplierArr = hayStack.readPoint(zonePriorityMultiplierPoint.get("id").toString());
+        for (HashMap valMap : zonePrioritySpreadMultiplierArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.pointWrite(HRef.copy(zonePriorityMultiplierId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(zonePriorityMultiplierId, HSUtil.getPriorityVal(zonePriorityMultiplierId));
+
+        Point coolingDb = new Point.Builder()
+                .setDisplayName(equipdis+"-"+"coolingDeadband")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("tuner").addMarker("ti").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("cooling").addMarker("deadband").addMarker("base").addMarker("sp")
+                .setTz(tz)
+                .setUnit("\u00B0F")
+                .build();
+        String coolingDbId = hayStack.addPoint(coolingDb);
+        HashMap defCdbPoint = hayStack.read("point and tuner and default and dab and cooling and deadband and base");
+        ArrayList<HashMap> cdbDefPointArr = hayStack.readPoint(defCdbPoint.get("id").toString());
+        for (HashMap valMap : cdbDefPointArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.pointWrite(HRef.copy(coolingDbId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(coolingDbId, HSUtil.getPriorityVal(coolingDbId));
+
+        Point coolingDbMultiplier = new Point.Builder()
+                .setDisplayName(equipdis+"-"+"coolingDeadbandMultiplier")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("tuner").addMarker("ti").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("cooling").addMarker("deadband").addMarker("multiplier").addMarker("sp")
+                .setTz(tz)
+                .build();
+        String coolingDbMultiplierId = hayStack.addPoint(coolingDbMultiplier);
+        HashMap coolingDbMultiplierPoint = hayStack.read("point and tuner and default and dab and cooling and deadband and multiplier");
+        ArrayList<HashMap> coolingDbMultiplierPointArr = hayStack.readPoint(coolingDbMultiplierPoint.get("id").toString());
+        for (HashMap valMap : coolingDbMultiplierPointArr) {
+            if (valMap.get("val") != null)
+            {
+                System.out.println(valMap);
+                hayStack.pointWrite(HRef.copy(coolingDbMultiplierId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(coolingDbMultiplierId, HSUtil.getPriorityVal(coolingDbMultiplierId));
+
+        Point heatingDb = new Point.Builder()
+                .setDisplayName(equipdis+"-"+"heatingDeadband")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("tuner").addMarker("ti").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("heating").addMarker("deadband").addMarker("base").addMarker("sp")
+                .setTz(tz)
+                .setUnit("\u00B0F")
+                .build();
+        String heatingDbId = hayStack.addPoint(heatingDb);
+        HashMap defHdbPoint = hayStack.read("point and tuner and default and dab and heating and deadband and base");
+        ArrayList<HashMap> hdbDefPointArr = hayStack.readPoint(defHdbPoint.get("id").toString());
+        for (HashMap valMap : hdbDefPointArr) {
+            if (valMap.get("val") != null)
+            {
+                hayStack.pointWrite(HRef.copy(heatingDbId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(heatingDbId, HSUtil.getPriorityVal(heatingDbId));
+
+        Point heatingDbMultiplier = new Point.Builder()
+                .setDisplayName(equipdis+"-"+"heatingDeadbandMultiplier")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("tuner").addMarker("ti").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("heating").addMarker("deadband").addMarker("multiplier").addMarker("sp")
+                .setTz(tz)
+                .build();
+        String heatingDbMultiplierId = hayStack.addPoint(heatingDbMultiplier);
+        HashMap heatingDbMultiplierPoint = hayStack.read("point and tuner and default and dab and heating and deadband and multiplier");
+        ArrayList<HashMap> heatingDbMultiplierPointArr = hayStack.readPoint(heatingDbMultiplierPoint.get("id").toString());
+        for (HashMap valMap : heatingDbMultiplierPointArr) {
+            if (valMap.get("val") != null)
+            {
+                hayStack.pointWrite(HRef.copy(heatingDbMultiplierId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(heatingDbMultiplierId, HSUtil.getPriorityVal(heatingDbMultiplierId));
+
+        Point propGain = new Point.Builder()
+                .setDisplayName(equipdis+"-"+"proportionalKFactor")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("tuner").addMarker("ti").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("pgain").addMarker("sp")
+                .setTz(tz)
+                .build();
+        String pgainId = hayStack.addPoint(propGain);
+        HashMap defPgainPoint = hayStack.read("point and tuner and default and dab and pgain");
+        ArrayList<HashMap> pgainDefPointArr = hayStack.readPoint(defPgainPoint.get("id").toString());
+        for (HashMap valMap : pgainDefPointArr) {
+            if (valMap.get("val") != null)
+            {
+                hayStack.pointWrite(HRef.copy(pgainId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(pgainId, HSUtil.getPriorityVal(pgainId));
+
+        Point integralGain = new Point.Builder()
+                .setDisplayName(equipdis+"-"+"integralKFactor")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("tuner").addMarker("ti").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("igain").addMarker("sp")
+                .setTz(tz)
+                .build();
+        String igainId = hayStack.addPoint(integralGain);
+        HashMap defIgainPoint = hayStack.read("point and tuner and default and dab and igain");
+        ArrayList<HashMap> igainDefPointArr = hayStack.readPoint(defIgainPoint.get("id").toString());
+        for (HashMap valMap : igainDefPointArr) {
+            if (valMap.get("val") != null)
+            {
+                hayStack.pointWrite(HRef.copy(igainId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(igainId, HSUtil.getPriorityVal(igainId));
+
+        Point propSpread = new Point.Builder()
+                .setDisplayName(equipdis+"-"+"temperatureProportionalRange")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("tuner").addMarker("ti").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("pspread").addMarker("sp")
+                .setTz(tz)
+                .build();
+        String pSpreadId = hayStack.addPoint(propSpread);
+        HashMap defPSpreadPoint = hayStack.read("point and tuner and default and dab and pspread");
+        ArrayList<HashMap> pspreadDefPointArr = hayStack.readPoint(defPSpreadPoint.get("id").toString());
+        for (HashMap valMap : pspreadDefPointArr) {
+            if (valMap.get("val") != null)
+            {
+                hayStack.pointWrite(HRef.copy(pSpreadId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(pSpreadId, HSUtil.getPriorityVal(pSpreadId));
+
+        Point integralTimeout = new Point.Builder()
+                .setDisplayName(equipdis+"-"+"temperatureIntegralTime")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .setRoomRef(roomRef)
+                .setFloorRef(floorRef)
+                .addMarker("tuner").addMarker("ti").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("itimeout").addMarker("sp")
+                .setTz(tz)
+                .build();
+        String iTimeoutId = hayStack.addPoint(integralTimeout);
+        HashMap defITPoint = hayStack.read("point and tuner and default and dab and itimeout");
+        ArrayList<HashMap> iTDefPointArr = hayStack.readPoint(defITPoint.get("id").toString());
+        for (HashMap valMap : iTDefPointArr) {
+            if (valMap.get("val") != null)
+            {
+                hayStack.pointWrite(HRef.copy(iTimeoutId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+            }
+        }
+        hayStack.writeHisValById(iTimeoutId, HSUtil.getPriorityVal(iTimeoutId));
+
+
+    }
     public void addEquipZoneStandaloneTuners(String equipdis, String equipref, String roomRef, String floorRef) {
         Point saHeatingDeadBand = new Point.Builder()
                 .setDisplayName(equipdis+"-"+"standaloneHeatingDeadband")

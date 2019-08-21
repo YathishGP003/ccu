@@ -850,7 +850,8 @@ public class ZonesFragment extends Fragment
                      zoneProfile.getProfileType() == ProfileType.SMARTSTAT_CONVENTIONAL_PACK_UNIT ||
                     zoneProfile.getProfileType() == ProfileType.SMARTSTAT_HEAT_PUMP_UNIT ||
                     zoneProfile.getProfileType() == ProfileType.SMARTSTAT_TWO_PIPE_FCU ||
-                    zoneProfile.getProfileType() == ProfileType.SMARTSTAT_FOUR_PIPE_FCU)
+                    zoneProfile.getProfileType() == ProfileType.SMARTSTAT_FOUR_PIPE_FCU||
+        zoneProfile.getProfileType() == ProfileType.TEMP_INFLUENCE)
             {
                 HashMap zoneMap = CCUHsApi.getInstance().read("equip and roomRef == \"" + zoneProfile.getEquip().getRoomRef() + "\"");
                 Zone z = new Zone.Builder().setHashMap(zoneMap).build();

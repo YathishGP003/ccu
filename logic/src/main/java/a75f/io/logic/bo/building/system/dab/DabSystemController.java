@@ -104,8 +104,10 @@ public class DabSystemController extends SystemController
                 
                 for (Equip q : HSUtil.getEquips(z.getId()))
                 {
-                    
-                    if (q.getMarkers().contains("dab") == false || isZoneDead(q) || !hasTemp(q))
+
+                    //isDab or CCu as zone profile
+                    boolean isDabOrTi = ((q.getMarkers().contains("dab") == false) ? ((q.getMarkers().contains("ti") == false) ? false: true) : true);
+                    if (!isDabOrTi || isZoneDead(q) || !hasTemp(q))
                     {
                         continue;
                     }
@@ -323,7 +325,7 @@ public class DabSystemController extends SystemController
     }
     
     public ZonePriority getEquipPriority(String equipRef) {
-        double priorityVal = CCUHsApi.getInstance().readDefaultVal("point and zone and config and dab and priority and equipRef == \""+equipRef+"\"");
+        double priorityVal = CCUHsApi.getInstance().readDefaultVal("point and zone and config and priority and equipRef == \""+equipRef+"\"");
         return ZonePriority.values()[(int) priorityVal];
     }
     

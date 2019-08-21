@@ -13,9 +13,13 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Zone;
+import a75f.io.logic.bo.building.ZoneProfile;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.lights.LightProfile;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
@@ -105,8 +109,23 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
     }
 
     @OnClick(R.id.rl_ccu) void oCCUClick() {
-        DialogCCUProfiling ccuProfiling = DialogCCUProfiling.newInstance(mNodeAddress, mRoomName, mFloorName);
-        showDialogFragment(ccuProfiling, DialogCCUProfiling.ID);
+        boolean isCazExists = false;
+
+        for(ZoneProfile zp :L.ccu().zoneProfiles) {
+            if (zp.getProfileType() == ProfileType.TEMP_INFLUENCE) {
+                isCazExists = true;
+                break;
+            }
+        }
+        if(isCazExists){
+            removeDialogFragment(ID);
+            Toast.makeText(getContext(),"CCU As Zone temperature influence is already enabled",Toast.LENGTH_LONG).show();
+        }else {
+            //For CCU we have it as start address  ending with 99
+            String ccuAddr = String.valueOf(mNodeAddress).substring(0, 2).concat("99");
+            DialogCCUProfiling ccuProfiling = DialogCCUProfiling.newInstance(Short.parseShort(ccuAddr), mRoomName, mFloorName);
+            showDialogFragment(ccuProfiling, DialogCCUProfiling.ID);
+        }
     }
 
     @OnClick(R.id.first_button) void onFirstButtonClick() {

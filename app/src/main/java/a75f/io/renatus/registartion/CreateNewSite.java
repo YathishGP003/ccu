@@ -314,6 +314,7 @@ public class CreateNewSite extends Fragment {
                         CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
                     }
                 }
+                L.saveCCUState();
             }
         });
 

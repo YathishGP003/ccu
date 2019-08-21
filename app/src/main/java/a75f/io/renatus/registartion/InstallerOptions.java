@@ -199,9 +199,7 @@ public class InstallerOptions extends Fragment {
             }
         }
 
-        imageTemp.setOnClickListener(view -> {
-            openMasterControllerDialog();
-        });
+        imageTemp.setOnClickListener(view -> openMasterControllerDialog());
 
         return rootView;
     }
@@ -219,11 +217,7 @@ public class InstallerOptions extends Fragment {
             dialog.findViewById(R.id.btnCancel).setOnClickListener(view -> dialog.dismiss());
             dialog.findViewById(R.id.btnClose).setOnClickListener(view -> dialog.dismiss());
 
-            dialog.findViewById(R.id.btnSet).setOnClickListener(view -> {
-                masterControlView.setTuner();
-
-                dialog.dismiss();
-            });
+            dialog.findViewById(R.id.btnSet).setOnClickListener(view -> masterControlView.setTuner(dialog));
 
             dialog.show();
         }

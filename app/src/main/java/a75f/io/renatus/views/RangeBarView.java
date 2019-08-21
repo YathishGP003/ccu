@@ -77,10 +77,10 @@ public class RangeBarView extends LinearLayout {
         layoutParams.weight = 1;
         this.addView(rangeBar, layoutParams);
 
-        if (mSchedule == null) {
-            getBuildingHeatAndCoolingDeadBand();
-        } else if (mSchedule.isZoneSchedule()) {
+         if (mSchedule!= null && mSchedule.isZoneSchedule()) {
             getZoneHeatAndCoolingDeadBand();
+        } else {
+            getBuildingHeatAndCoolingDeadBand();
         }
 
         rangeBar.setLowerCoolingTemp((float) coolValue);

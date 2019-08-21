@@ -718,13 +718,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         float pointcoolDB = (float)getPointVal(coolDB.get("id").toString());
 
         String floorName = floorList.get(mFloorListAdapter.getSelectedPostion()).getDisplayName();
-        float zoneCurrentTemp = (float)currentAverageTemp;
-        if(zoneCurrentTemp == 0 || zoneCurrentTemp == Float.NaN)
-        {
-            zoneCurrentTemp = 0.0;
-        }
-        Log.i("EachzoneData","CurrentTemp:"+zoneCurrentTemp+" FloorName:"+floorName+" ZoneName:"+zoneTitle+","+pointheatDB+","+pointcoolDB);
-        seekArc.setData(false, pointbuildingMin, pointbuildingMax, pointheatUL, pointheatLL, pointcoolLL, pointcoolUL, pointheatDT, pointcoolDT, zoneCurrentTemp, pointheatDB, pointcoolDB);
+        //float zoneCurrentTemp = (float)currentAverageTemp;
+        Log.i("EachzoneData","CurrentTemp:"+(float)currentAverageTemp+" FloorName:"+floorName+" ZoneName:"+zoneTitle+","+pointheatDB+","+pointcoolDB);
+        seekArc.setData(false, pointbuildingMin, pointbuildingMax, pointheatUL, pointheatLL, pointcoolLL, pointcoolUL, pointheatDT, pointcoolDT, (float)currentAverageTemp, pointheatDB, pointcoolDB);
         seekArc.setDetailedView(false);
         LinearLayout.LayoutParams rowLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
 

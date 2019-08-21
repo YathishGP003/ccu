@@ -111,8 +111,9 @@ public class VavSystemController extends SystemController
             for(Zone z: HSUtil.getZones(f.getId())) {
                 for (Equip q : HSUtil.getEquips(z.getId()))
                 {
-                    
-                    if (q.getMarkers().contains("vav") == false || isZoneDead(q) || !hasTemp(q))
+                    //isVav or CCu as zone profile
+                    boolean isVavOrTi = (q.getMarkers().contains("vav") == false) ? (q.getMarkers().contains("ti") == false) ? false: true : true;
+                    if ( !isVavOrTi || isZoneDead(q) || !hasTemp(q))
                     {
                         continue;
                     }
@@ -332,7 +333,7 @@ public class VavSystemController extends SystemController
     }
     
     public ZonePriority getEquipPriority(String equipRef) {
-        double priorityVal = CCUHsApi.getInstance().readDefaultVal("point and zone and config and vav and priority and equipRef == \""+equipRef+"\"");
+        double priorityVal = CCUHsApi.getInstance().readDefaultVal("point and zone and config and priority and equipRef == \""+equipRef+"\"");
         return ZonePriority.values()[(int) priorityVal];
     }
     

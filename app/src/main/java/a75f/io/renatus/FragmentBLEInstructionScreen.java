@@ -235,16 +235,16 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         }
         else if (mProfileType == ProfileType.TEMP_INFLUENCE)
         {
-            if (L.isSimulation())
-            {
+            //CCU As a Zone -- Temp influence profile - No pairing needed
+           // if (L.isSimulation()) {
                 showDialogFragment(FragmentTempInfConfiguration.newInstance(mNodeAddress, mRoomName, mNodeType, mFloorName), FragmentTempInfConfiguration.ID);
-            }
+            /*}
             else
             {
                 Log.d("FragBleInstrScrn","Temp influence profile. device scan");
                 FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.TEMP_INFLUENCE);
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
-            }
+            }*/
         }
         else if (mProfileType == ProfileType.SMARTSTAT_TWO_PIPE_FCU)
         {

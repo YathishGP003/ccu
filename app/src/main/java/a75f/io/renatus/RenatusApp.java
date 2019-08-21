@@ -66,7 +66,7 @@ public class RenatusApp extends UtilityApplication
 
             ApplicationInfo appInfo = RenatusApp.getAppContext().getApplicationInfo();
 			if(isRooted()) {
-				Process p = Runtime.getRuntime().exec("su -c");
+				Process p = Runtime.getRuntime().exec("su");
 				InputStream es = p.getErrorStream();
 				DataOutputStream os = new DataOutputStream(p.getOutputStream());
 

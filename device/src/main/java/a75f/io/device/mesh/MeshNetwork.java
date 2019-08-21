@@ -55,6 +55,8 @@ public class MeshNetwork extends DeviceNetwork
                         NodeType deviceType = NodeType.SMART_NODE;
                         if(d.getMarkers().contains("smartstat"))
                             deviceType = NodeType.SMART_STAT;
+                        else if(d.getMarkers().contains("ccu"))
+                            deviceType = NodeType.CONTROL_MOTE;
                         switch (deviceType) {
                             case SMART_NODE:
                                 if(bSeedMessage) {

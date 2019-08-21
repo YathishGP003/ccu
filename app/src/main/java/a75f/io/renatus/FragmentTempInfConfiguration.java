@@ -1,7 +1,10 @@
 package a75f.io.renatus;
 
 import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.res.Resources;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -10,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.NumberPicker;
 import android.widget.Spinner;
@@ -18,7 +22,12 @@ import android.widget.ToggleButton;
 
 import java.lang.reflect.Field;
 
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
+import a75f.io.logic.bo.building.ZonePriority;
+import a75f.io.logic.bo.building.ccu.CazProfile;
+import a75f.io.logic.bo.building.ccu.CazProfileConfig;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.plc.PlcProfile;
 import a75f.io.logic.bo.building.plc.PlcProfileConfiguration;
@@ -33,12 +42,13 @@ import butterknife.ButterKnife;
 
 public class FragmentTempInfConfiguration extends BaseDialogFragment
 {
-    public static final String TAG = "PlcConfig";
+    public static final String TAG = "TempInfluence";
     public static final String ID = FragmentTempInfConfiguration.class.getSimpleName();
 
+    static final int TEMP_OFFSET_LIMIT = 100;
 
     @BindView(R.id.zonePriority)
-    Spinner probe2TempSensor;
+    Spinner      zonePriority;
 
     @BindView(R.id.temperatureOffset)
     NumberPicker temperatureOffset;
@@ -47,8 +57,8 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
     Button setButton;
 
     private ProfileType             mProfileType;
-    private PlcProfile              mPlcProfile;
-    private PlcProfileConfiguration mProfileConfig;
+    private CazProfile              mCcuAsZoneProfile;
+    private CazProfileConfig mProfileConfig;
 
     private short    mSmartNodeAddress;
     private NodeType mNodeType;
@@ -85,7 +95,7 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
         Dialog dialog = getDialog();
         if (dialog != null) {
             int width = 1165;//ViewGroup.LayoutParams.WRAP_CONTENT;
-            int height = ViewGroup.LayoutParams.WRAP_CONTENT;
+            int height = 720;//ViewGroup.LayoutParams.WRAP_CONTENT;
             dialog.getWindow().setLayout(width, height);
         }
     }
@@ -108,8 +118,98 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        setDividerColor(temperatureOffset);
 
+
+        mCcuAsZoneProfile = (CazProfile) L.getProfile(mSmartNodeAddress);
+
+        if (mCcuAsZoneProfile != null) {
+            Log.d("CPUConfig", "Get Config: "+mCcuAsZoneProfile.getProfileType()+","+mCcuAsZoneProfile.getProfileConfiguration(mSmartNodeAddress)+","+mSmartNodeAddress);
+            mProfileConfig = (CazProfileConfig) mCcuAsZoneProfile
+                    .getProfileConfiguration(mSmartNodeAddress);
+        } else {
+            Log.d("CPUConfig", "Create Profile: ");
+            mCcuAsZoneProfile = new CazProfile();
+
+        }
+        setDividerColor(temperatureOffset);
+        temperatureOffset.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+        String[] nums = new String[TEMP_OFFSET_LIMIT * 2 + 1];//{"-4","-3","-2","-1","0","1","2","3","4"};
+        for (int nNum = 0; nNum < TEMP_OFFSET_LIMIT * 2 + 1; nNum++)
+            nums[nNum] = String.valueOf((float) (nNum - TEMP_OFFSET_LIMIT) / 10);
+        temperatureOffset.setDisplayedValues(nums);
+        temperatureOffset.setMinValue(0);
+        temperatureOffset.setMaxValue(TEMP_OFFSET_LIMIT * 2);
+        temperatureOffset.setValue(TEMP_OFFSET_LIMIT);
+        temperatureOffset.setWrapSelectorWheel(false);
+        setButton = (Button) view.findViewById(R.id.setBtn);
+        zonePriority = view.findViewById(R.id.zonePriority);
+        ArrayAdapter<CharSequence> zonePriorityAdapter = ArrayAdapter.createFromResource(getActivity(),
+                R.array.zone_priority, R.layout.spinner_dropdown_item);
+        zonePriorityAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        zonePriority.setAdapter(zonePriorityAdapter);
+
+
+        if(mProfileConfig != null) {
+            zonePriority.setSelection(mProfileConfig.getPriority().ordinal());
+            int offsetIndex = (int) mProfileConfig.temperaturOffset + TEMP_OFFSET_LIMIT;
+            temperatureOffset.setValue(offsetIndex);
+        }else {
+            zonePriority.setSelection(2);
+        }
+        setButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+
+                new AsyncTask<Void, Void, Void>() {
+
+                    ProgressDialog progressDlg = new ProgressDialog(getActivity());
+
+                    @Override
+                    protected void onPreExecute() {
+                        setButton.setEnabled(false);
+                        progressDlg.setMessage("Saving CCU As Zone Configuration");
+                        progressDlg.show();
+                        super.onPreExecute();
+                    }
+
+                    @Override
+                    protected Void doInBackground( final Void ... params ) {
+                        setupCcuAsZoneProfile();
+                        L.saveCCUState();
+
+                        return null;
+                    }
+
+                    @Override
+                    protected void onPostExecute( final Void result ) {
+                        progressDlg.dismiss();
+                        FragmentTempInfConfiguration.this.closeAllBaseDialogFragments();
+                        if(mCcuAsZoneProfile != null) getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
+                    }
+                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+            }
+        });
+    }
+
+    private void setupCcuAsZoneProfile() {
+
+        CazProfileConfig cazConfig = new CazProfileConfig();
+
+        cazConfig.setNodeType(mNodeType);
+        cazConfig.setNodeAddress(mSmartNodeAddress);
+        cazConfig.setPriority(ZonePriority.values()[zonePriority.getSelectedItemPosition()]);
+        cazConfig.temperaturOffset = temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
+
+
+        mCcuAsZoneProfile.getProfileConfiguration().put(mSmartNodeAddress, cazConfig);
+        if (mProfileConfig == null) {
+            mCcuAsZoneProfile.addCcuAsZoneEquip(mSmartNodeAddress, cazConfig, floorRef, zoneRef );
+        } else {
+            mCcuAsZoneProfile.updateCcuAsZone(cazConfig);
+        }
+        L.ccu().zoneProfiles.add(mCcuAsZoneProfile);
+        CcuLog.d(L.TAG_CCU_UI, "Set CCU As Zone Config: Profiles - "+L.ccu().zoneProfiles.size());
     }
     private void setDividerColor(NumberPicker picker) {
         Field[] numberPickerFields = NumberPicker.class.getDeclaredFields();
@@ -130,29 +230,6 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
                 }
                 break;
             }
-        }
-    }
-
-    private void setNumberPickerDividerColor(NumberPicker pk) {
-        Class<?> numberPickerClass = null;
-        try {
-            numberPickerClass = Class.forName("android.widget.NumberPicker");
-            Field selectionDivider = numberPickerClass.getDeclaredField("mSelectionDivider");
-            selectionDivider.setAccessible(true);
-            //if(!CCUUtils.isxlargedevice(getActivity())) {
-            selectionDivider.set(pk, getResources().getDrawable(R.drawable.line_959595));
-            //}else{
-            //   selectionDivider.set(pk, getResources().getDrawable(R.drawable.connect_192x48_orange));
-            //}
-
-        } catch (ClassNotFoundException e) {
-            Log.e("class not found",e.toString());
-        } catch (NoSuchFieldException e) {
-            Log.e("NoSuchFieldException",e.toString());
-        } catch (IllegalAccessException e) {
-            Log.e("IllegalAccessException",e.toString());
-        }catch (Exception e){
-            Log.e("dividerexception",e.getMessage().toString());
         }
     }
 

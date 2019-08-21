@@ -30,6 +30,7 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.bo.building.ccu.CazProfile;
 import a75f.io.logic.bo.building.ss4pfcu.FourPipeFanCoilUnitProfile;
 import a75f.io.logic.bo.building.system.dab.DabAdvancedHybridRtu;
 import a75f.io.logic.bo.building.ss2pfcu.TwoPipeFanCoilUnitProfile;
@@ -478,6 +479,11 @@ public class Globals {
                             EmrProfile emr = new EmrProfile();
                             emr.addEmrEquip(Short.valueOf(eq.getGroup()));
                             L.ccu().zoneProfiles.add(emr);
+                            break;
+                        case TEMP_INFLUENCE:
+                            CazProfile caz = new CazProfile();
+                            caz.addCcuAsZoneEquip(Short.valueOf(eq.getGroup()));
+                            L.ccu().zoneProfiles.add(caz);
                             break;
                         case SMARTSTAT_CONVENTIONAL_PACK_UNIT:
                             ConventionalUnitProfile cpu = new ConventionalUnitProfile();

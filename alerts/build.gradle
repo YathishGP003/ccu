@@ -47,4 +47,5 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.8.6'
 
     implementation project(':haystack')
+    implementation 'info.guardianproject.netcipher:netcipher:1.2'
 }

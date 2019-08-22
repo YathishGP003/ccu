@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.AsyncTask;
+import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -29,6 +30,7 @@ import a75f.io.api.haystack.Zone;
 import a75f.io.logic.L;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerConstants;
+import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.R;
 import a75f.io.renatus.schedules.ScheduleUtil;
 
@@ -46,6 +48,10 @@ public class MasterControlView extends LinearLayout {
     HashMap heatLL;
     HashMap buildingMin;
     HashMap buildingMax;
+    double hdb = 2.0;
+    double cdb = 2.0;
+    boolean isDeadBandWarning;
+    private AlertDialog deadBandAlert;
 
     public MasterControlView(Context context) {
         super(context);
@@ -79,6 +85,7 @@ public class MasterControlView extends LinearLayout {
     private int mImagePadding = 25;
 
     private void add() {
+        isDeadBandWarning = false;
         DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
 
         int angleWH = (int) (ANGLE_WIDTH * displayMetrics.density);
@@ -135,24 +142,24 @@ public class MasterControlView extends LinearLayout {
     }
 
     private void updateData() {
-        HashMap site = CCUHsApi.getInstance().read("site");
-        String siteLUID = site.get("id").toString();
-        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and siteRef == \"" + siteLUID + "\"");
+        HashMap tuner = CCUHsApi.getInstance().read("equip and tuner");
+        Equip p = new Equip.Builder().setHashMap(tuner).build();
 
-        for (HashMap m : equips) {
-            Equip p = new Equip.Builder().setHashMap(m).build();
+        hdb = TunerUtil.getHeatingDeadband(p.getId());
+        cdb = TunerUtil.getCoolingDeadband(p.getId());
+        coolUL = CCUHsApi.getInstance().read("point and limit and max and cooling and user and equipRef == \"" + p.getId() + "\"");
+        heatUL = CCUHsApi.getInstance().read("point and limit and max and heating and user and equipRef == \"" + p.getId() + "\"");
+        coolLL = CCUHsApi.getInstance().read("point and limit and min and cooling and user and equipRef == \"" + p.getId() + "\"");
+        heatLL = CCUHsApi.getInstance().read("point and limit and min and heating and user and equipRef == \"" + p.getId() + "\"");
+        buildingMin = CCUHsApi.getInstance().read("building and limit and min and equipRef == \"" + p.getId() + "\"");
+        buildingMax = CCUHsApi.getInstance().read("building and limit and max and equipRef == \"" + p.getId() + "\"");
+        HashMap setbackMap = CCUHsApi.getInstance().read("unoccupied and setback and equipRef == \"" + p.getId() + "\"");
+        HashMap zoneDiffMap = CCUHsApi.getInstance().read("building and zone and differential and equipRef == \"" + p.getId() + "\"");
 
-            if (p.getDisplayName().contains("BuildingTuner")) {
-                coolUL = CCUHsApi.getInstance().read("point and limit and max and cooling and user and equipRef == \"" + p.getId() + "\"");
-                heatUL = CCUHsApi.getInstance().read("point and limit and max and heating and user and equipRef == \"" + p.getId() + "\"");
-                coolLL = CCUHsApi.getInstance().read("point and limit and min and cooling and user and equipRef == \"" + p.getId() + "\"");
-                heatLL = CCUHsApi.getInstance().read("point and limit and min and heating and user and equipRef == \"" + p.getId() + "\"");
-                buildingMin = CCUHsApi.getInstance().read("building and limit and min and equipRef == \"" + p.getId() + "\"");
-                buildingMax = CCUHsApi.getInstance().read("building and limit and max and equipRef == \"" + p.getId() + "\"");
-
-            }
-        }
-        masterControl.setData((float) getTuner(heatLL.get("id").toString()), (float) getTuner(heatUL.get("id").toString()), (float) getTuner(coolLL.get("id").toString()), (float) getTuner(coolUL.get("id").toString()), (float) getTuner(buildingMin.get("id").toString()), (float) getTuner(buildingMax.get("id").toString()));
+        masterControl.setData((float) getTuner(heatLL.get("id").toString()), (float) getTuner(heatUL.get("id").toString()),
+                (float) getTuner(coolLL.get("id").toString()), (float) getTuner(coolUL.get("id").toString()),
+                (float) getTuner(buildingMin.get("id").toString()), (float) getTuner(buildingMax.get("id").toString()),
+                (float) getTuner(setbackMap.get("id").toString()), (float) getTuner(zoneDiffMap.get("id").toString()));
     }
 
     public void setTuner(Dialog dialog) {
@@ -160,30 +167,23 @@ public class MasterControlView extends LinearLayout {
         float coolTempLL = masterControl.getLowerCoolingTemp();
         float heatTempUL = masterControl.getUpperHeatingTemp();
         float heatTempLL = masterControl.getLowerHeatingTemp();
-        Schedule buildingSchedules = null;
+
         ArrayList<String> warningMessage = new ArrayList<>();
         ArrayList<Schedule> schedules = new ArrayList<>();
         ArrayList<Zone> zoneList = new ArrayList<>();
 
-        HashMap site = CCUHsApi.getInstance().read("site");
-        String siteLUID = site.get("id").toString();
-        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and siteRef == \"" + siteLUID + "\"");
+        HashMap tuner = CCUHsApi.getInstance().read("equip and tuner");
+        Equip p = new Equip.Builder().setHashMap(tuner).build();
+        coolUL = CCUHsApi.getInstance().read("point and limit and max and cooling and user and equipRef == \"" + p.getId() + "\"");
+        heatUL = CCUHsApi.getInstance().read("point and limit and max and heating and user and equipRef == \"" + p.getId() + "\"");
+        coolLL = CCUHsApi.getInstance().read("point and limit and min and cooling and user and equipRef == \"" + p.getId() + "\"");
+        heatLL = CCUHsApi.getInstance().read("point and limit and min and heating and user and equipRef == \"" + p.getId() + "\"");
+        buildingMin = CCUHsApi.getInstance().read("building and limit and min and equipRef == \"" + p.getId() + "\"");
+        buildingMax = CCUHsApi.getInstance().read("building and limit and max and equipRef == \"" + p.getId() + "\"");
 
-        for (HashMap m : equips) {
-            Equip p = new Equip.Builder().setHashMap(m).build();
+        Schedule buildingSchedules = Schedule.getScheduleByEquipId(p.getId());
+        schedules.add(buildingSchedules);
 
-            if (p.getDisplayName().contains("BuildingTuner")) {
-                coolUL = CCUHsApi.getInstance().read("point and limit and max and cooling and user and equipRef == \"" + p.getId() + "\"");
-                heatUL = CCUHsApi.getInstance().read("point and limit and max and heating and user and equipRef == \"" + p.getId() + "\"");
-                coolLL = CCUHsApi.getInstance().read("point and limit and min and cooling and user and equipRef == \"" + p.getId() + "\"");
-                heatLL = CCUHsApi.getInstance().read("point and limit and min and heating and user and equipRef == \"" + p.getId() + "\"");
-                buildingMin = CCUHsApi.getInstance().read("building and limit and min and equipRef == \"" + p.getId() + "\"");
-                buildingMax = CCUHsApi.getInstance().read("building and limit and max and equipRef == \"" + p.getId() + "\"");
-
-                buildingSchedules = Schedule.getScheduleByEquipId(p.getId());
-                schedules.add(buildingSchedules);
-            }
-        }
         // set schedule temps for building
         for (Schedule.Days buidlingdays : buildingSchedules.getDays()) {
             StringBuilder message = new StringBuilder("Building" + "\u0020" + ScheduleUtil.getDayString(buidlingdays.getDay() + 1) + "\u0020" + "Schedule1");
@@ -194,6 +194,10 @@ public class MasterControlView extends LinearLayout {
                 heatValues = "\u0020" + buidlingdays.getHeatingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + heatDTValue;
 
                 buidlingdays.setHeatingVal(heatDTValue);
+                if ((buidlingdays.getCoolingVal() - heatDTValue) < (float) (cdb + hdb)) {
+                    displayDeadBandWarning(buidlingdays.getCoolingVal(), heatDTValue);
+                    return;
+                }
             }
 
             if (buidlingdays.getCoolingVal() < coolTempLL || buidlingdays.getCoolingVal() > coolTempUL) {
@@ -201,6 +205,10 @@ public class MasterControlView extends LinearLayout {
                 coolValues = "\u0020 " + buidlingdays.getCoolingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + coolDTValue + "\u0020" + "\u0020";
 
                 buidlingdays.setCoolingVal(coolDTValue);
+                if ((coolDTValue - buidlingdays.getHeatingVal()) < (float) (cdb + hdb)) {
+                    displayDeadBandWarning(coolDTValue, buidlingdays.getHeatingVal());
+                    return;
+                }
             }
 
             if (!TextUtils.isEmpty(coolValues) && !TextUtils.isEmpty(heatValues)) {
@@ -235,6 +243,11 @@ public class MasterControlView extends LinearLayout {
                         heatValues = "\u0020" + days.getHeatingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + heatDTValue;
 
                         days.setHeatingVal(heatDTValue);
+
+                        if ((days.getCoolingVal() - heatDTValue) < (float) (cdb + hdb)) {
+                            displayDeadBandWarning(days.getCoolingVal(), heatDTValue);
+                            return;
+                        }
                     }
 
                     if (days.getCoolingVal() < coolTempLL || days.getCoolingVal() > coolTempUL) {
@@ -242,6 +255,10 @@ public class MasterControlView extends LinearLayout {
                         coolValues = "\u0020 " + days.getCoolingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + coolDTValue + "\u0020" + "\u0020";
 
                         days.setCoolingVal(coolDTValue);
+                        if ((coolDTValue - days.getHeatingVal()) < (float) (cdb + hdb)) {
+                            displayDeadBandWarning(coolDTValue, days.getHeatingVal());
+                            return;
+                        }
                     }
 
                     if (!TextUtils.isEmpty(coolValues) && !TextUtils.isEmpty(heatValues)) {
@@ -262,11 +279,30 @@ public class MasterControlView extends LinearLayout {
         if (warningMessage.size() > 0) {
             disPlayWarningMessage(warningMessage, dialog, schedules, zoneList);
         } else {
-            saveBuildingData(dialog);
+            if (!isDeadBandWarning) {
+                saveBuildingData(dialog);
 
-            for (Zone zone : zoneList) {
-                setZoneData(zone.getId());
+                for (Zone zone : zoneList) {
+                    setZoneData(zone.getId());
+                }
             }
+        }
+    }
+
+    private void displayDeadBandWarning(double coolingVal, double heatDTValue) {
+        isDeadBandWarning = true;
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setMessage("Cooling (" + coolingVal + ") and Heating (" + heatDTValue + ") difference should maintain to Deadband limit (" + (hdb + cdb) + ") !")
+                .setCancelable(false)
+                .setPositiveButton("Re-Edit", (dialog, id) -> {
+                    isDeadBandWarning = false;
+                    dialog.dismiss();
+                });
+        deadBandAlert = builder.create();
+
+        if (deadBandAlert != null && !deadBandAlert.isShowing()) {
+            deadBandAlert.show();
         }
     }
 
@@ -351,6 +387,7 @@ public class MasterControlView extends LinearLayout {
                 CCUHsApi.getInstance().writeHisValById(zoneHeatLL.get("id").toString(), (double) heatTempLL);
 
                 L.saveCCUState();
+                CCUHsApi.getInstance().syncEntityTree();
                 return null;
             }
 
@@ -392,6 +429,7 @@ public class MasterControlView extends LinearLayout {
                 CCUHsApi.getInstance().writeHisValById(buildingMin.get("id").toString(), (double) buildingTempLL);
 
                 L.saveCCUState();
+                CCUHsApi.getInstance().syncEntityTree();
                 return null;
             }
 

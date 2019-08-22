@@ -2,6 +2,7 @@ package a75f.io.renatus.registartion;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -199,7 +200,23 @@ public class InstallerOptions extends Fragment {
             }
         }
 
-        imageTemp.setOnClickListener(view -> openMasterControllerDialog());
+        imageTemp.setOnClickListener(view -> {
+            ProgressDialog progressDlg = new ProgressDialog(getActivity());
+            new CountDownTimer(8000, 1000) {
+                @Override
+                public void onTick(long l) {
+                    progressDlg.setMessage("Loading Master Controller...");
+                    progressDlg.show();
+                }
+
+                @Override
+                public void onFinish() {
+                    openMasterControllerDialog();
+                    progressDlg.dismiss();
+                }
+            }.start();
+
+        });
 
         return rootView;
     }

@@ -315,6 +315,7 @@ public class CreateNewSite extends Fragment {
                     }
                 }
                 L.saveCCUState();
+                CCUHsApi.getInstance().syncEntityTree();
             }
         });
 

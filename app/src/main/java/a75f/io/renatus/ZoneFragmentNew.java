@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -1981,20 +1982,28 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
     }
     
     public void setPointVal(String id, double val) {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        Point p = new Point.Builder().setHashMap(hayStack.readMapById(id)).build();
-        if (p.getMarkers().contains("writable"))
-        {
-            CcuLog.d(L.TAG_CCU_UI, "Set Writbale Val "+p.getDisplayName()+": " +val);
-            ScheduleProcessJob.handleDesiredTempUpdate(p, true, val);
+
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                CCUHsApi hayStack = CCUHsApi.getInstance();
+                Point p = new Point.Builder().setHashMap(hayStack.readMapById(id)).build();
+                if (p.getMarkers().contains("writable"))
+                {
+                    CcuLog.d(L.TAG_CCU_UI, "Set Writbale Val "+p.getDisplayName()+": " +val);
+                    ScheduleProcessJob.handleDesiredTempUpdate(p, true, val);
 
         }
 
-        if (p.getMarkers().contains("his"))
-        {
-            CcuLog.d(L.TAG_CCU_UI, "Set His Val "+id+": " +val);
-            hayStack.writeHisValById(id, val);
-        }
+                if (p.getMarkers().contains("his"))
+                {
+                    CcuLog.d(L.TAG_CCU_UI, "Set His Val "+id+": " +val);
+                    hayStack.writeHisValById(id, val);
+                }
+            }
+        });
+        thread.start();
     }
 
 

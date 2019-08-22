@@ -29,6 +29,10 @@ public class Device extends Entity
     {
         this.floorRef = floorRef;
     }
+    public void setAddr(int address)
+    {
+        this.addr = String.valueOf(address);
+    }
     public void setProfileType(String node){this.profileType = node;}
     private String equipRef;
     private String siteRef;

@@ -330,7 +330,7 @@ public class Pulse
 						curTempVal = getCMRoomTempConversion(val,tempOffset);
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						logicalCurTempPoint = logPoint.get("id").toString();
-						CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : currentTemp " + curTempVal+","+tempOffset);
+						CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : currentTemp " + curTempVal+","+tempOffset+","+val);
 						break;
 					case TH2_IN:
 						val = cmRegularUpdateMessage_t.thermistor2.get();

@@ -30,9 +30,65 @@
         }
       ],
       "relations": []
+    },
+    {
+      "id": "2:6756934624209419492",
+      "lastPropertyId": "13:3554938844371872188",
+      "name": "Alert",
+      "properties": [
+        {
+          "id": "1:1266283906766086815",
+          "name": "id"
+        },
+        {
+          "id": "3:4972674601855791834",
+          "name": "mTitle"
+        },
+        {
+          "id": "4:2586924490983167743",
+          "name": "mMessage"
+        },
+        {
+          "id": "5:3279220949577218363",
+          "name": "mNotificationMsg"
+        },
+        {
+          "id": "6:8256445436889612611",
+          "name": "mSeverity"
+        },
+        {
+          "id": "7:6688508497849238845",
+          "name": "mEnabled"
+        },
+        {
+          "id": "8:8688767729521073221",
+          "name": "startTime"
+        },
+        {
+          "id": "9:6508014023708824090",
+          "name": "endTime"
+        },
+        {
+          "id": "10:1223141086957328758",
+          "name": "isFixed"
+        },
+        {
+          "id": "11:6711939924893535554",
+          "name": "alertCount"
+        },
+        {
+          "id": "12:1795213841195798585",
+          "name": "alertId"
+        },
+        {
+          "id": "13:3554938844371872188",
+          "name": "ref"
+        }
+      ],
+      "relations": []
     }
   ],
-  "lastEntityId": "1:2444968064529553699",
+  "lastEntityId": "2:6756934624209419492",
   "lastIndexId": "0:0",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
@@ -40,7 +96,9 @@
   "modelVersionParserMinimum": 4,
   "retiredEntityUids": [],
   "retiredIndexUids": [],
-  "retiredPropertyUids": [],
+  "retiredPropertyUids": [
+    3031198001266913739
+  ],
   "retiredRelationUids": [],
   "version": 1
 }

@@ -81,7 +81,7 @@ public class CCUTagsDb extends HServer {
 
     private BoxStore boxStore;
     private Box<HisItem> hisBox;
-    private static final File TEST_DIRECTORY = new File("objectbox-example/test-db");
+    private static final File TEST_DIRECTORY = new File("objectbox-test/tags-db");
 
     public ConcurrentHashMap<String, String> idMap;
     public String idMapString;
@@ -167,6 +167,11 @@ public class CCUTagsDb extends HServer {
             updateIdMap = gson.fromJson(updateIdMapString, ConcurrentHashMap.class);
         }
     }
+    
+    public BoxStore getBoxStore() {
+        return boxStore;
+    }
+    
 
     private void loadGrid(String tagsString) {
 

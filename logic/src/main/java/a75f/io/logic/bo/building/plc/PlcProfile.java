@@ -85,7 +85,7 @@ public class PlcProfile extends ZoneProfile
             cv = plcEquip.getPIController().getControlVariable() * 100.0 / plcEquip.getPIController().getMaxAllowedError();
         }
         plcEquip.setControlVariable(Math.round(100*cv)/100);
-        plcEquip.setEquipStatus((int)(100 * cv));
+        plcEquip.setEquipStatus((int)(Math.round(100*cv)/100));
         plcEquip.getPIController().dump();
         Log.d(L.TAG_CCU_ZONE, "PlcProfile, pv: "+pv+", tv: "+tv+", cv: "+cv);
     }

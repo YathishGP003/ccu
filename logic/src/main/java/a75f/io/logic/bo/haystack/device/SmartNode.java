@@ -84,7 +84,7 @@ public class SmartNode
                                 .setType(OutputAnalogActuatorType.ZeroToTenV.displayName)
                                 .setRoomRef(roomRef)
                                 .setFloorRef(floorRef)
-                                .addMarker("sensor").addMarker("his")
+                                .addMarker("sensor").addMarker("his").addMarker("equipHis")
                                 .setTz(tz)
                                 .build();
     
@@ -97,7 +97,7 @@ public class SmartNode
                             .setType(OutputAnalogActuatorType.ZeroToTenV.displayName)
                             .setRoomRef(roomRef)
                             .setFloorRef(floorRef)
-                            .addMarker("sensor").addMarker("his")
+                            .addMarker("sensor").addMarker("his").addMarker("equipHis")
                             .setTz(tz)
                             .build();
     
@@ -109,7 +109,7 @@ public class SmartNode
                             .setPort(Port.TH1_IN.toString())
                             .setRoomRef(roomRef)
                             .setFloorRef(floorRef)
-                            .addMarker("sensor").addMarker("his")
+                            .addMarker("sensor").addMarker("his").addMarker("equipHis")
                             .setTz(tz)
                             .build();
     
@@ -121,7 +121,7 @@ public class SmartNode
                         .setPort(Port.TH2_IN.toString())
                         .setRoomRef(roomRef)
                         .setFloorRef(floorRef)
-                        .addMarker("sensor").addMarker("his")
+                        .addMarker("sensor").addMarker("his").addMarker("equipHis")
                         .setTz(tz)
                         .build();
     
@@ -133,7 +133,7 @@ public class SmartNode
                             .setType(OutputAnalogActuatorType.ZeroToTenV.displayName)
                             .setRoomRef(roomRef)
                             .setFloorRef(floorRef)
-                            .addMarker("cmd").addMarker("his")
+                            .addMarker("cmd").addMarker("his").addMarker("equipHis")
                             .setTz(tz)
                             .build();
     
@@ -145,7 +145,7 @@ public class SmartNode
                              .setType(OutputAnalogActuatorType.ZeroToTenV.displayName)
                              .setRoomRef(roomRef)
                              .setFloorRef(floorRef)
-                             .addMarker("cmd").addMarker("his")
+                             .addMarker("cmd").addMarker("his").addMarker("equipHis")
                              .setTz(tz)
                              .build();
     
@@ -157,7 +157,7 @@ public class SmartNode
                              .setFloorRef(floorRef)
                              .setPort(Port.RELAY_ONE.toString())
                              .setType(OutputRelayActuatorType.NormallyOpen.displayName)
-                             .addMarker("cmd").addMarker("his")
+                             .addMarker("cmd").addMarker("his").addMarker("equipHis")
                              .setTz(tz)
                              .build();
     
@@ -169,7 +169,7 @@ public class SmartNode
                          .setFloorRef(floorRef)
                          .setPort(Port.RELAY_TWO.toString())
                          .setType(OutputRelayActuatorType.NormallyOpen.displayName)
-                         .addMarker("cmd").addMarker("his")
+                         .addMarker("cmd").addMarker("his").addMarker("equipHis")
                          .setTz(tz)
                          .build();
     
@@ -179,7 +179,7 @@ public class SmartNode
                          .setSiteRef(siteRef)
                          .setRoomRef(roomRef)
                          .setFloorRef(floorRef)
-                         .addMarker("sensor").addMarker("his")
+                         .addMarker("sensor").addMarker("his").addMarker("equipHis")
                          .setPort(Port.SENSOR_RT.toString())
                          .setTz(tz)
                          .build();
@@ -190,7 +190,7 @@ public class SmartNode
                               .setSiteRef(siteRef)
                               .setRoomRef(roomRef)
                               .setFloorRef(floorRef)
-                              .addMarker("sensor").addMarker("his")
+                              .addMarker("sensor").addMarker("his").addMarker("equipHis")
                               .setPort(Port.DESIRED_TEMP.toString())
                               .setTz(tz)
                               .build();
@@ -205,7 +205,7 @@ public class SmartNode
                                     .setFloorRef(floorRef)
                                     .setPointRef(pointRef)
                                     .setEnabled(true)
-                                    .addMarker("sensor").addMarker("his")
+                                    .addMarker("sensor").addMarker("his").addMarker("equipHis")
                                     .setPort(p.toString())
                                     .setTz(tz)
                                     .build();
@@ -235,7 +235,7 @@ public class SmartNode
                                   .setFloorRef(floorRef)
                                   .setPointRef(pointRef)
                                   .setEnabled(true)
-                                  .addMarker("sensor").addMarker("his")
+                                  .addMarker("sensor").addMarker("his").addMarker("equipHis")
                                   .setPort(p.toString())
                                   .setTz(tz)
                                   .build();

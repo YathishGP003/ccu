@@ -1,0 +1,74 @@
+{
+  "_note1": "KEEP THIS FILE! Check it into a version control system (VCS) like git.",
+  "_note2": "ObjectBox manages crucial IDs for your object model. See docs for details.",
+  "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
+  "entities": [
+    {
+      "id": "1:4380661006772572227",
+      "lastPropertyId": "12:7987703315043920424",
+      "name": "Alert",
+      "properties": [
+        {
+          "id": "1:5075343360637793499",
+          "name": "id"
+        },
+        {
+          "id": "2:2070603720090071367",
+          "name": "mAlertType"
+        },
+        {
+          "id": "3:1235326661495611979",
+          "name": "mTitle"
+        },
+        {
+          "id": "4:7333442173360114733",
+          "name": "mMessage"
+        },
+        {
+          "id": "5:4002506720354510107",
+          "name": "mNotificationMsg"
+        },
+        {
+          "id": "6:4299207041726279287",
+          "name": "mSeverity"
+        },
+        {
+          "id": "7:3837325817251287753",
+          "name": "mEnabled"
+        },
+        {
+          "id": "8:1379633117589327989",
+          "name": "startTime"
+        },
+        {
+          "id": "9:363118018090771556",
+          "name": "endTime"
+        },
+        {
+          "id": "10:7749831852183534114",
+          "name": "isFixed"
+        },
+        {
+          "id": "11:997709771969935802",
+          "name": "alertCount"
+        },
+        {
+          "id": "12:7987703315043920424",
+          "name": "alertId"
+        }
+      ],
+      "relations": []
+    }
+  ],
+  "lastEntityId": "1:4380661006772572227",
+  "lastIndexId": "0:0",
+  "lastRelationId": "0:0",
+  "lastSequenceId": "0:0",
+  "modelVersion": 4,
+  "modelVersionParserMinimum": 4,
+  "retiredEntityUids": [],
+  "retiredIndexUids": [],
+  "retiredPropertyUids": [],
+  "retiredRelationUids": [],
+  "version": 1
+}

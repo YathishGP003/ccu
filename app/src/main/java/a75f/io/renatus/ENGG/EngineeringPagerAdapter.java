@@ -5,7 +5,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import a75f.io.renatus.ENGG.logger.LogFragment;
 
-
 /**
  * Created by samjithsadasivan isOn 8/17/17.
  */
@@ -37,7 +36,7 @@ public class EngineeringPagerAdapter extends FragmentStatePagerAdapter
 				fragment = SerialMessageFragment.newInstance();
 				break;
 			case 4:
-				fragment = BLETestFragment.newInstance();
+				fragment = ZoneFragmentTemp.newInstance();
 				break;
 			case 5:
 				fragment = OTAUpdateTestFragment.newInstance();
@@ -67,7 +66,7 @@ public class EngineeringPagerAdapter extends FragmentStatePagerAdapter
 			case 3:
 				return "Serial Messages";
 			case 4:
-				return "BLE Test";
+				return "Haystack Explorer";
 			case 5:
 				return "OTA Update";
 			case 6:

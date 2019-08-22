@@ -326,18 +326,31 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 				@Override
 				public void run() {
-					systemModePicker.setValue((int) TunerUtil.readSystemUserIntentVal("rtu and mode"));
 					String status = L.ccu().systemProfile.getStatusMessage();
-					equipmentStatus.setText(status.equals("") ? "OFF" : status);
-					occupancyStatus.setText(ScheduleProcessJob.getSystemStatusString());
-					tbCompHumidity.setChecked(TunerUtil.readSystemUserIntentVal("compensate and humidity") > 0);
-					tbDemandResponse.setChecked(TunerUtil.readSystemUserIntentVal("demand and response") > 0);
-					sbComfortValue.setProgress(5 - (int) TunerUtil.readSystemUserIntentVal("desired and ci"));
+					if (L.ccu().systemProfile instanceof DefaultSystem) {
+						equipmentStatus.setText(status.equals("") ? "System is in gateway mode" : status);
+						occupancyStatus.setText("No Central equipment connected.");
+						tbCompHumidity.setChecked(false);
+						tbDemandResponse.setChecked(false);
+						sbComfortValue.setProgress(0);
+						targetMaxInsideHumidity.setSelection(humidityAdapter
+								.getPosition(0.0), false);
+						targetMinInsideHumidity.setSelection(humidityAdapter
+								.getPosition(0.0), false);
+					}else{
+						systemModePicker.setValue((int) TunerUtil.readSystemUserIntentVal("rtu and mode"));
+					
+						equipmentStatus.setText(status.equals("") ? "OFF" : status);
+						occupancyStatus.setText(ScheduleProcessJob.getSystemStatusString());
+						tbCompHumidity.setChecked(TunerUtil.readSystemUserIntentVal("compensate and humidity") > 0);
+						tbDemandResponse.setChecked(TunerUtil.readSystemUserIntentVal("demand and response") > 0);
+						sbComfortValue.setProgress(5 - (int) TunerUtil.readSystemUserIntentVal("desired and ci"));
 
-					targetMaxInsideHumidity.setSelection(humidityAdapter
-							.getPosition(TunerUtil.readSystemUserIntentVal("target and max and inside and humidity")), false);
-					targetMinInsideHumidity.setSelection(humidityAdapter
-							.getPosition(TunerUtil.readSystemUserIntentVal("target and min and inside and humidity")), false);
+						targetMaxInsideHumidity.setSelection(humidityAdapter
+								.getPosition(TunerUtil.readSystemUserIntentVal("target and max and inside and humidity")), false);
+						targetMinInsideHumidity.setSelection(humidityAdapter
+								.getPosition(TunerUtil.readSystemUserIntentVal("target and min and inside and humidity")), false);
+					}
 				}
 			});
 		}

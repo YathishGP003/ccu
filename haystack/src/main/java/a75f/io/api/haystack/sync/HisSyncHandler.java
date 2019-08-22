@@ -208,7 +208,7 @@ public class HisSyncHandler
                     continue;
                 
                 }
-                ArrayList<HisItem> hisItems = (ArrayList<HisItem>) hayStack.tagsDb.getUnSyncedHisItems(HRef.copy(pointID));
+                /*ArrayList<HisItem> hisItems = (ArrayList<HisItem>) hayStack.tagsDb.getUnSyncedHisItems(HRef.copy(pointID));
                 if (hisItems.size() == 0) {
                     continue;
                 }
@@ -221,6 +221,15 @@ public class HisSyncHandler
                     item.setSyncStatus(true);
                 }
                 hayStack.tagsDb.setHisItemSyncStatus(hisItems);
+                hayStack.tagsDb.removeHisItems(HRef.copy(pointID));*/
+    
+                HisItem hisVal = hayStack.tagsDb.getLastHisItem(HRef.copy(pointID));
+                if (hisVal == null) {
+                    CcuLog.d(TAG, "His val not found : "+m.get("dis"));
+                    continue;
+                }
+                tsData.put( pointGUID.replace("@",""), String.valueOf(hisVal.getVal()));
+    
                 hayStack.tagsDb.removeHisItems(HRef.copy(pointID));
             
             }

@@ -1,4 +1,4 @@
-package a75f.io.renatus;
+package a75f.io.renatus.ENGG;
 
 import android.content.DialogInterface;
 import android.os.AsyncTask;
@@ -28,6 +28,8 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.renatus.EquipTempExpandableListAdapter;
+import a75f.io.renatus.R;
 
 public class ZoneFragmentTemp extends Fragment
 {

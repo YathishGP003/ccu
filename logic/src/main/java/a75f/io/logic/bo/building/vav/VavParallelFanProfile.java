@@ -124,10 +124,10 @@ public class VavParallelFanProfile extends VavProfile
                     heatingLoop.setEnabled();
                     coolingLoop.setDisabled();
                 }
-                
+    
+                loopOp = (int) heatingLoop.getLoopOutput(setTempHeating, roomTemp);
                 if (conditioning == SystemController.State.COOLING)
                 {
-                    loopOp = (int) heatingLoop.getLoopOutput(setTempHeating, roomTemp);
                     dischargeSp = supplyAirTemp + (MAX_DISCHARGE_TEMP - supplyAirTemp) * loopOp / 100;
                     vavDevice.setDischargeSp(dischargeSp);
                     valveController.updateControlVariable(dischargeSp, dischargeTemp);

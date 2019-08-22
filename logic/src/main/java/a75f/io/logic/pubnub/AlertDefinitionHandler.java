@@ -65,7 +65,7 @@ public class AlertDefinitionHandler
         HttpsURLConnection connection = null;
         try {
             //Create connection
-            url = new URL("https://ssap75f.azurewebsites.net/alerts/readDef");
+            url = new URL("https://alerts75f.azurewebsites.net/readDef");
             //connection = (HttpsURLConnection)url.openConnection();
             connection = NetCipher.getHttpsURLConnection(url);//TODO - Hack for SSLException
             connection.setRequestMethod("POST");

@@ -174,7 +174,7 @@ public class AlertProcessor
             }
         }
         
-        for (Alert a : getActiveAlerts()) {
+        for (Alert a : getActiveUnSyncedAlerts()) {
             CcuLog.d("CCU_ALERTS"," Active Alert "+a.toString());
         }
     }
@@ -243,6 +243,16 @@ public class AlertProcessor
         return alertQuery.build().find();
     }
     
+    public List<Alert> getActiveUnSyncedAlerts(){
+        QueryBuilder<Alert> alertQuery = alertBox.query();
+        alertQuery.equal(Alert_.isFixed, false)
+                  .equal(Alert_.alertId,"")
+                  .orderDesc(Alert_.startTime);
+        
+        return alertQuery.build().find();
+    }
+    
+    
     public List<Alert> getAllAlerts(){
         QueryBuilder<Alert> alertQuery = alertBox.query();
         alertQuery.orderDesc(Alert_.startTime);
@@ -265,6 +275,10 @@ public class AlertProcessor
                 return;
             }
         }
+        alertBox.put(alert);
+    }
+    
+    public void updateAlert(Alert alert) {
         alertBox.put(alert);
     }
     

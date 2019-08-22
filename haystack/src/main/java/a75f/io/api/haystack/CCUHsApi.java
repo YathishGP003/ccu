@@ -1099,6 +1099,11 @@ public class CCUHsApi
         return site.row(0).getRef("id");
     }
 
+    public HRef getCcuId() {
+        HDict hDict = new HDictBuilder().add("filter", "ccu").toDict();
+        HGrid site  = getHSClient().call("read", HGridBuilder.dictToGrid(hDict));
+        return site.row(0).getRef("id");
+    }
 
     public Schedule getSiteSchedule()
     {

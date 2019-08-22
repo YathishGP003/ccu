@@ -28,9 +28,13 @@ public class Alert
     public boolean  isFixed;
     public int alertCount;
     
+    //Backend guid of the alert
     public String alertId;
     
     public String ref;
+    
+    public String deviceRef;
+    public String siteRef;
     
     public long getId()
     {
@@ -124,7 +128,10 @@ public class Alert
     
     @Override
     public String toString() {
-        return ref+" "+getmMessage();
+        StringBuilder b = new StringBuilder();
+        b.append(" {").append(mTitle).append(",").append(mMessage).append(", ").append(alertId).append(",")
+         .append(ref).append(", ").append(startTime).append(", ").append(endTime).append(", ").append(isFixed).append(", ").append(deviceRef).append(", ").append(siteRef).append("}");
+        return b.toString();
     }
     public Alert(){
     }

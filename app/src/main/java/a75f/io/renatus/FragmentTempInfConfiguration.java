@@ -160,20 +160,20 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
             @Override
             public void onClick(View v) {
 
-                new AsyncTask<Void, Void, Void>() {
+                new AsyncTask<String, Void, Void>() {
 
                     ProgressDialog progressDlg = new ProgressDialog(getActivity());
 
                     @Override
                     protected void onPreExecute() {
                         setButton.setEnabled(false);
-                        progressDlg.setMessage("Saving CCU As Zone Configuration");
+                        progressDlg.setMessage("Saving CCU As a Zone Configuration");
                         progressDlg.show();
                         super.onPreExecute();
                     }
 
                     @Override
-                    protected Void doInBackground( final Void ... params ) {
+                    protected Void doInBackground(final String... params) {
                         setupCcuAsZoneProfile();
                         L.saveCCUState();
 
@@ -184,9 +184,9 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
                     protected void onPostExecute( final Void result ) {
                         progressDlg.dismiss();
                         FragmentTempInfConfiguration.this.closeAllBaseDialogFragments();
-                        if(mCcuAsZoneProfile != null) getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
+                        //getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
                     }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
 
             }
         });

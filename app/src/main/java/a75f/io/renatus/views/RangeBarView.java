@@ -77,10 +77,10 @@ public class RangeBarView extends LinearLayout {
         layoutParams.weight = 1;
         this.addView(rangeBar, layoutParams);
 
-        if (mSchedule == null) {
-            getBuildingHeatAndCoolingDeadBand();
-        } else if (mSchedule.isZoneSchedule()) {
+         if (mSchedule!= null && mSchedule.isZoneSchedule()) {
             getZoneHeatAndCoolingDeadBand();
+        } else {
+            getBuildingHeatAndCoolingDeadBand();
         }
 
         rangeBar.setLowerCoolingTemp((float) coolValue);
@@ -108,26 +108,22 @@ public class RangeBarView extends LinearLayout {
     }
 
     private void getBuildingHeatAndCoolingDeadBand() {
-        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip");
 
-        for (HashMap m : equips) {
-            Equip p = new Equip.Builder().setHashMap(m).build();
+        HashMap tuner = CCUHsApi.getInstance().read("equip and tuner");
+        Equip p = new Equip.Builder().setHashMap(tuner).build();
 
-            if (p.getDisplayName().contains("BuildingTuner")) {
-                hdb = TunerUtil.getHeatingDeadband(p.getId());
-                cdb = TunerUtil.getCoolingDeadband(p.getId());
-                HashMap coolULMap = CCUHsApi.getInstance().read("point and limit and max and cooling and user and equipRef == \"" + p.getId() + "\"");
-                HashMap heatULMap = CCUHsApi.getInstance().read("point and limit and max and heating and user and equipRef == \"" + p.getId() + "\"");
-                HashMap coolLLMap = CCUHsApi.getInstance().read("point and limit and min and cooling and user and equipRef == \"" + p.getId() + "\"");
-                HashMap heatLLMap = CCUHsApi.getInstance().read("point and limit and min and heating and user and equipRef == \"" + p.getId() + "\"");
-                heatLL = getTuner(heatLLMap.get("id").toString());
-                heatUL = getTuner(heatULMap.get("id").toString());
-                coolLL = getTuner(coolLLMap.get("id").toString());
-                coolUL = getTuner(coolULMap.get("id").toString());
+        hdb = TunerUtil.getHeatingDeadband(p.getId());
+        cdb = TunerUtil.getCoolingDeadband(p.getId());
+        HashMap coolULMap = CCUHsApi.getInstance().read("point and limit and max and cooling and user and equipRef == \"" + p.getId() + "\"");
+        HashMap heatULMap = CCUHsApi.getInstance().read("point and limit and max and heating and user and equipRef == \"" + p.getId() + "\"");
+        HashMap coolLLMap = CCUHsApi.getInstance().read("point and limit and min and cooling and user and equipRef == \"" + p.getId() + "\"");
+        HashMap heatLLMap = CCUHsApi.getInstance().read("point and limit and min and heating and user and equipRef == \"" + p.getId() + "\"");
+        heatLL = getTuner(heatLLMap.get("id").toString());
+        heatUL = getTuner(heatULMap.get("id").toString());
+        coolLL = getTuner(coolLLMap.get("id").toString());
+        coolUL = getTuner(coolULMap.get("id").toString());
 
-                rangeBar.setData((float) heatLL, (float) heatUL, (float) coolLL, (float) coolUL, (float) cdb, (float) hdb);
-            }
-        }
+        rangeBar.setData((float) heatLL, (float) heatUL, (float) coolLL, (float) coolUL, (float) cdb, (float) hdb);
     }
 
     private void getZoneHeatAndCoolingDeadBand() {

@@ -64,7 +64,7 @@
     </LinearLayout>
 
 
-    <android.support.v4.view.ViewPager
+    <a75f.io.renatus.registartion.CustomViewPager
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

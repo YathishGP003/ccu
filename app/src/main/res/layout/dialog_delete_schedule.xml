@@ -18,7 +18,7 @@
         <ImageView
             android:layout_width="36dp"
             android:layout_height="33dp"
-            app:srcCompat="@drawable/ic_alert" />
+            app:srcCompat="@drawable/ic_warning" />
 
         <TextView
             style="@style/text_appearance"

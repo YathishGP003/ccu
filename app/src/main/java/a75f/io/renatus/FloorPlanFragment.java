@@ -448,6 +448,13 @@ public class FloorPlanFragment extends Fragment
 		rl_systemdevice.setEnabled(false);
 		rl_oao.setEnabled(false);
 		enableModueButton();
+
+		if (updateOAOModule())
+		{
+			moduleListView.setVisibility(View.VISIBLE);
+		} else {
+			enableModueButton();
+		}
 	}
 
 
@@ -613,8 +620,7 @@ public class FloorPlanFragment extends Fragment
 			enableRoomBtn();
 		}
 	}
-	
-	
+
 	@OnEditorAction(R.id.addRoomEdit)
 	public boolean handleRoomChange(TextView v, int actionId, KeyEvent event)
 	{

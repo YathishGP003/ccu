@@ -3,6 +3,7 @@ package a75f.io.renatus;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.support.multidex.MultiDex;
+import android.support.v7.app.AppCompatDelegate;
 import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
@@ -29,6 +30,7 @@ public class RenatusApp extends UtilityApplication
 	{
 		super.onCreate();
 		mContext = getApplicationContext();
+		AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
 		Fabric.with(this, new Crashlytics());
 	}
 

@@ -543,5 +543,9 @@
 
     <string name="txt_alert_delete_schedule">Are you sure you want to delete the current schedule?</string>
     <string name="txt_proceed">PROCEED</string>
+    <string name="txt_warning_master_control">Following schedules temps will need to be trimmed to be within the new user limits.</string>
+    <string name="txt_discard">Discard</string>
+    <string name="txt_re_edit">Re Edit</string>
+    <string name="txt_force_trim">Force Trim</string>
 
 </resources>

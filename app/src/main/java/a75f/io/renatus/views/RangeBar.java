@@ -22,6 +22,8 @@ import android.view.View;
 
 import a75f.io.renatus.R;
 
+import static a75f.io.renatus.util.BitmapUtil.getBitmapFromVectorDrawable;
+
 /**
  * Created by mahesh on 15-08-2019.
  */
@@ -99,16 +101,21 @@ public class RangeBar extends View {
         canvas.drawBitmap(bitmaps[stateReflected.ordinal()], matrix, mTempPaint);
 
         matrix.reset();
-        matrix.postTranslate(xPos - mHitBoxPadding, yPos - mHitBoxPadding);
+        matrix.postTranslate(xPos - mHitBoxPadding + 5, yPos - mHitBoxPadding);
 
         //Make the hit boxes easy to click.
-        matrix.preScale(2.0f, 2.0f);
+        matrix.preScale(2.5f, 2.0f);
 
         matrix.mapRect(hitBoxes[stateReflected.ordinal()]);
         canvas.drawRect(hitBoxes[stateReflected.ordinal()], mDebugBoxesPaint);
 
         //The 2 and 1.5 are used to slide the number on the bitmap image.
         //Text centered left to right and 1/3 the way down the icon.
+        if (stateReflected == RangeBarState.LOWER_COOLING_LIMIT) {
+            mTempIconPaint.setColor(getResources().getColor(R.color.max_temp));
+        } else {
+            mTempIconPaint.setColor(getResources().getColor(R.color.accent));
+        }
         canvas.drawText(String.valueOf(roundToHalf(temps[stateReflected.ordinal()])),
                 xPos + bitmaps[stateReflected.ordinal()].getWidth() / 2f,
                 (yPos - 10f), mTempIconPaint);
@@ -237,15 +244,15 @@ public class RangeBar extends View {
         mDebugTextAlignCenterPaint.setTextSize(22);
 
         mTempPaint = new Paint();
-        mTempPaint.setColor(Color.parseColor("#7cb2d2"));
         mTempPaint.setAntiAlias(true);
         mTempPaint.setStyle(Paint.Style.FILL);
         mTempPaint.setStrokeCap(Paint.Cap.BUTT);
+        mTempPaint.setColor(Color.parseColor("#939393"));
         mTempPaint.setStrokeWidth(2);
 
         mTempLinePaint = new Paint();
-        mTempLinePaint.setColor(Color.parseColor("#d62e19"));
         mTempLinePaint.setAntiAlias(true);
+        mTempLinePaint.setColor(Color.TRANSPARENT);
         mTempLinePaint.setStyle(Paint.Style.FILL);
         mTempLinePaint.setStrokeWidth(2);
 
@@ -265,23 +272,6 @@ public class RangeBar extends View {
         mDebugBoxesPaint.setStrokeWidth(2);
         mDebugBoxesPaint.setTextAlign(Paint.Align.CENTER);
     }
-
-
-    public static Bitmap getBitmapFromVectorDrawable(Context context, int drawableId) {
-        Drawable drawable = ContextCompat.getDrawable(context, drawableId);
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            drawable = (DrawableCompat.wrap(drawable)).mutate();
-        }
-
-        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
-                drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-        drawable.draw(canvas);
-
-        return bitmap;
-    }
-
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -321,12 +311,10 @@ public class RangeBar extends View {
             drawTempLine(canvas);
 
             drawTempGauge(canvas, temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()],
-                    temps[RangeBarState.UPPER_HEATING_LIMIT.ordinal()],
-                    Color.parseColor("#e24301"));
+                    temps[RangeBarState.UPPER_HEATING_LIMIT.ordinal()]);
 
             drawTempGauge(canvas, temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()],
-                    temps[RangeBarState.UPPER_COOLING_LIMIT.ordinal()],
-                    Color.parseColor("#8392c9"));
+                    temps[RangeBarState.UPPER_COOLING_LIMIT.ordinal()]);
 
             drawSliderIcon(canvas, mCoolingBarDisplacement, RangeBarState.LOWER_COOLING_LIMIT);
 
@@ -336,10 +324,7 @@ public class RangeBar extends View {
     }
 
 
-    private void drawTempGauge(Canvas canvas, float mLowerHeatingTemp, float mUpperHeatingTemp,
-                               int parseColor) {
-        mTempPaint.setColor(parseColor);
-        mTempLinePaint.setColor(parseColor);
+    private void drawTempGauge(Canvas canvas, float mLowerHeatingTemp, float mUpperHeatingTemp) {
 
         //draw two more circle for shadow effect
         canvas.drawLine(getPXForTemp(mLowerHeatingTemp), getTempLineYLocation(), getPXForTemp(mUpperHeatingTemp), getTempLineYLocation(), mTempLinePaint);

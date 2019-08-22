@@ -82,27 +82,31 @@ public class TunerFragment extends Fragment
                 
                 String tunerName = expandableListDetail.get(expandableListTitle.get(groupPosition)).get(
                                                 childPosition);
-                Toast.makeText(getActivity(), expandableListTitle.get(groupPosition) + " -> " + tunerName, Toast.LENGTH_SHORT).show();
-                
-                final EditText taskEditText = new EditText(getActivity());
-                String tunerVal = String.valueOf(getTuner(tunerMap.get(tunerName)));
-                AlertDialog dialog = new AlertDialog.Builder(getActivity())
-                                             .setTitle(tunerName)
-                                             .setMessage(tunerVal)
-                                             .setView(taskEditText)
-                                             .setPositiveButton("Save", new DialogInterface.OnClickListener() {
-                                                 @Override
-                                                 public void onClick(DialogInterface dialog, int which) {
-                                                     if (taskEditText.getText().toString().trim().length() > 0) {
-                                                         setTuner(tunerMap.get(tunerName), Double.parseDouble(taskEditText.getText().toString()) );
-                                                         tunerMap.put(tunerMap.get(tunerName), taskEditText.getText().toString());
-                                                         expandableListView.invalidateViews();
-                                                     }
-                                                 }
-                                             })
-                                             .setNegativeButton("Cancel", null)
-                                             .create();
-                dialog.show();
+                if (!tunerName.contains("coolingUserLimitMax")&&!tunerName.contains("coolingUserLimitMin")&&!tunerName.contains("heatingUserLimitMin")
+                    &&!tunerName.contains("heatingUserLimitMax")&&!tunerName.contains("buildingLimitMin")&&!tunerName.contains("buildingLimitMax"))
+                {
+                    Toast.makeText(getActivity(), expandableListTitle.get(groupPosition) + " -> " + tunerName, Toast.LENGTH_SHORT).show();
+
+                    final EditText taskEditText = new EditText(getActivity());
+                    String tunerVal = String.valueOf(getTuner(tunerMap.get(tunerName)));
+                    AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                            .setTitle(tunerName)
+                            .setMessage(tunerVal)
+                            .setView(taskEditText)
+                            .setPositiveButton("Save", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    if (taskEditText.getText().toString().trim().length() > 0) {
+                                        setTuner(tunerMap.get(tunerName), Double.parseDouble(taskEditText.getText().toString()));
+                                        tunerMap.put(tunerMap.get(tunerName), taskEditText.getText().toString());
+                                        expandableListView.invalidateViews();
+                                    }
+                                }
+                            })
+                            .setNegativeButton("Cancel", null)
+                            .create();
+                    dialog.show();
+                }
                 return false;
             }
         });

@@ -186,6 +186,10 @@ public class HisSyncHandler
     
         ArrayList<HashMap> devices = hayStack.readAll("device");
         for (HashMap device : devices) {
+            if (device.get("ccu") != null) {
+                continue;
+            }
+            CcuLog.d(TAG," sendHisToInflux device "+device.get("dis"));
             ArrayList<HashMap> points = hayStack.readAll("point and his and deviceRef == \""+device.get("id")+"\"");
             if (CCUHsApi.getInstance().getGUID(device.get("id").toString()) == null) {
                 entitySyncRequired = true;

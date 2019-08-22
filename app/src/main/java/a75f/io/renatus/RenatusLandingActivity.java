@@ -243,7 +243,11 @@ public class RenatusLandingActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        // no-op
+        if (!(getSupportFragmentManager().getFragments().get(mViewPager.getCurrentItem()) instanceof SettingsFragment) && getSupportFragmentManager().getBackStackEntryCount() > 0) {
+            getSupportFragmentManager().popBackStack();
+        } else {
+           //no -op
+        }
     }
 
     public void setPointVal(String id, double val) {

@@ -322,7 +322,18 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
             for(Schedule.Days d : mDays) {
                 checkDays(d);
             }
-            checkTemp(mDays.get(0));
+            new CountDownTimer(100, 100) {
+                @Override
+                public void onTick(long l) {
+
+                }
+
+                @Override
+                public void onFinish() {
+                    checkTemp(mDays.get(0));
+                }
+            }.start();
+
             checkTime(mDays.get(0));
         }
 

@@ -82,7 +82,11 @@ public class PlcProfile extends ZoneProfile
             cv = 50.0 + plcEquip.getPIController().getControlVariable() * 50.0 / plcEquip.getPIController().getMaxAllowedError();
         } else
         {
+            //Get only the 0-100% portion of cv
             cv = plcEquip.getPIController().getControlVariable() * 100.0 / plcEquip.getPIController().getMaxAllowedError();
+            if (cv < 0) {
+                cv = 0;
+            }
         }
         plcEquip.setControlVariable(Math.round(100*cv)/100);
         plcEquip.setEquipStatus((int)(Math.round(100*cv)/100));

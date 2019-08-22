@@ -35,7 +35,30 @@ public class Alert
     
     public String deviceRef;
     public String siteRef;
-    
+    public String getRef()
+    {
+        return ref;
+    }
+    public void setRef(String ref)
+    {
+        this.ref = ref;
+    }
+    public String getDeviceRef()
+    {
+        return deviceRef;
+    }
+    public void setDeviceRef(String deviceRef)
+    {
+        this.deviceRef = deviceRef;
+    }
+    public String getSiteRef()
+    {
+        return siteRef;
+    }
+    public void setSiteRef(String siteRef)
+    {
+        this.siteRef = siteRef;
+    }
     public long getId()
     {
         return id;

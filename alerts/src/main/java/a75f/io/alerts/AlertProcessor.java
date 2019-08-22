@@ -177,6 +177,8 @@ public class AlertProcessor
         for (Alert a : getActiveUnSyncedAlerts()) {
             CcuLog.d("CCU_ALERTS"," Active Alert "+a.toString());
         }
+        
+        AlertSyncHandler.sync(mContext, getActiveUnSyncedAlerts());
     }
     
     public boolean isZoneAlert(AlertDefinition ad) {

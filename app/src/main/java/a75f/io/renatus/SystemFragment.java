@@ -96,6 +96,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	public void refreshDesiredTemp(String nodeAddress,String  coolDt, String heatDt){}
 	public void refreshScreenbySchedule(String nodeAddress, String equipId, String zoneId){}
 	public void updateTemperature(double currentTemp, short nodeAddress){}
+	public void updateSensorValue(short nodeAddress){}
 	@Override
 	public void onResume() {
 		// TODO Auto-generated method stub

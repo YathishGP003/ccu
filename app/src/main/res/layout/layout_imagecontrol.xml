@@ -1,42 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:nonTemp="http://schemas.android.com/apk/res-auto"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:focusableInTouchMode="true"
-    android:clickable="true"
-    android:focusable="true"
-    android:descendantFocusability="blocksDescendants"
-    android:orientation="vertical"
-    android:id="@+id/container"
-    android:background="@color/white">
-
-    <!--<RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/rl_nontemp"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:padding="6dp">
 
         <ImageView
             android:id="@+id/imageView"
             android:layout_width="200dp"
             android:layout_height="200dp"
-            android:layout_gravity="center"
+            app:srcCompat="@drawable/ic_zone_piloop"
+            android:visibility="gone"
+            />
+        <ImageView
+            android:id="@+id/imageViewExpanded"
+            android:layout_width="274dp"
+            android:layout_height="274dp"
+            app:srcCompat="@drawable/ic_zone_piloop_max"
             />
 
         <RelativeLayout
             android:id="@+id/piValues"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="gone">
+
+            >
 
             <TextView
                 android:id="@+id/textInput"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="142dp"
-                android:layout_marginTop="42dp"
+                android:layout_marginTop="30dp"
                 android:text="420"
                 android:textSize="30sp" />
             <TextView
@@ -55,8 +52,8 @@
                 android:layout_width="wrap_content"
                 android:text="420"
                 android:textSize="30sp"
-                android:layout_marginLeft="20dp"
-                android:layout_marginTop="164dp"/>
+                android:layout_marginLeft="5dp"
+                android:layout_marginTop="166dp"/>
             <TextView
                 android:id="@+id/textOutputCFM"
                 android:layout_height="wrap_content"
@@ -74,19 +71,19 @@
             android:id="@+id/emValues"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="gone"
-            android:paddingBottom="20dp"
-            android:layout_marginLeft="-20dp"
-            android:layout_alignBottom="@+id/imageView"
-            android:layout_toRightOf="@+id/imageView">
+            android:paddingBottom="34dp"
+            android:layout_marginLeft="-25dp"
+            android:layout_alignBottom="@+id/imageViewExpanded"
+            android:layout_toRightOf="@+id/imageViewExpanded"
+            >
 
             <TextView
                 android:id="@+id/textEmTotal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="42dp"
+                android:layout_marginTop="10dp"
                 android:text="2456.4"
-                android:textSize="36sp" />
+                android:textSize="39sp" />
             <TextView
                 android:id="@+id/textTotalUnit"
                 android:layout_height="wrap_content"
@@ -104,7 +101,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textEmTotal"
                 android:text="25"
-                android:textSize="36sp" />
+                android:textSize="39sp" />
             <TextView
                 android:id="@+id/textCurrentUnit"
                 android:layout_height="wrap_content"
@@ -117,24 +114,4 @@
                 android:layout_alignTop="@+id/textEmCurrent" />
 
         </RelativeLayout>
-    </RelativeLayout>-->
-    <a75f.io.renatus.util.NonTempControl
-        android:id="@+id/rl_nontemp"
-        android:layout_width="236dp"
-        android:layout_height="215dp"
-        android:layout_gravity="center"/>
-    <TextView
-        android:id="@+id/textEquipment"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/rl_nontemp"
-        android:layout_alignLeft="@id/rl_nontemp"
-        android:layout_alignRight="@id/rl_nontemp"
-        android:text="DAB"
-        android:gravity="center_horizontal|center_vertical"
-        android:textAppearance="@style/label_black"
-        android:clickable="false"
-        android:focusable="false"
-        android:duplicateParentState="true"/>
-
 </RelativeLayout>

@@ -184,7 +184,7 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
                     protected void onPostExecute( final Void result ) {
                         progressDlg.dismiss();
                         FragmentTempInfConfiguration.this.closeAllBaseDialogFragments();
-                        //getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
+                        getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
                     }
                 }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
 

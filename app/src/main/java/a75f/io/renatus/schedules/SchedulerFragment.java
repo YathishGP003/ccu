@@ -943,6 +943,8 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
             public void onClick(View v) {
                 int clickedPosition = (Integer) v.getTag();
                 Toast.makeText(SchedulerFragment.this.getContext(), "Clicked: " + clickedPosition, Toast.LENGTH_SHORT).show();
+                // force refresh schedule
+                schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
                 showDialog(ID_DIALOG_SCHEDULE, clickedPosition, schedule.getDays().get(clickedPosition));
             }
         });

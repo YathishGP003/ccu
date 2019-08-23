@@ -311,11 +311,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     if(zoneNodes.contains(nodeAddress))
                     {
                             SeekArc tempSeekArc = seekArcArrayList.get(i);
-                            currentTempSensor = 0;
-                            noTempSensor = 0;
                             new AsyncTask<String, Void, Double>() {
                                 @Override
                                 protected Double doInBackground( final String ... params ) {
+                                    currentTempSensor = 0;
+                                    noTempSensor = 0;
                                     ArrayList<HashMap> zoneEquips = gridItem.getZoneEquips();
                                     for (int j = 0; j < zoneEquips.size(); j++) {
                                         Equip tempEquip = new Equip.Builder().setHashMap(zoneEquips.get(j)).build();

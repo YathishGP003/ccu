@@ -89,6 +89,33 @@ public class AlertsFragment extends Fragment
 				alert.show();
 			}
 		});
+		
+		listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+			
+			public boolean onItemLongClick(AdapterView<?> arg0, View v,
+			                               int position, long arg3) {
+				// TODO Auto-generated method stub
+				
+				AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+				builder.setMessage("Delete ?")
+				       .setCancelable(true)
+				       .setIcon(android.R.drawable.ic_dialog_alert)
+				       .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+					       public void onClick(DialogInterface dialog, int id) {
+						       AlertManager.getInstance(getActivity()).deleteAlert(alertList.get(position));
+						       adapter.notifyDataSetChanged();
+					       }
+				        })
+						.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							//do things
+						}
+						});
+				AlertDialog alert = builder.create();
+				alert.show();
+				return true;
+			}
+		});
 	}
 	
 	String getFormattedDate(long millis) {

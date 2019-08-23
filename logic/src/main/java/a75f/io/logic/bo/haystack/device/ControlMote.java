@@ -55,8 +55,8 @@ public class ControlMote
 	//For CCU as a zone part
     public ControlMote(int address, String site, String floor, String room, String equipRef) {
         Device d = new Device.Builder()
-                .setDisplayName("CCU-"+address)
-                .addMarker("network").addMarker("node").addMarker("ccu").addMarker("equipHis")
+                .setDisplayName("TI-"+address)
+                .addMarker("network").addMarker("node").addMarker("ti").addMarker("equipHis")
                 .setAddr(address)
                 .setSiteRef(site)
                 .setFloorRef(floor)

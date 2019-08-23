@@ -424,7 +424,7 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
     Schedule.Days removeEntry = null;
     public boolean onClickSave(int position, double coolingTemp, double heatingTemp, int startTimeHour, int endTimeHour, int startTimeMinute, int endTimeMinute, ArrayList<DAYS> days) {
         
-        if (position != ManualSchedulerDialogFragment.NO_REPLACE && days == null) {
+        if (position != ManualSchedulerDialogFragment.NO_REPLACE) {
             removeEntry = schedule.getDays().remove(position);
         } else {
             removeEntry = null;
@@ -943,6 +943,8 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
             public void onClick(View v) {
                 int clickedPosition = (Integer) v.getTag();
                 Toast.makeText(SchedulerFragment.this.getContext(), "Clicked: " + clickedPosition, Toast.LENGTH_SHORT).show();
+                // force refresh schedule
+                schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
                 showDialog(ID_DIALOG_SCHEDULE, clickedPosition, schedule.getDays().get(clickedPosition));
             }
         });

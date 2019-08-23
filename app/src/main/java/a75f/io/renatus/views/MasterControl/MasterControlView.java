@@ -186,12 +186,12 @@ public class MasterControlView extends LinearLayout {
 
         // set schedule temps for building
         for (Schedule.Days buidlingdays : buildingSchedules.getDays()) {
-            StringBuilder message = new StringBuilder("Building" + "\u0020" + ScheduleUtil.getDayString(buidlingdays.getDay() + 1) + "\u0020" + "Schedule1");
+            StringBuilder message = new StringBuilder("Building" + "\u0020" + ScheduleUtil.getDayString(buidlingdays.getDay() + 1) + "\u0020" + "Schedule");
             String coolValues = "";
             String heatValues = "";
             if (buidlingdays.getHeatingVal() < heatTempUL || buidlingdays.getHeatingVal() > heatTempLL) {
                 double heatDTValue = getHeatDTemp(buidlingdays.getHeatingVal(), heatTempUL, heatTempLL);
-                heatValues = "\u0020" + buidlingdays.getHeatingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + heatDTValue;
+                heatValues = "\u0020" +   "Heating ("+buidlingdays.getHeatingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + heatDTValue+")";
 
                 buidlingdays.setHeatingVal(heatDTValue);
                 if ((buidlingdays.getCoolingVal() - heatDTValue) < (float) (cdb + hdb)) {
@@ -202,7 +202,7 @@ public class MasterControlView extends LinearLayout {
 
             if (buidlingdays.getCoolingVal() < coolTempLL || buidlingdays.getCoolingVal() > coolTempUL) {
                 double coolDTValue = getCoolDTemp(buidlingdays.getCoolingVal(), coolTempLL, coolTempUL);
-                coolValues = "\u0020 " + buidlingdays.getCoolingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + coolDTValue + "\u0020" + "\u0020";
+                coolValues = "\u0020 " +   "Cooling ("+buidlingdays.getCoolingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + coolDTValue + ")";
 
                 buidlingdays.setCoolingVal(coolDTValue);
                 if ((coolDTValue - buidlingdays.getHeatingVal()) < (float) (cdb + hdb)) {
@@ -235,12 +235,12 @@ public class MasterControlView extends LinearLayout {
 
 
                 for (Schedule.Days days : scheduleDaysList) {
-                    StringBuilder message = new StringBuilder(zone.getDisplayName() + "\u0020" + ScheduleUtil.getDayString(days.getDay() + 1) + "\u0020" + "Schedule1");
+                    StringBuilder message = new StringBuilder(zone.getDisplayName() + "\u0020" + ScheduleUtil.getDayString(days.getDay() + 1) + "\u0020" + "Schedule");
                     String coolValues = "";
                     String heatValues = "";
                     if (days.getHeatingVal() < heatTempUL || days.getHeatingVal() > heatTempLL) {
                         double heatDTValue = getHeatDTemp(days.getHeatingVal(), heatTempUL, heatTempLL);
-                        heatValues = "\u0020" + days.getHeatingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + heatDTValue;
+                        heatValues = "\u0020" +    "Heating ("+ days.getHeatingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + heatDTValue+")";
 
                         days.setHeatingVal(heatDTValue);
 
@@ -252,7 +252,7 @@ public class MasterControlView extends LinearLayout {
 
                     if (days.getCoolingVal() < coolTempLL || days.getCoolingVal() > coolTempUL) {
                         double coolDTValue = getCoolDTemp(days.getCoolingVal(), coolTempLL, coolTempUL);
-                        coolValues = "\u0020 " + days.getCoolingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + coolDTValue + "\u0020" + "\u0020";
+                        coolValues = "\u0020 " +    "Cooling ("+days.getCoolingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + coolDTValue + ")";
 
                         days.setCoolingVal(coolDTValue);
                         if ((coolDTValue - days.getHeatingVal()) < (float) (cdb + hdb)) {

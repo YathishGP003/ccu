@@ -75,7 +75,6 @@ public class SettingsFragment extends Fragment {
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
         transaction.replace(R.id.flContent, fragment);
-        transaction.addToBackStack(null);
         transaction.commit();
 
         navigationHandler();
@@ -104,7 +103,6 @@ public class SettingsFragment extends Fragment {
                             FragmentTransaction transaction = fragmentManager.beginTransaction();
                             transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
                             transaction.replace(R.id.flContent, fragment);
-                            transaction.addToBackStack(null);
                             transaction.commit();
                         } else {
                             isTransactionPending = true;
@@ -124,7 +122,6 @@ public class SettingsFragment extends Fragment {
                             FragmentTransaction transaction = fragmentManager.beginTransaction();
                             transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
                             transaction.replace(R.id.flContent, fragment);
-                            transaction.addToBackStack(null);
                             transaction.commit();
                         } else {
                             isTransactionPending = true;
@@ -143,7 +140,6 @@ public class SettingsFragment extends Fragment {
                             FragmentTransaction transaction = fragmentManager.beginTransaction();
                             transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
                             transaction.replace(R.id.flContent, fragment);
-                            transaction.addToBackStack(null);
                             transaction.commit();
                         } else {
                             isTransactionPending = true;
@@ -162,7 +158,6 @@ public class SettingsFragment extends Fragment {
                             FragmentTransaction transaction = fragmentManager.beginTransaction();
                             transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
                             transaction.replace(R.id.flContent, fragment);
-                            transaction.addToBackStack(null);
                             transaction.commit();
                         } else {
                             isTransactionPending = true;
@@ -181,7 +176,6 @@ public class SettingsFragment extends Fragment {
                             FragmentTransaction transaction = fragmentManager.beginTransaction();
                             transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
                             transaction.replace(R.id.flContent, fragment);
-                            transaction.addToBackStack(null);
                             transaction.commit();
                         } else {
                             isTransactionPending = true;
@@ -200,7 +194,6 @@ public class SettingsFragment extends Fragment {
                             FragmentTransaction transaction = fragmentManager.beginTransaction();
                             transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
                             transaction.replace(R.id.flContent, fragment);
-                            transaction.addToBackStack(null);
                             transaction.commit();
                         } else {
                             isTransactionPending = true;
@@ -219,7 +212,6 @@ public class SettingsFragment extends Fragment {
                             FragmentTransaction transaction = fragmentManager.beginTransaction();
                             transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
                             transaction.replace(R.id.flContent, fragment);
-                            transaction.addToBackStack(null);
                             transaction.commit();
                         } else {
                             isTransactionPending = true;

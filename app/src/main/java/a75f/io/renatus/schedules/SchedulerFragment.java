@@ -424,7 +424,7 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
     Schedule.Days removeEntry = null;
     public boolean onClickSave(int position, double coolingTemp, double heatingTemp, int startTimeHour, int endTimeHour, int startTimeMinute, int endTimeMinute, ArrayList<DAYS> days) {
         
-        if (position != ManualSchedulerDialogFragment.NO_REPLACE) {
+        if (position != ManualSchedulerDialogFragment.NO_REPLACE && days == null) {
             removeEntry = schedule.getDays().remove(position);
         } else {
             removeEntry = null;

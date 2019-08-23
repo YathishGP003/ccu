@@ -75,6 +75,7 @@ import a75f.io.logic.pubnub.UpdateScheduleHandler;
 import a75f.io.renatus.schedules.ScheduleUtil;
 import a75f.io.renatus.schedules.SchedulerFragment;
 import a75f.io.renatus.util.GridItem;
+import a75f.io.renatus.util.NonTempControl;
 import a75f.io.renatus.util.SeekArc;
 import a75f.io.logic.pubnub.ZoneDataInterface;
 
@@ -131,6 +132,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
     boolean zoneOpen = false;
     SeekArc seekArcOpen;
+    NonTempControl nonTempControlOpen;
     ImageView imageEquipOpen;
     View zonePointsOpen;
     Equip equipOpen;
@@ -149,6 +151,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
     boolean isHPUloaded = false;
     ArrayList<HashMap> openZoneMap;
     double currentAverageTemp = 0;
+    double currentTempSensor = 0;
+    int noTempSensor = 0;
     public ZoneFragmentNew()
     {
     }
@@ -247,13 +251,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
     {
         if(getActivity() != null) {
             int i;
-            double pointheatDT = CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and heating and group == \"" + nodeAddress + "\"");
-            double pointcoolDT = CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and cooling and group == \"" + nodeAddress + "\"");
             for (i = 0; i < seekArcArrayList.size(); i++) {
                 GridItem gridItem = (GridItem) seekArcArrayList.get(i).getTag();
                 if (gridItem.getNodeAddress() == Short.valueOf(nodeAddress)) {
                     SeekArc tempSeekArc = seekArcArrayList.get(i);
-
+                    double pointheatDT = CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and heating and group == \"" + nodeAddress + "\"");
+                    double pointcoolDT = CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and cooling and group == \"" + nodeAddress + "\"");
                     //float coolDt = Float.parseFloat(pointcoolDT);
                     //float heatDt = Float.parseFloat(pointheatDT);
                     if((tempSeekArc.getCoolingDesiredTemp() != pointcoolDT) || (tempSeekArc.getHeatingDesiredTemp() != pointheatDT)) {
@@ -302,44 +305,84 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             if(currentTemp > 0) {
                 for (i = 0; i < seekArcArrayList.size(); i++)
                 {
-                    //Log.i("CurrentTemp", "SensorCurrentTemp:" + currentTemp + " Node:" + nodeAddress);
                     GridItem gridItem = (GridItem) seekArcArrayList.get(i).getTag();
                     ArrayList<Short> zoneNodes = gridItem.getZoneNodes();
+                    Log.i("CurrentTemp", "SensorCurrentTemp:" + currentTemp + " Node:" + nodeAddress+" zoneNodes:"+zoneNodes);
                     if(zoneNodes.contains(nodeAddress))
                     {
-                        currentAverageTemp = 0;
-                        int noTempSensor = 0;
-                        SeekArc tempSeekArc = seekArcArrayList.get(i);
-                        ArrayList<HashMap> zoneEquips = gridItem.getZoneEquips();
-                        for (int j = 0; j < zoneEquips.size(); j++) {
-                            Equip tempEquip = new Equip.Builder().setHashMap(zoneEquips.get(j)).build();
-                            double avgTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" + tempEquip.getId() + "\"");
-                            if (avgTemp > 0) {
-                                currentAverageTemp = (currentAverageTemp + avgTemp);
-                            } else {
-                                noTempSensor++;
-                            }
-                        }
-                        currentAverageTemp = currentAverageTemp / (zoneEquips.size() - noTempSensor);
-                        //Log.i("CurrentTemp", "AvgCurrentTemp:" + currentAverageTemp + " Grid Node:" + zoneNodes.toString()+" UpdatedNode:"+nodeAddress + " Arc:" + tempSeekArc.getId());
-                        if (currentAverageTemp > 0) {
-                            getActivity().runOnUiThread(new Runnable() {
+                            SeekArc tempSeekArc = seekArcArrayList.get(i);
+                            currentTempSensor = 0;
+                            noTempSensor = 0;
+                            new AsyncTask<String, Void, Double>() {
+                                @Override
+                                protected Double doInBackground( final String ... params ) {
+                                    ArrayList<HashMap> zoneEquips = gridItem.getZoneEquips();
+                                    for (int j = 0; j < zoneEquips.size(); j++) {
+                                        Equip tempEquip = new Equip.Builder().setHashMap(zoneEquips.get(j)).build();
+                                        double avgTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" + tempEquip.getId() + "\"");
+                                        if (avgTemp > 0) {
+                                            currentTempSensor = (currentTempSensor + avgTemp);
+                                        } else {
+                                            noTempSensor++;
+                                        }
+                                    }
+                                    if (currentTempSensor > 0 && zoneEquips.size() >1) {
+                                            currentTempSensor = currentTempSensor / (zoneEquips.size() - noTempSensor);
+                                            DecimalFormat decimalFormat = new DecimalFormat("#.##");
+                                            currentTempSensor = Double.parseDouble(decimalFormat.format(currentTempSensor));
+                                    }
+                                    if(currentTempSensor > 0) {
+                                        return currentTempSensor;
+                                    }
+                                    return null;
+                                }
+
+                                @Override
+                                protected void onPostExecute( final Double result ) {
+                                    if(result != null) {
+                                        tempSeekArc.setCurrentTemp((float) (result.doubleValue()));
+                                    }
+                                }
+                            }.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, "");
+
+                           /* getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    DecimalFormat decimalFormat = new DecimalFormat("#.##");
-                                    currentAverageTemp = Double.parseDouble(decimalFormat.format(currentAverageTemp));
-                                    //Log.i("CurrentTemp", "AvgCurrentTemp:" + currentAverageTemp + " Grid Node:" + zoneNodes.toString()+" UpdatedNode:"+nodeAddress + " Arc:" + tempSeekArc.getId());
-                                    tempSeekArc.setCurrentTemp((float) (currentAverageTemp));
+                                    try {
+                                        if(zoneEquips.size() > 1) {
+                                            currentAverageTemp = currentAverageTemp / (zoneEquips.size() - noTempSensor);
+                                            DecimalFormat decimalFormat = new DecimalFormat("#.##");
+                                            currentAverageTemp = Double.parseDouble(decimalFormat.format(currentAverageTemp));
+                                        }
+                                        tempSeekArc.setCurrentTemp((float) (currentAverageTemp));
+                                    } catch (NumberFormatException e) {
+                                        e.printStackTrace();
+                                    }
                                 }
-                            });
-                        }
+                            });*/
+                        //}
+                        break;
                     }
-
                 }
             }
         }
     }
 
+    public void updateSensorValue(short nodeAddress){
+        if(getActivity() != null) {
+            if(zoneOpen) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (equipOpen.getProfile().contains("PLC") || equipOpen.getProfile().contains("EMR") || equipOpen.getProfile().contains("monitor")) {
+                            updateNonTemperatureBasedZones(nonTempControlOpen, zonePointsOpen, equipOpen, getLayoutInflater());
+                            tableLayout.invalidate();
+                        }
+                    }
+                });
+            }
+        }
+    }
     @Override
     public void onStart()
     {
@@ -535,13 +578,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 noTempSensor++;
             }
             equipNodes.add(Short.valueOf(avgTempEquip.getGroup()));
-            //Log.i("EachzoneData","temp:"+avgTemp+" currentAvg:"+currentAverageTemp);
+            Log.i("EachzoneData","temp:"+avgTemp+" currentAvg:"+currentAverageTemp);
         }
-        currentAverageTemp = currentAverageTemp/(zoneMap.size()-noTempSensor);
-        DecimalFormat decimalFormat = new DecimalFormat("#.##");
-        currentAverageTemp = Double.parseDouble(decimalFormat.format(currentAverageTemp));
-        //Log.i("EachzoneData"," currentAvg:"+currentAverageTemp);
-
+        if(zoneMap.size() > 1 && currentAverageTemp != 0){
+            currentAverageTemp = currentAverageTemp/(zoneMap.size()-noTempSensor);
+            DecimalFormat decimalFormat = new DecimalFormat("#.##");
+            currentAverageTemp = Double.parseDouble(decimalFormat.format(currentAverageTemp));
+        }
+        Log.i("EachzoneData"," currentAvg:"+currentAverageTemp);
         String equipId = p.getId();
         int i = gridPosition;
         View arcView = null;
@@ -719,11 +763,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         float pointcoolDB = (float)getPointVal(coolDB.get("id").toString());
 
         String floorName = floorList.get(mFloorListAdapter.getSelectedPostion()).getDisplayName();
-        float zoneCurrentTemp = (float)currentAverageTemp;
-        if(zoneCurrentTemp == 0 || zoneCurrentTemp == Float.NaN)
-            zoneCurrentTemp = 0;
-        Log.i("EachzoneData","CurrentTemp:"+(float)currentAverageTemp+" FloorName:"+floorName+" ZoneName:"+zoneTitle+","+pointheatDB+","+pointcoolDB);
-        seekArc.setData(false, pointbuildingMin, pointbuildingMax, pointheatUL, pointheatLL, pointcoolLL, pointcoolUL, pointheatDT, pointcoolDT, zoneCurrentTemp, pointheatDB, pointcoolDB);
+        Log.i("EachzoneData","CurrentTemp:"+currentAverageTemp+" FloorName:"+floorName+" ZoneName:"+zoneTitle+","+pointheatDB+","+pointcoolDB);
+        seekArc.setData(false, pointbuildingMin, pointbuildingMax, pointheatUL, pointheatLL, pointcoolLL, pointcoolUL, pointheatDT, pointcoolDT, (float) currentAverageTemp, pointheatDB, pointcoolDB);
         seekArc.setDetailedView(false);
         LinearLayout.LayoutParams rowLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
 
@@ -802,8 +843,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                                             textViewzone.setTextAppearance(getActivity(),R.style.label_black);
                                             textViewzone.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
                                             tableLayout.removeViewAt(row + 1);
-                                            ImageView imageViewExpanded = gridItem.findViewById(R.id.imageView);
-                                            ScaleImageToNormal(250,210,imageViewExpanded);
+                                            NonTempControl nonTempControl = gridItem.findViewById(R.id.rl_nontemp);
+                                            ScaleControlToNormal(250,210,nonTempControl);
+                                            nonTempControl.setExpand(false);
+                                            //ScaleImageToNormal(250,210,imageViewExpanded);
+                                            nonTempControl.setBackgroundColor(getResources().getColor(R.color.white));
                                             gridItem.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
                                         }
 
@@ -946,6 +990,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         Spinner scheduleSpinner     = zoneDetails.findViewById(R.id.schedule_spinner);
         ImageButton scheduleImageButton = zoneDetails.findViewById(R.id.schedule_edit_button);
         TextView vacationStatusTV = zoneDetails.findViewById(R.id.vacation_status);
+
 
 
         ArrayAdapter<CharSequence> scheduleAdapter = ArrayAdapter.createFromResource(
@@ -1129,6 +1174,53 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         }
     }
 
+    private void updateNonTemperatureBasedZones(NonTempControl nonTempControlOpen, View zonePointsOpen, Equip equipOpen, LayoutInflater inflater)
+    {
+        ArrayList<HashMap> zoneMap = openZoneMap;
+        Log.i("ProfileTypes","Points:"+zoneMap.toString());
+        Equip p = equipOpen;
+        View zoneDetails = zonePointsOpen;
+        LinearLayout linearLayoutZonePoints  = zoneDetails.findViewById(R.id.lt_profilepoints);
+        NonTempControl nonTempControl = nonTempControlOpen;
+        HashMap zoneEquips = zoneMap.get(0);
+
+            linearLayoutZonePoints.removeAllViews();
+            if (p.getProfile().startsWith("EMR")) {
+                LinearLayout ll_status  = zoneDetails.findViewById(R.id.lt_status);
+                LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
+                ll_status.setVisibility(View.GONE);
+                ll_schedule.setVisibility(View.GONE);
+                HashMap emPoints = ScheduleProcessJob.getEMEquipPoints(p.getId());
+                Log.i("PointsValue", "EM Points:" + emPoints.toString());
+                if(emPoints.size() > 0) {
+                    loadEMPointsUI(emPoints, inflater, linearLayoutZonePoints, p.getGroup());
+                    double totalEm = (double)emPoints.get("Energy Reading");
+                    double currentEm = (double)emPoints.get("Current Rate");
+                    nonTempControl.setEmTotalText(String.valueOf(totalEm));
+                    nonTempControl.setEmCurrentText(String.valueOf(currentEm));
+                    nonTempControl.setEmTotalUnitText("KWh");
+                    nonTempControl.setEmCurrentUnitText("KW");
+                }
+            }
+            if (p.getProfile().startsWith("PLC")) {
+                LinearLayout ll_status  = zoneDetails.findViewById(R.id.lt_status);
+                LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
+                ll_status.setVisibility(View.GONE);
+                ll_schedule.setVisibility(View.GONE);
+                HashMap plcPoints = ScheduleProcessJob.getPiEquipPoints(p.getId());
+                if(plcPoints.size() > 0) {
+                    Log.i("PointsValue", "PiLoop Points:" + plcPoints.toString());
+                    loadPLCPointsUI(plcPoints, inflater, linearLayoutZonePoints, p.getGroup());
+                    double targetValue = (double)plcPoints.get("Target Value");
+                    double inputValue = (double)plcPoints.get("Input Value");
+                    nonTempControl.setPiInputText(String.valueOf(inputValue));
+                    nonTempControl.setPiOutputText(String.valueOf(targetValue));
+                    nonTempControl.setPiInputUnitText(plcPoints.get("Unit").toString());
+                    nonTempControl.setPiOutputUnitText(plcPoints.get("Unit").toString());
+                }
+            }
+    }
+
 
     private void viewNonTemperatureBasedZone(LayoutInflater inflater, View rootView, ArrayList<HashMap> zoneMap,String zoneTitle, int gridPosition, LinearLayout[] tablerowLayout)
     {
@@ -1149,9 +1241,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         arcView.setTag(gridItemObj);
         arcView.setId(i);
         Log.i("EachzoneData","Data:"+zoneMap);
-        ImageView imageView = arcView.findViewById(R.id.imageView);
-        imageView.setTag(gridItemObj);
-        ScaleImageToNormal(250,210,imageView);
+        //ImageView imageView = arcView.findViewById(R.id.imageView);
+        NonTempControl nonTempControl = arcView.findViewById(R.id.rl_nontemp);
+        //imageView.setTag(gridItemObj);
+        nonTempControl.setTag(gridItemObj);
         TextView textEquipment = arcView.findViewById(R.id.textEquipment);
         textEquipment.setText(zoneTitle);
         LinearLayout.LayoutParams rowLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -1181,24 +1274,38 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         HashMap zoneEquips = zoneMap.get(0);
         if((zoneEquips.get("profile").toString()).contains("PLC"))
         {
-            imageView.setImageResource(R.drawable.ic_zone_piloop);
-            imageView.setPadding(36,36,36,36);
+            //imageView.setImageResource(R.drawable.ic_zone_piloop);
+            //imageView.setPadding(36,36,36,36);
+            nonTempControl.setEquipType(1);
+            nonTempControl.setImage(R.drawable.ic_zone_piloop);
+            nonTempControl.setImageViewExpanded(R.drawable.ic_zone_piloop_max);
         }if((zoneEquips.get("profile").toString()).contains("TEMP_MONITOR"))
         {
-            imageView.setImageResource(R.drawable.ic_zone_tempmonitor);
-            imageView.setPadding(36,36,36,36);
+            //imageView.setImageResource(R.drawable.ic_zone_tempmonitor);
+            //imageView.setPadding(36,36,36,36);
+            nonTempControl.setImage(R.drawable.ic_zone_tempmonitor);
+            nonTempControl.setImageViewExpanded(R.drawable.ic_zone_tempmonitor);
         }if((zoneEquips.get("profile").toString()).contains("TEMP_INFLUENCE"))
         {
-            imageView.setImageResource(R.drawable.ic_zone_tempmonitor);
-            imageView.setPadding(36,36,36,36);
+            //imageView.setImageResource(R.drawable.ic_zone_tempmonitor);
+            //imageView.setPadding(36,36,36,36);
+            nonTempControl.setImage(R.drawable.ic_zone_tempmonitor);
+            nonTempControl.setImageViewExpanded(R.drawable.ic_zone_tempmonitor);
         }if((zoneEquips.get("profile").toString()).contains("EMR"))
         {
-            imageView.setImageResource(R.drawable.ic_zone_em);
-            imageView.setPadding(36,36,36,36);
+            //imageView.setImageResource(R.drawable.ic_zone_em);
+            //imageView.setPadding(36,36,36,36);
+            //emValues = arcView.findViewById(R.id.emValues);
+            nonTempControl.setEquipType(0);
+            nonTempControl.setImage(R.drawable.ic_zone_em);
+            nonTempControl.setImageViewExpanded(R.drawable.ic_zone_em_max);
         }
+        //ScaleImageToNormal(250,210,imageView);
+        ScaleControlToNormal(250,210,nonTempControl);
+        nonTempControl.setExpand(false);
 
-
-        imageView.setOnClickListener(new View.OnClickListener() {
+        //imageView.setOnClickListener(new View.OnClickListener() {
+        nonTempControl.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 boolean isExpanded = false;
@@ -1223,9 +1330,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                                             textViewzone.setTextAppearance(getActivity(),R.style.label_black);
                                             textViewzone.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
                                             tableLayout.removeViewAt(row + 1);
-                                            ImageView imageViewExpanded = gridItem.findViewById(R.id.imageView);
-                                            ScaleImageToNormal(250,210,imageViewExpanded);
+                                            //ImageView imageViewExpanded = gridItem.findViewById(R.id.imageView);
+                                            NonTempControl nonTempControl = gridItem.findViewById(R.id.rl_nontemp);
+                                            //ScaleImageToNormal(250,210,imageViewExpanded);
+                                            ScaleControlToNormal(250,210,nonTempControl);
+                                            nonTempControl.setExpand(false);
+                                            nonTempControl.setBackgroundColor(getResources().getColor(R.color.white));
                                             gridItem.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
+                                            gridItem.invalidate();
                                         }else{
                                             SeekArc seekArcExpanded = (SeekArc) gridItem.findViewById(R.id.seekArc);
                                             TextView textViewzone = (TextView) gridItem.findViewById(R.id.textEquipment);
@@ -1247,11 +1359,19 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                                     break;
                                 }
                             }
+                            zoneOpen = true;
+                            zonePointsOpen = zoneDetails;
+                            equipOpen = p;
+                            openZoneMap = zoneMap;
                             clickedView = gridItemNew.getGridID();
                             v.setBackgroundColor(getActivity().getResources().getColor(R.color.zoneselection_gray));
                             int index = clickedView / columnCount + 1;
-                            ScaleImageToBig(250,210,imageView);
+                            //ScaleImageToBig(250,210,imageView);
+                            ScaleControlToExpand(250,210,nonTempControl);
+                            nonTempControl.setExpand(true);
+                            nonTempControlOpen = nonTempControl;
                             imageOn = true;
+                            isExpanded = true;
                             try {
                                 textEquipment.setTextAppearance(getActivity(),R.style.label_orange);
                                 textEquipment.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
@@ -1268,16 +1388,25 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                         textEquipment.setBackgroundColor(getActivity().getResources().getColor(R.color.white));
                         tableLayout.removeView(zoneDetails);
                         imageOn = false;
-                        ScaleImageToNormal(250,210,imageView);
+                        //ScaleImageToNormal(250,210,imageView);
+                        ScaleControlToNormal(250,210,nonTempControl);
+                        nonTempControl.setExpand(false);
                         showWeather();
                         clickedView = -1;
                         isExpanded = false;
                     }
                 } else {
+                    zoneOpen = true;
+                    zonePointsOpen = zoneDetails;
+                    equipOpen = p;
+                    openZoneMap = zoneMap;
                     clickedView = gridItemNew.getGridID();
                     v.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
                     int index = clickedView / columnCount + 1;
-                    ScaleImageToBig(250,210,imageView);
+                    //ScaleImageToBig(250,210,imageView);
+                    ScaleControlToExpand(250,210,nonTempControl);
+                    nonTempControl.setExpand(true);
+                    nonTempControlOpen = nonTempControl;
                     hideWeather();
                     imageOn = true;
                     isExpanded = true;
@@ -1294,6 +1423,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 if(isExpanded) {
                     linearLayoutZonePoints.removeAllViews();
                     if (p.getProfile().startsWith("EMR")) {
+
+                        nonTempControl.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,nonTempControl.getHeight()));
+                        nonTempControl.invalidate();
+
                         LinearLayout ll_status  = zoneDetails.findViewById(R.id.lt_status);
                         LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
                         ll_status.setVisibility(View.GONE);
@@ -1301,6 +1434,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                         HashMap emPoints = ScheduleProcessJob.getEMEquipPoints(p.getId());
                         Log.i("PointsValue", "EM Points:" + emPoints.toString());
                         loadEMPointsUI(emPoints, inflater, linearLayoutZonePoints,p.getGroup());
+
+                        nonTempControl.setEmTotalText(emPoints.get("Energy Reading").toString());
+                        nonTempControl.setEmTotalUnitText("KWh");
+                        nonTempControl.setEmCurrentText(emPoints.get("Current Rate").toString());
+                        nonTempControl.setEmCurrentUnitText("KW");
+
                     } if (p.getProfile().startsWith("PLC")) {
                         LinearLayout ll_status  = zoneDetails.findViewById(R.id.lt_status);
                         LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
@@ -1309,6 +1448,13 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                         HashMap plcPoints = ScheduleProcessJob.getPiEquipPoints(p.getId());
                         Log.i("PointsValue", "PiLoop Points:" + plcPoints.toString());
                         loadPLCPointsUI(plcPoints, inflater, linearLayoutZonePoints,p.getGroup());
+
+                        double targetValue = (double)plcPoints.get("Target Value");
+                        double inputValue = (double)plcPoints.get("Input Value");
+                        nonTempControl.setPiInputText(String.valueOf(inputValue));
+                        nonTempControl.setPiOutputText(String.valueOf(targetValue));
+                        nonTempControl.setPiInputUnitText(plcPoints.get("Unit").toString());
+                        nonTempControl.setPiOutputUnitText(plcPoints.get("Unit").toString());
                     }
                 }
             }
@@ -1914,20 +2060,28 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         textViewTitle.setText(plcPoints.get("Profile").toString()+" ("+nodeAddress+")");
         textViewStatus.setText(plcPoints.get("Status").toString());
 
-        labelInputAir.setText("Input Airflow : ");
-        labelTarget.setText("Target Airflow : ");
-        labelOffsetAir.setText("Offset Airflow : ");
+        labelInputAir.setText("Input  "+plcPoints.get("Unit Type").toString()+" : ");
+        labelTarget.setText("Target "+plcPoints.get("Unit Type").toString()+" : ");
+        labelOffsetAir.setText("Offset "+plcPoints.get("Unit Type").toString()+" : ");
 
-        textViewInputAir.setText(plcPoints.get("Input Value").toString());
-        textViewTargetAir.setText(plcPoints.get("Offset Value").toString());
-        textViewOffsetAir.setText(plcPoints.get("Target Value").toString());
-
-        viewPointRow2.setPadding(0,0,0,40);
+        textViewInputAir.setText(plcPoints.get("Input Value").toString()+plcPoints.get("Unit").toString());
+        textViewTargetAir.setText(plcPoints.get("Offset Value").toString()+plcPoints.get("Unit").toString());
+        textViewOffsetAir.setText(plcPoints.get("Target Value").toString()+plcPoints.get("Unit").toString());
         try {
-            linearLayoutZonePoints.addView(viewTitle);
-            linearLayoutZonePoints.addView(viewStatus);
-            linearLayoutZonePoints.addView(viewPointRow1);
-            linearLayoutZonePoints.addView(viewPointRow2);
+            if((boolean)plcPoints.get("Dynamic Setpoint") == true)
+            {
+                    viewPointRow2.setPadding(0,0,0,40);
+                    linearLayoutZonePoints.addView(viewTitle);
+                    linearLayoutZonePoints.addView(viewStatus);
+                    linearLayoutZonePoints.addView(viewPointRow1);
+                    linearLayoutZonePoints.addView(viewPointRow2);
+
+            }else{
+                    viewPointRow1.setPadding(0,0,0,40);
+                    linearLayoutZonePoints.addView(viewTitle);
+                    linearLayoutZonePoints.addView(viewStatus);
+                    linearLayoutZonePoints.addView(viewPointRow1);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -2075,6 +2229,23 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         imageView.getLayoutParams().height = endHeight;
         imageView.getLayoutParams().width = endWidth;
         imageView.setPadding(36,36,36,36);
+    }
+
+    public void ScaleControlToNormal(int height,int width, NonTempControl imageView)
+    {
+        int endHeight = (int) (height / 1.35);
+        int endWidth = (int) (width / 1.35);
+        imageView.getLayoutParams().height = endHeight;
+        imageView.getLayoutParams().width = endWidth;
+    }
+
+    public void ScaleControlToExpand(int height, int width, NonTempControl imageView)
+    {
+        int endHeight = (int) (height * 1.35);
+        int endWidth = (int) (width * 1.35);
+        imageView.getLayoutParams().height = endHeight;
+        imageView.getLayoutParams().width = endWidth;
+        //imageView.setPadding(20 ,20,20,20);
     }
 
     public void ScaleImageToBig(int height, int width, ImageView imageView)

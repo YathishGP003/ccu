@@ -84,6 +84,10 @@ public class Pulse
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						hayStack.writeHisValById(logPoint.get("id").toString(), getAnalogConversion(phyPoint, logPoint, val));
 						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : analog1In "+getAnalogConversion(phyPoint, logPoint, val));
+						if (currentTempInterface != null) {
+							if(getAnalogConversion(phyPoint, logPoint, val) > 0)
+							currentTempInterface.updateSensorValue(nodeAddr);
+						}
 						break;
 					case ANALOG_IN_TWO:
 						val = smartNodeRegularUpdateMessage_t.update.externalAnalogVoltageInput2.get();
@@ -166,6 +170,10 @@ public class Pulse
 			{
 				CCUHsApi.getInstance().writeHisValById(sp.getId(), (double) emVal);
 				CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), (double) emVal);
+
+				if (currentTempInterface != null) {
+						currentTempInterface.updateSensorValue(addr);
+				}
 			}
 			CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : EMR "+emVal);
 		}

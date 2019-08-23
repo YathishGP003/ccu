@@ -53,4 +53,37 @@
         <attr name="metaButtonBarStyle" format="reference" />
         <attr name="metaButtonBarButtonStyle" format="reference" />
     </declare-styleable>
+
+    <declare-styleable name="NonTempControl">
+
+        <attr name="expand" format="boolean" />
+        <attr name="equipType" format="integer" />
+
+        <attr name="image" format="reference" />
+        <attr name="imageViewExpanded" format="reference" />
+
+        <attr name="piInput" format="reference" />
+        <attr name="piOutput" format="reference" />
+
+        <attr name="piInputText" format="string" />
+        <attr name="piOutputText" format="string" />
+
+        <attr name="piInputUnit" format="reference" />
+        <attr name="piOutputUnit" format="reference" />
+
+        <attr name="piInputUnitText" format="string" />
+        <attr name="piOutputUnitText" format="string" />
+
+        <attr name="emTotal" format="reference" />
+        <attr name="emTotalUnit" format="reference" />
+
+        <attr name="emTotalText" format="string" />
+        <attr name="emTotalUnitText" format="string" />
+
+        <attr name="emCurrent" format="reference" />
+        <attr name="emCurrentUnit" format="reference" />
+
+        <attr name="emCurrentText" format="string" />
+        <attr name="emCurrentUnitText" format="string" />
+    </declare-styleable>
 </resources>

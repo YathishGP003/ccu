@@ -205,7 +205,7 @@ public class InstallerOptions extends Fragment {
             new CountDownTimer(8000, 1000) {
                 @Override
                 public void onTick(long l) {
-                    progressDlg.setMessage("Loading Master Controller...");
+                    progressDlg.setMessage("Loading Master Control...");
                     progressDlg.show();
                 }
 

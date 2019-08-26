@@ -129,11 +129,8 @@ public class MasterControl extends View {
         hitBoxes[stateReflected.ordinal()].set(0, 0, bitmaps[stateReflected.ordinal()].getWidth(), bitmaps[stateReflected.ordinal()].getHeight());
 
         int xPos = getPXForTemp(temps[stateReflected.ordinal()]) - bitmaps[stateReflected.ordinal()].getWidth() / 2;
-        int yPos = getTempLineYLocation() + yDisplacemnet + (direction == Direction.UP ? -bitmaps[stateReflected.ordinal()].getHeight()
-                : bitmaps[stateReflected.ordinal()].getHeight());
+        int yPos = getTempLineYLocation() + yDisplacemnet - bitmaps[stateReflected.ordinal()].getHeight();
 
-        if (direction == Direction.DOWN)
-            matrix.postRotate(180, bitmaps[stateReflected.ordinal()].getWidth() / 2, bitmaps[stateReflected.ordinal()].getHeight() / 3);
         matrix.postTranslate(xPos, yPos);
         canvas.drawBitmap(bitmaps[stateReflected.ordinal()], matrix, mTempPaint);
 
@@ -150,9 +147,7 @@ public class MasterControl extends View {
         //Text centered left to right and 1/3 the way down the icon.
         canvas.drawText(String.valueOf(Math.round(temps[stateReflected.ordinal()])),
                 xPos + bitmaps[stateReflected.ordinal()].getWidth() / 2,
-                (float) (yPos + (direction == Direction.UP ?
-                        bitmaps[stateReflected.ordinal()].getHeight() / 2 :
-                        bitmaps[stateReflected.ordinal()].getHeight() / 3)), mTempIconPaint);
+                (float) (yPos + bitmaps[stateReflected.ordinal()].getHeight() / 2), mTempIconPaint);
     }
 
     private MasterControlState isHitBoxTouched(float x, float y) {
@@ -183,7 +178,7 @@ public class MasterControl extends View {
             case MotionEvent.ACTION_MOVE:
                 Log.i("Movement", "mSelected - " + mSelected.name()
                         + " Temps: " + getTempForPX((int) event.getX()));
-                if (getTempForPX((int) event.getX()) > mLowerBound && getTempForPX((int) event.getX()) < mUpperBound) {
+                if (getTempForPX((int) event.getX()) >= mLowerBound && getTempForPX((int) event.getX()) <= mUpperBound) {
 
                     Log.i("Movement", "Temps: " + getTempForPX((int) event.getX()));
                     if (mSelected == MasterControlState.LOWER_COOLING_LIMIT) {
@@ -363,6 +358,8 @@ public class MasterControl extends View {
         mTempIconPaint.setTextAlign(Paint.Align.CENTER);
         mTempIconPaint.setTypeface(latoLightFont);
         mTempIconPaint.setStyle(Paint.Style.FILL);
+        mTempIconPaint.setTextSize(14);
+        mTempIconPaint.setFakeBoldText(true);
 
 
         mDebugBoxesPaint = new Paint();
@@ -440,19 +437,30 @@ public class MasterControl extends View {
                     Color.parseColor("#5E231f20"));
 
             if (mSelected != MasterControlState.LOWER_BUILDING_LIMIT && mSelected != MasterControlState.UPPER_BUILDING_LIMIT) {
-                if (mSelected == MasterControlState.UPPER_COOLING_LIMIT && temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()] == (temps[MasterControlState.UPPER_BUILDING_LIMIT.ordinal()] - mSetBack - mZoneDifferential)) {
-                    drawArrowText(canvas, "5\u00B0 SETBACK", mEnergySavingsSpacing - 18, temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()],
-                            temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()] + mSetBack,
-                            Color.parseColor("#5E000000"),
-                            Color.parseColor("#5E231f20"));
+                int coolTextColor;
+
+                if (temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()] == (temps[MasterControlState.UPPER_BUILDING_LIMIT.ordinal()] - mSetBack - mZoneDifferential)) {
+                    coolTextColor = Color.RED;
+                } else {
+                    coolTextColor = Color.parseColor("#5E000000");
                 }
 
-                if (mSelected == MasterControlState.UPPER_HEATING_LIMIT && temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()] == (temps[MasterControlState.LOWER_BUILDING_LIMIT.ordinal()] + mSetBack + mZoneDifferential)) {
-                    drawArrowText(canvas, "5\u00B0 SETBACK", mEnergySavingsSpacing - 18, (temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()] - mSetBack),
-                            temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()],
-                            Color.parseColor("#5E000000"),
-                            Color.RED);
+                drawArrowText(canvas, "5\u00B0 SETBACK", mEnergySavingsSpacing - 18, temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()],
+                        temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()] + mSetBack,
+                        Color.parseColor("#5E000000"),
+                        coolTextColor);
+
+                int heatTextColor;
+                if (temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()] == (temps[MasterControlState.LOWER_BUILDING_LIMIT.ordinal()] + mSetBack + mZoneDifferential)) {
+                    heatTextColor = Color.RED;
+                } else {
+                    heatTextColor = Color.parseColor("#5E000000");
                 }
+
+                drawArrowText(canvas, "5\u00B0 SETBACK", mEnergySavingsSpacing - 18, (temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()] - mSetBack),
+                        temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()],
+                        Color.parseColor("#5E000000"),
+                        heatTextColor );
 
                 if (mSelected == MasterControlState.UPPER_HEATING_LIMIT && temps[MasterControlState.UPPER_HEATING_LIMIT.ordinal()] == (temps[MasterControlState.LOWER_BUILDING_LIMIT.ordinal()] + mSetBack + mZoneDifferential) && temps[MasterControlState.LOWER_BUILDING_LIMIT.ordinal()] == (getEnergySavingLowerLimit() - mZoneDifferential)) {
                     drawArrowDiffText(canvas, "BUILDING\nZONE\nDIFFERENTIAL", mEnergySavingsSpacing - 18, temps[MasterControlState.LOWER_BUILDING_LIMIT.ordinal()],
@@ -465,7 +473,7 @@ public class MasterControl extends View {
                     drawArrowDiffText(canvas, "BUILDING\nZONE\nDIFFERENTIAL", mEnergySavingsSpacing - 18, temps[MasterControlState.UPPER_COOLING_LIMIT.ordinal()] + mSetBack,
                             temps[MasterControlState.UPPER_BUILDING_LIMIT.ordinal()],
                             Color.parseColor("#5E000000"),
-                            Color.parseColor("#5E000000"));
+                            Color.RED);
                 }
 
                 drawArrowText(canvas, "ENERGY SAVINGS RANGE", mEnergySavingsSpacing + 30,

@@ -26,15 +26,26 @@ public class Alert
     public long startTime;
     public long endTime;
     public boolean  isFixed;
-    public int alertCount;
     
     //Backend guid of the alert
-    public String alertId;
+    public String _id;
     
     public String ref;
     
     public String deviceRef;
     public String siteRef;
+    
+    public boolean syncStatus;
+    
+    public boolean getSyncStatus()
+    {
+        return syncStatus;
+    }
+    public void setSyncStatus(boolean syncStatus)
+    {
+        this.syncStatus = syncStatus;
+    }
+    
     public String getRef()
     {
         return ref;
@@ -132,28 +143,21 @@ public class Alert
     {
         isFixed = fixed;
     }
-    public int getAlertCount()
+    public String getGuid()
     {
-        return alertCount;
+        return _id;
     }
-    public void setAlertCount(int alertCount)
+    public void setGuid(String alertId)
     {
-        this.alertCount = alertCount;
-    }
-    public String getAlertId()
-    {
-        return alertId;
-    }
-    public void setAlertId(String alertId)
-    {
-        this.alertId = alertId;
+        this._id = alertId;
     }
     
     @Override
     public String toString() {
         StringBuilder b = new StringBuilder();
-        b.append(" {").append(mTitle).append(",").append(mMessage).append(", ").append(alertId).append(",")
-         .append(ref).append(", ").append(startTime).append(", ").append(endTime).append(", ").append(isFixed).append(", ").append(deviceRef).append(", ").append(siteRef).append("}");
+        b.append(" {").append(id).append(", ").append(mTitle).append(",").append(mMessage).append(", ").append(",")
+         .append(ref).append(", ").append(startTime).append(", ").append(endTime).append(", ").append(isFixed).append(", ")
+         .append(deviceRef).append(", ").append(siteRef).append(", ").append(syncStatus).append(", ").append(_id).append("}");
         return b.toString();
     }
     public Alert(){

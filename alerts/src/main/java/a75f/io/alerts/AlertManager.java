@@ -98,6 +98,9 @@ public class AlertManager
     public void fixAlert(Alert a) {
         processor.fixAlert(a);
     }
+    public void deleteAlert(Alert a) {
+        processor.deleteAlert(a);
+    }
     public void addAlertDefinition(AlertDefinition alert) {
         processor.addAlertDefinition(alert);
     }

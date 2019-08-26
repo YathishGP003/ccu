@@ -14,7 +14,7 @@ public class AlertBuilder
     public static Alert build(Alert a) {
         Alert alert = new Alert();
         alert.setId(a.id);
-        alert.setAlertId(a.alertId);
+        alert.setGuid(a._id);
         alert.setStartTime(a.startTime);
         alert.setEndTime(a.endTime);
         alert.setmTitle(a.mTitle);
@@ -26,22 +26,25 @@ public class AlertBuilder
         alert.setRef(a.ref);
         alert.setDeviceRef(a.deviceRef);
         alert.setSiteRef(a.siteRef);
+        alert.setSyncStatus(a.syncStatus);
         return alert;
     }
     public static Alert build(AlertDefinition def) {
         Alert alert = new Alert();
-        alert.setAlertId("");
+        alert.setGuid("");
         alert.setStartTime(GregorianCalendar.getInstance().getTimeInMillis());
         alert.setmTitle(def.alert.mTitle);
         alert.setmMessage(def.alert.mMessage);
         alert.setmNotificationMsg(def.alert.mNotificationMsg);
         alert.setmSeverity(def.alert.mSeverity);
+        alert.setmEnabled(true);
+        alert.setSyncStatus(false);
         return alert;
     }
     
     public static Alert build(AlertDefinition def, String message, String id) {
         Alert alert = new Alert();
-        alert.setAlertId("");
+        alert.setGuid("");
         alert.setStartTime(GregorianCalendar.getInstance().getTimeInMillis());
         alert.setmTitle(def.alert.mTitle);
         alert.setmMessage(message);
@@ -50,6 +53,8 @@ public class AlertBuilder
         alert.ref = id;
         alert.siteRef = CCUHsApi.getInstance().getSiteId().toString();
         alert.deviceRef = CCUHsApi.getInstance().getCcuId().toString();
+        alert.setmEnabled(true);
+        alert.setSyncStatus(false);
         return alert;
     }
     

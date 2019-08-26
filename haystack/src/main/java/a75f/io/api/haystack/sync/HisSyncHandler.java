@@ -1,5 +1,6 @@
 package a75f.io.api.haystack.sync;
 
+import org.joda.time.DateTime;
 import org.projecthaystack.HBool;
 import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDict;
@@ -123,6 +124,8 @@ public class HisSyncHandler
     private void sendHisToInflux() {
         
         ArrayList<HashMap> equips = hayStack.readAll("equip");
+        DateTime now = new DateTime();
+        
         for (HashMap equip : equips) {
             CcuLog.d(TAG," sendHisToInflux Equip "+equip.get("dis"));
             ArrayList<HashMap> points = hayStack.readAll("point and his and equipRef == \""+equip.get("id")+"\"");
@@ -170,7 +173,10 @@ public class HisSyncHandler
                 }
                 tsData.put( pointGUID.replace("@",""), String.valueOf(hisVal.getVal()));
                 
-                hayStack.tagsDb.removeHisItems(HRef.copy(pointID));
+                if (now.getMinuteOfDay() == 0)
+                {
+                    hayStack.tagsDb.removeHisItems(HRef.copy(pointID));
+                }
             
             }
             
@@ -182,8 +188,15 @@ public class HisSyncHandler
             }
         
         }
+        
+        //Send device data once in 5 mins
+        if (now.getMinuteOfDay() % 5 == 0) {
+            sendDeviceHisData();
+        }
+        
+    }
     
-    
+    private void sendDeviceHisData() {
         ArrayList<HashMap> devices = hayStack.readAll("device");
         for (HashMap device : devices) {
             if (device.get("ccu") != null) {
@@ -226,14 +239,14 @@ public class HisSyncHandler
                 }
                 hayStack.tagsDb.setHisItemSyncStatus(hisItems);
                 hayStack.tagsDb.removeHisItems(HRef.copy(pointID));*/
-    
+            
                 HisItem hisVal = hayStack.tagsDb.getLastHisItem(HRef.copy(pointID));
                 if (hisVal == null) {
                     CcuLog.d(TAG, "His val not found : "+m.get("dis"));
                     continue;
                 }
                 tsData.put( pointGUID.replace("@",""), String.valueOf(hisVal.getVal()));
-    
+            
                 hayStack.tagsDb.removeHisItems(HRef.copy(pointID));
             
             }

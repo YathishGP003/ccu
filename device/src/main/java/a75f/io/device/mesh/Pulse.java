@@ -33,7 +33,6 @@ import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.haystack.device.SmartStat;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.jobs.ScheduleProcessJob;
-import a75f.io.logic.pubnub.UpdatePointHandler;
 import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
 import a75f.io.logic.tuners.TunerConstants;
@@ -178,6 +177,10 @@ public class Pulse
 			CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : EMR "+emVal);
 		}
 	
+	}
+	
+	public static double round(double val) {
+		return Math.round(100*val)/100;
 	}
 	
 	public static Double getRoomTempConversion(Double temp) {

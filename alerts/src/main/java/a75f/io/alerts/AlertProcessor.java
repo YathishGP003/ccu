@@ -174,11 +174,18 @@ public class AlertProcessor
             }
         }
         
-        for (Alert a : getActiveUnSyncedAlerts()) {
+        for (Alert a : getActiveAlerts()) {
             CcuLog.d("CCU_ALERTS"," Active Alert "+a.toString());
         }
-        
-        AlertSyncHandler.sync(mContext, getActiveUnSyncedAlerts());
+        List<Alert> unsyncedAlerts = getUnSyncedAlerts();
+        CcuLog.d("CCU_ALERTS"," Unsynced Alerts "+unsyncedAlerts.size());
+        if (unsyncedAlerts.size() > 0)
+        {
+            List<Alert> syncedAlerts = AlertSyncHandler.sync(mContext, unsyncedAlerts);
+            for (Alert a : syncedAlerts) {
+                updateAlert(a);
+            }
+        }
     }
     
     public boolean isZoneAlert(AlertDefinition ad) {
@@ -248,12 +255,19 @@ public class AlertProcessor
     public List<Alert> getActiveUnSyncedAlerts(){
         QueryBuilder<Alert> alertQuery = alertBox.query();
         alertQuery.equal(Alert_.isFixed, false)
-                  .equal(Alert_.alertId,"")
+                  .equal(Alert_.syncStatus,false)
                   .orderDesc(Alert_.startTime);
         
         return alertQuery.build().find();
     }
     
+    public List<Alert> getUnSyncedAlerts(){
+        QueryBuilder<Alert> alertQuery = alertBox.query();
+        alertQuery.equal(Alert_.syncStatus,false)
+                  .orderDesc(Alert_.startTime);
+        
+        return alertQuery.build().find();
+    }
     
     public List<Alert> getAllAlerts(){
         QueryBuilder<Alert> alertQuery = alertBox.query();
@@ -287,7 +301,15 @@ public class AlertProcessor
     public void fixAlert(Alert alert) {
         alert.setEndTime((new DateTime()).getMillis());
         alert.setFixed(true);
+        alert.setSyncStatus(false);
         alertBox.put(alert);
+    }
+    
+    public void deleteAlert(Alert alert) {
+        if (AlertSyncHandler.delete(mContext, alert._id))
+        {
+            alertBox.remove(alert.id);
+        }
     }
     
     /*public void updateAlertDefinitions(Context c) {

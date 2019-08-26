@@ -124,7 +124,11 @@ class RoomListActionMenuListener implements MultiChoiceModeListener
 	{
 		//L.ccu().getFloors().get(0).mZoneList.remove(selectedRoom.get(0));
 		L.saveCCUState();
-		floorPlanActivity.refreshScreen();
+		for (int nCount = 0; nCount < selectedRoom.size(); nCount++)
+		{
+			Zone sZone = selectedRoom.get(nCount);
+			floorPlanActivity.renameZone(sZone);
+		}
 	}
 	
 	

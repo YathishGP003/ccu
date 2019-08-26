@@ -101,6 +101,10 @@ public class FloorPlanFragment extends Fragment
 
 	ArrayList<Floor> floorList = new ArrayList();
 	ArrayList<Zone> roomList = new ArrayList();
+	//
+	private Zone roomToRename;
+	private Floor floorToRename;
+
 	private final BroadcastReceiver mPairingReceiver = new BroadcastReceiver()
 	{
 		@Override
@@ -536,6 +540,40 @@ public class FloorPlanFragment extends Fragment
 	{
 		if (actionId == EditorInfo.IME_ACTION_DONE)
 		{
+			if (floorToRename != null){
+
+				floorList.remove(floorToRename);
+				for (Floor f : floorList) {
+					if (f.getDisplayName().equals(addFloorEdit.getText().toString())) {
+						Toast.makeText(getActivity().getApplicationContext(), "Floor already exists : " + addRoomEdit.getText(), Toast.LENGTH_SHORT).show();
+						return true;
+					}
+				}
+
+				Floor hsFloor = new Floor.Builder()
+						.setDisplayName(addFloorEdit.getText().toString())
+						.setSiteRef(floorToRename.getSiteRef())
+						.build();
+
+				hsFloor.setId(floorToRename.getId());
+				floorList.add(hsFloor);
+				CCUHsApi.getInstance().updateFloor(hsFloor, floorToRename.getId());
+
+				Collections.sort(floorList, new FloorComparator());
+				updateFloors();
+				selectFloor(HSUtil.getFloors().size() - 1);
+
+				InputMethodManager mgr = (InputMethodManager) getActivity()
+						.getSystemService(Context.INPUT_METHOD_SERVICE);
+				mgr.hideSoftInputFromWindow(addFloorEdit.getWindowToken(), 0);
+
+				floorToRename = null;
+				L.saveCCUState();
+				CCUHsApi.getInstance().syncEntityTree();
+
+				return true;
+			}
+
 			if(addFloorEdit.getText().toString().length() > 0) {
 				for (Floor f : HSUtil.getFloors()) {
 					if (f.getDisplayName().equals(addFloorEdit.getText().toString())) {
@@ -621,11 +659,74 @@ public class FloorPlanFragment extends Fragment
 		}
 	}
 
+	public void renameZone(Zone zone)
+	{
+		roomToRename = zone;
+		enableRoomEdit();
+		addRoomEdit.setText(zone.getDisplayName());
+		addRoomEdit.requestFocus();
+		addRoomEdit.setSelection(zone.getDisplayName().length());
+
+		InputMethodManager mgr =
+				(InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+		mgr.showSoftInput(addRoomEdit, InputMethodManager.SHOW_IMPLICIT);
+	}
+
+	public void renameFloor(Floor floor)
+	{
+		floorToRename = floor;
+		enableFloorEdit();
+		addFloorEdit.setText(floor.getDisplayName());
+		addFloorEdit.requestFocus();
+		addFloorEdit.setSelection(floor.getDisplayName().length());
+
+		InputMethodManager mgr =
+				(InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+		mgr.showSoftInput(addFloorEdit, InputMethodManager.SHOW_IMPLICIT);
+	}
+
 	@OnEditorAction(R.id.addRoomEdit)
 	public boolean handleRoomChange(TextView v, int actionId, KeyEvent event)
 	{
 		if (actionId == EditorInfo.IME_ACTION_DONE)
 		{
+
+			if (roomToRename!= null){
+
+				roomList.remove(roomToRename);
+
+				for (Floor f : HSUtil.getFloors()) {
+					for (Zone z : roomList) {
+						if (z.getDisplayName().equals(addRoomEdit.getText().toString())) {
+							Toast.makeText(getActivity().getApplicationContext(), "Zone already exists : " + addRoomEdit.getText(), Toast.LENGTH_SHORT).show();
+							return true;
+						}
+					}
+				}
+
+				Zone hsZone = new Zone.Builder()
+						.setDisplayName(addRoomEdit.getText().toString())
+						.setFloorRef(roomToRename.getFloorRef())
+						.setSiteRef(roomToRename.getSiteRef())
+						.build();
+
+				hsZone.setId(roomToRename.getId());
+				CCUHsApi.getInstance().updateZone(hsZone, roomToRename.getId());
+				L.saveCCUState();
+				CCUHsApi.getInstance().syncEntityTree();
+				roomList.add(hsZone);
+				Collections.sort(roomList, new ZoneComparator());
+				updateRooms(roomList);
+				selectRoom(roomList.indexOf(hsZone));
+
+				InputMethodManager mgr = (InputMethodManager) getActivity()
+						.getSystemService(Context.INPUT_METHOD_SERVICE);
+				mgr.hideSoftInputFromWindow(addRoomEdit.getWindowToken(), 0);
+
+				roomToRename = null;
+				return true;
+			}
+
 			if(addRoomEdit.getText().toString().length() > 0) {
 				for (Floor f : HSUtil.getFloors()) {
 					for (Zone z : HSUtil.getZones(f.getId())) {

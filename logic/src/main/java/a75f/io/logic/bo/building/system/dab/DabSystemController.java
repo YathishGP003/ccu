@@ -357,8 +357,8 @@ public class DabSystemController extends SystemController
             return p.val;
         }
         
-        double zonePrioritySpread = TunerUtil.readTunerValByQuery("point and tuner and dab and zone and priority and spread and equipRef == \"" + equipRef + "\"");;
-        double zonePriorityMultiplier = TunerUtil.readTunerValByQuery("point and tuner and dab and zone and priority and multiplier and equipRef == \""+equipRef+"\"");;
+        double zonePrioritySpread = TunerUtil.readTunerValByQuery("point and tuner and zone and priority and spread and equipRef == \"" + equipRef + "\"");;
+        double zonePriorityMultiplier = TunerUtil.readTunerValByQuery("point and tuner and zone and priority and multiplier and equipRef == \""+equipRef+"\"");;
         
         return p.val * Math.pow(zonePriorityMultiplier, (zoneLoad/zonePrioritySpread) > 10 ? 10 : (zoneLoad/zonePrioritySpread));
     }

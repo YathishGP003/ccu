@@ -64,4 +64,17 @@ public class AlertSyncHandler
         }
         return syncedAlerts;
     }
+    
+    public static boolean delete(Context c, String id) {
+        try
+        {
+            String response = HttpUtil.sendRequest(c, "removeAlert", new JSONObject().put("_id", id).toString());
+            CcuLog.d("CCU_ALERTS", " response " + response);
+            return response != null;
+        }catch (JSONException e) {
+            e.printStackTrace();
+            CcuLog.d("CCU_ALERTS", "Delete alert failed "+id);
+        }
+        return false;
+    }
 }

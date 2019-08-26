@@ -37,6 +37,7 @@ public class AlertBuilder
         alert.setmMessage(def.alert.mMessage);
         alert.setmNotificationMsg(def.alert.mNotificationMsg);
         alert.setmSeverity(def.alert.mSeverity);
+        alert.setmEnabled(true);
         alert.setSyncStatus(false);
         return alert;
     }
@@ -52,6 +53,7 @@ public class AlertBuilder
         alert.ref = id;
         alert.siteRef = CCUHsApi.getInstance().getSiteId().toString();
         alert.deviceRef = CCUHsApi.getInstance().getCcuId().toString();
+        alert.setmEnabled(true);
         alert.setSyncStatus(false);
         return alert;
     }

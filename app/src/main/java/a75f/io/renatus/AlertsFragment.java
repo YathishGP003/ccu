@@ -102,7 +102,15 @@ public class AlertsFragment extends Fragment
 				       .setIcon(android.R.drawable.ic_dialog_alert)
 				       .setPositiveButton("OK", new DialogInterface.OnClickListener() {
 					       public void onClick(DialogInterface dialog, int id) {
-						       AlertManager.getInstance(getActivity()).deleteAlert(alertList.get(position));
+					       	   new Thread(new Runnable()
+					           {
+						           @Override
+						           public void run()
+						           {
+							           AlertManager.getInstance(getActivity()).deleteAlert(alertList.get(position));
+						           }
+					           }).start();
+						       
 						       adapter.notifyDataSetChanged();
 					       }
 				        })

@@ -306,7 +306,10 @@ public class AlertProcessor
     }
     
     public void deleteAlert(Alert alert) {
-        alertBox.remove(alert.id);
+        if (AlertSyncHandler.delete(mContext, alert._id))
+        {
+            alertBox.remove(alert.id);
+        }
     }
     
     /*public void updateAlertDefinitions(Context c) {

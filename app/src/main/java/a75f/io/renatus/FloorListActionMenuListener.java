@@ -121,8 +121,8 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 	
 	private void renameSelectedFloor()
 	{
-		//selectedFloor.get(0).mFloorName = selectedFloor.get(0).mFloorName;
-		//floorPlanActivity.renameFloor(selectedFloor.get(0));
+		////selectedFloor.get(0).mFloorName = selectedFloor.get(0).mFloorName;
+		floorPlanActivity.renameFloor(selectedFloor.get(0));
 	}
 	
 	

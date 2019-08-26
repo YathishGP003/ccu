@@ -2065,8 +2065,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         labelOffsetAir.setText("Offset "+plcPoints.get("Unit Type").toString()+" : ");
 
         textViewInputAir.setText(plcPoints.get("Input Value").toString()+plcPoints.get("Unit").toString());
-        textViewTargetAir.setText(plcPoints.get("Offset Value").toString()+plcPoints.get("Unit").toString());
-        textViewOffsetAir.setText(plcPoints.get("Target Value").toString()+plcPoints.get("Unit").toString());
+        textViewTargetAir.setText(plcPoints.get("Target Value").toString()+plcPoints.get("Unit").toString());
+        textViewOffsetAir.setText(plcPoints.get("Offset Value").toString()+plcPoints.get("Unit").toString());
         try {
             if((boolean)plcPoints.get("Dynamic Setpoint") == true)
             {

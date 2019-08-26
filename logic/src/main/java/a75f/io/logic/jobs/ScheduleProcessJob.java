@@ -908,9 +908,10 @@ public class ScheduleProcessJob extends BaseJob {
         ArrayList equipStatusPoint = CCUHsApi.getInstance().readAll("point and status and message and equipRef == \""+equipID+"\"");
         ArrayList inputValue = CCUHsApi.getInstance().readAll("point and process and logical and variable and equipRef == \""+equipID+"\"");
         ArrayList offsetValue = CCUHsApi.getInstance().readAll("point and setpoint and sensor and offset and equipRef == \""+equipID+"\"");
-        ArrayList targetValue = CCUHsApi.getInstance().readAll("point and zone and pid and target and config and value and equipRef == \""+equipID+"\"");
+        //ArrayList targetValue = CCUHsApi.getInstance().readAll("point and zone and pid and target and config and value and equipRef == \""+equipID+"\"");
         ArrayList piSensorValue = CCUHsApi.getInstance().readAll("point and analog1 and config and input and sensor and equipRef == \""+equipID+"\"");
         double dynamicSetpoint = CCUHsApi.getInstance().readPointPriorityValByQuery("point and analog2 and config and enabled and equipRef == \""+equipID+"\"");
+        double targetValue = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and pid and target and config and equipRef == \""+equipID+"\"");
         double analog1sensorType = CCUHsApi.getInstance().readPointPriorityValByQuery("point and analog1 and config and input and sensor and equipRef == \""+equipID+"\"");
         double analog2sensorType = CCUHsApi.getInstance().readPointPriorityValByQuery("point and analog2 and config and input and sensor and equipRef == \""+equipID+"\"");
 
@@ -934,11 +935,11 @@ public class ScheduleProcessJob extends BaseJob {
             double offsetVal = CCUHsApi.getInstance().readHisValById(id);
             plcPoints.put("Offset Value",offsetVal);
         }
-        if (targetValue != null && targetValue.size() > 0)
+        if (targetValue != 0)
         {
-            String id = ((HashMap) targetValue.get(0)).get("id").toString();
-            double targetVal = CCUHsApi.getInstance().readHisValById(id);
-            plcPoints.put("Target Value",targetVal);
+            //String id = ((HashMap) targetValue.get(0)).get("id").toString();
+            //double targetVal = CCUHsApi.getInstance().readHisValById(id);
+            plcPoints.put("Target Value",targetValue);
         }
         if (piSensorValue != null && piSensorValue.size() > 0)
         {
@@ -958,42 +959,42 @@ public class ScheduleProcessJob extends BaseJob {
             if(dynamicSetpoint == 0)
                 plcPoints.put("Dynamic Setpoint",false);
         }
-        if(analog1sensorType == 0)
+        if(analog1sensorType == 1)
         {
             plcPoints.put("Unit Type","Voltage");
             plcPoints.put("Unit","V");
         }
-        if(analog1sensorType == 1 || analog1sensorType == 2)
+        if(analog1sensorType == 2 || analog1sensorType == 3)
         {
             plcPoints.put("Unit Type","Pressure");
             plcPoints.put("Unit","WC");
         }
-        if(analog1sensorType == 3)
+        if(analog1sensorType == 4)
         {
             plcPoints.put("Unit Type","Airflow");
             plcPoints.put("Unit","%");
         }
-        if(analog1sensorType == 4)
+        if(analog1sensorType == 5)
         {
             plcPoints.put("Unit Type","Humidity");
             plcPoints.put("Unit","%");
         }
-        if(analog1sensorType == 5)
+        if(analog1sensorType == 6)
         {
             plcPoints.put("Unit Type","CO2");
             plcPoints.put("Unit","PPM");
         }
-        if(analog1sensorType == 6)
+        if(analog1sensorType == 7)
         {
             plcPoints.put("Unit Type","CO");
             plcPoints.put("Unit","PPM");
         }
-        if(analog1sensorType == 7)
+        if(analog1sensorType == 8)
         {
             plcPoints.put("Unit Type","NO2");
             plcPoints.put("Unit","PPM");
         }
-        if(analog1sensorType == 8 || analog1sensorType == 9 || analog1sensorType == 10)
+        if(analog1sensorType == 9 || analog1sensorType == 10 || analog1sensorType == 11)
         {
             plcPoints.put("Unit Type","Current");
             plcPoints.put("Unit","AMPS");

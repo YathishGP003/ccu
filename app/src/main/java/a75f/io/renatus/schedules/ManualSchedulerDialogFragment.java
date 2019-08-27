@@ -103,7 +103,6 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
         rangeSeekBarView = view.findViewById(R.id.rangeSeekBar);
         rangeSeekBarView.setZoneSchedule(mSchedule);
 
-
         if (mDay == null) {
             deleteButton.setVisibility(View.INVISIBLE);
         } else {

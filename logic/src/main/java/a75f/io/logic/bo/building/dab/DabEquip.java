@@ -335,7 +335,7 @@ public class DabEquip
         CCUHsApi.getInstance().writeHisValById(dat2Id, 0.0);
     
         Point occupancy = new Point.Builder()
-                                  .setDisplayName(siteDis+"-VAV-"+nodeAddr+"-occupancy")
+                                  .setDisplayName(siteDis+"-DAB-"+nodeAddr+"-occupancy")
                                   .setEquipRef(equipRef)
                                   .setSiteRef(siteRef)
                                   .setRoomRef(roomRef)

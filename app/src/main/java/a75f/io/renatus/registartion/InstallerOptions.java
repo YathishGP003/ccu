@@ -36,6 +36,7 @@ import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.views.MasterControl.MasterControlView;
+import a75f.io.renatus.views.TempLimit.TempLimitView;
 
 import static a75f.io.logic.L.ccu;
 
@@ -50,7 +51,7 @@ public class InstallerOptions extends Fragment {
     private String mParam2;
 
     ImageView imageGoback;
-    ImageView imageTemp;
+    TempLimitView imageTemp;
     Button mNext;
     Context mContext;
     Spinner mAddressBandSpinner;
@@ -231,10 +232,19 @@ public class InstallerOptions extends Fragment {
             dialog.setContentView(R.layout.dialog_master_control);
             MasterControlView masterControlView = dialog.findViewById(R.id.masterControlView);
 
-            dialog.findViewById(R.id.btnCancel).setOnClickListener(view -> dialog.dismiss());
-            dialog.findViewById(R.id.btnClose).setOnClickListener(view -> dialog.dismiss());
+            dialog.findViewById(R.id.btnCancel).setOnClickListener(view -> {
+                dialog.dismiss();
+                imageTemp.updateData();
+            });
+            dialog.findViewById(R.id.btnClose).setOnClickListener(view -> {
+                dialog.dismiss();
+                imageTemp.updateData();
+            });
 
-            dialog.findViewById(R.id.btnSet).setOnClickListener(view -> masterControlView.setTuner(dialog));
+            dialog.findViewById(R.id.btnSet).setOnClickListener(view -> {
+                masterControlView.setTuner(dialog);
+                imageTemp.updateData();
+            });
 
             dialog.show();
         }

@@ -50,8 +50,6 @@ public class MasterControlView extends LinearLayout {
     HashMap buildingMax;
     double hdb = 2.0;
     double cdb = 2.0;
-    boolean isDeadBandWarning;
-    private AlertDialog deadBandAlert;
 
     public MasterControlView(Context context) {
         super(context);
@@ -85,7 +83,6 @@ public class MasterControlView extends LinearLayout {
     private int mImagePadding = 25;
 
     private void add() {
-        isDeadBandWarning = false;
         DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
 
         int angleWH = (int) (ANGLE_WIDTH * displayMetrics.density);
@@ -159,7 +156,8 @@ public class MasterControlView extends LinearLayout {
         masterControl.setData((float) getTuner(heatLL.get("id").toString()), (float) getTuner(heatUL.get("id").toString()),
                 (float) getTuner(coolLL.get("id").toString()), (float) getTuner(coolUL.get("id").toString()),
                 (float) getTuner(buildingMin.get("id").toString()), (float) getTuner(buildingMax.get("id").toString()),
-                (float) getTuner(setbackMap.get("id").toString()), (float) getTuner(zoneDiffMap.get("id").toString()));
+                (float) getTuner(setbackMap.get("id").toString()), (float) getTuner(zoneDiffMap.get("id").toString()),
+                (float)hdb, (float)cdb);
     }
 
     public void setTuner(Dialog dialog) {
@@ -184,6 +182,12 @@ public class MasterControlView extends LinearLayout {
         Schedule buildingSchedules = Schedule.getScheduleByEquipId(p.getId());
         schedules.add(buildingSchedules);
 
+        // initial ccu setup building/zone schedules are empty
+        if (buildingSchedules == null){
+            saveBuildingData(dialog);
+            return;
+        }
+
         // set schedule temps for building
         for (Schedule.Days buidlingdays : buildingSchedules.getDays()) {
             StringBuilder message = new StringBuilder("Building" + "\u0020" + ScheduleUtil.getDayString(buidlingdays.getDay() + 1) + "\u0020" + "Schedule");
@@ -194,10 +198,6 @@ public class MasterControlView extends LinearLayout {
                 heatValues = "\u0020" +   "Heating ("+buidlingdays.getHeatingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + heatDTValue+")";
 
                 buidlingdays.setHeatingVal(heatDTValue);
-                if ((buidlingdays.getCoolingVal() - heatDTValue) < (float) (cdb + hdb)) {
-                    displayDeadBandWarning(buidlingdays.getCoolingVal(), heatDTValue);
-                    return;
-                }
             }
 
             if (buidlingdays.getCoolingVal() < coolTempLL || buidlingdays.getCoolingVal() > coolTempUL) {
@@ -205,10 +205,6 @@ public class MasterControlView extends LinearLayout {
                 coolValues = "\u0020 " +   "Cooling ("+buidlingdays.getCoolingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + coolDTValue + ")";
 
                 buidlingdays.setCoolingVal(coolDTValue);
-                if ((coolDTValue - buidlingdays.getHeatingVal()) < (float) (cdb + hdb)) {
-                    displayDeadBandWarning(coolDTValue, buidlingdays.getHeatingVal());
-                    return;
-                }
             }
 
             if (!TextUtils.isEmpty(coolValues) && !TextUtils.isEmpty(heatValues)) {
@@ -243,11 +239,6 @@ public class MasterControlView extends LinearLayout {
                         heatValues = "\u0020" +    "Heating ("+ days.getHeatingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + heatDTValue+")";
 
                         days.setHeatingVal(heatDTValue);
-
-                        if ((days.getCoolingVal() - heatDTValue) < (float) (cdb + hdb)) {
-                            displayDeadBandWarning(days.getCoolingVal(), heatDTValue);
-                            return;
-                        }
                     }
 
                     if (days.getCoolingVal() < coolTempLL || days.getCoolingVal() > coolTempUL) {
@@ -255,10 +246,6 @@ public class MasterControlView extends LinearLayout {
                         coolValues = "\u0020 " +    "Cooling ("+days.getCoolingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + coolDTValue + ")";
 
                         days.setCoolingVal(coolDTValue);
-                        if ((coolDTValue - days.getHeatingVal()) < (float) (cdb + hdb)) {
-                            displayDeadBandWarning(coolDTValue, days.getHeatingVal());
-                            return;
-                        }
                     }
 
                     if (!TextUtils.isEmpty(coolValues) && !TextUtils.isEmpty(heatValues)) {
@@ -279,30 +266,11 @@ public class MasterControlView extends LinearLayout {
         if (warningMessage.size() > 0) {
             disPlayWarningMessage(warningMessage, dialog, schedules, zoneList);
         } else {
-            if (!isDeadBandWarning) {
                 saveBuildingData(dialog);
 
                 for (Zone zone : zoneList) {
                     setZoneData(zone.getId());
                 }
-            }
-        }
-    }
-
-    private void displayDeadBandWarning(double coolingVal, double heatDTValue) {
-        isDeadBandWarning = true;
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setMessage("Cooling (" + coolingVal + ") and Heating (" + heatDTValue + ") difference should maintain to Deadband limit (" + (hdb + cdb) + ") !")
-                .setCancelable(false)
-                .setPositiveButton("Re-Edit", (dialog, id) -> {
-                    isDeadBandWarning = false;
-                    dialog.dismiss();
-                });
-        deadBandAlert = builder.create();
-
-        if (deadBandAlert != null && !deadBandAlert.isShowing()) {
-            deadBandAlert.show();
         }
     }
 

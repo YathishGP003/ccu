@@ -1196,8 +1196,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     loadEMPointsUI(emPoints, inflater, linearLayoutZonePoints, p.getGroup());
                     double totalEm = (double)emPoints.get("Energy Reading");
                     double currentEm = (double)emPoints.get("Current Rate");
-                    nonTempControl.setEmTotalText(String.valueOf(totalEm));
-                    nonTempControl.setEmCurrentText(String.valueOf(currentEm));
+                    int currentValue = new BigDecimal(currentEm).intValue();
+                    nonTempControl.setEmCurrentText(String.valueOf(currentValue));
+                    nonTempControl.setEmTotalText(String.format("%.0f",totalEm));
+                    nonTempControl.setEmCurrentText(String.valueOf(currentValue));
                     nonTempControl.setEmTotalUnitText("KWh");
                     nonTempControl.setEmCurrentUnitText("KW");
                 }
@@ -1213,7 +1215,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     loadPLCPointsUI(plcPoints, inflater, linearLayoutZonePoints, p.getGroup());
                     double targetValue = (double)plcPoints.get("Target Value");
                     double inputValue = (double)plcPoints.get("Input Value");
-                    nonTempControl.setPiInputText(String.valueOf(inputValue));
+                    nonTempControl.setPiInputText(String.format("%.2f",inputValue));
                     nonTempControl.setPiOutputText(String.valueOf(targetValue));
                     nonTempControl.setPiInputUnitText(plcPoints.get("Unit").toString());
                     nonTempControl.setPiOutputUnitText(plcPoints.get("Unit").toString());
@@ -1435,9 +1437,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                         Log.i("PointsValue", "EM Points:" + emPoints.toString());
                         loadEMPointsUI(emPoints, inflater, linearLayoutZonePoints,p.getGroup());
 
-                        nonTempControl.setEmTotalText(emPoints.get("Energy Reading").toString());
+                        double energyRead = (double)emPoints.get("Energy Reading");
+                        double currentRead = (double)emPoints.get("Current Rate");
+                        int currentValue = new BigDecimal(currentRead).intValue();
+                        nonTempControl.setEmTotalText(String.format("%.0f",energyRead));
+                        nonTempControl.setEmCurrentText(String.valueOf(currentValue));
+                        //nonTempControl.setEmTotalText(emPoints.get("Energy Reading").toString());
                         nonTempControl.setEmTotalUnitText("KWh");
-                        nonTempControl.setEmCurrentText(emPoints.get("Current Rate").toString());
+                        //nonTempControl.setEmCurrentText(emPoints.get("Current Rate").toString());
                         nonTempControl.setEmCurrentUnitText("KW");
 
                     } if (p.getProfile().startsWith("PLC")) {
@@ -1451,7 +1458,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
                         double targetValue = (double)plcPoints.get("Target Value");
                         double inputValue = (double)plcPoints.get("Input Value");
-                        nonTempControl.setPiInputText(String.valueOf(inputValue));
+                        nonTempControl.setPiInputText(String.format("%.2f",inputValue));
                         nonTempControl.setPiOutputText(String.valueOf(targetValue));
                         nonTempControl.setPiInputUnitText(plcPoints.get("Unit").toString());
                         nonTempControl.setPiOutputUnitText(plcPoints.get("Unit").toString());
@@ -2064,7 +2071,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         labelTarget.setText("Target "+plcPoints.get("Unit Type").toString()+" : ");
         labelOffsetAir.setText("Offset "+plcPoints.get("Unit Type").toString()+" : ");
 
-        textViewInputAir.setText(plcPoints.get("Input Value").toString()+plcPoints.get("Unit").toString());
+        double processValue = (double)plcPoints.get("Input Value");
+        textViewInputAir.setText(String.format("%.2f",processValue)+plcPoints.get("Unit").toString());
         textViewTargetAir.setText(plcPoints.get("Target Value").toString()+plcPoints.get("Unit").toString());
         textViewOffsetAir.setText(plcPoints.get("Offset Value").toString()+plcPoints.get("Unit").toString());
         try {
@@ -2087,20 +2095,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         }
 
     }
-
-    public void updateSSHPUPointsUI(String id, LinearLayout linearLayoutZonePoints)
-    {
-
-        TextView textViewTitle = linearLayoutZonePoints.findViewById(R.id.textProfile);
-        TextView textViewStatus = linearLayoutZonePoints.findViewById(R.id.text_status);
-
-        TextView textViewLabel1 = linearLayoutZonePoints.findViewById(R.id.text_point1label);
-        TextView textViewLabel2 = linearLayoutZonePoints.findViewById(R.id.text_point2label);
-
-        Spinner spinnerValue1 = linearLayoutZonePoints.findViewById(R.id.spinnerValue1);
-        Spinner spinnerValue2 = linearLayoutZonePoints.findViewById(R.id.spinnerValue2);
-    }
-
 
     public static double getPointVal(String id) {
         CCUHsApi hayStack = CCUHsApi.getInstance();

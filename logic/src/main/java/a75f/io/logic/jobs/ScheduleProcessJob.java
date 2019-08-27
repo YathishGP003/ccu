@@ -887,13 +887,13 @@ public class ScheduleProcessJob extends BaseJob {
             double currentRateVal = currentRateHis.getVal();
             emPoints.put("Current Rate",currentRateVal);
         }else{
-            emPoints.put("Current Rate",0);
+            emPoints.put("Current Rate",0.0);
         }
         if (energyReading > 0)
         {
             emPoints.put("Energy Reading",energyReading);
         }else{
-            emPoints.put("Energy Reading",0);
+            emPoints.put("Energy Reading",0.0);
         }
 
         return emPoints;

@@ -522,6 +522,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
                     String profileVAV = "VAV";
                     String profileDAB = "DAB";
+                    String profileSSE = "SSE";
                     String profileSmartStat = "SMARTSTAT";
                     String profileEM = "EMR";
                     String profilePLC = "PLC";
@@ -534,7 +535,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     for (HashMap equipTypes : equipZones) {
                         profileType = equipTypes.get("profile").toString();
                         Log.e("RoomData", "ProfileType:" + profileType);
-                        if (profileType.contains(profileVAV) || profileType.contains(profileDAB) || profileType.contains(profileSmartStat) || profileType.contains(profileTempInfluence)) {
+                        if (profileType.contains(profileVAV) || profileType.contains(profileDAB)|| profileType.contains(profileSSE) || profileType.contains(profileSmartStat) || profileType.contains(profileTempInfluence)) {
                             tempModule = true;
                             Log.e("RoomData", "Load SmartNode ProfileType:" + profileType);
                         }
@@ -958,6 +959,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                                 Log.i("PointsValue", "VAV Points:" + vavPoints.toString());
                                 loadVAVPointsUI(vavPoints, inflater, linearLayoutZonePoints, p.getGroup());
                             }
+                            if (p.getProfile().startsWith("SSE")) {
+                                HashMap dabPoints = ScheduleProcessJob.getSSEEquipPoints(p.getId());
+                                Log.i("PointsValue", "SSSE Points:" + dabPoints.toString());
+                                loadSSEPointsUI(dabPoints, inflater, linearLayoutZonePoints, p.getGroup());
+                            }
                             if (p.getProfile().startsWith("TEMP_INFLUENCE")) {
                                 HashMap tiPoints = ScheduleProcessJob.getTIEquipPoints(p.getId());
                                 Log.i("PointsValue", "TI Points:" + tiPoints.toString());
@@ -1164,6 +1170,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 HashMap vavPoints = ScheduleProcessJob.getVAVEquipPoints(updatedEquip.getId());
                 Log.i("PointsValue", "VAV Points:" + vavPoints.toString());
                 loadVAVPointsUI(vavPoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
+            }
+            if (updatedEquip.getProfile().startsWith("SSE")) {
+                HashMap ssePoints = ScheduleProcessJob.getSSEEquipPoints(updatedEquip.getId());
+                Log.i("PointsValue", "SSE Points:" + ssePoints.toString());
+                loadSSEPointsUI(ssePoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
             }
             if (updatedEquip.getProfile().startsWith("TEMP_INFLUENCE")) {
                 HashMap tiPoints = ScheduleProcessJob.getTIEquipPoints(updatedEquip.getId());
@@ -1527,7 +1538,31 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         viewPointRow2.setPadding(0,0,0,40);
         linearLayoutZonePoints.addView(viewPointRow2);
     }
+    public void loadSSEPointsUI(HashMap ssePoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress)
+    {
+        View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
+        View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
+        View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
 
+        TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
+        TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+        TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
+        TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
+        textViewLabel2.setVisibility(View.GONE);
+        TextView textViewValue1 = viewPointRow1.findViewById(R.id.text_point1value);
+        TextView textViewValue2 = viewPointRow1.findViewById(R.id.text_point2value);
+        textViewValue2.setVisibility(View.GONE);
+
+        textViewTitle.setText(ssePoints.get("Profile").toString()+" ("+nodeAddress+")");
+        textViewStatus.setText(ssePoints.get("Status").toString());
+        textViewLabel1.setText("Discharge Airflow : ");
+        textViewValue1.setText(ssePoints.get("Discharge Airflow").toString());
+
+        linearLayoutZonePoints.addView(viewTitle);
+        linearLayoutZonePoints.addView(viewStatus);
+        viewPointRow1.setPadding(0,0,0,40);
+        linearLayoutZonePoints.addView(viewPointRow1);
+    }
     public void loadTIPointsUI(HashMap tiPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress)
     {
         View viewTitle = inflater.inflate(R.layout.zones_item_title, null);

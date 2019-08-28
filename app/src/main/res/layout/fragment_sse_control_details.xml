@@ -1,191 +1,352 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:baselineAligned="false"
-              android:id="@+id/floorPlanLayout"
-              android:layout_height="match_parent"
-              android:layout_width="match_parent"
-              android:orientation="vertical">
-
-
-    <TextView
-        android:background="@color/progress_gray"
-        android:gravity="center_vertical"
-        android:id="@+id/titleLcm"
-        android:layout_height="60dp"
-        android:layout_width="match_parent"
-        android:paddingLeft="40dp"
-        android:text="SSE Parameters"
-        android:textColor="@color/dark_gray"
-        android:textSize="@dimen/text_medium_xlarge"/>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/damperscrollView"
+    android:layout_width="match_parent"
+    android:overScrollMode="never"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <RelativeLayout
-        android:background="@drawable/snsse"
-        android:id="@+id/main"
-        android:layout_height="560dp"
-        android:layout_width="match_parent">
-
-
-        <TableLayout
-            android:id="@+id/table"
-            android:layout_height="420dp"
-            android:layout_marginLeft="500dp"
-            android:layout_marginRight="15dp"
-            android:layout_marginTop="0dp"
-            android:layout_width="match_parent"
-            android:shrinkColumns="*"
-            android:stretchColumns="*">
-
-            <TableRow
-                android:height="30dp"
-                android:layout_width="match_parent">
-
-                <TextView
-                    android:id="@+id/textView27"
-                    android:text="Enable"
-                    android:textSize="@dimen/text_small_xlarge"
-                    android:textStyle="bold"/>
-
-
-                <TextView
-                    android:text="Actuator Type"
-                    android:textSize="@dimen/text_small_xlarge"
-                    android:textStyle="bold"/>
-
-                <TextView
-                    android:id="@+id/textView28"
-
-                    android:text="Action"
-                    android:textSize="@dimen/text_small_xlarge"
-                    android:textStyle="bold"/>
-
-                <TextView
-                    android:text="Circuit Name"
-                    android:textSize="@dimen/text_small_xlarge"
-                    android:textStyle="bold"/>
-
-                <TextView
-                    android:text="."
-                    android:textSize="@dimen/text_small_xlarge"
-                    android:textStyle="bold"></TextView>
-
-                <TextView
-                    android:text="Force Test"
-                    android:textSize="@dimen/text_small_xlarge"
-                    android:textStyle="bold"/>
-            </TableRow>
-
-
-            <TableRow
-                android:height="35dp"
-                android:layout_height="match_parent"
-                android:layout_width="match_parent">
-
-                <android.support.v7.widget.SwitchCompat
-                    android:id="@+id/lcmRelay1Switch"/>
-
-                <Spinner
-                    android:id="@+id/lcmRelay1Actuator"
-
-                    android:text="Actuator Type"
-                    android:textSize="@dimen/text_small_xlarge"/>
-
-                <Spinner
-                    android:id="@+id/lcmRelay1HeatCoolFanSpinner"
-
-                    android:text="Action"
-                    android:textSize="@dimen/text_small_xlarge"/>
-
-
-                <EditText
-                    android:clickable="false"
-                    android:focusable="false"
-                    android:id="@+id/lcmRelay1EditName"
-
-                    android:textSize="@dimen/text_small_xlarge"/>
-
-                <ImageView
-                    android:id="@+id/lcmRelay1EditImg"
-                    android:src="@drawable/content_edit"/>
-
-
-                <ToggleButton
-                    android:background="@drawable/selector"
-                    android:id="@+id/testr1"></ToggleButton>
-
-            </TableRow>
-
-            <TableRow
-                android:layout_width="match_parent"
-                android:minHeight="95dp">
-
-                <android.support.v7.widget.SwitchCompat
-                    android:id="@+id/lcmRelay2Switch"
-                    />
-
-                <Spinner
-                    android:id="@+id/lcmRelay2Actuator"
-
-                    android:text="Actuator Type"
-                    android:textSize="@dimen/text_small_xlarge"/>
-
-                <Spinner
-                    android:id="@+id/lcmRelay2HeatCoolFanSpinner"
-                    android:text="Action"
-                    android:textSize="@dimen/text_small_xlarge"/>
-
-                <EditText
-                    android:clickable="false"
-                    android:focusable="false"
-                    android:id="@+id/lcmRelay2EditName"
-                    android:textSize="@dimen/text_small_xlarge"/>
-
-
-                <ImageView
-                    android:id="@+id/lcmRelay2EditImg"
-                    android:src="@drawable/content_edit"/>
-
-
-                <ToggleButton
-                    android:background="@drawable/selector"
-                    android:id="@+id/testr2"
-                    android:layout_height="45dp"
-                    android:layout_width="45dp"></ToggleButton>
-
-            </TableRow>
-        </TableLayout>
-    </RelativeLayout>
-
-    <View
-        android:background="@color/progress_gray"
-        android:id="@+id/divider"
-        android:layout_alignParentBottom="true"
-        android:layout_height="3dp"
-        android:layout_width="match_parent"></View>
-
-    <LinearLayout
-        android:layout_height="70dp"
         android:layout_width="match_parent"
-        android:orientation="horizontal"
-        android:weightSum="2">
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
 
-        <TextView
-            android:background="@color/white"
-            android:gravity="center"
-            android:id="@+id/lcmCancelCommand"
-            android:layout_height="70dp"
-            android:layout_weight="1"
-            android:layout_width="0dp"
-            android:text="Cancel"
-            android:textColor="@color/dark_gray"/>
+            <RelativeLayout
+                android:id="@+id/layoutHeader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp">
 
-        <TextView
-            android:background="@color/white"
-            android:gravity="center"
-            android:id="@+id/lcmSetCommand"
-            android:layout_height="70dp"
-            android:layout_weight="1"
-            android:layout_width="0dp"
-            android:text="Set"
-            android:textColor="@color/accent"/>
-    </LinearLayout>
-</LinearLayout>
+
+                <TextView
+                    android:id="@+id/textTitleFragment"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerVertical="true"
+                    android:fontFamily="@font/lato_bold"
+                    android:text="@string/title_sseinput"
+                    android:textAllCaps="true"
+                    android:textColor="@color/orange_75f"
+                    android:textSize="33.5dp"
+                    android:textStyle="bold" />
+
+            </RelativeLayout>
+
+            <LinearLayout
+                android:id="@+id/lt_inputs"
+                android:layout_width="wrap_content"
+                android:layout_height="184dp"
+                android:layout_marginLeft="25dp"
+                android:layout_toRightOf="@+id/imageRTUInput"
+                android:orientation="vertical">
+
+                <TableLayout
+                    android:id="@+id/sseTableLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:layout_marginBottom="16dp"
+                    android:stretchColumns="0"
+                    android:visibility="visible">
+
+                    <TableRow
+                        android:id="@+id/genericSSSEHeader"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="2dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginLeft="40dp"
+                            android:text="@string/title_enable"
+                            android:textAppearance="@style/text_label" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="24dp"
+                            android:layout_weight="1"
+                            android:gravity="center_horizontal"
+                            android:text="ACTUATOR TYPE"
+                            android:textAppearance="@style/text_label" />
+
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="34dp"
+                            android:layout_weight="1"
+                            android:gravity="center_horizontal"
+                            android:text="@string/title_testsignal"
+                            android:textAppearance="@style/text_label" />
+
+                    </TableRow>
+
+                    <TableRow
+                        android:id="@+id/tableRow1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="22dp">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="40dp"
+                            android:layout_weight="1">
+
+                            <ToggleButton
+                                android:id="@+id/sseRelay1Switch"
+                                android:layout_width="46.12dp"
+                                android:layout_height="27.42dp"
+                                android:layout_gravity="center_vertical"
+                                android:layout_marginLeft="10dp"
+                                android:background="@drawable/toggle_selector"
+                                android:checked="false"
+                                android:textOff=""
+                                android:textOn="" />
+
+                            <TextView
+                                android:id="@+id/textCompStage1"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:layout_marginLeft="20dp"
+                                android:layout_toRightOf="@+id/toggleRelay1"
+                                android:text="@string/label_relay1"
+                                android:textAppearance="@style/text_appearance" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="41.5dp"
+                            android:layout_marginLeft="34dp"
+                            android:layout_weight="1"
+                            android:gravity="center">
+
+                            <Spinner
+                                android:id="@+id/sseRelay1Actuator"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                android:layout_width="150dp"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:entries="@array/sse_relay1_mode"
+                                tools:listitem="@layout/spinner_dropdown_item" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="40dp"
+                            android:layout_marginLeft="34dp"
+                            android:layout_weight="1"
+                            android:gravity="center">
+
+                            <ToggleButton
+                                android:id="@+id/sseRelay1ForceTestBtn"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:background="@drawable/toggle_testselector"
+                                android:checked="false"
+                                android:textAppearance="@style/text_toggleappearance"
+                                android:textColor="@drawable/toggle_textselector"
+                                android:textOff="OFF"
+                                android:textOn="ON" />
+                        </LinearLayout>
+                    </TableRow>
+
+                    <TableRow
+                        android:id="@+id/tableRow2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="24dp">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="40dp"
+                            android:layout_weight="1">
+
+                            <ToggleButton
+                                android:id="@+id/sseRelay2Switch"
+                                android:layout_width="46.12dp"
+                                android:layout_height="27.42dp"
+                                android:layout_gravity="center_vertical"
+                                android:layout_marginLeft="10dp"
+                                android:background="@drawable/toggle_selector"
+                                android:checked="false"
+                                android:textOff=""
+                                android:textOn="" />
+
+                            <TextView
+                                android:id="@+id/textCompStage2"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerVertical="true"
+                                android:layout_gravity="center_vertical"
+                                android:layout_marginLeft="20dp"
+                                android:text="@string/label_relay2"
+                                android:textAppearance="@style/text_appearance" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="41.5dp"
+                            android:layout_marginLeft="34dp"
+                            android:layout_weight="1"
+                            android:gravity="center">
+
+                            <Spinner
+                                android:id="@+id/sseRelay2Actuator"
+                                style="@style/Widget.AppCompat.Spinner.Underlined"
+                                android:layout_width="150dp"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:entries="@array/sse_relay2_mode"
+                                tools:listitem="@layout/spinner_dropdown_item" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="40dp"
+                            android:layout_marginLeft="34dp"
+                            android:layout_weight="1"
+                            android:gravity="center">
+
+                            <ToggleButton
+                                android:id="@+id/sseRelay2ForceTestBtn"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:background="@drawable/toggle_testselector"
+                                android:checked="false"
+                                android:textAppearance="@style/text_toggleappearance"
+                                android:textColor="@drawable/toggle_textselector"
+                                android:textOff="OFF"
+                                android:textOn="ON" />
+                        </LinearLayout>
+                    </TableRow>
+
+
+                </TableLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:layout_marginLeft="25dp"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+
+                <ToggleButton
+                    android:id="@+id/sse_thermister1_switch"
+                    android:layout_width="46.12dp"
+                    android:layout_height="27.42dp"
+                    android:layout_gravity="center_vertical"
+                    android:background="@drawable/toggle_selector"
+                    android:layout_marginLeft="10dp"
+                    android:checked="false"
+                    android:textOff=""
+                    android:textOn="" />
+
+                <TextView
+                    android:id="@+id/textTh1sse"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="20dp"
+                    android:text="TH1 - Airflow Temperature Sensor"
+                    android:textAppearance="@style/text_appearance" />
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:layout_marginStart="25dp"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+
+                <ToggleButton
+                    android:id="@+id/sse_thermister2_switch"
+                    android:layout_width="46.12dp"
+                    android:layout_height="27.42dp"
+                    android:layout_gravity="center_vertical"
+                    android:background="@drawable/toggle_selector"
+                    android:layout_marginLeft="10dp"
+                    android:checked="false"
+                    android:textOff=""
+                    android:textOn="" />
+
+                <TextView
+                    android:id="@+id/textTh2sse"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="20dp"
+                    android:text="TH2 - Use external 10k Temperature Sensor"
+                    android:textAppearance="@style/text_appearance" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="42dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical" >
+
+                    <TextView
+                        android:id="@+id/textTempOffset"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:text="@string/label_tempoffset"
+                        android:gravity="center_vertical|center_horizontal"
+                        android:textAppearance="@style/label_values" />
+
+                    <NumberPicker
+                        android:id="@+id/temperatureOffset"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:textColor="#202020"
+                        android:textSize="30sp"/>
+                </LinearLayout>
+
+
+
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/setBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginRight="24dp"
+            android:layout_marginBottom="110dp"
+            android:background="@null"
+            android:button="@null"
+            android:fontFamily="@font/lato_regular"
+            android:text="@string/button_set"
+            android:textAllCaps="true"
+            android:textColor="@color/orange_75f"
+            android:textSize="19.5dp" />
+
+    </RelativeLayout>
+</ScrollView>

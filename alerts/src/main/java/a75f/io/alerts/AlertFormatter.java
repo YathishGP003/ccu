@@ -9,7 +9,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Point;
 
 /***
- *  Alert messages shall have variables with prefix # to have formatted with runtime values while
+ *  Alert messages shall have variables with prefix # to be formatted with runtime values while
  *  generating the message.
  *  Expected format is
  *  #entity-(name/val)-conditional-number

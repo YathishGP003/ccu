@@ -57,9 +57,10 @@ public class AlertDefinition
     public AlertDefinition(){
     
     }
-    //Evaluate conditionals for any entity.
+    
     public void evaluate() {
-        for (Conditional c : conditionals) {
+        for (Conditional c : conditionals)
+        {
             if (c.operator == null)
             {
                 c.evaluate();

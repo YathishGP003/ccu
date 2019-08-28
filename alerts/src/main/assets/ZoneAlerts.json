@@ -4,6 +4,7 @@
       {
         "order" : "1",
         "key" : "status and dab and his",
+        "grpOperation" : "",
         "value" : "3",
         "condition" :"=="
       }
@@ -22,6 +23,7 @@
         {
           "order" : "1",
           "key" : "co2 and sensor and his",
+          "grpOperation" : "",
           "value" : "1000",
           "condition" :">"
         }

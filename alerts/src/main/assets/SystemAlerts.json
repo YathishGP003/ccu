@@ -4,6 +4,7 @@
         {
           "order" : "1",
           "key" : "system and battery and level",
+          "grpOperation" : "",
           "value" : "80",
           "condition" :"<="
         },
@@ -14,6 +15,7 @@
         {
           "order" : "3",
           "key" : "system and battery and level",
+          "grpOperation" : "",
           "value" : "50",
           "condition" :">"
         },
@@ -24,8 +26,9 @@
         {
           "order" : "5",
           "key" : "system and battery and charging and status",
-          "value" : "==",
-          "condition" :"false"
+          "grpOperation" : "",
+          "value" : "0",
+          "condition" :"=="
         }
 
       ],
@@ -43,6 +46,7 @@
       {
         "order" : "1",
         "key" : "system and battery and level",
+        "grpOperation" : "",
         "value" : "50",
         "condition" :"<="
       },
@@ -53,6 +57,7 @@
       {
         "order" : "3",
         "key" : "system and battery and level",
+        "grpOperation" : "",
         "value" : "20",
         "condition" :">"
       },
@@ -63,8 +68,9 @@
       {
         "order" : "5",
         "key" : "system and battery and charging and status",
-        "value" : "==",
-        "condition" :"false"
+        "grpOperation" : "",
+        "value" : "0",
+        "condition" :"=="
       }
 
     ],
@@ -82,6 +88,7 @@
       {
         "order" : "1",
         "key" : "system and battery and level",
+        "grpOperation" : "",
         "value" : "20",
         "condition" :"<="
       }

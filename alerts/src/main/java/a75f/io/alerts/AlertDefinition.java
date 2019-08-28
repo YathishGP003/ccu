@@ -7,6 +7,7 @@ package a75f.io.alerts;
 import java.util.ArrayList;
 
 import a75f.io.api.haystack.Alert;
+import a75f.io.logger.CcuLog;
 /**
  * The format for alerts defined in json.
  */
@@ -90,6 +91,30 @@ public class AlertDefinition
             }
         }
         return alertStatus;
+    }
+    
+    public boolean validate() {
+        if (conditionals.size() % 2 == 0) {
+            logValidatation("Incorrect number of conditionals "+conditionals.size());
+            return false;
+        }
+        
+        for (int i = 0; i < conditionals.size() ; i++) {
+            Conditional c = conditionals.get(i);
+            if ((i%2 == 0 && c.operator != null) || (i%2 != 0 && c.operator == null)) {
+                logValidatation("Operator not allowed"+c.toString());
+            }
+            if (!c.grpOperation.equals("") && !c.grpOperation.equals("equip") && !c.grpOperation.equals("average")
+                        && !c.grpOperation.contains("top") && !c.grpOperation.contains("bottom")
+                        && !c.grpOperation.contains("min") && !c.grpOperation.contains("max")) {
+                logValidatation("grpOperator not supported "+c.grpOperation);
+            }
+        }
+        return true;
+    }
+    
+    private void logValidatation(String msg) {
+        CcuLog.d("CCU_ALERTS","Invalid Alert Definition : "+msg);
     }
     
     @Override

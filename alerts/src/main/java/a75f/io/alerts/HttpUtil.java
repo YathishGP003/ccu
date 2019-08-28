@@ -55,7 +55,7 @@ public class HttpUtil
             
             int responseCode = connection.getResponseCode();
             if (responseCode != 200) {
-                CcuLog.i("CCU_HS","HttpError: responseCode "+responseCode);
+                CcuLog.i("CCU_ALERTS","HttpError: responseCode "+responseCode);
             }
             //Get Response
             InputStream is = connection.getInputStream();

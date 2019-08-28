@@ -20,7 +20,7 @@ import a75f.io.logger.CcuLog;
  * Its evaluate() method returns true if the conditional is satisfied for current KVP.
  *
  */
-@JsonIgnoreProperties(value = { "pointValList", "pointList", "val","status" })
+@JsonIgnoreProperties(value = { "pointValList", "pointList", "resVal","status" })
 public class Conditional
 {
     int order;
@@ -39,7 +39,7 @@ public class Conditional
     
     ArrayList<String> pointList;
     
-    double val;
+    double resVal;
     
     boolean status;
     
@@ -47,20 +47,18 @@ public class Conditional
         if (key.isEmpty() || value.isEmpty() || condition.isEmpty()) {
             throw new IllegalArgumentException("Invalid Conditional");
         }
-        val = CCUHsApi.getInstance().readHisValByQuery(key+" and equipRef == \""+ref+"\"");
-        CcuLog.d("CCU_ALERTS ", " Evaluate Conditional: "+key+" "+condition+" "+value+", val "+val);
+        resVal = CCUHsApi.getInstance().readHisValByQuery(key+" and equipRef == \""+ref+"\"");
+        CcuLog.d("CCU_ALERTS ", " Evaluate Conditional: "+toString());
         if (!isNumeric(value)) {
             value = String.valueOf(CCUHsApi.getInstance().read(value));
         }
         
-        Expression expression = new Expression(val+ " "+condition+" " + value);
+        Expression expression = new Expression(resVal+ " "+condition+" " + value);
         status = expression.eval().intValue() > 0;
         return status;
     }
     
     void evaluate() {
-        
-        CcuLog.d("CCU_ALERTS ", " Evaluate Conditional: "+toString());
         
         if (key.isEmpty() || value.isEmpty() || condition.isEmpty()) {
             throw new IllegalArgumentException("Invalid Conditional");
@@ -72,11 +70,11 @@ public class Conditional
             ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("zone and equip");
             for (Map q : equips) {
                 HashMap point = CCUHsApi.getInstance().read(key+" and equipRef == \""+q.get("id")+"\"");
-                val = CCUHsApi.getInstance().readHisValById(point.get("id").toString());
+                resVal = CCUHsApi.getInstance().readHisValById(point.get("id").toString());
                 if (!isNumeric(value)) {
                     value = String.valueOf(CCUHsApi.getInstance().read(value));
                 }
-                Expression expression = new Expression(val+ " "+condition+" " + value);
+                Expression expression = new Expression(resVal+ " "+condition+" " + value);
                 if (expression.eval().intValue() > 0) {
                     pointList.add(point.get("id").toString());
                 }
@@ -139,38 +137,44 @@ public class Conditional
                 {
                     valSum += v.val;
                 }
-                Expression expression = new Expression((valSum / pointValList.size()) + " " + condition + " " + value);
+                resVal = (valSum / pointValList.size());
+                Expression expression = new Expression(resVal + " " + condition + " " + value);
                 status = expression.eval().intValue() > 0;
             }
             else if (grpOperation.contains("min"))
-            {
-                Collections.sort(pointValList, new PointValDesComparator());
-                if (!isNumeric(value))
-                {
-                    value = String.valueOf(CCUHsApi.getInstance().readHisValByQuery(value));
-                }
-                Expression expression = new Expression(pointValList.get(0).val + " " + condition + " " + value);
-                status = expression.eval().intValue() > 0;
-            }
-            else if (grpOperation.contains("max"))
             {
                 Collections.sort(pointValList, new PointValAscComparator());
                 if (!isNumeric(value))
                 {
                     value = String.valueOf(CCUHsApi.getInstance().readHisValByQuery(value));
                 }
-                Expression expression = new Expression(pointValList.get(0).val + " " + condition + " " + value);
+                resVal = pointValList.get(0).val;
+                Expression expression = new Expression( resVal+ " " + condition + " " + value);
                 status = expression.eval().intValue() > 0;
+            }
+            else if (grpOperation.contains("max"))
+            {
+                Collections.sort(pointValList, new PointValDesComparator());
+                if (!isNumeric(value))
+                {
+                    value = String.valueOf(CCUHsApi.getInstance().readHisValByQuery(value));
+                }
+                resVal = pointValList.get(0).val;
+                Expression expression = new Expression(resVal + " " + condition + " " + value);
+                status = expression.eval().intValue() > 0;
+                
             } else if (grpOperation.equals("") || grpOperation == null) {
                 
-                double hisVal = CCUHsApi.getInstance().readHisValByQuery(key);
+                resVal = CCUHsApi.getInstance().readHisValByQuery(key);
                 if (!isNumeric(value)) {
                     value = String.valueOf(CCUHsApi.getInstance().read(value));
                 }
-                Expression expression = new Expression(hisVal + " " + condition + " " + value);
+                Expression expression = new Expression(resVal + " " + condition + " " + value);
                 status = expression.eval().intValue() > 0;
             }
         }
+    
+        CcuLog.d("CCU_ALERTS ", " Evaluated Conditional: "+toString()+" ,"+(grpOperation.equals("equip") ? pointList.size() : status)+" resVal "+resVal);
     }
     
     class PointValAscComparator implements Comparator<PointVal>
@@ -195,7 +199,7 @@ public class Conditional
     
     @Override
     public String toString() {
-        return operator != null ? operator : key+" "+condition+" "+value+" "+grpOperation;
+        return operator != null ? operator : key+" "+condition+" "+value+" ("+grpOperation+")";
     }
     
 }

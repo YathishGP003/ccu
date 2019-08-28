@@ -4,6 +4,8 @@ package a75f.io.logger;
  * Created by samjithsadasivan isOn 8/17/17.
  */
 
+import android.util.Log;
+
 /**
  * Helper class for a list (or tree) of LoggerNodes.
  *
@@ -55,8 +57,8 @@ public class CcuLog
 		if (mLogNode != null) {
 			mLogNode.println(priority, tag, msg, tr);
 		}
-		//Log.i(tag, msg);
-		System.out.println(msg);
+		Log.i(tag, msg);
+		//System.out.println(msg);
 		if (tr != null) {
 			tr.printStackTrace();
 		}

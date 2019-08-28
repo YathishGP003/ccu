@@ -3,6 +3,7 @@ package a75f.io.alerts;
 import java.util.GregorianCalendar;
 
 import a75f.io.api.haystack.Alert;
+import a75f.io.api.haystack.CCUHsApi;
 
 /**
  * Created by samjithsadasivan on 4/25/18.
@@ -52,8 +53,8 @@ public class AlertBuilder
         alert.setmNotificationMsg(message);
         alert.setmSeverity(def.alert.mSeverity);
         alert.setmAlertType(def.alert.mAlertType);
-        //alert.setSiteRef(CCUHsApi.getInstance().getSiteId().toString());
-        //alert.setDeviceRef(CCUHsApi.getInstance().getCcuId().toString());
+        alert.setSiteRef(CCUHsApi.getInstance().getSiteId().toString());
+        alert.setDeviceRef(CCUHsApi.getInstance().getCcuId().toString());
         alert.setmEnabled(true);
         alert.setSyncStatus(false);
         return alert;
@@ -69,8 +70,8 @@ public class AlertBuilder
         alert.setmSeverity(def.alert.mSeverity);
         alert.setmAlertType(def.alert.mAlertType);
         alert.setRef(id);
-        //alert.setSiteRef(CCUHsApi.getInstance().getSiteId().toString());
-        //alert.setDeviceRef(CCUHsApi.getInstance().getCcuId().toString());
+        alert.setSiteRef(CCUHsApi.getInstance().getSiteId().toString());
+        alert.setDeviceRef(CCUHsApi.getInstance().getCcuId().toString());
         alert.setmEnabled(true);
         alert.setSyncStatus(false);
         return alert;

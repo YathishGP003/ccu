@@ -32,16 +32,16 @@ public class EngineeringPagerAdapter extends FragmentStatePagerAdapter
 			case 2:
 				fragment = FieldTestFragment.newInstance();
 				break;
+			//case 3:
+			//	fragment = SerialMessageFragment.newInstance();
+			//	break;
 			case 3:
-				fragment = SerialMessageFragment.newInstance();
-				break;
-			case 4:
 				fragment = ZoneFragmentTemp.newInstance();
 				break;
-			case 5:
+			case 4:
 				fragment = OTAUpdateTestFragment.newInstance();
 				break;
-			case 6:
+			case 5:
 				fragment = UpdateRenatusVersion.newInstance();
 				break;
 		}
@@ -50,8 +50,7 @@ public class EngineeringPagerAdapter extends FragmentStatePagerAdapter
 	
 	@Override
 	public int getCount() {
-		// Show 2 total pages.
-		return 7;
+		return 6;
 	}
 	
 	@Override
@@ -64,12 +63,10 @@ public class EngineeringPagerAdapter extends FragmentStatePagerAdapter
 			case 2:
 				return "Field Test";
 			case 3:
-				return "Serial Messages";
-			case 4:
 				return "Haystack Explorer";
-			case 5:
+			case 4:
 				return "OTA Update";
-			case 6:
+			case 5:
 				return "Install Update";
 				
 		}

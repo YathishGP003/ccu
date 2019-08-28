@@ -217,7 +217,7 @@ public class SingleStageProfile extends ZoneProfile
     }
     public void reset(short node){
 
-        if(getCmdSignal("relay1 and stage1", node) > 0)
-            setCmdSignal("relay1 and stage1",0,node);
+        if(getCmdSignal("cooling and stage1", node) > 0)
+            setCmdSignal("cooling and stage1",0,node);
     }
 }

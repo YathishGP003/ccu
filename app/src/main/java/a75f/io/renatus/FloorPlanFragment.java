@@ -893,6 +893,10 @@ public class FloorPlanFragment extends Fragment
 					showDialogFragment(FragmentTempInfConfiguration
 							.newInstance(Short.parseShort(nodeAddr),zone.getDisplayName(), NodeType.CONTROL_MOTE, floor.getDisplayName()), FragmentTempInfConfiguration.ID);
 					break;
+				case SSE:
+					showDialogFragment(FragmentSSEConfiguration
+							.newInstance(Short.parseShort(nodeAddr),zone.getDisplayName(), NodeType.SMART_NODE, floor.getDisplayName(),profile.getProfileType()), FragmentSSEConfiguration.ID);
+					break;
 
 			}
 		}else

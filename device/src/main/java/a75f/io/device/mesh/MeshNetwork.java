@@ -59,16 +59,22 @@ public class MeshNetwork extends DeviceNetwork
                             deviceType = NodeType.CONTROL_MOTE;
                         switch (deviceType) {
                             case SMART_NODE:
+                                String snprofile = "dab";
+                                if(d.getMarkers().contains("sse"))
+                                    snprofile = "sse";
+                                else if(d.getMarkers().contains("lcm"))
+                                    snprofile = "lcm";
+                                else if(d.getMarkers().contains("iftt"))
+                                    snprofile = "iftt";
                                 if(bSeedMessage) {
                                     CcuLog.d(L.TAG_CCU_DEVICE,"=================NOW SENDING SN SEEDS====================="+zone.getId());
-                                    //for (CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage : LSmartNode.getSeedMessages(zone)) {
-                                    CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = LSmartNode.getSeedMessage(zone, Short.parseShort(d.getAddr()),d.getEquipRef());
+                                    CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = LSmartNode.getSeedMessage(zone, Short.parseShort(d.getAddr()),d.getEquipRef(),snprofile);
                                     if (sendStructToCM(/*(short) seedMessage.smartNodeAddress.get(),*/ seedMessage)) {
                                         //Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
                                     }
                                 }else {
                                     CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING SN Settings=====================");
-                                    CcuToCmOverUsbSnSettingsMessage_t settingsMessage = LSmartNode.getSettingsMessage(zone,Short.parseShort(d.getAddr()),d.getEquipRef());
+                                    CcuToCmOverUsbSnSettingsMessage_t settingsMessage = LSmartNode.getSettingsMessage(zone,Short.parseShort(d.getAddr()),d.getEquipRef(),snprofile);
                                     if (sendStruct((short) settingsMessage.smartNodeAddress.get(), settingsMessage)) {
                                         //Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
                                     }
@@ -120,14 +126,14 @@ public class MeshNetwork extends DeviceNetwork
                 {
                     CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING OAO SN SEED Message =====================");
                     CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = LSmartNode.getSeedMessage(new Zone.Builder().setDisplayName("OAO").build(),
-                            (short)L.ccu().oaoProfile.getNodeAddress(), ccu().oaoProfile.getEquipRef());
+                            (short)L.ccu().oaoProfile.getNodeAddress(), ccu().oaoProfile.getEquipRef(),"oao");
                     sendStructToCM(seedMessage);
                 }
                 else
                 {
                     CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING OAO SN Settings=====================");
                     CcuToCmOverUsbSnSettingsMessage_t settingsMessage = LSmartNode.getSettingsMessage(new Zone.Builder().setDisplayName("OAO").build()
-                                                                                , (short)L.ccu().oaoProfile.getNodeAddress(), ccu().oaoProfile.getEquipRef());
+                                                                                , (short)L.ccu().oaoProfile.getNodeAddress(), ccu().oaoProfile.getEquipRef(),"oao");
                     sendStruct((short) settingsMessage.smartNodeAddress.get(), settingsMessage);
                     CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING SN CONTROLS=====================");
                     CcuToCmOverUsbSnControlsMessage_t controlsMessage = LSmartNode.getControlMessage(new Zone.Builder().setDisplayName("OAO").build()

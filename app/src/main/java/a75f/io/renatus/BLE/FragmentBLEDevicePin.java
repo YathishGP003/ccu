@@ -374,7 +374,7 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                         break;
                     case SSE:
                         showDialogFragment(FragmentSSEConfiguration
-                                                   .newInstance(mPairingAddress, mName, mNodeType, mFloorName), FragmentSSEConfiguration.ID);
+                                                   .newInstance(mPairingAddress, mName, mNodeType, mFloorName,mProfileType), FragmentSSEConfiguration.ID);
                         break;
                     case HMP:
                         showDialogFragment(FragmentHMPConfiguration

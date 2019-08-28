@@ -283,8 +283,8 @@ public class Globals {
         CcuLog.d(L.TAG_CCU,"registerSiteToPubNub "+siteId.replace("@",""));
 
         PNConfiguration pnConfiguration = new PNConfiguration();
-        pnConfiguration.setSubscribeKey("sub-c-6a55a31c-d30e-11e8-b41d-e643bd6bdd68");
-        pnConfiguration.setPublishKey("pub-c-6873a2c5-ec27-4604-a235-38a3f4eed9a6");
+        pnConfiguration.setSubscribeKey("sub-c-9497c79c-c96f-11e9-ac59-7e2323a85324");
+        pnConfiguration.setPublishKey("pub-c-77c360ff-23fa-49e0-a971-7c1b522b594e");
         pnConfiguration.setSecure(false);
 
         pubnub = new PubNub(pnConfiguration);

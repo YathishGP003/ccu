@@ -27,8 +27,11 @@ import java.util.Collections;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.oao.OAOEquip;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.jobs.ScheduleProcessJob;
@@ -61,7 +64,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	boolean maxHumiditySpinnerReady = false;
 	
 	
-	TextView ccuName;
+	TextView ccuName, oAoAirCo2Reading,oAoThresholdReading;
 	TextView profileTitle;
 	NumberPicker systemModePicker;
 	
@@ -101,6 +104,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	public void onResume() {
 		// TODO Auto-generated method stub
 		super.onResume();
+		checkforOao();
 		if(getUserVisibleHint()) {
             fetchPoints();
             if (prefs.getBoolean("REGISTRATION")) {
@@ -146,6 +150,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
 		ccuName.setText(ccu.get("dis").toString());
 		profileTitle = view.findViewById(R.id.profileTitle);
+		oAoThresholdReading = view.findViewById(R.id.oAoThresholdReading);
+		oAoAirCo2Reading = view.findViewById(R.id.oAoAirCo2Reading);
 		systemModePicker = view.findViewById(R.id.systemModePicker);
 		coolingAvailable = L.ccu().systemProfile.isCoolingAvailable();
 		heatingAvailable = L.ccu().systemProfile.isHeatingAvailable();
@@ -317,7 +323,33 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		});*/
 
 		fetchPoints();
+
+		checkforOao();
 		
+	}
+
+	private void checkforOao() {
+		ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and oao");
+
+		if (equips != null && equips.size() > 0) {
+			oAoAirCo2Reading.setVisibility(View.VISIBLE);
+			oAoThresholdReading.setVisibility(View.VISIBLE);
+
+			ArrayList<OAOEquip> equipList = new ArrayList<>();
+			for (HashMap m : equips)
+			{
+				equipList.add(new OAOEquip(ProfileType.OAO, Short.valueOf(m.get("group").toString())));
+			}
+
+			double returnAirCO2  = equipList.get(0).getHisVal("return and air and co2 and sensor");
+			double co2Threshold = equipList.get(0).getConfigNumVal("co2 and threshold");
+
+			oAoThresholdReading.setText((int)co2Threshold +" PPM");
+			oAoAirCo2Reading.setText((int)returnAirCO2 +" PPM");
+		} else {
+			oAoThresholdReading.setVisibility(View.INVISIBLE);
+			oAoAirCo2Reading.setVisibility(View.INVISIBLE);
+		}
 	}
 
 	public void fetchPoints()

@@ -3,6 +3,7 @@ package a75f.io.renatus;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.TabItem;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -33,10 +34,12 @@ public class RenatusLandingActivity extends AppCompatActivity {
     private static final String TAG = RenatusLandingActivity.class.getSimpleName();
     //TODO - refactor
     public boolean settingView = false;
-    ImageButton pageSwitchButton;
+    TabItem pageSettingButton;
+    TabItem pageDashBoardButton;
     ImageButton setupButton;
     ImageView menuToggle;
     ImageView floorMenu;
+
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -51,7 +54,7 @@ public class RenatusLandingActivity extends AppCompatActivity {
      * The {@link ViewPager} that will host the section contents.
      */
     private CustomViewPager mViewPager;
-    private TabLayout mTabLayout;
+    private TabLayout mTabLayout, btnTabs;
 
 
     @Override
@@ -67,15 +70,45 @@ public class RenatusLandingActivity extends AppCompatActivity {
             menuToggle = findViewById(R.id.menuToggle);
             mViewPager = findViewById(R.id.container);
             mTabLayout = findViewById(R.id.tabs);
+            btnTabs = findViewById(R.id.btnTabs);
             mTabLayout.setTabMode(TabLayout.MODE_SCROLLABLE);
+            btnTabs.setTabMode(TabLayout.MODE_SCROLLABLE);
 
-            pageSwitchButton = findViewById(R.id.pageSwitchButton);
-            pageSwitchButton.setOnClickListener(new View.OnClickListener() {
+            pageSettingButton = findViewById(R.id.pageSettingButton);
+            pageDashBoardButton = findViewById(R.id.pageDashBoardButton);
+
+            btnTabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
                 @Override
-                public void onClick(View view) {
-                    setViewPager();
+                public void onTabSelected(TabLayout.Tab tab) {
+                      if (tab.getPosition()==0){
+
+                          mViewPager.setAdapter(mSettingPagerAdapter);
+                          mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
+
+                          menuToggle.setVisibility(View.GONE);
+                          floorMenu.setVisibility(View.GONE);
+
+                      } else if (tab.getPosition() == 1){
+
+                          mViewPager.setAdapter(mStatusPagerAdapter);
+                          mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
+
+                          menuToggle.setVisibility(View.GONE);
+                          floorMenu.setVisibility(View.GONE);
+                      }
+                }
+
+                @Override
+                public void onTabUnselected(TabLayout.Tab tab) {
+
+                }
+
+                @Override
+                public void onTabReselected(TabLayout.Tab tab) {
+
                 }
             });
+
             menuToggle.setOnClickListener(view -> {
                 if (SettingsFragment.slidingPane.isOpen()) {
                     SettingsFragment.slidingPane.closePane();
@@ -162,28 +195,9 @@ public class RenatusLandingActivity extends AppCompatActivity {
         menuToggle.setVisibility(View.GONE);
         floorMenu.setVisibility(View.GONE);
         mViewPager.setOffscreenPageLimit(1);
-        if (settingView == true) {
 
-            mViewPager.setAdapter(mStatusPagerAdapter);
-            mTabLayout.post(new Runnable() {
-                @Override
-                public void run() {
-                    mTabLayout.setupWithViewPager(mViewPager, true);
-                }
-            });
-            settingView = false;
-            pageSwitchButton.setImageResource(R.drawable.setting);
-        } else {
-            mViewPager.setAdapter(mSettingPagerAdapter);
-            mTabLayout.post(new Runnable() {
-                @Override
-                public void run() {
-                    mTabLayout.setupWithViewPager(mViewPager, true);
-                }
-            });
-            settingView = true;
-            pageSwitchButton.setImageResource(R.drawable.status);
-        }
+        mViewPager.setAdapter(mSettingPagerAdapter);
+        mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
 
 
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -194,10 +208,16 @@ public class RenatusLandingActivity extends AppCompatActivity {
 
             @Override
             public void onPageSelected(int i) {
-                if (settingView && i == 1) menuToggle.setVisibility(View.VISIBLE);
-                else menuToggle.setVisibility(View.GONE);
-                if (!settingView && i == 1) floorMenu.setVisibility(View.VISIBLE);
-                else floorMenu.setVisibility(View.GONE);
+                if (i == 1 && mViewPager.getAdapter().instantiateItem(mViewPager, i)  instanceof SettingsFragment ) {
+                    menuToggle.setVisibility(View.VISIBLE);
+                    floorMenu.setVisibility(View.GONE);
+                } else if (i == 1 && mViewPager.getAdapter().instantiateItem(mViewPager, i) instanceof ZoneFragmentNew){
+                    menuToggle.setVisibility(View.GONE);
+                    floorMenu.setVisibility(View.VISIBLE);
+                } else {
+                    floorMenu.setVisibility(View.GONE);
+                    menuToggle.setVisibility(View.GONE);
+                }
             }
 
             @Override

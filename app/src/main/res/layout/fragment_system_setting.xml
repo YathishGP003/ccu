@@ -35,19 +35,52 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <NumberPicker
-            android:id="@+id/systemModePicker"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginLeft="100dp"
+            android:layout_marginStart="100dp"
             android:layout_marginBottom="90dp"
-            android:scaleX="1.2"
-            android:scaleY="1.2"
-            android:textColor="#202020"
-            android:textSize="32sp">
+            android:orientation="vertical">
 
-        </NumberPicker>
+            <TextView
+                android:id="@+id/oAoThresholdReading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="40dp"
+                android:gravity="center"
+                android:visibility="invisible"
+                android:textAppearance="@style/title_grey"
+                android:textColor="@color/grey_select" />
+
+            <TextView
+                android:id="@+id/oAoAirCo2Reading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="30dp"
+                android:gravity="center"
+                android:visibility="invisible"
+                android:textAppearance="@style/title_grey"
+                android:textColor="@color/grey_select"
+                />
+
+            <NumberPicker
+                android:id="@+id/systemModePicker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="30dp"
+                android:scaleX="1.2"
+                android:scaleY="1.2"
+                android:textColor="#202020"
+                android:textSize="32sp">
+
+            </NumberPicker>
+
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -173,6 +206,16 @@
                         android:layout_marginLeft="42dp"
                         android:entries="@array/hvac_stage_selector"
                         tools:listitem="@layout/spinner_dropdown_item" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="30dp"
+                        android:layout_gravity="center_vertical"
+                        android:gravity="bottom"
+                        android:paddingBottom="5dp"
+                        android:text="%"
+                        android:textAppearance="@style/title_grey"
+                        android:textSize="16sp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -199,6 +242,17 @@
                         android:layout_marginLeft="42dp"
                         android:entries="@array/hvac_stage_selector"
                         tools:listitem="@layout/spinner_dropdown_item" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="30dp"
+                        android:layout_gravity="center_vertical"
+                        android:gravity="bottom"
+                        android:paddingBottom="5dp"
+                        android:text="%"
+                        android:textAppearance="@style/title_grey"
+                        android:textSize="16sp" />
+
                 </LinearLayout>
 
             </LinearLayout>

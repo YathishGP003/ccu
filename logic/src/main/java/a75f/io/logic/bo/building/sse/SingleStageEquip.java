@@ -175,25 +175,13 @@ public class SingleStageEquip {
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
-                .addMarker("standalone").addMarker("relay1").addMarker("stage1").addMarker("his").addMarker("zone")
+                .addMarker("standalone").addMarker("cooling").addMarker("heating").addMarker("stage1").addMarker("his").addMarker("zone")
                 .addMarker("logical").addMarker("sse").addMarker("equipHis").addMarker("cmd")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
         String r1coolID = CCUHsApi.getInstance().addPoint(coolingStage);
 
-        /*Point heatingStage1 = new Point.Builder()
-                .setDisplayName(equipDis+"-heatingStage1")
-                .setEquipRef(equipRef)
-                .setSiteRef(siteRef)
-                .setRoomRef(roomRef)
-                .setFloorRef(floorRef)
-                .addMarker("standalone").addMarker("heating").addMarker("stage1").addMarker("his").addMarker("zone")
-                .addMarker("logical").addMarker("sse").addMarker("equipHis").addMarker("cmd")
-                .setGroup(String.valueOf(nodeAddr))
-                .setTz(tz)
-                .build();
-        String r1HeatID = CCUHsApi.getInstance().addPoint(heatingStage1);*/
 
         Point fanStage1 = new Point.Builder()
                 .setDisplayName(equipDis+"-fanStage1")
@@ -298,43 +286,6 @@ public class SingleStageEquip {
                 .setTz(tz)
                 .build();
         CCUHsApi.getInstance().addPoint(occupancy);
-/*
-        Point maxCoolAlertTime = new Point.Builder()
-                .setDisplayName(siteDis+"-SSE-"+nodeAddr+"-maxCoolTempAlert")
-                .setEquipRef(equipRef)
-                .setSiteRef(siteRef)
-                .setRoomRef(roomRef)
-                .setFloorRef(floorRef)
-                .addMarker("sse").addMarker("max").addMarker("cool").addMarker("temp").addMarker("alert").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setGroup(String.valueOf(nodeAddr))
-                .setTz(tz)
-                .build();
-        String maxCoolAlertTimeId = CCUHsApi.getInstance().addPoint(maxCoolAlertTime);
-        CCUHsApi.getInstance().writeHisValById(maxCoolAlertTimeId, 70.0);
-        Point minHeatAlertTime = new Point.Builder()
-                .setDisplayName(siteDis+"-SSE-"+nodeAddr+"-maxHeatTempAlert")
-                .setEquipRef(equipRef)
-                .setSiteRef(siteRef)
-                .setRoomRef(roomRef)
-                .setFloorRef(floorRef)
-                .addMarker("sse").addMarker("min").addMarker("heat").addMarker("temp").addMarker("alert").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setGroup(String.valueOf(nodeAddr))
-                .setTz(tz)
-                .build();
-        String minHeatAlertTimeId = CCUHsApi.getInstance().addPoint(minHeatAlertTime);
-        CCUHsApi.getInstance().writeHisValById(minHeatAlertTimeId, 80.0);
-        Point offsetTime = new Point.Builder()
-                .setDisplayName(siteDis+"-SSE-"+nodeAddr+"-offsetTime")
-                .setEquipRef(equipRef)
-                .setSiteRef(siteRef)
-                .setRoomRef(roomRef)
-                .setFloorRef(floorRef)
-                .addMarker("sse").addMarker("time").addMarker("offset").addMarker("zone").addMarker("writable").addMarker("his").addMarker("equipHis")
-                .setGroup(String.valueOf(nodeAddr))
-                .setTz(tz)
-                .build();
-        String offsetTimeId = CCUHsApi.getInstance().addPoint(offsetTime);
-        CCUHsApi.getInstance().writeHisValById(offsetTimeId, 10.0);*/
 
         SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
         device.currentTemp.setPointRef(ctID);
@@ -346,7 +297,6 @@ public class SingleStageEquip {
         device.th2In.setPointRef(eatID);
         device.th2In.setEnabled(config.enableThermistor2);
         device.relay1.setPointRef(r1coolID);
-        //device.relay1.setPointRef(r1HeatID);
         device.relay2.setPointRef(r2ID);
 
         device.relay1.setEnabled(config.enableRelay1 > 0 ? true : false);
@@ -500,8 +450,7 @@ public class SingleStageEquip {
         SmartNode.setPointEnabled(nodeAddr, Port.RELAY_TWO.name(), config.isOpConfigured(Port.RELAY_TWO) );
         SmartNode.setPointEnabled(nodeAddr, Port.TH2_IN.name(), config.enableThermistor2);
         SmartNode.setPointEnabled(nodeAddr, Port.TH1_IN.name(), config.enableThermistor1);
-Log.d("SSE"," setup== sseequip="+config.enableRelay1+","+config.enableRelay2);
-        setConfigNumVal("enable and relay1",config.isOpConfigured(Port.RELAY_ONE) ? (double)config.enableRelay1 : 0);
+		setConfigNumVal("enable and relay1",config.isOpConfigured(Port.RELAY_ONE) ? (double)config.enableRelay1 : 0);
         setConfigNumVal("enable and relay2",config.isOpConfigured(Port.RELAY_TWO) ? (double)config.enableRelay2 : 0);
         setConfigNumVal("temperature and offset",config.temperaturOffset);
         setConfigNumVal("enable and th2",config.enableThermistor2 == true ? 1.0 : 0);

@@ -190,9 +190,9 @@ public class HisSyncHandler
         }
         
         //Send device data once in 5 mins
-        if (now.getMinuteOfDay() % 5 == 0) {
+        //if (now.getMinuteOfDay() % 5 == 0) {
             sendDeviceHisData();
-        }
+        //}
         
     }
     

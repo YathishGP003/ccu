@@ -1,8 +1,6 @@
 package a75f.io.renatus.registartion;
 
-import android.annotation.SuppressLint;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -26,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.SettingPoint;
 import a75f.io.api.haystack.Tags;
@@ -33,11 +32,15 @@ import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.tuners.BuildingTuners;
+import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.R;
+import a75f.io.renatus.tuners.ExpandableTunerListAdapter;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.views.MasterControl.MasterControlView;
+import a75f.io.renatus.views.TempLimit.TempLimitView;
 
 import static a75f.io.logic.L.ccu;
+import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
 
 public class InstallerOptions extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
@@ -50,7 +53,7 @@ public class InstallerOptions extends Fragment {
     private String mParam2;
 
     ImageView imageGoback;
-    ImageView imageTemp;
+    TempLimitView imageTemp;
     Button mNext;
     Context mContext;
     Spinner mAddressBandSpinner;
@@ -62,8 +65,33 @@ public class InstallerOptions extends Fragment {
     String localSiteID;
     String CCU_ID = "";
     private boolean isFreshRegister;
+    //
+    float lowerHeatingTemp;
+    float upperHeatingTemp;
+    float lowerCoolingTemp;
+    float upperCoolingTemp;
+    float lowerBuildingTemp;
+    float upperBuildingTemp;
+    float mSetBack;
+    float zoneDiff;
+    float cdb, hdb;
 
     private static final String TAG = InstallerOptions.class.getSimpleName();
+
+    MasterControlView.OnClickListener onSaveChangeListener = (lowerHeatingTemp, upperHeatingTemp, lowerCoolingTemp, upperCoolingTemp, lowerBuildingTemp, upperBuildingTemp, setBack, zoneDiff, hdb, cdb) -> {
+        imageTemp.setTempControl(lowerHeatingTemp, upperHeatingTemp, lowerCoolingTemp, upperCoolingTemp, lowerBuildingTemp, upperBuildingTemp);
+
+        this.lowerHeatingTemp = lowerHeatingTemp;
+        this.upperHeatingTemp = upperHeatingTemp;
+        this.lowerCoolingTemp = lowerCoolingTemp;
+        this.upperCoolingTemp = upperCoolingTemp;
+        this.lowerBuildingTemp = lowerBuildingTemp;
+        this.upperBuildingTemp = upperBuildingTemp;
+        this.mSetBack = setBack;
+        this.zoneDiff = zoneDiff;
+        this.cdb = cdb;
+        this.hdb = hdb;
+    };
 
     public InstallerOptions() {
         // Required empty public constructor
@@ -191,9 +219,9 @@ public class InstallerOptions extends Fragment {
             }
         });
 
-        if (!isFreshRegister){
+        if (!isFreshRegister) {
             ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone");
-            if (equips != null && equips.size()>0){
+            if (equips != null && equips.size() > 0) {
                 mAddressBandSpinner.setEnabled(false);
             } else {
                 mAddressBandSpinner.setEnabled(true);
@@ -201,24 +229,40 @@ public class InstallerOptions extends Fragment {
         }
 
         imageTemp.setOnClickListener(view -> {
-            ProgressDialog progressDlg = new ProgressDialog(getActivity());
-            new CountDownTimer(8000, 1000) {
-                @Override
-                public void onTick(long l) {
-                    progressDlg.setMessage("Loading Master Control...");
-                    progressDlg.show();
-                }
-
-                @Override
-                public void onFinish() {
-                    openMasterControllerDialog();
-                    progressDlg.dismiss();
-                }
-            }.start();
+            openMasterControllerDialog();
 
         });
 
+        getTempValues();
+
         return rootView;
+    }
+
+    // initial master control values
+    private void getTempValues() {
+
+        HashMap tuner = CCUHsApi.getInstance().read("equip and tuner");
+        Equip p = new Equip.Builder().setHashMap(tuner).build();
+
+        hdb = (float) TunerUtil.getHeatingDeadband(p.getId());
+        cdb = (float) TunerUtil.getCoolingDeadband(p.getId());
+        HashMap coolUL = CCUHsApi.getInstance().read("point and limit and max and cooling and user and equipRef == \"" + p.getId() + "\"");
+        HashMap heatUL = CCUHsApi.getInstance().read("point and limit and max and heating and user and equipRef == \"" + p.getId() + "\"");
+        HashMap coolLL = CCUHsApi.getInstance().read("point and limit and min and cooling and user and equipRef == \"" + p.getId() + "\"");
+        HashMap heatLL = CCUHsApi.getInstance().read("point and limit and min and heating and user and equipRef == \"" + p.getId() + "\"");
+        HashMap buildingMin = CCUHsApi.getInstance().read("building and limit and min and equipRef == \"" + p.getId() + "\"");
+        HashMap buildingMax = CCUHsApi.getInstance().read("building and limit and max and equipRef == \"" + p.getId() + "\"");
+        HashMap setbackMap = CCUHsApi.getInstance().read("unoccupied and setback and equipRef == \"" + p.getId() + "\"");
+        HashMap zoneDiffMap = CCUHsApi.getInstance().read("building and zone and differential and equipRef == \"" + p.getId() + "\"");
+
+        upperCoolingTemp = (float) getTuner(coolUL.get("id").toString());
+        lowerCoolingTemp = (float) getTuner(coolLL.get("id").toString());
+        upperHeatingTemp = (float) getTuner(heatUL.get("id").toString());
+        lowerHeatingTemp = (float) getTuner(heatLL.get("id").toString());
+        lowerBuildingTemp = (float) getTuner(buildingMin.get("id").toString());
+        upperBuildingTemp = (float) getTuner(buildingMax.get("id").toString());
+        mSetBack = (float) getTuner(setbackMap.get("id").toString());
+        zoneDiff = (float) getTuner(zoneDiffMap.get("id").toString());
     }
 
     //custom dialog to control building temperature
@@ -235,6 +279,22 @@ public class InstallerOptions extends Fragment {
             dialog.findViewById(R.id.btnClose).setOnClickListener(view -> dialog.dismiss());
 
             dialog.findViewById(R.id.btnSet).setOnClickListener(view -> masterControlView.setTuner(dialog));
+
+            masterControlView.setOnClickChangeListener(onSaveChangeListener);
+
+            new CountDownTimer(100, 100) {
+                @Override
+                public void onTick(long l) {
+
+                }
+
+                @Override
+                public void onFinish() {
+                    masterControlView.setMasterControl(lowerHeatingTemp, upperHeatingTemp, lowerCoolingTemp,
+                            upperCoolingTemp, lowerBuildingTemp, upperBuildingTemp,
+                            mSetBack, zoneDiff, hdb, cdb);
+                }
+            }.start();
 
             dialog.show();
         }

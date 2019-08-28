@@ -657,8 +657,24 @@ public class ScheduleProcessJob extends BaseJob {
         }
         return dabPoints;
     }
+    public static HashMap getTIEquipPoints(String equipID) {
 
 
+        //damperPos: ['zone', 'damper', 'base'],
+        //equipStatusMessage: ['zone', 'message', 'status'],
+        //dischargeAirTemp: ['zone', 'discharge', 'air', 'temp'],
+
+        HashMap tiPoints = new HashMap();
+        tiPoints.put("Profile","TEMP_INFLUENCE");
+        String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and equipRef == \""+equipID+"\"");
+        if (equipStatusPoint.length() > 0)
+        {
+            tiPoints.put("Status",equipStatusPoint);
+        }else{
+            tiPoints.put("Status","OFF");
+        }
+        return tiPoints;
+    }
     public static HashMap getVAVEquipPoints(String equipID) {
         HashMap vavPoints = new HashMap();
 

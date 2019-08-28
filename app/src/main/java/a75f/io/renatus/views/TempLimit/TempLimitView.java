@@ -74,9 +74,19 @@ public class TempLimitView extends LinearLayout {
         HashMap buildingMin = CCUHsApi.getInstance().read("building and limit and min and equipRef == \"" + p.getId() + "\"");
         HashMap buildingMax = CCUHsApi.getInstance().read("building and limit and max and equipRef == \"" + p.getId() + "\"");
 
-        tempControl.setData((float) getTuner(heatLL.get("id").toString()), (float) getTuner(heatUL.get("id").toString()),
+        setTempControl((float) getTuner(heatLL.get("id").toString()), (float) getTuner(heatUL.get("id").toString()),
                 (float) getTuner(coolLL.get("id").toString()), (float) getTuner(coolUL.get("id").toString()),
                 (float) getTuner(buildingMin.get("id").toString()), (float) getTuner(buildingMax.get("id").toString()));
+    }
+
+
+    public void setTempControl(float lowerHeatingTemp, float upperHeatingTemp, float lowerCoolingTemp,
+                               float upperCoolingTemp, float lowerBuildingTemp, float upperBuildingTemp){
+
+        if (tempControl!=null)
+        tempControl.setData(lowerHeatingTemp, upperHeatingTemp,
+                lowerCoolingTemp, upperCoolingTemp,
+                lowerBuildingTemp, upperBuildingTemp);
     }
 }
 

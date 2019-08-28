@@ -48,8 +48,12 @@ public class MasterControlView extends LinearLayout {
     HashMap heatLL;
     HashMap buildingMin;
     HashMap buildingMax;
+    HashMap setbackMap;
+    HashMap zoneDiffMap;
     double hdb = 2.0;
     double cdb = 2.0;
+    //
+    private OnClickListener mOnClickListener;
 
     public MasterControlView(Context context) {
         super(context);
@@ -150,14 +154,9 @@ public class MasterControlView extends LinearLayout {
         heatLL = CCUHsApi.getInstance().read("point and limit and min and heating and user and equipRef == \"" + p.getId() + "\"");
         buildingMin = CCUHsApi.getInstance().read("building and limit and min and equipRef == \"" + p.getId() + "\"");
         buildingMax = CCUHsApi.getInstance().read("building and limit and max and equipRef == \"" + p.getId() + "\"");
-        HashMap setbackMap = CCUHsApi.getInstance().read("unoccupied and setback and equipRef == \"" + p.getId() + "\"");
-        HashMap zoneDiffMap = CCUHsApi.getInstance().read("building and zone and differential and equipRef == \"" + p.getId() + "\"");
+        setbackMap = CCUHsApi.getInstance().read("unoccupied and setback and equipRef == \"" + p.getId() + "\"");
+        zoneDiffMap = CCUHsApi.getInstance().read("building and zone and differential and equipRef == \"" + p.getId() + "\"");
 
-        masterControl.setData((float) getTuner(heatLL.get("id").toString()), (float) getTuner(heatUL.get("id").toString()),
-                (float) getTuner(coolLL.get("id").toString()), (float) getTuner(coolUL.get("id").toString()),
-                (float) getTuner(buildingMin.get("id").toString()), (float) getTuner(buildingMax.get("id").toString()),
-                (float) getTuner(setbackMap.get("id").toString()), (float) getTuner(zoneDiffMap.get("id").toString()),
-                (float)hdb, (float)cdb);
     }
 
     public void setTuner(Dialog dialog) {
@@ -375,6 +374,9 @@ public class MasterControlView extends LinearLayout {
         float buildingTempUL = masterControl.getUpperBuildingTemp();
         float buildingTempLL = masterControl.getLowerBuildingTemp();
 
+        mOnClickListener.onSaveClick(heatTempLL, heatTempUL,coolTempLL,coolTempUL,buildingTempLL,buildingTempUL,
+                (float) getTuner(setbackMap.get("id").toString()),(float) getTuner(zoneDiffMap.get("id").toString()),(float)hdb, (float)cdb);
+
         new AsyncTask<String, Void, Void>() {
             @Override
             protected Void doInBackground(final String... params) {
@@ -465,5 +467,28 @@ public class MasterControlView extends LinearLayout {
         float width = getDefaultSize(getSuggestedMinimumWidth(),
                 widthMeasureSpec);
 
+    }
+
+    public void setOnClickChangeListener(OnClickListener l)
+    {
+        mOnClickListener = l;
+    }
+
+    public interface OnClickListener
+    {
+        void onSaveClick(float lowerHeatingTemp, float upperHeatingTemp, float lowerCoolingTemp,
+                     float upperCoolingTemp, float lowerBuildingTemp, float upperBuildingTemp,
+                     float setBack, float zoneDiff, float hdb, float cdb);
+    }
+
+    public void setMasterControl(float lowerHeatingTemp, float upperHeatingTemp, float lowerCoolingTemp,
+                               float upperCoolingTemp, float lowerBuildingTemp, float upperBuildingTemp,
+                               float setBack, float zoneDiff, float hdb, float cdb){
+
+        if (masterControl != null)
+            masterControl.setData(lowerHeatingTemp, upperHeatingTemp,
+                    lowerCoolingTemp, upperCoolingTemp,
+                    lowerBuildingTemp, upperBuildingTemp,
+                    setBack,zoneDiff,hdb,cdb);
     }
 }

@@ -32,7 +32,6 @@ public class TempLimit extends View {
     private int mViewHeight = 0;
     private int mHeatingBarDisplacement = 0;
     private int mCoolingBarDisplacement = 0;
-    private int mHitBoxPadding = 0;
 
     //
     private float lowerHeatingTemp = 72;
@@ -166,6 +165,7 @@ public class TempLimit extends View {
 
         mTempLinePaint = new Paint();
         mTempLinePaint.setAntiAlias(true);
+        mTempLinePaint.setColor(Color.TRANSPARENT);
         mTempLinePaint.setStyle(Paint.Style.FILL);
         mTempLinePaint.setStrokeWidth(2);
 
@@ -200,7 +200,6 @@ public class TempLimit extends View {
         mHeatingBarDisplacement = (int) (20 * displayMetrics.density);
         mCoolingBarDisplacement = (int) (20 * displayMetrics.density);
 
-        mHitBoxPadding = (int) (25 * displayMetrics.density);
         mPaddingBetweenCoolingBarAndSliderIcon = (int) (10 * displayMetrics.density);
         setMeasuredDimension(Math.round(mViewWidth), mViewHeight);
     }

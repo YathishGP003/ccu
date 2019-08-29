@@ -166,17 +166,29 @@ public class OAOEquip
                                      .build();
         String outsideAirTemperatureId = hayStack.addPoint(outsideAirTemperature);
     
-        Point outsideAirHumidity = new Point.Builder()
-                                              .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-outsideHumidity")
+        Point weatherOutsideTemp = new Point.Builder()
+                                         .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-weatherOutsideTemp")
+                                         .setEquipRef(equipRef)
+                                         .setSiteRef(siteRef)
+                                         .setRoomRef(roomRef)
+                                         .setFloorRef(floorRef)
+                                         .addMarker("oao").addMarker("weather").addMarker("outside").addMarker("air").addMarker("temp").addMarker("sensor").addMarker("his").addMarker("equipHis")
+                                         .setGroup(String.valueOf(nodeAddr))
+                                         .setTz(tz)
+                                         .build();
+        String weatherOutsideTempId = hayStack.addPoint(weatherOutsideTemp);
+    
+        Point weatherOutsideHumidity = new Point.Builder()
+                                              .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-weatherOutsideHumidity")
                                               .setEquipRef(equipRef)
                                               .setSiteRef(siteRef)
                                               .setRoomRef(roomRef)
                                               .setFloorRef(floorRef)
-                                              .addMarker("oao").addMarker("outside").addMarker("air").addMarker("humidity").addMarker("sensor").addMarker("his").addMarker("equipHis")
+                                              .addMarker("oao").addMarker("weather").addMarker("outside").addMarker("air").addMarker("humidity").addMarker("sensor").addMarker("his").addMarker("equipHis")
                                               .setGroup(String.valueOf(nodeAddr))
                                               .setTz(tz)
                                               .build();
-        String outsideAirHumidityId = hayStack.addPoint(outsideAirHumidity);
+        String weatherOutsideHumidityId = hayStack.addPoint(weatherOutsideHumidity);
     
         Point supplyAirTemperature = new Point.Builder()
                                               .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-supplyAirTemperature")
@@ -306,7 +318,8 @@ public class OAOEquip
         hayStack.writeHisValById(exhaustFanStage1Id,0.0);
         hayStack.writeHisValById(exhaustFanStage2Id,0.0);
         hayStack.writeHisValById(economizingAvailableId, 0.0);
-        hayStack.writeHisValById(outsideAirHumidityId, 0.0);
+        hayStack.writeHisValById(weatherOutsideTempId, 0.0);
+        hayStack.writeHisValById(weatherOutsideHumidityId, 0.0);
     
         CCUHsApi.getInstance().syncEntityTree();
     }

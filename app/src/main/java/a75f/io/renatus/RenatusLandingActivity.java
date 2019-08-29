@@ -268,31 +268,4 @@ public class RenatusLandingActivity extends AppCompatActivity {
         }
     }
 
-    public void setPointVal(String id, double val) {
-        new AsyncTask<String, Void, Void>() {
-            @Override
-            protected Void doInBackground(final String... params) {
-
-                CCUHsApi hayStack = CCUHsApi.getInstance();
-                Point p = new Point.Builder().setHashMap(hayStack.readMapById(id)).build();
-                if (p.getMarkers().contains("writable")) {
-                    CcuLog.d(L.TAG_CCU_UI, "Set Writbale Val " + p.getDisplayName() + ": " + val);
-                    //CCUHsApi.getInstance().pointWrite(HRef.copy(id), TunerConstants.MANUAL_OVERRIDE_VAL_LEVEL, "manual", HNum.make(val) , HNum.make(2 * 60 * 60 * 1000, "ms"));
-                    ScheduleProcessJob.handleDesiredTempUpdate(p, true, val);
-
-                }
-
-                if (p.getMarkers().contains("his")) {
-                    CcuLog.d(L.TAG_CCU_UI, "Set His Val " + id + ": " + val);
-                    hayStack.writeHisValById(id, val);
-                }
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(final Void result) {
-                // continue what you are doing...
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
-    }
 }

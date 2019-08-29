@@ -1162,7 +1162,158 @@ public class ScheduleProcessJob extends BaseJob {
             //HSUtil.printPointArr(point);
         }
     }
+    public static void handleDesiredTempUpdate(Point coolpoint,Point heatpoint, Point avgpoint,boolean manual, double coolval, double heatval, double avgval) {
     
+        CcuLog.d(L.TAG_CCU_JOB, "handleDesiredTempUpdate for "+coolpoint.getDisplayName()+","+heatpoint.getDisplayName());
+        Occupied occ = ScheduleProcessJob.getOccupiedModeCache(coolpoint.getRoomRef());
+        
+        if (occ != null && occ.isOccupied()) {
+            Schedule equipSchedule = Schedule.getScheduleByEquipId(coolpoint.getEquipRef());
+    
+            if(equipSchedule == null)
+            {
+                CcuLog.d(L.TAG_CCU_JOB,"<- *no schedule* skip handleDesiredTempUpdate");
+                return;
+            }
+            
+            if (!manual) {
+                if(coolpoint != null) {
+                    HashMap overrideLevel = getAppOverride(coolpoint.getId());
+                    Log.d(L.TAG_CCU_JOB, " OverrideLevel : " + overrideLevel);
+                    if (overrideLevel == null) {
+                        return;
+                    }
+                    coolval = Double.parseDouble(overrideLevel.get("val").toString());
+                }
+                if(heatpoint != null) {
+                    HashMap overrideHeatLevel = getAppOverride(heatpoint.getId());
+                    Log.d(L.TAG_CCU_JOB, " OverrideLevel : " + overrideHeatLevel);
+                    if (overrideHeatLevel == null) {
+                        return;
+                    }
+                    heatval = Double.parseDouble(overrideHeatLevel.get("val").toString());
+                }
+                if(avgpoint != null) {
+                    HashMap overrideAvgLevel = getAppOverride(avgpoint.getId());
+                    Log.d(L.TAG_CCU_JOB, " OverrideLevel : " + overrideAvgLevel);
+                    if (overrideAvgLevel == null) {
+                        return;
+                    }
+                    avgval = Double.parseDouble(overrideAvgLevel.get("val").toString());
+                }
+            }
+            
+            //TODO - change when setting to applyToAllDays enabled.
+            if (equipSchedule.isZoneSchedule()) {
+                if (coolpoint != null)
+                {
+                    equipSchedule.setDaysCoolVal(coolval, false);
+                }
+                if (heatpoint != null) {
+                    equipSchedule.setDaysHeatVal(heatval, false);
+                }
+                setAppOverrideExpiry(coolpoint, System.currentTimeMillis() + 10*1000);
+                setAppOverrideExpiry(heatpoint, System.currentTimeMillis() + 10*1000);
+                CCUHsApi.getInstance().updateZoneSchedule(equipSchedule, equipSchedule.getRoomRef());
+                CCUHsApi.getInstance().syncEntityTree();
+            } else {
+                Schedule.Days day = occ.getCurrentlyOccupiedSchedule();
+    
+                DateTime overrideExpiry = new DateTime(MockTime.getInstance().getMockTime())
+                                                 .withHourOfDay(day.getEthh())
+                                                 .withMinuteOfHour(day.getEtmm())
+                                                 .withDayOfWeek(day.getDay() + 1)
+                                                 .withSecondOfMinute(0);
+
+                if(coolpoint != null) {
+                    CCUHsApi.getInstance().pointWrite(HRef.copy(coolpoint.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, "ccu", HNum.make(coolval), HNum.make(overrideExpiry.getMillis()
+                            - System.currentTimeMillis(), "ms"));
+                    setAppOverrideExpiry(coolpoint, overrideExpiry.getMillis());
+                }
+                if(heatpoint != null) {
+                    CCUHsApi.getInstance().pointWrite(HRef.copy(heatpoint.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, "ccu", HNum.make(heatval), HNum.make(overrideExpiry.getMillis()
+                            - System.currentTimeMillis(), "ms"));
+                    setAppOverrideExpiry(heatpoint, overrideExpiry.getMillis());
+                }
+                if(avgpoint != null){
+                    CCUHsApi.getInstance().pointWrite(HRef.copy(avgpoint.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, "ccu", HNum.make(avgval), HNum.make(overrideExpiry.getMillis()
+                            - System.currentTimeMillis(), "ms"));
+                    setAppOverrideExpiry(avgpoint, overrideExpiry.getMillis());
+                }
+            }
+            
+        }else if (occ!= null && !occ.isOccupied()) {
+            
+            double forcedOccupiedMins = TunerUtil.readTunerValByQuery("forced and occupied and time");
+            
+            if (manual) {
+                if(coolpoint != null)
+                    CCUHsApi.getInstance().pointWrite(HRef.copy(coolpoint.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, "manual", HNum.make(coolval) , HNum.make(forcedOccupiedMins * 60 * 1000, "ms"));
+                if(heatpoint != null)
+                    CCUHsApi.getInstance().pointWrite(HRef.copy(heatpoint.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, "manual", HNum.make(coolval) , HNum.make(forcedOccupiedMins * 60 * 1000, "ms"));
+
+            } else
+            {
+                if(coolpoint != null) {
+                    HashMap overrideLevel = getAppOverride(coolpoint.getId());
+                    Log.d(L.TAG_CCU_JOB, " Desired Cooling Temp OverrideLevel : " + overrideLevel);
+                    if (overrideLevel == null) {
+                        return;
+                    }
+                    double dur = Double.parseDouble(overrideLevel.get("duration").toString());
+                    CCUHsApi.getInstance().pointWrite(HRef.copy(coolpoint.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, "ccu", HNum.make(Double.parseDouble(overrideLevel.get("val").toString())), HNum.make(dur == 0 ? forcedOccupiedMins * 60 * 1000 : dur - System.currentTimeMillis(), "ms"));
+
+                    writeOverRideLevel(coolpoint,dur,forcedOccupiedMins);
+                }
+                if(heatpoint != null) {
+                    HashMap overrideHeatLevel = getAppOverride(heatpoint.getId());
+                    Log.d(L.TAG_CCU_JOB, " Desired Temp Heating OverrideLevel : " + overrideHeatLevel);
+                    if (overrideHeatLevel == null) {
+                        return;
+                    }
+                    double dur = Double.parseDouble(overrideHeatLevel.get("duration").toString());
+                    CCUHsApi.getInstance().pointWrite(HRef.copy(heatpoint.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, "ccu", HNum.make(Double.parseDouble(overrideHeatLevel.get("val").toString())), HNum.make(dur == 0 ? forcedOccupiedMins * 60 * 1000 : dur - System.currentTimeMillis(), "ms"));
+
+                    writeOverRideLevel(heatpoint,dur,forcedOccupiedMins);
+                }
+
+                //TODO need to check whether we also override avg level?? kumar -- RECHECK
+                if(avgpoint != null) {
+                    HashMap overrideAvgLevel = getAppOverride(avgpoint.getId());
+                    Log.d(L.TAG_CCU_JOB, " Desired Temp Average OverrideLevel : " + overrideAvgLevel);
+                    if (overrideAvgLevel == null) {
+                        return;
+                    }
+                    double dur = Double.parseDouble(overrideAvgLevel.get("duration").toString());
+                    CCUHsApi.getInstance().pointWrite(HRef.copy(avgpoint.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, "ccu", HNum.make(Double.parseDouble(overrideAvgLevel.get("val").toString())), HNum.make(dur == 0 ? forcedOccupiedMins * 60 * 1000 : dur - System.currentTimeMillis(), "ms"));
+
+                    writeOverRideLevel(avgpoint,dur,forcedOccupiedMins);
+                }
+            }
+            
+        }
+    }
+
+    private static void writeOverRideLevel(Point point, double dur, double forcedOccupiedMins){
+        //Write to level 9/10
+        ArrayList values = CCUHsApi.getInstance().readPoint(point.getId());
+        if (values != null && values.size() > 0)
+        {
+            for (int l = 9; l <= values.size(); l++)
+            {
+                HashMap valMap = ((HashMap) values.get(l - 1));
+                Log.d(L.TAG_CCU_JOB, " Desired Temp Override : " + valMap);
+                if (valMap.get("duration") != null && valMap.get("val") != null)
+                {
+                    long d = (long) Double.parseDouble(valMap.get("duration").toString());
+                    if (d == 0)
+                    {
+                        CCUHsApi.getInstance().pointWrite(HRef.copy(point.getId()), l, "ccu", HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(dur == 0 ? forcedOccupiedMins * 60 * 1000 : dur - System.currentTimeMillis(), "ms"));
+                    }
+                }
+            }
+        }
+    }
     
     public static HashMap getAppOverride(String id) {
         ArrayList values = CCUHsApi.getInstance().readPoint(id);

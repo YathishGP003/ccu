@@ -1,5 +1,20 @@
- - Merge branch 'patch-7' into 'master'
- - Update VERSION
  - Merge branch 'renatus_dev_sam' into 'master'
- - Device his update interavl 1 min
- - Version bump to 1.308.0
+ - Alert grpOperator support
+ - Pub key update
+ - Merge branch 'master' of https://gitlab.com/75f/android/renatus
+ - Merge branch 'kumar_renatus' into 'master'
+ - #RENATUS-632, SSE profile
+ - Merge branch 'kumar_renatus' into 'master'
+ - #RENATUS-632, SSE profile
+ - #RENATUS-632, SSE profile
+ - #RENATUS-573, Temp influence profile enabling
+ - Merge branch 'mahesh_renuts' into 'master'
+ - RENATUS-647, display  CO2 values on System page
+ - Merge branch 'mahesh_renuts' into 'master'
+ - remove progress loader and listener to save callback
+ - fix the master control for dead band validation
+ - Version bump to 1.309.0
+ - Version bump to 1.309.0
+ - alert 2.0
+ - Device his update interval changed to 1 min
+ - Alert modified conditionals

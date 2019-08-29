@@ -45,8 +45,6 @@ public class AlertProcessor
     private BoxStore     boxStore;
     private Box<Alert> alertBox;
     
-    AlertProcessor instance = null;
-    
     private static final File TEST_DIRECTORY = new File("objectbox-test/alert-db");
     
     private static final String PREFS_ALERT_DEFS = "ccu_alerts";
@@ -89,6 +87,137 @@ public class AlertProcessor
     }
     
     public void processAlerts() {
+        
+        CcuLog.d("CCU_ALERTS", "processAlerts ");
+        activeAlertRefs = new HashSet<>();
+        for (AlertDefinition def : getAlertDefinitions())
+        {
+            if (!def.alert.ismEnabled())
+            {
+                continue;
+            }
+            CcuLog.d("CCU_ALERTS", def.toString());
+            def.evaluate();
+    
+            ArrayList<String> pointList = null;
+            boolean alertStatus = false;
+            boolean statusInit = false;
+            for (int i = 0; i < def.conditionals.size(); i+=2) {
+                
+                if (i == 0) {
+                    if (def.conditionals.get(0).grpOperation.equals("equip"))
+                    {
+                        pointList = def.conditionals.get(0).pointList;
+                        CcuLog.d("CCU_ALERTS", "pointList "+pointList.size());
+                    } else {
+                        statusInit = true;
+                        alertStatus = def.conditionals.get(0).status;
+                    }
+                    
+                    continue;
+                }
+                if (def.conditionals.get(i-1).operator.contains("&&")) {
+                    if (def.conditionals.get(i).grpOperation.equals("equip"))
+                    {
+                        if (pointList == null) {
+                            if (alertStatus)
+                            {
+                                pointList = def.conditionals.get(i).pointList;
+                            }
+                        } else {
+                            pointList.retainAll(def.conditionals.get(i).pointList);
+                        }
+                        
+                    } else {
+                        alertStatus = statusInit ? (alertStatus && def.conditionals.get(0).status)
+                                            : def.conditionals.get(0).status;
+                    }
+                    
+                } else if (def.conditionals.get(i-1).operator.contains("||")) {
+                    CcuLog.d("CCU_ALERTS", "pointList "+pointList.size());
+                    if (def.conditionals.get(i).grpOperation.equals("equip"))
+                    {
+                        pointList.addAll(def.conditionals.get(i).pointList);
+        
+                    } else {
+                        alertStatus = alertStatus || def.conditionals.get(i).status;
+                    }
+                }
+            }
+            
+            if (pointList != null) {
+                for(String point : pointList) {
+                    if (!alertActive(def.alert, point))
+                    {
+                        HashMap p = CCUHsApi.getInstance().readMapById(point);
+                        if (Integer.parseInt(def.offset) > 0) {
+                            int offset = 0;
+                            if (offsetCounter.get(def.alert.mTitle+p.get("id")) != null)
+                            {
+                                offset = offsetCounter.get(def.alert.mTitle + p.get("id"));
+                            }
+                            if (offset++ >= Integer.parseInt(def.offset)) {
+                                CcuLog.d("CCU_ALERTS", "Point " + p.get("dis") + " addAlert " + def.toString());
+                                addAlert(AlertBuilder.build(def, AlertFormatter.getFormattedMessage(def, point), point));
+                            } else
+                            {
+                                CcuLog.d("CCU_ALERTS", "Point "+p.get("dis") + " offset " +offset);
+                            }
+                        } else {
+                            CcuLog.d("CCU_ALERTS", "Point " + p.get("dis") + " addAlert " + def.toString());
+                            addAlert(AlertBuilder.build(def, AlertFormatter.getFormattedMessage(def, point), point));
+                        }
+                    }
+                    activeAlertRefs.add(def.alert.mTitle+point);
+                }
+            } else if (alertStatus) {
+                activeAlertRefs.add(def.alert.mTitle);
+                if (alertActive(def.alert)){
+                    continue;
+                }
+                if (Integer.parseInt(def.offset) > 0) {
+                    int offset = 0;
+                    if (offsetCounter.get(def.alert.mTitle) != null)
+                    {
+                        offset = offsetCounter.get(def.alert.mTitle);
+                    }
+        
+                    if (offset++ >= Integer.parseInt(def.offset)) {
+                        addAlert(AlertBuilder.build(def, AlertFormatter.getFormattedMessage(def)));
+                        CcuLog.d("CCU_ALERTS", " addAlert "+def.toString());
+                    } else
+                    {
+                        CcuLog.d("CCU_ALERTS", " Alert offset " +offset);
+                    }
+                    offsetCounter.put(def.alert.mTitle, offset);
+                } else {
+                    addAlert(AlertBuilder.build(def, AlertFormatter.getFormattedMessage(def)));
+                }
+            }
+        }
+    
+        //Fix alerts which are no more active
+        for (Alert  a : getActiveAlerts()) {
+            if (!activeAlertRefs.contains(a.mTitle+ (a.ref != null ? a.ref :""))) {
+                fixAlert(a);
+            }
+        }
+    
+        for (Alert a : getActiveAlerts()) {
+            CcuLog.d("CCU_ALERTS"," Active Alert "+a.toString());
+        }
+        List<Alert> unsyncedAlerts = getUnSyncedAlerts();
+        CcuLog.d("CCU_ALERTS"," Unsynced Alerts "+unsyncedAlerts.size());
+        if (unsyncedAlerts.size() > 0)
+        {
+            List<Alert> syncedAlerts = AlertSyncHandler.sync(mContext, unsyncedAlerts);
+            for (Alert a : syncedAlerts) {
+                updateAlert(a);
+            }
+        }
+    }
+    
+    public void processAlertsObsolete() {
         CcuLog.d("CCU_ALERTS", "processAlerts ");
         activeAlertRefs = new HashSet<>();
         for (AlertDefinition def : getAlertDefinitions()) {
@@ -132,13 +261,13 @@ public class AlertProcessor
                 ArrayList<String> pointList = null;
                 for (int i = 0; i < def.conditionals.size(); i+=2) {
                     if (i == 0) {
-                        pointList = def.conditionals.get(0).trueList;
+                        pointList = def.conditionals.get(0).pointList;
                         continue;
                     }
                     if (def.conditionals.get(i-1).operator.contains("&&")) {
-                        pointList.retainAll(def.conditionals.get(i).trueList);
+                        pointList.retainAll(def.conditionals.get(i).pointList);
                     } else if (def.conditionals.get(i-1).operator.contains("||")) {
-                        pointList.addAll(def.conditionals.get(i).trueList);
+                        pointList.addAll(def.conditionals.get(i).pointList);
                     }
                 }
                 for(String point : pointList) {
@@ -200,7 +329,16 @@ public class AlertProcessor
     
     public boolean alertActive(Alert a, String ref) {
         for (Alert b : getActiveAlerts()) {
-            if (b.mMessage.equals(a.mMessage) && b.ref.equals(ref)) {
+            if (b.mTitle.equals(a.mTitle) && b.ref.equals(ref)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public boolean alertActive(Alert a) {
+        for (Alert b : getActiveAlerts()) {
+            if (b.mTitle.equals(a.mTitle)) {
                 return true;
             }
         }
@@ -209,7 +347,7 @@ public class AlertProcessor
     
     public ArrayList<AlertDefinition> getAlertDefinitions(){
         ArrayList<AlertDefinition> definedAlerts = new ArrayList<>();
-        definedAlerts.addAll(predefinedAlerts);
+        //definedAlerts.addAll(predefinedAlerts);
         definedAlerts.addAll(getCustomAlertDefinitions());
         return definedAlerts;
     }
@@ -285,9 +423,8 @@ public class AlertProcessor
     }
     
     public void addAlert(Alert alert) {
-        //Need to handle equip level alerts
         for (Alert a : getActiveAlerts()) {
-            if (a.mTitle.equals(alert.mTitle)) {
+            if (a.mTitle.equals(alert.mTitle) && (a.ref != null && a.ref == alert.ref)) {
                 return;
             }
         }
@@ -306,7 +443,7 @@ public class AlertProcessor
     }
     
     public void deleteAlert(Alert alert) {
-        if (AlertSyncHandler.delete(mContext, alert._id))
+        if (alert._id.equals("") || AlertSyncHandler.delete(mContext, alert._id))
         {
             alertBox.remove(alert.id);
         }

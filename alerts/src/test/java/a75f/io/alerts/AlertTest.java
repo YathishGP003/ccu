@@ -39,7 +39,7 @@ public class AlertTest
     
     public static final String TEST_ALERTS_NEW = "[{\n" + "    \"conditionals\":[\n" + "      {\n" + "        \"order\" : \"1\",\n" + "        \"key\" : \"zone and status and his\",\n" + "        \"value\" : \"3\",\n" + "        \"condition\" :\"==\"\n" + "      },\n" + "      {\n" + "        \"order\" : \"2\",\n" + "        \"operator\" : \"&&\"\n" + "      },\n" + "      {\n" + "        \"order\" : \"3\",\n" + "        \"key\" : \"current and temp\",\n" + "        \"value\" : \"80\",\n" + "        \"condition\": \"==\"\n" + "      },\n" + "      {\n" + "        \"order\" : \"4\",\n" + "        \"operator\" : \"||\"\n" + "      },\n" + "      {\n" + "        \"order\" : \"5\",\n" + "        \"key\" : \"desired and temp and cooling\",\n" + "        \"value\" : \"80\",\n" + "        \"condition\": \"==\"\n" + "      }\n" + "\n" + "    ],\n" + "    \"offset\": \"0\",\n" + "    \"alert\": {\n" + "      \"mAlertType\": \"ZONE_TEMP_DEAD\",\n" + "      \"mTitle\": \"Zone Temperature Dead\",\n" + "      \"mMessage\": \"Equip #equipname3 is reporting a temperature of #pointval3 outside the defined building limits\",\n" + "      \"mNotificationMsg\": \"Equip %s is reporting a temperature of %s outside the defined building limits\",\n" + "      \"mSeverity\": \"0\",\n" + "      \"mEnabled\": \"true\"\n" + "    }\n" + "  }]\n";
     
-    public static final String PROCESS_TEST_ALERT = "[\n" + "    {\n" + "      \"conditionals\":[\n" + "        {\n" + "          \"order\" : \"1\",\n" + "          \"key\" : \"zone and current and temp and his\",\n" + "          \"value\" : \"80\",\n" + "          \"condition\" :\">\"\n" + "        },\n" + "        {\n" + "          \"order\" : \"2\",\n" + "          \"operator\" : \"&&\"\n" + "        },\n" + "        {\n" + "          \"order\" : \"3\",\n" + "          \"key\" : \"zone and current and temp and his\",\n" + "          \"value\" : \"100\",\n" + "          \"condition\": \"<\"\n" + "        }\n" + "      ],\n" + "      \"offset\": \"0\",\n" + "      \"alert\": {\n" + "\n" + "        \"mTitle\": \"Temperature breach detected\",\n" + "        \"mMessage\": \"Equip #equipname1 is reporting a temperature of #pointval1 which is greater than  #condval1 and less than #condval3\",\n" + "        \"mNotificationMsg\": \"Equip #equipname1 is reporting a temperature of #pointval1 which is greater than  #condval1 and less than #condval3\",\n" + "        \"mSeverity\": \"WARN\",\n" + "        \"mEnabled\": \"true\"\n" + "      }\n" + "    }\n" + "  ]";
+    public static final String PROCESS_TEST_ALERT = "[{\n" + "        \"siteRef\" : \"5d5c131b07dba3262fb48505\",\n" + "        \"custom\" : true,\n" + "        \"conditionals\":[\n" + "          {\n" + "            \"order\" : \"1\",\n" + "            \"key\" : \"current and temp and his\",\n" + "            \"grpOperation\" : \"max\",\n" + "            \"condition\" :\">\",\n" + "            \"value\" : \"80\"\n" + "          },\n" + "          {\n" + "            \"order\" : \"2\",\n" + "            \"operator\" : \"&&\"\n" + "\n" + "          },\n" + "          {\n" + "            \"order\" : \"3\",\n" + "            \"key\" : \"current and temp and his\",\n" + "            \"grpOperation\":\"equip\",\n" + "            \"value\" : \"95\",\n" + "            \"condition\": \">\"\n" + "          \n" + "          }\n" + "        ],\n" + "        \"offset\": \"0\",\n" + "        \"alert\": {\n" + "          \"mTitle\": \"Temperature breach detected HHHHHOOO\",\n" + "          \"mMessage\": \"Equip #equipname1 is reporting a temperature of #pointval1 which is greater than  #condval1\",\n" + "          \"mNotificationMsg\": \"Equip #equipname1 is reporting a temperature of #pointval1 which is greater than  #condval1\",\n" + "          \"mSeverity\": \"WARN\",\n" + "          \"mEnabled\": \"true\"\n" + "        }\n" + "      }]";
     
     public static final String PROCESS_TEST_ALERT_OFFSET = "[\n" + "    {\n" + "      \"conditionals\":[\n" + "        {\n" + "          \"order\" : \"1\",\n" + "          \"key\" : \"zone and current and temp and his\",\n" + "          \"value\" : \"80\",\n" + "          \"condition\" :\">\"\n" + "        },\n" + "        {\n" + "          \"order\" : \"2\",\n" + "          \"operator\" : \"&&\"\n" + "        },\n" + "        {\n" + "          \"order\" : \"3\",\n" + "          \"key\" : \"zone and current and temp and his\",\n" + "          \"value\" : \"100\",\n" + "          \"condition\": \"<\"\n" + "        }\n" + "      ],\n" + "      \"offset\": \"5\",\n" + "      \"alert\": {\n" + "\n" + "        \"mTitle\": \"Temperature breach detected\",\n" + "        \"mMessage\": \"Equip #equipname1 is reporting a temperature of #pointval1 which is greater than  #condval1 and less than #condval3\",\n" + "        \"mNotificationMsg\": \"Equip #equipname1 is reporting a temperature of #pointval1 which is greater than  #condval1 and less than #condval3\",\n" + "        \"mSeverity\": \"WARN\",\n" + "        \"mEnabled\": \"true\"\n" + "      }\n" + "    }\n" + "  ]";
     
@@ -252,7 +252,39 @@ public class AlertTest
                                   .setUnit("\u00B0F")
                                   .build();
     
+    
+        ++nodeAddr;
+        Equip v2 = new Equip.Builder()
+                           .setSiteRef(siteRef)
+                           .setDisplayName("Test-VAV-"+nodeAddr)
+                           .setRoomRef("room")
+                           .setFloorRef("floor")
+                           .addMarker("equip")
+                           .addMarker("vav")
+                           .addMarker("zone")
+                           .setGroup(String.valueOf(nodeAddr))
+                           .build();
+        String equipRef2 = hayStack.addEquip(v2);
+        Point testPoint2 = new Point.Builder()
+                                   .setDisplayName("Test AHU-"+nodeAddr+"-TestTemp")
+                                   .setEquipRef(equipRef2)
+                                   .setSiteRef(siteRef)
+                                   .setRoomRef("room")
+                                   .setFloorRef("floor")
+                                   .addMarker("current")
+                                   .addMarker("zone")
+                                   .addMarker("temp").addMarker("air").addMarker("sensor").addMarker("his")
+                                   .setGroup(String.valueOf(nodeAddr))
+                                   .setTz(tz)
+                                   .setUnit("\u00B0F")
+                                   .build();
+    
+    
+    
         String ctId = CCUHsApi.getInstance().addPoint(testPoint);
+        String ctId2 = CCUHsApi.getInstance().addPoint(testPoint2);
+    
+        
         HClient hsClient = hayStack.getHSClient();
         ArrayList<HHisItem> hislist = new ArrayList<>();
         HHisItem[] hisArray = new HHisItem[3];
@@ -263,6 +295,13 @@ public class AlertTest
         hsClient.hisWrite(HRef.copy(ctId),hislist.toArray(new HHisItem[hislist.size()]));
     
     
+        ArrayList<HHisItem> hislist1 = new ArrayList<>();
+        HHisItem[] hisArray1 = new HHisItem[3];
+        hisArray1[0] = HHisItem.make(HDateTime.make(now), HNum.make(100));
+        hislist1.add(hisArray1[0]);
+        hsClient.hisWrite(HRef.copy(ctId2),hislist1.toArray(new HHisItem[hislist1.size()]));
+    
+        
         AlertProcessor p = new AlertProcessor(PROCESS_TEST_ALERT);
         p.processAlerts();
         Assert.assertEquals(1, p.getActiveAlerts().size());
@@ -301,7 +340,6 @@ public class AlertTest
                           .setGroup(String.valueOf(nodeAddr))
                           .build();
         String equipRef = hayStack.addEquip(v);
-        
         Point testPoint = new Point.Builder()
                                   .setDisplayName("Test AHU-"+nodeAddr+"-TestTemp")
                                   .setEquipRef(equipRef)
@@ -316,7 +354,9 @@ public class AlertTest
                                   .setUnit("\u00B0F")
                                   .build();
         
-        String ctId = CCUHsApi.getInstance().addPoint(testPoint);
+        
+        String ctId1 = CCUHsApi.getInstance().addPoint(testPoint);
+        
         HClient hsClient = hayStack.getHSClient();
         ArrayList<HHisItem> hislist = new ArrayList<>();
         HHisItem[] hisArray = new HHisItem[3];
@@ -324,8 +364,8 @@ public class AlertTest
         hisArray[0] = HHisItem.make(HDateTime.make(now), HNum.make(90));
         hislist.add(hisArray[0]);
         
-        hsClient.hisWrite(HRef.copy(ctId),hislist.toArray(new HHisItem[hislist.size()]));
-        
+        hsClient.hisWrite(HRef.copy(ctId1),hislist.toArray(new HHisItem[hislist.size()]));
+    
         
         AlertProcessor p = new AlertProcessor(PROCESS_TEST_ALERT_OFFSET);
         p.processAlerts();

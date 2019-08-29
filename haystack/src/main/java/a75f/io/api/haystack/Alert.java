@@ -36,7 +36,16 @@ public class Alert
     public String siteRef;
     
     public boolean syncStatus;
+    public String mAlertType;
     
+    public String getmAlertType()
+    {
+        return mAlertType;
+    }
+    public void setmAlertType(String mAlertType)
+    {
+        this.mAlertType = mAlertType;
+    }
     public boolean getSyncStatus()
     {
         return syncStatus;

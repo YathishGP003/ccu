@@ -172,9 +172,12 @@ public class EntityParser
         for(Schedule s : getSchedules()) {
             if (s.getMarkers().contains("building"))
             {
+                String guid = s.getId();
                 s.setmSiteId(CCUHsApi.getInstance().getSiteId().toString());
                 HRef localId = HRef.make(UUID.randomUUID().toString());
+                s.setId(localId.toVal());
                 CCUHsApi.getInstance().addSchedule(localId.toVal(), s.getScheduleHDict());
+                CCUHsApi.getInstance().putUIDMap(localId.toString(), "@" + guid);
             }
         }
     }

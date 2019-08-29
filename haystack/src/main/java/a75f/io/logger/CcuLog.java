@@ -58,6 +58,7 @@ public class CcuLog
 			mLogNode.println(priority, tag, msg, tr);
 		}
 		Log.i(tag, msg);
+		//System.out.println(msg);
 		if (tr != null) {
 			tr.printStackTrace();
 		}

@@ -9,7 +9,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Point;
 
 /***
- *  Alert messages shall have variables with prefix # to have formatted with runtime values while
+ *  Alert messages shall have variables with prefix # to be formatted with runtime values while
  *  generating the message.
  *  Expected format is
  *  #entity-(name/val)-conditional-number
@@ -45,21 +45,39 @@ public class AlertFormatter
         {
             String token = t.nextToken();
             if (token.startsWith("#")) {
-                message = message.replace(token, parseToken(def, token));
+                message = message.replace(token, parseToken(def, token, null));
             }
         }
         return message;
     }
     
-    private static String parseToken(AlertDefinition def, String token) {
+    public static String getFormattedMessage(AlertDefinition def, String pointId) {
+        String message = def.alert.mMessage;
+        StringTokenizer t = new StringTokenizer(def.alert.mMessage);
+        while(t.hasMoreTokens())
+        {
+            String token = t.nextToken();
+            if (token.startsWith("#")) {
+                message = message.replace(token, parseToken(def, token, pointId));
+            }
+        }
+        return message;
+    }
+    
+    private static String parseToken(AlertDefinition def, String token, String point) {
         token.replace("#","");
         int n = getConditionalIndex(token);
         Conditional c = n > 0 ? def.conditionals.get(n-1) : null;
         CCUHsApi hs = CCUHsApi.getInstance();
-        Point p = c != null ? new Point.Builder().setHashMap(hs.read(c.key)).build() : null;
+        Point p = new Point.Builder().setHashMap(c != null ? hs.read(c.key) : hs.readMapById(point)).build();
         switch (getEntity(token)) {
             case "point":
-                return token.contains("name") ? p.getDisplayName() : hs.readHisValById(p.getId()).toString();
+                if (c == null) {
+                    return token.contains("name") ? p.getDisplayName() : hs.readHisValById(p.getId()).toString();
+                } else
+                {
+                    return token.contains("name") ? p.getDisplayName() : ((c.grpOperation.contains("min") || c.grpOperation.contains("max") || c.grpOperation.contains("average")) ? String.valueOf(c.resVal) : hs.readHisValById(p.getId()).toString());
+                }
             case "equip":
                 HashMap q = hs.readMapById(p.getEquipRef());
                 return q.get("dis").toString();

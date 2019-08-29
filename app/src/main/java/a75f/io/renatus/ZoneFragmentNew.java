@@ -580,7 +580,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         {
             Equip avgTempEquip = new Equip.Builder().setHashMap(zoneMap.get(i)).build();
             double avgTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" + avgTempEquip.getId() + "\"");
-            
+
             double heatDB = CCUHsApi.getInstance().readHisValByQuery("point and heating and deadband and base and equipRef == \"" + avgTempEquip.getId() + "\"");
             double coolDB = CCUHsApi.getInstance().readHisValByQuery("point and cooling and deadband and base and equipRef == \"" + avgTempEquip.getId() + "\"");
 
@@ -2183,15 +2183,16 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         labelInputAir.setText("Input  "+plcPoints.get("Unit Type").toString()+" : ");
         labelTarget.setText("Target "+plcPoints.get("Unit Type").toString()+" : ");
-        labelOffsetAir.setText("Offset "+plcPoints.get("Unit Type").toString()+" : ");
 
         double processValue = (double)plcPoints.get("Input Value");
         textViewInputAir.setText(String.format("%.2f",processValue)+plcPoints.get("Unit").toString());
         textViewTargetAir.setText(plcPoints.get("Target Value").toString()+plcPoints.get("Unit").toString());
-        textViewOffsetAir.setText(plcPoints.get("Offset Value").toString()+plcPoints.get("Unit").toString());
+
         try {
             if((boolean)plcPoints.get("Dynamic Setpoint") == true)
             {
+                    labelOffsetAir.setText("Offset "+plcPoints.get("Unit Type").toString()+" : ");
+                    textViewOffsetAir.setText(plcPoints.get("Offset Value").toString()+plcPoints.get("Unit").toString());
                     viewPointRow2.setPadding(0,0,0,40);
                     linearLayoutZonePoints.addView(viewTitle);
                     linearLayoutZonePoints.addView(viewStatus);

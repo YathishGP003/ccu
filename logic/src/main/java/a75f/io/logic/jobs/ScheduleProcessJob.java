@@ -978,12 +978,12 @@ public class ScheduleProcessJob extends BaseJob {
             double offsetVal = CCUHsApi.getInstance().readHisValById(id);
             plcPoints.put("Offset Value",offsetVal);
         }
-        if (targetValue != 0)
-        {
+        //if (targetValue != 0)
+        //{
             //String id = ((HashMap) targetValue.get(0)).get("id").toString();
             //double targetVal = CCUHsApi.getInstance().readHisValById(id);
             plcPoints.put("Target Value",targetValue);
-        }
+        //}
         if (piSensorValue != null && piSensorValue.size() > 0)
         {
             String id = ((HashMap) piSensorValue.get(0)).get("id").toString();

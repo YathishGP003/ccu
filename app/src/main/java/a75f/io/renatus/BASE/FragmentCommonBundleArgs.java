@@ -14,4 +14,5 @@ public class FragmentCommonBundleArgs
 	public static final String ZONE_NAME        = "ZONE_NAME";
 	public static final String NODE_TYPE        = "NODE_TYPE";
 	public static final String PORT             =  "PORT";
+	public static final String ALREADY_PAIRED    =  "ALREADY_PAIRED";
 }

@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.logic.bo.building.NodeType;
@@ -41,6 +42,7 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     
     String mRoomName;
     String mFloorName;
+    boolean isPaired;
     
     @BindView(R.id.default_text_view)
     TextView    defaultTextView;
@@ -177,14 +179,22 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
     @OnClick(R.id.rl_picontrol)
     void onPiControlOnClick()
     {
-        showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.PLC, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
+        if(!isPaired) {
+            showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.PLC, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
+        }else{
+            Toast.makeText(getActivity(), "Pi Loop cannot be paired with existing any module in this zone", Toast.LENGTH_LONG).show();
+        }
     }
 
     @Optional
     @OnClick(R.id.rl_energymeter)
     void onEnergyMeterOnClick()
     {
-        showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.EMR, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
+        if(!isPaired) {
+            showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.EMR, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
+        }else{
+            Toast.makeText(getActivity(), "Energy meter cannot be paired with existing any module in this zone", Toast.LENGTH_LONG).show();
+        }
     }
 
     @Optional
@@ -244,6 +254,7 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
         mNodeAddress = getArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR);
         mRoomName = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
         mFloorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
+        isPaired = getArguments().getBoolean(FragmentCommonBundleArgs.ALREADY_PAIRED);
         //mZone = L.findZoneByName(mFloorName, mRoomName);
         //mLightProfile = (LightProfile) mZone.findProfile(ProfileType.LIGHT);
         
@@ -327,13 +338,14 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
         }
     }
     
-    public static DialogSmartNodeProfiling newInstance(short meshAddress, String roomName, String floorName)
+    public static DialogSmartNodeProfiling newInstance(short meshAddress, String roomName, String floorName,boolean isPaired)
     {
         DialogSmartNodeProfiling f = new DialogSmartNodeProfiling();
         Bundle bundle = new Bundle();
         bundle.putShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR, meshAddress);
         bundle.putString(FragmentCommonBundleArgs.ARG_NAME, roomName);
         bundle.putString(FragmentCommonBundleArgs.FLOOR_NAME, floorName);
+        bundle.putBoolean(FragmentCommonBundleArgs.ALREADY_PAIRED, isPaired);
         f.setArguments(bundle);
         return f;
     }

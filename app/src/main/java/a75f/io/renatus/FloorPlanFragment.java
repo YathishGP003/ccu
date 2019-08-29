@@ -774,23 +774,57 @@ public class FloorPlanFragment extends Fragment
 	@OnClick(R.id.pairModuleBtn)
 	public void startPairing()
 	{
-		short meshAddress = L.generateSmartNodeAddress();
-		if(mFloorListAdapter.getSelectedPostion() == -1)
+
+		Zone selectedZone = getSelectedZone();
+		ArrayList<Equip> zoneEquips  = HSUtil.getEquips(selectedZone.getId());
+		boolean isPLCPaired = false;
+		boolean isEMRPaired = false;
+		boolean isCCUPaired = false;
+		boolean isPaired = false;
+		if(zoneEquips.size() > 0)
 		{
-			if (L.ccu().oaoProfile != null) {
-				Toast.makeText(getActivity(),"OAO Module already paired",Toast.LENGTH_LONG).show();
-			} else
+			isPaired = true;
+			for(int i=0;i<zoneEquips.size();i++)
 			{
-				showDialogFragment(FragmentBLEInstructionScreen.getInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.OAO, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
-				//DialogOAOProfile oaoProfiling = DialogOAOProfile.newInstance(Short.parseShort(nodeAddr), "SYSTEM", "SYSTEM");
-				//showDialogFragment(oaoProfiling, DialogOAOProfile.ID);
+				if(zoneEquips.get(i).getProfile().contains("PLC"))
+				{
+					isPLCPaired = true;
+				}if(zoneEquips.get(i).getProfile().contains("EMR"))
+				{
+					isEMRPaired = true;
+				}if(zoneEquips.get(i).getProfile().contains("TEMP_INFLUENCE"))
+				{
+					isCCUPaired = true;
+				}
 			}
 		}
-		else {
-			/* Checks to see if emulated and doesn't popup BLE dialogs */
 
-			//This should be moved to pair button for select device type screen.
-			showDialogFragment(FragmentSelectDeviceType.newInstance(meshAddress, getSelectedZone().getId(), getSelectedFloor().getId()), FragmentSelectDeviceType.ID);
+		if(!isPLCPaired && !isEMRPaired && !isCCUPaired) {
+			short meshAddress = L.generateSmartNodeAddress();
+			if (mFloorListAdapter.getSelectedPostion() == -1) {
+				if (L.ccu().oaoProfile != null) {
+					Toast.makeText(getActivity(), "OAO Module already paired", Toast.LENGTH_LONG).show();
+				} else {
+					showDialogFragment(FragmentBLEInstructionScreen.getInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.OAO, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
+					//DialogOAOProfile oaoProfiling = DialogOAOProfile.newInstance(Short.parseShort(nodeAddr), "SYSTEM", "SYSTEM");
+					//showDialogFragment(oaoProfiling, DialogOAOProfile.ID);
+				}
+			} else {
+				/* Checks to see if emulated and doesn't popup BLE dialogs */
+
+				//This should be moved to pair button for select device type screen.
+				showDialogFragment(FragmentSelectDeviceType.newInstance(meshAddress, getSelectedZone().getId(), getSelectedFloor().getId(),isPaired), FragmentSelectDeviceType.ID);
+			}
+		}else {
+			if (isPLCPaired) {
+				Toast.makeText(getActivity(), "Pi Loop Module is already paired in this zone", Toast.LENGTH_LONG).show();
+			}
+			if (isEMRPaired) {
+				Toast.makeText(getActivity(), "Energy Meter Module is already paired in this zone", Toast.LENGTH_LONG).show();
+			}
+			if (isCCUPaired) {
+				Toast.makeText(getActivity(), "CCU as Zone is already paired in this zone", Toast.LENGTH_LONG).show();
+			}
 		}
 	}
 	

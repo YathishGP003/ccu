@@ -40,14 +40,16 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
     
     String       mRoomName;
     String       mFloorName;
-    
-    public static FragmentSelectDeviceType newInstance(short meshAddress, String roomName, String mFloorName)
+    Boolean      misPaired;
+
+    public static FragmentSelectDeviceType newInstance(short meshAddress, String roomName, String mFloorName, boolean isPaired)
     {
         FragmentSelectDeviceType f = new FragmentSelectDeviceType();
         Bundle bundle = new Bundle();
         bundle.putShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR, meshAddress);
         bundle.putString(FragmentCommonBundleArgs.ARG_NAME, roomName);
         bundle.putString(FragmentCommonBundleArgs.FLOOR_NAME, mFloorName);
+        bundle.putBoolean(FragmentCommonBundleArgs.ALREADY_PAIRED, isPaired);
         f.setArguments(bundle);
         return f;
     }
@@ -92,7 +94,7 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
     }
 
     @OnClick(R.id.rl_smartnode) void onSmartNodeClick() {
-        DialogSmartNodeProfiling wrmProfiling = DialogSmartNodeProfiling.newInstance(mNodeAddress, mRoomName, mFloorName);
+        DialogSmartNodeProfiling wrmProfiling = DialogSmartNodeProfiling.newInstance(mNodeAddress, mRoomName, mFloorName, misPaired);
         showDialogFragment(wrmProfiling, DialogSmartNodeProfiling.ID);
     }
 
@@ -147,6 +149,7 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
         mNodeAddress = getArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR);
         mRoomName = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
         mFloorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
+        misPaired = getArguments().getBoolean(FragmentCommonBundleArgs.ALREADY_PAIRED);
         //mZone = L.findZoneByName(mFloorName, mRoomName);
         //mLightProfile = (LightProfile) mZone.findProfile(ProfileType.LIGHT);
         
@@ -159,7 +162,7 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
         
         if (smartNode.isChecked())
         {
-            DialogSmartNodeProfiling wrmProfiling = DialogSmartNodeProfiling.newInstance(mNodeAddress, mRoomName, mFloorName);
+            DialogSmartNodeProfiling wrmProfiling = DialogSmartNodeProfiling.newInstance(mNodeAddress, mRoomName, mFloorName, misPaired);
             showDialogFragment(wrmProfiling, DialogSmartNodeProfiling.ID);
             
         }

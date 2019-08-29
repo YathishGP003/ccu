@@ -135,7 +135,7 @@ public class DabProfile extends ZoneProfile
     
         SystemController.State conditioning = L.ccu().systemProfile.getSystemController().getSystemState();
     
-        if (roomTemp > setTempCooling)
+        if (roomTemp > setTempCooling && conditioning == SystemController.State.COOLING)
         {
             //Zone is in Cooling
             if (state != COOLING)
@@ -143,12 +143,9 @@ public class DabProfile extends ZoneProfile
                 state = COOLING;
                 damperOpController.reset();
             }
-            if (conditioning == SystemController.State.COOLING)
-            {
-                damperOpController.updateControlVariable(roomTemp, setTempCooling);
-            }
+            damperOpController.updateControlVariable(roomTemp, setTempCooling);
         }
-        else if (roomTemp < setTempHeating)
+        else if (roomTemp < setTempHeating && conditioning == SystemController.State.HEATING)
         {
             //Zone is in heating
             if (state != HEATING)
@@ -156,10 +153,7 @@ public class DabProfile extends ZoneProfile
                 state = HEATING;
                 damperOpController.reset();
             }
-            if (conditioning == SystemController.State.HEATING)
-            {
-                damperOpController.updateControlVariable(setTempHeating, roomTemp);
-            }
+            damperOpController.updateControlVariable(setTempHeating, roomTemp);
         } else {
             if (state != DEADBAND) {
                 state = DEADBAND;

@@ -658,7 +658,10 @@ public class SingleStageEquip {
             {
                 message = (status == 0 ? "Recirculating Air" : status == 1 ? "Cooling Space" : "Warming Space");
                 if(!sseStatus.isEmpty()){
-                    message = message + ","+sseStatus;
+                    if(sseStatus.equals("Fan ON"))
+                        message = "Recirculating Air, " + sseStatus;
+                    else
+                        message = message + ","+sseStatus;
                 }
             }
         }

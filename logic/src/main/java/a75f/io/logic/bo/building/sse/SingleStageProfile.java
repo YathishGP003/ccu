@@ -159,7 +159,7 @@ public class SingleStageProfile extends ZoneProfile
                         stageStatus = stageStatus + ", Fan ON";
                         setCmdSignal("fan and stage1", 1.0, (short) sseEquip.nodeAddr);
                     }
-                } else if (roomTemp >= (setTempCooling + hysteresis)) {
+                } else if (roomTemp >= (setTempHeating + hysteresis)) {
                     setCmdSignal("heating and stage1", 0, (short) sseEquip.nodeAddr);
                     if ((relay2config > 0) && occupied) {
                         stageStatus = "Fan ON";

@@ -10,8 +10,6 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -147,6 +145,12 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
         showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.DAB, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
     }
 
+    @Optional
+    @OnClick(R.id.rl_sse)
+    void onSSEOnClick()
+    {
+        showDialogFragment(FragmentBLEInstructionScreen.getInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.SSE, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
+    }
     @Optional
     @OnClick(R.id.rl_light)
     void onLightonClick()

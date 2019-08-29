@@ -1,86 +1,77 @@
 package a75f.io.renatus;
 
 import android.app.Dialog;
-import android.content.DialogInterface;
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.res.Resources;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.SwitchCompat;
-import android.text.Editable;
-import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CompoundButton;
-import android.widget.EditText;
-import android.widget.ImageView;
+import android.widget.NumberPicker;
 import android.widget.Spinner;
-import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
 
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.device.mesh.MeshUtil;
+import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
+import a75f.io.device.serial.MessageType;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Output;
-import a75f.io.logic.bo.building.TestProfile;
-import a75f.io.logic.bo.building.Zone;
-import a75f.io.logic.bo.building.ZoneProfile;
+import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
-import a75f.io.logic.bo.building.definitions.ScheduleType;
-import a75f.io.logic.bo.building.definitions.SingleStageMode;
-import a75f.io.logic.bo.building.sse.SingleStageLogicalMap;
+import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.sse.SingleStageConfig;
 import a75f.io.logic.bo.building.sse.SingleStageProfile;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
-
-import static a75f.io.logic.L.ccu;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnCheckedChanged;
 
 /**
- * Created by ryant on 9/27/2017.
+ * Created by Anilkumar on 8/22/2019.
  */
 
-public class FragmentSSEConfiguration extends BaseDialogFragment implements CompoundButton.OnCheckedChangeListener, View.OnClickListener
-{
-    
-    public static final String ID = FragmentSSEConfiguration.class.getSimpleName();
-    
-    View view;
-    boolean mbIsInEditMode = false;
-    Spinner      spRelay1;
-    Spinner      spRelay2;
-    SwitchCompat relay1Switch;
-    SwitchCompat relay2Switch;
-    EditText     relay1EditText;
-    EditText     relay2EditText;
-    Spinner      spRelay1Action;
-    Spinner      spRelay2Action;
-    ImageView    editRelay1;
-    ImageView    editRelay2;
-    
-    TextView     lcmSetCommand;
-    TextView     lcmCancelCommand;
-    ToggleButton lcmRelay1Override;
-    ToggleButton lcmRelay2Override;
-    
-    ArrayList<String> zoneCircuitNames;
-    Zone              mZone;
-    
-    private ArrayAdapter<CharSequence> relay1Adapter;
-    private ArrayAdapter<CharSequence> relay2Adapter;
-    private short                      mSmartNodeAddress;
-    private NodeType                   mNodeType;
-    
+public class FragmentSSEConfiguration  extends BaseDialogFragment implements CompoundButton.OnCheckedChangeListener {
+    public static final String ID = FragmentCPUConfiguration.class.getSimpleName();
+    static final int TEMP_OFFSET_LIMIT = 100;
+    String floorRef;
+    String roomRef;
+    private ProfileType mProfileType;
+    private short    mSmartNodeAddress;
+    private NodeType mNodeType;
+    private SingleStageProfile mSSEProfile;
+    private SingleStageConfig mProfileConfig;
+
+    ToggleButton switchCoolHeatR1;
+    Spinner sseRelay1Actuator;
+    Spinner sseRelay2Actuator;
+    @BindView(R.id.sseRelay1ForceTestBtn)ToggleButton testCoolHeatRelay1;
+    ToggleButton switchFanR2;
+    @BindView(R.id.sseRelay2ForceTestBtn)ToggleButton testFanRelay2;
+    ToggleButton switchExtTempSensor;
+    ToggleButton switchAirflowTempSensor;
+    Button setButton;
+    NumberPicker temperatureOffset;
     public FragmentSSEConfiguration()
     {
     }
-    
-    public static FragmentSSEConfiguration newInstance(short smartNodeAddress, String roomName, NodeType nodeType, String floorName)
+
+    public static FragmentSSEConfiguration newInstance(short smartNodeAddress, String roomName, NodeType nodeType, String floorName, ProfileType profileType)
     {
         FragmentSSEConfiguration f = new FragmentSSEConfiguration();
         Bundle bundle = new Bundle();
@@ -88,195 +79,18 @@ public class FragmentSSEConfiguration extends BaseDialogFragment implements Comp
         bundle.putString(FragmentCommonBundleArgs.ARG_NAME, roomName);
         bundle.putString(FragmentCommonBundleArgs.FLOOR_NAME, floorName);
         bundle.putString(FragmentCommonBundleArgs.NODE_TYPE, nodeType.toString());
+        bundle.putInt(FragmentCommonBundleArgs.PROFILE_TYPE, profileType.ordinal());
         f.setArguments(bundle);
         return f;
     }
-    
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
-    {
-        view = inflater.inflate(R.layout.fragment_sse_control_details, container, false);
-        mSmartNodeAddress = getArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR);
-        String mRoomName = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
-        String mFloorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
-        mNodeType = NodeType.valueOf(getArguments().getString(FragmentCommonBundleArgs.NODE_TYPE));
-        mZone = L.findZoneByName(mFloorName, mRoomName);
-        lcmSetCommand = (TextView) view.findViewById(R.id.lcmSetCommand);
-        lcmCancelCommand = (TextView) view.findViewById(R.id.lcmCancelCommand);
-        if (!mbIsInEditMode)
-        {
-            lcmCancelCommand.setVisibility(View.INVISIBLE);
-        }
-        //setUpTestTriggers();
-        spRelay1 = (Spinner) view.findViewById(R.id.lcmRelay1Actuator);
-        spRelay2 = (Spinner) view.findViewById(R.id.lcmRelay2Actuator);
-        relay1Switch = (SwitchCompat) view.findViewById(R.id.lcmRelay1Switch);
-        relay2Switch = (SwitchCompat) view.findViewById(R.id.lcmRelay2Switch);
-        relay1EditText = (EditText) view.findViewById(R.id.lcmRelay1EditName);
-        relay2EditText = (EditText) view.findViewById(R.id.lcmRelay2EditName);
-        spRelay1Action = (Spinner) view.findViewById(R.id.lcmRelay1HeatCoolFanSpinner);
-        spRelay2Action = (Spinner) view.findViewById(R.id.lcmRelay2HeatCoolFanSpinner);
-        ArrayAdapter sseActionType = ArrayAdapter.createFromResource(getActivity(), R.array.sse_action_type, R.layout.spinner_dropdown_item);
-        sseActionType.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        spRelay1Action.setAdapter(sseActionType);
-        spRelay2Action.setAdapter(sseActionType);
-        relay1Adapter = ArrayAdapter.createFromResource(getActivity(), R.array.lcm_relay, R.layout.spinner_dropdown_item);
-        relay1Adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        spRelay1.setAdapter(relay1Adapter);
-        relay2Adapter = ArrayAdapter.createFromResource(getActivity(), R.array.lcm_relay, R.layout.spinner_dropdown_item);
-        relay2Adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        spRelay2.setAdapter(relay2Adapter);
-        editRelay1 = (ImageView) view.findViewById(R.id.lcmRelay1EditImg);
-        editRelay2 = (ImageView) view.findViewById(R.id.lcmRelay2EditImg);
-        relay1Switch.setOnCheckedChangeListener(this);
-        relay2Switch.setOnCheckedChangeListener(this);
-        editRelay1.setOnClickListener(this);
-        editRelay2.setOnClickListener(this);
-        zoneCircuitNames = new ArrayList<>();
-        TextView setBtn = (TextView) view.findViewById(R.id.lcmSetCommand);
-        setBtn.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                BaseProfileConfiguration baseProfileConfiguration = new BaseProfileConfiguration();
-                SingleStageProfile mSingleStageProfile = new SingleStageProfile();
-                mZone.mZoneProfiles.add(mSingleStageProfile);
-                bindData(baseProfileConfiguration, mSingleStageProfile, false);
-                SingleStageLogicalMap singleStageLogicalMap = null;
-                if(mSingleStageProfile.getLogicalMap().containsKey(mSmartNodeAddress))
-                {
-                    singleStageLogicalMap = mSingleStageProfile.getLogicalMap().get(mSmartNodeAddress);
-                }
-                else
-                {
-                    singleStageLogicalMap = new SingleStageLogicalMap();
-                    mSingleStageProfile.getLogicalMap().put(mSmartNodeAddress, singleStageLogicalMap);
-                }
-                
-                singleStageLogicalMap.getLogicalMap().put(Port.RELAY_ONE, getSingleStageMode(spRelay1Action));
-                singleStageLogicalMap.getLogicalMap().put(Port.RELAY_TWO, getSingleStageMode(spRelay2Action));
-                
-                mSingleStageProfile.setScheduleMode(ScheduleType.BUILDING);
-                mSingleStageProfile.setSchedules(ccu().getDefaultTemperatureSchedule());
-                
-                L.saveCCUState();
-                getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
-                FragmentSSEConfiguration.this.closeAllBaseDialogFragments();
-            }
-        });
-        TextView cancelBtn = (TextView) view.findViewById(R.id.lcmCancelCommand);
-        cancelBtn.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                dismiss();
-            }
-        });
-        return view;
-    }
-    
-    private SingleStageMode getSingleStageMode(Spinner modeSpinner)
-    {
-        if (modeSpinner.getSelectedItemPosition() == 0)
-        {
-            return SingleStageMode.COOLING;
-        }
-        else if (modeSpinner.getSelectedItemPosition() == 1)
-        {
-            return SingleStageMode.HEATING;
-        }
-        else if (modeSpinner.getSelectedItemPosition() == 2)
-        {
-            return SingleStageMode.FAN;
-        }
-        else
-        {
-            return SingleStageMode.NOT_INSTALLED;
-        }
-    }
-    
-    private void setUpTestTriggers()
-    {
-        final Zone testZone = new Zone(null, null);
-        final TestProfile testSingleStage = new TestProfile();
-        testZone.mZoneProfiles.add(testSingleStage);
-        
-        testSingleStage.setCircuitTest(true);
-        lcmRelay1Override = (ToggleButton) view.findViewById(R.id.testr1);
-        lcmRelay2Override = (ToggleButton) view.findViewById(R.id.testr2);
-        //TODO why is analog min a tuner???
-        CompoundButton.OnCheckedChangeListener onCheckChangedListener = new CompoundButton.OnCheckedChangeListener()
-        {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
-            {
-                BaseProfileConfiguration baseProfileConfiguration = new BaseProfileConfiguration();
-                bindData(baseProfileConfiguration , testSingleStage, true);
-                L.sendTestMessage(mSmartNodeAddress, testZone);
-            }
-        };
-        lcmRelay1Override.setOnCheckedChangeListener(onCheckChangedListener);
-        lcmRelay2Override.setOnCheckedChangeListener(onCheckChangedListener);
-    }
-    
-    public void bindData(BaseProfileConfiguration zoneProfileConfiguration, ZoneProfile zoneProfile, boolean isTest)
-    {
-        zoneProfileConfiguration.setNodeType(mNodeType);
-        Output relayOne;
-        Output relayTwo;
-        if (relay1Switch.isChecked())
-        {
-            relayOne = new Output();
-            relayOne.setAddress(mSmartNodeAddress);
-            relayOne.setPort(Port.RELAY_ONE);
-            if (spRelay1.getSelectedItemPosition() == 0)
-            {
-                relayOne.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyOpen;
-            }
-            else
-            {
-                relayOne.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyClose;
-            }
-            relayOne.setName(relay1EditText.getText().toString());
-            if (isTest)
-            {
-                relayOne.setTestVal(lcmRelay1Override.isChecked() ? (short) 1 : 0);
-            }
-            zoneProfileConfiguration.getOutputs().add(relayOne);
-        }
-        if (relay2Switch.isChecked())
-        {
-            relayTwo = new Output();
-            relayTwo.setAddress(mSmartNodeAddress);
-            relayTwo.setPort(Port.RELAY_TWO);
-            if (spRelay2.getSelectedItemPosition() == 0)
-            {
-                relayTwo.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyOpen;
-            }
-            else
-            {
-                relayTwo.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyClose;
-            }
-            relayTwo.setName(relay2EditText.getText().toString());
-            relayTwo.setPort(Port.RELAY_TWO);
-            zoneProfileConfiguration.getOutputs().add(relayTwo);
-            if (isTest)
-            {
-                relayTwo.setTestVal(lcmRelay2Override.isChecked() ? (short) 1 : 0);
-            }
-        }
-        zoneProfile.getProfileConfiguration().put(mSmartNodeAddress, zoneProfileConfiguration);
-    }
-    
+
     @Override
     public String getIdString()
     {
         return ID;
     }
-    
+
+
     @Override
     public void onStart()
     {
@@ -284,124 +98,244 @@ public class FragmentSSEConfiguration extends BaseDialogFragment implements Comp
         Dialog dialog = getDialog();
         if (dialog != null)
         {
-            int width = ViewGroup.LayoutParams.MATCH_PARENT;
-            int height = ViewGroup.LayoutParams.MATCH_PARENT;
+            int width = 1165;//ViewGroup.LayoutParams.WRAP_CONTENT;
+            int height = 720;//ViewGroup.LayoutParams.WRAP_CONTENT;
             dialog.getWindow().setLayout(width, height);
         }
+        setTitle();
     }
-    
+
+    private void setTitle() {
+        Dialog dialog = getDialog();
+
+        if (dialog == null) {
+            return;
+        }
+        int titleDividerId = getContext().getResources()
+                .getIdentifier("titleDivider", "id", "android");
+
+        View titleDivider = dialog.findViewById(titleDividerId);
+        if (titleDivider != null) {
+            titleDivider.setBackgroundColor(getContext().getResources()
+                    .getColor(R.color.transparent));
+        }
+    }
+
+    @Nullable
     @Override
-    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
+        getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+        View view = inflater.inflate(R.layout.fragment_sse_control_details, container, false);
+        mSmartNodeAddress = getArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR);
+        roomRef = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
+        floorRef = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
+        mNodeType = NodeType.valueOf(getArguments().getString(FragmentCommonBundleArgs.NODE_TYPE));
+        mProfileType = ProfileType.values()[getArguments().getInt(FragmentCommonBundleArgs.PROFILE_TYPE)];
+        ButterKnife.bind(this, view);
+        return view;
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
+    {
+
+        mSSEProfile = (SingleStageProfile) L.getProfile(mSmartNodeAddress);
+
+        if (mSSEProfile != null) {
+            Log.d("SSEConfig", "Get Config: ");
+            mProfileConfig = (SingleStageConfig) mSSEProfile.getProfileConfiguration(mSmartNodeAddress);
+        } else {
+            Log.d("SSEConfig", "Create Profile: ");
+            mSSEProfile = new SingleStageProfile();
+
+        }
+
+        switchCoolHeatR1 = (ToggleButton) view.findViewById(R.id.sseRelay1Switch);
+        switchFanR2 = (ToggleButton) view.findViewById(R.id.sseRelay2Switch);
+        switchAirflowTempSensor = (ToggleButton)view.findViewById(R.id.sse_thermister1_switch);
+        switchExtTempSensor = (ToggleButton)view.findViewById(R.id.sse_thermister2_switch);
+        temperatureOffset = (NumberPicker) view.findViewById(R.id.temperatureOffset);
+        sseRelay1Actuator = (Spinner)view.findViewById(R.id.sseRelay1Actuator);
+        sseRelay2Actuator = (Spinner)view.findViewById(R.id.sseRelay2Actuator);
+        setDividerColor(temperatureOffset);
+        temperatureOffset.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+        String[] nums = new String[TEMP_OFFSET_LIMIT * 2 + 1];//{"-4","-3","-2","-1","0","1","2","3","4"};
+        for (int nNum = 0; nNum < TEMP_OFFSET_LIMIT * 2 + 1; nNum++)
+            nums[nNum] = String.valueOf((float) (nNum - TEMP_OFFSET_LIMIT) / 10);
+        temperatureOffset.setDisplayedValues(nums);
+        temperatureOffset.setMinValue(0);
+        temperatureOffset.setMaxValue(TEMP_OFFSET_LIMIT * 2);
+        temperatureOffset.setValue(TEMP_OFFSET_LIMIT);
+        temperatureOffset.setWrapSelectorWheel(false);
+
+        ArrayList<Integer> temp = new ArrayList<Integer>();
+        for (int pos = 0; pos <= 150; pos++)
+            temp.add(pos);
+        ArrayAdapter<Integer> tempRange = new ArrayAdapter<Integer>(getActivity(), android.R.layout.simple_spinner_item, temp);
+        tempRange.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        ArrayAdapter<CharSequence> sseRelay1TypeAdapter = ArrayAdapter.createFromResource(
+                getActivity(), R.array.sse_relay1_mode, R.layout.spinner_dropdown_item);
+        sseRelay1TypeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        sseRelay1Actuator.setAdapter(sseRelay1TypeAdapter);
+        ArrayAdapter<CharSequence> sseRelay2TypeAdapter = ArrayAdapter.createFromResource(
+                getActivity(), R.array.sse_relay2_mode, R.layout.spinner_dropdown_item);
+        sseRelay2TypeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        sseRelay2Actuator.setAdapter(sseRelay2TypeAdapter);
+        setButton = (Button) view.findViewById(R.id.setBtn);
+
+        if (mProfileConfig != null) {
+            int offsetIndex = (int)mProfileConfig.temperaturOffset+TEMP_OFFSET_LIMIT;
+            temperatureOffset.setValue(offsetIndex);
+            switchExtTempSensor.setChecked(mProfileConfig.enableThermistor2);
+            switchAirflowTempSensor.setChecked(mProfileConfig.enableThermistor1);
+            sseRelay1Actuator.setSelection(mProfileConfig.enableRelay1 -1,false);
+            sseRelay2Actuator.setSelection(mProfileConfig.enableRelay2,false);
+            if(mProfileConfig.getOutputs().size() > 0) {
+                for(Output output : mProfileConfig.getOutputs()) {
+                    switch (output.getPort()) {
+                        case RELAY_ONE:
+                            switchCoolHeatR1.setChecked(mProfileConfig.isOpConfigured(output.getPort()));
+                            break;
+                        case RELAY_TWO:
+                            switchFanR2.setChecked(mProfileConfig.isOpConfigured(output.getPort()));
+                            break;
+                    }
+                }
+            }
+        }else{
+            sseRelay2Actuator.setSelection(1,false);
+        }
+        setButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+
+                new AsyncTask<String, Void, Void>() {
+
+                    ProgressDialog progressDlg = new ProgressDialog(getActivity());
+
+                    @Override
+                    protected void onPreExecute() {
+                        setButton.setEnabled(false);
+                        progressDlg.setMessage("Saving SSE Configuration");
+                        progressDlg.show();
+                        super.onPreExecute();
+                    }
+
+                    @Override
+                    protected Void doInBackground( final String ... params ) {
+                        setupSSEZoneProfile();
+                        L.saveCCUState();
+
+                        return null;
+                    }
+
+                    @Override
+                    protected void onPostExecute( final Void result ) {
+                        progressDlg.dismiss();
+                        FragmentSSEConfiguration.this.closeAllBaseDialogFragments();
+                        getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
+                    }
+                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+
+            }
+        });
+    }
+
+    private void setupSSEZoneProfile() {
+
+        SingleStageConfig sseConfig = new SingleStageConfig();
+        sseConfig.setNodeType(mNodeType);
+        sseConfig.setNodeAddress(mSmartNodeAddress);
+        sseConfig.setPriority(ZonePriority.NONE);
+        sseConfig.temperaturOffset = temperatureOffset.getValue() - TEMP_OFFSET_LIMIT;
+        sseConfig.enableThermistor1 = switchAirflowTempSensor.isChecked();
+        sseConfig.enableThermistor2 = switchExtTempSensor.isChecked();
+        if(switchCoolHeatR1.isChecked()) sseConfig.enableRelay1 = sseRelay1Actuator.getSelectedItemPosition()+1;
+        else sseConfig.enableRelay1 = 0;
+        if(switchFanR2.isChecked()) sseConfig.enableRelay2 = sseRelay2Actuator.getSelectedItemPosition();
+        else sseConfig.enableRelay2 = 0;
+
+
+        if(switchCoolHeatR1.isChecked()) {
+            Output relay1Op = new Output();
+            relay1Op.setAddress(mSmartNodeAddress);
+            relay1Op.setPort(Port.RELAY_ONE);
+            relay1Op.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyOpen;
+            sseConfig.getOutputs().add(relay1Op);
+        }
+        if(switchFanR2.isChecked()){
+            Output relay2Op = new Output();
+            relay2Op.setAddress(mSmartNodeAddress);
+            relay2Op.setPort(Port.RELAY_TWO);
+            relay2Op.mOutputRelayActuatorType = OutputRelayActuatorType.NormallyOpen;
+            sseConfig.getOutputs().add(relay2Op);
+        }
+
+        mSSEProfile.getProfileConfiguration().put(mSmartNodeAddress, sseConfig);
+        if (mProfileConfig == null) {
+            mSSEProfile.addSSEEquip(mSmartNodeAddress, sseConfig, floorRef, roomRef);
+        } else
+        {
+            mSSEProfile.updateSSEEquip(mSmartNodeAddress, sseConfig,roomRef);
+        }
+        L.ccu().zoneProfiles.add(mSSEProfile);
+        Log.d("SSEConfig", "Set Config: Profiles - "+L.ccu().zoneProfiles.size());
+    }
+
+    private void setDividerColor(NumberPicker picker) {
+        Field[] numberPickerFields = NumberPicker.class.getDeclaredFields();
+        for (Field field : numberPickerFields) {
+            if (field.getName().equals("mSelectionDivider")) {
+                field.setAccessible(true);
+                try {
+                    field.set(picker, getResources().getDrawable(R.drawable.divider_np));
+                } catch (IllegalArgumentException e) {
+                    Log.v("NP", "Illegal Argument Exception");
+                    e.printStackTrace();
+                } catch (Resources.NotFoundException e) {
+                    Log.v("NP", "Resources NotFound");
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    Log.v("NP", "Illegal Access Exception");
+                    e.printStackTrace();
+                }
+                break;
+            }
+        }
+    }
+
+    @Override
+    @OnCheckedChanged({R.id.sseRelay1ForceTestBtn,R.id.sseRelay2ForceTestBtn})
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         switch (buttonView.getId())
         {
-            case R.id.lcmRelay1Switch:
+            case R.id.sseRelay1ForceTestBtn:
+                sendRelayActivationTestSignal();
                 break;
-            case R.id.lcmRelay2Switch:
-                break;
-            case R.id.lcmAnalog1OutSwitch:
-                break;
-            case R.id.lcmAnalog2OutSwitch:
-                break;
-            case R.id.lcmAnalog1InSwitch:
-                break;
-            case R.id.lcmAnalog2InSwitch:
+            case R.id.sseRelay2ForceTestBtn:
+                sendRelayActivationTestSignal();
                 break;
         }
     }
-    
-    @Override
-    public void onClick(View v)
-    {
-        switch (v.getId())
-        {
-            case R.id.lcmRelay1EditImg:
-                if (relay1Switch.isChecked())
-                {
-                    showEditLogicalNameDialog(relay1EditText, v.getId());
-                }
-                break;
-            case R.id.lcmRelay2EditImg:
-                if (relay1Switch.isChecked())
-                {
-                    showEditLogicalNameDialog(relay2EditText, v.getId());
-                }
-                break;
-        }
+
+    public void sendRelayActivationTestSignal() {
+        CcuToCmOverUsbSnControlsMessage_t msg = new CcuToCmOverUsbSnControlsMessage_t();
+        msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_CONTROLS);
+        msg.smartNodeAddress.set(mSmartNodeAddress);
+        msg.controls.setTemperature.set((short)(getDesiredTemp(mSmartNodeAddress)*2));
+        msg.controls.digitalOut1.set((short)(testCoolHeatRelay1.isChecked() ? 1 : 0));
+        msg.controls.digitalOut2.set((short)(testFanRelay2.isChecked() ? 1 : 0));
+        MeshUtil.sendStructToCM(msg);
     }
-    
-    public void showEditLogicalNameDialog(final EditText etext, final int id)
+    public static double getDesiredTemp(short node)
     {
-        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(getActivity(), R.style.NewDialogStyle);
-        alertBuilder.setTitle("SSE Parameters");
-        alertBuilder.setCancelable(false);
-        LayoutInflater inflater = LayoutInflater.from(getActivity());
-        final View view = inflater.inflate(R.layout.edit_circuit_name_dialog, null);
-        final EditText input = (EditText) view.findViewById(R.id.editTextCircuitName);
-        final TextView remainingChar = (TextView) view.findViewById(R.id.remainingChar);
-        input.addTextChangedListener(new TextWatcher()
-        {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after)
-            {
-            }
-            
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count)
-            {
-            }
-            
-            @Override
-            public void afterTextChanged(Editable s)
-            {
-                if (input.getText().toString().length() > 20)
-                {
-                    int i = 30 - input.getText().toString().length();
-                    remainingChar.setVisibility(View.VISIBLE);
-                    remainingChar.setText(i + " ");
-                }
-                else
-                {
-                    remainingChar.setVisibility(View.GONE);
-                }
-            }
-        });
-        input.setText(etext.getText().toString());
-        alertBuilder.setView(view);
-        alertBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener()
-        {
-            @Override
-            public void onClick(DialogInterface dialog, int which)
-            {
-                String displayName = input.getText().toString();
-                if (displayName.isEmpty())
-                {
-                    Toast.makeText(getActivity(), "Circuit Name cannot be Empty", Toast.LENGTH_SHORT).show();
-                }
-                else
-                {
-                    if (!zoneCircuitNames.contains(displayName))
-                    {
-                        zoneCircuitNames.add(displayName);
-                    }
-                    else
-                    {
-                        Toast.makeText(getActivity(), "Circuit Name [" + displayName + "] exists, enter a valid circuit name", Toast.LENGTH_LONG).show();
-                        displayName = "";
-                    }
-                }
-                etext.setText(displayName.length() > 15 ? displayName.substring(0, 12).concat("...") : displayName.toString());
-                dialog.dismiss();
-            }
-        });
-        alertBuilder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener()
-        {
-            @Override
-            public void onClick(DialogInterface dialog, int which)
-            {
-                dialog.dismiss();
-            }
-        });
-        alertBuilder.show();
+        HashMap point = CCUHsApi.getInstance().read("point and air and temp and desired and average and sp and group == \""+node+"\"");
+        if (point == null || point.size() == 0) {
+            Log.d("HPU", " Desired Temp point does not exist for equip , sending 0");
+            return 72;
+        }
+        return CCUHsApi.getInstance().readPointPriorityVal(point.get("id").toString());
     }
 }

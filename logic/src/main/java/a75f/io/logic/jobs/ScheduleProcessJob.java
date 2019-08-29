@@ -239,7 +239,7 @@ public class ScheduleProcessJob extends BaseJob {
     }
 
     private static void writePointsForEquip(Equip equip, Schedule equipSchedule, Schedule vacation) {
-        if((equip.getMarkers().contains("vav") || equip.getMarkers().contains("dab") || equip.getMarkers().contains("ti")) && !equip.getMarkers().contains("system"))
+        if((equip.getMarkers().contains("vav") || equip.getMarkers().contains("dab")|| equip.getMarkers().contains("sse") || equip.getMarkers().contains("ti")) && !equip.getMarkers().contains("system"))
         {
             VAVScheduler.processEquip(equip, equipSchedule, vacation, systemOccupancy);
         }else if (equip.getMarkers().contains("pid")) {
@@ -657,7 +657,50 @@ public class ScheduleProcessJob extends BaseJob {
         }
         return dabPoints;
     }
+    public static HashMap getTIEquipPoints(String equipID) {
 
+
+        //damperPos: ['zone', 'damper', 'base'],
+        //equipStatusMessage: ['zone', 'message', 'status'],
+        //dischargeAirTemp: ['zone', 'discharge', 'air', 'temp'],
+
+        HashMap tiPoints = new HashMap();
+        tiPoints.put("Profile","TEMP_INFLUENCE");
+        String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and equipRef == \""+equipID+"\"");
+        if (equipStatusPoint.length() > 0)
+        {
+            tiPoints.put("Status",equipStatusPoint);
+        }else{
+            tiPoints.put("Status","OFF");
+        }
+        return tiPoints;
+    }
+    public static HashMap getSSEEquipPoints(String equipID) {
+
+
+        //damperPos: ['zone', 'damper', 'base'],
+        //equipStatusMessage: ['zone', 'message', 'status'],
+        //dischargeAirTemp: ['zone', 'discharge', 'air', 'temp'],
+
+        HashMap ssePoints = new HashMap();
+        ssePoints.put("Profile","SSE");
+        String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and equipRef == \""+equipID+"\"");
+        double dischargePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and discharge and air and temp and equipRef == \""+equipID+"\"");
+        if (equipStatusPoint.length() > 0)
+        {
+            ssePoints.put("Status",equipStatusPoint);
+        }else{
+            ssePoints.put("Status","OFF");
+        }
+        if (dischargePoint  > 0)
+        {
+
+            ssePoints.put("Discharge Airflow",dischargePoint+" \u2109");
+        }else{
+            ssePoints.put("Discharge Airflow",0+" \u2109");
+        }
+        return ssePoints;
+    }
 
     public static HashMap getVAVEquipPoints(String equipID) {
         HashMap vavPoints = new HashMap();
@@ -887,13 +930,13 @@ public class ScheduleProcessJob extends BaseJob {
             double currentRateVal = currentRateHis.getVal();
             emPoints.put("Current Rate",currentRateVal);
         }else{
-            emPoints.put("Current Rate",0);
+            emPoints.put("Current Rate",0.0);
         }
         if (energyReading > 0)
         {
             emPoints.put("Energy Reading",energyReading);
         }else{
-            emPoints.put("Energy Reading",0);
+            emPoints.put("Energy Reading",0.0);
         }
 
         return emPoints;

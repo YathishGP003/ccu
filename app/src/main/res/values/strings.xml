@@ -408,6 +408,8 @@
     <string name="desc_vav">Control a VAV box for airflow and reheat valves/electric coils</string>
     <string name="title_dab">Dynamic Airflow Balancing</string>
     <string name="desc_dab">Control dampers in ductwork to provide granular airflow control</string>
+    <string name="title_sse">Single Stage Equipments</string>
+    <string name="desc_sse">Controls simple HVAC equipment like Uni Heaters, split Acs.</string>
     <string name="title_lighting">Lighting</string>
     <string name="desc_light">Control switched loads as well as modulate fixtures for dimming</string>
     <string name="title_tempmonitor">Temperature Monitoring</string>
@@ -548,4 +550,15 @@
     <string name="txt_re_edit">Re Edit</string>
     <string name="txt_force_trim">Force Trim</string>
 
+
+    <!--SSE Screen-->
+    <string name="title_sseinput">SSE</string>
+    <string-array name="sse_relay1_mode">
+        <item>  Heating </item>
+        <item>  Cooling </item>
+    </string-array>
+    <string-array name="sse_relay2_mode">
+        <item>  Not enabled </item>
+        <item>  Fan </item>
+    </string-array>
 </resources>

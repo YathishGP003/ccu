@@ -32,6 +32,7 @@ import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.bo.building.ccu.CazProfile;
 import a75f.io.logic.bo.building.ss4pfcu.FourPipeFanCoilUnitProfile;
+import a75f.io.logic.bo.building.sse.SingleStageProfile;
 import a75f.io.logic.bo.building.system.dab.DabAdvancedHybridRtu;
 import a75f.io.logic.bo.building.ss2pfcu.TwoPipeFanCoilUnitProfile;
 import a75f.io.logic.pubnub.PubNubHandler;
@@ -484,6 +485,11 @@ public class Globals {
                             CazProfile caz = new CazProfile();
                             caz.addCcuAsZoneEquip(Short.valueOf(eq.getGroup()));
                             L.ccu().zoneProfiles.add(caz);
+                            break;
+                        case SSE:
+                            SingleStageProfile sse = new SingleStageProfile();
+                            sse.addSSEEquip(Short.valueOf(eq.getGroup()));
+                            L.ccu().zoneProfiles.add(sse);
                             break;
                         case SMARTSTAT_CONVENTIONAL_PACK_UNIT:
                             ConventionalUnitProfile cpu = new ConventionalUnitProfile();

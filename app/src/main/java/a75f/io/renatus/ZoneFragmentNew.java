@@ -45,6 +45,7 @@ import android.widget.Toast;
 
 import org.joda.time.Interval;
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -521,6 +522,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
                     String profileVAV = "VAV";
                     String profileDAB = "DAB";
+                    String profileSSE = "SSE";
                     String profileSmartStat = "SMARTSTAT";
                     String profileEM = "EMR";
                     String profilePLC = "PLC";
@@ -533,7 +535,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     for (HashMap equipTypes : equipZones) {
                         profileType = equipTypes.get("profile").toString();
                         Log.e("RoomData", "ProfileType:" + profileType);
-                        if (profileType.contains(profileVAV) || profileType.contains(profileDAB) || profileType.contains(profileSmartStat) || profileType.contains(profileTempInfluence)) {
+                        if (profileType.contains(profileVAV) || profileType.contains(profileDAB)|| profileType.contains(profileSSE) || profileType.contains(profileSmartStat) || profileType.contains(profileTempInfluence)) {
                             tempModule = true;
                             Log.e("RoomData", "Load SmartNode ProfileType:" + profileType);
                         }
@@ -800,8 +802,19 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 if(syncToHaystack){
                     Log.i("Scheduler","cooldt:"+coolDT.get("id").toString()+" value:"+Double.parseDouble(Float.valueOf(coolingDesiredTemp).toString()));
                     Log.i("Scheduler","heatdt:"+heatDT.get("id").toString()+" value:"+Double.parseDouble(Float.valueOf(heatingDesiredTemp).toString()));
-                    setPointVal(coolDT.get("id").toString(),Double.parseDouble(Float.valueOf(coolingDesiredTemp).toString()));
-                    setPointVal(heatDT.get("id").toString(),Double.parseDouble(Float.valueOf(heatingDesiredTemp).toString()));
+                    //setPointVal(coolDT.get("id").toString(),Double.parseDouble(Float.valueOf(coolingDesiredTemp).toString()));
+                    //setPointVal(heatDT.get("id").toString(),Double.parseDouble(Float.valueOf(heatingDesiredTemp).toString()));
+                    if(zoneMap.size() > 0)
+                    {
+                        for(int i=0;i<zoneMap.size();i++)
+                        {
+                            Equip zoneEquip = new Equip.Builder().setHashMap(zoneMap.get(i)).build();
+                            HashMap coolDT = CCUHsApi.getInstance().read("point and temp and desired and cooling and sp and equipRef == \"" + zoneEquip.getId() + "\"");
+                            HashMap heatDT = CCUHsApi.getInstance().read("point and temp and desired and heating and sp and equipRef == \"" + zoneEquip.getId() + "\"");
+                            setPointVal(coolDT.get("id").toString(),Double.parseDouble(Float.valueOf(coolingDesiredTemp).toString()));
+                            setPointVal(heatDT.get("id").toString(),Double.parseDouble(Float.valueOf(heatingDesiredTemp).toString()));
+                        }
+                    }
                 }
 
             }
@@ -945,6 +958,16 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                                 HashMap vavPoints = ScheduleProcessJob.getVAVEquipPoints(p.getId());
                                 Log.i("PointsValue", "VAV Points:" + vavPoints.toString());
                                 loadVAVPointsUI(vavPoints, inflater, linearLayoutZonePoints, p.getGroup());
+                            }
+                            if (p.getProfile().startsWith("SSE")) {
+                                HashMap dabPoints = ScheduleProcessJob.getSSEEquipPoints(p.getId());
+                                Log.i("PointsValue", "SSSE Points:" + dabPoints.toString());
+                                loadSSEPointsUI(dabPoints, inflater, linearLayoutZonePoints, p.getGroup());
+                            }
+                            if (p.getProfile().startsWith("TEMP_INFLUENCE")) {
+                                HashMap tiPoints = ScheduleProcessJob.getTIEquipPoints(p.getId());
+                                Log.i("PointsValue", "TI Points:" + tiPoints.toString());
+                                loadTIPointsUI(tiPoints, inflater, linearLayoutZonePoints, p.getGroup());
                             }
                             if (p.getProfile().startsWith("SMARTSTAT_TWO_PIPE_FCU")) {
                                 HashMap p2FCUPoints = ScheduleProcessJob.get2PFCUEquipPoints(p.getId());
@@ -1148,6 +1171,16 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 Log.i("PointsValue", "VAV Points:" + vavPoints.toString());
                 loadVAVPointsUI(vavPoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
             }
+            if (updatedEquip.getProfile().startsWith("SSE")) {
+                HashMap ssePoints = ScheduleProcessJob.getSSEEquipPoints(updatedEquip.getId());
+                Log.i("PointsValue", "SSE Points:" + ssePoints.toString());
+                loadSSEPointsUI(ssePoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
+            }
+            if (updatedEquip.getProfile().startsWith("TEMP_INFLUENCE")) {
+                HashMap tiPoints = ScheduleProcessJob.getTIEquipPoints(updatedEquip.getId());
+                Log.i("PointsValue", "TI Points:" + tiPoints.toString());
+                loadTIPointsUI(tiPoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
+            }
             if (updatedEquip.getProfile().startsWith("SMARTSTAT_TWO_PIPE_FCU")) {
                 HashMap p2FCUPoints = ScheduleProcessJob.get2PFCUEquipPoints(updatedEquip.getId());
                 Log.i("PointsValue", "2PFCU Points:" + p2FCUPoints.toString());
@@ -1196,8 +1229,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     loadEMPointsUI(emPoints, inflater, linearLayoutZonePoints, p.getGroup());
                     double totalEm = (double)emPoints.get("Energy Reading");
                     double currentEm = (double)emPoints.get("Current Rate");
-                    nonTempControl.setEmTotalText(String.valueOf(totalEm));
-                    nonTempControl.setEmCurrentText(String.valueOf(currentEm));
+                    int currentValue = new BigDecimal(currentEm).intValue();
+                    nonTempControl.setEmCurrentText(String.valueOf(currentValue));
+                    nonTempControl.setEmTotalText(String.format("%.0f",totalEm));
+                    nonTempControl.setEmCurrentText(String.valueOf(currentValue));
                     nonTempControl.setEmTotalUnitText("KWh");
                     nonTempControl.setEmCurrentUnitText("KW");
                 }
@@ -1213,7 +1248,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     loadPLCPointsUI(plcPoints, inflater, linearLayoutZonePoints, p.getGroup());
                     double targetValue = (double)plcPoints.get("Target Value");
                     double inputValue = (double)plcPoints.get("Input Value");
-                    nonTempControl.setPiInputText(String.valueOf(inputValue));
+                    nonTempControl.setPiInputText(String.format("%.2f",inputValue));
                     nonTempControl.setPiOutputText(String.valueOf(targetValue));
                     nonTempControl.setPiInputUnitText(plcPoints.get("Unit").toString());
                     nonTempControl.setPiOutputUnitText(plcPoints.get("Unit").toString());
@@ -1435,9 +1470,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                         Log.i("PointsValue", "EM Points:" + emPoints.toString());
                         loadEMPointsUI(emPoints, inflater, linearLayoutZonePoints,p.getGroup());
 
-                        nonTempControl.setEmTotalText(emPoints.get("Energy Reading").toString());
+                        double energyRead = (double)emPoints.get("Energy Reading");
+                        double currentRead = (double)emPoints.get("Current Rate");
+                        int currentValue = new BigDecimal(currentRead).intValue();
+                        nonTempControl.setEmTotalText(String.format("%.0f",energyRead));
+                        nonTempControl.setEmCurrentText(String.valueOf(currentValue));
+                        //nonTempControl.setEmTotalText(emPoints.get("Energy Reading").toString());
                         nonTempControl.setEmTotalUnitText("KWh");
-                        nonTempControl.setEmCurrentText(emPoints.get("Current Rate").toString());
+                        //nonTempControl.setEmCurrentText(emPoints.get("Current Rate").toString());
                         nonTempControl.setEmCurrentUnitText("KW");
 
                     } if (p.getProfile().startsWith("PLC")) {
@@ -1451,7 +1491,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
                         double targetValue = (double)plcPoints.get("Target Value");
                         double inputValue = (double)plcPoints.get("Input Value");
-                        nonTempControl.setPiInputText(String.valueOf(inputValue));
+                        nonTempControl.setPiInputText(String.format("%.2f",inputValue));
                         nonTempControl.setPiOutputText(String.valueOf(targetValue));
                         nonTempControl.setPiInputUnitText(plcPoints.get("Unit").toString());
                         nonTempControl.setPiOutputUnitText(plcPoints.get("Unit").toString());
@@ -1498,7 +1538,56 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         viewPointRow2.setPadding(0,0,0,40);
         linearLayoutZonePoints.addView(viewPointRow2);
     }
+    public void loadSSEPointsUI(HashMap ssePoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress)
+    {
+        View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
+        View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
+        View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
 
+        TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
+        TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+        TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
+        TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
+        textViewLabel2.setVisibility(View.GONE);
+        TextView textViewValue1 = viewPointRow1.findViewById(R.id.text_point1value);
+        TextView textViewValue2 = viewPointRow1.findViewById(R.id.text_point2value);
+        textViewValue2.setVisibility(View.GONE);
+
+        textViewTitle.setText(ssePoints.get("Profile").toString()+" ("+nodeAddress+")");
+        textViewStatus.setText(ssePoints.get("Status").toString());
+        textViewLabel1.setText("Discharge Airflow : ");
+        textViewValue1.setText(ssePoints.get("Discharge Airflow").toString());
+
+        linearLayoutZonePoints.addView(viewTitle);
+        linearLayoutZonePoints.addView(viewStatus);
+        viewPointRow1.setPadding(0,0,0,40);
+        linearLayoutZonePoints.addView(viewPointRow1);
+    }
+    public void loadTIPointsUI(HashMap tiPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress)
+    {
+        View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
+        View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
+        View viewPointRow1 = inflater.inflate(R.layout.zones_item_type1, null);
+
+        TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
+        TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+        TextView textViewLabel1 = viewPointRow1.findViewById(R.id.text_point1label);
+        textViewLabel1.setVisibility(View.GONE);
+        TextView textViewLabel2 = viewPointRow1.findViewById(R.id.text_point2label);
+        textViewLabel2.setVisibility(View.GONE);
+        TextView textViewValue1 = viewPointRow1.findViewById(R.id.text_point1value);
+        textViewValue1.setVisibility(View.GONE);
+        TextView textViewValue2 = viewPointRow1.findViewById(R.id.text_point2value);
+        textViewValue2.setVisibility(View.GONE);
+
+        textViewTitle.setText(tiPoints.get("Profile").toString()+" ("+nodeAddress+")");
+        textViewStatus.setText(tiPoints.get("Status").toString());
+
+        linearLayoutZonePoints.addView(viewTitle);
+        linearLayoutZonePoints.addView(viewStatus);
+        viewPointRow1.setPadding(0,0,0,40);
+        linearLayoutZonePoints.addView(viewPointRow1);
+    }
     public void loadDABPointsUI(HashMap dabPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress)
     {
         View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
@@ -2064,7 +2153,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         labelTarget.setText("Target "+plcPoints.get("Unit Type").toString()+" : ");
         labelOffsetAir.setText("Offset "+plcPoints.get("Unit Type").toString()+" : ");
 
-        textViewInputAir.setText(plcPoints.get("Input Value").toString()+plcPoints.get("Unit").toString());
+        double processValue = (double)plcPoints.get("Input Value");
+        textViewInputAir.setText(String.format("%.2f",processValue)+plcPoints.get("Unit").toString());
         textViewTargetAir.setText(plcPoints.get("Target Value").toString()+plcPoints.get("Unit").toString());
         textViewOffsetAir.setText(plcPoints.get("Offset Value").toString()+plcPoints.get("Unit").toString());
         try {
@@ -2087,20 +2177,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         }
 
     }
-
-    public void updateSSHPUPointsUI(String id, LinearLayout linearLayoutZonePoints)
-    {
-
-        TextView textViewTitle = linearLayoutZonePoints.findViewById(R.id.textProfile);
-        TextView textViewStatus = linearLayoutZonePoints.findViewById(R.id.text_status);
-
-        TextView textViewLabel1 = linearLayoutZonePoints.findViewById(R.id.text_point1label);
-        TextView textViewLabel2 = linearLayoutZonePoints.findViewById(R.id.text_point2label);
-
-        Spinner spinnerValue1 = linearLayoutZonePoints.findViewById(R.id.spinnerValue1);
-        Spinner spinnerValue2 = linearLayoutZonePoints.findViewById(R.id.spinnerValue2);
-    }
-
 
     public static double getPointVal(String id) {
         CCUHsApi hayStack = CCUHsApi.getInstance();

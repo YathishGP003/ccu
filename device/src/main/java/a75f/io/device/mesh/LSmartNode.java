@@ -73,13 +73,13 @@ public class LSmartNode
     
     /***************************** SEED MESSAGES ****************************/
     
-    public static ArrayList<CcuToCmOverUsbDatabaseSeedSnMessage_t> getSeedMessages(Zone zone, String equipRef)
+    public static ArrayList<CcuToCmOverUsbDatabaseSeedSnMessage_t> getSeedMessages(Zone zone, String equipRef,String profile)
     {
         ArrayList<CcuToCmOverUsbDatabaseSeedSnMessage_t> seedMessages = new ArrayList<>();
         int i = 0;
         for (Device d : HSUtil.getDevices(zone.getId()))
         {
-            seedMessages.add(getSeedMessage(zone, Short.parseShort(d.getAddr()),equipRef));
+            seedMessages.add(getSeedMessage(zone, Short.parseShort(d.getAddr()),equipRef,profile));
             i++;
         }
         return seedMessages;
@@ -164,28 +164,28 @@ public class LSmartNode
         return controlsMessage_t;
     }
     
-    public static CcuToCmOverUsbDatabaseSeedSnMessage_t getSeedMessage(Zone zone, short address,String equipRef)
+    public static CcuToCmOverUsbDatabaseSeedSnMessage_t getSeedMessage(Zone zone, short address,String equipRef,String profile)
     {
         CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage =
                 new CcuToCmOverUsbDatabaseSeedSnMessage_t();
         seedMessage.messageType.set(MessageType.CCU_TO_CM_OVER_USB_DATABASE_SEED_SN);
         seedMessage.smartNodeAddress.set(address);
         seedMessage.putEncrptionKey(L.getEncryptionKey());
-        fillSmartNodeSettings(seedMessage.settings,zone,address,equipRef);
+        fillSmartNodeSettings(seedMessage.settings,zone,address,equipRef,profile);
         fillCurrentUpdatedTime(seedMessage.controls);
         fillSmartNodeControls(seedMessage.controls,zone,address,equipRef);
         return seedMessage;
     }
-    public static CcuToCmOverUsbSnSettingsMessage_t getSettingsMessage(Zone zone, short address, String equipRef)
+    public static CcuToCmOverUsbSnSettingsMessage_t getSettingsMessage(Zone zone, short address, String equipRef,String profile)
     {
         CcuToCmOverUsbSnSettingsMessage_t settingsMessage =
                 new CcuToCmOverUsbSnSettingsMessage_t();
         settingsMessage.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_SETTINGS);
         settingsMessage.smartNodeAddress.set(address);
-        fillSmartNodeSettings(settingsMessage.settings,zone,address,equipRef);
+        fillSmartNodeSettings(settingsMessage.settings,zone,address,equipRef, profile);
         return settingsMessage;
     }
-    private static void fillSmartNodeSettings(SmartNodeSettings_t settings,Zone zone, short address, String equipRef){
+    private static void fillSmartNodeSettings(SmartNodeSettings_t settings,Zone zone, short address, String equipRef,String profile){
 
         try
         {
@@ -207,8 +207,26 @@ public class LSmartNode
         
         settings.temperatureOffset.set((short)getTempOffset(address));
         
-        //TODO need to update for diff profiles
-        settings.profileBitmap.dynamicAirflowBalancing.set((short) 1);
+        if(profile == null)
+            profile = "dab";
+        switch (profile){
+            case "dab":
+                settings.profileBitmap.dynamicAirflowBalancing.set((short)1);
+                break;
+            case "lcm":
+                settings.profileBitmap.lightingControl.set((short)1);
+                break;
+            case "oao":
+                settings.profileBitmap.outsideAirOptimization.set((short)1);
+                break;
+            case "sse":
+                settings.profileBitmap.singleStageEquipment.set((short)1);
+                break;
+            case "iftt":
+                settings.profileBitmap.customControl.set((short)1);
+                break;
+
+        }
         settings.roomName.set(zone.getDisplayName());
         
         settings.forwardMotorBacklash.set((short)5);
@@ -264,6 +282,10 @@ public class LSmartNode
                     {
                         //In case of vav , relay-2 maps to stage-2
                         mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) : mapDigitalOut(p.getType(), p.getPort().equals(RELAY_TWO) ? logicalVal > 50 : logicalVal > 0));
+                    }else if (isEquipType("sse", node))
+                    {
+                        //In case of sse , relay actuator maps to normally open by default
+                        mappedVal = mapSSEDigitalOut(p.getType(), logicalVal > 0);
                     } else {
                         mappedVal = (isAnalog(p.getPort()) ? mapAnalogOut(p.getType(), (short) logicalVal) : mapDigitalOut(p.getType(), logicalVal > 0));
                     }
@@ -354,7 +376,20 @@ public class LSmartNode
         }
         return (short) 0;
     }
-    
+    public static short mapSSEDigitalOut(String type, boolean val)
+    {
+
+        switch (type)
+        {
+            case "Relay N/O":
+                return (short) (val ? 1 : 0);
+            ///Defaults to normally open
+            case "Relay N/C":
+                return (short) (val ? 0 : 1);
+        }
+
+        return 0;
+    }
     public static short mapDigitalOut(String type, boolean val)
     {
         

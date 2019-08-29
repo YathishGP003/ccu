@@ -426,7 +426,7 @@ public class ConventionalUnitLogicalMap {
                                           .setSiteRef(siteRef)
                                           .setRoomRef(room)
                                           .setFloorRef(floor)
-                                          .addMarker("zone").addMarker("cpu").addMarker("scheduleType").addMarker("writable").addMarker("zone").addMarker("equipHis").addMarker("his")
+                                          .addMarker("zone").addMarker("cpu").addMarker("scheduleType").addMarker("writable").addMarker("equipHis").addMarker("his")
                                           .setGroup(String.valueOf(nodeAddr))
                                           .setTz(tz)
                                           .build();

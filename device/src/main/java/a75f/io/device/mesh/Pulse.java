@@ -261,14 +261,14 @@ public class Pulse
 		if (coolingDtPoint == null || coolingDtPoint.size() == 0) {
 			throw new IllegalArgumentException();
 		}
-		ScheduleProcessJob.handleDesiredTempUpdate(new Point.Builder().setHashMap(coolingDtPoint).build(), true, coolingDesiredTemp);
+		//ScheduleProcessJob.handleDesiredTempUpdate(new Point.Builder().setHashMap(coolingDtPoint).build(), true, coolingDesiredTemp);
 		CCUHsApi.getInstance().writeHisValById(coolingDtPoint.get("id").toString(), coolingDesiredTemp);
 
 		HashMap heatinDtPoint = CCUHsApi.getInstance().read("point and air and temp and desired and heating and sp and equipRef == \""+q.getId()+"\"");
 		if (heatinDtPoint == null || heatinDtPoint.size() == 0) {
 			throw new IllegalArgumentException();
 		}
-		ScheduleProcessJob.handleDesiredTempUpdate(new Point.Builder().setHashMap(heatinDtPoint).build(), true, heatingDesiredTemp);
+		//ScheduleProcessJob.handleDesiredTempUpdate(new Point.Builder().setHashMap(heatinDtPoint).build(), true, heatingDesiredTemp);
 		CCUHsApi.getInstance().writeHisValById(heatinDtPoint.get("id").toString(), heatingDesiredTemp);
 
 
@@ -276,9 +276,10 @@ public class Pulse
 		if (singleDtPoint == null || singleDtPoint.size() == 0) {
 			throw new IllegalArgumentException();
 		}
-		ScheduleProcessJob.handleDesiredTempUpdate(new Point.Builder().setHashMap(singleDtPoint).build(), true, dt);
+		//ScheduleProcessJob.handleDesiredTempUpdate(new Point.Builder().setHashMap(singleDtPoint).build(), true, dt);
 		CCUHsApi.getInstance().writeHisValById(singleDtPoint.get("id").toString(), dt);
 
+		ScheduleProcessJob.handleManualDesiredTempUpdate(new Point.Builder().setHashMap(coolingDtPoint).build(),new Point.Builder().setHashMap(heatinDtPoint).build(),new Point.Builder().setHashMap(singleDtPoint).build(),coolingDesiredTemp,heatingDesiredTemp,dt);
 		sendSNControlMessage((short)node,q.getId());
 		sendSetTemperatureAck((short)node);
 
@@ -304,7 +305,7 @@ public class Pulse
         if (coolingDtPoint == null || coolingDtPoint.size() == 0) {
             throw new IllegalArgumentException();
         }
-	    ScheduleProcessJob.handleDesiredTempUpdate(new Point.Builder().setHashMap(coolingDtPoint).build(), true, coolingDesiredTemp);
+	    //ScheduleProcessJob.handleDesiredTempUpdate(new Point.Builder().setHashMap(coolingDtPoint).build(), true, coolingDesiredTemp);
         try{
             CCUHsApi.getInstance().writeHisValById(coolingDtPoint.get("id").toString(), coolingDesiredTemp);
         }catch (Exception e){
@@ -315,7 +316,7 @@ public class Pulse
         if (heatinDtPoint == null || heatinDtPoint.size() == 0) {
             throw new IllegalArgumentException();
         }
-	    ScheduleProcessJob.handleDesiredTempUpdate(new Point.Builder().setHashMap(heatinDtPoint).build(), true, heatingDesiredTemp);
+	    //ScheduleProcessJob.handleDesiredTempUpdate(new Point.Builder().setHashMap(heatinDtPoint).build(), true, heatingDesiredTemp);
         try{
             CCUHsApi.getInstance().writeHisValById(heatinDtPoint.get("id").toString(), heatingDesiredTemp);
         }catch (Exception e){
@@ -326,12 +327,13 @@ public class Pulse
 		if (singleDtPoint == null || singleDtPoint.size() == 0) {
 			throw new IllegalArgumentException();
 		}
-	    ScheduleProcessJob.handleDesiredTempUpdate(new Point.Builder().setHashMap(singleDtPoint).build(), true, dt);
+	    //ScheduleProcessJob.handleDesiredTempUpdate(new Point.Builder().setHashMap(singleDtPoint).build(), true, dt);
 		try {
 		    CCUHsApi.getInstance().writeHisValById(singleDtPoint.get("id").toString(), dt);
         }catch (Exception e){
 		    e.printStackTrace();
         }
+		ScheduleProcessJob.handleManualDesiredTempUpdate(new Point.Builder().setHashMap(coolingDtPoint).build(),new Point.Builder().setHashMap(heatinDtPoint).build(),new Point.Builder().setHashMap(singleDtPoint).build(),coolingDesiredTemp,heatingDesiredTemp,dt);
         if(sendAck) {
 			sendSmartStatControlMessage((short) node, q.getId());
 			sendSetTemperatureAck((short) node);

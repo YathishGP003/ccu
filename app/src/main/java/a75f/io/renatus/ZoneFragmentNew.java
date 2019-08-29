@@ -7,7 +7,6 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -16,8 +15,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.method.DigitsKeyListener;
-import android.text.method.KeyListener;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,7 +25,6 @@ import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.GridLayout;
@@ -52,7 +48,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
-import java.util.zip.Inflater;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -65,20 +60,16 @@ import a75f.io.device.mesh.Pulse;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
-import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.StandaloneScheduler;
-import a75f.io.logic.jobs.VAVScheduler;
 import a75f.io.logic.pubnub.UpdatePointHandler;
-import a75f.io.logic.pubnub.UpdateScheduleHandler;
+import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.renatus.schedules.ScheduleUtil;
 import a75f.io.renatus.schedules.SchedulerFragment;
 import a75f.io.renatus.util.GridItem;
 import a75f.io.renatus.util.NonTempControl;
 import a75f.io.renatus.util.SeekArc;
-import a75f.io.logic.pubnub.ZoneDataInterface;
 
 public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 {
@@ -843,8 +834,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                             Equip zoneEquip = new Equip.Builder().setHashMap(zoneMap.get(i)).build();
                             HashMap coolDT = CCUHsApi.getInstance().read("point and temp and desired and cooling and sp and equipRef == \"" + zoneEquip.getId() + "\"");
                             HashMap heatDT = CCUHsApi.getInstance().read("point and temp and desired and heating and sp and equipRef == \"" + zoneEquip.getId() + "\"");
-                            setPointVal(coolDT.get("id").toString(),Double.parseDouble(Float.valueOf(coolingDesiredTemp).toString()));
-                            setPointVal(heatDT.get("id").toString(),Double.parseDouble(Float.valueOf(heatingDesiredTemp).toString()));
+                            HashMap avgDT = CCUHsApi.getInstance().read("point and temp and desired and average and sp and equipRef == \"" + zoneEquip.getId() + "\"");
+                            setPointVal(coolDT.get("id").toString(),Double.parseDouble(Float.valueOf(coolingDesiredTemp).toString()),heatDT.get("id").toString(),Double.parseDouble(Float.valueOf(heatingDesiredTemp).toString()),avgDT.get("id").toString());
+                            //setPointVal(heatDT.get("id").toString(),Double.parseDouble(Float.valueOf(heatingDesiredTemp).toString()));
                         }
                     }
                 }
@@ -2244,25 +2236,38 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         return 0;
     }
     
-    public void setPointVal(String id, double val) {
+    public void setPointVal(String coolid, double coolval,String heatid, double heatval, String avgid) {
 
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
 
                 CCUHsApi hayStack = CCUHsApi.getInstance();
-                Point p = new Point.Builder().setHashMap(hayStack.readMapById(id)).build();
-                if (p.getMarkers().contains("writable"))
+                Point coolpoint = new Point.Builder().setHashMap(hayStack.readMapById(coolid)).build();
+                Point heatpoint = new Point.Builder().setHashMap(hayStack.readMapById(heatid)).build();
+                Point avgpoint = new Point.Builder().setHashMap(hayStack.readMapById(avgid)).build();
+                double avgval = (coolval + heatval) / 2.0;
+                if (coolpoint.getMarkers().contains("writable"))
                 {
-                    CcuLog.d(L.TAG_CCU_UI, "Set Writbale Val "+p.getDisplayName()+": " +val);
-                    ScheduleProcessJob.handleDesiredTempUpdate(p, true, val);
+                    CcuLog.d(L.TAG_CCU_UI, "Set Writbale Val "+coolpoint.getDisplayName()+": " +coolid+","+heatpoint.getDisplayName()+","+heatval+","+avgpoint.getDisplayName());
+                    ScheduleProcessJob.handleManualDesiredTempUpdate(coolpoint, heatpoint,avgpoint, coolval, heatval,avgval);
 
-        }
+                }
 
-                if (p.getMarkers().contains("his"))
+                if (coolpoint.getMarkers().contains("his"))
                 {
-                    CcuLog.d(L.TAG_CCU_UI, "Set His Val "+id+": " +val);
-                    hayStack.writeHisValById(id, val);
+                    CcuLog.d(L.TAG_CCU_UI, "Set His Val "+coolid+": " +coolval);
+                    hayStack.writeHisValById(coolid, coolval);
+                }
+                if (heatpoint.getMarkers().contains("his"))
+                {
+                    CcuLog.d(L.TAG_CCU_UI, "Set His Val "+heatid+": " +heatval);
+                    hayStack.writeHisValById(heatid, heatval);
+                }
+                if (avgpoint.getMarkers().contains("his"))
+                {
+                    CcuLog.d(L.TAG_CCU_UI, "Set His Val "+avgid+": " +avgval);
+                    hayStack.writeHisValById(avgid, avgval);
                 }
             }
         });
@@ -2411,7 +2416,16 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
     }
 
     private void setScheduleType(String id, ScheduleType schedule) {
-        new AsyncTask<String, Void, Void>() {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                CCUHsApi.getInstance().writeDefaultValById(id, (double)schedule.ordinal());
+                ScheduleProcessJob.handleScheduleTypeUpdate(new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(id)).build());
+            }
+        });
+        thread.start();
+        /*new AsyncTask<String, Void, Void>() {
             @Override
             protected Void doInBackground( final String ... params ) {
                 CCUHsApi.getInstance().writeDefaultValById(id, (double)schedule.ordinal());
@@ -2423,7 +2437,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             protected void onPostExecute( final Void result ) {
                 // continue what you are doing...
             }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");*/
     }
     
     

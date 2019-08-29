@@ -341,17 +341,26 @@ public class MasterControlView extends LinearLayout {
         new AsyncTask<String, Void, Void>() {
             @Override
             protected Void doInBackground(final String... params) {
-                CCUHsApi.getInstance().writePoint(zoneCoolUL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", (double) coolTempUL, 0);
-                CCUHsApi.getInstance().writeHisValById(zoneCoolUL.get("id").toString(), (double) coolTempUL);
 
-                CCUHsApi.getInstance().writePoint(zoneCoolLL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", (double) coolTempLL, 0);
-                CCUHsApi.getInstance().writeHisValById(zoneCoolLL.get("id").toString(), (double) coolTempLL);
+                if (zoneCoolUL.size() != 0) {
+                    CCUHsApi.getInstance().writePoint(zoneCoolUL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", (double) coolTempUL, 0);
+                    CCUHsApi.getInstance().writeHisValById(zoneCoolUL.get("id").toString(), (double) coolTempUL);
+                }
 
-                CCUHsApi.getInstance().writePoint(zoneHeatUL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", (double) heatTempUL, 0);
-                CCUHsApi.getInstance().writeHisValById(zoneHeatUL.get("id").toString(), (double) heatTempUL);
+                if (zoneCoolLL.size() != 0) {
+                    CCUHsApi.getInstance().writePoint(zoneCoolLL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", (double) coolTempLL, 0);
+                    CCUHsApi.getInstance().writeHisValById(zoneCoolLL.get("id").toString(), (double) coolTempLL);
+                }
 
-                CCUHsApi.getInstance().writePoint(zoneHeatLL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", (double) heatTempLL, 0);
-                CCUHsApi.getInstance().writeHisValById(zoneHeatLL.get("id").toString(), (double) heatTempLL);
+                if (zoneHeatUL.size() != 0) {
+                    CCUHsApi.getInstance().writePoint(zoneHeatUL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", (double) heatTempUL, 0);
+                    CCUHsApi.getInstance().writeHisValById(zoneHeatUL.get("id").toString(), (double) heatTempUL);
+                }
+
+                if (zoneHeatLL.size() != 0) {
+                    CCUHsApi.getInstance().writePoint(zoneHeatLL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", (double) heatTempLL, 0);
+                    CCUHsApi.getInstance().writeHisValById(zoneHeatLL.get("id").toString(), (double) heatTempLL);
+                }
 
                 L.saveCCUState();
                 CCUHsApi.getInstance().syncEntityTree();
@@ -380,24 +389,35 @@ public class MasterControlView extends LinearLayout {
         new AsyncTask<String, Void, Void>() {
             @Override
             protected Void doInBackground(final String... params) {
-                CCUHsApi.getInstance().writePoint(coolUL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", (double) coolTempUL, 0);
-                CCUHsApi.getInstance().writeHisValById(coolUL.get("id").toString(), (double) coolTempUL);
+                if (coolUL.size() != 0) {
+                    CCUHsApi.getInstance().writePoint(coolUL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", (double) coolTempUL, 0);
+                    CCUHsApi.getInstance().writeHisValById(coolUL.get("id").toString(), (double) coolTempUL);
+                }
 
-                CCUHsApi.getInstance().writePoint(coolLL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", (double) coolTempLL, 0);
-                CCUHsApi.getInstance().writeHisValById(coolLL.get("id").toString(), (double) coolTempLL);
+                if (coolLL.size() != 0) {
+                    CCUHsApi.getInstance().writePoint(coolLL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", (double) coolTempLL, 0);
+                    CCUHsApi.getInstance().writeHisValById(coolLL.get("id").toString(), (double) coolTempLL);
+                }
 
-                CCUHsApi.getInstance().writePoint(heatUL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", (double) heatTempUL, 0);
-                CCUHsApi.getInstance().writeHisValById(heatUL.get("id").toString(), (double) heatTempUL);
+                if (heatUL.size() != 0) {
+                    CCUHsApi.getInstance().writePoint(heatUL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", (double) heatTempUL, 0);
+                    CCUHsApi.getInstance().writeHisValById(heatUL.get("id").toString(), (double) heatTempUL);
+                }
 
-                CCUHsApi.getInstance().writePoint(heatLL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", (double) heatTempLL, 0);
-                CCUHsApi.getInstance().writeHisValById(heatLL.get("id").toString(), (double) heatTempLL);
+                if (heatLL.size() != 0) {
+                    CCUHsApi.getInstance().writePoint(heatLL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", (double) heatTempLL, 0);
+                    CCUHsApi.getInstance().writeHisValById(heatLL.get("id").toString(), (double) heatTempLL);
+                }
 
-                CCUHsApi.getInstance().writePoint(buildingMax.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", (double) buildingTempUL, 0);
-                CCUHsApi.getInstance().writeHisValById(buildingMax.get("id").toString(), (double) buildingTempUL);
+                if (buildingMax.size() != 0) {
+                    CCUHsApi.getInstance().writePoint(buildingMax.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", (double) buildingTempUL, 0);
+                    CCUHsApi.getInstance().writeHisValById(buildingMax.get("id").toString(), (double) buildingTempUL);
+                }
 
-                CCUHsApi.getInstance().writePoint(buildingMin.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", (double) buildingTempLL, 0);
-                CCUHsApi.getInstance().writeHisValById(buildingMin.get("id").toString(), (double) buildingTempLL);
-
+                if (buildingMin.size() != 0) {
+                    CCUHsApi.getInstance().writePoint(buildingMin.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", (double) buildingTempLL, 0);
+                    CCUHsApi.getInstance().writeHisValById(buildingMin.get("id").toString(), (double) buildingTempLL);
+                }
                 L.saveCCUState();
                 CCUHsApi.getInstance().syncEntityTree();
                 return null;

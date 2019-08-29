@@ -57,8 +57,8 @@ public class RangeBar extends View {
 
     int mDefaultVisibleDegrees = 35;
 
-    float mLowerBound = 55.0f;
-    float mUpperBound = 90.0f;
+    float mLowerBound = 32.0f;
+    float mUpperBound = 110.0f;
 
     int mDegreeIncremntPX = 0;
     boolean mMeasured = false;

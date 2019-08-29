@@ -569,10 +569,33 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         double currentAverageTemp = 0;
         int noTempSensor = 0;
         ArrayList<Short> equipNodes = new ArrayList<>();
+        double heatDeadband = 0;
+        double coolDeadband = 0;
+        double coolUpperlimit = 0;
+        double coolLowerlimit = 0;
+        double heatUpperlimit = 0;
+        double heatLowerlimit = 0;
+
         for(int i=0;i<zoneMap.size();i++)
         {
             Equip avgTempEquip = new Equip.Builder().setHashMap(zoneMap.get(i)).build();
             double avgTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" + avgTempEquip.getId() + "\"");
+            
+            double heatDB = CCUHsApi.getInstance().readHisValByQuery("point and heating and deadband and base and equipRef == \"" + avgTempEquip.getId() + "\"");
+            double coolDB = CCUHsApi.getInstance().readHisValByQuery("point and cooling and deadband and base and equipRef == \"" + avgTempEquip.getId() + "\"");
+
+            double coolUL = CCUHsApi.getInstance().readHisValByQuery("point and limit and max and cooling and user and equipRef == \"" + avgTempEquip.getId() + "\"");
+            double heatUL = CCUHsApi.getInstance().readHisValByQuery("point and limit and max and heating and user and equipRef == \"" + avgTempEquip.getId() + "\"");
+            double coolLL = CCUHsApi.getInstance().readHisValByQuery("point and limit and min and cooling and user and equipRef == \"" + avgTempEquip.getId() + "\"");
+            double heatLL = CCUHsApi.getInstance().readHisValByQuery("point and limit and min and heating and user and equipRef == \"" + avgTempEquip.getId() + "\"");
+            if(heatDB < heatDeadband || heatDeadband == 0)
+            {
+                heatDeadband = heatDB;
+            }
+            if(coolDB < coolDeadband || coolDeadband == 0)
+            {
+                coolDeadband = coolDB;
+            }
             if(avgTemp > 0)
             {
                 currentAverageTemp = (currentAverageTemp + avgTemp);
@@ -581,6 +604,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             }
             equipNodes.add(Short.valueOf(avgTempEquip.getGroup()));
             Log.i("EachzoneData","temp:"+avgTemp+" currentAvg:"+currentAverageTemp);
+
+            if(heatDB == heatDeadband && coolDB == coolDeadband) // Setting User Limits based on deadband
+            {
+                coolUpperlimit = coolUL;
+                coolLowerlimit = coolLL;
+                heatUpperlimit = heatUL;
+                heatLowerlimit = heatLL;
+            }
+
         }
         if(zoneMap.size() > 1 && currentAverageTemp != 0){
             currentAverageTemp = currentAverageTemp/(zoneMap.size()-noTempSensor);
@@ -765,8 +797,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         float pointcoolDB = (float)getPointVal(coolDB.get("id").toString());
 
         String floorName = floorList.get(mFloorListAdapter.getSelectedPostion()).getDisplayName();
-        Log.i("EachzoneData","CurrentTemp:"+currentAverageTemp+" FloorName:"+floorName+" ZoneName:"+zoneTitle+","+pointheatDB+","+pointcoolDB);
-        seekArc.setData(false, pointbuildingMin, pointbuildingMax, pointheatUL, pointheatLL, pointcoolLL, pointcoolUL, pointheatDT, pointcoolDT, (float) currentAverageTemp, pointheatDB, pointcoolDB);
+        Log.i("EachzoneData","CurrentTemp:"+currentAverageTemp+" FloorName:"+floorName+" ZoneName:"+zoneTitle+","+heatDeadband+","+coolDeadband);
+        seekArc.setData(false, pointbuildingMin, pointbuildingMax, (float) heatUpperlimit, (float) heatLowerlimit, (float) coolLowerlimit, (float) coolUpperlimit, pointheatDT, pointcoolDT, (float) currentAverageTemp, (float) heatDeadband, (float) coolDeadband);
         seekArc.setDetailedView(false);
         LinearLayout.LayoutParams rowLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
 

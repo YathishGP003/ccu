@@ -709,7 +709,7 @@ public class ScheduleProcessJob extends BaseJob {
         vavPoints.put("Profile","VAV Reheat - No Fan");
         String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and equipRef == \""+equipID+"\"");
         double damperPosPoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and damper and base and equipRef == \""+equipID+"\"");
-        double reheatPoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and reheat and base and equipRef == \""+equipID+"\"");
+        double reheatPoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and reheat and cmd and equipRef == \""+equipID+"\"");
         double supplyAirPoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and entering and air and temp and equipRef == \""+equipID+"\"");
         double dischargePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and discharge and air and temp and equipRef == \""+equipID+"\"");
         if (equipStatusPoint.length() > 0)

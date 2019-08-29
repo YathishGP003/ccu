@@ -2250,7 +2250,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 if (coolpoint.getMarkers().contains("writable"))
                 {
                     CcuLog.d(L.TAG_CCU_UI, "Set Writbale Val "+coolpoint.getDisplayName()+": " +coolid+","+heatpoint.getDisplayName()+","+heatval+","+avgpoint.getDisplayName());
-                    ScheduleProcessJob.handleDesiredTempUpdate(coolpoint, heatpoint,avgpoint,true, coolval, heatval,avgval);
+                    ScheduleProcessJob.handleManualDesiredTempUpdate(coolpoint, heatpoint,avgpoint, coolval, heatval,avgval);
 
                 }
 
@@ -2416,7 +2416,16 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
     }
 
     private void setScheduleType(String id, ScheduleType schedule) {
-        new AsyncTask<String, Void, Void>() {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                CCUHsApi.getInstance().writeDefaultValById(id, (double)schedule.ordinal());
+                ScheduleProcessJob.handleScheduleTypeUpdate(new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(id)).build());
+            }
+        });
+        thread.start();
+        /*new AsyncTask<String, Void, Void>() {
             @Override
             protected Void doInBackground( final String ... params ) {
                 CCUHsApi.getInstance().writeDefaultValById(id, (double)schedule.ordinal());
@@ -2428,7 +2437,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             protected void onPostExecute( final Void result ) {
                 // continue what you are doing...
             }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");*/
     }
     
     

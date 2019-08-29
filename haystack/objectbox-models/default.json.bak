@@ -33,7 +33,7 @@
     },
     {
       "id": "2:6756934624209419492",
-      "lastPropertyId": "18:7517296999905547159",
+      "lastPropertyId": "19:1563815564009531725",
       "name": "Alert",
       "properties": [
         {
@@ -91,19 +91,25 @@
         {
           "id": "18:7517296999905547159",
           "name": "_id"
+        },
+        {
+          "id": "19:1563815564009531725",
+          "name": "mAlertType"
         }
       ],
       "relations": []
     }
   ],
   "lastEntityId": "2:6756934624209419492",
-  "lastIndexId": "0:0",
+  "lastIndexId": "1:5977877711410822094",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 4,
   "modelVersionParserMinimum": 4,
   "retiredEntityUids": [],
-  "retiredIndexUids": [],
+  "retiredIndexUids": [
+    5977877711410822094
+  ],
   "retiredPropertyUids": [
     3031198001266913739,
     6711939924893535554,

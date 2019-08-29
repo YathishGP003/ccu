@@ -923,11 +923,35 @@ public class CCUTagsDb extends HServer {
         
         HDict entity = readById(id);
         
+        Diagnostics.startMethodTracing("newmethod");
         QueryBuilder<HisItem> hisQuery = hisBox.query();
-        hisQuery.equal(HisItem_.rec, entity.get("id").toString())
+        /*hisQuery.equal(HisItem_.rec, entity.get("id").toString())
+                .orderDesc(HisItem_.date);*/
+        //List<HisItem>  hisItems = hisQuery.build().find(0,1);
+        //return hisItems.size() > 0 ? hisItems.get(0) : null;
+        hisQuery.equal(HisItem_.rec, entity.get("id").toString()).equal(HisItem_.date, hisBox.query().build().property(HisItem_.date).max());
+        HisItem retVal = hisQuery.build().findFirst();
+        Diagnostics.stopMethodTracing("newmethod");
+        if (retVal != null)
+        {
+            retVal.dump();
+        }else {
+            System.out.println("Key: retVal - "+retVal);
+        }
+        Diagnostics.startMethodTracing("oldmethod");
+        QueryBuilder<HisItem> hisQuery1 = hisBox.query();
+        hisQuery1.equal(HisItem_.rec, entity.get("id").toString())
                 .orderDesc(HisItem_.date);
-        List<HisItem>  hisItems = hisQuery.build().find(0,1);
-        return hisItems.size() > 0 ? hisItems.get(0) : null;
+        HisItem retVal2 = hisQuery1.build().findFirst();
+        Diagnostics.stopMethodTracing("oldmethod");
+        if (retVal2 != null)
+        {
+            retVal2.dump();
+        }else {
+            System.out.println("Key: retVal2 - "+retVal2);
+        }
+        
+        return retVal;
     }
 
     public void setHisItemSyncStatus(ArrayList<HisItem> hisItems) {

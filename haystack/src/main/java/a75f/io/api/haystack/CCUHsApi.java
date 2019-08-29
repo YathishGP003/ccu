@@ -615,14 +615,14 @@ public class CCUHsApi
         for (int itr = 0; itr < array.length; itr++)
         {
             HisItem item = hisList.get(itr);
-            array[itr] = HHisItem.make(HDateTime.make(item.date.getTime()), HNum.make(item.getVal()));
+            array[itr] = HHisItem.make(HDateTime.make(item.date), HNum.make(item.getVal()));
         }
         hsClient.hisWrite(HRef.copy(hisList.get(0).getRec()), array);
     }
 
     public void hisWrite(HisItem item)
     {
-        hsClient.hisWrite(HRef.copy(item.getRec()), new HHisItem[]{HHisItem.make(HDateTime.make(item.date.getTime()), HNum.make(item.val))});
+        hsClient.hisWrite(HRef.copy(item.getRec()), new HHisItem[]{HHisItem.make(HDateTime.make(item.date), HNum.make(item.val))});
     }
 
     public ArrayList<HisItem> hisRead(String id, Object range)

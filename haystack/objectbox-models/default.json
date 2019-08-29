@@ -14,10 +14,12 @@
         },
         {
           "id": "2:3721575554880413599",
+          "indexId": "2:7084376089127273340",
           "name": "rec"
         },
         {
           "id": "3:2636138725932829874",
+          "indexId": "3:6552647423424257173",
           "name": "date"
         },
         {
@@ -101,13 +103,15 @@
     }
   ],
   "lastEntityId": "2:6756934624209419492",
-  "lastIndexId": "0:0",
+  "lastIndexId": "3:6552647423424257173",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 4,
   "modelVersionParserMinimum": 4,
   "retiredEntityUids": [],
-  "retiredIndexUids": [],
+  "retiredIndexUids": [
+    5977877711410822094
+  ],
   "retiredPropertyUids": [
     3031198001266913739,
     6711939924893535554,

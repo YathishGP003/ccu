@@ -165,6 +165,7 @@ public class HisSyncHandler
                 }
                 hayStack.tagsDb.setHisItemSyncStatus(hisItems);*/
     
+                CcuLog.d(TAG,"getLastHisItem "+m.get("dis"));
                 //Write recent his val for all points even if it was not updated.
                 HisItem hisVal = hayStack.tagsDb.getLastHisItem(HRef.copy(pointID));
                 if (hisVal == null) {
@@ -172,7 +173,7 @@ public class HisSyncHandler
                     continue;
                 }
                 tsData.put( pointGUID.replace("@",""), String.valueOf(hisVal.getVal()));
-                
+                CcuLog.d(TAG,"witeData to Influx");
                 if (now.getMinuteOfDay() == 0)
                 {
                     hayStack.tagsDb.removeHisItems(HRef.copy(pointID));

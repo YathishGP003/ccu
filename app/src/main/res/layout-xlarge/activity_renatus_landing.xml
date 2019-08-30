@@ -59,6 +59,8 @@
             style="@style/RenatusTabStyle"
             android:layout_width="120dp"
             android:layout_height="?actionBarSize"
+            app:tabBackground = "@null"
+            app:tabRippleColor="@null"
             app:tabIconTint="@color/white"
             app:tabIndicator="@color/accent"
             app:tabIndicatorHeight="6dp"

@@ -61,6 +61,8 @@
             android:layout_height="?actionBarSize"
             app:tabIconTint="@color/white"
             app:tabIndicator="@color/accent"
+            app:tabBackground = "@null"
+            app:tabRippleColor="@null"
             app:tabIndicatorHeight="6dp"
             app:tabMaxWidth="60dp"
             app:tabMode="fixed">

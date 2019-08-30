@@ -73,6 +73,9 @@ public class EmrProfile extends ZoneProfile
         }
         
         int timeDiffMins = (int) (reading1.getDate().getTime() - reading2.getDate().getTime())/(60*1000);
+        if (timeDiffMins < 1) {
+            return;
+        }
         double readingDiff = 100 * (reading1.getVal() - reading2.getVal());
         
         double ratekWh = (60 * readingDiff) / (timeDiffMins * 1000);

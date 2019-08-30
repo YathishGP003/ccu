@@ -5,7 +5,7 @@ import java.util.Date;
 import a75f.io.logger.CcuLog;
 import io.objectbox.annotation.Entity;
 import io.objectbox.annotation.Id;
-import io.objectbox.annotation.Index;
+import io.objectbox.annotation.Transient;
 
 /**
  * Created by samjithsadasivan on 9/24/18.
@@ -17,15 +17,16 @@ public class HisItem
     @Id
     long id;
     
-    @Index
     String rec;
     
-    @Index
     long date;
     
     Double val;
     
     boolean syncStatus;
+    
+    @Transient
+    public Boolean initialized = true;
     
     public HisItem(){
     }
@@ -35,6 +36,21 @@ public class HisItem
         this.date = date.getTime();
         this.val = val;
     }
+    
+    public HisItem(long id, Date date, Double val, Boolean initialized) {
+        this.id = id;
+        this.date = date.getTime();
+        this.val = val;
+        this.initialized = initialized;
+    }
+    
+    public HisItem(String rec, Date date, Double val, Boolean initialized) {
+        this.rec = rec;
+        this.date = date.getTime();
+        this.val = val;
+        this.initialized = initialized;
+    }
+    
     public HisItem(String rec, Date date, Double val) {
         this.rec = rec;
         this.date = date.getTime();

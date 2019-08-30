@@ -893,6 +893,7 @@ public class CCUTagsDb extends HServer {
             hisItem.setVal(Double.parseDouble(item.val.toString()));
             hisItem.setSyncStatus(false);
             hisBox.put(hisItem);
+            HisItemCache.getInstance().add(rec.get("id").toString(), hisItem);
         }
     }
 
@@ -921,36 +922,15 @@ public class CCUTagsDb extends HServer {
     
     public HisItem getLastHisItem(HRef id) {
         
-        HDict entity = readById(id);
-        
-        Diagnostics.startMethodTracing("newmethod");
-        QueryBuilder<HisItem> hisQuery = hisBox.query();
-        /*hisQuery.equal(HisItem_.rec, entity.get("id").toString())
-                .orderDesc(HisItem_.date);*/
-        //List<HisItem>  hisItems = hisQuery.build().find(0,1);
-        //return hisItems.size() > 0 ? hisItems.get(0) : null;
-        hisQuery.equal(HisItem_.rec, entity.get("id").toString()).equal(HisItem_.date, hisBox.query().build().property(HisItem_.date).max());
-        HisItem retVal = hisQuery.build().findFirst();
-        Diagnostics.stopMethodTracing("newmethod");
-        if (retVal != null)
-        {
-            retVal.dump();
-        }else {
-            System.out.println("Key: retVal - "+retVal);
+        HisItem retVal = HisItemCache.getInstance().get(id.toString());
+        if (retVal == null) {
+            retVal = hisBox.query().equal(HisItem_.rec, id.toString())
+                           .orderDesc(HisItem_.date).build().findFirst();
+            if (retVal == null) {
+                retVal = new HisItem(id.toString(), new Date(), 0.0, Boolean.FALSE);
+                HisItemCache.getInstance().add(id.toString(), retVal);
+            }
         }
-        Diagnostics.startMethodTracing("oldmethod");
-        QueryBuilder<HisItem> hisQuery1 = hisBox.query();
-        hisQuery1.equal(HisItem_.rec, entity.get("id").toString())
-                .orderDesc(HisItem_.date);
-        HisItem retVal2 = hisQuery1.build().findFirst();
-        Diagnostics.stopMethodTracing("oldmethod");
-        if (retVal2 != null)
-        {
-            retVal2.dump();
-        }else {
-            System.out.println("Key: retVal2 - "+retVal2);
-        }
-        
         return retVal;
     }
 

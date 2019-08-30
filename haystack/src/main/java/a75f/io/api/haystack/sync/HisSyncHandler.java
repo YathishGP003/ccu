@@ -164,16 +164,15 @@ public class HisSyncHandler
                     item.setSyncStatus(true);
                 }
                 hayStack.tagsDb.setHisItemSyncStatus(hisItems);*/
-    
-                CcuLog.d(TAG,"getLastHisItem "+m.get("dis"));
+                
                 //Write recent his val for all points even if it was not updated.
                 HisItem hisVal = hayStack.tagsDb.getLastHisItem(HRef.copy(pointID));
-                if (hisVal == null) {
+                if (hisVal == null || !hisVal.initialized) {
                     CcuLog.d(TAG, "His val not found : "+m.get("dis"));
                     continue;
                 }
                 tsData.put( pointGUID.replace("@",""), String.valueOf(hisVal.getVal()));
-                CcuLog.d(TAG,"witeData to Influx");
+                
                 if (now.getMinuteOfDay() == 0)
                 {
                     hayStack.tagsDb.removeHisItems(HRef.copy(pointID));
@@ -242,7 +241,7 @@ public class HisSyncHandler
                 hayStack.tagsDb.removeHisItems(HRef.copy(pointID));*/
             
                 HisItem hisVal = hayStack.tagsDb.getLastHisItem(HRef.copy(pointID));
-                if (hisVal == null) {
+                if (hisVal == null || !hisVal.initialized) {
                     CcuLog.d(TAG, "His val not found : "+m.get("dis"));
                     continue;
                 }

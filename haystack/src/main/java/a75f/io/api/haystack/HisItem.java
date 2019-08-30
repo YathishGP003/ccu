@@ -5,6 +5,7 @@ import java.util.Date;
 import a75f.io.logger.CcuLog;
 import io.objectbox.annotation.Entity;
 import io.objectbox.annotation.Id;
+import io.objectbox.annotation.Transient;
 
 /**
  * Created by samjithsadasivan on 9/24/18.
@@ -18,23 +19,41 @@ public class HisItem
     
     String rec;
     
-    Date date;
+    long date;
     
     Double val;
     
     boolean syncStatus;
+    
+    @Transient
+    public Boolean initialized = true;
     
     public HisItem(){
     }
     
     public HisItem(long id, Date date, Double val) {
         this.id = id;
-        this.date = date;
+        this.date = date.getTime();
         this.val = val;
     }
+    
+    public HisItem(long id, Date date, Double val, Boolean initialized) {
+        this.id = id;
+        this.date = date.getTime();
+        this.val = val;
+        this.initialized = initialized;
+    }
+    
+    public HisItem(String rec, Date date, Double val, Boolean initialized) {
+        this.rec = rec;
+        this.date = date.getTime();
+        this.val = val;
+        this.initialized = initialized;
+    }
+    
     public HisItem(String rec, Date date, Double val) {
         this.rec = rec;
-        this.date = date;
+        this.date = date.getTime();
         this.val = val;
     }
     public long getId()
@@ -56,11 +75,11 @@ public class HisItem
     }
     public Date getDate()
     {
-        return date;
+        return new Date(date);
     }
     public void setDate(Date date)
     {
-        this.date = date;
+        this.date = date.getTime();
     }
     public Double getVal()
     {
@@ -80,6 +99,6 @@ public class HisItem
         this.syncStatus = syncStatus;
     }
     public void dump(){
-        CcuLog.d("CCU_HS", "id: " + id + " rec: " + rec + " date: " + date + " val: " + val + " syncStatus: " + syncStatus);
+        CcuLog.d("CCU_HS Key:", "id: " + id + " rec: " + rec + " date: " + date + " val: " + val + " syncStatus: " + syncStatus);
     }
 }

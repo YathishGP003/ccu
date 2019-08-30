@@ -893,6 +893,7 @@ public class CCUTagsDb extends HServer {
             hisItem.setVal(Double.parseDouble(item.val.toString()));
             hisItem.setSyncStatus(false);
             hisBox.put(hisItem);
+            HisItemCache.getInstance().add(rec.get("id").toString(), hisItem);
         }
     }
 
@@ -921,13 +922,16 @@ public class CCUTagsDb extends HServer {
     
     public HisItem getLastHisItem(HRef id) {
         
-        HDict entity = readById(id);
-        
-        QueryBuilder<HisItem> hisQuery = hisBox.query();
-        hisQuery.equal(HisItem_.rec, entity.get("id").toString())
-                .orderDesc(HisItem_.date);
-        List<HisItem>  hisItems = hisQuery.build().find(0,1);
-        return hisItems.size() > 0 ? hisItems.get(0) : null;
+        HisItem retVal = HisItemCache.getInstance().get(id.toString());
+        if (retVal == null) {
+            retVal = hisBox.query().equal(HisItem_.rec, id.toString())
+                           .orderDesc(HisItem_.date).build().findFirst();
+            if (retVal == null) {
+                retVal = new HisItem(id.toString(), new Date(), 0.0, Boolean.FALSE);
+                HisItemCache.getInstance().add(id.toString(), retVal);
+            }
+        }
+        return retVal;
     }
 
     public void setHisItemSyncStatus(ArrayList<HisItem> hisItems) {

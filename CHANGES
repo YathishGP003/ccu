@@ -1,20 +1,16 @@
+ - Merge branch 'dev_sam' into 'master'
+ - resolves RENATUS-635
+ - resolves RENATUS-649
  - Merge branch 'renatus_dev_sam' into 'master'
- - Alert grpOperator support
- - Pub key update
- - Merge branch 'master' of https://gitlab.com/75f/android/renatus
+ - resolves RENATUS-600
  - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-632, SSE profile
- - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-632, SSE profile
- - #RENATUS-632, SSE profile
- - #RENATUS-573, Temp influence profile enabling
+ - #RENATUS-605, Multiple pubnub calls gets triggered when we change desired temp
+ - #RENATUS-605, Multiple pubnub calls gets triggered when we change desired temp
+ - #RENATUS-652, SSE - heating not turning off
  - Merge branch 'mahesh_renuts' into 'master'
- - RENATUS-647, display  CO2 values on System page
- - Merge branch 'mahesh_renuts' into 'master'
- - remove progress loader and listener to save callback
- - fix the master control for dead band validation
- - Version bump to 1.309.0
- - Version bump to 1.309.0
- - alert 2.0
- - Device his update interval changed to 1 min
- - Alert modified conditionals
+ - RENATUS-650, fix the crash, update zone temp if ccu has a zone
+ - Merge branch 'suresh_zonesnew' into 'master'
+ - RENATUS-626:Restriction of Energy meter and PLC pair with other modules
+ - Merge branch 'suresh_zonesnew' into 'master'
+ - RENATUS-637:Pi Loop
+ - RENATUS-603:Dead band and userlimits

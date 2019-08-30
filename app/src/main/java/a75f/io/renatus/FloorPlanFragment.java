@@ -775,6 +775,16 @@ public class FloorPlanFragment extends Fragment
 	public void startPairing()
 	{
 
+        if (mFloorListAdapter.getSelectedPostion() == -1) {
+            short meshAddress = L.generateSmartNodeAddress();
+            if (L.ccu().oaoProfile != null) {
+                Toast.makeText(getActivity(), "OAO Module already paired", Toast.LENGTH_LONG).show();
+            } else {
+                showDialogFragment(FragmentBLEInstructionScreen.getInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.OAO, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
+            }
+            return;
+        }
+
 		Zone selectedZone = getSelectedZone();
 		ArrayList<Equip> zoneEquips  = HSUtil.getEquips(selectedZone.getId());
 		boolean isPLCPaired = false;

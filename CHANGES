@@ -1,16 +1,6 @@
- - Merge branch 'dev_sam' into 'master'
- - resolves RENATUS-635
- - resolves RENATUS-649
  - Merge branch 'renatus_dev_sam' into 'master'
- - resolves RENATUS-600
- - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-605, Multiple pubnub calls gets triggered when we change desired temp
- - #RENATUS-605, Multiple pubnub calls gets triggered when we change desired temp
- - #RENATUS-652, SSE - heating not turning off
+ - resolves RENATUS-646
+ - resolves RENATUS-631
+ - WIP-Objectbox optimization
  - Merge branch 'mahesh_renuts' into 'master'
- - RENATUS-650, fix the crash, update zone temp if ccu has a zone
- - Merge branch 'suresh_zonesnew' into 'master'
- - RENATUS-626:Restriction of Energy meter and PLC pair with other modules
- - Merge branch 'suresh_zonesnew' into 'master'
- - RENATUS-637:Pi Loop
- - RENATUS-603:Dead band and userlimits
+ - RENATUS-656, fixed a crash when pairing oao

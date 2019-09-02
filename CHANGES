@@ -1,6 +1,0 @@
- - Merge branch 'renatus_dev_sam' into 'master'
- - resolves RENATUS-646
- - resolves RENATUS-631
- - WIP-Objectbox optimization
- - Merge branch 'mahesh_renuts' into 'master'
- - RENATUS-656, fixed a crash when pairing oao

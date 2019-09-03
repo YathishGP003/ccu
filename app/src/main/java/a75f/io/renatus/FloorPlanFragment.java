@@ -820,6 +820,10 @@ public class FloorPlanFragment extends Fragment
 					//showDialogFragment(oaoProfiling, DialogOAOProfile.ID);
 				}
 			} else {
+				if (zoneEquips.size() >= 3){
+					Toast.makeText(getActivity(), "More than 3 modules are not allowed", Toast.LENGTH_LONG).show();
+					return;
+				}
 				/* Checks to see if emulated and doesn't popup BLE dialogs */
 
 				//This should be moved to pair button for select device type screen.
@@ -879,6 +883,7 @@ public class FloorPlanFragment extends Fragment
 	
 	private void selectModule(int position)
 	{
+		mModuleListAdapter.setSelectedItem(position);
 		String nodeAddr = mModuleListAdapter.getItem(position);
 		if (((mFloorListAdapter != null && mFloorListAdapter.getSelectedPostion() == -1) && (mRoomListAdapter != null && mRoomListAdapter.getSelectedPostion() != -1))|| (mRoomListAdapter == null || mRoomListAdapter.getSelectedPostion() == -1) )
 		{

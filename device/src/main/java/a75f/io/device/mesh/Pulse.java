@@ -121,16 +121,17 @@ public class Pulse
 			}
 
 			//Write Current temp point based on th2 enabled or not
+            double oldCurTempVal = hayStack.readHisValById(logicalCurTempPoint);
 			if(isTh2Enabled && !logicalCurTempPoint.isEmpty() && isSse) {
 				hayStack.writeHisValById(logicalCurTempPoint, th2TempVal);
-				if (currentTempInterface != null) {
+				if ((currentTempInterface != null) && (oldCurTempVal != th2TempVal)) {
 					Log.i("PubNub", "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);
 					currentTempInterface.updateTemperature(th2TempVal, nodeAddr);
 				}
 			}
 			else if(!logicalCurTempPoint.isEmpty()){
 				hayStack.writeHisValById(logicalCurTempPoint, curTempVal);
-				if (currentTempInterface != null) {
+				if ((currentTempInterface != null) && (oldCurTempVal != curTempVal)) {
 					Log.i("PubNub", "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);
 					currentTempInterface.updateTemperature(curTempVal, nodeAddr);
 				}
@@ -498,16 +499,19 @@ public class Pulse
 			if (sensorReadings.length > 0) {
 				handleSmartStatSensorEvents(sensorReadings, nodeAddr, deviceInfo, occupancyDetected );
 			}
-			//Write Current temp point based on th2 enabled or not, except for 2pfcu
+			//Write Current temp point based on th2 enabled or not, except for 2pfcud
+            double oldCurTempVal = hayStack.readHisValById(logicalCurTempPoint);
 			if(isTh2Enabled && !logicalCurTempPoint.isEmpty() && !is2pfcu) {
 				hayStack.writeHisValById(logicalCurTempPoint, th2TempVal);
-				if (currentTempInterface != null) {
+				if ((currentTempInterface != null) && (oldCurTempVal != th2TempVal)) {
+					Log.i("PubNub", "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);
 					currentTempInterface.updateTemperature(th2TempVal, nodeAddr);
 				}
 			}
 			else if(!logicalCurTempPoint.isEmpty()){
 				hayStack.writeHisValById(logicalCurTempPoint, curTempVal);
-				if (currentTempInterface != null) {
+				if ((currentTempInterface != null) && (oldCurTempVal != curTempVal)) {
+					Log.i("PubNub", "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);
 					currentTempInterface.updateTemperature(curTempVal, nodeAddr);
 				}
 			}

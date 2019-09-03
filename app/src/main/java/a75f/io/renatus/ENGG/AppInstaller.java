@@ -237,12 +237,13 @@ public class AppInstaller
                     (DownloadManager) RenatusApp.getAppContext().getSystemService(Context.DOWNLOAD_SERVICE);
             if (bSilent)
             {
-                final String libs = "LD_LIBRARY_PATH=/vendor/lib:/system/lib64 ";
-                String sFilePath = RenatusApp.getAppContext().getExternalFilesDir(null).getPath()+"/"+CCU_APK_FILE_NAME ;//manager.getUriForDownloadedFile(downloadId).getPath();
+                String sFilePath = RenatusApp.getAppContext().getExternalFilesDir(null).getPath()+"/"+CCU_APK_FILE_NAME ;
                 if (!sFilePath.isEmpty())
                 {
-                    final String[] commands = {libs+"pm install -r -d "+sFilePath};
-                    Log.d("CCU_DOWNLOAD", "Install AppInstall invokeInstallerIntent===>>>"+sFilePath+","+commands.toString());
+                    File file = new File(RenatusApp.getAppContext().getExternalFilesDir(null), CCU_APK_FILE_NAME);
+                    final String[] commands = {"pm install -r -d "+file.getAbsolutePath()};
+
+                    Log.d("CCU_DOWNLOAD", "Install AppInstall silent invokeInstallerIntent===>>>"+sFilePath);
                     RenatusApp.executeAsRoot(commands);
                 }
             }
@@ -283,9 +284,16 @@ public class AppInstaller
         {
             DownloadManager manager =
                     (DownloadManager) RenatusApp.getAppContext().getSystemService(Context.DOWNLOAD_SERVICE);
-            String sFilePath = RenatusApp.getAppContext().getExternalFilesDir(null).getPath()+"/"+CCU_APK_FILE_NAME ;//manager.getUriForDownloadedFile(downloadId).getPath();
+            String sFilePath = manager.getUriForDownloadedFile(downloadId).getLastPathSegment();
+
             PackageManager pm = RenatusApp.getAppContext().getPackageManager();
             PackageInfo pinew = pm.getPackageArchiveInfo(sFilePath, 0);
+            if (pinew == null)
+            {
+                File file = new File(RenatusApp.getAppContext().getExternalFilesDir(null), CCU_APK_FILE_NAME);
+                pinew = pm.getPackageArchiveInfo(file.getAbsolutePath(), 0);
+            }
+
             if (pinew != null)
             {
                 //if (RenatusApp.DEBUG)

@@ -62,38 +62,46 @@ public class RenatusApp extends UtilityApplication
 		return found;
 	}
 	public static void executeAsRoot(String[] commands) {
-		try {
-			// Do the magic
+		Thread thread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					// Do the magic
 
 
-            ApplicationInfo appInfo = RenatusApp.getAppContext().getApplicationInfo();
-			if(isRooted()) {
-				Process p = Runtime.getRuntime().exec("su");
-				InputStream es = p.getErrorStream();
-				DataOutputStream os = new DataOutputStream(p.getOutputStream());
+					ApplicationInfo appInfo = RenatusApp.getAppContext().getApplicationInfo();
+					Log.d("CCU_DOWNLOAD", "RenatusAPP ExecuteAsRoot===>"+isRooted()+","+(appInfo.flags & ApplicationInfo.FLAG_SYSTEM));
+					if(isRooted()) {
+						Process p = Runtime.getRuntime().exec("su");
+						InputStream es = p.getErrorStream();
+						DataOutputStream os = new DataOutputStream(p.getOutputStream());
 
-				for (String command : commands) {
-					//Log.i(TAG,command);
-					os.writeBytes(command + "\n");
+						for (String command : commands) {
+							//Log.i(TAG,command);
+							os.writeBytes(command + "\n");
+						}
+						os.writeBytes("exit\n");
+						os.flush();
+						os.close();
+
+						int read;
+						byte[] buffer = new byte[4096];
+						String output = new String();
+						while ((read = es.read(buffer)) > 0) {
+							output += new String(buffer, 0, read);
+						}
+						p.waitFor();
+						Log.d("CCU_DOWNLOAD", output.trim() + " (" + p.exitValue() + ")");
+						ApplicationInfo appInfo2 = RenatusApp.getAppContext().getApplicationInfo();
+						Log.d("CCU_DOWNLOAD", "RenatusAPP ExecuteAsRoot END===>"+(appInfo2.flags & ApplicationInfo.FLAG_SYSTEM));
+					}
+				} catch (IOException e) {
+					Log.e("CCU_DOWNLOAD", e.getMessage());
+				} catch (InterruptedException e) {
+					Log.e("CCU_DOWNLOAD", e.getMessage());
 				}
-				os.writeBytes("exit\n");
-				os.flush();
-				os.close();
-
-				int read;
-				byte[] buffer = new byte[4096];
-				String output = new String();
-				while ((read = es.read(buffer)) > 0) {
-					output += new String(buffer, 0, read);
-				}
-				p.waitFor();
-				Log.d("CCU_ROOT_CMD", output.trim() + " (" + p.exitValue() + ")");
-                ApplicationInfo appInfo2 = RenatusApp.getAppContext().getApplicationInfo();
 			}
-		} catch (IOException e) {
-			Log.e("CCU_ROOT_CMD", e.getMessage());
-		} catch (InterruptedException e) {
-			Log.e("CCU_ROOT_CMD", e.getMessage());
-		}
+		});
+		thread.start();
 	}
 }

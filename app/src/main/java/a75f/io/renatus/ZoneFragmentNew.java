@@ -320,7 +320,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                                     }
                                     if (currentTempSensor > 0 && zoneEquips.size() >1) {
                                             currentTempSensor = currentTempSensor / (zoneEquips.size() - noTempSensor);
-                                            DecimalFormat decimalFormat = new DecimalFormat("#.##");
+                                            DecimalFormat decimalFormat = new DecimalFormat("#.#");
                                             currentTempSensor = Double.parseDouble(decimalFormat.format(currentTempSensor));
                                     }
                                     if(currentTempSensor > 0) {

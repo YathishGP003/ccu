@@ -776,8 +776,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         {
             pointcurrTmep = 72;
         }*/
-        float pointcoolDT = (float)getPointVal(coolDT.get("id").toString());
-        float pointheatDT = (float)getPointVal(heatDT.get("id").toString());
+
+        double pointheatDT =  CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and heating and equipRef == \"" + p.getId() + "\"");
+        double pointcoolDT = CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and cooling and equipRef == \"" + p.getId() + "\"");
+        //float pointcoolDT = (float)getPointVal(coolDT.get("id").toString());
+        //float pointheatDT = (float)getPointVal(heatDT.get("id").toString());
         float pointcoolUL = (float)getPointVal(coolUL.get("id").toString());
         float pointheatUL = (float)getPointVal(heatUL.get("id").toString());
         float pointcoolLL = (float)getPointVal(coolLL.get("id").toString());
@@ -789,7 +792,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
         String floorName = floorList.get(mFloorListAdapter.getSelectedPostion()).getDisplayName();
         Log.i("EachzoneData","CurrentTemp:"+currentAverageTemp+" FloorName:"+floorName+" ZoneName:"+zoneTitle+","+heatDeadband+","+coolDeadband);
-        seekArc.setData(false, pointbuildingMin, pointbuildingMax, (float) heatUpperlimit, (float) heatLowerlimit, (float) coolLowerlimit, (float) coolUpperlimit, pointheatDT, pointcoolDT, (float) currentAverageTemp, (float) heatDeadband, (float) coolDeadband);
+        seekArc.setData(false, pointbuildingMin, pointbuildingMax, (float) heatUpperlimit, (float) heatLowerlimit, (float) coolLowerlimit, (float) coolUpperlimit, (float)pointheatDT, (float)pointcoolDT, (float) currentAverageTemp, (float) heatDeadband, (float) coolDeadband);
         seekArc.setDetailedView(false);
         LinearLayout.LayoutParams rowLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
 

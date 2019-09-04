@@ -57,28 +57,27 @@
         <android.support.design.widget.TabLayout
             android:id="@+id/btnTabs"
             style="@style/RenatusTabStyle"
-            android:layout_width="120dp"
+            android:layout_width="140dp"
             android:layout_height="?actionBarSize"
-            app:tabIconTint="@color/white"
-            app:tabIndicator="@color/accent"
             app:tabBackground = "@null"
             app:tabRippleColor="@null"
+            app:tabIndicator="@color/accent"
             app:tabIndicatorHeight="6dp"
-            app:tabMaxWidth="60dp"
+            app:tabMaxWidth="70dp"
+            app:tabGravity="fill"
             app:tabMode="fixed">
 
             <android.support.design.widget.TabItem
                 android:id="@+id/pageSettingButton"
-                android:layout_width="60dp"
+                android:layout_width="70dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:icon="@drawable/ic_account"
-                android:padding="8dp"
-                android:tint="@color/white" />
+                android:icon="@drawable/ic_settings_orange"
+                android:padding="8dp" />
 
             <android.support.design.widget.TabItem
                 android:id="@+id/pageDashBoardButton"
-                android:layout_width="60dp"
+                android:layout_width="70dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:icon="@drawable/ic_tachometer"

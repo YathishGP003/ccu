@@ -124,6 +124,14 @@ public class RangeBarView extends LinearLayout {
         coolUL = getTuner(coolULMap.get("id").toString());
 
         rangeBar.setData((float) heatLL, (float) heatUL, (float) coolLL, (float) coolUL, (float) cdb, (float) hdb);
+
+        if (mSchedule!= null){
+            heatValue = mSchedule.getCurrentValues().getHeatingVal();
+            coolValue = mSchedule.getCurrentValues().getCoolingVal();
+
+        }
+        rangeBar.setLowerHeatingTemp((float) heatValue);
+        rangeBar.setLowerCoolingTemp((float) coolValue);
     }
 
     private void getZoneHeatAndCoolingDeadBand() {

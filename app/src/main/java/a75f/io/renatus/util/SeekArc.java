@@ -470,8 +470,10 @@ public class SeekArc extends View
         }
 
         //Draw icon at current temperature
-        drawIconByTemp(canvas, isDetailedView() ? mCurrentTempRectangle : mRedLimitNonDetailedView,
-                       mCurrentTemp, mArcRadius - mScaledICCTDrawable, mSmallThumbPaint);
+        if (getCurrentTemp() > 0) {
+            drawIconByTemp(canvas, isDetailedView() ? mCurrentTempRectangle : mRedLimitNonDetailedView,
+                    mCurrentTemp, mArcRadius - mScaledICCTDrawable, mSmallThumbPaint);
+        }
 
 
     }

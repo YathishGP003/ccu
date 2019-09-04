@@ -30,7 +30,7 @@ import static a75f.io.renatus.util.BitmapUtil.getBitmapFromVectorDrawable;
 public class RangeBar extends View {
 
     //
-    public static final float RECOMMENDED_WIDTH_DP = 500.0f;
+    public static final float RECOMMENDED_WIDTH_DP = 300.0f;
     //
     private Paint mLinePaint;
     private Paint mTempIconPaint;
@@ -55,7 +55,7 @@ public class RangeBar extends View {
     //Amount of degrees below the bottom reading and above the top reading.
     int mEdgeDegrees = 2;
 
-    int mDefaultVisibleDegrees = 35;
+    int mDefaultVisibleDegrees = 39;
 
     float mLowerBound = 32.0f;
     float mUpperBound = 110.0f;
@@ -116,9 +116,20 @@ public class RangeBar extends View {
         } else {
             mTempIconPaint.setColor(getResources().getColor(R.color.accent));
         }
+
+        //force push the text if overlap
+        int dbWidth = 0;
+        if (temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] - temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()] <= (float) (cdb + hdb + 2.5)){
+            dbWidth = (int)(temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] - temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()]) + 5;
+        }
+        if (stateReflected == RangeBarState.LOWER_HEATING_LIMIT){
+            xPos = (int)( xPos + bitmaps[stateReflected.ordinal()].getWidth() / 2f) - dbWidth;
+        } else {
+            xPos = (int)( xPos + bitmaps[stateReflected.ordinal()].getWidth() / 2f) + dbWidth;
+        }
+
         canvas.drawText(String.valueOf(roundToHalf(temps[stateReflected.ordinal()])),
-                xPos + bitmaps[stateReflected.ordinal()].getWidth() / 2f,
-                (yPos - 10f), mTempIconPaint);
+                xPos,(yPos - 10f), mTempIconPaint);
     }
 
     private RangeBarState isHitBoxTouched(float x, float y) {

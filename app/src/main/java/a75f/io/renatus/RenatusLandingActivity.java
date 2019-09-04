@@ -80,8 +80,8 @@ public class RenatusLandingActivity extends AppCompatActivity {
             btnTabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
                 @Override
                 public void onTabSelected(TabLayout.Tab tab) {
-                      if (tab.getPosition()==0){
-
+                      if (tab.getPosition() == 0){
+                          tab.setIcon(R.drawable.ic_settings_orange);
                           mViewPager.setAdapter(mSettingPagerAdapter);
                           mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
 
@@ -89,7 +89,7 @@ public class RenatusLandingActivity extends AppCompatActivity {
                           floorMenu.setVisibility(View.GONE);
 
                       } else if (tab.getPosition() == 1){
-
+                          tab.setIcon(R.drawable.ic_dashboard_orange);
                           mViewPager.setAdapter(mStatusPagerAdapter);
                           mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
 
@@ -100,7 +100,11 @@ public class RenatusLandingActivity extends AppCompatActivity {
 
                 @Override
                 public void onTabUnselected(TabLayout.Tab tab) {
-
+                    if (tab.getPosition() == 0){
+                        tab.setIcon(R.drawable.ic_account_white);
+                    } else if(tab.getPosition() == 1) {
+                        tab.setIcon(R.drawable.ic_tachometer);
+                    }
                 }
 
                 @Override

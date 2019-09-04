@@ -34,6 +34,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.mesh.LSerial;
@@ -43,12 +44,15 @@ import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
+import a75f.io.logic.jobs.ScheduleProcessJob;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnEditorAction;
 import butterknife.OnFocusChange;
 import butterknife.OnItemClick;
+
+import static a75f.io.renatus.tuners.ExpandableTunerListAdapter.getTuner;
 
 /**
  * Created by samjithsadasivan isOn 8/7/17.
@@ -762,6 +766,20 @@ public class FloorPlanFragment extends Fragment
 				InputMethodManager mgr = (InputMethodManager) getActivity()
 						.getSystemService(Context.INPUT_METHOD_SERVICE);
 				mgr.hideSoftInputFromWindow(addRoomEdit.getWindowToken(), 0);
+
+				//TODO: update default building data
+				HashMap tuner = CCUHsApi.getInstance().read("equip and tuner");
+				Equip p = new Equip.Builder().setHashMap(tuner).build();
+				Schedule buildingSchedule =  Schedule.getScheduleByEquipId(p.getId());
+				Schedule zoneSchedule = CCUHsApi.getInstance().getScheduleById(hsZone.getScheduleRef());
+
+				for (Schedule.Days days : zoneSchedule.getDays()) {
+					days.setHeatingVal(buildingSchedule.getCurrentValues().getHeatingVal());
+					days.setCoolingVal(buildingSchedule.getCurrentValues().getCoolingVal());
+				}
+
+				CCUHsApi.getInstance().updateZoneSchedule(zoneSchedule, zoneSchedule.getRoomRef());
+
 				return true;
 			}
 			else {

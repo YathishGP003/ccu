@@ -57,7 +57,7 @@ public class OaoArc extends View {
     /**
      * The Angle through which to draw the arc (Max is 360)
      */
-    private int mSweepAngle = 300;
+    private int mSweepAngle = 240;
 
     /**
      * The rotation of the SeekArc- 0 is twelve o'clock
@@ -183,7 +183,7 @@ public class OaoArc extends View {
     protected void onDraw(Canvas canvas) {
         // Draw the arcs
         float arcSweep = mSweepAngle;
-        float arcStart = mStartAngle + 90;
+        float arcStart = mStartAngle + 120;
 
         canvas.drawArc(mArcRect, arcStart, arcSweep, false, mArcPaint);
         if (mProgressSweep > 0) {
@@ -209,8 +209,8 @@ public class OaoArc extends View {
         String oaoTitle = "OAO";
         mOAOTitleTextPaint.getTextBounds(oaoTitle, 0, oaoTitle.length(), bounds);
 
-        float yPos = getHeight();  // baseline
-        canvas.drawText(oaoTitle, 80, yPos, mOAOTitleTextPaint);
+        float yPos = getHeight() /1.1f;  // baseline
+        canvas.drawText(oaoTitle, 75, yPos, mOAOTitleTextPaint);
     }
 
     private void drawAirCo2Text(Canvas canvas) {
@@ -228,8 +228,8 @@ public class OaoArc extends View {
 
         float yPos = getHeight();  // baseline
 
-        canvas.drawText("0 PPM", 40, yPos - 40, mTextPaint);
-        canvas.drawText("2000 PPM", 125, yPos - 40, mTextPaint);
+        canvas.drawText("0 PPM", 0, yPos - 70, mTextPaint);
+        canvas.drawText("2000 PPM", 145, yPos - 70, mTextPaint);
     }
 
     @Override
@@ -352,6 +352,6 @@ public class OaoArc extends View {
     }
 
     private float getAngle(float ppmRead) {
-        return (300.0f * (ppmRead / mMax) + 30.0f);
+        return (240.0f * (ppmRead / mMax) + 60.0f);
     }
 }

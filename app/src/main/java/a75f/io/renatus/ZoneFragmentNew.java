@@ -65,6 +65,7 @@ import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.pubnub.UpdatePointHandler;
 import a75f.io.logic.pubnub.ZoneDataInterface;
+import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.schedules.ScheduleUtil;
 import a75f.io.renatus.schedules.SchedulerFragment;
 import a75f.io.renatus.util.GridItem;
@@ -74,13 +75,8 @@ import a75f.io.renatus.util.SeekArc;
 public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 {
     ExpandableListView            expandableListView;
-    ExpandableListAdapter         expandableListAdapter;
-    List<String>                  expandableListTitle;
     HashMap<String, List<String>> expandableListDetail;
 
-
-    HashMap<String, String> tunerMap = new HashMap();
-    int lastExpandedPosition;
 
     ImageView floorMenu;
     public DrawerLayout mDrawerLayout;
@@ -97,7 +93,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
     private ImageView weather_icon;
     private TextView maxmintemp;
     private TextView note;
-    private boolean isWeatherWidget = false;
     private Runnable weatherUpdate;
     private Handler weatherUpdateHandler;
     public RecyclerView recyclerView;
@@ -115,23 +110,16 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
     int numRows = 0;
     int columnCount = 4;
     int rowcount = 0;
-    GridItem gridItemSelected = new GridItem();
     View parentRootView;
     Schedule mSchedule = null;
-    int mScheduleType = -1;
     ScrollView scrollViewParent;
     Equip equipment;
 
     boolean zoneOpen = false;
     SeekArc seekArcOpen;
     NonTempControl nonTempControlOpen;
-    ImageView imageEquipOpen;
     View zonePointsOpen;
     Equip equipOpen;
-    View titleOpen;
-    View statusOpen;
-    View type1Open;
-    View type2Open;
     HashMap pointsOpen = new HashMap();
     ArrayList<SeekArc> seekArcArrayList = new ArrayList<>();
     ArrayList<TextView> statusTextArrayList = new ArrayList<>();
@@ -142,7 +130,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
     boolean isCPUloaded = false;
     boolean isHPUloaded = false;
     ArrayList<HashMap> openZoneMap;
-    double currentAverageTemp = 0;
     double currentTempSensor = 0;
     int noTempSensor = 0;
     public ZoneFragmentNew()
@@ -295,6 +282,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         if(getActivity() != null) {
             int i;
             if(currentTemp > 0) {
+                double buildingLimitMax =  TunerUtil.readTunerValByQuery("building and limit and max", L.ccu().systemProfile.getSystemEquipRef());
+                double buildingLimitMin =  TunerUtil.readTunerValByQuery("building and limit and min", L.ccu().systemProfile.getSystemEquipRef());
+
+                double tempDeadLeeway = TunerUtil.readTunerValByQuery("temp and dead and leeway",L.ccu().systemProfile.getSystemEquipRef());
                 for (i = 0; i < seekArcArrayList.size(); i++)
                 {
                     GridItem gridItem = (GridItem) seekArcArrayList.get(i).getTag();
@@ -312,7 +303,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                                     for (int j = 0; j < zoneEquips.size(); j++) {
                                         Equip tempEquip = new Equip.Builder().setHashMap(zoneEquips.get(j)).build();
                                         double avgTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" + tempEquip.getId() + "\"");
-                                        if (avgTemp > 0) {
+                                        if ((avgTemp < (buildingLimitMax + tempDeadLeeway)) && (avgTemp > (buildingLimitMin + tempDeadLeeway))) {
                                             currentTempSensor = (currentTempSensor + avgTemp);
                                         } else {
                                             noTempSensor++;
@@ -363,15 +354,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
     public void updateSensorValue(short nodeAddress){
         if(getActivity() != null) {
             if(zoneOpen) {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (equipOpen.getProfile().contains("PLC") || equipOpen.getProfile().contains("EMR") || equipOpen.getProfile().contains("monitor")) {
+                if (equipOpen.getProfile().contains("PLC") || equipOpen.getProfile().contains("EMR") || equipOpen.getProfile().contains("monitor")) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
                             updateNonTemperatureBasedZones(nonTempControlOpen, zonePointsOpen, equipOpen, getLayoutInflater());
                             tableLayout.invalidate();
                         }
-                    }
-                });
+                    });
+                }
             }
         }
     }
@@ -637,8 +628,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         vacationStatusTV.setText(vacationStatus);
         scheduleStatus.setText(status);
         String scheduleTypeId = CCUHsApi.getInstance().readId("point and scheduleType and equipRef == \""+equipId+"\"");
-        mScheduleType = (int)CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId);
-
+        final int mScheduleType = (int)CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId);
+        Log.d("ScheduleType","mScheduleType=="+mScheduleType+","+(int)CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId)+","+p.getDisplayName());
         mSchedule = Schedule.getScheduleByEquipId(equipId);
 
         scheduleImageButton.setTag(mSchedule.getId());
@@ -687,7 +678,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
                     if (mScheduleType != ScheduleType.BUILDING.ordinal()) {
                         setScheduleType(scheduleTypeId, ScheduleType.BUILDING);
-                        mScheduleType = ScheduleType.BUILDING.ordinal();
+                        //mScheduleType = ScheduleType.BUILDING.ordinal();
                     }
 
                     CCUHsApi.getInstance().scheduleSync();
@@ -724,7 +715,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     }
                     if (mScheduleType != ScheduleType.ZONE.ordinal()) {
                         setScheduleType(scheduleTypeId, ScheduleType.ZONE);
-                        mScheduleType = ScheduleType.ZONE.ordinal();
+                        //mScheduleType = ScheduleType.ZONE.ordinal();
                     }
                 } else
                 {
@@ -762,12 +753,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         HashMap currTmep = CCUHsApi.getInstance().read("point and air and temp and sensor and current and equipRef == \"" + p.getId() + "\"");
         HashMap coolDT = CCUHsApi.getInstance().read("point and temp and desired and cooling and sp and equipRef == \"" + p.getId() + "\"");
         HashMap heatDT = CCUHsApi.getInstance().read("point and temp and desired and heating and sp and equipRef == \"" + p.getId() + "\"");
-        HashMap coolUL = CCUHsApi.getInstance().read("point and limit and max and cooling and user and equipRef == \"" + p.getId() + "\"");
-        HashMap heatUL = CCUHsApi.getInstance().read("point and limit and max and heating and user and equipRef == \"" + p.getId() + "\"");
-        HashMap coolLL = CCUHsApi.getInstance().read("point and limit and min and cooling and user and equipRef == \"" + p.getId() + "\"");
-        HashMap heatLL = CCUHsApi.getInstance().read("point and limit and min and heating and user and equipRef == \"" + p.getId() + "\"");
-        HashMap heatDB = CCUHsApi.getInstance().read("point and heating and deadband and base and equipRef == \"" + p.getId() + "\"");
-        HashMap coolDB = CCUHsApi.getInstance().read("point and cooling and deadband and base and equipRef == \"" + p.getId() + "\"");
+        //HashMap coolUL = CCUHsApi.getInstance().read("point and limit and max and cooling and user and equipRef == \"" + p.getId() + "\"");
+        //HashMap heatUL = CCUHsApi.getInstance().read("point and limit and max and heating and user and equipRef == \"" + p.getId() + "\"");
+        //HashMap coolLL = CCUHsApi.getInstance().read("point and limit and min and cooling and user and equipRef == \"" + p.getId() + "\"");
+        //HashMap heatLL = CCUHsApi.getInstance().read("point and limit and min and heating and user and equipRef == \"" + p.getId() + "\"");
+        //HashMap heatDB = CCUHsApi.getInstance().read("point and heating and deadband and base and equipRef == \"" + p.getId() + "\"");
+        //HashMap coolDB = CCUHsApi.getInstance().read("point and cooling and deadband and base and equipRef == \"" + p.getId() + "\"");
         HashMap buildingMin = CCUHsApi.getInstance().read("building and limit and min and equipRef == \"" + L.ccu().systemProfile.getSystemEquipRef() + "\"");
         HashMap buildingMax = CCUHsApi.getInstance().read("building and limit and max and equipRef == \"" + L.ccu().systemProfile.getSystemEquipRef() + "\"");
 
@@ -781,14 +772,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         double pointcoolDT = CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and cooling and equipRef == \"" + p.getId() + "\"");
         //float pointcoolDT = (float)getPointVal(coolDT.get("id").toString());
         //float pointheatDT = (float)getPointVal(heatDT.get("id").toString());
-        float pointcoolUL = (float)getPointVal(coolUL.get("id").toString());
-        float pointheatUL = (float)getPointVal(heatUL.get("id").toString());
-        float pointcoolLL = (float)getPointVal(coolLL.get("id").toString());
-        float pointheatLL = (float)getPointVal(heatLL.get("id").toString());
+        //float pointcoolUL = (float)getPointVal(coolUL.get("id").toString());
+        //float pointheatUL = (float)getPointVal(heatUL.get("id").toString());
+        //float pointcoolLL = (float)getPointVal(coolLL.get("id").toString());
+        //float pointheatLL = (float)getPointVal(heatLL.get("id").toString());
         float pointbuildingMin = (float)getPointVal(buildingMin.get("id").toString());
         float pointbuildingMax = (float)getPointVal(buildingMax.get("id").toString());
-        float pointheatDB = (float)getPointVal(heatDB.get("id").toString());
-        float pointcoolDB = (float)getPointVal(coolDB.get("id").toString());
+        //float pointheatDB = (float)getPointVal(heatDB.get("id").toString());
+        //float pointcoolDB = (float)getPointVal(coolDB.get("id").toString());
 
         String floorName = floorList.get(mFloorListAdapter.getSelectedPostion()).getDisplayName();
         Log.i("EachzoneData","CurrentTemp:"+currentAverageTemp+" FloorName:"+floorName+" ZoneName:"+zoneTitle+","+heatDeadband+","+coolDeadband);
@@ -1056,7 +1047,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         vacationStatusTV.setText(vacationStatus);
         scheduleStatus.setText(status);
         String scheduleTypeId = CCUHsApi.getInstance().readId("point and scheduleType and equipRef == \""+equipId+"\"");
-        mScheduleType = (int)CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId);
+        final int mScheduleType = (int)CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId);
+        Log.d("ScheduleType","update mScheduleType=="+mScheduleType+","+(int)CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId)+","+p.getDisplayName());
 
         mSchedule = Schedule.getScheduleByEquipId(equipId);
 
@@ -1106,7 +1098,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
                     if (mScheduleType != ScheduleType.BUILDING.ordinal()) {
                         setScheduleType(scheduleTypeId, ScheduleType.BUILDING);
-                        mScheduleType = ScheduleType.BUILDING.ordinal();
+                        //mScheduleType = ScheduleType.BUILDING.ordinal();
                     }
 
                     CCUHsApi.getInstance().scheduleSync();
@@ -1143,7 +1135,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     }
                     if (mScheduleType != ScheduleType.ZONE.ordinal()) {
                         setScheduleType(scheduleTypeId, ScheduleType.ZONE);
-                        mScheduleType = ScheduleType.ZONE.ordinal();
+                        //mScheduleType = ScheduleType.ZONE.ordinal();
                     }
                 } else
                 {

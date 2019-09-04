@@ -146,12 +146,19 @@ public class Schedule extends Entity
                     return true;
                 }
                 //If current day is monday , it could conflict with next week's multi-day sunday schedule.
-                if (current.getStart().getDayOfWeek() == 7
-                        && additions.getStart().getDayOfWeek() == 1) {
+                if (current.getStart().getDayOfWeek() == 7 && additions.getStart().getDayOfWeek() == 1) {
                     DateTime start = new DateTime(additions.getStartMillis()+ 7*24*60*60*1000);
                     DateTime end = new DateTime(additions.getEndMillis()+ 7*24*60*60*1000);
                     additions = new Interval(start, end);
                     hasOverlap = current.overlaps(additions);
+                    if (hasOverlap) {
+                        return true;
+                    }
+                } else if (current.getStart().getDayOfWeek() == 1 && additions.getStart().getDayOfWeek() == 7) {
+                    DateTime start = new DateTime(current.getStartMillis()+ 7*24*60*60*1000);
+                    DateTime end = new DateTime(current.getEndMillis()+ 7*24*60*60*1000);
+                    current = new Interval(start, end);
+                    hasOverlap = additions.overlaps(current);
                     if (hasOverlap) {
                         return true;
                     }
@@ -171,9 +178,9 @@ public class Schedule extends Entity
         for (Interval current : intervalsOfCurrent)
         {
             boolean hasOverlap = intervalOfAddition.overlaps(current);
-            Log.d("CCU_UI"," Current "+current+" new "+intervalOfAddition+" overlaps "+hasOverlap);
             if (hasOverlap)
             {
+                Log.d("CCU_UI"," Current "+current+" new "+intervalOfAddition+" overlaps "+hasOverlap);
                 if (current.getStart().minuteOfDay().get() < current.getEnd().minuteOfDay().get())
                 {
                     overLaps.add(current.overlap(intervalOfAddition));
@@ -200,6 +207,14 @@ public class Schedule extends Entity
                 hasOverlap = current.overlaps(addition);
                 if (hasOverlap) {
                     overLaps.add(current.overlap(addition));
+                }
+            }else if (current.getStart().getDayOfWeek() == 1 && intervalOfAddition.getStart().getDayOfWeek() == 7) {
+                DateTime start = new DateTime(current.getStartMillis()+ 7*24*60*60*1000);
+                DateTime end = new DateTime(current.getEndMillis()+ 7*24*60*60*1000);
+                current = new Interval(start, end);
+                hasOverlap = current.overlaps(intervalOfAddition);
+                if (hasOverlap) {
+                    overLaps.add(current.overlap(intervalOfAddition));
                 }
             }
         }
@@ -545,7 +560,12 @@ public class Schedule extends Entity
         
         if (startDateTime.isAfter(endDateTime))
         {
-            return new Interval(startDateTime, endDateTime.withDayOfWeek(DAYS.values()[day.getDay()].getNextDay().ordinal() + 1));
+            if (day.getDay() == DAYS.SUNDAY.ordinal()) {
+                return new Interval(startDateTime, endDateTime.withWeekOfWeekyear(startDateTime.getWeekOfWeekyear()+1)
+                                                                           .withDayOfWeek(DAYS.values()[day.getDay()].getNextDay().ordinal() + 1));
+            } else {
+                return new Interval(startDateTime, endDateTime.withDayOfWeek(DAYS.values()[day.getDay()].getNextDay().ordinal() + 1));
+            }
         } else
         {
             return new Interval(startDateTime, endDateTime);

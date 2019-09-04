@@ -124,4 +124,9 @@ public class EmrEquip
     {
         hayStack.writeHisValByQuery( query+" and equipRef == \""+equipRef+"\"", val);
     }
+    
+    public double getHisVal(String query)
+    {
+        return hayStack.readHisValByQuery( query+" and equipRef == \""+equipRef+"\"");
+    }
 }

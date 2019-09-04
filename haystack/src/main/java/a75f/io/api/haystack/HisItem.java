@@ -101,4 +101,7 @@ public class HisItem
     public void dump(){
         CcuLog.d("CCU_HS Key:", "id: " + id + " rec: " + rec + " date: " + date + " val: " + val + " syncStatus: " + syncStatus);
     }
+    public String toString() {
+        return "id: " + id + " rec: " + rec + " date: " + date + " val: " + val + " syncStatus: " + syncStatus;
+    }
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonParseException;
 
 import junit.framework.Assert;
 
@@ -14,12 +15,20 @@ import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 import org.projecthaystack.client.HClient;
 
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.TimeZone;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import a75f.io.api.haystack.Alert;
 import a75f.io.api.haystack.CCUHsApi;
@@ -448,5 +457,74 @@ public class AlertTest
         }
         
         
+    }
+    
+    @Test
+    public void testPredefinedAlertFetch() {
+        try
+        {
+            String alertDef = sendRequest( "readPredefined", "");
+            System.out.println(alertDef);
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+            AlertDefinition[] pojos = objectMapper.readValue(alertDef, AlertDefinition[].class);
+            ArrayList<AlertDefinition> predefinedAlerts = new ArrayList<>(Arrays.asList(pojos));
+            for (AlertDefinition d : predefinedAlerts)
+            {
+                System.out.println("alertDef Parsed " + d.toString());
+            }
+        }catch (JsonParseException | IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public static String sendRequest(String endpoint, String postData) {
+        URL url;
+        HttpsURLConnection connection = null;
+        try {
+            //Create connection
+            url = new URL("https://alerts75f-dev.azurewebsites.net/"+endpoint);
+            connection = (HttpsURLConnection)url.openConnection();
+            //connection = NetCipher.getHttpsURLConnection(url);//TODO - Hack for SSLException
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Content-Type",
+                    "application/json");
+            
+            connection.setUseCaches (false);
+            connection.setDoInput(true);
+            connection.setDoOutput(true);
+            
+            System.out.println(url.toString()+" "+postData);
+            //Send request
+            DataOutputStream wr = new DataOutputStream (connection.getOutputStream());
+            wr.writeBytes (postData);
+            wr.flush ();
+            wr.close ();
+            
+            //Get Response
+            InputStream is = connection.getInputStream();
+            BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+            String line;
+            StringBuffer response = new StringBuffer();
+            while((line = rd.readLine()) != null) {
+                response.append(line);
+                response.append('\n');
+            }
+            rd.close();
+            
+            return response.toString();
+            
+        } catch (Exception e) {
+            
+            e.printStackTrace();
+            return null;
+            
+        } finally {
+            
+            if(connection != null) {
+                connection.disconnect();
+            }
+        }
     }
 }

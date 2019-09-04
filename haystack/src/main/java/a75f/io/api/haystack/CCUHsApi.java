@@ -46,6 +46,7 @@ public class CCUHsApi
 {
 
     public static  boolean  DEBUG_CCUHS = true;
+    public static boolean CACHED_HIS_QUERY = false ;
     private static CCUHsApi instance;
 
     public AndroidHSClient hsClient;
@@ -255,7 +256,7 @@ public class CCUHsApi
      */
     public ArrayList<HashMap> readAll(String query)
     {
-        CcuLog.d("CCU_HS", "Read Query: " + query);
+        //CcuLog.d("CCU_HS", "Read Query: " + query);
         ArrayList<HashMap> rowList = new ArrayList<>();
         try
         {
@@ -289,7 +290,7 @@ public class CCUHsApi
      */
     public HashMap read(String query)
     {
-        CcuLog.d("CCU_HS", "Read Query: " + query);
+        //CcuLog.d("CCU_HS", "Read Query: " + query);
         HashMap<Object, Object> map = new HashMap<>();
         try
         {
@@ -669,16 +670,32 @@ public class CCUHsApi
 
     public Double readHisValByQuery(String query)
     {
-        ArrayList points = readAll(query);
-        String    id     = points.size() == 0 ? null : ((HashMap) points.get(0)).get("id").toString();
-        if (id == null || id == "")
+        if (CACHED_HIS_QUERY)
         {
-            return 0.0; //Crash because we return null, which should be 0
+            String cachedId = QueryCache.getInstance().get(query);
+            if (cachedId == null)
+            {
+                HashMap p = read(query);
+                if (p.size() == 0)
+                {
+                    return 0.0;
+                }
+                cachedId = p.get("id").toString();
+                QueryCache.getInstance().add(query, cachedId);
+            }
+            HisItem cachedItem = curRead(cachedId);
+            return cachedItem == null ? 0 : cachedItem.getVal();
+        } else {
+            ArrayList points = readAll(query);
+            String    id     = points.size() == 0 ? null : ((HashMap) points.get(0)).get("id").toString();
+            if (id == null || id == "")
+            {
+                return 0.0;
+            }
+    
+            HisItem item = curRead(id);
+            return item == null ? 0 : item.getVal();
         }
-
-        HisItem item = curRead(id);
-        return item == null ? 0 : item.getVal();
-
     }
 
     public synchronized void writeHisValById(String id, Double val)
@@ -691,16 +708,31 @@ public class CCUHsApi
 
     public synchronized void writeHisValByQuery(String query, Double val)
     {
-
-        ArrayList points = readAll(query);
-        String    id     = points.size() == 0 ? null : ((HashMap) points.get(0)).get("id").toString();
-        if (id == null || id == "") {
-            CcuLog.d("CCU_HS","write point id is null");
-            return;
+        if (CACHED_HIS_QUERY)
+        {
+            String cachedId = QueryCache.getInstance().get(query);
+            if (cachedId == null)
+            {
+                HashMap p = read(query);
+                if (p.size() == 0)
+                {
+                    return;
+                }
+                cachedId = p.get("id").toString();
+                QueryCache.getInstance().add(query, cachedId);
+                HisItem item = new HisItem(cachedId, new Date(), val);
+                hisWrite(item);
+            }
+        } else {
+            ArrayList points = readAll(query);
+            String    id     = points.size() == 0 ? null : ((HashMap) points.get(0)).get("id").toString();
+            if (id == null || id == "") {
+                CcuLog.d("CCU_HS","write point id is null");
+                return;
+            }
+            HisItem item = new HisItem(id, new Date(), val);
+            hisWrite(item);
         }
-
-        HisItem item = new HisItem(id, new Date(), val);
-        hisWrite(item);
     }
 
     public ArrayList<HashMap> nav(String id)

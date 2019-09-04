@@ -465,7 +465,7 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
                 ArrayList<Interval> overlaps = schedule.getOverLapInterval(day);
                 for (Interval overlap : overlaps) {
                     Log.d("CCU_UI"," overLap "+overlap);
-                    overlapDays.append(getDayString(day)+"("+overlap.getStart().hourOfDay().get()+":"+(overlap.getStart().minuteOfHour().get() == 0 ? "00" : overlap.getStart().minuteOfHour().get())
+                    overlapDays.append(getDayString(overlap.getStart())+"("+overlap.getStart().hourOfDay().get()+":"+(overlap.getStart().minuteOfHour().get() == 0 ? "00" : overlap.getStart().minuteOfHour().get())
                                        +" - " +overlap.getEnd().hourOfDay().get()+":"+(overlap.getEnd().minuteOfHour().get()  == 0 ? "00": overlap.getEnd().minuteOfHour().get())+ ") ");
                 }
             }
@@ -588,46 +588,6 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
         if (!schedule.isBuildingSchedule()) {
             return null;
         }
-        /*ArrayList<Schedule.Days> removeDayList = new ArrayList<>();
-        for (Schedule.Days sd : schedule.getDays()) {
-            if (sd.getDay() == d.getDay()) {
-                removeDayList.add(sd);
-            }
-        }
-        if (removeDayList.size() == 0) {
-            HashMap<String,ArrayList<Interval>> spillsMap = new HashMap<>();
-            ArrayList<HashMap> zones = CCUHsApi.getInstance().readAll("room");
-            for (HashMap m : zones) {
-                ArrayList<Interval> intervalSpills = new ArrayList<>();
-                Schedule zoneSchedule = CCUHsApi.getInstance().getScheduleById(m.get("scheduleRef").toString());
-                if (zoneSchedule.getMarkers().contains("disabled")) {
-                    continue;
-                }
-                removeDayList.add(d);
-                ArrayList<Interval> zoneIntervals = zoneSchedule.getScheduledIntervalsForDays(removeDayList);
-        
-                for (Interval v : zoneIntervals)
-                {
-                    CcuLog.d("CCU_UI", "Zone interval for the day "+v);
-                    intervalSpills.add(v);
-                }
-                
-                CcuLog.d("CCU_UI","Check schedule spills : Zone "+m);
-                if (intervalSpills.size() > 0)
-                {
-                    spillsMap.put(m.get("id").toString(), intervalSpills);
-                }
-                for (Interval v : intervalSpills)
-                {
-                    CcuLog.d("CCU_UI", "Spilled Zone interval for the day "+v);
-                }
-        
-            }
-            return spillsMap;
-        } else
-        {
-            return getScheduleSpills(removeDayList);
-        }*/
         return getScheduleSpills(null);
     }
     
@@ -759,6 +719,9 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
         return spillsMap;
     }
     
+    private String getDayString(DateTime d) {
+        return ScheduleUtil.getDayString(d.getDayOfWeek());
+    }
     private String getDayString(Schedule.Days day) {
         return ScheduleUtil.getDayString(day.getDay()+1);
     }

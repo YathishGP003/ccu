@@ -1,0 +1,6 @@
+ - Merge branch 'kumar_renatus' into 'master'
+ - #RENATUS-611, Check for latest renatus App version and install updates
+ - Merge branch 'mahesh_renuts' into 'master'
+ - RENATUS-647, display CO2 values display on System page RENATUS-659, set selected module RENATUS-660, limit module paring to 3
+ - Merge branch 'kumar_renatus' into 'master'
+ - #RENATUS-605, multi modules pubnub trigger

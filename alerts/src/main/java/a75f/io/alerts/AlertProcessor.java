@@ -2,11 +2,17 @@ package a75f.io.alerts;
 
 import android.content.Context;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.google.gson.JsonParseException;
 
 import org.joda.time.DateTime;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -49,6 +55,7 @@ public class AlertProcessor
     
     private static final String PREFS_ALERT_DEFS = "ccu_alerts";
     private static final String PREFS_ALERTS_CUSTOM = "custom_alerts";
+    private static final String PREFS_ALERTS_PREDEFINED = "predef_alerts";
     
     HashMap<String, Integer> offsetCounter = new HashMap<>();
     HashSet<String> activeAlertRefs ;
@@ -65,7 +72,10 @@ public class AlertProcessor
         alertList = new ArrayList<>();
         activeAlertList = new ArrayList<>();
         parser = new AlertParser();
-        predefinedAlerts = parser.parseAllAlerts(c);
+        predefinedAlerts = getPredefinedAlerts();
+        if (predefinedAlerts == null || predefinedAlerts.size() == 0) {
+            fetchPredefinedAlerts();
+        }
     }
     
     //For Unit testing
@@ -83,7 +93,37 @@ public class AlertProcessor
         alertList = new ArrayList<>();
         activeAlertList = new ArrayList<>();
         parser = new AlertParser();
-        predefinedAlerts = parser.parseAlertsString(alertDef);
+        fetchPredefinedAlerts();
+        
+    }
+    
+    public ArrayList<AlertDefinition> getPredefinedAlerts() {
+        String alerts = mContext.getSharedPreferences(PREFS_ALERT_DEFS, Context.MODE_PRIVATE).getString(PREFS_ALERTS_PREDEFINED, null);
+        return alerts != null ? parser.parseAlertsString(alerts) : null;
+    }
+    public void fetchPredefinedAlerts() {
+        try
+        {
+            String alertDef = HttpUtil.sendRequest(mContext, "readPredefined", "");
+            CcuLog.d("CCU_ALERTS", " alertDef " + alertDef);
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+            AlertDefinition[] pojos = objectMapper.readValue(alertDef, AlertDefinition[].class);
+            predefinedAlerts = new ArrayList<>(Arrays.asList(pojos));
+            for (AlertDefinition d : predefinedAlerts)
+            {
+                CcuLog.d("CCU_ALERTS", "Predefined alertDef Fetched: " + d.toString());
+            }
+            savePredefinedAlertDefinitions(alertDef);
+        }catch (JsonParseException | IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void savePredefinedAlertDefinitions(String alerts) {
+        CcuLog.d("CCU_ALERTS", "Save Predefined Alerts "+alerts);
+        mContext.getSharedPreferences(PREFS_ALERT_DEFS, Context.MODE_PRIVATE).edit().putString(PREFS_ALERTS_PREDEFINED, alerts).apply();
     }
     
     public void processAlerts() {
@@ -203,106 +243,6 @@ public class AlertProcessor
             }
         }
     
-        for (Alert a : getActiveAlerts()) {
-            CcuLog.d("CCU_ALERTS"," Active Alert "+a.toString());
-        }
-        List<Alert> unsyncedAlerts = getUnSyncedAlerts();
-        CcuLog.d("CCU_ALERTS"," Unsynced Alerts "+unsyncedAlerts.size());
-        if (unsyncedAlerts.size() > 0)
-        {
-            List<Alert> syncedAlerts = AlertSyncHandler.sync(mContext, unsyncedAlerts);
-            for (Alert a : syncedAlerts) {
-                updateAlert(a);
-            }
-        }
-    }
-    
-    public void processAlertsObsolete() {
-        CcuLog.d("CCU_ALERTS", "processAlerts ");
-        activeAlertRefs = new HashSet<>();
-        for (AlertDefinition def : getAlertDefinitions()) {
-            if (!def.alert.ismEnabled()) {
-                continue;
-            }
-            
-            if (isZoneAlert(def)) {
-                CcuLog.d("CCU_ALERTS", "processAlerts: Check equips for  "+def.toString());
-                ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("zone and equip");
-                for (HashMap eq : equips) {
-                    if (def.evaluate(eq.get("id").toString())) {
-                        activeAlertRefs.add(def.alert.mTitle+eq.get("id"));
-                        if (alertActive(def.alert,eq.get("id").toString())){
-                            continue;
-                        }
-                        if (Integer.parseInt(def.offset) > 0) {
-                            int offset = 0;
-                            if (offsetCounter.get(def.alert.mTitle+eq.get("id")) != null)
-                            {
-                                offset = offsetCounter.get(def.alert.mTitle + eq.get("id"));
-                            }
-                            
-                            if (offset++ >= Integer.parseInt(def.offset)) {
-                                addAlert(AlertBuilder.build(def, AlertFormatter.getFormattedMessage(def),eq.get("id").toString()));
-                                CcuLog.d("CCU_ALERTS", "Equip "+eq.get("dis")+" addAlert "+def.toString());
-                            } else
-                            {
-                                CcuLog.d("CCU_ALERTS", "Equip "+eq.get("dis") + " offset " +offset);
-                            }
-                            offsetCounter.put(def.alert.mTitle + eq.get("id"), offset);
-                        } else {
-                            addAlert(AlertBuilder.build(def, AlertFormatter.getFormattedMessage(def), eq.get("id").toString()));
-                        }
-                        
-                    }
-                }
-            } else {
-                CcuLog.d("CCU_ALERTS", "processAlerts: Find points for "+def.toString());
-                def.evaluate();
-                ArrayList<String> pointList = null;
-                for (int i = 0; i < def.conditionals.size(); i+=2) {
-                    if (i == 0) {
-                        pointList = def.conditionals.get(0).pointList;
-                        continue;
-                    }
-                    if (def.conditionals.get(i-1).operator.contains("&&")) {
-                        pointList.retainAll(def.conditionals.get(i).pointList);
-                    } else if (def.conditionals.get(i-1).operator.contains("||")) {
-                        pointList.addAll(def.conditionals.get(i).pointList);
-                    }
-                }
-                for(String point : pointList) {
-                    if (!alertActive(def.alert, point))
-                    {
-                        HashMap p = CCUHsApi.getInstance().readMapById(point);
-                        if (Integer.parseInt(def.offset) > 0) {
-                            int offset = 0;
-                            if (offsetCounter.get(def.alert.mTitle+p.get("id")) != null)
-                            {
-                                offset = offsetCounter.get(def.alert.mTitle + p.get("id"));
-                            }
-                            if (offset++ >= Integer.parseInt(def.offset)) {
-                                addAlert(AlertBuilder.build(def, AlertFormatter.getFormattedMessage(def), point));
-                                CcuLog.d("CCU_ALERTS", "Point " + p.get("dis") + " addAlert " + def.toString());
-                            } else
-                            {
-                                CcuLog.d("CCU_ALERTS", "Point "+p.get("dis") + " offset " +offset);
-                            }
-                        } else {
-                            addAlert(AlertBuilder.build(def, AlertFormatter.getFormattedMessage(def), point));
-                        }
-                    }
-                    activeAlertRefs.add(def.alert.mTitle+point);
-                }
-            }
-        }
-        
-        //Fix alerts which are no more active
-        for (Alert  a : getActiveAlerts()) {
-            if (!activeAlertRefs.contains(a.mTitle+a.ref)) {
-                fixAlert(a);
-            }
-        }
-        
         for (Alert a : getActiveAlerts()) {
             CcuLog.d("CCU_ALERTS"," Active Alert "+a.toString());
         }

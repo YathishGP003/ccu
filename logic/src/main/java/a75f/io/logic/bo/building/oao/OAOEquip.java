@@ -172,7 +172,7 @@ public class OAOEquip
                                          .setSiteRef(siteRef)
                                          .setRoomRef(roomRef)
                                          .setFloorRef(floorRef)
-                                         .addMarker("oao").addMarker("weather").addMarker("outside").addMarker("air").addMarker("temp").addMarker("sensor").addMarker("his").addMarker("equipHis")
+                                         .addMarker("oao").addMarker("outsideWeather").addMarker("air").addMarker("temp").addMarker("sensor").addMarker("his").addMarker("equipHis")
                                          .setGroup(String.valueOf(nodeAddr))
                                          .setTz(tz)
                                          .build();
@@ -184,7 +184,7 @@ public class OAOEquip
                                               .setSiteRef(siteRef)
                                               .setRoomRef(roomRef)
                                               .setFloorRef(floorRef)
-                                              .addMarker("oao").addMarker("weather").addMarker("outside").addMarker("air").addMarker("humidity").addMarker("sensor").addMarker("his").addMarker("equipHis")
+                                              .addMarker("oao").addMarker("outsideWeather").addMarker("air").addMarker("humidity").addMarker("sensor").addMarker("his").addMarker("equipHis")
                                               .setGroup(String.valueOf(nodeAddr))
                                               .setTz(tz)
                                               .build();

@@ -415,6 +415,14 @@ public class Schedule extends Entity
 
     public ArrayList<Days> getDays()
     {
+        Collections.sort(mDays, new Comparator<Days>()
+        {
+            @Override
+            public int compare(Days d1, Days d2)
+            {
+                return d1.mDay - d2.mDay;
+            }
+        });
         return mDays;
     }
     
@@ -1209,6 +1217,5 @@ public class Schedule extends Entity
         
         return defaultSchedule.toDict();
     }
-
 
 }

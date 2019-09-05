@@ -845,7 +845,11 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
 
         if (leftBreak) {
             drawableCompat = getResources().getDrawable(R.drawable.temperature_background_left);
-            textViewTemp.setCompoundDrawablesWithIntrinsicBounds(mDrawableBreakLineLeft, null, null, null);
+            if (intersection) {
+                Drawable rightGreyBar = getResources().getDrawable(R.drawable.vline);
+                textViewTemp.setCompoundDrawablesWithIntrinsicBounds(mDrawableBreakLineLeft, null, rightGreyBar, null);
+            }else
+                textViewTemp.setCompoundDrawablesWithIntrinsicBounds(mDrawableBreakLineLeft, null, null, null);
 
             Space space = new Space(getActivity());
             space.setId(View.generateViewId());

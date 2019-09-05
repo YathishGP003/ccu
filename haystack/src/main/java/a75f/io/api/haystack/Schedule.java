@@ -622,6 +622,11 @@ public class Schedule extends Entity
                 if (scheduledIntervals.get(i).getEndMillis() == scheduledIntervals.get(ii).getStartMillis())
                 {
                     this.mDays.get(i).setIntersection(true);
+                }else if((scheduledIntervals.get(i).getEnd().getDayOfWeek() == scheduledIntervals.get(ii).getStart().getDayOfWeek())
+                        && (scheduledIntervals.get(i).getEnd().getHourOfDay() == scheduledIntervals.get(ii).getStart().getHourOfDay())
+                        && (scheduledIntervals.get(i).getEnd().getMinuteOfHour() == scheduledIntervals.get(ii).getStart().getMinuteOfHour())){
+                    //Multi day schedule intersection check
+                    this.mDays.get(i).setIntersection(true);
                 }
             }
         }

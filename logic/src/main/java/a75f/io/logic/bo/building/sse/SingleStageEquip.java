@@ -201,13 +201,11 @@ public class SingleStageEquip {
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
-                .addMarker("status").addMarker("sse").addMarker("his").addMarker("sse").addMarker("logical").addMarker("zone").addMarker("equipHis")
+                .addMarker("status").addMarker("his").addMarker("sse").addMarker("logical").addMarker("zone").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
         String equipStatusId = CCUHsApi.getInstance().addPoint(equipStatus);
-        CCUHsApi.getInstance().writeDefaultValById(equipStatusId, 0.0);
-        CCUHsApi.getInstance().writeHisValById(equipStatusId, 0.0);
 
         Point equipStatusMessage = new Point.Builder()
                 .setDisplayName(siteDis+"-SSE-"+nodeAddr+"-equipStatusMessage")
@@ -275,7 +273,7 @@ public class SingleStageEquip {
                 .setTz(tz)
                 .build();
         String eatID = CCUHsApi.getInstance().addPoint(eatPoint);
-        CCUHsApi.getInstance().writeHisValById(eatID, 0.0);
+        //CCUHsApi.getInstance().writeHisValById(eatID, 0.0);
         Point occupancy = new Point.Builder()
                 .setDisplayName(equipDis + "-" + "occupancy")
                 .setSiteRef(siteRef)
@@ -385,7 +383,7 @@ public class SingleStageEquip {
                 .setTz(tz)
                 .build();
         String enableRelay1Id = CCUHsApi.getInstance().addPoint(enableRelay1);
-        CCUHsApi.getInstance().writeDefaultValById(enableRelay1Id, (double)(config.enableRelay1 > 0 ? 1.0 : 0));
+        CCUHsApi.getInstance().writeDefaultValById(enableRelay1Id, config.isOpConfigured(Port.RELAY_ONE) ? (double)config.enableRelay1 : 0);
 
         Point enableRelay2 = new Point.Builder()
                 .setDisplayName(equipDis+"-enableFanStageRelay2")
@@ -399,7 +397,7 @@ public class SingleStageEquip {
                 .setTz(tz)
                 .build();
         String enableRelay2Id = CCUHsApi.getInstance().addPoint(enableRelay2);
-        CCUHsApi.getInstance().writeDefaultValById(enableRelay2Id, (double)(config.enableRelay2 > 0? 1.0 : 0));
+        CCUHsApi.getInstance().writeDefaultValById(enableRelay2Id, config.isOpConfigured(Port.RELAY_TWO) ? (double)config.enableRelay2 : 0);
         Point enableTh1 = new Point.Builder()
                 .setDisplayName(equipDis+"-enableAirflowTempSensor")
                 .setEquipRef(equipRef)
@@ -426,8 +424,8 @@ public class SingleStageEquip {
                 .build();
         String enableTh2Id = CCUHsApi.getInstance().addPoint(enableTh2);
         CCUHsApi.getInstance().writeDefaultValById(enableTh2Id, (config.enableThermistor2 ? 1.0 : 0));
-        setConfigNumVal("enable and relay1",config.enableRelay1 > 0 ? 1.0 : 0);
-        setConfigNumVal("enable and relay2",config.enableRelay2 > 0 ? 1.0 : 0);
+        setConfigNumVal("enable and relay1",config.isOpConfigured(Port.RELAY_ONE) ? (double)config.enableRelay1 : 0);
+        setConfigNumVal("enable and relay2",config.isOpConfigured(Port.RELAY_TWO) ? (double)config.enableRelay2 : 0);
         setConfigNumVal("enable and th2",config.enableThermistor2 == true ? 1.0 : 0);
         setConfigNumVal("enable and th1",config.enableThermistor1 == true ? 1.0 : 0);
         setConfigNumVal("temperature and offset",config.temperaturOffset);

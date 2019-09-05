@@ -598,7 +598,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         }
         if(zoneMap.size() > 1 && currentAverageTemp != 0){
             currentAverageTemp = currentAverageTemp/(zoneMap.size()-noTempSensor);
-            DecimalFormat decimalFormat = new DecimalFormat("#.##");
+            DecimalFormat decimalFormat = new DecimalFormat("#.#");
             currentAverageTemp = Double.parseDouble(decimalFormat.format(currentAverageTemp));
         }
         Log.i("EachzoneData"," currentAvg:"+currentAverageTemp);

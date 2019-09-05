@@ -1,6 +1,9 @@
- - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-611, Check for latest renatus App version and install updates
+ - Merge branch 'renatus_dev_sam' into 'master'
+ - Predefined Alerts fetch
+ - Query Cache
+ - resolves RENATUS-646
+ - resolves RENATUS-634
  - Merge branch 'mahesh_renuts' into 'master'
- - RENATUS-647, display CO2 values display on System page RENATUS-659, set selected module RENATUS-660, limit module paring to 3
+ - RENATUS-653, fixed slider is restricted from 55.0 to 90.0 RENATUS-654, fixed default schedule values for building schedule
  - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-605, multi modules pubnub trigger
+ - #RENATUS-668, Zone schedule is chaning back to building schedule

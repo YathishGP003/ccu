@@ -254,7 +254,7 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
             schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
         } else {
             schedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
-            Log.d("CCU_UI"," Loaded System Schedule "+schedule.getScheduleHDict().toZinc());
+            Log.d("CCU_UI"," Loaded System Schedule "+schedule.toString());
         }
         
         if(schedule != null && schedule.isZoneSchedule())
@@ -457,9 +457,7 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
     
         boolean intersection = schedule.checkIntersection(daysArrayList);
         if (intersection) {
-            if (removeEntry != null)
-                schedule.getDays().add(position, removeEntry);
-        
+            
             StringBuilder overlapDays = new StringBuilder();
             for (Schedule.Days day : daysArrayList) {
                 ArrayList<Interval> overlaps = schedule.getOverLapInterval(day);
@@ -476,7 +474,8 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
                    .setIcon(android.R.drawable.ic_dialog_alert)
                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                        public void onClick(DialogInterface dialog, int id) {
-                           //do things
+                           if (removeEntry != null)
+                               schedule.getDays().add(position, removeEntry);
                        }
                    });
         
@@ -566,7 +565,6 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
     
         schedule.getDays().addAll(daysArrayList);
         doScheduleUpdate();
-        
         return true;
     }
     
@@ -817,7 +815,7 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
                                    int startTimeMM, int endTimeMM, TextView textView,
                                    boolean leftBreak, boolean rightBreak, boolean intersection) {
 
-        Log.i("CCU_UI", "tempStartTime: " + tempStartTime + " tempEndTime: " + tempEndTime + " startTimeMM: " + startTimeMM + " endTimeMM " + endTimeMM);
+        Log.i("CCU_UI", "position: "+position+" tempStartTime: " + tempStartTime + " tempEndTime: " + tempEndTime + " startTimeMM: " + startTimeMM + " endTimeMM " + endTimeMM);
 
 
         AppCompatTextView textViewTemp = new AppCompatTextView(getActivity());

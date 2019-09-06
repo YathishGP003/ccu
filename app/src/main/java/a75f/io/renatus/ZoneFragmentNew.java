@@ -15,7 +15,9 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -449,34 +451,18 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
     private void loadGrid(View rootView){
         rowcount = 0;
         if(floorList.size()>0) {
-            ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone and roomRef and floorRef == \"" + floorList.get(mFloorListAdapter.getSelectedPostion()).getId() + "\"");
             ArrayList<HashMap> roomMap = CCUHsApi.getInstance().readAll("room and floorRef == \"" + floorList.get(mFloorListAdapter.getSelectedPostion()).getId() + "\"");
-
-            HashMap<String, ArrayList<HashMap>> zoneData = new HashMap<String, ArrayList<HashMap>>();
-            for (HashMap zoneModel : equips) {
-                if (zoneData.containsKey(zoneModel.get("roomRef").toString())) {
-                    ArrayList<HashMap> exisiting = zoneData.get(zoneModel.get("roomRef").toString());
-                    exisiting.add(zoneModel);
-                    zoneData.put(zoneModel.get("roomRef").toString(), exisiting);
-                } else {
-                    ArrayList<HashMap> newData = new ArrayList<HashMap>();
-                    newData.add(zoneModel);
-                    zoneData.put(zoneModel.get("roomRef").toString(), newData);
-                }
-            }
-            Log.i("ZonesMap", "Size:" + zoneData.size() + " Data:" + zoneData);
-
             imag = new ImageView(getActivity());
             tableLayout.removeAllViews();
             gridItems.clear();
             tableRows.clear();
             String[] itemNames = getResources().getStringArray(R.array.sse_action_type);
             LinearLayout rowLayout = null;
-            numRows = (zoneData.size() / columnCount);
-            if (zoneData.size() % columnCount != 0)
+            numRows = (roomMap.size() / columnCount);
+            if (roomMap.size() % columnCount != 0)
                 numRows++;
 
-            Button[] buttons = new Button[itemNames.length];
+            //Button[] buttons = new Button[itemNames.length];
             if (numRows > 0) {
                 LinearLayout[] tablerowLayout = new LinearLayout[numRows];
                 for (int j = 0; j < numRows; j++) {
@@ -484,59 +470,73 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     tableRows.add(rowLayout);
                 }
                 tablerowLayout[0] = new LinearLayout(tableLayout.getContext());
-
-
                 int i = 0;
-                for (ArrayList<HashMap> equipZones : zoneData.values()) {
+                 for (int m = 0; m < roomMap.size(); m++) {
                     String zoneTitle = "";
                     LayoutInflater inflater = LayoutInflater.from(getContext());
-                    View arcViewParent = null;
-                    for (int m = 0; m < roomMap.size(); m++) {
-                        String roomRef = equipZones.get(0).get("roomRef").toString();
-                        String roomRef_Room = roomMap.get(m).get("id").toString();
-                        //Log.i("RoomData","roomRef:"+roomRef+" roomMap:"+roomRef_Room);
-                        if (roomRef_Room.equals(roomRef)) {
-                            zoneTitle = roomMap.get(m).get("dis").toString();
-                            break;
-                        }
-                    }
-                    String profileType = "";
 
-                    String profileVAV = "VAV";
-                    String profileDAB = "DAB";
-                    String profileSSE = "SSE";
-                    String profileSmartStat = "SMARTSTAT";
-                    String profileEM = "EMR";
-                    String profilePLC = "PLC";
-                    String profileTempMonitor = "TEMP_MONITOR";
-                    String profileTempInfluence = "TEMP_INFLUENCE";
+                     zoneTitle = roomMap.get(m).get("dis").toString();
+                     ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone and roomRef ==\""+ roomMap.get(m).get("id").toString()+"\" and floorRef == \"" + floorList.get(mFloorListAdapter.getSelectedPostion()).getId() + "\"");
+                     if(equips.size() > 0) {// zones has devices paired
+                         HashMap<String, ArrayList<HashMap>> zoneData = new HashMap<String, ArrayList<HashMap>>();
+                         for (HashMap zoneModel : equips) {
+                             if (zoneData.containsKey(zoneModel.get("roomRef").toString())) {
+                                 ArrayList<HashMap> exisiting = zoneData.get(zoneModel.get("roomRef").toString());
+                                 exisiting.add(zoneModel);
+                                 zoneData.put(zoneModel.get("roomRef").toString(), exisiting);
+                             } else {
+                                 ArrayList<HashMap> newData = new ArrayList<HashMap>();
+                                 newData.add(zoneModel);
+                                 zoneData.put(zoneModel.get("roomRef").toString(), newData);
+                             }
+                         }
+                         Log.i("ZonesMap", "Size:" + zoneData.size() + " Data:" + zoneData);
+                         for (ArrayList<HashMap> equipZones : zoneData.values()) {
 
-                    //Log.e("RoomData","ProfileType:"+profileType);
-                    boolean tempModule = false;
-                    boolean nontempModule = false;
-                    for (HashMap equipTypes : equipZones) {
-                        profileType = equipTypes.get("profile").toString();
-                        Log.e("RoomData", "ProfileType:" + profileType);
-                        if (profileType.contains(profileVAV) || profileType.contains(profileDAB)|| profileType.contains(profileSSE) || profileType.contains(profileSmartStat) || profileType.contains(profileTempInfluence)) {
-                            tempModule = true;
-                            Log.e("RoomData", "Load SmartNode ProfileType:" + profileType);
-                        }
-                        if (profileType.contains(profileEM)||profileType.contains(profilePLC) || profileType.contains(profileTempMonitor) || profileType.contains(profileTempInfluence)) {
-                            nontempModule = true;
-                            Log.e("RoomData", "Load SmartStat ProfileType:" + profileType);
-                        }
-                    }
+                             String profileType = "";
 
-                    if (tempModule) {
-                        Log.e("RoomData", "Load Temperature Based View");
-                        viewTemperatureBasedZone(inflater, rootView, equipZones, zoneTitle, i, tablerowLayout);
-                    }
-                    if (!tempModule && nontempModule) {
-                        Log.e("RoomData", "Load Non Temperature Based View");
-                        viewNonTemperatureBasedZone(inflater, rootView, equipZones, zoneTitle, i, tablerowLayout);
-                        //arcViewParent = inflater.inflate(R.layout.zones_item_smartstat, (ViewGroup) rootView, false);
-                    }
-                    i++;
+                             String profileVAV = "VAV";
+                             String profileDAB = "DAB";
+                             String profileSSE = "SSE";
+                             String profileSmartStat = "SMARTSTAT";
+                             String profileEM = "EMR";
+                             String profilePLC = "PLC";
+                             String profileTempMonitor = "TEMP_MONITOR";
+                             String profileTempInfluence = "TEMP_INFLUENCE";
+
+                             //Log.e("RoomData","ProfileType:"+profileType);
+                             boolean tempModule = false;
+                             boolean nontempModule = false;
+                             for (HashMap equipTypes : equipZones) {
+                                 profileType = equipTypes.get("profile").toString();
+                                 Log.e("RoomData", "ProfileType:" + profileType);
+                                 if (profileType.contains(profileVAV) || profileType.contains(profileDAB) || profileType.contains(profileSSE) || profileType.contains(profileSmartStat) || profileType.contains(profileTempInfluence)) {
+                                     tempModule = true;
+                                     Log.e("RoomData", "Load SmartNode ProfileType:" + profileType);
+                                 }
+                                 if (profileType.contains(profileEM) || profileType.contains(profilePLC) || profileType.contains(profileTempMonitor) || profileType.contains(profileTempInfluence)) {
+                                     nontempModule = true;
+                                     Log.e("RoomData", "Load SmartStat ProfileType:" + profileType);
+                                 }
+                             }
+
+                             if (tempModule) {
+                                 Log.e("RoomData", "Load Temperature Based View");
+                                 viewTemperatureBasedZone(inflater, rootView, equipZones, zoneTitle, i, tablerowLayout);
+                             }
+                             if (!tempModule && nontempModule) {
+                                 Log.e("RoomData", "Load Non Temperature Based View");
+                                 viewNonTemperatureBasedZone(inflater, rootView, equipZones, zoneTitle, i, tablerowLayout);
+                                 //arcViewParent = inflater.inflate(R.layout.zones_item_smartstat, (ViewGroup) rootView, false);
+                             }
+                             i++;
+                         }
+                     }else{
+                         //No devices paired
+                         Log.e("RoomData", "Load No device paired Based View");
+                         viewNonTemperatureBasedZone(inflater, rootView, new ArrayList<HashMap>(), zoneTitle, i, tablerowLayout);
+                         i++;
+                     }
                 }
 
             }
@@ -753,33 +753,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         HashMap currTmep = CCUHsApi.getInstance().read("point and air and temp and sensor and current and equipRef == \"" + p.getId() + "\"");
         HashMap coolDT = CCUHsApi.getInstance().read("point and temp and desired and cooling and sp and equipRef == \"" + p.getId() + "\"");
         HashMap heatDT = CCUHsApi.getInstance().read("point and temp and desired and heating and sp and equipRef == \"" + p.getId() + "\"");
-        //HashMap coolUL = CCUHsApi.getInstance().read("point and limit and max and cooling and user and equipRef == \"" + p.getId() + "\"");
-        //HashMap heatUL = CCUHsApi.getInstance().read("point and limit and max and heating and user and equipRef == \"" + p.getId() + "\"");
-        //HashMap coolLL = CCUHsApi.getInstance().read("point and limit and min and cooling and user and equipRef == \"" + p.getId() + "\"");
-        //HashMap heatLL = CCUHsApi.getInstance().read("point and limit and min and heating and user and equipRef == \"" + p.getId() + "\"");
-        //HashMap heatDB = CCUHsApi.getInstance().read("point and heating and deadband and base and equipRef == \"" + p.getId() + "\"");
-        //HashMap coolDB = CCUHsApi.getInstance().read("point and cooling and deadband and base and equipRef == \"" + p.getId() + "\"");
         HashMap buildingMin = CCUHsApi.getInstance().read("building and limit and min and equipRef == \"" + L.ccu().systemProfile.getSystemEquipRef() + "\"");
         HashMap buildingMax = CCUHsApi.getInstance().read("building and limit and max and equipRef == \"" + L.ccu().systemProfile.getSystemEquipRef() + "\"");
 
-        float pointcurrTmep = (float)getPointVal(currTmep.get("id").toString());
-        /*if(pointcurrTmep == 0)
-        {
-            pointcurrTmep = 72;
-        }*/
+        //float pointcurrTmep = (float)getPointVal(currTmep.get("id").toString());
 
         double pointheatDT =  CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and heating and equipRef == \"" + p.getId() + "\"");
         double pointcoolDT = CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and cooling and equipRef == \"" + p.getId() + "\"");
-        //float pointcoolDT = (float)getPointVal(coolDT.get("id").toString());
-        //float pointheatDT = (float)getPointVal(heatDT.get("id").toString());
-        //float pointcoolUL = (float)getPointVal(coolUL.get("id").toString());
-        //float pointheatUL = (float)getPointVal(heatUL.get("id").toString());
-        //float pointcoolLL = (float)getPointVal(coolLL.get("id").toString());
-        //float pointheatLL = (float)getPointVal(heatLL.get("id").toString());
         float pointbuildingMin = (float)getPointVal(buildingMin.get("id").toString());
         float pointbuildingMax = (float)getPointVal(buildingMax.get("id").toString());
-        //float pointheatDB = (float)getPointVal(heatDB.get("id").toString());
-        //float pointcoolDB = (float)getPointVal(coolDB.get("id").toString());
 
         String floorName = floorList.get(mFloorListAdapter.getSelectedPostion()).getDisplayName();
         Log.i("EachzoneData","CurrentTemp:"+currentAverageTemp+" FloorName:"+floorName+" ZoneName:"+zoneTitle+","+heatDeadband+","+coolDeadband);
@@ -1228,49 +1210,48 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
     private void updateNonTemperatureBasedZones(NonTempControl nonTempControlOpen, View zonePointsOpen, Equip equipOpen, LayoutInflater inflater)
     {
-        ArrayList<HashMap> zoneMap = openZoneMap;
-        Log.i("ProfileTypes","Points:"+zoneMap.toString());
         Equip p = equipOpen;
         View zoneDetails = zonePointsOpen;
         LinearLayout linearLayoutZonePoints  = zoneDetails.findViewById(R.id.lt_profilepoints);
         NonTempControl nonTempControl = nonTempControlOpen;
-        HashMap zoneEquips = zoneMap.get(0);
 
             linearLayoutZonePoints.removeAllViews();
-            if (p.getProfile().startsWith("EMR")) {
-                LinearLayout ll_status  = zoneDetails.findViewById(R.id.lt_status);
-                LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
-                ll_status.setVisibility(View.GONE);
-                ll_schedule.setVisibility(View.GONE);
-                HashMap emPoints = ScheduleProcessJob.getEMEquipPoints(p.getId());
-                Log.i("PointsValue", "EM Points:" + emPoints.toString());
-                if(emPoints.size() > 0) {
-                    loadEMPointsUI(emPoints, inflater, linearLayoutZonePoints, p.getGroup());
-                    double totalEm = (double)emPoints.get("Energy Reading");
-                    double currentEm = (double)emPoints.get("Current Rate");
-                    int currentValue = new BigDecimal(currentEm).intValue();
-                    nonTempControl.setEmCurrentText(String.valueOf(currentValue));
-                    nonTempControl.setEmTotalText(String.format("%.0f",totalEm));
-                    nonTempControl.setEmCurrentText(String.valueOf(currentValue));
-                    nonTempControl.setEmTotalUnitText("KWh");
-                    nonTempControl.setEmCurrentUnitText("KW");
+            if(p != null) {
+                if (p.getProfile().startsWith("EMR")) {
+                    LinearLayout ll_status = zoneDetails.findViewById(R.id.lt_status);
+                    LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
+                    ll_status.setVisibility(View.GONE);
+                    ll_schedule.setVisibility(View.GONE);
+                    HashMap emPoints = ScheduleProcessJob.getEMEquipPoints(p.getId());
+                    Log.i("PointsValue", "EM Points:" + emPoints.toString());
+                    if (emPoints.size() > 0) {
+                        loadEMPointsUI(emPoints, inflater, linearLayoutZonePoints, p.getGroup());
+                        double totalEm = (double) emPoints.get("Energy Reading");
+                        double currentEm = (double) emPoints.get("Current Rate");
+                        int currentValue = new BigDecimal(currentEm).intValue();
+                        nonTempControl.setEmCurrentText(String.valueOf(currentValue));
+                        nonTempControl.setEmTotalText(String.format("%.0f", totalEm));
+                        nonTempControl.setEmCurrentText(String.valueOf(currentValue));
+                        nonTempControl.setEmTotalUnitText("KWh");
+                        nonTempControl.setEmCurrentUnitText("KW");
+                    }
                 }
-            }
-            if (p.getProfile().startsWith("PLC")) {
-                LinearLayout ll_status  = zoneDetails.findViewById(R.id.lt_status);
-                LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
-                ll_status.setVisibility(View.GONE);
-                ll_schedule.setVisibility(View.GONE);
-                HashMap plcPoints = ScheduleProcessJob.getPiEquipPoints(p.getId());
-                if(plcPoints.size() > 0) {
-                    Log.i("PointsValue", "PiLoop Points:" + plcPoints.toString());
-                    loadPLCPointsUI(plcPoints, inflater, linearLayoutZonePoints, p.getGroup());
-                    double targetValue = (double)plcPoints.get("Target Value");
-                    double inputValue = (double)plcPoints.get("Input Value");
-                    nonTempControl.setPiInputText(String.format("%.2f",inputValue));
-                    nonTempControl.setPiOutputText(String.valueOf(targetValue));
-                    nonTempControl.setPiInputUnitText(plcPoints.get("Unit").toString());
-                    nonTempControl.setPiOutputUnitText(plcPoints.get("Unit").toString());
+                if (p.getProfile().startsWith("PLC")) {
+                    LinearLayout ll_status = zoneDetails.findViewById(R.id.lt_status);
+                    LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
+                    ll_status.setVisibility(View.GONE);
+                    ll_schedule.setVisibility(View.GONE);
+                    HashMap plcPoints = ScheduleProcessJob.getPiEquipPoints(p.getId());
+                    if (plcPoints.size() > 0) {
+                        Log.i("PointsValue", "PiLoop Points:" + plcPoints.toString());
+                        loadPLCPointsUI(plcPoints, inflater, linearLayoutZonePoints, p.getGroup());
+                        double targetValue = (double) plcPoints.get("Target Value");
+                        double inputValue = (double) plcPoints.get("Input Value");
+                        nonTempControl.setPiInputText(String.format("%.2f", inputValue));
+                        nonTempControl.setPiOutputText(String.valueOf(targetValue));
+                        nonTempControl.setPiInputUnitText(plcPoints.get("Unit").toString());
+                        nonTempControl.setPiOutputUnitText(plcPoints.get("Unit").toString());
+                    }
                 }
             }
     }
@@ -1278,11 +1259,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
     private void viewNonTemperatureBasedZone(LayoutInflater inflater, View rootView, ArrayList<HashMap> zoneMap,String zoneTitle, int gridPosition, LinearLayout[] tablerowLayout)
     {
-        Log.i("ProfileTypes","Points:"+zoneMap.toString());
-        Equip p = new Equip.Builder().setHashMap(zoneMap.get(0)).build();
 
-        String equipId = p.getId();
-
+        Equip p = null;
         int i = gridPosition;
         View arcView = null;
         arcView = inflater.inflate(R.layout.zones_item_nontemp, (ViewGroup) rootView, false);
@@ -1294,7 +1272,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         arcView.setClickable(true);
         arcView.setTag(gridItemObj);
         arcView.setId(i);
-        Log.i("EachzoneData","Data:"+zoneMap);
         //ImageView imageView = arcView.findViewById(R.id.imageView);
         NonTempControl nonTempControl = arcView.findViewById(R.id.rl_nontemp);
         //imageView.setTag(gridItemObj);
@@ -1324,41 +1301,43 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 e.printStackTrace();
             }
         }
+        if(zoneMap.size() > 0) {
+            Log.i("ProfileTypes", "Points:" + zoneMap.toString());
+            p =new Equip.Builder().setHashMap(zoneMap.get(0)).build();
 
-        HashMap zoneEquips = zoneMap.get(0);
-        if((zoneEquips.get("profile").toString()).contains("PLC"))
-        {
-            //imageView.setImageResource(R.drawable.ic_zone_piloop);
-            //imageView.setPadding(36,36,36,36);
-            nonTempControl.setEquipType(1);
-            nonTempControl.setImage(R.drawable.ic_zone_piloop);
-            nonTempControl.setImageViewExpanded(R.drawable.ic_zone_piloop_max);
-        }if((zoneEquips.get("profile").toString()).contains("TEMP_MONITOR"))
-        {
-            //imageView.setImageResource(R.drawable.ic_zone_tempmonitor);
-            //imageView.setPadding(36,36,36,36);
-            nonTempControl.setImage(R.drawable.ic_zone_tempmonitor);
-            nonTempControl.setImageViewExpanded(R.drawable.ic_zone_tempmonitor);
-        }if((zoneEquips.get("profile").toString()).contains("TEMP_INFLUENCE"))
-        {
-            //imageView.setImageResource(R.drawable.ic_zone_tempmonitor);
-            //imageView.setPadding(36,36,36,36);
-            nonTempControl.setImage(R.drawable.ic_zone_tempmonitor);
-            nonTempControl.setImageViewExpanded(R.drawable.ic_zone_tempmonitor);
-        }if((zoneEquips.get("profile").toString()).contains("EMR"))
-        {
-            //imageView.setImageResource(R.drawable.ic_zone_em);
-            //imageView.setPadding(36,36,36,36);
-            //emValues = arcView.findViewById(R.id.emValues);
-            nonTempControl.setEquipType(0);
-            nonTempControl.setImage(R.drawable.ic_zone_em);
-            nonTempControl.setImageViewExpanded(R.drawable.ic_zone_em_max);
+            String equipId = p.getId();
+            HashMap zoneEquips = zoneMap.get(0);
+            if ((zoneEquips.get("profile").toString()).contains("PLC")) {
+                nonTempControl.setEquipType(1);
+                nonTempControl.setImage(R.drawable.ic_zone_piloop);
+                nonTempControl.setImageViewExpanded(R.drawable.ic_zone_piloop_max);
+            }
+            if ((zoneEquips.get("profile").toString()).contains("TEMP_MONITOR")) {
+                nonTempControl.setImage(R.drawable.ic_zone_tempmonitor);
+                nonTempControl.setImageViewExpanded(R.drawable.ic_zone_tempmonitor);
+            }
+            if ((zoneEquips.get("profile").toString()).contains("TEMP_INFLUENCE")) {
+                nonTempControl.setImage(R.drawable.ic_zone_tempmonitor);
+                nonTempControl.setImageViewExpanded(R.drawable.ic_zone_tempmonitor);
+            }
+            if ((zoneEquips.get("profile").toString()).contains("EMR")) {
+                nonTempControl.setEquipType(0);
+                nonTempControl.setImage(R.drawable.ic_zone_em);
+                nonTempControl.setImageViewExpanded(R.drawable.ic_zone_em_max);
+            }
+        }else{
+            //No devices paired zone
+
+            nonTempControl.setEquipType(2);
+            nonTempControl.setImage(R.drawable.ic_no_device_paired_icon);
+            nonTempControl.setImageViewExpanded(R.drawable.ic_no_device_paired_expanded_icon);
         }
         //ScaleImageToNormal(250,210,imageView);
         ScaleControlToNormal(250,210,nonTempControl);
         nonTempControl.setExpand(false);
 
         //imageView.setOnClickListener(new View.OnClickListener() {
+        Equip nonTempEquip = p;
         nonTempControl.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -1415,7 +1394,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                             }
                             zoneOpen = true;
                             zonePointsOpen = zoneDetails;
-                            equipOpen = p;
+                            equipOpen = nonTempEquip;
                             openZoneMap = zoneMap;
                             clickedView = gridItemNew.getGridID();
                             v.setBackgroundColor(getActivity().getResources().getColor(R.color.zoneselection_gray));
@@ -1452,7 +1431,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 } else {
                     zoneOpen = true;
                     zonePointsOpen = zoneDetails;
-                    equipOpen = p;
+                    equipOpen = nonTempEquip;
                     openZoneMap = zoneMap;
                     clickedView = gridItemNew.getGridID();
                     v.setBackgroundColor(getResources().getColor(R.color.zoneselection_gray));
@@ -1476,44 +1455,54 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
                 if(isExpanded) {
                     linearLayoutZonePoints.removeAllViews();
-                    if (p.getProfile().startsWith("EMR")) {
+                    if(nonTempEquip != null) {
+                        if (nonTempEquip.getProfile().startsWith("EMR")) {
 
-                        nonTempControl.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,nonTempControl.getHeight()));
-                        nonTempControl.invalidate();
+                            nonTempControl.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, nonTempControl.getHeight()));
+                            nonTempControl.invalidate();
 
-                        LinearLayout ll_status  = zoneDetails.findViewById(R.id.lt_status);
+                            LinearLayout ll_status = zoneDetails.findViewById(R.id.lt_status);
+                            LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
+                            ll_status.setVisibility(View.GONE);
+                            ll_schedule.setVisibility(View.GONE);
+                            HashMap emPoints = ScheduleProcessJob.getEMEquipPoints(nonTempEquip.getId());
+                            Log.i("PointsValue", "EM Points:" + emPoints.toString());
+                            loadEMPointsUI(emPoints, inflater, linearLayoutZonePoints, nonTempEquip.getGroup());
+
+                            double energyRead = (double) emPoints.get("Energy Reading");
+                            double currentRead = (double) emPoints.get("Current Rate");
+                            int currentValue = new BigDecimal(currentRead).intValue();
+                            nonTempControl.setEmTotalText(String.format("%.0f", energyRead));
+                            nonTempControl.setEmCurrentText(String.valueOf(currentValue));
+                            //nonTempControl.setEmTotalText(emPoints.get("Energy Reading").toString());
+                            nonTempControl.setEmTotalUnitText("KWh");
+                            //nonTempControl.setEmCurrentText(emPoints.get("Current Rate").toString());
+                            nonTempControl.setEmCurrentUnitText("KW");
+
+                        }
+                        if (nonTempEquip.getProfile().startsWith("PLC")) {
+                            LinearLayout ll_status = zoneDetails.findViewById(R.id.lt_status);
+                            LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
+                            ll_status.setVisibility(View.GONE);
+                            ll_schedule.setVisibility(View.GONE);
+                            HashMap plcPoints = ScheduleProcessJob.getPiEquipPoints(nonTempEquip.getId());
+                            Log.i("PointsValue", "PiLoop Points:" + plcPoints.toString());
+                            loadPLCPointsUI(plcPoints, inflater, linearLayoutZonePoints, nonTempEquip.getGroup());
+
+                            double targetValue = (double) plcPoints.get("Target Value");
+                            double inputValue = (double) plcPoints.get("Input Value");
+                            nonTempControl.setPiInputText(String.format("%.2f", inputValue));
+                            nonTempControl.setPiOutputText(String.valueOf(targetValue));
+                            nonTempControl.setPiInputUnitText(plcPoints.get("Unit").toString());
+                            nonTempControl.setPiOutputUnitText(plcPoints.get("Unit").toString());
+                        }
+                    }else{
+                        //Non paired devices
+                        LinearLayout ll_status = zoneDetails.findViewById(R.id.lt_status);
                         LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
                         ll_status.setVisibility(View.GONE);
                         ll_schedule.setVisibility(View.GONE);
-                        HashMap emPoints = ScheduleProcessJob.getEMEquipPoints(p.getId());
-                        Log.i("PointsValue", "EM Points:" + emPoints.toString());
-                        loadEMPointsUI(emPoints, inflater, linearLayoutZonePoints,p.getGroup());
-
-                        double energyRead = (double)emPoints.get("Energy Reading");
-                        double currentRead = (double)emPoints.get("Current Rate");
-                        int currentValue = new BigDecimal(currentRead).intValue();
-                        nonTempControl.setEmTotalText(String.format("%.0f",energyRead));
-                        nonTempControl.setEmCurrentText(String.valueOf(currentValue));
-                        //nonTempControl.setEmTotalText(emPoints.get("Energy Reading").toString());
-                        nonTempControl.setEmTotalUnitText("KWh");
-                        //nonTempControl.setEmCurrentText(emPoints.get("Current Rate").toString());
-                        nonTempControl.setEmCurrentUnitText("KW");
-
-                    } if (p.getProfile().startsWith("PLC")) {
-                        LinearLayout ll_status  = zoneDetails.findViewById(R.id.lt_status);
-                        LinearLayout ll_schedule = zoneDetails.findViewById(R.id.lt_schedule);
-                        ll_status.setVisibility(View.GONE);
-                        ll_schedule.setVisibility(View.GONE);
-                        HashMap plcPoints = ScheduleProcessJob.getPiEquipPoints(p.getId());
-                        Log.i("PointsValue", "PiLoop Points:" + plcPoints.toString());
-                        loadPLCPointsUI(plcPoints, inflater, linearLayoutZonePoints,p.getGroup());
-
-                        double targetValue = (double)plcPoints.get("Target Value");
-                        double inputValue = (double)plcPoints.get("Input Value");
-                        nonTempControl.setPiInputText(String.format("%.2f",inputValue));
-                        nonTempControl.setPiOutputText(String.valueOf(targetValue));
-                        nonTempControl.setPiInputUnitText(plcPoints.get("Unit").toString());
-                        nonTempControl.setPiOutputUnitText(plcPoints.get("Unit").toString());
+                        loadNoDevicesPairedUI(inflater,linearLayoutZonePoints);
                     }
                 }
             }
@@ -2122,7 +2111,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
     }
 
 
-    public void loadEMPointsUI(HashMap p4FCUPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress)
+    public void loadEMPointsUI(HashMap EmrPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress)
     {
         View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
         View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
@@ -2130,8 +2119,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
         TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
 
-        textViewTitle.setText(p4FCUPoints.get("Profile").toString()+" ("+nodeAddress+")");
-        textViewStatus.setText(p4FCUPoints.get("Status").toString());
+        textViewTitle.setText(EmrPoints.get("Profile").toString()+" ("+nodeAddress+")");
+        textViewStatus.setText(EmrPoints.get("Status").toString());
         viewStatus.setPadding(0,0,0,40);
         try {
             linearLayoutZonePoints.addView(viewTitle);
@@ -2142,6 +2131,25 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
     }
 
+    public void loadNoDevicesPairedUI(LayoutInflater inflater,LinearLayout linearLayoutZonePoints)
+    {
+        View viewTitle = inflater.inflate(R.layout.zones_item_title, null);
+        View viewStatus = inflater.inflate(R.layout.zones_item_status, null);
+
+        TextView textViewTitle = viewTitle.findViewById(R.id.textProfile);
+        textViewTitle.setVisibility(View.GONE);
+        TextView statusTitle = viewStatus.findViewById(R.id.inner_status_title);
+        statusTitle.setVisibility(View.GONE);
+        TextView textViewStatus = viewStatus.findViewById(R.id.text_status);
+        textViewStatus.setGravity(Gravity.CENTER|Gravity.CENTER_HORIZONTAL|Gravity.CENTER_VERTICAL);
+        textViewStatus.setText(Html.fromHtml("<b>No device currently Paired</b> <br>Please go to the floor planner on settings page to pair a new device</br>"));
+        viewStatus.setPadding(0,0,0,40);
+        try {
+            linearLayoutZonePoints.addView(viewStatus);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     public void loadPLCPointsUI(HashMap plcPoints, LayoutInflater inflater, LinearLayout linearLayoutZonePoints, String nodeAddress)
     {
         View viewTitle = inflater.inflate(R.layout.zones_item_title, null);

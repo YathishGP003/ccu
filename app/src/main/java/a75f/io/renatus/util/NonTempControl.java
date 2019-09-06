@@ -101,6 +101,10 @@ public class NonTempControl extends RelativeLayout {
                     piValues.setVisibility(VISIBLE);
                     emValues.setVisibility(GONE);
                 }
+                if(equipType == 2){
+                    piValues.setVisibility(GONE);
+                    emValues.setVisibility(GONE);
+                }
             } else if(!expand){
                 image.setVisibility(View.VISIBLE);
                 imageViewExpanded.setVisibility(View.GONE);
@@ -131,8 +135,10 @@ public class NonTempControl extends RelativeLayout {
                 piValues.setVisibility(VISIBLE);
                 emValues.setVisibility(GONE);
             }
-            if (equipType == 2) { //temperature influencer
+            if (equipType == 2) { //No Zones Paired
 
+                piValues.setVisibility(GONE);
+                emValues.setVisibility(GONE);
             }
         }
     }

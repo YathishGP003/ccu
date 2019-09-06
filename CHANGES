@@ -1,9 +1,5 @@
  - Merge branch 'renatus_dev_sam' into 'master'
- - Predefined Alerts fetch
- - Query Cache
- - resolves RENATUS-646
- - resolves RENATUS-634
- - Merge branch 'mahesh_renuts' into 'master'
- - RENATUS-653, fixed slider is restricted from 55.0 to 90.0 RENATUS-654, fixed default schedule values for building schedule
+ - resolves RENATUS-672
  - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-668, Zone schedule is chaning back to building schedule
+ - #RENATUS-634, Schedule over lap issue
+ - #RENATUS-669, SSE, drop down selection, was not correct, at first time config

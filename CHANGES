@@ -1,5 +1,3 @@
- - Merge branch 'renatus_dev_sam' into 'master'
- - resolves RENATUS-672
  - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-634, Schedule over lap issue
- - #RENATUS-669, SSE, drop down selection, was not correct, at first time config
+ - #RENATUS-671, No Sensor paired screen display
+ - #RENATUS-666, SSE - for multi zone modules zone dead should be ignored in current temp calculations

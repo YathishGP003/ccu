@@ -78,12 +78,12 @@
         <item>  VAV Fully Modulating AHU </item>
         <item>  VAV Staged RTU with VFD Fan</item>
         <item>  VAV Advanced Hybrid AHU</item>
-        <!--<item>  VAV IE RTU </item>
-        <item>  VAV Bacnet RTU </item>-->
+        <!--<item>  VAV Bacnet RTU </item>-->
         <item>  DAB Staged RTU </item>
         <item>  DAB Fully Modulating AHU</item>
         <item>  DAB Staged RTU with VFD Fan</item>
         <item>  DAB Advanced Hybrid AHU</item>
+        <item>  Daikin IE Rtu</item>
     </string-array>
 
     <string-array name="hvac_stage_selector">

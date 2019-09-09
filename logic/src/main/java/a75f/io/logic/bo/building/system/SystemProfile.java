@@ -109,6 +109,10 @@ public abstract class SystemProfile
         return systemCo2LoopOp;
     }
     
+    public double getCmd(String tags) {
+        return CCUHsApi.getInstance().readHisValByQuery(tags+" and equipRef == \""+getSystemEquipRef()+"\"");
+    }
+    
     public SystemController getSystemController() {
         if (this instanceof VavSystemProfile) {
             return VavSystemController.getInstance();

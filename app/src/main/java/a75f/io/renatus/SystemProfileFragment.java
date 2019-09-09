@@ -113,6 +113,10 @@ public class SystemProfileFragment extends Fragment {
                         getActivity().getSupportFragmentManager().beginTransaction()
                                 .replace(R.id.profileContainer, new DABHybridAhuProfile()).commit();
                         break;
+                    case 9:
+                        getActivity().getSupportFragmentManager().beginTransaction()
+                                     .replace(R.id.profileContainer, new VavIERtuProfile()).commit();
+                        break;
 					/*case 0:
 						getActivity().getSupportFragmentManager().beginTransaction()
 						             .replace(R.id.profileContainer, new DefaultSystemProfile()).commit();

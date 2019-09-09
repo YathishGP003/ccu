@@ -9,8 +9,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
@@ -637,9 +639,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         {
             SchedulerFragment schedulerFragment    = SchedulerFragment.newInstance((String) v.getTag());
             FragmentManager childFragmentManager = getFragmentManager();
-            childFragmentManager.beginTransaction()
-                    .add(R.id.zone_fragment_temp, schedulerFragment)
-                    .addToBackStack("schedule").commit();
+            childFragmentManager.beginTransaction();
+            schedulerFragment.show(childFragmentManager,"dialog");
 
             schedulerFragment.setOnExitListener(() -> {
                 Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
@@ -1039,9 +1040,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         {
             SchedulerFragment schedulerFragment    = SchedulerFragment.newInstance((String) v.getTag());
             FragmentManager childFragmentManager = getFragmentManager();
-            childFragmentManager.beginTransaction()
-                    .add(R.id.zone_fragment_temp, schedulerFragment)
-                    .addToBackStack("schedule").commit();
+            childFragmentManager.beginTransaction();
+            schedulerFragment.show(childFragmentManager, "dialog");
 
             schedulerFragment.setOnExitListener(() -> {
                 Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
@@ -2497,9 +2497,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                        public void onClick(DialogInterface dialog, int id) {
                            SchedulerFragment schedulerFragment    = SchedulerFragment.newInstance(zoneSchedule.getId());
                            FragmentManager   childFragmentManager = getFragmentManager();
-                           childFragmentManager.beginTransaction()
-                                               .add(R.id.zone_fragment_temp, schedulerFragment)
-                                               .addToBackStack("schedule").commit();
+                           childFragmentManager.beginTransaction();
+                           schedulerFragment.show(childFragmentManager, "dialog");
                     
                            schedulerFragment.setOnExitListener(() -> {
                                mSchedule = CCUHsApi.getInstance().getScheduleById(zoneSchedule.getId());

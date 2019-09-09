@@ -1,12 +1,15 @@
 package a75f.io.renatus;
 
 import android.content.res.Resources;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.SwitchCompat;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -15,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.SeekBar;
 import android.widget.Spinner;
@@ -23,12 +27,9 @@ import android.widget.ToggleButton;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.Equip;
-import a75f.io.api.haystack.HSUtil;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.oao.OAOEquip;
@@ -39,6 +40,7 @@ import a75f.io.logic.pubnub.UpdatePointHandler;
 import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.util.Prefs;
+import a75f.io.renatus.views.NumberPicker.SystemNumberPicker;
 import a75f.io.renatus.views.OaoArc;
 
 /**
@@ -67,7 +69,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	
 	TextView ccuName;
 	TextView profileTitle;
-	NumberPicker systemModePicker;
+	SystemNumberPicker systemModePicker;
 	
 	TextView occupancyStatus;
 	TextView equipmentStatus;
@@ -167,33 +169,36 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		if (heatingAvailable) {
 			modesAvailable.add(SystemMode.HEATONLY.displayName);
 		}
-		
+
+		systemModePicker.setTextColorResource(R.color.my_gray);
+		systemModePicker.setSelectedTextSize(R.dimen.selected_text_size);
+		systemModePicker.setTextSize(R.dimen.text_size);
+		systemModePicker.setDividerColor(getResources().getColor(R.color.accent));
+
 		systemModePicker.setMinValue(0);
 		systemModePicker.setMaxValue(modesAvailable.size()-1);
+
+		// Set fading edge enabled
+		systemModePicker.setFadingEdgeEnabled(true);
+
+		// Set scroller enabled
+		systemModePicker.setScrollerEnabled(true);
+
+		// Set wrap selector wheel
+		systemModePicker.setWrapSelectorWheel(false);
 		
 		systemModePicker.setDisplayedValues(modesAvailable.toArray(new String[modesAvailable.size()]));
 		systemModePicker.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
-		systemModePicker.setWrapSelectorWheel(false);
-		setDividerColor(systemModePicker);
-		
-		
-		systemModePicker.setOnScrollListener(new NumberPicker.OnScrollListener() {
-			@Override
-			public void onScrollStateChange(NumberPicker numberPicker, int scrollState) {
-				if (scrollState == SCROLL_STATE_IDLE) {
-					//Adding a dealy of 100ms as instant invocation of getVal() returns old value at times.
-					new Handler().postDelayed(new Runnable()
+
+		systemModePicker.setOnScrollListener((view1, scrollState) -> {
+			if (scrollState == SystemNumberPicker.OnScrollListener.SCROLL_STATE_IDLE) {
+				//Adding a dealy of 100ms as instant invocation of getVal() returns old value at times.
+				new Handler().postDelayed(() -> {
+					if (systemModePicker.getValue() != TunerUtil.readSystemUserIntentVal("rtu and mode"))
 					{
-						@Override
-						public void run()
-						{
-							if (numberPicker.getValue() != TunerUtil.readSystemUserIntentVal("rtu and mode"))
-							{
-								setUserIntentBackground("rtu and mode", SystemMode.getEnum(modesAvailable.get(numberPicker.getValue())).ordinal());
-							}
-						}
-					}, 100);
-				}
+						setUserIntentBackground("rtu and mode", SystemMode.getEnum(modesAvailable.get(systemModePicker.getValue())).ordinal());
+					}
+				}, 100);
 			}
 		});
 		
@@ -374,7 +379,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				public void run() {
 					String status = L.ccu().systemProfile.getStatusMessage();
 					if (L.ccu().systemProfile instanceof DefaultSystem) {
-						equipmentStatus.setText(status.equals("") ? "System is in gateway mode" : status);
+						equipmentStatus.setText(status.equals("") ? "System is in gateway mode" : Html.fromHtml(status.replace("ON", "<font color='#e24725'>ON</font>")));
 						occupancyStatus.setText("No Central equipment connected.");
 						tbCompHumidity.setChecked(false);
 						tbDemandResponse.setChecked(false);
@@ -385,8 +390,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 								.getPosition(0.0), false);
 					}else{
 						systemModePicker.setValue((int) TunerUtil.readSystemUserIntentVal("rtu and mode"));
-					
-						equipmentStatus.setText(status.equals("") ? "OFF" : status);
+
+						equipmentStatus.setText(status.equals("") ? Html.fromHtml("<font color='#e24725'>OFF</font>") : Html.fromHtml(status.replace("ON","<font color='#e24725'>ON</font>").replace("OFF","<font color='#e24725'>OFF</font>")));
 						occupancyStatus.setText(ScheduleProcessJob.getSystemStatusString());
 						tbCompHumidity.setChecked(TunerUtil.readSystemUserIntentVal("compensate and humidity") > 0);
 						tbDemandResponse.setChecked(TunerUtil.readSystemUserIntentVal("demand and response") > 0);
@@ -429,28 +434,6 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	@Override
 	public void onNothingSelected(AdapterView<?> arg0) {
 		// TODO Auto-generated method stub
-	}
-	
-	private void setDividerColor(NumberPicker picker) {
-		Field[] numberPickerFields = NumberPicker.class.getDeclaredFields();
-		for (Field field : numberPickerFields) {
-			if (field.getName().equals("mSelectionDivider")) {
-				field.setAccessible(true);
-				try {
-					field.set(picker, getResources().getDrawable(R.drawable.divider_np));
-				} catch (IllegalArgumentException e) {
-					Log.v("NP", "Illegal Argument Exception");
-					e.printStackTrace();
-				} catch (Resources.NotFoundException e) {
-					Log.v("NP", "Resources NotFound");
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					Log.v("NP", "Illegal Access Exception");
-					e.printStackTrace();
-				}
-				break;
-			}
-		}
 	}
 	
 	private void setUserIntentBackground(String query, double val) {

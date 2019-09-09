@@ -1,6 +1,7 @@
 package a75f.io.renatus;
 
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.TabItem;
@@ -14,9 +15,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import java.util.HashMap;
 
@@ -226,6 +229,29 @@ public class RenatusLandingActivity extends AppCompatActivity {
 
             @Override
             public void onPageScrollStateChanged(int i) {
+
+            }
+        });
+
+        mTabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                LinearLayout tabLayout = (LinearLayout)((ViewGroup) mTabLayout.getChildAt(0)).getChildAt(tab.getPosition());
+                TextView tabTextView = (TextView) tabLayout.getChildAt(1);
+
+                tabTextView.setTextAppearance(tabLayout.getContext(), R.style.RenatusTabTextSelected);
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+                LinearLayout tabLayout = (LinearLayout)((ViewGroup) mTabLayout.getChildAt(0)).getChildAt(tab.getPosition());
+                TextView tabTextView = (TextView) tabLayout.getChildAt(1);
+
+                tabTextView.setTextAppearance(tabLayout.getContext(), R.style.RenatusLandingTabTextStyle);
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
 
             }
         });

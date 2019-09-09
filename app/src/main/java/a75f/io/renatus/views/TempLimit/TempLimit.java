@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
@@ -49,7 +50,7 @@ public class TempLimit extends View {
 
     int mDefaultVisibleDegrees = 35;
 
-    float mLowerBound = 33.0f;
+    float mLowerBound = 32.0f;
     float mUpperBound = 110.0f;
 
     int mDegreeIncremntPX = 0;
@@ -266,7 +267,7 @@ public class TempLimit extends View {
 
     private void drawTempLine(Canvas canvas) {
         //why 10
-        canvas.drawLine(mPaddingPX, getTempLineYLocation(), mViewWidth, getTempLineYLocation(), mLinePaint);
+        canvas.drawLine(mPaddingPX, getTempLineYLocation(), mViewWidth - mPaddingPX, getTempLineYLocation(), mLinePaint);
     }
 
     private int getTempLineYLocation() {

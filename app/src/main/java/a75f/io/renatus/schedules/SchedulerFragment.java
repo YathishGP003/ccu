@@ -31,6 +31,7 @@ import android.widget.Space;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.javolution.annotations.Nullable;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 
@@ -49,7 +50,7 @@ import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.renatus.R;
 import a75f.io.renatus.schedules.ManualSchedulerDialogFragment.ManualScheduleDialogListener;
 import a75f.io.renatus.util.FontManager;
-public class SchedulerFragment extends Fragment implements ManualScheduleDialogListener {
+public class SchedulerFragment extends DialogFragment implements ManualScheduleDialogListener {
 
     private static final String PARAM_SCHEDULE_ID = "PARAM_SCHEDULE_ID";
     private static final int ID_DIALOG_VACATION = 02;
@@ -101,7 +102,6 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
 
     }
 
-
     public static SchedulerFragment newInstance() {
         return new SchedulerFragment();
     }
@@ -112,6 +112,18 @@ public class SchedulerFragment extends Fragment implements ManualScheduleDialogL
         args.putString(PARAM_SCHEDULE_ID, scheduleId);
         schedulerFragment.setArguments(args);
         return schedulerFragment;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Bundle args = getArguments();
+        if (args != null) {
+            setShowsDialog(true);
+            setStyle(DialogFragment.STYLE_NORMAL, R.style.DialogFragmentTheme);
+        } else {
+            setShowsDialog(false);
+        }
     }
 
     @Override

@@ -91,6 +91,8 @@ public class OAOProfile
         if (matTemp < outsideDamperMatTarget && matTemp > outsideDamperMatMin) {
             outsideAirFinalLoopOutput = outsideAirLoopOutput -
                                         outsideAirLoopOutput * ((outsideDamperMatTarget - matTemp)/(outsideDamperMatTarget - outsideDamperMatMin));
+        } else if (matTemp < outsideDamperMatMin){
+            outsideAirFinalLoopOutput = 0;
         } else {
             outsideAirFinalLoopOutput = outsideAirLoopOutput;
         }

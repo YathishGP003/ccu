@@ -693,7 +693,7 @@ public class DabEquip
     }
     
     public void setHisVal(String tags,double val) {
-        CCUHsApi.getInstance().writeDefaultVal("point and zone and config and dab and "+tags+" and group == \""+nodeAddr+"\"", val);
+        CCUHsApi.getInstance().writeHisValByQuery("point and zone and config and dab and "+tags+" and group == \""+nodeAddr+"\"", val);
     }
     
     public double getCurrentTemp()

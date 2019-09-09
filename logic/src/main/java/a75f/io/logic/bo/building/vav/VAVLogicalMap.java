@@ -874,7 +874,7 @@ public class VAVLogicalMap
     }
     
     public void setHisVal(String tags,double val) {
-        CCUHsApi.getInstance().writeDefaultVal("point and zone and config and vav and "+tags+" and group == \""+nodeAddr+"\"", val);
+        CCUHsApi.getInstance().writeHisValByQuery("point and zone and config and vav and "+tags+" and group == \""+nodeAddr+"\"", val);
     }
     
     public void deleteHaystackPoints() {

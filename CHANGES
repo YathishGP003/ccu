@@ -1,2 +1,4 @@
  - Merge branch 'renatus_dev_sam' into 'master'
- - OAO fix
+ - resolves RENATUS-676
+ - Daikin IE Profile Implementation
+ - Weather point tag correction

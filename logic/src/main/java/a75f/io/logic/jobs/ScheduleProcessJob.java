@@ -38,6 +38,7 @@ import static a75f.io.logic.bo.building.Occupancy.OCCUPANCY_SENSING;
 import static a75f.io.logic.bo.building.Occupancy.OCCUPIED;
 import static a75f.io.logic.bo.building.Occupancy.PRECONDITIONING;
 import static a75f.io.logic.bo.building.Occupancy.UNOCCUPIED;
+import static a75f.io.logic.bo.building.Occupancy.VACATION;
 
 /*
     The scheduler needs to maintain the state of things, so it doesn't write
@@ -451,13 +452,14 @@ public class ScheduleProcessJob extends BaseJob {
         systemOccupancy = UNOCCUPIED;
         
         if (systemVacation) {
-            double curOccupancy = CCUHsApi.getInstance().readHisValByQuery("point and system and his and occupancy and status");
+            double curOccupancy = CCUHsApi.getInstance().readHisValByQuery("point and system and his and occupancy and mode");
             if (getSystemTemporaryHoldExpiry() > 0) {
                 systemOccupancy = FORCED_OCCUPIED;
             }
             if (curOccupancy != systemOccupancy.ordinal())
             {
-                CCUHsApi.getInstance().writeHisValByQuery("point and system and his and occupancy and status", (double) systemOccupancy.ordinal());
+                systemOccupancy = VACATION;
+                CCUHsApi.getInstance().writeHisValByQuery("point and system and his and occupancy and mode", (double) systemOccupancy.ordinal());
             }
             Log.d(TAG_CCU_JOB, " In SystemVacation : systemOccupancy : "+systemOccupancy);
             return;
@@ -540,7 +542,7 @@ public class ScheduleProcessJob extends BaseJob {
             systemOccupancy = FORCED_OCCUPIED;
         }
         
-        CCUHsApi.getInstance().writeHisValByQuery("point and system and his and occupancy and status",(double)systemOccupancy.ordinal());
+        CCUHsApi.getInstance().writeHisValByQuery("point and system and his and occupancy and mode",(double)systemOccupancy.ordinal());
         CcuLog.d(TAG_CCU_JOB, "systemOccupancy status : " + systemOccupancy);
     }
     
@@ -622,7 +624,7 @@ public class ScheduleProcessJob extends BaseJob {
             }
         }
 
-        ArrayList occ = CCUHsApi.getInstance().readAll("point and occupancy and status and equipRef == \""+equip.getId()+"\"");
+        ArrayList occ = CCUHsApi.getInstance().readAll("point and occupancy and mode and equipRef == \""+equip.getId()+"\"");
         if (occ != null && occ.size() > 0) {
             String id = ((HashMap) points.get(0)).get("id").toString();
             CCUHsApi.getInstance().writeHisValById(id, (double) zoneOccupancy.ordinal());
@@ -1057,18 +1059,17 @@ public class ScheduleProcessJob extends BaseJob {
             c = OCCUPIED;
         } else if (getTemporaryHoldExpiry(equip.getRoomRef()) > 0){
             c = FORCED_OCCUPIED;
-        }else if((cachedOccupied != null) && (cachedOccupied.isPreconditioning())) {
-            //handle preconditioning??
-
-            c = PRECONDITIONING;
+        }else if((cachedOccupied != null) && cachedOccupied.getVacation() != null) {
+            c = VACATION;
         }else if((cachedOccupied != null) && cachedOccupied.isOccupancySensed()){
             c = OCCUPANCY_SENSING;
+        }else if((cachedOccupied != null) && (cachedOccupied.isPreconditioning())) {
+            //handle preconditioning??
+            c = PRECONDITIONING;
         }
         if((zoneDataInterface != null) && (cachedOccupied != null)){
             Log.d("Scheduler","updateZoneOccupancy==>>"+cachedOccupied.isForcedOccupied()+","+cachedOccupied.isOccupied()+","+cachedOccupied.isPreconditioning());
-            double coolVal = (c == UNOCCUPIED ? cachedOccupied.getCoolingVal() + cachedOccupied.getUnoccupiedZoneSetback() : cachedOccupied.getCoolingVal());
-            double heatVal = (c== UNOCCUPIED ? cachedOccupied.getHeatingVal() - cachedOccupied.getUnoccupiedZoneSetback() : cachedOccupied.getHeatingVal());
-            zoneDataInterface.refreshDesiredTemp(equip.getGroup(), String.valueOf(coolVal),String.valueOf(heatVal));
+            zoneDataInterface.refreshDesiredTemp(equip.getGroup(), "","");
         }
         
         return c;

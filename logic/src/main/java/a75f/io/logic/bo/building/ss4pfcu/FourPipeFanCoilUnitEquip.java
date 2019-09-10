@@ -503,7 +503,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setEquipRef(equipref)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("standalone").addMarker("occupancy").addMarker("status").addMarker("his").addMarker("equipHis").addMarker("sp").addMarker("zone").addMarker("fcu").addMarker("pipe4")
+                .addMarker("standalone").addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("equipHis").addMarker("sp").addMarker("zone").addMarker("fcu").addMarker("pipe4")
                 .setTz(tz)
                 .build();
         CCUHsApi.getInstance().addPoint(twoPfcuOccupancy);

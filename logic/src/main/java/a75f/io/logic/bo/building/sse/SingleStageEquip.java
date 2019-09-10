@@ -280,7 +280,7 @@ public class SingleStageEquip {
                 .setEquipRef(equipRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
-                .addMarker("standalone").addMarker("occupancy").addMarker("status").addMarker("his").addMarker("equipHis").addMarker("sp").addMarker("zone").addMarker("sse")
+                .addMarker("standalone").addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("equipHis").addMarker("sp").addMarker("zone").addMarker("sse")
                 .setTz(tz)
                 .build();
         CCUHsApi.getInstance().addPoint(occupancy);

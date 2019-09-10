@@ -503,7 +503,7 @@ public class ConventionalUnitLogicalMap {
                 .setEquipRef(equipref)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("standalone").addMarker("occupancy").addMarker("status").addMarker("his").addMarker("equipHis").addMarker("sp").addMarker("zone")
+                .addMarker("standalone").addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("equipHis").addMarker("sp").addMarker("zone")
                 .setTz(tz)
                 .build();
         CCUHsApi.getInstance().addPoint(cpuOccupancy);

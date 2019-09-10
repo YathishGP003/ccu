@@ -57,7 +57,7 @@
                 <Spinner
                     android:id="@+id/damper1Type"
                     android:layout_width="160dp"
-                    android:layout_height="40dp"
+                    android:layout_height="42dp"
                     android:layout_marginLeft="80dp"
                     android:layout_toRightOf="@+id/textDamper1Type"
                     android:layout_gravity="center_vertical"
@@ -92,7 +92,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="40dp"
                     android:layout_marginLeft="136dp"
-                    android:layout_toRightOf="@+id/damper1Size"
+                    android:layout_toEndOf="@+id/damper1Size"
                     android:layout_gravity="center_vertical"
                     android:text="@string/label_damper1shape"
                     android:textAppearance="@style/title_normal"/>
@@ -101,8 +101,7 @@
                     android:id="@+id/damper1Shape"
                     android:layout_width="wrap_content"
                     android:layout_height="40dp"
-                    android:minWidth="76dp"
-                    android:layout_marginLeft="46dp"
+                    android:layout_marginLeft="20dp"
                     android:layout_toRightOf="@+id/textdamper1Shape"
                     android:layout_gravity="center_vertical"
                     style="@style/Widget.AppCompat.Spinner.Underlined"
@@ -123,7 +122,7 @@
                 <Spinner
                     android:id="@+id/damper2Type"
                     android:layout_width="160dp"
-                    android:layout_height="40dp"
+                    android:layout_height="42dp"
                     android:layout_marginLeft="80dp"
                     android:layout_toRightOf="@+id/textDamper2Type"
                     android:layout_gravity="center_vertical"
@@ -177,7 +176,6 @@
                     android:id="@+id/damper2Shape"
                     android:layout_width="wrap_content"
                     android:layout_height="40dp"
-                    android:minWidth="76dp"
                     android:layout_toRightOf="@+id/textdamper2Shape"
                     android:layout_gravity="center_vertical"
                     style="@style/Widget.AppCompat.Spinner.Underlined"
@@ -240,7 +238,7 @@
                 <TextView
                     android:id="@+id/textEnableOccupancy"
                     android:layout_width="wrap_content"
-                    android:layout_height="30dp"
+                    android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_alignLeft="@id/textZonePriority"
                     android:layout_marginTop="32dp"

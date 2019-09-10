@@ -9,7 +9,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="655dp"
+        android:layout_height="wrap_content"
         android:padding="16dp">
         <LinearLayout
             android:layout_width="match_parent"
@@ -44,7 +44,7 @@
                 android:layout_marginLeft="72dp"
                 android:layout_marginRight="72dp"
                 android:orientation="horizontal"
-                android:layout_marginTop="48dp"
+                android:layout_marginTop="20dp"
                 android:layout_gravity="center_horizontal"
                 android:paddingTop="20dp" >
 
@@ -63,23 +63,29 @@
 
                         <RelativeLayout
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content">
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:gravity="center">
 
                             <TextView
                                 android:id="@+id/textOADamperAtMin"
                                 android:layout_width="wrap_content"
-                                android:layout_height="40dp"
-                                android:layout_gravity="center_vertical"
+                                android:layout_height="wrap_content"
+                                android:layout_centerInParent="true"
                                 android:text="@string/label_oadamper_at_min"
-                                android:layout_alignParentLeft="true"
+                                android:layout_alignParentStart="true"
+                                android:layout_toStartOf="@+id/oaDamperAtMin"
+                                android:layout_marginEnd="5dp"
                                 android:textAppearance="@style/title_normal" />
 
                             <Spinner
                                 android:id="@+id/oaDamperAtMin"
                                 android:layout_width="wrap_content"
-                                android:layout_height="40dp"
+                                android:layout_height="wrap_content"
                                 android:layout_alignParentRight="true"
-                                android:layout_gravity="center_vertical"
+                                android:layout_centerHorizontal="true"
+                                android:layout_gravity="center"
+                                android:gravity="center"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
 
@@ -89,23 +95,28 @@
                         <RelativeLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="36dp">
+                            android:layout_marginTop="30dp"
+                            android:layout_gravity="center"
+                            android:gravity="center">
 
                             <TextView
                                 android:id="@+id/textRetDamperMin"
                                 android:layout_width="wrap_content"
-                                android:layout_height="40dp"
-                                android:layout_gravity="center_vertical"
+                                android:layout_height="wrap_content"
+                                android:layout_centerInParent="true"
+                                android:layout_alignParentStart="true"
+                                android:layout_toStartOf="@+id/returnDamperAtMin"
+                                android:layout_marginEnd="5dp"
                                 android:text="@string/label_return_damper_at_min"
-                                android:layout_alignParentLeft="true"
                                 android:textAppearance="@style/title_normal" />
 
                             <Spinner
                                 android:id="@+id/returnDamperAtMin"
                                 android:layout_width="wrap_content"
-                                android:layout_height="40dp"
+                                android:layout_height="wrap_content"
                                 android:layout_alignParentRight="true"
-                                android:layout_gravity="center_vertical"
+                                android:layout_gravity="center"
+                                android:gravity="center"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
 
@@ -115,21 +126,23 @@
                         <RelativeLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="36dp">
+                            android:layout_marginTop="30dp">
 
                             <TextView
                                 android:id="@+id/textOAMinOpen"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
+                                android:layout_centerInParent="true"
+                                android:layout_alignParentStart="true"
                                 android:text="@string/label_oadamper_min_open"
-                                android:layout_alignParentLeft="true"
+                                android:layout_toStartOf="@+id/oaDamperMinOpen"
+                                android:layout_marginEnd="5dp"
                                 android:textAppearance="@style/title_normal" />
 
                             <Spinner
                                 android:id="@+id/oaDamperMinOpen"
                                 android:layout_width="wrap_content"
-                                android:layout_height="40dp"
+                                android:layout_height="wrap_content"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
@@ -141,13 +154,14 @@
                         <RelativeLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="36dp">
+                            android:layout_marginTop="30dp">
 
                             <TextView
                                 android:id="@+id/textExFanStage1"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
+                                android:layout_centerInParent="true"
+                                android:layout_alignParentStart="true"
                                 android:text="@string/label_exfan_stage1_threshold"
                                 android:layout_alignParentLeft="true"
                                 android:textAppearance="@style/title_normal" />
@@ -167,21 +181,23 @@
                         <RelativeLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="36dp">
+                            android:layout_marginTop="30dp">
 
                             <TextView
                                 android:id="@+id/textCurrTransType"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
+                                android:layout_alignParentStart="true"
+                                android:layout_centerInParent="true"
                                 android:text="@string/label_current_transformer_type"
-                                android:layout_alignParentLeft="true"
+                                android:layout_toStartOf="@+id/currentTransformerType"
+                                android:layout_marginEnd="5dp"
                                 android:textAppearance="@style/title_normal" />
 
                             <Spinner
                                 android:id="@+id/currentTransformerType"
                                 android:layout_width="wrap_content"
-                                android:layout_height="40dp"
+                                android:layout_height="wrap_content"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
@@ -193,22 +209,24 @@
                         <RelativeLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="36dp">
+                            android:layout_marginTop="30dp">
 
                             <TextView
                                 android:id="@+id/textExFanHyst"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
+                                android:layout_centerInParent="true"
+                                android:layout_alignParentStart="true"
                                 android:text="@string/label_exfan_hysteresis"
-                                android:layout_alignParentLeft="true"
+                                android:layout_toStartOf="@+id/exFanHysteresis"
+                                android:layout_marginEnd="5dp"
                                 android:textAppearance="@style/title_normal" />
 
                             <Spinner
                                 android:id="@+id/exFanHysteresis"
                                 android:layout_width="wrap_content"
-                                android:layout_height="40dp"
-                                android:layout_alignParentRight="true"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
                                 android:layout_gravity="center_vertical"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
                                 tools:listitem="@layout/spinner_dropdown_item"/>
@@ -232,16 +250,18 @@
                             <TextView
                                 android:id="@+id/textOADamperAtMax"
                                 android:layout_width="wrap_content"
-                                android:layout_height="40dp"
-                                android:layout_gravity="center_vertical"
+                                android:layout_height="wrap_content"
+                                android:layout_centerInParent="true"
+                                android:layout_alignParentStart="true"
                                 android:text="@string/label_oadamper_at_max"
-                                android:layout_alignParentLeft="true"
+                                android:layout_toStartOf="@+id/oaDamperAtMax"
+                                android:layout_marginEnd="5dp"
                                 android:textAppearance="@style/title_normal" />
 
                             <Spinner
                                 android:id="@+id/oaDamperAtMax"
                                 android:layout_width="wrap_content"
-                                android:layout_height="40dp"
+                                android:layout_height="wrap_content"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
@@ -253,21 +273,23 @@
                         <RelativeLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="36dp">
+                            android:layout_marginTop="30dp">
 
                             <TextView
                                 android:id="@+id/textRetDamperMax"
                                 android:layout_width="wrap_content"
-                                android:layout_height="40dp"
-                                android:layout_gravity="center_vertical"
+                                android:layout_height="wrap_content"
+                                android:layout_centerInParent="true"
+                                android:layout_alignParentStart="true"
                                 android:text="@string/label_return_damper_at_max"
-                                android:layout_alignParentLeft="true"
+                                android:layout_toStartOf="@+id/returnDamperAtMax"
+                                android:layout_marginEnd="5dp"
                                 android:textAppearance="@style/title_normal" />
 
                             <Spinner
                                 android:id="@+id/returnDamperAtMax"
                                 android:layout_width="wrap_content"
-                                android:layout_height="40dp"
+                                android:layout_height="wrap_content"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
@@ -279,21 +301,23 @@
                         <RelativeLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="36dp">
+                            android:layout_marginTop="30dp">
 
                             <TextView
                                 android:id="@+id/textReturnMinOpen"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
+                                android:layout_centerInParent="true"
+                                android:layout_alignParentStart="true"
                                 android:text="@string/label_return_damper_min_open"
-                                android:layout_alignParentLeft="true"
+                                android:layout_toStartOf="@+id/returnDamperMinOpen"
+                                android:layout_marginEnd="5dp"
                                 android:textAppearance="@style/title_normal" />
 
                             <Spinner
                                 android:id="@+id/returnDamperMinOpen"
                                 android:layout_width="wrap_content"
-                                android:layout_height="40dp"
+                                android:layout_height="wrap_content"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
@@ -305,15 +329,15 @@
                         <RelativeLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="36dp">
+                            android:layout_marginTop="30dp">
 
                             <TextView
                                 android:id="@+id/textExFanStage2"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
+                                android:layout_centerInParent="true"
                                 android:text="@string/label_exfan_stage2_threshold"
-                                android:layout_alignParentLeft="true"
+                                android:layout_alignParentStart="true"
                                 android:textAppearance="@style/title_normal" />
 
                             <Spinner
@@ -331,21 +355,23 @@
                         <RelativeLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="36dp">
+                            android:layout_marginTop="30dp">
 
                             <TextView
                                 android:id="@+id/textCO2Threshold"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
+                                android:layout_centerInParent="true"
                                 android:text="@string/label_co2threshold"
-                                android:layout_alignParentLeft="true"
+                                android:layout_toStartOf="@+id/co2Threshold"
+                                android:layout_marginEnd="5dp"
+                                android:layout_alignParentStart="true"
                                 android:textAppearance="@style/title_normal" />
 
                             <Spinner
                                 android:id="@+id/co2Threshold"
                                 android:layout_width="wrap_content"
-                                android:layout_height="40dp"
+                                android:layout_height="wrap_content"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
@@ -357,29 +383,31 @@
                         <RelativeLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="36dp">
+                            android:layout_marginTop="30dp">
 
                             <TextView
                                 android:id="@+id/textRoomCo2Sensing"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
+                                android:layout_centerInParent="true"
+                                android:layout_alignParentStart="true"
                                 android:text="@string/label_use_room_co2_sensing"
-                                android:layout_alignParentLeft="true"
+                                android:layout_toStartOf="@+id/roomCO2Sensing"
+                                android:layout_marginEnd="5dp"
                                 android:textAppearance="@style/title_normal" />
 
                             <ToggleButton
                                 android:id="@+id/roomCO2Sensing"
-                                android:layout_width="46.12dp"
-                                android:layout_height="27.42dp"
-                                android:layout_alignParentRight="true"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
                                 android:layout_centerVertical="true"
                                 android:layout_marginLeft="10dp"
-                                android:background="@drawable/toggle_selector"
+                                android:background="@null"
+                                android:button="@drawable/toggle_selector"
                                 android:checked="false"
                                 android:textOff=""
                                 android:textOn="" />
-
 
                         </RelativeLayout>
                     </LinearLayout>
@@ -388,23 +416,22 @@
 
             </RelativeLayout>
 
+            <Button
+                android:id="@+id/setBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="10dp"
+                android:layout_marginTop="10dp"
+                android:background="@null"
+                android:button="@null"
+                android:layout_gravity="end|center"
+                android:fontFamily="@font/lato_regular"
+                android:text="@string/button_set"
+                android:textAllCaps="true"
+                android:textColor="@color/orange_75f"
+                android:textSize="19.5dp" />
         </LinearLayout>
-
-        <Button
-            android:id="@+id/setBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentBottom="true"
-            android:layout_marginRight="16dp"
-            android:layout_marginBottom="48dp"
-            android:background="@null"
-            android:button="@null"
-            android:fontFamily="@font/lato_regular"
-            android:text="@string/button_set"
-            android:textAllCaps="true"
-            android:textColor="@color/orange_75f"
-            android:textSize="19.5dp" />
 
     </RelativeLayout>
 </ScrollView>

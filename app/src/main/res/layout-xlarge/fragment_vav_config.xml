@@ -58,7 +58,7 @@
                 <Spinner
                     android:id="@+id/damperType"
                     android:layout_width="160dp"
-                    android:layout_height="40dp"
+                    android:layout_height="42dp"
                     android:layout_marginLeft="80dp"
                     android:layout_toRightOf="@+id/textDamperType"
                     android:layout_gravity="center_vertical"
@@ -80,7 +80,7 @@
                 <Spinner
                     android:id="@+id/damperSize"
                     android:layout_width="wrap_content"
-                    android:layout_height="40dp"
+                    android:layout_height="42dp"
                     android:minWidth="76dp"
                     android:layout_marginLeft="46dp"
                     android:layout_toRightOf="@+id/textDamperSize"
@@ -93,7 +93,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="40dp"
                     android:layout_marginLeft="136dp"
-                    android:layout_toRightOf="@+id/damperSize"
+                    android:layout_toEndOf="@+id/damperSize"
                     android:layout_gravity="center_vertical"
                     android:text="@string/label_damper1shape"
                     android:textAppearance="@style/title_normal"/>
@@ -101,9 +101,8 @@
                 <Spinner
                     android:id="@+id/damperShape"
                     android:layout_width="wrap_content"
-                    android:layout_height="40dp"
-                    android:minWidth="76dp"
-                    android:layout_marginLeft="46dp"
+                    android:layout_height="42dp"
+                    android:layout_marginLeft="30dp"
                     android:layout_toRightOf="@+id/textdamperShape"
                     android:layout_gravity="center_vertical"
                     style="@style/Widget.AppCompat.Spinner.Underlined"
@@ -113,7 +112,7 @@
             <TextView
                 android:id="@+id/textEnableOccupancy"
                 android:layout_width="wrap_content"
-                android:layout_height="30dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_alignLeft="@id/textDamperType"
                 android:layout_marginTop="32dp"
@@ -139,7 +138,7 @@
             <TextView
                 android:id="@+id/textReheatType"
                 android:layout_width="wrap_content"
-                android:layout_height="30dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="@string/label_reheattype"
                 android:textAppearance="@style/title_normal"
@@ -151,7 +150,7 @@
             <Spinner
                 android:id="@+id/vavReheatType"
                 android:layout_width="wrap_content"
-                android:layout_height="40dp"
+                android:layout_height="42dp"
                 android:minWidth="76dp"
                 android:layout_gravity="center_vertical"
                 style="@style/Widget.AppCompat.Spinner.Underlined"
@@ -201,7 +200,7 @@
             <Spinner
                 android:id="@+id/zonePriority"
                 android:layout_width="wrap_content"
-                android:layout_height="40dp"
+                android:layout_height="42dp"
                 android:minWidth="76dp"
                 android:layout_gravity="center_vertical"
                 style="@style/Widget.AppCompat.Spinner.Underlined"

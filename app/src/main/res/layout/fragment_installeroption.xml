@@ -184,9 +184,7 @@
                 android:layout_height="100dp"
                 android:layout_below="@+id/textTempLimitDesc"
                 android:layout_marginTop="36dp"
-                android:layout_marginLeft="76dp"
-                android:src="@drawable/placeholder_buildinglimit"
-                />
+                android:layout_marginLeft="76dp" />
 
             <TextView
                 android:id="@+id/textUseCelsius"

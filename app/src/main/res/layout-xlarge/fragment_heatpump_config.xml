@@ -212,7 +212,7 @@
 
             <LinearLayout
                 android:id="@+id/lt_enableLabel"
-                android:layout_width="291dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textEnable"
                 android:layout_marginLeft="15dp"
@@ -231,7 +231,7 @@
                     android:id="@+id/textCompStage2"
                     android:layout_width="wrap_content"
                     android:layout_height="28.5dp"
-                    android:layout_marginTop="32dp"
+                    android:layout_marginTop="25dp"
                     android:text="@string/label_compstage2"
                     android:textAppearance="@style/text_appearance" />
 
@@ -265,7 +265,7 @@
                     android:id="@+id/textHeatChangeover"
                     android:layout_width="wrap_content"
                     android:layout_height="28.5dp"
-                    android:layout_marginTop="25dp"
+                    android:layout_marginTop="20dp"
                     android:text="@string/label_pumpchange"
                     android:textAppearance="@style/text_appearance" />
 

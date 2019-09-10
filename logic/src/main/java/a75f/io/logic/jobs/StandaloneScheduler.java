@@ -39,6 +39,7 @@ public class StandaloneScheduler {
         Log.i(TAG, "Equip: " + equip);
         Log.i(TAG, "Equip Schedule: " + equipSchedule);
         Occupied occ = equipSchedule.getCurrentValues();
+        Occupied curOccu = ScheduleProcessJob.getOccupiedModeCache(equip.getRoomRef());
         //When schedule is deleted
         if (occ == null) {
             ScheduleProcessJob.occupiedHashMap.remove(equip.getRoomRef());
@@ -48,6 +49,10 @@ public class StandaloneScheduler {
             occ.setOccupied(false);
 
         occ.setVacation(vacation);
+        if(curOccu != null) {
+            occ.setPreconditioning(curOccu.isPreconditioning());
+            occ.setForcedOccupied(curOccu.isForcedOccupied());
+        }
 
 
         double heatingDeadBand = StandaloneTunerUtil.readTunerValByQuery("heating and deadband", equip.getId());

@@ -240,18 +240,18 @@ public class ScheduleProcessJob extends BaseJob {
     }
 
     private static void writePointsForEquip(Equip equip, Schedule equipSchedule, Schedule vacation) {
-        if((equip.getMarkers().contains("vav") || equip.getMarkers().contains("dab")|| equip.getMarkers().contains("sse") || equip.getMarkers().contains("ti")) && !equip.getMarkers().contains("system"))
+        if((equip.getMarkers().contains("vav") || equip.getMarkers().contains("dab") || equip.getMarkers().contains("ti")) && !equip.getMarkers().contains("system"))
         {
             VAVScheduler.processEquip(equip, equipSchedule, vacation, systemOccupancy);
         }else if (equip.getMarkers().contains("pid")) {
             Occupied occ = equipSchedule.getCurrentValues();
             if (occ != null) {
-                ScheduleProcessJob.putOccupiedModeCache(equip.getRoomRef(), occ);
+                putOccupiedModeCache(equip.getRoomRef(), occ);
             } else {
                 ScheduleProcessJob.occupiedHashMap.remove(equip.getRoomRef());
             }
         }
-		if( !equip.getMarkers().contains("system") && equip.getMarkers().contains("standalone"))
+		if( !equip.getMarkers().contains("system") && (equip.getMarkers().contains("standalone") || equip.getMarkers().contains("sse")))
         {
             StandaloneScheduler.processEquip(equip,equipSchedule,vacation);
         }
@@ -344,31 +344,38 @@ public class ScheduleProcessJob extends BaseJob {
                 DateTime et = new DateTime(th);
                 int min = et.getMinuteOfHour();
                 cachedOccupied.setForcedOccupied(true);
+                putOccupiedModeCache(equip.getRoomRef(),cachedOccupied);
                 return String.format("In Temporary Hold | till %s", et.getHourOfDay()+":"+(min < 10 ? "0"+min : min));
             }
+            String statusString = "";
             cachedOccupied.setForcedOccupied(false);
     
             if(cachedOccupied.getVacation() != null)
             {
-                return String.format("In Energy saving %s till %s", "Vacation",
+                statusString = String.format("In Energy saving %s till %s", "Vacation",
                             cachedOccupied.getVacation().getEndDateString());
         
             } else
             {
-                if(isZonePreconditioningActive(equipId,cachedOccupied, isZoneHasStandaloneEquip)) {//Currently handled only for smartstat
-                    return String.format("In %s, changes to Energy saving range of %.1f-%.1fF at %02d:%02d", "Preconditioning",
+                if(isZonePreconditioningActive(equipId,cachedOccupied, isZoneHasStandaloneEquip)) {//Currently handled only for standalone
+                    cachedOccupied.setPreconditioning(true);
+                    statusString = String.format("In %s, changes to Energy saving range of %.1f-%.1fF at %02d:%02d", "Preconditioning",
                             cachedOccupied.getHeatingVal() - cachedOccupied.getUnoccupiedZoneSetback(),
                             cachedOccupied.getCoolingVal() + cachedOccupied.getUnoccupiedZoneSetback(),
                             cachedOccupied.getNextOccupiedSchedule().getEthh(),
                             cachedOccupied.getNextOccupiedSchedule().getEtmm());
 
-                }else
-                    return String.format("In Energy saving %s, changes to %.1f-%.1fF at %02d:%02d", "Unoccupied mode",
-                        cachedOccupied.getHeatingVal(),
-                        cachedOccupied.getCoolingVal(),
-                        cachedOccupied.getNextOccupiedSchedule().getSthh(),
-                        cachedOccupied.getNextOccupiedSchedule().getStmm());
+                }else {
+                    cachedOccupied.setPreconditioning(false);
+                    statusString = String.format("In Energy saving %s, changes to %.1f-%.1fF at %02d:%02d", "Unoccupied mode",
+                            cachedOccupied.getHeatingVal(),
+                            cachedOccupied.getCoolingVal(),
+                            cachedOccupied.getNextOccupiedSchedule().getSthh(),
+                            cachedOccupied.getNextOccupiedSchedule().getStmm());
+                }
             }
+            putOccupiedModeCache(equip.getRoomRef(),cachedOccupied);
+            return statusString;
         }
     }
 
@@ -610,10 +617,11 @@ public class ScheduleProcessJob extends BaseJob {
         if (points != null && points.size() > 0)
         {
             String id = ((HashMap) points.get(0)).get("id").toString();
-            String currentState = CCUHsApi.getInstance().readDefaultStrValById(id);
-            if (!currentState.equals(getZoneStatusString(equip.getRoomRef(), equip.getId())))
+            String hisZoneStatus = CCUHsApi.getInstance().readDefaultStrValById(id);
+            String currentZoneStatus = getZoneStatusString(equip.getRoomRef(), equip.getId());
+            if (!hisZoneStatus.equals(currentZoneStatus))
             {
-                CCUHsApi.getInstance().writeDefaultValById(id, getZoneStatusString(equip.getRoomRef(),equip.getId()));
+                CCUHsApi.getInstance().writeDefaultValById(id, currentZoneStatus);
                 CCUHsApi.getInstance().writeHisValById(id, (double) zoneOccupancy.ordinal());
                 if(scheduleDataInterface !=null){
                     String zoneId = Schedule.getZoneIdByEquipId(equip.getId());
@@ -626,7 +634,7 @@ public class ScheduleProcessJob extends BaseJob {
 
         ArrayList occ = CCUHsApi.getInstance().readAll("point and occupancy and mode and equipRef == \""+equip.getId()+"\"");
         if (occ != null && occ.size() > 0) {
-            String id = ((HashMap) points.get(0)).get("id").toString();
+            String id = ((HashMap) occ.get(0)).get("id").toString();
             CCUHsApi.getInstance().writeHisValById(id, (double) zoneOccupancy.ordinal());
         }
     }

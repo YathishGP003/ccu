@@ -870,11 +870,11 @@ public class VAVLogicalMap
         setDamperLimit("heating","min",config.minDamperHeating);
         setHisVal("heating and min and damper and pos",config.minDamperHeating);
         setDamperLimit("heating","max",config.maxDamperHeating);
-        setHisVal("heating and mac and damper and pos",config.maxDamperHeating);
+        setHisVal("heating and max and damper and pos",config.maxDamperHeating);
     }
     
     public void setHisVal(String tags,double val) {
-        CCUHsApi.getInstance().writeDefaultVal("point and zone and config and vav and "+tags+" and group == \""+nodeAddr+"\"", val);
+        CCUHsApi.getInstance().writeHisValByQuery("point and zone and config and vav and "+tags+" and group == \""+nodeAddr+"\"", val);
     }
     
     public void deleteHaystackPoints() {

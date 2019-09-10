@@ -143,16 +143,16 @@ public class OAOProfile
             e.printStackTrace();
             Log.d(L.TAG_CCU_OAO," Failed to read external Temp or Humidity , Disable Economizing");
             setEconomizingAvailable(false);
-            oaoEquip.setHisVal("weather and outside and air and temp", 0);
-            oaoEquip.setHisVal("weather and outside and air and humidity", 0);
+            oaoEquip.setHisVal("outsideWeather and air and temp", 0);
+            oaoEquip.setHisVal("outsideWeather and air and humidity", 0);
             oaoEquip.setHisVal("inside and enthalpy", 0);
             oaoEquip.setHisVal("outside and enthalpy", 0);
             oaoEquip.setHisVal("economizing and available", 0);
             oaoEquip.setHisVal("economizing and loop and output", 0);
             return;
         }
-        oaoEquip.setHisVal("weather and outside and air and temp", externalTemp);
-        oaoEquip.setHisVal("weather and outside and air and humidity", externalHumidity);
+        oaoEquip.setHisVal("outsideWeather and air and temp", externalTemp);
+        oaoEquip.setHisVal("outsideWeather and air and humidity", externalHumidity);
         
         double insideEnthalpy = getAirEnthalpy(L.ccu().systemProfile.getSystemController().getAverageSystemTemperature(),
                                     L.ccu().systemProfile.getSystemController().getAverageSystemHumidity());

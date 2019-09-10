@@ -1,4 +1,6 @@
- - Merge branch 'renatus_dev_sam' into 'master'
- - resolves RENATUS-676
- - Daikin IE Profile Implementation
- - Weather point tag correction
+ - Merge branch 'kumar_renatus' into 'master'
+ - Merge branch 'mahesh_renuts' into 'master'
+ - margin fix
+ - multiple ui fixes
+ - #RENATUS-679, Rectify the occupancy status to occupancy mode tags
+ - #RENATUS-677, implement preconditiong for SSE - standalone

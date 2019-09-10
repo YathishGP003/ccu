@@ -307,7 +307,7 @@ public abstract class SystemProfile
                                              .setKind("string")
                                              .build();
         CCUHsApi.getInstance().addPoint(systemScheduleStatus);
-        Point systemOccupancy = new Point.Builder().setDisplayName(equipDis + "-" + "occupancy").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("occupancy").addMarker("status").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
+        Point systemOccupancy = new Point.Builder().setDisplayName(equipDis + "-" + "occupancy").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(systemOccupancy);
         Point systemOperatingMode = new Point.Builder().setDisplayName(equipDis + "-" + "operatingMode").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("operating").addMarker("mode").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(systemOperatingMode);

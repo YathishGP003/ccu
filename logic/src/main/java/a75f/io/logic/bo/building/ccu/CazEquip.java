@@ -233,7 +233,7 @@ public class CazEquip
                 .setSiteRef(siteRef)
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
-                .addMarker("ti").addMarker("occupancy").addMarker("status").addMarker("zone").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("ti").addMarker("occupancy").addMarker("mode").addMarker("zone").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();

@@ -314,7 +314,7 @@ public class ScheduleProcessJob extends BaseJob {
 
 
         Equip equip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().readMapById(equipId)).build();
-        boolean isZoneHasSmartStat = equip.getMarkers().contains("smartstat");
+        boolean isZoneHasStandaloneEquip = equip.getMarkers().contains("smartstat") ? true :  equip.getMarkers().contains("sse") ? true : false;
         Occupied cachedOccupied = getOccupiedModeCache(zoneId);
         if(cachedOccupied == null)
         {
@@ -325,7 +325,7 @@ public class ScheduleProcessJob extends BaseJob {
             }
             return "Setting up..";
         }
-        if ((systemOccupancy == PRECONDITIONING) && !isZoneHasSmartStat) {
+        if ((systemOccupancy == PRECONDITIONING) && !isZoneHasStandaloneEquip) {
             return "In Preconditioning ";
         }
         //{Current Mode}, Changes to Energy Saving Range of %.1f-%.1fF at %s
@@ -354,7 +354,7 @@ public class ScheduleProcessJob extends BaseJob {
         
             } else
             {
-                if(isZonePreconditioningActive(equipId,cachedOccupied, isZoneHasSmartStat)) {//Currently handled only for smartstat
+                if(isZonePreconditioningActive(equipId,cachedOccupied, isZoneHasStandaloneEquip)) {//Currently handled only for smartstat
                     return String.format("In %s, changes to Energy saving range of %.1f-%.1fF at %02d:%02d", "Preconditioning",
                             cachedOccupied.getHeatingVal() - cachedOccupied.getUnoccupiedZoneSetback(),
                             cachedOccupied.getCoolingVal() + cachedOccupied.getUnoccupiedZoneSetback(),

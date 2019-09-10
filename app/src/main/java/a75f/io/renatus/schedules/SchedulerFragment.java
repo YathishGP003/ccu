@@ -1,8 +1,11 @@
 package a75f.io.renatus.schedules;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
@@ -24,6 +27,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -120,9 +124,20 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         Bundle args = getArguments();
         if (args != null) {
             setShowsDialog(true);
-            setStyle(DialogFragment.STYLE_NORMAL, R.style.DialogFragmentTheme);
         } else {
             setShowsDialog(false);
+        }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Dialog dialog = getDialog();
+
+        if (dialog != null) {
+                int width = 1165;
+                int height = 646;
+                dialog.getWindow().setLayout(width, height);
         }
     }
 

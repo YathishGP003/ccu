@@ -212,58 +212,58 @@
 
             <LinearLayout
                 android:id="@+id/lt_enableLabel"
-                android:layout_width="291dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textEnable"
                 android:layout_marginLeft="15dp"
-                android:layout_marginTop="30dp"
+                android:layout_marginTop="25dp"
                 android:layout_toRightOf="@+id/lt_toggles"
                 android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/textCoolStage1"
                     android:layout_width="wrap_content"
-                    android:layout_height="28.5dp"
+                    android:layout_height="40dp"
                     android:text="@string/label_cpucoolstage1"
                     android:textAppearance="@style/text_appearance" />
 
                 <TextView
                     android:id="@+id/textCoolStage2"
                     android:layout_width="wrap_content"
-                    android:layout_height="28.5dp"
-                    android:layout_marginTop="32dp"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="23dp"
                     android:text="@string/label_cpucoolstage2"
                     android:textAppearance="@style/text_appearance" />
 
                 <TextView
                     android:id="@+id/textFanLow"
                     android:layout_width="wrap_content"
-                    android:layout_height="28.5dp"
-                    android:layout_marginTop="33.5dp"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="24dp"
                     android:text="@string/label_fanlow"
                     android:textAppearance="@style/text_appearance" />
 
                 <TextView
                     android:id="@+id/textHeatStage1"
                     android:layout_width="195dp"
-                    android:layout_height="28.5dp"
-                    android:layout_marginTop="32dp"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="22dp"
                     android:text="@string/label_cpuheatstage1"
                     android:textAppearance="@style/text_appearance" />
 
                 <TextView
                     android:id="@+id/textHeatChangeover"
                     android:layout_width="wrap_content"
-                    android:layout_height="28.5dp"
-                    android:layout_marginTop="32dp"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="22dp"
                     android:text="@string/label_cpuheatstage2"
                     android:textAppearance="@style/text_appearance" />
 
                 <android.support.v7.widget.AppCompatSpinner
                     android:id="@+id/spinnerCpuFanHigh"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="25dp"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="16dp"
                     android:entries="@array/smartstat_relay_fanHumiD"
                     android:gravity="start"
                     android:spinnerMode="dropdown" />
@@ -271,24 +271,24 @@
                 <TextView
                     android:id="@+id/textAirflow"
                     android:layout_width="wrap_content"
-                    android:layout_height="28.5dp"
-                    android:layout_marginTop="100dp"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="96dp"
                     android:text="@string/label_airflowtemp"
                     android:textAppearance="@style/text_appearance" />
 
                 <TextView
                     android:id="@+id/textExtSensor"
                     android:layout_width="wrap_content"
-                    android:layout_height="28.5dp"
-                    android:layout_marginTop="30dp"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="20dp"
                     android:text="@string/label_extsensor"
                     android:textAppearance="@style/text_appearance" />
 
                 <TextView
                     android:id="@+id/textOccupancy"
                     android:layout_width="wrap_content"
-                    android:layout_height="28.5dp"
-                    android:layout_marginTop="30dp"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="20dp"
                     android:text="@string/label_enableoccup"
                     android:textAppearance="@style/text_appearance" />
 
@@ -322,7 +322,7 @@
                     android:layout_width="60dp"
                     android:layout_height="40dp"
                     android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="24dp"
+                    android:layout_marginTop="20dp"
                     android:background="@drawable/toggle_testselector"
                     android:checked="false"
                     android:textAppearance="@style/text_toggleappearance"
@@ -335,7 +335,7 @@
                     android:layout_width="60dp"
                     android:layout_height="40dp"
                     android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="24dp"
+                    android:layout_marginTop="20dp"
                     android:background="@drawable/toggle_testselector"
                     android:checked="false"
                     android:textAppearance="@style/text_toggleappearance"
@@ -348,7 +348,7 @@
                     android:layout_width="60dp"
                     android:layout_height="40dp"
                     android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="24dp"
+                    android:layout_marginTop="20dp"
                     android:background="@drawable/toggle_testselector"
                     android:checked="false"
                     android:textAppearance="@style/text_toggleappearance"
@@ -361,7 +361,7 @@
                     android:layout_width="60dp"
                     android:layout_height="40dp"
                     android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="24dp"
+                    android:layout_marginTop="20dp"
                     android:background="@drawable/toggle_testselector"
                     android:checked="false"
                     android:textAppearance="@style/text_toggleappearance"
@@ -374,7 +374,7 @@
                     android:layout_width="60dp"
                     android:layout_height="40dp"
                     android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="24dp"
+                    android:layout_marginTop="20dp"
                     android:background="@drawable/toggle_testselector"
                     android:checked="false"
                     android:textAppearance="@style/text_toggleappearance"

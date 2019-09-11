@@ -1,6 +1,3 @@
- - Merge branch 'renatus_dev_sam' into 'master'
- - resolves RENATUS-683
- - Merge branch 'mahesh_renuts' into 'master'
- - RENATUS-655, ui issue in zone when open schedule screen
  - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-677, implement preconditiong for SSE - standalone
+ - #RENATUS-682, change of desired temp from app, updates ct to 72
+ - #RENATUS-681, Whenever cdt is changed , pubnub generates two points

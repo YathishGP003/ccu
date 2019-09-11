@@ -1187,11 +1187,11 @@ public class ScheduleProcessJob extends BaseJob {
             
             //TODO - change when setting to applyToAllDays enabled.
             if (equipSchedule.isZoneSchedule()) {
-                if (coolpoint != null)
+                if ((coolpoint != null) && (coolval != 0))
                 {
                     equipSchedule.setDaysCoolVal(coolval, false);
                 }
-                if (heatpoint != null) {
+                if ((heatpoint != null) && (heatval != 0)) {
                     equipSchedule.setDaysHeatVal(heatval, false);
                 }
                 setAppOverrideExpiry(coolpoint, System.currentTimeMillis() + 10*1000);
@@ -1207,12 +1207,12 @@ public class ScheduleProcessJob extends BaseJob {
                                                  .withDayOfWeek(day.getDay() + 1)
                                                  .withSecondOfMinute(0);
 
-                if(coolpoint != null) {
+                if((coolpoint != null) && (coolval != 0)) {
                     CCUHsApi.getInstance().pointWrite(HRef.copy(coolpoint.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, "ccu", HNum.make(coolval), HNum.make(overrideExpiry.getMillis()
                             - System.currentTimeMillis(), "ms"));
                     setAppOverrideExpiry(coolpoint, overrideExpiry.getMillis());
                 }
-                if(heatpoint != null) {
+                if((heatpoint != null) && (heatval != 0)){
                     CCUHsApi.getInstance().pointWrite(HRef.copy(heatpoint.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, "ccu", HNum.make(heatval), HNum.make(overrideExpiry.getMillis()
                             - System.currentTimeMillis(), "ms"));
                     setAppOverrideExpiry(heatpoint, overrideExpiry.getMillis());
@@ -1228,9 +1228,9 @@ public class ScheduleProcessJob extends BaseJob {
             
             double forcedOccupiedMins = TunerUtil.readTunerValByQuery("forced and occupied and time");
             
-                if(coolpoint != null)
+                if((coolpoint != null) && (coolval != 0))
                     CCUHsApi.getInstance().pointWrite(HRef.copy(coolpoint.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, "manual", HNum.make(coolval) , HNum.make(forcedOccupiedMins * 60 * 1000, "ms"));
-                if(heatpoint != null)
+                if((heatpoint != null) && (heatval != 0))
                     CCUHsApi.getInstance().pointWrite(HRef.copy(heatpoint.getId()), HayStackConstants.FORCE_OVERRIDE_LEVEL, "manual", HNum.make(heatval) , HNum.make(forcedOccupiedMins * 60 * 1000, "ms"));
 
             

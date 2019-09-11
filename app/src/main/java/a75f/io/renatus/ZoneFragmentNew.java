@@ -800,8 +800,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             @Override
             public void onTemperatureChange(SeekArc seekArc, float coolingDesiredTemp, float heatingDesiredTemp,boolean syncToHaystack) {
                 if(syncToHaystack){
-                    Log.i("Scheduler","cooldt:"+coolDT.get("id").toString()+" value:"+Double.parseDouble(Float.valueOf(coolingDesiredTemp).toString()));
-                    Log.i("Scheduler","heatdt:"+heatDT.get("id").toString()+" value:"+Double.parseDouble(Float.valueOf(heatingDesiredTemp).toString()));
+                    Log.i("Scheduler","cooldt:"+coolDT.get("id").toString()+" value:"+Double.parseDouble(Float.valueOf(coolingDesiredTemp).toString())+","+pointcoolDT);
+                    Log.i("Scheduler","heatdt:"+heatDT.get("id").toString()+" value:"+Double.parseDouble(Float.valueOf(heatingDesiredTemp).toString())+","+pointheatDT);
                     //setPointVal(coolDT.get("id").toString(),Double.parseDouble(Float.valueOf(coolingDesiredTemp).toString()));
                     //setPointVal(heatDT.get("id").toString(),Double.parseDouble(Float.valueOf(heatingDesiredTemp).toString()));
                     if(zoneMap.size() > 0)
@@ -809,10 +809,18 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                         for(int i=0;i<zoneMap.size();i++)
                         {
                             Equip zoneEquip = new Equip.Builder().setHashMap(zoneMap.get(i)).build();
+                            double curCoolDt = 0;
+                            double curHeatDt = 0;
+                            if(pointcoolDT != coolingDesiredTemp)
+                                curCoolDt = coolingDesiredTemp;
+                            if(pointheatDT != heatingDesiredTemp)
+                                curHeatDt = heatingDesiredTemp;
+                            double curAvgDt = (coolingDesiredTemp + heatingDesiredTemp) / 2.0;
                             HashMap coolDT = CCUHsApi.getInstance().read("point and temp and desired and cooling and sp and equipRef == \"" + zoneEquip.getId() + "\"");
                             HashMap heatDT = CCUHsApi.getInstance().read("point and temp and desired and heating and sp and equipRef == \"" + zoneEquip.getId() + "\"");
                             HashMap avgDT = CCUHsApi.getInstance().read("point and temp and desired and average and sp and equipRef == \"" + zoneEquip.getId() + "\"");
-                            setPointVal(coolDT.get("id").toString(),Double.parseDouble(Float.valueOf(coolingDesiredTemp).toString()),heatDT.get("id").toString(),Double.parseDouble(Float.valueOf(heatingDesiredTemp).toString()),avgDT.get("id").toString());
+                            //setPointVal(coolDT.get("id").toString(),Double.parseDouble(Float.valueOf(coolingDesiredTemp).toString()),heatDT.get("id").toString(),Double.parseDouble(Float.valueOf(heatingDesiredTemp).toString()),avgDT.get("id").toString());
+                            setPointVal(coolDT.get("id").toString(),curCoolDt,heatDT.get("id").toString(),curHeatDt,avgDT.get("id").toString(), curAvgDt);
                             //setPointVal(heatDT.get("id").toString(),Double.parseDouble(Float.valueOf(heatingDesiredTemp).toString()));
                         }
                     }
@@ -2239,7 +2247,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         return 0;
     }
     
-    public void setPointVal(String coolid, double coolval,String heatid, double heatval, String avgid) {
+    public void setPointVal(String coolid, double coolval,String heatid, double heatval, String avgid, double avgval) {
 
         Thread thread = new Thread(new Runnable() {
             @Override
@@ -2249,7 +2257,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 Point coolpoint = new Point.Builder().setHashMap(hayStack.readMapById(coolid)).build();
                 Point heatpoint = new Point.Builder().setHashMap(hayStack.readMapById(heatid)).build();
                 Point avgpoint = new Point.Builder().setHashMap(hayStack.readMapById(avgid)).build();
-                double avgval = (coolval + heatval) / 2.0;
+
                 if (coolpoint.getMarkers().contains("writable"))
                 {
                     CcuLog.d(L.TAG_CCU_UI, "Set Writbale Val "+coolpoint.getDisplayName()+": " +coolid+","+heatpoint.getDisplayName()+","+heatval+","+avgpoint.getDisplayName());
@@ -2257,12 +2265,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
                 }
 
-                if (coolpoint.getMarkers().contains("his"))
+                if (coolpoint.getMarkers().contains("his") && (coolval != 0))
                 {
                     CcuLog.d(L.TAG_CCU_UI, "Set His Val "+coolid+": " +coolval);
                     hayStack.writeHisValById(coolid, coolval);
                 }
-                if (heatpoint.getMarkers().contains("his"))
+                if (heatpoint.getMarkers().contains("his") && (heatval != 0))
                 {
                     CcuLog.d(L.TAG_CCU_UI, "Set His Val "+heatid+": " +heatval);
                     hayStack.writeHisValById(heatid, heatval);

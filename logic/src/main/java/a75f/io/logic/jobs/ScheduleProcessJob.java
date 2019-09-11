@@ -1065,6 +1065,16 @@ public class ScheduleProcessJob extends BaseJob {
         if (cachedOccupied != null && cachedOccupied.isOccupied())
         {
             c = OCCUPIED;
+            if(getTemporaryHoldExpiry(equip.getRoomRef()) > 0){
+                HashMap coolDT = CCUHsApi.getInstance().read("point and desired and cooling and temp and equipRef == \""+equip.getId()+"\"");
+                clearOverrides(coolDT.get("id").toString());
+                HashMap heatDT = CCUHsApi.getInstance().read("point and desired and heating and temp and equipRef == \""+equip.getId()+"\"");
+                clearOverrides(heatDT.get("id").toString());
+                HashMap avgDt = CCUHsApi.getInstance().read("point and desired and average and temp and equipRef == \""+equip.getId()+"\"");
+                clearOverrides(avgDt.get("id").toString());
+                cachedOccupied.setForcedOccupied(false);
+                putOccupiedModeCache(equip.getRoomRef(),cachedOccupied);
+            }
         } else if (getTemporaryHoldExpiry(equip.getRoomRef()) > 0){
             c = FORCED_OCCUPIED;
         }else if((cachedOccupied != null) && cachedOccupied.getVacation() != null) {

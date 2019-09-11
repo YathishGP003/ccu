@@ -18,7 +18,6 @@ import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.standalone.Stage;
 import a75f.io.logic.bo.haystack.device.SmartStat;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.logic.tuners.TunerConstants;
@@ -587,7 +586,7 @@ public class ConventionalUnitLogicalMap {
         CCUHsApi.getInstance().writeDefaultValById(enableexternal10KProbeTh2Id, (double)(config.enableThermistor2 == true? 1.0 : 0));
 
         Point enableRelay1 = new Point.Builder()
-                .setDisplayName(equipDis+"-enable"+ Stage.COOLING_1.displayName)
+                .setDisplayName(equipDis+"-enableCoolingStage1")
                 .setEquipRef(equipRef)
                 .setSiteRef(siteRef)
                 .setFloorRef(floor)

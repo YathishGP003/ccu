@@ -260,10 +260,10 @@ public abstract class VavProfile extends ZoneProfile
         
         Damper d = vavDeviceMap.get(node).getVavUnit().vavDamper;
     
-        int damperLoopOp = 0;
-        if (d.maxPosition > d.iaqCompensatedMinPos) {
-            damperLoopOp = (d.currentPosition - d.iaqCompensatedMinPos) * 100/ (d.maxPosition - d.iaqCompensatedMinPos);
-        }
+        int damperLoopOp = d.currentPosition;
+        //if (d.maxPosition > d.iaqCompensatedMinPos) {
+        //    damperLoopOp = (d.currentPosition - d.iaqCompensatedMinPos) * 100/ (d.maxPosition - d.iaqCompensatedMinPos);
+        //}
         
         TrimResponseRequest spResetRequest = vavDeviceMap.get(node).spResetRequest;
         if (damperLoopOp > 95) {

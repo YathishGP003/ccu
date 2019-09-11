@@ -50,7 +50,7 @@
                 android:visibility="gone"
                 android:layout_marginBottom="20dp" />
 
-            <a75f.io.renatus.views.NumberPicker.SystemNumberPicker
+            <NumberPicker
                 android:id="@+id/systemModePicker"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -59,9 +59,20 @@
                 android:layout_marginTop="30dp"
                 android:layout_marginBottom="30dp">
 
-            </a75f.io.renatus.views.NumberPicker.SystemNumberPicker>
+            </NumberPicker>
 
-        </RelativeLayout>
+            <!--a75f.io.renatus.views.NumberPicker.SystemNumberPicker
+                android:id="@+id/systemModePicker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/oaoArc"
+                android:layout_centerInParent="true"
+                android:layout_marginTop="30dp"
+                android:layout_marginBottom="30dp">
+
+            </a75f.io.renatus.views.NumberPicker.SystemNumberPicker -->
+
+        </RelativeLayout >
 
         <LinearLayout
             android:layout_width="match_parent"

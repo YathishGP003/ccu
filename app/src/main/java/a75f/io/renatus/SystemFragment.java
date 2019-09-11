@@ -69,7 +69,9 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	
 	TextView ccuName;
 	TextView profileTitle;
-	SystemNumberPicker systemModePicker;
+	//TODO uncomment for acctuall prod releasee, commenting it out for Automation test
+	//SystemNumberPicker systemModePicker;
+	NumberPicker systemModePicker;
 	
 	TextView occupancyStatus;
 	TextView equipmentStatus;
@@ -170,7 +172,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			modesAvailable.add(SystemMode.HEATONLY.displayName);
 		}
 
-		systemModePicker.setTextColorResource(R.color.my_gray);
+//TODO uncomment when it comes to prod release KUMAR.. commenting for now for Automation test case , dont forget to revoke xml file too
+		/*systemModePicker.setTextColorResource(R.color.my_gray);
 		systemModePicker.setSelectedTextSize(R.dimen.selected_text_size);
 		systemModePicker.setTextSize(R.dimen.text_size);
 		systemModePicker.setDividerColor(getResources().getColor(R.color.accent));
@@ -186,11 +189,40 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 		// Set wrap selector wheel
 		systemModePicker.setWrapSelectorWheel(false);
+		*/
+
+		systemModePicker.setMinValue(0);
+		systemModePicker.setMaxValue(modesAvailable.size()-1);
 		
 		systemModePicker.setDisplayedValues(modesAvailable.toArray(new String[modesAvailable.size()]));
 		systemModePicker.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
 
-		systemModePicker.setOnScrollListener((view1, scrollState) -> {
+		//TODO we will comment out below two lines for prod release
+		systemModePicker.setWrapSelectorWheel(false);
+		setDividerColor(systemModePicker);
+		
+		
+		systemModePicker.setOnScrollListener(new NumberPicker.OnScrollListener() {
+			@Override
+			public void onScrollStateChange(NumberPicker numberPicker, int scrollState) {
+				if (scrollState == SCROLL_STATE_IDLE) {
+					//Adding a dealy of 100ms as instant invocation of getVal() returns old value at times.
+					new Handler().postDelayed(new Runnable()
+					{
+						@Override
+						public void run()
+						{
+							if (numberPicker.getValue() != TunerUtil.readSystemUserIntentVal("rtu and mode"))
+							{
+								setUserIntentBackground("rtu and mode", SystemMode.getEnum(modesAvailable.get(numberPicker.getValue())).ordinal());
+							}
+						}
+					}, 100);
+				}
+			}
+		});
+		//TODO Commented this out for Automation test, we will revoke for actual prod test
+		/*systemModePicker.setOnScrollListener((view1, scrollState) -> {
 			if (scrollState == SystemNumberPicker.OnScrollListener.SCROLL_STATE_IDLE) {
 				//Adding a dealy of 100ms as instant invocation of getVal() returns old value at times.
 				new Handler().postDelayed(() -> {
@@ -200,7 +232,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 					}
 				}, 100);
 			}
-		});
+		});*/
 		
 		occupancyStatus = view.findViewById(R.id.occupancyStatus);
 		equipmentStatus = view.findViewById(R.id.equipmentStatus);
@@ -434,6 +466,28 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	@Override
 	public void onNothingSelected(AdapterView<?> arg0) {
 		// TODO Auto-generated method stub
+	}
+	
+	private void setDividerColor(NumberPicker picker) {
+		Field[] numberPickerFields = NumberPicker.class.getDeclaredFields();
+		for (Field field : numberPickerFields) {
+			if (field.getName().equals("mSelectionDivider")) {
+				field.setAccessible(true);
+				try {
+					field.set(picker, getResources().getDrawable(R.drawable.divider_np));
+				} catch (IllegalArgumentException e) {
+					Log.v("NP", "Illegal Argument Exception");
+					e.printStackTrace();
+				} catch (Resources.NotFoundException e) {
+					Log.v("NP", "Resources NotFound");
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					Log.v("NP", "Illegal Access Exception");
+					e.printStackTrace();
+				}
+				break;
+			}
+		}
 	}
 	
 	private void setUserIntentBackground(String query, double val) {

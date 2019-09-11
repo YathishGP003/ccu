@@ -1,3 +1,4 @@
  - Merge branch 'kumar_renatus' into 'master'
  - #RENATUS-682, change of desired temp from app, updates ct to 72
- - #RENATUS-681, Whenever cdt is changed , pubnub generates two points
+ - Merge branch 'kumar_renatus' into 'master'
+ - revoke system page op mode for automation

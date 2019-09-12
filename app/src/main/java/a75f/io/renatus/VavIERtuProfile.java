@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.text.method.DigitsKeyListener;
+import android.text.method.KeyListener;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +23,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.device.mesh.DaikinIE;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
@@ -38,6 +41,7 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
     @BindView(R.id.analog1RTU)CheckBox analog1Cb;
     @BindView(R.id.analog2RTU)CheckBox analog2Cb;
     @BindView(R.id.analog3RTU)CheckBox analog3Cb;
+    @BindView(R.id.humidificationCb)CheckBox humidificationCb;
     
     @BindView(R.id.coolingDatMin)Spinner coolingDatMin;
     @BindView(R.id.coolingDatMax)Spinner coolingDatMax;
@@ -50,6 +54,8 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
     @BindView(R.id.analog1RTUTest) Spinner coolingTest;
     @BindView(R.id.analog2RTUTest) Spinner spTest;
     @BindView(R.id.analog3RTUTest) Spinner heatingTest;
+    @BindView(R.id.humidificationTest) Spinner humidificationTest;
+    @BindView(R.id.oaMinTest) Spinner oaMinTest;
     
     VavIERtu systemProfile = null;
     
@@ -132,8 +138,8 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
             {
                 final EditText editText = new EditText(getActivity());
             
-                //KeyListener keyListener = DigitsKeyListener.getInstance("0123456789.");
-                ///editText.setKeyListener(keyListener);
+                KeyListener keyListener = DigitsKeyListener.getInstance("0123456789.");
+                editText.setKeyListener(keyListener);
                 AlertDialog dialog = new AlertDialog.Builder(getActivity())
                                              .setTitle("Internet Equipment IP")
                                              .setMessage(eqIp)
@@ -203,22 +209,31 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         val = systemProfile.getConfigVal("heating and dat and max");
         heatingDatMax.setSelection(val != 0 ? heatingAdapter.getPosition(val) : heatingDatArr.size() -1, false);
     
+        
+        ArrayAdapter<Double> coolingSatTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, coolingDatArr);
+        coolingSatTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        coolingTest.setAdapter(coolingSatTestAdapter);
+        
+        ArrayAdapter<Double> spTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, spArr);
+        spTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        spTest.setAdapter(spTestAdapter);
+    
+        ArrayAdapter<Double> heatingSatTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, heatingDatArr);
+        heatingSatTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        heatingTest.setAdapter(heatingSatTestAdapter);
+    
         ArrayList<Double> zoroToHundred = new ArrayList<>();
         for (double i = 0;  i <= 100.0; i++)
         {
             zoroToHundred.add(i);
         }
-        ArrayAdapter<Double> coolingSatTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
-        coolingSatTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        coolingTest.setAdapter(coolingSatTestAdapter);
+        ArrayAdapter<Double> humidificationTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
+        humidificationTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        humidificationTest.setAdapter(humidificationTestAdapter);
     
-        ArrayAdapter<Double> spTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
-        spTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        spTest.setAdapter(spTestAdapter);
-    
-        ArrayAdapter<Double> heatingSatTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
-        heatingSatTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        heatingTest.setAdapter(heatingSatTestAdapter);
+        ArrayAdapter<Double> oaMinTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, zoroToHundred);
+        oaMinTestAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        oaMinTest.setAdapter(oaMinTestAdapter);
     
     
         coolingDatMin.setOnItemSelectedListener(this);
@@ -230,6 +245,8 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         coolingTest.setOnItemSelectedListener(this);
         spTest.setOnItemSelectedListener(this);
         heatingTest.setOnItemSelectedListener(this);
+        humidificationTest.setOnItemSelectedListener(this);
+        oaMinTest.setOnItemSelectedListener(this);
         
     }
     
@@ -247,6 +264,8 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
             case R.id.analog3RTU:
                 setSelectionBackground("analog3", isChecked);
                 break;
+            case R.id.humidificationCb:
+                setSelectionBackground("humidification", isChecked);
         }
     }
     
@@ -277,10 +296,13 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
                 setConfigBackground("heating and dat and max", val);
                 break;
             case R.id.analog1RTUTest:
+                DaikinIE.sendCoolingDATAutoControl(val);
+                break;
             case R.id.analog2RTUTest:
             case R.id.analog3Spinner:
-            case R.id.analog4Spinner:
-                sendAnalogOutTestSignal();
+            case R.id.humidificationTest:
+            case R.id.oaMinTest:
+                sendAnalogOutTestSignal(val);
                 break;
         }
     }
@@ -367,7 +389,7 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         }
     }
     
-    public void sendAnalogOutTestSignal() {
+    public void sendAnalogOutTestSignal(double val) {
         
     
     }

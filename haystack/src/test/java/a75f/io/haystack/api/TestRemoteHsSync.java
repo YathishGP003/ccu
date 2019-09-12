@@ -859,12 +859,12 @@ public class TestRemoteHsSync
     @Test
     public void testWeatherDataFetch() {
         CCUHsApi api = new CCUHsApi();
-        HClient hClient   = new HClient("https://renatusv2-dev.azurewebsites.net/", HayStackConstants.USER, HayStackConstants.PASS);
-        HDict   navIdDict = new HDictBuilder().add(HayStackConstants.ID, HRef.make("5d0ab09d200ed22c767fb952")).toDict();
+        HClient hClient   = new HClient("https://renatusv2-qa.azurewebsites.net/", HayStackConstants.USER, HayStackConstants.PASS);
+        HDict   navIdDict = new HDictBuilder().add(HayStackConstants.ID, HRef.make("5d7813b43edf896868c8b139")).toDict();
         HGrid   hGrid     = HGridBuilder.dictToGrid(navIdDict);
     
         HGrid site = hClient.call(HStdOps.read.name(), hGrid);
-        site.dump();
+        //site.dump();
         
         HRef tempWeatherRef = null;
         HDict tDict = new HDictBuilder().add("filter", "weatherPoint and air and temp and weatherRef == " + site.row(0).get("weatherRef")).toDict();
@@ -878,7 +878,7 @@ public class TestRemoteHsSync
         hisGrid.dump();
         if (hisGrid != null && hisGrid.numRows() > 0)
         {
-            HRow r = hisGrid.row(0/*hisGrid.numRows() - 1*/);
+            HRow r = hisGrid.row(hisGrid.numRows() - 1);
             HDateTime date = (HDateTime) r.get("ts");
             double tempVal = Double.parseDouble(r.get("val").toString());
             System.out.println(date + " External Temp: " + tempVal);

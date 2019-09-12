@@ -275,7 +275,7 @@ public class VavIERtu extends VavSystemProfile
         String siteRef = siteMap.get("id").toString();
         String tz = siteMap.get("tz").toString();
         Point coolingSignal = new Point.Builder()
-                                      .setDisplayName(equipDis+"-"+"coolingSignal")
+                                      .setDisplayName(equipDis+"-"+"coolingDat")
                                       .setSiteRef(siteRef)
                                       .setEquipRef(equipref)
                                       .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("his").addMarker("equipHis")
@@ -284,7 +284,7 @@ public class VavIERtu extends VavSystemProfile
         CCUHsApi.getInstance().addPoint(coolingSignal);
         
         Point heatingSignal = new Point.Builder()
-                                      .setDisplayName(equipDis+"-"+"heatingSignal")
+                                      .setDisplayName(equipDis+"-"+"heatingDat")
                                       .setSiteRef(siteRef)
                                       .setEquipRef(equipref)
                                       .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("his").addMarker("equipHis")
@@ -293,23 +293,13 @@ public class VavIERtu extends VavSystemProfile
         CCUHsApi.getInstance().addPoint(heatingSignal);
         
         Point fanSignal = new Point.Builder()
-                                  .setDisplayName(equipDis+"-"+"fanSignal")
+                                  .setDisplayName(equipDis+"-"+"ductStaticPressure")
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipref)
                                   .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("his").addMarker("equipHis")
                                   .setTz(tz)
                                   .build();
         CCUHsApi.getInstance().addPoint(fanSignal);
-        
-        /*Point occupancySignal = new Point.Builder()
-                                        .setDisplayName(equipDis+"-"+"occupancySignal")
-                                        .setSiteRef(siteRef)
-                                        .setEquipRef(equipref)
-                                        .addMarker("system").addMarker("cmd").addMarker("occupancy").addMarker("his").addMarker("equipHis")
-                                        .setTz(tz)
-                                        .build();
-        CCUHsApi.getInstance().addPoint(occupancySignal);*/
-        
     }
     
     private void addConfigPoints(String equipref) {
@@ -350,6 +340,17 @@ public class VavIERtu extends VavSystemProfile
                                              .build();
         String analog3OutputEnabledId = hayStack.addPoint(analog3OutputEnabled);
         hayStack.writeDefaultValById(analog3OutputEnabledId, 0.0 );
+    
+        Point humidificationEnabled = new Point.Builder()
+                                             .setDisplayName(equipDis+"-"+"humidificationEnabled")
+                                             .setSiteRef(siteRef)
+                                             .setEquipRef(equipref)
+                                             .addMarker("system").addMarker("config").addMarker("humidification")
+                                             .addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
+                                             .setTz(tz)
+                                             .build();
+        String humidificationEnabledId = hayStack.addPoint(analog3OutputEnabled);
+        hayStack.writeDefaultValById(humidificationEnabledId, 0.0 );
         
         
         Point minCoolingDat = new Point.Builder()
@@ -434,7 +435,7 @@ public class VavIERtu extends VavSystemProfile
                                       .setTz(tz)
                                       .build();
         String equipmentIPId = hayStack.addPoint(equipmentIP);
-        hayStack.writeDefaultValById(equipmentIPId, "http://10.100.11.71" );
+        hayStack.writeDefaultValById(equipmentIPId, "10.100.11.71" );
     }
     
     public double getCmdSignal(String cmd) {

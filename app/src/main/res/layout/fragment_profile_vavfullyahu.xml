@@ -79,11 +79,12 @@
                         android:id="@+id/tableRow1"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="26dp">
+                        android:layout_marginTop="24dp">
 
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
+                            android:layout_gravity="center_vertical"
                             android:layout_weight="1">
 
                             <ToggleButton
@@ -112,6 +113,7 @@
                             android:layout_weight="1"
                             android:layout_height="40dp"
                             android:gravity="center"
+                            android:layout_gravity="center_vertical"
                             android:layout_marginLeft="34dp">
 
                             <TextView
@@ -127,6 +129,7 @@
                             android:layout_weight="1"
                             android:layout_height="40dp"
                             android:gravity="center"
+                            android:layout_gravity="center_vertical"
                             android:layout_marginLeft="34dp">
                             <Spinner
                                 android:id="@+id/analog1Spinner"
@@ -148,6 +151,7 @@
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
+                            android:layout_gravity="center_vertical"
                             android:layout_weight="1">
 
                             <ToggleButton
@@ -175,6 +179,7 @@
                             android:layout_weight="1"
                             android:layout_height="40dp"
                             android:gravity="center"
+                            android:layout_gravity="center_vertical"
                             android:layout_marginLeft="34dp">
                             <TextView
                                 android:layout_width="129dp"
@@ -190,6 +195,7 @@
                             android:layout_weight="1"
                             android:layout_height="40dp"
                             android:gravity="center"
+                            android:layout_gravity="center_vertical"
                             android:layout_marginLeft="34dp">
                             <Spinner
                                 android:id="@+id/analog2Spinner"
@@ -206,11 +212,12 @@
                         android:id="@+id/tableRow3"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="24dp" >
+                        android:layout_marginTop="22dp" >
 
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
+                            android:layout_gravity="center_vertical"
                             android:layout_weight="1">
 
                             <ToggleButton
@@ -238,6 +245,7 @@
                             android:layout_weight="1"
                             android:layout_height="40dp"
                             android:gravity="center"
+                            android:layout_gravity="center_vertical"
                             android:layout_marginLeft="34dp">
                             <TextView
                                 android:layout_width="129dp"
@@ -253,6 +261,7 @@
                             android:layout_weight="1"
                             android:layout_height="40dp"
                             android:gravity="center"
+                            android:layout_gravity="center_vertical"
                             android:layout_marginLeft="34dp">
                             <Spinner
                                 android:id="@+id/analog3Spinner"
@@ -275,6 +284,7 @@
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
+                            android:layout_gravity="center_vertical"
                             android:layout_weight="1">
 
                             <ToggleButton
@@ -302,6 +312,7 @@
                             android:layout_weight="1"
                             android:layout_height="40dp"
                             android:gravity="center"
+                            android:layout_gravity="center_vertical"
                             android:layout_marginLeft="34dp">
                             <TextView
                                 android:layout_width="129dp"
@@ -317,6 +328,7 @@
                             android:layout_weight="1"
                             android:layout_height="40dp"
                             android:gravity="center"
+                            android:layout_gravity="center_vertical"
                             android:layout_marginLeft="34dp">
                             <Spinner
                                 android:id="@+id/analog4Spinner"
@@ -339,6 +351,7 @@
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
+                            android:layout_gravity="center_vertical"
                             android:layout_weight="1">
 
                             <ToggleButton
@@ -366,6 +379,7 @@
                             android:layout_weight="1"
                             android:layout_height="40dp"
                             android:gravity="center"
+                            android:layout_gravity="center_vertical"
                             android:layout_marginLeft="34dp">
                             <TextView
                                 android:layout_width="129dp"
@@ -381,6 +395,7 @@
                             android:layout_weight="1"
                             android:layout_height="40dp"
                             android:gravity="center"
+                            android:layout_gravity="center_vertical"
                             android:layout_marginLeft="34dp">
 
                             <ToggleButton
@@ -409,6 +424,7 @@
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
+                            android:layout_gravity="center_vertical"
                             android:layout_weight="1">
 
                             <ToggleButton
@@ -436,6 +452,7 @@
                             android:layout_weight="1"
                             android:layout_height="41.5dp"
                             android:gravity="center"
+                            android:layout_gravity="center_vertical"
                             android:layout_marginLeft="34dp">
                             <Spinner
                                 android:id="@+id/relay7Spinner"
@@ -452,6 +469,7 @@
                             android:layout_weight="1"
                             android:layout_height="40dp"
                             android:gravity="center"
+                            android:layout_gravity="center_vertical"
                             android:layout_marginLeft="34dp">
                             <ToggleButton
                                 android:id="@+id/relay7Test"

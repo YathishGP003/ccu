@@ -216,38 +216,38 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textEnable"
                 android:layout_marginLeft="15dp"
-                android:layout_marginTop="30dp"
+                android:layout_marginTop="25dp"
                 android:layout_toRightOf="@+id/lt_toggles"
                 android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/textCompStage1"
                     android:layout_width="wrap_content"
-                    android:layout_height="28.5dp"
+                    android:layout_height="40dp"
                     android:text="@string/label_compstage1"
                     android:textAppearance="@style/text_appearance" />
 
                 <TextView
                     android:id="@+id/textCompStage2"
                     android:layout_width="wrap_content"
-                    android:layout_height="28.5dp"
-                    android:layout_marginTop="25dp"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="22dp"
                     android:text="@string/label_compstage2"
                     android:textAppearance="@style/text_appearance" />
 
                 <TextView
                     android:id="@+id/textFanLow"
                     android:layout_width="wrap_content"
-                    android:layout_height="28.5dp"
-                    android:layout_marginTop="33.5dp"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="25dp"
                     android:text="@string/label_fanlow"
                     android:textAppearance="@style/text_appearance" />
 
                 <TextView
                     android:id="@+id/textAuxHeat"
-                    android:layout_width="205dp"
-                    android:layout_height="28.5dp"
-                    android:layout_marginTop="32dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="23dp"
                     android:text="@string/label_auxheat"
                     android:textAppearance="@style/text_appearance" />
 
@@ -256,7 +256,7 @@
                     android:layout_width="224dp"
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
-                    android:layout_marginTop="25dp"
+                    android:layout_marginTop="15dp"
                     android:layout_marginRight="42dp"
                     android:entries="@array/smartstat_relay_fanHumiD"
                     android:spinnerMode="dropdown" />
@@ -264,14 +264,14 @@
                 <TextView
                     android:id="@+id/textHeatChangeover"
                     android:layout_width="wrap_content"
-                    android:layout_height="28.5dp"
+                    android:layout_height="40dp"
                     android:layout_marginTop="20dp"
                     android:text="@string/label_pumpchange"
                     android:textAppearance="@style/text_appearance" />
 
                 <android.support.v7.widget.AppCompatSpinner
                     android:id="@+id/spinnerPumpChange"
-                    android:layout_width="224dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
                     android:layout_marginLeft="5dp"
@@ -283,24 +283,24 @@
                 <TextView
                     android:id="@+id/textAirflow"
                     android:layout_width="wrap_content"
-                    android:layout_height="28.5dp"
-                    android:layout_marginTop="28dp"
+                    android:layout_height="40dp"
                     android:text="@string/label_airflowtemp"
+                    android:layout_marginTop="50dp"
                     android:textAppearance="@style/text_appearance" />
 
                 <TextView
                     android:id="@+id/textOccupancy"
                     android:layout_width="wrap_content"
-                    android:layout_height="28.5dp"
-                    android:layout_marginTop="30dp"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="20dp"
                     android:text="@string/label_extsensor"
                     android:textAppearance="@style/text_appearance" />
 
                 <TextView
                     android:id="@+id/textExtSensor"
                     android:layout_width="wrap_content"
-                    android:layout_height="28.5dp"
-                    android:layout_marginTop="30dp"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="20dp"
                     android:text="@string/label_enableoccup"
                     android:textAppearance="@style/text_appearance" />
 
@@ -373,7 +373,7 @@
                     android:layout_width="60dp"
                     android:layout_height="40dp"
                     android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="24dp"
+                    android:layout_marginTop="20dp"
                     android:background="@drawable/toggle_testselector"
                     android:checked="false"
                     android:textAppearance="@style/text_toggleappearance"

@@ -79,11 +79,12 @@
                         android:id="@+id/tableRow1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="26dp">
+                        android:layout_marginTop="18dp">
 
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
+                            android:layout_gravity="center_vertical"
                             android:layout_weight="1">
 
                             <ToggleButton
@@ -111,7 +112,7 @@
 
                         <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_height="41.5dp"
+                            android:layout_height="45dp"
                             android:layout_marginLeft="34dp"
                             android:layout_weight="1"
                             android:gravity="center">
@@ -132,14 +133,13 @@
                             android:layout_height="40dp"
                             android:layout_marginLeft="34dp"
                             android:layout_weight="1"
+                            android:layout_gravity="center_vertical"
                             android:gravity="center">
 
                             <ToggleButton
                                 android:id="@+id/relay1Test"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_centerHorizontal="true"
-                                android:layout_centerVertical="true"
                                 android:background="@drawable/toggle_testselector"
                                 android:checked="false"
                                 android:textAppearance="@style/text_toggleappearance"
@@ -153,11 +153,12 @@
                         android:id="@+id/tableRow2"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp">
+                        android:layout_marginTop="15dp">
 
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
+                            android:layout_gravity="center_vertical"
                             android:layout_weight="1">
 
                             <ToggleButton
@@ -185,7 +186,7 @@
 
                         <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_height="41.5dp"
+                            android:layout_height="45dp"
                             android:layout_marginLeft="34dp"
                             android:layout_weight="1"
                             android:gravity="center">
@@ -206,6 +207,7 @@
                             android:layout_height="40dp"
                             android:layout_marginLeft="34dp"
                             android:layout_weight="1"
+                            android:layout_gravity="center_vertical"
                             android:gravity="center">
 
                             <ToggleButton
@@ -227,11 +229,12 @@
                         android:id="@+id/tableRow3"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp">
+                        android:layout_marginTop="15dp">
 
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
+                            android:layout_gravity="center_vertical"
                             android:layout_weight="1">
 
                             <ToggleButton
@@ -259,7 +262,7 @@
 
                         <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_height="41.5dp"
+                            android:layout_height="45dp"
                             android:layout_marginLeft="34dp"
                             android:layout_weight="1"
                             android:gravity="center">
@@ -280,6 +283,7 @@
                             android:layout_height="40dp"
                             android:layout_marginLeft="34dp"
                             android:layout_weight="1"
+                            android:layout_gravity="center_vertical"
                             android:gravity="center">
 
                             <ToggleButton
@@ -301,11 +305,12 @@
                         android:id="@+id/tableRow4"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="15dp">
+                        android:layout_marginTop="10dp">
 
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
+                            android:layout_gravity="center_vertical"
                             android:layout_weight="1">
 
                             <ToggleButton
@@ -333,7 +338,7 @@
 
                         <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_height="41.5dp"
+                            android:layout_height="45dp"
                             android:layout_marginLeft="34dp"
                             android:layout_weight="1"
                             android:gravity="center">
@@ -354,6 +359,7 @@
                             android:layout_height="40dp"
                             android:layout_marginLeft="34dp"
                             android:layout_weight="1"
+                            android:layout_gravity="center_vertical"
                             android:gravity="center">
 
                             <ToggleButton
@@ -380,6 +386,7 @@
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
+                            android:layout_gravity="center_vertical"
                             android:layout_weight="1">
 
                             <ToggleButton
@@ -407,7 +414,7 @@
 
                         <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_height="41.5dp"
+                            android:layout_height="45dp"
                             android:layout_marginLeft="34dp"
                             android:layout_weight="1"
                             android:gravity="center">
@@ -428,6 +435,7 @@
                             android:layout_height="40dp"
                             android:layout_marginLeft="34dp"
                             android:layout_weight="1"
+                            android:layout_gravity="center_vertical"
                             android:gravity="center">
 
                             <ToggleButton
@@ -455,6 +463,7 @@
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
+                            android:layout_gravity="center_vertical"
                             android:layout_weight="1">
 
                             <ToggleButton
@@ -482,7 +491,7 @@
 
                         <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_height="41.5dp"
+                            android:layout_height="45dp"
                             android:layout_marginLeft="34dp"
                             android:layout_weight="1"
                             android:gravity="center">
@@ -503,6 +512,7 @@
                             android:layout_height="40dp"
                             android:layout_marginLeft="34dp"
                             android:layout_weight="1"
+                            android:layout_gravity="center_vertical"
                             android:gravity="center">
 
                             <ToggleButton
@@ -525,12 +535,13 @@
                         android:id="@+id/tableRow7"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_marginTop="18dp"
+                        android:layout_marginTop="15dp"
                         android:visibility="visible">
 
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
+                            android:layout_gravity="center_vertical"
                             android:layout_weight="1">
 
                             <ToggleButton
@@ -558,7 +569,7 @@
 
                         <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_height="41.5dp"
+                            android:layout_height="45dp"
                             android:layout_marginLeft="34dp"
                             android:layout_weight="1"
                             android:gravity="center">
@@ -579,6 +590,7 @@
                             android:layout_height="40dp"
                             android:layout_marginLeft="34dp"
                             android:layout_weight="1"
+                            android:layout_gravity="center_vertical"
                             android:gravity="center">
 
                             <ToggleButton
@@ -601,11 +613,12 @@
                         android:id="@+id/tableRow8"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_marginTop="18dp">
+                        android:layout_marginTop="15dp">
 
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
+                            android:layout_gravity="center_vertical"
                             android:layout_weight="1">
 
                             <ToggleButton
@@ -655,6 +668,7 @@
                             android:layout_height="40dp"
                             android:layout_marginLeft="34dp"
                             android:layout_weight="1"
+                            android:layout_gravity="center_vertical"
                             android:gravity="center">
 
                             <Spinner
@@ -682,6 +696,7 @@
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
+                            android:layout_gravity="center_vertical"
                             android:layout_weight="1">
 
                             <ToggleButton
@@ -731,6 +746,7 @@
                             android:layout_height="40dp"
                             android:layout_marginLeft="34dp"
                             android:layout_weight="1"
+                            android:layout_gravity="center_vertical"
                             android:gravity="center">
 
                             <Spinner
@@ -757,6 +773,7 @@
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
+                            android:layout_gravity="center_vertical"
                             android:layout_weight="1">
 
                             <ToggleButton
@@ -806,6 +823,7 @@
                             android:layout_height="40dp"
                             android:layout_marginLeft="34dp"
                             android:layout_weight="1"
+                            android:layout_gravity="center_vertical"
                             android:gravity="center">
 
                             <Spinner
@@ -831,6 +849,7 @@
 
                         <LinearLayout
                             android:layout_width="0dp"
+                            android:layout_gravity="center_vertical"
                             android:layout_height="40dp"
                             android:layout_weight="1">
 
@@ -881,6 +900,7 @@
                             android:layout_height="40dp"
                             android:layout_marginLeft="34dp"
                             android:layout_weight="1"
+                            android:layout_gravity="center_vertical"
                             android:gravity="center">
 
                             <Spinner
@@ -936,7 +956,7 @@
                             style="@style/Widget.AppCompat.Spinner.Underlined"
                             android:layout_width="120dp"
                             android:layout_gravity="center"
-                            android:layout_height="wrap_content"
+                            android:layout_height="?android:attr/listPreferredItemHeight"
                             android:layout_marginLeft="54dp"
                             android:entries="@array/hvac_stage_selector"
                             tools:listitem="@layout/spinner_dropdown_item" />
@@ -963,7 +983,7 @@
                             android:id="@+id/ahuAnalog1Max"
                             style="@style/Widget.AppCompat.Spinner.Underlined"
                             android:layout_width="120dp"
-                            android:layout_height="wrap_content"
+                            android:layout_height="?android:attr/listPreferredItemHeight"
                             android:layout_gravity="center"
                             android:layout_marginRight="54dp"
                             android:entries="@array/hvac_stage_selector"
@@ -995,7 +1015,7 @@
                             android:id="@+id/ahuAnalog2Min"
                             style="@style/Widget.AppCompat.Spinner.Underlined"
                             android:layout_width="120dp"
-                            android:layout_height="wrap_content"
+                            android:layout_height="?android:attr/listPreferredItemHeight"
                             android:layout_gravity="center"
                             android:layout_marginLeft="54dp"
                             android:layout_toRightOf="@+id/textA2minPres"
@@ -1022,7 +1042,7 @@
                             android:id="@+id/ahuAnalog2Max"
                             style="@style/Widget.AppCompat.Spinner.Underlined"
                             android:layout_width="120dp"
-                            android:layout_height="wrap_content"
+                            android:layout_height="?android:attr/listPreferredItemHeight"
                             android:layout_gravity="center"
                             android:layout_marginRight="54dp"
                             android:entries="@array/hvac_stage_selector"
@@ -1055,7 +1075,7 @@
                             android:id="@+id/ahuAnalog3Min"
                             style="@style/Widget.AppCompat.Spinner.Underlined"
                             android:layout_width="120dp"
-                            android:layout_height="wrap_content"
+                            android:layout_height="?android:attr/listPreferredItemHeight"
                             android:layout_gravity="center"
                             android:layout_marginLeft="54dp"
                             android:entries="@array/hvac_stage_selector"
@@ -1082,7 +1102,7 @@
                             android:id="@+id/ahuAnalog3Max"
                             style="@style/Widget.AppCompat.Spinner.Underlined"
                             android:layout_width="120dp"
-                            android:layout_height="wrap_content"
+                            android:layout_height="?android:attr/listPreferredItemHeight"
                             android:layout_gravity="center"
                             android:layout_marginRight="54dp"
                             android:entries="@array/hvac_stage_selector"
@@ -1114,7 +1134,7 @@
                             android:id="@+id/ahuAnalog4MinCooling"
                             style="@style/Widget.AppCompat.Spinner.Underlined"
                             android:layout_width="120dp"
-                            android:layout_height="wrap_content"
+                            android:layout_height="?android:attr/listPreferredItemHeight"
                             android:layout_gravity="center"
                             android:layout_marginLeft="54dp"
                             android:entries="@array/hvac_stage_selector"
@@ -1140,7 +1160,7 @@
                             android:id="@+id/ahuAnalog4MaxCooling"
                             style="@style/Widget.AppCompat.Spinner.Underlined"
                             android:layout_width="120dp"
-                            android:layout_height="wrap_content"
+                            android:layout_height="?android:attr/listPreferredItemHeight"
                             android:layout_gravity="center"
                             android:layout_marginRight="54dp"
                             android:entries="@array/hvac_stage_selector"
@@ -1174,7 +1194,7 @@
                             android:id="@+id/ahuAnalog4MinHeating"
                             style="@style/Widget.AppCompat.Spinner.Underlined"
                             android:layout_width="120dp"
-                            android:layout_height="wrap_content"
+                            android:layout_height="?android:attr/listPreferredItemHeight"
                             android:layout_gravity="center"
                             android:layout_marginLeft="54dp"
                             android:entries="@array/hvac_stage_selector"
@@ -1202,7 +1222,7 @@
                             android:id="@+id/ahuAnalog4MaxHeating"
                             style="@style/Widget.AppCompat.Spinner.Underlined"
                             android:layout_width="120dp"
-                            android:layout_height="wrap_content"
+                            android:layout_height="?android:attr/listPreferredItemHeight"
                             android:layout_gravity="center"
                             android:layout_marginRight="54dp"
                             android:entries="@array/hvac_stage_selector"

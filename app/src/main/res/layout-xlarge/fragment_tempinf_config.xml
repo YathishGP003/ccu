@@ -61,7 +61,7 @@
                 <Spinner
                     android:id="@+id/zonePriority"
                     android:layout_width="160dp"
-                    android:layout_height="40dp"
+                    android:layout_height="?android:attr/listPreferredItemHeight"
                     android:layout_alignParentRight="true"
                     style="@style/Widget.AppCompat.Spinner.Underlined"
                     android:entries="@array/hvac_stage_selector"

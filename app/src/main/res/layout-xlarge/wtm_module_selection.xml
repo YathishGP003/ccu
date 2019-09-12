@@ -77,7 +77,7 @@
                 <RelativeLayout
                     android:id="@+id/rl_tempmonitor"
                     android:layout_width="match_parent"
-                    android:layout_height="92dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginLeft="180dp">
 
                     <LinearLayout
@@ -99,6 +99,7 @@
                             android:id="@+id/textTempMonitordesc"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginBottom="12dp"
                             android:text="@string/desc_tempmonitor"
                             android:textAppearance="@style/text_label"/>
 
@@ -122,7 +123,7 @@
                 <RelativeLayout
                     android:id="@+id/rl_tempinf"
                     android:layout_width="match_parent"
-                    android:layout_height="92dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginLeft="180dp">
 
                     <LinearLayout
@@ -130,6 +131,7 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentRight="true"
                         android:layout_marginRight="190dp"
+                        android:layout_marginTop="6dp"
                         android:layout_centerVertical="true"
                         android:orientation="vertical">
                         <TextView
@@ -146,6 +148,7 @@
                             android:layout_height="wrap_content"
                             android:text="@string/desc_tempinfluence"
                             android:gravity="right|center_vertical"
+                            android:layout_marginBottom="12dp"
                             android:textAppearance="@style/text_label"/>
 
                     </LinearLayout>

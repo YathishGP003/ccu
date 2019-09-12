@@ -304,6 +304,7 @@ public class AlertProcessor
     }
     
     public void updateCustomAlertDefinitions(List<AlertDefinition> aList) {
+        
         Iterator iterator = customAlerts.iterator();
         for (AlertDefinition d : aList) {
             while(iterator.hasNext()) {

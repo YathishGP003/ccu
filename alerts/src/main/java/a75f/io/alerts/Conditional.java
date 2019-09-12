@@ -63,8 +63,17 @@ public class Conditional
         if (key.isEmpty() || value.isEmpty() || condition.isEmpty()) {
             throw new IllegalArgumentException("Invalid Conditional");
         }
+    
+        if (grpOperation == null || grpOperation.equals("")) {
         
-        if (grpOperation.contains("equip")) {
+            resVal = CCUHsApi.getInstance().readHisValByQuery(key);
+            if (!isNumeric(value)) {
+                value = String.valueOf(CCUHsApi.getInstance().read(value));
+            }
+            Expression expression = new Expression(resVal + " " + condition + " " + value);
+            status = expression.eval().intValue() > 0;
+            
+        } else if (grpOperation.contains("equip")) {
             pointValList = null;
             pointList = new ArrayList<>();
             ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("zone and equip");
@@ -163,14 +172,6 @@ public class Conditional
                 Expression expression = new Expression(resVal + " " + condition + " " + value);
                 status = expression.eval().intValue() > 0;
                 
-            } else if (grpOperation.equals("") || grpOperation == null) {
-                
-                resVal = CCUHsApi.getInstance().readHisValByQuery(key);
-                if (!isNumeric(value)) {
-                    value = String.valueOf(CCUHsApi.getInstance().read(value));
-                }
-                Expression expression = new Expression(resVal + " " + condition + " " + value);
-                status = expression.eval().intValue() > 0;
             }
         }
     

@@ -10,12 +10,14 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 
 import a75f.io.alerts.AlertDefinition;
 import a75f.io.alerts.AlertManager;
 import a75f.io.alerts.HttpUtil;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
+import a75f.io.logic.L;
 
 public class AlertDefinitionHandler
 {
@@ -24,8 +26,6 @@ public class AlertDefinitionHandler
     public static void handleMessage(JsonObject msgObject)
     {
         String alertGUID = msgObject.get("alert_def_id").getAsString();
-        CcuLog.d("CCU_PUBNUB"," alertGUID "+alertGUID);
-        
         ArrayList<AlertDefinition> alertList = null;
         try
         {
@@ -34,15 +34,21 @@ public class AlertDefinitionHandler
     
             String alertDef = HttpUtil.sendRequest(Globals.getInstance().getApplicationContext(),
                                     "readDef", postData.toString());//getAlertJson(alertGUID);
-            CcuLog.d("CCU_PUBNUB"," alertDef "+alertDef);
+            CcuLog.d(L.TAG_CCU_PUBNUB," alertDef "+alertDef);
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
             AlertDefinition[] pojos = objectMapper.readValue(alertDef, AlertDefinition[].class);
             alertList = new ArrayList<>(Arrays.asList(pojos));
-            
-            for(AlertDefinition d : alertList) {
-                CcuLog.d("CCU_PUBNUB","alertDef Parsed "+d.toString());
+    
+            Iterator iterator = alertList.iterator();
+            while(iterator.hasNext())
+            {
+                AlertDefinition a = (AlertDefinition) iterator.next();
+                if (a.validate() == false) {
+                    CcuLog.d(L.TAG_CCU_PUBNUB, " Invalid Alert Definition "+a.toString());
+                    iterator.remove();
+                }
             }
             if (alertList.size() > 0)
             {
@@ -51,7 +57,7 @@ public class AlertDefinitionHandler
         }
         catch (Exception e)
         {
-            CcuLog.d("CCU_PUBNUB","alertDef Parse Failed "+e.getMessage());
+            CcuLog.d(L.TAG_CCU_PUBNUB,"alertDef Parse Failed "+e.getMessage());
             e.printStackTrace();
         }
         

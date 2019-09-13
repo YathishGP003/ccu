@@ -559,6 +559,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         double coolLowerlimit = 0;
         double heatUpperlimit = 0;
         double heatLowerlimit = 0;
+        double buildingLimitMax =  TunerUtil.readTunerValByQuery("building and limit and max", L.ccu().systemProfile.getSystemEquipRef());
+        double buildingLimitMin =  TunerUtil.readTunerValByQuery("building and limit and min", L.ccu().systemProfile.getSystemEquipRef());
+
+        double tempDeadLeeway = TunerUtil.readTunerValByQuery("temp and dead and leeway",L.ccu().systemProfile.getSystemEquipRef());
 
         for(int i=0;i<zoneMap.size();i++)
         {
@@ -580,8 +584,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             {
                 coolDeadband = coolDB;
             }
-            if(avgTemp > 0)
-            {
+            if ((avgTemp < (buildingLimitMax + tempDeadLeeway)) && (avgTemp > (buildingLimitMin - tempDeadLeeway))) {
                 currentAverageTemp = (currentAverageTemp + avgTemp);
             }else{
                 noTempSensor++;

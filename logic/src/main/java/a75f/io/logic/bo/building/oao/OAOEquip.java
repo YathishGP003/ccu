@@ -329,7 +329,7 @@ public class OAOEquip
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
         String siteDis = (String) siteMap.get("dis");
-        String equipDis = siteDis + "-DAB-" + nodeAddr;
+        String equipDis = siteDis + "-OAO-" + nodeAddr;
         String tz = siteMap.get("tz").toString();
         Point outsideDamperAtMinDrive  = new Point.Builder().setDisplayName(equipDis + "-outsideDamperAtMinDrive")
                                                .setEquipRef(equipRef)

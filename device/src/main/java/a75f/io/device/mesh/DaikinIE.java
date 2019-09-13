@@ -12,19 +12,36 @@ import java.net.URL;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemProfile;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
+import a75f.io.logic.jobs.ScheduleProcessJob;
 
 public class DaikinIE
 {
     public static final String DAIKIN_IE_CLG_URL = "http://%s:8080/BN/MT3/AV/DATClgSetpoint/Present_Value?access-token=12345678";
     public static final String DAIKIN_IE_HTG_URL = "http://%s:8080/BN/MT3/AV/DATHtgSetpoint/Present_Value?access-token=12345678";
     public static final String DAIKIN_IE_SP_URL = "http://%s:8080/BN/MT3/AV/DSPSpt/Present_Value?access-token=12345678";
+    public static final String DAIKIN_IE_HUMIDITY_SP_URL = "http://%s:8080/BN/MT3/AV/HumiditySpt/Present_Value?access-token=12345678";
+    public static final String DAIKIN_IE_HUMIDITY_IN_URL = "http://%s:8080/BN/MT3/AV/SpaceRHNetIn/Present_Value?access-token=12345678";
+    public static final String DAIKIN_IE_OAMIN_URL = "http://%s:8080/BN/MT3/AV/Net_OAMinPos/Present_Value?access-token=12345678";
+    public static final String DAIKIN_IE_OCCMODE_URL = "http://%s:8080/BN/MT3/MV/OccMode/Present_Value?access-token=12345678";
+    public static final String DAIKIN_IE_APPMODE_URL = "http://%s:8080/BN/MT3/MI/NetApplicMode/Present_Value?access-token=12345678";
+    public static final String DAIKIN_IE_HUMIDITY_MODE_URL = "http://%s:8080/BN/MT3/MI/HumidityCtrl/Present_Value?access-token=12345678";
     public static final String DAIKIN_IE_MSG_BODY = "<requests>\n<request>\n%f\n</request>\n</requests>";
+    
+    enum OccMode {Occ, Unocc, tntOvrd, Auto, UnInit}
+    enum NetApplicMode {Null, Off, HeatOnly, CoolOnly, FanOnly, Auto, Invalid, UnInit}
+    enum HumidityCtrl {None,RelHum,DewPt,Always, UnInit}
+    
+    static OccMode occMode = OccMode.UnInit;
+    static NetApplicMode appMode = NetApplicMode.UnInit;
+    static HumidityCtrl humCtrl = HumidityCtrl.UnInit;
     
     public static void sendControl() {
         Log.d("DAIKIN_IE"," sendDaikinControl :");
+        
         new Thread()
         {
             @Override
@@ -36,9 +53,66 @@ public class DaikinIE
                     return;
                 }
                 sendCoolingDATAutoControl(String.format(DAIKIN_IE_CLG_URL, eqIp));
-                //sendCoolingDAT(String.format(DAIKIN_IE_CLG_URL, eqIp));
-                //sendHeatingDAT(String.format(DAIKIN_IE_HTG_URL, eqIp));
-                sendStaticPressure(String.format(DAIKIN_IE_SP_URL, eqIp));
+                
+                VavIERtu systemProfile = (VavIERtu) L.ccu().systemProfile;
+                
+                if (systemProfile.getConfigEnabled("analog2") > 0)
+                {
+                    sendStaticPressure(String.format(DAIKIN_IE_SP_URL, eqIp));
+                }
+                
+                if (L.ccu().oaoProfile != null) {
+                    double oaMin = CCUHsApi.getInstance().readHisValByQuery("point and his and outside and air and damper and cmd");
+                    send(String.format(DAIKIN_IE_OAMIN_URL, eqIp), String.format(DAIKIN_IE_MSG_BODY, oaMin));
+                }
+                
+                if (systemProfile.getConfigEnabled("humidification") > 0) {
+                    if (humCtrl != HumidityCtrl.RelHum)
+                    {
+                        send(String.format(DAIKIN_IE_HUMIDITY_MODE_URL, getIEUrl()), String.format(DAIKIN_IE_MSG_BODY, HumidityCtrl.RelHum.ordinal() ));
+                        humCtrl = HumidityCtrl.RelHum;
+                    }
+                    send(String.format(DAIKIN_IE_HUMIDITY_IN_URL, getIEUrl()), String.format(DAIKIN_IE_MSG_BODY,
+                                                                systemProfile.getSystemController().getAverageSystemHumidity()));
+                } else {
+                    if (humCtrl != HumidityCtrl.None)
+                    {
+                        send(String.format(DAIKIN_IE_HUMIDITY_MODE_URL, getIEUrl()), String.format(DAIKIN_IE_MSG_BODY, HumidityCtrl.None.ordinal() ));
+                        humCtrl = HumidityCtrl.None;
+                    }
+                }
+    
+                if (ScheduleProcessJob.getSystemOccupancy() == Occupancy.OCCUPIED
+                    || ScheduleProcessJob.getSystemOccupancy() == Occupancy.FORCED_OCCUPIED
+                    || ScheduleProcessJob.getSystemOccupancy() == Occupancy.PRECONDITIONING
+                    || ScheduleProcessJob.getSystemOccupancy() == Occupancy.OCCUPANCY_SENSING
+                    || systemProfile.getSystemController().getSystemState() != SystemController.State.OFF) {
+                    if (occMode != OccMode.Occ)
+                    {
+                        send(String.format(DAIKIN_IE_OCCMODE_URL, eqIp), String.format(DAIKIN_IE_MSG_BODY, OccMode.Occ.ordinal()));
+                        occMode = OccMode.Occ;
+                    }
+                } else {
+                    if (occMode != OccMode.Unocc)
+                    {
+                        send(String.format(DAIKIN_IE_OCCMODE_URL, eqIp), String.format(DAIKIN_IE_MSG_BODY, OccMode.Unocc.ordinal()));
+                        occMode = OccMode.Unocc;
+                    }
+                }
+                
+                if (systemProfile.getSystemController().getSystemState() != SystemController.State.OFF) {
+                    if (appMode != NetApplicMode.Auto)
+                    {
+                        send(String.format(DAIKIN_IE_APPMODE_URL, eqIp), String.format(DAIKIN_IE_MSG_BODY, NetApplicMode.Auto.ordinal()));
+                    }
+                } else {
+                    if (appMode != NetApplicMode.FanOnly)
+                    {
+                        send(String.format(DAIKIN_IE_APPMODE_URL, eqIp), String.format(DAIKIN_IE_MSG_BODY, NetApplicMode.FanOnly.ordinal()));
+                    }
+                }
+                
+                
             }
         }.start();
     }
@@ -79,8 +153,8 @@ public class DaikinIE
     }
     
     
-    private static void sendStaticPressure(String url) {
-        send(url, String.format(DAIKIN_IE_MSG_BODY, inchToPascal(L.ccu().systemProfile.getCmd("staticPressure"))));
+    public static void sendStaticPressure(String url) {
+        send(url, String.format(DAIKIN_IE_MSG_BODY, inchToPascal(L.ccu().systemProfile.getCmd("fan"))));
     }
     
     public static void sendCoolingDATAutoControl(final Double val){
@@ -88,8 +162,16 @@ public class DaikinIE
     }
     
     
-    private static void sendStaticPressure(final Double val) {
-        sendAsync(String.format(DAIKIN_IE_SP_URL, getIEUrl()), String.format(DAIKIN_IE_MSG_BODY, val));
+    public static void sendStaticPressure(final Double val) {
+        sendAsync(String.format(DAIKIN_IE_SP_URL, getIEUrl()), String.format(DAIKIN_IE_MSG_BODY, inchToPascal(val)));
+    }
+    
+    public static void sendHumidityInput(final Double val) {
+        sendAsync(String.format(DAIKIN_IE_HUMIDITY_IN_URL, getIEUrl()), String.format(DAIKIN_IE_MSG_BODY, val));
+    }
+    
+    public static void sendOAMinPos(final Double val) {
+        sendAsync(String.format(DAIKIN_IE_OAMIN_URL, getIEUrl()), String.format(DAIKIN_IE_MSG_BODY, val));
     }
     
     public static void send(final String urlString,final String data) {

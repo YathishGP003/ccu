@@ -83,6 +83,15 @@ public class DaikinIE
         send(url, String.format(DAIKIN_IE_MSG_BODY, inchToPascal(L.ccu().systemProfile.getCmd("staticPressure"))));
     }
     
+    public static void sendCoolingDATAutoControl(final Double val){
+        sendAsync(String.format(DAIKIN_IE_CLG_URL, getIEUrl()), String.format(DAIKIN_IE_MSG_BODY, fahrenheitToCelsius(val)));
+    }
+    
+    
+    private static void sendStaticPressure(final Double val) {
+        sendAsync(String.format(DAIKIN_IE_SP_URL, getIEUrl()), String.format(DAIKIN_IE_MSG_BODY, val));
+    }
+    
     public static void send(final String urlString,final String data) {
         try
         {
@@ -111,6 +120,44 @@ public class DaikinIE
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    
+    public static void sendAsync(final String urlString,final String data) {
+        new Thread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                try
+                {
+                    Log.d("CCU_DAIKIN", urlString + "\n data: \n" + data);
+                    URL url = new URL(urlString);
+                    HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
+                    httpCon.setDoOutput(true);
+                    httpCon.setRequestMethod("PUT");
+                    httpCon.setRequestProperty("Content-Type", "text/plain");
+                    httpCon.setRequestProperty("Authorization", "Bearer=11021962");
+        
+                    OutputStreamWriter out = new OutputStreamWriter(httpCon.getOutputStream());
+                    out.write(data);
+                    out.close();
+        
+                    StringBuilder sb = new StringBuilder();
+                    BufferedReader br = new BufferedReader(new InputStreamReader((httpCon.getInputStream())));
+                    String output;
+                    while ((output = br.readLine()) != null)
+                    {
+                        sb.append(output);
+                    }
+                    Log.d("DAIKIN_IE", " response \n" + sb.toString());
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+       
     }
     
     public static double fahrenheitToCelsius(double T) {

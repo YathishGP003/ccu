@@ -102,12 +102,14 @@ public class AlertDefinition
         for (int i = 0; i < conditionals.size() ; i++) {
             Conditional c = conditionals.get(i);
             if ((i%2 == 0 && c.operator != null) || (i%2 != 0 && c.operator == null)) {
-                logValidatation("Operator not allowed"+c.toString());
+                logValidatation("Operator not allowed "+c.toString());
+                return false;
             }
             if (!c.grpOperation.equals("") && !c.grpOperation.equals("equip") && !c.grpOperation.equals("average")
                         && !c.grpOperation.contains("top") && !c.grpOperation.contains("bottom")
                         && !c.grpOperation.contains("min") && !c.grpOperation.contains("max")) {
                 logValidatation("grpOperator not supported "+c.grpOperation);
+                return false;
             }
         }
         return true;

@@ -65,13 +65,14 @@
                         android:paddingRight="14dp"
                         android:textSize="@dimen/text_small_xlarge"
                         android:layout_gravity="center_vertical"
-                        android:text="  Cooling (Analog 1)" />
+                        android:text="  Cooling " />
 
                     <Spinner
                         android:id="@+id/analog1RTUSelector"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center"/>
+                        android:layout_gravity="center"
+                        android:visibility="invisible"/>
 
                     <Spinner
                         android:id="@+id/analog1RTUTest"
@@ -95,13 +96,14 @@
                         android:paddingRight="14dp"
                         android:textSize="@dimen/text_small_xlarge"
                         android:layout_gravity="center_vertical"
-                        android:text="  Fan (Analog 2)" />
+                        android:text="  Fan " />
 
                     <Spinner
                         android:id="@+id/analog2RTUSelector"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical|center" />
+                        android:layout_gravity="center_vertical|center"
+                        android:visibility="invisible"/>
 
                     <Spinner
                         android:id="@+id/analog2RTUTest"
@@ -125,17 +127,77 @@
                         android:paddingRight="14dp"
                         android:textSize="@dimen/text_small_xlarge"
                         android:layout_gravity="center_vertical"
-                        android:text="  Heating (Analog 3)" />
+                        android:text="  Heating " />
 
                     <Spinner
                         android:id="@+id/analog3RTUSelector"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-
-                        android:layout_gravity="center"/>
+                        android:layout_gravity="center"
+                        android:visibility="invisible"/>
 
                     <Spinner
                         android:id="@+id/analog3RTUTest"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right" />
+
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/humidification"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginBottom="15dp">
+
+                    <CheckBox
+                        android:id="@+id/humidificationCb"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingRight="14dp"
+                        android:textSize="@dimen/text_small_xlarge"
+                        android:layout_gravity="center_vertical"
+                        android:text="  Humidification " />
+
+                    <Spinner
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:visibility="invisible"/>
+
+                    <Spinner
+                        android:id="@+id/humidificationTest"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right" />
+
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/oaMin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginBottom="15dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingRight="14dp"
+                        android:textSize="@dimen/text_small_xlarge"
+                        android:layout_gravity="center_vertical"
+                        android:textColor="@color/black"
+                        android:text="  OA Minimum " />
+
+                    <Spinner
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:visibility="invisible"/>
+
+                    <Spinner
+                        android:id="@+id/oaMinTest"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="right" />

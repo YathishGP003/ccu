@@ -7,10 +7,12 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
+import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
+import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
 
 /*
@@ -87,18 +89,20 @@ public class OAOProfile
     
         Log.d(L.TAG_CCU_OAO,"outsideAirLoopOutput "+outsideAirLoopOutput+" outsideDamperMatTarget "+outsideDamperMatTarget+" outsideDamperMatMin "+outsideDamperMatMin
                             +" matTemp "+matTemp);
-        
-        if (matTemp < outsideDamperMatTarget && matTemp > outsideDamperMatMin) {
-            outsideAirFinalLoopOutput = outsideAirLoopOutput -
-                                        outsideAirLoopOutput * ((outsideDamperMatTarget - matTemp)/(outsideDamperMatTarget - outsideDamperMatMin));
-        } else if (matTemp < outsideDamperMatMin){
-            outsideAirFinalLoopOutput = 0;
+        if (outsideAirLoopOutput > 0) {
+            if (matTemp < outsideDamperMatTarget && matTemp > outsideDamperMatMin)
+            {
+                outsideAirFinalLoopOutput = outsideAirLoopOutput - outsideAirLoopOutput * ((outsideDamperMatTarget - matTemp) / (outsideDamperMatTarget - outsideDamperMatMin));
+            }
+            else if (matTemp < outsideDamperMatMin)
+            {
+                outsideAirFinalLoopOutput = 0;
+            }
+            outsideAirFinalLoopOutput = Math.max(outsideAirFinalLoopOutput , 0);
+            outsideAirFinalLoopOutput = Math.min(outsideAirFinalLoopOutput , 100);
         } else {
             outsideAirFinalLoopOutput = outsideAirLoopOutput;
         }
-        
-        outsideAirFinalLoopOutput = Math.max(outsideAirFinalLoopOutput , 0);
-        outsideAirFinalLoopOutput = Math.min(outsideAirFinalLoopOutput , 100);
         
         returnAirFinalOutput = 100 - outsideAirFinalLoopOutput;
     
@@ -214,6 +218,10 @@ public class OAOProfile
     
         double outsideDamperMinOpen = oaoEquip.getConfigNumVal("oao and outside and damper and min and open");
         outsideAirCalculatedMinDamper = outsideDamperMinOpen + dcvCalculatedMinDamper;
+        if (ScheduleProcessJob.getSystemOccupancy() == Occupancy.UNOCCUPIED || ScheduleProcessJob.getSystemOccupancy() == Occupancy.VACATION) {
+            outsideAirCalculatedMinDamper = 0;
+            Log.d(L.TAG_CCU_OAO,"System Unoccupied, Disable DCV ");
+        }
         oaoEquip.setHisVal("outside and air and calculated and min and damper", outsideAirCalculatedMinDamper);
     }
     

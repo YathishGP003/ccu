@@ -74,6 +74,7 @@ public class VavReheatProfile extends VavProfile
                     vavDevice.setDamperPos(damperPos);
                     vavDevice.setNormalizedDamperPos(damperPos);
                     vavDevice.setReheatPos(0);
+                    CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + node + "\"", (double)TEMP_DEAD.ordinal());
                 }
                 continue;
             }

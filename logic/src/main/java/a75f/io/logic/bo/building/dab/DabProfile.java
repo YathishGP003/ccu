@@ -115,6 +115,7 @@ public class DabProfile extends ZoneProfile
                 dabEquip.setDamperPos(damperPos, "secondary");
                 dabEquip.setNormalizedDamperPos(damperPos, "primary");
                 dabEquip.setNormalizedDamperPos(damperPos, "secondary");
+                CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + dabEquip.nodeAddr + "\"", (double)TEMP_DEAD.ordinal());
             }
             return;
         }

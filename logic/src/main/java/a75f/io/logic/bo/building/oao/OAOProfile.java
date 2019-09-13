@@ -90,19 +90,17 @@ public class OAOProfile
         Log.d(L.TAG_CCU_OAO,"outsideAirLoopOutput "+outsideAirLoopOutput+" outsideDamperMatTarget "+outsideDamperMatTarget+" outsideDamperMatMin "+outsideDamperMatMin
                             +" matTemp "+matTemp);
         if (outsideAirLoopOutput > 0) {
-            if (matTemp < outsideDamperMatTarget && matTemp > outsideDamperMatMin)
-            {
+            if (matTemp < outsideDamperMatTarget && matTemp > outsideDamperMatMin) {
                 outsideAirFinalLoopOutput = outsideAirLoopOutput - outsideAirLoopOutput * ((outsideDamperMatTarget - matTemp) / (outsideDamperMatTarget - outsideDamperMatMin));
             }
-            else if (matTemp < outsideDamperMatMin)
-            {
-                outsideAirFinalLoopOutput = 0;
+            else {
+                outsideAirFinalLoopOutput = matTemp < outsideDamperMatMin ? 0 : outsideAirLoopOutput;
             }
-            outsideAirFinalLoopOutput = Math.max(outsideAirFinalLoopOutput , 0);
-            outsideAirFinalLoopOutput = Math.min(outsideAirFinalLoopOutput , 100);
         } else {
             outsideAirFinalLoopOutput = outsideAirLoopOutput;
         }
+        outsideAirFinalLoopOutput = Math.max(outsideAirFinalLoopOutput , 0);
+        outsideAirFinalLoopOutput = Math.min(outsideAirFinalLoopOutput , 100);
         
         returnAirFinalOutput = 100 - outsideAirFinalLoopOutput;
     
@@ -178,7 +176,9 @@ public class OAOProfile
             
             setEconomizingAvailable(true);
             if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_ANALOG_RTU ||
-                                L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_ANALOG_RTU) {
+                                L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_ANALOG_RTU ||
+                                L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_IE_RTU
+            ) {
                 economizingLoopOutput = Math.min(L.ccu().systemProfile.getCoolingLoopOp() * 100 / economizingToMainCoolingLoopMap ,100);
             }else if (L.ccu().systemProfile instanceof VavStagedRtu) {
                 //VavStagedProfile

@@ -83,7 +83,7 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
             analog1Cb.setChecked(systemProfile.getConfigEnabled("analog1") > 0);
             analog2Cb.setChecked(systemProfile.getConfigEnabled("analog2") > 0);
             analog3Cb.setChecked(systemProfile.getConfigEnabled("analog3") > 0);
-            
+            humidificationCb.setChecked(systemProfile.getConfigEnabled("humidification") > 0);
             setupAnalogLimitSelectors();
             setupEquipAddrEditor();
             
@@ -126,6 +126,7 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         analog1Cb.setOnCheckedChangeListener(this);
         analog2Cb.setOnCheckedChangeListener(this);
         analog3Cb.setOnCheckedChangeListener(this);
+        humidificationCb.setOnCheckedChangeListener(this);
     }
     
     public void setupEquipAddrEditor() {
@@ -299,10 +300,16 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
                 DaikinIE.sendCoolingDATAutoControl(val);
                 break;
             case R.id.analog2RTUTest:
+                DaikinIE.sendStaticPressure(val);
+                break;
             case R.id.analog3Spinner:
+                DaikinIE.sendCoolingDATAutoControl(val);
+                break;
             case R.id.humidificationTest:
+                DaikinIE.sendHumidityInput(val);
+                break;
             case R.id.oaMinTest:
-                sendAnalogOutTestSignal(val);
+                DaikinIE.sendOAMinPos(val);
                 break;
         }
     }
@@ -388,10 +395,4 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
             setUserIntentBackground("rtu and mode", SystemMode.OFF.ordinal());
         }
     }
-    
-    public void sendAnalogOutTestSignal(double val) {
-        
-    
-    }
-    
 }

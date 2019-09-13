@@ -15,6 +15,8 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.ToggleButton;
 
@@ -158,6 +160,12 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
                 goTonext();
             }
         });
+
+        if (getResources().getDisplayMetrics().xdpi == (float)149.824){
+            RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(255,475);
+            lp.setMargins(0, 62, 0, 0);
+            imageView.setLayoutParams(lp);
+        }
     }
 
     private void goTonext() {

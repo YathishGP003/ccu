@@ -14,6 +14,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.ToggleButton;
 
@@ -60,6 +62,8 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
 
     @BindView(R.id.relay3Test) ToggleButton relay3Test;
     @BindView(R.id.relay7Test) ToggleButton relay7Test;
+    @BindView(R.id.imageRTUInput)
+    ImageView imageView;
 
     Prefs prefs;
     @BindView(R.id.buttonNext)
@@ -151,6 +155,12 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
                 goTonext();
             }
         });
+
+        if (getResources().getDisplayMetrics().xdpi == (float)149.824){
+            RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(248,325);
+            lp.setMargins(0, 38, 0, 0);
+            imageView.setLayoutParams(lp);
+        }
 
     }
 

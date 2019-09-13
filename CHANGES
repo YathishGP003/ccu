@@ -1,4 +1,5 @@
- - Merge branch 'renatus_dev_sam' into 'master'
- - Daikin IE Profile
- - handle alert definition without grpOperation
- - resolves RENATUS-686
+ - Merge branch 'kumar_renatus' into 'master'
+ - #RENATUS-687, system occupancy status should be based on dab or vav
+ - #RENATUS-680, Weather temp mismatch
+ - #RENATUS-691, zone dead should be excluded in avg
+ - #RENATUS-689, clubbing TI modules with others shouldnt happen

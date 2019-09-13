@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.HashMap;
 import java.util.Set;
+
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
@@ -13,7 +14,6 @@ import a75f.io.api.haystack.Occupied;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.Occupancy;
-import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.ZoneTempState;
@@ -29,6 +29,7 @@ import a75f.io.logic.tuners.TunerUtil;
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
+import static a75f.io.logic.bo.building.ZoneState.TEMP_DEAD;
 import static a75f.io.logic.bo.building.definitions.StandaloneFanSpeed.OFF;
 
 public class ConventionalUnitProfile extends ZoneProfile {
@@ -102,6 +103,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
                     CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"", "Zone Temp Dead");
                 }
 				Log.d(TAG,"Invalid Temp , skip controls update for "+node+" roomTemp : "+cpuDeviceMap.get(node).getCurrentTemp());
+                CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + node + "\"", (double)TEMP_DEAD.ordinal());
                 continue;
             }
 			setTempCooling = cpuDevice.getDesiredTempCooling();

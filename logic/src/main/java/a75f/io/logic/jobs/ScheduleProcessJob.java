@@ -339,7 +339,7 @@ public class ScheduleProcessJob extends BaseJob {
                     cachedOccupied.getCurrentlyOccupiedSchedule().getEtmm());
         }
         else {
-            long th = getTemporaryHoldExpiry(zoneId);
+            long th = getTemporaryHoldExpiry(equip);
             if (th > 0) {
                 DateTime et = new DateTime(th);
                 int min = et.getMinuteOfHour();
@@ -1065,7 +1065,7 @@ public class ScheduleProcessJob extends BaseJob {
         if (cachedOccupied != null && cachedOccupied.isOccupied())
         {
             c = OCCUPIED;
-        } else if (getTemporaryHoldExpiry(equip.getRoomRef()) > 0){
+        } else if (getTemporaryHoldExpiry(equip) > 0){
             c = FORCED_OCCUPIED;
         }else if((cachedOccupied != null) && cachedOccupied.getVacation() != null) {
             c = VACATION;
@@ -1350,8 +1350,11 @@ public class ScheduleProcessJob extends BaseJob {
         {
             for (Zone z : HSUtil.getZones(f.getId()))
             {
-                if (getTemporaryHoldExpiry(z.getId()) > thExpiry) {
-                    thExpiry = getTemporaryHoldExpiry(z.getId());
+                Equip q = HSUtil.getEquipFromZone(z.getId());
+                if(q.getMarkers().contains("dab") || q.getMarkers().contains("vav" ) || q.getMarkers().contains("ti")) {
+                    if (getTemporaryHoldExpiry(q) > thExpiry) {
+                        thExpiry = getTemporaryHoldExpiry(q);
+                    }
                 }
             }
         }
@@ -1364,9 +1367,9 @@ public class ScheduleProcessJob extends BaseJob {
         return thExpiry;
     }
     
-    public static long getTemporaryHoldExpiry(String zoneRef) {
+    public static long getTemporaryHoldExpiry(Equip q) {
         
-        Equip q = HSUtil.getEquipFromZone(zoneRef);
+        //Equip q = HSUtil.getEquipFromZone(zoneRef);
         
         HashMap coolDT = CCUHsApi.getInstance().read("point and desired and cooling and temp and equipRef == \""+q.getId()+"\"");
         if (coolDT.size() > 0) {

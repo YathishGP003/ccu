@@ -122,7 +122,12 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
         if(isCazExists){
             removeDialogFragment(ID);
             Toast.makeText(getContext(),"CCU As Zone temperature influence is already enabled",Toast.LENGTH_LONG).show();
-        }else {
+        }else if(misPaired){
+            removeDialogFragment(ID);
+            Toast.makeText(getContext(),"Temperature Influence profile cannot be paired with already paired modules",Toast.LENGTH_LONG).show();
+
+        }
+        else {
             //For CCU we have it as start address  ending with 99
             String ccuAddr = String.valueOf(mNodeAddress).substring(0, 2).concat("99");
             DialogCCUProfiling ccuProfiling = DialogCCUProfiling.newInstance(Short.parseShort(ccuAddr), mRoomName, mFloorName);

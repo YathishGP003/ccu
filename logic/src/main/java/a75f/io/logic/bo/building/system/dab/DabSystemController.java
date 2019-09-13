@@ -414,10 +414,13 @@ public class DabSystemController extends SystemController
         
         for (HashMap q : dabEquips)
         {
-            double tempVal = hayStack.readHisValByQuery("point and air and temp and sensor and current and equipRef == \""+q.get("id")+"\"");
-            if (!isZoneDead(new Equip.Builder().setHashMap(q).build()) && tempVal > 0) {
-                tempSum += tempVal;
-                tempZones++;
+            Equip equip = new Equip.Builder().setHashMap(q).build();
+            if(equip.getMarkers().contains("dab") || equip.getMarkers().contains("ti")) {
+                double tempVal = hayStack.readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" + q.get("id") + "\"");
+                if (!isZoneDead(equip) && tempVal > 0) {
+                    tempSum += tempVal;
+                    tempZones++;
+                }
             }
         }
         averageSystemTemperature = tempZones == 0 ? 0 : tempSum/tempZones;

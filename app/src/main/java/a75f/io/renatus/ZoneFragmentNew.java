@@ -379,11 +379,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
     public void UpdateWeatherData() {
         if (WeatherDataDownloadService.getMinTemperature() != 0.0 && WeatherDataDownloadService.getMaxTemperature() != 0.0) {
-            temperature.setText(String.format("%.0f", WeatherDataDownloadService.getTemperature()));
+
+            temperature.setText(String.format("%.0f", CCUHsApi.getInstance().getExternalTemp()/*WeatherDataDownloadService.getTemperature()*/));
             maxmintemp.setText(String.format("%.0f", WeatherDataDownloadService.getMaxTemperature()) + "\n" + String.format("%.0f", WeatherDataDownloadService.getMinTemperature()));
             DecimalFormat df = new DecimalFormat("#.##");
             double weatherPercipitation = WeatherDataDownloadService.getPrecipitation();
-            double weatherHumidity = WeatherDataDownloadService.getHumidity();
+            double weatherHumidity = CCUHsApi.getInstance().getExternalHumidity() /*WeatherDataDownloadService.getHumidity()*/;
             weatherHumidity = weatherHumidity * 100;
             weatherPercipitation = Double.valueOf(df.format(weatherPercipitation));
             note.setText("Humidity : "+weatherHumidity+"%"+"\n"+"Precipitation : "+weatherPercipitation);

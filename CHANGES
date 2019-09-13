@@ -1,0 +1,4 @@
+ - Merge branch 'renatus_dev_sam' into 'master'
+ - Daikin IE Profile
+ - handle alert definition without grpOperation
+ - resolves RENATUS-686

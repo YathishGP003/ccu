@@ -14,7 +14,10 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import android.widget.NumberPicker;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import java.lang.reflect.Field;
@@ -63,6 +66,11 @@ public class Fragment4PipeFanCoilUnitConfig extends BaseDialogFragment implement
     @BindView(R.id.test2pfcuRelay4)ToggleButton testAuxHeating;
     ToggleButton switchCoolingWaterValve;
     @BindView(R.id.test2pfcuRelay6)ToggleButton testWaterValve;
+    @BindView(R.id.textAirflow)TextView textAirflow;
+    @BindView(R.id.text2pfcuWaterValve)
+    TextView text2pfcuWaterValve;
+    @BindView(R.id.lt_enableLabel)
+    LinearLayout ltEnableLabel;
     ToggleButton switchOccSensor;
     ToggleButton switchExtTempSensor;
     Button setButton;
@@ -128,6 +136,21 @@ public class Fragment4PipeFanCoilUnitConfig extends BaseDialogFragment implement
         mNodeType = NodeType.valueOf(getArguments().getString(FragmentCommonBundleArgs.NODE_TYPE));
         mProfileType = ProfileType.values()[getArguments().getInt(FragmentCommonBundleArgs.PROFILE_TYPE)];
         ButterKnife.bind(this, view);
+
+        if (getResources().getDisplayMetrics().xdpi == (float)149.824){
+            RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,RelativeLayout.LayoutParams.WRAP_CONTENT);
+            lp.setMargins(330, 53, 0, 0);
+            ltEnableLabel.setLayoutParams(lp);
+
+            LinearLayout.LayoutParams txtlp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.WRAP_CONTENT);
+            txtlp.setMargins(0, 10, 0, 0);
+            text2pfcuWaterValve.setLayoutParams(txtlp);
+
+            LinearLayout.LayoutParams txtAirlp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,40);
+            txtAirlp.setMargins(0, 50, 0, 0);
+            textAirflow.setLayoutParams(txtAirlp);
+
+        }
         return view;
     }
 

@@ -56,14 +56,14 @@
                 android:textColor="@color/black"
                 android:alpha="0.6"
                 android:fontFamily="@font/lato_regular"
-                android:layout_toRightOf="@+id/textEnable"
-                android:layout_marginLeft="284dp"/>
+                android:layout_toEndOf="@+id/textEnable"
+                android:layout_marginLeft="285dp"/>
 
             <TextView
                 android:id="@+id/textTempOffset"
                 android:layout_width="wrap_content"
                 android:layout_height="24dp"
-                android:layout_marginLeft="145dp"
+                android:layout_marginLeft="115dp"
                 android:layout_toRightOf="@+id/textTestSignal"
                 android:alpha="0.6"
                 android:fontFamily="@font/lato_regular"
@@ -168,7 +168,7 @@
                     android:layout_height="27.42dp"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginTop="72dp"
+                    android:layout_marginTop="75dp"
                     android:background="@drawable/toggle_selector"
                     android:checked="false"
                     android:textOff=""
@@ -201,74 +201,73 @@
 
             <LinearLayout
                 android:id="@+id/lt_enableLabel"
-                android:layout_width="325dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textEnable"
                 android:layout_marginLeft="15dp"
-                android:layout_marginTop="30dp"
+                android:layout_marginTop="25dp"
                 android:layout_toRightOf="@+id/lt_toggles"
                 android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/textFanMed2pfcu"
                     android:layout_width="wrap_content"
-                    android:layout_height="28.5dp"
+                    android:layout_height="40dp"
                     android:text="@string/label_fanmedium"
                     android:textAppearance="@style/text_appearance" />
 
                 <TextView
                     android:id="@+id/textFanHigh2pfcu"
                     android:layout_width="wrap_content"
-                    android:layout_height="28.5dp"
-                    android:layout_marginTop="32dp"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="20dp"
                     android:text="@string/label_fanhigh"
                     android:textAppearance="@style/text_appearance" />
 
                 <TextView
                     android:id="@+id/textFanLow2pfcu"
                     android:layout_width="wrap_content"
-                    android:layout_height="28.5dp"
-                    android:layout_marginTop="33.5dp"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="25dp"
                     android:text="@string/label_fanlow"
                     android:textAppearance="@style/text_appearance" />
 
                 <TextView
                     android:id="@+id/textAuxHeat"
-                    android:layout_width="322dp"
-                    android:layout_height="28.5dp"
-                    android:layout_marginTop="32dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
                     android:text="@string/label_wv_heating"
                     android:textAppearance="@style/text_appearance" />
 
                 <TextView
                     android:id="@+id/text2pfcuWaterValve"
-                    android:layout_width="322dp"
-                    android:layout_height="28.5dp"
-                    android:layout_marginTop="32dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:text="@string/label_wv_cooling"
                     android:textAppearance="@style/text_appearance" />
 
                 <TextView
                     android:id="@+id/textAirflow"
                     android:layout_width="wrap_content"
-                    android:layout_height="28.5dp"
-                    android:layout_marginTop="69dp"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="40dp"
                     android:text="@string/label_airflowtemp"
                     android:textAppearance="@style/text_appearance" />
 
                 <TextView
                     android:id="@+id/textOccupancy"
-                    android:layout_width="322dp"
-                    android:layout_height="28.5dp"
-                    android:layout_marginTop="30dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="20dp"
                     android:text="@string/label_extsensor"
                     android:textAppearance="@style/text_appearance" />
 
                 <TextView
                     android:id="@+id/textExtSensor"
                     android:layout_width="wrap_content"
-                    android:layout_height="28.5dp"
-                    android:layout_marginTop="30dp"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="20dp"
                     android:text="@string/label_enableoccup"
                     android:textAppearance="@style/text_appearance" />
 
@@ -284,6 +283,7 @@
                 android:layout_alignLeft="@+id/textTestSignal"
                 android:layout_alignRight="@+id/textTestSignal"
                 android:layout_below="@+id/textEnable">
+                android:layout_marginStart="30dp"
 
                 <ToggleButton
                     android:id="@+id/test2pfcuRelay1"

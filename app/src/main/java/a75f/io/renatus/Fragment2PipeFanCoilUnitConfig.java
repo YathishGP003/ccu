@@ -14,7 +14,10 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import android.widget.NumberPicker;
+import android.widget.RelativeLayout;
+import android.widget.TableLayout;
 import android.widget.ToggleButton;
 
 import java.lang.reflect.Field;
@@ -63,6 +66,8 @@ public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implement
     @BindView(R.id.test2pfcuRelay4)ToggleButton testAuxHeating;
     ToggleButton switchWaterValve;
     @BindView(R.id.test2pfcuRelay6)ToggleButton testWaterValve;
+    @BindView(R.id.lt_enableLabel)
+    LinearLayout ltEnableLabel;
     ToggleButton switchOccSensor;
     ToggleButton switchExtTempSensor;
     Button setButton;
@@ -128,6 +133,13 @@ public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implement
         mNodeType = NodeType.valueOf(getArguments().getString(FragmentCommonBundleArgs.NODE_TYPE));
         mProfileType = ProfileType.values()[getArguments().getInt(FragmentCommonBundleArgs.PROFILE_TYPE)];
         ButterKnife.bind(this, view);
+
+        if (getResources().getDisplayMetrics().xdpi == (float)149.824){
+            RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,RelativeLayout.LayoutParams.WRAP_CONTENT);
+            lp.setMargins(330, 53, 0, 0);
+            ltEnableLabel.setLayoutParams(lp);
+
+        }
         return view;
     }
 

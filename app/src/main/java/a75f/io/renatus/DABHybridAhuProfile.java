@@ -14,7 +14,11 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.ToggleButton;
 
 import java.util.ArrayList;
@@ -85,6 +89,13 @@ public class DABHybridAhuProfile extends Fragment implements AdapterView.OnItemS
     @BindView(R.id.relay5Test)ToggleButton relay5Test;
     @BindView(R.id.relay6Test)ToggleButton relay6Test;
     @BindView(R.id.relay7Test)ToggleButton relay7Test;
+    @BindView(R.id.imageRTUInput)
+    ImageView imageView;
+
+    @BindView(R.id.tableRow1) TableRow tableRow1;
+    @BindView(R.id.tableRow3) TableRow tableRow3;
+    @BindView(R.id.tableRow4) TableRow tableRow4;
+    @BindView(R.id.tableRow8) TableRow tableRow8;
 
     Prefs prefs;
     @BindView(R.id.buttonNext)
@@ -187,6 +198,21 @@ public class DABHybridAhuProfile extends Fragment implements AdapterView.OnItemS
                 goTonext();
             }
         });
+
+        if (getResources().getDisplayMetrics().xdpi == (float)149.824){
+            RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(253,680);
+            lp.setMargins(0, 58, 0, 0);
+            imageView.setLayoutParams(lp);
+
+            TableLayout.LayoutParams tr = new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.WRAP_CONTENT);
+            tr.setMargins(0, 18, 0, 0);
+            tableRow1.setLayoutParams(tr);
+            //
+            tr.setMargins(0, 15, 0, 0);
+            tableRow3.setLayoutParams(tr);
+            tableRow8.setLayoutParams(tr);
+
+        }
 
     }
 

@@ -15,8 +15,10 @@ import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import java.lang.reflect.Field;
@@ -76,6 +78,8 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
     ToggleButton testFanHighOb;
     ToggleButton switchOccSensor;
     ToggleButton switchExtTempSensor;
+    @BindView(R.id.textCoolStage1)
+    TextView textCoolStage1;
     Button setButton;
     Button cancelButton;
     NumberPicker temperatureOffset;
@@ -141,6 +145,12 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
         mNodeType = NodeType.valueOf(getArguments().getString(FragmentCommonBundleArgs.NODE_TYPE));
         mProfileType = ProfileType.values()[getArguments().getInt(FragmentCommonBundleArgs.PROFILE_TYPE)];
         ButterKnife.bind(this, view);
+
+        if (getResources().getDisplayMetrics().xdpi == (float)149.824){
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,40);
+            lp.setMargins(0, 5, 0, 0);
+            textCoolStage1.setLayoutParams(lp);
+        }
         return view;
     }
 

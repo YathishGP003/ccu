@@ -79,11 +79,12 @@
                         android:id="@+id/tableRow1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="26dp">
+                        android:layout_marginTop="16dp">
 
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
+                            android:layout_gravity="center_vertical"
                             android:layout_weight="1">
 
                             <ToggleButton
@@ -111,7 +112,8 @@
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_weight="1"
-                            android:layout_height="wrap_content"
+                            android:layout_height="45dp"
+                            android:layout_gravity="center_vertical"
                             android:gravity="center"
                             android:layout_marginLeft="34dp">
                             <Spinner
@@ -130,6 +132,7 @@
                             android:layout_weight="1"
                             android:layout_height="40dp"
                             android:gravity="center"
+                            android:layout_gravity="center_vertical"
                             android:layout_marginLeft="34dp">
                             <ToggleButton
                                 android:id="@+id/relay1Test"
@@ -150,11 +153,12 @@
                         android:id="@+id/tableRow2"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="22dp" >
+                        android:layout_marginTop="15dp" >
 
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
+                            android:layout_gravity="center_vertical"
                             android:layout_weight="1">
 
                             <ToggleButton
@@ -184,11 +188,12 @@
                             android:layout_weight="1"
                             android:layout_height="wrap_content"
                             android:gravity="center"
+                            android:layout_gravity="center_vertical"
                             android:layout_marginLeft="34dp">
                             <Spinner
                                 android:id="@+id/relay2Spinner"
                                 android:layout_width="202dp"
-                                android:layout_height="wrap_content"
+                                android:layout_height="45dp"
                                 android:layout_centerHorizontal="true"
                                 android:layout_centerVertical="true"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
@@ -201,6 +206,7 @@
                             android:layout_weight="1"
                             android:layout_height="40dp"
                             android:gravity="center"
+                            android:layout_gravity="center_vertical"
                             android:layout_marginLeft="34dp">
                             <ToggleButton
                                 android:id="@+id/relay2Test"
@@ -226,6 +232,7 @@
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
+                            android:layout_gravity="center_vertical"
                             android:layout_weight="1">
 
                             <ToggleButton
@@ -255,11 +262,12 @@
                             android:layout_weight="1"
                             android:layout_height="wrap_content"
                             android:gravity="center"
+                            android:layout_gravity="center_vertical"
                             android:layout_marginLeft="34dp">
                             <Spinner
                                 android:id="@+id/relay3Spinner"
                                 android:layout_width="202dp"
-                                android:layout_height="wrap_content"
+                                android:layout_height="45dp"
                                 android:layout_centerHorizontal="true"
                                 android:layout_centerVertical="true"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
@@ -271,6 +279,7 @@
                             android:layout_width="0dp"
                             android:layout_weight="1"
                             android:layout_height="40dp"
+                            android:layout_gravity="center_vertical"
                             android:gravity="center"
                             android:layout_marginLeft="34dp">
                             <ToggleButton
@@ -292,11 +301,12 @@
                         android:id="@+id/tableRow4"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="22dp" >
+                        android:layout_marginTop="15dp" >
 
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
+                            android:layout_gravity="center_vertical"
                             android:layout_weight="1">
 
                             <ToggleButton
@@ -326,11 +336,12 @@
                             android:layout_weight="1"
                             android:layout_height="wrap_content"
                             android:gravity="center"
+                            android:layout_gravity="center_vertical"
                             android:layout_marginLeft="34dp">
                             <Spinner
                                 android:id="@+id/relay4Spinner"
                                 android:layout_width="202dp"
-                                android:layout_height="wrap_content"
+                                android:layout_height="45dp"
                                 android:layout_centerHorizontal="true"
                                 android:layout_centerVertical="true"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
@@ -363,11 +374,12 @@
                         android:id="@+id/tableRow5"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="21dp" >
+                        android:layout_marginTop="15dp" >
 
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
+                            android:layout_gravity="center_vertical"
                             android:layout_weight="1">
 
                             <ToggleButton
@@ -397,11 +409,12 @@
                             android:layout_weight="1"
                             android:layout_height="wrap_content"
                             android:gravity="center"
+                            android:layout_gravity="center_vertical"
                             android:layout_marginLeft="34dp">
                             <Spinner
                                 android:id="@+id/relay5Spinner"
                                 android:layout_width="202dp"
-                                android:layout_height="wrap_content"
+                                android:layout_height="45dp"
                                 android:layout_centerHorizontal="true"
                                 android:layout_centerVertical="true"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
@@ -414,6 +427,7 @@
                             android:layout_weight="1"
                             android:layout_height="40dp"
                             android:gravity="center"
+                            android:layout_gravity="center_vertical"
                             android:layout_marginLeft="34dp">
                             <ToggleButton
                                 android:id="@+id/relay5Test"
@@ -435,11 +449,12 @@
                         android:id="@+id/tableRow6"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="24dp" >
+                        android:layout_marginTop="25dp" >
 
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
+                            android:layout_gravity="center_vertical"
                             android:layout_weight="1">
 
                             <ToggleButton
@@ -469,11 +484,12 @@
                             android:layout_weight="1"
                             android:layout_height="wrap_content"
                             android:gravity="center"
+                            android:layout_gravity="center_vertical"
                             android:layout_marginLeft="34dp">
                             <Spinner
                                 android:id="@+id/relay6Spinner"
                                 android:layout_width="202dp"
-                                android:layout_height="wrap_content"
+                                android:layout_height="45dp"
                                 android:layout_centerVertical="true"
                                 android:layout_centerHorizontal="true"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
@@ -486,6 +502,7 @@
                             android:layout_weight="1"
                             android:layout_height="40dp"
                             android:gravity="center"
+                            android:layout_gravity="center_vertical"
                             android:layout_marginLeft="34dp">
                             <ToggleButton
                                 android:id="@+id/relay6Test"
@@ -507,11 +524,12 @@
                         android:id="@+id/tableRow7"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_marginTop="22dp">
+                        android:layout_marginTop="20dp">
 
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="40dp"
+                            android:layout_gravity="center_vertical"
                             android:layout_weight="1">
 
                             <ToggleButton
@@ -541,11 +559,12 @@
                             android:layout_weight="1"
                             android:gravity="center"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
                             android:layout_marginLeft="34dp">
                             <Spinner
                                 android:id="@+id/relay7Spinner"
                                 android:layout_width="202dp"
-                                android:layout_height="wrap_content"
+                                android:layout_height="45dp"
                                 android:layout_centerVertical="true"
                                 android:layout_centerHorizontal="true"
                                 style="@style/Widget.AppCompat.Spinner.Underlined"
@@ -558,6 +577,7 @@
                             android:layout_weight="1"
                             android:layout_height="40dp"
                             android:gravity="center"
+                            android:layout_gravity="center_vertical"
                             android:layout_marginLeft="34dp">
                             <ToggleButton
                                 android:id="@+id/relay7Test"

@@ -15,8 +15,11 @@ import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import android.widget.NumberPicker;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import java.lang.reflect.Field;
@@ -69,6 +72,9 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
     @BindView(R.id.testHpuRelay5)ToggleButton testFanHighOb;
     ToggleButton switchHpChangeOver;
     @BindView(R.id.testHpuRelay6)ToggleButton testHeatChangeOver;
+    @BindView(R.id.textCompStage1)TextView textCompStage1;
+    @BindView(R.id.textHeatChangeover)
+    TextView textHeatChangeover;
     ToggleButton switchOccSensor;
     ToggleButton switchExtTempSensor;
     Button setButton;
@@ -142,6 +148,17 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
         mNodeType = NodeType.valueOf(getArguments().getString(FragmentCommonBundleArgs.NODE_TYPE));
         mProfileType = ProfileType.values()[getArguments().getInt(FragmentCommonBundleArgs.PROFILE_TYPE)];
         ButterKnife.bind(this, view);
+
+        if (getResources().getDisplayMetrics().xdpi == (float)149.824){
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,40);
+            lp.setMargins(0, 26, 0, 0);
+            textHeatChangeover.setLayoutParams(lp);
+
+            LinearLayout.LayoutParams lp2 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,40);
+            lp2.setMargins(0, 5, 0, 0);
+            textCompStage1.setLayoutParams(lp2);
+
+        }
         return view;
     }
 

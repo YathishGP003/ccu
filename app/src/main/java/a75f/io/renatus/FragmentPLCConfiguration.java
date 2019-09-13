@@ -16,6 +16,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -78,6 +80,9 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
     
     @BindView(R.id.setBtn)
     Button setButton;
+
+    @BindView(R.id.setPointLayout)
+    RelativeLayout setPointLayout;
     
     private ProfileType             mProfileType;
     private PlcProfile              mPlcProfile;
@@ -158,6 +163,12 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         floorRef = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
         mNodeType = NodeType.valueOf(getArguments().getString(FragmentCommonBundleArgs.NODE_TYPE));
         ButterKnife.bind(this, view);
+
+        if (getResources().getDisplayMetrics().xdpi == (float)149.824){
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT);
+            lp.setMargins(0, 70, 0, 0);
+            setPointLayout.setLayoutParams(lp);
+        }
         return view;
     }
     

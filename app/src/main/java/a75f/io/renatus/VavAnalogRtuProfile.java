@@ -14,6 +14,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.ToggleButton;
 
@@ -66,7 +68,9 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 
 	@BindView(R.id.relay3Test) ToggleButton relay3Test;
 	@BindView(R.id.relay7Test) ToggleButton relay7Test;
-	
+	@BindView(R.id.imageRTUInput)
+	ImageView imageView;
+
 	VavFullyModulatingRtu systemProfile = null;
 	@BindView(R.id.buttonNext)
 	Button mNext;
@@ -163,6 +167,12 @@ public class VavAnalogRtuProfile extends Fragment implements AdapterView.OnItemS
 				goTonext();
 			}
 		});
+
+		if (getResources().getDisplayMetrics().xdpi == (float)149.824){
+			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(250,400);
+			lp.setMargins(0, 22, 0, 0);
+			imageView.setLayoutParams(lp);
+		}
 	}
 
 	private void goTonext() {

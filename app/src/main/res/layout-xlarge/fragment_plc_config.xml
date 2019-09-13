@@ -58,16 +58,19 @@
                         <TextView
                             android:id="@+id/textAnalogin1"
                             android:layout_width="wrap_content"
-                            android:layout_height="40dp"
+                            android:layout_height="wrap_content"
                             android:layout_alignParentLeft="true"
+                            android:layout_centerVertical="true"
+                            android:layout_toStartOf="@+id/analog1InSensor"
                             android:text="@string/label_analogin1"
                             android:textAppearance="@style/title_normal" />
 
                         <Spinner
                             android:id="@+id/analog1InSensor"
                             android:layout_width="160dp"
-                            android:layout_height="40dp"
+                            android:layout_height="?android:attr/listPreferredItemHeight"
                             android:layout_alignParentRight="true"
+                            android:layout_centerVertical="true"
                             style="@style/Widget.AppCompat.Spinner.Underlined"
                             android:entries="@array/hvac_stage_selector"
                             tools:listitem="@layout/spinner_dropdown_item"/>
@@ -77,20 +80,24 @@
                     <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="36dp">
+                        android:layout_gravity="center"
+                        android:layout_marginTop="20dp">
                         <TextView
                             android:id="@+id/textTHin1"
                             android:layout_width="wrap_content"
-                            android:layout_height="40dp"
+                            android:layout_height="wrap_content"
                             android:layout_alignParentLeft="true"
+                            android:layout_centerVertical="true"
+                            android:layout_toStartOf="@+id/th1InSensor"
                             android:text="@string/label_thin1"
                             android:textAppearance="@style/title_normal" />
 
                         <Spinner
                             android:id="@+id/th1InSensor"
                             android:layout_width="160dp"
-                            android:layout_height="40dp"
+                            android:layout_height="?android:attr/listPreferredItemHeight"
                             android:layout_alignParentRight="true"
+                            android:layout_centerVertical="true"
                             style="@style/Widget.AppCompat.Spinner.Underlined"
                             android:entries="@array/hvac_stage_selector"
                             tools:listitem="@layout/spinner_dropdown_item"/>
@@ -99,12 +106,13 @@
                     <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="36dp">
+                        android:layout_marginTop="20dp">
                         <TextView
                             android:id="@+id/textUseAnalog2"
                             android:layout_width="wrap_content"
-                            android:layout_height="40dp"
+                            android:layout_height="wrap_content"
                             android:layout_alignParentLeft="true"
+                            android:layout_toStartOf="@+id/analog2DynamicSp"
                             android:text="@string/label_useanalogin2"
                             android:textAppearance="@style/title_normal" />
 
@@ -113,6 +121,7 @@
                             android:layout_width="46.12dp"
                             android:layout_height="27.42dp"
                             android:layout_alignParentRight="true"
+                            android:layout_centerVertical="true"
                             android:background="@drawable/toggle_selector"
                             android:checked="false"
                             android:textOff=""
@@ -123,20 +132,23 @@
                     <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="36dp">
+                        android:layout_marginTop="20dp">
                         <TextView
                             android:id="@+id/textAnaglog2"
                             android:layout_width="wrap_content"
-                            android:layout_height="40dp"
+                            android:layout_height="wrap_content"
                             android:layout_alignParentLeft="true"
+                            android:layout_centerVertical="true"
+                            android:layout_toStartOf="@+id/analog2InSensor"
                             android:text="@string/label_analogin2"
                             android:textAppearance="@style/title_normal" />
 
                         <Spinner
                             android:id="@+id/analog2InSensor"
                             android:layout_width="160dp"
-                            android:layout_height="40dp"
+                            android:layout_height="?android:attr/listPreferredItemHeight"
                             android:layout_alignParentRight="true"
+                            android:layout_centerVertical="true"
                             style="@style/Widget.AppCompat.Spinner.Underlined"
                             android:entries="@array/hvac_stage_selector"
                             tools:listitem="@layout/spinner_dropdown_item"/>
@@ -145,20 +157,23 @@
                     <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="36dp">
+                        android:layout_marginTop="20dp">
                         <TextView
                             android:id="@+id/textAnalog1Min"
                             android:layout_width="wrap_content"
-                            android:layout_height="40dp"
+                            android:layout_height="wrap_content"
                             android:layout_alignParentLeft="true"
+                            android:layout_centerVertical="true"
+                            android:layout_toStartOf="@+id/analogout1AtMin"
                             android:text="@string/label_analogout1min"
                             android:textAppearance="@style/title_normal" />
 
                         <Spinner
                             android:id="@+id/analogout1AtMin"
                             android:layout_width="160dp"
-                            android:layout_height="40dp"
+                            android:layout_height="?android:attr/listPreferredItemHeight"
                             android:layout_alignParentRight="true"
+                            android:layout_centerVertical="true"
                             style="@style/Widget.AppCompat.Spinner.Underlined"
                             android:entries="@array/hvac_stage_selector"
                             tools:listitem="@layout/spinner_dropdown_item"/>
@@ -167,20 +182,23 @@
                     <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="36dp">
+                        android:layout_marginTop="20dp">
                         <TextView
                             android:id="@+id/textAnalog1Max"
                             android:layout_width="wrap_content"
-                            android:layout_height="40dp"
+                            android:layout_height="wrap_content"
                             android:layout_alignParentLeft="true"
+                            android:layout_centerVertical="true"
+                            android:layout_toStartOf="@+id/analogout1AtMax"
                             android:text="@string/label_analogout1max"
                             android:textAppearance="@style/title_normal" />
 
                         <Spinner
                             android:id="@+id/analogout1AtMax"
                             android:layout_width="160dp"
-                            android:layout_height="40dp"
+                            android:layout_height="?android:attr/listPreferredItemHeight"
                             android:layout_alignParentRight="true"
+                            android:layout_centerVertical="true"
                             style="@style/Widget.AppCompat.Spinner.Underlined"
                             android:entries="@array/hvac_stage_selector"
                             tools:listitem="@layout/spinner_dropdown_item"/>
@@ -190,12 +208,14 @@
                     <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="36dp">
+                        android:layout_marginTop="20dp">
                         <TextView
                             android:id="@+id/textZeroError"
                             android:layout_width="wrap_content"
-                            android:layout_height="40dp"
+                            android:layout_height="wrap_content"
                             android:layout_alignParentLeft="true"
+                            android:layout_marginBottom="12dp"
+                            android:layout_centerVertical="true"
                             android:text="@string/label_zeroerrormp"
                             android:textAppearance="@style/title_normal" />
 
@@ -204,6 +224,7 @@
                             android:layout_width="46.12dp"
                             android:layout_height="27.42dp"
                             android:layout_alignParentRight="true"
+                            android:layout_centerVertical="true"
                             android:background="@drawable/toggle_selector"
                             android:checked="false"
                             android:textOff=""
@@ -223,16 +244,18 @@
                         <TextView
                             android:id="@+id/textTargetValue"
                             android:layout_width="wrap_content"
-                            android:layout_height="40dp"
+                            android:layout_height="wrap_content"
                             android:layout_alignParentLeft="true"
+                            android:layout_centerVertical="true"
                             android:text="@string/label_targetvalue"
                             android:textAppearance="@style/title_normal" />
 
                         <Spinner
                             android:id="@+id/targetVal"
                             android:layout_width="160dp"
-                            android:layout_height="40dp"
+                            android:layout_height="?android:attr/listPreferredItemHeight"
                             android:layout_alignParentRight="true"
+                            android:layout_centerVertical="true"
                             style="@style/Widget.AppCompat.Spinner.Underlined"
                             android:entries="@array/hvac_stage_selector"
                             tools:listitem="@layout/spinner_dropdown_item"/>
@@ -241,42 +264,48 @@
                     <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="36dp">
+                        android:layout_marginTop="20dp">
                         <TextView
                             android:id="@+id/textErrorRange"
                             android:layout_width="wrap_content"
-                            android:layout_height="40dp"
+                            android:layout_height="wrap_content"
                             android:layout_alignParentLeft="true"
+                            android:layout_centerVertical="true"
                             android:text="@string/label_expectedError"
                             android:textAppearance="@style/title_normal" />
 
                         <Spinner
                             android:id="@+id/errorRange"
                             android:layout_width="160dp"
-                            android:layout_height="40dp"
+                            android:layout_height="?android:attr/listPreferredItemHeight"
                             android:layout_alignParentRight="true"
+                            android:layout_centerVertical="true"
                             style="@style/Widget.AppCompat.Spinner.Underlined"
                             android:entries="@array/hvac_stage_selector"
                             tools:listitem="@layout/spinner_dropdown_item"/>
                     </RelativeLayout>
 
                     <RelativeLayout
+                        android:id="@+id/setPointLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="114dp">
                     <TextView
                         android:id="@+id/textSetpoint"
                         android:layout_width="wrap_content"
-                        android:layout_height="40dp"
+                        android:layout_height="wrap_content"
+                        android:layout_toStartOf="@+id/sensorOffset"
                         android:layout_alignParentLeft="true"
+                        android:layout_centerVertical="true"
                         android:text="@string/label_setpointsensor"
                         android:textAppearance="@style/title_normal" />
 
                     <Spinner
                         android:id="@+id/sensorOffset"
                         android:layout_width="160dp"
-                        android:layout_height="40dp"
+                        android:layout_height="?android:attr/listPreferredItemHeight"
                         android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
                         style="@style/Widget.AppCompat.Spinner.Underlined"
                         android:entries="@array/hvac_stage_selector"
                         tools:listitem="@layout/spinner_dropdown_item"/>

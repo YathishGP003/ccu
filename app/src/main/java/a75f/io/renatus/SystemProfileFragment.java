@@ -69,10 +69,10 @@ public class SystemProfileFragment extends Fragment {
         spSystemProfile.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                if (!isFreshRegister&& adapterView.getChildAt(0)!=null) {
+                if (!isFreshRegister&& adapterView.getChildAt(0)!= null) {
                     ((TextView) adapterView.getChildAt(0)).setTextColor(getResources().getColor(R.color.accent));
                     ((TextView) adapterView.getChildAt(0)).setTextSize(18);
-                    spSystemProfile.getLayoutParams().width = 320;
+                    spSystemProfile.getLayoutParams().width = 340;
                 }
                 switch (i) {
                     case 0:

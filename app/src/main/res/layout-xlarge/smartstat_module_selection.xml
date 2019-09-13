@@ -78,7 +78,7 @@
                 <RelativeLayout
                     android:id="@+id/rl_cpu"
                     android:layout_width="match_parent"
-                    android:layout_height="92dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginLeft="180dp">
 
                     <LinearLayout
@@ -93,6 +93,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="right"
+                            android:layout_marginBottom="6dp"
                             android:text="@string/title_cpu"
                             android:textAppearance="@style/title_normal"/>
 
@@ -102,6 +103,7 @@
                             android:layout_height="wrap_content"
                             android:text="@string/desc_cpu"
                             android:gravity="right"
+                            android:layout_marginBottom="12dp"
                             android:textAppearance="@style/text_label"/>
 
                     </LinearLayout>
@@ -124,7 +126,7 @@
                 <RelativeLayout
                     android:id="@+id/rl_commercial"
                     android:layout_width="match_parent"
-                    android:layout_height="92dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginLeft="180dp">
 
                     <LinearLayout
@@ -133,6 +135,7 @@
                         android:layout_alignParentRight="true"
                         android:layout_marginRight="190dp"
                         android:layout_centerVertical="true"
+                        android:layout_marginTop="6dp"
                         android:orientation="vertical">
                         <TextView
                             android:id="@+id/textCommercial"
@@ -148,6 +151,7 @@
                             android:layout_height="wrap_content"
                             android:text="@string/desc_commercial"
                             android:gravity="right"
+                            android:layout_marginBottom="12dp"
                             android:textAppearance="@style/text_label"/>
 
                     </LinearLayout>
@@ -170,7 +174,7 @@
                 <RelativeLayout
                     android:id="@+id/rl_hpu"
                     android:layout_width="match_parent"
-                    android:layout_height="92dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginLeft="180dp">
 
                     <LinearLayout
@@ -179,6 +183,7 @@
                         android:layout_alignParentRight="true"
                         android:layout_marginRight="190dp"
                         android:layout_centerVertical="true"
+                        android:layout_marginTop="6dp"
                         android:orientation="vertical">
                         <TextView
                             android:id="@+id/textHPU"
@@ -194,6 +199,7 @@
                             android:layout_height="wrap_content"
                             android:text="@string/desc_hpu"
                             android:gravity="right"
+                            android:layout_marginBottom="12dp"
                             android:textAppearance="@style/text_label"/>
 
                     </LinearLayout>
@@ -216,7 +222,7 @@
                 <RelativeLayout
                     android:id="@+id/rl_2pipe"
                     android:layout_width="match_parent"
-                    android:layout_height="92dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginLeft="180dp">
 
                     <LinearLayout
@@ -225,6 +231,7 @@
                         android:layout_alignParentRight="true"
                         android:layout_marginRight="190dp"
                         android:layout_centerVertical="true"
+                        android:layout_marginTop="6dp"
                         android:orientation="vertical">
                         <TextView
                             android:id="@+id/text2Pipe"
@@ -240,6 +247,7 @@
                             android:layout_height="wrap_content"
                             android:text="@string/desc_2pipe"
                             android:gravity="right"
+                            android:layout_marginBottom="12dp"
                             android:textAppearance="@style/text_label"/>
 
                     </LinearLayout>
@@ -262,7 +270,7 @@
                 <RelativeLayout
                     android:id="@+id/rl_4pipe"
                     android:layout_width="match_parent"
-                    android:layout_height="92dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginLeft="180dp">
 
                     <LinearLayout
@@ -271,6 +279,7 @@
                         android:layout_alignParentRight="true"
                         android:layout_marginRight="190dp"
                         android:layout_centerVertical="true"
+                        android:layout_marginTop="6dp"
                         android:orientation="vertical">
                         <TextView
                             android:id="@+id/text4Pipe"
@@ -286,6 +295,7 @@
                             android:layout_height="wrap_content"
                             android:text="@string/desc_4pipe"
                             android:gravity="right"
+                            android:layout_marginBottom="12dp"
                             android:textAppearance="@style/text_label"/>
 
                     </LinearLayout>

@@ -32,28 +32,28 @@
                     style="@style/text_appearance"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="100dp"
+                    android:layout_marginStart="80dp"
                     android:text="@string/title_input_value" />
 
                 <TextView
                     style="@style/text_appearance"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="100dp"
+                    android:layout_marginStart="80dp"
                     android:text="@string/title_input_value" />
 
                 <TextView
                     style="@style/text_appearance"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="100dp"
+                    android:layout_marginStart="80dp"
                     android:text="@string/title_calculated_output" />
 
                 <TextView
                     style="@style/text_appearance"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="100dp"
+                    android:layout_marginStart="80dp"
                     android:text="@string/title_override_value" />
             </TableRow>
 

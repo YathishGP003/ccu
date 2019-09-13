@@ -613,6 +613,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/desc_iftt"
+                            android:gravity="right"
                             android:textAppearance="@style/text_label"/>
 
                     </LinearLayout>

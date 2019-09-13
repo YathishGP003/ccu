@@ -281,6 +281,8 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:gravity="center"
+                    android:drawablePadding="50dp"
+                    android:drawableEnd="@drawable/ic_edit_site"
                     android:text="@string/title_edit" />
 
                 <View
@@ -301,6 +303,8 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:gravity="center"
+                    android:drawablePadding="50dp"
+                    android:drawableEnd="@drawable/ic_unregister"
                     android:text="@string/title_unregister" />
             </LinearLayout>
 

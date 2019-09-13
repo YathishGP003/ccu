@@ -59,9 +59,7 @@
                             android:layout_height="wrap_content"
                             android:text="@string/title_mapping"
                             android:textAppearance="@style/text_label"
-                            android:gravity="center_horizontal"
-                            android:layout_marginLeft="34dp"
-                            />
+                            android:gravity="center_horizontal" />
 
 
                         <TextView

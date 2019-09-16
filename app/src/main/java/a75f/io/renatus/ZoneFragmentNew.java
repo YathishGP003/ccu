@@ -63,6 +63,7 @@ import a75f.io.api.haystack.Zone;
 import a75f.io.device.mesh.Pulse;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.jobs.ScheduleProcessJob;
@@ -1651,21 +1652,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         Spinner spinnerValue2 = viewPointRow1.findViewById(R.id.spinnerValue2);
 
 
-        ArrayAdapter<CharSequence> conModeAdapter = ArrayAdapter.createFromResource(
-                getActivity(), R.array.smartstat_conditionmode, R.layout.spinner_zone_item);
-        conModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
-        spinnerValue1.setAdapter(conModeAdapter);
-
-        ArrayAdapter<CharSequence> fanModeAdapter = ArrayAdapter.createFromResource(
-                getActivity(), R.array.smartstat_fanmode, R.layout.spinner_zone_item);
-        fanModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
-        spinnerValue2.setAdapter(fanModeAdapter);
-
-        textViewTitle.setText(cpuEquipPoints.get("Profile").toString()+" ("+nodeAddress+")");
-        textViewStatus.setText(cpuEquipPoints.get("Status").toString());
-        textViewLabel1.setText("Conditioning Mode : ");
-        textViewLabel2.setText("Fan Mode : ");
-
         int conditionMode = 0;
         int fanMode = 0;
         try {
@@ -1674,6 +1660,41 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        ArrayAdapter<CharSequence> conModeAdapter = ArrayAdapter.createFromResource(
+                getActivity(), R.array.smartstat_conditionmode, R.layout.spinner_zone_item);
+
+        if(cpuEquipPoints.containsKey("condEnabled")){
+            if(cpuEquipPoints.get("condEnabled").toString().contains("Cool Only"))
+                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_coolonly, R.layout.spinner_zone_item);
+            else if(cpuEquipPoints.get("condEnabled").toString().contains("Heat Only"))
+                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_heatonly, R.layout.spinner_zone_item);
+            if(cpuEquipPoints.get("condEnabled").toString().contains("Off")) {
+                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_off, R.layout.spinner_zone_item);
+                conditionMode = 0;
+            }
+
+        }
+        conModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+        spinnerValue1.setAdapter(conModeAdapter);
+
+        ArrayAdapter<CharSequence> fanModeAdapter = ArrayAdapter.createFromResource(
+                getActivity(), R.array.smartstat_fanmode, R.layout.spinner_zone_item);
+        if(cpuEquipPoints.containsKey("fanEnabled")) {
+            if (cpuEquipPoints.get("fanEnabled").toString().contains("No High Fan"))
+                fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_fanmode_low, R.layout.spinner_zone_item);
+            else if (cpuEquipPoints.get("fanEnabled").toString().contains("No Fan")) {
+                fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_fanmode_off, R.layout.spinner_zone_item);
+                fanMode = 0;
+            }
+        }
+        fanModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+        spinnerValue2.setAdapter(fanModeAdapter);
+
+        textViewTitle.setText(cpuEquipPoints.get("Profile").toString()+" ("+nodeAddress+")");
+        textViewStatus.setText(cpuEquipPoints.get("Status").toString());
+        textViewLabel1.setText("Conditioning Mode : ");
+        textViewLabel2.setText("Fan Mode : ");
 
         spinnerValue1.setSelection(conditionMode,false);
         spinnerValue2.setSelection(fanMode,false);
@@ -1758,12 +1779,18 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 if(isCPUFromPubNub) {
                     if (tempFanMode != position) {
                         StandaloneScheduler.updateOperationalPoints(tempEquipId, "fan and operation and mode", position);
+                        if((position != 0) && (position % 3 == 0))
+                            Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().putInt(tempEquipId, position).apply();
+                        else
+                            Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode",Context.MODE_PRIVATE).edit().remove(tempEquipId).commit();
                     }
                     isCPUFromPubNub = false;
                 }else {
-                    //if(isCPUloaded) {
-                        StandaloneScheduler.updateOperationalPoints(tempEquipId, "fan and operation and mode", position);
-                    //}
+                    StandaloneScheduler.updateOperationalPoints(tempEquipId, "fan and operation and mode", position);
+                    if((position != 0) && (position % 3 == 0)) //Save only Fan occupied period mode alone, else no need.
+                        Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().putInt(tempEquipId, position).apply();
+                    else
+                        Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode",Context.MODE_PRIVATE).edit().remove(tempEquipId).commit();
                 }
             }
 
@@ -1792,15 +1819,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         Spinner spinnerValue1 = viewPointRow1.findViewById(R.id.spinnerValue1);
         Spinner spinnerValue2 = viewPointRow1.findViewById(R.id.spinnerValue2);
 
-        ArrayAdapter<CharSequence> conModeAdapter = ArrayAdapter.createFromResource(
-                getActivity(), R.array.smartstat_conditionmode, R.layout.spinner_zone_item);
-        conModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
-        spinnerValue1.setAdapter(conModeAdapter);
-
-        ArrayAdapter<CharSequence> fanModeAdapter = ArrayAdapter.createFromResource(
-                getActivity(), R.array.smartstat_fanmode, R.layout.spinner_zone_item);
-        fanModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
-        spinnerValue2.setAdapter(fanModeAdapter);
 
         textViewTitle.setText(hpuEquipPoints.get("Profile").toString()+" ("+nodeAddress+")");
         textViewStatus.setText(hpuEquipPoints.get("Status").toString());
@@ -1819,6 +1837,34 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         } catch (Exception e) {
             e.printStackTrace();
         }
+        ArrayAdapter<CharSequence> conModeAdapter = ArrayAdapter.createFromResource(
+                getActivity(), R.array.smartstat_conditionmode, R.layout.spinner_zone_item);
+        if(hpuEquipPoints.containsKey("condEnabled")){
+            if(hpuEquipPoints.get("condEnabled").toString().contains("Cool Only"))
+                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_coolonly, R.layout.spinner_zone_item);
+            else if(hpuEquipPoints.get("condEnabled").toString().contains("Heat Only"))
+                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_heatonly, R.layout.spinner_zone_item);
+            if(hpuEquipPoints.get("condEnabled").toString().contains("Off")) {
+                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_off, R.layout.spinner_zone_item);
+                conditionMode = 0;
+            }
+
+        }
+        conModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+        spinnerValue1.setAdapter(conModeAdapter);
+        ArrayAdapter<CharSequence> fanModeAdapter = ArrayAdapter.createFromResource(
+                getActivity(), R.array.smartstat_fanmode, R.layout.spinner_zone_item);
+
+        if(hpuEquipPoints.containsKey("fanEnabled")) {
+            if (hpuEquipPoints.get("fanEnabled").toString().contains("No High Fan"))
+                fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_fanmode_low, R.layout.spinner_zone_item);
+            else if (hpuEquipPoints.get("fanEnabled").toString().contains("No Fan")) {
+                fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_fanmode_off, R.layout.spinner_zone_item);
+                fanMode = 0;
+            }
+        }
+        fanModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+        spinnerValue2.setAdapter(fanModeAdapter);
 
         spinnerValue1.setSelection(conditionMode,false);
         spinnerValue2.setSelection(fanMode,false);
@@ -1911,12 +1957,20 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                         if(tempfanMode!= position) {
                             Log.i("PubNub","fanMode:"+tempfanMode+" position:"+position);
                             StandaloneScheduler.updateOperationalPoints(tempEquipId, "fan and operation and mode", position);
+                            if((position != 0) && (position % 3 == 0))
+                                Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().putInt(tempEquipId, position).apply();
+                            else
+                                Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode",Context.MODE_PRIVATE).edit().remove(tempEquipId).commit();
                         }
                         isHPUFromPubNub = false;
                     }
                     else {
                         //if(isHPUloaded) {
                             StandaloneScheduler.updateOperationalPoints(tempEquipId, "fan and operation and mode", position);
+                        if((position != 0) && (position % 3 == 0))
+                            Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().putInt(tempEquipId, position).apply();
+                        else
+                            Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode",Context.MODE_PRIVATE).edit().remove(tempEquipId).commit();
                         //}
                     }
                 } catch (Exception e) {
@@ -1948,20 +2002,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         Spinner spinnerValue2 = viewPointRow1.findViewById(R.id.spinnerValue2);
 
 
-        ArrayAdapter<CharSequence> conModeAdapter = ArrayAdapter.createFromResource(
-                getActivity(), R.array.smartstat_conditionmode, R.layout.spinner_zone_item);
-        conModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
-        spinnerValue1.setAdapter(conModeAdapter);
-
-        ArrayAdapter<CharSequence> fanModeAdapter = ArrayAdapter.createFromResource(
-                getActivity(), R.array.smartstat_2pfcu_fanmode, R.layout.spinner_zone_item);
-        fanModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
-        spinnerValue2.setAdapter(fanModeAdapter);
-
-        textViewTitle.setText(p2FCUPoints.get("Profile").toString()+" ("+nodeAddress+")");
-        textViewStatus.setText(p2FCUPoints.get("Status").toString());
-        textViewLabel1.setText("Conditioning Mode : ");
-        textViewLabel2.setText("Fan Mode : ");
 
         int conditionMode = 0;
         int fanMode = 0;
@@ -1971,6 +2011,42 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        ArrayAdapter<CharSequence> conModeAdapter = ArrayAdapter.createFromResource(
+                getActivity(), R.array.smartstat_conditionmode, R.layout.spinner_zone_item);
+
+        if(p2FCUPoints.containsKey("condEnabled")){
+            if(p2FCUPoints.get("condEnabled").toString().contains("Cool Only"))
+                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_coolonly, R.layout.spinner_zone_item);
+            else if(p2FCUPoints.get("condEnabled").toString().contains("Heat Only"))
+                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_heatonly, R.layout.spinner_zone_item);
+            if(p2FCUPoints.get("condEnabled").toString().contains("Off")) {
+                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_off, R.layout.spinner_zone_item);
+                conditionMode = 0;
+            }
+
+        }
+        conModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+        spinnerValue1.setAdapter(conModeAdapter);
+        ArrayAdapter<CharSequence> fanModeAdapter = ArrayAdapter.createFromResource(
+                getActivity(), R.array.smartstat_2pfcu_fanmode, R.layout.spinner_zone_item);
+        if(p2FCUPoints.containsKey("fanEnabled")) {
+            if (p2FCUPoints.get("fanEnabled").toString().contains("No High Fan"))
+                fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_2pfcu_fanmode_medium, R.layout.spinner_zone_item);
+            else if (p2FCUPoints.get("fanEnabled").toString().contains("No Medium High Fan"))
+                fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_2pfcu_fanmode_low, R.layout.spinner_zone_item);
+            else if (p2FCUPoints.get("fanEnabled").toString().contains("No Fan")) {
+                fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_2pfcu_fanmode_off, R.layout.spinner_zone_item);
+                fanMode = 0;
+            }
+        }
+        fanModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+        spinnerValue2.setAdapter(fanModeAdapter);
+
+        textViewTitle.setText(p2FCUPoints.get("Profile").toString()+" ("+nodeAddress+")");
+        textViewStatus.setText(p2FCUPoints.get("Status").toString());
+        textViewLabel1.setText("Conditioning Mode : ");
+        textViewLabel2.setText("Fan Mode : ");
 
         spinnerValue1.setSelection(conditionMode,false);
         spinnerValue2.setSelection(fanMode,false);
@@ -2012,10 +2088,18 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 if(isFromPubNub) {
                     if(tempfanMode != position) {
                         StandaloneScheduler.updateOperationalPoints(tempEquipId, "fan and operation and mode", position);
+                        if((position != 0) && (position % 3 == 0))
+                            Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().putInt(tempEquipId, position).apply();
+                        else
+                            Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode",Context.MODE_PRIVATE).edit().remove(tempEquipId).commit();
                     }
                     isFromPubNub = false;
                 }else {
                     StandaloneScheduler.updateOperationalPoints(tempEquipId, "fan and operation and mode", position);
+                    if((position != 0) && (position % 3 == 0))
+                        Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().putInt(tempEquipId, position).apply();
+                    else
+                        Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode",Context.MODE_PRIVATE).edit().remove(tempEquipId).commit();
                 }
             }
 
@@ -2043,21 +2127,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         Spinner spinnerValue2 = viewPointRow1.findViewById(R.id.spinnerValue2);
 
 
-        ArrayAdapter<CharSequence> conModeAdapter = ArrayAdapter.createFromResource(
-                getActivity(), R.array.smartstat_conditionmode, R.layout.spinner_zone_item);
-        conModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
-        spinnerValue1.setAdapter(conModeAdapter);
-
-        ArrayAdapter<CharSequence> fanModeAdapter = ArrayAdapter.createFromResource(
-                getActivity(), R.array.smartstat_2pfcu_fanmode, R.layout.spinner_zone_item);
-        fanModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
-        spinnerValue2.setAdapter(fanModeAdapter);
-
-        textViewTitle.setText(p4FCUPoints.get("Profile").toString()+" ("+nodeAddress+")");
-        textViewStatus.setText(p4FCUPoints.get("Status").toString());
-        textViewLabel1.setText("Conditioning Mode : ");
-        textViewLabel2.setText("Fan Mode : ");
-
         int conditionMode = 0;
         int fanMode = 0;
         try {
@@ -2066,6 +2135,43 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        ArrayAdapter<CharSequence> conModeAdapter = ArrayAdapter.createFromResource(
+                getActivity(), R.array.smartstat_conditionmode, R.layout.spinner_zone_item);
+        if(p4FCUPoints.containsKey("condEnabled")){
+            if(p4FCUPoints.get("condEnabled").toString().contains("Cool Only"))
+                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_coolonly, R.layout.spinner_zone_item);
+            else if(p4FCUPoints.get("condEnabled").toString().contains("Heat Only"))
+                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_heatonly, R.layout.spinner_zone_item);
+            if(p4FCUPoints.get("condEnabled").toString().contains("Off")) {
+                conModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_conditionmode_off, R.layout.spinner_zone_item);
+                conditionMode = 0;
+            }
+
+        }
+        conModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+        spinnerValue1.setAdapter(conModeAdapter);
+
+        ArrayAdapter<CharSequence> fanModeAdapter = ArrayAdapter.createFromResource(
+                getActivity(), R.array.smartstat_2pfcu_fanmode, R.layout.spinner_zone_item);
+
+        if(p4FCUPoints.containsKey("fanEnabled")) {
+            if (p4FCUPoints.get("fanEnabled").toString().contains("No High Fan"))
+                fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_2pfcu_fanmode_medium, R.layout.spinner_zone_item);
+            else if (p4FCUPoints.get("fanEnabled").toString().contains("No Medium High Fan"))
+                fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_2pfcu_fanmode_low, R.layout.spinner_zone_item);
+            else if (p4FCUPoints.get("fanEnabled").toString().contains("No Fan")) {
+                fanModeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.smartstat_2pfcu_fanmode_off, R.layout.spinner_zone_item);
+                fanMode = 0;
+            }
+        }
+        fanModeAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
+        spinnerValue2.setAdapter(fanModeAdapter);
+
+        textViewTitle.setText(p4FCUPoints.get("Profile").toString()+" ("+nodeAddress+")");
+        textViewStatus.setText(p4FCUPoints.get("Status").toString());
+        textViewLabel1.setText("Conditioning Mode : ");
+        textViewLabel2.setText("Fan Mode : ");
 
         spinnerValue1.setSelection(conditionMode,false);
         spinnerValue2.setSelection(fanMode,false);
@@ -2108,10 +2214,18 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 if(isFromPubNub) {
                     if (tempFanMode != position) {
                         StandaloneScheduler.updateOperationalPoints(equipId, "fan and operation and mode", position);
+                        if((position != 0) && (position % 3 == 0))
+                            Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().putInt(equipId, position).apply();
+                        else
+                            Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode",Context.MODE_PRIVATE).edit().remove(equipId).commit();
                     }
                     isFromPubNub = false;
                 }else {
                     StandaloneScheduler.updateOperationalPoints(equipId, "fan and operation and mode", position);
+                    if((position != 0) && (position % 3 == 0))
+                        Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).edit().putInt(equipId, position).apply();
+                    else
+                        Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode",Context.MODE_PRIVATE).edit().remove(equipId).commit();
                 }
             }
 
@@ -2300,6 +2414,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             Pulse.setCurrentTempInterface(this);
             ScheduleProcessJob.setScheduleDataInterface(this);
             ScheduleProcessJob.setZoneDataInterface(this);
+            StandaloneScheduler.setZoneDataInterface(this);
         }
         weatherUpdateHandler = new Handler();
         weatherUpdate = new Runnable() {
@@ -2324,6 +2439,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         Pulse.setCurrentTempInterface(null);
         ScheduleProcessJob.setScheduleDataInterface(null);
         ScheduleProcessJob.setZoneDataInterface(null);
+        StandaloneScheduler.setZoneDataInterface(null);
     }
 
     @Override
@@ -2334,12 +2450,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             Pulse.setCurrentTempInterface(this);
             ScheduleProcessJob.setScheduleDataInterface(this);
             ScheduleProcessJob.setZoneDataInterface(this);
+            StandaloneScheduler.setZoneDataInterface(this);
         } else {
 
             UpdatePointHandler.setZoneDataInterface(null);
             Pulse.setCurrentTempInterface(null);
             ScheduleProcessJob.setScheduleDataInterface(null);
             ScheduleProcessJob.setZoneDataInterface(null);
+            StandaloneScheduler.setZoneDataInterface(null);
         }
     }
 

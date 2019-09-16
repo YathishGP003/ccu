@@ -17,6 +17,7 @@ import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemProfile;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
 import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.tuners.TunerUtil;
 
 public class DaikinIE
 {
@@ -69,15 +70,17 @@ public class DaikinIE
                 if (systemProfile.getConfigEnabled("humidification") > 0) {
                     if (humCtrl != HumidityCtrl.RelHum)
                     {
-                        send(String.format(DAIKIN_IE_HUMIDITY_MODE_URL, getIEUrl()), String.format(DAIKIN_IE_MSG_BODY, HumidityCtrl.RelHum.ordinal() ));
+                        send(String.format(DAIKIN_IE_HUMIDITY_MODE_URL, getIEUrl()), String.format(DAIKIN_IE_MSG_BODY, (double)HumidityCtrl.RelHum.ordinal() ));
                         humCtrl = HumidityCtrl.RelHum;
                     }
                     send(String.format(DAIKIN_IE_HUMIDITY_IN_URL, getIEUrl()), String.format(DAIKIN_IE_MSG_BODY,
                                                                 systemProfile.getSystemController().getAverageSystemHumidity()));
+                    send(String.format(DAIKIN_IE_HUMIDITY_SP_URL, getIEUrl()), String.format(DAIKIN_IE_MSG_BODY,
+                                                                TunerUtil.readSystemUserIntentVal("target and max and inside and humidity")));
                 } else {
                     if (humCtrl != HumidityCtrl.None)
                     {
-                        send(String.format(DAIKIN_IE_HUMIDITY_MODE_URL, getIEUrl()), String.format(DAIKIN_IE_MSG_BODY, HumidityCtrl.None.ordinal() ));
+                        send(String.format(DAIKIN_IE_HUMIDITY_MODE_URL, getIEUrl()), String.format(DAIKIN_IE_MSG_BODY, (double)HumidityCtrl.None.ordinal() ));
                         humCtrl = HumidityCtrl.None;
                     }
                 }
@@ -89,13 +92,13 @@ public class DaikinIE
                     || systemProfile.getSystemController().getSystemState() != SystemController.State.OFF) {
                     if (occMode != OccMode.Occ)
                     {
-                        send(String.format(DAIKIN_IE_OCCMODE_URL, eqIp), String.format(DAIKIN_IE_MSG_BODY, OccMode.Occ.ordinal()));
+                        send(String.format(DAIKIN_IE_OCCMODE_URL, eqIp), String.format(DAIKIN_IE_MSG_BODY, (double)OccMode.Occ.ordinal()));
                         occMode = OccMode.Occ;
                     }
                 } else {
                     if (occMode != OccMode.Unocc)
                     {
-                        send(String.format(DAIKIN_IE_OCCMODE_URL, eqIp), String.format(DAIKIN_IE_MSG_BODY, OccMode.Unocc.ordinal()));
+                        send(String.format(DAIKIN_IE_OCCMODE_URL, eqIp), String.format(DAIKIN_IE_MSG_BODY, (double)OccMode.Unocc.ordinal()));
                         occMode = OccMode.Unocc;
                     }
                 }
@@ -103,12 +106,14 @@ public class DaikinIE
                 if (systemProfile.getSystemController().getSystemState() != SystemController.State.OFF) {
                     if (appMode != NetApplicMode.Auto)
                     {
-                        send(String.format(DAIKIN_IE_APPMODE_URL, eqIp), String.format(DAIKIN_IE_MSG_BODY, NetApplicMode.Auto.ordinal()));
+                        send(String.format(DAIKIN_IE_APPMODE_URL, eqIp), String.format(DAIKIN_IE_MSG_BODY, (double)NetApplicMode.Auto.ordinal()));
+                        appMode = NetApplicMode.Auto;
                     }
                 } else {
                     if (appMode != NetApplicMode.FanOnly)
                     {
-                        send(String.format(DAIKIN_IE_APPMODE_URL, eqIp), String.format(DAIKIN_IE_MSG_BODY, NetApplicMode.FanOnly.ordinal()));
+                        send(String.format(DAIKIN_IE_APPMODE_URL, eqIp), String.format(DAIKIN_IE_MSG_BODY, (double)NetApplicMode.FanOnly.ordinal()));
+                        appMode = NetApplicMode.FanOnly;
                     }
                 }
                 
@@ -177,7 +182,7 @@ public class DaikinIE
     public static void send(final String urlString,final String data) {
         try
         {
-            Log.d("CCU_DAIKIN", urlString + "\n data: \n" + data);
+            Log.d("DAIKIN_IE", urlString + "\n data: \n" + data);
             URL url = new URL(urlString);
             HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
             httpCon.setDoOutput(true);
@@ -212,7 +217,7 @@ public class DaikinIE
             {
                 try
                 {
-                    Log.d("CCU_DAIKIN", urlString + "\n data: \n" + data);
+                    Log.d("DAIKIN_IE", urlString + "\n data: \n" + data);
                     URL url = new URL(urlString);
                     HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
                     httpCon.setDoOutput(true);

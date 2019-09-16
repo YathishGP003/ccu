@@ -136,7 +136,7 @@ public class OAOEquip
                                               .setSiteRef(siteRef)
                                               .setRoomRef(roomRef)
                                               .setFloorRef(floorRef)
-                                              .addMarker("oao").addMarker("return").addMarker("air").addMarker("co2").addMarker("sensor").addMarker("his").addMarker("equipHis").addMarker("sp")
+                                              .addMarker("oao").addMarker("return").addMarker("air").addMarker("co2").addMarker("sensor").addMarker("his").addMarker("equipHis")
                                               .setGroup(String.valueOf(nodeAddr))
                                               .setTz(tz)
                                               .build();

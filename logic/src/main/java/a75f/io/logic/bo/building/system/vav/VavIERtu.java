@@ -240,6 +240,8 @@ public class VavIERtu extends VavSystemProfile
         setCmdSignal("fan", signal);
         ControlMote.setAnalogOut("analog2", signal);
         
+        ControlMote.setAnalogOut("analog4", VavSystemController.getInstance().getAverageSystemHumidity());
+        
         setSystemPoint("operating and mode", VavSystemController.getInstance().systemState.ordinal());
         String systemStatus = getStatusMessage();
         String scheduleStatus = ScheduleProcessJob.getSystemStatusString();
@@ -349,7 +351,7 @@ public class VavIERtu extends VavSystemProfile
                                              .addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
                                              .setTz(tz)
                                              .build();
-        String humidificationEnabledId = hayStack.addPoint(analog3OutputEnabled);
+        String humidificationEnabledId = hayStack.addPoint(humidificationEnabled);
         hayStack.writeDefaultValById(humidificationEnabledId, 0.0 );
         
         

@@ -403,9 +403,9 @@ public class Pulse
 						val = cmRegularUpdateMessage_t.humidity.get();
 						if (val > 0) {
 							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-							hayStack.writeHisValById(logPoint.get("id").toString(), getHumidityConversion(val));
+							hayStack.writeHisValById(logPoint.get("id").toString(), val/*getHumidityConversion(val)*/);
 						}
-						CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Humidity " + getHumidityConversion(val));
+						CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Humidity " + val /*getHumidityConversion(val)*/);
 						break;
 				}
 			}

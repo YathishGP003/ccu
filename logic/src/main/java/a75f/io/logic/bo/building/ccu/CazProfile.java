@@ -103,6 +103,7 @@ public class CazProfile extends ZoneProfile
                 CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + cazEquip.nodeAddr + "\"", "Zone Temp Dead");
 
             }
+            CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + cazEquip.nodeAddr + "\"", (double)TEMP_DEAD.ordinal());
             return;
         }
 

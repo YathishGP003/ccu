@@ -31,6 +31,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.Port;
+import a75f.io.logic.bo.building.definitions.StandaloneLogicalFanSpeeds;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
 
@@ -82,8 +83,8 @@ public class LSmartStat {
                     CCUHsApi hayStack = CCUHsApi.getInstance();
                     HashMap device = hayStack.read("device and addr == \"" + node + "\"");
                     controlsMessage_t.controls.setTemperature.set((short) 144); //for Smartstat we always send desired temp as fixed value.
-                    controlsMessage_t.controls.fanSpeed.set(SmartStatFanSpeed_t.values()[(int) getOperationalMode("fan",zp.getEquip().getId())]);
-                    controlsMessage_t.controls.conditioningMode.set(SmartStatConditioningMode_t.values()[(int) getOperationalMode("temp",zp.getEquip().getId())]);
+                    controlsMessage_t.controls.fanSpeed.set(getOperationalMode("fan",zp.getEquip().getId()));
+                    controlsMessage_t.controls.conditioningMode.set(SmartStatConditioningMode_t.values()[(int) getTempOperationalMode("temp",zp.getEquip().getId())]);
                     if (device != null && device.size() > 0) {
                         ArrayList<HashMap> physicalOpPoints = hayStack.readAll("point and physical and cmd and deviceRef == \"" + device.get("id") + "\"");
                         for (HashMap opPoint : physicalOpPoints) {
@@ -214,8 +215,8 @@ public class LSmartStat {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap device = hayStack.read("device and addr == \"" + node + "\"");
         controls.setTemperature.set((short)(getDesiredTemp(node) * 2)); //for Smartstat we always send desired temp as fixed values??? doubts over here? kumar
-        controls.fanSpeed.set(SmartStatFanSpeed_t.values()[(int) getOperationalMode("fan",equipId)]);
-        controls.conditioningMode.set(SmartStatConditioningMode_t.values()[(int) getOperationalMode("temp",equipId)]);
+        controls.fanSpeed.set(getOperationalMode("fan",equipId));
+        controls.conditioningMode.set(SmartStatConditioningMode_t.values()[(int) getTempOperationalMode("temp",equipId)]);
         if (device != null && device.size() > 0) {
             ArrayList<HashMap> physicalOpPoints = hayStack.readAll("point and physical and cmd and deviceRef == \"" + device.get("id") + "\"");
             for (HashMap opPoint : physicalOpPoints) {
@@ -245,10 +246,51 @@ public class LSmartStat {
     public static double getHeatPumpChangeOverType(short addr) {
         return CCUHsApi.getInstance().readDefaultVal("point and zone and config and standalone and relay6 and type and group == \""+addr+"\"");
     }
+    public static double getTempOperationalMode(String cmd, String equipRef) {
 
-    public static double getOperationalMode(String cmd, String equipRef){
+        return CCUHsApi.getInstance().readPointPriorityValByQuery("point and standalone and operation and mode and his and " + cmd + " and equipRef== \"" + equipRef + "\"");
+    }
+    public static SmartStatFanSpeed_t getOperationalMode(String cmd, String equipRef){
 
-        return CCUHsApi.getInstance().readPointPriorityValByQuery("point and standalone and operation and mode and his and "+cmd+" and equipRef== \"" + equipRef + "\"");
+        double fanMode = CCUHsApi.getInstance().readPointPriorityValByQuery("point and standalone and operation and mode and his and "+cmd+" and equipRef== \"" + equipRef + "\"");
+        StandaloneLogicalFanSpeeds fanSpeeds = StandaloneLogicalFanSpeeds.values()[(int)fanMode];
+        SmartStatFanSpeed_t fanSpeed_t = SmartStatFanSpeed_t.FAN_SPEED_AUTO;
+        switch (fanSpeeds){
+            case OFF:
+                fanSpeed_t = SmartStatFanSpeed_t.FAN_SPEED_OFF;
+                break;
+            case AUTO:
+                fanSpeed_t = SmartStatFanSpeed_t.FAN_SPEED_AUTO;
+                break;
+            case FAN_LOW_CURRENT_OCCUPIED:
+                fanSpeed_t = SmartStatFanSpeed_t.FAN_SPEED_LOW;
+                break;
+            case FAN_LOW_OCCUPIED:
+                fanSpeed_t = SmartStatFanSpeed_t.FAN_SPEED_LOW;
+                break;
+            case FAN_LOW_ALL_TIMES:
+                fanSpeed_t = SmartStatFanSpeed_t.FAN_SPEED_LOW;
+                break;
+            case FAN_HIGH_OCCUPIED://High equal to medium
+                fanSpeed_t = SmartStatFanSpeed_t.FAN_SPEED_HIGH;
+                break;
+            case FAN_HIGH_CURRENT_OCCUPIED:
+                fanSpeed_t = SmartStatFanSpeed_t.FAN_SPEED_HIGH;
+                break;
+            case FAN_HIGH_ALL_TIMES:
+                fanSpeed_t = SmartStatFanSpeed_t.FAN_SPEED_HIGH;
+                break;
+            case FAN_HIGH2_OCCUPIED://High2 is actual high in firmware mapping
+                fanSpeed_t = SmartStatFanSpeed_t.FAN_SPEED_HIGH2;
+                break;
+            case FAN_HIGH2_CURRENT_OCCUPIED:
+                fanSpeed_t = SmartStatFanSpeed_t.FAN_SPEED_HIGH2;
+                break;
+            case FAN_HIGH2_ALL_TIMES:
+                fanSpeed_t = SmartStatFanSpeed_t.FAN_SPEED_HIGH2;
+                break;
+        }
+        return fanSpeed_t;
     }
 
     private static short getConfigEnabled(String relays, short address){

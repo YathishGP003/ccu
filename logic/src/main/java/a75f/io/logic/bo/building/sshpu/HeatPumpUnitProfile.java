@@ -1,5 +1,6 @@
 package a75f.io.logic.bo.building.sshpu;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -11,6 +12,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.Occupancy;
@@ -20,7 +22,7 @@ import a75f.io.logic.bo.building.ZoneTempState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.SmartStatFanRelayType;
 import a75f.io.logic.bo.building.definitions.SmartStatHeatPumpChangeOverType;
-import a75f.io.logic.bo.building.definitions.StandaloneFanSpeed;
+import a75f.io.logic.bo.building.definitions.StandaloneLogicalFanSpeeds;
 import a75f.io.logic.bo.building.definitions.StandaloneOperationalMode;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.StandaloneScheduler;
@@ -123,11 +125,19 @@ public class HeatPumpUnitProfile extends ZoneProfile {
             double ssOperatingMode = getOperationalModes("temp", hpuEquip.getId());
             double ssFanOpMode = getOperationalModes("fan", hpuEquip.getId());
             StandaloneOperationalMode opMode = StandaloneOperationalMode.values()[(int) ssOperatingMode];
-            StandaloneFanSpeed fanSpeed = StandaloneFanSpeed.values()[(int) ssFanOpMode];
-            if (!occupied && (fanSpeed != OFF)) {
-                if (fanSpeed != StandaloneFanSpeed.AUTO) {
-                    StandaloneScheduler.updateOperationalPoints(hpuEquip.getId(), "fan and operation and mode", StandaloneFanSpeed.AUTO.ordinal());
-                    fanSpeed = StandaloneFanSpeed.AUTO;
+            StandaloneLogicalFanSpeeds fanSpeed = StandaloneLogicalFanSpeeds.values()[(int) ssFanOpMode];
+            int fanModeSaved = Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).getInt(hpuEquip.getId(),0);
+            if (!occupied && (fanSpeed != StandaloneLogicalFanSpeeds.OFF)) {
+                if (fanSpeed != StandaloneLogicalFanSpeeds.AUTO) {
+                    StandaloneScheduler.updateOperationalPoints(hpuEquip.getId(), "fan and operation and mode", StandaloneLogicalFanSpeeds.AUTO.ordinal());
+                    fanSpeed = StandaloneLogicalFanSpeeds.AUTO;
+                }
+            }
+            if(occupied && (fanSpeed == StandaloneLogicalFanSpeeds.AUTO) && (fanModeSaved != 0)){
+                //KUMAR need to reset back for FAN_LOW_OCCIPIED or FAN_MEDIUM_OCCUPIED or FAN_HIGH_OCCUPIED_PERIOD means next day schedule periods
+                if(fanSpeed == StandaloneLogicalFanSpeeds.AUTO) {
+                    StandaloneScheduler.updateOperationalPoints(hpuEquip.getId(), "fan and operation and mode", fanModeSaved);
+                    fanSpeed = StandaloneLogicalFanSpeeds.values()[ fanModeSaved];
                 }
             }
             if(occuStatus != null){
@@ -137,7 +147,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
             }
             Log.d(TAG, " smartstat hpu, updates =" + node+","+roomTemp+","+occupied+","+","+state);
 
-            if((fanSpeed != OFF) ){
+            if((fanSpeed != StandaloneLogicalFanSpeeds.OFF) ){
                 switch (opMode){
                     case AUTO:
                         if(roomTemp < averageDesiredTemp){
@@ -154,7 +164,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                             hpuCoolOnlyMode(hpuDevice,hpuEquip.getId(),roomTemp,occuStatus,node,fanSpeed);
                         }else {
                             state = DEADBAND;
-                            if(fanSpeed == AUTO)
+                            if(fanSpeed == StandaloneLogicalFanSpeeds.AUTO)
                                 resetRelays(hpuEquip.getId(),node,curHumidity,ZoneTempState.NONE);
                             else {
                                 handleFanStages(hpuEquip.getId(), node, fanSpeed, curHumidity);
@@ -167,7 +177,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                             hpuHeatOnlyMode(hpuDevice,hpuEquip.getId(),roomTemp,occuStatus,node,fanSpeed);
                         }else {
                             state = DEADBAND;
-                            if(fanSpeed == AUTO)
+                            if(fanSpeed == StandaloneLogicalFanSpeeds.AUTO)
                                 resetRelays(hpuEquip.getId(),node,curHumidity,ZoneTempState.NONE);
                             else {
                                 handleFanStages(hpuEquip.getId(), node, fanSpeed, curHumidity);
@@ -314,14 +324,15 @@ public class HeatPumpUnitProfile extends ZoneProfile {
         return CCUHsApi.getInstance().readHisValByQuery("point and standalone and operation and mode and his and " + cmd + " and equipRef == \"" + equipRef + "\"");
     }
 
-    private void handleFanStages(String equipId, short node, StandaloneFanSpeed fanSpeed, double curHumidity){
+    private void handleFanStages(String equipId, short node, StandaloneLogicalFanSpeeds fanSpeed, double curHumidity){
         int fanStage2Type = (int) getConfigType("relay5", node);
         HashMap<String, Integer> relayStages = new HashMap<String, Integer>();
         switch (fanSpeed) {
             case AUTO:
                 resetRelays(equipId, node,curHumidity,ZoneTempState.NONE);
                 break;
-            case FAN_LOW:
+            case FAN_LOW_CURRENT_OCCUPIED:
+            case FAN_LOW_OCCUPIED:
                 if (occupied) {
                     setCmdSignal("fan and stage1", 1.0, node);
                     relayStages.put("FanStage1", 1);
@@ -329,7 +340,11 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                     setCmdSignal("fan and stage1", 0, node);
 
                 break;
-            case FAN_HIGH:
+            case FAN_LOW_ALL_TIMES:
+                setCmdSignal("fan and stage1", 1.0, node);
+                relayStages.put("FanStage1", 1);
+            case FAN_HIGH_CURRENT_OCCUPIED:
+            case FAN_HIGH_OCCUPIED:
                 if (occupied && (fanStage2Type == SmartStatFanRelayType.FAN_STAGE2.ordinal())) {
                     setCmdSignal("fan and stage1", 1.0, node);
                     setCmdSignal("fan and stage2", 1.0, node);
@@ -338,6 +353,14 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                 }else {
                     setCmdSignal("fan and stage1", 0, node);
                     if (!occupied && (fanStage2Type == SmartStatFanRelayType.FAN_STAGE2.ordinal())) setCmdSignal("fan and stage2", 0, node);
+                }
+                break;
+            case FAN_HIGH_ALL_TIMES:
+                if (fanStage2Type == SmartStatFanRelayType.FAN_STAGE2.ordinal()) {
+                    setCmdSignal("fan and stage1", 1.0, node);
+                    setCmdSignal("fan and stage2", 1.0, node);
+                    relayStages.put("FanStage1", 1);
+                    relayStages.put("FanStage2", 1);
                 }
                 break;
         }
@@ -382,7 +405,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
         StandaloneScheduler.updateSmartStatStatus(equipId, DEADBAND,relayStages ,temperatureState);
     }
 
-    private void hpuCoolOnlyMode(HeatPumpUnitEquip hpuEquip, String equipId, double curTemp,  Occupied occuStatus,Short addr, StandaloneFanSpeed fanSpeed){
+    private void hpuCoolOnlyMode(HeatPumpUnitEquip hpuEquip, String equipId, double curTemp,  Occupied occuStatus,Short addr, StandaloneLogicalFanSpeeds fanSpeed){
 
 
         double hysteresis = StandaloneTunerUtil.getStandaloneStage1Hysteresis(equipId);
@@ -457,14 +480,21 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                         }else
                             setCmdSignal("fan and stage1",0,addr);
                         break;
-                    case FAN_LOW:
+                    case FAN_LOW_CURRENT_OCCUPIED:
+                    case FAN_LOW_OCCUPIED:
                         if(relayStages.containsKey("CoolingStage1") || relayStages.containsKey("CoolingStage2") || occupied) {
                             relayStages.put("FanStage1",1);
                             setCmdSignal("fan and stage1", 1.0, addr);
                         }else
                             setCmdSignal("fan and stage1",0,addr);
                         break;
-                    case FAN_HIGH:
+                    case FAN_LOW_ALL_TIMES:
+                    case FAN_HIGH_ALL_TIMES:
+                        relayStages.put("FanStage1",1);
+                        setCmdSignal("fan and stage1", 1.0, addr);
+                        break;
+                    case FAN_HIGH_CURRENT_OCCUPIED:
+                    case FAN_HIGH_OCCUPIED:
                         if(occupied || relayStages.containsKey("CoolingStage1")) {
                             relayStages.put("FanStage1",1);
                             setCmdSignal("fan and stage1", 1.0, addr);
@@ -484,19 +514,25 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                                 }else
                                     setCmdSignal("fan and stage2",0,addr);
                                 break;
-                            case FAN_LOW:
+                            case FAN_LOW_CURRENT_OCCUPIED:
+                            case FAN_LOW_OCCUPIED:
                                 if(relayStages.containsKey("CoolingStage2") && occupied) {
                                     relayStages.put("FanStage2",1);
                                     setCmdSignal("fan and stage2", 1.0, addr);
                                 }else
                                     setCmdSignal("fan and stage2",0,addr);
                                 break;
-                            case FAN_HIGH:
+                            case FAN_HIGH_CURRENT_OCCUPIED:
+                            case FAN_HIGH_OCCUPIED:
                                 if(occupied || relayStages.containsKey("CoolingStage2")) {
                                     relayStages.put("FanStage2",1);
                                     setCmdSignal("fan and stage2", 1.0, addr);
                                 }else
                                     setCmdSignal("fan and stage2",0,addr);
+                                break;
+                            case FAN_HIGH_ALL_TIMES:
+                                relayStages.put("FanStage2",1);
+                                setCmdSignal("fan and stage2", 1.0, addr);
                                 break;
                         }
                         break;
@@ -521,11 +557,13 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                             setCmdSignal("fan and stage1",0,addr);
                             setCmdSignal("fan and stage2",0,addr);
                             break;
-                        case FAN_LOW:
+                        case FAN_LOW_CURRENT_OCCUPIED:
+                        case FAN_LOW_OCCUPIED:
                             relayStages.put("FanStage1",1);
                             setCmdSignal("fan and stage1",1.0,addr);
                             break;
-                        case FAN_HIGH:
+                        case FAN_HIGH_CURRENT_OCCUPIED:
+                        case FAN_HIGH_OCCUPIED:
 
                             if(isFanStage1Enabled) {
                                 relayStages.put("FanStage1", 1);
@@ -539,8 +577,28 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                     }
 
                 }else {
-                    setCmdSignal("fan and stage1", 0, addr);
-                    setCmdSignal("fan and stage2",0,addr);
+                    switch (fanSpeed){
+                        case FAN_LOW_ALL_TIMES:
+                            if(isFanStage1Enabled) {
+                                relayStages.put("FanStage1", 1);
+                                setCmdSignal("fan and stage1", 1.0, addr);
+                            }
+                            break;
+                        case FAN_HIGH_ALL_TIMES:
+                            if(isFanStage1Enabled) {
+                                relayStages.put("FanStage1", 1);
+                                setCmdSignal("fan and stage1", 1.0, addr);
+                            }
+                            if(isFanRelay5Enabled && (fanRelayType == SmartStatFanRelayType.FAN_STAGE2)) {
+                                relayStages.put("FanStage2", 1);
+                                setCmdSignal("fan and stage2", 1.0, addr);
+                            }
+                            break;
+                        default:
+                            setCmdSignal("fan and stage1", 0, addr);
+                            setCmdSignal("fan and stage2",0,addr);
+                            break;
+                    }
                 }
             }else{
                 if((getCmdSignal("compressor and stage1", addr) > 0) || ((hpChangeOverType == SmartStatHeatPumpChangeOverType.ENERGIZE_IN_COOLING) && (getCmdSignal("changeover and stage1",addr) > 0)))
@@ -586,7 +644,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
             temperatureState = ZoneTempState.EMERGENCY;
         StandaloneScheduler.updateSmartStatStatus(equipId, state, relayStages,temperatureState);
     }
-    private void hpuHeatOnlyMode(HeatPumpUnitEquip hpuEquip,String equipId, double curTemp, Occupied occuStatus,Short addr, StandaloneFanSpeed fanSpeed){
+    private void hpuHeatOnlyMode(HeatPumpUnitEquip hpuEquip,String equipId, double curTemp, Occupied occuStatus,Short addr, StandaloneLogicalFanSpeeds fanSpeed){
         double hysteresis = StandaloneTunerUtil.getStandaloneStage1Hysteresis(equipId);
         boolean isCompressorStage1Enabled = getConfigEnabled("relay1",addr) > 0 ? true : false;
         boolean isCompressorStage2Enabled = getConfigEnabled("relay2",addr) > 0 ? true : false;
@@ -681,19 +739,26 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                         }else
                             setCmdSignal("fan and stage1",0,addr);
                         break;
-                    case FAN_LOW:
+                    case FAN_LOW_CURRENT_OCCUPIED:
+                    case FAN_LOW_OCCUPIED:
                         if(relayStages.containsKey("HeatingStage1") || relayStages.containsKey("HeatingStage2") || occupied) {
                             relayStages.put("FanStage1", 1);
                             setCmdSignal("fan and stage1", 1.0, addr);
                         }else
                             setCmdSignal("fan and stage1",0,addr);
                         break;
-                    case FAN_HIGH:
+                    case FAN_HIGH_CURRENT_OCCUPIED:
+                    case FAN_HIGH_OCCUPIED:
                         if(occupied || relayStages.containsKey("HeatingStage1")) {
                             relayStages.put("FanStage1", 1);
                             setCmdSignal("fan and stage1", 1.0, addr);
                         }else
                             setCmdSignal("fan and stage1",0,addr);
+                        break;
+                    case FAN_HIGH_ALL_TIMES:
+                    case FAN_LOW_ALL_TIMES:
+                        relayStages.put("FanStage1", 1);
+                        setCmdSignal("fan and stage1", 1.0, addr);
                         break;
                 }
             }
@@ -708,19 +773,25 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                                 }else
                                     setCmdSignal("fan and stage2",0,addr);
                                 break;
-                            case FAN_LOW:
+                            case FAN_LOW_CURRENT_OCCUPIED:
+                            case FAN_LOW_OCCUPIED:
                                 if(relayStages.containsKey("HeatingStage2") && occupied) {
                                     relayStages.put("FanStage2", 1);
                                     setCmdSignal("fan and stage2", 1.0, addr);
                                 }else
                                     setCmdSignal("fan and stage2",0,addr);
                                 break;
-                            case FAN_HIGH:
+                            case FAN_HIGH_CURRENT_OCCUPIED:
+                            case FAN_HIGH_OCCUPIED:
                                 if(occupied || relayStages.containsKey("HeatingStage2")) {
                                     relayStages.put("FanStage2", 1);
                                     setCmdSignal("fan and stage2", 1.0, addr);
                                 }else
                                     setCmdSignal("fan and stage2",0,addr);
+                                break;
+                            case FAN_HIGH_ALL_TIMES:
+                                relayStages.put("FanStage2", 1);
+                                setCmdSignal("fan and stage2", 1.0, addr);
                                 break;
                         }
                         break;
@@ -748,13 +819,15 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                             setCmdSignal("fan and stage1",0,addr);
                             setCmdSignal("fan and stage2",0,addr);
                             break;
-                        case FAN_LOW:
+                        case FAN_LOW_CURRENT_OCCUPIED:
+                        case FAN_LOW_OCCUPIED:
                             if(isFanStage1Enabled) {
                                 relayStages.put("FanStage1", 1);
                                 setCmdSignal("fan and stage1", 1.0, addr);
                             }
                             break;
-                        case FAN_HIGH:
+                        case FAN_HIGH_CURRENT_OCCUPIED:
+                        case FAN_HIGH_OCCUPIED:
                             if(isFanStage1Enabled) {
                                 relayStages.put("FanStage1", 1);
                                 setCmdSignal("fan and stage1", 1.0, addr);
@@ -767,8 +840,28 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                     }
 
                 }else {
-                    setCmdSignal("fan and stage1", 0, addr);
-                    setCmdSignal("fan and stage2",0,addr);
+                    switch (fanSpeed){
+                        case FAN_LOW_ALL_TIMES:
+                            if(isFanStage1Enabled) {
+                                relayStages.put("FanStage1", 1);
+                                setCmdSignal("fan and stage1", 1.0, addr);
+                            }
+                            break;
+                        case FAN_HIGH_ALL_TIMES:
+                            if(isFanStage1Enabled) {
+                                relayStages.put("FanStage1", 1);
+                                setCmdSignal("fan and stage1", 1.0, addr);
+                            }
+                            if(isFanRelay5Enabled && (fanRelayType == SmartStatFanRelayType.FAN_STAGE2)) {
+                                relayStages.put("FanStage2", 1);
+                                setCmdSignal("fan and stage2", 1.0, addr);
+                            }
+                            break;
+                        default:
+                            setCmdSignal("fan and stage1", 0, addr);
+                            setCmdSignal("fan and stage2",0,addr);
+                            break;
+                    }
                 }
             }else{
 

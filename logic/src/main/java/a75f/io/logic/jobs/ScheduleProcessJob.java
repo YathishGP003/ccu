@@ -766,6 +766,12 @@ public class ScheduleProcessJob extends BaseJob {
         double fanopModePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and fan and mode and operation and equipRef == \""+equipID+"\"");
         double operationModePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and temp and mode and operation and equipRef == \""+equipID+"\"");
 
+        boolean isCoolingOn = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay6 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
+        boolean isHeatingOn = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay4 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
+        boolean isFanLowEnabled = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay3 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
+        boolean isFanMediumEnabled = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay1 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
+        boolean isFanHighEnabled = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay2 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
+
         if (equipStatusPoint.length() > 0)
         {
             p2FCUPoints.put("Status",equipStatusPoint);
@@ -787,42 +793,73 @@ public class ScheduleProcessJob extends BaseJob {
         }else{
             p2FCUPoints.put("Conditioning Mode",0);
         }
+        if(isCoolingOn && !isHeatingOn)
+            p2FCUPoints.put("condEnabled","Cool Only");
+        else if(!isCoolingOn && isHeatingOn)
+            p2FCUPoints.put("condEnabled","Heat Only");
+        else if(!isCoolingOn && !isHeatingOn)
+            p2FCUPoints.put("condEnabled","Off");
+        if(isFanLowEnabled && isFanMediumEnabled && !isFanHighEnabled)
+            p2FCUPoints.put("fanEnabled","No High Fan");
+        else if(isFanLowEnabled && !isFanMediumEnabled)
+            p2FCUPoints.put("fanEnabled","No Medium High Fan");
+        else if(!isFanLowEnabled)
+            p2FCUPoints.put("fanEnabled","No Fan");
         return p2FCUPoints;
     }
 
 
     public static HashMap get4PFCUEquipPoints(String equipID) {
-        HashMap p2FCUPoints = new HashMap();
+        HashMap p4FCUPoints = new HashMap();
 
 
 
-        p2FCUPoints.put("Profile","Smartstat - 4 Pipe FCU");
+        p4FCUPoints.put("Profile","Smartstat - 4 Pipe FCU");
         String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and equipRef == \""+equipID+"\"");
         double fanopModePoint = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and fan and mode and operation and equipRef == \""+equipID+"\"");
         double operationModePoint = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and temp and mode and operation and equipRef == \""+equipID+"\"");
 
+        boolean isCoolingOn = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay6 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
+        boolean isHeatingOn = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay4 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
+
+        boolean isFanLowEnabled = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay3 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
+        boolean isFanMediumEnabled = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay1 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
+        boolean isFanHighEnabled = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay2 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
         if (equipStatusPoint.length() > 0)
         {
-            p2FCUPoints.put("Status",equipStatusPoint);
+            p4FCUPoints.put("Status",equipStatusPoint);
             //vavPoints.add(status);
         }else{
-            p2FCUPoints.put("Status","OFF");
+            p4FCUPoints.put("Status","OFF");
         }
         if (fanopModePoint > 0)
         {
-            p2FCUPoints.put("Fan Mode",fanopModePoint);
+            p4FCUPoints.put("Fan Mode",fanopModePoint);
             //vavPoints.add(dampPos+"% Open");
         }else{
-            p2FCUPoints.put("Fan Mode",0);
+            p4FCUPoints.put("Fan Mode",0);
             //vavPoints.add(0);
         }
         if (operationModePoint > 0)
         {
-            p2FCUPoints.put("Conditioning Mode",operationModePoint);
+            p4FCUPoints.put("Conditioning Mode",operationModePoint);
         }else{
-            p2FCUPoints.put("Conditioning Mode",0);
+            p4FCUPoints.put("Conditioning Mode",0);
         }
-        return p2FCUPoints;
+        if(isCoolingOn && !isHeatingOn)
+            p4FCUPoints.put("condEnabled","Cool Only");
+        else if(!isCoolingOn && isHeatingOn)
+            p4FCUPoints.put("condEnabled","Heat Only");
+        else if(!isCoolingOn && !isHeatingOn)
+            p4FCUPoints.put("condEnabled","Off");
+
+        if(isFanLowEnabled && isFanMediumEnabled && !isFanHighEnabled)
+            p4FCUPoints.put("fanEnabled","No High Fan");
+        else if(isFanLowEnabled && !isFanMediumEnabled)
+            p4FCUPoints.put("fanEnabled","No Medium High Fan");
+        else if(!isFanLowEnabled)
+            p4FCUPoints.put("fanEnabled","No Fan");
+        return p4FCUPoints;
     }
 
      public static HashMap getCPUEquipPoints(String equipID) {
@@ -830,6 +867,15 @@ public class ScheduleProcessJob extends BaseJob {
 
                     cpuPoints.put("Profile","Smartstat - Convention Package Unit");
             ArrayList equipStatusPoint = CCUHsApi.getInstance().readAll("point and status and message and equipRef == \""+equipID+"\"");
+
+         boolean isCooling1On = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay1 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
+         boolean isCooling2On = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay2 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
+
+         boolean isHeating1On = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay4 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
+         boolean isHeating2On = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay5 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
+
+         boolean isFanLowEnabled = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay3 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
+         boolean isFanHighEnabled = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay6 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
             double fanopModePoint = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and fan and mode and operation and equipRef == \""+equipID+"\"");
             double operationModePoint = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and temp and mode and operation and equipRef == \""+equipID+"\"");
             double fanHighHumdOption = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and config and relay6 and type and equipRef == \"" + equipID + "\"");
@@ -855,6 +901,7 @@ public class ScheduleProcessJob extends BaseJob {
                 cpuPoints.put("Conditioning Mode",0);
             }
             if(fanHighHumdOption > 0){
+                isFanHighEnabled = false;
                 cpuPoints.put("Fan High Humidity",fanHighHumdOption);
                 if(fanHighHumdOption == 2.0) {
                     targetHumidity = CCUHsApi.getInstance().readDefaultVal("point and standalone and target and humidity and his and equipRef == \"" + equipID + "\"");
@@ -866,6 +913,18 @@ public class ScheduleProcessJob extends BaseJob {
             }else{
                 cpuPoints.put("Fan High Humidity",0);
             }
+
+         if((isCooling1On || isCooling2On) && (!isHeating1On && !isHeating2On))
+             cpuPoints.put("condEnabled","Cool Only");
+         else if((!isCooling1On && !isCooling2On) && (isHeating1On || isHeating2On))
+             cpuPoints.put("condEnabled","Heat Only");
+         else if((!isCooling1On && !isCooling2On) && (!isHeating1On && !isHeating2On))
+             cpuPoints.put("condEnabled","Off");
+
+         if(isFanLowEnabled && !isFanHighEnabled)
+             cpuPoints.put("fanEnabled","No High Fan");
+         else if(!isFanLowEnabled && !isFanHighEnabled)
+             cpuPoints.put("fanEnabled","No Fan");
             return cpuPoints;
     }
 
@@ -876,6 +935,15 @@ public class ScheduleProcessJob extends BaseJob {
 
         cpuPoints.put("Profile","Smartstat - Heat Pump Unit");
         ArrayList equipStatusPoint = CCUHsApi.getInstance().readAll("point and status and message and equipRef == \""+equipID+"\"");
+
+        boolean isCompressor1On = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay1 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
+        boolean isCompressor2On = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay2 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
+
+        boolean isAuxHeatingOn = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay4 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
+        double isChangeOverOn = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay6 and equipRef == \"" + equipID + "\"");
+
+        boolean isFanLowEnabled = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay3 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
+        boolean isFanHighEnabled = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay5 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
         double fanopModePoint = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and fan and mode and operation and equipRef == \""+equipID+"\"");
         double operationModePoint = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and temp and mode and operation and equipRef == \""+equipID+"\"");
         double fanHighHumdOption = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and config and relay5 and type and equipRef == \"" + equipID + "\"");
@@ -902,6 +970,7 @@ public class ScheduleProcessJob extends BaseJob {
             cpuPoints.put("Conditioning Mode",0);
         }
         if(fanHighHumdOption > 0){
+            isFanHighEnabled = false; //Since relay 5 is mapped to humidity or dehumidity
             cpuPoints.put("Fan High Humidity",fanHighHumdOption);
             if(fanHighHumdOption == 2.0) {
                 targetHumidity = CCUHsApi.getInstance().readDefaultVal("point and standalone and target and humidity and his and equipRef == \"" + equipID + "\"");
@@ -913,6 +982,18 @@ public class ScheduleProcessJob extends BaseJob {
         }else{
             cpuPoints.put("Fan High Humidity",0);
         }
+
+        if(!isCompressor1On && !isCompressor1On && (isChangeOverOn == 1.0))
+            cpuPoints.put("condEnabled","Cool Only");
+        else if(!isCompressor1On && !isCompressor1On && ((isChangeOverOn == 2.0) || isAuxHeatingOn))
+            cpuPoints.put("condEnabled","Heat Only");
+        else if(!isCompressor1On && !isCompressor1On && (isChangeOverOn == 0) && !isAuxHeatingOn)
+            cpuPoints.put("condEnabled","Off");
+
+        if(isFanLowEnabled && !isFanHighEnabled)
+            cpuPoints.put("fanEnabled","No High Fan");
+        else if(!isFanLowEnabled && !isFanHighEnabled)
+            cpuPoints.put("fanEnabled","No Fan");
         return cpuPoints;
     }
 

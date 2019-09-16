@@ -434,6 +434,14 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
             case R.id.testHpuRelay6:
                 sendRelayActivationTestSignal();
                 break;
+            case R.id.toggleFanLow:
+                if(switchFanLowG.isChecked()){
+                    switchFanHigh.setEnabled(true);
+                }else {
+                    switchFanHigh.setEnabled(false);
+                    switchFanHigh.setChecked(false);
+                }
+                break;
         }
     }
 

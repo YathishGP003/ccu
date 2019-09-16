@@ -410,6 +410,14 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
             case R.id.testCpuRelay6:
                 sendRelayActivationTestSignal();
                 break;
+            case R.id.toggleFanLow:
+                if(switchFanLowG.isChecked()){
+                    switchFanHighOb.setEnabled(true);
+                }else {
+                    switchFanHighOb.setEnabled(false);
+                    switchFanHighOb.setChecked(false);
+                }
+                break;
         }
     }
 

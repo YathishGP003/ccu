@@ -1,25 +1,28 @@
 package a75f.io.logic.bo.building.sscpu;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.HashMap;
 import java.util.Set;
-
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.Occupancy;
+import a75f.io.logic.bo.building.Output;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.ZoneTempState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.SmartStatFanRelayType;
 import a75f.io.logic.bo.building.definitions.StandaloneFanSpeed;
+import a75f.io.logic.bo.building.definitions.StandaloneLogicalFanSpeeds;
 import a75f.io.logic.bo.building.definitions.StandaloneOperationalMode;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.StandaloneScheduler;
@@ -30,7 +33,8 @@ import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
 import static a75f.io.logic.bo.building.ZoneState.TEMP_DEAD;
-import static a75f.io.logic.bo.building.definitions.StandaloneFanSpeed.OFF;
+import static a75f.io.logic.bo.building.definitions.StandaloneLogicalFanSpeeds.AUTO;
+import static a75f.io.logic.bo.building.definitions.StandaloneLogicalFanSpeeds.OFF;
 
 public class ConventionalUnitProfile extends ZoneProfile {
 
@@ -133,12 +137,22 @@ public class ConventionalUnitProfile extends ZoneProfile {
             double ssFanOpMode = getOperationalModes("fan",cpuEquip.getId());
             int fanStage2Type = (int)getConfigType("relay6",node);
             StandaloneOperationalMode opMode = StandaloneOperationalMode.values()[(int)ssOperatingMode];
-            StandaloneFanSpeed fanSpeed = StandaloneFanSpeed.values()[(int)ssFanOpMode];
+            StandaloneLogicalFanSpeeds fanSpeed = StandaloneLogicalFanSpeeds.values()[(int)ssFanOpMode];
             SmartStatFanRelayType fanHighType = SmartStatFanRelayType.values()[(int)fanStage2Type];
-            if(!occupied &&(fanSpeed != OFF ) ){
-                if(fanSpeed != StandaloneFanSpeed.AUTO) {
-                    StandaloneScheduler.updateOperationalPoints(cpuEquip.getId(), "fan and operation and mode", StandaloneFanSpeed.AUTO.ordinal());
-                    fanSpeed = StandaloneFanSpeed.AUTO;
+            int fanModeSaved = Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).getInt(cpuEquip.getId(),0);
+            Log.d("FANMODE","CPU profile - fanmodesaved="+fanModeSaved+","+fanSpeed.name()+","+occupied);
+            if(!occupied &&(fanSpeed != OFF ) && (fanSpeed != StandaloneLogicalFanSpeeds.FAN_LOW_ALL_TIMES) && (fanSpeed != StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES)&& (fanSpeed != StandaloneLogicalFanSpeeds.FAN_HIGH2_ALL_TIMES)){
+                //Reset to auto during unoccupied hours, if it is not all times set
+                if(fanSpeed != StandaloneLogicalFanSpeeds.AUTO) {
+                    StandaloneScheduler.updateOperationalPoints(cpuEquip.getId(), "fan and operation and mode", StandaloneLogicalFanSpeeds.AUTO.ordinal());
+                    fanSpeed = StandaloneLogicalFanSpeeds.AUTO;
+                }
+            }
+            if(occupied && (fanSpeed == AUTO) && (fanModeSaved != 0)){
+                //KUMAR need to reset back for FAN_LOW_OCCIPIED or FAN_MEDIUM_OCCUPIED or FAN_HIGH_OCCUPIED_PERIOD means next day schedule periods
+                if(fanSpeed == StandaloneLogicalFanSpeeds.AUTO) {
+                    StandaloneScheduler.updateOperationalPoints(cpuEquip.getId(), "fan and operation and mode", fanModeSaved);
+                    fanSpeed = StandaloneLogicalFanSpeeds.values()[ fanModeSaved];
                 }
             }
 
@@ -181,7 +195,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
                             if(getCmdSignal("cooling and stage1", node) > 0)
                                 setCmdSignal("cooling and stage1",0,node);
 
-                            if(occupied && isFanStage1Enabled && ((fanSpeed == StandaloneFanSpeed.FAN_LOW) || (fanSpeed == StandaloneFanSpeed.FAN_HIGH))){
+                            if(occupied && isFanStage1Enabled && (fanSpeed != StandaloneLogicalFanSpeeds.AUTO) /*((fanSpeed == StandaloneLogicalFanSpeeds.FAN_LOW) || (fanSpeed == StandaloneFanSpeed.FAN_HIGH))*/){
                                 relayStages.put("FanStage1",1);
                                 setCmdSignal("fan and stage1",1.0,node);
                             }else if(isFanStage1Enabled)
@@ -192,9 +206,8 @@ public class ConventionalUnitProfile extends ZoneProfile {
                         }
                     }
                 }else{
-                    //TODO Do we  need to send his data when not enabled???
 
-                    if(occupied && isFanStage1Enabled && (fanSpeed == StandaloneFanSpeed.FAN_LOW)){
+                    if(occupied && isFanStage1Enabled && (fanSpeed != StandaloneLogicalFanSpeeds.AUTO) /*(fanSpeed == StandaloneFanSpeed.FAN_LOW)*/){
                         relayStages.put("FanStage1",1);
                         setCmdSignal("fan and stage1",1.0,node);
                     }else if(isFanStage1Enabled)
@@ -213,7 +226,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
                         if (roomTemp <= setTempCooling) {//Turn off stage 2
                             if(getCmdSignal("cooling and stage2", node) > 0)
                                 setCmdSignal("cooling and stage2", 0, node);
-                            if (occupied && isFanStage2Enabled && (fanHighType == SmartStatFanRelayType.FAN_STAGE2) && (fanSpeed == StandaloneFanSpeed.FAN_HIGH)) {
+                            if (occupied && isFanStage2Enabled && (fanHighType == SmartStatFanRelayType.FAN_STAGE2) && ((fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_CURRENT_OCCUPIED) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_OCCUPIED)   ) /*(fanSpeed == StandaloneFanSpeed.FAN_HIGH)*/) {
                                 relayStages.put("FanStage2", 1);
                                 setCmdSignal("fan and stage2", 1.0, node);
                             } else if (isFanStage2Enabled && (fanHighType == SmartStatFanRelayType.FAN_STAGE2))
@@ -224,7 +237,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
                         }
                     }
                 }else{
-                    if(occupied && isFanStage2Enabled && (fanHighType == SmartStatFanRelayType.FAN_STAGE2)&& (fanSpeed == StandaloneFanSpeed.FAN_HIGH)){
+                    if(occupied && isFanStage2Enabled && (fanHighType == SmartStatFanRelayType.FAN_STAGE2)&& ((fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_CURRENT_OCCUPIED) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_OCCUPIED)   ) /*(fanSpeed == StandaloneFanSpeed.FAN_HIGH)*/){
                         relayStages.put("FanStage2",1);
                         setCmdSignal("fan and stage2",1.0,node);
                     }
@@ -256,7 +269,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
                             if(getCmdSignal("heating and stage1", node) > 0)
                                 setCmdSignal("heating and stage1",0,node);
 
-                            if(occupied && isFanStage1Enabled &&   ((fanSpeed == StandaloneFanSpeed.FAN_LOW) || (fanSpeed == StandaloneFanSpeed.FAN_HIGH))){
+                            if(occupied && isFanStage1Enabled &&  (fanSpeed != AUTO) /*((fanSpeed == StandaloneFanSpeed.FAN_LOW) || (fanSpeed == StandaloneFanSpeed.FAN_HIGH))*/){
                                 relayStages.put("FanStage1",1);
                                 setCmdSignal("fan and stage1",1.0,node);
                             }else if(isFanStage1Enabled){
@@ -269,7 +282,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
                     }
                 }else{
 
-                    if(occupied && isFanStage1Enabled &&  (fanSpeed == StandaloneFanSpeed.FAN_LOW)){
+                    if(occupied && isFanStage1Enabled && (fanSpeed != StandaloneLogicalFanSpeeds.AUTO) /*(fanSpeed == StandaloneFanSpeed.FAN_LOW)*/){
                         relayStages.put("FanStage1",1);
                         setCmdSignal("fan and stage1",1.0,node);
                     }else if(isFanStage1Enabled)setCmdSignal("fan and stage1",0,node);
@@ -289,7 +302,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
                         if (roomTemp >= setTempHeating) {//Turn off stage 2
                             if(getCmdSignal("heating and stage2", node) > 0)
                                 setCmdSignal("heating and stage2", 0, node);
-                            if (occupied && isFanStage2Enabled && (fanHighType == SmartStatFanRelayType.FAN_STAGE2) && (fanSpeed == StandaloneFanSpeed.FAN_HIGH)) {
+                            if (occupied && isFanStage2Enabled && (fanHighType == SmartStatFanRelayType.FAN_STAGE2) && ((fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_CURRENT_OCCUPIED) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_OCCUPIED)   )/*(fanSpeed == StandaloneFanSpeed.FAN_HIGH)*/) {
                                 relayStages.put("FanStage2", 1);
                                 setCmdSignal("fan and stage2", 1.0, node);
                             } else if (isFanStage2Enabled && (fanHighType == SmartStatFanRelayType.FAN_STAGE2)){
@@ -301,7 +314,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
                         }
                     }
                 }else{
-                    if(occupied && isFanStage2Enabled && (fanHighType == SmartStatFanRelayType.FAN_STAGE2) && (fanSpeed == StandaloneFanSpeed.FAN_HIGH)){
+                    if(occupied && isFanStage2Enabled && (fanHighType == SmartStatFanRelayType.FAN_STAGE2) && ((fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_CURRENT_OCCUPIED) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_OCCUPIED)   )/*(fanSpeed == StandaloneFanSpeed.FAN_HIGH)*/){
                         relayStages.put("FanStage2",1);
                         setCmdSignal("fan and stage2",1.0,node);
                     }
@@ -316,13 +329,13 @@ public class ConventionalUnitProfile extends ZoneProfile {
             else
             {
                 if(occupied && (fanSpeed != OFF)) {
-                    if(isFanStage1Enabled &&   ((fanSpeed == StandaloneFanSpeed.FAN_LOW) || (fanSpeed == StandaloneFanSpeed.FAN_HIGH))) {
+                    if(isFanStage1Enabled &&  (fanSpeed != AUTO) /*((fanSpeed == StandaloneFanSpeed.FAN_LOW) || (fanSpeed == StandaloneFanSpeed.FAN_HIGH))*/) {
                         relayStages.put("FanStage1", 1);
                         setCmdSignal("fan and stage1",1.0,node);
                     }else{
                         setCmdSignal("fan and stage1",0,node);
                     }
-                    if(isFanStage2Enabled  && (fanHighType == SmartStatFanRelayType.FAN_STAGE2) &&  (fanSpeed == StandaloneFanSpeed.FAN_HIGH)) {
+                    if(isFanStage2Enabled  && (fanHighType == SmartStatFanRelayType.FAN_STAGE2) && ((fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_CURRENT_OCCUPIED) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_OCCUPIED)   ) /*(fanSpeed == StandaloneFanSpeed.FAN_HIGH)*/) {
                         relayStages.put("FanStage2", 1);
                         setCmdSignal("fan and stage2",1.0,node);
                     }else if(fanHighType == SmartStatFanRelayType.FAN_STAGE2){

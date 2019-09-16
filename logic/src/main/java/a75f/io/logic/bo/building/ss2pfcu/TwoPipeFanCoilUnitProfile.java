@@ -1,5 +1,6 @@
 package a75f.io.logic.bo.building.ss2pfcu;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -11,6 +12,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.Occupancy;
@@ -18,7 +20,7 @@ import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.ZoneTempState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.definitions.StandaloneFanSpeed;
+import a75f.io.logic.bo.building.definitions.StandaloneLogicalFanSpeeds;
 import a75f.io.logic.bo.building.definitions.StandaloneOperationalMode;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.StandaloneScheduler;
@@ -29,6 +31,7 @@ import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
 import static a75f.io.logic.bo.building.ZoneState.TEMP_DEAD;
+import static a75f.io.logic.bo.building.definitions.StandaloneFanSpeed.AUTO;
 import static a75f.io.logic.bo.building.definitions.StandaloneFanSpeed.OFF;
 
 public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
@@ -117,24 +120,33 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
             double ssFanOpMode = getOperationalModes("fan", twoPfcuEquip.getId());
             updateThresholdsForTwoPipe(twoPfcuEquip.getId());
             StandaloneOperationalMode opMode = StandaloneOperationalMode.values()[(int) ssOperatingMode];
-            StandaloneFanSpeed fanSpeed = StandaloneFanSpeed.values()[(int) ssFanOpMode];
+            StandaloneLogicalFanSpeeds fanSpeed = StandaloneLogicalFanSpeeds.values()[(int) ssFanOpMode];
             setTempCooling = twoPfcuDevice.getDesiredTempCooling();
             setTempHeating = twoPfcuDevice.getDesiredTempHeating();
             supplyWaterTempTh2 = twoPfcuDevice.getSupplyWaterTemp();
             String zoneId = HSUtil.getZoneIdFromEquipId(twoPfcuEquip.getId());
             Occupied occuStatus = ScheduleProcessJob.getOccupiedModeCache(zoneId);
+            int fanModeSaved = Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).getInt(twoPfcuEquip.getId(),0);
             Log.d(TAG, " smartstat 2pfcu, updates 111=" + heatingThreshold+","+coolingThreshold + "," + setTempHeating + "," + setTempCooling + "," + roomTemp+","+supplyWaterTempTh2);
 
             boolean occupied = (occuStatus == null ? false : occuStatus.isOccupied());
             //For dual temp but for single mode we use tuners
 
-            if (!occupied && (fanSpeed != OFF)) {
-                if (fanSpeed != StandaloneFanSpeed.AUTO) {
-                    StandaloneScheduler.updateOperationalPoints(twoPfcuEquip.getId(), "fan and operation and mode", StandaloneFanSpeed.AUTO.ordinal());
-                    fanSpeed = StandaloneFanSpeed.AUTO;
+            if (!occupied && (fanSpeed != StandaloneLogicalFanSpeeds.OFF)) {
+                if (fanSpeed != StandaloneLogicalFanSpeeds.AUTO) {
+                    StandaloneScheduler.updateOperationalPoints(twoPfcuEquip.getId(), "fan and operation and mode", StandaloneLogicalFanSpeeds.AUTO.ordinal());
+                    fanSpeed = StandaloneLogicalFanSpeeds.AUTO;
                 }
             }
-            if(fanSpeed != OFF){
+
+            if(occupied && (fanSpeed == StandaloneLogicalFanSpeeds.AUTO) && (fanModeSaved != 0)){
+                //KUMAR need to reset back for FAN_LOW_OCCIPIED or FAN_MEDIUM_OCCUPIED or FAN_HIGH_OCCUPIED_PERIOD means next day schedule periods
+                if(fanSpeed == StandaloneLogicalFanSpeeds.AUTO) {
+                    StandaloneScheduler.updateOperationalPoints(twoPfcuEquip.getId(), "fan and operation and mode", fanModeSaved);
+                    fanSpeed = StandaloneLogicalFanSpeeds.values()[ fanModeSaved];
+                }
+            }
+            if(fanSpeed != StandaloneLogicalFanSpeeds.OFF){
                 switch (opMode){
                     case AUTO:
                         if(supplyWaterTempTh2 > heatingThreshold){
@@ -294,7 +306,7 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
     public double getOperationalModes(String cmd, String equipRef) {
         return CCUHsApi.getInstance().readHisValByQuery("point and standalone and operation and mode and his and " + cmd + " and equipRef == \"" + equipRef + "\"");
     }
-    private void fanOperationalModes(String equipId, StandaloneFanSpeed fanSpeed, short addr, boolean occupied, StandaloneOperationalMode opMode, double roomTemp){
+    private void fanOperationalModes(String equipId, StandaloneLogicalFanSpeeds fanSpeed, short addr, boolean occupied, StandaloneOperationalMode opMode, double roomTemp){
 
         HashMap<String,Integer> relayStates = new HashMap<String, Integer>();
         boolean isFanMediumEnabled = getConfigEnabled("relay1",addr) > 0 ? true : false;
@@ -306,45 +318,54 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
             case AUTO:
                 resetRelays(equipId,addr,ZoneTempState.NONE);
                 break;
-            case FAN_HIGH://Firmware mapping is medium
+            case FAN_HIGH_CURRENT_OCCUPIED://Firmware mapping is medium
+            case FAN_HIGH_OCCUPIED:
+            case FAN_HIGH_ALL_TIMES:
 
                 if (isFanLowEnabled) {
                     if (occupied) {
-                        setCmdSignal("fan and low", 1.0, addr);
-                        relayStates.put("FanStage1", 1);
+                        setCmdSignal("fan and low", 0, addr);
                     }
                 }
                 if (isFanMediumEnabled) {
-                    if (getCmdSignal("fan and medium", addr) < 1.0)
-                        setCmdSignal("fan and medium", 1.0, addr);
-                    relayStates.put("FanStage2", 1);
+                    if(occupied || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES)) {
+                        if (getCmdSignal("fan and medium", addr) == 0)
+                            setCmdSignal("fan and medium", 1.0, addr);
+                        relayStates.put("FanStage2", 1);
+                    }
                 }
                 if (isFanHighEnabled) {
                     if (getCmdSignal("fan and high", addr) > 0)
                         setCmdSignal("fan and high", 0, addr);
                 }
                 break;
-            case FAN_HIGH2://firmware mapping is high
+            case FAN_HIGH2_CURRENT_OCCUPIED://firmware mapping is high
+            case FAN_HIGH2_OCCUPIED:
+            case FAN_HIGH2_ALL_TIMES:
 
                 if (isFanLowEnabled) {
-                    setCmdSignal("fan and low", 1.0, addr);
-                    relayStates.put("FanStage1", 1);
+                    setCmdSignal("fan and low", 0, addr);
                 }
                 if (isFanMediumEnabled) {
-                    if (getCmdSignal("fan and medium", addr) < 1.0)
-                        setCmdSignal("fan and medium", 1.0, addr);
-                    relayStates.put("FanStage2", 1);
+                    if (getCmdSignal("fan and medium", addr) > 0)
+                        setCmdSignal("fan and medium", 0, addr);
                 }
                 if (isFanHighEnabled) {
-                    if (getCmdSignal("fan and high", addr) < 1.0)
-                        setCmdSignal("fan and high", 1.0, addr);
-                    relayStates.put("FanStage3", 1);
+                    if(occupied || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH2_ALL_TIMES)) {
+                        if (getCmdSignal("fan and high", addr) == 0)
+                            setCmdSignal("fan and high", 1.0, addr);
+                        relayStates.put("FanStage3", 1);
+                    }
                 }
                 break;
-            case FAN_LOW:
+            case FAN_LOW_CURRENT_OCCUPIED:
+            case FAN_LOW_OCCUPIED:
+            case FAN_LOW_ALL_TIMES:
                 if (isFanLowEnabled) {
-                    setCmdSignal("fan and low", 1.0, addr);
-                    relayStates.put("FanStage1", 1);
+                    if(occupied || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_LOW_ALL_TIMES)) {
+                        setCmdSignal("fan and low", 1.0, addr);
+                        relayStates.put("FanStage1", 1);
+                    }
                 }
                 if (isFanMediumEnabled) {
                     if (getCmdSignal("fan and medium", addr) > 0)
@@ -427,7 +448,7 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
         StandaloneScheduler.updateSmartStatStatus(equipId, DEADBAND,new HashMap<String, Integer>() ,temperatureState);
     }
 
-    private void twoPipeFCUCoolOnlyMode(String equipId, short addr, double roomTemp,Occupied occuStatus,StandaloneFanSpeed fanSpeed){
+    private void twoPipeFCUCoolOnlyMode(String equipId, short addr, double roomTemp,Occupied occuStatus,StandaloneLogicalFanSpeeds fanSpeed){
 
         double hysteresis = StandaloneTunerUtil.getStandaloneStage1Hysteresis(equipId);
         boolean isFanMediumEnabled = getConfigEnabled("relay1",addr) > 0 ? true : false;
@@ -445,81 +466,106 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
         }
         HashMap<String,Integer> relayStates = new HashMap<String, Integer>();
 
+        String fanstages = "";
+        Log.d("FANMODE","SmartStat - 111 2PFCcool only :"+fanSpeed.name()+","+relayStates.toString()+","+coolingDeadband+","+roomTemp+","+setTempCooling);
         switch (fanSpeed){
             case AUTO:
                 if(isFanLowEnabled){
-                    if(roomTemp >= setTempCooling || (roomTemp <= setTempHeating)){
-                        setCmdSignal("fan and low", 1.0 , addr);
-                        relayStates.put("FanStage1",1);
+                    if((roomTemp >= setTempCooling) || (roomTemp <= setTempHeating)){
+                        if(getCmdSignal("fan and medium", addr) == 0) {
+                            setCmdSignal("fan and low", 1.0, addr);
+                            setCmdSignal("fan and medium", 0, addr);
+                            setCmdSignal("fan and high", 0, addr);
+                            fanstages = "FanStage1";
+                        }else if((getCmdSignal("fan and low",addr) == 0) && (roomTemp == setTempCooling)) {
+                            setCmdSignal("fan and low", 1.0, addr);
+                            fanstages = "FanStage1";
+                        }
                     }else if( (roomTemp > (setTempHeating+hysteresis)) && (roomTemp <= setTempCooling - hysteresis)){
                         setCmdSignal("fan and low",0,addr);
                     }else {
                         if(getCmdSignal("fan and low",addr) > 0)
-                            relayStates.put("FanStage1",1);
+                            fanstages = "FanStage1";
                     }
                 }
                 if(isFanMediumEnabled){
-                    if((roomTemp >= setTempCooling + coolingDeadband) || (roomTemp <= (setTempHeating - heatingDeadband))){
-                        setCmdSignal("fan and medium", 1.0 , addr);
-                        relayStates.put("FanStage2",1);
+                    if((roomTemp >= (setTempCooling + coolingDeadband) ) || (roomTemp <= (setTempHeating - heatingDeadband))){
+                        if(getCmdSignal("fan and high",addr) == 0) {
+                            setCmdSignal("fan and medium", 1.0, addr);
+                            setCmdSignal("fan and low", 0, addr);
+                            setCmdSignal("fan and high", 0, addr);
+                            fanstages = "FanStage2";
+                        }
                     }else if((roomTemp >= setTempHeating) && (roomTemp <= setTempCooling)){
                         setCmdSignal("fan and medium",0,addr);
                     }else {
                         if(getCmdSignal("fan and medium",addr) > 0)
-                            relayStates.put("FanStage2",1);
+                            fanstages = "FanStage2";
                     }
                 }
                 if(isFanHighEnabled){
                     if((roomTemp >= (setTempCooling + (coolingDeadband * 2.0))) || (roomTemp <= (setTempHeating - (heatingDeadband * 2.0)))){
                         setCmdSignal("fan and high", 1.0 , addr);
-                        relayStates.put("FanStage3",1);
+                        setCmdSignal("fan and medium",0,addr);
+                        setCmdSignal("fan and low",0,addr);
+                        fanstages = "FanStage3";
                     }else if((roomTemp >= (setTempHeating+heatingDeadband)) && (roomTemp <= (setTempCooling + coolingDeadband))){
                         setCmdSignal("fan and high",0,addr);
                     }else {
                         if(getCmdSignal("fan and high",addr) > 0)
-                            relayStates.put("FanStage3",1);
+                            fanstages = "FanStage3";
                     }
                 }
+                if(!fanstages.isEmpty())relayStates.put(fanstages,1);
                 break;
-            case FAN_HIGH://Firmware mapping is medium for pfcu but for CPU and HPU it is high
+            case FAN_HIGH_CURRENT_OCCUPIED://Firmware mapping is medium for pfcu but for CPU and HPU it is high
+            case FAN_HIGH_OCCUPIED:
+            case FAN_HIGH_ALL_TIMES:
 
                 if (isFanLowEnabled) {
-                    if(occupied) {
-                        setCmdSignal("fan and low", 1.0, addr);
-                        relayStates.put("FanStage1", 1);
-                    }
+                    setCmdSignal("fan and low", 0, addr);
+
                 }
                 if(isFanMediumEnabled){
-                    if(getCmdSignal("fan and medium",addr) < 1.0)
-                        setCmdSignal("fan and medium",1.0,addr);
-                    relayStates.put("FanStage2",1);
+                    if(occupied || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES)) {
+                        if (getCmdSignal("fan and medium", addr) == 0)
+                            setCmdSignal("fan and medium", 1.0, addr);
+                        relayStates.put("FanStage2", 1);
+                    }
                 }
                 if(isFanHighEnabled){
                     if(getCmdSignal("fan and high",addr) > 0)
                         setCmdSignal("fan and high",0,addr);
                 }
                 break;
-            case FAN_HIGH2://firmware mapping is high, only for pfcu
+            case FAN_HIGH2_CURRENT_OCCUPIED://firmware mapping is high, only for pfcu
+            case FAN_HIGH2_OCCUPIED:
+            case FAN_HIGH2_ALL_TIMES:
 
                 if (isFanLowEnabled) {
-                    setCmdSignal("fan and low",1.0,addr);
-                    relayStates.put("FanStage1",1);
+                    setCmdSignal("fan and low",0,addr);
                 }
                 if(isFanMediumEnabled){
-                    if(getCmdSignal("fan and medium",addr) < 1.0)
-                        setCmdSignal("fan and medium",1.0,addr);
-                    relayStates.put("FanStage2",1);
+                    if(getCmdSignal("fan and medium",addr) > 0)
+                        setCmdSignal("fan and medium",0,addr);
                 }
                 if(isFanHighEnabled){
-                    if(getCmdSignal("fan and high",addr) < 1.0)
-                        setCmdSignal("fan and high",1.0,addr);
-                    relayStates.put("FanStage3",1);
+
+                    if(occupied || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH2_ALL_TIMES)) {
+                        if (getCmdSignal("fan and high", addr) == 0)
+                            setCmdSignal("fan and high", 1.0, addr);
+                        relayStates.put("FanStage3", 1);
+                    }
                 }
                 break;
-            case FAN_LOW:
+            case FAN_LOW_OCCUPIED:
+            case FAN_LOW_CURRENT_OCCUPIED:
+            case FAN_LOW_ALL_TIMES:
                 if (isFanLowEnabled) {
-                    setCmdSignal("fan and low",1.0,addr);
-                    relayStates.put("FanStage1",1);
+                    if(occupied || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_LOW_ALL_TIMES)) {
+                        setCmdSignal("fan and low", 1.0, addr);
+                        relayStates.put("FanStage1", 1);
+                    }
                 }
                 if(isFanMediumEnabled){
                     if(getCmdSignal("fan and medium",addr) > 0)
@@ -560,7 +606,7 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
         StandaloneScheduler.updateSmartStatStatus(equipId, COOLING,relayStates,ZoneTempState.NONE);
     }
 
-    private void twoPipeFCUHeatOnlyMode(String equipId, short addr, double roomTemp,Occupied occuStatus,StandaloneFanSpeed fanSpeed){
+    private void twoPipeFCUHeatOnlyMode(String equipId, short addr, double roomTemp,Occupied occuStatus,StandaloneLogicalFanSpeeds fanSpeed){
         double hysteresis = StandaloneTunerUtil.getStandaloneStage1Hysteresis(equipId);
         boolean isFanMediumEnabled = getConfigEnabled("relay1",addr) > 0 ? true : false;
         boolean isFanHighEnabled = getConfigEnabled("relay2",addr) > 0 ? true : false;
@@ -575,81 +621,105 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
         }
         HashMap<String,Integer> relayStates = new HashMap<String, Integer>();
 
+        String fanstages = "";
         switch (fanSpeed){
             case AUTO:
+                // Turn on only one relay at any given point of time say if 70 is dt, then 70-68- fan low on, 66-68 - fan medium on, 64-66 - fan high on,
                 if(isFanLowEnabled){
-                    if(roomTemp <= setTempHeating){
-                        setCmdSignal("fan and low", 1.0 , addr);
-                        relayStates.put("FanStage1",1);
+                    if(roomTemp <= setTempHeating ){
+                        if(getCmdSignal("fan and medium",addr) == 0) {
+                            setCmdSignal("fan and low", 1.0, addr);
+                            setCmdSignal("fan and medium", 0, addr);
+                            setCmdSignal("fan and high", 0, addr);
+                            fanstages = "FanStage1";
+                        }else if((getCmdSignal("fan and low",addr) == 0) && (roomTemp == setTempHeating)) {
+                            setCmdSignal("fan and low", 1.0, addr);
+                            fanstages = "FanStage1";
+                        }
                     }else if(roomTemp >= setTempHeating + hysteresis){
                         setCmdSignal("fan and low",0,addr);
                     }else {
                         if(getCmdSignal("fan and low",addr) > 0)
-                            relayStates.put("FanStage1",1);
+                            fanstages = "FanStage1";
                     }
                 }
                 if(isFanMediumEnabled){
                     if(roomTemp <= (setTempHeating - heatingDeadband)){
+                        setCmdSignal("fan and low",0,addr);
+                        setCmdSignal("fan and high",0,addr);
                         setCmdSignal("fan and medium", 1.0 , addr);
-                        relayStates.put("FanStage2",1);
+                        fanstages = "FanStage2";
                     }else if(roomTemp >= setTempHeating){
                         setCmdSignal("fan and medium",0,addr);
                     }else {
                         if(getCmdSignal("fan and medium",addr) > 0)
-                            relayStates.put("FanStage2",1);
+                            fanstages = "FanStage2";
                     }
                 }
                 if(isFanHighEnabled){
                     if(roomTemp <= (setTempHeating - (heatingDeadband * 2.0))){
                         setCmdSignal("fan and high", 1.0 , addr);
+                        setCmdSignal("fan and low",0,addr);
+                        setCmdSignal("fan and medium",0,addr);
+                        fanstages = "FanStage3";
                         relayStates.put("FanStage3",1);
                     }else if(roomTemp >= (setTempHeating - heatingDeadband)){
                         setCmdSignal("fan and high",0,addr);
                     }else {
                         if(getCmdSignal("fan and high",addr) > 0)
-                            relayStates.put("FanStage3",1);
+                            fanstages = "FanStage3";
                     }
                 }
+                if(!fanstages.isEmpty())relayStates.put(fanstages,1);
                 break;
-            case FAN_HIGH://Firmware mapping is medium for pfcu but for CPU and HPU it is high
+            case FAN_HIGH_CURRENT_OCCUPIED://Firmware mapping is medium for pfcu but for CPU and HPU it is high
+            case FAN_HIGH_OCCUPIED:
+            case FAN_HIGH_ALL_TIMES:
 
                 if (isFanLowEnabled) {
                     if(occupied) {
-                        setCmdSignal("fan and low", 1.0, addr);
-                        relayStates.put("FanStage1", 1);
+                        setCmdSignal("fan and low", 0, addr);
                     }
                 }
                 if(isFanMediumEnabled){
-                    if(getCmdSignal("fan and medium",addr) < 1.0)
-                        setCmdSignal("fan and medium",1.0,addr);
-                    relayStates.put("FanStage2",1);
+                    if(occupied || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES)) {
+                        if (getCmdSignal("fan and medium", addr) == 0)
+                            setCmdSignal("fan and medium", 1.0, addr);
+                        relayStates.put("FanStage2", 1);
+                    }
                 }
                 if(isFanHighEnabled){
                     if(getCmdSignal("fan and high",addr) > 0)
                         setCmdSignal("fan and high",0,addr);
                 }
                 break;
-            case FAN_HIGH2://firmware mapping is high, only for pfcu
+            case FAN_HIGH2_CURRENT_OCCUPIED://firmware mapping is high, only for pfcu
+            case FAN_HIGH2_OCCUPIED:
+            case FAN_HIGH2_ALL_TIMES:
 
                 if (isFanLowEnabled) {
-                    setCmdSignal("fan and low",1.0,addr);
-                    relayStates.put("FanStage1",1);
+                    setCmdSignal("fan and low",0,addr);
                 }
                 if(isFanMediumEnabled){
-                    if(getCmdSignal("fan and medium",addr) < 1.0)
-                        setCmdSignal("fan and medium",1.0,addr);
-                    relayStates.put("FanStage2",1);
+                    if(getCmdSignal("fan and medium",addr) > 0)
+                        setCmdSignal("fan and medium",0,addr);
                 }
                 if(isFanHighEnabled){
-                    if(getCmdSignal("fan and high",addr) < 1.0)
-                        setCmdSignal("fan and high",1.0,addr);
-                    relayStates.put("FanStage3",1);
+                    if(occupied || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH2_ALL_TIMES)) {
+                        if (getCmdSignal("fan and high", addr) == 0)
+                            setCmdSignal("fan and high", 1.0, addr);
+                        relayStates.put("FanStage3", 1);
+                    }
                 }
                 break;
-            case FAN_LOW:
+            case FAN_LOW_CURRENT_OCCUPIED:
+            case FAN_LOW_OCCUPIED:
+            case FAN_LOW_ALL_TIMES:
                 if (isFanLowEnabled) {
-                    setCmdSignal("fan and low",1.0,addr);
-                    relayStates.put("FanStage1",1);
+                    if(occupied || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_LOW_ALL_TIMES)) {
+                        setCmdSignal("fan and low", 1.0, addr);
+                        relayStates.put("FanStage1", 1);
+                    }
                 }
                 if(isFanMediumEnabled){
                     if(getCmdSignal("fan and medium",addr) > 0)
@@ -694,7 +764,7 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
     private boolean fcuPeriodicWaterValveCheck(short addr, boolean isHourlyCheck){
         Log.d("FCU","fcuPeriodicWaterCheck="+addr+","+isHourlyCheck+","+twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer()+","+((System.currentTimeMillis() - twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer())/60000)+","+((System.currentTimeMillis() - twoPfcuDeviceMap.get(addr).getWaterValveLastOnTime())/60000));
         if((twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer() == 0) ||(((System.currentTimeMillis() - twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer())/60000) < 2)){ //ON for two mins
-            if((getCmdSignal("pipe2 and fcu and water and valve",addr) < 1.0) || ( twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer() == 0)) {
+            if((getCmdSignal("pipe2 and fcu and water and valve",addr) == 0) || ( twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer() == 0)) {
                 setCmdSignal("pipe2 and fcu and water and valve", 1.0, addr);
                 twoPfcuDeviceMap.get(addr).setWaterValvePeriodicTimer(System.currentTimeMillis());
                 if(!isHourlyCheck)

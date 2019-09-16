@@ -21,6 +21,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.ZoneTempState;
+import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
@@ -29,6 +30,7 @@ public class StandaloneScheduler {
 
     private static final int SCHEDULER_PRIORITY = 12;
 
+    private static ZoneDataInterface zoneDataInterface = null;
 
     static HashMap<String, String> standaloneStatus = new HashMap<String, String>();
 
@@ -153,18 +155,20 @@ public class StandaloneScheduler {
 
         if((temperatureState != ZoneTempState.FAN_OP_MODE_OFF) && (temperatureState != ZoneTempState.TEMP_DEAD)) {
             if (status.equals("OFF ") && relayStages.size() > 0) status = "";
-            if(relayStages.containsKey("FanStage3") && relayStages.containsKey("FanStage2") && relayStages.containsKey("FanStage1"))
+            /*if(relayStages.containsKey("FanStage3") && relayStages.containsKey("FanStage2") && relayStages.containsKey("FanStage1"))
                 status = status + " Fan 1,2&3 ON";
             else if (relayStages.containsKey("FanStage3") && relayStages.containsKey("FanStage2"))
                 status = status + " Fan 2&3 ON";
             else if (relayStages.containsKey("FanStage3") && relayStages.containsKey("FanStage1"))
-                status = status + " Fan 1&3 ON";
+                status = status + " Fan 1&3 ON";*/
            else if (relayStages.containsKey("FanStage2") && relayStages.containsKey("FanStage1"))
                 status = status + " Fan 1&2 ON";
             else if (relayStages.containsKey("Humidifier") && relayStages.containsKey("FanStage1"))
                 status = status + " Fan 1 ON, Humidifier ON";
             else if (relayStages.containsKey("Dehumidifier") && relayStages.containsKey("FanStage1"))
                 status = status + " Fan 1 ON, Dehumidifier ON";
+            else if (relayStages.containsKey("FanStage3"))
+                status = status + " Fan 3 ON";
             else if (relayStages.containsKey("FanStage2"))
                 status = status + " Fan 2 ON";
             else if (relayStages.containsKey("Humidifier"))
@@ -225,13 +229,22 @@ public class StandaloneScheduler {
             @Override
             protected void onPostExecute( final Void result ) {
                 // continue what you are doing...
+                if (zoneDataInterface != null) {
+                    Log.i("PubNub","Zone Data updateOperationalPoints Refresh");
+                    zoneDataInterface.refreshScreen("");
+                }
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
     }
 
 	public static void updateStandaloneEquipStatus(String equipId,String status) {
         CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and equipRef == \""+equipId+"\"", status);
+        if (zoneDataInterface != null) {
+            Log.i("PubNub","updateStandaloneEquipStatus Refresh");
+            zoneDataInterface.refreshScreen("");
+        }
 
     }
 
+    public static void setZoneDataInterface(ZoneDataInterface in) { zoneDataInterface = in; }
 }

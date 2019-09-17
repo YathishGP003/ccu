@@ -330,7 +330,7 @@ public class CazEquip
     }
 
     public void setHisVal(String tags,double val) {
-        CCUHsApi.getInstance().writeDefaultVal("point and zone and config and ti and "+tags+" and group == \""+nodeAddr+"\"", val);
+        CCUHsApi.getInstance().writeHisValByQuery("point and zone and config and ti and "+tags+" and group == \""+nodeAddr+"\"", val);
     }
 
     public double getCurrentTemp()

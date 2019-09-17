@@ -280,33 +280,31 @@ public abstract class SystemProfile
     
     public void addDefaultSystemPoints(String siteRef, String equipref, String equipDis, String tz)
     {
-        Point systemStatusMessage = new Point.Builder().setDisplayName(equipDis + "-StatusMessage").setEquipRef(equipref).setSiteRef(siteRef).addMarker("system").addMarker("status").addMarker("message").addMarker("writable").setTz(tz).setKind("string").build();
+        Point systemStatusMessage = new Point.Builder()
+                .setDisplayName(equipDis + "-StatusMessage")
+                .setEquipRef(equipref)
+                .setSiteRef(siteRef)
+                .addMarker("system")
+                .addMarker("status")
+                .addMarker("message")
+                .addMarker("writable")
+                .setTz(tz)
+                .setKind("string").build();
         CCUHsApi.getInstance().addPoint(systemStatusMessage);
-        Point systemScheduleStatus = new Point.Builder().setDisplayName(equipDis + "-ScheduleStatus").setEquipRef(equipref).setSiteRef(siteRef).addMarker("system").addMarker("scheduleStatus").addMarker("writable").setTz(tz).setKind("string").build();
+        Point systemScheduleStatus = new Point.Builder()
+                .setDisplayName(equipDis + "-ScheduleStatus")
+                .setEquipRef(equipref).setSiteRef(siteRef)
+                .addMarker("system")
+                .addMarker("scheduleStatus")
+                .addMarker("writable")
+                .setTz(tz)
+                .setKind("string").build();
         CCUHsApi.getInstance().addPoint(systemScheduleStatus);
     }
     
     //VAV & DAB System profile common points are added here.
     public void addRTUSystemPoints(String siteRef, String equipref, String equipDis, String tz) {
         addDefaultSystemPoints(siteRef, equipref, equipDis, tz);
-        Point systemStatusMessage = new Point.Builder()
-                                            .setDisplayName(equipDis+"-StatusMessage")
-                                            .setEquipRef(equipref)
-                                            .setSiteRef(siteRef)
-                                            .addMarker("system").addMarker("status").addMarker("message").addMarker("writable")
-                                            .setTz(tz)
-                                            .setKind("string")
-                                            .build();
-        CCUHsApi.getInstance().addPoint(systemStatusMessage);
-        Point systemScheduleStatus = new Point.Builder()
-                                             .setDisplayName(equipDis+"-ScheduleStatus")
-                                             .setEquipRef(equipref)
-                                             .setSiteRef(siteRef)
-                                             .addMarker("system").addMarker("scheduleStatus").addMarker("writable")
-                                             .setTz(tz)
-                                             .setKind("string")
-                                             .build();
-        CCUHsApi.getInstance().addPoint(systemScheduleStatus);
         Point systemOccupancy = new Point.Builder().setDisplayName(equipDis + "-" + "occupancy").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(systemOccupancy);
         Point systemOperatingMode = new Point.Builder().setDisplayName(equipDis + "-" + "operatingMode").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("operating").addMarker("mode").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();

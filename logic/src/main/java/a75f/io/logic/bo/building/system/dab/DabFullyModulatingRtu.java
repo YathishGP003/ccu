@@ -247,7 +247,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         {
             CCUHsApi.getInstance().writeDefaultVal("system and status and message", systemStatus);
         }
-        if (!CCUHsApi.getInstance().readDefaultStrVal("system and scheduleStatus").equals(systemStatus))
+        if (!CCUHsApi.getInstance().readDefaultStrVal("system and scheduleStatus").equals(scheduleStatus))
         {
             CCUHsApi.getInstance().writeDefaultVal("system and scheduleStatus", scheduleStatus);
         }

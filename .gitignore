@@ -45,6 +45,7 @@ proguard/
 Thumbs.db
 
 .idea
+haystack/objectbox-test/
 create_version.sh
 add_version_to_task.sh
 deploy.sh

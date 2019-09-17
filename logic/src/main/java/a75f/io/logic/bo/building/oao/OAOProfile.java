@@ -94,7 +94,7 @@ public class OAOProfile
                 outsideAirFinalLoopOutput = outsideAirLoopOutput - outsideAirLoopOutput * ((outsideDamperMatTarget - matTemp) / (outsideDamperMatTarget - outsideDamperMatMin));
             }
             else {
-                outsideAirFinalLoopOutput = matTemp < outsideDamperMatMin ? 0 : outsideAirLoopOutput;
+                outsideAirFinalLoopOutput = (matTemp <= outsideDamperMatMin) ? 0 : outsideAirLoopOutput;
             }
         } else {
             outsideAirFinalLoopOutput = outsideAirLoopOutput;

@@ -1,2 +1,6 @@
  - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-695, CM Humidity update
+ - #RENATUS-378, UI | Smartstat zone page operational and fan mode selection
+ - #RENATUS-378, UI | Smartstat zone page operational and fan mode selection
+ - #RENATUS-378, UI | Smartstat zone page operational and fan mode selection
+ - #RENATUS-684, SmartStat | Pipe FCU only one fan relay should turn on
+ - #RENATUS-700, SmartStat | Fan mode changes

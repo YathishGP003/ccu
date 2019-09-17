@@ -903,5 +903,14 @@ public class TestRemoteHsSync
         }
     }
     
+    @Test
+    public void testGetFloors() {
+        CCUHsApi api = new CCUHsApi();
+        HClient hClient   = new HClient("https://renatusv2.azurewebsites.net/", HayStackConstants.USER, HayStackConstants.PASS);
+        HDict tDict = new HDictBuilder().add("filter", "floor and siteRef == @5d7b622a0078582c8705b607").toDict();
+        HGrid floors = hClient.call("read", HGridBuilder.dictToGrid(tDict));
+        floors.dump();
+    }
+    
     
 }

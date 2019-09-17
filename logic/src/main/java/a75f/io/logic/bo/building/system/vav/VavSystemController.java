@@ -78,6 +78,7 @@ public class VavSystemController extends SystemController
     double weightedAverageHeatingOnlyLoadPostML;
     double weightedAverageLoadPostML;
     
+    double co2WA = 0;
     
     private VavSystemController()
     {
@@ -106,6 +107,7 @@ public class VavSystemController extends SystemController
         profile.setSystemPoint("average and humidity", averageSystemHumidity);
         profile.setSystemPoint("average and temp", averageSystemTemperature);
         
+        double co2WASum = 0;
         for (Floor f: HSUtil.getFloors())
         {
             for(Zone z: HSUtil.getZones(f.getId())) {
@@ -132,7 +134,8 @@ public class VavSystemController extends SystemController
                     weightedAverageHeatingOnlyLoadSum += zoneHeatingLoad * zoneDynamicPriority;
                     weightedAverageLoadSum += (zoneCoolingLoad * zoneDynamicPriority) - (zoneHeatingLoad * zoneDynamicPriority);
                     prioritySum += zoneDynamicPriority;
-                    CcuLog.d(L.TAG_CCU_SYSTEM, q.getDisplayName() + " zoneDynamicPriority: " + zoneDynamicPriority + " zoneCoolingLoad: " + zoneCoolingLoad + " zoneHeatingLoad: " + zoneHeatingLoad);
+                    co2WASum += (getEquipCo2(q.getId()) * zoneDynamicPriority);
+                    CcuLog.d(L.TAG_CCU_SYSTEM, q.getDisplayName() + " zoneDynamicPriority: " + zoneDynamicPriority + " zoneCoolingLoad: " + zoneCoolingLoad + " zoneHeatingLoad: " + zoneHeatingLoad+" co2WASum "+co2WASum);
                     CcuLog.d(L.TAG_CCU_SYSTEM, q.getDisplayName() + " weightedAverageCoolingOnlyLoadSum:" + weightedAverageCoolingOnlyLoadSum + " weightedAverageHeatingOnlyLoadSum " + weightedAverageHeatingOnlyLoadSum);
                 }
             }
@@ -149,7 +152,7 @@ public class VavSystemController extends SystemController
         weightedAverageCoolingOnlyLoad = weightedAverageCoolingOnlyLoadSum / prioritySum;
         weightedAverageHeatingOnlyLoad = weightedAverageHeatingOnlyLoadSum / prioritySum;
         weightedAverageLoad = weightedAverageLoadSum / prioritySum;
-        
+        co2WA = co2WASum/prioritySum;
         comfortIndex = (int)(totalCoolingLoad + totalHeatingLoad) /zoneCount;
         
         profile.setSystemPoint("ci and running", comfortIndex);
@@ -391,6 +394,14 @@ public class VavSystemController extends SystemController
         return p.val * Math.pow(zonePriorityMultiplier, (zoneLoad/zonePrioritySpread) > 10 ? 10 : (zoneLoad/zonePrioritySpread));
     }
     
+    private double getEquipCo2(String equipRef) {
+        return CCUHsApi.getInstance().readHisValByQuery("point and air and co2 and sensor and current and equipRef == \""+equipRef+"\"");
+    }
+    
+    @Override
+    public double getSystemCO2WA() {
+        return co2WA;
+    }
     
     /*public double getZoneCurrentTemp(String zoneRef) {
         double tempSum = 0;

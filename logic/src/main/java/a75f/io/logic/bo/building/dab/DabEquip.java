@@ -259,7 +259,7 @@ public class DabEquip
                                     .setSiteRef(siteRef)
                                     .setRoomRef(roomRef)
                                     .setFloorRef(floorRef)
-                                    .addMarker("status").addMarker("vav").addMarker("his").addMarker("dab").addMarker("logical").addMarker("zone").addMarker("equipHis")
+                                    .addMarker("status").addMarker("his").addMarker("dab").addMarker("logical").addMarker("zone").addMarker("equipHis")
                                     .setGroup(String.valueOf(nodeAddr))
                                     .setTz(tz)
                                     .build();

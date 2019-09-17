@@ -171,27 +171,28 @@ public class MeshNetwork extends DeviceNetwork
             return;
         }
         
-        if (ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_IE_RTU) {
-            DaikinIE.sendControl();
-        } else
+        if (ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_IE_RTU)
         {
-            CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
-            msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
-            msg.analog0.set((short) ControlMote.getAnalogOut("analog1"));
-            msg.analog1.set((short) ControlMote.getAnalogOut("analog2"));
-            msg.analog2.set((short) ControlMote.getAnalogOut("analog3"));
-            msg.analog3.set((short) ControlMote.getAnalogOut("analog4"));
-            int relayBitmap = 0;
-            for (int i = 1; i <= 7; i++)
-            {
-                if (ControlMote.getRelayState("relay" + i) > 0)
-                {
-                    relayBitmap |= 1 << (i - 1);
-                }
-            }
-            msg.relayBitmap.set((short) relayBitmap);
-            MeshUtil.sendStructToCM(msg);
+            DaikinIE.sendControl();
         }
+       
+        CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
+        msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
+        msg.analog0.set((short) ControlMote.getAnalogOut("analog1"));
+        msg.analog1.set((short) ControlMote.getAnalogOut("analog2"));
+        msg.analog2.set((short) ControlMote.getAnalogOut("analog3"));
+        msg.analog3.set((short) ControlMote.getAnalogOut("analog4"));
+        int relayBitmap = 0;
+        for (int i = 1; i <= 7; i++)
+        {
+            if (ControlMote.getRelayState("relay" + i) > 0)
+            {
+                relayBitmap |= 1 << (i - 1);
+            }
+        }
+        msg.relayBitmap.set((short) relayBitmap);
+        MeshUtil.sendStructToCM(msg);
+        
         
     }
 }

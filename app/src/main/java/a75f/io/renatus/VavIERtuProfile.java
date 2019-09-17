@@ -196,7 +196,7 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         spMax.setSelection(val != 0 ? spAdapter.getPosition(val) : spArr.size()-1, false);
     
         ArrayList<Double> heatingDatArr = new ArrayList<>();
-        for (double hdat = 75;  hdat <= 100.0; hdat++)
+        for (double hdat = 75;  hdat <= 130.0; hdat++)
         {
             heatingDatArr.add(hdat);
         }
@@ -208,7 +208,7 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
     
         heatingDatMax.setAdapter(heatingAdapter);
         val = systemProfile.getConfigVal("heating and dat and max");
-        heatingDatMax.setSelection(val != 0 ? heatingAdapter.getPosition(val) : heatingDatArr.size() -1, false);
+        heatingDatMax.setSelection(val != 0 ? heatingAdapter.getPosition(val) : heatingAdapter.getPosition(100.0), false);
     
         
         ArrayAdapter<Double> coolingSatTestAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, coolingDatArr);

@@ -29,6 +29,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Sensor;
 import a75f.io.logic.bo.building.SensorType;
 import a75f.io.logic.bo.building.definitions.Port;
+import a75f.io.logic.bo.building.definitions.StandaloneLogicalFanSpeeds;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.haystack.device.SmartStat;
 import a75f.io.logic.bo.util.CCUUtils;
@@ -589,8 +590,48 @@ public class Pulse
 				}
 			}
 			HashMap fanOpModePoint = CCUHsApi.getInstance().read("point and standalone and fan and operation and mode and his and equipRef== \"" + device.get("equipRef") + "\"");
-			if(fanOpModePoint != null && fanOpModePoint.size() > 0)
-				CCUHsApi.getInstance().writePoint(fanOpModePoint.get("id").toString(), TunerConstants.UI_DEFAULT_VAL_LEVEL,"manual",(double)fanSpeed.ordinal(),0);
+			double curFanMode = CCUHsApi.getInstance().readHisValById(fanOpModePoint.get("id").toString());
+			StandaloneLogicalFanSpeeds curFanSpeeds = StandaloneLogicalFanSpeeds.values()[(int)curFanMode];
+
+			CcuLog.d(L.TAG_CCU_DEVICE, "updateSetTempFromSmartStat : FanMode " + fanSpeed.name()+","+curFanSpeeds.name());
+			boolean isFanModeChanged = false;
+			if(fanOpModePoint != null && fanOpModePoint.size() > 0) {
+				StandaloneLogicalFanSpeeds fanSpeed_t = StandaloneLogicalFanSpeeds.AUTO;
+				switch (fanSpeed){
+					case FAN_SPEED_LOW:
+						if((curFanSpeeds != StandaloneLogicalFanSpeeds.FAN_LOW_ALL_TIMES) && (curFanSpeeds != StandaloneLogicalFanSpeeds.FAN_LOW_CURRENT_OCCUPIED) && (curFanSpeeds != StandaloneLogicalFanSpeeds.FAN_LOW_OCCUPIED)) {
+							isFanModeChanged = true;
+							fanSpeed_t = StandaloneLogicalFanSpeeds.FAN_LOW_CURRENT_OCCUPIED;
+						}
+						break;
+					case FAN_SPEED_HIGH:
+						if((curFanSpeeds != StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES) && (curFanSpeeds != StandaloneLogicalFanSpeeds.FAN_HIGH_CURRENT_OCCUPIED) && (curFanSpeeds != StandaloneLogicalFanSpeeds.FAN_HIGH_OCCUPIED)) {
+							isFanModeChanged = true;
+							fanSpeed_t = StandaloneLogicalFanSpeeds.FAN_HIGH_CURRENT_OCCUPIED;
+						}
+						break;
+					case FAN_SPEED_HIGH2:
+						if((curFanSpeeds != StandaloneLogicalFanSpeeds.FAN_HIGH2_ALL_TIMES) && (curFanSpeeds != StandaloneLogicalFanSpeeds.FAN_HIGH2_CURRENT_OCCUPIED) && (curFanSpeeds != StandaloneLogicalFanSpeeds.FAN_HIGH2_OCCUPIED)) {
+							isFanModeChanged = true;
+							fanSpeed_t = StandaloneLogicalFanSpeeds.FAN_HIGH2_CURRENT_OCCUPIED;
+						}
+						break;
+					case FAN_SPEED_OFF:
+						if(curFanSpeeds != StandaloneLogicalFanSpeeds.OFF ){
+							isFanModeChanged = true;
+							fanSpeed_t = StandaloneLogicalFanSpeeds.OFF;
+						}
+						break;
+					case FAN_SPEED_AUTO:
+						if(curFanSpeeds != StandaloneLogicalFanSpeeds.AUTO ){
+							isFanModeChanged = true;
+							fanSpeed_t = StandaloneLogicalFanSpeeds.AUTO;
+						}
+						break;
+				}
+				if(isFanModeChanged)
+					CCUHsApi.getInstance().writePoint(fanOpModePoint.get("id").toString(), TunerConstants.UI_DEFAULT_VAL_LEVEL, "manual", (double) fanSpeed_t.ordinal(), 0);
+			}
 		}
 	}
 

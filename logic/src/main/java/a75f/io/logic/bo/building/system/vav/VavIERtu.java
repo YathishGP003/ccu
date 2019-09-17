@@ -173,8 +173,6 @@ public class VavIERtu extends VavSystemProfile
         }
         
         setCmdSignal("cooling",signal);
-        ControlMote.setAnalogOut("analog1", signal);
-        
         
         if (VavSystemController.getInstance().getSystemState() == HEATING)
         {
@@ -201,7 +199,8 @@ public class VavIERtu extends VavSystemProfile
             signal = 0;
         }
         setCmdSignal("heating", signal);
-        ControlMote.setAnalogOut("analog3", signal);
+    
+        ControlMote.setAnalogOut("analog1", VavSystemController.getInstance().getSystemState() == COOLING ? getCmdSignal("cooling") : getCmdSignal("heating"));
         
         double analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier", getSystemEquipRef());
         if (VavSystemController.getInstance().getSystemState() == COOLING)
@@ -240,7 +239,13 @@ public class VavIERtu extends VavSystemProfile
         setCmdSignal("fan", signal);
         ControlMote.setAnalogOut("analog2", signal);
         
-        ControlMote.setAnalogOut("analog4", VavSystemController.getInstance().getAverageSystemHumidity());
+        ControlMote.setAnalogOut("analog3", VavSystemController.getInstance().getAverageSystemHumidity());
+        
+        if (L.ccu().oaoProfile != null) {
+            ControlMote.setAnalogOut("analog4", CCUHsApi.getInstance().readHisValByQuery("point and his and outside and air and damper and cmd"));
+        } else {
+            ControlMote.setAnalogOut("analog4",0);
+        }
         
         setSystemPoint("operating and mode", VavSystemController.getInstance().systemState.ordinal());
         String systemStatus = getStatusMessage();

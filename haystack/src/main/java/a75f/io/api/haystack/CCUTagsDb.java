@@ -928,8 +928,8 @@ public class CCUTagsDb extends HServer {
                            .orderDesc(HisItem_.date).build().findFirst();
             if (retVal == null) {
                 retVal = new HisItem(id.toString(), new Date(), 0.0, Boolean.FALSE);
-                HisItemCache.getInstance().add(id.toString(), retVal);
             }
+            HisItemCache.getInstance().add(id.toString(), retVal);
         }
         return retVal;
     }

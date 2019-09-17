@@ -215,7 +215,7 @@ public class OAOProfile
             }
             Log.d(L.TAG_CCU_OAO," dcvCalculatedMinDamper "+dcvCalculatedMinDamper+" returnAirCO2 "+returnAirCO2+" co2Threshold "+co2Threshold);
         }
-    
+        oaoEquip.setHisVal("co2 and weighted and average", L.ccu().systemProfile.getWeightedAverageCO2());
         double outsideDamperMinOpen = oaoEquip.getConfigNumVal("oao and outside and damper and min and open");
         outsideAirCalculatedMinDamper = outsideDamperMinOpen + dcvCalculatedMinDamper;
         if (ScheduleProcessJob.getSystemOccupancy() == Occupancy.UNOCCUPIED || ScheduleProcessJob.getSystemOccupancy() == Occupancy.VACATION) {

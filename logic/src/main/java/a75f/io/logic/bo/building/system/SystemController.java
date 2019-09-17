@@ -71,6 +71,10 @@ public abstract class SystemController
         return emergencyMode;
     }
     
+    public double getSystemCO2WA() {
+        return 0;
+    }
+    
     public abstract SystemController.State getConditioningForecast(Occupied occupiedSchedule);
     
     public void reset() {

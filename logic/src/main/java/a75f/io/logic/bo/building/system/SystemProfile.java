@@ -130,6 +130,10 @@ public abstract class SystemProfile
         return getSystemController().getAverageSystemTemperature();
     }
     
+    public double getWeightedAverageCO2() {
+        return getSystemController().getSystemCO2WA();
+    }
+    
     public String getSystemEquipRef() {
         if (equipRef == null)
         {

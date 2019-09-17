@@ -272,6 +272,18 @@ public class OAOEquip
                                          .build();
         String exhaustFanStage2Id = hayStack.addPoint(exhaustFanStage2);
     
+        Point co2WA = new Point.Builder()
+                                         .setDisplayName(siteDis+"-OAO-"+nodeAddr+"-co2WeightedAverage")
+                                         .setEquipRef(equipRef)
+                                         .setSiteRef(siteRef)
+                                         .setRoomRef(roomRef)
+                                         .setFloorRef(floorRef)
+                                         .addMarker("oao").addMarker("co2").addMarker("weighted").addMarker("average").addMarker("sp").addMarker("his").addMarker("equipHis")
+                                         .setGroup(String.valueOf(nodeAddr))
+                                         .setTz(tz)
+                                         .build();
+        String co2WAId = hayStack.addPoint(co2WA);
+    
     
         SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
         device.analog1In.setPointRef(returnAirCO2Id);
@@ -320,6 +332,7 @@ public class OAOEquip
         hayStack.writeHisValById(economizingAvailableId, 0.0);
         hayStack.writeHisValById(weatherOutsideTempId, 0.0);
         hayStack.writeHisValById(weatherOutsideHumidityId, 0.0);
+        hayStack.writeHisValById(co2WAId, 0.0);
     
         CCUHsApi.getInstance().syncEntityTree();
     }

@@ -70,6 +70,7 @@ public class DabSystemController extends SystemController
     double averageSystemTemperature = 0;
     
     double co2LoopOpWA = 0;
+    double co2WA = 0;
     private DabSystemController()
     {
         piController = new ControlLoop();
@@ -89,14 +90,14 @@ public class DabSystemController extends SystemController
         CcuLog.d(L.TAG_CCU_SYSTEM, "runDabSystemControlAlgo -> ciDesired: " + ciDesired + " systemMode: " + systemMode);
     
         weightedAverageCoolingLoadPostML = weightedAverageHeatingLoadPostML = weightedAverageLoadSum = 0;
-        totalCoolingLoad = totalHeatingLoad = zoneCount = 0;
+        co2LoopOpWA = co2WA = totalCoolingLoad = totalHeatingLoad = zoneCount = 0;
         updateSystemHumidity();
         updateSystemTemperature();
         
         profile.setSystemPoint("average and humidity", averageSystemHumidity);
         profile.setSystemPoint("average and temp", averageSystemTemperature);
         
-        double co2LoopWASum = 0;
+        double co2LoopWASum = 0, co2WASum = 0;
         
         for (Floor f: HSUtil.getFloors())
         {
@@ -126,8 +127,9 @@ public class DabSystemController extends SystemController
                     weightedAverageLoadSum += (zoneCoolingLoad * zoneDynamicPriority) - (zoneHeatingLoad * zoneDynamicPriority);
                     prioritySum += zoneDynamicPriority;
                     co2LoopWASum += (getEquipCo2LoopOp(q.getId()) * zoneDynamicPriority);
+                    co2WASum += (getEquipCo2(q.getId()) * zoneDynamicPriority);
                     CcuLog.d(L.TAG_CCU_SYSTEM, q.getDisplayName() + " zoneDynamicPriority: " + zoneDynamicPriority + " zoneCoolingLoad: " + zoneCoolingLoad + " zoneHeatingLoad: " + zoneHeatingLoad);
-                    CcuLog.d(L.TAG_CCU_SYSTEM, q.getDisplayName() + " weightedAverageLoadSum: "+weightedAverageLoadSum+" co2LoopWASum "+co2LoopWASum);
+                    CcuLog.d(L.TAG_CCU_SYSTEM, q.getDisplayName() + " weightedAverageLoadSum: "+weightedAverageLoadSum+" co2LoopWASum "+co2LoopWASum+" co2WASum "+co2WASum);
                 }
             }
             
@@ -142,6 +144,7 @@ public class DabSystemController extends SystemController
         
         weightedAverageLoad = weightedAverageLoadSum / prioritySum;
         co2LoopOpWA = co2LoopWASum/prioritySum;
+        co2WA = co2WASum/prioritySum;
         
         comfortIndex = (int)(totalCoolingLoad + totalHeatingLoad) /zoneCount;
         
@@ -379,6 +382,10 @@ public class DabSystemController extends SystemController
         return 0;
     }
     
+    private double getEquipCo2(String equipRef) {
+        return CCUHsApi.getInstance().readHisValByQuery("point and air and co2 and sensor and current and equipRef == \""+equipRef+"\"");
+    }
+    
     public void updateSystemHumidity() {
         //Average across zones or from proxy zone.
         double humiditySum = 0;
@@ -451,6 +458,11 @@ public class DabSystemController extends SystemController
     
     public double getWACo2LoopOp() {
         return co2LoopOpWA;
+    }
+    
+    @Override
+    public double getSystemCO2WA() {
+        return co2WA;
     }
     
     /*public double getDynamicPriority(double zoneLoad, String zoneRef) {

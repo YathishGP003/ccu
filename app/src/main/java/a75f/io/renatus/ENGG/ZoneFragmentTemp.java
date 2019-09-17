@@ -8,7 +8,6 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.text.method.DigitsKeyListener;
 import android.text.method.KeyListener;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,13 +19,12 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.renatus.EquipTempExpandableListAdapter;
 import a75f.io.renatus.R;
@@ -65,7 +63,7 @@ public class ZoneFragmentTemp extends Fragment
         expandableListView = view.findViewById(R.id.expandableListView);
         
         expandableListDetail = new HashMap<>();
-        updateData();
+        updateAllData();
         expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
         expandableListAdapter = new EquipTempExpandableListAdapter(ZoneFragmentTemp.this, expandableListTitle, expandableListDetail, tunerMap, getActivity());
         expandableListView.setAdapter(expandableListAdapter);
@@ -112,7 +110,7 @@ public class ZoneFragmentTemp extends Fragment
             
             @Override
             public void onGroupExpand(int groupPosition) {
-                updateData();
+                updateAllData();
                 for (int g = 0; g < expandableListAdapter.getGroupCount(); g++) {
                     if (g != groupPosition) {
                         expandableListView.collapseGroup(g);
@@ -130,111 +128,46 @@ public class ZoneFragmentTemp extends Fragment
         });
     }
     
-    private void updateData() {
+    private void updateAllData() {
         tunerMap.clear();
         expandableListDetail.clear();
         ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip");
-        for (HashMap m : equips)
-        {
-            Log.d("CCU_UI","Equip: "+m);
-            Equip p = new Equip.Builder().setHashMap(m).build();
-            if (p.getProfile() != null && !p.getProfile().contains("SYSTEM") && (p.getProfile().contains("VAV") || p.getProfile().contains("DAB")) )
-            {
-                HashMap currTmep = CCUHsApi.getInstance().read("point and air and temp and sensor and current and equipRef == \""+p.getId()+"\"");
-                HashMap coolDT = CCUHsApi.getInstance().read("point and air and temp and desired and cooling and sp and equipRef == \""+p.getId()+"\"");
-                HashMap heatDT = CCUHsApi.getInstance().read("point and air and temp and desired and heating and sp and equipRef == \""+p.getId()+"\"");
-                
-                if (currTmep.size() != 0 && coolDT.size() != 0 && heatDT.size() != 0) {
-                    ArrayList tunerList = new ArrayList();
-                    tunerList.add(currTmep.get("dis").toString());
-                    tunerList.add(coolDT.get("dis").toString());
-                    tunerList.add(heatDT.get("dis").toString());
-                    tunerList.add("schedule_" + p.getId());
-    
-                    tunerMap.put(currTmep.get("dis").toString(), currTmep.get("id").toString());
-                    tunerMap.put(coolDT.get("dis").toString(), coolDT.get("id").toString());
-                    tunerMap.put(heatDT.get("dis").toString(), heatDT.get("id").toString());
-                    tunerMap.put("schedule_" + p.getId(), p.getId());
-    
-                    expandableListDetail.put(p.getDisplayName(), tunerList);
-                }
-            }
-
-            if ((p.getProfile() != null) && !p.getProfile().contains("SYSTEM") && p.getProfile().contains("SMARTSTAT"))
-            {
-                HashMap currTmep = CCUHsApi.getInstance().read("point and air and temp and sensor and current and equipRef == \""+p.getId()+"\"");
-                HashMap coolDT = CCUHsApi.getInstance().read("point and air and temp and desired and cooling and sp and equipRef == \""+p.getId()+"\"");
-                HashMap heatDT = CCUHsApi.getInstance().read("point and air and temp and desired and heating and sp and equipRef == \""+p.getId()+"\"");
-
-                if (currTmep.size() != 0 && coolDT.size() != 0 && heatDT.size() != 0) {
-                    ArrayList tunerList = new ArrayList();
-                    tunerList.add(currTmep.get("dis").toString());
-                    tunerList.add(coolDT.get("dis").toString());
-                    tunerList.add(heatDT.get("dis").toString());
-                    //tunerList.add("schedule_" + p.getId());
-                    ProfileType ptype = ProfileType.valueOf(p.getProfile());
-                    Log.d("ZoneFragTemp","SmartStat ptype="+ptype.name()+","+p.getProfile());
-                    switch (ptype){
-                        case SMARTSTAT_CONVENTIONAL_PACK_UNIT:
-                            tunerList.add("smartstat_cpu"+ p.getId());
-                            tunerMap.put("smartstat_cpu"+ p.getId(),p.getId());
-                            break;
-                        case SMARTSTAT_HEAT_PUMP_UNIT:
-                            tunerList.add("smartstat_hpu"+ p.getId());
-                            tunerMap.put("smartstat_hpu"+ p.getId(),p.getId());
-                            break;
-                        case SMARTSTAT_TWO_PIPE_FCU:
-                            tunerList.add("smartstat_pfcu2"+ p.getId());
-                            tunerMap.put("smartstat_pfcu2"+ p.getId(),p.getId());
-                            break;
-                        case SMARTSTAT_FOUR_PIPE_FCU:
-                            tunerList.add("smartstat_pfcu4"+ p.getId());
-                            tunerMap.put("smartstat_pfcu4"+ p.getId(),p.getId());
-                            break;
-                    }
-
-                    tunerMap.put(currTmep.get("dis").toString(), currTmep.get("id").toString());
-                    tunerMap.put(coolDT.get("dis").toString(), coolDT.get("id").toString());
-                    tunerMap.put(heatDT.get("dis").toString(), heatDT.get("id").toString());
-                    //tunerMap.put("schedule_" + p.getId(), p.getId());
-
-                    expandableListDetail.put(p.getDisplayName(), tunerList);
-                }
-            }
-            
-            if (p.getProfile() != null && p.getProfile().equals(ProfileType.PLC.name())) {
-    
-                HashMap pv = CCUHsApi.getInstance().read("point and process and variable and equipRef == \""+p.getId()+"\"");
-                HashMap cv = CCUHsApi.getInstance().read("point and control and variable and equipRef == \""+p.getId()+"\"");
-                
-                ArrayList tunerList = new ArrayList();
-                tunerList.add(pv.get("dis").toString());
-                tunerList.add(cv.get("dis").toString());
-                tunerList.add("schedule_" + p.getId());
-    
-                tunerMap.put(pv.get("dis").toString(), pv.get("id").toString());
-                tunerMap.put(cv.get("dis").toString(), cv.get("id").toString());
-                
-                tunerMap.put("schedule_" + p.getId(), p.getId());
-                expandableListDetail.put(p.getDisplayName(), tunerList);
-                
-            }
-    
-            if (p.getProfile() != null && p.getProfile().equals(ProfileType.EMR.name())) {
-                HashMap emReading = CCUHsApi.getInstance().read("point and emr and sensor and equipRef == \""+p.getId()+"\"");
-                HashMap emRate = CCUHsApi.getInstance().read("point and emr and rate and equipRef == \""+p.getId()+"\"");
-                ArrayList tunerList = new ArrayList();
-                tunerList.add(emReading.get("dis").toString());
-                tunerMap.put(emReading.get("dis").toString(), emReading.get("id").toString());
-                tunerList.add(emRate.get("dis").toString());
-                tunerMap.put(emRate.get("dis").toString(), emRate.get("id").toString());
-                expandableListDetail.put(p.getDisplayName(), tunerList);
-            }
-    
-            
-            
-        }
+        for (Map m : equips) {
+            ArrayList<HashMap> tuners = CCUHsApi.getInstance().readAll("point and his and equipRef == \""+m.get("id")+"\"");
+            ArrayList tunerList = new ArrayList();
         
+            for (Map t : tuners) {
+                tunerList.add(t.get("dis").toString());
+                tunerMap.put(t.get("dis").toString(), t.get("id").toString());
+            }
+        
+            ArrayList<HashMap> userIntents = CCUHsApi.getInstance().readAll("userIntent and equipRef == \""+m.get("id")+"\"");
+        
+            for (Map t : userIntents) {
+                tunerList.add(t.get("dis").toString());
+                tunerMap.put(t.get("dis").toString(), t.get("id").toString());
+            }
+    
+            ArrayList<HashMap> configs = CCUHsApi.getInstance().readAll("config and equipRef == \""+m.get("id")+"\"");
+    
+            for (Map t : configs) {
+                tunerList.add(t.get("dis").toString());
+                tunerMap.put(t.get("dis").toString(), t.get("id").toString());
+            }
+            expandableListDetail.put(m.get("dis").toString(), tunerList);
+        }
+    
+        ArrayList<HashMap> devices = CCUHsApi.getInstance().readAll("device");
+        for (Map m : devices) {
+            ArrayList<HashMap> tuners = CCUHsApi.getInstance().readAll("point and his and deviceRef == \""+m.get("id")+"\"");
+            ArrayList tunerList = new ArrayList();
+        
+            for (Map t : tuners) {
+                tunerList.add(t.get("dis").toString());
+                tunerMap.put(t.get("dis").toString(), t.get("id").toString());
+            }
+            expandableListDetail.put(m.get("dis").toString(), tunerList);
+        }
     }
     
     public static double getPointVal(String id) {
@@ -253,7 +186,12 @@ public class ZoneFragmentTemp extends Fragment
                         System.out.println(valMap);
                         if (valMap.get("val") != null)
                         {
-                            return Double.parseDouble(valMap.get("val").toString());
+                            try
+                            {
+                                return Double.parseDouble(valMap.get("val").toString());
+                            }catch (Exception e) {
+                                return 0;
+                            }
                         }
                     }
                 }
@@ -267,7 +205,12 @@ public class ZoneFragmentTemp extends Fragment
                 return hayStack.readHisValById(p.getId());
             }
         }
+        
         return 0;
+    }
+    
+    public static boolean isNumeric(String strNum) {
+        return strNum.matches("-?\\d+(\\.\\d+)?");
     }
     
     public void setPointVal(String id, double val) {

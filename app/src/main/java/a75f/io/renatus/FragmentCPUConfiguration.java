@@ -389,7 +389,7 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
     }
 
     @Override
-    @OnCheckedChanged({R.id.testCpuRelay1, R.id.testCpuRelay2, R.id.testCpuRelay3, R.id.testCpuRelay4, R.id.testCpuRelay5, R.id.testCpuRelay6})
+    @OnCheckedChanged({R.id.testCpuRelay1, R.id.testCpuRelay2, R.id.testCpuRelay3, R.id.testCpuRelay4, R.id.testCpuRelay5, R.id.testCpuRelay6,R.id.toggleCpuFanLow})
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         switch (buttonView.getId()) {
             case R.id.testCpuRelay1:
@@ -410,7 +410,7 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
             case R.id.testCpuRelay6:
                 sendRelayActivationTestSignal();
                 break;
-            case R.id.toggleFanLow:
+            case R.id.toggleCpuFanLow:
                 if(switchFanLowG.isChecked()){
                     switchFanHighOb.setEnabled(true);
                 }else {

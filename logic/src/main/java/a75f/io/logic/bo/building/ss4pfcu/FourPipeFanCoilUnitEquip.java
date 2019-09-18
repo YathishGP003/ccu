@@ -397,6 +397,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setTz(tz)
                 .build();
         String equipStatusId = CCUHsApi.getInstance().addPoint(equipStatus);
+        CCUHsApi.getInstance().writeHisValById(equipStatusId, 0.0);
 
         Point equipStatusMessage = new Point.Builder()
                 .setDisplayName(equipDis+"-equipStatusMessage")

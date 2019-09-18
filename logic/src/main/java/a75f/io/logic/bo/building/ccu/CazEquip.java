@@ -6,7 +6,6 @@ import org.projecthaystack.HRef;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import a75.io.algos.GenericPIController;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HayStackConstants;
@@ -156,6 +155,7 @@ public class CazEquip
                 .setTz(tz)
                 .build();
         String equipStatusId = CCUHsApi.getInstance().addPoint(equipStatus);
+        CCUHsApi.getInstance().writeHisValById(equipStatusId, 0.0);
 
         Point equipStatusMessage = new Point.Builder()
                 .setDisplayName(siteDis+"-TI-"+nodeAddr+"-equipStatusMessage")

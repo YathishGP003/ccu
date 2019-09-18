@@ -1,7 +1,5 @@
 package a75f.io.logic.bo.building.sse;
 
-import android.util.Log;
-
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 
@@ -206,6 +204,7 @@ public class SingleStageEquip {
                 .setTz(tz)
                 .build();
         String equipStatusId = CCUHsApi.getInstance().addPoint(equipStatus);
+        CCUHsApi.getInstance().writeHisValById(equipStatusId, 0.0);
 
         Point equipStatusMessage = new Point.Builder()
                 .setDisplayName(siteDis+"-SSE-"+nodeAddr+"-equipStatusMessage")

@@ -15,7 +15,7 @@
         android:max="100"
         android:backgroundTint="@color/white"
         android:layout_gravity="bottom"
-        android:indeterminateTint="#1a09d6"
+        android:indeterminateTint="@color/accent"
         android:layout_marginTop="-7dp"/>
 
     <EditText
@@ -31,6 +31,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:maxLines="1"
+        android:inputType="textEmailAddress"
         android:hint="Installer Email" />
 
     <TextView

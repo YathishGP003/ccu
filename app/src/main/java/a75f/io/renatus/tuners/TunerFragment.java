@@ -82,9 +82,9 @@ public class TunerFragment extends Fragment
                 
                 String tunerName = expandableListDetail.get(expandableListTitle.get(groupPosition)).get(
                                                 childPosition);
-                if (!tunerName.contains("coolingUserLimitMax")&&!tunerName.contains("coolingUserLimitMin")&&!tunerName.contains("heatingUserLimitMin")
+               /* if (!tunerName.contains("coolingUserLimitMax")&&!tunerName.contains("coolingUserLimitMin")&&!tunerName.contains("heatingUserLimitMin")
                     &&!tunerName.contains("heatingUserLimitMax")&&!tunerName.contains("buildingLimitMin")&&!tunerName.contains("buildingLimitMax"))
-                {
+                {*/
                     Toast.makeText(getActivity(), expandableListTitle.get(groupPosition) + " -> " + tunerName, Toast.LENGTH_SHORT).show();
 
                     final EditText taskEditText = new EditText(getActivity());
@@ -106,7 +106,7 @@ public class TunerFragment extends Fragment
                             .setNegativeButton("Cancel", null)
                             .create();
                     dialog.show();
-                }
+             //   }
                 return false;
             }
         });

@@ -31,6 +31,7 @@ import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.tuners.BuildingTuners;
+import a75f.io.renatus.util.Prefs;
 
 import static a75f.io.logic.L.ccu;
 
@@ -45,6 +46,7 @@ public class RegisterGatherCCUDetails extends Activity {
     Spinner     mAddressBandSpinner;
     Button      mCreateNewCCU;
     HGrid       mCCUS;
+    Prefs prefs;
     String      mSiteId;
     String addressBandSelected = "1000";
 
@@ -53,7 +55,7 @@ public class RegisterGatherCCUDetails extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register_gather_ccu_details);
 
-
+        prefs = new Prefs(getApplicationContext());
         mInstallerEmailET = findViewById(R.id.installer_email_et);
         mOrTextView = findViewById(R.id.or_textview);
         mUseExistingCCUButton = findViewById(R.id.use_existing_ccu);
@@ -63,7 +65,6 @@ public class RegisterGatherCCUDetails extends Activity {
         mCreateNewCCU = findViewById(R.id.create_new);
     
         ArrayList<String> addressBand = new ArrayList<>();
-        addressBand.add("Select SmartNode Address Band");
         for (int addr = 1000; addr <= 10000; addr+=100)
         {
             addressBand.add(String.valueOf(addr));
@@ -200,6 +201,7 @@ public class RegisterGatherCCUDetails extends Activity {
             protected void onPostExecute(Void nul) {
                 super.onPostExecute(nul);
                 hideProgressDialog();
+                prefs.setBoolean("CCU_SETUP", true);
                 Intent i = new Intent(RegisterGatherCCUDetails.this,
                         RenatusLandingActivity.class);
 

@@ -2,6 +2,7 @@ package a75f.io.renatus.registartion;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
@@ -28,6 +29,8 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.renatus.R;
+import a75f.io.renatus.RegisterGatherCCUDetails;
+import a75f.io.renatus.RegisterGatherDetails;
 
 public class AddtoExisting extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
@@ -318,7 +321,7 @@ public class AddtoExisting extends Fragment {
             public void onClick(DialogInterface dialog, int id) {
 
 
-                //saveExistingSite(hGrid);
+                saveExistingSite(hGrid);
                 Toast.makeText(mContext, "Using this site!", Toast.LENGTH_LONG).show();
                 // CCUHsApi.getInstance().addExistingSite(hGrid);
                 //navigateToCCUScreen();
@@ -378,7 +381,7 @@ public class AddtoExisting extends Fragment {
                 }
 
                 Toast.makeText(mContext, "Sync successful.", Toast.LENGTH_LONG).show();
-                //navigateToCCUScreen();
+                navigateToCCUScreen();
             }
         };
 
@@ -396,5 +399,8 @@ public class AddtoExisting extends Fragment {
 
     }
 
-
+    private void navigateToCCUScreen() {
+        Intent intent = new Intent(getActivity(), RegisterGatherCCUDetails.class);
+        startActivity(intent);
+    }
 }

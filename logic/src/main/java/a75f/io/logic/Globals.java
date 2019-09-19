@@ -30,24 +30,23 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
-import a75f.io.logic.bo.building.ccu.CazProfile;
-import a75f.io.logic.bo.building.ss4pfcu.FourPipeFanCoilUnitProfile;
-import a75f.io.logic.bo.building.sse.SingleStageProfile;
-import a75f.io.logic.bo.building.system.dab.DabAdvancedHybridRtu;
-import a75f.io.logic.bo.building.ss2pfcu.TwoPipeFanCoilUnitProfile;
-import a75f.io.logic.pubnub.PubNubHandler;
 import a75f.io.logic.bo.building.CCUApplication;
 import a75f.io.logic.bo.building.Day;
 import a75f.io.logic.bo.building.NamedSchedule;
 import a75f.io.logic.bo.building.Schedule;
+import a75f.io.logic.bo.building.ccu.CazProfile;
 import a75f.io.logic.bo.building.dab.DabProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.erm.EmrProfile;
 import a75f.io.logic.bo.building.oao.OAOProfile;
 import a75f.io.logic.bo.building.plc.PlcProfile;
+import a75f.io.logic.bo.building.ss2pfcu.TwoPipeFanCoilUnitProfile;
+import a75f.io.logic.bo.building.ss4pfcu.FourPipeFanCoilUnitProfile;
 import a75f.io.logic.bo.building.sscpu.ConventionalUnitProfile;
+import a75f.io.logic.bo.building.sse.SingleStageProfile;
 import a75f.io.logic.bo.building.sshpu.HeatPumpUnitProfile;
 import a75f.io.logic.bo.building.system.DefaultSystem;
+import a75f.io.logic.bo.building.system.dab.DabAdvancedHybridRtu;
 import a75f.io.logic.bo.building.system.dab.DabFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtuWithVfd;
@@ -64,6 +63,8 @@ import a75f.io.logic.jobs.BuildingProcessJob;
 import a75f.io.logic.jobs.PrintProcessJob;
 import a75f.io.logic.jobs.PrintProcessJobTwo;
 import a75f.io.logic.jobs.ScheduleProcessJob;
+import a75f.io.logic.pubnub.PubNubHandler;
+import a75f.io.logic.watchdog.Watchdog;
 
 /**
  * Created by rmatt isOn 7/19/2017.
@@ -214,6 +215,10 @@ public class Globals {
     
         mAlertProcessJob = new AlertProcessJob(mApplicationContext);
         getScheduledThreadPool().scheduleAtFixedRate(mAlertProcessJob.getJobRunnable(), TASK_SEPERATION +30, DEFAULT_HEARTBEAT_INTERVAL, TASK_SERERATION_TIMEUNIT );
+    
+        Watchdog.getInstance().addMonitor(mProcessJob);
+        Watchdog.getInstance().addMonitor(mScheduleProcessJob);
+        Watchdog.getInstance().start();
     
     }
 

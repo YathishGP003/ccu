@@ -30,6 +30,7 @@ import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.logic.watchdog.WatchdogMonitor;
 
 import static a75f.io.logic.L.TAG_CCU_JOB;
 import static a75f.io.logic.L.TAG_CCU_SCHEDULER;
@@ -62,7 +63,8 @@ import static a75f.io.logic.bo.building.Occupancy.VACATION;
 
     The scheduler cache should be queryable by ID.
  */
-public class ScheduleProcessJob extends BaseJob {
+public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
+{
 
     private static final String TAG = "ScheduleProcessJob";
 
@@ -84,8 +86,19 @@ public class ScheduleProcessJob extends BaseJob {
         }
         return occupiedHashMap.get(id);
     }
-
-
+    
+    boolean watchdogMonitor = false;
+    
+    @Override
+    public void bark() {
+        watchdogMonitor = true;
+    }
+    
+    @Override
+    public boolean pet() {
+        return watchdogMonitor;
+    }
+    
     /*
      *  If the occupied mode is different when putting it in the cache return true.
      *
@@ -127,7 +140,9 @@ public class ScheduleProcessJob extends BaseJob {
 
 
         CcuLog.d(TAG_CCU_JOB,"ScheduleProcessJob-> "+CCUHsApi.getInstance());
-
+    
+        watchdogMonitor = false;
+        
         HashMap site = CCUHsApi.getInstance().read("site");
         if (site.size() == 0) {
             CcuLog.d(TAG_CCU_JOB,"No Site Registered ! <-ScheduleProcessJob ");

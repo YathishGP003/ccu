@@ -10,20 +10,34 @@ import a75f.io.logic.BaseJob;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneProfile;
+import a75f.io.logic.watchdog.WatchdogMonitor;
 
 /**
  * Created by samjithsadasivan on 9/14/18.
  */
 
-public class BuildingProcessJob extends BaseJob
+public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
 {
     HashMap<String, String> tsData;
     
+    boolean watchdogMonitor = false;
+    
+    @Override
+    public void bark() {
+        watchdogMonitor = true;
+    }
+    
+    @Override
+    public boolean pet() {
+        return watchdogMonitor;
+    }
     
     @Override
     public void doJob() {
         CcuLog.d(L.TAG_CCU_JOB,"BuildingProcessJob -> "+CCUHsApi.getInstance());
-    
+        
+        watchdogMonitor = false;
+        
         HashMap site = CCUHsApi.getInstance().read("site");
         if (site.size() == 0) {
             CcuLog.d(L.TAG_CCU_JOB,"No Site Registered ! <-BuildingProcessJob ");

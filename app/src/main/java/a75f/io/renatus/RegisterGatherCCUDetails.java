@@ -63,7 +63,6 @@ public class RegisterGatherCCUDetails extends Activity {
         mCreateNewCCU = findViewById(R.id.create_new);
     
         ArrayList<String> addressBand = new ArrayList<>();
-        addressBand.add("Select SmartNode Address Band");
         for (int addr = 1000; addr <= 10000; addr+=100)
         {
             addressBand.add(String.valueOf(addr));

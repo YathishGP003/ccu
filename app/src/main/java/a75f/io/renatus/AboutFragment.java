@@ -117,7 +117,9 @@ public class AboutFragment extends Fragment {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        tvSerialNumber.setText(site.get("id").toString());
+
+        String siteGUID = CCUHsApi.getInstance().getGUID(site.get("id").toString());
+        tvSerialNumber.setText(siteGUID);
 
         return rootView;
     }

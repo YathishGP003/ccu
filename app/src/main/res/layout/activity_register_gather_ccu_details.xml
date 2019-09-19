@@ -2,6 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_marginStart="4dp"
+    android:layout_marginEnd="4dp"
     android:orientation="vertical">
 
     <ProgressBar
@@ -20,6 +22,7 @@
         android:id="@+id/ccu_name_et"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:maxLines="1"
         android:hint="CCU Name" />
 
 
@@ -27,17 +30,30 @@
         android:id="@+id/installer_email_et"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:maxLines="1"
         android:hint="Installer Email" />
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="4dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"
+        android:textSize="16sp"
+        android:text="Select SmartNode Address Band"/>
     <Spinner
         android:id="@+id/addressBandSpinner"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_width="170dp"
+        android:layout_height="45dp"
+        android:spinnerMode="dropdown"/>
 
     <Button
         android:id="@+id/create_new"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="45dp"
+        android:background="@color/accent"
+        android:textColor="@color/white"
         android:text="Create New" />
 
     <TextView

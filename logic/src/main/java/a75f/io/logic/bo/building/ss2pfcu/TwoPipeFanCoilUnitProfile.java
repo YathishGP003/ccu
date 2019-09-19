@@ -471,7 +471,7 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
         switch (fanSpeed){
             case AUTO:
                 if(isFanLowEnabled){
-                    if((roomTemp >= setTempCooling) || (roomTemp <= setTempHeating)){
+                    if(((roomTemp >= setTempCooling) && (roomTemp < (setTempCooling+coolingDeadband)))|| ((roomTemp <= setTempHeating) && (roomTemp > (setTempHeating - heatingDeadband)))){
                         if(getCmdSignal("fan and medium", addr) == 0) {
                             setCmdSignal("fan and low", 1.0, addr);
                             setCmdSignal("fan and medium", 0, addr);
@@ -626,7 +626,7 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
             case AUTO:
                 // Turn on only one relay at any given point of time say if 70 is dt, then 70-68- fan low on, 66-68 - fan medium on, 64-66 - fan high on,
                 if(isFanLowEnabled){
-                    if(roomTemp <= setTempHeating ){
+                    if((roomTemp <= setTempHeating) &&(roomTemp > (setTempHeating - heatingDeadband)) ){
                         if(getCmdSignal("fan and medium",addr) == 0) {
                             setCmdSignal("fan and low", 1.0, addr);
                             setCmdSignal("fan and medium", 0, addr);

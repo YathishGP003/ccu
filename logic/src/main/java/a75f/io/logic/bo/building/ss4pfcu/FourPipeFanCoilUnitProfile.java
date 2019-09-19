@@ -402,7 +402,7 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
         switch (fanSpeed){
             case AUTO:
                 if(isFanLowEnabled){
-                    if(roomTemp >= setTempCooling){
+                    if((roomTemp >= setTempCooling) && (roomTemp < (setTempCooling+coolingDeadband))){
                         if(getCmdSignal("fan and medium", addr) == 0) {
                             setCmdSignal("fan and low", 1.0, addr);
                             fanstages = "FanStage1";
@@ -537,7 +537,7 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
         switch (fanSpeed){
             case AUTO:
                 if(isFanLowEnabled){
-                    if( roomTemp <= setTempHeating){ //68-70
+                    if( (roomTemp <= setTempHeating ) && (roomTemp > (setTempHeating - heatingDeadband))){ //68-70
                         if(getCmdSignal("fan and medium",addr) == 0) {
                             setCmdSignal("fan and low", 1.0, addr);
                             fanstages = "FanStage1";

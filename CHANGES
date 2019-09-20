@@ -1,2 +1,5 @@
- - Merge branch 'renatus_dev_sam' into 'master'
- - Initialize equipStatus for missing equips
+ - Merge branch 'kumar_renatus' into 'master'
+ - #RENATUS-636, SmartStat auto reverting to fan auto
+ - Merge branch 'mahesh_renuts' into 'master'
+ - change loader color
+ - adding ccu to existing site

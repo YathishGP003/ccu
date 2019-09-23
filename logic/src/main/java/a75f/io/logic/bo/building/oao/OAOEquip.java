@@ -541,7 +541,7 @@ public class OAOEquip
         SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_OUT_ONE.name(), config.outsideDamperAtMinDrive+"-"+config.outsideDamperAtMaxDrive);
         SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_OUT_TWO.name(), config.returnDamperAtMinDrive+"-"+config.returnDamperAtMaxDrive);
     
-        SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_IN_ONE.name(), "4");
+        SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_IN_ONE.name(), "5");
         SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_IN_TWO.name(), String.valueOf(config.currentTranformerType));
         
         setConfigNumVal("outside and damper and min and drive", config.outsideDamperAtMinDrive);

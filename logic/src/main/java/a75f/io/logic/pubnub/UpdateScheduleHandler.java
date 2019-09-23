@@ -73,6 +73,8 @@ public class UpdateScheduleHandler
                             }
                         }).start();
                         
+                    } else {
+                        CCUHsApi.getInstance().updateScheduleNoSync(s, null);
                     }
                 }
                 else if (s.getMarkers().contains("zone"))
@@ -91,6 +93,7 @@ public class UpdateScheduleHandler
                 {
                     String lroomRef = CCUHsApi.getInstance().getLUID(s.getRoomRef());
                     s.setRoomRef(lroomRef);
+                    if (lroomRef != null)
                     CCUHsApi.getInstance().addSchedule(luid, s.getZoneScheduleHDict(lroomRef));
                 }
                 else

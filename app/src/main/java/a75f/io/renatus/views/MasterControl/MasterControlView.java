@@ -2,13 +2,14 @@ package a75f.io.renatus.views.MasterControl;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.AsyncTask;
-import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,15 +19,33 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.projecthaystack.HDateTime;
+import org.projecthaystack.HDict;
+import org.projecthaystack.HDictBuilder;
+import org.projecthaystack.HGrid;
+import org.projecthaystack.HGridBuilder;
+import org.projecthaystack.HHisItem;
+import org.projecthaystack.HNum;
+import org.projecthaystack.HRef;
+import org.projecthaystack.HRow;
+import org.projecthaystack.UnknownRecException;
+import org.projecthaystack.client.HClient;
+import org.projecthaystack.io.HZincReader;
+import org.projecthaystack.io.HZincWriter;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
-import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Zone;
+import a75f.io.api.haystack.sync.HttpUtil;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerConstants;
@@ -160,6 +179,12 @@ public class MasterControlView extends LinearLayout {
     }
 
     public void setTuner(Dialog dialog) {
+        HashMap tuner = CCUHsApi.getInstance().read("equip and tuner");
+        Equip p = new Equip.Builder().setHashMap(tuner).build();
+        getSchedule(CCUHsApi.getInstance().getGUID(p.getSiteRef()),dialog);
+    }
+
+    private void checkForSchedules(Dialog dialog, ArrayList<Schedule> schedulesList) {
         float coolTempUL = masterControl.getUpperCoolingTemp();
         float coolTempLL = masterControl.getLowerCoolingTemp();
         float heatTempUL = masterControl.getUpperHeatingTemp();
@@ -171,6 +196,7 @@ public class MasterControlView extends LinearLayout {
 
         HashMap tuner = CCUHsApi.getInstance().read("equip and tuner");
         Equip p = new Equip.Builder().setHashMap(tuner).build();
+
         coolUL = CCUHsApi.getInstance().read("point and limit and max and cooling and user and equipRef == \"" + p.getId() + "\"");
         heatUL = CCUHsApi.getInstance().read("point and limit and max and heating and user and equipRef == \"" + p.getId() + "\"");
         coolLL = CCUHsApi.getInstance().read("point and limit and min and cooling and user and equipRef == \"" + p.getId() + "\"");
@@ -179,15 +205,14 @@ public class MasterControlView extends LinearLayout {
         buildingMax = CCUHsApi.getInstance().read("building and limit and max and equipRef == \"" + p.getId() + "\"");
 
         Schedule buildingSchedules = Schedule.getScheduleByEquipId(p.getId());
-        schedules.add(buildingSchedules);
 
         // initial ccu setup building/zone schedules are empty
         if (buildingSchedules == null){
-            saveBuildingData(dialog);
+            saveBuildingData(dialog, p.getSiteRef());
             return;
         }
 
-        // set schedule temps for building
+    /*    // set schedule temps for building
         for (Schedule.Days buidlingdays : buildingSchedules.getDays()) {
             StringBuilder message = new StringBuilder("Building" + "\u0020" + ScheduleUtil.getDayString(buidlingdays.getDay() + 1) + "\u0020" + "Schedule");
             String coolValues = "";
@@ -216,61 +241,116 @@ public class MasterControlView extends LinearLayout {
                 message.append(heatValues);
                 warningMessage.add("\n" + message);
             }
-        }
+        }*/
 
         // set schedule temps for Zones
-        for (Floor floor : HSUtil.getFloors()) {
-            zoneList = HSUtil.getZones(floor.getId());
+        for (Schedule schedule : schedulesList) {
+            ArrayList<Schedule.Days> scheduleDaysList = schedule.getDays();
+            schedules.add(schedule);
 
-            for (Zone zone : zoneList) {
+            for (Schedule.Days days : scheduleDaysList) {
+                StringBuilder message = new StringBuilder(schedule.getDis()+ "\u0020" + ScheduleUtil.getDayString(days.getDay() + 1) + "\u0020");
+                String coolValues = "";
+                String heatValues = "";
+                if (days.getHeatingVal() < heatTempUL || days.getHeatingVal() > heatTempLL) {
+                    double heatDTValue = getHeatDTemp(days.getHeatingVal(), heatTempUL, heatTempLL);
+                    heatValues = "\u0020" +    "Heating ("+ days.getHeatingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + heatDTValue+")";
 
-                Schedule zoneSchedule = CCUHsApi.getInstance().getScheduleById(zone.getScheduleRef());
-                ArrayList<Schedule.Days> scheduleDaysList = zoneSchedule.getDays();
-                schedules.add(zoneSchedule);
-
-
-                for (Schedule.Days days : scheduleDaysList) {
-                    StringBuilder message = new StringBuilder(zone.getDisplayName() + "\u0020" + ScheduleUtil.getDayString(days.getDay() + 1) + "\u0020" + "Schedule");
-                    String coolValues = "";
-                    String heatValues = "";
-                    if (days.getHeatingVal() < heatTempUL || days.getHeatingVal() > heatTempLL) {
-                        double heatDTValue = getHeatDTemp(days.getHeatingVal(), heatTempUL, heatTempLL);
-                        heatValues = "\u0020" +    "Heating ("+ days.getHeatingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + heatDTValue+")";
-
-                        days.setHeatingVal(heatDTValue);
-                    }
-
-                    if (days.getCoolingVal() < coolTempLL || days.getCoolingVal() > coolTempUL) {
-                        double coolDTValue = getCoolDTemp(days.getCoolingVal(), coolTempLL, coolTempUL);
-                        coolValues = "\u0020 " +    "Cooling ("+days.getCoolingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + coolDTValue + ")";
-
-                        days.setCoolingVal(coolDTValue);
-                    }
-
-                    if (!TextUtils.isEmpty(coolValues) && !TextUtils.isEmpty(heatValues)) {
-                        message.append(coolValues).append(heatValues);
-                        warningMessage.add("\n" + message);
-                    } else if (!TextUtils.isEmpty(coolValues) && TextUtils.isEmpty(heatValues)) {
-                        message.append(coolValues);
-                        warningMessage.add("\n" + message);
-                    } else if (TextUtils.isEmpty(coolValues) && !TextUtils.isEmpty(heatValues)) {
-                        message.append(heatValues);
-                        warningMessage.add("\n" + message);
-                    }
+                    days.setHeatingVal(heatDTValue);
                 }
 
+                if (days.getCoolingVal() < coolTempLL || days.getCoolingVal() > coolTempUL) {
+                    double coolDTValue = getCoolDTemp(days.getCoolingVal(), coolTempLL, coolTempUL);
+                    coolValues = "\u0020 " +    "Cooling ("+days.getCoolingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + coolDTValue + ")";
+
+                    days.setCoolingVal(coolDTValue);
+                }
+
+                if (!TextUtils.isEmpty(coolValues) && !TextUtils.isEmpty(heatValues)) {
+                    message.append(coolValues).append(heatValues);
+                    warningMessage.add("\n" + message);
+                } else if (!TextUtils.isEmpty(coolValues) && TextUtils.isEmpty(heatValues)) {
+                    message.append(coolValues);
+                    warningMessage.add("\n" + message);
+                } else if (TextUtils.isEmpty(coolValues) && !TextUtils.isEmpty(heatValues)) {
+                    message.append(heatValues);
+                    warningMessage.add("\n" + message);
+                }
             }
+
         }
 
         if (warningMessage.size() > 0) {
             disPlayWarningMessage(warningMessage, dialog, schedules, zoneList);
         } else {
-                saveBuildingData(dialog);
-
-                for (Zone zone : zoneList) {
-                    setZoneData(zone.getId());
-                }
+            if (schedulesList.size()> 0) {
+                saveScheduleData(schedulesList, zoneList, dialog);
+            }
         }
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    public void getSchedule(String siteRef, Dialog dialog) {
+        ProgressDialog progressDlg = new ProgressDialog(getContext());
+        progressDlg.setMessage("Loading...");
+        progressDlg.show();
+
+        final ArrayList<Schedule>[] scheduleList = new ArrayList[]{new ArrayList<>()};
+        new AsyncTask<String, Void, ArrayList<Schedule>>() {
+
+            @Override
+            protected ArrayList<Schedule> doInBackground(final String... params) {
+                HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+
+                HDict tDict = new HDictBuilder().add("filter", "schedule and days and siteRef == " + siteRef).toDict();
+                HGrid schedulePoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
+                Iterator it = schedulePoint.iterator();
+                while (it.hasNext())
+                {
+                    HRow r = (HRow) it.next();
+                    scheduleList[0].add(new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build());
+                }
+
+                return scheduleList[0];
+            }
+
+            @Override
+            protected void onPostExecute(ArrayList<Schedule> schedules) {
+                progressDlg.dismiss();
+                checkForSchedules(dialog, schedules);
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+
+    }
+
+    public ArrayList<HashMap> readAll(HGrid grid)
+    {
+        //CcuLog.d("CCU_HS", "Read Query: " + query);
+        ArrayList<HashMap> rowList = new ArrayList<>();
+        try
+        {
+            if (grid != null)
+            {
+                Iterator it = grid.iterator();
+                while (it.hasNext())
+                {
+                    HashMap<Object, Object> map = new HashMap<>();
+                    HRow                    r   = (HRow) it.next();
+                    HRow.RowIterator        ri  = (HRow.RowIterator) r.iterator();
+                    while (ri.hasNext())
+                    {
+                        HDict.MapEntry m = (HDict.MapEntry) ri.next();
+                        map.put(m.getKey(), m.getValue());
+                    }
+                    rowList.add(map);
+                }
+            }
+        }
+        catch (UnknownRecException e)
+        {
+            e.printStackTrace();
+        }
+        return rowList;
     }
 
     private void disPlayWarningMessage(ArrayList<String> warningMessage, Dialog masterControlDialog, ArrayList<Schedule> schedules, ArrayList<Zone> zoneList) {
@@ -304,78 +384,125 @@ public class MasterControlView extends LinearLayout {
 
     private void saveScheduleData(ArrayList<Schedule> schedules, ArrayList<Zone> zoneList, Dialog masterControlDialog) {
         //TODO:
-        for (Zone zone : zoneList) {
-            setZoneData(zone.getId());
-        }
-
         for (Schedule schedule : schedules) {
-
             if (schedule.isZoneSchedule()) {
-                CCUHsApi.getInstance().updateZoneSchedule(schedule, schedule.getRoomRef());
+                if (schedule.getRoomRef()!= null)
+                setZoneData(masterControlDialog, schedule.getRoomRef());
+                /*String scheduleLuid = CCUHsApi.getInstance().getLUID("@"+schedule.getId());
+                String zoneLuid = CCUHsApi.getInstance().getLUID(schedule.getRoomRef());
+                if (scheduleLuid != null && zoneLuid != null) {
+                    schedule.setId(scheduleLuid.replace("@",""));
+                    schedule.setRoomRef(zoneLuid);
+                    CCUHsApi.getInstance().updateZoneSchedule(schedule, schedule.getRoomRef());
+                }*/
             } else {
-                CCUHsApi.getInstance().updateSchedule(schedule);
+                String scheduleLuid = CCUHsApi.getInstance().getLUID("@"+schedule.getId());
+                if (scheduleLuid != null) {
+                    schedule.setId(scheduleLuid.replace("@",""));
+                    CCUHsApi.getInstance().updateSchedule(schedule);
+                }
             }
-            CCUHsApi.getInstance().syncEntityTree();
-            ScheduleProcessJob.updateSchedules();
-            L.saveCCUState();
         }
-
-        saveBuildingData(masterControlDialog);
+        syncSchedules(schedules);
+        saveBuildingData(masterControlDialog, schedules.get(0).getmSiteId());
     }
 
     @SuppressLint("StaticFieldLeak")
-    private void setZoneData(String roomRef) {
+    private void syncSchedules(ArrayList<Schedule> schedules) {
+        ArrayList<HDict> entities = new ArrayList<>();
+        for (Schedule s : schedules)
+        {
+            String scheduleguid = CCUHsApi.getInstance().getGUID("@"+s.getId());
+            if ( scheduleguid != null){
+                s.setId(scheduleguid.replace("@",""));
+            }
+            entities.add(s.getRoomRef() == null ? s.getScheduleHDict(): s.getZoneScheduleHDict(s.getRoomRef()));
+        }
+
+        new AsyncTask<String, Void, Void>() {
+            @Override
+            protected Void doInBackground(final String... params) {
+                HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
+                String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "addEntity", HZincWriter.gridToString(grid));
+                if (response == null)
+                {
+                    CcuLog.i("CCU_HS_SYNC", "Aborting Schedule Sync");
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    private void setZoneData(Dialog masterControlDialog, String roomRef) {
         //TODO:
         float coolTempUL = masterControl.getUpperCoolingTemp();
         float coolTempLL = masterControl.getLowerCoolingTemp();
         float heatTempUL = masterControl.getUpperHeatingTemp();
         float heatTempLL = masterControl.getLowerHeatingTemp();
 
-        Equip p = HSUtil.getEquipFromZone(roomRef);
-
-        HashMap zoneCoolUL = CCUHsApi.getInstance().read("point and limit and max and cooling and user and equipRef == \"" + p.getId() + "\"");
-        HashMap zoneHeatUL = CCUHsApi.getInstance().read("point and limit and max and heating and user and equipRef == \"" + p.getId() + "\"");
-        HashMap zoneCoolLL = CCUHsApi.getInstance().read("point and limit and min and cooling and user and equipRef == \"" + p.getId() + "\"");
-        HashMap zoneHeatLL = CCUHsApi.getInstance().read("point and limit and min and heating and user and equipRef == \"" + p.getId() + "\"");
+        if (masterControlDialog != null && masterControlDialog.isShowing()) {
+            masterControlDialog.dismiss();
+        }
 
         new AsyncTask<String, Void, Void>() {
             @Override
             protected Void doInBackground(final String... params) {
+                HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+                HashMap ccu = CCUHsApi.getInstance().read("ccu");
+                String ccuName = ccu.get("dis").toString();
+                HDict tDict = new HDictBuilder().add("filter", "equip and roomRef == " + roomRef).toDict();
+                HGrid hGrid = hClient.call("read", HGridBuilder.dictToGrid(tDict));
+                ArrayList<HashMap> gridList = readAll(hGrid);
+
+                if (gridList.size() == 0) {
+                    return null;
+                }
+                Equip p = new Equip.Builder().setHashMap(gridList.get(0)).build();
+
+                HashMap zoneCoolUL = read("point and limit and max and cooling and user and equipRef == \"" + p.getId() + "\"");
+                HashMap zoneHeatUL = read("point and limit and max and heating and user and equipRef == \"" + p.getId() + "\"");
+                HashMap zoneCoolLL = read("point and limit and min and cooling and user and equipRef == \"" + p.getId() + "\"");
+                HashMap zoneHeatLL = read("point and limit and min and heating and user and equipRef == \"" + p.getId() + "\"");
 
                 if (zoneCoolUL.size() != 0) {
-                    CCUHsApi.getInstance().writePoint(zoneCoolUL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", (double) coolTempUL, 0);
-                    CCUHsApi.getInstance().writeHisValById(zoneCoolUL.get("id").toString(), (double) coolTempUL);
+                    writePoint(zoneCoolUL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_"+ccuName, (double) coolTempUL, 0);
+                    writeHisValById(zoneCoolUL.get("id").toString(), (double) coolTempUL);
                 }
 
                 if (zoneCoolLL.size() != 0) {
-                    CCUHsApi.getInstance().writePoint(zoneCoolLL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", (double) coolTempLL, 0);
-                    CCUHsApi.getInstance().writeHisValById(zoneCoolLL.get("id").toString(), (double) coolTempLL);
+                    writePoint(zoneCoolLL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_"+ccuName, (double) coolTempLL, 0);
+                    writeHisValById(zoneCoolLL.get("id").toString(), (double) coolTempLL);
                 }
 
                 if (zoneHeatUL.size() != 0) {
-                    CCUHsApi.getInstance().writePoint(zoneHeatUL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", (double) heatTempUL, 0);
-                    CCUHsApi.getInstance().writeHisValById(zoneHeatUL.get("id").toString(), (double) heatTempUL);
+                    writePoint(zoneHeatUL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_"+ccuName, (double) heatTempUL, 0);
+                    writeHisValById(zoneHeatUL.get("id").toString(), (double) heatTempUL);
                 }
 
                 if (zoneHeatLL.size() != 0) {
-                    CCUHsApi.getInstance().writePoint(zoneHeatLL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", (double) heatTempLL, 0);
-                    CCUHsApi.getInstance().writeHisValById(zoneHeatLL.get("id").toString(), (double) heatTempLL);
+                    writePoint(zoneHeatLL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_"+ccuName, (double) heatTempLL, 0);
+                    writeHisValById(zoneHeatLL.get("id").toString(), (double) heatTempLL);
                 }
 
-                L.saveCCUState();
-                CCUHsApi.getInstance().syncEntityTree();
                 return null;
             }
 
             @Override
             protected void onPostExecute(final Void result) {
-                // continue what you are doing...
+                super.onPostExecute(result);
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
     }
 
     @SuppressLint("StaticFieldLeak")
-    private void saveBuildingData(Dialog dialog) {
+    private void saveBuildingData(Dialog dialog, String siteRef) {
         float coolTempUL = masterControl.getUpperCoolingTemp();
         float coolTempLL = masterControl.getLowerCoolingTemp();
         float heatTempUL = masterControl.getUpperHeatingTemp();
@@ -386,57 +513,123 @@ public class MasterControlView extends LinearLayout {
         mOnClickListener.onSaveClick(heatTempLL, heatTempUL,coolTempLL,coolTempUL,buildingTempLL,buildingTempUL,
                 (float) getTuner(setbackMap.get("id").toString()),(float) getTuner(zoneDiffMap.get("id").toString()),(float)hdb, (float)cdb);
 
+        if (dialog!= null && dialog.isShowing()) {
+            dialog.dismiss();
+        }
+
         new AsyncTask<String, Void, Void>() {
             @Override
             protected Void doInBackground(final String... params) {
-                if (coolUL.size() != 0) {
-                    CCUHsApi.getInstance().writePoint(coolUL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", (double) coolTempUL, 0);
-                    CCUHsApi.getInstance().writeHisValById(coolUL.get("id").toString(), (double) coolTempUL);
+                HashMap ccu = CCUHsApi.getInstance().read("ccu");
+                String ccuName = ccu.get("dis").toString();
+
+                HashMap tuner = CCUHsApi.getInstance().read("equip and tuner");
+                Equip p = new Equip.Builder().setHashMap(tuner).build();
+                String gUid  = CCUHsApi.getInstance().getGUID(p.getId());
+
+                HashMap buildingCoolUL = read("point and limit and max and cooling and user and equipRef == \"" + gUid + "\"");
+                HashMap buildingHeatUL = read("point and limit and max and heating and user and equipRef == \"" + gUid + "\"");
+                HashMap buildingCoolLL = read("point and limit and min and cooling and user and equipRef == \"" + gUid + "\"");
+                HashMap buildingHeatLL = read("point and limit and min and heating and user and equipRef == \"" + gUid + "\"");
+                HashMap buildingMin = read("building and limit and min and equipRef == \"" + gUid + "\"");
+                HashMap buildingMax = read("building and limit and max and equipRef == \"" + gUid + "\"");
+
+                if (buildingCoolUL.size() != 0) {
+                    writePoint(buildingCoolUL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_"+ccuName, (double) coolTempUL, 0);
+                    writeHisValById(buildingCoolUL.get("id").toString(), (double) coolTempUL);
                 }
 
-                if (coolLL.size() != 0) {
-                    CCUHsApi.getInstance().writePoint(coolLL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", (double) coolTempLL, 0);
-                    CCUHsApi.getInstance().writeHisValById(coolLL.get("id").toString(), (double) coolTempLL);
+                if (buildingCoolLL.size() != 0) {
+                    writePoint(buildingCoolLL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_"+ccuName, (double) coolTempLL, 0);
+                    writeHisValById(buildingCoolLL.get("id").toString(), (double) coolTempLL);
                 }
 
-                if (heatUL.size() != 0) {
-                    CCUHsApi.getInstance().writePoint(heatUL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", (double) heatTempUL, 0);
-                    CCUHsApi.getInstance().writeHisValById(heatUL.get("id").toString(), (double) heatTempUL);
+                if (buildingHeatUL.size() != 0) {
+                    writePoint(buildingHeatUL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_"+ccuName, (double) heatTempUL, 0);
+                    writeHisValById(buildingHeatUL.get("id").toString(), (double) heatTempUL);
                 }
 
-                if (heatLL.size() != 0) {
-                    CCUHsApi.getInstance().writePoint(heatLL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", (double) heatTempLL, 0);
-                    CCUHsApi.getInstance().writeHisValById(heatLL.get("id").toString(), (double) heatTempLL);
+                if (buildingHeatLL.size() != 0) {
+                    writePoint(buildingHeatLL.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_"+ccuName, (double) heatTempLL, 0);
+                    writeHisValById(buildingHeatLL.get("id").toString(), (double) heatTempLL);
                 }
 
                 if (buildingMax.size() != 0) {
-                    CCUHsApi.getInstance().writePoint(buildingMax.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", (double) buildingTempUL, 0);
-                    CCUHsApi.getInstance().writeHisValById(buildingMax.get("id").toString(), (double) buildingTempUL);
+                    writePoint(buildingMax.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_"+ccuName, (double) buildingTempUL, 0);
+                    writeHisValById(buildingMax.get("id").toString(), (double) buildingTempUL);
                 }
 
                 if (buildingMin.size() != 0) {
-                    CCUHsApi.getInstance().writePoint(buildingMin.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu", (double) buildingTempLL, 0);
-                    CCUHsApi.getInstance().writeHisValById(buildingMin.get("id").toString(), (double) buildingTempLL);
+                    writePoint(buildingMin.get("id").toString(), TunerConstants.TUNER_EQUIP_VAL_LEVEL, "ccu_"+ccuName, (double) buildingTempLL, 0);
+                    writeHisValById(buildingMin.get("id").toString(), (double) buildingTempLL);
                 }
-                L.saveCCUState();
-                CCUHsApi.getInstance().syncEntityTree();
+
                 return null;
             }
 
             @Override
             protected void onPostExecute(final Void result) {
-                // continue what you are doing...
-            }
-
-            @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
-
-                if (dialog.isShowing()) {
-                    dialog.dismiss();
-                }
+                super.onPostExecute(result);
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+    }
+
+    public void writePoint(String guid, int level, String who, double value, int duration)
+    {
+        HNum val = HNum.make(value);
+        HNum dur = HNum.make(duration);
+        if (dur.unit == null) {
+            dur = HNum.make(dur.val ,"ms");
+        }
+
+        HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+        String lUid = CCUHsApi.getInstance().getLUID(guid);
+
+        if (lUid != null){
+            CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(lUid), level, who, val, dur);
+        }
+
+        hClient.pointWrite(HRef.copy(guid), level, who, val, dur);
+
+        if (guid != null)
+        {
+            HDictBuilder b = new HDictBuilder().add("id", HRef.copy(guid)).add("level", level).add("who", who).add("val", val).add("duration", dur);
+            HDict[] dictArr  = {b.toDict()};
+            String  response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "pointWrite", HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+            CcuLog.d("CCU_HS", "Response: \n" + response +" guid:\n" + guid);
+        }
+    }
+
+    public synchronized void writeHisValById(String id, Double val)
+    {
+        HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+        hClient.hisWrite(HRef.copy(id), new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), HNum.make(val))});
+    }
+
+    /**
+     * Read the first matching record
+     */
+    @SuppressLint("StaticFieldLeak")
+    public HashMap read(String query)
+    {
+        //CcuLog.d("CCU_HS", "Read Query: " + query);
+        HashMap<Object, Object> map = new HashMap<>();
+        HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+        HDict tDict = new HDictBuilder().add("filter", query).toDict();
+        HGrid hGrid = hClient.call("read", HGridBuilder.dictToGrid(tDict));
+        hGrid.dump();
+        Iterator it   = hGrid.iterator();
+        while (it.hasNext())
+        {
+            HRow                    r   = (HRow) it.next();
+            HRow.RowIterator        ri  = (HRow.RowIterator) r.iterator();
+            while (ri.hasNext())
+            {
+                HDict.MapEntry m = (HDict.MapEntry) ri.next();
+                map.put(m.getKey(), m.getValue());
+            }
+        }
+        return map;
     }
 
     private double getCoolDTemp(double coolDT, double coolTempLL, double coolTempUL) {

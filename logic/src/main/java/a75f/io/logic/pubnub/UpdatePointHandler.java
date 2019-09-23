@@ -26,7 +26,10 @@ public class UpdatePointHandler
     
     public static void handleMessage(JsonObject msgObject) {
         String src = msgObject.get("who").getAsString();
-        if (src.equals("ccu") || src.equals("Scheduler") || src.equals("manual")) {
+
+        HashMap ccu = CCUHsApi.getInstance().read("ccu");
+        String ccuName = ccu.get("dis").toString();
+        if (src.equals("ccu")|| src.equals("ccu_"+ccuName) || src.equals("Scheduler") || src.equals("manual")) {
             CcuLog.d(L.TAG_CCU_PUBNUB, "PubNub received for CCU write : Ignore");
             return;
         }

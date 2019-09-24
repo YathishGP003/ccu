@@ -172,8 +172,8 @@ public class VavTRTuners
                                   .setTz(tz)
                                   .build();
         String staticPressureSPInitId = hayStack.addPoint(staticPressureSPInit);
-        hayStack.writeDefaultValById(staticPressureSPInitId, 0.1 );
-        hayStack.writeHisValById(staticPressureSPInitId,0.1);
+        hayStack.writeDefaultValById(staticPressureSPInitId, 0.2 );
+        hayStack.writeHisValById(staticPressureSPInitId,0.2);
         
         Point staticPressureSPMin = new Point.Builder()
                                  .setDisplayName(equipDis+"-"+"staticPressureSPMin")
@@ -185,8 +185,8 @@ public class VavTRTuners
                                  .setTz(tz)
                                  .build();
         String staticPressureSPMinId = hayStack.addPoint(staticPressureSPMin);
-        hayStack.writeDefaultValById(staticPressureSPMinId, 0.1 );
-        hayStack.writeHisValById(staticPressureSPMinId,0.1);
+        hayStack.writeDefaultValById(staticPressureSPMinId, 0.2 );
+        hayStack.writeHisValById(staticPressureSPMinId,0.2);
         
         Point staticPressureSPMax = new Point.Builder()
                                  .setDisplayName(equipDis+"-"+"staticPressureSPMax")
@@ -198,8 +198,8 @@ public class VavTRTuners
                                  .setTz(tz)
                                  .build();
         String staticPressureSPMaxId = hayStack.addPoint(staticPressureSPMax);
-        hayStack.writeDefaultValById(staticPressureSPMaxId, 1.5 );
-        hayStack.writeHisValById(staticPressureSPMaxId,1.5);
+        hayStack.writeDefaultValById(staticPressureSPMaxId, 1.0 );
+        hayStack.writeHisValById(staticPressureSPMaxId,1.0);
         
         Point staticPressureTimeDelay = new Point.Builder()
                                      .setDisplayName(equipDis+"-"+"staticPressureTimeDelay")

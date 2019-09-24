@@ -88,6 +88,7 @@ public class HttpUtil
                 retry = false;
                 clientToken = parseToken(authorizeToken(CLIENT_ID, "", CLIENT_SECRET, TENANT_ID));
                 CcuLog.i("CCU_HS","Client Token: " + clientToken);
+                connection.disconnect();
                 return executePost(targetURL, urlParameters);
             }
             retry = true;

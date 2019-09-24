@@ -51,7 +51,6 @@ android {
                missingDimensionStrategy 'dev', 'prod'
         signingConfig signingConfigs.debug
 
-        vectorDrawables.useSupportLibrary = true
 
     }
 

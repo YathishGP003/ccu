@@ -105,7 +105,7 @@ public class AlertDefinition
                 logValidatation("Operator not allowed "+c.toString());
                 return false;
             }
-            if (!c.grpOperation.equals("") && !c.grpOperation.equals("equip") && !c.grpOperation.equals("average")
+            if ((c.grpOperation != null) && !c.grpOperation.equals("") && !c.grpOperation.equals("equip") && !c.grpOperation.equals("average")
                         && !c.grpOperation.contains("top") && !c.grpOperation.contains("bottom")
                         && !c.grpOperation.contains("min") && !c.grpOperation.contains("max")) {
                 logValidatation("grpOperator not supported "+c.grpOperation);

@@ -52,6 +52,7 @@ import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.R;
 import a75f.io.renatus.schedules.ScheduleUtil;
+import a75f.io.renatus.util.ProgressDialogUtils;
 
 import static a75f.io.renatus.util.BitmapUtil.getBitmapFromVectorDrawable;
 
@@ -181,6 +182,14 @@ public class MasterControlView extends LinearLayout {
     public void setTuner(Dialog dialog) {
         HashMap tuner = CCUHsApi.getInstance().read("equip and tuner");
         Equip p = new Equip.Builder().setHashMap(tuner).build();
+        Schedule buildingSchedules = Schedule.getScheduleByEquipId(p.getId());
+
+        // initial ccu setup building/zone schedules are empty
+        if (buildingSchedules == null){
+            saveBuildingData(dialog, p.getSiteRef());
+            return;
+        }
+
         getSchedule(CCUHsApi.getInstance().getGUID(p.getSiteRef()),dialog);
     }
 
@@ -204,46 +213,7 @@ public class MasterControlView extends LinearLayout {
         buildingMin = CCUHsApi.getInstance().read("building and limit and min and equipRef == \"" + p.getId() + "\"");
         buildingMax = CCUHsApi.getInstance().read("building and limit and max and equipRef == \"" + p.getId() + "\"");
 
-        Schedule buildingSchedules = Schedule.getScheduleByEquipId(p.getId());
-
-        // initial ccu setup building/zone schedules are empty
-        if (buildingSchedules == null){
-            saveBuildingData(dialog, p.getSiteRef());
-            return;
-        }
-
-    /*    // set schedule temps for building
-        for (Schedule.Days buidlingdays : buildingSchedules.getDays()) {
-            StringBuilder message = new StringBuilder("Building" + "\u0020" + ScheduleUtil.getDayString(buidlingdays.getDay() + 1) + "\u0020" + "Schedule");
-            String coolValues = "";
-            String heatValues = "";
-            if (buidlingdays.getHeatingVal() < heatTempUL || buidlingdays.getHeatingVal() > heatTempLL) {
-                double heatDTValue = getHeatDTemp(buidlingdays.getHeatingVal(), heatTempUL, heatTempLL);
-                heatValues = "\u0020" +   "Heating ("+buidlingdays.getHeatingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + heatDTValue+")";
-
-                buidlingdays.setHeatingVal(heatDTValue);
-            }
-
-            if (buidlingdays.getCoolingVal() < coolTempLL || buidlingdays.getCoolingVal() > coolTempUL) {
-                double coolDTValue = getCoolDTemp(buidlingdays.getCoolingVal(), coolTempLL, coolTempUL);
-                coolValues = "\u0020 " +   "Cooling ("+buidlingdays.getCoolingVal() + "\u0020" + "\u0020" + "to" + "\u0020" + "\u0020" + coolDTValue + ")";
-
-                buidlingdays.setCoolingVal(coolDTValue);
-            }
-
-            if (!TextUtils.isEmpty(coolValues) && !TextUtils.isEmpty(heatValues)) {
-                message.append(coolValues).append(heatValues);
-                warningMessage.add("\n" + message);
-            } else if (!TextUtils.isEmpty(coolValues) && TextUtils.isEmpty(heatValues)) {
-                message.append(coolValues);
-                warningMessage.add("\n" + message);
-            } else if (TextUtils.isEmpty(coolValues) && !TextUtils.isEmpty(heatValues)) {
-                message.append(heatValues);
-                warningMessage.add("\n" + message);
-            }
-        }*/
-
-        // set schedule temps for Zones
+        // set schedule temps for building and Zones
         for (Schedule schedule : schedulesList) {
             ArrayList<Schedule.Days> scheduleDaysList = schedule.getDays();
             schedules.add(schedule);
@@ -291,11 +261,9 @@ public class MasterControlView extends LinearLayout {
 
     @SuppressLint("StaticFieldLeak")
     public void getSchedule(String siteRef, Dialog dialog) {
-        ProgressDialog progressDlg = new ProgressDialog(getContext());
-        progressDlg.setMessage("Loading...");
-        progressDlg.show();
+        ProgressDialogUtils.showProgressDialog(getContext(), "Fetching global schedule data...");
 
-        final ArrayList<Schedule>[] scheduleList = new ArrayList[]{new ArrayList<>()};
+        final ArrayList<Schedule> scheduleList = new ArrayList<>();
         new AsyncTask<String, Void, ArrayList<Schedule>>() {
 
             @Override
@@ -308,15 +276,15 @@ public class MasterControlView extends LinearLayout {
                 while (it.hasNext())
                 {
                     HRow r = (HRow) it.next();
-                    scheduleList[0].add(new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build());
+                    scheduleList.add(new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build());
                 }
 
-                return scheduleList[0];
+                return scheduleList;
             }
 
             @Override
             protected void onPostExecute(ArrayList<Schedule> schedules) {
-                progressDlg.dismiss();
+                ProgressDialogUtils.hideProgressDialog();
                 checkForSchedules(dialog, schedules);
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
@@ -388,13 +356,6 @@ public class MasterControlView extends LinearLayout {
             if (schedule.isZoneSchedule()) {
                 if (schedule.getRoomRef()!= null)
                 setZoneData(masterControlDialog, schedule.getRoomRef());
-                /*String scheduleLuid = CCUHsApi.getInstance().getLUID("@"+schedule.getId());
-                String zoneLuid = CCUHsApi.getInstance().getLUID(schedule.getRoomRef());
-                if (scheduleLuid != null && zoneLuid != null) {
-                    schedule.setId(scheduleLuid.replace("@",""));
-                    schedule.setRoomRef(zoneLuid);
-                    CCUHsApi.getInstance().updateZoneSchedule(schedule, schedule.getRoomRef());
-                }*/
             } else {
                 String scheduleLuid = CCUHsApi.getInstance().getLUID("@"+schedule.getId());
                 if (scheduleLuid != null) {

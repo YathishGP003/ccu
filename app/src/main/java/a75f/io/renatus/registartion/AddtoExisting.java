@@ -31,6 +31,7 @@ import a75f.io.logic.tuners.BuildingTuners;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RegisterGatherCCUDetails;
 import a75f.io.renatus.RegisterGatherDetails;
+import a75f.io.renatus.util.ProgressDialogUtils;
 
 public class AddtoExisting extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
@@ -280,7 +281,7 @@ public class AddtoExisting extends Fragment {
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
-                showProgressDialog();
+                ProgressDialogUtils.showProgressDialog(getActivity(), "Loading Site...");
             }
 
             @Override
@@ -297,7 +298,7 @@ public class AddtoExisting extends Fragment {
             @Override
             protected void onPostExecute(HGrid hGrid) {
                 super.onPostExecute(hGrid);
-                hideProgressDialog();
+                ProgressDialogUtils.hideProgressDialog();
                 if (hGrid == null || hGrid.isEmpty()) {
                     Toast.makeText(mContext, "No Site returned!", Toast.LENGTH_LONG).show();
                 } else if (!hGrid.row(0).has("site")) {
@@ -319,7 +320,6 @@ public class AddtoExisting extends Fragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-
 
                 saveExistingSite(hGrid);
                 Toast.makeText(mContext, "Using this site!", Toast.LENGTH_LONG).show();
@@ -357,7 +357,7 @@ public class AddtoExisting extends Fragment {
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
-                showProgressDialog();
+                ProgressDialogUtils.showProgressDialog(getActivity(),"Saving Site...");
             }
 
             @Override
@@ -373,30 +373,18 @@ public class AddtoExisting extends Fragment {
             @Override
             protected void onPostExecute(Boolean success) {
                 super.onPostExecute(success);
-                hideProgressDialog();
-
                 if (!success) {
                     Toast.makeText(mContext, "The site failed to sync.", Toast.LENGTH_LONG).show();
                     return;
                 }
 
                 Toast.makeText(mContext, "Sync successful.", Toast.LENGTH_LONG).show();
+                ProgressDialogUtils.hideProgressDialog();
                 navigateToCCUScreen();
             }
         };
 
         syncSiteTask.execute(siteIdVal);
-    }
-
-    private void showProgressDialog() {
-
-        mProgressDialog.setVisibility(View.VISIBLE);
-    }
-
-    private void hideProgressDialog() {
-
-        mProgressDialog.setVisibility(View.INVISIBLE);
-
     }
 
     private void navigateToCCUScreen() {

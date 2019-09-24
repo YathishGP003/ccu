@@ -1,5 +1,6 @@
 package a75f.io.renatus;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -17,14 +18,21 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.projecthaystack.HDict;
+import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
+import org.projecthaystack.HGridBuilder;
 import org.projecthaystack.HRef;
+import org.projecthaystack.HRow;
+import org.projecthaystack.client.HClient;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HayStackConstants;
+import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.SettingPoint;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logic.DefaultSchedules;
@@ -49,6 +57,8 @@ public class RegisterGatherCCUDetails extends Activity {
     Prefs prefs;
     String      mSiteId;
     String addressBandSelected = "1000";
+    ArrayList<String> regAddressBands = new ArrayList<>();
+    ArrayList<String> addressBand = new ArrayList<>();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -56,6 +66,7 @@ public class RegisterGatherCCUDetails extends Activity {
         setContentView(R.layout.activity_register_gather_ccu_details);
 
         prefs = new Prefs(getApplicationContext());
+        getRegisteredAddressBands();
         mInstallerEmailET = findViewById(R.id.installer_email_et);
         mOrTextView = findViewById(R.id.or_textview);
         mUseExistingCCUButton = findViewById(R.id.use_existing_ccu);
@@ -63,8 +74,7 @@ public class RegisterGatherCCUDetails extends Activity {
         mProgressDialog = findViewById(R.id.progressbar);
         mCCUNameET = findViewById(R.id.ccu_name_et);
         mCreateNewCCU = findViewById(R.id.create_new);
-    
-        ArrayList<String> addressBand = new ArrayList<>();
+
         for (int addr = 1000; addr <= 10000; addr+=100)
         {
             addressBand.add(String.valueOf(addr));
@@ -104,8 +114,7 @@ public class RegisterGatherCCUDetails extends Activity {
                 String installerEmail = mInstallerEmailET.getText().toString();
                 String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail);
                 CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
-    
-    
+
                 HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
                 SettingPoint snBand = new SettingPoint.Builder()
                                                         .setDeviceRef(localId)
@@ -118,6 +127,54 @@ public class RegisterGatherCCUDetails extends Activity {
         });
 
         loadCCUs();
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    private void getRegisteredAddressBands() {
+        regAddressBands.clear();
+        new AsyncTask<String, Void,Void>(){
+
+            @Override
+            protected Void doInBackground(String... strings) {
+                HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+                HashMap site = CCUHsApi.getInstance().read("site");
+                String siteLUID = site.get("id").toString();
+                String siteGUID = CCUHsApi.getInstance().getGUID(siteLUID);
+                HDict tDict = new HDictBuilder().add("filter", "equip and group and siteRef == " + siteGUID).toDict();
+                HGrid schedulePoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
+                Iterator it = schedulePoint.iterator();
+                while (it.hasNext())
+                {
+                    HRow r = (HRow) it.next();
+
+                    if (r.getStr("group") != null) {
+                        regAddressBands.add(r.getStr("group"));
+                    }
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+
+                //remove registered SmartNodeAddressBand
+                for(int i = 0; i < regAddressBands.size(); i++)
+                {
+                    for(int j = 0; j < addressBand.size(); j++)
+                    {
+                        if(regAddressBands.get(i).equals(addressBand.get(j)))
+                        {
+                            addressBand.remove(regAddressBands.get(i));
+                        }
+                    }
+                }
+                ArrayAdapter<String> analogAdapter = new ArrayAdapter<String>(RegisterGatherCCUDetails.this, R.layout.spinner_dropdown_item, addressBand);
+                analogAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+
+                mAddressBandSpinner.setAdapter(analogAdapter);
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     private void loadCCUs() {

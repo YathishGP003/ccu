@@ -119,7 +119,7 @@ public class AboutFragment extends Fragment {
         }
 
         String siteGUID = CCUHsApi.getInstance().getGUID(site.get("id").toString());
-        tvSerialNumber.setText(siteGUID);
+        tvSerialNumber.setText(siteGUID == null? site.get("id").toString() :siteGUID);
 
         return rootView;
     }

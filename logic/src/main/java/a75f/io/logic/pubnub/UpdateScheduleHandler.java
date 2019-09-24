@@ -58,6 +58,7 @@ public class UpdateScheduleHandler
                 s.setRoomRef(CCUHsApi.getInstance().getLUID(s.getRoomRef()));
                 if (s.getMarkers().contains("building"))
                 {
+                    CCUHsApi.getInstance().updateScheduleNoSync(s, null);
                     Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
                     if (!systemSchedule.equals(s))
                     {
@@ -91,6 +92,7 @@ public class UpdateScheduleHandler
                 {
                     String lroomRef = CCUHsApi.getInstance().getLUID(s.getRoomRef());
                     s.setRoomRef(lroomRef);
+                    if (lroomRef != null)
                     CCUHsApi.getInstance().addSchedule(luid, s.getZoneScheduleHDict(lroomRef));
                 }
                 else

@@ -569,7 +569,7 @@ public class CreateNewSite extends Fragment {
         ccuHsApi.updateSite(s75f, siteId);
         BuildingTuners.getInstance();
         ccuHsApi.log();
-        L.ccu().systemProfile = new DefaultSystem();
+      //  L.ccu().systemProfile = new DefaultSystem();
         ccuHsApi.saveTagsData();
 
     }

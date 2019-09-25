@@ -40,6 +40,7 @@ import a75f.io.logic.bo.building.ss4pfcu.FourPipeFanCoilUnitConfiguration;
 import a75f.io.logic.bo.building.ss4pfcu.FourPipeFanCoilUnitProfile;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
@@ -233,13 +234,10 @@ public class Fragment4PipeFanCoilUnitConfig extends BaseDialogFragment implement
 
                 new AsyncTask<String, Void, Void>() {
 
-                    ProgressDialog progressDlg = new ProgressDialog(getActivity());
-
                     @Override
                     protected void onPreExecute() {
                         setButton.setEnabled(false);
-                        progressDlg.setMessage("Saving 4PFCU Configuration");
-                        progressDlg.show();
+                        ProgressDialogUtils.showProgressDialog(getActivity(), "Saving 4PFCU Configuration");
                         super.onPreExecute();
                     }
 
@@ -253,7 +251,7 @@ public class Fragment4PipeFanCoilUnitConfig extends BaseDialogFragment implement
 
                     @Override
                     protected void onPostExecute(final Void result) {
-                        progressDlg.dismiss();
+                        ProgressDialogUtils.hideProgressDialog();
                         Fragment4PipeFanCoilUnitConfig.this.closeAllBaseDialogFragments();
                         getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
                     }

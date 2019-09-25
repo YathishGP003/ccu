@@ -40,6 +40,7 @@ import a75f.io.logic.bo.building.ss2pfcu.TwoPipeFanCoilUnitConfiguration;
 import a75f.io.logic.bo.building.ss2pfcu.TwoPipeFanCoilUnitProfile;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
@@ -226,13 +227,10 @@ public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implement
 
                 new AsyncTask<String, Void, Void>() {
 
-                    ProgressDialog progressDlg = new ProgressDialog(getActivity());
-
                     @Override
                     protected void onPreExecute() {
                         setButton.setEnabled(false);
-                        progressDlg.setMessage("Saving 2PFCU Configuration");
-                        progressDlg.show();
+                        ProgressDialogUtils.showProgressDialog(getActivity(),"Saving 2PFCU Configuration");
                         super.onPreExecute();
                     }
 
@@ -246,7 +244,7 @@ public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implement
 
                     @Override
                     protected void onPostExecute(final Void result) {
-                        progressDlg.dismiss();
+                        ProgressDialogUtils.hideProgressDialog();
                         Fragment2PipeFanCoilUnitConfig.this.closeAllBaseDialogFragments();
                         getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
                     }

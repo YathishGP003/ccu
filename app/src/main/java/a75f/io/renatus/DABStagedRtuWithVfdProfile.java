@@ -33,6 +33,7 @@ import a75f.io.logic.bo.building.system.dab.DabStagedRtuWithVfd;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.registartion.FreshRegistration;
 import a75f.io.renatus.util.Prefs;
+import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -133,13 +134,9 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         
             new AsyncTask<String, Void, Void>() {
             
-                ProgressDialog progressDlg = new ProgressDialog(getActivity());
-            
                 @Override
                 protected void onPreExecute() {
-                    progressDlg.setMessage("Loading System Profile");
-                    progressDlg.setCancelable(false);
-                    progressDlg.show();
+                    ProgressDialogUtils.showProgressDialog(getActivity(),"Loading System Profile");
                     super.onPreExecute();
                 }
             
@@ -161,7 +158,7 @@ public class DABStagedRtuWithVfdProfile extends Fragment implements AdapterView.
                     setUpSpinners();
                     CCUHsApi.getInstance().saveTagsData();
                     CCUHsApi.getInstance().syncEntityTree();
-                    progressDlg.dismiss();
+                    ProgressDialogUtils.hideProgressDialog();
                 }
             }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
         }

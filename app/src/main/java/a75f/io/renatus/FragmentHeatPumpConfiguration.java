@@ -42,6 +42,7 @@ import a75f.io.logic.bo.building.sshpu.HeatPumpUnitConfiguration;
 import a75f.io.logic.bo.building.sshpu.HeatPumpUnitProfile;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
@@ -263,13 +264,10 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
 
                 new AsyncTask<String, Void, Void>() {
 
-                    ProgressDialog progressDlg = new ProgressDialog(getActivity());
-
                     @Override
                     protected void onPreExecute() {
                         setButton.setEnabled(false);
-                        progressDlg.setMessage("Saving HPU Configuration");
-                        progressDlg.show();
+                        ProgressDialogUtils.showProgressDialog(getActivity(),"Saving HPU Configuration");
                         super.onPreExecute();
                     }
 
@@ -283,7 +281,7 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
 
                     @Override
                     protected void onPostExecute(final Void result) {
-                        progressDlg.dismiss();
+                        ProgressDialogUtils.hideProgressDialog();
                         FragmentHeatPumpConfiguration.this.closeAllBaseDialogFragments();
                         getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
                     }

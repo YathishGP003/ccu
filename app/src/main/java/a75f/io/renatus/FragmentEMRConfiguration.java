@@ -20,6 +20,7 @@ import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.erm.EmrProfile;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -131,13 +132,10 @@ public class FragmentEMRConfiguration extends BaseDialogFragment
                 
                 new AsyncTask<String, Void, Void>() {
                     
-                    ProgressDialog progressDlg = new ProgressDialog(getActivity());
-                    
                     @Override
                     protected void onPreExecute() {
                         setButton.setEnabled(false);
-                        progressDlg.setMessage("Saving EMR Configuration");
-                        progressDlg.show();
+                        ProgressDialogUtils.showProgressDialog(getActivity(),"Saving EMR Configuration");
                         super.onPreExecute();
                     }
                     
@@ -151,7 +149,7 @@ public class FragmentEMRConfiguration extends BaseDialogFragment
                     
                     @Override
                     protected void onPostExecute( final Void result ) {
-                        progressDlg.dismiss();
+                        ProgressDialogUtils.hideProgressDialog();
                         FragmentEMRConfiguration.this.closeAllBaseDialogFragments();
                         getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
                     }

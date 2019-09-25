@@ -29,6 +29,7 @@ import a75f.io.logic.bo.building.oao.OAOProfile;
 import a75f.io.logic.bo.building.oao.OAOProfileConfiguration;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -150,14 +151,11 @@ public class DialogOAOProfile extends BaseDialogFragment
             public void onClick(View v) {
             
                 new AsyncTask<Void, Void, Void>() {
-                
-                    ProgressDialog progressDlg = new ProgressDialog(getActivity());
-                
+
                     @Override
                     protected void onPreExecute() {
                         setButton.setEnabled(false);
-                        progressDlg.setMessage("Saving OAO Configuration");
-                        progressDlg.show();
+                        ProgressDialogUtils.showProgressDialog(getActivity(),"Saving OAO Configuration");
                         super.onPreExecute();
                     }
                 
@@ -171,7 +169,7 @@ public class DialogOAOProfile extends BaseDialogFragment
                 
                     @Override
                     protected void onPostExecute( final Void result ) {
-                        progressDlg.dismiss();
+                        ProgressDialogUtils.hideProgressDialog();
                         DialogOAOProfile.this.closeAllBaseDialogFragments();
                         getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
                     }

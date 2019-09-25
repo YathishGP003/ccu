@@ -28,6 +28,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -90,13 +91,9 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         } else {
             new AsyncTask<String, Void, Void>() {
         
-                ProgressDialog progressDlg = new ProgressDialog(getActivity());
-        
                 @Override
                 protected void onPreExecute() {
-                    progressDlg.setMessage("Loading System Profile");
-                    progressDlg.setCancelable(false);
-                    progressDlg.show();
+                    ProgressDialogUtils.showProgressDialog(getActivity(),"Loading System Profile");
                     super.onPreExecute();
                 }
         
@@ -116,7 +113,7 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
                 protected void onPostExecute(final Void result) {
                     setupAnalogLimitSelectors();
                     setupEquipAddrEditor();
-                    progressDlg.dismiss();
+                    ProgressDialogUtils.hideProgressDialog();
                     CCUHsApi.getInstance().saveTagsData();
                     CCUHsApi.getInstance().syncEntityTree();
                 }

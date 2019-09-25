@@ -36,6 +36,7 @@ import a75f.io.logic.bo.building.plc.PlcProfile;
 import a75f.io.logic.bo.building.plc.PlcProfileConfiguration;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -401,14 +402,12 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                 }
                 
                 new AsyncTask<String, Void, Void>() {
-        
-                    ProgressDialog progressDlg = new ProgressDialog(getActivity());
+
         
                     @Override
                     protected void onPreExecute() {
                         setButton.setEnabled(false);
-                        progressDlg.setMessage("Saving PLC Configuration");
-                        progressDlg.show();
+                        ProgressDialogUtils.showProgressDialog(getActivity(),"Saving PLC Configuration");
                         super.onPreExecute();
                     }
         
@@ -422,7 +421,7 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
         
                     @Override
                     protected void onPostExecute( final Void result ) {
-                        progressDlg.dismiss();
+                        ProgressDialogUtils.hideProgressDialog();
                         FragmentPLCConfiguration.this.closeAllBaseDialogFragments();
                         getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
                     }

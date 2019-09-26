@@ -43,6 +43,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.ButterKnife;
 
 import static a75f.io.logic.bo.building.definitions.DamperType.ZeroToTenV;
@@ -385,13 +386,10 @@ public class FragmentDABConfiguration extends BaseDialogFragment
                 
                 new AsyncTask<Void, Void, Void>() {
                     
-                    ProgressDialog progressDlg = new ProgressDialog(getActivity());
-                    
                     @Override
                     protected void onPreExecute() {
                         setButton.setEnabled(false);
-                        progressDlg.setMessage("Saving DAB Configuration");
-                        progressDlg.show();
+                        ProgressDialogUtils.showProgressDialog(getActivity(),"Saving DAB Configuration");
                         super.onPreExecute();
                     }
                     
@@ -405,7 +403,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
                     
                     @Override
                     protected void onPostExecute( final Void result ) {
-                        progressDlg.dismiss();
+                        ProgressDialogUtils.hideProgressDialog();
                         FragmentDABConfiguration.this.closeAllBaseDialogFragments();
                         getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
                     }

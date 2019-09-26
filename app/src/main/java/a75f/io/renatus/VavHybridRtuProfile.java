@@ -33,6 +33,7 @@ import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.registartion.FreshRegistration;
 import a75f.io.renatus.util.Prefs;
+import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -138,13 +139,9 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
             } else {
                 new AsyncTask<String, Void, Void>() {
 
-                    ProgressDialog progressDlg = new ProgressDialog(getActivity());
-
                     @Override
                     protected void onPreExecute() {
-                        progressDlg.setMessage("Loading System Profile");
-                        progressDlg.setCancelable(false);
-                        progressDlg.show();
+                        ProgressDialogUtils.showProgressDialog(getActivity(),"Loading System Profile");
                         super.onPreExecute();
                     }
 
@@ -164,7 +161,7 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
                     protected void onPostExecute(final Void result) {
                         setUpCheckBoxes();
                         setUpSpinners();
-                        progressDlg.dismiss();
+                        ProgressDialogUtils.hideProgressDialog();
                         CCUHsApi.getInstance().saveTagsData();
                         CCUHsApi.getInstance().syncEntityTree();
                     }

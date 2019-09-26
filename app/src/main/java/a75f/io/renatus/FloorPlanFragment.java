@@ -1,10 +1,12 @@
 package a75f.io.renatus;
 
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -25,15 +27,24 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.projecthaystack.HDict;
+import org.projecthaystack.HDictBuilder;
+import org.projecthaystack.HGrid;
+import org.projecthaystack.HGridBuilder;
+import org.projecthaystack.HRow;
+import org.projecthaystack.client.HClient;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
@@ -108,6 +119,8 @@ public class FloorPlanFragment extends Fragment
 	//
 	private Zone roomToRename;
 	private Floor floorToRename;
+	ArrayList<String> siteFloorList = new ArrayList<>();
+	ArrayList<String> siteRoomList = new ArrayList<>();
 
 	private final BroadcastReceiver mPairingReceiver = new BroadcastReceiver()
 	{
@@ -176,10 +189,11 @@ public class FloorPlanFragment extends Fragment
 	{
 		View rootView = inflater.inflate(R.layout.floorplan, container, false);
 		ButterKnife.bind(this, rootView);
+
+		getBuildingFloorsZones();
 		return rootView;
 	}
-	
-	
+
 	@Override
 	public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
 	{
@@ -310,7 +324,53 @@ public class FloorPlanFragment extends Fragment
 			disableModuButton();
 		}
 	}
-	
+
+
+	@SuppressLint("StaticFieldLeak")
+	private void getBuildingFloorsZones() {
+		new AsyncTask<String, Void,Void>(){
+
+			@Override
+			protected Void doInBackground(String... strings) {
+				HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+				HashMap site = CCUHsApi.getInstance().read("site");
+				String siteLUID = site.get("id").toString();
+				String siteGUID = CCUHsApi.getInstance().getGUID(siteLUID);
+
+				//for floor
+				HDict tDict = new HDictBuilder().add("filter", "floor and siteRef == " + siteGUID).toDict();
+				HGrid floorPoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
+				Iterator it = floorPoint.iterator();
+
+				siteFloorList.clear();
+				while (it.hasNext())
+				{
+					HRow r = (HRow) it.next();
+
+					if (r.getStr("dis") != null) {
+						siteFloorList.add(r.getStr("dis"));
+					}
+				}
+
+				//for zones
+				HDict zDict = new HDictBuilder().add("filter", "room and not oao and siteRef == " + siteGUID).toDict();
+				HGrid zonePoint = hClient.call("read", HGridBuilder.dictToGrid(zDict));
+				Iterator zit = zonePoint.iterator();
+
+				siteRoomList.clear();
+				while (zit.hasNext())
+				{
+					HRow zr = (HRow) zit.next();
+
+					if (zr.getStr("dis") != null) {
+						siteRoomList.add(zr.getStr("dis"));
+					}
+				}
+
+				return null;
+			}
+		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+	}
 	
 	private void selectRoom(int position)
 	{
@@ -427,6 +487,7 @@ public class FloorPlanFragment extends Fragment
 	@OnClick(R.id.lt_addfloor)
 	public void addFloorBtn()
 	{
+		getBuildingFloorsZones();
 		enableFloorEdit();
 		addFloorEdit.setText("");
 		addFloorEdit.requestFocus();
@@ -547,9 +608,9 @@ public class FloorPlanFragment extends Fragment
 			if (floorToRename != null){
 
 				floorList.remove(floorToRename);
-				for (Floor f : floorList) {
-					if (f.getDisplayName().equals(addFloorEdit.getText().toString())) {
-						Toast.makeText(getActivity().getApplicationContext(), "Floor already exists : " + addRoomEdit.getText(), Toast.LENGTH_SHORT).show();
+				for (String floorName : siteFloorList) {
+					if (floorName.equals(addFloorEdit.getText().toString())) {
+						Toast.makeText(getActivity().getApplicationContext(), "Floor already exists : " + addFloorEdit.getText(), Toast.LENGTH_SHORT).show();
 						return true;
 					}
 				}
@@ -575,13 +636,16 @@ public class FloorPlanFragment extends Fragment
 				L.saveCCUState();
 				CCUHsApi.getInstance().syncEntityTree();
 
+				if (!siteFloorList.contains(addFloorEdit.getText().toString())){
+					siteFloorList.add(addFloorEdit.getText().toString());
+				}
 				return true;
 			}
 
 			if(addFloorEdit.getText().toString().length() > 0) {
-				for (Floor f : HSUtil.getFloors()) {
-					if (f.getDisplayName().equals(addFloorEdit.getText().toString())) {
-						Toast.makeText(getActivity().getApplicationContext(), "Floor already exists : " + addRoomEdit.getText(), Toast.LENGTH_SHORT).show();
+				for (String f : siteFloorList) {
+					if (f.equals(addFloorEdit.getText().toString())) {
+						Toast.makeText(getActivity().getApplicationContext(), "Floor already exists : " + addFloorEdit.getText(), Toast.LENGTH_SHORT).show();
 						return true;
 					}
 				}
@@ -602,6 +666,7 @@ public class FloorPlanFragment extends Fragment
 				mgr.hideSoftInputFromWindow(addFloorEdit.getWindowToken(), 0);
 				Toast.makeText(getActivity().getApplicationContext(),
 						"Floor " + addFloorEdit.getText() + " added", Toast.LENGTH_SHORT).show();
+				siteFloorList.add(addFloorEdit.getText().toString());
 				return true;
 			}
 			else {
@@ -637,6 +702,7 @@ public class FloorPlanFragment extends Fragment
 	@OnClick(R.id.lt_addzone)
 	public void addRoomBtn()
 	{
+		getBuildingFloorsZones();
 		enableRoomEdit();
 		addRoomEdit.setText("");
 		addRoomEdit.requestFocus();
@@ -644,7 +710,6 @@ public class FloorPlanFragment extends Fragment
 				(InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 		mgr.showSoftInput(addRoomEdit, InputMethodManager.SHOW_IMPLICIT);
 	}
-
 
 	private void enableRoomEdit()
 	{
@@ -699,14 +764,12 @@ public class FloorPlanFragment extends Fragment
 
 				roomList.remove(roomToRename);
 
-				for (Floor f : HSUtil.getFloors()) {
-					for (Zone z : roomList) {
-						if (z.getDisplayName().equals(addRoomEdit.getText().toString())) {
+					for (String z : siteRoomList) {
+						if (z.equals(addRoomEdit.getText().toString())) {
 							Toast.makeText(getActivity().getApplicationContext(), "Zone already exists : " + addRoomEdit.getText(), Toast.LENGTH_SHORT).show();
 							return true;
 						}
 					}
-				}
 
 				Zone hsZone = new Zone.Builder()
 						.setDisplayName(addRoomEdit.getText().toString())
@@ -728,17 +791,18 @@ public class FloorPlanFragment extends Fragment
 				mgr.hideSoftInputFromWindow(addRoomEdit.getWindowToken(), 0);
 
 				roomToRename = null;
+				if (!siteRoomList.contains(addRoomEdit.getText().toString())){
+					siteRoomList.add(addRoomEdit.getText().toString());
+				}
 				return true;
 			}
 
 			if(addRoomEdit.getText().toString().length() > 0) {
-				for (Floor f : HSUtil.getFloors()) {
-					for (Zone z : HSUtil.getZones(f.getId())) {
-						if (z.getDisplayName().equals(addRoomEdit.getText().toString())) {
+					for (String z : siteRoomList) {
+						if (z.equals(addRoomEdit.getText().toString())) {
 							Toast.makeText(getActivity().getApplicationContext(), "Zone already exists : " + addRoomEdit.getText(), Toast.LENGTH_SHORT).show();
 							return true;
 						}
-					}
 				}
 
 				Toast.makeText(getActivity().getApplicationContext(),
@@ -779,7 +843,7 @@ public class FloorPlanFragment extends Fragment
 				}
 
 				CCUHsApi.getInstance().updateZoneSchedule(zoneSchedule, zoneSchedule.getRoomRef());
-
+				siteRoomList.add(addRoomEdit.getText().toString());
 				return true;
 			}
 			else {

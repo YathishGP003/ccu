@@ -41,6 +41,7 @@ import a75f.io.logic.bo.building.sscpu.ConventionalUnitConfiguration;
 import a75f.io.logic.bo.building.sscpu.ConventionalUnitProfile;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
@@ -239,13 +240,10 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
 
                 new AsyncTask<String, Void, Void>() {
 
-                    ProgressDialog progressDlg = new ProgressDialog(getActivity());
-
                     @Override
                     protected void onPreExecute() {
                         setButton.setEnabled(false);
-                        progressDlg.setMessage("Saving CPU Configuration");
-                        progressDlg.show();
+                        ProgressDialogUtils.showProgressDialog(getActivity(),"Saving CPU Configuration");
                         super.onPreExecute();
                     }
 
@@ -259,7 +257,7 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
 
                     @Override
                     protected void onPostExecute(final Void result) {
-                        progressDlg.dismiss();
+                        ProgressDialogUtils.hideProgressDialog();
                         FragmentCPUConfiguration.this.closeAllBaseDialogFragments();
                         getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
                     }

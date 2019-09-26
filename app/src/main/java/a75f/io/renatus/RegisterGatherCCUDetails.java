@@ -39,6 +39,7 @@ import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.tuners.BuildingTuners;
+import a75f.io.renatus.registartion.FreshRegistration;
 import a75f.io.renatus.util.Prefs;
 
 import static a75f.io.logic.L.ccu;
@@ -173,6 +174,8 @@ public class RegisterGatherCCUDetails extends Activity {
                 analogAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 
                 mAddressBandSpinner.setAdapter(analogAdapter);
+                addressBandSelected = addressBand.get(0);
+                L.ccu().setSmartNodeAddressBand(Short.parseShort(addressBandSelected));
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
@@ -260,8 +263,8 @@ public class RegisterGatherCCUDetails extends Activity {
                 hideProgressDialog();
                 prefs.setBoolean("CCU_SETUP", true);
                 Intent i = new Intent(RegisterGatherCCUDetails.this,
-                        RenatusLandingActivity.class);
-
+                        FreshRegistration.class);
+                i.putExtra("viewpager_position", 9);
                 i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(i);
                 finish();

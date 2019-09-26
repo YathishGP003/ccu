@@ -99,13 +99,13 @@ public class AlertDefinition
             return false;
         }
         
-        for (int i = 0; i < conditionals.size() ; i++) {
+        for (int i = 0; i < conditionals.size() ; i+=2) {
             Conditional c = conditionals.get(i);
-            if ((i%2 == 0 && c.operator != null) || (i%2 != 0 && c.operator == null)) {
+            if ( (c.isOperator() && c.operator != null) || (c.isCondition() && c.operator == null)) {
                 logValidatation("Operator not allowed "+c.toString());
                 return false;
             }
-            if ((c.grpOperation != null) && !c.grpOperation.equals("") && !c.grpOperation.equals("equip") && !c.grpOperation.equals("average")
+            if (c.isCondition() && c.grpOperation != null && !c.grpOperation.equals("") && !c.grpOperation.equals("equip") && !c.grpOperation.equals("average")
                         && !c.grpOperation.contains("top") && !c.grpOperation.contains("bottom")
                         && !c.grpOperation.contains("min") && !c.grpOperation.contains("max")) {
                 logValidatation("grpOperator not supported "+c.grpOperation);
@@ -114,6 +114,8 @@ public class AlertDefinition
         }
         return true;
     }
+    
+    
     
     private void logValidatation(String msg) {
         CcuLog.d("CCU_ALERTS","Invalid Alert Definition : "+msg);

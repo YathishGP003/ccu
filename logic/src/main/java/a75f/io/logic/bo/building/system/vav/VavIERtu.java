@@ -285,7 +285,7 @@ public class VavIERtu extends VavSystemProfile
                                       .setDisplayName(equipDis+"-"+"coolingDat")
                                       .setSiteRef(siteRef)
                                       .setEquipRef(equipref)
-                                      .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("his").addMarker("equipHis")
+                                      .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("discharge").addMarker("air").addMarker("temp").addMarker("his").addMarker("equipHis")
                                       .setTz(tz)
                                       .build();
         CCUHsApi.getInstance().addPoint(coolingSignal);
@@ -294,7 +294,7 @@ public class VavIERtu extends VavSystemProfile
                                       .setDisplayName(equipDis+"-"+"heatingDat")
                                       .setSiteRef(siteRef)
                                       .setEquipRef(equipref)
-                                      .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("his").addMarker("equipHis")
+                                      .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("discharge").addMarker("air").addMarker("temp").addMarker("his").addMarker("equipHis")
                                       .setTz(tz)
                                       .build();
         CCUHsApi.getInstance().addPoint(heatingSignal);

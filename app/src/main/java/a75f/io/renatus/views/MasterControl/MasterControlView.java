@@ -353,38 +353,72 @@ public class MasterControlView extends LinearLayout {
     private void saveScheduleData(ArrayList<Schedule> schedules, ArrayList<Zone> zoneList, Dialog masterControlDialog) {
         //TODO:
         for (Schedule schedule : schedules) {
-            if (schedule.isZoneSchedule()) {
-                if (schedule.getRoomRef()!= null)
-                setZoneData(masterControlDialog, schedule.getRoomRef());
+            if (schedule.isZoneSchedule() && schedule.getRoomRef()!= null) {
+                    setZoneData(masterControlDialog, schedule.getRoomRef());
+                    String scheduleLuid = CCUHsApi.getInstance().getLUID("@" + schedule.getId());
+                    if (scheduleLuid != null && schedule.getRoomRef() != null) {
+                        schedule.setId(scheduleLuid.replace("@", ""));
+                        CCUHsApi.getInstance().updateZoneSchedule(schedule, schedule.getRoomRef());
+                    }
+                syncZoneSchedules(schedule);
             } else {
                 String scheduleLuid = CCUHsApi.getInstance().getLUID("@"+schedule.getId());
                 if (scheduleLuid != null) {
                     schedule.setId(scheduleLuid.replace("@",""));
                     CCUHsApi.getInstance().updateSchedule(schedule);
                 }
+                syncBuildingSchedules(schedule);
             }
         }
-        syncSchedules(schedules);
+
         saveBuildingData(masterControlDialog, schedules.get(0).getmSiteId());
     }
 
     @SuppressLint("StaticFieldLeak")
-    private void syncSchedules(ArrayList<Schedule> schedules) {
+    private void syncZoneSchedules(Schedule schedule) {
         ArrayList<HDict> entities = new ArrayList<>();
-        for (Schedule s : schedules)
-        {
-            String scheduleguid = CCUHsApi.getInstance().getGUID("@"+s.getId());
-            if ( scheduleguid != null){
-                s.setId(scheduleguid.replace("@",""));
-            }
-            entities.add(s.getRoomRef() == null ? s.getScheduleHDict(): s.getZoneScheduleHDict(s.getRoomRef()));
+        String scheduleguid = CCUHsApi.getInstance().getGUID("@"+schedule.getId());
+        if ( scheduleguid != null){
+            schedule.setId(scheduleguid.replace("@",""));
         }
+        entities.add( schedule.getZoneScheduleHDict(schedule.getRoomRef()));
 
         new AsyncTask<String, Void, Void>() {
             @Override
             protected Void doInBackground(final String... params) {
                 HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
                 String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "addEntity", HZincWriter.gridToString(grid));
+
+                if (response == null)
+                {
+                    CcuLog.i("CCU_HS_SYNC", "Aborting Schedule Sync");
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    private void syncBuildingSchedules(Schedule schedule) {
+        ArrayList<HDict> entities = new ArrayList<>();
+        String scheduleguid = CCUHsApi.getInstance().getGUID("@"+schedule.getId());
+        if ( scheduleguid != null){
+            schedule.setId(scheduleguid.replace("@",""));
+        }
+        entities.add(schedule.getScheduleHDict());
+
+        new AsyncTask<String, Void, Void>() {
+            @Override
+            protected Void doInBackground(final String... params) {
+                HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
+                String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "addEntity", HZincWriter.gridToString(grid));
+
                 if (response == null)
                 {
                     CcuLog.i("CCU_HS_SYNC", "Aborting Schedule Sync");

@@ -337,6 +337,9 @@ public class FloorPlanFragment extends Fragment
 				String siteLUID = site.get("id").toString();
 				String siteGUID = CCUHsApi.getInstance().getGUID(siteLUID);
 
+				if (siteGUID == null) {
+					return null;
+				}
 				//for floor
 				HDict tDict = new HDictBuilder().add("filter", "floor and siteRef == " + siteGUID).toDict();
 				HGrid floorPoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));

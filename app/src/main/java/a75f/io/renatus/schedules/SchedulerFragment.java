@@ -3,9 +3,7 @@ package a75f.io.renatus.schedules;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.graphics.Color;
 import android.graphics.Typeface;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
@@ -27,7 +25,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -540,7 +537,11 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                        .setPositiveButton("Force-Trim", new DialogInterface.OnClickListener() {
                            public void onClick(DialogInterface dialog, int id) {
                                schedule.getDays().addAll(daysArrayList);
-                               ScheduleUtil.trimZoneSchedules(spillsMap);
+                               if (schedule.isZoneSchedule()) {
+                                   ScheduleUtil.trimZoneSchedule(schedule, spillsMap);
+                               } else{
+                                   ScheduleUtil.trimZoneSchedules(spillsMap);
+                               }
                                schedule = CCUHsApi.getInstance().getScheduleById(schedule.getId());
                                doScheduleUpdate();
                            }

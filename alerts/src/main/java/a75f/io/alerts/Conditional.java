@@ -58,6 +58,14 @@ public class Conditional
         return status;
     }
     
+    public boolean isOperator() {
+        return order%2 == 1;
+    }
+    
+    public boolean isCondition() {
+        return order%2 == 0;
+    }
+    
     void evaluate() {
         
         if (key.isEmpty() || value.isEmpty() || condition.isEmpty()) {
@@ -79,6 +87,9 @@ public class Conditional
             ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("zone and equip");
             for (Map q : equips) {
                 HashMap point = CCUHsApi.getInstance().read(key+" and equipRef == \""+q.get("id")+"\"");
+                if (point.size() == 0) {
+                    continue;
+                }
                 resVal = CCUHsApi.getInstance().readHisValById(point.get("id").toString());
                 if (!isNumeric(value)) {
                     value = String.valueOf(CCUHsApi.getInstance().read(value));

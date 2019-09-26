@@ -302,7 +302,6 @@ public class ConventionalUnitLogicalMap {
                 .setTz(tz)
                 .build();
         String eatID = CCUHsApi.getInstance().addPoint(eatPoint);
-        CCUHsApi.getInstance().writeHisValById(eatID, 0.0);
         
         Point coolingStage1 = new Point.Builder()
                 .setDisplayName(equipDis+"-coolingStage1")

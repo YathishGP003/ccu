@@ -309,7 +309,6 @@ public class FourPipeFanCoilUnitEquip  {
                 .setTz(tz)
                 .build();
         String eatID = CCUHsApi.getInstance().addPoint(eatPoint);
-        CCUHsApi.getInstance().writeHisValById(eatID, 0.0);
 
         Point fanMedium = new Point.Builder()
                 .setDisplayName(equipDis+"-fanMedium")

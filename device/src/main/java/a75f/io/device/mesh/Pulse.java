@@ -468,8 +468,6 @@ public class Pulse
 							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 							hayStack.writeHisValById(logPoint.get("id").toString(), ThermistorUtil.getThermistorValueToTemp(val * 10));
 						}
-						else
-							hayStack.writeHisValById(logPoint.get("id").toString(), val * 10);
 						break;
 					case ANALOG_IN_ONE:
 						val = smartStatRegularUpdateMessage_t.update.externalAnalogVoltageInput1.get();

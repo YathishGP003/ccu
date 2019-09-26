@@ -301,7 +301,6 @@ public class HeatPumpUnitEquip{
                 .setTz(tz)
                 .build();
         String eatID = CCUHsApi.getInstance().addPoint(eatPoint);
-        CCUHsApi.getInstance().writeHisValById(eatID, 0.0);
 
         Point compressorStage1 = new Point.Builder()
                 .setDisplayName(equipDis+"-compressorStage1")

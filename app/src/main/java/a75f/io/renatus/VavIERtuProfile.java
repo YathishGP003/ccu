@@ -213,7 +213,7 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         coolingDatMax.setSelection(val != 0 ? coolingDatAdapter.getPosition(val) : coolingDatArr.size()-1 , false);
     
         ArrayList<Double> spArr = new ArrayList<>();
-        for (int sp = 5;  sp <= 15; sp++)
+        for (int sp = 2;  sp <= 10; sp++)
         {
             spArr.add((double)sp/10);
         }

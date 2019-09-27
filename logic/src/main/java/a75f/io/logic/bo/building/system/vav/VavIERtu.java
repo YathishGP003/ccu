@@ -202,7 +202,9 @@ public class VavIERtu extends VavSystemProfile
         }
         setCmdSignal("heating", signal);
     
-        ControlMote.setAnalogOut("analog1", VavSystemController.getInstance().getSystemState() == COOLING ? getCmdSignal("cooling") : getCmdSignal("heating"));
+        double datSp = VavSystemController.getInstance().getSystemState() == COOLING ? getCmdSignal("cooling") : getCmdSignal("heating");
+        setCmdSignal("dat", datSp);
+        ControlMote.setAnalogOut("analog1", datSp);
         
         double analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier", getSystemEquipRef());
         if (VavSystemController.getInstance().getSystemState() == COOLING)
@@ -229,11 +231,11 @@ public class VavIERtu extends VavSystemProfile
             
             if (staticPressureMax > staticPressureMin)
             {
-                signal = (int) (staticPressureMin + (staticPressureMax - staticPressureMin) * (systemFanLoopOp/100));
+                signal = (int) ( 10 * (staticPressureMin + (staticPressureMax - staticPressureMin) * (systemFanLoopOp/100)));
             }
             else
             {
-                signal = (int) (staticPressureMin - (staticPressureMin - staticPressureMax) * (systemFanLoopOp/100));
+                signal = (int) (10 * (staticPressureMin - (staticPressureMin - staticPressureMax) * (systemFanLoopOp/100)));
             }
         } else {
             signal = 0;
@@ -304,6 +306,15 @@ public class VavIERtu extends VavSystemProfile
                                       .setTz(tz)
                                       .build();
         CCUHsApi.getInstance().addPoint(heatingSignal);
+    
+        Point DATClgSetpoint = new Point.Builder()
+                                      .setDisplayName(equipDis+"-"+"DATClgSetpoint")
+                                      .setSiteRef(siteRef)
+                                      .setEquipRef(equipref)
+                                      .addMarker("system").addMarker("cmd").addMarker("dat").addMarker("setpoint").addMarker("temp").addMarker("his").addMarker("equipHis")
+                                      .setTz(tz)
+                                      .build();
+        CCUHsApi.getInstance().addPoint(DATClgSetpoint);
         
         Point fanSignal = new Point.Builder()
                                   .setDisplayName(equipDis+"-"+"ductStaticPressure")
@@ -400,7 +411,7 @@ public class VavIERtu extends VavSystemProfile
                                                    .setTz(tz)
                                                    .build();
         String minStaticPressureId = hayStack.addPoint(minStaticPressure);
-        hayStack.writeDefaultValById(minStaticPressureId, 0.5 );
+        hayStack.writeDefaultValById(minStaticPressureId, 0.2 );
         
         Point maxStaticPressure = new Point.Builder()
                                                    .setDisplayName(equipDis+"-"+"maxStaticPressure")
@@ -412,7 +423,7 @@ public class VavIERtu extends VavSystemProfile
                                                    .setTz(tz)
                                                    .build();
         String maxStaticPressureId = hayStack.addPoint(maxStaticPressure);
-        hayStack.writeDefaultValById(maxStaticPressureId, 1.5 );
+        hayStack.writeDefaultValById(maxStaticPressureId, 1.0 );
         
         Point minHeatingDat = new Point.Builder()
                                             .setDisplayName(equipDis+"-"+"minHeatingDat")

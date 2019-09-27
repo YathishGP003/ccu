@@ -14,7 +14,6 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.system.SystemController;
-import a75f.io.logic.bo.building.system.SystemProfile;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
@@ -127,13 +126,7 @@ public class DaikinIE
     }
     
     private static void sendCoolingDATAutoControl(String url){
-        SystemProfile p = L.ccu().systemProfile;
-        double coolingDat = p.getSystemController().getSystemState() == SystemController.State.COOLING ?
-                                    p.getCmd("cooling") : p.getCmd ("heating");
-        if (coolingDat > 0)
-        {
-            send(url, String.format(DAIKIN_IE_MSG_BODY, fahrenheitToCelsius(coolingDat)));
-        }
+        send(url, String.format(DAIKIN_IE_MSG_BODY, fahrenheitToCelsius(L.ccu().systemProfile.getCmd("dat"))));
     }
     
     private void sendCoolingDAT(String url) {
@@ -159,7 +152,7 @@ public class DaikinIE
     
     
     public static void sendStaticPressure(String url) {
-        send(url, String.format(DAIKIN_IE_MSG_BODY, inchToPascal(L.ccu().systemProfile.getCmd("fan"))));
+        send(url, String.format(DAIKIN_IE_MSG_BODY, inchToPascal(L.ccu().systemProfile.getCmd("fan")/10)));
     }
     
     public static void sendCoolingDATAutoControl(final Double val){

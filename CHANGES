@@ -1,0 +1,9 @@
+ - Merge branch 'renatus_dev_sam' into 'master'
+ - resolves RENATUS-721
+ - resloves RENATUS-725
+ - Merge branch 'kumar_renatus' into 'master'
+ - remove unwanted points tag
+ - Merge branch 'mahesh_renuts' into 'master'
+ - fixed the issue in zone schedule sync
+ - Merge branch 'mahesh_renuts' into 'master'
+ - RENATUS-588, Case sensitivity of Names across System RENATUS-642, System profile changing to default and system page is inactive when we change the zipcode

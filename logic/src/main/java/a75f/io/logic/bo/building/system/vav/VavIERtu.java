@@ -14,6 +14,8 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.system.SystemConstants;
+import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
@@ -240,6 +242,10 @@ public class VavIERtu extends VavSystemProfile
         ControlMote.setAnalogOut("analog2", signal);
         
         ControlMote.setAnalogOut("analog3", VavSystemController.getInstance().getAverageSystemHumidity());
+    
+        systemCo2LoopOp = VavSystemController.getInstance().getSystemState() == SystemController.State.OFF
+                                  ? 0 : (SystemConstants.CO2_CONFIG_MAX - getSystemCO2()) * 100 / 200 ;
+        setSystemLoopOp("co2", systemCo2LoopOp);
         
         if (L.ccu().oaoProfile != null) {
             ControlMote.setAnalogOut("analog4", CCUHsApi.getInstance().readHisValByQuery("point and his and outside and air and damper and cmd"));

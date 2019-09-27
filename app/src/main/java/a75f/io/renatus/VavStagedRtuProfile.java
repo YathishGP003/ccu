@@ -171,7 +171,7 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
         //startActivity(i);
         prefs.setBoolean("PROFILE_SETUP",true);
         prefs.setString("PROFILE",PROFILE);
-        ((FreshRegistration)getActivity()).selectItem(18);
+        ((FreshRegistration)getActivity()).selectItem(19);
     }
 
     private void setUpCheckBoxes() {

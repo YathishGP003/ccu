@@ -95,7 +95,7 @@ public class MenuFragment extends Fragment {
         textTemporaryOverride.setTextColor(getResources().getColor(R.color.black));
         textAbout.setTextColor(getResources().getColor(R.color.black));
 
-        lilAccount.setBackgroundColor(getResources().getColor(R.color.accent));
+        lilAccount.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
         lilSecurity.setBackgroundColor(getResources().getColor(android.R.color.transparent));
         liltWifi.setBackgroundColor(getResources().getColor(android.R.color.transparent));
         lilInstaller.setBackgroundColor(getResources().getColor(android.R.color.transparent));
@@ -139,7 +139,7 @@ public class MenuFragment extends Fragment {
             textTemporaryOverride.setTextColor(getResources().getColor(R.color.black));
             textAbout.setTextColor(getResources().getColor(R.color.black));
 
-            lilAccount.setBackgroundColor(getResources().getColor(R.color.accent));
+            lilAccount.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
             lilSecurity.setBackgroundColor(getResources().getColor(android.R.color.transparent));
             liltWifi.setBackgroundColor(getResources().getColor(android.R.color.transparent));
             lilInstaller.setBackgroundColor(getResources().getColor(android.R.color.transparent));
@@ -177,7 +177,7 @@ public class MenuFragment extends Fragment {
             textAbout.setTextColor(getResources().getColor(R.color.black));
 
             lilAccount.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-            lilSecurity.setBackgroundColor(getResources().getColor(R.color.accent));
+            lilSecurity.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
             liltWifi.setBackgroundColor(getResources().getColor(android.R.color.transparent));
             lilInstaller.setBackgroundColor(getResources().getColor(android.R.color.transparent));
             lilSystemProfile.setBackgroundColor(getResources().getColor(android.R.color.transparent));
@@ -214,7 +214,7 @@ public class MenuFragment extends Fragment {
             textAbout.setTextColor(getResources().getColor(R.color.black));
 
             lilAccount.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-            liltWifi.setBackgroundColor(getResources().getColor(R.color.accent));
+            liltWifi.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
             lilSecurity.setBackgroundColor(getResources().getColor(android.R.color.transparent));
             lilInstaller.setBackgroundColor(getResources().getColor(android.R.color.transparent));
             lilSystemProfile.setBackgroundColor(getResources().getColor(android.R.color.transparent));
@@ -251,7 +251,7 @@ public class MenuFragment extends Fragment {
             textAbout.setTextColor(getResources().getColor(R.color.black));
 
             lilAccount.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-            lilInstaller.setBackgroundColor(getResources().getColor(R.color.accent));
+            lilInstaller.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
             lilSecurity.setBackgroundColor(getResources().getColor(android.R.color.transparent));
             liltWifi.setBackgroundColor(getResources().getColor(android.R.color.transparent));
             lilSystemProfile.setBackgroundColor(getResources().getColor(android.R.color.transparent));
@@ -290,7 +290,7 @@ public class MenuFragment extends Fragment {
             textAbout.setTextColor(getResources().getColor(R.color.black));
 
             lilAccount.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-            lilSystemProfile.setBackgroundColor(getResources().getColor(R.color.accent));
+            lilSystemProfile.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
             lilSecurity.setBackgroundColor(getResources().getColor(android.R.color.transparent));
             liltWifi.setBackgroundColor(getResources().getColor(android.R.color.transparent));
             lilInstaller.setBackgroundColor(getResources().getColor(android.R.color.transparent));
@@ -328,7 +328,7 @@ public class MenuFragment extends Fragment {
             textAbout.setTextColor(getResources().getColor(R.color.black));
 
             lilAccount.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-            lilTemporaryOverride.setBackgroundColor(getResources().getColor(R.color.accent));
+            lilTemporaryOverride.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
             lilSecurity.setBackgroundColor(getResources().getColor(android.R.color.transparent));
             liltWifi.setBackgroundColor(getResources().getColor(android.R.color.transparent));
             lilInstaller.setBackgroundColor(getResources().getColor(android.R.color.transparent));
@@ -367,7 +367,7 @@ public class MenuFragment extends Fragment {
 
 
             lilAccount.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-            lilAbout.setBackgroundColor(getResources().getColor(R.color.accent));
+            lilAbout.setBackground(getResources().getDrawable(R.drawable.ic_listselector));
             lilSecurity.setBackgroundColor(getResources().getColor(android.R.color.transparent));
             liltWifi.setBackgroundColor(getResources().getColor(android.R.color.transparent));
             lilInstaller.setBackgroundColor(getResources().getColor(android.R.color.transparent));

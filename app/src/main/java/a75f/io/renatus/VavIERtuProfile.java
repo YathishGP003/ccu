@@ -14,9 +14,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -28,6 +30,8 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.renatus.registartion.FreshRegistration;
+import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -57,8 +61,15 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
     @BindView(R.id.analog3RTUTest) Spinner heatingTest;
     @BindView(R.id.humidificationTest) Spinner humidificationTest;
     @BindView(R.id.oaMinTest) Spinner oaMinTest;
+    @BindView(R.id.buttonNext)
+    Button mNext;
+    @BindView(R.id.btnEditIp)
+    ImageView btnEditIp;
     
     VavIERtu systemProfile = null;
+    String PROFILE = "VAV_IE_RTU";
+    Prefs prefs;
+    boolean isFromReg = false;
     
     public static VavAnalogRtuProfile newInstance()
     {
@@ -72,12 +83,16 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
     {
         View rootView = inflater.inflate(R.layout.fragment_profile_rtuie, container, false);
         ButterKnife.bind(this, rootView);
+        if(getArguments() != null) {
+            isFromReg = getArguments().getBoolean("REGISTRATION_WIZARD");
+        }
         return rootView;
     }
     
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
     {
+        prefs = new Prefs(getContext().getApplicationContext());
         if ((L.ccu().systemProfile instanceof VavIERtu))
         {
             systemProfile = (VavIERtu) L.ccu().systemProfile;
@@ -87,6 +102,7 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
             humidificationCb.setChecked(systemProfile.getConfigEnabled("humidification") > 0);
             setupAnalogLimitSelectors();
             setupEquipAddrEditor();
+            btnEditIp.setOnClickListener(view1 -> equipAddr.setEnabled(true));
             
         } else {
             new AsyncTask<String, Void, Void>() {
@@ -119,7 +135,18 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
                 }
             }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
         }
-    
+
+        if(isFromReg){
+            mNext.setVisibility(View.VISIBLE);
+        }
+        else {
+            mNext.setVisibility(View.GONE);
+        }
+
+        mNext.setOnClickListener(v -> {
+            goTonext();
+        });
+
         analog1Cb.setOnCheckedChangeListener(this);
         analog2Cb.setOnCheckedChangeListener(this);
         analog3Cb.setOnCheckedChangeListener(this);
@@ -160,6 +187,14 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
                 dialog.show();
             }
         });
+    }
+
+    private void goTonext() {
+        //Intent i = new Intent(mContext, RegisterGatherCCUDetails.class);
+        //startActivity(i);
+        prefs.setBoolean("PROFILE_SETUP",true);
+        prefs.setString("PROFILE",PROFILE);
+        ((FreshRegistration)getActivity()).selectItem(19);
     }
     
     private void setupAnalogLimitSelectors() {

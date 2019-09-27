@@ -193,7 +193,7 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         //startActivity(i);
         prefs.setBoolean("PROFILE_SETUP",true);
         prefs.setString("PROFILE",PROFILE);
-        ((FreshRegistration)getActivity()).selectItem(18);
+        ((FreshRegistration)getActivity()).selectItem(19);
     }
 
     private void setUpCheckBoxes() {

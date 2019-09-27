@@ -97,6 +97,6 @@ public class DefaultSystemProfile extends Fragment
         //startActivity(i);
         prefs.setBoolean("PROFILE_SETUP",true);
         prefs.setString("PROFILE",PROFILE);
-        ((FreshRegistration)getActivity()).selectItem(18);
+        ((FreshRegistration)getActivity()).selectItem(19);
     }
 }

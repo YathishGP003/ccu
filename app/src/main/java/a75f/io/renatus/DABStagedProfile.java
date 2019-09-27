@@ -170,7 +170,7 @@ public class DABStagedProfile extends Fragment implements AdapterView.OnItemSele
         //startActivity(i);
         prefs.setBoolean("PROFILE_SETUP",true);
         prefs.setString("PROFILE",PROFILE);
-        ((FreshRegistration)getActivity()).selectItem(18);
+        ((FreshRegistration)getActivity()).selectItem(19);
     }
     
     private void setUpCheckBoxes() {

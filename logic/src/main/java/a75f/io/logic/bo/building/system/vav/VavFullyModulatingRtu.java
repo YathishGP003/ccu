@@ -239,7 +239,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         if (getConfigVal("relay3 and output and enabled") > 0 && systemMode != SystemMode.OFF)
         {
             double staticPressuremOp = getStaticPressure() - SystemConstants.SP_CONFIG_MIN;
-            signal = (ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED || staticPressuremOp > 0) ? 1 : 0;
+            signal = ((ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED && ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION) || staticPressuremOp > 0) ? 1 : 0;
         } else {
             signal = 0;
         }
@@ -247,7 +247,8 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         ControlMote.setRelayState("relay3", signal );
         
         if (getConfigVal("relay7 and output and enabled") > 0 && systemMode != SystemMode.OFF
-                                                && ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED)
+                                                && ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED
+                                                && ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION)
         {
             double humidity = VavSystemController.getInstance().getAverageSystemHumidity();
             double targetMinHumidity = TunerUtil.readSystemUserIntentVal("target and min and inside and humidity");

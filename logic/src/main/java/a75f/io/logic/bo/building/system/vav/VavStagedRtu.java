@@ -265,7 +265,8 @@ public class VavStagedRtu extends VavSystemProfile
                         }
                         break;
                     case FAN_1:
-                        if ((systemMode != SystemMode.OFF && (ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED
+                        if ((systemMode != SystemMode.OFF && ((ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED
+                                            && ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION)
                                             || VavSystemController.getInstance().getSystemState() != OFF))
                                 || systemFanLoopOp > 0) {
                             relayState = 1;
@@ -298,7 +299,8 @@ public class VavStagedRtu extends VavSystemProfile
                         break;
                     case HUMIDIFIER:
                     case DEHUMIDIFIER:
-                        if (systemMode == SystemMode.OFF || ScheduleProcessJob.getSystemOccupancy() == Occupancy.UNOCCUPIED) {
+                        if (systemMode == SystemMode.OFF || ScheduleProcessJob.getSystemOccupancy() == Occupancy.UNOCCUPIED
+                                                            || ScheduleProcessJob.getSystemOccupancy() == Occupancy.VACATION) {
                             relayState = 0;
                         } else
                         {

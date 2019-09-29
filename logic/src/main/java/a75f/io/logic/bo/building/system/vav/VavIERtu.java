@@ -14,6 +14,8 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.system.SystemConstants;
+import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
@@ -200,7 +202,9 @@ public class VavIERtu extends VavSystemProfile
         }
         setCmdSignal("heating", signal);
     
-        ControlMote.setAnalogOut("analog1", VavSystemController.getInstance().getSystemState() == COOLING ? getCmdSignal("cooling") : getCmdSignal("heating"));
+        double datSp = VavSystemController.getInstance().getSystemState() == COOLING ? getCmdSignal("cooling") : getCmdSignal("heating");
+        setCmdSignal("dat", datSp);
+        ControlMote.setAnalogOut("analog1", datSp);
         
         double analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier", getSystemEquipRef());
         if (VavSystemController.getInstance().getSystemState() == COOLING)
@@ -227,11 +231,11 @@ public class VavIERtu extends VavSystemProfile
             
             if (staticPressureMax > staticPressureMin)
             {
-                signal = (int) (staticPressureMin + (staticPressureMax - staticPressureMin) * (systemFanLoopOp/100));
+                signal = (int) ( 10 * (staticPressureMin + (staticPressureMax - staticPressureMin) * (systemFanLoopOp/100)));
             }
             else
             {
-                signal = (int) (staticPressureMin - (staticPressureMin - staticPressureMax) * (systemFanLoopOp/100));
+                signal = (int) (10 * (staticPressureMin - (staticPressureMin - staticPressureMax) * (systemFanLoopOp/100)));
             }
         } else {
             signal = 0;
@@ -240,6 +244,10 @@ public class VavIERtu extends VavSystemProfile
         ControlMote.setAnalogOut("analog2", signal);
         
         ControlMote.setAnalogOut("analog3", VavSystemController.getInstance().getAverageSystemHumidity());
+    
+        systemCo2LoopOp = VavSystemController.getInstance().getSystemState() == SystemController.State.OFF
+                                  ? 0 : (SystemConstants.CO2_CONFIG_MAX - getSystemCO2()) * 100 / 200 ;
+        setSystemLoopOp("co2", systemCo2LoopOp);
         
         if (L.ccu().oaoProfile != null) {
             ControlMote.setAnalogOut("analog4", CCUHsApi.getInstance().readHisValByQuery("point and his and outside and air and damper and cmd"));
@@ -298,6 +306,15 @@ public class VavIERtu extends VavSystemProfile
                                       .setTz(tz)
                                       .build();
         CCUHsApi.getInstance().addPoint(heatingSignal);
+    
+        Point DATClgSetpoint = new Point.Builder()
+                                      .setDisplayName(equipDis+"-"+"DATClgSetpoint")
+                                      .setSiteRef(siteRef)
+                                      .setEquipRef(equipref)
+                                      .addMarker("system").addMarker("cmd").addMarker("dat").addMarker("setpoint").addMarker("temp").addMarker("his").addMarker("equipHis")
+                                      .setTz(tz)
+                                      .build();
+        CCUHsApi.getInstance().addPoint(DATClgSetpoint);
         
         Point fanSignal = new Point.Builder()
                                   .setDisplayName(equipDis+"-"+"ductStaticPressure")
@@ -394,7 +411,7 @@ public class VavIERtu extends VavSystemProfile
                                                    .setTz(tz)
                                                    .build();
         String minStaticPressureId = hayStack.addPoint(minStaticPressure);
-        hayStack.writeDefaultValById(minStaticPressureId, 0.5 );
+        hayStack.writeDefaultValById(minStaticPressureId, 0.2 );
         
         Point maxStaticPressure = new Point.Builder()
                                                    .setDisplayName(equipDis+"-"+"maxStaticPressure")
@@ -406,7 +423,7 @@ public class VavIERtu extends VavSystemProfile
                                                    .setTz(tz)
                                                    .build();
         String maxStaticPressureId = hayStack.addPoint(maxStaticPressure);
-        hayStack.writeDefaultValById(maxStaticPressureId, 1.5 );
+        hayStack.writeDefaultValById(maxStaticPressureId, 1.0 );
         
         Point minHeatingDat = new Point.Builder()
                                             .setDisplayName(equipDis+"-"+"minHeatingDat")

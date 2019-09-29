@@ -190,7 +190,8 @@ public class DabStagedRtu extends DabSystemProfile
                         }
                         break;
                     case FAN_1:
-                        if ((systemMode != SystemMode.OFF && (ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED
+                        if ((systemMode != SystemMode.OFF && ((ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED
+                                                                               && ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION)
                                                                                || getSystemController().getSystemState() != OFF))
                             ||  systemFanLoopOp > 0) {
                             relayState = 1;
@@ -223,7 +224,8 @@ public class DabStagedRtu extends DabSystemProfile
                         break;
                     case HUMIDIFIER:
                     case DEHUMIDIFIER:
-                        if (systemMode == SystemMode.OFF || ScheduleProcessJob.getSystemOccupancy() == Occupancy.UNOCCUPIED) {
+                        if (systemMode == SystemMode.OFF || ScheduleProcessJob.getSystemOccupancy() == Occupancy.UNOCCUPIED
+                                                             || ScheduleProcessJob.getSystemOccupancy() == Occupancy.VACATION) {
                             relayState = 0;
                         } else
                         {

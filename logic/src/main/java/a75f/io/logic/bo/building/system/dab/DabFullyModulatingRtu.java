@@ -185,7 +185,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("rtu and mode")];
         if (getConfigVal("relay3 and output and enabled") > 0 && systemMode != SystemMode.OFF)
         {
-            signal = (ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED || systemFanLoopOp > 0) ? 1 : 0;
+            signal = ((ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED && ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION) || systemFanLoopOp > 0) ? 1 : 0;
         }else {
             signal = 0;
         }
@@ -193,7 +193,8 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         ControlMote.setRelayState("relay3", signal);
         
         if (getConfigVal("relay7 and output and enabled") > 0 && systemMode != SystemMode.OFF
-                                                                    && ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED)
+                                                                    && ScheduleProcessJob.getSystemOccupancy() != Occupancy.UNOCCUPIED
+                                                                    && ScheduleProcessJob.getSystemOccupancy() != Occupancy.VACATION)
         {
             double humidity = dabSystem.getAverageSystemHumidity();
             double targetMinHumidity = TunerUtil.readSystemUserIntentVal("target and min and inside and humidity");

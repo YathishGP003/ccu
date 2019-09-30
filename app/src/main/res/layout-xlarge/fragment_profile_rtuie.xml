@@ -56,10 +56,11 @@
 
                     <ImageView
                         android:id="@+id/btnEditIp"
-                        android:layout_width="18dp"
-                        android:layout_height="18dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
-                        android:layout_marginStart="20dp"
+                        android:layout_marginStart="10dp"
+                        android:padding="8dp"
                         android:layout_toEndOf="@+id/equipmentIp"
                         app:srcCompat="@drawable/ic_edit" />
                 </RelativeLayout>

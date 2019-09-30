@@ -102,6 +102,7 @@ public class HttpUtil
                 response.append('\n');
             }
             rd.close();
+            is.close();
             
             return responseCode == 200 ? response.toString() : null;
             

@@ -478,7 +478,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             if (getSystemTemporaryHoldExpiry() > 0) {
                 systemOccupancy = FORCED_OCCUPIED;
             }
-            if (curOccupancy != systemOccupancy.ordinal())
+            if (curOccupancy != VACATION.ordinal())
             {
                 systemOccupancy = VACATION;
                 CCUHsApi.getInstance().writeHisValByQuery("point and system and his and occupancy and mode", (double) systemOccupancy.ordinal());

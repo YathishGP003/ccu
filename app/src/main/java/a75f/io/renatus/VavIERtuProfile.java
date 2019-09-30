@@ -1,6 +1,5 @@
 package a75f.io.renatus;
 
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -179,7 +178,7 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
                                                          Toast.makeText(getActivity(), "IP Address Empty", Toast.LENGTH_SHORT).show();
                                                          return;
                                                      }
-                                                     CCUHsApi.getInstance().writeDefaultVal("point and system and config and and ie and address",editText.getText().toString().trim());
+                                                     CCUHsApi.getInstance().writeDefaultVal("point and system and config and ie and address",editText.getText().toString().trim());
                                                      equipAddr.setText(editText.getText().toString());
                                                  }
                                              })

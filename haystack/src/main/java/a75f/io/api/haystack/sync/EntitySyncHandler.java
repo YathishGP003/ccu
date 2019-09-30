@@ -6,7 +6,9 @@ import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HGridBuilder;
+import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
+import org.projecthaystack.HStr;
 import org.projecthaystack.io.HZincWriter;
 
 import java.util.ArrayList;
@@ -78,6 +80,70 @@ public class EntitySyncHandler
             doSyncUpdateEntities();
         }
         syncProgress = false;
+    }
+    
+    public void doSyncWithWrite(){
+        sync();
+    
+        ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip");
+        for (Map equip: equips)
+        {
+            if (CCUHsApi.getInstance().getGUID(equip.get("id").toString()) == null) {
+                continue;
+            }
+            ArrayList<HDict> equipDict = new ArrayList<>();
+            ArrayList<HashMap> points = CCUHsApi.getInstance().readAll("point and writable and equipRef == \"" + equip.get("id") + "\"");
+            for (Map point : points)
+            {
+                String luid = point.get("id").toString();
+                String guid = CCUHsApi.getInstance().getGUID(luid);
+                if (guid != null)
+                {
+                    ArrayList<HDict> dictList = getWriteArrDict(luid, guid);
+                    if (dictList.size() > 0)
+                    {
+                        equipDict.addAll(dictList);
+                    } else {
+                        CcuLog.d("CCU_HS"," Writable point not initialized "+point.get("dis"));
+                    }
+                }
+            }
+            if (equipDict.size() > 0)
+            {
+                HDict nosyncMeta = new HDictBuilder().add("nosync").toDict();
+                String r = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "pointWriteMany",
+                                        HZincWriter.gridToString(HGridBuilder.dictsToGrid(nosyncMeta,equipDict.toArray(new HDict[equipDict.size()]))));
+                CcuLog.d("CCU_HS", "Response: \n" + r);
+            }
+        }
+    }
+    
+    private ArrayList<HDict> getWriteArrDict(String luid, String guid) {
+        ArrayList<HashMap> pointArr = CCUHsApi.getInstance().readPoint(luid);
+        ArrayList<HDict> dictArr = new ArrayList<>();
+        for (HashMap valMap : pointArr) {
+            if (valMap.get("val") != null)
+            {
+                boolean isDouble = false;
+                Double val = 0.0;
+                try
+                {
+                    val = Double.parseDouble(valMap.get("val").toString());
+                    isDouble = true;
+                }
+                catch (NumberFormatException e)
+                {
+                    CcuLog.d("CCU_HS", "Writable Val is not Double " + valMap.get("val").toString());
+                }
+    
+                HDictBuilder b = new HDictBuilder().add("id", HRef.copy(guid))
+                                                     .add("level", (int) Double.parseDouble(valMap.get("level").toString()))
+                                                     .add("who", valMap.get("who").toString())
+                                                     .add("val", isDouble? HNum.make(val) : HStr.make(valMap.get("val").toString()));
+                dictArr.add(b.toDict());
+            }
+        }
+        return dictArr;
     }
     
     public boolean isSyncProgress() {

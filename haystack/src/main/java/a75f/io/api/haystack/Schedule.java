@@ -447,9 +447,9 @@ public class Schedule extends Entity
             {
                 b.append(d.toString());
             }
-            for (String m :mMarkers ) {
-                b.append(m+" ");
-            }
+        }
+        for (String m :mMarkers ) {
+            b.append(m+" ");
         }
         
         return b.toString();

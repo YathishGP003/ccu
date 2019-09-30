@@ -219,6 +219,9 @@ public class Globals {
         Watchdog.getInstance().addMonitor(mProcessJob);
         Watchdog.getInstance().addMonitor(mScheduleProcessJob);
         Watchdog.getInstance().start();
+        
+        CCUHsApi.getInstance().syncEntityWithPointWrite();
+        
     
     }
 

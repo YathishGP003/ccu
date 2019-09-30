@@ -923,6 +923,23 @@ public class CCUHsApi
         }.start();
     }
     
+    public void syncEntityWithPointWrite() {
+        new Thread()
+        {
+            @Override
+            public void run()
+            {
+                if (!testHarnessEnabled)
+                {
+                    entitySyncHandler.doSyncWithWrite();
+                } else
+                {
+                    CcuLog.d("CCU_HS", " Test Harness Enabled , Skip Entity Sync");
+                }
+            }
+        }.start();
+    }
+    
     public void scheduleSync() {
         entitySyncHandler.scheduleSync();
     }

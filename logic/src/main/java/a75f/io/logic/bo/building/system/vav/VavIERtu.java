@@ -455,7 +455,7 @@ public class VavIERtu extends VavSystemProfile
                                       .setEquipRef(equipref)
                                       .addMarker("system").addMarker("config").addMarker("ie").addMarker("ip")
                                       .addMarker("address").addMarker("writable").addMarker("sp")
-                                      .setUnit("\u00B0F")
+                                      .setKind("string")
                                       .setTz(tz)
                                       .build();
         String equipmentIPId = hayStack.addPoint(equipmentIP);

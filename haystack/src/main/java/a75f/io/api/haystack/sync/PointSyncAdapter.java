@@ -117,13 +117,16 @@ public class PointSyncAdapter extends EntitySyncAdapter
     }
     
     private void initWritableRemotePoints(ArrayList<String> luidList) {
+        ArrayList<String> writablePoints = new ArrayList<>();
         for (String luid: luidList)
         {
             if (isWritable(luid))
             {
-                writeValRemote(luid, CCUHsApi.getInstance().getGUID(luid));
+                //writeValRemote(luid, CCUHsApi.getInstance().getGUID(luid));
+                writablePoints.add(luid);
             }
         }
+        writeValRemoteMany(writablePoints);
     }
     
     private boolean isWritable(String id) {
@@ -160,5 +163,56 @@ public class PointSyncAdapter extends EntitySyncAdapter
             }
         }
     
+    }
+    
+    private void writeValRemoteMany(ArrayList<String> idList) {
+    
+        ArrayList<HDict> pointValList = new ArrayList<>();
+        for (String luid : idList)
+        {
+            String guid = CCUHsApi.getInstance().getGUID(luid);
+            if (guid != null)
+            {
+                ArrayList<HDict> dictList = getWriteArrDict(luid, guid);
+                if (dictList.size() > 0)
+                {
+                    pointValList.addAll(dictList);
+                }
+            }
+        }
+        if (pointValList.size() > 0)
+        {
+            String r = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "pointWriteMany",
+                                                HZincWriter.gridToString(HGridBuilder.dictsToGrid(pointValList.toArray(new HDict[pointValList.size()]))));
+            CcuLog.d("CCU_HS", "Response: \n" + r);
+        }
+    }
+    
+    private ArrayList<HDict> getWriteArrDict(String luid, String guid) {
+        ArrayList<HashMap> pointArr = CCUHsApi.getInstance().readPoint(luid);
+        ArrayList<HDict> dictArr = new ArrayList<>();
+        for (HashMap valMap : pointArr) {
+            if (valMap.get("val") != null)
+            {
+                boolean isDouble = false;
+                Double val = 0.0;
+                try
+                {
+                    val = Double.parseDouble(valMap.get("val").toString());
+                    isDouble = true;
+                }
+                catch (NumberFormatException e)
+                {
+                    CcuLog.d("CCU_HS", "Writable Val is not Double " + valMap.get("val").toString());
+                }
+                
+                HDictBuilder b = new HDictBuilder().add("id", HRef.copy(guid))
+                                                   .add("level", (int) Double.parseDouble(valMap.get("level").toString()))
+                                                   .add("who", valMap.get("who").toString())
+                                                   .add("val", isDouble? HNum.make(val) : HStr.make(valMap.get("val").toString()));
+                dictArr.add(b.toDict());
+            }
+        }
+        return dictArr;
     }
 }

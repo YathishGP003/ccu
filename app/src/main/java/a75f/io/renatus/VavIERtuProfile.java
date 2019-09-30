@@ -86,6 +86,8 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
         if(getArguments() != null) {
             isFromReg = getArguments().getBoolean("REGISTRATION_WIZARD");
         }
+
+        btnEditIp.setOnClickListener(view1 -> equipAddr.setEnabled(true));
         return rootView;
     }
     
@@ -102,7 +104,6 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
             humidificationCb.setChecked(systemProfile.getConfigEnabled("humidification") > 0);
             setupAnalogLimitSelectors();
             setupEquipAddrEditor();
-            btnEditIp.setOnClickListener(view1 -> equipAddr.setEnabled(true));
             
         } else {
             new AsyncTask<String, Void, Void>() {

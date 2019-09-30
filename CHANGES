@@ -1,0 +1,6 @@
+ - Merge branch 'renatus_dev_sam' into 'master'
+ - resolves RENATUS-730
+ - Update system profiles algos to incorporate VACATION mode
+ - resolves RENATUS-733
+ - resolves RENATUS-734
+ - Add modulating tag to hybrid profile points

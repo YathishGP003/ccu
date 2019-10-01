@@ -6,7 +6,6 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.LinearLayout;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -125,7 +124,7 @@ public class RangeBarView extends LinearLayout {
 
         rangeBar.setData((float) heatLL, (float) heatUL, (float) coolLL, (float) coolUL, (float) cdb, (float) hdb);
 
-        if (mSchedule!= null){
+        if (mSchedule!= null && mSchedule.getCurrentValues() != null){
             heatValue = mSchedule.getCurrentValues().getHeatingVal();
             coolValue = mSchedule.getCurrentValues().getCoolingVal();
 

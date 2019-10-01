@@ -259,7 +259,7 @@
                                 android:layout_centerVertical="true"
                                 android:layout_gravity="center_vertical"
                                 android:paddingRight="14dp"
-                                android:text="  Humidification "
+                                android:text="  Building Humidity % "
                                 android:textAppearance="@style/text_appearance" />
 
                             <Spinner

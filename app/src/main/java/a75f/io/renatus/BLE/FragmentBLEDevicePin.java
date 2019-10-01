@@ -23,6 +23,7 @@ import org.javolution.annotations.Nullable;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import a75f.io.renatus.DialogOAOProfile;
 import a75f.io.renatus.Fragment2PipeFanCoilUnitConfig;
 import a75f.io.renatus.Fragment4PipeFanCoilUnitConfig;
 import a75f.io.renatus.FragmentCPUConfiguration;
@@ -389,6 +390,9 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                     case DAB:
                         showDialogFragment(FragmentDABConfiguration
                                                    .newInstance(mPairingAddress, mName, mNodeType, mFloorName, mProfileType), FragmentDABConfiguration.ID);
+                        break;
+                    case OAO:
+                        showDialogFragment(DialogOAOProfile.newInstance(mPairingAddress,mName,mFloorName),DialogOAOProfile.ID);
                         break;
                     case PLC:
                         showDialogFragment(FragmentPLCConfiguration

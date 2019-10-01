@@ -660,7 +660,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         dabPoints.put("Profile","DAB");
         String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and equipRef == \""+equipID+"\"");
         double damperPosPoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and damper and base and equipRef == \""+equipID+"\"");
-        double dischargePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and discharge and air and temp and equipRef == \""+equipID+"\"");
+        double dischargePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and discharge and air and temp and equipRef == \""+equipID+"\"");
         if (equipStatusPoint.length() > 0)
         {
             dabPoints.put("Status",equipStatusPoint);
@@ -710,7 +710,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         HashMap ssePoints = new HashMap();
         ssePoints.put("Profile","SSE");
         String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and equipRef == \""+equipID+"\"");
-        double dischargePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and discharge and air and temp and equipRef == \""+equipID+"\"");
+        double dischargePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and discharge and air and temp and equipRef == \""+equipID+"\"");
         if (equipStatusPoint.length() > 0)
         {
             ssePoints.put("Status",equipStatusPoint);
@@ -735,8 +735,8 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and equipRef == \""+equipID+"\"");
         double damperPosPoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and damper and base and equipRef == \""+equipID+"\"");
         double reheatPoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and reheat and cmd and equipRef == \""+equipID+"\"");
-        double supplyAirPoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and entering and air and temp and equipRef == \""+equipID+"\"");
-        double dischargePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and discharge and air and temp and equipRef == \""+equipID+"\"");
+        double supplyAirPoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and entering and air and temp and equipRef == \""+equipID+"\"");
+        double dischargePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and discharge and air and temp and vav and equipRef == \""+equipID+"\"");
         if (equipStatusPoint.length() > 0)
         {
             vavPoints.put("Status",equipStatusPoint);

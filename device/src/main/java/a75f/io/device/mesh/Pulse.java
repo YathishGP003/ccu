@@ -86,8 +86,13 @@ public class Pulse
 							th2TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
 							th2TempVal = CCUUtils.roundTo2Decimal(th2TempVal);
 						}else {
+
+							double oldEntTempVal = hayStack.readHisValById(logPoint.get("id").toString());
+							double curEntTempVal = ThermistorUtil.getThermistorValueToTemp(val * 10 );
+						curEntTempVal = CCUUtils.roundTo2Decimal(curEntTempVal);
 							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-							hayStack.writeHisValById(logPoint.get("id").toString(), ThermistorUtil.getThermistorValueToTemp(val * 10));
+							if(oldEntTempVal != curEntTempVal)
+								hayStack.writeHisValById(logPoint.get("id").toString(), curEntTempVal);
 						}
 						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : Thermistor2 "+th2TempVal+","+(val*10)+","+logicalCurTempPoint+","+isTh2Enabled+","+logPointInfo.getMarkers().toString());
 						break;
@@ -109,9 +114,14 @@ public class Pulse
 						break;
 					case TH1_IN:
 						val = smartNodeRegularUpdateMessage_t.update.externalThermistorInput1.get();
+
+						double oldDisTempVal = hayStack.readHisValById(logPoint.get("id").toString());
+						double curDisTempVal = ThermistorUtil.getThermistorValueToTemp(val * 10 );
+						curDisTempVal = CCUUtils.roundTo2Decimal(curDisTempVal);
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-						hayStack.writeHisValById(logPoint.get("id").toString(), ThermistorUtil.getThermistorValueToTemp(val * 10 ));
-						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : Thermistor1 "+ThermistorUtil.getThermistorValueToTemp(val * 10 ));
+						if(oldDisTempVal != curDisTempVal)
+							hayStack.writeHisValById(logPoint.get("id").toString(), curDisTempVal);
+						CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : Thermistor1 "+curDisTempVal+","+oldDisTempVal+","+logPointInfo.getMarkers().toString()+","+logPoint.get("id").toString());
 						break;
 				}
 			}
@@ -481,8 +491,13 @@ public class Pulse
 						break;
 					case TH1_IN:
 						val = smartStatRegularUpdateMessage_t.update.externalThermistorInput1.get();
+
+						double oldTh1TempVal = hayStack.readHisValById(logPoint.get("id").toString());
+						double curTh1TempVal = ThermistorUtil.getThermistorValueToTemp(val * 10 );
+						curTh1TempVal = CCUUtils.roundTo2Decimal(curTh1TempVal);
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-						hayStack.writeHisValById(logPoint.get("id").toString(), ThermistorUtil.getThermistorValueToTemp(val * 10 ));
+						if(oldTh1TempVal != curTh1TempVal)
+							hayStack.writeHisValById(logPoint.get("id").toString(), curTh1TempVal);
 						break;
 					case SENSOR_RH:
 						val = smartStatRegularUpdateMessage_t.update.humidity.get();

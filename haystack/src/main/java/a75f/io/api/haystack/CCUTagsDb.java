@@ -445,7 +445,8 @@ public class CCUTagsDb extends HServer {
                 .add("kind", p.getKind() == null ? "Number" : p.getKind())
                 .add("tz", p.getTz());
         if (p.getUnit() != null) b.add("unit", p.getUnit());
-
+        if (p.getEnums() != null) b.add("enum", p.getEnums());
+        
         for (String m : p.getMarkers()) {
             b.add(m);
         }
@@ -467,7 +468,8 @@ public class CCUTagsDb extends HServer {
                 .add("kind", p.getKind() == null ? "Number" : p.getKind())
                 .add("tz", p.getTz());
         if (p.getUnit() != null) b.add("unit", p.getUnit());
-
+        if (p.getEnums() != null) b.add("enum", p.getEnums());
+        
         for (String m : p.getMarkers()) {
             b.add(m);
         }

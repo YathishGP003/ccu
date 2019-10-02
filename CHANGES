@@ -1,7 +1,5 @@
- - Merge branch 'renatus_dev_sam' into 'master'
- - resolves RENATUS-735
- - resolves RENATUS-705
- - Merge branch 'mahesh_renuts' into 'master'
- - RENATUS-737, fixed edit ip address issue
+ - Merge branch 'dev_sam' into 'master'
+ - resolves RENATUS-741
  - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-739, System equip occupancy value for vacation is wrog
+ - #RENATUS-736, Discharge air temp no showing up in CCU
+ - #RENATUS-740, OAO Zone is not getting paired in real setup

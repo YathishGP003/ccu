@@ -57,7 +57,7 @@ public class UpdateScheduleHandler
                 s.setmSiteId(CCUHsApi.getInstance().getSiteId().toString());
                 s.setRoomRef(CCUHsApi.getInstance().getLUID(s.getRoomRef()));
                 if (s.isVacation()) {
-                    CCUHsApi.getInstance().updateScheduleNoSync(s, null);
+                    CCUHsApi.getInstance().updateScheduleNoSync(s, s.getRoomRef());
                 }
                 else if (s.getMarkers().contains("building"))
                 {

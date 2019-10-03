@@ -1,5 +1,2 @@
  - Merge branch 'dev_sam' into 'master'
- - resolves RENATUS-741
- - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-736, Discharge air temp no showing up in CCU
- - #RENATUS-740, OAO Zone is not getting paired in real setup
+ - resolves RENATUS-744

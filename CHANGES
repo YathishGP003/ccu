@@ -1,2 +1,5 @@
- - Merge branch 'dev_sam' into 'master'
- - resolves RENATUS-744
+ - Merge branch 'mahesh_renuts' into 'master'
+ - ui issues fixed
+ - Merge branch 'kumar_renatus' into 'master'
+ - #RENATUS-726, PI controller, dynamic target value read
+ - #RENATUS-745, Desired temp change update

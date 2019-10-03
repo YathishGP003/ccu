@@ -2,9 +2,6 @@ package a75f.io.renatus.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.location.Address;
 import android.os.AsyncTask;
@@ -18,7 +15,6 @@ import org.apache.http.HttpEntity;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -42,6 +38,7 @@ import java.util.TimeZone;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.RenatusApp;
 import a75f.io.renatus.WeatherDataDownloadService;
+import a75f.io.renatus.util.HttpsUtils.HTTPUtils;
 
 public class CCUUtils {
 	private static List<Address> locAddress= new ArrayList<Address>();
@@ -512,7 +509,7 @@ public class CCUUtils {
 						StrictMode.setThreadPolicy(policy);
 					}
 
-					HttpClient client = new DefaultHttpClient();
+					HttpClient client = HTTPUtils.getNewHttpClient();
 					try {
 						//String address = locadd.replaceAll(" ", "%20");
                         String address = locadd.replaceAll(" ", "+");

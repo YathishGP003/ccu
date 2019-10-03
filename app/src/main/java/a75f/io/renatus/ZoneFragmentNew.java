@@ -805,6 +805,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             @Override
             public void onTemperatureChange(SeekArc seekArc, float coolingDesiredTemp, float heatingDesiredTemp,boolean syncToHaystack) {
                 if(syncToHaystack){
+
+                    double pointheatDT =  CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and heating and equipRef == \"" + p.getId() + "\"");
+                    double pointcoolDT = CCUHsApi.getInstance().readPointPriorityValByQuery("point and temp and desired and cooling and equipRef == \"" + p.getId() + "\"");
                     Log.i("Scheduler","cooldt:"+coolDT.get("id").toString()+" value:"+Double.parseDouble(Float.valueOf(coolingDesiredTemp).toString())+","+pointcoolDT);
                     Log.i("Scheduler","heatdt:"+heatDT.get("id").toString()+" value:"+Double.parseDouble(Float.valueOf(heatingDesiredTemp).toString())+","+pointheatDT);
                     //setPointVal(coolDT.get("id").toString(),Double.parseDouble(Float.valueOf(coolingDesiredTemp).toString()));

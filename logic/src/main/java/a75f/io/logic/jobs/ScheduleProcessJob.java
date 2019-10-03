@@ -1056,13 +1056,14 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         //this.getZoneSettings('piDynamicSetpointValue', this.helperService.getPointIdbyTags(profileObj, ['analog2', 'config', 'enabled'], this.roomRef), 'write', profileObj.name);
         ArrayList equipStatusPoint = CCUHsApi.getInstance().readAll("point and status and message and equipRef == \""+equipID+"\"");
         ArrayList inputValue = CCUHsApi.getInstance().readAll("point and process and logical and variable and equipRef == \""+equipID+"\"");
-        ArrayList offsetValue = CCUHsApi.getInstance().readAll("point and setpoint and sensor and offset and equipRef == \""+equipID+"\"");
+        //ArrayList offsetValue = CCUHsApi.getInstance().readAll("point and setpoint and sensor and offset and equipRef == \""+equipID+"\"");
         //ArrayList targetValue = CCUHsApi.getInstance().readAll("point and zone and pid and target and config and value and equipRef == \""+equipID+"\"");
         ArrayList piSensorValue = CCUHsApi.getInstance().readAll("point and analog1 and config and input and sensor and equipRef == \""+equipID+"\"");
-        double dynamicSetpoint = CCUHsApi.getInstance().readPointPriorityValByQuery("point and analog2 and config and enabled and equipRef == \""+equipID+"\"");
+        double dynamicSetpoint = CCUHsApi.getInstance().readDefaultVal("point and analog2 and config and enabled and equipRef == \""+equipID+"\"");
         double targetValue = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and pid and target and config and equipRef == \""+equipID+"\"");
         double analog1sensorType = CCUHsApi.getInstance().readPointPriorityValByQuery("point and analog1 and config and input and sensor and equipRef == \""+equipID+"\"");
         double analog2sensorType = CCUHsApi.getInstance().readPointPriorityValByQuery("point and analog2 and config and input and sensor and equipRef == \""+equipID+"\"");
+        double offsetValue = CCUHsApi.getInstance().readDefaultVal("point and config and setpoint and sensor and offset and equipRef == \""+equipID+"\"");
 
         if (equipStatusPoint != null && equipStatusPoint.size() > 0)
         {
@@ -1078,18 +1079,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             double inputVal = CCUHsApi.getInstance().readHisValById(id);
             plcPoints.put("Input Value",inputVal);
         }
-        if (offsetValue != null && offsetValue.size() > 0)
-        {
-            String id = ((HashMap) offsetValue.get(0)).get("id").toString();
-            double offsetVal = CCUHsApi.getInstance().readHisValById(id);
-            plcPoints.put("Offset Value",offsetVal);
-        }
-        //if (targetValue != 0)
-        //{
-            //String id = ((HashMap) targetValue.get(0)).get("id").toString();
-            //double targetVal = CCUHsApi.getInstance().readHisValById(id);
-            plcPoints.put("Target Value",targetValue);
-        //}
+
+        plcPoints.put("Offset Value",offsetValue);
+
         if (piSensorValue != null && piSensorValue.size() > 0)
         {
             String id = ((HashMap) piSensorValue.get(0)).get("id").toString();
@@ -1104,10 +1096,13 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }*/
         if(dynamicSetpoint == 1) {
             plcPoints.put("Dynamic Setpoint",true);
+            targetValue = CCUHsApi.getInstance().readHisValByQuery("point and setpoint and variable and equipRef == \""+equipID+"\"") + offsetValue;
         }else {
             if(dynamicSetpoint == 0)
                 plcPoints.put("Dynamic Setpoint",false);
         }
+
+        plcPoints.put("Target Value",targetValue);
         if(analog1sensorType == 1)
         {
             plcPoints.put("Unit Type","Voltage");

@@ -401,7 +401,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
     private void loadVacations() {
         
         ArrayList<Schedule> vacations;
-        if (schedule.isZoneSchedule()) {
+        if (schedule.isZoneSchedule() && schedule.getRoomRef()!= null) {
             vacations = CCUHsApi.getInstance().getZoneSchedule(schedule.getRoomRef(), true);
         } else
         {

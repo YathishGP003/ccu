@@ -13,10 +13,11 @@
 
         <ImageView
             android:id="@+id/floorMenu"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:clickable="true"
-            android:padding="12dp"
+            android:padding="8dp"
+            android:layout_gravity="center_vertical"
             app:srcCompat="@drawable/ic_floormenu" />
 
         <ImageView
@@ -28,16 +29,13 @@
             android:visibility="gone"
             app:srcCompat="@drawable/ic_menu" />
 
-        <ImageButton
-            android:id="@+id/logo"
+        <ImageView
+            android:id="@+id/logo_daikin"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:adjustViewBounds="true"
-            android:background="@color/grey_select"
-            android:paddingStart="4dp"
-            android:paddingEnd="4dp"
-            android:scaleType="fitCenter"
-            android:src="@drawable/x75f_new" />
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_gravity="center_vertical"
+            app:srcCompat="@drawable/ic_daikin_logo" />
 
         <android.support.design.widget.TabLayout
             android:id="@+id/tabs"
@@ -54,6 +52,14 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_weight="1" />
+
+        <ImageView
+            android:id="@+id/logo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:layout_gravity="center_vertical"
+            app:srcCompat="@drawable/ic_powered_by_75f" />
 
         <android.support.design.widget.TabLayout
             android:id="@+id/btnTabs"

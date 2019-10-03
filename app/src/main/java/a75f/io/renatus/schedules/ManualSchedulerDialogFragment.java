@@ -128,6 +128,16 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
         checkBoxSaturday = view.findViewById(R.id.checkBoxSat);
         checkBoxSunday = view.findViewById(R.id.checkBoxSun);
 
+        if (mDay != null){
+            checkBoxMonday.setEnabled(false);
+            checkBoxTuesday.setEnabled(false);
+            checkBoxWednesday.setEnabled(false);
+            checkBoxThursday.setEnabled(false);
+            checkBoxFriday.setEnabled(false);
+            checkBoxSaturday.setEnabled(false);
+            checkBoxSunday.setEnabled(false);
+        }
+
         npStartTime.setMinValue(nMinVal);
         npStartTime.setMaxValue(nMaxVal);
 

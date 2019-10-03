@@ -57,10 +57,13 @@ public class UpdateScheduleHandler
                 s.setmSiteId(CCUHsApi.getInstance().getSiteId().toString());
                 s.setRoomRef(CCUHsApi.getInstance().getLUID(s.getRoomRef()));
                 if (s.isVacation()) {
+                    CCUHsApi.getInstance().updateScheduleNoSync(s, null);
+                    if (s.getRoomRef()!= null)
                     CCUHsApi.getInstance().updateScheduleNoSync(s, s.getRoomRef());
                 }
-                else if (s.getMarkers().contains("building"))
+                else if (s.getMarkers().contains("building") && !s.getMarkers().contains("zone"))
                 {
+                    CCUHsApi.getInstance().updateScheduleNoSync(s, null);
                     Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
                     if (!systemSchedule.equals(s))
                     {
@@ -78,7 +81,7 @@ public class UpdateScheduleHandler
                         
                     }
                 }
-                else if (s.getMarkers().contains("zone"))
+                else if (s.getMarkers().contains("zone") && !s.getMarkers().contains("building") && s.getRoomRef() != null)
                 {
                     CCUHsApi.getInstance().updateScheduleNoSync(s, s.getRoomRef());
                 }
@@ -90,17 +93,18 @@ public class UpdateScheduleHandler
                 s.setmSiteId(CCUHsApi.getInstance().getSiteId().toString());
                 luid = UUID.randomUUID().toString();
                 s.setId(luid);
-                if (s.getRoomRef() != null)
+                if (s.getRoomRef() != null && s.isZoneSchedule())
                 {
                     String lroomRef = CCUHsApi.getInstance().getLUID(s.getRoomRef());
                     s.setRoomRef(lroomRef);
                     if (lroomRef != null)
                     CCUHsApi.getInstance().addSchedule(luid, s.getZoneScheduleHDict(lroomRef));
                 }
-                else
+                else if (s.isBuildingSchedule()&& !s.isZoneSchedule())
                 {
                     CCUHsApi.getInstance().addSchedule(luid, s.getScheduleHDict());
                 }
+                if (luid != null && guid != null)
                 CCUHsApi.getInstance().putUIDMap("@" + luid, "@" + guid);
             }
             ScheduleProcessJob.updateSchedules();
@@ -186,6 +190,7 @@ public class UpdateScheduleHandler
                     }
                 }
                 Log.d(L.TAG_CCU_PUBNUB, "Trimmed Zone Schedule " + zoneSchedule.toString());
+                if (zoneSchedule.getRoomRef()!= null)
                 CCUHsApi.getInstance().updateZoneSchedule(zoneSchedule, zoneSchedule.getRoomRef());
             }
         }

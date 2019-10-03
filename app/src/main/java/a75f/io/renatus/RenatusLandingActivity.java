@@ -39,7 +39,7 @@ public class RenatusLandingActivity extends AppCompatActivity {
     public boolean settingView = false;
     TabItem pageSettingButton;
     TabItem pageDashBoardButton;
-    ImageButton setupButton;
+    ImageView setupButton;
     ImageView menuToggle;
     ImageView floorMenu;
 
@@ -123,7 +123,7 @@ public class RenatusLandingActivity extends AppCompatActivity {
                     SettingsFragment.slidingPane.openPane();
                 }
             });
-            setupButton = (ImageButton) findViewById(R.id.logo);
+            setupButton = findViewById(R.id.logo);
             setupButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {

@@ -25,6 +25,7 @@ import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HGridBuilder;
 import org.projecthaystack.HHisItem;
+import org.projecthaystack.HList;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 import org.projecthaystack.HRow;
@@ -203,6 +204,8 @@ public class MasterControlView extends LinearLayout {
         ArrayList<Schedule> schedules = new ArrayList<>();
         ArrayList<Zone> zoneList = new ArrayList<>();
 
+        ArrayList<Schedule> filterSchedules = new ArrayList<>();
+
         HashMap tuner = CCUHsApi.getInstance().read("equip and tuner");
         Equip p = new Equip.Builder().setHashMap(tuner).build();
 
@@ -213,8 +216,16 @@ public class MasterControlView extends LinearLayout {
         buildingMin = CCUHsApi.getInstance().read("building and limit and min and equipRef == \"" + p.getId() + "\"");
         buildingMax = CCUHsApi.getInstance().read("building and limit and max and equipRef == \"" + p.getId() + "\"");
 
+        for (Schedule s: schedulesList){
+            if(s.isBuildingSchedule() && !s.isZoneSchedule()){
+                filterSchedules.add(s);
+            } else if (!s.isBuildingSchedule() && s.isZoneSchedule() && s.getRoomRef() != null){
+                filterSchedules.add(s);
+            }
+        }
+
         // set schedule temps for building and Zones
-        for (Schedule schedule : schedulesList) {
+        for (Schedule schedule : filterSchedules) {
             ArrayList<Schedule.Days> scheduleDaysList = schedule.getDays();
             schedules.add(schedule);
 
@@ -253,8 +264,8 @@ public class MasterControlView extends LinearLayout {
         if (warningMessage.size() > 0) {
             disPlayWarningMessage(warningMessage, dialog, schedules, zoneList);
         } else {
-            if (schedulesList.size()> 0) {
-                saveScheduleData(schedulesList, zoneList, dialog);
+            if (filterSchedules.size()> 0) {
+                saveScheduleData(filterSchedules, zoneList, dialog);
             }
         }
     }
@@ -381,14 +392,53 @@ public class MasterControlView extends LinearLayout {
         if ( scheduleguid != null){
             schedule.setId(scheduleguid.replace("@",""));
         }
-        entities.add( schedule.getZoneScheduleHDict(schedule.getRoomRef()));
+
+        HDict[] days = new HDict[schedule.getDays().size()];
+
+        for (int i = 0; i < schedule.getDays().size(); i++)
+        {
+            Schedule.Days day = schedule.getDays().get(i);
+            HDictBuilder hDictDay = new HDictBuilder()
+                    .add("day", HNum.make(day.getDay()))
+                    .add("sthh", HNum.make(day.getSthh()))
+                    .add("stmm", HNum.make(day.getStmm()))
+                    .add("ethh", HNum.make(day.getEthh()))
+                    .add("etmm", HNum.make(day.getEtmm()));
+            if (day.getHeatingVal() != null)
+                hDictDay.add("heatVal", HNum.make(day.getHeatingVal()));
+            if (day.getCoolingVal() != null)
+                hDictDay.add("coolVal", HNum.make(day.getCoolingVal()));
+            if (day.getVal() != null)
+                hDictDay.add("curVal", HNum.make(day.getVal()));
+
+            //need boolean & string support
+            if (day.isSunset()) hDictDay.add("sunset", day.isSunset());
+            if (day.isSunrise()) hDictDay.add("sunrise", day.isSunrise());
+
+            days[i] = hDictDay.toDict();
+        }
+
+        HList hList = HList.make(days);
+        HDictBuilder zoneSchedule = new HDictBuilder()
+                .add("id", HRef.copy(schedule.getId()))
+                .add("unit", schedule.getUnit())
+                .add("kind", schedule.getKind())
+                .add("dis", schedule.getDis())
+                .add("days", hList)
+                .add("roomRef",HRef.copy(schedule.getRoomRef()))
+                .add("siteRef", HRef.copy(schedule.getmSiteId()));
+
+        for (String marker : schedule.getMarkers())
+        {
+            zoneSchedule.add(marker);
+        }
+        entities.add( zoneSchedule.toDict());
 
         new AsyncTask<String, Void, Void>() {
             @Override
             protected Void doInBackground(final String... params) {
                 HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
                 String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "addEntity", HZincWriter.gridToString(grid));
-
                 if (response == null)
                 {
                     CcuLog.i("CCU_HS_SYNC", "Aborting Schedule Sync");
@@ -411,14 +461,52 @@ public class MasterControlView extends LinearLayout {
         if ( scheduleguid != null){
             schedule.setId(scheduleguid.replace("@",""));
         }
-        entities.add(schedule.getScheduleHDict());
+
+        HDict[] days = new HDict[schedule.getDays().size()];
+
+        for (int i = 0; i < schedule.getDays().size(); i++)
+        {
+            Schedule.Days day = schedule.getDays().get(i);
+            HDictBuilder hDictDay = new HDictBuilder()
+                    .add("day", HNum.make(day.getDay()))
+                    .add("sthh", HNum.make(day.getSthh()))
+                    .add("stmm", HNum.make(day.getStmm()))
+                    .add("ethh", HNum.make(day.getEthh()))
+                    .add("etmm", HNum.make(day.getEtmm()));
+            if (day.getHeatingVal() != null)
+                hDictDay.add("heatVal", HNum.make(day.getHeatingVal()));
+            if (day.getCoolingVal() != null)
+                hDictDay.add("coolVal", HNum.make(day.getCoolingVal()));
+            if (day.getVal() != null)
+                hDictDay.add("curVal", HNum.make(day.getVal()));
+
+            //need boolean & string support
+            if (day.isSunset()) hDictDay.add("sunset", day.isSunset());
+            if (day.isSunrise()) hDictDay.add("sunrise", day.isSunrise());
+
+            days[i] = hDictDay.toDict();
+        }
+
+        HList hList = HList.make(days);
+        HDictBuilder buildingSchedule = new HDictBuilder()
+                .add("id", HRef.copy(schedule.getId()))
+                .add("unit", schedule.getUnit())
+                .add("kind", schedule.getKind())
+                .add("dis", schedule.getDis())
+                .add("days", hList)
+                .add("siteRef", HRef.copy(schedule.getmSiteId()));
+
+        for (String marker : schedule.getMarkers())
+        {
+            buildingSchedule.add(marker);
+        }
+        entities.add(buildingSchedule.toDict());
 
         new AsyncTask<String, Void, Void>() {
             @Override
             protected Void doInBackground(final String... params) {
-                HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
+                HGrid grid = HGridBuilder.dictsToGrid(entities.toArray(new HDict[0]));
                 String response = HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "addEntity", HZincWriter.gridToString(grid));
-
                 if (response == null)
                 {
                     CcuLog.i("CCU_HS_SYNC", "Aborting Schedule Sync");

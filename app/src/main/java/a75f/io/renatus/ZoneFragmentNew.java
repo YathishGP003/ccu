@@ -61,6 +61,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.LOutput;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.StandaloneScheduler;
@@ -271,8 +272,17 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                             TextView scheduleStatus = tempZoneDetails.findViewById(R.id.schedule_status_tv);
                             //Spinner scheduleSpinner = tempZoneDetails.findViewById(R.id.schedule_spinner);
                             TextView vacationStatusTV = tempZoneDetails.findViewById(R.id.vacation_status);
+                            ImageButton vacationImageButton = tempZoneDetails.findViewById(R.id.vacation_edit_button);
                             vacationStatusTV.setText(vacationStatus);
                             scheduleStatus.setText(status);
+
+                            if (vacationStatus.equals("Active Vacation"))
+                            {
+                                vacationImageButton.setVisibility(View.VISIBLE);
+                            } else
+                            {
+                                vacationImageButton.setVisibility(View.GONE);
+                            }
                         }
                     });
                 }
@@ -616,6 +626,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         TextView    scheduleStatus      = zoneDetails.findViewById(R.id.schedule_status_tv);
         Spinner scheduleSpinner     = zoneDetails.findViewById(R.id.schedule_spinner);
         ImageButton scheduleImageButton = zoneDetails.findViewById(R.id.schedule_edit_button);
+        ImageButton vacationImageButton = zoneDetails.findViewById(R.id.vacation_edit_button);
         TextView vacationStatusTV = zoneDetails.findViewById(R.id.vacation_status);
 
 
@@ -638,6 +649,23 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         scheduleSpinner.setTag(mScheduleType);
         mScheduleTypeMap.put(equipId,mScheduleType);
         scheduleImageButton.setTag(mSchedule.getId());
+        vacationImageButton.setTag(mSchedule.getId());
+
+        if (mSchedule.isZoneSchedule() && !mSchedule.isBuildingSchedule())
+        {
+            scheduleImageButton.setVisibility(View.VISIBLE);
+        }else
+        {
+            scheduleImageButton.setVisibility(View.GONE);
+        }
+
+        if (vacationStatus.equals("Active Vacation"))
+        {
+            vacationImageButton.setVisibility(View.VISIBLE);
+        } else
+        {
+            vacationImageButton.setVisibility(View.GONE);
+        }
         scheduleImageButton.setOnClickListener(v ->
         {
             SchedulerFragment schedulerFragment    = SchedulerFragment.newInstance((String) v.getTag());
@@ -650,21 +678,26 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 mSchedule = Schedule.getScheduleByEquipId(equipId);
                 ScheduleProcessJob.updateSchedules(equipOpen);
 
+            });
+        });
+
+        vacationImageButton.setOnClickListener(v ->
+        {
+            SchedulerFragment schedulerFragment    = SchedulerFragment.newInstance((String) v.getTag(), true, zoneId);
+            FragmentManager childFragmentManager = getFragmentManager();
+            childFragmentManager.beginTransaction();
+            schedulerFragment.show(childFragmentManager,"dialog");
+
+            schedulerFragment.setOnExitListener(() -> {
+                Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
+                mSchedule = Schedule.getScheduleByEquipId(equipId);
+                ScheduleProcessJob.updateSchedules(equipOpen);
+
 
             });
         });
-        scheduleSpinner.setSelection(mScheduleType,false);
-        if (mSchedule.isZoneSchedule())
-        {
-            scheduleImageButton.setVisibility(View.VISIBLE);
-        } else if (mSchedule.isNamedSchedule())
-        {
-            scheduleImageButton.setVisibility(View.VISIBLE);
-        } else
-        {
-            scheduleImageButton.setVisibility(View.GONE);
-        }
 
+        scheduleSpinner.setSelection(mScheduleType,false);
 
         scheduleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
         {
@@ -684,7 +717,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                         setScheduleType(scheduleTypeId, ScheduleType.BUILDING);
                         mScheduleTypeMap.put(equipId, ScheduleType.BUILDING.ordinal());
                     }
-
+                    scheduleImageButton.setTag(mSchedule.getId());
+                    vacationImageButton.setTag(mSchedule.getId());
                     CCUHsApi.getInstance().scheduleSync();
                 } else if (position == 1 && (mScheduleType != -1))
                 {
@@ -693,6 +727,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                         mSchedule.setDisabled(false);
                         CCUHsApi.getInstance().updateZoneSchedule(mSchedule, zoneId);
                         scheduleImageButton.setTag(mSchedule.getId());
+                        vacationImageButton.setTag(mSchedule.getId());
                     } else
                     {
 
@@ -714,6 +749,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                             //CCUHsApi.getInstance().syncEntityTree();
                         }
                         scheduleImageButton.setTag(scheduleById.getId());
+                        vacationImageButton.setTag(scheduleById.getId());
                         scheduleImageButton.setVisibility(View.VISIBLE);
                         CCUHsApi.getInstance().scheduleSync();
                     }
@@ -721,11 +757,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                         setScheduleType(scheduleTypeId, ScheduleType.ZONE);
                         mScheduleTypeMap.put(equipId, ScheduleType.ZONE.ordinal());
                     }
+                } else if(position == 2 && (mScheduleType != -1)){
+                    scheduleImageButton.setVisibility(View.GONE);
                 } else
                 {
                     //list named schedules
                 }
                 mSchedule = Schedule.getScheduleByEquipId(equipId);
+                scheduleImageButton.setTag(mSchedule.getId());
+                vacationImageButton.setTag(mSchedule.getId());
             }
 
             @Override
@@ -959,6 +999,24 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
                 if(isExpanded) {
                     linearLayoutZonePoints.removeAllViews();
+                    if (scheduleSpinner.getSelectedItemPosition() == 1)
+                    {
+                        scheduleImageButton.setVisibility(View.VISIBLE);
+                    } else
+                    {
+                        scheduleImageButton.setVisibility(View.GONE);
+                    }
+
+                    String vacationStatus = ScheduleProcessJob.getVacationStateString(zoneId);
+                    vacationStatusTV.setText(vacationStatus);
+                    if (vacationStatus.equals("Active Vacation"))
+                    {
+                        vacationImageButton.setVisibility(View.VISIBLE);
+                    } else
+                    {
+                        vacationImageButton.setVisibility(View.GONE);
+                    }
+
                     {
                         for(int k=0;k<zoneMap.size();k++)
                         {
@@ -1027,6 +1085,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         TextView    scheduleStatus      = zoneDetails.findViewById(R.id.schedule_status_tv);
         Spinner scheduleSpinner     = zoneDetails.findViewById(R.id.schedule_spinner);
         ImageButton scheduleImageButton = zoneDetails.findViewById(R.id.schedule_edit_button);
+        ImageButton vacationImageButton = zoneDetails.findViewById(R.id.vacation_edit_button);
         TextView vacationStatusTV = zoneDetails.findViewById(R.id.vacation_status);
 
 
@@ -1050,6 +1109,20 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         mSchedule = Schedule.getScheduleByEquipId(equipId);
 
         scheduleImageButton.setTag(mSchedule.getId());
+        vacationImageButton.setTag(mSchedule.getId());
+        vacationImageButton.setOnClickListener(v ->
+        {
+            SchedulerFragment schedulerFragment    = SchedulerFragment.newInstance((String) v.getTag(), true, zoneId);
+            FragmentManager childFragmentManager = getFragmentManager();
+            childFragmentManager.beginTransaction();
+            schedulerFragment.show(childFragmentManager,"dialog");
+
+            schedulerFragment.setOnExitListener(() -> {
+                Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
+                mSchedule = Schedule.getScheduleByEquipId(equipId);
+                ScheduleProcessJob.updateSchedules(equipOpen);
+            });
+        });
         scheduleImageButton.setOnClickListener(v ->
         {
             SchedulerFragment schedulerFragment    = SchedulerFragment.newInstance((String) v.getTag());
@@ -1061,20 +1134,23 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
                 mSchedule = Schedule.getScheduleByEquipId(equipId);
                 ScheduleProcessJob.updateSchedules(equipOpen);
-
-
             });
         });
         scheduleSpinner.setSelection(mScheduleType,false);
         if (mSchedule.isZoneSchedule())
         {
             scheduleImageButton.setVisibility(View.VISIBLE);
-        } else if (mSchedule.isNamedSchedule())
-        {
-            scheduleImageButton.setVisibility(View.VISIBLE);
         } else
         {
             scheduleImageButton.setVisibility(View.GONE);
+        }
+
+        if (vacationStatus.equals("Active Vacation"))
+        {
+            vacationImageButton.setVisibility(View.VISIBLE);
+        } else
+        {
+            vacationImageButton.setVisibility(View.GONE);
         }
 
 
@@ -1099,6 +1175,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     }
 
                     CCUHsApi.getInstance().scheduleSync();
+                    scheduleImageButton.setTag(mSchedule.getId());
+                    vacationImageButton.setTag(mSchedule.getId());
                 } else if (position == 1 && (mScheduleType != -1))
                 {
                     if (mSchedule.isZoneSchedule() && mSchedule.getMarkers().contains("disabled"))
@@ -1106,6 +1184,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                         mSchedule.setDisabled(false);
                         CCUHsApi.getInstance().updateZoneSchedule(mSchedule, zoneId);
                         scheduleImageButton.setTag(mSchedule.getId());
+                        vacationImageButton.setTag(mSchedule.getId());
                     } else
                     {
 
@@ -1127,6 +1206,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                             //CCUHsApi.getInstance().syncEntityTree();
                         }
                         scheduleImageButton.setTag(scheduleById.getId());
+                        vacationImageButton.setTag(scheduleById.getId());
                         scheduleImageButton.setVisibility(View.VISIBLE);
                         CCUHsApi.getInstance().scheduleSync();
                     }
@@ -1134,11 +1214,15 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                         setScheduleType(scheduleTypeId, ScheduleType.ZONE);
                         mScheduleTypeMap.put(equipId, ScheduleType.ZONE.ordinal());
                     }
+                } else if(position == 2 && (mScheduleType != -1)){
+                    scheduleImageButton.setVisibility(View.GONE);
                 } else
                 {
                     //list named schedules
                 }
                 mSchedule = Schedule.getScheduleByEquipId(equipId);
+                scheduleImageButton.setTag(mSchedule.getId());
+                vacationImageButton.setTag(mSchedule.getId());
             }
 
             @Override

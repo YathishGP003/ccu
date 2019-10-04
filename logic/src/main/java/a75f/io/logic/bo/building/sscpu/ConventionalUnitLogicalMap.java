@@ -431,6 +431,7 @@ public class ConventionalUnitLogicalMap {
                                           .build();
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
         CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
+        CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, 0.0);
         
         //Create Physical points and map
         SmartStat device = new SmartStat(nodeAddr, siteRef, floor, room,equipRef,"cpu");

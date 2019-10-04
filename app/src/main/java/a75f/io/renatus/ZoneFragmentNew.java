@@ -9,10 +9,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
@@ -28,8 +26,6 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.GridLayout;
 import android.widget.ImageButton;
@@ -137,6 +133,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
     ArrayList<HashMap> openZoneMap;
     double currentTempSensor = 0;
     int noTempSensor = 0;
+    HashMap<String, Integer> mScheduleTypeMap = new HashMap<>();
     public ZoneFragmentNew()
     {
     }
@@ -635,10 +632,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         vacationStatusTV.setText(vacationStatus);
         scheduleStatus.setText(status);
         String scheduleTypeId = CCUHsApi.getInstance().readId("point and scheduleType and equipRef == \""+equipId+"\"");
-        final int mScheduleType = (int)CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId);
+        final Integer mScheduleType = (int)CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId);
         Log.d("ScheduleType","mScheduleType=="+mScheduleType+","+(int)CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId)+","+p.getDisplayName());
         mSchedule = Schedule.getScheduleByEquipId(equipId);
-
+        scheduleSpinner.setTag(mScheduleType);
+        mScheduleTypeMap.put(equipId,mScheduleType);
         scheduleImageButton.setTag(mSchedule.getId());
         scheduleImageButton.setOnClickListener(v ->
         {
@@ -682,9 +680,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     }
                     scheduleImageButton.setVisibility(View.GONE);
 
-                    if (mScheduleType != ScheduleType.BUILDING.ordinal()) {
+                    if (mScheduleTypeMap.get(equipId) != ScheduleType.BUILDING.ordinal()) {
                         setScheduleType(scheduleTypeId, ScheduleType.BUILDING);
-                        //mScheduleType = ScheduleType.BUILDING.ordinal();
+                        mScheduleTypeMap.put(equipId, ScheduleType.BUILDING.ordinal());
                     }
 
                     CCUHsApi.getInstance().scheduleSync();
@@ -719,9 +717,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                         scheduleImageButton.setVisibility(View.VISIBLE);
                         CCUHsApi.getInstance().scheduleSync();
                     }
-                    if (mScheduleType != ScheduleType.ZONE.ordinal()) {
+                    if (mScheduleTypeMap.get(equipId) != ScheduleType.ZONE.ordinal()) {
                         setScheduleType(scheduleTypeId, ScheduleType.ZONE);
-                        //mScheduleType = ScheduleType.ZONE.ordinal();
+                        mScheduleTypeMap.put(equipId, ScheduleType.ZONE.ordinal());
                     }
                 } else
                 {
@@ -1048,7 +1046,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         String scheduleTypeId = CCUHsApi.getInstance().readId("point and scheduleType and equipRef == \""+equipId+"\"");
         final int mScheduleType = (int)CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId);
         Log.d("ScheduleType","update mScheduleType=="+mScheduleType+","+(int)CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId)+","+p.getDisplayName());
-
+        mScheduleTypeMap.put(equipId, mScheduleType);
         mSchedule = Schedule.getScheduleByEquipId(equipId);
 
         scheduleImageButton.setTag(mSchedule.getId());
@@ -1085,6 +1083,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
             {
+                Log.d(L.TAG_CCU_UI," scheduleType "+mScheduleType);
                 if (position == 0 && (mScheduleType != -1))
                 {
                     if (mSchedule.isZoneSchedule())
@@ -1094,9 +1093,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     }
                     scheduleImageButton.setVisibility(View.GONE);
 
-                    if (mScheduleType != ScheduleType.BUILDING.ordinal()) {
+                    if (mScheduleTypeMap.get(equipId) != ScheduleType.BUILDING.ordinal()) {
                         setScheduleType(scheduleTypeId, ScheduleType.BUILDING);
-                        //mScheduleType = ScheduleType.BUILDING.ordinal();
+                        mScheduleTypeMap.put(equipId, ScheduleType.BUILDING.ordinal());
                     }
 
                     CCUHsApi.getInstance().scheduleSync();
@@ -1131,9 +1130,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                         scheduleImageButton.setVisibility(View.VISIBLE);
                         CCUHsApi.getInstance().scheduleSync();
                     }
-                    if (mScheduleType != ScheduleType.ZONE.ordinal()) {
+                    if (mScheduleTypeMap.get(equipId) != ScheduleType.ZONE.ordinal()) {
                         setScheduleType(scheduleTypeId, ScheduleType.ZONE);
-                        //mScheduleType = ScheduleType.ZONE.ordinal();
+                        mScheduleTypeMap.put(equipId, ScheduleType.ZONE.ordinal());
                     }
                 } else
                 {
@@ -2555,8 +2554,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
-
                 CCUHsApi.getInstance().writeDefaultValById(id, (double)schedule.ordinal());
+                CcuLog.d("CCU_UI"," Set Schedule type "+schedule.ordinal());
+                CCUHsApi.getInstance().writeHisValById(id, (double)schedule.ordinal());
                 ScheduleProcessJob.handleScheduleTypeUpdate(new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(id)).build());
             }
         });

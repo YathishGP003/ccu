@@ -1,8 +1,6 @@
 package a75f.io.renatus;
 
 import android.content.Intent;
-import android.graphics.Typeface;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.TabItem;
 import android.support.design.widget.TabLayout;
@@ -13,10 +11,8 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -24,8 +20,6 @@ import android.widget.TextView;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.Point;
-import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.renatus.ENGG.RenatusEngineeringActivity;
@@ -123,7 +117,7 @@ public class RenatusLandingActivity extends AppCompatActivity {
                     SettingsFragment.slidingPane.openPane();
                 }
             });
-            setupButton = findViewById(R.id.logo);
+            setupButton = findViewById(R.id.logo_daikin);
             setupButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {

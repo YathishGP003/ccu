@@ -296,6 +296,7 @@ public class PlcEquip
                                           .build();
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
         CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
+        CCUHsApi.getInstance().writeHisValById(equipScheduleTypeId, 0.0);
     
         SmartNode device = new SmartNode(nodeAddr, siteRef, floorRef, roomRef, equipRef);
     

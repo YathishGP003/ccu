@@ -255,6 +255,19 @@ public abstract class SystemProfile
                 hayStack.writeHisValById(coolingPreconditioningRateId, Double.parseDouble(valMap.get("val").toString()));
             }
         }
+
+        Point cmTempInfPercentileZonesDead = new Point.Builder().setDisplayName(HSUtil.getDis(equipRef) + "-" + "cmTempPercentDeadZonesAllowed").setSiteRef(siteRef).setEquipRef(equipRef).addMarker("system").addMarker("tuner").addMarker("writable").addMarker("his").addMarker("zone").addMarker("percent").addMarker("dead").addMarker("influence").addMarker("sp").addMarker("equipHis").setTz(tz).build();
+        String cmTempInfPercentileZonesDeadId = hayStack.addPoint(cmTempInfPercentileZonesDead);
+        HashMap cmTempInfPercentileZonesDeadPoint = hayStack.read("point and tuner and default and zone and percent and dead and influence");
+        ArrayList<HashMap> cmTempInfPercentileZonesDeadPointArr = hayStack.readPoint(cmTempInfPercentileZonesDeadPoint.get("id").toString());
+        for (HashMap valMap : cmTempInfPercentileZonesDeadPointArr)
+        {
+            if (valMap.get("val") != null)
+            {
+                hayStack.pointWrite(HRef.copy(cmTempInfPercentileZonesDeadId), (int) Double.parseDouble(valMap.get("level").toString()), valMap.get("who").toString(), HNum.make(Double.parseDouble(valMap.get("val").toString())), HNum.make(0));
+                hayStack.writeHisValById(cmTempInfPercentileZonesDeadId, Double.parseDouble(valMap.get("val").toString()));
+            }
+        }
     }
     
     public void updateGatewayRef(String systemEquipId)
@@ -274,8 +287,9 @@ public abstract class SystemProfile
     public void addCMPoints(String siteRef, String equipref, String equipDis , String tz) {
         Point cmAlive = new Point.Builder().setDisplayName(equipDis + "-" + "cmAlive").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("cm").addMarker("alive").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(cmAlive);
-        Point cmCurrentTemp = new Point.Builder().setDisplayName(equipDis + "-" + "cmCurrentTemp").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("cm").addMarker("current").addMarker("temp").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
-        CCUHsApi.getInstance().addPoint(cmCurrentTemp);
+		Point cmCurrentTemp = new Point.Builder().setDisplayName(equipDis + "-" + "cmCurrentTemp").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("cm").addMarker("current").addMarker("temp").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
+        String ctID = CCUHsApi.getInstance().addPoint(cmCurrentTemp);
+        CCUHsApi.getInstance().writeHisValById(ctID, 0.0);
         Point cmDesiredTemp = new Point.Builder().setDisplayName(equipDis + "-" + "cmDesiredTemp").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("cm").addMarker("desired").addMarker("temp").addMarker("writable").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
         String cmDesiredTempId = CCUHsApi.getInstance().addPoint(cmDesiredTemp);
         CCUHsApi.getInstance().writeDefaultValById(cmDesiredTempId, 0.0);

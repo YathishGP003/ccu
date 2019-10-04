@@ -394,6 +394,23 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }
     }
 
+    public static double getSystemCoolingDesiredTemp(){
+        double setback = TunerUtil.readTunerValByQuery("default and unoccupied and setback");
+        if(currOccupied != null)
+            return (((systemOccupancy == UNOCCUPIED) || (systemOccupancy == VACATION)) ? currOccupied.getCoolingVal() + setback : currOccupied.getCoolingVal());
+        else if(nextOccupied != null)
+            return (((systemOccupancy == UNOCCUPIED) || (systemOccupancy == VACATION)) ? nextOccupied.getCoolingVal() + setback : nextOccupied.getCoolingVal());
+        else return 0;
+    }
+
+    public static double getSystemHeatingDesiredTemp(){
+        double setback = TunerUtil.readTunerValByQuery("default and unoccupied and setback");
+        if(currOccupied != null)
+            return (((systemOccupancy == UNOCCUPIED) || (systemOccupancy == VACATION)) ? currOccupied.getHeatingVal() + setback : currOccupied.getHeatingVal());
+        else if (nextOccupied != null)
+            return (((systemOccupancy == UNOCCUPIED) || (systemOccupancy == VACATION)) ? nextOccupied.getHeatingVal() + setback : nextOccupied.getHeatingVal());
+        else return 0;
+    }
     public static String getSystemStatusString() {
 
         if(L.ccu().systemProfile instanceof DefaultSystem)

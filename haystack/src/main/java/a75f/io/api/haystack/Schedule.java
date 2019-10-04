@@ -89,7 +89,7 @@ public class Schedule extends Entity
         {
             Schedule schedule = CCUHsApi.getInstance().getScheduleById(ref);
             
-            if (schedule != null && !schedule.mMarkers.contains("disabled"))
+            if (schedule != null && (!schedule.mMarkers.contains("disabled") || vacation))
             {
                 CcuLog.d("Schedule", "Zone Schedule: for "+build.getDisplayName()+" : "+ schedule.toString());
                 return schedule;

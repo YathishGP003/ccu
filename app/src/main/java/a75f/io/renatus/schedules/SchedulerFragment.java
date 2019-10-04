@@ -11,6 +11,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewCompat;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v4.widget.TextViewCompat;
 import android.support.v7.content.res.AppCompatResources;
 import android.support.v7.widget.AppCompatImageView;
@@ -54,6 +55,8 @@ import a75f.io.renatus.util.FontManager;
 public class SchedulerFragment extends DialogFragment implements ManualScheduleDialogListener {
 
     private static final String PARAM_SCHEDULE_ID = "PARAM_SCHEDULE_ID";
+    private static final String PARAM_IS_VACATION = "PARAM_IS_VACATION";
+    private static final String PARAM_ROOM_REF = "PARAM_ROOM_REF";
     private static final int ID_DIALOG_VACATION = 02;
     private static final int ID_DIALOG_SCHEDULE = 01;
 
@@ -83,9 +86,9 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
     String colorMinTemp = "";
     String colorMaxTemp = "";
     RecyclerView mVacationRecycler;
+    NestedScrollView scheduleScrollView;
     private OnExitListener mOnExitListener;
     private VacationAdapter mVacationAdapter;
-
 
     @Override
     public void onStop() {
@@ -111,6 +114,16 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         SchedulerFragment schedulerFragment = new SchedulerFragment();
         Bundle args = new Bundle();
         args.putString(PARAM_SCHEDULE_ID, scheduleId);
+        schedulerFragment.setArguments(args);
+        return schedulerFragment;
+    }
+
+    public static SchedulerFragment newInstance(String scheduleId, boolean isVacation, String roomRef) {
+        SchedulerFragment schedulerFragment = new SchedulerFragment();
+        Bundle args = new Bundle();
+        args.putString(PARAM_SCHEDULE_ID, scheduleId);
+        args.putBoolean(PARAM_IS_VACATION, isVacation);
+        args.putString(PARAM_ROOM_REF, roomRef);
         schedulerFragment.setArguments(args);
         return schedulerFragment;
     }
@@ -152,6 +165,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         textViewaddEntry = rootView.findViewById(R.id.addEntry);
         textViewaddEntryIcon = rootView.findViewById(R.id.addEntryIcon);
         mVacationLayout = rootView.findViewById(R.id.constraintLt_Vacations);
+        scheduleScrollView = rootView.findViewById(R.id.scheduleScrollView);
 
         textViewaddEntryIcon.setTypeface(iconFont);
         textViewaddEntryIcon.setText(getString(R.string.icon_plus));
@@ -266,7 +280,6 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
 
             }
         });
-
         return rootView;
     }
 
@@ -397,12 +410,15 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
             ScheduleProcessJob.updateSchedules();
     };
 
-
     private void loadVacations() {
         
         ArrayList<Schedule> vacations;
         if (schedule.isZoneSchedule() && schedule.getRoomRef()!= null) {
             vacations = CCUHsApi.getInstance().getZoneSchedule(schedule.getRoomRef(), true);
+        } else if (getArguments() != null && getArguments().containsKey(PARAM_ROOM_REF)){
+            String roomRef = getArguments().getString(PARAM_ROOM_REF);
+            vacations = CCUHsApi.getInstance().getZoneSchedule(roomRef, true);
+            textViewVacations.setText("Zone Vacations");
         } else
         {
             vacations = CCUHsApi.getInstance().getSystemSchedule(true);
@@ -856,6 +872,17 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         textViewTemp.setContentDescription(textView.getText().toString()+"_"+tempStartTime+":"+startTimeMM+"-"+tempEndTime+":"+endTimeMM);
         textViewTemp.setId(ViewCompat.generateViewId());
 
+        if (getArguments() != null && getArguments().containsKey(PARAM_IS_VACATION)) {
+            boolean isVacation = getArguments().getBoolean(PARAM_IS_VACATION);
+            if (isVacation){
+                scheduleScrollView.post(() -> scheduleScrollView.fullScroll(View.FOCUS_DOWN));
+                if (schedule.getDis().equals("Building Schedule")) {
+                    textViewaddEntry.setEnabled(false);
+                    textViewaddEntryIcon.setEnabled(false);
+                    textViewTemp.setEnabled(false);
+                }
+            }
+        }
 
         ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(0, (int) mPixelsBetweenADay);
         lp.baselineToBaseline = textView.getId();

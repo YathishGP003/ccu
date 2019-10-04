@@ -472,8 +472,8 @@ public class DabSystemController extends SystemController
                     totalEquips++;
             }
         }
-
-        if( !hasTi && ((tempZones > 0) && (((tempZones*100)/(tempZones + totalEquips)) <= 50/*getPercentDeadZonesAllowed()*/))){
+        double cmTempInfForPercentileZonesDead = TunerUtil.readTunerValByQuery("zone and dead and percent and influence",L.ccu().systemProfile.getSystemEquipRef());
+        if( !hasTi && ((tempZones > 0) && (((tempZones*100)/(tempZones + totalEquips)) <= cmTempInfForPercentileZonesDead))){
             tempSum += getCMCurrentTemp(L.ccu().systemProfile.getSystemEquipRef());
             tempZones++;
         }

@@ -435,7 +435,7 @@ public class Pulse
 				}
 			}
 		}else if(L.ccu().systemProfile.getSystemEquipRef() != null){
-			HashMap cmCurrentTemp = hayStack.read("point and system and cm and temp and current");// and equipRef == \"" +sysEquipRef + "\"");
+			HashMap cmCurrentTemp = hayStack.read("point and system and cm and temp and current");
 			if (cmCurrentTemp != null && cmCurrentTemp.size() > 0) {
 
 				double val = cmRegularUpdateMessage_t.roomTemperature.get();
@@ -443,7 +443,7 @@ public class Pulse
 				hayStack.writeHisValById(cmCurrentTemp.get("id").toString(), curTempVal);
 				CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : CM currentTemp " + curTempVal+","+val);
 			}
-			HashMap cmHumidity = hayStack.read("point and system and cm and humidity");// and equipRef == \"" +sysEquipRef + "\"");
+			HashMap cmHumidity = hayStack.read("point and system and cm and humidity");
 			if (cmHumidity != null && cmHumidity.size() > 0) {
 				double val = cmRegularUpdateMessage_t.humidity.get();
 				if (val > 0) {

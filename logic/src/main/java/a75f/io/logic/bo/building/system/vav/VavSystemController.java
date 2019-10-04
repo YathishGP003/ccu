@@ -537,8 +537,9 @@ public class VavSystemController extends SystemController
                     totalEquips++;
             }
         }
+        double cmTempInfForPercentileZonesDead = TunerUtil.readTunerValByQuery("zone and dead and percent and influence",L.ccu().systemProfile.getSystemEquipRef());
 
-        if( !hasTi && ((tempZones > 0) && (((tempZones*100)/(tempZones + totalEquips)) <= 50/*getPercentDeadZonesAllowed()*/))){
+        if( !hasTi && ((tempZones > 0) && (((tempZones*100)/(tempZones + totalEquips)) <= cmTempInfForPercentileZonesDead))){
             tempSum += getCMCurrentTemp(L.ccu().systemProfile.getSystemEquipRef());
             tempZones++;
         }

@@ -24,6 +24,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.util.HSEquipUtil;
+import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
@@ -98,6 +99,8 @@ public class DabSystemController extends SystemController
         profile.setSystemPoint("average and temp", averageSystemTemperature);
         
         double co2LoopWASum = 0, co2WASum = 0;
+        int zoneDeadCount = 0;
+        boolean hasTi = false;
         
         for (Floor f: HSUtil.getFloors())
         {
@@ -108,12 +111,16 @@ public class DabSystemController extends SystemController
 
                     //isDab or CCu as zone profile
                     boolean isDabOrTi = ((q.getMarkers().contains("dab") == false) ? ((q.getMarkers().contains("ti") == false) ? false: true) : true);
-                    if (!isDabOrTi || isZoneDead(q) || !hasTemp(q))
-                    {
+                    hasTi = !hasTi ? q.getMarkers().contains("ti") : true;
+                    if(!isDabOrTi)
                         continue;
-                    }
+                    else if( isDabOrTi && isZoneDead(q)){
+
+                        zoneDeadCount++;
+                        continue;
+                    }else if(!hasTemp(q))
+                        continue;
                     double zoneCurTemp = getEquipCurrentTemp(q.getId());
-                    double zoneTargetTemp = getEquipTempTarget(q.getId());
                     double desiredTempCooling = HSEquipUtil.getDesiredTempCooling(q.getId());
                     double desiredTempHeating = HSEquipUtil.getDesiredTempHeating(q.getId());
                     
@@ -133,6 +140,27 @@ public class DabSystemController extends SystemController
                 }
             }
             
+        }
+        double cmTempInfForPercentileZonesDead = TunerUtil.readTunerValByQuery("zone and dead and percent and influence",L.ccu().systemProfile.getSystemEquipRef());
+        if( !hasTi && ((zoneDeadCount > 0) && (((zoneCount*100)/(zoneDeadCount + zoneCount)) <= cmTempInfForPercentileZonesDead))){
+
+            String sysEquip = L.ccu().systemProfile.getSystemEquipRef();
+            if(sysEquip != null) {
+                double cmCurrentTemp = getCMCurrentTemp(sysEquip);
+                double desiredTempCooling = ScheduleProcessJob.getSystemCoolingDesiredTemp();
+                double desiredTempHeating = ScheduleProcessJob.getSystemHeatingDesiredTemp();
+
+                double cmCoolingLoad = cmCurrentTemp > desiredTempCooling ? cmCurrentTemp - desiredTempCooling : 0;
+                double cmHeatingLoad = cmCurrentTemp < desiredTempHeating ? desiredTempHeating - cmCurrentTemp : 0;
+                double zoneDynamicPriority = getCMDynamicPriority(cmCoolingLoad > 0 ? cmCoolingLoad : cmHeatingLoad);
+                totalCoolingLoad += cmCoolingLoad;
+                totalHeatingLoad += cmHeatingLoad;
+                zoneCount++;
+
+                weightedAverageLoadSum += (cmCoolingLoad * zoneDynamicPriority) - (cmHeatingLoad * zoneDynamicPriority);
+                prioritySum += zoneDynamicPriority;
+                CcuLog.d(L.TAG_CCU_SYSTEM, "CM dab zoneDynamicPriority: " + zoneDynamicPriority + " cmCoolingLoad: " + cmCoolingLoad + " cmHeatingLoad: " + cmHeatingLoad+" weightedAverageLoadSum "+weightedAverageLoadSum+","+prioritySum+","+cmCurrentTemp);
+            }
         }
         
         if (prioritySum == 0 || zoneCount == 0) {
@@ -326,6 +354,9 @@ public class DabSystemController extends SystemController
     public double getEquipCurrentTemp(String equipRef) {
         return CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \""+equipRef+"\"");
     }
+    public double getCMCurrentTemp(String equipRef) {
+        return CCUHsApi.getInstance().readHisValByQuery("point and system and temp and cm and current and equipRef == \""+equipRef+"\"");
+    }
     
     public ZonePriority getEquipPriority(String equipRef) {
         double priorityVal = CCUHsApi.getInstance().readDefaultVal("point and zone and config and priority and equipRef == \""+equipRef+"\"");
@@ -353,7 +384,14 @@ public class DabSystemController extends SystemController
     {
         return getEquipDesiredTemp(zoneRef);//TODO - TEMP
     }
-    
+
+
+    public double getCMDynamicPriority(double zoneLoad){
+        ZonePriority p = ZonePriority.NORMAL;
+        double zonePrioritySpread = TunerUtil.readTunerValByQuery("point and default and tuner and zone and priority and spread and vav");
+        double zonePriorityMultiplier = TunerUtil.readTunerValByQuery("point and default and tuner and zone and priority and multiplier and vav");
+        return p.val * Math.pow(zonePriorityMultiplier, (zoneLoad/zonePrioritySpread) > 10 ? 10 : (zoneLoad/zonePrioritySpread));
+    }
     public double getEquipDynamicPriority(double zoneLoad, String equipRef) {
         ZonePriority p = getEquipPriority(equipRef);
         if (getEquipCurrentTemp(equipRef) == 0) {
@@ -415,6 +453,8 @@ public class DabSystemController extends SystemController
         //Average across zones or from proxy zone.
         double tempSum = 0;
         double tempZones = 0;
+        int totalEquips = 0;
+        boolean hasTi = false;
         
         CCUHsApi hayStack = CCUHsApi.getInstance();
         ArrayList<HashMap> dabEquips = hayStack.readAll("equip and zone");
@@ -424,11 +464,18 @@ public class DabSystemController extends SystemController
             Equip equip = new Equip.Builder().setHashMap(q).build();
             if(equip.getMarkers().contains("dab") || equip.getMarkers().contains("ti")) {
                 double tempVal = hayStack.readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" + q.get("id") + "\"");
+                hasTi = !hasTi ? equip.getMarkers().contains("ti") : true;
                 if (!isZoneDead(equip) && tempVal > 0) {
                     tempSum += tempVal;
                     tempZones++;
-                }
+                }else
+                    totalEquips++;
             }
+        }
+        double cmTempInfForPercentileZonesDead = TunerUtil.readTunerValByQuery("zone and dead and percent and influence",L.ccu().systemProfile.getSystemEquipRef());
+        if( !hasTi && ((tempZones > 0) && (((tempZones*100)/(tempZones + totalEquips)) <= cmTempInfForPercentileZonesDead))){
+            tempSum += getCMCurrentTemp(L.ccu().systemProfile.getSystemEquipRef());
+            tempZones++;
         }
         averageSystemTemperature = tempZones == 0 ? 0 : tempSum/tempZones;
     }

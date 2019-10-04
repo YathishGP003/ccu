@@ -54,6 +54,12 @@ public class ControlMote
     }
 	//For CCU as a zone part
     public ControlMote(int address, String site, String floor, String room, String equipRef) {
+
+        HashMap device = CCUHsApi.getInstance().read("device and addr == \""+address+"\"");
+        if (device != null && device.size() > 0) {
+            CcuLog.d(L.TAG_CCU_DEVICE," CM device exists");
+            return;
+        }
         Device d = new Device.Builder()
                 .setDisplayName("TI-"+address)
                 .addMarker("network").addMarker("node").addMarker("ti").addMarker("equipHis")

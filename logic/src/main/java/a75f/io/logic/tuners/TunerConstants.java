@@ -66,6 +66,7 @@ public class TunerConstants
     public static final double BUILDING_LIMIT_MAX = 90;
     public static final double BUILDING_TO_ZONE_DIFFERENTIAL = 3;
     public static final double ZONE_TEMP_DEAD_LEEWAY = 10;
+    public static final double CM_TEMP_INFLU_PERCENTILE_ZONE_DEAD = 50;
     
     public static final double MIN_COOLING_DAMPER = 40;
     public static final double MAX_COOLING_DAMPER = 80;

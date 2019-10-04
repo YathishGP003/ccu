@@ -187,8 +187,18 @@ public class BuildingTuners
         String humidityCompensationOffsetId = hayStack.addPoint(humidityCompensationOffset);
         hayStack.writePoint(humidityCompensationOffsetId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", 0.0, 0);
         hayStack.writeHisValById(humidityCompensationOffsetId, 0.0);
-        
-        
+
+        Point percentOfDeadZonesAllowed = new Point.Builder()
+                .setDisplayName(equipDis+"-"+"cmTempPercentDeadZonesAllowed")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipRef)
+                .addMarker("tuner").addMarker("default").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .addMarker("system").addMarker("zone").addMarker("dead").addMarker("percent").addMarker("influence").addMarker("sp")
+                .setTz(tz)
+                .build();
+        String percentOfDeadZonesAllowedId = hayStack.addPoint(percentOfDeadZonesAllowed);
+        hayStack.writePoint(percentOfDeadZonesAllowedId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.CM_TEMP_INFLU_PERCENTILE_ZONE_DEAD, 0);
+        hayStack.writeHisValById(percentOfDeadZonesAllowedId, TunerConstants.CM_TEMP_INFLU_PERCENTILE_ZONE_DEAD);
         
     }
     

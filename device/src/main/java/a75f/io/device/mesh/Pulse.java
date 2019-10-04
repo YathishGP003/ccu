@@ -89,7 +89,7 @@ public class Pulse
 
 							double oldEntTempVal = hayStack.readHisValById(logPoint.get("id").toString());
 							double curEntTempVal = ThermistorUtil.getThermistorValueToTemp(val * 10 );
-						curEntTempVal = CCUUtils.roundTo2Decimal(curEntTempVal);
+							curEntTempVal = CCUUtils.roundTo2Decimal(curEntTempVal);
 							hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 							if(oldEntTempVal != curEntTempVal)
 								hayStack.writeHisValById(logPoint.get("id").toString(), curEntTempVal);
@@ -434,6 +434,24 @@ public class Pulse
 					currentTempInterface.updateTemperature(curTempVal, Short.parseShort(deviceInfo.getAddr()));
 				}
 			}
+		}else if(L.ccu().systemProfile.getSystemEquipRef() != null){
+			HashMap cmCurrentTemp = hayStack.read("point and system and cm and temp and current");
+			if (cmCurrentTemp != null && cmCurrentTemp.size() > 0) {
+
+				double val = cmRegularUpdateMessage_t.roomTemperature.get();
+				double curTempVal = getCMRoomTempConversion(val,0);
+				hayStack.writeHisValById(cmCurrentTemp.get("id").toString(), curTempVal);
+				CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : CM currentTemp " + curTempVal+","+val);
+			}
+			HashMap cmHumidity = hayStack.read("point and system and cm and humidity");
+			if (cmHumidity != null && cmHumidity.size() > 0) {
+				double val = cmRegularUpdateMessage_t.humidity.get();
+				if (val > 0) {
+					hayStack.writeHisValById(cmHumidity.get("id").toString(), val);
+				}
+				CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Humidity " + val );
+			}
+
 		}
 	}
 

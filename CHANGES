@@ -1,5 +1,5 @@
- - Merge branch 'dev_sam' into 'master'
- - resolves RENATUS-747
- - Update scheduletype his data on change
  - Merge branch 'mahesh_renuts' into 'master'
- - added custom ssl socket factory for https request
+ - update zone vaction
+ - Merge branch 'kumar_renatus' into 'master'
+ - #RENATUS-709, CM Temp should be used if zone dead is less thatn 50 or whatever tuner value is
+ - #RENATUS-709, CM Temp should be used if zone dead is less thatn 50 or whatever tuner value is

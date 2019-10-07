@@ -60,6 +60,7 @@ public class EmrEquip
                                           .addMarker("sp").addMarker("emr").addMarker("sensor").addMarker("zone").addMarker("his")
                                           .addMarker("cur").addMarker("logical").addMarker("equipHis")
                                           .setGroup(String.valueOf(nodeAddr))
+                                          .setUnit("KWh")
                                           .setTz(tz)
                                           .build();
         String emrReadingId  = hayStack.addPoint(emrReading );
@@ -74,6 +75,7 @@ public class EmrEquip
                                     .addMarker("sp").addMarker("emr").addMarker("zone").addMarker("his")
                                     .addMarker("current").addMarker("rate").addMarker("logical").addMarker("equipHis").addMarker("sp")
                                     .setGroup(String.valueOf(nodeAddr))
+                                    .setUnit("KW")
                                     .setTz(tz)
                                     .build();
         String currentRateId  = hayStack.addPoint(currentRate );

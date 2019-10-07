@@ -390,7 +390,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                                       .setSiteRef(siteRef)
                                       .setEquipRef(equipref)
                                       .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("his").addMarker("equipHis")
-                                      .setTz(tz)
+                                      .setUnit("%").setTz(tz)
                                       .build();
         CCUHsApi.getInstance().addPoint(heatingSignal);
     
@@ -399,7 +399,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                                       .setSiteRef(siteRef)
                                       .setEquipRef(equipref)
                                       .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("his").addMarker("equipHis")
-                                      .setTz(tz)
+                                      .setUnit("%").setTz(tz)
                                       .build();
         CCUHsApi.getInstance().addPoint(fanSignal);
     
@@ -408,7 +408,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipref)
                                   .addMarker("system").addMarker("cmd").addMarker("co2").addMarker("his").addMarker("equipHis")
-                                  .setTz(tz)
+                                  .setUnit("%").setTz(tz)
                                   .build();
         CCUHsApi.getInstance().addPoint(co2Signal);
         Point occupancySignal = new Point.Builder()
@@ -424,7 +424,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipref)
                                   .addMarker("system").addMarker("cmd").addMarker("humidifier").addMarker("his").addMarker("equipHis")
-                                  .setTz(tz)
+                                  .setUnit("%").setTz(tz)
                                   .build();
         CCUHsApi.getInstance().addPoint(humidifierSignal);
     
@@ -433,7 +433,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                                          .setSiteRef(siteRef)
                                          .setEquipRef(equipref)
                                          .addMarker("system").addMarker("cmd").addMarker("dehumidifier").addMarker("his").addMarker("equipHis")
-                                         .setTz(tz)
+                                         .setUnit("%").setTz(tz)
                                          .build();
         CCUHsApi.getInstance().addPoint(dehumidifierSignal);
     }

@@ -103,6 +103,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("fcu").addMarker("cur")
                 .addMarker("air").addMarker("humidity").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
+                .setUnit("%")
                 .setTz(tz)
                 .build();
         String humidityId = CCUHsApi.getInstance().addPoint(humidity);
@@ -117,6 +118,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("fcu").addMarker("cur")
                 .addMarker("air").addMarker("co2").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
+                .setUnit("ppm")
                 .setTz(tz)
                 .build();
         String co2Id = CCUHsApi.getInstance().addPoint(co2);
@@ -131,6 +133,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("fcu").addMarker("cur")
                 .addMarker("air").addMarker("voc").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
+                .setUnit("ppm")
                 .setTz(tz)
                 .build();
         String vocId = CCUHsApi.getInstance().addPoint(voc);
@@ -145,6 +148,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("fcu").addMarker("cur")
                 .addMarker("air").addMarker("sound").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
+                .setUnit("dB")
                 .setTz(tz)
                 .build();
         String soundId = CCUHsApi.getInstance().addPoint(sound);
@@ -171,6 +175,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("fcu").addMarker("cur")
                 .addMarker("air").addMarker("co").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
+                .setUnit("ppm")
                 .setTz(tz)
                 .build();
         String coId = CCUHsApi.getInstance().addPoint(co);
@@ -184,6 +189,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("fcu").addMarker("cur")
                 .addMarker("air").addMarker("co2Equivalent").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
+                .setUnit("ppm")
                 .setTz(tz)
                 .build();
         String co2EqId = CCUHsApi.getInstance().addPoint(co2Eq);
@@ -197,6 +203,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("fcu").addMarker("cur")
                 .addMarker("air").addMarker("no").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
+                .setUnit("ppm")
                 .setTz(tz)
                 .build();
         String no2Id = CCUHsApi.getInstance().addPoint(no2);
@@ -210,6 +217,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("fcu").addMarker("cur")
                 .addMarker("air").addMarker("pressure").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
+                .setUnit("Pa")
                 .setTz(tz)
                 .build();
         String psId = CCUHsApi.getInstance().addPoint(ps);
@@ -223,6 +231,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("fcu").addMarker("cur")
                 .addMarker("air").addMarker("illuminance").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
+                .setUnit("lux")
                 .setTz(tz)
                 .build();
         String illuId = CCUHsApi.getInstance().addPoint(illu);

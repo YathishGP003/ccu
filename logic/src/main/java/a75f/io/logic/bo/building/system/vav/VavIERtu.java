@@ -294,7 +294,7 @@ public class VavIERtu extends VavSystemProfile
                                       .setSiteRef(siteRef)
                                       .setEquipRef(equipref)
                                       .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("discharge").addMarker("air").addMarker("temp").addMarker("his").addMarker("equipHis")
-                                      .setTz(tz)
+                                      .setUnit("\u00B0F").setTz(tz)
                                       .build();
         CCUHsApi.getInstance().addPoint(coolingSignal);
         
@@ -303,7 +303,7 @@ public class VavIERtu extends VavSystemProfile
                                       .setSiteRef(siteRef)
                                       .setEquipRef(equipref)
                                       .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("discharge").addMarker("air").addMarker("temp").addMarker("his").addMarker("equipHis")
-                                      .setTz(tz)
+                                      .setUnit("\u00B0F").setTz(tz)
                                       .build();
         CCUHsApi.getInstance().addPoint(heatingSignal);
     
@@ -312,7 +312,7 @@ public class VavIERtu extends VavSystemProfile
                                       .setSiteRef(siteRef)
                                       .setEquipRef(equipref)
                                       .addMarker("system").addMarker("cmd").addMarker("dat").addMarker("setpoint").addMarker("temp").addMarker("his").addMarker("equipHis")
-                                      .setTz(tz)
+                                      .setUnit("\u00B0F").setTz(tz)
                                       .build();
         CCUHsApi.getInstance().addPoint(DATClgSetpoint);
         
@@ -321,7 +321,7 @@ public class VavIERtu extends VavSystemProfile
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipref)
                                   .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("his").addMarker("equipHis")
-                                  .setTz(tz)
+                                  .setUnit("in").setTz(tz)
                                   .build();
         CCUHsApi.getInstance().addPoint(fanSignal);
     }

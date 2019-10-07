@@ -427,23 +427,23 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
                                                  .setSiteRef(siteRef)
                                                  .setEquipRef(equipref)
                                                  .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("his").addMarker("equipHis")
-                                                 .setTz(tz).build();
+                                                 .setUnit("%").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(coolingSignal);
         Point heatingSignal = new Point.Builder().setDisplayName(equipDis + "-" + "heatingSignal")
                                                  .setSiteRef(siteRef).setEquipRef(equipref)
                                                  .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("his").addMarker("equipHis")
-                                                 .setTz(tz).build();
+                                                 .setUnit("%").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(heatingSignal);
         Point fanSignal = new Point.Builder().setDisplayName(equipDis + "-" + "fanSignal")
                                              .setSiteRef(siteRef)
                                              .setEquipRef(equipref)
                                              .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("his").addMarker("equipHis")
-                                             .setTz(tz).build();
+                                             .setUnit("%").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(fanSignal);
         Point compositeSignal = new Point.Builder().setDisplayName(equipDis + "-" + "CompositeSignal")
                                                    .setSiteRef(siteRef).setEquipRef(equipref)
                                                    .addMarker("system").addMarker("cmd").addMarker("composite").addMarker("his").addMarker("equipHis")
-                                                   .setTz(tz).build();
+                                                   .setUnit("%").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(compositeSignal);
     }
     

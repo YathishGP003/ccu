@@ -97,6 +97,7 @@ public class CazEquip
                 .addMarker("zone").addMarker("ti")
                 .addMarker("air").addMarker("humidity").addMarker("sensor").addMarker("current").addMarker("his").addMarker("cur").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
+                .setUnit("%")
                 .setTz(tz)
                 .build();
         String humidityId = CCUHsApi.getInstance().addPoint(humidity);
@@ -302,6 +303,7 @@ public class CazEquip
                 .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
                 .addMarker("temperature").addMarker("offset").addMarker("sp")
                 .setGroup(String.valueOf(nodeAddr))
+                .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
         String temperatureOffsetId = CCUHsApi.getInstance().addPoint(temperatureOffset);

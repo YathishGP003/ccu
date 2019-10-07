@@ -117,6 +117,7 @@ public class DabEquip
                                   .setFloorRef(floorRef)
                                   .addMarker("damper").addMarker("primary").addMarker("dab").addMarker("base").addMarker("cmd").addMarker("his").addMarker("logical").addMarker("zone").addMarker("equipHis")
                                   .setGroup(String.valueOf(nodeAddr))
+                                  .setUnit("%")
                                   .setTz(tz)
                                   .build();
         String dpID = CCUHsApi.getInstance().addPoint(damper1Pos);
@@ -129,6 +130,7 @@ public class DabEquip
                                   .setFloorRef(floorRef)
                                   .addMarker("damper").addMarker("secondary").addMarker("dab").addMarker("base").addMarker("cmd").addMarker("his").addMarker("logical").addMarker("zone").addMarker("equipHis")
                                   .setGroup(String.valueOf(nodeAddr))
+                                  .setUnit("%")
                                   .setTz(tz)
                                   .build();
         String dp1ID = CCUHsApi.getInstance().addPoint(damper2Pos);
@@ -142,6 +144,7 @@ public class DabEquip
                                             .setFloorRef(floorRef)
                                             .addMarker("damper").addMarker("primary").addMarker("dab").addMarker("normalized").addMarker("cmd").addMarker("his").addMarker("logical").addMarker("zone").addMarker("equipHis")
                                             .setGroup(String.valueOf(nodeAddr))
+                                            .setUnit("%")
                                             .setTz(tz)
                                             .build();
         String normalizedDamper1PosId = CCUHsApi.getInstance().addPoint(normalizedDamper1Pos);
@@ -154,6 +157,7 @@ public class DabEquip
                                              .setFloorRef(floorRef)
                                              .addMarker("damper").addMarker("secondary").addMarker("dab").addMarker("normalized").addMarker("cmd").addMarker("his").addMarker("logical").addMarker("zone").addMarker("equipHis")
                                              .setGroup(String.valueOf(nodeAddr))
+                                             .setUnit("%")
                                              .setTz(tz)
                                              .build();
         String normalizedDamper2PosId = CCUHsApi.getInstance().addPoint(normalizedDamper2Pos);
@@ -181,6 +185,7 @@ public class DabEquip
                                  .addMarker("zone").addMarker("dab")
                                  .addMarker("air").addMarker("humidity").addMarker("sensor").addMarker("current").addMarker("his").addMarker("cur").addMarker("logical").addMarker("equipHis")
                                  .setGroup(String.valueOf(nodeAddr))
+                                 .setUnit("%")
                                  .setTz(tz)
                                  .build();
         String humidityId = CCUHsApi.getInstance().addPoint(humidity);
@@ -194,6 +199,7 @@ public class DabEquip
                             .addMarker("zone").addMarker("dab")
                             .addMarker("air").addMarker("co2").addMarker("sensor").addMarker("current").addMarker("his").addMarker("cur").addMarker("logical").addMarker("equipHis")
                             .setGroup(String.valueOf(nodeAddr))
+                            .setUnit("ppm")
                             .setTz(tz)
                             .build();
         String co2Id = CCUHsApi.getInstance().addPoint(co2);
@@ -207,6 +213,7 @@ public class DabEquip
                             .addMarker("zone").addMarker("dab")
                             .addMarker("air").addMarker("voc").addMarker("sensor").addMarker("current").addMarker("his").addMarker("cur").addMarker("logical").addMarker("equipHis")
                             .setGroup(String.valueOf(nodeAddr))
+                            .setUnit("ppm")
                             .setTz(tz)
                             .build();
         String vocId = CCUHsApi.getInstance().addPoint(voc);
@@ -550,6 +557,7 @@ public class DabEquip
                                           .addMarker("config").addMarker("dab").addMarker("writable").addMarker("zone")
                                           .addMarker("temperature").addMarker("offset").addMarker("sp")
                                           .setGroup(String.valueOf(nodeAddr))
+                                          .setUnit("\u00B0F")
                                           .setTz(tz)
                                           .build();
         String temperatureOffsetId = CCUHsApi.getInstance().addPoint(temperatureOffset);
@@ -562,6 +570,7 @@ public class DabEquip
                                          .addMarker("config").addMarker("dab").addMarker("damper").addMarker("min").addMarker("cooling").addMarker("pos")
                                          .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his").addMarker("equipHis")
                                          .setGroup(String.valueOf(nodeAddr))
+                                         .setUnit("%")
                                          .setTz(tz)
                                          .build();
         String damperMinCoolingId = CCUHsApi.getInstance().addPoint(damperMinCooling);
@@ -575,6 +584,7 @@ public class DabEquip
                                          .addMarker("config").addMarker("dab").addMarker("damper").addMarker("max").addMarker("cooling").addMarker("pos")
                                          .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his").addMarker("equipHis")
                                          .setGroup(String.valueOf(nodeAddr))
+                                         .setUnit("%")
                                          .setTz(tz)
                                          .build();
         String damperMaxCoolingId = CCUHsApi.getInstance().addPoint(damperMaxCooling);
@@ -589,6 +599,7 @@ public class DabEquip
                                          .addMarker("config").addMarker("dab").addMarker("damper").addMarker("min").addMarker("heating").addMarker("pos")
                                          .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his").addMarker("equipHis")
                                          .setGroup(String.valueOf(nodeAddr))
+                                         .setUnit("%")
                                          .setTz(tz)
                                          .build();
         String damperMinHeatingId = CCUHsApi.getInstance().addPoint(damperMinHeating);
@@ -602,6 +613,7 @@ public class DabEquip
                                          .addMarker("config").addMarker("dab").addMarker("damper").addMarker("max").addMarker("heating").addMarker("pos")
                                          .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his").addMarker("equipHis")
                                          .setGroup(String.valueOf(nodeAddr))
+                                         .setUnit("%")
                                          .setTz(tz)
                                          .build();
         String damperMaxHeatingId = CCUHsApi.getInstance().addPoint(damperMaxHeating);

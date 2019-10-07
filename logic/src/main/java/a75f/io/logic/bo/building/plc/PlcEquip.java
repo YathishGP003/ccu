@@ -94,6 +94,7 @@ public class PlcEquip
                                    .addMarker("config").addMarker("pid").addMarker("zone").addMarker("writable")
                                    .addMarker("analog1").addMarker("input").addMarker("sensor")
                                    .setGroup(String.valueOf(nodeAddr))
+                                   .setUnit("mV")
                                    .setTz(tz)
                                    .build();
         String analog1InputSensorId = hayStack.addPoint(analog1InputSensor);
@@ -108,6 +109,7 @@ public class PlcEquip
                                            .addMarker("config").addMarker("pid").addMarker("zone").addMarker("writable")
                                            .addMarker("th1").addMarker("input").addMarker("sensor")
                                            .setGroup(String.valueOf(nodeAddr))
+                                           .setUnit("Ohm")
                                            .setTz(tz)
                                            .build();
         String th1InputSensorId = hayStack.addPoint(th1InputSensor);
@@ -122,6 +124,7 @@ public class PlcEquip
                                        .addMarker("config").addMarker("pid").addMarker("zone").addMarker("writable")
                                        .addMarker("target").addMarker("value")
                                        .setGroup(String.valueOf(nodeAddr))
+                                       .setUnit("V")
                                        .setTz(tz)
                                        .build();
         String pidTargetValueId = hayStack.addPoint(pidTargetValue);
@@ -195,6 +198,7 @@ public class PlcEquip
                                            .addMarker("config").addMarker("pid").addMarker("zone").addMarker("writable")
                                            .addMarker("analog2").addMarker("input").addMarker("sensor")
                                            .setGroup(String.valueOf(nodeAddr))
+                                           .setUnit("mV")
                                            .setTz(tz)
                                            .build();
         String analog2InputSensorId = hayStack.addPoint(analog2InputSensor);

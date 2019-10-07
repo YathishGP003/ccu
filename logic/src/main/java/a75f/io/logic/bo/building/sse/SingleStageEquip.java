@@ -95,6 +95,7 @@ public class SingleStageEquip {
                 .addMarker("zone").addMarker("sse")
                 .addMarker("air").addMarker("humidity").addMarker("sensor").addMarker("current").addMarker("his").addMarker("cur").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
+                .setUnit("%")
                 .setTz(tz)
                 .build();
         String humidityId = CCUHsApi.getInstance().addPoint(humidity);
@@ -108,6 +109,7 @@ public class SingleStageEquip {
                 .addMarker("zone").addMarker("sse")
                 .addMarker("air").addMarker("co2").addMarker("sensor").addMarker("current").addMarker("his").addMarker("cur").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
+                .setUnit("ppm")
                 .setTz(tz)
                 .build();
         String co2Id = CCUHsApi.getInstance().addPoint(co2);
@@ -121,6 +123,7 @@ public class SingleStageEquip {
                 .addMarker("zone").addMarker("sse")
                 .addMarker("air").addMarker("voc").addMarker("sensor").addMarker("current").addMarker("his").addMarker("cur").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
+                .setUnit("ppm")
                 .setTz(tz)
                 .build();
         String vocId = CCUHsApi.getInstance().addPoint(voc);
@@ -355,6 +358,7 @@ public class SingleStageEquip {
                 .addMarker("config").addMarker("sse").addMarker("writable").addMarker("zone")
                 .addMarker("temperature").addMarker("offset").addMarker("sp")
                 .setGroup(String.valueOf(nodeAddr))
+                .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
         String temperatureOffsetId = CCUHsApi.getInstance().addPoint(temperatureOffset);
@@ -368,6 +372,7 @@ public class SingleStageEquip {
                 .setRoomRef(roomRef)
                 .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone").addMarker("th2").addMarker("sp").addMarker("enable").addMarker(profile)
                 .setGroup(String.valueOf(nodeAddr))
+                .setUnit("Ohm")
                 .setTz(tz)
                 .build();
         String enableexternal10KProbeTh2Id = CCUHsApi.getInstance().addPoint(external10KProbeTh2);

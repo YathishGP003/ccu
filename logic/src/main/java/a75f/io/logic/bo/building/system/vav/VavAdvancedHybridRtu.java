@@ -437,12 +437,12 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
                                                  .setSiteRef(siteRef)
                                                  .setEquipRef(equipref)
                                                  .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("modulating").addMarker("his").addMarker("equipHis")
-                                                 .setTz(tz).build();
+                                                 .setUnit("%").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(coolingSignal);
         Point heatingSignal = new Point.Builder().setDisplayName(equipDis + "-" + "heatingSignal")
                                                  .setSiteRef(siteRef).setEquipRef(equipref)
                                                  .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("modulating").addMarker("his").addMarker("equipHis")
-                                                 .setTz(tz).build();
+                                                 .setUnit("%").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(heatingSignal);
         Point fanSignal = new Point.Builder().setDisplayName(equipDis + "-" + "fanSignal")
                                              .setSiteRef(siteRef)
@@ -453,7 +453,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         Point compositeSignal = new Point.Builder().setDisplayName(equipDis + "-" + "CompositeSignal")
                                                    .setSiteRef(siteRef).setEquipRef(equipref)
                                                    .addMarker("system").addMarker("cmd").addMarker("composite").addMarker("his").addMarker("equipHis")
-                                                   .setTz(tz).build();
+                                                   .setUnit("%").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(compositeSignal);
     }
     

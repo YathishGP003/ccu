@@ -180,6 +180,7 @@ public class PlcEquip
                                            .addMarker("config").addMarker("pid").addMarker("zone").addMarker("writable")
                                            .addMarker("enabled").addMarker("analog2").addMarker("setpoint")
                                            .setGroup(String.valueOf(nodeAddr))
+                                           .setEnums("false,true")
                                            .setTz(tz)
                                            .build();
         String useAnalogIn2ForSetpointId = hayStack.addPoint(useAnalogIn2ForSetpoint);
@@ -223,6 +224,7 @@ public class PlcEquip
                                              .addMarker("config").addMarker("pid").addMarker("zone").addMarker("writable")
                                              .addMarker("enabled").addMarker("zero").addMarker("error").addMarker("midpoint")
                                              .setGroup(String.valueOf(nodeAddr))
+                                             .setEnums("false,true")
                                              .setTz(tz)
                                              .build();
         String expectZeroErrorAtMidpointId  = hayStack.addPoint(expectZeroErrorAtMidpoint );
@@ -292,6 +294,7 @@ public class PlcEquip
                                           .setFloorRef(floorRef)
                                           .addMarker("zone").addMarker("pid").addMarker("scheduleType").addMarker("writable").addMarker("his").addMarker("equipHis")
                                           .setGroup(String.valueOf(nodeAddr))
+                                          .setEnums("building,zone,named")
                                           .setTz(tz)
                                           .build();
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);

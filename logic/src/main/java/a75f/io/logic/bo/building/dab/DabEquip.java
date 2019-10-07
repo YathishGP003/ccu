@@ -261,6 +261,7 @@ public class DabEquip
                                     .setFloorRef(floorRef)
                                     .addMarker("status").addMarker("his").addMarker("dab").addMarker("logical").addMarker("zone").addMarker("equipHis")
                                     .setGroup(String.valueOf(nodeAddr))
+                                    .setEnums("deadband,cooling,heating,tempdead")
                                     .setTz(tz)
                                     .build();
         String equipStatusId = CCUHsApi.getInstance().addPoint(equipStatus);
@@ -299,6 +300,7 @@ public class DabEquip
                                           .setFloorRef(floorRef)
                                           .addMarker("zone").addMarker("dab").addMarker("scheduleType").addMarker("writable").addMarker("his").addMarker("equipHis")
                                           .setGroup(String.valueOf(nodeAddr))
+                                          .setEnums("building,zone,named")
                                           .setTz(tz)
                                           .build();
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
@@ -342,6 +344,7 @@ public class DabEquip
                                   .setRoomRef(roomRef)
                                   .setFloorRef(floorRef)
                                   .addMarker("dab").addMarker("occupancy").addMarker("mode").addMarker("zone").addMarker("writable").addMarker("his").addMarker("equipHis")
+                                  .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing")
                                   .setGroup(String.valueOf(nodeAddr))
                                   .setTz(tz)
                                   .build();
@@ -424,6 +427,7 @@ public class DabEquip
                                    .addMarker("config").addMarker("dab").addMarker("writable").addMarker("zone")
                                    .addMarker("damper").addMarker("primary").addMarker("size").addMarker("sp")
                                    .setGroup(String.valueOf(nodeAddr))
+                                   .setEnums("ZeroToTenV,TwoToTenV,TenToTwov,TenToZeroV,mat")
                                    .setTz(tz)
                                    .build();
         String damper1SizeId = CCUHsApi.getInstance().addPoint(damper1Size);
@@ -436,6 +440,7 @@ public class DabEquip
                                     .addMarker("config").addMarker("dab").addMarker("writable").addMarker("zone")
                                     .addMarker("damper").addMarker("primary").addMarker("shape").addMarker("sp")
                                     .setGroup(String.valueOf(nodeAddr))
+                                    .setEnums("round,square,rectangular")
                                     .setTz(tz)
                                     .build();
         String damper1ShapeId = CCUHsApi.getInstance().addPoint(damper1Shape);
@@ -449,6 +454,7 @@ public class DabEquip
                                    .addMarker("config").addMarker("dab").addMarker("writable").addMarker("zone")
                                    .addMarker("damper").addMarker("secondary").addMarker("type").addMarker("sp")
                                    .setGroup(String.valueOf(nodeAddr))
+                                   .setEnums("ZeroToTenV,TwoToTenV,TenToTwov,TenToZeroV,mat")
                                    .setTz(tz)
                                    .build();
         String damper2TypeId = CCUHsApi.getInstance().addPoint(damper2Type);
@@ -473,6 +479,7 @@ public class DabEquip
                                     .addMarker("config").addMarker("dab").addMarker("writable").addMarker("zone")
                                     .addMarker("damper").addMarker("secondary").addMarker("shape").addMarker("sp")
                                     .setGroup(String.valueOf(nodeAddr))
+                                    .setEnums("round,square,rectangular")
                                     .setTz(tz)
                                     .build();
         String damper2ShapeId = CCUHsApi.getInstance().addPoint(damper2Shape);
@@ -487,6 +494,7 @@ public class DabEquip
                                                .addMarker("config").addMarker("dab").addMarker("writable").addMarker("zone")
                                                .addMarker("enable").addMarker("occupancy").addMarker("control").addMarker("his").addMarker("equipHis").addMarker("sp")
                                                .setGroup(String.valueOf(nodeAddr))
+                                               .setEnums("false,true")
                                                .setTz(tz)
                                                .build();
         String enableOccupancyControlId = CCUHsApi.getInstance().addPoint(enableOccupancyControl);
@@ -500,6 +508,7 @@ public class DabEquip
                                          .addMarker("config").addMarker("dab").addMarker("writable").addMarker("zone")
                                          .addMarker("enable").addMarker("co2").addMarker("control").addMarker("sp").addMarker("his").addMarker("equipHis")
                                          .setGroup(String.valueOf(nodeAddr))
+                                         .setEnums("false,true")
                                          .setTz(tz)
                                          .build();
         String enableCO2ControlId = CCUHsApi.getInstance().addPoint(enableCO2Control);
@@ -513,6 +522,7 @@ public class DabEquip
                                          .addMarker("config").addMarker("dab").addMarker("writable").addMarker("zone")
                                          .addMarker("enable").addMarker("iaq").addMarker("control").addMarker("sp").addMarker("his").addMarker("equipHis")
                                          .setGroup(String.valueOf(nodeAddr))
+                                         .setEnums("false,true")
                                          .setTz(tz)
                                          .build();
         String enableIAQControlId = CCUHsApi.getInstance().addPoint(enableIAQControl);
@@ -526,6 +536,7 @@ public class DabEquip
                                      .addMarker("config").addMarker("dab").addMarker("writable").addMarker("zone")
                                      .addMarker("priority").addMarker("sp").addMarker("his").addMarker("equipHis")
                                      .setGroup(String.valueOf(nodeAddr))
+                                     .setEnums("none,low,normal,high")
                                      .setTz(tz)
                                      .build();
         String zonePriorityId = CCUHsApi.getInstance().addPoint(zonePriority);

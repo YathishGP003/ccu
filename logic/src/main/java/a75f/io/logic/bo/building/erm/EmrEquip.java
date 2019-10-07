@@ -101,6 +101,7 @@ public class EmrEquip
                                           .setFloorRef(floorRef)
                                           .addMarker("zone").addMarker("emr").addMarker("scheduleType").addMarker("writable").addMarker("his").addMarker("equipHis")
                                           .setGroup(String.valueOf(nodeAddr))
+                                          .setEnums("building,zone,named")
                                           .setTz(tz)
                                           .build();
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);

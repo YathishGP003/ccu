@@ -152,6 +152,7 @@ public class CazEquip
                 .setFloorRef(floorRef)
                 .addMarker("status").addMarker("vav").addMarker("his").addMarker("ti").addMarker("logical").addMarker("zone").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
+                .setEnums("deadband,cooling,heating,tempdead")
                 .setTz(tz)
                 .build();
         String equipStatusId = CCUHsApi.getInstance().addPoint(equipStatus);
@@ -190,6 +191,7 @@ public class CazEquip
                 .setFloorRef(floorRef)
                 .addMarker("zone").addMarker("ti").addMarker("scheduleType").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
+                .setEnums("building,zone,named")
                 .setTz(tz)
                 .build();
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
@@ -234,6 +236,7 @@ public class CazEquip
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .addMarker("ti").addMarker("occupancy").addMarker("mode").addMarker("zone").addMarker("writable").addMarker("his").addMarker("equipHis")
+                .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing")
                 .setGroup(String.valueOf(nodeAddr))
                 .setTz(tz)
                 .build();
@@ -285,6 +288,7 @@ public class CazEquip
                 .addMarker("config").addMarker("ti").addMarker("writable").addMarker("zone")
                 .addMarker("priority").addMarker("sp").addMarker("his").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
+                .setEnums("none,low,normal,high")
                 .setTz(tz)
                 .build();
         String zonePriorityId = CCUHsApi.getInstance().addPoint(zonePriority);

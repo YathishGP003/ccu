@@ -6,11 +6,10 @@ import android.util.Log;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-import a75.io.algos.GenericPIController;
+
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
-import a75f.io.api.haystack.Occupied;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
@@ -19,13 +18,12 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.dab.DabSystemController;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
-import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
-import static a75f.io.logic.bo.building.ZoneState.TEMP_DEAD;
+import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
 //CCU As a Zone Profile
 public class CazProfile extends ZoneProfile
@@ -96,14 +94,14 @@ public class CazProfile extends ZoneProfile
     {
         if (isZoneDead()) {
             CcuLog.d(L.TAG_CCU_ZONE,"Zone Temp Dead: "+cazEquip.nodeAddr+" roomTemp : "+cazEquip.getCurrentTemp());
-            state = TEMP_DEAD;
+            state = TEMPDEAD;
             String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \""+cazEquip.nodeAddr+"\"");
             if (!curStatus.equals("Zone Temp Dead"))
             {
                 CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + cazEquip.nodeAddr + "\"", "Zone Temp Dead");
 
             }
-            CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + cazEquip.nodeAddr + "\"", (double)TEMP_DEAD.ordinal());
+            CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + cazEquip.nodeAddr + "\"", (double) TEMPDEAD.ordinal());
             return;
         }
 

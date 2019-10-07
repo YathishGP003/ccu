@@ -394,6 +394,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .setFloorRef(floor)
                 .addMarker("status").addMarker("his").addMarker("zone").addMarker("equipHis").addMarker(profile).addMarker("fcu")
                 .setGroup(String.valueOf(nodeAddr))
+                .setEnums("deadband,cooling,heating,tempdead")
                 .setTz(tz)
                 .build();
         String equipStatusId = CCUHsApi.getInstance().addPoint(equipStatus);
@@ -432,6 +433,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .setFloorRef(floor)
                 .addMarker("zone").addMarker("scheduleType").addMarker("writable").addMarker("zone").addMarker("equipHis").addMarker("his").addMarker(profile)
                 .setGroup(String.valueOf(nodeAddr))
+                .setEnums("building,zone,named")
                 .setTz(tz)
                 .build();
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
@@ -506,6 +508,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .setRoomRef(room)
                 .setFloorRef(floor)
                 .addMarker("standalone").addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("equipHis").addMarker("sp").addMarker("zone").addMarker("pipe2").addMarker("fcu")
+                .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing")
                 .setTz(tz)
                 .build();
         CCUHsApi.getInstance().addPoint(twoPfcuOccupancy);
@@ -543,6 +546,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone")
                 .addMarker("enable").addMarker("occupancy").addMarker("control").addMarker("sp").addMarker(profile).addMarker("fcu")
                 .setGroup(String.valueOf(nodeAddr))
+                .setEnums("false,true")
                 .setTz(tz)
                 .build();
         String enableOccupancyControlId = CCUHsApi.getInstance().addPoint(enableOccupancyControl);
@@ -597,6 +601,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone")
                 .addMarker("relay1").addMarker("sp").addMarker("enable").addMarker(profile).addMarker("fcu")
                 .setGroup(String.valueOf(nodeAddr))
+                .setEnums("false,true")
                 .setTz(tz)
                 .build();
         String enableRelay1Id = CCUHsApi.getInstance().addPoint(enableRelay1);
@@ -611,6 +616,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone")
                 .addMarker("relay2").addMarker("sp").addMarker("enable").addMarker(profile).addMarker("fcu")
                 .setGroup(String.valueOf(nodeAddr))
+                .setEnums("false,true")
                 .setTz(tz)
                 .build();
         String enableRelay2Id = CCUHsApi.getInstance().addPoint(enableRelay2);
@@ -625,6 +631,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone")
                 .addMarker("relay3").addMarker("sp").addMarker("enable").addMarker(profile).addMarker("fcu")
                 .setGroup(String.valueOf(nodeAddr))
+                .setEnums("false,true")
                 .setTz(tz)
                 .build();
         String enableRelay3Id = CCUHsApi.getInstance().addPoint(enableRelay3);
@@ -639,6 +646,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone")
                 .addMarker("relay4").addMarker("sp").addMarker("enable").addMarker(profile).addMarker("fcu")
                 .setGroup(String.valueOf(nodeAddr))
+                .setEnums("false,true")
                 .setTz(tz)
                 .build();
         String enableRelay4Id = CCUHsApi.getInstance().addPoint(enableRelay4);
@@ -652,6 +660,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone")
                 .addMarker("relay5").addMarker("sp").addMarker("enable").addMarker(profile).addMarker("fcu")
                 .setGroup(String.valueOf(nodeAddr))
+                .setEnums("false,true")
                 .setTz(tz)
                 .build();
         String enableRelay5Id = CCUHsApi.getInstance().addPoint(enableRelay5);
@@ -665,6 +674,7 @@ public class TwoPipeFanCoilUnitEquip {
                 .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone")
                 .addMarker("relay6").addMarker("sp").addMarker("enable").addMarker(profile).addMarker("fcu")
                 .setGroup(String.valueOf(nodeAddr))
+                .setEnums("false,true")
                 .setTz(tz)
                 .build();
         String enableRelay6Id = CCUHsApi.getInstance().addPoint(enableRelay6);

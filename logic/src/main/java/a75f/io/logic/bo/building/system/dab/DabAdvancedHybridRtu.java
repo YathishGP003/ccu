@@ -261,27 +261,27 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
                                                         .setSiteRef(siteRef)
                                                         .setEquipRef(equipref)
                                                         .addMarker("system").addMarker("config").addMarker("analog1").addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
-                                                        .setTz(tz).build();
+                                                        .setEnums("false,true").setTz(tz).build();
         String analog1OutputEnabledId = hayStack.addPoint(analog1OutputEnabled);
         hayStack.writeDefaultValById(analog1OutputEnabledId, 0.0);
         Point analog2OutputEnabled = new Point.Builder().setDisplayName(equipDis + "-" + "analog2OutputEnabled")
                                                         .setSiteRef(siteRef).setEquipRef(equipref)
                                                         .addMarker("system").addMarker("config").addMarker("analog2").addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
-                                                        .setTz(tz).build();
+                                                        .setEnums("false,true").setTz(tz).build();
         String analog2OutputEnabledId = hayStack.addPoint(analog2OutputEnabled);
         hayStack.writeDefaultValById(analog2OutputEnabledId, 0.0);
         Point analog3OutputEnabled = new Point.Builder().setDisplayName(equipDis + "-" + "analog3OutputEnabled")
                                                         .setSiteRef(siteRef)
                                                         .setEquipRef(equipref)
                                                         .addMarker("system").addMarker("config").addMarker("analog3").addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
-                                                        .setTz(tz).build();
+                                                        .setEnums("false,true").setTz(tz).build();
         String analog3OutputEnabledId = hayStack.addPoint(analog3OutputEnabled);
         hayStack.writeDefaultValById(analog3OutputEnabledId, 0.0);
         Point analog4OutputEnabled = new Point.Builder().setDisplayName(equipDis + "-" + "analog4OutputEnabled")
                                                         .setSiteRef(siteRef)
                                                         .setEquipRef(equipref)
                                                         .addMarker("system").addMarker("config").addMarker("analog4").addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
-                                                        .setTz(tz).build();
+                                                        .setEnums("false,true").setTz(tz).build();
         String analog4OutputEnabledId = hayStack.addPoint(analog4OutputEnabled);
         hayStack.writeDefaultValById(analog4OutputEnabledId, 0.0);
         

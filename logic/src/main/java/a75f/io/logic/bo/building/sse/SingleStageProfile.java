@@ -26,7 +26,7 @@ import a75f.io.logic.tuners.TunerUtil;
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
-import static a75f.io.logic.bo.building.ZoneState.TEMP_DEAD;
+import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
 /**
  * Created by Anilkumar on 8/19/2019.
@@ -99,14 +99,14 @@ public class SingleStageProfile extends ZoneProfile
         if (isZoneDead()) {
             reset((short) sseEquip.nodeAddr);
             CcuLog.d(L.TAG_CCU_UI,"sse Zone Temp Dead: "+sseEquip.nodeAddr+" roomTemp : "+sseEquip.getCurrentTemp());
-            state = TEMP_DEAD;
+            state = TEMPDEAD;
             String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \""+sseEquip.nodeAddr+"\"");
             if (!curStatus.equals("Zone Temp Dead"))
             {
                 CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + sseEquip.nodeAddr + "\"", "Zone Temp Dead");
 
             }
-            CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + sseEquip.nodeAddr + "\"", (double)TEMP_DEAD.ordinal());
+            CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + sseEquip.nodeAddr + "\"", (double) TEMPDEAD.ordinal());
             return;
         }
 
@@ -189,7 +189,7 @@ public class SingleStageProfile extends ZoneProfile
             }
            sseEquip.setStatus(stageStatus, state.ordinal(), (state == HEATING ? buildingLimitMinBreached() : state == COOLING ? buildingLimitMaxBreached() : false));
             if (occuStatus != null) {
-                sseEquip.setProfilePoint("occupancy and status", occuStatus.isOccupied() ? Occupancy.OCCUPIED.ordinal() : (occuStatus.isPreconditioning() ? Occupancy.PRECONDITIONING.ordinal() : (occuStatus.isForcedOccupied() ? Occupancy.FORCED_OCCUPIED.ordinal() : 0)));
+                sseEquip.setProfilePoint("occupancy and status", occuStatus.isOccupied() ? Occupancy.OCCUPIED.ordinal() : (occuStatus.isPreconditioning() ? Occupancy.PRECONDITIONING.ordinal() : (occuStatus.isForcedOccupied() ? Occupancy.FORCEDOCCUPIED.ordinal() : 0)));
             } else {
                 sseEquip.setProfilePoint("occupancy and status", occupied ? 1 : 0);
             }

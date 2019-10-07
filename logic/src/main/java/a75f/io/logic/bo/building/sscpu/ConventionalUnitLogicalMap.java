@@ -427,6 +427,7 @@ public class ConventionalUnitLogicalMap {
                                           .setFloorRef(floor)
                                           .addMarker("zone").addMarker("cpu").addMarker("scheduleType").addMarker("writable").addMarker("equipHis").addMarker("his")
                                           .setGroup(String.valueOf(nodeAddr))
+                                          .setEnums("building,zone,named")
                                           .setTz(tz)
                                           .build();
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
@@ -504,6 +505,7 @@ public class ConventionalUnitLogicalMap {
                 .setRoomRef(room)
                 .setFloorRef(floor)
                 .addMarker("standalone").addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("equipHis").addMarker("sp").addMarker("zone")
+                .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing")
                 .setTz(tz)
                 .build();
         CCUHsApi.getInstance().addPoint(cpuOccupancy);
@@ -595,6 +597,7 @@ public class ConventionalUnitLogicalMap {
                 .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone")
                 .addMarker("relay1").addMarker("sp").addMarker("enable").addMarker(profile)
                 .setGroup(String.valueOf(nodeAddr))
+                .setEnums("false,true")
                 .setTz(tz)
                 .build();
         String enableRelay1Id = CCUHsApi.getInstance().addPoint(enableRelay1);
@@ -609,6 +612,7 @@ public class ConventionalUnitLogicalMap {
                 .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone")
                 .addMarker("relay2").addMarker("sp").addMarker("enable").addMarker(profile)
                 .setGroup(String.valueOf(nodeAddr))
+                .setEnums("false,true")
                 .setTz(tz)
                 .build();
         String enableRelay2Id = CCUHsApi.getInstance().addPoint(enableRelay2);
@@ -623,6 +627,7 @@ public class ConventionalUnitLogicalMap {
                 .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone")
                 .addMarker("relay3").addMarker("sp").addMarker("enable").addMarker(profile)
                 .setGroup(String.valueOf(nodeAddr))
+                .setEnums("false,true")
                 .setTz(tz)
                 .build();
         String enableRelay3Id = CCUHsApi.getInstance().addPoint(enableRelay3);
@@ -637,6 +642,7 @@ public class ConventionalUnitLogicalMap {
                 .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone")
                 .addMarker("relay4").addMarker("sp").addMarker("enable").addMarker(profile)
                 .setGroup(String.valueOf(nodeAddr))
+                .setEnums("false,true")
                 .setTz(tz)
                 .build();
         String enableRelay4Id = CCUHsApi.getInstance().addPoint(enableRelay4);
@@ -651,6 +657,7 @@ public class ConventionalUnitLogicalMap {
                 .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone")
                 .addMarker("relay5").addMarker("sp").addMarker("enable").addMarker(profile)
                 .setGroup(String.valueOf(nodeAddr))
+                .setEnums("false,true")
                 .setTz(tz)
                 .build();
         String enableRelay5Id = CCUHsApi.getInstance().addPoint(enableRelay5);
@@ -665,6 +672,7 @@ public class ConventionalUnitLogicalMap {
                 .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone")
                 .addMarker("relay6").addMarker("sp").addMarker("enable").addMarker(profile)
                 .setGroup(String.valueOf(nodeAddr))
+                .setEnums("false,true")
                 .setTz(tz)
                 .build();
         String enableRelay6Id = CCUHsApi.getInstance().addPoint(enableRelay6);
@@ -679,6 +687,7 @@ public class ConventionalUnitLogicalMap {
                 .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone")
                 .addMarker("relay6").addMarker("type").addMarker("sp").addMarker(profile)
                 .setGroup(String.valueOf(nodeAddr))
+                .setEnums("false,true")
                 .setTz(tz)
                 .build();
         String relay6TypeId = CCUHsApi.getInstance().addPoint(relay6Type);

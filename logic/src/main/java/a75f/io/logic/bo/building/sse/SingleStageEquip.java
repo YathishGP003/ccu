@@ -239,6 +239,7 @@ public class SingleStageEquip {
                 .setFloorRef(floorRef)
                 .addMarker("zone").addMarker("sse").addMarker("scheduleType").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
+                .setEnums("building,zone,named")
                 .setTz(tz)
                 .build();
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
@@ -280,6 +281,7 @@ public class SingleStageEquip {
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .addMarker("standalone").addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("equipHis").addMarker("sp").addMarker("zone").addMarker("sse")
+                .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing")
                 .setTz(tz)
                 .build();
         CCUHsApi.getInstance().addPoint(occupancy);
@@ -339,6 +341,7 @@ public class SingleStageEquip {
                 .addMarker("config").addMarker("sse").addMarker("writable").addMarker("zone")
                 .addMarker("priority").addMarker("sp").addMarker("his").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
+                .setEnums("none,low,normal,high")
                 .setTz(tz)
                 .build();
         String zonePriorityId = CCUHsApi.getInstance().addPoint(zonePriority);
@@ -379,6 +382,7 @@ public class SingleStageEquip {
                 .addMarker("config").addMarker("sse").addMarker("writable").addMarker("zone")
                 .addMarker("relay1").addMarker("sp").addMarker("enable").addMarker(profile)
                 .setGroup(String.valueOf(nodeAddr))
+                .setEnums("false,true")
                 .setTz(tz)
                 .build();
         String enableRelay1Id = CCUHsApi.getInstance().addPoint(enableRelay1);
@@ -393,6 +397,7 @@ public class SingleStageEquip {
                 .addMarker("config").addMarker("sse").addMarker("writable").addMarker("zone")
                 .addMarker("relay2").addMarker("sp").addMarker("enable").addMarker(profile)
                 .setGroup(String.valueOf(nodeAddr))
+                .setEnums("false,true")
                 .setTz(tz)
                 .build();
         String enableRelay2Id = CCUHsApi.getInstance().addPoint(enableRelay2);
@@ -406,6 +411,7 @@ public class SingleStageEquip {
                 .addMarker("config").addMarker("sse").addMarker("writable").addMarker("zone")
                 .addMarker("th1").addMarker("sp").addMarker("enable").addMarker(profile)
                 .setGroup(String.valueOf(nodeAddr))
+                .setEnums("false,true")
                 .setTz(tz)
                 .build();
         String enableTh1Id = CCUHsApi.getInstance().addPoint(enableTh1);
@@ -419,6 +425,7 @@ public class SingleStageEquip {
                 .addMarker("config").addMarker("sse").addMarker("writable").addMarker("zone")
                 .addMarker("th2").addMarker("sp").addMarker("enable").addMarker(profile)
                 .setGroup(String.valueOf(nodeAddr))
+                .setEnums("false,true")
                 .setTz(tz)
                 .build();
         String enableTh2Id = CCUHsApi.getInstance().addPoint(enableTh2);

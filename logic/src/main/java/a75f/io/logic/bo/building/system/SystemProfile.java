@@ -323,9 +323,9 @@ public abstract class SystemProfile
     //VAV & DAB System profile common points are added here.
     public void addRTUSystemPoints(String siteRef, String equipref, String equipDis, String tz) {
         addDefaultSystemPoints(siteRef, equipref, equipDis, tz);
-        Point systemOccupancy = new Point.Builder().setDisplayName(equipDis + "-" + "occupancy").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
+        Point systemOccupancy = new Point.Builder().setDisplayName(equipDis + "-" + "occupancy").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("equipHis").addMarker("sp").setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(systemOccupancy);
-        Point systemOperatingMode = new Point.Builder().setDisplayName(equipDis + "-" + "operatingMode").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("operating").addMarker("mode").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
+        Point systemOperatingMode = new Point.Builder().setDisplayName(equipDis + "-" + "operatingMode").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("operating").addMarker("mode").addMarker("his").addMarker("equipHis").addMarker("sp").setEnums("off,cooling,heating").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(systemOperatingMode);
         Point ciRunning = new Point.Builder().setDisplayName(equipDis + "-" + "systemCI").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("ci").addMarker("running").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(ciRunning);

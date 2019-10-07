@@ -144,7 +144,7 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
         Point analog2OutputEnabled = new Point.Builder().setDisplayName(equipDis + "-" + "analog2OutputEnabled")
                                                         .setSiteRef(siteRef).setEquipRef(equipref)
                                                         .addMarker("system").addMarker("config").addMarker("analog2").addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
-                                                        .setTz(tz).build();
+                                                        .setEnums("false,true").setTz(tz).build();
         String analog2OutputEnabledId = hayStack.addPoint(analog2OutputEnabled);
         hayStack.writeDefaultValById(analog2OutputEnabledId, 0.0);
         

@@ -458,7 +458,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                                       .setEquipRef(equipref)
                                       .addMarker("system").addMarker("config").addMarker("analog1")
                                       .addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
-                                      .setTz(tz)
+                                      .setEnums("false,true").setTz(tz)
                                       .build();
         String analog1OutputEnabledId = hayStack.addPoint(analog1OutputEnabled);
         hayStack.writeDefaultValById(analog1OutputEnabledId, 0.0 );
@@ -469,7 +469,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                                              .setEquipRef(equipref)
                                              .addMarker("system").addMarker("config").addMarker("analog2")
                                              .addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
-                                             .setTz(tz)
+                                             .setEnums("false,true").setTz(tz)
                                              .build();
         String analog2OutputEnabledId = hayStack.addPoint(analog2OutputEnabled);
         hayStack.writeDefaultValById(analog2OutputEnabledId, 0.0 );
@@ -480,7 +480,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                                              .setEquipRef(equipref)
                                              .addMarker("system").addMarker("config").addMarker("analog3")
                                              .addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
-                                             .setTz(tz)
+                                             .setEnums("false,true").setTz(tz)
                                              .build();
         String analog3OutputEnabledId = hayStack.addPoint(analog3OutputEnabled);
         hayStack.writeDefaultValById(analog3OutputEnabledId, 0.0 );
@@ -491,7 +491,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                                              .setEquipRef(equipref)
                                              .addMarker("system").addMarker("config").addMarker("analog4")
                                              .addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
-                                             .setTz(tz)
+                                             .setEnums("false,true").setTz(tz)
                                              .build();
         String analog4OutputEnabledId = hayStack.addPoint(analog4OutputEnabled);
         hayStack.writeDefaultValById(analog4OutputEnabledId, 0.0 );
@@ -502,7 +502,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                                              .setEquipRef(equipref)
                                              .addMarker("system").addMarker("config").addMarker("relay3")
                                              .addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
-                                             .setTz(tz)
+                                             .setEnums("false,true").setTz(tz)
                                              .build();
         String relay3OutputEnabledId = hayStack.addPoint(relay3OutputEnabled);
         hayStack.writeDefaultValById(relay3OutputEnabledId, 0.0 );
@@ -513,7 +513,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                                             .setEquipRef(equipref)
                                             .addMarker("system").addMarker("config").addMarker("relay7")
                                             .addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
-                                            .setTz(tz)
+                                            .setEnums("false,true").setTz(tz)
                                             .build();
         String relay7OutputEnabledId = hayStack.addPoint(relay7OutputEnabled);
         hayStack.writeDefaultValById(relay7OutputEnabledId, 0.0 );

@@ -471,7 +471,7 @@ public class DabStagedRtu extends DabSystemProfile
                                      .setEquipRef(equipref)
                                      .addMarker("system").addMarker("config").addMarker(relay)
                                      .addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
-                                     .setTz(tz)
+                                     .setEnums("false,true").setTz(tz)
                                      .build();
         String relayEnabledId = CCUHsApi.getInstance().addPoint(relayEnabled);
         CCUHsApi.getInstance().writeDefaultValById(relayEnabledId, 0.0 );

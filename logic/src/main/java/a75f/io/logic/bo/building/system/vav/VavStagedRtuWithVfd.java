@@ -224,7 +224,7 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
                                  .addMarker("system").addMarker("config").addMarker("analog2")
                                  .addMarker(coolheat).addMarker(stage).addMarker("writable").addMarker("sp")
                                  .setUnit("V")
-                                 .setTz(tz)
+                                 .setEnums("false,true").setTz(tz)
                                  .build();
         String analog2Id = CCUHsApi.getInstance().addPoint(analog2);
         CCUHsApi.getInstance().writeDefaultValById(analog2Id, val );

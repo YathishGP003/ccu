@@ -399,6 +399,7 @@ public class HeatPumpUnitEquip{
                 .setFloorRef(floor)
                 .addMarker("status").addMarker("hpu").addMarker("his").addMarker("zone").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
+                .setEnums("deadband,cooling,heating,tempdead")
                 .setTz(tz)
                 .build();
         String equipStatusId = CCUHsApi.getInstance().addPoint(equipStatus);
@@ -437,6 +438,7 @@ public class HeatPumpUnitEquip{
                 .setFloorRef(floor)
                 .addMarker("zone").addMarker(profile).addMarker("scheduleType").addMarker("writable").addMarker("zone").addMarker("equipHis").addMarker("his")
                 .setGroup(String.valueOf(nodeAddr))
+                .setEnums("building,zone,named")
                 .setTz(tz)
                 .build();
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
@@ -479,7 +481,7 @@ public class HeatPumpUnitEquip{
         device.relay6.setEnabled(config.isOpConfigured(Port.RELAY_SIX));
 
         device.addPointsToDb();
-//initialize with default values if schedule fetch is null
+        //initialize with default values if schedule fetch is null
         double coolingVal = 74.0;
         double heatingVal = 70.0;
         double defaultDesiredTemp = 72;
@@ -511,6 +513,7 @@ public class HeatPumpUnitEquip{
                 .setRoomRef(room)
                 .setFloorRef(floor)
                 .addMarker("standalone").addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("equipHis").addMarker("sp").addMarker("zone")
+                .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing")
                 .setTz(tz)
                 .build();
         CCUHsApi.getInstance().addPoint(cpuOccupancy);

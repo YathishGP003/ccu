@@ -551,6 +551,7 @@ public class VAVLogicalMap
                                     .addMarker("vav").addMarker("occupancy").addMarker("mode").addMarker("zone").addMarker("writable").addMarker("his").addMarker("equipHis")
                                     .setGroup(String.valueOf(nodeAddr))
                                     .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing")
+                                    .setTz(tz)
                                     .build();
         String occupancyId = CCUHsApi.getInstance().addPoint(occupancy);
         CCUHsApi.getInstance().writeHisValById(occupancyId, 0.0);

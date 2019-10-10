@@ -22,6 +22,7 @@ public class Point extends Entity
     private String            group;
     private String            kind;
     private String            id;
+    private String enums;
     
     public void setDisplayName(String displayName)
     {
@@ -91,6 +92,14 @@ public class Point extends Entity
     public String toString() {
         return displayName;
     }
+    public String getEnums()
+    {
+        return enums;
+    }
+    public void setEnums(String enums)
+    {
+        this.enums = enums;
+    }
     private Point(){
     }
     
@@ -104,6 +113,7 @@ public class Point extends Entity
         private String roomRef;
         private String floorRef;
         private String group;
+        private String enums;
         public Builder setKind(String kind)
         {
             this.kind = kind;
@@ -156,6 +166,10 @@ public class Point extends Entity
             this.tz = tz;
             return this;
         }
+        public Builder setEnums(String enums) {
+            this.enums = enums;
+            return this;
+        }
         public Builder addMarker(String marker)
         {
             this.markers.add(marker);
@@ -175,6 +189,7 @@ public class Point extends Entity
             p.group = this.group;
             p.id = this.id;
             p.kind = this.kind;
+            p.enums = this.enums;
             //CCUHsApi.getInstance().addPoint(p);
             return p;
         }
@@ -229,6 +244,10 @@ public class Point extends Entity
                 else if (pair.getKey().equals("tz"))
                 {
                     this.tz = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("enum"))
+                {
+                    this.enums = pair.getValue().toString();
                 }
                 //it.remove();
             }

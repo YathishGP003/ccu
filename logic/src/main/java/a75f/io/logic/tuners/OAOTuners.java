@@ -45,6 +45,7 @@ public class OAOTuners
                                                   .setEquipRef(equipRef)
                                                   .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                   .addMarker("economizing").addMarker("min").addMarker("temp")
+                                                  .setUnit("\u00B0F")
                                                   .setTz(tz)
                                                   .build();
         String economizingMinTemperatureId = hayStack.addPoint(economizingMinTemperature);
@@ -57,6 +58,7 @@ public class OAOTuners
                                                   .setEquipRef(equipRef)
                                                   .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                   .addMarker("economizing").addMarker("max").addMarker("temp")
+                                                  .setUnit("\u00B0F")
                                                   .setTz(tz)
                                                   .build();
         String economizingMaxTemperatureId = hayStack.addPoint(economizingMaxTemperature);
@@ -69,6 +71,7 @@ public class OAOTuners
                                                .setEquipRef(equipRef)
                                                .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                .addMarker("economizing").addMarker("min").addMarker("humidity")
+                                               .setUnit("%")
                                                .setTz(tz)
                                                .build();
         String economizingMinHumidityId = hayStack.addPoint(economizingMinHumidity);
@@ -81,6 +84,7 @@ public class OAOTuners
                                                .setEquipRef(equipRef)
                                                .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                .addMarker("economizing").addMarker("max").addMarker("humidity")
+                                               .setUnit("%")
                                                .setTz(tz)
                                                .build();
         String economizingMaxHumidityId = hayStack.addPoint(economizingMaxHumidity);
@@ -93,6 +97,7 @@ public class OAOTuners
                                                      .setEquipRef(equipRef)
                                                      .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                      .addMarker("outside").addMarker("damper").addMarker("mat").addMarker("target")
+                                                     .setUnit("\u00B0F")
                                                      .setTz(tz)
                                                      .build();
         String outsideDamperMixedAirTargetId = hayStack.addPoint(outsideDamperMixedAirTarget);
@@ -105,6 +110,7 @@ public class OAOTuners
                                                       .setEquipRef(equipRef)
                                                       .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                       .addMarker("outside").addMarker("damper").addMarker("mat").addMarker("min")
+                                                      .setUnit("\u00B0F")
                                                       .setTz(tz)
                                                       .build();
         String outsideDamperMixedAirMinimumId = hayStack.addPoint(outsideDamperMixedAirMinimum);
@@ -117,6 +123,7 @@ public class OAOTuners
                                                          .setEquipRef(equipRef)
                                                          .addMarker("tuner").addMarker("default").addMarker("oao").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                          .addMarker("economizing").addMarker("main").addMarker("cooling").addMarker("loop").addMarker("map")
+                                                         .setUnit("\u00B0F")
                                                          .setTz(tz)
                                                          .build();
         String economizingToMainCoolingLoopMapId = hayStack.addPoint(economizingToMainCoolingLoopMap);
@@ -173,6 +180,7 @@ public class OAOTuners
                                                        .setEquipRef(equipref)
                                                        .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                        .addMarker("economizing").addMarker("min").addMarker("temp")
+                                                       .setUnit("\u00B0F")
                                                        .setTz(tz)
                                                        .build();
         String economizingMinTemperatureId = hayStack.addPoint(economizingMinTemperature);
@@ -193,6 +201,7 @@ public class OAOTuners
                                                   .setEquipRef(equipref)
                                                   .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                   .addMarker("economizing").addMarker("max").addMarker("temp")
+                                                  .setUnit("\u00B0F")
                                                   .setTz(tz)
                                                   .build();
         String economizingMaxTemperatureId = hayStack.addPoint(economizingMaxTemperature);
@@ -213,6 +222,7 @@ public class OAOTuners
                                                   .setEquipRef(equipref)
                                                   .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                   .addMarker("economizing").addMarker("min").addMarker("humidity")
+                                                  .setUnit("%")
                                                   .setTz(tz)
                                                   .build();
         String economizingMinHumidityId = hayStack.addPoint(economizingMinHumidity);
@@ -233,6 +243,7 @@ public class OAOTuners
                                                .setEquipRef(equipref)
                                                .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                .addMarker("economizing").addMarker("max").addMarker("humidity")
+                                               .setUnit("%")
                                                .setTz(tz)
                                                .build();
         String economizingMaxHumidityId = hayStack.addPoint(economizingMaxHumidity);
@@ -253,6 +264,7 @@ public class OAOTuners
                                                .setEquipRef(equipref)
                                                .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                .addMarker("outside").addMarker("damper").addMarker("mat").addMarker("target")
+                                               .setUnit("\u00B0F")
                                                .setTz(tz)
                                                .build();
         String outsideDamperMixedAirTargetId = hayStack.addPoint(outsideDamperMixedAirTarget);
@@ -273,6 +285,7 @@ public class OAOTuners
                                                     .setEquipRef(equipref)
                                                     .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                     .addMarker("outside").addMarker("damper").addMarker("mat").addMarker("minimum")
+                                                    .setUnit("\u00B0F")
                                                     .setTz(tz)
                                                     .build();
         String outsideDamperMixedAirMinimumId = hayStack.addPoint(outsideDamperMixedAirMinimum);
@@ -293,6 +306,7 @@ public class OAOTuners
                                                      .setEquipRef(equipref)
                                                      .addMarker("tuner").addMarker("oao").addMarker("writable").addMarker("his").addMarker("equipHis")
                                                      .addMarker("economizing").addMarker("main").addMarker("cooling").addMarker("loop").addMarker("map")
+                                                     .setUnit("%")
                                                      .setTz(tz)
                                                      .build();
         String economizingToMainCoolingLoopMapId = hayStack.addPoint(economizingToMainCoolingLoopMap);

@@ -224,7 +224,7 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
                                  .addMarker("system").addMarker("config").addMarker("analog2")
                                  .addMarker(coolheat).addMarker(stage).addMarker("writable").addMarker("sp")
                                  .setUnit("V")
-                                 .setTz(tz)
+                                 .setEnums("false,true").setTz(tz)
                                  .build();
         String analog2Id = CCUHsApi.getInstance().addPoint(analog2);
         CCUHsApi.getInstance().writeDefaultValById(analog2Id, val );
@@ -247,7 +247,7 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
         String equipDis = siteMap.get("dis").toString() + "-SystemEquip";
         String siteRef = siteMap.get("id").toString();
         String tz = siteMap.get("tz").toString();
-        Point coolingSignal = new Point.Builder().setDisplayName(equipDis + "-" + "anlog2Signal").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("cmd").addMarker("analog2").addMarker("his").addMarker("equipHis").setTz(tz).build();
+        Point coolingSignal = new Point.Builder().setDisplayName(equipDis + "-" + "anlog2Signal").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("cmd").addMarker("analog2").addMarker("his").addMarker("equipHis").setUnit("%").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(coolingSignal);
     }
     

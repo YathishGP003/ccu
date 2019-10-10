@@ -294,7 +294,7 @@ public class VavIERtu extends VavSystemProfile
                                       .setSiteRef(siteRef)
                                       .setEquipRef(equipref)
                                       .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("discharge").addMarker("air").addMarker("temp").addMarker("his").addMarker("equipHis")
-                                      .setTz(tz)
+                                      .setUnit("\u00B0F").setTz(tz)
                                       .build();
         CCUHsApi.getInstance().addPoint(coolingSignal);
         
@@ -303,7 +303,7 @@ public class VavIERtu extends VavSystemProfile
                                       .setSiteRef(siteRef)
                                       .setEquipRef(equipref)
                                       .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("discharge").addMarker("air").addMarker("temp").addMarker("his").addMarker("equipHis")
-                                      .setTz(tz)
+                                      .setUnit("\u00B0F").setTz(tz)
                                       .build();
         CCUHsApi.getInstance().addPoint(heatingSignal);
     
@@ -312,7 +312,7 @@ public class VavIERtu extends VavSystemProfile
                                       .setSiteRef(siteRef)
                                       .setEquipRef(equipref)
                                       .addMarker("system").addMarker("cmd").addMarker("dat").addMarker("setpoint").addMarker("temp").addMarker("his").addMarker("equipHis")
-                                      .setTz(tz)
+                                      .setUnit("\u00B0F").setTz(tz)
                                       .build();
         CCUHsApi.getInstance().addPoint(DATClgSetpoint);
         
@@ -321,7 +321,7 @@ public class VavIERtu extends VavSystemProfile
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipref)
                                   .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("his").addMarker("equipHis")
-                                  .setTz(tz)
+                                  .setUnit("in").setTz(tz)
                                   .build();
         CCUHsApi.getInstance().addPoint(fanSignal);
     }
@@ -338,7 +338,7 @@ public class VavIERtu extends VavSystemProfile
                                              .setEquipRef(equipref)
                                              .addMarker("system").addMarker("config").addMarker("analog1")
                                              .addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
-                                             .setTz(tz)
+                                             .setEnums("false,true").setTz(tz)
                                              .build();
         String analog1OutputEnabledId = hayStack.addPoint(analog1OutputEnabled);
         hayStack.writeDefaultValById(analog1OutputEnabledId, 0.0 );
@@ -349,7 +349,7 @@ public class VavIERtu extends VavSystemProfile
                                              .setEquipRef(equipref)
                                              .addMarker("system").addMarker("config").addMarker("analog2")
                                              .addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
-                                             .setTz(tz)
+                                             .setEnums("false,true").setTz(tz)
                                              .build();
         String analog2OutputEnabledId = hayStack.addPoint(analog2OutputEnabled);
         hayStack.writeDefaultValById(analog2OutputEnabledId, 0.0 );
@@ -360,7 +360,7 @@ public class VavIERtu extends VavSystemProfile
                                              .setEquipRef(equipref)
                                              .addMarker("system").addMarker("config").addMarker("analog3")
                                              .addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
-                                             .setTz(tz)
+                                             .setEnums("false,true").setTz(tz)
                                              .build();
         String analog3OutputEnabledId = hayStack.addPoint(analog3OutputEnabled);
         hayStack.writeDefaultValById(analog3OutputEnabledId, 0.0 );
@@ -371,7 +371,7 @@ public class VavIERtu extends VavSystemProfile
                                              .setEquipRef(equipref)
                                              .addMarker("system").addMarker("config").addMarker("humidification")
                                              .addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
-                                             .setTz(tz)
+                                             .setEnums("false,true").setTz(tz)
                                              .build();
         String humidificationEnabledId = hayStack.addPoint(humidificationEnabled);
         hayStack.writeDefaultValById(humidificationEnabledId, 0.0 );

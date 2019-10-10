@@ -95,6 +95,7 @@ public class HeatPumpUnitEquip{
                 .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("cur")
                 .addMarker("air").addMarker("humidity").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
+                .setUnit("%")
                 .setTz(tz)
                 .build();
         String humidityId = CCUHsApi.getInstance().addPoint(humidity);
@@ -108,6 +109,7 @@ public class HeatPumpUnitEquip{
                 .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("cur")
                 .addMarker("air").addMarker("co2").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
+                .setUnit("ppm")
                 .setTz(tz)
                 .build();
         String co2Id = CCUHsApi.getInstance().addPoint(co2);
@@ -121,6 +123,7 @@ public class HeatPumpUnitEquip{
                 .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("cur")
                 .addMarker("air").addMarker("voc").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
+                .setUnit("ppm")
                 .setTz(tz)
                 .build();
         String vocId = CCUHsApi.getInstance().addPoint(voc);
@@ -147,6 +150,7 @@ public class HeatPumpUnitEquip{
                 .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("cur")
                 .addMarker("air").addMarker("sound").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
+                .setUnit("dB")
                 .setTz(tz)
                 .build();
         String soundId = CCUHsApi.getInstance().addPoint(sound);
@@ -175,6 +179,7 @@ public class HeatPumpUnitEquip{
                 .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("cur")
                 .addMarker("air").addMarker("co").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
+                .setUnit("ppm")
                 .setTz(tz)
                 .build();
         String coId = CCUHsApi.getInstance().addPoint(co);
@@ -188,6 +193,7 @@ public class HeatPumpUnitEquip{
                 .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("cur")
                 .addMarker("air").addMarker("co2Equivalent").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
+                .setUnit("ppm")
                 .setTz(tz)
                 .build();
         String co2EqId = CCUHsApi.getInstance().addPoint(co2Eq);
@@ -201,6 +207,7 @@ public class HeatPumpUnitEquip{
                 .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("cur")
                 .addMarker("air").addMarker("no").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
+                .setUnit("ppm")
                 .setTz(tz)
                 .build();
         String no2Id = CCUHsApi.getInstance().addPoint(no2);
@@ -214,6 +221,7 @@ public class HeatPumpUnitEquip{
                 .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("cur")
                 .addMarker("air").addMarker("pressure").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
+                .setUnit("Pa")
                 .setTz(tz)
                 .build();
         String psId = CCUHsApi.getInstance().addPoint(ps);
@@ -227,6 +235,7 @@ public class HeatPumpUnitEquip{
                 .addMarker("zone").addMarker("standalone").addMarker(profile).addMarker("cur")
                 .addMarker("air").addMarker("illuminance").addMarker("sensor").addMarker("current").addMarker("his").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
+                .setUnit("lux")
                 .setTz(tz)
                 .build();
         String illuId = CCUHsApi.getInstance().addPoint(illu);
@@ -399,6 +408,7 @@ public class HeatPumpUnitEquip{
                 .setFloorRef(floor)
                 .addMarker("status").addMarker("hpu").addMarker("his").addMarker("zone").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
+                .setEnums("deadband,cooling,heating,tempdead")
                 .setTz(tz)
                 .build();
         String equipStatusId = CCUHsApi.getInstance().addPoint(equipStatus);
@@ -437,6 +447,7 @@ public class HeatPumpUnitEquip{
                 .setFloorRef(floor)
                 .addMarker("zone").addMarker(profile).addMarker("scheduleType").addMarker("writable").addMarker("zone").addMarker("equipHis").addMarker("his")
                 .setGroup(String.valueOf(nodeAddr))
+                .setEnums("building,zone,named")
                 .setTz(tz)
                 .build();
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
@@ -479,7 +490,7 @@ public class HeatPumpUnitEquip{
         device.relay6.setEnabled(config.isOpConfigured(Port.RELAY_SIX));
 
         device.addPointsToDb();
-//initialize with default values if schedule fetch is null
+        //initialize with default values if schedule fetch is null
         double coolingVal = 74.0;
         double heatingVal = 70.0;
         double defaultDesiredTemp = 72;
@@ -511,6 +522,7 @@ public class HeatPumpUnitEquip{
                 .setRoomRef(room)
                 .setFloorRef(floor)
                 .addMarker("standalone").addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("equipHis").addMarker("sp").addMarker("zone")
+                .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing")
                 .setTz(tz)
                 .build();
         CCUHsApi.getInstance().addPoint(cpuOccupancy);

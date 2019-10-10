@@ -18,7 +18,6 @@ import a75f.io.api.haystack.Schedule;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Occupancy;
-import a75f.io.logic.pubnub.ZoneDataInterface;
 import a75f.io.logic.tuners.TunerUtil;
 
 public class VAVScheduler {
@@ -58,11 +57,11 @@ public class VAVScheduler {
             double deadbands = (occ.getCoolingVal() - occ.getHeatingVal()) / 2.0 ;
             occ.setCoolingDeadBand(deadbands);
             occ.setHeatingDeadBand(deadbands);
-            Double coolingTemp = (occ.isOccupied() || (systemOcc == Occupancy.PRECONDITIONING) || (systemOcc == Occupancy.FORCED_OCCUPIED)) ? occ.getCoolingVal() : (occ.getCoolingVal() + occ.getUnoccupiedZoneSetback());
+            Double coolingTemp = (occ.isOccupied() || (systemOcc == Occupancy.PRECONDITIONING) || (systemOcc == Occupancy.FORCEDOCCUPIED)) ? occ.getCoolingVal() : (occ.getCoolingVal() + occ.getUnoccupiedZoneSetback());
 
             setDesiredTemp(equip, coolingTemp, "cooling");
 
-            Double heatingTemp = (occ.isOccupied() || (systemOcc == Occupancy.PRECONDITIONING) || (systemOcc == Occupancy.FORCED_OCCUPIED)) ? occ.getHeatingVal() : (occ.getHeatingVal() - occ.getUnoccupiedZoneSetback());
+            Double heatingTemp = (occ.isOccupied() || (systemOcc == Occupancy.PRECONDITIONING) || (systemOcc == Occupancy.FORCEDOCCUPIED)) ? occ.getHeatingVal() : (occ.getHeatingVal() - occ.getUnoccupiedZoneSetback());
             setDesiredTemp(equip, heatingTemp, "heating");
             setDesiredTemp(equip, avgTemp, "average");
         }

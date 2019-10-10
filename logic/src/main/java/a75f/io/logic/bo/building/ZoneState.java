@@ -9,6 +9,6 @@ public enum ZoneState
     DEADBAND,
     COOLING,
     HEATING,
-    TEMP_DEAD
+    TEMPDEAD
     
 }

@@ -144,7 +144,7 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
         Point analog2OutputEnabled = new Point.Builder().setDisplayName(equipDis + "-" + "analog2OutputEnabled")
                                                         .setSiteRef(siteRef).setEquipRef(equipref)
                                                         .addMarker("system").addMarker("config").addMarker("analog2").addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
-                                                        .setTz(tz).build();
+                                                        .setEnums("false,true").setTz(tz).build();
         String analog2OutputEnabledId = hayStack.addPoint(analog2OutputEnabled);
         hayStack.writeDefaultValById(analog2OutputEnabledId, 0.0);
         
@@ -220,7 +220,7 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
         String equipDis = siteMap.get("dis").toString() + "-SystemEquip";
         String siteRef = siteMap.get("id").toString();
         String tz = siteMap.get("tz").toString();
-        Point coolingSignal = new Point.Builder().setDisplayName(equipDis + "-" + "anlog2Signal").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("cmd").addMarker("analog2").addMarker("his").addMarker("equipHis").setTz(tz).build();
+        Point coolingSignal = new Point.Builder().setDisplayName(equipDis + "-" + "anlog2Signal").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("cmd").addMarker("analog2").addMarker("his").addMarker("equipHis").setUnit("%").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(coolingSignal);
     }
     

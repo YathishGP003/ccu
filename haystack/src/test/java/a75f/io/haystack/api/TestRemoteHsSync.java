@@ -912,5 +912,49 @@ public class TestRemoteHsSync
         floors.dump();
     }
     
+    @Test
+    public void testAddEnum() {
+        CCUHsApi hayStack = new CCUHsApi();
+        int nodeAddr = 7000;
+    
+        Site s = new Site.Builder()
+                         .setDisplayName("Test")
+                         .addMarker("site")
+                         .setGeoCity("Burnsville")
+                         .setGeoState("MN")
+                         .setTz("Chicago")
+                         .setArea(1000).build();
+        hayStack.addSite(s);
+    
+        HashMap siteMap = hayStack.read(Tags.SITE);
+        String siteRef = (String) siteMap.get(Tags.ID);
+        String siteDis = (String) siteMap.get("dis");
+    
+        Equip v = new Equip.Builder()
+                          .setSiteRef(siteRef)
+                          .setDisplayName(siteDis+"-VAV-"+nodeAddr)
+                          .setRoomRef("room")
+                          .setFloorRef("floor")
+                          .addMarker("equip")
+                          .addMarker("vav")
+                          .setGroup(String.valueOf(nodeAddr))
+                          .build();
+        Point testPoint = new Point.Builder()
+                                  .setDisplayName(siteDis+"VAV-"+nodeAddr+"-TestTemp")
+                                  .setEquipRef(hayStack.addEquip(v))
+                                  .setSiteRef(siteRef)
+                                  .setRoomRef("room")
+                                  .setFloorRef("floor")
+                                  .addMarker("system").addMarker("mode")
+                                  .setTz("Chicago").addMarker("his")
+                                  .setEnums("off,auto,heatonly,coolonly")
+                                  .setGroup(String.valueOf(nodeAddr))
+                                  .setUnit("\u00B0F")
+                                  .build();
+        hayStack.addPoint(testPoint);
+    
+        System.out.println(HZincWriter.gridToString(CCUHsApi.getInstance().readHGrid("point and system and mode")));
+    }
+    
     
 }

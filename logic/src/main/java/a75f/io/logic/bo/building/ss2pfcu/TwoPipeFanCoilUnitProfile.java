@@ -30,9 +30,7 @@ import a75f.io.logic.tuners.TunerUtil;
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
-import static a75f.io.logic.bo.building.ZoneState.TEMP_DEAD;
-import static a75f.io.logic.bo.building.definitions.StandaloneFanSpeed.AUTO;
-import static a75f.io.logic.bo.building.definitions.StandaloneFanSpeed.OFF;
+import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
 public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
 
@@ -105,7 +103,7 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
                 if (!curStatus.equals("Zone Temp Dead")) {
                     CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"", "Zone Temp Dead");
                 }
-                CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + node + "\"", (double)TEMP_DEAD.ordinal());
+                CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + node + "\"", (double) TEMPDEAD.ordinal());
                 continue;
 
             }
@@ -181,7 +179,7 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
 
             }
             if(occuStatus != null){
-                twoPfcuDevice.setProfilePoint("occupancy and status", occuStatus.isOccupied() ? Occupancy.OCCUPIED.ordinal() : (occuStatus.isPreconditioning() ? Occupancy.PRECONDITIONING.ordinal() : (occuStatus.isForcedOccupied() ? Occupancy.FORCED_OCCUPIED.ordinal() : 0)));
+                twoPfcuDevice.setProfilePoint("occupancy and status", occuStatus.isOccupied() ? Occupancy.OCCUPIED.ordinal() : (occuStatus.isPreconditioning() ? Occupancy.PRECONDITIONING.ordinal() : (occuStatus.isForcedOccupied() ? Occupancy.FORCEDOCCUPIED.ordinal() : 0)));
             }else {
                 twoPfcuDevice.setProfilePoint("occupancy and status", occupied ? 1 : 0);
             }

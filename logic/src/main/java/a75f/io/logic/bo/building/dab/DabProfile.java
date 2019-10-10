@@ -27,7 +27,7 @@ import a75f.io.logic.tuners.TunerUtil;
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
-import static a75f.io.logic.bo.building.ZoneState.TEMP_DEAD;
+import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
 /**
  * Created by samjithsadasivan on 3/13/19.
@@ -101,7 +101,7 @@ public class DabProfile extends ZoneProfile
     {
         if (isZoneDead()) {
             CcuLog.d(L.TAG_CCU_ZONE,"Zone Temp Dead: "+dabEquip.nodeAddr+" roomTemp : "+dabEquip.getCurrentTemp());
-            state = TEMP_DEAD;
+            state = TEMPDEAD;
             String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \""+dabEquip.nodeAddr+"\"");
             if (!curStatus.equals("Zone Temp Dead"))
             {
@@ -115,7 +115,7 @@ public class DabProfile extends ZoneProfile
                 dabEquip.setDamperPos(damperPos, "secondary");
                 dabEquip.setNormalizedDamperPos(damperPos, "primary");
                 dabEquip.setNormalizedDamperPos(damperPos, "secondary");
-                CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + dabEquip.nodeAddr + "\"", (double)TEMP_DEAD.ordinal());
+                CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + dabEquip.nodeAddr + "\"", (double) TEMPDEAD.ordinal());
             }
             return;
         }

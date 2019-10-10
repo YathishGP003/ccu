@@ -85,9 +85,9 @@ public class DaikinIE
                 }
     
                 if (ScheduleProcessJob.getSystemOccupancy() == Occupancy.OCCUPIED
-                    || ScheduleProcessJob.getSystemOccupancy() == Occupancy.FORCED_OCCUPIED
+                    || ScheduleProcessJob.getSystemOccupancy() == Occupancy.FORCEDOCCUPIED
                     || ScheduleProcessJob.getSystemOccupancy() == Occupancy.PRECONDITIONING
-                    || ScheduleProcessJob.getSystemOccupancy() == Occupancy.OCCUPANCY_SENSING
+                    || ScheduleProcessJob.getSystemOccupancy() == Occupancy.OCCUPANCYSENSING
                     || systemProfile.getSystemController().getSystemState() != SystemController.State.OFF) {
                     if (occMode != OccMode.Occ)
                     {

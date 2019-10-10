@@ -23,7 +23,7 @@ import a75f.io.logic.tuners.TunerUtil;
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
-import static a75f.io.logic.bo.building.ZoneState.TEMP_DEAD;
+import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
 /**
  * Created by samjithsadasivan on 8/23/18.
@@ -82,7 +82,7 @@ public class VavSeriesFanProfile extends VavProfile
     
             if (isZoneDead()) {
                 CcuLog.d(L.TAG_CCU_ZONE,"Zone Temp Dead : "+node+" roomTemp : "+vavDeviceMap.get(node).getCurrentTemp());
-                state = TEMP_DEAD;
+                state = TEMPDEAD;
                 String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \""+node+"\"");
                 if (!curStatus.equals("Zone Temp Dead"))
                 {
@@ -94,7 +94,7 @@ public class VavSeriesFanProfile extends VavProfile
                     vavDevice.setDamperPos(damperPos);
                     vavDevice.setNormalizedDamperPos(damperPos);
                     vavDevice.setReheatPos(0);
-                    CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + node + "\"", (double)TEMP_DEAD.ordinal());
+                    CCUHsApi.getInstance().writeHisValByQuery("point and status and his and group == \"" + node + "\"", (double) TEMPDEAD.ordinal());
                 }
                 continue;
             }

@@ -34,8 +34,8 @@ import a75f.io.logic.watchdog.WatchdogMonitor;
 
 import static a75f.io.logic.L.TAG_CCU_JOB;
 import static a75f.io.logic.L.TAG_CCU_SCHEDULER;
-import static a75f.io.logic.bo.building.Occupancy.FORCED_OCCUPIED;
-import static a75f.io.logic.bo.building.Occupancy.OCCUPANCY_SENSING;
+import static a75f.io.logic.bo.building.Occupancy.FORCEDOCCUPIED;
+import static a75f.io.logic.bo.building.Occupancy.OCCUPANCYSENSING;
 import static a75f.io.logic.bo.building.Occupancy.OCCUPIED;
 import static a75f.io.logic.bo.building.Occupancy.PRECONDITIONING;
 import static a75f.io.logic.bo.building.Occupancy.UNOCCUPIED;
@@ -420,7 +420,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             return "Setting up..";
         }
         
-        if (systemVacation == true && systemOccupancy != FORCED_OCCUPIED) {
+        if (systemVacation == true && systemOccupancy != FORCEDOCCUPIED) {
             if (activeSystemVacation != null) {
                 return "In Energy saving Vacation till "+activeSystemVacation.getEndDateString();
             } else if (activeZoneVacation != null) {
@@ -452,7 +452,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                         nextOccupied.getCoolingVal(),
                         nextOccupied.getNextOccupiedSchedule().getSthh(),
                         nextOccupied.getNextOccupiedSchedule().getStmm());
-            case FORCED_OCCUPIED:
+            case FORCEDOCCUPIED:
                 DateTime et = new DateTime(getSystemTemporaryHoldExpiry());
                 int min = et.getMinuteOfHour();
                 return String.format("In Temporary Hold | till %s", et.getHourOfDay()+":"+(min < 10 ? "0"+min : min));
@@ -493,7 +493,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         if (systemVacation) {
             double curOccupancy = CCUHsApi.getInstance().readHisValByQuery("point and system and his and occupancy and mode");
             if (getSystemTemporaryHoldExpiry() > 0) {
-                systemOccupancy = FORCED_OCCUPIED;
+                systemOccupancy = FORCEDOCCUPIED;
             }
             if (curOccupancy != VACATION.ordinal())
             {
@@ -578,7 +578,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }
     
         if (systemOccupancy == UNOCCUPIED && getSystemTemporaryHoldExpiry() > 0) {
-            systemOccupancy = FORCED_OCCUPIED;
+            systemOccupancy = FORCEDOCCUPIED;
         }
         
         CCUHsApi.getInstance().writeHisValByQuery("point and system and his and occupancy and mode",(double)systemOccupancy.ordinal());
@@ -1174,11 +1174,11 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         {
             c = OCCUPIED;
         } else if (getTemporaryHoldExpiry(equip) > 0){
-            c = FORCED_OCCUPIED;
+            c = FORCEDOCCUPIED;
         }else if((cachedOccupied != null) && cachedOccupied.getVacation() != null) {
             c = VACATION;
         }else if((cachedOccupied != null) && cachedOccupied.isOccupancySensed()){
-            c = OCCUPANCY_SENSING;
+            c = OCCUPANCYSENSING;
         }else if((cachedOccupied != null) && (cachedOccupied.isPreconditioning())) {
             //handle preconditioning??
             c = PRECONDITIONING;

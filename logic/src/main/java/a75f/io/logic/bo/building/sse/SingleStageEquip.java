@@ -95,6 +95,7 @@ public class SingleStageEquip {
                 .addMarker("zone").addMarker("sse")
                 .addMarker("air").addMarker("humidity").addMarker("sensor").addMarker("current").addMarker("his").addMarker("cur").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
+                .setUnit("%")
                 .setTz(tz)
                 .build();
         String humidityId = CCUHsApi.getInstance().addPoint(humidity);
@@ -108,6 +109,7 @@ public class SingleStageEquip {
                 .addMarker("zone").addMarker("sse")
                 .addMarker("air").addMarker("co2").addMarker("sensor").addMarker("current").addMarker("his").addMarker("cur").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
+                .setUnit("ppm")
                 .setTz(tz)
                 .build();
         String co2Id = CCUHsApi.getInstance().addPoint(co2);
@@ -121,6 +123,7 @@ public class SingleStageEquip {
                 .addMarker("zone").addMarker("sse")
                 .addMarker("air").addMarker("voc").addMarker("sensor").addMarker("current").addMarker("his").addMarker("cur").addMarker("logical").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
+                .setUnit("ppm")
                 .setTz(tz)
                 .build();
         String vocId = CCUHsApi.getInstance().addPoint(voc);
@@ -239,6 +242,7 @@ public class SingleStageEquip {
                 .setFloorRef(floorRef)
                 .addMarker("zone").addMarker("sse").addMarker("scheduleType").addMarker("writable").addMarker("his").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
+                .setEnums("building,zone,named")
                 .setTz(tz)
                 .build();
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
@@ -280,6 +284,7 @@ public class SingleStageEquip {
                 .setRoomRef(roomRef)
                 .setFloorRef(floorRef)
                 .addMarker("standalone").addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("equipHis").addMarker("sp").addMarker("zone").addMarker("sse")
+                .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing")
                 .setTz(tz)
                 .build();
         CCUHsApi.getInstance().addPoint(occupancy);
@@ -339,6 +344,7 @@ public class SingleStageEquip {
                 .addMarker("config").addMarker("sse").addMarker("writable").addMarker("zone")
                 .addMarker("priority").addMarker("sp").addMarker("his").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
+                .setEnums("none,low,normal,high")
                 .setTz(tz)
                 .build();
         String zonePriorityId = CCUHsApi.getInstance().addPoint(zonePriority);
@@ -352,6 +358,7 @@ public class SingleStageEquip {
                 .addMarker("config").addMarker("sse").addMarker("writable").addMarker("zone")
                 .addMarker("temperature").addMarker("offset").addMarker("sp")
                 .setGroup(String.valueOf(nodeAddr))
+                .setUnit("\u00B0F")
                 .setTz(tz)
                 .build();
         String temperatureOffsetId = CCUHsApi.getInstance().addPoint(temperatureOffset);
@@ -365,6 +372,7 @@ public class SingleStageEquip {
                 .setRoomRef(roomRef)
                 .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone").addMarker("th2").addMarker("sp").addMarker("enable").addMarker(profile)
                 .setGroup(String.valueOf(nodeAddr))
+                .setUnit("Ohm")
                 .setTz(tz)
                 .build();
         String enableexternal10KProbeTh2Id = CCUHsApi.getInstance().addPoint(external10KProbeTh2);
@@ -379,6 +387,7 @@ public class SingleStageEquip {
                 .addMarker("config").addMarker("sse").addMarker("writable").addMarker("zone")
                 .addMarker("relay1").addMarker("sp").addMarker("enable").addMarker(profile)
                 .setGroup(String.valueOf(nodeAddr))
+                .setEnums("false,true")
                 .setTz(tz)
                 .build();
         String enableRelay1Id = CCUHsApi.getInstance().addPoint(enableRelay1);
@@ -393,6 +402,7 @@ public class SingleStageEquip {
                 .addMarker("config").addMarker("sse").addMarker("writable").addMarker("zone")
                 .addMarker("relay2").addMarker("sp").addMarker("enable").addMarker(profile)
                 .setGroup(String.valueOf(nodeAddr))
+                .setEnums("false,true")
                 .setTz(tz)
                 .build();
         String enableRelay2Id = CCUHsApi.getInstance().addPoint(enableRelay2);
@@ -406,6 +416,7 @@ public class SingleStageEquip {
                 .addMarker("config").addMarker("sse").addMarker("writable").addMarker("zone")
                 .addMarker("th1").addMarker("sp").addMarker("enable").addMarker(profile)
                 .setGroup(String.valueOf(nodeAddr))
+                .setEnums("false,true")
                 .setTz(tz)
                 .build();
         String enableTh1Id = CCUHsApi.getInstance().addPoint(enableTh1);
@@ -419,6 +430,7 @@ public class SingleStageEquip {
                 .addMarker("config").addMarker("sse").addMarker("writable").addMarker("zone")
                 .addMarker("th2").addMarker("sp").addMarker("enable").addMarker(profile)
                 .setGroup(String.valueOf(nodeAddr))
+                .setEnums("false,true")
                 .setTz(tz)
                 .build();
         String enableTh2Id = CCUHsApi.getInstance().addPoint(enableTh2);

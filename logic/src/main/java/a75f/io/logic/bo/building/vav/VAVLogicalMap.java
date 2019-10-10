@@ -237,6 +237,7 @@ public class VAVLogicalMap
                                 .setFloorRef(floor)
                                 .addMarker("damper").addMarker("vav").addMarker("base").addMarker("cmd").addMarker("his").addMarker("logical").addMarker("zone").addMarker("equipHis")
                                 .setGroup(String.valueOf(nodeAddr))
+                                .setUnit("%")
                                 .setTz(tz)
                                 .build();
         String dpID = CCUHsApi.getInstance().addPoint(damperPos);
@@ -249,6 +250,7 @@ public class VAVLogicalMap
                                   .setFloorRef(floor)
                                   .addMarker("damper").addMarker("vav").addMarker("normalized").addMarker("cmd").addMarker("his").addMarker("logical").addMarker("zone").addMarker("equipHis")
                                   .setGroup(String.valueOf(nodeAddr))
+                                  .setUnit("%")
                                   .setTz(tz)
                                   .build();
         String normalizedDPId = CCUHsApi.getInstance().addPoint(normalizedDamperPos);
@@ -262,6 +264,7 @@ public class VAVLogicalMap
                                   .addMarker("reheat").addMarker("vav")
                                   .addMarker("water").addMarker("valve").addMarker("cmd").addMarker("his").addMarker("logical").addMarker("zone").addMarker("equipHis")
                                   .setGroup(String.valueOf(nodeAddr))
+                                  .setUnit("%")
                                   .setTz(tz)
                                   .build();
         String rhID = CCUHsApi.getInstance().addPoint(reheatPos);
@@ -289,6 +292,7 @@ public class VAVLogicalMap
                                     .addMarker("zone").addMarker("vav")
                                     .addMarker("air").addMarker("humidity").addMarker("sensor").addMarker("current").addMarker("his").addMarker("cur").addMarker("logical").addMarker("equipHis")
                                     .setGroup(String.valueOf(nodeAddr))
+                                    .setUnit("%")
                                     .setTz(tz)
                                     .build();
         String humidityId = CCUHsApi.getInstance().addPoint(humidity);
@@ -302,6 +306,7 @@ public class VAVLogicalMap
                                  .addMarker("zone").addMarker("vav")
                                  .addMarker("air").addMarker("co2").addMarker("sensor").addMarker("current").addMarker("his").addMarker("cur").addMarker("logical").addMarker("equipHis")
                                  .setGroup(String.valueOf(nodeAddr))
+                                 .setUnit("ppm")
                                  .setTz(tz)
                                  .build();
         String co2Id = CCUHsApi.getInstance().addPoint(co2);
@@ -315,6 +320,7 @@ public class VAVLogicalMap
                                  .addMarker("zone").addMarker("vav")
                                  .addMarker("air").addMarker("voc").addMarker("sensor").addMarker("current").addMarker("his").addMarker("cur").addMarker("logical").addMarker("equipHis")
                                  .setGroup(String.valueOf(nodeAddr))
+                                 .setUnit("ppm")
                                  .setTz(tz)
                                  .build();
         String vocId = CCUHsApi.getInstance().addPoint(voc);
@@ -370,6 +376,7 @@ public class VAVLogicalMap
                                     .addMarker("heating").addMarker("loop").addMarker("sp").addMarker("his").addMarker("vav").addMarker("equipHis")
                                     .addMarker("zone")
                                     .setGroup(String.valueOf(nodeAddr))
+                                    .setUnit("%")
                                     .setTz(tz)
                                     .build();
         CCUHsApi.getInstance().addPoint(heatingLoopOp);
@@ -383,6 +390,7 @@ public class VAVLogicalMap
                                       .addMarker("cooling").addMarker("loop").addMarker("sp").addMarker("his").addMarker("vav").addMarker("equipHis")
                                       .addMarker("zone")
                                       .setGroup(String.valueOf(nodeAddr))
+                                      .setUnit("%")
                                       .setTz(tz)
                                       .build();
         CCUHsApi.getInstance().addPoint(coolingLoopOp);
@@ -396,6 +404,7 @@ public class VAVLogicalMap
                                       .addMarker("discharge").addMarker("air").addMarker("temp").addMarker("zone").addMarker("equipHis")
                                       .addMarker("sp").addMarker("his").addMarker("vav")
                                       .setGroup(String.valueOf(nodeAddr))
+                                      .setUnit("\u00B0F")
                                       .setTz(tz)
                                       .build();
         CCUHsApi.getInstance().addPoint(dischargeSp);
@@ -409,6 +418,7 @@ public class VAVLogicalMap
                                     .addMarker("request").addMarker("hour").addMarker("cumulative").addMarker("vav")
                                     .addMarker("tr").addMarker("supply").addMarker("air").addMarker("temp").addMarker("his").addMarker("zone").addMarker("equipHis")
                                     .setGroup(String.valueOf(nodeAddr))
+                                    .setUnit("%")
                                     .setTz(tz)
                                     .build();
         CCUHsApi.getInstance().addPoint(satRequestPercentage);
@@ -422,6 +432,7 @@ public class VAVLogicalMap
                                              .addMarker("request").addMarker("hour").addMarker("cumulative").addMarker("vav")
                                              .addMarker("tr").addMarker("co2").addMarker("temp").addMarker("his").addMarker("zone").addMarker("equipHis")
                                              .setGroup(String.valueOf(nodeAddr))
+                                             .setUnit("%")
                                              .setTz(tz)
                                              .build();
         CCUHsApi.getInstance().addPoint(co2RequestPercentage);
@@ -448,6 +459,7 @@ public class VAVLogicalMap
                                              .addMarker("request").addMarker("hour").addMarker("cumulative").addMarker("vav")
                                              .addMarker("tr").addMarker("staticPressure").addMarker("his").addMarker("zone").addMarker("equipHis")
                                              .setGroup(String.valueOf(nodeAddr))
+                                             .setUnit("%")
                                              .setTz(tz)
                                              .build();
         CCUHsApi.getInstance().addPoint(pressureRequestPercentage);
@@ -499,6 +511,7 @@ public class VAVLogicalMap
                                   .setFloorRef(floor)
                                   .addMarker("status").addMarker("vav").addMarker("his").addMarker("zone").addMarker("equipHis")
                                   .setGroup(String.valueOf(nodeAddr))
+                                  .setEnums("deadband,cooling,heating,tempdead")
                                   .setTz(tz)
                                   .build();
         String equipStatusId = CCUHsApi.getInstance().addPoint(equipStatus);
@@ -537,6 +550,7 @@ public class VAVLogicalMap
                                     .setFloorRef(floor)
                                     .addMarker("vav").addMarker("occupancy").addMarker("mode").addMarker("zone").addMarker("writable").addMarker("his").addMarker("equipHis")
                                     .setGroup(String.valueOf(nodeAddr))
+                                    .setEnums("unoccupied,occupied,preconditioning,forcedoccupied,vacation,occupancysensing")
                                     .setTz(tz)
                                     .build();
         String occupancyId = CCUHsApi.getInstance().addPoint(occupancy);
@@ -551,6 +565,7 @@ public class VAVLogicalMap
                                            .addMarker("zone").addMarker("vav").addMarker("scheduleType").addMarker("writable").addMarker("his").addMarker("equipHis")
                                            .setGroup(String.valueOf(nodeAddr))
                                            .setTz(tz)
+                                           .setEnums("building,zone,named")
                                            .build();
         String equipScheduleTypeId = CCUHsApi.getInstance().addPoint(equipScheduleType);
         CCUHsApi.getInstance().writeDefaultValById(equipScheduleTypeId, 0.0);
@@ -632,6 +647,7 @@ public class VAVLogicalMap
                                          .addMarker("config").addMarker("vav").addMarker("writable").addMarker("zone")
                                          .addMarker("damper").addMarker("type").addMarker("sp")
                                          .setGroup(String.valueOf(nodeAddr))
+                                         .setEnums("ZeroToTenV,TwoToTenV,TenToTwov,TenToZeroV,mat")
                                          .setTz(tz)
                                          .build();
         String damperTypeId = CCUHsApi.getInstance().addPoint(damperType);
@@ -660,6 +676,7 @@ public class VAVLogicalMap
                                    .addMarker("config").addMarker("vav").addMarker("writable").addMarker("zone")
                                    .addMarker("damper").addMarker("shape").addMarker("sp")
                                    .setGroup(String.valueOf(nodeAddr))
+                                   .setEnums("round,square,rectangular")
                                    .setTz(tz)
                                    .build();
         String damperShapeId = CCUHsApi.getInstance().addPoint(damperShape);
@@ -674,6 +691,7 @@ public class VAVLogicalMap
                                    .addMarker("config").addMarker("vav").addMarker("writable").addMarker("zone")
                                    .addMarker("reheat").addMarker("type").addMarker("sp")
                                    .setGroup(String.valueOf(nodeAddr))
+                                   .setEnums("ZeroToTenV,TwoToTenV,TenToTwov,TenToZeroV,Pulse,OneStage,TwoStage")
                                    .setTz(tz)
                                    .build();
         String reheatTypeId = CCUHsApi.getInstance().addPoint(reheatType);
@@ -688,6 +706,7 @@ public class VAVLogicalMap
                                    .addMarker("config").addMarker("vav").addMarker("writable").addMarker("zone")
                                    .addMarker("enable").addMarker("occupancy").addMarker("control").addMarker("sp").addMarker("his").addMarker("equipHis")
                                    .setGroup(String.valueOf(nodeAddr))
+                                   .setEnums("false,true")
                                    .setTz(tz)
                                    .build();
         String enableOccupancyControlId = CCUHsApi.getInstance().addPoint(enableOccupancyControl);
@@ -703,6 +722,7 @@ public class VAVLogicalMap
                                                .addMarker("config").addMarker("vav").addMarker("writable").addMarker("zone")
                                                .addMarker("enable").addMarker("co2").addMarker("control").addMarker("sp").addMarker("his").addMarker("equipHis")
                                                .setGroup(String.valueOf(nodeAddr))
+                                               .setEnums("false,true")
                                                .setTz(tz)
                                                .build();
         String enableCO2ControlId = CCUHsApi.getInstance().addPoint(enableCO2Control);
@@ -718,6 +738,7 @@ public class VAVLogicalMap
                                                .addMarker("config").addMarker("vav").addMarker("writable").addMarker("zone")
                                                .addMarker("enable").addMarker("iaq").addMarker("control").addMarker("sp").addMarker("his").addMarker("equipHis")
                                                .setGroup(String.valueOf(nodeAddr))
+                                               .setEnums("false,true")
                                                .setTz(tz)
                                                .build();
         String enableIAQControlId = CCUHsApi.getInstance().addPoint(enableIAQControl);
@@ -733,6 +754,7 @@ public class VAVLogicalMap
                                          .addMarker("config").addMarker("vav").addMarker("writable").addMarker("zone")
                                          .addMarker("priority").addMarker("userIntent").addMarker("sp").addMarker("his").addMarker("equipHis")
                                          .setGroup(String.valueOf(nodeAddr))
+                                         .setEnums("none,low,normal,high")
                                          .setTz(tz)
                                          .build();
         String zonePriorityId = CCUHsApi.getInstance().addPoint(zonePriority);
@@ -748,6 +770,7 @@ public class VAVLogicalMap
                                      .addMarker("config").addMarker("vav").addMarker("writable").addMarker("zone")
                                      .addMarker("temperature").addMarker("offset").addMarker("sp")
                                      .setGroup(String.valueOf(nodeAddr))
+                                     .setUnit("\u00B0F")
                                      .setTz(tz)
                                      .build();
         String temperatureOffsetId = CCUHsApi.getInstance().addPoint(temperatureOffset);
@@ -762,6 +785,7 @@ public class VAVLogicalMap
                                          .addMarker("config").addMarker("vav").addMarker("damper").addMarker("min").addMarker("cooling").addMarker("pos")
                                          .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his").addMarker("equipHis")
                                          .setGroup(String.valueOf(nodeAddr))
+                                         .setUnit("%")
                                          .setTz(tz)
                                          .build();
         String damperMinCoolingId = CCUHsApi.getInstance().addPoint(damperMinCooling);
@@ -777,6 +801,7 @@ public class VAVLogicalMap
                                          .addMarker("config").addMarker("vav").addMarker("damper").addMarker("max").addMarker("cooling").addMarker("pos")
                                          .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his").addMarker("equipHis")
                                          .setGroup(String.valueOf(nodeAddr))
+                                         .setUnit("%")
                                          .setTz(tz)
                                          .build();
         String damperMaxCoolingId = CCUHsApi.getInstance().addPoint(damperMaxCooling);
@@ -792,6 +817,7 @@ public class VAVLogicalMap
                                          .addMarker("config").addMarker("vav").addMarker("damper").addMarker("min").addMarker("heating").addMarker("pos")
                                          .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his").addMarker("equipHis")
                                          .setGroup(String.valueOf(nodeAddr))
+                                         .setUnit("%")
                                          .setTz(tz)
                                          .build();
         String damperMinHeatingId = CCUHsApi.getInstance().addPoint(damperMinHeating);
@@ -807,6 +833,7 @@ public class VAVLogicalMap
                                          .addMarker("config").addMarker("vav").addMarker("damper").addMarker("max").addMarker("heating").addMarker("pos")
                                          .addMarker("sp").addMarker("writable").addMarker("zone").addMarker("his").addMarker("equipHis")
                                          .setGroup(String.valueOf(nodeAddr))
+                                         .setUnit("%")
                                          .setTz(tz)
                                          .build();
         String damperMaxHeatingId = CCUHsApi.getInstance().addPoint(damperMaxHeating);

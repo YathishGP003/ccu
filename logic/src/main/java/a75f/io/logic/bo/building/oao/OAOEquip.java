@@ -65,6 +65,7 @@ public class OAOEquip
                                    .setFloorRef(floorRef)
                                    .addMarker("oao").addMarker("inside").addMarker("enthalpy").addMarker("his").addMarker("equipHis").addMarker("sp")
                                    .setGroup(String.valueOf(nodeAddr))
+                                   .setUnit("J")
                                    .setTz(tz)
                                    .build();
         hayStack.addPoint(insideEnthalpy);
@@ -77,6 +78,7 @@ public class OAOEquip
                                        .setFloorRef(floorRef)
                                        .addMarker("oao").addMarker("outside").addMarker("enthalpy").addMarker("his").addMarker("equipHis").addMarker("sp")
                                        .setGroup(String.valueOf(nodeAddr))
+                                       .setUnit("J")
                                        .setTz(tz)
                                        .build();
         hayStack.addPoint(outsideEnthalpy);
@@ -101,6 +103,7 @@ public class OAOEquip
                                              .setFloorRef(floorRef)
                                              .addMarker("oao").addMarker("economizing").addMarker("loop").addMarker("output").addMarker("his").addMarker("equipHis").addMarker("sp")
                                              .setGroup(String.valueOf(nodeAddr))
+                                             .setUnit("%")
                                              .setTz(tz)
                                              .build();
         hayStack.addPoint(economizingLoopOutput);
@@ -113,6 +116,7 @@ public class OAOEquip
                                              .setFloorRef(floorRef)
                                              .addMarker("oao").addMarker("outside").addMarker("air").addMarker("calculated").addMarker("min").addMarker("damper").addMarker("his").addMarker("equipHis").addMarker("sp")
                                              .setGroup(String.valueOf(nodeAddr))
+                                             .setUnit("%")
                                              .setTz(tz)
                                              .build();
         hayStack.addPoint(outsideAirCalculatedMinDamper);
@@ -125,6 +129,7 @@ public class OAOEquip
                                              .setFloorRef(floorRef)
                                              .addMarker("oao").addMarker("outside").addMarker("air").addMarker("loop").addMarker("output").addMarker("final").addMarker("his").addMarker("equipHis").addMarker("sp")
                                              .setGroup(String.valueOf(nodeAddr))
+                                             .setUnit("%")
                                              .setTz(tz)
                                              .build();
         String outsideAirFinalLoopOutputId = hayStack.addPoint(outsideAirFinalLoopOutput);
@@ -138,6 +143,7 @@ public class OAOEquip
                                               .setFloorRef(floorRef)
                                               .addMarker("oao").addMarker("return").addMarker("air").addMarker("co2").addMarker("sensor").addMarker("his").addMarker("equipHis")
                                               .setGroup(String.valueOf(nodeAddr))
+                                              .setUnit("ppm")
                                               .setTz(tz)
                                               .build();
         String returnAirCO2Id = hayStack.addPoint(returnAirCO2);
@@ -150,6 +156,7 @@ public class OAOEquip
                                      .setFloorRef(floorRef)
                                      .addMarker("oao").addMarker("rtu").addMarker("current").addMarker("transformer").addMarker("sensor").addMarker("his").addMarker("equipHis")
                                      .setGroup(String.valueOf(nodeAddr))
+                                     .setUnit("A")
                                      .setTz(tz)
                                      .build();
         String rtuCurrentTransformerId = hayStack.addPoint(rtuCurrentTransformer);
@@ -162,6 +169,7 @@ public class OAOEquip
                                      .setFloorRef(floorRef)
                                      .addMarker("oao").addMarker("outside").addMarker("air").addMarker("temp").addMarker("sensor").addMarker("his").addMarker("equipHis")
                                      .setGroup(String.valueOf(nodeAddr))
+                                     .setUnit("\u00B0F")
                                      .setTz(tz)
                                      .build();
         String outsideAirTemperatureId = hayStack.addPoint(outsideAirTemperature);
@@ -174,6 +182,7 @@ public class OAOEquip
                                          .setFloorRef(floorRef)
                                          .addMarker("oao").addMarker("outsideWeather").addMarker("air").addMarker("temp").addMarker("sensor").addMarker("his").addMarker("equipHis")
                                          .setGroup(String.valueOf(nodeAddr))
+                                         .setUnit("\u00B0F")
                                          .setTz(tz)
                                          .build();
         String weatherOutsideTempId = hayStack.addPoint(weatherOutsideTemp);
@@ -186,6 +195,7 @@ public class OAOEquip
                                               .setFloorRef(floorRef)
                                               .addMarker("oao").addMarker("outsideWeather").addMarker("air").addMarker("humidity").addMarker("sensor").addMarker("his").addMarker("equipHis")
                                               .setGroup(String.valueOf(nodeAddr))
+                                              .setUnit("%")
                                               .setTz(tz)
                                               .build();
         String weatherOutsideHumidityId = hayStack.addPoint(weatherOutsideHumidity);
@@ -198,6 +208,7 @@ public class OAOEquip
                                               .setFloorRef(floorRef)
                                               .addMarker("oao").addMarker("supply").addMarker("air").addMarker("temp").addMarker("sensor").addMarker("his").addMarker("equipHis")
                                               .setGroup(String.valueOf(nodeAddr))
+                                              .setUnit("\u00B0F")
                                               .setTz(tz)
                                               .build();
         String supplyAirTemperatureId = hayStack.addPoint(supplyAirTemperature);
@@ -210,6 +221,7 @@ public class OAOEquip
                                              .setFloorRef(floorRef)
                                              .addMarker("oao").addMarker("mixed").addMarker("air").addMarker("temp").addMarker("sensor").addMarker("his").addMarker("equipHis")
                                              .setGroup(String.valueOf(nodeAddr))
+                                             .setUnit("\u00B0F")
                                              .setTz(tz)
                                              .build();
         String mixedAirTemperatureId = hayStack.addPoint(mixedAirTemperature);
@@ -222,6 +234,7 @@ public class OAOEquip
                                             .setFloorRef(floorRef)
                                             .addMarker("oao").addMarker("mixed").addMarker("air").addMarker("humidity").addMarker("sensor").addMarker("his").addMarker("equipHis")
                                             .setGroup(String.valueOf(nodeAddr))
+                                            .setUnit("%")
                                             .setTz(tz)
                                             .build();
         String mixedAirHumidityId = hayStack.addPoint(mixedAirHumidity);
@@ -234,6 +247,7 @@ public class OAOEquip
                                          .setFloorRef(floorRef)
                                          .addMarker("oao").addMarker("outside").addMarker("air").addMarker("damper").addMarker("cmd").addMarker("his").addMarker("equipHis")
                                          .setGroup(String.valueOf(nodeAddr))
+                                         .setUnit("%")
                                          .setTz(tz)
                                          .build();
         String outsideAirDamperId = hayStack.addPoint(outsideAirDamper);
@@ -245,6 +259,7 @@ public class OAOEquip
                                          .setFloorRef(floorRef)
                                          .addMarker("oao").addMarker("return").addMarker("air").addMarker("damper").addMarker("cmd").addMarker("his").addMarker("equipHis")
                                          .setGroup(String.valueOf(nodeAddr))
+                                         .setUnit("%")
                                          .setTz(tz)
                                          .build();
         String returnAirDamperId = hayStack.addPoint(returnAirDamper);
@@ -280,6 +295,7 @@ public class OAOEquip
                                          .setFloorRef(floorRef)
                                          .addMarker("oao").addMarker("co2").addMarker("weighted").addMarker("average").addMarker("sp").addMarker("his").addMarker("equipHis")
                                          .setGroup(String.valueOf(nodeAddr))
+                                         .setUnit("ppm")
                                          .setTz(tz)
                                          .build();
         String co2WAId = hayStack.addPoint(co2WA);
@@ -349,7 +365,7 @@ public class OAOEquip
                                                .setSiteRef(siteRef)
                                                .addMarker("config").addMarker("oao").addMarker("writable").addMarker("outside").addMarker("damper").addMarker("min").addMarker("drive").addMarker("sp")
                                                .setGroup(String.valueOf(nodeAddr))
-                                               .setTz(tz).build();
+                                               .setUnit("V").setTz(tz).build();
         String outsideDamperAtMinDriveId = CCUHsApi.getInstance().addPoint(outsideDamperAtMinDrive );
         hayStack.writeDefaultValById(outsideDamperAtMinDriveId, config.outsideDamperAtMinDrive);
     
@@ -358,7 +374,7 @@ public class OAOEquip
                                                             .setSiteRef(siteRef)
                                                             .addMarker("config").addMarker("oao").addMarker("writable").addMarker("outside").addMarker("damper").addMarker("max").addMarker("drive").addMarker("sp")
                                                             .setGroup(String.valueOf(nodeAddr))
-                                                            .setTz(tz).build();
+                                                            .setUnit("V").setTz(tz).build();
         String outsideDamperAtMaxDriveId = CCUHsApi.getInstance().addPoint(outsideDamperAtMaxDrive );
         hayStack.writeDefaultValById(outsideDamperAtMaxDriveId, config.outsideDamperAtMaxDrive);
     
@@ -368,7 +384,7 @@ public class OAOEquip
                                                             .setSiteRef(siteRef)
                                                             .addMarker("config").addMarker("oao").addMarker("writable").addMarker("outside").addMarker("damper").addMarker("min").addMarker("open").addMarker("sp")
                                                             .setGroup(String.valueOf(nodeAddr))
-                                                            .setTz(tz).build();
+                                                            .setUnit("%").setTz(tz).build();
         String outsideDamperMinOpenId = CCUHsApi.getInstance().addPoint(outsideDamperMinOpen  );
         hayStack.writeDefaultValById(outsideDamperMinOpenId, config.outsideDamperMinOpen);
         
@@ -378,7 +394,7 @@ public class OAOEquip
                                                             .setSiteRef(siteRef)
                                                             .addMarker("config").addMarker("oao").addMarker("writable").addMarker("return").addMarker("damper").addMarker("min").addMarker("drive").addMarker("sp")
                                                             .setGroup(String.valueOf(nodeAddr))
-                                                            .setTz(tz).build();
+                                                            .setUnit("V").setTz(tz).build();
         String returnDamperAtMinDriveId = CCUHsApi.getInstance().addPoint(returnDamperAtMinDrive );
         hayStack.writeDefaultValById(returnDamperAtMinDriveId, config.returnDamperAtMinDrive);
     
@@ -387,7 +403,7 @@ public class OAOEquip
                                                             .setSiteRef(siteRef)
                                                             .addMarker("config").addMarker("oao").addMarker("writable").addMarker("return").addMarker("damper").addMarker("max").addMarker("drive").addMarker("sp")
                                                             .setGroup(String.valueOf(nodeAddr))
-                                                            .setTz(tz).build();
+                                                            .setUnit("V").setTz(tz).build();
         String returnDamperAtMaxDriveId = CCUHsApi.getInstance().addPoint(returnDamperAtMaxDrive);
         hayStack.writeDefaultValById(returnDamperAtMaxDriveId, config.returnDamperAtMaxDrive);
     
@@ -396,7 +412,7 @@ public class OAOEquip
                                                            .setSiteRef(siteRef)
                                                            .addMarker("config").addMarker("oao").addMarker("writable").addMarker("return").addMarker("damper").addMarker("min").addMarker("open").addMarker("sp")
                                                            .setGroup(String.valueOf(nodeAddr))
-                                                           .setTz(tz).build();
+                                                           .setUnit("%").setTz(tz).build();
         String returnDamperMinOpenId = CCUHsApi.getInstance().addPoint(returnDamperMinOpen );
         hayStack.writeDefaultValById(returnDamperMinOpenId, config.returnDamperMinOpen);
     
@@ -405,7 +421,7 @@ public class OAOEquip
                                                         .setSiteRef(siteRef)
                                                         .addMarker("config").addMarker("oao").addMarker("writable").addMarker("exhaust").addMarker("fan").addMarker("stage1").addMarker("threshold").addMarker("sp")
                                                         .setGroup(String.valueOf(nodeAddr))
-                                                        .setTz(tz).build();
+                                                        .setUnit("%").setTz(tz).build();
         String exhaustFanStage1ThresholdId = CCUHsApi.getInstance().addPoint(exhaustFanStage1Threshold );
         hayStack.writeDefaultValById(exhaustFanStage1ThresholdId, config.exhaustFanStage1Threshold);
     
@@ -414,7 +430,7 @@ public class OAOEquip
                                                               .setSiteRef(siteRef)
                                                               .addMarker("config").addMarker("oao").addMarker("writable").addMarker("exhaust").addMarker("fan").addMarker("stage2").addMarker("threshold").addMarker("sp")
                                                               .setGroup(String.valueOf(nodeAddr))
-                                                              .setTz(tz).build();
+                                                              .setUnit("%").setTz(tz).build();
         String exhaustFanStage2ThresholdId = CCUHsApi.getInstance().addPoint(exhaustFanStage2Threshold );
         hayStack.writeDefaultValById(exhaustFanStage2ThresholdId, config.exhaustFanStage2Threshold);
     
@@ -432,7 +448,7 @@ public class OAOEquip
                                                           .setSiteRef(siteRef)
                                                           .addMarker("config").addMarker("oao").addMarker("writable").addMarker("co2").addMarker("threshold").addMarker("sp")
                                                           .setGroup(String.valueOf(nodeAddr))
-                                                          .setTz(tz).build();
+                                                          .setUnit("ppm").setTz(tz).build();
         String co2ThresholdId = CCUHsApi.getInstance().addPoint(co2Threshold );
         hayStack.writeDefaultValById(co2ThresholdId, config.co2Threshold);
     
@@ -441,7 +457,7 @@ public class OAOEquip
                                                           .setSiteRef(siteRef)
                                                           .addMarker("config").addMarker("oao").addMarker("writable").addMarker("exhaust").addMarker("fan").addMarker("hysteresis").addMarker("sp")
                                                           .setGroup(String.valueOf(nodeAddr))
-                                                          .setTz(tz).build();
+                                                          .setUnit("%").setTz(tz).build();
         String exhaustFanHysteresisId = CCUHsApi.getInstance().addPoint(exhaustFanHysteresis );
         hayStack.writeDefaultValById(exhaustFanHysteresisId, config.exhaustFanHysteresis);
     

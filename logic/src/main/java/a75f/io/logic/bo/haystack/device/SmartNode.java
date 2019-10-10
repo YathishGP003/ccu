@@ -85,6 +85,7 @@ public class SmartNode
                                 .setRoomRef(roomRef)
                                 .setFloorRef(floorRef)
                                 .addMarker("sensor").addMarker("his").addMarker("equipHis")
+                                .setUnit("mV")
                                 .setTz(tz)
                                 .build();
     
@@ -98,6 +99,7 @@ public class SmartNode
                             .setRoomRef(roomRef)
                             .setFloorRef(floorRef)
                             .addMarker("sensor").addMarker("his").addMarker("equipHis")
+                            .setUnit("mV")
                             .setTz(tz)
                             .build();
     
@@ -110,6 +112,7 @@ public class SmartNode
                             .setRoomRef(roomRef)
                             .setFloorRef(floorRef)
                             .addMarker("sensor").addMarker("his").addMarker("equipHis")
+                            .setUnit("Ohm")
                             .setTz(tz)
                             .build();
     
@@ -122,6 +125,7 @@ public class SmartNode
                         .setRoomRef(roomRef)
                         .setFloorRef(floorRef)
                         .addMarker("sensor").addMarker("his").addMarker("equipHis")
+                        .setUnit("Ohm")
                         .setTz(tz)
                         .build();
     
@@ -134,6 +138,7 @@ public class SmartNode
                             .setRoomRef(roomRef)
                             .setFloorRef(floorRef)
                             .addMarker("cmd").addMarker("his").addMarker("equipHis")
+                            .setUnit("dV")
                             .setTz(tz)
                             .build();
     
@@ -146,6 +151,7 @@ public class SmartNode
                              .setRoomRef(roomRef)
                              .setFloorRef(floorRef)
                              .addMarker("cmd").addMarker("his").addMarker("equipHis")
+                             .setUnit("dV")
                              .setTz(tz)
                              .build();
     
@@ -181,6 +187,7 @@ public class SmartNode
                          .setFloorRef(floorRef)
                          .addMarker("sensor").addMarker("his").addMarker("equipHis")
                          .setPort(Port.SENSOR_RT.toString())
+                         .setUnit("\u00B0F")
                          .setTz(tz)
                          .build();
     
@@ -192,6 +199,7 @@ public class SmartNode
                               .setFloorRef(floorRef)
                               .addMarker("sensor").addMarker("his").addMarker("equipHis")
                               .setPort(Port.DESIRED_TEMP.toString())
+                              .setUnit("\u00B0F")
                               .setTz(tz)
                               .build();
     }

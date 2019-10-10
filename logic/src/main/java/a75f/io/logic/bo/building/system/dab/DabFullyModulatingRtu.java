@@ -324,7 +324,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                       .setSiteRef(siteRef)
                                       .setEquipRef(equipref)
                                       .addMarker("system").addMarker("cmd").addMarker("cooling").addMarker("his").addMarker("equipHis")
-                                      .setTz(tz)
+                                      .setUnit("%").setTz(tz)
                                       .build();
         CCUHsApi.getInstance().addPoint(coolingSignal);
         
@@ -333,7 +333,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                       .setSiteRef(siteRef)
                                       .setEquipRef(equipref)
                                       .addMarker("system").addMarker("cmd").addMarker("heating").addMarker("his").addMarker("equipHis")
-                                      .setTz(tz)
+                                      .setUnit("%").setTz(tz)
                                       .build();
         CCUHsApi.getInstance().addPoint(heatingSignal);
         
@@ -341,7 +341,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                   .setDisplayName(equipDis+"-"+"fanSignal")
                                   .setSiteRef(siteRef)
                                   .setEquipRef(equipref)
-                                  .addMarker("system").addMarker("cmd").addMarker("fan").addMarker("his").addMarker("equipHis")
+                                  .setUnit("%").addMarker("system").addMarker("cmd").addMarker("fan").addMarker("his").addMarker("equipHis")
                                   .setTz(tz)
                                   .build();
         CCUHsApi.getInstance().addPoint(fanSignal);
@@ -359,7 +359,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                          .setSiteRef(siteRef)
                                          .setEquipRef(equipref)
                                          .addMarker("system").addMarker("cmd").addMarker("humidifier").addMarker("his").addMarker("equipHis")
-                                         .setTz(tz)
+                                         .setUnit("%").setTz(tz)
                                          .build();
         CCUHsApi.getInstance().addPoint(humidifierSignal);
         
@@ -368,7 +368,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                            .setSiteRef(siteRef)
                                            .setEquipRef(equipref)
                                            .addMarker("system").addMarker("cmd").addMarker("dehumidifier").addMarker("his").addMarker("equipHis")
-                                           .setTz(tz)
+                                           .setUnit("%").setTz(tz)
                                            .build();
         CCUHsApi.getInstance().addPoint(dehumidifierSignal);
     }
@@ -393,7 +393,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                              .setEquipRef(equipref)
                                              .addMarker("system").addMarker("config").addMarker("analog1")
                                              .addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
-                                             .setTz(tz)
+                                             .setEnums("false,true").setTz(tz)
                                              .build();
         String analog1OutputEnabledId = hayStack.addPoint(analog1OutputEnabled);
         hayStack.writeDefaultValById(analog1OutputEnabledId, 0.0 );
@@ -404,7 +404,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                              .setEquipRef(equipref)
                                              .addMarker("system").addMarker("config").addMarker("analog2")
                                              .addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
-                                             .setTz(tz)
+                                             .setEnums("false,true").setTz(tz)
                                              .build();
         String analog2OutputEnabledId = hayStack.addPoint(analog2OutputEnabled);
         hayStack.writeDefaultValById(analog2OutputEnabledId, 0.0 );
@@ -415,7 +415,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                              .setEquipRef(equipref)
                                              .addMarker("system").addMarker("config").addMarker("analog3")
                                              .addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
-                                             .setTz(tz)
+                                             .setEnums("false,true").setTz(tz)
                                              .build();
         String analog3OutputEnabledId = hayStack.addPoint(analog3OutputEnabled);
         hayStack.writeDefaultValById(analog3OutputEnabledId, 0.0 );
@@ -426,7 +426,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                             .setEquipRef(equipref)
                                             .addMarker("system").addMarker("config").addMarker("relay3")
                                             .addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
-                                            .setTz(tz)
+                                            .setEnums("false,true").setTz(tz)
                                             .build();
         String relay3OutputEnabledId = hayStack.addPoint(relay3OutputEnabled);
         hayStack.writeDefaultValById(relay3OutputEnabledId, 0.0 );
@@ -437,7 +437,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
                                             .setEquipRef(equipref)
                                             .addMarker("system").addMarker("config").addMarker("relay7")
                                             .addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
-                                            .setTz(tz)
+                                            .setEnums("false,true").setTz(tz)
                                             .build();
         String relay7OutputEnabledId = hayStack.addPoint(relay7OutputEnabled);
         hayStack.writeDefaultValById(relay7OutputEnabledId, 0.0 );

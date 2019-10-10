@@ -34,7 +34,7 @@ public abstract class DabSystemProfile extends SystemProfile
     
     private void addSystemLoopOpPoint(String loop, String siteRef, String equipref, String equipDis, String tz)
     {
-        Point relay1Op = new Point.Builder().setDisplayName(equipDis + "-" + loop + "LoopOutput").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker(loop).addMarker("loop").addMarker("output").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).build();
+        Point relay1Op = new Point.Builder().setDisplayName(equipDis + "-" + loop + "LoopOutput").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker(loop).addMarker("loop").addMarker("output").addMarker("his").addMarker("equipHis").addMarker("sp").setUnit("%").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(relay1Op);
     }
     
@@ -148,24 +148,24 @@ public abstract class DabSystemProfile extends SystemProfile
         String desiredCIId = CCUHsApi.getInstance().addPoint(desiredCI);
         CCUHsApi.getInstance().writePoint(desiredCIId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.SYSTEM_DEFAULT_CI, 0);
         CCUHsApi.getInstance().writeHisValById(desiredCIId, TunerConstants.SYSTEM_DEFAULT_CI);
-        Point systemState = new Point.Builder().setDisplayName(equipDis + "-" + "systemMode").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("rtu").addMarker("mode").addMarker("sp").addMarker("his").addMarker("equipHis").setTz(tz).build();
+        Point systemState = new Point.Builder().setDisplayName(equipDis + "-" + "systemMode").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("rtu").addMarker("mode").addMarker("sp").addMarker("his").addMarker("equipHis").setEnums("off,auto,coolonly,heatonly").setTz(tz).build();
         String systemStateId = CCUHsApi.getInstance().addPoint(systemState);
         CCUHsApi.getInstance().writePoint(systemStateId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", (double) SystemState.OFF.ordinal(), 0);
         CCUHsApi.getInstance().writeHisValById(systemStateId, (double) SystemState.OFF.ordinal());
-        Point targetMaxInsideHumidty = new Point.Builder().setDisplayName(equipDis + "-" + "targetMaxInsideHumidty").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("target").addMarker("max").addMarker("his").addMarker("equipHis").setTz(tz).addMarker("inside").addMarker("humidity").addMarker("sp").build();
+        Point targetMaxInsideHumidty = new Point.Builder().setDisplayName(equipDis + "-" + "targetMaxInsideHumidty").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("target").addMarker("max").addMarker("his").addMarker("equipHis").setUnit("%").setTz(tz).addMarker("inside").addMarker("humidity").addMarker("sp").build();
         String targetMaxInsideHumidtyId = CCUHsApi.getInstance().addPoint(targetMaxInsideHumidty);
         CCUHsApi.getInstance().writePoint(targetMaxInsideHumidtyId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.TARGET_MAX_INSIDE_HUMIDITY, 0);
         CCUHsApi.getInstance().writeHisValById(targetMaxInsideHumidtyId, TunerConstants.TARGET_MAX_INSIDE_HUMIDITY);
-        Point targetMinInsideHumidty = new Point.Builder().setDisplayName(equipDis + "-" + "targetMinInsideHumidty").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("target").addMarker("min").addMarker("inside").addMarker("humidity").addMarker("sp").addMarker("his").addMarker("equipHis").setTz(tz).build();
+        Point targetMinInsideHumidty = new Point.Builder().setDisplayName(equipDis + "-" + "targetMinInsideHumidty").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("target").addMarker("min").addMarker("inside").addMarker("humidity").setUnit("%").addMarker("sp").addMarker("his").addMarker("equipHis").setTz(tz).build();
         String targetMinInsideHumidtyId = CCUHsApi.getInstance().addPoint(targetMinInsideHumidty);
         CCUHsApi.getInstance().writePoint(targetMinInsideHumidtyId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", TunerConstants.TARGET_MIN_INSIDE_HUMIDITY, 0);
         CCUHsApi.getInstance().writeHisValById(targetMinInsideHumidtyId, TunerConstants.TARGET_MIN_INSIDE_HUMIDITY);
-        Point compensateHumidity = new Point.Builder().setDisplayName(equipDis + "-" + "compensateHumidity").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("his").addMarker("equipHis").addMarker("compensate").addMarker("humidity").setTz(tz).build();
+        Point compensateHumidity = new Point.Builder().setDisplayName(equipDis + "-" + "compensateHumidity").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("his").addMarker("equipHis").addMarker("compensate").addMarker("humidity").setUnit("%").setEnums("false,true").setTz(tz).build();
         String compensateHumidityId = CCUHsApi.getInstance().addPoint(compensateHumidity);
         CCUHsApi.getInstance().writePoint(compensateHumidityId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", 0.0, 0);
         CCUHsApi.getInstance().writeHisValById(compensateHumidityId, 0.0);
         
-        Point demandResponseMode = new Point.Builder().setDisplayName(equipDis + "-" + "demandResponseMode").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("his").addMarker("equipHis").addMarker("demand").addMarker("response").setTz(tz).build();
+        Point demandResponseMode = new Point.Builder().setDisplayName(equipDis + "-" + "demandResponseMode").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("userIntent").addMarker("writable").addMarker("his").addMarker("equipHis").addMarker("demand").addMarker("response").setEnums("false,true").setTz(tz).build();
         String demandResponseModeId = CCUHsApi.getInstance().addPoint(demandResponseMode);
         CCUHsApi.getInstance().writePoint(demandResponseModeId, TunerConstants.UI_DEFAULT_VAL_LEVEL, "ccu", 0.0, 0);
         CCUHsApi.getInstance().writeHisValById(demandResponseModeId, 0.0);

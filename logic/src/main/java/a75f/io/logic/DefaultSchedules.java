@@ -37,7 +37,6 @@ public class DefaultSchedules {
         HRef localId = HRef.make(UUID.randomUUID().toString());
         HDictBuilder defaultSchedule = new HDictBuilder()
                 .add("id", localId)
-                .add("unit", "\\u00B0F")
                 .add("kind", "Number")
                 .add(zone ? "zone":"building")
                 .add("temp")

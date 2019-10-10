@@ -123,7 +123,7 @@ public class RawPoint extends Entity
         private String pointRef;
         private String port;
         private String type;
-        private String unit = "F";
+        private String unit;
         private String tz;
         private String roomRef;
         private String floorRef;

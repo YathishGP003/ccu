@@ -3,10 +3,12 @@ package a75f.io.renatus;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -158,6 +160,14 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
             RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(248,325);
             lp.setMargins(0, 38, 0, 0);
             imageView.setLayoutParams(lp);
+        }
+        Display display = getActivity().getWindowManager().getDefaultDisplay();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (display.getMode().getRefreshRate() == (float)59.28){
+                RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(248,325);
+                lp.setMargins(0, 42, 0, 0);
+                imageView.setLayoutParams(lp);
+            }
         }
 
     }

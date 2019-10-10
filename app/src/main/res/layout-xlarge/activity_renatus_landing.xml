@@ -32,8 +32,9 @@
         <ImageView
             android:id="@+id/logo_daikin"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="?actionBarSize"
             android:layout_marginStart="16dp"
+            android:padding="8dp"
             android:layout_gravity="center_vertical"
             app:srcCompat="@drawable/ic_daikin_logo" />
 

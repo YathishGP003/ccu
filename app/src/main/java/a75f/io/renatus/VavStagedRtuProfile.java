@@ -2,12 +2,16 @@ package a75f.io.renatus;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.graphics.Point;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -163,6 +167,14 @@ public class VavStagedRtuProfile extends Fragment implements AdapterView.OnItemS
             RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(255,475);
             lp.setMargins(0, 62, 0, 0);
             imageView.setLayoutParams(lp);
+        }
+        Display display = getActivity().getWindowManager().getDefaultDisplay();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (display.getMode().getRefreshRate() == (float)59.28){
+                RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(255,475);
+                lp.setMargins(0, 66, 0, 0);
+                imageView.setLayoutParams(lp);
+            }
         }
     }
 

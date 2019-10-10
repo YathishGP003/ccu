@@ -109,8 +109,11 @@ public class AlertProcessor
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-            AlertDefinition[] pojos = objectMapper.readValue(alertDef, AlertDefinition[].class);
-            predefinedAlerts = new ArrayList<>(Arrays.asList(pojos));
+            if ( alertDef != null) {
+                AlertDefinition[] pojos = objectMapper.readValue(alertDef, AlertDefinition[].class);
+                predefinedAlerts = new ArrayList<>(Arrays.asList(pojos));
+            }
+            if (predefinedAlerts!= null  && predefinedAlerts.size()>0)
             for (AlertDefinition d : predefinedAlerts)
             {
                 CcuLog.d("CCU_ALERTS", "Predefined alertDef Fetched: " + d.toString());

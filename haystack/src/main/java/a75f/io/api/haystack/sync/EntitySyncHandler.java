@@ -205,12 +205,10 @@ public class EntitySyncHandler
             builder.add("id", HRef.copy(CCUHsApi.getInstance().getGUID(luid)));
             if (!updateRefs(entity, builder)) {
                 scheduleSync();
-                return;
             }
             
             entities.add(builder.toDict());
         }
-
 
         updateEntities(entities);
 

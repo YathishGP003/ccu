@@ -3,10 +3,12 @@ package a75f.io.renatus;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +18,8 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.ToggleButton;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -64,6 +68,8 @@ public class DABStagedProfile extends Fragment implements AdapterView.OnItemSele
     @BindView(R.id.relay5Test)ToggleButton relay5Test;
     @BindView(R.id.relay6Test)ToggleButton relay6Test;
     @BindView(R.id.relay7Test)ToggleButton relay7Test;
+    @BindView(R.id.tableRow2)
+    TableRow tableRow2;
     @BindView(R.id.imageRTUInput)
     ImageView imageView;
 
@@ -162,6 +168,18 @@ public class DABStagedProfile extends Fragment implements AdapterView.OnItemSele
             RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(253,470);
             lp.setMargins(0, 58, 0, 0);
             imageView.setLayoutParams(lp);
+        }
+        Display display = getActivity().getWindowManager().getDefaultDisplay();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (display.getMode().getRefreshRate() == (float)59.28){
+                RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(253,470);
+                lp.setMargins(0, 66, 0, 0);
+                imageView.setLayoutParams(lp);
+
+                TableLayout.LayoutParams tr = new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.WRAP_CONTENT);
+                tr.setMargins(0, 20, 0, 0);
+                tableRow2.setLayoutParams(tr);
+            }
         }
     }
 

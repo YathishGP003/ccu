@@ -3,10 +3,12 @@ package a75f.io.renatus;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -97,6 +99,7 @@ public class DABHybridAhuProfile extends Fragment implements AdapterView.OnItemS
     @BindView(R.id.tableRow3) TableRow tableRow3;
     @BindView(R.id.tableRow4) TableRow tableRow4;
     @BindView(R.id.tableRow8) TableRow tableRow8;
+    @BindView(R.id.tableRow7) TableRow tableRow7;
 
     Prefs prefs;
     @BindView(R.id.buttonNext)
@@ -209,6 +212,31 @@ public class DABHybridAhuProfile extends Fragment implements AdapterView.OnItemS
             tableRow3.setLayoutParams(tr);
             tableRow8.setLayoutParams(tr);
 
+        }
+
+        Display display = getActivity().getWindowManager().getDefaultDisplay();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (display.getMode().getRefreshRate() == (float)59.28){
+                RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(253,680);
+                lp.setMargins(0, 69, 0, 0);
+                imageView.setLayoutParams(lp);
+
+                TableLayout.LayoutParams tr = new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.WRAP_CONTENT);
+                tr.setMargins(0, 20, 0, 0);
+                tableRow3.setLayoutParams(tr);
+                TableLayout.LayoutParams tr1 = new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.WRAP_CONTENT);
+                tr1.setMargins(0, 17, 0, 0);
+                tableRow1.setLayoutParams(tr1);
+                TableLayout.LayoutParams tr2 = new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.WRAP_CONTENT);
+                tr2.setMargins(0, 15, 0, 0);
+                tableRow8.setLayoutParams(tr2);
+                TableLayout.LayoutParams tr3 = new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.WRAP_CONTENT);
+                tr3.setMargins(0, 15, 0, 0);
+                tableRow4.setLayoutParams(tr3);
+                TableLayout.LayoutParams tr4 = new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.WRAP_CONTENT);
+                tr4.setMargins(0, 17, 0, 0);
+                tableRow7.setLayoutParams(tr4);
+            }
         }
 
     }

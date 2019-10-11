@@ -1,5 +1,4 @@
  - Merge branch 'renatus_dev_sam' into 'master'
- - resolves RENATUS-750 Handle pubnub messages on background thread
- - Add Units to missing entities
- - Set enum for points with enum values
- - Point with enum tags
+ - resolves RENATUS-751
+ - Merge branch 'mahesh_renuts' into 'master'
+ - RENATUS-752, fix the building schedule sync issue UI fix for new tab

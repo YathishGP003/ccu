@@ -30,8 +30,13 @@ public class PubNubHandler
             case AlertDefinitionHandler.CMD:
                 AlertDefinitionHandler.handleMessage(msg);
                 break;
+            case AlertRemoveHandler.REM_ALERT_CMD:
+            case AlertRemoveHandler.REMOVE_DEF_CMD:
+            case AlertRemoveHandler.CLR_SITEDEF_CMD:
+                AlertRemoveHandler.handleMessage(cmd, msg);
+                break;
             default:
-                CcuLog.d(L.TAG_CCU_PUBNUB, "UnSupported PubNub Command Received"+cmd);
+                CcuLog.d(L.TAG_CCU_PUBNUB, "UnSupported PubNub Command : "+cmd);
                 
         }
         

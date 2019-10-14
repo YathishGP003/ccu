@@ -101,8 +101,16 @@ public class AlertManager
     public void deleteAlert(Alert a) {
         processor.deleteAlert(a);
     }
+    
+    public void deleteAlert(String id) {
+        processor.deleteAlert(id);
+    }
     public void addAlertDefinition(AlertDefinition alert) {
         processor.addAlertDefinition(alert);
     }
+    public void deleteAlertDefinition(String _id) {
+        processor.deleteCustomAlertDefinition(_id);
+    }
+    
 }
 

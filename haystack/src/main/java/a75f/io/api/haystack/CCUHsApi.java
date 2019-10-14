@@ -940,6 +940,12 @@ public class CCUHsApi
         }.start();
     }
     
+    //Force-writes local entities to the backend.
+    public void forceSync() {
+        tagsDb.removeIdMap.clear();
+        syncEntityWithPointWrite();
+    }
+    
     public void scheduleSync() {
         entitySyncHandler.scheduleSync();
     }

@@ -1179,8 +1179,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             c = VACATION;
         }else if((cachedOccupied != null) && cachedOccupied.isOccupancySensed()){
             c = OCCUPANCYSENSING;
-        }else if((cachedOccupied != null) && (cachedOccupied.isPreconditioning())) {
-            //handle preconditioning??
+        }else if(ScheduleProcessJob.getSystemOccupancy() == Occupancy.PRECONDITIONING || (cachedOccupied != null && cachedOccupied.isPreconditioning())) {
             c = PRECONDITIONING;
         }
         if((zoneDataInterface != null) && (cachedOccupied != null)){

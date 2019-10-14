@@ -95,7 +95,7 @@ public class BuildingTunersTest
         String equipRef = CCUHsApi.getInstance().addEquip(vavEquip);
         
         System.out.println("Add VAV Equip #######");
-        tuners.addVavEquipTuners("TestVavEquip",equipRef, v);
+        //tuners.addVavEquipTuners("TestVavEquip",equipRef, v);
         
         
         

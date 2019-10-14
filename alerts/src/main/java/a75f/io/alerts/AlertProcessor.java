@@ -40,8 +40,6 @@ import io.objectbox.query.QueryBuilder;
 public class AlertProcessor
 {
     
-    ArrayList<Alert> alertList;
-    ArrayList<Alert> activeAlertList;
     ArrayList<AlertDefinition> predefinedAlerts;
     
     ArrayList<AlertDefinition> customAlerts = new ArrayList<>();
@@ -69,8 +67,6 @@ public class AlertProcessor
         }
         boxStore = CCUHsApi.getInstance().tagsDb.getBoxStore();//MyObjectBox.builder().androidContext(c).build();
         alertBox = boxStore.boxFor(Alert.class);
-        alertList = new ArrayList<>();
-        activeAlertList = new ArrayList<>();
         parser = new AlertParser();
         predefinedAlerts = getPredefinedAlerts();
         if (predefinedAlerts == null || predefinedAlerts.size() == 0) {
@@ -90,8 +86,6 @@ public class AlertProcessor
                                   .debugFlags(DebugFlags.LOG_QUERIES | DebugFlags.LOG_QUERY_PARAMETERS).build();
             alertBox = boxStore.boxFor(Alert.class);
         }
-        alertList = new ArrayList<>();
-        activeAlertList = new ArrayList<>();
         parser = new AlertParser();
         fetchPredefinedAlerts();
         
@@ -321,6 +315,18 @@ public class AlertProcessor
         saveCustomAlertDefinitions(new Gson().toJson(customAlerts));
     }
     
+    public void deleteCustomAlertDefinition(String id) {
+        Iterator iterator = customAlerts.iterator();
+        while(iterator.hasNext()) {
+            AlertDefinition a = (AlertDefinition) iterator.next();
+            if (a._id.equals(id)) {
+                iterator.remove();
+            }
+        }
+        saveCustomAlertDefinitions(new Gson().toJson(customAlerts));
+    }
+    
+    
     public void saveCustomAlertDefinitions(String alerts) {
         CcuLog.d("CCU_ALERTS", "Save Custom Alerts "+alerts);
         mContext.getSharedPreferences(PREFS_ALERT_DEFS, Context.MODE_PRIVATE).edit().putString(PREFS_ALERTS_CUSTOM, alerts).apply();
@@ -358,6 +364,12 @@ public class AlertProcessor
         return alertQuery.build().find();
     }
     
+    public Alert getAlert(String id) {
+        QueryBuilder<Alert> alertQuery = alertBox.query();
+        alertQuery.equal(Alert_._id, id);
+        return alertQuery.build().findFirst();
+    }
+    
     public List<Alert> getAllAlerts(String message){
         QueryBuilder<Alert> alertQuery = alertBox.query();
         alertQuery.equal(Alert_.mMessage, message)
@@ -387,9 +399,18 @@ public class AlertProcessor
     }
     
     public void deleteAlert(Alert alert) {
+        //_id is empty if the alert is not synced to backend.
         if (alert._id.equals("") || AlertSyncHandler.delete(mContext, alert._id))
         {
             alertBox.remove(alert.id);
+        }
+    }
+    
+    public void deleteAlert(String id) {
+        Alert a = getAlert(id);
+        if (a != null)
+        {
+            alertBox.remove(a.id);
         }
     }
     
@@ -420,7 +441,7 @@ public class AlertProcessor
     }
     
     public void clearAlerts() {
-        alertList.clear();
-        activeAlertList.clear();
+        //alertList.clear();
+        //activeAlertList.clear();
     }
 }

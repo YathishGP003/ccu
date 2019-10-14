@@ -32,6 +32,7 @@ import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HGridBuilder;
 import org.projecthaystack.HRow;
+import org.projecthaystack.client.CallException;
 import org.projecthaystack.client.HClient;
 
 import java.util.ArrayList;
@@ -55,15 +56,12 @@ import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
-import a75f.io.logic.jobs.ScheduleProcessJob;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnEditorAction;
 import butterknife.OnFocusChange;
 import butterknife.OnItemClick;
-
-import static a75f.io.renatus.tuners.ExpandableTunerListAdapter.getTuner;
 
 /**
  * Created by samjithsadasivan isOn 8/7/17.
@@ -342,18 +340,25 @@ public class FloorPlanFragment extends Fragment
 
 				//for zones
 				HDict zDict = new HDictBuilder().add("filter", "room and not oao and siteRef == " + siteGUID).toDict();
-				HGrid zonePoint = hClient.call("read", HGridBuilder.dictToGrid(zDict));
-				Iterator zit = zonePoint.iterator();
-
-				siteRoomList.clear();
-				while (zit.hasNext())
+				
+				try
 				{
-					HRow zr = (HRow) zit.next();
-
-					if (zr.getStr("dis") != null) {
-						siteRoomList.add(zr.getStr("dis"));
+					HGrid zonePoint = hClient.call("read", HGridBuilder.dictToGrid(zDict));
+					Iterator zit = zonePoint.iterator();
+					siteRoomList.clear();
+					while (zit.hasNext())
+					{
+						HRow zr = (HRow) zit.next();
+						
+						if (zr.getStr("dis") != null) {
+							siteRoomList.add(zr.getStr("dis"));
+						}
 					}
+				} catch (CallException e) {
+					Log.d(L.TAG_CCU_UI, "Failed to fetch room data "+e.getMessage());
+					e.printStackTrace();
 				}
+				
 
 				return null;
 			}

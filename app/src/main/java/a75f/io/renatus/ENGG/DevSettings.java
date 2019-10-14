@@ -61,6 +61,9 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     @BindView(R.id.deleteHis)
     Button deleteHis;
     
+    @BindView(R.id.forceSyncBtn)
+    Button forceSyncBtn;
+    
     @BindView(R.id.testModBtn)
     ToggleButton testModBtn;
     
@@ -172,6 +175,16 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
             }
         });
     
+        forceSyncBtn.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                Log.d("CCU"," forceSync site data ");
+                CCUHsApi.getInstance().forceSync();
+            }
+        });
+        
         testModBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
         {
             @Override

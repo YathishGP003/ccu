@@ -1136,7 +1136,6 @@ public class Schedule extends Entity
         HList hList = HList.make(days);
         HDictBuilder defaultSchedule = new HDictBuilder()
                 .add("id", HRef.copy(getId()))
-                .add("unit", getUnit())
                 .add("kind", getKind())
                 .add("dis", "Building Schedule")
                 .add("days", hList)
@@ -1203,7 +1202,6 @@ public class Schedule extends Entity
         HList hList = HList.make(days);
         HDictBuilder defaultSchedule = new HDictBuilder()
                                                .add("id", HRef.copy(getId()))
-                                               .add("unit", getUnit())
                                                .add("kind", getKind())
                                                .add("dis", "Zone Schedule")
                                                .add("days", hList)

@@ -942,7 +942,9 @@ public class CCUHsApi
     
     //Force-writes local entities to the backend.
     public void forceSync() {
-        tagsDb.removeIdMap.clear();
+        tagsDb.idMap.clear();
+        tagsDb.saveTags();
+        tagsDb.init(cxt);
         syncEntityWithPointWrite();
     }
     

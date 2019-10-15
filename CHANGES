@@ -1,0 +1,9 @@
+ - Merge branch 'mahesh_renuts' into 'master'
+ - Merge branch 'renatus_dev_sam' into 'master'
+ - resolves RENATUS-760
+ - resolves RENATUS-756
+ - Implement Re-Sync option
+ - resolves RENATUS-758
+ - force Sync api
+ - add unit param
+ - fixed the multiple runtime exceptions

@@ -43,6 +43,7 @@ public class DefaultSchedules {
                 .add("schedule")
                 .add("heating")
                 .add("cooling")
+                .add("unit")
                 .add("dis", zone ? "Zone Schedule" : "Building Schedule")
                 .add("days", hList)
                 .add("siteRef", siteId);

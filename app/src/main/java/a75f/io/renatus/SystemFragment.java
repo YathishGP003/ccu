@@ -293,6 +293,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			}
 			@Override
 			public void onStopTrackingTouch(SeekBar seekBar) {
+				sbComfortValue.setContentDescription(String.valueOf(seekBar.getProgress()));
 				setUserIntentBackground("desired and ci",5 - seekBar.getProgress());
 			}
 		});
@@ -416,6 +417,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 						tbCompHumidity.setChecked(false);
 						tbDemandResponse.setChecked(false);
 						sbComfortValue.setProgress(0);
+						sbComfortValue.setContentDescription("0");
 						targetMaxInsideHumidity.setSelection(humidityAdapter
 								.getPosition(0.0), false);
 						targetMinInsideHumidity.setSelection(humidityAdapter
@@ -428,6 +430,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 						tbCompHumidity.setChecked(TunerUtil.readSystemUserIntentVal("compensate and humidity") > 0);
 						tbDemandResponse.setChecked(TunerUtil.readSystemUserIntentVal("demand and response") > 0);
 						sbComfortValue.setProgress(5 - (int) TunerUtil.readSystemUserIntentVal("desired and ci"));
+						sbComfortValue.setContentDescription(String.valueOf(5 - (int) TunerUtil.readSystemUserIntentVal("desired and ci")));
 
 						targetMaxInsideHumidity.setSelection(humidityAdapter
 								.getPosition(TunerUtil.readSystemUserIntentVal("target and max and inside and humidity")), false);

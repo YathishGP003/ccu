@@ -821,6 +821,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         }
         if (((i + 1) % columnCount == 0) && (i != 0)) {
             try {
+                if(tablerowLayout[rowcount].getParent() != null) {
+                    ((ViewGroup)tablerowLayout[rowcount].getParent()).removeView(tablerowLayout[rowcount]);
+                }
                 tableLayout.addView(tablerowLayout[rowcount++]);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -830,6 +833,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         }
         if (rowcount < numRows) {
             try {
+                if(tablerowLayout[rowcount].getParent() != null) {
+                    ((ViewGroup)tablerowLayout[rowcount].getParent()).removeView(tablerowLayout[rowcount]);
+                }
                 tableLayout.addView(tablerowLayout[rowcount]);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -1395,6 +1401,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         }
         if (rowcount < numRows) {
             try {
+                if(tablerowLayout[rowcount].getParent() != null) {
+                    ((ViewGroup)tablerowLayout[rowcount].getParent()).removeView(tablerowLayout[rowcount]);
+                }
                 tableLayout.addView(tablerowLayout[rowcount]);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -1998,6 +2007,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         linearLayoutZonePoints.addView(viewPointRow1);
         viewPointRow1.setPadding(0,0,0,40);
         try {
+            if(viewPointRow1.getParent() != null) {
+                ((ViewGroup)viewPointRow1.getParent()).removeView(viewPointRow1);
+            }
             linearLayoutZonePoints.addView(viewPointRow1);
         } catch (Exception e) {
             e.printStackTrace();
@@ -2142,6 +2154,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         linearLayoutZonePoints.addView(viewPointRow1);
         viewPointRow1.setPadding(0,0,0,40);
         try {
+            if(viewPointRow1.getParent() != null) {
+                ((ViewGroup)viewPointRow1.getParent()).removeView(viewPointRow1);
+            }
             linearLayoutZonePoints.addView(viewPointRow1);
         } catch (Exception e) {
             e.printStackTrace();
@@ -2267,6 +2282,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         linearLayoutZonePoints.addView(viewPointRow1);
         viewPointRow1.setPadding(0,0,0,40);
         try {
+            if(viewPointRow1.getParent() != null) {
+                ((ViewGroup)viewPointRow1.getParent()).removeView(viewPointRow1);
+            }
             linearLayoutZonePoints.addView(viewPointRow1);
         } catch (Exception e) {
             e.printStackTrace();

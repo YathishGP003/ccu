@@ -1,7 +1,6 @@
     variables:
       GIT_STRATEGY: clone
-    
-    
+
     before_script:
       - whoami
       - git submodule add --force https://ryan75f:Ayngayn6!@gitlab.com/75f/apps/lightsaber/ci-setup.git
@@ -12,20 +11,12 @@
       - rm -f setup.py
       - touch setup.py
       - cat ci-setup/setup.py >> setup.py
-      - rm -rf ci-setup
       - ls -al
       - pip install configparser
       - python setup.py
       - chmod +x ./build.sh
-      - chmod +x ./add_version_to_task.sh
-      - chmod +x ./bulk_add_version_to_task.sh
-      - chmod +x ./create_version.sh    
-      - chmod +x ./bump_silent.sh
-      - chmod +x ./deploy.sh
     stages:
       - build
-      - deploy
-      - release
     
     build:
       stage: build
@@ -34,27 +25,3 @@
       except:
         - tags
         - schedules
-    
-    
-    deploy:
-        stage: deploy
-        script:
-         - echo "Deploying from tag"
-         - ./build.sh
-         - ./deploy.sh
-         - ./create_version.sh
-         - ./bulk_add_version_to_task.sh
-        only:
-         - tags
-        except:
-         - schedules
-    
-    release:on-schedule:
-      stage: release
-      script:
-        - echo "Bump silent"
-        - ./bump_silent.sh
-      only:
-        - schedules
-        - manual
-        

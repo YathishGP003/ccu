@@ -397,6 +397,7 @@ public class ConventionalUnitLogicalMap {
                                   .setFloorRef(floor)
                                   .addMarker("status").addMarker("cpu").addMarker("his").addMarker("zone").addMarker("equipHis")
                                   .setGroup(String.valueOf(nodeAddr))
+                .setEnums("deadband,cooling,heating,tempdead")
                                   .setTz(tz)
                                   .build();
         String equipStatusId = CCUHsApi.getInstance().addPoint(equipStatus);

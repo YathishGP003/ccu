@@ -700,6 +700,7 @@ public class HeatPumpUnitEquip{
                 .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone")
                 .addMarker("relay6").addMarker("changeover").addMarker("type").addMarker("sp").addMarker(profile)
                 .setGroup(String.valueOf(nodeAddr))
+				.setEnums("heating,cooling")
                 .setTz(tz)
                 .build();
         String relay6TypeID = CCUHsApi.getInstance().addPoint(relay6Type);
@@ -713,6 +714,7 @@ public class HeatPumpUnitEquip{
                 .addMarker("config").addMarker("standalone").addMarker("writable").addMarker("zone")
                 .addMarker("relay5").addMarker("fan").addMarker("type").addMarker("sp").addMarker(profile)
                 .setGroup(String.valueOf(nodeAddr))
+                .setEnums("fanhigh,humidifier,dehumidifier")
                 .setTz(tz)
                 .build();
         String relay5FanTypeId = CCUHsApi.getInstance().addPoint(relay5FanType);

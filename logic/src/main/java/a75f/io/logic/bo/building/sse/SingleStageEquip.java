@@ -204,6 +204,7 @@ public class SingleStageEquip {
                 .setFloorRef(floorRef)
                 .addMarker("status").addMarker("his").addMarker("sse").addMarker("logical").addMarker("zone").addMarker("equipHis")
                 .setGroup(String.valueOf(nodeAddr))
+                .setEnums("deadband,cooling,heating,tempdead")
                 .setTz(tz)
                 .build();
         String equipStatusId = CCUHsApi.getInstance().addPoint(equipStatus);
@@ -387,7 +388,7 @@ public class SingleStageEquip {
                 .addMarker("config").addMarker("sse").addMarker("writable").addMarker("zone")
                 .addMarker("relay1").addMarker("sp").addMarker("enable").addMarker(profile)
                 .setGroup(String.valueOf(nodeAddr))
-                .setEnums("false,true")
+                .setEnums("notenabled,heating,cooling")
                 .setTz(tz)
                 .build();
         String enableRelay1Id = CCUHsApi.getInstance().addPoint(enableRelay1);
@@ -402,7 +403,7 @@ public class SingleStageEquip {
                 .addMarker("config").addMarker("sse").addMarker("writable").addMarker("zone")
                 .addMarker("relay2").addMarker("sp").addMarker("enable").addMarker(profile)
                 .setGroup(String.valueOf(nodeAddr))
-                .setEnums("false,true")
+                .setEnums("notenabled,fan")
                 .setTz(tz)
                 .build();
         String enableRelay2Id = CCUHsApi.getInstance().addPoint(enableRelay2);
@@ -661,10 +662,6 @@ public class SingleStageEquip {
             message = (status == 0 ? "Recirculating Air" : status == 1 ? "Emergency Cooling" : "Emergency Heating");
         } else
         {
-            if (ScheduleProcessJob.getSystemOccupancy() == Occupancy.PRECONDITIONING) {
-                message = "In Preconditioning ";
-            } else
-            {
                 message = (status == 0 ? "Recirculating Air" : status == 1 ? "Cooling Space" : "Warming Space");
                 if(!sseStatus.isEmpty()){
                     if(sseStatus.equals("Fan ON"))
@@ -672,7 +669,6 @@ public class SingleStageEquip {
                     else
                         message = message + ","+sseStatus;
                 }
-            }
         }
 
         String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \""+nodeAddr+"\"");

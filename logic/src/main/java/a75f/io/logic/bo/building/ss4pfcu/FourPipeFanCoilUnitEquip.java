@@ -402,6 +402,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setFloorRef(floor)
                 .addMarker("status").addMarker("his").addMarker("zone").addMarker("equipHis").addMarker(profile).addMarker("fcu")
                 .setGroup(String.valueOf(nodeAddr))
+                .setEnums("deadband,cooling,heating,tempdead")
                 .setTz(tz)
                 .build();
         String equipStatusId = CCUHsApi.getInstance().addPoint(equipStatus);

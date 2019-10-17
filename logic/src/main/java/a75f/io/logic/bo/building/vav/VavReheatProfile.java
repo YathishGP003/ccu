@@ -70,7 +70,7 @@ public class VavReheatProfile extends VavProfile
                     VAVLogicalMap vavDevice = vavDeviceMap.get(node);
                     double damperMin = vavDevice.getDamperLimit(state == HEATING ? "heating":"cooling", "min");
                     double damperMax = vavDevice.getDamperLimit(state == HEATING ? "heating":"cooling", "max");
-                    double damperPos = (L.ccu().systemProfile.getSystemController().getSystemState() == SystemController.State.OFF) ? damperMin : (damperMax+damperMin)/2;
+                    double damperPos = (damperMax+damperMin)/2;
                     vavDevice.setDamperPos(damperPos);
                     vavDevice.setNormalizedDamperPos(damperPos);
                     vavDevice.setReheatPos(0);

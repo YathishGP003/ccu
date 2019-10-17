@@ -35,6 +35,7 @@ public class DefaultSystem extends SystemProfile
     }
     @Override
     public void doSystemControl() {
+        updateOutsideWeatherParams();
         //update default points for apps and portals to consume
         String systemStatus = getStatusMessage();
         String scheduleStatus =  "No Central equipment is connected.";

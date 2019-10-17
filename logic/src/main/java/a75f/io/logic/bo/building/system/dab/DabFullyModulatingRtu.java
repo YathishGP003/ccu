@@ -75,7 +75,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     }
     
     private synchronized void updateSystemPoints() {
-    
+        updateOutsideWeatherParams();
         int signal = 0;
         double analogMin, analogMax;
         

@@ -208,33 +208,7 @@ public class DaikinIE
             @Override
             public void run()
             {
-                try
-                {
-                    Log.d("DAIKIN_IE", urlString + "\n data: \n" + data);
-                    URL url = new URL(urlString);
-                    HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
-                    httpCon.setDoOutput(true);
-                    httpCon.setRequestMethod("PUT");
-                    httpCon.setRequestProperty("Content-Type", "text/plain");
-                    httpCon.setRequestProperty("Authorization", "Bearer=11021962");
-        
-                    OutputStreamWriter out = new OutputStreamWriter(httpCon.getOutputStream());
-                    out.write(data);
-                    out.close();
-        
-                    StringBuilder sb = new StringBuilder();
-                    BufferedReader br = new BufferedReader(new InputStreamReader((httpCon.getInputStream())));
-                    String output;
-                    while ((output = br.readLine()) != null)
-                    {
-                        sb.append(output);
-                    }
-                    Log.d("DAIKIN_IE", " response \n" + sb.toString());
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                send(urlString, data);
             }
         }).start();
        

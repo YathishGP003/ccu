@@ -115,7 +115,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
     }
     
     private synchronized void updateSystemPoints() {
-        
+        updateOutsideWeatherParams();
         if (VavSystemController.getInstance().getSystemState() == COOLING)
         {
             double satSpMax = VavTRTuners.getSatTRTunerVal("spmax");

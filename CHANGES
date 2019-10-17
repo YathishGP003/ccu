@@ -1,2 +1,2 @@
- - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-761, SSE - Zone equipment status conflict
+ - Merge branch 'giridhar-fixes' into 'master'
+ - Modifying the ci.config file for solving the gitlab mail version issue

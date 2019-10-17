@@ -129,36 +129,9 @@
                         />
 
                 </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/lt_row14"
-                    android:layout_below="@id/lt_row13"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2.5dp"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/labelCMSerial"
-                        android:layout_width="wrap_content"
-                        android:layout_height="29dp"
-                        android:textAppearance="@style/text_appearance"
-                        android:text="@string/label_cmserialno"
-                        android:gravity="left|center_vertical"/>
-
-                    <TextView
-                        android:id="@+id/textCMSerial"
-                        android:layout_width="wrap_content"
-                        android:layout_height="29dp"
-                        android:layout_marginLeft="5dp"
-                        android:gravity="left|center_vertical"
-                        android:textAppearance="@style/text_values"
-                        />
-
-                </LinearLayout>
                 <LinearLayout
                     android:id="@+id/lt_row15"
-                    android:layout_below="@id/lt_row14"
+                    android:layout_below="@id/lt_row13"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2.5dp"

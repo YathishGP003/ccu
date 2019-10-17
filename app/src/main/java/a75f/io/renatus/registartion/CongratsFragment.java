@@ -10,6 +10,7 @@ import android.text.Editable;
 import android.text.Html;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,9 +23,16 @@ import android.widget.TextView;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
+import a75f.io.logic.L;
+import a75f.io.logic.bo.building.system.DefaultSystem;
+import a75f.io.logic.bo.util.HSEquipUtil;
+import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.R;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import static a75f.io.renatus.views.MasterControl.MasterControlView.getTuner;
 
 public class CongratsFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
@@ -42,8 +50,6 @@ public class CongratsFragment extends Fragment {
     TextView mSerialNo;
     @BindView(R.id.textCCUVer)
     TextView mCCUVersion;
-    @BindView(R.id.textCMSerial)
-    TextView mCMSerialNo;
     @BindView(R.id.textFirmware)
     TextView mCMFirwareVer;
     @BindView(R.id.textBuildingLimit)
@@ -60,6 +66,8 @@ public class CongratsFragment extends Fragment {
     TextView mCurrentHumidity;
     @BindView(R.id.textHvac)
     TextView mHVACEquip;
+    @BindView(R.id.labelHvac)
+    TextView labelHvac;
     @BindView(R.id.textComfort)
     TextView mComfortSelector;
 
@@ -138,10 +146,27 @@ public class CongratsFragment extends Fragment {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+        HashMap tuner = CCUHsApi.getInstance().read("equip and tuner");
+        Equip eqp = new Equip.Builder().setHashMap(tuner).build();
+        double buildingLimitMax =  TunerUtil.readTunerValByQuery("building and limit and max", eqp.getId());
+        double buildingLimitMin =  TunerUtil.readTunerValByQuery("building and limit and min", eqp.getId());
+        HashMap maxHeatMap =  CCUHsApi.getInstance().read("point and limit and max and heating and user and equipRef ==\"" + eqp.getId() + "\"");
+        HashMap minHeatMap =  CCUHsApi.getInstance().read("point and limit and min and heating and user and equipRef ==\"" +  eqp.getId() + "\"");
+        HashMap maxCoolMap =  CCUHsApi.getInstance().read("point and limit and max and cooling and user and equipRef ==\""+  eqp.getId() + "\"");
+        HashMap minCoolMap =  CCUHsApi.getInstance().read("point and limit and min and cooling and user and equipRef ==\""+  eqp.getId() + "\"");
+        buldingLimit = (int)buildingLimitMin+"|"+ (int)buildingLimitMax;
+        heatingLimit = (int)getTuner(minHeatMap.get("id").toString())+"|"+(int)getTuner(maxHeatMap.get("id").toString());
+        coolingLimit = (int)getTuner(minCoolMap.get("id").toString())+"|"+(int)getTuner(maxCoolMap.get("id").toString());
+        zoneRange = (int)getTuner(maxHeatMap.get("id").toString())+"|"+(int)getTuner(maxCoolMap.get("id").toString());
+        currentTemp = String.valueOf((int)HSEquipUtil.getCurrentTemp(eqp.getId()));
+        if (L.ccu().systemProfile instanceof DefaultSystem) {
+            currentHumidity = "0.0%";
+        } else {
+            currentHumidity = TunerUtil.readSystemUserIntentVal("humidity") + "%";
+        }
 
         mCCUName.setText(ccu.get("dis").toString());
         mSerialNo.setText(site.get("id").toString());
-        mCMSerialNo.setText("NA");
         mCMFirwareVer.setText("NA");
         mBuildingLimits.setText(buldingLimit);
         mHeatingLimits.setText(heatingLimit);
@@ -149,14 +174,21 @@ public class CongratsFragment extends Fragment {
         mZoneRange.setText(zoneRange);
         mCurrentTemp.setText(currentTemp);
         mCurrentHumidity.setText(currentHumidity);
-        mHVACEquip.setText(Html.fromHtml("<small><font color='#000000'>Cooling Stage 1 | "+"</font></small>"+"<font color='#E24301'> "+coolingStage1+"</font>"+
+        labelHvac.setText(L.ccu().systemProfile.getProfileName()+":");
+       /* mHVACEquip.setText(Html.fromHtml("<small><font color='#000000'>Cooling Stage 1 | "+"</font></small>"+"<font color='#E24301'> "+coolingStage1+"</font>"+
                                                 "<small><font color='#000000'>   Cooling Stage 2 | "+"</font></small>"+"<font color='#E24301'> "+coolingStage2+"</font><br>"+
                                                 "<small><font color='#000000'>Heating Stage 1 | "+"</font></small>"+"<font color='#E24301'> "+heatingStage1+"</font>"+
                                                 "<small><font color='#000000'>   Heating Stage 2 | "+"</font></small>"+"<font color='#E24301'> "+heatingStage2+"</font><br>"+
                                                 "<small><font color='#000000'>Humidifier | "+"</font></small>"+"<font color='#E24301'> "+humidifierStatus+"</font><br>"+
                                                 "<small><font color='#000000'>OAO | "+"</font></small>"+"<font color='#E24301'> "+oaoStatus+"</font><br>"+
                                                 "<small><font color='#000000'>Analog | "+"</font></small>"+"<font color='#E24301'> "+analogStatus+"</font>"
-        ));
+        ));*/
+        String status = L.ccu().systemProfile.getStatusMessage();
+        if (L.ccu().systemProfile instanceof DefaultSystem) {
+            mHVACEquip.setText(status.equals("") ? "System is in gateway mode" : Html.fromHtml(status.replace("ON", "<font color='#e24725'>ON</font>")));
+        }else {
+            mHVACEquip.setText(status.equals("") ? Html.fromHtml("<font color='#e24725'>OFF</font>") : Html.fromHtml(status.replace("ON","<font color='#e24725'>ON</font>").replace("OFF","<font color='#e24725'>OFF</font>")));
+        }
         mComfortSelector.setText("Maximum Comfort");
 
 

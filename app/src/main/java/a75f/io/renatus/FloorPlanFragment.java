@@ -734,6 +734,8 @@ public class FloorPlanFragment extends Fragment
 				Collections.sort(floorList, new FloorComparator());
 				updateFloors();
 				selectFloor(HSUtil.getFloors().size() - 1);
+				L.saveCCUState();
+				CCUHsApi.getInstance().syncEntityTree();
 
 				InputMethodManager mgr = (InputMethodManager) getActivity()
 						.getSystemService(Context.INPUT_METHOD_SERVICE);

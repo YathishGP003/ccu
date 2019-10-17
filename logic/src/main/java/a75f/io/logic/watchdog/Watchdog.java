@@ -3,6 +3,7 @@ package a75f.io.logic.watchdog;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import a75f.io.logger.CcuLog;
 
@@ -11,8 +12,8 @@ public class Watchdog extends Thread
     public static final int WDT_INTERVAL_MINUTES = 5;
     
     static Watchdog watchdog = new Watchdog();
-    
-    ArrayList<WatchdogMonitor> wdtMonitors = new ArrayList<>();
+
+    CopyOnWriteArrayList<WatchdogMonitor> wdtMonitors = new CopyOnWriteArrayList<>();
     
     public static Watchdog getInstance()
     {

@@ -479,7 +479,7 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
                             setCmdSignal("fan and low", 1.0, addr);
                             fanstages = "FanStage1";
                         }
-                    }else if( (roomTemp > (setTempHeating+hysteresis)) && (roomTemp <= setTempCooling - hysteresis)){
+                    }else if( (roomTemp >= (setTempHeating+hysteresis)) && (roomTemp <= setTempCooling - hysteresis)){
                         setCmdSignal("fan and low",0,addr);
                     }else {
                         if(getCmdSignal("fan and low",addr) > 0)

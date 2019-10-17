@@ -1,6 +1,7 @@
 package a75f.io.renatus;
 
 import android.os.AsyncTask;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -8,6 +9,7 @@ import android.view.MenuItem;
 import android.widget.AbsListView.MultiChoiceModeListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
@@ -36,8 +38,8 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 	@Override
 	public boolean onCreateActionMode(ActionMode mode, Menu menu)
 	{
-		floorPlanActivity.mRoomListAdapter.setMultiSelectMode(true);
-		
+		floorPlanActivity.mFloorListAdapter.setMultiSelectMode(true);
+
 		MenuInflater inflater = mode.getMenuInflater();
 		inflater.inflate(R.menu.action_menu, menu);
 		mMenu = menu;
@@ -80,7 +82,7 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 	public void onDestroyActionMode(ActionMode mode)
 	{
 		
-		floorPlanActivity.mRoomListAdapter.setMultiSelectMode(false);
+		floorPlanActivity.mFloorListAdapter.setMultiSelectMode(false);
 		selectedFloor.clear();
 		mMenu = null;
 	}
@@ -97,6 +99,11 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 				for (Device d : HSUtil.getDevices(sZone.getId())) {
 					L.removeHSDeviceEntities(Short.parseShort(d.getAddr()));
 				}
+                ArrayList<HashMap> schedules = CCUHsApi.getInstance().readAll("schedule and roomRef == "+ sZone.getId() );
+                for (HashMap schedule : schedules)
+                {
+                    CCUHsApi.getInstance().deleteEntity(schedule.get("id").toString());
+                }
 				CCUHsApi.getInstance().deleteEntity(sZone.getId());
 			}
 			CCUHsApi.getInstance().deleteEntityTree(floor.getId());

@@ -101,8 +101,9 @@ public class AboutFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_about, container, false);
-
-        getActivity().registerReceiver(receiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+        if (getActivity() != null) {
+            getActivity().registerReceiver(receiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+        }
         ButterKnife.bind(this, rootView);
 
         HashMap site = CCUHsApi.getInstance().read("site");
@@ -154,5 +155,13 @@ public class AboutFragment extends Fragment {
         mCCUAppDownloaded = false;
         mHomeAppDownloaded = false;
         AppInstaller.getHandle().downloadInstalls();
+    }
+
+    @Override
+    public void onDestroyView() {
+        if (getActivity() != null) {
+            getActivity().unregisterReceiver(receiver);
+        }
+        super.onDestroyView();
     }
 }

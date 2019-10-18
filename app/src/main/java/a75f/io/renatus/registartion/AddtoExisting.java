@@ -22,6 +22,7 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import org.projecthaystack.HGrid;
+import org.projecthaystack.ParseException;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.Globals;
@@ -286,9 +287,14 @@ public class AddtoExisting extends Fragment {
 
             @Override
             protected HGrid doInBackground(String... strings) {
-                HGrid hGrid = CCUHsApi.getInstance().getRemoteSite(strings[0]);
-
-                if (hGrid == null || hGrid.isEmpty()) {
+                HGrid hGrid = null;
+                try {
+                    hGrid = CCUHsApi.getInstance().getRemoteSite(strings[0]);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+                if (hGrid == null || hGrid.isEmpty()|| hGrid.isErr()) {
+                    getActivity().runOnUiThread(() -> Toast.makeText(getActivity(), "No Site returned!", Toast.LENGTH_LONG).show());
                     return null;
                 } else {
                     return hGrid;

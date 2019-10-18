@@ -138,8 +138,8 @@ public class OAOProfile
                                       .getInt("outside_humidity", 0);
             } else
             {
-                externalTemp = CCUHsApi.getInstance().getExternalTemp();
-                externalHumidity = CCUHsApi.getInstance().getExternalHumidity();
+                externalTemp = CCUHsApi.getInstance().readHisValByQuery("system and outside and temp");
+                externalHumidity = CCUHsApi.getInstance().readHisValByQuery("system and outside and humidity");
             }
         } catch (Exception e) {
             e.printStackTrace();

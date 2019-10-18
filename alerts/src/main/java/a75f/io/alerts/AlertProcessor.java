@@ -135,26 +135,23 @@ public class AlertProcessor
             }
             CcuLog.d("CCU_ALERTS", def.toString());
             def.evaluate();
-    
             ArrayList<String> pointList = null;
             boolean alertStatus = false;
             boolean statusInit = false;
             for (int i = 0; i < def.conditionals.size(); i+=2) {
-                
                 if (i == 0) {
-                    if (def.conditionals.get(0).grpOperation.equals("equip"))
+                    if (def.conditionals.get(0).grpOperation != null && def.conditionals.get(0).grpOperation.equals("equip"))
                     {
                         pointList = def.conditionals.get(0).pointList;
-                        CcuLog.d("CCU_ALERTS", "pointList "+pointList.size());
                     } else {
                         statusInit = true;
                         alertStatus = def.conditionals.get(0).status;
                     }
-                    
                     continue;
                 }
+                
                 if (def.conditionals.get(i-1).operator.contains("&&")) {
-                    if (def.conditionals.get(i).grpOperation.equals("equip"))
+                    if (def.conditionals.get(i).grpOperation != null && def.conditionals.get(i).grpOperation.equals("equip"))
                     {
                         if (pointList == null) {
                             if (alertStatus)
@@ -162,26 +159,35 @@ public class AlertProcessor
                                 pointList = def.conditionals.get(i).pointList;
                             }
                         } else {
-                            pointList.retainAll(def.conditionals.get(i).pointList);
+                            if (def.conditionals.get(i).pointList != null)
+                            {
+                                pointList.retainAll(def.conditionals.get(i).pointList);
+                            }
                         }
                         
                     } else {
-                        alertStatus = statusInit ? (alertStatus && def.conditionals.get(0).status)
-                                            : def.conditionals.get(0).status;
+                        if (statusInit) {
+                            alertStatus = alertStatus && def.conditionals.get(i).status;
+                        } else {
+                            statusInit = true;
+                            alertStatus = def.conditionals.get(i).status;
+                        }
+                        
                     }
-                    
                 } else if (def.conditionals.get(i-1).operator.contains("||")) {
-                    CcuLog.d("CCU_ALERTS", "pointList "+pointList.size());
-                    if (def.conditionals.get(i).grpOperation.equals("equip"))
+                    
+                    if (def.conditionals.get(i).grpOperation != null && def.conditionals.get(i).grpOperation.equals("equip"))
                     {
-                        pointList.addAll(def.conditionals.get(i).pointList);
+                        if (def.conditionals.get(i).pointList != null)
+                        {
+                            pointList.addAll(def.conditionals.get(i).pointList);
+                        }
         
                     } else {
                         alertStatus = alertStatus || def.conditionals.get(i).status;
                     }
                 }
             }
-            
             if (pointList != null) {
                 for(String point : pointList) {
                     if (!alertActive(def.alert, point))
@@ -212,7 +218,8 @@ public class AlertProcessor
                 if (alertActive(def.alert)){
                     continue;
                 }
-                if (Integer.parseInt(def.offset) > 0) {
+                
+                if (def.offset != null && Integer.parseInt(def.offset) > 0) {
                     int offset = 0;
                     if (offsetCounter.get(def.alert.mTitle) != null)
                     {
@@ -221,7 +228,6 @@ public class AlertProcessor
         
                     if (offset++ >= Integer.parseInt(def.offset)) {
                         addAlert(AlertBuilder.build(def, AlertFormatter.getFormattedMessage(def)));
-                        CcuLog.d("CCU_ALERTS", " addAlert "+def.toString());
                     } else
                     {
                         CcuLog.d("CCU_ALERTS", " Alert offset " +offset);
@@ -232,14 +238,14 @@ public class AlertProcessor
                 }
             }
         }
-    
+        
         //Fix alerts which are no more active
         for (Alert  a : getActiveAlerts()) {
             if (!activeAlertRefs.contains(a.mTitle+ (a.ref != null ? a.ref :""))) {
                 fixAlert(a);
             }
         }
-    
+        
         for (Alert a : getActiveAlerts()) {
             CcuLog.d("CCU_ALERTS"," Active Alert "+a.toString());
         }
@@ -312,6 +318,9 @@ public class AlertProcessor
             }
         }
         customAlerts.addAll(aList);
+        for (AlertDefinition a : customAlerts) {
+            CcuLog.d("CCU_ALERTS"," add def "+a.toString());
+        }
         saveCustomAlertDefinitions(new Gson().toJson(customAlerts));
     }
     

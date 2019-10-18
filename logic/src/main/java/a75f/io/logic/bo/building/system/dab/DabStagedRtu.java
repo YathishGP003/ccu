@@ -101,6 +101,7 @@ public class DabStagedRtu extends DabSystemProfile
     }
     
     protected synchronized void updateSystemPoints() {
+        updateOutsideWeatherParams();
         
         stageStatus = new int[17];
         if (getSystemController().getSystemState() == COOLING)

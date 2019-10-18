@@ -1,5 +1,7 @@
 package a75f.io.logic.bo.building.system;
 
+import android.util.Log;
+
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 
@@ -12,6 +14,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Schedule;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.dab.DabSystemController;
@@ -318,6 +321,12 @@ public abstract class SystemProfile
                 .setTz(tz)
                 .setKind("string").build();
         CCUHsApi.getInstance().addPoint(systemScheduleStatus);
+        
+        Point outsideTemperature = new Point.Builder().setDisplayName(equipDis + "-" + "outsideTemperature").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("outside").addMarker("temp").addMarker("his").addMarker("equipHis").addMarker("sp").setUnit("\u00B0F").setTz(tz).build();
+        CCUHsApi.getInstance().addPoint(outsideTemperature);
+    
+        Point outsideHumidity = new Point.Builder().setDisplayName(equipDis + "-" + "outsideHumidity").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("outside").addMarker("humidity").addMarker("his").addMarker("equipHis").addMarker("sp").setUnit("%").setTz(tz).build();
+        CCUHsApi.getInstance().addPoint(outsideHumidity);
     }
     
     //VAV & DAB System profile common points are added here.
@@ -331,20 +340,22 @@ public abstract class SystemProfile
         CCUHsApi.getInstance().addPoint(ciRunning);
         Point averageHumidity = new Point.Builder().setDisplayName(equipDis + "-" + "averageHumidity").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("average").addMarker("humidity").addMarker("his").addMarker("equipHis").addMarker("sp").setUnit("%").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(averageHumidity);
-        Point outsideHumidity = new Point.Builder().setDisplayName(equipDis + "-" + "outsideHumidity").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("outside").addMarker("humidity").addMarker("his").addMarker("equipHis").addMarker("sp").setUnit("%").setTz(tz).build();
-        CCUHsApi.getInstance().addPoint(outsideHumidity);
-        Point calculatedHumidity = new Point.Builder().setDisplayName(equipDis + "-" + "calculatedHumidity").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("calculated").addMarker("humidity").addMarker("his").addMarker("equipHis").addMarker("sp").setUnit("%").setTz(tz).build();
-        CCUHsApi.getInstance().addPoint(calculatedHumidity);
-        Point targetHumidity = new Point.Builder().setDisplayName(equipDis + "-" + "targetHumidity").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("target").addMarker("humidity").addMarker("his").addMarker("equipHis").addMarker("sp").setUnit("%").setTz(tz).build();
-        CCUHsApi.getInstance().addPoint(targetHumidity);
         Point cmHumidity = new Point.Builder().setDisplayName(equipDis + "-" + "cmHumidity").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("cm").addMarker("humidity").addMarker("his").addMarker("equipHis").addMarker("sp").setTz(tz).setUnit("%").build();
         CCUHsApi.getInstance().addPoint(cmHumidity);
         Point averageTemperature = new Point.Builder().setDisplayName(equipDis + "-" + "averageTemperature").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("average").addMarker("temp").addMarker("his").addMarker("equipHis").addMarker("sp").setUnit("\u00B0F").setTz(tz).build();
         CCUHsApi.getInstance().addPoint(averageTemperature);
-        Point outsideTemperature = new Point.Builder().setDisplayName(equipDis + "-" + "outsideTemperature").setSiteRef(siteRef).setEquipRef(equipref).addMarker("system").addMarker("outside").addMarker("temp").addMarker("his").addMarker("equipHis").addMarker("sp").setUnit("\u00B0F").setTz(tz).build();
-        CCUHsApi.getInstance().addPoint(outsideTemperature);
-        
         addCMPoints(siteRef, equipref, equipDis, tz);
+    }
+    
+    public void updateOutsideWeatherParams() {
+        try {
+            CCUHsApi.getInstance().writeHisValByQuery("system and outside and temp", CCUHsApi.getInstance().getExternalTemp());
+            CCUHsApi.getInstance().writeHisValByQuery("system and outside and humidity", CCUHsApi.getInstance().getExternalHumidity());
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+            Log.d(L.TAG_CCU_OAO, " Failed to read external Temp or Humidity , Disable Economizing");
+        }
     }
     
     public void reset() {

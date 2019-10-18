@@ -165,7 +165,7 @@ public class VavStagedRtu extends VavSystemProfile
     }
     
     protected synchronized void updateSystemPoints() {
-    
+        updateOutsideWeatherParams();
         stageStatus = new int[17];
         if (VavSystemController.getInstance().getSystemState() == COOLING)
         {

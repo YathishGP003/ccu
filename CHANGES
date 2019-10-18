@@ -1,2 +1,5 @@
- - Merge branch 'giridhar-fixes' into 'master'
- - Modifying the ci.config file for solving the gitlab mail version issue
+ - Merge branch 'mahesh_renuts' into 'master'
+ - RENATUS-768, RENATUS-763 fixed
+ - Merge branch 'kumar_renatus' into 'master'
+ - #RENATUS-776, fan low relay not off
+ - #RENATUS-771, add tuner for cmPercentTempDeadAllowed

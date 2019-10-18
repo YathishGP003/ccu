@@ -859,8 +859,8 @@ public class TestRemoteHsSync
     @Test
     public void testWeatherDataFetch() {
         CCUHsApi api = new CCUHsApi();
-        HClient hClient   = new HClient("https://renatusv2-qa.azurewebsites.net/", HayStackConstants.USER, HayStackConstants.PASS);
-        HDict   navIdDict = new HDictBuilder().add(HayStackConstants.ID, HRef.make("5d7813b43edf896868c8b139")).toDict();
+        HClient hClient   = new HClient("https://renatusv2.azurewebsites.net/", HayStackConstants.USER, HayStackConstants.PASS);
+        HDict   navIdDict = new HDictBuilder().add(HayStackConstants.ID, HRef.make("5d9b67e210dd8b3faaecb429")).toDict();
         HGrid   hGrid     = HGridBuilder.dictToGrid(navIdDict);
     
         HGrid site = hClient.call(HStdOps.read.name(), hGrid);
@@ -874,7 +874,7 @@ public class TestRemoteHsSync
         {
             tempWeatherRef = HRef.copy(weatherPoint.row(0).get("id").toString());
         }
-        HGrid hisGrid = hClient.hisRead(tempWeatherRef, "current");
+        HGrid hisGrid = hClient.hisRead(tempWeatherRef, "today");
         hisGrid.dump();
         if (hisGrid != null && hisGrid.numRows() > 0)
         {

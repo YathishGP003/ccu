@@ -57,7 +57,7 @@ public class CCUHsApi
 
     public boolean testHarnessEnabled = false;
     
-    public boolean unitTestingEnabled = false;
+    public boolean unitTestingEnabled = true;
     
     Context cxt;
     

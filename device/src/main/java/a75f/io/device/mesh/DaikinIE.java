@@ -11,6 +11,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Occupancy;
 import a75f.io.logic.bo.building.system.SystemController;
@@ -126,7 +127,8 @@ public class DaikinIE
     }
     
     private static void sendCoolingDATAutoControl(String url){
-        send(url, String.format(DAIKIN_IE_MSG_BODY, fahrenheitToCelsius(L.ccu().systemProfile.getCmd("dat"))));
+        CcuLog.d("DAIKIN_IE"," DATClgSetpoint (F) - "+L.ccu().systemProfile.getCmd("dat and setpoint"));
+        send(url, String.format(DAIKIN_IE_MSG_BODY, fahrenheitToCelsius(L.ccu().systemProfile.getCmd("dat and setpoint"))));
     }
     
     private void sendCoolingDAT(String url) {

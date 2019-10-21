@@ -113,7 +113,7 @@ public abstract class SystemProfile
     }
     
     public double getCmd(String tags) {
-        return CCUHsApi.getInstance().readHisValByQuery(tags+" and equipRef == \""+getSystemEquipRef()+"\"");
+        return CCUHsApi.getInstance().readHisValByQuery(tags+" and cmd and equipRef == \""+getSystemEquipRef()+"\"");
     }
     
     public SystemController getSystemController() {

@@ -1,11 +1,2 @@
  - Merge branch 'renatus_dev_sam' into 'master'
- - Set damper of Dead dab zone to mid point
- - Merge branch 'mahesh_renuts' into 'master'
- - RENATUS-748, RENATUS-779 fix
- - Merge branch 'renatus_dev_sam' into 'master'
- - Disable reheat during cooling
- - Merge branch 'renatus_dev_sam' into 'master'
- - Alert processing refactor
- - resloves RENATUS-770
- - resolves RENATUS-777
- - Tweak outside weather point updates
+ - Correct datclgspt tags

@@ -131,8 +131,8 @@ public class ConventionalUnitProfile extends ZoneProfile {
             //For dual temp but for single mode we use tuners
             double hysteresis = StandaloneTunerUtil.getStandaloneStage1Hysteresis(cpuEquip.getId());
 
-            double ssOperatingMode = getOperationalModes("temp",cpuEquip.getId());
-            double ssFanOpMode = getOperationalModes("fan",cpuEquip.getId());
+            double ssOperatingMode = getOperationalModes("temp and conditioning",cpuEquip.getId());
+            double ssFanOpMode = getOperationalModes("fan and operation",cpuEquip.getId());
             int fanStage2Type = (int)getConfigType("relay6",node);
             StandaloneOperationalMode opMode = StandaloneOperationalMode.values()[(int)ssOperatingMode];
             StandaloneLogicalFanSpeeds fanSpeed = StandaloneLogicalFanSpeeds.values()[(int)ssFanOpMode];
@@ -493,7 +493,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
     }
 
     public double getOperationalModes(String cmd, String equipRef){
-        return CCUHsApi.getInstance().readHisValByQuery("point and standalone and operation and mode and his and "+cmd+" and equipRef == \"" + equipRef + "\"");
+        return CCUHsApi.getInstance().readHisValByQuery("point and standalone and mode and his and "+cmd+" and equipRef == \"" + equipRef + "\"");
     }
 
     private void resetRelays(String equipRef, short node){

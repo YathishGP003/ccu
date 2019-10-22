@@ -114,8 +114,8 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
             }
 
 
-            double ssOperatingMode = getOperationalModes("temp", twoPfcuEquip.getId());
-            double ssFanOpMode = getOperationalModes("fan", twoPfcuEquip.getId());
+            double ssOperatingMode = getOperationalModes("temp and conditioning", twoPfcuEquip.getId());
+            double ssFanOpMode = getOperationalModes("fan and operation", twoPfcuEquip.getId());
             updateThresholdsForTwoPipe(twoPfcuEquip.getId());
             StandaloneOperationalMode opMode = StandaloneOperationalMode.values()[(int) ssOperatingMode];
             StandaloneLogicalFanSpeeds fanSpeed = StandaloneLogicalFanSpeeds.values()[(int) ssFanOpMode];
@@ -302,7 +302,7 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
     }
 
     public double getOperationalModes(String cmd, String equipRef) {
-        return CCUHsApi.getInstance().readHisValByQuery("point and standalone and operation and mode and his and " + cmd + " and equipRef == \"" + equipRef + "\"");
+        return CCUHsApi.getInstance().readHisValByQuery("point and standalone and mode and his and " + cmd + " and equipRef == \"" + equipRef + "\"");
     }
     private void fanOperationalModes(String equipId, StandaloneLogicalFanSpeeds fanSpeed, short addr, boolean occupied, StandaloneOperationalMode opMode, double roomTemp){
 

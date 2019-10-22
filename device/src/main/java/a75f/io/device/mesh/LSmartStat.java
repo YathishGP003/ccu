@@ -84,7 +84,7 @@ public class LSmartStat {
                     HashMap device = hayStack.read("device and addr == \"" + node + "\"");
                     controlsMessage_t.controls.setTemperature.set((short) 144); //for Smartstat we always send desired temp as fixed value.
                     controlsMessage_t.controls.fanSpeed.set(getOperationalMode("fan",zp.getEquip().getId()));
-                    controlsMessage_t.controls.conditioningMode.set(SmartStatConditioningMode_t.values()[(int) getTempOperationalMode("temp",zp.getEquip().getId())]);
+                    controlsMessage_t.controls.conditioningMode.set(SmartStatConditioningMode_t.values()[(int) getTempConditioningMode("temp and conditioning",zp.getEquip().getId())]);
                     if (device != null && device.size() > 0) {
                         ArrayList<HashMap> physicalOpPoints = hayStack.readAll("point and physical and cmd and deviceRef == \"" + device.get("id") + "\"");
                         for (HashMap opPoint : physicalOpPoints) {
@@ -216,7 +216,7 @@ public class LSmartStat {
         HashMap device = hayStack.read("device and addr == \"" + node + "\"");
         controls.setTemperature.set((short)(getDesiredTemp(node) * 2)); //for Smartstat we always send desired temp as fixed values??? doubts over here? kumar
         controls.fanSpeed.set(getOperationalMode("fan",equipId));
-        controls.conditioningMode.set(SmartStatConditioningMode_t.values()[(int) getTempOperationalMode("temp",equipId)]);
+        controls.conditioningMode.set(SmartStatConditioningMode_t.values()[(int) getTempConditioningMode("temp and conditioning",equipId)]);
         if (device != null && device.size() > 0) {
             ArrayList<HashMap> physicalOpPoints = hayStack.readAll("point and physical and cmd and deviceRef == \"" + device.get("id") + "\"");
             for (HashMap opPoint : physicalOpPoints) {
@@ -246,9 +246,9 @@ public class LSmartStat {
     public static double getHeatPumpChangeOverType(short addr) {
         return CCUHsApi.getInstance().readDefaultVal("point and zone and config and standalone and relay6 and type and group == \""+addr+"\"");
     }
-    public static double getTempOperationalMode(String cmd, String equipRef) {
+    public static double getTempConditioningMode(String cmd, String equipRef) {
 
-        return CCUHsApi.getInstance().readPointPriorityValByQuery("point and standalone and operation and mode and his and " + cmd + " and equipRef== \"" + equipRef + "\"");
+        return CCUHsApi.getInstance().readPointPriorityValByQuery("point and standalone and mode and his and " + cmd + " and equipRef== \"" + equipRef + "\"");
     }
     public static SmartStatFanSpeed_t getOperationalMode(String cmd, String equipRef){
 

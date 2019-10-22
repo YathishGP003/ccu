@@ -112,8 +112,8 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
             Log.d(TAG, " smartstat 4pfcu, updates 111=" + fourPfcuEquip.getRoomRef() + "," + setTempHeating + "," + setTempCooling + "," + roomTemp );
 
 
-            double ssOperatingMode = getOperationalModes("temp", fourPfcuEquip.getId());
-            double ssFanOpMode = getOperationalModes("fan", fourPfcuEquip.getId());
+            double ssOperatingMode = getOperationalModes("temp and conditioning", fourPfcuEquip.getId());
+            double ssFanOpMode = getOperationalModes("fan and operation", fourPfcuEquip.getId());
             StandaloneOperationalMode opMode = StandaloneOperationalMode.values()[(int) ssOperatingMode];
             StandaloneLogicalFanSpeeds fanSpeed = StandaloneLogicalFanSpeeds.values()[(int) ssFanOpMode];
             setTempCooling = fourPfcuDevice.getDesiredTempCooling();
@@ -292,7 +292,7 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
     }
 
     public double getOperationalModes(String cmd, String equipRef) {
-        return CCUHsApi.getInstance().readHisValByQuery("point and standalone and operation and mode and his and " + cmd + " and equipRef == \"" + equipRef + "\"");
+        return CCUHsApi.getInstance().readHisValByQuery("point and standalone and mode and his and " + cmd + " and equipRef == \"" + equipRef + "\"");
     }
 
     private void fanOperationalModes(String equipId, short addr, Occupied occuStatus, StandaloneLogicalFanSpeeds fanSpeed){

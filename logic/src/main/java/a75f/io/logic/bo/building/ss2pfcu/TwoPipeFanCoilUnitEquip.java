@@ -306,13 +306,13 @@ public class TwoPipeFanCoilUnitEquip {
         CCUHsApi.getInstance().writeHisValById(datID, 0.0);
 
         Point eatPoint = new Point.Builder()
-                .setDisplayName(equipDis+"-external10kTempSensorTh2")
+                .setDisplayName(equipDis+"-supplyWaterTempSensorTh2")
                 .setEquipRef(equipRef)
                 .setSiteRef(siteRef)
                 .setRoomRef(room)
                 .setFloorRef(floor)
                 .addMarker("standalone").addMarker(profile).addMarker("fcu").addMarker("equipHis").addMarker("cur")
-                .addMarker("air").addMarker("temp").addMarker("th2").addMarker("sensor").addMarker("his").addMarker("logical").addMarker("zone")
+                .addMarker("supply").addMarker("water").addMarker("temp").addMarker("th2").addMarker("sensor").addMarker("his").addMarker("logical").addMarker("zone")
                 .setGroup(String.valueOf(nodeAddr))
                 .setUnit("\u00B0F")
                 .setTz(tz)
@@ -523,15 +523,17 @@ public class TwoPipeFanCoilUnitEquip {
         CCUHsApi.getInstance().addPoint(twoPfcuOccupancy);
 
         Point twoPfcuConditioningMode = new Point.Builder()
-                .setDisplayName(equipDis + "-" + "ConditionMode")
+                .setDisplayName(equipDis + "-" + "OperatingMode")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipref)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("standalone").addMarker("temp").addMarker("conditioning").addMarker("mode").addMarker("his").addMarker("equipHis").addMarker("sp").addMarker("zone").addMarker("pipe2").addMarker("fcu")
+                .setEnums("off,cooling,heating,tempdead")
+                .addMarker("standalone").addMarker("temp").addMarker("operating").addMarker("mode").addMarker("his").addMarker("equipHis").addMarker("sp").addMarker("zone").addMarker("pipe2").addMarker("fcu")
                 .setTz(tz)
                 .build();
-        CCUHsApi.getInstance().addPoint(twoPfcuConditioningMode);
+        String condModeId = CCUHsApi.getInstance().addPoint(twoPfcuConditioningMode);
+        CCUHsApi.getInstance().writeHisValById(condModeId, 0.0);
 
 
     }
@@ -589,7 +591,7 @@ public class TwoPipeFanCoilUnitEquip {
         CCUHsApi.getInstance().writeDefaultValById(enableAirflowId, (double)(config.enableThermistor1 == true? 1.0 : 0));
 
         Point external10KProbeTh2 = new Point.Builder()
-                .setDisplayName(equipDis+"-enableExternal10kTempSensorTh2")
+                .setDisplayName(equipDis+"-enableSupplyWaterTempTh2")
                 .setEquipRef(equipRef)
                 .setSiteRef(siteRef)
                 .setFloorRef(floor)
@@ -848,7 +850,7 @@ public class TwoPipeFanCoilUnitEquip {
 
     public double getSupplyWaterTemp()
     {
-        supplyWaterTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and th2 and standalone and group == \""+nodeAddr+"\"");
+        supplyWaterTemp = CCUHsApi.getInstance().readHisValByQuery("point and supply and water and temp and sensor and th2 and standalone and group == \""+nodeAddr+"\"");
         return supplyWaterTemp;
     }
 
@@ -1006,13 +1008,14 @@ public class TwoPipeFanCoilUnitEquip {
         CCUHsApi.getInstance().writeHisValById(fanOpModeId, TunerConstants.STANDALONE_DEFAULT_FAN_OPERATIONAL_MODE);
 
         Point operationalMode = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"OperationalMode")
+                .setDisplayName(equipDis+"-"+"ConditioningMode")
                 .setSiteRef(siteRef)
                 .setFloorRef(floor)
                 .setRoomRef(room)
                 .setEquipRef(equipref)
-                .addMarker("standalone").addMarker("userIntent").addMarker("writable").addMarker("operation").addMarker("mode").addMarker("zone").addMarker("his").addMarker("equipHis")
+                .addMarker("standalone").addMarker("userIntent").addMarker("writable").addMarker("conditioning").addMarker("mode").addMarker("zone").addMarker("his").addMarker("equipHis")
                 .addMarker("pipe2").addMarker("fcu").addMarker("temp")
+                .setEnums("off,auto,heatonly,coolonly")
                 .setTz(tz)
                 .build();
         String operationalModeId = CCUHsApi.getInstance().addPoint(operationalMode);

@@ -796,7 +796,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         p2FCUPoints.put("Profile","Smartstat - 2 Pipe FCU");
         String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and equipRef == \""+equipID+"\"");
         double fanopModePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and fan and mode and operation and equipRef == \""+equipID+"\"");
-        double operationModePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and temp and mode and operation and equipRef == \""+equipID+"\"");
+        double condtionModePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and temp and mode and conditioning and equipRef == \""+equipID+"\"");
 
         boolean isCoolingOn = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay6 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
         boolean isHeatingOn = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay4 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
@@ -819,9 +819,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             p2FCUPoints.put("Fan Mode",0);
             //vavPoints.add(0);
         }
-        if (operationModePoint > 0)
+        if (condtionModePoint > 0)
         {
-            p2FCUPoints.put("Conditioning Mode",operationModePoint);
+            p2FCUPoints.put("Conditioning Mode",condtionModePoint);
         }else{
             p2FCUPoints.put("Conditioning Mode",0);
         }
@@ -849,7 +849,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         p4FCUPoints.put("Profile","Smartstat - 4 Pipe FCU");
         String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and equipRef == \""+equipID+"\"");
         double fanopModePoint = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and fan and mode and operation and equipRef == \""+equipID+"\"");
-        double operationModePoint = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and temp and mode and operation and equipRef == \""+equipID+"\"");
+        double condtionModePoint = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and temp and mode and conditioning and equipRef == \""+equipID+"\"");
 
         boolean isCoolingOn = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay6 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
         boolean isHeatingOn = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay4 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
@@ -872,9 +872,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             p4FCUPoints.put("Fan Mode",0);
             //vavPoints.add(0);
         }
-        if (operationModePoint > 0)
+        if (condtionModePoint > 0)
         {
-            p4FCUPoints.put("Conditioning Mode",operationModePoint);
+            p4FCUPoints.put("Conditioning Mode",condtionModePoint);
         }else{
             p4FCUPoints.put("Conditioning Mode",0);
         }
@@ -909,7 +909,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
          boolean isFanLowEnabled = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay3 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
          boolean isFanHighEnabled = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay6 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
             double fanopModePoint = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and fan and mode and operation and equipRef == \""+equipID+"\"");
-            double operationModePoint = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and temp and mode and operation and equipRef == \""+equipID+"\"");
+            double conditionModePoint = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and temp and mode and conditioning and equipRef == \""+equipID+"\"");
             double fanHighHumdOption = CCUHsApi.getInstance().readDefaultVal("point and zone and config and relay6 and type and equipRef == \"" + equipID + "\"");
             double targetHumidity = 0;
             if (equipStatusPoint != null && equipStatusPoint.size() > 0)
@@ -926,9 +926,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
             }else{
                 cpuPoints.put("Fan Mode",0);
             }
-            if (operationModePoint > 0)
+            if (conditionModePoint > 0)
             {
-                cpuPoints.put("Conditioning Mode",operationModePoint);
+                cpuPoints.put("Conditioning Mode",conditionModePoint);
             }else{
                 cpuPoints.put("Conditioning Mode",0);
             }
@@ -977,7 +977,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         boolean isFanLowEnabled = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay3 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
         boolean isFanHighEnabled = CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and relay5 and equipRef == \"" + equipID + "\"") > 0 ? true : false;
         double fanopModePoint = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and fan and mode and operation and equipRef == \""+equipID+"\"");
-        double operationModePoint = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and temp and mode and operation and equipRef == \""+equipID+"\"");
+        double conditionModePoint = CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and temp and mode and conditioning and equipRef == \""+equipID+"\"");
         double fanHighHumdOption = CCUHsApi.getInstance().readDefaultVal("point and zone and config and relay5 and type and equipRef == \"" + equipID + "\"");
         double targetHumidity = 0;
         if (equipStatusPoint != null && equipStatusPoint.size() > 0)
@@ -995,9 +995,9 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         }else{
             hpuPoints.put("Fan Mode",0);
         }
-        if (operationModePoint > 0)
+        if (conditionModePoint > 0)
         {
-            hpuPoints.put("Conditioning Mode",operationModePoint);
+            hpuPoints.put("Conditioning Mode",conditionModePoint);
         }else{
             hpuPoints.put("Conditioning Mode",0);
         }

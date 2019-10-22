@@ -289,7 +289,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                             Log.d("EquipTempListAdap","condition mode change ="+position+","+ssOperatingMode);
                             if(position != (int)ssOperatingMode)
-                                StandaloneScheduler.updateOperationalPoints(equipId,"temp and operation and mode",position);
+                                StandaloneScheduler.updateOperationalPoints(equipId,"temp and conditioning and mode",position);
                         }
 
                         @Override

@@ -315,7 +315,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                                     for (int j = 0; j < zoneEquips.size(); j++) {
                                         Equip tempEquip = new Equip.Builder().setHashMap(zoneEquips.get(j)).build();
                                         double avgTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" + tempEquip.getId() + "\"");
-                                        if ((avgTemp < (buildingLimitMax + tempDeadLeeway)) && (avgTemp > (buildingLimitMin - tempDeadLeeway))) {
+                                        if ((avgTemp <= (buildingLimitMax + tempDeadLeeway)) && (avgTemp >= (buildingLimitMin - tempDeadLeeway))) {
                                             currentTempSensor = (currentTempSensor + avgTemp);
                                         } else {
                                             noTempSensor++;

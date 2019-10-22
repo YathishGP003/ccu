@@ -120,8 +120,8 @@ public class HeatPumpUnitProfile extends ZoneProfile {
             occupied = (occuStatus == null ? false : occuStatus.isOccupied());
             //For dual temp but for single mode we use tuners
 
-            double ssOperatingMode = getOperationalModes("temp", hpuEquip.getId());
-            double ssFanOpMode = getOperationalModes("fan", hpuEquip.getId());
+            double ssOperatingMode = getOperationalModes("temp and conditioning", hpuEquip.getId());
+            double ssFanOpMode = getOperationalModes("fan and operation", hpuEquip.getId());
             StandaloneOperationalMode opMode = StandaloneOperationalMode.values()[(int) ssOperatingMode];
             StandaloneLogicalFanSpeeds fanSpeed = StandaloneLogicalFanSpeeds.values()[(int) ssFanOpMode];
             int fanModeSaved = Globals.getInstance().getApplicationContext().getSharedPreferences("ss_fan_op_mode", Context.MODE_PRIVATE).getInt(hpuEquip.getId(),0);
@@ -319,7 +319,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
     }
 
     public double getOperationalModes(String cmd, String equipRef) {
-        return CCUHsApi.getInstance().readHisValByQuery("point and standalone and operation and mode and his and " + cmd + " and equipRef == \"" + equipRef + "\"");
+        return CCUHsApi.getInstance().readHisValByQuery("point and standalone and mode and his and " + cmd + " and equipRef == \"" + equipRef + "\"");
     }
 
     private void handleFanStages(String equipId, short node, StandaloneLogicalFanSpeeds fanSpeed, double curHumidity){

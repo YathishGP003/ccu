@@ -520,16 +520,18 @@ public class FourPipeFanCoilUnitEquip  {
                 .build();
         CCUHsApi.getInstance().addPoint(twoPfcuOccupancy);
 
-        Point twoPfcuConditioningMode = new Point.Builder()
-                .setDisplayName(equipDis + "-" + "ConditionMode")
+        Point fourPfcuConditioningMode = new Point.Builder()
+                .setDisplayName(equipDis + "-" + "OperatingMode")
                 .setSiteRef(siteRef)
                 .setEquipRef(equipref)
                 .setRoomRef(room)
                 .setFloorRef(floor)
-                .addMarker("standalone").addMarker("temp").addMarker("conditioning").addMarker("mode").addMarker("his").addMarker("equipHis").addMarker("sp").addMarker("zone").addMarker("fcu").addMarker("pipe4")
+                .addMarker("standalone").addMarker("temp").addMarker("operating").addMarker("mode").addMarker("his").addMarker("equipHis").addMarker("sp").addMarker("zone").addMarker("fcu").addMarker("pipe4")
+                .setEnums("off,cooling,heating,tempdead")
                 .setTz(tz)
                 .build();
-        CCUHsApi.getInstance().addPoint(twoPfcuConditioningMode);
+        String condModeId = CCUHsApi.getInstance().addPoint(fourPfcuConditioningMode);
+        CCUHsApi.getInstance().writeHisValById(condModeId, 0.0);
 
 
     }
@@ -979,6 +981,7 @@ public class FourPipeFanCoilUnitEquip  {
                 .setRoomRef(room)
                 .addMarker("standalone").addMarker("userIntent").addMarker("writable").addMarker("fan").addMarker("operation").addMarker("mode").addMarker("his").addMarker("equipHis")
                 .addMarker("fcu").addMarker("pipe4").addMarker("zone")
+                .setEnums("off,auto,low,medium,high")
                 .setTz(tz)
                 .build();
         String fanOpModeId = CCUHsApi.getInstance().addPoint(fanOpMode);
@@ -986,13 +989,14 @@ public class FourPipeFanCoilUnitEquip  {
         CCUHsApi.getInstance().writeHisValById(fanOpModeId, TunerConstants.STANDALONE_DEFAULT_FAN_OPERATIONAL_MODE);
 
         Point operationalMode = new Point.Builder()
-                .setDisplayName(equipDis+"-"+"OperationalMode")
+                .setDisplayName(equipDis+"-"+"ConditioningMode")
                 .setSiteRef(siteRef)
                 .setFloorRef(floor)
                 .setRoomRef(room)
                 .setEquipRef(equipref)
-                .addMarker("standalone").addMarker("userIntent").addMarker("writable").addMarker("operation").addMarker("mode").addMarker("zone").addMarker("his").addMarker("equipHis")
+                .addMarker("standalone").addMarker("userIntent").addMarker("writable").addMarker("conditioning").addMarker("mode").addMarker("zone").addMarker("his").addMarker("equipHis")
                 .addMarker("pipe4").addMarker("fcu").addMarker("temp")
+                .setEnums("off,auto,heatonly,coolonly")
                 .setTz(tz)
                 .build();
         String operationalModeId = CCUHsApi.getInstance().addPoint(operationalMode);

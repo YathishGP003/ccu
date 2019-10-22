@@ -469,12 +469,12 @@ public class DabSystemController extends SystemController
                 if (!isZoneDead(equip) && tempVal > 0) {
                     tempSum += tempVal;
                     tempZones++;
-                }else
-                    totalEquips++;
+                }
+                totalEquips++;
             }
         }
         double cmTempInfForPercentileZonesDead = TunerUtil.readTunerValByQuery("zone and dead and percent and influence",L.ccu().systemProfile.getSystemEquipRef());
-        if( !hasTi && ((tempZones > 0) && ((((totalEquips -tempZones )*100)/(tempZones + totalEquips)) >= cmTempInfForPercentileZonesDead))){
+        if( !hasTi && ((((totalEquips -tempZones )*100)/(totalEquips)) >= cmTempInfForPercentileZonesDead)){
             tempSum += getCMCurrentTemp(L.ccu().systemProfile.getSystemEquipRef());
             tempZones++;
         }

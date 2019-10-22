@@ -1,5 +1,7 @@
 package a75f.io.logic.bo.building.system.vav;
 
+import android.util.Log;
+
 import com.google.common.collect.EvictingQueue;
 
 import java.util.ArrayList;
@@ -150,7 +152,7 @@ public class VavSystemController extends SystemController
         
         }
         double cmTempInfForPercentileZonesDead = TunerUtil.readTunerValByQuery("zone and dead and percent and influence",L.ccu().systemProfile.getSystemEquipRef());
-        CcuLog.d(L.TAG_CCU_SYSTEM, "VavSysController = "+hasTi+","+zoneDeadCount+","+zoneCount+","+cmTempInfForPercentileZonesDead);
+        CcuLog.d(L.TAG_CCU_SYSTEM, "VavSysController = "+hasTi+","+zoneDeadCount+","+zoneCount+","+cmTempInfForPercentileZonesDead+","+((zoneDeadCount*100)/(zoneDeadCount + zoneCount)));
         if( !hasTi && ((zoneDeadCount > 0) && (((zoneDeadCount*100)/(zoneDeadCount + zoneCount)) >= cmTempInfForPercentileZonesDead))){
 
             String sysEquip = L.ccu().systemProfile.getSystemEquipRef();
@@ -534,13 +536,15 @@ public class VavSystemController extends SystemController
                 if (!isZoneDead(equip) && tempVal > 0) {
                     tempSum += tempVal;
                     tempZones++;
-                }else
-                    totalEquips++;
+                }
+                totalEquips++;
             }
         }
         double cmTempInfForPercentileZonesDead = TunerUtil.readTunerValByQuery("zone and dead and percent and influence",L.ccu().systemProfile.getSystemEquipRef());
 
-        if( !hasTi && ((tempZones > 0) && ((((totalEquips - tempZones)*100)/(tempZones + totalEquips)) >= cmTempInfForPercentileZonesDead))){
+
+        CcuLog.d(L.TAG_CCU_SYSTEM, "VavSysController = "+hasTi+","+tempZones+","+totalEquips+","+cmTempInfForPercentileZonesDead+","+(((totalEquips - tempZones)*100)/(totalEquips)));
+        if( !hasTi && ((((totalEquips - tempZones)*100)/(totalEquips)) >= cmTempInfForPercentileZonesDead)){
             tempSum += getCMCurrentTemp(L.ccu().systemProfile.getSystemEquipRef());
             tempZones++;
         }

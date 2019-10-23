@@ -95,6 +95,7 @@ public class AlertProcessor
         String alerts = mContext.getSharedPreferences(PREFS_ALERT_DEFS, Context.MODE_PRIVATE).getString(PREFS_ALERTS_PREDEFINED, null);
         return alerts != null ? parser.parseAlertsString(alerts) : null;
     }
+    
     public void fetchPredefinedAlerts() {
         try
         {
@@ -206,6 +207,7 @@ public class AlertProcessor
                             {
                                 CcuLog.d("CCU_ALERTS", "Point "+p.get("dis") + " offset " +offset);
                             }
+                            offsetCounter.put(def.alert.mTitle + p.get("id"), offset);
                         } else {
                             CcuLog.d("CCU_ALERTS", "Point " + p.get("dis") + " addAlert " + def.toString());
                             addAlert(AlertBuilder.build(def, AlertFormatter.getFormattedMessage(def, point), point));
@@ -272,7 +274,7 @@ public class AlertProcessor
     
     public boolean alertActive(Alert a, String ref) {
         for (Alert b : getActiveAlerts()) {
-            if (b.mTitle.equals(a.mTitle) && b.ref.equals(ref)) {
+            if (b.mTitle.equals(a.mTitle) && (b!= null && b.ref.equals(ref))) {
                 return true;
             }
         }
@@ -290,7 +292,7 @@ public class AlertProcessor
     
     public ArrayList<AlertDefinition> getAlertDefinitions(){
         ArrayList<AlertDefinition> definedAlerts = new ArrayList<>();
-        //definedAlerts.addAll(predefinedAlerts);
+        definedAlerts.addAll(predefinedAlerts);
         definedAlerts.addAll(getCustomAlertDefinitions());
         return definedAlerts;
     }

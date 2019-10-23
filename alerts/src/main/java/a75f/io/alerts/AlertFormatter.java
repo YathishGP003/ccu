@@ -7,6 +7,7 @@ import java.util.StringTokenizer;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Point;
+import a75f.io.logger.CcuLog;
 
 /***
  *  Alert messages shall have variables with prefix # to be formatted with runtime values while
@@ -48,6 +49,7 @@ public class AlertFormatter
                 message = message.replace(token, parseToken(def, token, null));
             }
         }
+        CcuLog.d("CCU_ALERTS","  Alert Formatted Message "+message);
         return message;
     }
     
@@ -61,6 +63,7 @@ public class AlertFormatter
                 message = message.replace(token, parseToken(def, token, pointId));
             }
         }
+        CcuLog.d("CCU_ALERTS","  Alert Formatted Message "+message);
         return message;
     }
     
@@ -94,7 +97,22 @@ public class AlertFormatter
                 HashMap ccu = hs.read("device and ccu");
                 return ccu.get("dis").toString();
             case "cond":
-                return c.value;
+                CcuLog.d("CCU_ALERTS"," Read cond val point "+point);
+                //Cond vals can of three forms
+                // 1. value fetched for a unique query or absolute value -> use c.val
+                // 2. point id for key - > run query to fetch cond val
+                // 3. point id to get value -> run through pointValList to find
+                // the value for a point that triggered the alert.
+                if (c == null) {
+                    for (Conditional d : def.conditionals) {
+                        for (PointVal v : d.pointValList) {
+                            if (v.id.equals(point)) {
+                                return String.valueOf(v.val);
+                            }
+                        }
+                    }
+                }
+                return point != null ? String.valueOf(hs.readHisValByQuery(c.value)) : c.val;
         }
         return "";
     }

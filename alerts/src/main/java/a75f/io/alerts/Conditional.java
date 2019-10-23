@@ -78,11 +78,16 @@ public class Conditional
         CcuLog.d("CCU_ALERTS"," Evaluate Conditional : "+key+ " "+condition+" "+val);
         
         if (grpOperation == null || grpOperation.equals("")) {
-            resVal = CCUHsApi.getInstance().readHisValByQuery(key);
+            HashMap point = CCUHsApi.getInstance().read(key);
+            if (point.size() == 0) {
+                status = false;
+                return;
+            }
+            resVal = CCUHsApi.getInstance().readHisValById(point.get("id").toString());
             Expression expression = new Expression(resVal + " " + condition + " " + val);
             status = expression.eval().intValue() > 0;
         } else if (grpOperation.contains("equip")) {
-            pointValList = null;
+            pointValList = new ArrayList<>();
             pointList = new ArrayList<>();
             ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("zone and equip");
             for (Map q : equips) {
@@ -90,10 +95,15 @@ public class Conditional
                 if (point.size() == 0) {
                     continue;
                 }
+                if (value.contains("zone")) {
+                    val = String.valueOf(CCUHsApi.getInstance().readHisValByQuery(value+" and equipRef == \""+q.get("id")+"\""));
+                }
                 resVal = CCUHsApi.getInstance().readHisValById(point.get("id").toString());
                 Expression expression = new Expression(resVal+ " "+condition+" " + val);
                 if (expression.eval().intValue() > 0) {
                     pointList.add(point.get("id").toString());
+                    pointValList.add(new PointVal(point.get("id").toString(), Double.parseDouble(val)));
+                    
                 }
             }
         } else {

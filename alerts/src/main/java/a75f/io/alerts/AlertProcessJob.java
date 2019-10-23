@@ -37,7 +37,13 @@ public class AlertProcessJob
             CcuLog.d("CCU_ALERTS","No Site Registered ! <-AlertProcessJob ");
             return;
         }
-        AlertManager.getInstance(mContext).processAlerts();
+        try
+        {
+            AlertManager.getInstance(mContext).processAlerts();
+        }catch (Exception e) {
+            CcuLog.d("CCU_ALERTS", "AlertProcessJob Exception: "+e.getMessage());
+            e.printStackTrace();
+        }
         CcuLog.d("CCU_ALERTS", "<-AlertProcessJob ");
     }
 }

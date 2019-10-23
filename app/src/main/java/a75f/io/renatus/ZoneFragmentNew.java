@@ -1026,6 +1026,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                         for(int k=0;k<zoneMap.size();k++)
                         {
                             Equip p = new Equip.Builder().setHashMap(zoneMap.get(k)).build();
+                            equipOpen = p;
                             String updatedEquipId = p.getId();
                             equipId[0] = updatedEquipId;
                             mSchedule = Schedule.getScheduleByEquipId(p.getId());

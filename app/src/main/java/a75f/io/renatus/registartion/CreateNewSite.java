@@ -21,6 +21,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HRef;
@@ -316,6 +317,7 @@ public class CreateNewSite extends Fragment {
                 }
                 L.saveCCUState();
                 CCUHsApi.getInstance().syncEntityTree();
+                Toast.makeText(getActivity(),"Details edited saved Successfully",Toast.LENGTH_LONG).show();
             }
         });
 

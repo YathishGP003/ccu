@@ -616,7 +616,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             currentAverageTemp = Double.parseDouble(decimalFormat.format(currentAverageTemp));
         }
         Log.i("EachzoneData"," currentAvg:"+currentAverageTemp);
-        String equipId = p.getId();
+        final String[] equipId = {p.getId()};
         int i = gridPosition;
         View arcView = null;
         arcView = inflater.inflate(R.layout.zones_item, (ViewGroup) rootView, false);
@@ -635,19 +635,19 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         scheduleAdapter.setDropDownViewResource(R.layout.spinner_item_grey);
         scheduleSpinner.setAdapter(scheduleAdapter);
 
-        String zoneId = Schedule.getZoneIdByEquipId(equipId);
-        String status = ScheduleProcessJob.getZoneStatusString(zoneId, equipId);
+        String zoneId = Schedule.getZoneIdByEquipId(equipId[0]);
+        String status = ScheduleProcessJob.getZoneStatusString(zoneId, equipId[0]);
         String vacationStatus = ScheduleProcessJob.getVacationStateString(zoneId);
         //Log.i("ZonePoints","zoneId:"+zoneId+" status:"+status+" vacationstatus:"+vacationStatus);
 
         vacationStatusTV.setText(vacationStatus);
         scheduleStatus.setText(status);
-        String scheduleTypeId = CCUHsApi.getInstance().readId("point and scheduleType and equipRef == \""+equipId+"\"");
+        String scheduleTypeId = CCUHsApi.getInstance().readId("point and scheduleType and equipRef == \""+ equipId[0] +"\"");
         final Integer mScheduleType = (int)CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId);
         Log.d("ScheduleType","mScheduleType=="+mScheduleType+","+(int)CCUHsApi.getInstance().readPointPriorityVal(scheduleTypeId)+","+p.getDisplayName());
-        mSchedule = Schedule.getScheduleByEquipId(equipId);
+        mSchedule = Schedule.getScheduleByEquipId(equipId[0]);
         scheduleSpinner.setTag(mScheduleType);
-        mScheduleTypeMap.put(equipId,mScheduleType);
+        mScheduleTypeMap.put(equipId[0],mScheduleType);
         scheduleImageButton.setTag(mSchedule.getId());
         vacationImageButton.setTag(mSchedule.getId());
 
@@ -675,9 +675,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
             schedulerFragment.setOnExitListener(() -> {
                 Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
-                mSchedule = Schedule.getScheduleByEquipId(equipId);
+                mSchedule = Schedule.getScheduleByEquipId(equipId[0]);
                 ScheduleProcessJob.updateSchedules(equipOpen);
-
             });
         });
 
@@ -690,7 +689,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
 
             schedulerFragment.setOnExitListener(() -> {
                 Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
-                mSchedule = Schedule.getScheduleByEquipId(equipId);
+                mSchedule = Schedule.getScheduleByEquipId(equipId[0]);
                 ScheduleProcessJob.updateSchedules(equipOpen);
 
 
@@ -713,9 +712,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     }
                     scheduleImageButton.setVisibility(View.GONE);
 
-                    if (mScheduleTypeMap.get(equipId) != ScheduleType.BUILDING.ordinal()) {
+                    if (mScheduleTypeMap.get(equipId[0]) != ScheduleType.BUILDING.ordinal()) {
                         setScheduleType(scheduleTypeId, ScheduleType.BUILDING);
-                        mScheduleTypeMap.put(equipId, ScheduleType.BUILDING.ordinal());
+                        mScheduleTypeMap.put(equipId[0], ScheduleType.BUILDING.ordinal());
                     }
                     scheduleImageButton.setTag(mSchedule.getId());
                     vacationImageButton.setTag(mSchedule.getId());
@@ -731,7 +730,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                     } else
                     {
 
-                        Zone     zone         = Schedule.getZoneforEquipId(equipId);
+                        Zone     zone         = Schedule.getZoneforEquipId(equipId[0]);
                         Schedule scheduleById = null;
                         if (zone.hasSchedule())
                         {
@@ -753,9 +752,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                         scheduleImageButton.setVisibility(View.VISIBLE);
                         CCUHsApi.getInstance().scheduleSync();
                     }
-                    if (mScheduleTypeMap.get(equipId) != ScheduleType.ZONE.ordinal()) {
+                    if (mScheduleTypeMap.get(equipId[0]) != ScheduleType.ZONE.ordinal()) {
                         setScheduleType(scheduleTypeId, ScheduleType.ZONE);
-                        mScheduleTypeMap.put(equipId, ScheduleType.ZONE.ordinal());
+                        mScheduleTypeMap.put(equipId[0], ScheduleType.ZONE.ordinal());
                     }
                 } else if(position == 2 && (mScheduleType != -1)){
                     scheduleImageButton.setVisibility(View.GONE);
@@ -763,7 +762,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                 {
                     //list named schedules
                 }
-                mSchedule = Schedule.getScheduleByEquipId(equipId);
+                mSchedule = Schedule.getScheduleByEquipId(equipId[0]);
                 scheduleImageButton.setTag(mSchedule.getId());
                 vacationImageButton.setTag(mSchedule.getId());
             }
@@ -1027,7 +1026,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                         for(int k=0;k<zoneMap.size();k++)
                         {
                             Equip p = new Equip.Builder().setHashMap(zoneMap.get(k)).build();
+                            equipOpen = p;
                             String updatedEquipId = p.getId();
+                            equipId[0] = updatedEquipId;
+                            mSchedule = Schedule.getScheduleByEquipId(p.getId());
                             if (p.getProfile().startsWith("DAB")) {
                                 HashMap dabPoints = ScheduleProcessJob.getDABEquipPoints(p.getId());
                                 Log.i("PointsValue", "DAB Points:" + dabPoints.toString());

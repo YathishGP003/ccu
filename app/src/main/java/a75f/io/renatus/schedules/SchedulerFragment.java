@@ -38,6 +38,8 @@ import org.joda.time.DateTime;
 import org.joda.time.Interval;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -52,6 +54,8 @@ import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.renatus.R;
 import a75f.io.renatus.schedules.ManualSchedulerDialogFragment.ManualScheduleDialogListener;
 import a75f.io.renatus.util.FontManager;
+import io.objectbox.model.Model;
+
 public class SchedulerFragment extends DialogFragment implements ManualScheduleDialogListener {
 
     private static final String PARAM_SCHEDULE_ID = "PARAM_SCHEDULE_ID";
@@ -302,7 +306,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         loadVacations();
         updateUI();
     }
-    
+
     private void updateUI() {
         schedule.populateIntersections();
     
@@ -311,6 +315,9 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
             hasTextViewChildren();
         
             ArrayList<Schedule.Days> days = schedule.getDays();
+            Collections.sort(days, (lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
+            Collections.sort(days, (lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
+
             for (int i = 0; i < days.size(); i++) {
                 Schedule.Days daysElement = days.get(i);
                 drawSchedule(i, daysElement.getCoolingVal(), daysElement.getHeatingVal(),
@@ -606,7 +613,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
             return true;
             
         }
-    
+
         schedule.getDays().addAll(daysArrayList);
         doScheduleUpdate();
         return true;
@@ -871,6 +878,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         textViewTemp.setMaxLines(2);
         textViewTemp.setContentDescription(textView.getText().toString()+"_"+tempStartTime+":"+startTimeMM+"-"+tempEndTime+":"+endTimeMM);
         textViewTemp.setId(ViewCompat.generateViewId());
+        textViewTemp.setTag(position);
 
         if (getArguments() != null && getArguments().containsKey(PARAM_IS_VACATION)) {
             boolean isVacation = getArguments().getBoolean(PARAM_IS_VACATION);
@@ -958,12 +966,10 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
 
         textViewTemp.setBackground(drawableCompat);
         constraintScheduler.addView(textViewTemp, lp);
-
-        textViewTemp.setTag(position);
         textViewTemp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                int clickedPosition = (Integer) v.getTag();
+                int clickedPosition = (int)v.getTag();
                 Toast.makeText(SchedulerFragment.this.getContext(), "Clicked: " + clickedPosition, Toast.LENGTH_SHORT).show();
                 // force refresh schedule
                 if(mScheduleId != null) schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);

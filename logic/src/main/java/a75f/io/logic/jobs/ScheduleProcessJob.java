@@ -1435,13 +1435,19 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
         CcuLog.d(L.TAG_CCU_JOB, " ScheduleType handleScheduleTypeUpdate and  clearoverides for "+p.getDisplayName()+","+CCUHsApi.getInstance().readDefaultValById(p.getId()));
         Zone zone = new Zone.Builder().setHashMap(CCUHsApi.getInstance().readMapById(p.getRoomRef())).build();
         Schedule schedule = CCUHsApi.getInstance().getScheduleById(zone.getScheduleRef());
-        
+
         if (CCUHsApi.getInstance().readDefaultValById(p.getId()) == ScheduleType.ZONE.ordinal()) {
             schedule.setDisabled(false);
         } else {
             schedule.setDisabled(true);
         }
-        
+
+        if (schedule.isZoneSchedule() && schedule.getRoomRef()!= null){
+            CCUHsApi.getInstance().updateScheduleNoSync(schedule, schedule.getRoomRef());
+        } else {
+            CCUHsApi.getInstance().updateScheduleNoSync(schedule, null);
+        }
+
         HashMap coolDT = CCUHsApi.getInstance().read("point and desired and cooling and temp and equipRef == \""+p.getEquipRef()+"\"");
         clearOverrides(coolDT.get("id").toString());
         HashMap heatDT = CCUHsApi.getInstance().read("point and desired and heating and temp and equipRef == \""+p.getEquipRef()+"\"");

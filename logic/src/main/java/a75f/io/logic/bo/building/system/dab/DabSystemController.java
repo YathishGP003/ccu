@@ -475,8 +475,11 @@ public class DabSystemController extends SystemController
         }
         double cmTempInfForPercentileZonesDead = TunerUtil.readTunerValByQuery("zone and dead and percent and influence",L.ccu().systemProfile.getSystemEquipRef());
         if( !hasTi && ((((totalEquips -tempZones )*100)/(totalEquips)) >= cmTempInfForPercentileZonesDead)){
-            tempSum += getCMCurrentTemp(L.ccu().systemProfile.getSystemEquipRef());
-            tempZones++;
+            double cmTemp = getCMCurrentTemp(L.ccu().systemProfile.getSystemEquipRef());
+            if(!isCMTempDead(cmTemp)) {
+                tempSum += cmTemp;
+                tempZones++;
+            }
         }
         averageSystemTemperature = tempZones == 0 ? 0 : tempSum/tempZones;
     }
@@ -489,7 +492,21 @@ public class DabSystemController extends SystemController
             return false;
         }
     }
-    
+    public boolean isCMTempDead(double cmTemp) {
+
+        double buildingLimitMax =  TunerUtil.readTunerValByQuery("building and limit and max", L.ccu().systemProfile.getSystemEquipRef());
+        double buildingLimitMin =  TunerUtil.readTunerValByQuery("building and limit and min", L.ccu().systemProfile.getSystemEquipRef());
+
+        double tempDeadLeeway = TunerUtil.readTunerValByQuery("temp and dead and leeway",L.ccu().systemProfile.getSystemEquipRef());
+
+        if (cmTemp > (buildingLimitMax + tempDeadLeeway)
+                || cmTemp < (buildingLimitMin - tempDeadLeeway))
+        {
+            return true;
+        }
+
+        return false;
+    }
     public boolean hasTemp(Equip q) {
         try
         {

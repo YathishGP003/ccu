@@ -1,6 +1,6 @@
- - Merge branch 'kumar_renatus' into 'master'
- - #RENATUS-786, SmartStat | Change of operating and conditiong mode similar to system
- - #RENATUS-786, SmartStat | Change of operating and conditiong mode similar to system
- - #RENATUS-771, System Average temp , cmtemp is not included
- - #RENATUS-786, SmartStat | Change of operating and conditiong mode similar to system
- - #RENATUS-778, zone temp shows avg temp even after building breach
+ - Merge branch 'renatus_dev_sam' into 'master'
+ - resolves RENATUS-769
+ - Alert conditional value fetch optimization
+ - Merge branch 'mahesh_renuts' into 'master'
+ - update equip open
+ - resolved RENATUS-767

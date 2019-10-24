@@ -7,9 +7,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.HisItem;
 import a75f.io.logger.CcuLog;
 /**
  * Created by samjithsadasivan on 4/27/18.
@@ -68,6 +70,13 @@ public class Conditional
         return order%2 == 0;
     }
     
+    /*
+     * Evaluation produces 3 types results for a conditional
+     *  - when grpOperation is empty (run the query system wide and fetch the matching point) , update the status boolean
+     *  - when grpOperation is equip/delta , create pointList having all the points satisfying the conditional
+     *  - when grpOperation is max/min/bottom etc , update status boolean.
+     *
+     */
     void evaluate() {
         
         if (key.isEmpty() || value.isEmpty() || condition.isEmpty()) {
@@ -170,6 +179,35 @@ public class Conditional
                 Expression expression = new Expression(resVal + " " + condition + " " + val);
                 status = expression.eval().intValue() > 0;
                 
+            }
+            else if (grpOperation.contains("delta"))
+            {
+                pointList = new ArrayList<>();
+                ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("zone and equip");
+                for (Map q : equips) {
+                    HashMap point = CCUHsApi.getInstance().read(key+" and equipRef == \""+q.get("id")+"\"");
+                    if (point.size() == 0) {
+                        continue;
+                    }
+    
+                    List<HisItem> hisItems = CCUHsApi.getInstance().getHisItems(point.get("id").toString(), 0 ,2);
+                    if (hisItems.size() < 2) {
+                        return;
+                    }
+                    
+                    HisItem reading1 = hisItems.get(0);
+                    HisItem reading2 = hisItems.get(1);
+    
+                    if (value.contains("zone")) {
+                        val = String.valueOf(CCUHsApi.getInstance().readHisValByQuery(value+" and equipRef == \""+q.get("id")+"\""));
+                    }
+                    resVal = reading1.getVal() - reading2.getVal();
+                    Expression expression = new Expression(resVal+ " "+condition+" " + val);
+                    if (expression.eval().intValue() > 0) {
+                        pointList.add(point.get("id").toString());
+                    }
+                }
+    
             }
         }
         

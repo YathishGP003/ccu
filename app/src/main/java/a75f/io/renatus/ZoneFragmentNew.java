@@ -593,7 +593,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
             {
                 coolDeadband = coolDB;
             }
-            if ((avgTemp < (buildingLimitMax + tempDeadLeeway)) && (avgTemp > (buildingLimitMin - tempDeadLeeway))) {
+            if ((avgTemp <= (buildingLimitMax + tempDeadLeeway)) && (avgTemp >= (buildingLimitMin - tempDeadLeeway))) {
                 currentAverageTemp = (currentAverageTemp + avgTemp);
             }else{
                 noTempSensor++;

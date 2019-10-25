@@ -204,6 +204,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                             } else if (!zone.hasSchedule())
                             {
                                 Log.d(L.TAG_CCU_UI," Zone does not have Schedule : Shouldn't happen");
+                                DefaultSchedules.setDefaultCoolingHeatingTemp();
                                 zone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true, zone.getId()));
                                 CCUHsApi.getInstance().updateZone(zone, zone.getId());
                                 scheduleById = CCUHsApi.getInstance().getScheduleById(zone.getScheduleRef());

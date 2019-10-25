@@ -246,6 +246,7 @@ public class RegisterGatherCCUDetails extends Activity {
 
                 if(!Globals.getInstance().siteAlreadyCreated()) {
                     BuildingTuners.getInstance();
+                    DefaultSchedules.setDefaultCoolingHeatingTemp();
                     DefaultSchedules.generateDefaultSchedule(false, null);
                 }
 

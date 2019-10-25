@@ -576,15 +576,16 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
         for(int i=0;i<zoneMap.size();i++)
         {
             Equip avgTempEquip = new Equip.Builder().setHashMap(zoneMap.get(i)).build();
-            double avgTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" + avgTempEquip.getId() + "\"");
+            double avgTemp = CCUHsApi.getInstance().readPointPriorityValByQuery("point and air and temp and sensor and current and equipRef == \"" + avgTempEquip.getId() + "\"");
 
-            double heatDB = CCUHsApi.getInstance().readHisValByQuery("point and heating and deadband and base and equipRef == \"" + avgTempEquip.getId() + "\"");
-            double coolDB = CCUHsApi.getInstance().readHisValByQuery("point and cooling and deadband and base and equipRef == \"" + avgTempEquip.getId() + "\"");
+            double heatDB = CCUHsApi.getInstance().readPointPriorityValByQuery("point and heating and deadband and base and equipRef == \"" + avgTempEquip.getId() + "\"");
+            double coolDB = CCUHsApi.getInstance().readPointPriorityValByQuery("point and cooling and deadband and base and equipRef == \"" + avgTempEquip.getId() + "\"");
 
-            double coolUL = CCUHsApi.getInstance().readHisValByQuery("point and limit and max and cooling and user and equipRef == \"" + avgTempEquip.getId() + "\"");
-            double heatUL = CCUHsApi.getInstance().readHisValByQuery("point and limit and max and heating and user and equipRef == \"" + avgTempEquip.getId() + "\"");
-            double coolLL = CCUHsApi.getInstance().readHisValByQuery("point and limit and min and cooling and user and equipRef == \"" + avgTempEquip.getId() + "\"");
-            double heatLL = CCUHsApi.getInstance().readHisValByQuery("point and limit and min and heating and user and equipRef == \"" + avgTempEquip.getId() + "\"");
+            double coolUL = CCUHsApi.getInstance().readPointPriorityValByQuery("point and limit and max and cooling and user and equipRef == \"" + avgTempEquip.getId() + "\"");
+            double heatUL = CCUHsApi.getInstance().readPointPriorityValByQuery("point and limit and max and heating and user and equipRef == \"" + avgTempEquip.getId() + "\"");
+            double coolLL = CCUHsApi.getInstance().readPointPriorityValByQuery("point and limit and min and cooling and user and equipRef == \"" + avgTempEquip.getId() + "\"");
+            double heatLL = CCUHsApi.getInstance().readPointPriorityValByQuery("point and limit and min and heating and user and equipRef == \"" + avgTempEquip.getId() + "\"");
+
             if(heatDB < heatDeadband || heatDeadband == 0)
             {
                 heatDeadband = heatDB;
@@ -742,6 +743,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                         } else if (!zone.hasSchedule())
                         {
                             Log.d(L.TAG_CCU_UI," Zone does not have Schedule : Shouldn't happen");
+                            DefaultSchedules.setDefaultCoolingHeatingTemp();
                             zone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true, zone.getId()));
                             CCUHsApi.getInstance().updateZone(zone, zone.getId());
                             scheduleById = CCUHsApi.getInstance().getScheduleById(zone.getScheduleRef());
@@ -1208,6 +1210,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface
                         } else if (!zone.hasSchedule())
                         {
                             Log.d(L.TAG_CCU_UI," Zone does not have Schedule : Shouldn't happen");
+                            DefaultSchedules.setDefaultCoolingHeatingTemp();
                             zone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true, zone.getId()));
                             CCUHsApi.getInstance().updateZone(zone, zone.getId());
                             scheduleById = CCUHsApi.getInstance().getScheduleById(zone.getScheduleRef());

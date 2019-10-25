@@ -447,7 +447,7 @@ public class ScheduleProcessJob extends BaseJob implements WatchdogMonitor
                 return "In Preconditioning";
 
             case UNOCCUPIED:
-                return String.format("In Energy saving  %s | Changes to %.1f-%.1fF at %02d:%02d", "Unoccupied mode",
+                return String.format("In Energy saving %s | Changes to %.1f-%.1fF at %02d:%02d", "Unoccupied mode",
                         nextOccupied.getHeatingVal(),
                         nextOccupied.getCoolingVal(),
                         nextOccupied.getNextOccupiedSchedule().getSthh(),

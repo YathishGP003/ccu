@@ -2,6 +2,7 @@ package a75f.io.renatus.views;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.LinearLayout;
@@ -82,8 +83,8 @@ public class RangeBarView extends LinearLayout {
             getBuildingHeatAndCoolingDeadBand();
         }
 
-        rangeBar.setLowerCoolingTemp((float) coolValue);
-        rangeBar.setLowerHeatingTemp((float) heatValue);
+      //  rangeBar.setLowerCoolingTemp((float) coolValue);
+      //  rangeBar.setLowerHeatingTemp((float) heatValue);
     }
 
     public void setLowerCoolingTemp(double lowerCoolTemp) {
@@ -124,11 +125,25 @@ public class RangeBarView extends LinearLayout {
 
         rangeBar.setData((float) heatLL, (float) heatUL, (float) coolLL, (float) coolUL, (float) cdb, (float) hdb);
 
-        if (mSchedule!= null && mSchedule.getCurrentValues() != null){
-            heatValue = mSchedule.getCurrentValues().getHeatingVal();
-            coolValue = mSchedule.getCurrentValues().getCoolingVal();
+        double coolValue = (coolLL + coolUL)/2;
+        double heatValue = (heatLL + heatUL)/2;
 
+        double coolHeatValue = coolValue > heatValue ? (coolValue - heatValue) : (heatValue - coolValue);
+        if (coolHeatValue <(hdb + cdb)){
+            double diff = (hdb + cdb) - coolHeatValue;
+            double dbDiff = diff/2;
+            if (diff > 1) {
+                coolValue = coolValue - dbDiff;
+                heatValue = heatValue + dbDiff;
+            }else {
+                if (mSchedule!= null && mSchedule.getCurrentValues() != null){
+                    heatValue = mSchedule.getCurrentValues().getHeatingVal();
+                    coolValue = mSchedule.getCurrentValues().getCoolingVal();
+
+                }
+            }
         }
+
         rangeBar.setLowerHeatingTemp((float) heatValue);
         rangeBar.setLowerCoolingTemp((float) coolValue);
     }
@@ -153,6 +168,23 @@ public class RangeBarView extends LinearLayout {
         heatValue = getTuner(heatDT.get("id").toString());
 
         rangeBar.setData((float) heatLL, (float) heatUL, (float) coolLL, (float) coolUL, (float) cdb, (float) hdb);
+        coolValue = (coolLL + coolUL)/2;
+        heatValue = (heatLL + heatUL)/2;
+
+        double coolHeatValue = coolValue > heatValue ? (coolValue - heatValue) : (heatValue - coolValue);
+        if (coolHeatValue <(hdb + cdb)){
+            double diff = (hdb + cdb) - coolHeatValue;
+            double dbDiff = diff/2;
+            if (diff > 1) {
+                coolValue = coolValue - dbDiff;
+                heatValue = heatValue + dbDiff;
+            } else {
+                if (mSchedule!= null && mSchedule.getCurrentValues() != null){
+                    heatValue = mSchedule.getCurrentValues().getHeatingVal();
+                    coolValue = mSchedule.getCurrentValues().getCoolingVal();
+                }
+            }
+        }
         rangeBar.setLowerHeatingTemp((float) heatValue);
         rangeBar.setLowerCoolingTemp((float) coolValue);
     }
